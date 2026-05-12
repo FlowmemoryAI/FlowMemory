@@ -1,0 +1,46 @@
+name: Security
+description: Report or track protocol, service, hardware, crypto, or operational security work.
+title: "[Security]: "
+labels:
+  - security
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include live secrets, private keys, seed phrases, or exploitable private details in public issue text.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Protocol
+        - Contracts
+        - Indexer or verifier
+        - AI memory
+        - Hardware
+        - Infrastructure
+        - Supply chain
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: concern
+    attributes:
+      label: Concern
+      description: What is the security concern?
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: What could go wrong if this is real?
+    validations:
+      required: true
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: Recommendation
+      description: Proposed fix, mitigation, or next investigation step.
+    validations:
+      required: false

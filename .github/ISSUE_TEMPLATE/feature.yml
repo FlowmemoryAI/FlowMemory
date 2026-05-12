@@ -1,0 +1,38 @@
+name: Feature
+description: Propose a FlowMemory product, protocol, service, app, or infra feature.
+title: "[Feature]: "
+labels:
+  - feature
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for scoped implementation proposals. Keep heavy data, secrets, and private credentials out of issues.
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should exist after this feature is complete?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Which directories, systems, or interfaces are in scope?
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Boundaries
+      description: What is explicitly out of scope?
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Tests Or Verification
+      description: What checks should prove this works?
+    validations:
+      required: false

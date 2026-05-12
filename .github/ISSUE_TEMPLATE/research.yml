@@ -1,0 +1,38 @@
+name: Research
+description: Track AI memory, neural geometry, protocol, reliability, or appchain/L1 research.
+title: "[Research]: "
+labels:
+  - research
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for research questions, hypotheses, experiments, and literature notes.
+  - type: textarea
+    id: question
+    attributes:
+      label: Research Question
+      description: What are we trying to learn?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What project context or prior work matters?
+    validations:
+      required: true
+  - type: textarea
+    id: method
+    attributes:
+      label: Proposed Method
+      description: How should the research be conducted?
+    validations:
+      required: false
+  - type: textarea
+    id: output
+    attributes:
+      label: Expected Output
+      description: Paper note, decision record, experiment result, prototype, or other artifact.
+    validations:
+      required: true
