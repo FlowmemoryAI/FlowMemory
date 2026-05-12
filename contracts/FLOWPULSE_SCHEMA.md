@@ -1,6 +1,6 @@
 # FlowPulse Schema v0
 
-FlowPulse is the first shared event stream for FlowMemory protocol activity. It is intentionally small and commitment-oriented: contracts emit roots, commitments, and short pointers while indexers and verifiers reconstruct full context from receipts, logs, and off-chain artifacts.
+FlowPulse is the first shared event stream for FlowMemory protocol activity. It is intentionally small and commitment-oriented: contracts emit roots, commitments, and advisory URI strings while indexers and verifiers reconstruct full context from receipts, logs, and off-chain artifacts.
 
 ## Solidity Event
 
@@ -30,7 +30,9 @@ event FlowPulse(
 - `parentPulseId`: Optional prior pulse reference for chains of work or verification.
 - `sequence`: Monotonic sequence within the rootfield namespace.
 - `occurredAt`: Block timestamp observed by the emitting contract.
-- `uri`: Optional short pointer to off-chain metadata or evidence. It must not be treated as arbitrary on-chain storage.
+- `uri`: Arbitrary advisory string supplied by the caller. In `RootfieldRegistry`, `metadataURI` and `evidenceURI` are not length-limited, content-checked, format-checked, resolvability-checked, or otherwise enforced as short pointers by the contract. Emitted URI bytes are still on-chain log data.
+
+Warning: Do not place sensitive data or heavy raw data in URI fields. The current skeleton relies on caller discipline and verifier policy; it does not enforce the off-chain-data boundary in contract logic.
 
 ## Receipt Boundary
 
@@ -39,5 +41,6 @@ FlowPulse does not include `txHash` or `logIndex`. Those values are not availabl
 ## v0 Assumptions
 
 - `pulseId` is unique within the emitting contract's domain but indexers should still key canonical observations by chain id, contract address, transaction hash, and log index.
-- `uri` values are advisory pointers. Verifiers must validate off-chain content against the emitted `commitment`.
+- `uri` values are advisory by convention only. The skeleton does not enforce that they are short, resolvable, or off-chain pointers, so callers and reviewers must treat the off-chain-data boundary as a design convention rather than an enforcement guarantee.
+- Verifiers must validate any referenced off-chain content against the emitted `commitment`.
 - Pulse type expansion should happen by reserving new numeric values and documenting their subject and commitment semantics before contracts depend on them.

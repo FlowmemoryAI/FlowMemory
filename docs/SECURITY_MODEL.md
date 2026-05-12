@@ -32,7 +32,7 @@ This document captures initial security assumptions. It is not a final audit mod
 - Excessive on-chain storage
 - Commitment formats that are ambiguous or replayable
 
-#### Contracts Foundation Assumptions
+#### Off-Chain Data Boundary
 
 Initial contracts foundation assumptions:
 
