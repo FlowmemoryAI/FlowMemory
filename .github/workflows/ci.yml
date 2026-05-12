@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  repository-hygiene:
+    name: Repository hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check required bootstrap paths
+        shell: bash
+        run: |
+          required_paths=(
+            "AGENTS.md"
+            "README.md"
+            "docs/FLOWMEMORY_HQ_CONTEXT.md"
+            "docs/START_HERE.md"
+            "docs/PROJECT_CHARTER.md"
+            "docs/CURRENT_STATE.md"
+            "docs/ROADMAP.md"
+            "docs/ARCHITECTURE.md"
+            "docs/SECURITY_MODEL.md"
+            "docs/AGENT_ROLES.md"
+            "docs/DECISIONS"
+            "contracts"
+            "services"
+            "apps"
+            "hardware"
+            "research"
+            "crypto"
+            "infra/scripts"
+            "inbox/claude-code"
+            "inbox/old-prompts"
+            "inbox/unsorted"
+            ".github/pull_request_template.md"
+            ".github/ISSUE_TEMPLATE/feature.yml"
+            ".github/ISSUE_TEMPLATE/research.yml"
+            ".github/ISSUE_TEMPLATE/hardware.yml"
+            ".github/ISSUE_TEMPLATE/security.yml"
+            ".github/ISSUE_TEMPLATE/bug.yml"
+          )
+
+          missing=0
+          for path in "${required_paths[@]}"; do
+            if [[ ! -e "$path" ]]; then
+              echo "::error::Missing required path: $path"
+              missing=1
+            fi
+          done
+
+          exit "$missing"
+
+      - name: Check for obvious committed secrets
+        shell: bash
+        run: |
+          patterns=(
+            'BEGIN (RSA|OPENSSH|PRIVATE) K[E]Y'
+            'AWS_SECRET_ACCESS_K[E]Y'
+            'PRIVATE_K[E]Y='
+            'SECRET_K[E]Y='
+            'gho_[A-Za-z0-9_]+'
+          )
+
+          for pattern in "${patterns[@]}"; do
+            if grep -RInE "$pattern" . --exclude-dir=.git; then
+              echo "::error::Potential secret detected. Remove it or document why this is a false positive."
+              exit 1
+            fi
+          done

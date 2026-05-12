@@ -1,0 +1,38 @@
+name: Hardware
+description: Track FlowRouter, Meshtastic, LoRa, enclosure, or field-test work.
+title: "[Hardware]: "
+labels:
+  - hardware
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Meshtastic and LoRa are low-bandwidth control signaling paths. Do not assume normal internet bandwidth.
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What hardware outcome is needed?
+    validations:
+      required: true
+  - type: textarea
+    id: components
+    attributes:
+      label: Components
+      description: Devices, radios, sensors, enclosure parts, boards, or power systems involved.
+    validations:
+      required: false
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints
+      description: Bandwidth, power, size, thermal, safety, field, or manufacturing constraints.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation
+      description: How should this be tested or field-validated?
+    validations:
+      required: false

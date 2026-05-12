@@ -1,0 +1,41 @@
+name: Bug
+description: Report a defect in docs, protocol design, services, apps, hardware, crypto, or infra.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What is broken or incorrect?
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Current Behavior
+      description: What happens now?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction Or Evidence
+      description: Steps, logs, screenshots, file references, or reasoning.
+    validations:
+      required: false
+  - type: textarea
+    id: scope
+    attributes:
+      label: Suspected Scope
+      description: Which area or directory is likely affected?
+    validations:
+      required: false
