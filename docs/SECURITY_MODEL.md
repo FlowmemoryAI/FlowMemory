@@ -32,6 +32,22 @@ This document captures initial security assumptions. It is not a final audit mod
 - Excessive on-chain storage
 - Commitment formats that are ambiguous or replayable
 
+#### Off-Chain Data Boundary
+
+Initial contracts foundation assumptions:
+
+- FlowPulse events intentionally omit `txHash` and `logIndex`; indexers derive them from receipts and logs.
+- RootfieldRegistry stores compact hashes and counters, but `metadataURI` and `evidenceURI` are arbitrary strings accepted by the current skeleton contract.
+- The contract does not enforce URI length, content, format, resolvability, or "short pointer" behavior.
+- Emitted URI bytes are on-chain log data.
+- Keeping heavy or sensitive metadata, AI memory, model artifacts, media, and evidence off-chain is currently a design convention and caller responsibility, not a contract guarantee.
+- Verifiers must check referenced content against emitted commitments.
+- `pulseId` values domain-separate the emitting chain and contract, but canonical indexing should still use receipt metadata.
+
+Follow-up:
+
+- Consider bounded `bytes32` commitments, CID/hash-only fields, URI length caps, or a URI validation policy before treating this skeleton as an enforceable off-chain-data boundary.
+
 ### Indexers And Verifiers
 
 - Log parsing errors
