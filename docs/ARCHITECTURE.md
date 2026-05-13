@@ -40,6 +40,12 @@ Expected responsibilities:
 - Verify roots, receipts, commitments, attestations, and proofs.
 - Produce deterministic verification outputs.
 
+Crypto foundation:
+
+- Use `crypto/FLOWMEMORY_CRYPTO_SPEC.md` as the draft v0 schema overview.
+- Use `crypto/OBSERVATION_IDENTITY.md` to distinguish contract `pulseId`, indexer-derived `observationId`, and verifier `reportId`.
+- Use `services/verifier/README.md` for the draft deterministic verifier report flow and status vocabulary.
+
 ## AI Memory Layer
 
 Expected responsibilities:
