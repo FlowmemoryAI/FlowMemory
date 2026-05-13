@@ -105,8 +105,9 @@ npm run flowchain:demo
 npm run flowchain:export
 ```
 
-Run the merged-surface smoke path when Foundry, Python, dashboard dependencies,
-and crypto dependencies are installed:
+Run the merged-surface smoke path when Foundry, Python, Visual Studio Build
+Tools C++ workload, dashboard dependencies, and crypto dependencies are
+installed:
 
 ```powershell
 npm install --prefix apps/dashboard

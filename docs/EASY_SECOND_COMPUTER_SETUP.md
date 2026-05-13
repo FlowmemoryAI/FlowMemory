@@ -15,7 +15,8 @@ The root installer installs or verifies:
 2. Node.js LTS with npm
 3. Python 3
 4. Rust with Cargo
-5. Foundry
+5. Visual Studio Build Tools with the C++ workload
+6. Foundry
 
 Foundry is installed through Git Bash because Foundry's Windows installer does
 not support PowerShell directly.
