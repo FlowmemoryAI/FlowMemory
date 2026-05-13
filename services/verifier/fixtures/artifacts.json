@@ -1,0 +1,15 @@
+{
+  "resolverPolicyId": "flowmemory.resolver.policy.v0.fixture",
+  "artifactsByUri": {
+    "ipfs://bafy-flowmemory-example": {
+      "kind": "rootfield-registration",
+      "schemaHash": "0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "metadataHash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    },
+    "fixture://root-commit-valid": {
+      "kind": "root-commitment",
+      "root": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1",
+      "artifactCommitment": "0x9999999999999999999999999999999999999999999999999999999999999999"
+    }
+  }
+}

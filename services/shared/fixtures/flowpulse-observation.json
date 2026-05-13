@@ -1,0 +1,76 @@
+{
+  "description": "Synthetic FlowPulse observation fixture. Values are local test vectors only and do not reference live chain data.",
+  "identityInput": {
+    "chainId": "8453",
+    "emittingContract": "0x1111111111111111111111111111111111111111",
+    "blockNumber": "123456",
+    "blockHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+    "txHash": "0x3333333333333333333333333333333333333333333333333333333333333333",
+    "transactionIndex": "7",
+    "logIndex": "2"
+  },
+  "rawLog": {
+    "chainId": "8453",
+    "address": "0x1111111111111111111111111111111111111111",
+    "topics": [
+      "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "0x0000000000000000000000004444444444444444444444444444444444444444"
+    ],
+    "data": "0x0000000000000000000000000000000000000000000000000000000000000001bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb4122209ff672fc04b2ec3af31ab1af79813971f86de000aa6534038cc79de6b500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000006a03e48000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000001e697066733a2f2f626166792d666c6f776d656d6f72792d6578616d706c650000",
+    "blockNumber": "123456",
+    "blockHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+    "transactionHash": "0x3333333333333333333333333333333333333333333333333333333333333333",
+    "transactionIndex": "7",
+    "logIndex": "2",
+    "receiptStatus": "success"
+  },
+  "expected": {
+    "flowPulseTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+    "observationId": "0x579e7de876bcc03e2bbf2ac8cd6a8a362b44cfca455e355933631dc7d1e80815",
+    "reportId": "0x93502ae2f02cbc1a74c56f2fe7c198239715402c56f9ba29ad341fc86e91e8d9"
+  },
+  "reportCore": {
+    "schema": "flowmemory.verifier.report.v0",
+    "verifierSpecVersion": "0",
+    "resolverPolicyId": "flowmemory.resolver.policy.v0.fixture",
+    "status": "valid",
+    "observationId": "0x579e7de876bcc03e2bbf2ac8cd6a8a362b44cfca455e355933631dc7d1e80815",
+    "observation": {
+      "chainId": "8453",
+      "emittingContract": "0x1111111111111111111111111111111111111111",
+      "eventSignature": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "blockNumber": "123456",
+      "blockHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "txHash": "0x3333333333333333333333333333333333333333333333333333333333333333",
+      "transactionIndex": "7",
+      "logIndex": "2",
+      "pulseId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "rootfieldId": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "flowPulse": {
+      "actor": "0x4444444444444444444444444444444444444444",
+      "pulseType": "1",
+      "subject": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "commitment": "0x4122209ff672fc04b2ec3af31ab1af79813971f86de000aa6534038cc79de6b5",
+      "parentPulseId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "sequence": "1",
+      "occurredAt": "1778640000",
+      "uri": "ipfs://bafy-flowmemory-example"
+    },
+    "checks": [
+      {
+        "id": "observation.decoded",
+        "passed": true
+      }
+    ],
+    "evidenceRefs": [
+      {
+        "kind": "rootfield-registration",
+        "uri": "ipfs://bafy-flowmemory-example"
+      }
+    ],
+    "reasonCodes": []
+  }
+}

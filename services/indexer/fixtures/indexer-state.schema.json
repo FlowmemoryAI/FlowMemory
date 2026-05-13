@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.indexer.persistence.v0",
+  "type": "object",
+  "required": ["schema", "state"],
+  "properties": {
+    "schema": { "const": "flowmemory.indexer.persistence.v0" },
+    "state": {
+      "type": "object",
+      "required": [
+        "schema",
+        "source",
+        "observations",
+        "pulses",
+        "rootfields",
+        "cursors",
+        "batches",
+        "rejectedLogs",
+        "duplicates"
+      ],
+      "properties": {
+        "schema": { "const": "flowmemory.indexer.state.v0" },
+        "source": { "enum": ["fixture", "local-rpc-placeholder"] },
+        "observations": { "type": "array" },
+        "pulses": { "type": "array" },
+        "rootfields": { "type": "array" },
+        "cursors": { "type": "array" },
+        "batches": { "type": "array" },
+        "rejectedLogs": { "type": "array" },
+        "duplicates": { "type": "array" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
