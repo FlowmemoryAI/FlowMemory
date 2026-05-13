@@ -32,15 +32,24 @@ URLs in committed files.
 
 ## Current Merged Setup Path
 
-The beginner setup path is:
+This repo is private, so a clean second computer needs GitHub authentication
+before it can clone the code. The beginner setup path is:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -Command '$p=Join-Path $env:TEMP "INSTALL_FLOWCHAIN_WINDOWS.ps1"; Invoke-WebRequest "https://raw.githubusercontent.com/FlowmemoryAI/FlowMemory/main/INSTALL_FLOWCHAIN_WINDOWS.ps1" -OutFile $p; & powershell -NoProfile -ExecutionPolicy Bypass -File $p'
+winget install --id Git.Git --exact --source winget --accept-package-agreements --accept-source-agreements
+winget install --id GitHub.cli --exact --source winget --accept-package-agreements --accept-source-agreements
+$env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
+gh auth login
+gh repo clone FlowmemoryAI/FlowMemory "$env:USERPROFILE\FlowMemory\FlowMemory"
+cd "$env:USERPROFILE\FlowMemory\FlowMemory"
+powershell -ExecutionPolicy Bypass -File .\INSTALL_FLOWCHAIN_WINDOWS.ps1
 ```
 
 This installs missing tools, clones or updates the repo, wraps the manual
 commands below, and opens the control plane and workbench in separate
 PowerShell windows.
+
+When `gh auth login` asks questions, use GitHub.com, HTTPS, and browser login.
 
 Use this path today on a clean second computer. It validates the merged V0
 launch-core, no-value local devnet prototype, dashboard workbench, hardware
