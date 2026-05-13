@@ -38,8 +38,9 @@ Status vocabulary for this milestone:
 | Devnet/runtime | `crates/flowmemory-devnet/`, `docs/LOCAL_DEVNET.md` | Implemented no-value deterministic prototype | Local Alpha work expands native object transitions and lifecycle tests. |
 | Contracts spine | `contracts/`, `tests/`, FlowPulse and registry skeletons | Implemented local/test settlement/event foundation | Contracts work should remain optional settlement/event spine. |
 | Crypto/object identity | `crypto/`, `crypto/fixtures/`, `schemas/flowmemory/` | Implemented V0 hash helpers and vectors | Local Alpha work adds object IDs for agent, model, memory, challenge, and finality objects. |
-| Indexer/verifier/control plane | `services/indexer/`, `services/verifier/`, `services/flowmemory/` | Implemented fixture-first indexer/verifier and generator | Local Alpha work adds `services/control-plane/` as the local API. |
+| Indexer/verifier/control plane | `services/indexer/`, `services/verifier/`, `services/flowmemory/`, `services/control-plane/` | Implemented fixture-first indexer/verifier, generator, and local fixture-backed API | Full-L1 work adds live-node adapters, transaction submission, bridge intake, full lifecycle smoke, and no-secret API checks. |
 | Dashboard/workbench | `apps/dashboard/` and generated dashboard fixtures | Implemented fixture-backed dashboard V0 | Workbench work should extend this app, not create a second dashboard. |
+| Bridge/test credit path | `docs/bridge/`, `contracts/bridge/`, `services/bridge-relayer/`, `fixtures/bridge/`, bridge schemas | Implemented test-only POC foundation | Full-L1 work maps mock/Base Sepolia observations into local BridgeObservation and BridgeCredit handoffs. |
 | Hardware/operator signals | `hardware/`, `fixtures/hardware/`, simulator | Implemented FlowRouter POC and simulator | Local Alpha work maps optional operator signals into private testnet views. |
 | Research gates | `research/`, `docs/DECISIONS/` | Implemented research docs and guardrails | Local Alpha research gates Process-Witness, SEAL, private state, and public L1 work. |
 
@@ -59,12 +60,14 @@ change only if the second-computer setup guide names the chosen commands.
 | Start private testnet | `npm run flowchain:start` | Implemented bounded wrapper that prepares launch-core fixtures and inspects local state. Current devnet is still CLI/demo oriented, not a long-running node. |
 | Run deterministic demo | `npm run flowchain:demo` | Implemented wrapper over the existing devnet `demo`. |
 | Run full smoke test | `npm run flowchain:smoke` | Implemented for merged surfaces: services, crypto tests/vectors, launch candidate, devnet tests, deterministic replay, dashboard build, hardware fixture, unsafe-claim scan, and no-secret export scan. Native object/control-plane coverage remains blocked on subsystem work. |
+| Run full private/local L1 smoke gate | `npm run flowchain:full-smoke` | Implemented as a temporary blocker-report wrapper for #108. It runs the merged-surface smoke unless skipped, writes `devnet/local/smoke/flowchain-full-smoke-report.json`, and exits nonzero until issues #99 through #105 land the missing subsystem command coverage. |
 | Export state | `npm run flowchain:export` | Implemented wrapper over `export-fixtures`; writes ignored export bundles under `devnet/local/export/`. |
 | Import state | `npm run flowchain:import -- --BundlePath <zip> -Force` | Implemented script path for local state restore from an exported bundle. |
 | Start local workbench | `npm run workbench:dev` | Implemented wrapper over the existing dashboard dev server. |
 | Prerequisite check | `npm run flowchain:prereq` | Implemented Windows-first prerequisite and dependency-state check. |
 | Stop private testnet | `npm run flowchain:stop` | Implemented operator-state wrapper; can reset ignored local state with `-ResetLocalState`. |
-| Start control plane | documented local API command | In flight in `services/control-plane/`; active command is `npm run control-plane:serve` in the control-plane worktree. |
+| Start control plane | `npm run control-plane:serve` | Implemented local fixture-backed API command; live-node transaction submission and full lifecycle coverage remain #101. |
+| Run bridge mock | `npm run bridge:mock` | Implemented test-only bridge observation mock; local-credit smoke remains #104. |
 
 ## Target Native Objects
 
@@ -109,17 +112,25 @@ machine can:
 15. Finalize receipts.
 16. Query all state through the documented local control-plane API.
 17. Inspect all state through the existing dashboard/workbench surface.
-18. Export and import snapshots or state bundles.
-19. Run an end-to-end smoke test proving the full flow.
-20. Re-run the same smoke test deterministically.
+18. Observe a mock or Base Sepolia test bridge deposit and apply or hand off a
+    local BridgeCredit without real-funds defaults.
+19. Export and import snapshots or state bundles.
+20. Run an end-to-end smoke test proving the full flow.
+21. Re-run the same smoke test deterministically.
 
 Current HQ/Ops completion for this pass:
 
 - The second-computer command names now exist at the repo root.
 - The commands exercise the current merged launch-core, Rust devnet,
-  dashboard, hardware simulator, export, import, and claim-guardrail surfaces.
+  control plane, bridge mock, dashboard, hardware simulator, export, import,
+  and claim-guardrail surfaces.
+- GitHub milestone #7 and issues #99 through #108 now track the full-L1
+  workstreams and final smoke gate.
+- `npm run flowchain:full-smoke` now exists as the explicit full acceptance
+  wrapper, but it is intentionally incomplete until subsystem commands land.
 - The full private object lifecycle is still owned by the chain, crypto,
-  control-plane, and dashboard workstreams named in
+  control-plane, dashboard, contracts, bridge, hardware, research, and HQ
+  workstreams named in
   `docs/FLOWCHAIN_AGENT_INTEGRATION_MAP.md`.
 
 ## Non-Goals

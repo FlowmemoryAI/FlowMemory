@@ -55,9 +55,10 @@ When `gh auth login` asks questions, use GitHub.com, HTTPS, and browser login.
 
 Use this path today on a clean second computer. It validates the merged V0
 launch-core, no-value local devnet prototype, dashboard workbench, hardware
-simulator fixture, and Windows wrapper layer. It does not yet prove the full
-native AgentAccount, ModelPassport, MemoryCell, Challenge, FinalityReceipt, or
-control-plane lifecycle.
+simulator fixture, bridge mock, control-plane fixture API, and Windows wrapper
+layer. It does not yet prove the full long-running node, wallet signing,
+native AgentAccount, ModelPassport, MemoryCell, Challenge, FinalityReceipt,
+live control-plane, bridge local-credit, or live workbench lifecycle.
 
 If the repo is already cloned, run from the repo root:
 
@@ -117,6 +118,18 @@ Run the full merged-surface smoke path:
 npm run flowchain:smoke
 ```
 
+Check the full private/local L1 gate status:
+
+```powershell
+npm run flowchain:full-smoke -- -AllowIncomplete
+```
+
+This command writes
+`devnet/local/smoke/flowchain-full-smoke-report.json`. It is expected to report
+missing subsystem command coverage until issues #99 through #105 land. Without
+`-AllowIncomplete`, it exits nonzero while the full local L1 package remains
+incomplete.
+
 Run the local workbench in a separate PowerShell window:
 
 ```powershell
@@ -146,13 +159,16 @@ Expected current result:
 - `npm run flowchain:smoke` writes
   `devnet/local/smoke/flowchain-smoke-report.json` and compares deterministic
   replay roots.
+- `npm run flowchain:full-smoke -- -AllowIncomplete` writes
+  `devnet/local/smoke/flowchain-full-smoke-report.json` and names missing
+  command coverage with owning issue numbers.
 - `npm run workbench:dev` opens the existing dashboard as the local workbench.
 
 Current stop point: if a second computer needs long-running node behavior,
-control-plane queries, encrypted key storage, native AgentAccount,
-ModelPassport, MemoryCell, Challenge, FinalityReceipt, or full workbench
-inspection of those entities, that is still the private/local testnet package
-target owned by the subsystem workstreams.
+signed transaction intake, encrypted key storage, native AgentAccount,
+ModelPassport, MemoryCell, Challenge, FinalityReceipt, bridge local credits,
+or full live workbench inspection of those entities, that is still the
+private/local testnet package target owned by issues #99 through #108.
 
 ## Final Second-Computer Path
 
@@ -170,13 +186,13 @@ npm run flowchain:init
 npm run flowchain:start
 npm run control-plane:serve
 npm run workbench:dev
-npm run flowchain:smoke
+npm run flowchain:full-smoke
 npm run flowchain:export
 ```
 
 If `flowchain:start`, `control-plane:serve`, or `workbench:dev` are
 long-running commands, run each one in its own PowerShell window and run
-`flowchain:smoke` from a fourth window after the services are healthy.
+`flowchain:full-smoke` from a fourth window after the services are healthy.
 
 If final command names differ, this guide must be updated in the same PR that
 adds the commands. The final path must still include prerequisite checks,
@@ -195,7 +211,9 @@ npm run flowchain:start
 npm run flowchain:stop
 npm run flowchain:demo
 npm run flowchain:smoke
+npm run flowchain:full-smoke
 npm run flowchain:export
+npm run control-plane:serve
 npm run workbench:dev
 ```
 
@@ -209,8 +227,10 @@ Current status:
 | `npm run flowchain:stop` | Implemented bounded wrapper | Use `npm run flowchain:stop -- -ResetLocalState` for an explicit reset. |
 | `npm run flowchain:demo` | Implemented | Wraps the existing Rust devnet `demo`. |
 | `npm run flowchain:smoke` | Implemented for merged surfaces | Native object/control-plane smoke coverage remains missing. |
+| `npm run flowchain:full-smoke` | Temporary blocker-report wrapper | Runs merged smoke unless skipped, writes `devnet/local/smoke/flowchain-full-smoke-report.json`, and exits nonzero until #99-#105 command coverage lands. |
 | `npm run flowchain:export` | Implemented | Writes ignored export directory and zip bundle. |
 | `npm run flowchain:import -- --BundlePath <zip> -Force` | Implemented script path | Restores local state from an exported bundle. |
+| `npm run control-plane:serve` | Implemented fixture-backed API | Live node adapters and transaction submission remain #101. |
 | `npm run workbench:dev` | Implemented | Wraps `npm run dev --prefix apps/dashboard`. |
 
 ## Local Operator Keys

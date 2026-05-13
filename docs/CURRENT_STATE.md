@@ -118,6 +118,12 @@ Launch-core specifications:
 - `docs/FLOWCHAIN_TESTNET_ACCEPTANCE.md` marks private/local testnet features as implemented, in flight, missing, or later gated.
 - `docs/FLOWCHAIN_AGENT_INTEGRATION_MAP.md` maps the next-wave worktree ownership and cross-agent handoffs.
 - `docs/FLOWCHAIN_TROUBLESHOOTING.md` and `docs/FLOWCHAIN_OPERATOR_CHECKLIST.md` provide the Windows-first second-computer troubleshooting and operator checklist layer.
+- `docs/FLOWCHAIN_HQ_INTEGRATION_STATUS.md` is the live HQ issue/PR, branch
+  ownership, merge-order, and full-smoke blocker map for the full local/private
+  L1 push.
+- `docs/agent-goals/full-l1/` contains the active copy-ready full-L1 agent
+  prompts, and `infra/scripts/launch-full-l1-agents.ps1` launches those
+  dedicated worktree agents.
 - `docs/DECISIONS/rootflow-v0.md` records the V0 decision and non-goal boundaries.
 - `docs/reviews/ROOTFLOW_FLOW_MEMORY_V0_ACCEPTANCE_AUDIT.md` tracks evidence and missing work for the active launch-core goal.
 - `docs/reviews/OPEN_PR_MERGE_READINESS.md` is now historical merge-readiness evidence for PRs that have merged.
@@ -127,18 +133,24 @@ FlowChain private/local testnet snapshot:
 
 - Implemented: V0 launch-core generation and validation, no-value deterministic
   Rust devnet prototype, contract event/settlement spine, crypto V0 helpers and
-  vectors, fixture indexer/verifier, fixture-backed dashboard, hardware POC
+  vectors, fixture indexer/verifier, fixture-backed control-plane API,
+  fixture-backed dashboard, test-only bridge POC foundation, hardware POC
   simulator, Base Sepolia reader/deploy commands, guarded canary reader, and
   Windows-first root wrapper commands for prerequisite checks, init, bounded
-  start/stop, demo, smoke, export/import, and workbench dev mode.
-- In flight: native private-testnet object lifecycle, local control-plane API,
-  private-testnet object IDs and envelopes, workbench extension, optional
-  hardware operator signal fixtures, and advanced L1 research gates.
+  start/stop, demo, smoke, temporary full-smoke blocker reporting,
+  export/import, bridge mock/test, control-plane serve/smoke, and workbench dev
+  mode.
+- In flight: native private-testnet object lifecycle, live-node control-plane
+  adapters, private-testnet object IDs and signed envelopes, wallet/vault
+  support, bridge local-credit application, workbench live-state extension,
+  optional hardware operator signal fixtures, and advanced L1 research gates.
 - Missing: long-running local runtime start behavior, private genesis/config
   package beyond the deterministic devnet genesis, full native object
-  lifecycle coverage, full control-plane method coverage, full workbench entity
-  coverage, no-secret API checks, and second-computer smoke evidence for the
-  unmerged native object/control-plane/workbench surfaces.
+  lifecycle coverage, signed transaction intake, encrypted local wallet,
+  full live control-plane method coverage, full workbench entity coverage,
+  bridge local-credit smoke, no-secret API checks, and second-computer smoke
+  evidence for the unmerged native object/control-plane/workbench/bridge
+  surfaces.
 - Later gated: production L1/mainnet, public validators, tokenomics,
   production bridge, production hook deployment, audited cryptography,
   proof-circuit infrastructure, production hardware, and hosted production
@@ -165,17 +177,24 @@ FlowChain private/local testnet snapshot:
 
 ## Active GitHub Work Shape
 
-Issues #6 through #55 define the current foundation-hardening backlog. They are organized into program milestones in `docs/ISSUE_BACKLOG.md`.
+Issues #6 through #55 define the foundation-hardening backlog. GitHub milestone
+#7 and issues #99 through #108 define the current full local/private L1
+workstreams. They are organized in `docs/ISSUE_BACKLOG.md` and summarized in
+`docs/FLOWCHAIN_HQ_INTEGRATION_STATUS.md`.
 
 Closed issue notes:
 
 - #16 was closed as not planned because its scope was folded into other architecture/status issues.
 - #39 was closed; future on-chain verifier adapter work should stay gated behind accepted verifier and crypto boundaries.
+- #76, #77, and #79 are closed canary follow-ups and should not be treated as
+  active private/local testnet blockers.
 
-As of the 2026-05-13 HQ review for the private/local testnet next wave, GitHub
-shows open draft PRs #71 and #73, plus open canary follow-up issues #76 through
-#79. Local sibling worktrees contain unmerged Local Alpha work; those changes
-are useful context but are not source of truth until merged.
+As of the 2026-05-13 HQ review for the full local/private L1 push, GitHub shows
+open draft PRs #71, #73, #110, #111, #112, #113, and #114. PR #98 has merged into `main` and added the
+full-L1 agent prompt/launcher layer. Issue #78 remains open for the real
+Uniswap v4 hook path but is outside the private/local runtime critical path.
+Local sibling worktrees contain unmerged full-L1 work; those changes are useful
+context but are not source of truth until merged.
 
 Recently merged PRs:
 
@@ -188,6 +207,8 @@ Recently merged PRs:
 - #62 Dashboard V0.
 - #68 Launch-core FlowMemory V0 integration.
 - #69 Contract event spine for launch-core Flow Memory objects.
+- #97 Control-plane CORS/browser-safe endpoint fix.
+- #98 Full L1 agent goal launcher.
 
 ## Active Local Work
 
@@ -219,9 +240,9 @@ Before assigning agents, check for dirty worktrees and avoid overlapping folders
 ## Current Operator Priorities
 
 1. Keep the generated launch-core command stable in CI.
-2. Keep the new root wrapper path usable on Windows: `flowchain:prereq`, `flowchain:init`, `flowchain:start`, `flowchain:demo`, `flowchain:smoke`, `flowchain:export`, and `workbench:dev`.
+2. Keep the root wrapper path usable on Windows: `flowchain:prereq`, `flowchain:init`, `flowchain:start`, `flowchain:demo`, `flowchain:smoke`, `flowchain:full-smoke`, `flowchain:export`, `control-plane:serve`, bridge mock/test commands, and `workbench:dev`.
 3. Convert the remaining V0/local-alpha surfaces into one FlowChain private/local L1 testnet package for second-computer validation.
-4. Land the missing subsystem pieces behind the wrappers: long-running runtime behavior, control-plane serve/query coverage, native object lifecycle, and workbench entity coverage.
+4. Land the missing subsystem pieces behind the wrappers: long-running runtime behavior, wallet/signing, live control-plane query/submission coverage, native object lifecycle, bridge local-credit smoke, and workbench entity coverage.
 5. Keep the guarded Base canary reader and dashboard canary artifacts fresh when canary smoke actions change.
 6. Exercise the Base Sepolia deploy/read path on explicit testnet contract addresses only.
 7. Continue contracts hardening without production mainnet deployment or token mechanics.

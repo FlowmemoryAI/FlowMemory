@@ -59,6 +59,7 @@ or workbench commands.
 | Crypto dependency error during strict prereq | Crypto deps are separate from root npm workspaces. | Run `npm install --prefix crypto`. |
 | Workbench does not open | Vite dev server did not start or the port changed. | Run `npm run workbench:dev` again and use the URL printed by Vite. |
 | Smoke fails during hardware fixture check | Python is missing or not on PATH. | Install Python 3 or run `npm run flowchain:smoke -- -SkipHardware` for a scoped local smoke. |
+| `flowchain:full-smoke` fails with missing command coverage | The full local/private L1 package is not complete yet. | Read `devnet/local/smoke/flowchain-full-smoke-report.json` and the owning issues #99-#108. Use `npm run flowchain:full-smoke -- -SkipMergedSmoke -AllowIncomplete` only to validate the temporary report wrapper. |
 | Cargo output looks like a different worktree | A shared `CARGO_TARGET_DIR` is reusing stale binaries. | Use the root wrapper scripts; they pin cargo output to `crates/flowmemory-devnet/target` for this checkout. |
 | Existing state blocks init | `devnet/local/state.json` already exists. | Run `npm run flowchain:demo`, or force reset with `powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-init.ps1 -Force`. |
 | Import refuses to overwrite state | Import protects existing local state by default. | Run `npm run flowchain:import -- --BundlePath <zip> -Force`. |
@@ -91,6 +92,17 @@ The report should show:
 The current smoke report also lists blocked lifecycle coverage. Those blocked
 rows are expected until the chain, crypto, control-plane, and workbench
 workstreams land the remaining native private/local testnet surfaces.
+
+The full-L1 wrapper report is:
+
+```powershell
+Get-Content -Raw devnet/local/smoke/flowchain-full-smoke-report.json
+```
+
+Until the full workstreams land, it is expected to list missing command
+coverage for long-running node, wallet/signing, live control plane, live
+workbench, bridge local credit, optional hardware ingestion, and deterministic
+full replay. Treat that as the integration checklist, not as passing evidence.
 
 ## Secret Hygiene
 
