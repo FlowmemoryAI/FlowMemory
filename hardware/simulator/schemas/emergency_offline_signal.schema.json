@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Emergency Offline Signal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["packet_type", "schema_version", "device_id", "sequence", "emitted_at", "code", "priority", "ttl_seconds", "summary", "last_gateway_id", "operator_action"],
+  "properties": {
+    "packet_type": { "type": "string", "enum": ["emergency_offline_signal"] },
+    "schema_version": { "type": "string" },
+    "device_id": { "type": "string", "maxLength": 32 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "emitted_at": { "type": "string" },
+    "code": { "type": "string", "enum": ["UPSTREAM_LOSS", "POWER_WARNING", "THERMAL_WARNING", "SIDECAR_OFFLINE", "LOCAL_ONLY"] },
+    "priority": { "type": "string", "enum": ["local", "operator", "test"] },
+    "ttl_seconds": { "type": "integer", "minimum": 0, "maximum": 3600 },
+    "summary": { "type": "string", "maxLength": 160 },
+    "last_gateway_id": { "type": "string", "maxLength": 32 },
+    "operator_action": { "type": "string", "maxLength": 64 }
+  }
+}

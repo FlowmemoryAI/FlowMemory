@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NFC Memory Cartridge Metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["packet_type", "schema_version", "cartridge_id", "label", "pointer", "digest", "created_at", "expires_at", "contains_secrets", "trust_level"],
+  "properties": {
+    "packet_type": { "type": "string", "enum": ["nfc_memory_cartridge_metadata"] },
+    "schema_version": { "type": "string" },
+    "cartridge_id": { "type": "string", "maxLength": 48 },
+    "label": { "type": "string", "maxLength": 64 },
+    "pointer": { "type": "string", "maxLength": 128 },
+    "digest": { "type": "string", "maxLength": 64 },
+    "created_at": { "type": "string" },
+    "expires_at": { "type": "string" },
+    "contains_secrets": { "type": "boolean", "enum": [false] },
+    "trust_level": { "type": "string", "enum": ["untrusted-pointer", "local-only", "advisory"] }
+  }
+}
