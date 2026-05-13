@@ -42,15 +42,17 @@ $status = [ordered]@{
     startedAt = (Get-Date).ToUniversalTime().ToString("o")
     statePath = $stateFullPath
     runtimeMode = "bounded-local-cli"
-    longRunningNode = $false
+    longRunningNode = "available through npm run flowchain:node"
     launchCoreGenerated = -not $SkipLaunchCore
     workbenchCommand = "npm run workbench:dev"
     smokeCommand = "npm run flowchain:smoke"
-    note = "Current merged runtime is a deterministic local CLI, not a daemon. Keep this file as operator state for the second-computer package."
+    nodeCommand = "npm run flowchain:node"
+    note = "This compatibility wrapper prepares local state and launch-core fixtures. Use npm run flowchain:node for the long-running private/local runtime."
 }
 Write-FlowChainJson -Path $statusPath -Value $status
 
 Write-Host ""
 Write-Host "FlowChain private/local stack is ready in bounded local CLI mode."
 Write-Host "Next command for a transaction demo: npm run flowchain:demo"
+Write-Host "Long-running node command: npm run flowchain:node"
 Write-Host "Workbench command: npm run workbench:dev"
