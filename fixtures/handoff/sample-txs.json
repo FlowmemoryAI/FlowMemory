@@ -1,0 +1,52 @@
+{
+  "schema": "flowmemory.local_devnet.fixture.txs.v0",
+  "description": "No-value local FlowMemory transaction fixture.",
+  "txs": [
+    {
+      "type": "RegisterRootfield",
+      "rootfieldId": "rootfield:fixture:alpha",
+      "owner": "operator:fixture",
+      "schemaHash": "0x0d05a0ad7f9c8650e1f9b6f92a9714d7e9b7c29fcd067a8e3d48ccf8a84d1e7a",
+      "metadataHash": "0x2b49f44f3d7f2a97970cc7ee3cb3cb9e5db4c4ab65f9fd797f0c703275c9eabc"
+    },
+    {
+      "type": "SubmitArtifactCommitment",
+      "artifactId": "artifact:fixture:001",
+      "rootfieldId": "rootfield:fixture:alpha",
+      "commitment": "0xd09d2dbcb9447a778f30076fb1c42d9a5d1ef9cdaea43d68f72de06abf4f4b7f",
+      "uriHint": "fixture://artifact/fixture/001"
+    },
+    {
+      "type": "CommitRoot",
+      "rootfieldId": "rootfield:fixture:alpha",
+      "actor": "operator:fixture",
+      "root": "0x62a35c9dcb3eb4e391f13f4f74eecfbf0cd8279ea7acde57f48f2cb119b84a45",
+      "artifactCommitment": "0xd09d2dbcb9447a778f30076fb1c42d9a5d1ef9cdaea43d68f72de06abf4f4b7f"
+    },
+    {
+      "type": "SubmitWorkReceipt",
+      "receiptId": "receipt:fixture:001",
+      "rootfieldId": "rootfield:fixture:alpha",
+      "workerId": "worker:fixture",
+      "inputRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "outputRoot": "0x62a35c9dcb3eb4e391f13f4f74eecfbf0cd8279ea7acde57f48f2cb119b84a45",
+      "artifactCommitment": "0xd09d2dbcb9447a778f30076fb1c42d9a5d1ef9cdaea43d68f72de06abf4f4b7f",
+      "ruleSet": "flowmemory.work.rule_set.fixture.v0"
+    },
+    {
+      "type": "SubmitVerifierReport",
+      "reportId": "report:fixture:001",
+      "rootfieldId": "rootfield:fixture:alpha",
+      "receiptId": "receipt:fixture:001",
+      "verifierId": "verifier:fixture",
+      "reportDigest": "0xae02b712d4690ee2607a1951fa7d71b5f04d5cf8cbe0f533315816c4f6a14d85",
+      "status": "verified",
+      "reasonCodes": []
+    },
+    {
+      "type": "AnchorBatchToBasePlaceholder",
+      "appchainChainId": "flowmemory-local-devnet-v0",
+      "finalityStatus": "local-placeholder"
+    }
+  ]
+}

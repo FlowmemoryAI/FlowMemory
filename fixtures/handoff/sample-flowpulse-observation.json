@@ -1,0 +1,22 @@
+{
+  "description": "Synthetic FlowPulse observation fixture. Values are local test vectors only and do not reference live chain data.",
+  "rawLog": {
+    "chainId": "8453",
+    "address": "0x1111111111111111111111111111111111111111",
+    "topics": [
+      "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "0x0000000000000000000000004444444444444444444444444444444444444444"
+    ],
+    "blockNumber": "123456",
+    "blockHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+    "transactionHash": "0x3333333333333333333333333333333333333333333333333333333333333333",
+    "transactionIndex": "7",
+    "logIndex": "2",
+    "receiptStatus": "success"
+  },
+  "expected": {
+    "observationId": "0x9717b7bad57bd0fa089e672e75cede4ae0bf3c86321dc0525ba00e9e0cc2da91"
+  }
+}
