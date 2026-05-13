@@ -58,6 +58,7 @@ Current protections:
 Launch risk to watch:
 
 - deployer is permanent owner in V0; there is no multisig, timelock, or owner transfer.
+- see `docs/OPERATIONS/V0_OPERATOR_POLICY.md` for the current canary operator policy and production gates.
 - allowlists are coordination controls, not decentralized verifier consensus.
 
 ## Self-Registration Registries
@@ -114,7 +115,7 @@ Current boundary:
 
 - `ReceiptVerifier` accepts first-writer receipt-report commitments and does not cryptographically verify receipts.
 - `WorkDebtScheduler` allows any scheduler to assign work to a nonzero worker and allows scheduler or worker to mark completion.
-- `FlowMemoryHookAdapter` validates nonzero inputs and emits an observation event; it is not a production Uniswap v4 hook.
+- `FlowMemoryHookAdapter` validates nonzero inputs and emits an observation event. It also exposes a dependency-light Uniswap v4-shaped `afterSwap` callback path, but it is not a production Uniswap v4 hook deployment.
 
 Launch risk to watch:
 

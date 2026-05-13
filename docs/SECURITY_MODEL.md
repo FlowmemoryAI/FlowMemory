@@ -149,6 +149,18 @@ Static analysis preparation:
 - Audit environments should run `npm run contracts:hardening:slither`.
 - Slither findings must be attached to the relevant PR or issue before any public testnet deployment.
 
+### V0 Operator Policy
+
+The live Base canary deployment uses direct V0 ownership and caller
+self-registration surfaces. It is intentionally not a governance, multisig,
+upgrade, token, or production-operations model.
+
+Current operator rules and production-claim blockers live in
+`docs/OPERATIONS/V0_OPERATOR_POLICY.md`. In short: source verification,
+operator separation, multisig or comparable account-control decisions,
+key-rotation/recovery, verifier signing policy, PoolManager hook wiring, and a
+recorded go/no-go decision are required before any production claim.
+
 ## PR Security Checklist
 
 - Does this change introduce or require secrets?

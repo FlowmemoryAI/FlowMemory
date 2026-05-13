@@ -41,6 +41,7 @@ Private keys must not be committed to the repo, copied into docs, or stored in g
 npm run deploy:base-sepolia
 npm run deploy:base-sepolia:broadcast
 npm run read:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --from-block <n> --to-block <n>
+npm run verify:base-canary:sources -- --json
 ```
 
 `deploy:base-sepolia` requires `BASE_SEPOLIA_RPC_URL` and
@@ -48,10 +49,17 @@ npm run read:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpul
 loader. The example file is `.env.example`; real key material must stay
 outside Git.
 
+`verify:base-canary:sources` reads `fixtures/deployments/base-canary-v0.json`
+and prints a dry-run verification plan by default. It also writes the same
+non-secret plan to
+`fixtures/deployments/base-canary-source-verification-plan.json`. Actual
+submission uses `npm run verify:base-canary:sources:submit` and requires
+`BASESCAN_API_KEY`. This script does not need a private key.
+
 ## Current Contract Set
 
 - `RootfieldRegistry`: Rootfield namespaces and root commitment pulses.
-- `FlowMemoryHookAdapter`: dependency-light hook-adapter event scaffold, not a production Uniswap hook.
+- `FlowMemoryHookAdapter`: dependency-light hook-adapter plus Uniswap v4-shaped afterSwap callback path, not a production Uniswap hook deployment.
 - `ReceiptVerifier`: compact receipt-report commitments, not cryptographic receipt verification.
 - `VerifierReportRegistry`: owner-authorized verifier report commitments.
 - `WorkReceiptRegistry`: owner-authorized worker receipt commitments.

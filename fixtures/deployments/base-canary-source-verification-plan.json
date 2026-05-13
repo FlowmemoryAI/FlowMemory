@@ -1,0 +1,228 @@
+{
+  "schema": "flowmemory.base_canary_source_verification_plan.v0",
+  "deploymentPath": "fixtures/deployments/base-canary-v0.json",
+  "reportPath": "fixtures/deployments/base-canary-source-verification-plan.json",
+  "network": {
+    "name": "Base mainnet",
+    "chainId": "8453",
+    "environment": "mainnet",
+    "rpcLabel": "public Base RPC"
+  },
+  "productionReady": false,
+  "submit": false,
+  "checkBytecode": true,
+  "apiKeyEnv": "BASESCAN_API_KEY",
+  "contractCount": 10,
+  "commands": [
+    {
+      "name": "RootfieldRegistry",
+      "address": "0x2a7ADd68a1d45C3251E2F92fFe4926124654a97C",
+      "sourceName": "contracts/RootfieldRegistry.sol:RootfieldRegistry",
+      "argv": [
+        "forge",
+        "verify-contract",
+        "0x2a7ADd68a1d45C3251E2F92fFe4926124654a97C",
+        "contracts/RootfieldRegistry.sol:RootfieldRegistry",
+        "--chain-id",
+        "8453",
+        "--compiler-version",
+        "v0.8.24+commit.e11b9ed9",
+        "--num-of-optimizations",
+        "200",
+        "--verifier",
+        "etherscan",
+        "--etherscan-api-key",
+        "<BASESCAN_API_KEY>"
+      ]
+    },
+    {
+      "name": "FlowMemoryHookAdapter",
+      "address": "0x179Df6d52e9DeF5D02704583a2E4E5a9FF427245",
+      "sourceName": "contracts/FlowMemoryHookAdapter.sol:FlowMemoryHookAdapter",
+      "argv": [
+        "forge",
+        "verify-contract",
+        "0x179Df6d52e9DeF5D02704583a2E4E5a9FF427245",
+        "contracts/FlowMemoryHookAdapter.sol:FlowMemoryHookAdapter",
+        "--chain-id",
+        "8453",
+        "--compiler-version",
+        "v0.8.24+commit.e11b9ed9",
+        "--num-of-optimizations",
+        "200",
+        "--verifier",
+        "etherscan",
+        "--etherscan-api-key",
+        "<BASESCAN_API_KEY>"
+      ]
+    },
+    {
+      "name": "ArtifactRegistry",
+      "address": "0x8F074d0F4e66975b740A4b7a316330c9660a485E",
+      "sourceName": "contracts/ArtifactRegistry.sol:ArtifactRegistry",
+      "argv": [
+        "forge",
+        "verify-contract",
+        "0x8F074d0F4e66975b740A4b7a316330c9660a485E",
+        "contracts/ArtifactRegistry.sol:ArtifactRegistry",
+        "--chain-id",
+        "8453",
+        "--compiler-version",
+        "v0.8.24+commit.e11b9ed9",
+        "--num-of-optimizations",
+        "200",
+        "--verifier",
+        "etherscan",
+        "--etherscan-api-key",
+        "<BASESCAN_API_KEY>"
+      ]
+    },
+    {
+      "name": "CursorRegistry",
+      "address": "0x3360689009685eade15c876855D24161b05829C1",
+      "sourceName": "contracts/CursorRegistry.sol:CursorRegistry",
+      "argv": [
+        "forge",
+        "verify-contract",
+        "0x3360689009685eade15c876855D24161b05829C1",
+        "contracts/CursorRegistry.sol:CursorRegistry",
+        "--chain-id",
+        "8453",
+        "--compiler-version",
+        "v0.8.24+commit.e11b9ed9",
+        "--num-of-optimizations",
+        "200",
+        "--verifier",
+        "etherscan",
+        "--etherscan-api-key",
+        "<BASESCAN_API_KEY>"
+      ]
+    },
+    {
+      "name": "ReceiptVerifier",
+      "address": "0x94ba7aA4562f8F8528C327378F6352350f6ddB5B",
+      "sourceName": "contracts/ReceiptVerifier.sol:ReceiptVerifier",
+      "argv": [
+        "forge",
+        "verify-contract",
+        "0x94ba7aA4562f8F8528C327378F6352350f6ddB5B",
+        "contracts/ReceiptVerifier.sol:ReceiptVerifier",
+        "--chain-id",
+        "8453",
+        "--compiler-version",
+        "v0.8.24+commit.e11b9ed9",
+        "--num-of-optimizations",
+        "200",
+        "--verifier",
+        "etherscan",
+        "--etherscan-api-key",
+        "<BASESCAN_API_KEY>"
+      ]
+    },
+    {
+      "name": "WorkerRegistry",
+      "address": "0xa8c07eF53Eeb4e57297ee35025a9cD5303fCCD29",
+      "sourceName": "contracts/WorkerRegistry.sol:WorkerRegistry",
+      "argv": [
+        "forge",
+        "verify-contract",
+        "0xa8c07eF53Eeb4e57297ee35025a9cD5303fCCD29",
+        "contracts/WorkerRegistry.sol:WorkerRegistry",
+        "--chain-id",
+        "8453",
+        "--compiler-version",
+        "v0.8.24+commit.e11b9ed9",
+        "--num-of-optimizations",
+        "200",
+        "--verifier",
+        "etherscan",
+        "--etherscan-api-key",
+        "<BASESCAN_API_KEY>"
+      ]
+    },
+    {
+      "name": "VerifierRegistry",
+      "address": "0xAf920ca7436Bb72172E27C96E0B716f01dcC5DBd",
+      "sourceName": "contracts/VerifierRegistry.sol:VerifierRegistry",
+      "argv": [
+        "forge",
+        "verify-contract",
+        "0xAf920ca7436Bb72172E27C96E0B716f01dcC5DBd",
+        "contracts/VerifierRegistry.sol:VerifierRegistry",
+        "--chain-id",
+        "8453",
+        "--compiler-version",
+        "v0.8.24+commit.e11b9ed9",
+        "--num-of-optimizations",
+        "200",
+        "--verifier",
+        "etherscan",
+        "--etherscan-api-key",
+        "<BASESCAN_API_KEY>"
+      ]
+    },
+    {
+      "name": "WorkReceiptRegistry",
+      "address": "0x2874cee0D581E4562ac9015BfCf330f1ea58a1F3",
+      "sourceName": "contracts/WorkReceiptRegistry.sol:WorkReceiptRegistry",
+      "argv": [
+        "forge",
+        "verify-contract",
+        "0x2874cee0D581E4562ac9015BfCf330f1ea58a1F3",
+        "contracts/WorkReceiptRegistry.sol:WorkReceiptRegistry",
+        "--chain-id",
+        "8453",
+        "--compiler-version",
+        "v0.8.24+commit.e11b9ed9",
+        "--num-of-optimizations",
+        "200",
+        "--verifier",
+        "etherscan",
+        "--etherscan-api-key",
+        "<BASESCAN_API_KEY>"
+      ]
+    },
+    {
+      "name": "VerifierReportRegistry",
+      "address": "0x95bC7455AdFD60e1B908ba455c25Ae732C1Ef996",
+      "sourceName": "contracts/VerifierReportRegistry.sol:VerifierReportRegistry",
+      "argv": [
+        "forge",
+        "verify-contract",
+        "0x95bC7455AdFD60e1B908ba455c25Ae732C1Ef996",
+        "contracts/VerifierReportRegistry.sol:VerifierReportRegistry",
+        "--chain-id",
+        "8453",
+        "--compiler-version",
+        "v0.8.24+commit.e11b9ed9",
+        "--num-of-optimizations",
+        "200",
+        "--verifier",
+        "etherscan",
+        "--etherscan-api-key",
+        "<BASESCAN_API_KEY>"
+      ]
+    },
+    {
+      "name": "WorkDebtScheduler",
+      "address": "0xa752e9bC7fAf39f659110D8Cf408E7707db94E34",
+      "sourceName": "contracts/WorkDebtScheduler.sol:WorkDebtScheduler",
+      "argv": [
+        "forge",
+        "verify-contract",
+        "0xa752e9bC7fAf39f659110D8Cf408E7707db94E34",
+        "contracts/WorkDebtScheduler.sol:WorkDebtScheduler",
+        "--chain-id",
+        "8453",
+        "--compiler-version",
+        "v0.8.24+commit.e11b9ed9",
+        "--num-of-optimizations",
+        "200",
+        "--verifier",
+        "etherscan",
+        "--etherscan-api-key",
+        "<BASESCAN_API_KEY>"
+      ]
+    }
+  ]
+}
