@@ -12,6 +12,7 @@ import {WorkDebtScheduler} from "../contracts/WorkDebtScheduler.sol";
 import {WorkReceiptRegistry} from "../contracts/WorkReceiptRegistry.sol";
 import {IArtifactRegistry} from "../contracts/interfaces/IArtifactRegistry.sol";
 import {IReceiptVerifier} from "../contracts/interfaces/IReceiptVerifier.sol";
+import {IUniswapV4SwapHookLike} from "../contracts/interfaces/IUniswapV4SwapHookLike.sol";
 import {IVerifierRegistry} from "../contracts/interfaces/IVerifierRegistry.sol";
 import {IWorkDebtScheduler} from "../contracts/interfaces/IWorkDebtScheduler.sol";
 import {IWorkerRegistry} from "../contracts/interfaces/IWorkerRegistry.sol";
@@ -627,6 +628,46 @@ contract LiveV0PackageTest {
         _assertTrue(keccak256(bytes(uri)) == keccak256("flowmemory://uniswap-v4/after-swap"));
     }
 
+    function testFlowMemoryHookAdapterExposesUniswapV4AfterSwapShape() public {
+        FlowMemoryHookAdapter adapter = new FlowMemoryHookAdapter();
+        bytes32 rootfieldId = keccak256("rootfield.v4");
+        bytes32 commitment = keccak256("hook.commitment.v4");
+        bytes32 parentPulseId = keccak256("parent.pulse");
+        IUniswapV4SwapHookLike.PoolKey memory key = IUniswapV4SwapHookLike.PoolKey({
+            currency0: address(0x1000),
+            currency1: address(0x2000),
+            fee: 3000,
+            tickSpacing: 60,
+            hooks: address(adapter)
+        });
+        IUniswapV4SwapHookLike.SwapParams memory params = IUniswapV4SwapHookLike.SwapParams({
+            zeroForOne: true,
+            amountSpecified: -1 ether,
+            sqrtPriceLimitX96: 42
+        });
+        bytes memory hookData =
+            adapter.encodeSwapHookData(rootfieldId, commitment, parentPulseId, "flowmemory://uniswap-v4/canary-after-swap");
+
+        vm.recordLogs();
+        (bytes4 selector, int128 hookDelta) = adapter.afterSwap(address(this), key, params, int256(123), hookData);
+        LiveV0Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        bytes32 poolId = keccak256(abi.encode(key.currency0, key.currency1, key.fee, key.tickSpacing, key.hooks));
+        _assertTrue(selector == adapter.UNISWAP_V4_AFTER_SWAP_SELECTOR());
+        _assertTrue(hookDelta == 0);
+        _assertTrue(logs.length == 2);
+        _assertTrue(logs[1].topics[0] == FLOWPULSE_SIGNATURE);
+        _assertTrue(logs[1].topics[2] == rootfieldId);
+        _assertTrue(logs[1].topics[3] == bytes32(uint256(uint160(address(this)))));
+        _assertSwapPulseData(
+            logs[1].data,
+            poolId,
+            commitment,
+            parentPulseId,
+            "flowmemory://uniswap-v4/canary-after-swap"
+        );
+    }
+
     function testFlowMemoryHookAdapterRejectsZeroCommitment() public {
         FlowMemoryHookAdapter adapter = new FlowMemoryHookAdapter();
 
@@ -649,7 +690,52 @@ contract LiveV0PackageTest {
         adapter.afterSwap(address(this), keccak256("pool.alpha"), bytes32(0), keccak256("commitment"), "");
     }
 
+    function testFlowMemoryHookAdapterRejectsEmptyUniswapV4HookData() public {
+        FlowMemoryHookAdapter adapter = new FlowMemoryHookAdapter();
+        IUniswapV4SwapHookLike.PoolKey memory key = IUniswapV4SwapHookLike.PoolKey({
+            currency0: address(0x1000),
+            currency1: address(0x2000),
+            fee: 3000,
+            tickSpacing: 60,
+            hooks: address(adapter)
+        });
+        IUniswapV4SwapHookLike.SwapParams memory params = IUniswapV4SwapHookLike.SwapParams({
+            zeroForOne: true,
+            amountSpecified: -1 ether,
+            sqrtPriceLimitX96: 42
+        });
+
+        vm.expectRevert(FlowMemoryHookAdapter.EmptyHookData.selector);
+        adapter.afterSwap(address(this), key, params, int256(0), "");
+    }
+
     function _assertTrue(bool condition) private pure {
         if (!condition) revert AssertionFailed();
+    }
+
+    function _assertSwapPulseData(
+        bytes memory data,
+        bytes32 expectedSubject,
+        bytes32 expectedCommitment,
+        bytes32 expectedParentPulseId,
+        string memory expectedUri
+    ) private pure {
+        (
+            uint8 pulseType,
+            bytes32 subject,
+            bytes32 flowPulseCommitment,
+            bytes32 decodedParentPulseId,
+            uint64 sequence,
+            uint64 occurredAt,
+            string memory uri
+        ) = abi.decode(data, (uint8, bytes32, bytes32, bytes32, uint64, uint64, string));
+
+        _assertTrue(pulseType == 4);
+        _assertTrue(subject == expectedSubject);
+        _assertTrue(flowPulseCommitment == expectedCommitment);
+        _assertTrue(decodedParentPulseId == expectedParentPulseId);
+        _assertTrue(sequence == 1);
+        _assertTrue(occurredAt > 0);
+        _assertTrue(keccak256(bytes(uri)) == keccak256(bytes(expectedUri)));
     }
 }

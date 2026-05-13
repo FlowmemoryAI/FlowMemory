@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import canaryFixture from "../../../../fixtures/dashboard/flowmemory-dashboard-base-canary-v0.json";
 import fixture from "../../../../fixtures/dashboard/flowmemory-dashboard-v0.json";
 import { validateDashboardData } from "../data/loadDashboardData";
 import { DASHBOARD_STATUSES } from "../data/status";
@@ -7,6 +8,7 @@ import type { DashboardData, ProvenancedRecord } from "../data/types";
 
 describe("dashboard fixture", () => {
   const data = validateDashboardData(fixture) as DashboardData;
+  const canaryData = validateDashboardData(canaryFixture) as DashboardData;
 
   it("loads the V0 dashboard fixture shape", () => {
     expect(data.metadata.schema).toBe("flowmemory.dashboard.fixture.v0");
@@ -17,6 +19,18 @@ describe("dashboard fixture", () => {
     expect(data.memorySignals.every((signal) => signal.contractEvent.topicMatchesContract)).toBe(true);
     expect(data.memorySignals.some((signal) => signal.signalType === "swap_memory_signal")).toBe(true);
     expect(data.rootflowTransitions.every((transition) => transition.contractEventRef.signalId === transition.memorySignalId)).toBe(true);
+  });
+
+  it("loads the Base canary dashboard mode separately from local fixtures", () => {
+    expect(canaryData.metadata.schema).toBe("flowmemory.dashboard.fixture.v0");
+    expect(canaryData.metadata.mode).toBe("canary");
+    expect(canaryData.metadata.canary?.productionReady).toBe(false);
+    expect(canaryData.chain.environment).toBe("mainnet");
+    expect(canaryData.chain.source).toBe("live");
+    expect(canaryData.flowPulseObservations).toHaveLength(4);
+    expect(canaryData.verifierReports).toHaveLength(0);
+    expect(canaryData.memorySignals.some((signal) => signal.signalType === "swap_memory_signal")).toBe(true);
+    expect(canaryData.agentMemoryViews.every((view) => view.localOnly === false)).toBe(true);
   });
 
   it("covers every required dashboard status", () => {

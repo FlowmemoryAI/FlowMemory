@@ -121,16 +121,59 @@ The canary reader refuses non-Base-mainnet RPC endpoints, refuses scans wider
 than 5,000 blocks, stores no RPC URLs or private keys, and marks checkpoint
 output as not production-ready.
 
+Committed deployment and dashboard artifacts:
+
+- `fixtures/deployments/base-canary-v0.json`
+- `fixtures/deployments/base-canary-indexer-state.json`
+- `fixtures/deployments/base-canary-indexer-checkpoint.json`
+- `fixtures/dashboard/flowmemory-dashboard-base-canary-v0.json`
+- `apps/dashboard/public/data/flowmemory-dashboard-base-canary-v0.json`
+
+Regenerate the canary dashboard data after refreshing the guarded reader output:
+
+```powershell
+npm run flowmemory:canary-dashboard
+```
+
+The dashboard exposes this as a separate Base canary mode. It stays separate
+from the local fixture mode so live canary reads do not get mistaken for local
+acceptance fixtures or production readiness.
+
+## Source Verification Automation
+
+Dry-run the source verification plan:
+
+```powershell
+npm run verify:base-canary:sources -- --json
+```
+
+Submit to the configured explorer after setting `BASESCAN_API_KEY`:
+
+```powershell
+$env:BASESCAN_API_KEY="<basescan-api-key>"
+npm run verify:base-canary:sources:submit
+```
+
+Optional bytecode check before submitting:
+
+```powershell
+npm run verify:base-canary:sources -- --check-bytecode --rpc-url https://mainnet.base.org
+```
+
+The script uses `fixtures/deployments/base-canary-v0.json`, requires no private
+key, redacts the API key in generated plans, and writes a non-secret report to
+`fixtures/deployments/base-canary-source-verification-plan.json` by default.
+
 ## Important Gaps Found
 
-1. The dashboard still consumes generated fixtures. It does not yet ingest a
-   deployment artifact plus live read output.
-2. Contract source verification is not automated for all deployed contracts.
-3. `FlowMemoryHookAdapter` is still an adapter scaffold. It is not a production
-   Uniswap v4 hook wired into PoolManager permissions.
-4. Ownership is still direct deployer ownership where applicable. There is no
+1. Contract source verification automation exists, but actual submission
+   requires `BASESCAN_API_KEY` and explorer acceptance.
+2. `FlowMemoryHookAdapter` now exposes a dependency-light Uniswap v4-shaped
+   `afterSwap` callback path, but it is not a production hook deployment wired
+   into PoolManager permissions.
+3. Ownership is still direct deployer ownership where applicable. There is no
    multisig, governance, recovery, or operational key policy.
-5. Verifier and worker registry flows are deployed, but live verifier report
+4. Verifier and worker registry flows are deployed, but live verifier report
    submission, report signing, and verifier economics are not built.
 
 ## Notes

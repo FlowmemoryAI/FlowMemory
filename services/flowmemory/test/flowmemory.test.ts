@@ -11,6 +11,10 @@ import {
   type DashboardData,
 } from "../src/generate-launch-core.ts";
 import {
+  DEFAULT_CANARY_DASHBOARD_PATHS,
+  generateCanaryDashboard,
+} from "../src/generate-canary-dashboard.ts";
+import {
   FLOW_MEMORY_STATUSES,
   verifierStatusToFlowMemoryStatus,
 } from "../src/status.ts";
@@ -91,6 +95,31 @@ test("generates concrete Rootflow and Flow Memory V0 outputs", () => {
     assert.ok(transitionStatuses.has("reorged"));
 
     assertDashboardCoversStatuses(dashboard);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("generates Base canary dashboard output from committed deployment artifacts", () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-canary-dashboard-"));
+  const paths = {
+    ...DEFAULT_CANARY_DASHBOARD_PATHS,
+    dashboardOutPath: join(dir, "flowmemory-dashboard-base-canary-v0.json"),
+    dashboardRuntimePath: join(dir, "runtime-flowmemory-dashboard-base-canary-v0.json"),
+  };
+
+  try {
+    const dashboard = generateCanaryDashboard(paths);
+
+    assert.equal(dashboard.metadata.schema, "flowmemory.dashboard.fixture.v0");
+    assert.equal(dashboard.metadata.mode, "canary");
+    assert.equal(dashboard.chain.chainId, "8453");
+    assert.equal(dashboard.chain.source, "live");
+    assert.equal(dashboard.flowPulseObservations.length, 4);
+    assert.equal(dashboard.memorySignals.length, 4);
+    assert.equal(dashboard.rootflowTransitions.length, 4);
+    assert.equal(dashboard.verifierReports.length, 0);
+    assert.equal(dashboard.alerts[0].severity, "info");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

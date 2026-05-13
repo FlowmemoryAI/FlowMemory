@@ -2,6 +2,13 @@
 pragma solidity ^0.8.24;
 
 interface IFlowMemoryHookAdapter {
+    struct FlowMemorySwapHookData {
+        bytes32 rootfieldId;
+        bytes32 commitment;
+        bytes32 parentPulseId;
+        string uri;
+    }
+
     event AfterSwapObserved(
         address indexed caller,
         address indexed sender,
@@ -14,4 +21,9 @@ interface IFlowMemoryHookAdapter {
     function afterSwap(address sender, bytes32 poolId, bytes32 rootfieldId, bytes32 commitment, bytes calldata hookData)
         external
         returns (bytes4 selector);
+
+    function encodeSwapHookData(bytes32 rootfieldId, bytes32 commitment, bytes32 parentPulseId, string calldata uri)
+        external
+        pure
+        returns (bytes memory hookData);
 }

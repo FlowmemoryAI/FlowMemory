@@ -1,6 +1,7 @@
 import type { DashboardData } from "./types";
 
 export const DEFAULT_DASHBOARD_DATA_PATH = "/data/flowmemory-dashboard-v0.json";
+export const DEFAULT_CANARY_DASHBOARD_DATA_PATH = "/data/flowmemory-dashboard-base-canary-v0.json";
 
 function assertArray(value: unknown, label: string): void {
   if (!Array.isArray(value)) {
@@ -17,8 +18,8 @@ export function validateDashboardData(payload: unknown): DashboardData {
   if (candidate.metadata?.schema !== "flowmemory.dashboard.fixture.v0") {
     throw new Error("Unsupported dashboard fixture schema.");
   }
-  if (candidate.metadata.mode !== "fixture") {
-    throw new Error("Dashboard V0 expects fixture mode data.");
+  if (candidate.metadata.mode !== "fixture" && candidate.metadata.mode !== "canary") {
+    throw new Error("Dashboard V0 expects fixture or canary mode data.");
   }
   if (candidate.chain === undefined) {
     throw new Error("Dashboard fixture is missing chain context.");
