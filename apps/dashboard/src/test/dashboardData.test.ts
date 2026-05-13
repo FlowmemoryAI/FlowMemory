@@ -13,6 +13,9 @@ describe("dashboard fixture", () => {
     expect(data.metadata.mode).toBe("fixture");
     expect(data.flowPulseObservations.length).toBeGreaterThan(0);
     expect(data.verifierReports.length).toBeGreaterThan(0);
+    expect(data.memorySignals.every((signal) => signal.contractEvent.eventName === "FlowPulse")).toBe(true);
+    expect(data.memorySignals.every((signal) => signal.contractEvent.topicMatchesContract)).toBe(true);
+    expect(data.rootflowTransitions.every((transition) => transition.contractEventRef.signalId === transition.memorySignalId)).toBe(true);
   });
 
   it("covers every required dashboard status", () => {

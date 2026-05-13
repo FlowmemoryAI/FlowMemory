@@ -46,17 +46,39 @@ Minimum V0 fields:
   "signalType": "root_commitment|swap_activity|failure|repair|evaluation|hardware_heartbeat|unsupported",
   "subject": "bytes32-or-hex-string",
   "commitment": "bytes32-or-hex-string",
-  "source": {
-    "chainId": 84532,
-    "contractAddress": "0x...",
-    "blockNumber": 1,
-    "blockHash": "0x...",
-    "txHash": "0x...",
-    "logIndex": 0
+  "contractEvent": {
+    "schema": "flowmemory.flowpulse_contract_event.v0",
+    "interfaceName": "IFlowPulse",
+    "eventName": "FlowPulse",
+    "eventSignatureText": "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)",
+    "pulseTypeName": "ROOT_COMMITTED",
+    "indexed": {
+      "pulseId": "bytes32-or-hex-string",
+      "rootfieldId": "bytes32-or-hex-string",
+      "actor": "0x..."
+    },
+    "payload": {
+      "subject": "bytes32-or-hex-string",
+      "commitment": "bytes32-or-hex-string",
+      "parentPulseId": "bytes32-or-hex-string",
+      "sequence": "2"
+    },
+    "receiptLocator": {
+      "chainId": "8453",
+      "blockNumber": "123457",
+      "txHash": "0x...",
+      "logIndex": "3"
+    }
   },
   "status": "observed|pending|verified|failed|reorged|unsupported"
 }
 ```
+
+`contractEvent` is intentionally split between contract-emitted event fields and
+receipt-derived locator fields. `IFlowPulse` emits `pulseId`, `rootfieldId`,
+`actor`, `pulseType`, `subject`, `commitment`, `parentPulseId`, `sequence`,
+`occurredAt`, and `uri`; the indexer adds `txHash`, `logIndex`, block metadata,
+and receipt status after receipts/logs exist.
 
 ### MemoryReceipt
 
@@ -142,6 +164,7 @@ Allowed:
 
 - "This swap or fixture produced a FlowPulse."
 - "The indexer observed the pulse and derived receipt metadata."
+- "This MemorySignal is linked to `IFlowPulse.FlowPulse` event semantics."
 - "The verifier produced a V0 report."
 - "Rootflow moved this Rootfield from one committed root to another."
 - "This AgentMemoryView exposes verified and pending memory signals."

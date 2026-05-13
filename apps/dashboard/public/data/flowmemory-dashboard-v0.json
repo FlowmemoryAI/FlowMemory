@@ -666,6 +666,16 @@
       "txHash": "0x3333333333333333333333333333333333333333333333333333333333333333",
       "sequence": "1",
       "reasonCodes": [],
+      "contractEventRef": {
+        "signalId": "0xec2a80963190d2fa4d0eae023e735eeaf770cf33496eabdea696f3c7dda071eb",
+        "eventName": "FlowPulse",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "1",
+        "pulseTypeName": "ROOTFIELD_REGISTERED",
+        "txHash": "0x3333333333333333333333333333333333333333333333333333333333333333",
+        "logIndex": "2"
+      },
       "id": "0x29fcee50b38bf403556ea08db7faeda6ea50430c08fc3126cebffad4a7657522",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {
@@ -696,6 +706,16 @@
       "txHash": "0x3333333333333333333333333333333333333333333333333333333333333334",
       "sequence": "2",
       "reasonCodes": [],
+      "contractEventRef": {
+        "signalId": "0xc595baea5e90a5f06ff49d8afeea0996eb39e13b3794903b8142dc9daf3a2df0",
+        "eventName": "FlowPulse",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "2",
+        "pulseTypeName": "ROOT_COMMITTED",
+        "txHash": "0x3333333333333333333333333333333333333333333333333333333333333334",
+        "logIndex": "3"
+      },
       "id": "0x5cdf7f5498350650adc19c62828425723a09bcca6571774992ca2d013fdc1068",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {
@@ -728,6 +748,16 @@
       "reasonCodes": [
         "observation.reorged"
       ],
+      "contractEventRef": {
+        "signalId": "0x4699ec901e15d260417fd6a9a86357c179ac55b631df05f28b29f28d5a5f3b61",
+        "eventName": "FlowPulse",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "2",
+        "pulseTypeName": "ROOT_COMMITTED",
+        "txHash": "0x3333333333333333333333333333333333333333333333333333333333333335",
+        "logIndex": "4"
+      },
       "id": "0xe1b6f858279961c968cdfba0b85d489767c486289e824cab3d017997064fed89",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {
@@ -760,6 +790,16 @@
       "reasonCodes": [
         "commitment.mismatch"
       ],
+      "contractEventRef": {
+        "signalId": "0xe32d6eeeff9c6bafadca56b980d58159afe8ffb29184458fa589c890829b9627",
+        "eventName": "FlowPulse",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "2",
+        "pulseTypeName": "ROOT_COMMITTED",
+        "txHash": "0x3333333333333333333333333333333333333333333333333333333333333336",
+        "logIndex": "5"
+      },
       "id": "0x35db5f8c36e2bc988c4d60f25a2e60d971256bdfdb79a73c92c0b82a41e5a367",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {
@@ -792,6 +832,16 @@
       "reasonCodes": [
         "artifact.unavailable"
       ],
+      "contractEventRef": {
+        "signalId": "0xfdc7756ac00683bc3e85bb3a9c2bd01f9719667b2d739818591fe697ee45d6c4",
+        "eventName": "FlowPulse",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "2",
+        "pulseTypeName": "ROOT_COMMITTED",
+        "txHash": "0x3333333333333333333333333333333333333333333333333333333333333337",
+        "logIndex": "6"
+      },
       "id": "0x31d44377aa98e7fcaa07110256e1600249c4337c69e6d06c14d36e6aad6a79c4",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {
@@ -824,6 +874,16 @@
       "reasonCodes": [
         "pulse.type.unsupported"
       ],
+      "contractEventRef": {
+        "signalId": "0x74f686fdd91352713b0e1f74f8218d8e41359b67634f8c8be6cbafe15f7f95d5",
+        "eventName": "FlowPulse",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "99",
+        "pulseTypeName": "UNKNOWN_FLOWPULSE_TYPE",
+        "txHash": "0x3333333333333333333333333333333333333333333333333333333333333338",
+        "logIndex": "7"
+      },
       "id": "0xdc9a57620b3309aceee35e858f62650b565e5f17ec6d9218ffd653ef5a633cdf",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {
@@ -860,6 +920,47 @@
       "occurredAt": "2026-05-13T02:40:00.000Z",
       "uri": "ipfs://bafy-flowmemory-example",
       "summary": "rootfield registration pulse 1",
+      "contractEvent": {
+        "schema": "flowmemory.flowpulse_contract_event.v0",
+        "interfaceName": "IFlowPulse",
+        "eventName": "FlowPulse",
+        "eventSignatureText": "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "expectedTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "topicMatchesContract": true,
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "1",
+        "pulseTypeName": "ROOTFIELD_REGISTERED",
+        "indexed": {
+          "pulseId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "rootfieldId": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "actor": "0x4444444444444444444444444444444444444444"
+        },
+        "payload": {
+          "subject": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "commitment": "0x4122209ff672fc04b2ec3af31ab1af79813971f86de000aa6534038cc79de6b5",
+          "parentPulseId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "sequence": "1",
+          "occurredAt": "2026-05-13T02:40:00.000Z",
+          "uri": "ipfs://bafy-flowmemory-example"
+        },
+        "receiptLocator": {
+          "chainId": "8453",
+          "blockNumber": "123456",
+          "blockHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+          "txHash": "0x3333333333333333333333333333333333333333333333333333333333333333",
+          "transactionIndex": "7",
+          "logIndex": "2",
+          "receiptStatus": "success"
+        },
+        "receiptDerivedFields": [
+          "blockHash",
+          "txHash",
+          "transactionIndex",
+          "logIndex",
+          "receiptStatus"
+        ]
+      },
       "id": "0xec2a80963190d2fa4d0eae023e735eeaf770cf33496eabdea696f3c7dda071eb",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {
@@ -894,6 +995,47 @@
       "occurredAt": "2026-05-13T02:40:00.000Z",
       "uri": "ipfs://bafy-flowmemory-example",
       "summary": "rootfield registration pulse 1",
+      "contractEvent": {
+        "schema": "flowmemory.flowpulse_contract_event.v0",
+        "interfaceName": "IFlowPulse",
+        "eventName": "FlowPulse",
+        "eventSignatureText": "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "expectedTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "topicMatchesContract": true,
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "1",
+        "pulseTypeName": "ROOTFIELD_REGISTERED",
+        "indexed": {
+          "pulseId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "rootfieldId": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "actor": "0x4444444444444444444444444444444444444444"
+        },
+        "payload": {
+          "subject": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "commitment": "0x4122209ff672fc04b2ec3af31ab1af79813971f86de000aa6534038cc79de6b5",
+          "parentPulseId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "sequence": "1",
+          "occurredAt": "2026-05-13T02:40:00.000Z",
+          "uri": "ipfs://bafy-flowmemory-example"
+        },
+        "receiptLocator": {
+          "chainId": "8453",
+          "blockNumber": "123456",
+          "blockHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+          "txHash": "0x3333333333333333333333333333333333333333333333333333333333333333",
+          "transactionIndex": "7",
+          "logIndex": "2",
+          "receiptStatus": "success"
+        },
+        "receiptDerivedFields": [
+          "blockHash",
+          "txHash",
+          "transactionIndex",
+          "logIndex",
+          "receiptStatus"
+        ]
+      },
       "id": "0xec2a80963190d2fa4d0eae023e735eeaf770cf33496eabdea696f3c7dda071eb",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {
@@ -928,6 +1070,47 @@
       "occurredAt": "2026-05-13T02:41:00.000Z",
       "uri": "fixture://root-commit-valid",
       "summary": "root commitment pulse 2",
+      "contractEvent": {
+        "schema": "flowmemory.flowpulse_contract_event.v0",
+        "interfaceName": "IFlowPulse",
+        "eventName": "FlowPulse",
+        "eventSignatureText": "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "expectedTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "topicMatchesContract": true,
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "2",
+        "pulseTypeName": "ROOT_COMMITTED",
+        "indexed": {
+          "pulseId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab001",
+          "rootfieldId": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "actor": "0x4444444444444444444444444444444444444444"
+        },
+        "payload": {
+          "subject": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1",
+          "commitment": "0x69a9f953179a6ce2e08724dd759fb71b08b0759a5900fc0399a753ecf0557df5",
+          "parentPulseId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "sequence": "2",
+          "occurredAt": "2026-05-13T02:41:00.000Z",
+          "uri": "fixture://root-commit-valid"
+        },
+        "receiptLocator": {
+          "chainId": "8453",
+          "blockNumber": "123457",
+          "blockHash": "0x2222222222222222222222222222222222222222222222222222222222222223",
+          "txHash": "0x3333333333333333333333333333333333333333333333333333333333333334",
+          "transactionIndex": "8",
+          "logIndex": "3",
+          "receiptStatus": "success"
+        },
+        "receiptDerivedFields": [
+          "blockHash",
+          "txHash",
+          "transactionIndex",
+          "logIndex",
+          "receiptStatus"
+        ]
+      },
       "id": "0xc595baea5e90a5f06ff49d8afeea0996eb39e13b3794903b8142dc9daf3a2df0",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {
@@ -962,6 +1145,47 @@
       "occurredAt": "2026-05-13T02:41:00.000Z",
       "uri": "fixture://root-commit-valid",
       "summary": "root commitment pulse 2",
+      "contractEvent": {
+        "schema": "flowmemory.flowpulse_contract_event.v0",
+        "interfaceName": "IFlowPulse",
+        "eventName": "FlowPulse",
+        "eventSignatureText": "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "expectedTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "topicMatchesContract": true,
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "2",
+        "pulseTypeName": "ROOT_COMMITTED",
+        "indexed": {
+          "pulseId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab002",
+          "rootfieldId": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "actor": "0x4444444444444444444444444444444444444444"
+        },
+        "payload": {
+          "subject": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1",
+          "commitment": "0x69a9f953179a6ce2e08724dd759fb71b08b0759a5900fc0399a753ecf0557df5",
+          "parentPulseId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "sequence": "2",
+          "occurredAt": "2026-05-13T02:41:00.000Z",
+          "uri": "fixture://root-commit-valid"
+        },
+        "receiptLocator": {
+          "chainId": "8453",
+          "blockNumber": "123458",
+          "blockHash": "0x2222222222222222222222222222222222222222222222222222222222222224",
+          "txHash": "0x3333333333333333333333333333333333333333333333333333333333333335",
+          "transactionIndex": "9",
+          "logIndex": "4",
+          "receiptStatus": "success"
+        },
+        "receiptDerivedFields": [
+          "blockHash",
+          "txHash",
+          "transactionIndex",
+          "logIndex",
+          "receiptStatus"
+        ]
+      },
       "id": "0x4699ec901e15d260417fd6a9a86357c179ac55b631df05f28b29f28d5a5f3b61",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {
@@ -996,6 +1220,47 @@
       "occurredAt": "2026-05-13T02:42:00.000Z",
       "uri": "fixture://root-commit-valid",
       "summary": "root commitment pulse 3",
+      "contractEvent": {
+        "schema": "flowmemory.flowpulse_contract_event.v0",
+        "interfaceName": "IFlowPulse",
+        "eventName": "FlowPulse",
+        "eventSignatureText": "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "expectedTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "topicMatchesContract": true,
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "2",
+        "pulseTypeName": "ROOT_COMMITTED",
+        "indexed": {
+          "pulseId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab003",
+          "rootfieldId": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "actor": "0x4444444444444444444444444444444444444444"
+        },
+        "payload": {
+          "subject": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1",
+          "commitment": "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "parentPulseId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "sequence": "3",
+          "occurredAt": "2026-05-13T02:42:00.000Z",
+          "uri": "fixture://root-commit-valid"
+        },
+        "receiptLocator": {
+          "chainId": "8453",
+          "blockNumber": "123459",
+          "blockHash": "0x2222222222222222222222222222222222222222222222222222222222222225",
+          "txHash": "0x3333333333333333333333333333333333333333333333333333333333333336",
+          "transactionIndex": "10",
+          "logIndex": "5",
+          "receiptStatus": "success"
+        },
+        "receiptDerivedFields": [
+          "blockHash",
+          "txHash",
+          "transactionIndex",
+          "logIndex",
+          "receiptStatus"
+        ]
+      },
       "id": "0xe32d6eeeff9c6bafadca56b980d58159afe8ffb29184458fa589c890829b9627",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {
@@ -1030,6 +1295,47 @@
       "occurredAt": "2026-05-13T02:43:00.000Z",
       "uri": "fixture://missing-artifact",
       "summary": "root commitment pulse 4",
+      "contractEvent": {
+        "schema": "flowmemory.flowpulse_contract_event.v0",
+        "interfaceName": "IFlowPulse",
+        "eventName": "FlowPulse",
+        "eventSignatureText": "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "expectedTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "topicMatchesContract": true,
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "2",
+        "pulseTypeName": "ROOT_COMMITTED",
+        "indexed": {
+          "pulseId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab004",
+          "rootfieldId": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "actor": "0x4444444444444444444444444444444444444444"
+        },
+        "payload": {
+          "subject": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1",
+          "commitment": "0x69a9f953179a6ce2e08724dd759fb71b08b0759a5900fc0399a753ecf0557df5",
+          "parentPulseId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "sequence": "4",
+          "occurredAt": "2026-05-13T02:43:00.000Z",
+          "uri": "fixture://missing-artifact"
+        },
+        "receiptLocator": {
+          "chainId": "8453",
+          "blockNumber": "123460",
+          "blockHash": "0x2222222222222222222222222222222222222222222222222222222222222226",
+          "txHash": "0x3333333333333333333333333333333333333333333333333333333333333337",
+          "transactionIndex": "11",
+          "logIndex": "6",
+          "receiptStatus": "success"
+        },
+        "receiptDerivedFields": [
+          "blockHash",
+          "txHash",
+          "transactionIndex",
+          "logIndex",
+          "receiptStatus"
+        ]
+      },
       "id": "0xfdc7756ac00683bc3e85bb3a9c2bd01f9719667b2d739818591fe697ee45d6c4",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {
@@ -1064,6 +1370,47 @@
       "occurredAt": "2026-05-13T02:44:00.000Z",
       "uri": "fixture://unsupported",
       "summary": "unsupported pulse pulse 5",
+      "contractEvent": {
+        "schema": "flowmemory.flowpulse_contract_event.v0",
+        "interfaceName": "IFlowPulse",
+        "eventName": "FlowPulse",
+        "eventSignatureText": "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "expectedTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "topicMatchesContract": true,
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "99",
+        "pulseTypeName": "UNKNOWN_FLOWPULSE_TYPE",
+        "indexed": {
+          "pulseId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab005",
+          "rootfieldId": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "actor": "0x4444444444444444444444444444444444444444"
+        },
+        "payload": {
+          "subject": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1",
+          "commitment": "0x69a9f953179a6ce2e08724dd759fb71b08b0759a5900fc0399a753ecf0557df5",
+          "parentPulseId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "sequence": "5",
+          "occurredAt": "2026-05-13T02:44:00.000Z",
+          "uri": "fixture://unsupported"
+        },
+        "receiptLocator": {
+          "chainId": "8453",
+          "blockNumber": "123461",
+          "blockHash": "0x2222222222222222222222222222222222222222222222222222222222222227",
+          "txHash": "0x3333333333333333333333333333333333333333333333333333333333333338",
+          "transactionIndex": "12",
+          "logIndex": "7",
+          "receiptStatus": "success"
+        },
+        "receiptDerivedFields": [
+          "blockHash",
+          "txHash",
+          "transactionIndex",
+          "logIndex",
+          "receiptStatus"
+        ]
+      },
       "id": "0x74f686fdd91352713b0e1f74f8218d8e41359b67634f8c8be6cbafe15f7f95d5",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {

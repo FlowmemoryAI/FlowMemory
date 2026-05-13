@@ -73,24 +73,31 @@ Every Rootflow transition must be expressible with this canonical shape:
   "sequence": 1,
   "observedAt": "iso-8601-or-block-time",
   "updatedAt": "iso-8601",
-  "source": {
-    "chainId": 84532,
-    "contractAddress": "0x...",
-    "blockNumber": 1,
-    "blockHash": "0x...",
+  "contractEventRef": {
+    "signalId": "bytes32-or-hex-string",
+    "eventName": "FlowPulse",
+    "eventTopic0": "bytes32-or-hex-string",
+    "sourceContract": "0x...",
+    "pulseTypeId": "2",
+    "pulseTypeName": "ROOT_COMMITTED",
     "txHash": "0x...",
-    "logIndex": 0
+    "logIndex": "3"
   }
 }
 ```
 
-The exact JSON schema may live in the crypto or indexer package, but the fields above are the V0 minimum.
+The canonical local/test JSON schema lives at
+`schemas/flowmemory/rootflow-transition.schema.json`. `contractEventRef`
+keeps each transition tied to the `IFlowPulse.FlowPulse` event that produced its
+MemorySignal while preserving the boundary that `txHash` and `logIndex` are
+indexer-derived after receipts/logs exist.
 
 ## Invariants
 
 - A transition must belong to exactly one `rootfieldId`.
 - A transition must link to one `pulseId`.
 - A transition must identify its source observation after the indexer reads receipts and logs.
+- A transition must include enough contract-event reference data for a dashboard or reviewer to map it back to `IFlowPulse.FlowPulse` semantics.
 - A contract must not claim final `txHash` or `logIndex` during execution.
 - Heavy memory, model, evaluation, media, and artifact data stays off-chain.
 - On-chain state stores compact roots, commitments, receipts, counters, and intentional protocol state only.

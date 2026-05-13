@@ -62,6 +62,8 @@ Launch-core integration:
 - `fixtures/launch-core/flowmemory-launch-v0.json` contains generated MemorySignal, MemoryReceipt, RootfieldBundle, AgentMemoryView, and RootflowTransition objects.
 - `fixtures/launch-core/rootflow-transitions.json` contains concrete generated RootflowTransition output.
 - `schemas/flowmemory/` contains canonical JSON schemas for MemorySignal, MemoryReceipt, RootflowTransition, RootfieldBundle, and AgentMemoryView.
+- Generated MemorySignals include a `contractEvent` object tying each signal to `IFlowPulse.FlowPulse` event semantics, pulse type names, indexed fields, payload fields, and receipt-derived locator fields.
+- Generated RootflowTransitions include `contractEventRef` so reviewers and dashboards can trace each transition back to the contract event that produced the MemorySignal.
 - `services/flowmemory/src/status.ts` implements the explicit verifier-to-Flow-Memory status adapter: `valid` -> `verified`, `invalid` -> `failed`, `unresolved` -> `unresolved`, `unsupported` -> `unsupported`, `reorged` -> `reorged`.
 - `.github/workflows/ci.yml` now includes area jobs for contracts, services/launch core, crypto, dashboard, devnet, and hardware.
 
@@ -126,6 +128,7 @@ Recently merged PRs:
 - #60 Crypto V0 foundation.
 - #61 Indexer/verifier V0 fixture package.
 - #62 Dashboard V0.
+- #68 Launch-core FlowMemory V0 integration.
 
 ## Active Local Work
 
@@ -156,12 +159,11 @@ Before assigning agents, check for dirty worktrees and avoid overlapping folders
 
 ## Current Operator Priorities
 
-1. Make Rootflow V0 and Flow Memory V0 pass the launch acceptance matrix in `docs/V0_LAUNCH_ACCEPTANCE.md`.
-2. Keep the generated launch-core command stable in CI.
-3. Add richer schema validation before live services.
-4. Finish contracts hardening without production deployment or token mechanics.
-5. Keep dashboard work fixture-backed until a production API is explicitly scoped.
-6. Keep chain/appchain work no-value and local until explicit gates are passed.
+1. Keep the generated launch-core command stable in CI.
+2. Add runtime schema validation and fixture diff guardrails before live services.
+3. Finish contracts hardening without production deployment or token mechanics.
+4. Keep dashboard work fixture-backed until a production API is explicitly scoped.
+5. Keep chain/appchain work no-value and local until explicit gates are passed.
 
 ## Update Rule
 

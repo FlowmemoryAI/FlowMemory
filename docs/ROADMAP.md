@@ -14,6 +14,7 @@ The launch-core V0 stack means:
 - FlowPulse fixtures can be produced or consumed deterministically.
 - Rootflow transitions link FlowPulse observations, parent state, receipts, verifier reports, and new roots.
 - Flow Memory objects expose MemorySignal, MemoryReceipt, RootfieldBundle, and AgentMemoryView shapes.
+- MemorySignals and RootflowTransitions preserve explicit `IFlowPulse.FlowPulse` contract-event semantics while keeping receipt-only fields indexer-derived.
 - Indexer/verifier specs define observation identity, reorg states, and report shape.
 - Crypto vocabulary defines receipts, attestations, roots, commitments, and proof boundaries.
 - Dashboard can consume fixture-backed observed, pending, verified, failed, unsupported, and reorged states.
@@ -60,6 +61,7 @@ Status: implemented as fixture-first services plus generated launch-core state; 
 - Verifier statuses and report JSON schema exist for local fixture reports.
 - Rootflow transition schema and parent/child state-linking behavior exist as generated local fixtures.
 - Flow Memory schemas for MemorySignal, MemoryReceipt, RootfieldBundle, and AgentMemoryView exist under `schemas/flowmemory/`.
+- Generated MemorySignal and RootflowTransition fixtures expose contract-event linkage through `contractEvent` and `contractEventRef`.
 - Fixture-based parser and reorg-state tests exist in the indexer/verifier packages.
 - Define persistence and local RPC reader boundaries only after fixture behavior stabilizes.
 - Local devnet smoke-test gates exist as a no-value Rust prototype, without mainnet or production deployment.
@@ -92,6 +94,7 @@ Status: implemented as a generated fixture-backed local app.
 - App-facing entities exist in `apps/dashboard`.
 - Observed, pending, finalized, verified, failed, unresolved, unsupported, reorged, offline, and stale states are modeled for display.
 - Dashboard renders local fixture views for overview, Flow Memory / Rootflow, FlowPulse stream, Rootfields, work receipts, verifier reports, devnet blocks, hardware nodes, alerts, and raw JSON.
+- The Flow Memory / Rootflow view includes launch-demo summaries for contract event linkage, transition status counts, root bundle state, and agent memory warnings.
 - The dashboard fixture is generated from services, local devnet, and hardware POC outputs by `npm run launch:v0`.
 - Keep hosted production APIs and deployment out of scope until the local stack stabilizes.
 
