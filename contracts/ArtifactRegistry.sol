@@ -13,6 +13,7 @@ contract ArtifactRegistry is IArtifactRegistry {
     error ZeroRootfieldId();
     error ZeroArtifactType();
     error ZeroCommitmentHash();
+    error ZeroSchemaHash();
     error ArtifactAlreadyRegistered(bytes32 artifactId);
     error ArtifactNotRegistered(bytes32 artifactId);
     error ArtifactNotActive(bytes32 artifactId);
@@ -32,6 +33,7 @@ contract ArtifactRegistry is IArtifactRegistry {
         if (rootfieldId == bytes32(0)) revert ZeroRootfieldId();
         if (artifactType == bytes32(0)) revert ZeroArtifactType();
         if (commitmentHash == bytes32(0)) revert ZeroCommitmentHash();
+        if (schemaHash == bytes32(0)) revert ZeroSchemaHash();
         if (_artifacts[artifactId].exists) revert ArtifactAlreadyRegistered(artifactId);
 
         uint64 now64 = _blockTimestamp();
