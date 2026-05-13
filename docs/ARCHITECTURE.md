@@ -93,8 +93,15 @@ Responsibilities:
 - Derive `txHash`, `logIndex`, block metadata, and observation identity.
 - Reconstruct FlowPulse streams.
 - Track pending, finalized, duplicate, invalid, unsupported, unresolved, and reorged states.
-- Verify commitments against allowed off-chain evidence.
-- Produce deterministic verification reports.
+- Resolve off-chain artifacts.
+- Verify roots, receipts, commitments, attestations, and proof placeholders against allowed evidence.
+- Produce deterministic verification reports and outputs.
+
+Crypto foundation:
+
+- Use `crypto/FLOWMEMORY_CRYPTO_SPEC.md` as the draft v0 schema overview.
+- Use `crypto/OBSERVATION_IDENTITY.md` to distinguish contract `pulseId`, indexer-derived `observationId`, and verifier `reportId`.
+- Use `services/verifier/README.md` for the draft deterministic verifier report flow and status vocabulary.
 
 Boundaries:
 

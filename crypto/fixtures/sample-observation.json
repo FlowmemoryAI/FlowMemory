@@ -1,0 +1,47 @@
+{
+  "input": {
+    "chainId": 8453,
+    "emittingContract": "0x1234567890abcdef1234567890abcdef12345678",
+    "blockNumber": 12345678,
+    "blockHash": "0x1111111111111111111111111111111111111111111111111111111111111111",
+    "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+    "transactionIndex": 7,
+    "logIndex": 3,
+    "eventSignature": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+    "pulseId": "0x86b8325d6da0767e12097aed29aefe4820aaf4d6b7d4bb8371f1db927fda9d9d",
+    "rootfieldId": "0x726f6f746669656c642e62657461000000000000000000000000000000000000"
+  },
+  "artifact": {
+    "chunks": ["alpha", "beta", "gamma"],
+    "chunkSize": 5,
+    "mediaType": "text/plain; charset=utf-8",
+    "metadata": {
+      "name": "flowmemory-test-artifact",
+      "purpose": "flowpulse-observation-vector"
+    }
+  },
+  "storage": {
+    "artifactRoot": "0xff501ac63f870de597cdc2a28dad8aeae3b52c5f1e2a658b1ea37c440b76f644",
+    "providerId": "0xe258c429fc59ff6f69bec97364ee5d4ad329b65231151219e7241739ed50b43c",
+    "locationCommitment": "0xcce30f05ced736a23714458a881d47f8c735466f8d6a9e46afb6b146ac14d938",
+    "retentionPolicyHash": "0x330509f9a6a21217e358dd4e862e18f0f1e02ad307685ecf6b13ac3772a1ef45",
+    "encryptionCommitment": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "availabilitySampleRoot": "0x784d414314d577f517ba5daafed500794621a7e114da383cbea7fd058fac5555",
+    "issuedAtUnixMs": 1767225600000,
+    "expiresAtUnixMs": 1893456000000,
+    "nonce": "0x41a13ee24f0edded7a93c874f40f87bfd6db19f4f06c3ff788ee63a902d831e3"
+  },
+  "receipt": {
+    "artifactRoot": "0xff501ac63f870de597cdc2a28dad8aeae3b52c5f1e2a658b1ea37c440b76f644",
+    "storageReceiptCommitment": "0xb341bddb79e03b03c0a6acfcc4d01d393a84d5187f02fea2fd1761c09f345da7",
+    "evidenceRoot": "0xe8e37a51ab4052012bd245722091179b164d04c550d736d0b95f81da8d7b10de",
+    "receiptVersion": 0
+  },
+  "expected": {
+    "observationId": "0xd80d0a3b317ceae266c9b7983c5a9376529f457a01469c96d8d3fd5a6c2d8a3f",
+    "artifactRoot": "0xff501ac63f870de597cdc2a28dad8aeae3b52c5f1e2a658b1ea37c440b76f644",
+    "contentMerkleRoot": "0x71d29e65fd4f25301225dcaabeb40fddabac5cbb327d4992c21a591b05eebca2",
+    "storageReceiptCommitment": "0xb341bddb79e03b03c0a6acfcc4d01d393a84d5187f02fea2fd1761c09f345da7",
+    "receiptHash": "0xca2ebca63e004ff4b0ca9766acbb2862b45059a480d911b67dbc25e937c2e733"
+  }
+}
