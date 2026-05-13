@@ -58,6 +58,8 @@ codex
 
 Give the agent the prompt from `docs/AGENT_PROMPTS.md` plus the assigned issue number.
 
+For Rootflow V0 and Flow Memory V0 launch-core work, use `docs/LAUNCH_CORE_AGENT_GOALS.md`.
+
 Do not start two agents on the same folder family unless the changed files are clearly disjoint.
 
 ## Monitoring PRs

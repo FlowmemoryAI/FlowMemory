@@ -40,6 +40,7 @@ Launch-core specifications:
 - `docs/V0_LAUNCH_ACCEPTANCE.md` maps the Rootflow and Flow Memory objective to concrete artifacts and evidence.
 - `docs/DECISIONS/rootflow-v0.md` records the V0 decision and non-goal boundaries.
 - `docs/reviews/ROOTFLOW_FLOW_MEMORY_V0_ACCEPTANCE_AUDIT.md` tracks evidence and missing work for the active launch-core goal.
+- `docs/LAUNCH_CORE_AGENT_GOALS.md` provides copy-ready goals for the contracts, crypto, indexer/verifier, dashboard, and review worktrees.
 
 ## Conceptual Or Not Implemented Yet
 
