@@ -1,6 +1,6 @@
 {
   "schema": "flowmemory.local_devnet.fixture.txs.v0",
-  "description": "No-value local FlowMemory transaction fixture.",
+  "description": "No-value local FlowMemory transaction fixture covering the full smoke lifecycle.",
   "txs": [
     {
       "type": "RegisterRootfield",
@@ -10,11 +10,43 @@
       "metadataHash": "0x2b49f44f3d7f2a97970cc7ee3cb3cb9e5db4c4ab65f9fd797f0c703275c9eabc"
     },
     {
+      "type": "RegisterModelPassport",
+      "modelPassportId": "model:fixture:alpha",
+      "issuer": "operator:fixture",
+      "modelFamily": "local-fixture-model",
+      "modelHash": "0x94fb2b5e8a9712d2cf2475ff2ef301549f39778533cab5fa5b76b82d0011d635",
+      "metadataHash": "0xff7549bf123d6c6211ed280f87624aa51b98cc73bba0f1db26db345b7fed402d"
+    },
+    {
+      "type": "RegisterAgent",
+      "agentId": "agent:fixture:alpha",
+      "controller": "operator:fixture",
+      "modelPassportId": "model:fixture:alpha",
+      "metadataHash": "0x6b4c7e0ad82f80a60ef758f760ef39f752157c45a889d27a197b0c6a225f9ccb"
+    },
+    {
+      "type": "RegisterVerifierModule",
+      "verifierId": "verifier:fixture",
+      "operator": "operator:fixture",
+      "moduleHash": "0x11328344d17342875d060ba3e42032be3ee9469ba2f61fba411c7d233fd1d336",
+      "ruleSet": "flowmemory.work.rule_set.fixture.v0",
+      "metadataHash": "0xd9687f64d6ee634b8801ce7d42647742658de9ec07063e8aa64953f5aa0576ab"
+    },
+    {
       "type": "SubmitArtifactCommitment",
       "artifactId": "artifact:fixture:001",
       "rootfieldId": "rootfield:fixture:alpha",
       "commitment": "0xd09d2dbcb9447a778f30076fb1c42d9a5d1ef9cdaea43d68f72de06abf4f4b7f",
       "uriHint": "fixture://artifact/fixture/001"
+    },
+    {
+      "type": "MarkArtifactAvailability",
+      "proofId": "availability:fixture:001",
+      "artifactId": "artifact:fixture:001",
+      "rootfieldId": "rootfield:fixture:alpha",
+      "proofDigest": "0x6aee0c0b0a23d6859b1c295a490c857cf64a3ecfcb4cfc9e5eb888c2b6b75fda",
+      "storageBackend": "fixture-local",
+      "status": "available"
     },
     {
       "type": "CommitRoot",
@@ -42,6 +74,36 @@
       "reportDigest": "0xae02b712d4690ee2607a1951fa7d71b5f04d5cf8cbe0f533315816c4f6a14d85",
       "status": "verified",
       "reasonCodes": []
+    },
+    {
+      "type": "UpdateMemoryCell",
+      "memoryCellId": "memory:fixture:agent-alpha:core",
+      "agentId": "agent:fixture:alpha",
+      "rootfieldId": "rootfield:fixture:alpha",
+      "sourceReceiptId": "receipt:fixture:001",
+      "newRoot": "0xf1aa3ba90f90cefc00e3f65e0f556817245172a6f535c3f2f72f8fa7b41e5937",
+      "memoryDeltaRoot": "0x63da2313068c53548f0bc5f184ef0a7b2855d168ed3bef22ad006e8ceda1190f"
+    },
+    {
+      "type": "OpenChallenge",
+      "challengeId": "challenge:fixture:001",
+      "receiptId": "receipt:fixture:001",
+      "challenger": "reviewer:fixture",
+      "evidenceHash": "0x4022c35817a9d660d32335960bda5d17c5630f4c2e47b6ec9c475e24a58b157d",
+      "reasonCode": "fixture-review"
+    },
+    {
+      "type": "ResolveChallenge",
+      "challengeId": "challenge:fixture:001",
+      "resolver": "verifier:fixture",
+      "resolution": "dismissed"
+    },
+    {
+      "type": "FinalizeWorkReceipt",
+      "finalityReceiptId": "finality:fixture:001",
+      "receiptId": "receipt:fixture:001",
+      "finalizedBy": "operator:fixture",
+      "finalityStatus": "finalized"
     },
     {
       "type": "AnchorBatchToBasePlaceholder",
