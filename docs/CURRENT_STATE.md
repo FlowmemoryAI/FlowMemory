@@ -14,6 +14,8 @@ The launch-core V0 stack now has a single runnable local command that connects c
 
 Launch-critical direction: Rootflow V0 and Flow Memory V0 are the core of the next milestone. Rootflow defines memory-state transitions. Flow Memory defines the agent-facing memory objects derived from FlowPulse observations, receipts, verifier reports, and committed roots.
 
+L1 research direction is now inventoried in `docs/L1_RESEARCH_INVENTORY.md`. Noesis / Flow Chain remains an external research corpus and longer-term AI-native state direction; it is not approved for production L1 implementation in this repo.
+
 ## Implemented In The Merged Repo
 
 Repository operating system:
@@ -94,6 +96,7 @@ Launch-core specifications:
 - `docs/reviews/ROOTFLOW_FLOW_MEMORY_V0_ACCEPTANCE_AUDIT.md` tracks evidence and missing work for the active launch-core goal.
 - `docs/reviews/OPEN_PR_MERGE_READINESS.md` is now historical merge-readiness evidence for PRs that have merged.
 - `docs/LAUNCH_CORE_AGENT_GOALS.md` provides copy-ready goals for the contracts, crypto, indexer/verifier, dashboard, and review worktrees.
+- `docs/L1_RESEARCH_INVENTORY.md` maps the external Noesis / Flow Chain, Rootflow, FlowCodec, and older AI-L1 research archives to FlowMemory V0 boundaries.
 
 ## Conceptual Or Not Implemented Yet
 
@@ -113,6 +116,7 @@ Launch-core specifications:
 - Real Meshtastic or LoRa device integration.
 - Cryptographic proof systems, GPU proofs, verifier networks, or verifier economics.
 - Production appchain/L1 implementation, validator planning, sequencer planning, bridge deployment, or mainnet deployment.
+- Direct Noesis code import, production Flow Chain implementation, production validator network work, tokenomics, and mainnet work.
 
 ## Active GitHub Work Shape
 

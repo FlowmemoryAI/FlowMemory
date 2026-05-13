@@ -120,6 +120,9 @@ Status: research-only.
 - Define no-value devnet/appchain research criteria.
 - Compare Base settlement anchors and local devnet smoke-test requirements.
 - Research bridge/security review requirements before any chain design.
+- Use `docs/L1_RESEARCH_INVENTORY.md` as the current source map for Noesis / Flow Chain, Rootflow, FlowCodec, and earlier AI-L1 research archives.
+- Extract concepts from Noesis into FlowMemory V0 schemas and decisions before importing code or expanding implementation scope.
+- Treat Noesis as a longer-term AI-native state research path while Rootflow V0 and Flow Memory V0 remain the launch-core priority.
 
 ### Phase 8: Later Gated Work
 
