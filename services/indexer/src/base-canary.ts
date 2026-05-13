@@ -2,9 +2,9 @@ import { resolve } from "node:path";
 
 import { indexFlowPulseLogs, type IndexerState } from "./indexer.ts";
 import {
-  baseSepoliaIndexerCheckpoint,
-  type BaseSepoliaIndexerCheckpoint,
-  writeBaseSepoliaIndexerCheckpoint,
+  baseCanaryIndexerCheckpoint,
+  type BaseCanaryIndexerCheckpoint,
+  writeBaseCanaryIndexerCheckpoint,
   writeIndexerState,
 } from "./persistence.ts";
 import {
@@ -13,11 +13,11 @@ import {
   normalizeEvmAddresses,
   readArgValue,
 } from "./reader-utils.ts";
-import { BASE_SEPOLIA_CHAIN_ID, readBaseSepoliaFlowPulseLogs } from "./rpc.ts";
+import { BASE_MAINNET_CHAIN_ID, readBaseMainnetCanaryFlowPulseLogs } from "./rpc.ts";
 
-export { blockArgumentToDecimalString, blockArgumentToRpcQuantity } from "./reader-utils.ts";
+export const BASE_CANARY_MAX_BLOCK_SPAN = 5_000n;
 
-export interface BaseSepoliaReaderOptions {
+export interface BaseCanaryReaderOptions {
   rpcUrl: string;
   addresses: string[];
   fromBlock: string;
@@ -26,33 +26,57 @@ export interface BaseSepoliaReaderOptions {
   checkpointPath?: string;
   finalizedBlockNumber?: string;
   generatedAt?: string;
+  acknowledgeMainnetCanary?: boolean;
   fetchImpl?: typeof fetch;
 }
 
-export interface BaseSepoliaReaderResult {
+export interface BaseCanaryReaderResult {
   state: IndexerState;
-  checkpoint: BaseSepoliaIndexerCheckpoint;
+  checkpoint: BaseCanaryIndexerCheckpoint;
   statePath: string;
   checkpointPath: string;
 }
 
-interface CliOptions extends BaseSepoliaReaderOptions {
+interface CliOptions extends BaseCanaryReaderOptions {
   outPath: string;
   checkpointPath: string;
+  acknowledgeMainnetCanary: true;
 }
 
-export function parseBaseSepoliaReaderArgs(args: string[]): CliOptions {
+function assertCanaryAcknowledged(acknowledgeMainnetCanary?: boolean): void {
+  if (acknowledgeMainnetCanary !== true) {
+    throw new Error("--acknowledge-mainnet-canary is required for the Base mainnet canary reader");
+  }
+}
+
+function assertCanaryBlockRange(fromBlock: string, toBlock: string): void {
+  if (BigInt(toBlock) < BigInt(fromBlock)) {
+    throw new Error("--to-block must be greater than or equal to --from-block");
+  }
+
+  const span = BigInt(toBlock) - BigInt(fromBlock);
+  if (span > BASE_CANARY_MAX_BLOCK_SPAN) {
+    throw new Error(
+      `Base canary reader refuses broad scans; block span ${span.toString()} exceeds ${BASE_CANARY_MAX_BLOCK_SPAN.toString()}`,
+    );
+  }
+}
+
+export function parseBaseCanaryReaderArgs(args: string[]): CliOptions {
   let rpcUrl = "";
   let fromBlock = "";
   let toBlock = "";
   let finalizedBlockNumber: string | undefined;
+  let acknowledgeMainnetCanary = false;
   const addresses: string[] = [];
-  let outPath = "out/base-sepolia-indexer-state.json";
-  let checkpointPath = "out/base-sepolia-indexer-checkpoint.json";
+  let outPath = "out/base-canary-indexer-state.json";
+  let checkpointPath = "out/base-canary-indexer-checkpoint.json";
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
-    if (arg === "--rpc-url") {
+    if (arg === "--acknowledge-mainnet-canary") {
+      acknowledgeMainnetCanary = true;
+    } else if (arg === "--rpc-url") {
       rpcUrl = readArgValue(args, index, arg);
       index += 1;
     } else if (arg === "--address" || arg === "--addresses") {
@@ -88,29 +112,36 @@ export function parseBaseSepoliaReaderArgs(args: string[]): CliOptions {
     throw new Error("--to-block is required");
   }
 
+  assertCanaryAcknowledged(acknowledgeMainnetCanary);
+
+  const normalizedFromBlock = blockArgumentToDecimalString(fromBlock);
+  const normalizedToBlock = blockArgumentToDecimalString(toBlock);
+  assertCanaryBlockRange(normalizedFromBlock, normalizedToBlock);
+
   return {
     rpcUrl,
     addresses: normalizeEvmAddresses(addresses),
-    fromBlock: blockArgumentToDecimalString(fromBlock),
-    toBlock: blockArgumentToDecimalString(toBlock),
+    fromBlock: normalizedFromBlock,
+    toBlock: normalizedToBlock,
     finalizedBlockNumber,
     outPath,
     checkpointPath,
+    acknowledgeMainnetCanary: true,
   };
 }
 
-export async function runBaseSepoliaReader(options: BaseSepoliaReaderOptions): Promise<BaseSepoliaReaderResult> {
+export async function runBaseCanaryReader(options: BaseCanaryReaderOptions): Promise<BaseCanaryReaderResult> {
+  assertCanaryAcknowledged(options.acknowledgeMainnetCanary);
+
   const addresses = normalizeEvmAddresses(options.addresses);
   const fromBlock = blockArgumentToDecimalString(options.fromBlock);
   const toBlock = blockArgumentToDecimalString(options.toBlock);
-  const outPath = resolve(options.outPath ?? "out/base-sepolia-indexer-state.json");
-  const checkpointPath = resolve(options.checkpointPath ?? "out/base-sepolia-indexer-checkpoint.json");
+  const outPath = resolve(options.outPath ?? "out/base-canary-indexer-state.json");
+  const checkpointPath = resolve(options.checkpointPath ?? "out/base-canary-indexer-checkpoint.json");
 
-  if (BigInt(toBlock) < BigInt(fromBlock)) {
-    throw new Error("--to-block must be greater than or equal to --from-block");
-  }
+  assertCanaryBlockRange(fromBlock, toBlock);
 
-  const readResult = await readBaseSepoliaFlowPulseLogs({
+  const readResult = await readBaseMainnetCanaryFlowPulseLogs({
     rpcUrl: options.rpcUrl,
     addresses,
     fromBlock: blockArgumentToRpcQuantity(fromBlock),
@@ -123,12 +154,12 @@ export async function runBaseSepoliaReader(options: BaseSepoliaReaderOptions): P
     : blockArgumentToDecimalString(options.finalizedBlockNumber);
 
   const state = indexFlowPulseLogs(readResult.logs, {
-    chainId: BASE_SEPOLIA_CHAIN_ID,
+    chainId: BASE_MAINNET_CHAIN_ID,
     finalizedBlockNumber,
-    source: "base-sepolia-rpc",
+    source: "base-mainnet-canary-rpc",
     sourceAddresses: addresses,
   });
-  const checkpoint = baseSepoliaIndexerCheckpoint({
+  const checkpoint = baseCanaryIndexerCheckpoint({
     addresses,
     fromBlock,
     toBlock,
@@ -139,7 +170,7 @@ export async function runBaseSepoliaReader(options: BaseSepoliaReaderOptions): P
   });
 
   writeIndexerState(outPath, state);
-  writeBaseSepoliaIndexerCheckpoint(checkpointPath, checkpoint);
+  writeBaseCanaryIndexerCheckpoint(checkpointPath, checkpoint);
 
   return {
     state,
@@ -152,25 +183,28 @@ export async function runBaseSepoliaReader(options: BaseSepoliaReaderOptions): P
 function usage(): string {
   return [
     "Usage:",
-    "  node src/base-sepolia.ts --rpc-url <url> --address <0x...> --from-block <n> --to-block <n> [--finalized-block <n>] [--out <path>] [--checkpoint-out <path>]",
+    "  node src/base-canary.ts --acknowledge-mainnet-canary --rpc-url <url> --address <0x...> --from-block <n> --to-block <n> [--finalized-block <n>] [--out <path>] [--checkpoint-out <path>]",
     "",
     "Boundary:",
-    `  This reader only accepts Base Sepolia chainId ${BASE_SEPOLIA_CHAIN_ID}. It does not read Base mainnet.`,
+    `  This reader only accepts Base mainnet chainId ${BASE_MAINNET_CHAIN_ID} and is canary-only.`,
+    `  It refuses scans wider than ${BASE_CANARY_MAX_BLOCK_SPAN.toString()} blocks and stores no RPC URLs or keys.`,
   ].join("\n");
 }
 
-if (process.argv[1]?.replaceAll("\\", "/").endsWith("/base-sepolia.ts")) {
-  runBaseSepoliaReader(parseBaseSepoliaReaderArgs(process.argv.slice(2)))
+if (process.argv[1]?.replaceAll("\\", "/").endsWith("/base-canary.ts")) {
+  runBaseCanaryReader(parseBaseCanaryReaderArgs(process.argv.slice(2)))
     .then((result) => {
       console.log(JSON.stringify({
-        schema: "flowmemory.indexer.base_sepolia_reader_summary.v0",
+        schema: "flowmemory.indexer.base_canary_reader_summary.v0",
         network: result.checkpoint.network,
         chainId: result.checkpoint.chainId,
         statePath: result.statePath,
         checkpointPath: result.checkpointPath,
         observationCount: result.checkpoint.observationCount,
         rejectedLogCount: result.checkpoint.rejectedLogCount,
+        duplicateCount: result.checkpoint.duplicateCount,
         lastIndexedBlock: result.checkpoint.lastIndexedBlock,
+        productionReady: result.checkpoint.safety.productionReady,
       }, null, 2));
     })
     .catch((error) => {
