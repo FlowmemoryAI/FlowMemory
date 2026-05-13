@@ -1,0 +1,1163 @@
+{
+  "schema": "flowmemory.crypto.local-alpha-object-fixtures.v0",
+  "rdBoundary": {
+    "currentPackage": "E:\\FlowMemory\\flowmemory-crypto\\crypto",
+    "researchCryptoCrate": "E:\\FlowMemory\\github-research-sources\\noesis-l1\\crates\\noesis-crypto",
+    "researchZkCrate": "E:\\FlowMemory\\github-research-sources\\noesis-l1\\crates\\noesis-zk",
+    "consumeAs": "Research vocabulary and future proof input reference only. FlowChain Local Alpha object IDs are Keccak ABI typed hashes from this package.",
+    "operatorVaultBoundary": "Local Alpha signing keys are deterministic no-value test keys. Operator vault policy is a boundary document, not a wallet custody or value-bearing claim."
+  },
+  "signingKeys": {
+    "operator": {
+      "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+      "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+      "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+      "note": "Deterministic no-value local test key. Do not fund or reuse outside fixtures."
+    },
+    "agent": {
+      "signerId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+      "signerKeyId": "0x0cd3ace447934998e0819d90cf89904776a2407e816541c1c43b99d38c351893",
+      "publicKey": "0x02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",
+      "note": "Deterministic no-value local test key. Do not fund or reuse outside fixtures."
+    },
+    "verifier": {
+      "signerId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
+      "signerKeyId": "0x9bc6e07b6ca6b1f21697ed511d211b82186960d193036d5817f1a8a46a6daff5",
+      "publicKey": "0x02f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "note": "Deterministic no-value local test key. Do not fund or reuse outside fixtures."
+    },
+    "hardware": {
+      "signerId": "0xc3a21c4e3c455b2388d06fb384165ff7156a3d40d877a19f88d814a8a1edeaea",
+      "signerKeyId": "0x2960db74c119e17ca2323f749c1df8bfdb1b7e5eaddf640d52fda9d96b59c61b",
+      "publicKey": "0x02e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13",
+      "note": "Deterministic no-value local test key. Do not fund or reuse outside fixtures."
+    }
+  },
+  "positive": [
+    {
+      "name": "agent-account.demo",
+      "schemaPath": "../../schemas/flowmemory/agent-account.schema.json",
+      "function": "agentAccountId",
+      "idField": "agentId",
+      "input": {
+        "namespaceId": "0x4c2eae268c3f97a510b66597873c6c08ae9e427a7c03cd383df6acfeda9bbf37",
+        "owner": "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1",
+        "policyRoot": "0x20121b5daa2be4de0d9dbcae292d1d3466a4e0a8b6cc3149ce46c30c352a1f0e",
+        "toolPermissionsRoot": "0x39079bde86c6743c81fd927a14012331688374b55118484529ce257317327120",
+        "modelAllowlistRoot": "0x00a463537f12e3419d4bf3655d28d93f3e189b9a89a3ad40c4819bbc4eb2acc9",
+        "memoryNamespaceRoot": "0x574eee506454973fb82863a3225ea78696b96907a17c360ad2c2b5234dfa2d83",
+        "spendingLimitPerEpoch": "0",
+        "nonce": "0x37e916697be966b19c0cd7aa6073e78ffb7ee5cf27a4392383f9cfe5fa5025bb"
+      },
+      "expected": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+      "document": {
+        "schema": "flowchain.agent_account.v0",
+        "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+        "namespaceId": "0x4c2eae268c3f97a510b66597873c6c08ae9e427a7c03cd383df6acfeda9bbf37",
+        "owner": "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1",
+        "policyRoot": "0x20121b5daa2be4de0d9dbcae292d1d3466a4e0a8b6cc3149ce46c30c352a1f0e",
+        "toolPermissionsRoot": "0x39079bde86c6743c81fd927a14012331688374b55118484529ce257317327120",
+        "modelAllowlistRoot": "0x00a463537f12e3419d4bf3655d28d93f3e189b9a89a3ad40c4819bbc4eb2acc9",
+        "memoryNamespaceRoot": "0x574eee506454973fb82863a3225ea78696b96907a17c360ad2c2b5234dfa2d83",
+        "spendingLimitPerEpoch": "0",
+        "status": "active",
+        "nonce": "0x37e916697be966b19c0cd7aa6073e78ffb7ee5cf27a4392383f9cfe5fa5025bb"
+      }
+    },
+    {
+      "name": "model-passport.demo",
+      "schemaPath": "../../schemas/flowmemory/model-passport.schema.json",
+      "function": "modelPassportId",
+      "idField": "modelId",
+      "input": {
+        "providerHash": "0x1dcd953776be1cde4f3d9f516d8ecf3641d664d8c97623af60327315c5600d0a",
+        "modelFamilyHash": "0x91c830851e70677b8aa487b104e05230fdd5d2ae5ee26b5423ca223b154b58cc",
+        "versionHash": "0x7c56a7f2edbd518ffcf014b4155ec4ad47062390e3a1302550e5a080c5ef4975",
+        "licenseRoot": "0x7c4f5757bbcb3cb1c84df192e87f2ba40b9d4cacb1e62b612e604a8d831bc4ee",
+        "policyRoot": "0x519cc6db7ebafcfa1add95a09f9ef811013d86d3e76e1d4b5099f9a379a98bdb",
+        "artifactRoot": "0x14d1fb24e2da3cdb25d55912b5f7b56fde462707343f827791dfb1c3945a0a99",
+        "metadataHash": "0x198ae9ec53443e3a46f8762e4b9ee166c2927d7faec07ce2bdc8714859504d17",
+        "nonce": "0x6550e26ef27367750192911d54ae8c97af6f828e52f4b696a25f215581a34b6b"
+      },
+      "expected": "0xf1e4695d11203b1fd1702d4294b001387da6f6e66278e6018026eab22fa38879",
+      "document": {
+        "schema": "flowchain.model_passport.v0",
+        "modelId": "0xf1e4695d11203b1fd1702d4294b001387da6f6e66278e6018026eab22fa38879",
+        "providerHash": "0x1dcd953776be1cde4f3d9f516d8ecf3641d664d8c97623af60327315c5600d0a",
+        "modelFamilyHash": "0x91c830851e70677b8aa487b104e05230fdd5d2ae5ee26b5423ca223b154b58cc",
+        "versionHash": "0x7c56a7f2edbd518ffcf014b4155ec4ad47062390e3a1302550e5a080c5ef4975",
+        "licenseRoot": "0x7c4f5757bbcb3cb1c84df192e87f2ba40b9d4cacb1e62b612e604a8d831bc4ee",
+        "policyRoot": "0x519cc6db7ebafcfa1add95a09f9ef811013d86d3e76e1d4b5099f9a379a98bdb",
+        "artifactRoot": "0x14d1fb24e2da3cdb25d55912b5f7b56fde462707343f827791dfb1c3945a0a99",
+        "metadataHash": "0x198ae9ec53443e3a46f8762e4b9ee166c2927d7faec07ce2bdc8714859504d17",
+        "status": "active",
+        "nonce": "0x6550e26ef27367750192911d54ae8c97af6f828e52f4b696a25f215581a34b6b"
+      }
+    },
+    {
+      "name": "work-receipt.demo",
+      "schemaPath": "../../schemas/flowmemory/work-receipt.schema.json",
+      "function": "workReceiptId",
+      "idField": "workReceiptId",
+      "input": {
+        "observationId": "0xd80d0a3b317ceae266c9b7983c5a9376529f457a01469c96d8d3fd5a6c2d8a3f",
+        "receiptHash": "0xca2ebca63e004ff4b0ca9766acbb2862b45059a480d911b67dbc25e937c2e733",
+        "workerId": "0x7803fe537f4b6e4ddd47f00b97a87c06aad1e42e22b83fdb522268e393319598",
+        "workerSequence": "1",
+        "nonce": "0x3574313751905cc45384e0a3f62258d38e9c64735e29bcee180459bb16cd4039"
+      },
+      "expected": "0xb7404c2b88e7f6a1991dfc5294f8f78932cbbf00ebecf302a1139950672f81f9",
+      "document": {
+        "schema": "flowchain.work_receipt.v0",
+        "workReceiptId": "0xb7404c2b88e7f6a1991dfc5294f8f78932cbbf00ebecf302a1139950672f81f9",
+        "observationId": "0xd80d0a3b317ceae266c9b7983c5a9376529f457a01469c96d8d3fd5a6c2d8a3f",
+        "receiptHash": "0xca2ebca63e004ff4b0ca9766acbb2862b45059a480d911b67dbc25e937c2e733",
+        "workerId": "0x7803fe537f4b6e4ddd47f00b97a87c06aad1e42e22b83fdb522268e393319598",
+        "workerSequence": "1",
+        "status": "verified",
+        "nonce": "0x3574313751905cc45384e0a3f62258d38e9c64735e29bcee180459bb16cd4039"
+      }
+    },
+    {
+      "name": "artifact-availability-proof.demo",
+      "schemaPath": "../../schemas/flowmemory/artifact-availability-proof.schema.json",
+      "function": "artifactAvailabilityProofId",
+      "idField": "proofId",
+      "input": {
+        "artifactRoot": "0x14d1fb24e2da3cdb25d55912b5f7b56fde462707343f827791dfb1c3945a0a99",
+        "providerId": "0x0dc433e7afcaecae8532a1bd432c3954072ee62a73d9112e57bfd01a001c393f",
+        "locationCommitment": "0x42dca9f7b94d6d927d5af2d65be01e2180f0f7992df017410fbe70118299eccd",
+        "storageReceiptCommitment": "0x1e71bf37d72b2b1a3dafd534a5fad68b62f8e00017ca170f211e963fbbc7d59a",
+        "availabilitySampleRoot": "0xd72d47a64f960ca8af6e1746c576f4211ed4238383684a438026b10f7c9f2c60",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1810238400000",
+        "status": 7,
+        "nonce": "0xb68051d46145d6360b963e755c6950ea087bc7bbdb3ad4a0dc4508150a2c7685"
+      },
+      "expected": "0x9d5fae6b0098c96fc0ab37e75ca34cef4a9dfcf18c7153762ba75ddf563e536e",
+      "document": {
+        "schema": "flowchain.artifact_availability_proof.v0",
+        "proofId": "0x9d5fae6b0098c96fc0ab37e75ca34cef4a9dfcf18c7153762ba75ddf563e536e",
+        "artifactRoot": "0x14d1fb24e2da3cdb25d55912b5f7b56fde462707343f827791dfb1c3945a0a99",
+        "providerId": "0x0dc433e7afcaecae8532a1bd432c3954072ee62a73d9112e57bfd01a001c393f",
+        "locationCommitment": "0x42dca9f7b94d6d927d5af2d65be01e2180f0f7992df017410fbe70118299eccd",
+        "storageReceiptCommitment": "0x1e71bf37d72b2b1a3dafd534a5fad68b62f8e00017ca170f211e963fbbc7d59a",
+        "availabilitySampleRoot": "0xd72d47a64f960ca8af6e1746c576f4211ed4238383684a438026b10f7c9f2c60",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1810238400000",
+        "status": "available",
+        "statusCode": 7,
+        "nonce": "0xb68051d46145d6360b963e755c6950ea087bc7bbdb3ad4a0dc4508150a2c7685"
+      }
+    },
+    {
+      "name": "verifier-module.demo",
+      "schemaPath": "../../schemas/flowmemory/verifier-module.schema.json",
+      "function": "verifierModuleId",
+      "idField": "moduleId",
+      "input": {
+        "ownerId": "0x5453d44b67a39bcbd94ad71b4499798ea0f5b3e27b22ce51e9343c0223a3d58a",
+        "codeRoot": "0x6900549a6f3c5becb720e7bc0176a85305dbfb1881a52ff84c269bddff77067c",
+        "manifestRoot": "0x4d491666ff5482701f6ac44230cc7929030ce7f6f6b7b021c59b211eb88e6c1e",
+        "supportedModesRoot": "0xd9bbac634f1a0edb893028ea020757da28e1aae731be0702d708098c6d53a009",
+        "supportedChallengeTypesRoot": "0x4b8175b52291488cab4145ed9b34f0dcb4f6439d212e892909a0a0c9f3da1113",
+        "verifierSetRoot": "0xc4f5360009577f8e8cb3000867f5da8cb88b899cae39ef97737e98efc18bdbf3",
+        "moduleVersion": 0,
+        "status": 2
+      },
+      "expected": "0xbb9456a90fd97dfe26d07d3a39111a43484568d9b2088e82ca64d86487e5e360",
+      "document": {
+        "schema": "flowchain.verifier_module.v0",
+        "moduleId": "0xbb9456a90fd97dfe26d07d3a39111a43484568d9b2088e82ca64d86487e5e360",
+        "ownerId": "0x5453d44b67a39bcbd94ad71b4499798ea0f5b3e27b22ce51e9343c0223a3d58a",
+        "codeRoot": "0x6900549a6f3c5becb720e7bc0176a85305dbfb1881a52ff84c269bddff77067c",
+        "manifestRoot": "0x4d491666ff5482701f6ac44230cc7929030ce7f6f6b7b021c59b211eb88e6c1e",
+        "supportedModesRoot": "0xd9bbac634f1a0edb893028ea020757da28e1aae731be0702d708098c6d53a009",
+        "supportedChallengeTypesRoot": "0x4b8175b52291488cab4145ed9b34f0dcb4f6439d212e892909a0a0c9f3da1113",
+        "verifierSetRoot": "0xc4f5360009577f8e8cb3000867f5da8cb88b899cae39ef97737e98efc18bdbf3",
+        "moduleVersion": 0,
+        "status": "active",
+        "statusCode": 2
+      }
+    },
+    {
+      "name": "verifier-report.demo",
+      "schemaPath": "../../schemas/flowmemory/verifier-report.schema.json",
+      "function": "verifierReportHash",
+      "idField": "reportId",
+      "input": {
+        "reportSchemaHash": "0x487a3a70cf72c079fa8645f8d732cbe286f7f3aa0abd654f212ac1c1911a20ae",
+        "observationId": "0xd80d0a3b317ceae266c9b7983c5a9376529f457a01469c96d8d3fd5a6c2d8a3f",
+        "receiptHash": "0xca2ebca63e004ff4b0ca9766acbb2862b45059a480d911b67dbc25e937c2e733",
+        "verifierId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
+        "verifierSetRoot": "0x96130fe314e14b7f7d4347094f6b5ec4338b1f7730bf505e59fd3e731753ff8b",
+        "status": 2,
+        "checksRoot": "0x48468783cf12adfeba9be8e0a5e250ab04b19d5034f7e1996610cf05f4fcef83",
+        "finalizedBlockNumber": "12345742",
+        "finalizedBlockHash": "0x1111111111111111111111111111111111111111111111111111111111111111",
+        "reportVersion": 0
+      },
+      "expected": "0x1b1c2940d6e83ee78a7e0a8285e4ce2530da1ce7964817806e61520a2e767355",
+      "document": {
+        "schema": "flowchain.verifier_report.v0",
+        "reportId": "0x1b1c2940d6e83ee78a7e0a8285e4ce2530da1ce7964817806e61520a2e767355",
+        "reportSchemaHash": "0x487a3a70cf72c079fa8645f8d732cbe286f7f3aa0abd654f212ac1c1911a20ae",
+        "observationId": "0xd80d0a3b317ceae266c9b7983c5a9376529f457a01469c96d8d3fd5a6c2d8a3f",
+        "receiptHash": "0xca2ebca63e004ff4b0ca9766acbb2862b45059a480d911b67dbc25e937c2e733",
+        "verifierId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
+        "verifierSetRoot": "0x96130fe314e14b7f7d4347094f6b5ec4338b1f7730bf505e59fd3e731753ff8b",
+        "status": "verified",
+        "statusCode": 2,
+        "checksRoot": "0x48468783cf12adfeba9be8e0a5e250ab04b19d5034f7e1996610cf05f4fcef83",
+        "finalizedBlockNumber": "12345742",
+        "finalizedBlockHash": "0x1111111111111111111111111111111111111111111111111111111111111111",
+        "reportVersion": 0
+      }
+    },
+    {
+      "name": "memory-cell.demo",
+      "schemaPath": "../../schemas/flowmemory/memory-cell.schema.json",
+      "function": "memoryCellId",
+      "idField": "memoryCellId",
+      "input": {
+        "ownerAgentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+        "currentMemoryRoot": "0x4cddf39c05428ff95e92ad96a6a4199348dd19e9935b681ec3f111217f87dbc8",
+        "previousMemoryRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "lastDeltaRoot": "0xf8951ccd1d2827cfe0078df813223eb8b97c68adce39a9e07c6a92cb692ad010",
+        "sourceReceiptsRoot": "0xe20859136519b00db74fd38d9f4228de33eecfb3e554aaa9438ea2edc0d17e0c",
+        "dependencyRoot": "0x87e2cc37cbb9eee123e6f0a84be9eb0bec68c0e4f7e35c1c119cf4a8015d56c6",
+        "updatedAtUnixMs": "1778702400000",
+        "cellVersion": 0
+      },
+      "expected": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f",
+      "document": {
+        "schema": "flowchain.memory_cell.v0",
+        "memoryCellId": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f",
+        "ownerAgentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+        "currentMemoryRoot": "0x4cddf39c05428ff95e92ad96a6a4199348dd19e9935b681ec3f111217f87dbc8",
+        "previousMemoryRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "lastDeltaRoot": "0xf8951ccd1d2827cfe0078df813223eb8b97c68adce39a9e07c6a92cb692ad010",
+        "sourceReceiptsRoot": "0xe20859136519b00db74fd38d9f4228de33eecfb3e554aaa9438ea2edc0d17e0c",
+        "dependencyRoot": "0x87e2cc37cbb9eee123e6f0a84be9eb0bec68c0e4f7e35c1c119cf4a8015d56c6",
+        "status": "active",
+        "updatedAtUnixMs": "1778702400000",
+        "cellVersion": 0
+      }
+    },
+    {
+      "name": "challenge.demo",
+      "schemaPath": "../../schemas/flowmemory/challenge.schema.json",
+      "function": "challengeId",
+      "idField": "challengeId",
+      "input": {
+        "receiptId": "0x8e89965b455212cb3767352ae3adb0bb5dd0d59fba141cb5064245d05bdbb2aa",
+        "challengerId": "0x40dc731df288781313d04725dc79f969488b910d9ed2220695c0e249477ffc57",
+        "challengeType": 7,
+        "evidenceRoot": "0x0b6a5765989e49f9763082146b15d5b7e3ef614c3d12c9cfbbdcd940164b4c56",
+        "openedAtUnixMs": "1778702400000",
+        "deadlineUnixMs": "1779307200000",
+        "status": 1,
+        "nonce": "0x3fae75c35d96efdccce46b8d8223846defbb52752d3332afc0a799b84a55020d"
+      },
+      "expected": "0x184dbda3f9e19adfe64d8ef4636dc9a3e6ab8f62761589653816dc574ffb3403",
+      "document": {
+        "schema": "flowchain.challenge.v0",
+        "challengeId": "0x184dbda3f9e19adfe64d8ef4636dc9a3e6ab8f62761589653816dc574ffb3403",
+        "receiptId": "0x8e89965b455212cb3767352ae3adb0bb5dd0d59fba141cb5064245d05bdbb2aa",
+        "challengerId": "0x40dc731df288781313d04725dc79f969488b910d9ed2220695c0e249477ffc57",
+        "challengeType": "dependency_omission",
+        "challengeTypeCode": 7,
+        "evidenceRoot": "0x0b6a5765989e49f9763082146b15d5b7e3ef614c3d12c9cfbbdcd940164b4c56",
+        "openedAtUnixMs": "1778702400000",
+        "deadlineUnixMs": "1779307200000",
+        "status": "open",
+        "statusCode": 1,
+        "nonce": "0x3fae75c35d96efdccce46b8d8223846defbb52752d3332afc0a799b84a55020d"
+      }
+    },
+    {
+      "name": "finality-receipt.demo",
+      "schemaPath": "../../schemas/flowmemory/finality-receipt.schema.json",
+      "function": "finalityReceiptId",
+      "idField": "finalityReceiptId",
+      "input": {
+        "receiptId": "0x8e89965b455212cb3767352ae3adb0bb5dd0d59fba141cb5064245d05bdbb2aa",
+        "reportId": "0x9577aa6df7026dfe6f46042d71397769591841ee8e0fd23bca3160a2032d2925",
+        "challengeRoot": "0xf8962b5f9cf19578b6fe3cebc986cd054d594c0674e1fa48387c0278c6522967",
+        "finalityState": 2,
+        "finalizedAtUnixMs": "0",
+        "finalizedBlockNumber": "0",
+        "finalizedBlockHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "policyHash": "0xa6c5cdc9afc15dea4b2de2ab4bf4fa1ec5a6acee82e1864319ad8c46d2ae826d"
+      },
+      "expected": "0x95216aeaec225965a4ce35eb2b136e27819642e68284201feade0d68dc4f9ddf",
+      "document": {
+        "schema": "flowchain.finality_receipt.v0",
+        "finalityReceiptId": "0x95216aeaec225965a4ce35eb2b136e27819642e68284201feade0d68dc4f9ddf",
+        "receiptId": "0x8e89965b455212cb3767352ae3adb0bb5dd0d59fba141cb5064245d05bdbb2aa",
+        "reportId": "0x9577aa6df7026dfe6f46042d71397769591841ee8e0fd23bca3160a2032d2925",
+        "challengeRoot": "0xf8962b5f9cf19578b6fe3cebc986cd054d594c0674e1fa48387c0278c6522967",
+        "finalityState": "challengeable",
+        "finalityStateCode": 2,
+        "finalizedAtUnixMs": "0",
+        "finalizedBlockNumber": "0",
+        "finalizedBlockHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "policyHash": "0xa6c5cdc9afc15dea4b2de2ab4bf4fa1ec5a6acee82e1864319ad8c46d2ae826d"
+      }
+    },
+    {
+      "name": "hardware-signal-envelope.demo",
+      "schemaPath": "../../schemas/flowmemory/hardware-signal-envelope.schema.json",
+      "function": "hardwareSignalEnvelopeId",
+      "idField": "hardwareSignalEnvelopeId",
+      "input": {
+        "deviceId": "0xc3a21c4e3c455b2388d06fb384165ff7156a3d40d877a19f88d814a8a1edeaea",
+        "signalRoot": "0xf57eaf258fac37071f818115db61e6bb48bbdfb41424316199ed0963d59a75b3",
+        "previousSignalEnvelopeId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "channelRoot": "0x280db3544e0aec306695543b1f7a1452e29b708d6df8749c293aec13f382944d",
+        "sequence": "1",
+        "observedAtUnixMs": "1778702400000",
+        "transport": 1,
+        "nonce": "0x1b85840b67182a89cf64394167db32108e00798b043aad5c6c2cab58d8726110"
+      },
+      "expected": "0xde6601ee3fc7e925d2d54b1dca26cf7cb560432f066f93b3f3bf1f31b4934a10",
+      "document": {
+        "schema": "flowchain.hardware_signal_envelope.v0",
+        "hardwareSignalEnvelopeId": "0xde6601ee3fc7e925d2d54b1dca26cf7cb560432f066f93b3f3bf1f31b4934a10",
+        "deviceId": "0xc3a21c4e3c455b2388d06fb384165ff7156a3d40d877a19f88d814a8a1edeaea",
+        "signalRoot": "0xf57eaf258fac37071f818115db61e6bb48bbdfb41424316199ed0963d59a75b3",
+        "previousSignalEnvelopeId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "channelRoot": "0x280db3544e0aec306695543b1f7a1452e29b708d6df8749c293aec13f382944d",
+        "sequence": "1",
+        "observedAtUnixMs": "1778702400000",
+        "transport": "local_simulator",
+        "transportCode": 1,
+        "status": "accepted",
+        "nonce": "0x1b85840b67182a89cf64394167db32108e00798b043aad5c6c2cab58d8726110"
+      }
+    },
+    {
+      "name": "control-plane-provenance-response.demo",
+      "schemaPath": "../../schemas/flowmemory/control-plane-provenance-response.schema.json",
+      "function": "controlPlaneProvenanceResponseId",
+      "idField": "provenanceResponseId",
+      "input": {
+        "requestId": "0x147deb7c7f91259726ff0b4146c5249836a162f93c14562847cc15dac768e8d7",
+        "subjectId": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f",
+        "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+        "receiptId": "0x8e89965b455212cb3767352ae3adb0bb5dd0d59fba141cb5064245d05bdbb2aa",
+        "reportId": "0x9577aa6df7026dfe6f46042d71397769591841ee8e0fd23bca3160a2032d2925",
+        "memoryCellId": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f",
+        "dependencyRoot": "0x87e2cc37cbb9eee123e6f0a84be9eb0bec68c0e4f7e35c1c119cf4a8015d56c6",
+        "responseBodyHash": "0x709a37c10de55cbcfe702a41d49e08ecdb95bfa3b7149b1d855b60ac5359f24b",
+        "issuedAtUnixMs": "1778702400000",
+        "responseVersion": 0
+      },
+      "expected": "0xb0336e11f4e939bbf8b423c7d57cc383a9cdf4982fb90b004c6d94ea5a3ec0eb",
+      "document": {
+        "schema": "flowchain.control_plane_provenance_response.v0",
+        "provenanceResponseId": "0xb0336e11f4e939bbf8b423c7d57cc383a9cdf4982fb90b004c6d94ea5a3ec0eb",
+        "requestId": "0x147deb7c7f91259726ff0b4146c5249836a162f93c14562847cc15dac768e8d7",
+        "subjectId": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f",
+        "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+        "receiptId": "0x8e89965b455212cb3767352ae3adb0bb5dd0d59fba141cb5064245d05bdbb2aa",
+        "reportId": "0x9577aa6df7026dfe6f46042d71397769591841ee8e0fd23bca3160a2032d2925",
+        "memoryCellId": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f",
+        "dependencyRoot": "0x87e2cc37cbb9eee123e6f0a84be9eb0bec68c0e4f7e35c1c119cf4a8015d56c6",
+        "responseBodyHash": "0x709a37c10de55cbcfe702a41d49e08ecdb95bfa3b7149b1d855b60ac5359f24b",
+        "responseBody": {
+          "subject": "local-alpha-memory-cell",
+          "status": "challengeable",
+          "limitations": [
+            "V0 binds IDs and commitments only.",
+            "V0 does not prove model output correctness."
+          ]
+        },
+        "issuedAtUnixMs": "1778702400000",
+        "responseVersion": 0
+      }
+    }
+  ],
+  "negative": [
+    {
+      "name": "agent-account.swapped-policy-and-tool-roots",
+      "reason": "swapped-field-rejection",
+      "function": "agentAccountId",
+      "input": {
+        "namespaceId": "0x4c2eae268c3f97a510b66597873c6c08ae9e427a7c03cd383df6acfeda9bbf37",
+        "owner": "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1",
+        "policyRoot": "0x39079bde86c6743c81fd927a14012331688374b55118484529ce257317327120",
+        "toolPermissionsRoot": "0x20121b5daa2be4de0d9dbcae292d1d3466a4e0a8b6cc3149ce46c30c352a1f0e",
+        "modelAllowlistRoot": "0x00a463537f12e3419d4bf3655d28d93f3e189b9a89a3ad40c4819bbc4eb2acc9",
+        "memoryNamespaceRoot": "0x574eee506454973fb82863a3225ea78696b96907a17c360ad2c2b5234dfa2d83",
+        "spendingLimitPerEpoch": "0",
+        "nonce": "0x37e916697be966b19c0cd7aa6073e78ffb7ee5cf27a4392383f9cfe5fa5025bb"
+      },
+      "mustNotEqual": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61"
+    },
+    {
+      "name": "finality-receipt.swapped-receipt-and-report",
+      "reason": "swapped-field-rejection",
+      "function": "finalityReceiptId",
+      "input": {
+        "receiptId": "0x9577aa6df7026dfe6f46042d71397769591841ee8e0fd23bca3160a2032d2925",
+        "reportId": "0x8e89965b455212cb3767352ae3adb0bb5dd0d59fba141cb5064245d05bdbb2aa",
+        "challengeRoot": "0xf8962b5f9cf19578b6fe3cebc986cd054d594c0674e1fa48387c0278c6522967",
+        "finalityState": 2,
+        "finalizedAtUnixMs": "0",
+        "finalizedBlockNumber": "0",
+        "finalizedBlockHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "policyHash": "0xa6c5cdc9afc15dea4b2de2ab4bf4fa1ec5a6acee82e1864319ad8c46d2ae826d"
+      },
+      "mustNotEqual": "0x95216aeaec225965a4ce35eb2b136e27819642e68284201feade0d68dc4f9ddf"
+    },
+    {
+      "name": "memory-cell.malformed-current-root",
+      "reason": "malformed-hex-rejection",
+      "function": "memoryCellId",
+      "input": {
+        "ownerAgentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+        "currentMemoryRoot": "0xnot-a-bytes32",
+        "previousMemoryRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "lastDeltaRoot": "0xf8951ccd1d2827cfe0078df813223eb8b97c68adce39a9e07c6a92cb692ad010",
+        "sourceReceiptsRoot": "0xe20859136519b00db74fd38d9f4228de33eecfb3e554aaa9438ea2edc0d17e0c",
+        "dependencyRoot": "0x87e2cc37cbb9eee123e6f0a84be9eb0bec68c0e4f7e35c1c119cf4a8015d56c6",
+        "updatedAtUnixMs": "1778702400000",
+        "cellVersion": 0
+      },
+      "throws": "invalid hex"
+    },
+    {
+      "name": "agent-account.duplicate-id-list",
+      "reason": "duplicate-id-rejection",
+      "documents": [
+        {
+          "schema": "flowchain.agent_account.v0",
+          "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61"
+        },
+        {
+          "schema": "flowchain.agent_account.v0",
+          "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61"
+        }
+      ],
+      "duplicateId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61"
+    }
+  ],
+  "envelopes": {
+    "positive": [
+      {
+        "name": "agent-account.demo.operator-signature-envelope",
+        "objectName": "agent-account.demo",
+        "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
+        "function": "localSignatureEnvelopeHash",
+        "expected": {
+          "objectId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+          "envelopeId": "0x55656083efaf8a511fbae76b2a1bb740b08c92959e506a14f489f0fedcef3279",
+          "signingDigest": "0x5a6640f50a22ae2d72ebe1d0687bd557d2d33d5de0fc6563ccafba17de48273e"
+        },
+        "input": {
+          "objectId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+          "objectTypeHash": "0x0b32d0c8ec630542359a97b7b5c44804b7021b96433ba120572ad0609d81d029",
+          "domainSeparator": "0xff84e3bb0214d3812d1bf8521ab9d5b836c7746794e226af2a56a2efd0b65ee6",
+          "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+          "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+          "signerRole": 1,
+          "sequence": "1",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xe9b99686c583dbed5b3bf743c2a3db8a5da8c8ceea4398eb45d57c518c555034"
+        },
+        "envelope": {
+          "schema": "flowchain.local_signature_envelope.v0",
+          "envelopeId": "0x55656083efaf8a511fbae76b2a1bb740b08c92959e506a14f489f0fedcef3279",
+          "objectType": "agent_account",
+          "objectSchema": "flowchain.agent_account.v0",
+          "objectId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+          "objectTypeHash": "0x0b32d0c8ec630542359a97b7b5c44804b7021b96433ba120572ad0609d81d029",
+          "domain": "flowchain.local-alpha.v0.agent-account.id",
+          "domainSeparator": "0xff84e3bb0214d3812d1bf8521ab9d5b836c7746794e226af2a56a2efd0b65ee6",
+          "signerRole": "operator",
+          "signerRoleCode": 1,
+          "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+          "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+          "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "sequence": "1",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xe9b99686c583dbed5b3bf743c2a3db8a5da8c8ceea4398eb45d57c518c555034",
+          "signingDigest": "0x5a6640f50a22ae2d72ebe1d0687bd557d2d33d5de0fc6563ccafba17de48273e",
+          "signature": "0xa9024e98d7ffacdfeb80e568609dc0ef5fac9c2b120762ab171e4e7e08f70bde0393d0eab85707c5c81aaf3318f5d9912e7e33af9db30e8842402984bb4dbb11"
+        }
+      },
+      {
+        "name": "model-passport.demo.operator-signature-envelope",
+        "objectName": "model-passport.demo",
+        "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
+        "function": "localSignatureEnvelopeHash",
+        "expected": {
+          "objectId": "0xf1e4695d11203b1fd1702d4294b001387da6f6e66278e6018026eab22fa38879",
+          "envelopeId": "0x7f7eb2933ed962047f566b05a89a6572b398cf0de099c592827de5adf98ad830",
+          "signingDigest": "0xaf3b21f90c311952b732fbbfe58fd0cf9f5c5de4e130f6cdd0f59b59ef82c7bc"
+        },
+        "input": {
+          "objectId": "0xf1e4695d11203b1fd1702d4294b001387da6f6e66278e6018026eab22fa38879",
+          "objectTypeHash": "0x068eb5f8adc1d9e0b9c7bba728c6dc5b0fd01d25f895b4cf838c493981cfd8b7",
+          "domainSeparator": "0x9abbbfb63ea4784cfcd331c1cd76e009dbd88b7c4a05b08782778dc1bd2a804f",
+          "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+          "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+          "signerRole": 1,
+          "sequence": "2",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xf73b964ab858057624a48b7dde73db2653ad9650d5a73644971471e9b0034d9a"
+        },
+        "envelope": {
+          "schema": "flowchain.local_signature_envelope.v0",
+          "envelopeId": "0x7f7eb2933ed962047f566b05a89a6572b398cf0de099c592827de5adf98ad830",
+          "objectType": "model_passport",
+          "objectSchema": "flowchain.model_passport.v0",
+          "objectId": "0xf1e4695d11203b1fd1702d4294b001387da6f6e66278e6018026eab22fa38879",
+          "objectTypeHash": "0x068eb5f8adc1d9e0b9c7bba728c6dc5b0fd01d25f895b4cf838c493981cfd8b7",
+          "domain": "flowchain.local-alpha.v0.model-passport.id",
+          "domainSeparator": "0x9abbbfb63ea4784cfcd331c1cd76e009dbd88b7c4a05b08782778dc1bd2a804f",
+          "signerRole": "operator",
+          "signerRoleCode": 1,
+          "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+          "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+          "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "sequence": "2",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xf73b964ab858057624a48b7dde73db2653ad9650d5a73644971471e9b0034d9a",
+          "signingDigest": "0xaf3b21f90c311952b732fbbfe58fd0cf9f5c5de4e130f6cdd0f59b59ef82c7bc",
+          "signature": "0xeace6a95d927fb422334500535147fe4ba35f4ca1d97e8789e3ce3245d3cd5b742bde6b1edad69c845951fda688857545bf3d31f3a01749f7e078cc73285111d"
+        }
+      },
+      {
+        "name": "work-receipt.demo.agent-signature-envelope",
+        "objectName": "work-receipt.demo",
+        "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
+        "function": "localSignatureEnvelopeHash",
+        "expected": {
+          "objectId": "0xb7404c2b88e7f6a1991dfc5294f8f78932cbbf00ebecf302a1139950672f81f9",
+          "envelopeId": "0xa950d733414e06b7aff0823abd958a7974d65d4b5fe05674fab5a9fcf803af8e",
+          "signingDigest": "0xbd93059c8c963d193bc337ed6a480b285738a80583829cf74c323da81e82d64a"
+        },
+        "input": {
+          "objectId": "0xb7404c2b88e7f6a1991dfc5294f8f78932cbbf00ebecf302a1139950672f81f9",
+          "objectTypeHash": "0x06e024249a151c7131610c5d00ee551983f967c010382a89004da89a6f158489",
+          "domainSeparator": "0x4638694e800bc411c242b45deb8d2a911fabbd6ae454c39bfc668a1b88ea315f",
+          "signerId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+          "signerKeyId": "0x0cd3ace447934998e0819d90cf89904776a2407e816541c1c43b99d38c351893",
+          "signerRole": 2,
+          "sequence": "3",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0x6a7818dd52eaf447f0807f0c2b65672139275fefb3ed0435840d48410f2abc64"
+        },
+        "envelope": {
+          "schema": "flowchain.local_signature_envelope.v0",
+          "envelopeId": "0xa950d733414e06b7aff0823abd958a7974d65d4b5fe05674fab5a9fcf803af8e",
+          "objectType": "work_receipt",
+          "objectSchema": "flowchain.work_receipt.v0",
+          "objectId": "0xb7404c2b88e7f6a1991dfc5294f8f78932cbbf00ebecf302a1139950672f81f9",
+          "objectTypeHash": "0x06e024249a151c7131610c5d00ee551983f967c010382a89004da89a6f158489",
+          "domain": "flowmemory.v0.work.receipt-id",
+          "domainSeparator": "0x4638694e800bc411c242b45deb8d2a911fabbd6ae454c39bfc668a1b88ea315f",
+          "signerRole": "agent",
+          "signerRoleCode": 2,
+          "signerId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+          "signerKeyId": "0x0cd3ace447934998e0819d90cf89904776a2407e816541c1c43b99d38c351893",
+          "publicKey": "0x02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",
+          "sequence": "3",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0x6a7818dd52eaf447f0807f0c2b65672139275fefb3ed0435840d48410f2abc64",
+          "signingDigest": "0xbd93059c8c963d193bc337ed6a480b285738a80583829cf74c323da81e82d64a",
+          "signature": "0x8853f2fdee647dba9461ea8b9b45ab9d5cb943e5508f1861521010d9146955f669da89c56b93407e4be4c52d6c5032f34dd4a9bd00fc079768d817155705b136"
+        }
+      },
+      {
+        "name": "artifact-availability-proof.demo.operator-signature-envelope",
+        "objectName": "artifact-availability-proof.demo",
+        "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
+        "function": "localSignatureEnvelopeHash",
+        "expected": {
+          "objectId": "0x9d5fae6b0098c96fc0ab37e75ca34cef4a9dfcf18c7153762ba75ddf563e536e",
+          "envelopeId": "0xeaa553befba878862c614b8ca9df9c3e5e90e6299ca415043e50d8cb2874f4b0",
+          "signingDigest": "0x6a0e253e6002840c3a8edbaf603211d156c1b5c56b8ddd5b0efa3753e5635da3"
+        },
+        "input": {
+          "objectId": "0x9d5fae6b0098c96fc0ab37e75ca34cef4a9dfcf18c7153762ba75ddf563e536e",
+          "objectTypeHash": "0x505f965c4ae6db350bdf73d2f85117ae099b4faec87b7ff83940e3854c6920c5",
+          "domainSeparator": "0xa7bbdb457725f7ad03fe4e6d2becb74c1ea54be06083f3d3e693f843615c7a20",
+          "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+          "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+          "signerRole": 1,
+          "sequence": "4",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0x64e8a1902689ca7d2c9eeb3200ddca8679faa549e898c639632a46cca55d88f2"
+        },
+        "envelope": {
+          "schema": "flowchain.local_signature_envelope.v0",
+          "envelopeId": "0xeaa553befba878862c614b8ca9df9c3e5e90e6299ca415043e50d8cb2874f4b0",
+          "objectType": "artifact_availability_proof",
+          "objectSchema": "flowchain.artifact_availability_proof.v0",
+          "objectId": "0x9d5fae6b0098c96fc0ab37e75ca34cef4a9dfcf18c7153762ba75ddf563e536e",
+          "objectTypeHash": "0x505f965c4ae6db350bdf73d2f85117ae099b4faec87b7ff83940e3854c6920c5",
+          "domain": "flowchain.local-alpha.v0.artifact-availability-proof.id",
+          "domainSeparator": "0xa7bbdb457725f7ad03fe4e6d2becb74c1ea54be06083f3d3e693f843615c7a20",
+          "signerRole": "operator",
+          "signerRoleCode": 1,
+          "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+          "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+          "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "sequence": "4",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0x64e8a1902689ca7d2c9eeb3200ddca8679faa549e898c639632a46cca55d88f2",
+          "signingDigest": "0x6a0e253e6002840c3a8edbaf603211d156c1b5c56b8ddd5b0efa3753e5635da3",
+          "signature": "0xabeedc2cd0390ab361c7b544d1a5cd52445e098d36e59766ddde9e64bfd105c1358fe95b576f26ac9498187e52936becdc8fd4181bf2f16ee5290469f41034f9"
+        }
+      },
+      {
+        "name": "verifier-module.demo.verifier-signature-envelope",
+        "objectName": "verifier-module.demo",
+        "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
+        "function": "localSignatureEnvelopeHash",
+        "expected": {
+          "objectId": "0xbb9456a90fd97dfe26d07d3a39111a43484568d9b2088e82ca64d86487e5e360",
+          "envelopeId": "0x0db093584755eb839086ef8d06adb7f1f4283365abdc8e5fc0de3452a519b408",
+          "signingDigest": "0x0127126d3ca637a481b753b2e404a510d3a0ca97349ba907cfa3161f563cb836"
+        },
+        "input": {
+          "objectId": "0xbb9456a90fd97dfe26d07d3a39111a43484568d9b2088e82ca64d86487e5e360",
+          "objectTypeHash": "0x9d02e1e5ef3686eef661fe474251de5ccffc5974c58c61fe6f34758c8a720275",
+          "domainSeparator": "0xfdb5ce2359d87d7546c9e5cdf604a270ffc2485dccc345df0c881daadd0e3aed",
+          "signerId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
+          "signerKeyId": "0x9bc6e07b6ca6b1f21697ed511d211b82186960d193036d5817f1a8a46a6daff5",
+          "signerRole": 3,
+          "sequence": "5",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xc2c56aa26345dc56be8c781635cb27c917d32b5da76cfc04996cd0d7cea1b49e"
+        },
+        "envelope": {
+          "schema": "flowchain.local_signature_envelope.v0",
+          "envelopeId": "0x0db093584755eb839086ef8d06adb7f1f4283365abdc8e5fc0de3452a519b408",
+          "objectType": "verifier_module",
+          "objectSchema": "flowchain.verifier_module.v0",
+          "objectId": "0xbb9456a90fd97dfe26d07d3a39111a43484568d9b2088e82ca64d86487e5e360",
+          "objectTypeHash": "0x9d02e1e5ef3686eef661fe474251de5ccffc5974c58c61fe6f34758c8a720275",
+          "domain": "flowchain.local-alpha.v0.verifier-module.id",
+          "domainSeparator": "0xfdb5ce2359d87d7546c9e5cdf604a270ffc2485dccc345df0c881daadd0e3aed",
+          "signerRole": "verifier",
+          "signerRoleCode": 3,
+          "signerId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
+          "signerKeyId": "0x9bc6e07b6ca6b1f21697ed511d211b82186960d193036d5817f1a8a46a6daff5",
+          "publicKey": "0x02f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+          "sequence": "5",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xc2c56aa26345dc56be8c781635cb27c917d32b5da76cfc04996cd0d7cea1b49e",
+          "signingDigest": "0x0127126d3ca637a481b753b2e404a510d3a0ca97349ba907cfa3161f563cb836",
+          "signature": "0x8d47ba1876c942f4eac15cfdc153406a47eb7233c9a44506702311755dd01d212933de6d1b96f7f5be49986325c5e4ea0f89ef4f27a8174520a466fa4c5d45fa"
+        }
+      },
+      {
+        "name": "verifier-report.demo.verifier-signature-envelope",
+        "objectName": "verifier-report.demo",
+        "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
+        "function": "localSignatureEnvelopeHash",
+        "expected": {
+          "objectId": "0x1b1c2940d6e83ee78a7e0a8285e4ce2530da1ce7964817806e61520a2e767355",
+          "envelopeId": "0xbe0d02653b37c8c6fc9dd2691bad7d7ccfe7ad89dfca899a44760144aa30c295",
+          "signingDigest": "0xd93b37d75d937c09e9603c8159e20e396931d1fd1cb257a176864526cd7432b3"
+        },
+        "input": {
+          "objectId": "0x1b1c2940d6e83ee78a7e0a8285e4ce2530da1ce7964817806e61520a2e767355",
+          "objectTypeHash": "0x3c1d703293c54d61da59603a7ccdb51b8b5ca21a96ef34c34570864e1943c242",
+          "domainSeparator": "0x8ef53353c77dafe36cddcee05e4f11cc5027f7b54a9c0cbbc215a71bea8323f8",
+          "signerId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
+          "signerKeyId": "0x9bc6e07b6ca6b1f21697ed511d211b82186960d193036d5817f1a8a46a6daff5",
+          "signerRole": 3,
+          "sequence": "6",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0x61e313795f9590163b38135b400bb0438d81787ec59ef9d628497320179a87d0"
+        },
+        "envelope": {
+          "schema": "flowchain.local_signature_envelope.v0",
+          "envelopeId": "0xbe0d02653b37c8c6fc9dd2691bad7d7ccfe7ad89dfca899a44760144aa30c295",
+          "objectType": "verifier_report",
+          "objectSchema": "flowchain.verifier_report.v0",
+          "objectId": "0x1b1c2940d6e83ee78a7e0a8285e4ce2530da1ce7964817806e61520a2e767355",
+          "objectTypeHash": "0x3c1d703293c54d61da59603a7ccdb51b8b5ca21a96ef34c34570864e1943c242",
+          "domain": "flowmemory.v0.verifier.report-digest",
+          "domainSeparator": "0x8ef53353c77dafe36cddcee05e4f11cc5027f7b54a9c0cbbc215a71bea8323f8",
+          "signerRole": "verifier",
+          "signerRoleCode": 3,
+          "signerId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
+          "signerKeyId": "0x9bc6e07b6ca6b1f21697ed511d211b82186960d193036d5817f1a8a46a6daff5",
+          "publicKey": "0x02f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+          "sequence": "6",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0x61e313795f9590163b38135b400bb0438d81787ec59ef9d628497320179a87d0",
+          "signingDigest": "0xd93b37d75d937c09e9603c8159e20e396931d1fd1cb257a176864526cd7432b3",
+          "signature": "0x9870e8ce192cfaa2a78ab7a749076c5308218edb6918b75d9e04fe3403e29b6965ae945140b8d415af91d7bb1638e28cf06ac2b50889a33c0a9a137261c717ae"
+        }
+      },
+      {
+        "name": "memory-cell.demo.agent-signature-envelope",
+        "objectName": "memory-cell.demo",
+        "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
+        "function": "localSignatureEnvelopeHash",
+        "expected": {
+          "objectId": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f",
+          "envelopeId": "0x374082e4aaa3c940eeba7b53d0348cf81415652a3e0127cccb403677b47674fd",
+          "signingDigest": "0x2df8a5742b883c13c7bb5ebec91c92a6283101236971f0d62128eaffb1e589cf"
+        },
+        "input": {
+          "objectId": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f",
+          "objectTypeHash": "0x6ed0f1045cef52eba52442242fbfc74a44bc1e0568866319b88e6c5b38ff43e0",
+          "domainSeparator": "0x06e4e0e2491dee22170b7dc2a29131b92db1bf405e1e4a9018b1f8b042c1f003",
+          "signerId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+          "signerKeyId": "0x0cd3ace447934998e0819d90cf89904776a2407e816541c1c43b99d38c351893",
+          "signerRole": 2,
+          "sequence": "7",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xf4dfd21727eda874622b35788a9a8c4953fe53bcd9d12a97cf207bcbe88937f9"
+        },
+        "envelope": {
+          "schema": "flowchain.local_signature_envelope.v0",
+          "envelopeId": "0x374082e4aaa3c940eeba7b53d0348cf81415652a3e0127cccb403677b47674fd",
+          "objectType": "memory_cell",
+          "objectSchema": "flowchain.memory_cell.v0",
+          "objectId": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f",
+          "objectTypeHash": "0x6ed0f1045cef52eba52442242fbfc74a44bc1e0568866319b88e6c5b38ff43e0",
+          "domain": "flowchain.local-alpha.v0.memory-cell.id",
+          "domainSeparator": "0x06e4e0e2491dee22170b7dc2a29131b92db1bf405e1e4a9018b1f8b042c1f003",
+          "signerRole": "agent",
+          "signerRoleCode": 2,
+          "signerId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+          "signerKeyId": "0x0cd3ace447934998e0819d90cf89904776a2407e816541c1c43b99d38c351893",
+          "publicKey": "0x02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",
+          "sequence": "7",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xf4dfd21727eda874622b35788a9a8c4953fe53bcd9d12a97cf207bcbe88937f9",
+          "signingDigest": "0x2df8a5742b883c13c7bb5ebec91c92a6283101236971f0d62128eaffb1e589cf",
+          "signature": "0x07cd84afb338d899d25cdc420f46911789ea5da876a4e1f845a54ac35f90d8cd1ceb8769c02f6b2d28308658e645d691a46217c7d92fa8b0ae877e2bf9d878af"
+        }
+      },
+      {
+        "name": "challenge.demo.agent-signature-envelope",
+        "objectName": "challenge.demo",
+        "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
+        "function": "localSignatureEnvelopeHash",
+        "expected": {
+          "objectId": "0x184dbda3f9e19adfe64d8ef4636dc9a3e6ab8f62761589653816dc574ffb3403",
+          "envelopeId": "0x0b0269ba2354d34b121062b3aeb0918826695af5b56bc9796ebfe915bc19a57e",
+          "signingDigest": "0xa4b0a44c3d2292fec4d22d664d9babef4e8e925951160797221933b47ab05367"
+        },
+        "input": {
+          "objectId": "0x184dbda3f9e19adfe64d8ef4636dc9a3e6ab8f62761589653816dc574ffb3403",
+          "objectTypeHash": "0x83372cb17c18bc1eefba613367a330e190119898aac881c685b08b6e47fb42d3",
+          "domainSeparator": "0x9ef9b9d51f8deab79f1b2a18cf1fd9cef8325daccd42015312cdc857c39c7568",
+          "signerId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+          "signerKeyId": "0x0cd3ace447934998e0819d90cf89904776a2407e816541c1c43b99d38c351893",
+          "signerRole": 2,
+          "sequence": "8",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xe413acc238046a9cdf67715e02b2aeb359b242250554d29f764ef14634bafe0c"
+        },
+        "envelope": {
+          "schema": "flowchain.local_signature_envelope.v0",
+          "envelopeId": "0x0b0269ba2354d34b121062b3aeb0918826695af5b56bc9796ebfe915bc19a57e",
+          "objectType": "challenge",
+          "objectSchema": "flowchain.challenge.v0",
+          "objectId": "0x184dbda3f9e19adfe64d8ef4636dc9a3e6ab8f62761589653816dc574ffb3403",
+          "objectTypeHash": "0x83372cb17c18bc1eefba613367a330e190119898aac881c685b08b6e47fb42d3",
+          "domain": "flowchain.local-alpha.v0.challenge.id",
+          "domainSeparator": "0x9ef9b9d51f8deab79f1b2a18cf1fd9cef8325daccd42015312cdc857c39c7568",
+          "signerRole": "agent",
+          "signerRoleCode": 2,
+          "signerId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+          "signerKeyId": "0x0cd3ace447934998e0819d90cf89904776a2407e816541c1c43b99d38c351893",
+          "publicKey": "0x02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",
+          "sequence": "8",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xe413acc238046a9cdf67715e02b2aeb359b242250554d29f764ef14634bafe0c",
+          "signingDigest": "0xa4b0a44c3d2292fec4d22d664d9babef4e8e925951160797221933b47ab05367",
+          "signature": "0x768a36b2053f7c8da468d7c422a057180c234cf766df24fff785c3a3370d9ed567adb7b5bd1bbf7098dfb3f2e7cb70fc1056d90e4037332ac3661ff959807319"
+        }
+      },
+      {
+        "name": "finality-receipt.demo.verifier-signature-envelope",
+        "objectName": "finality-receipt.demo",
+        "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
+        "function": "localSignatureEnvelopeHash",
+        "expected": {
+          "objectId": "0x95216aeaec225965a4ce35eb2b136e27819642e68284201feade0d68dc4f9ddf",
+          "envelopeId": "0x662920534f0ae5d94b327cc7374d91cced76cf7b79752f4c0ef44db2edcc0a8e",
+          "signingDigest": "0x4b2644f8ae78f7d15075e1d6037fd855b1b84e23d3d58c628e8e68dc464b6541"
+        },
+        "input": {
+          "objectId": "0x95216aeaec225965a4ce35eb2b136e27819642e68284201feade0d68dc4f9ddf",
+          "objectTypeHash": "0x381c5cc90ae4f9e807ffbefd2190f856678a0a7d4ff518970bf95859c5c29560",
+          "domainSeparator": "0x20f563bef0df073d41d9b981bbc82d8a9606a6f1055fa0c541b8bca28efaaeb1",
+          "signerId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
+          "signerKeyId": "0x9bc6e07b6ca6b1f21697ed511d211b82186960d193036d5817f1a8a46a6daff5",
+          "signerRole": 3,
+          "sequence": "9",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0x0acb03f13a6705e9458fac25c44575707ee7ab8f92104da4e3216230e11b72a8"
+        },
+        "envelope": {
+          "schema": "flowchain.local_signature_envelope.v0",
+          "envelopeId": "0x662920534f0ae5d94b327cc7374d91cced76cf7b79752f4c0ef44db2edcc0a8e",
+          "objectType": "finality_receipt",
+          "objectSchema": "flowchain.finality_receipt.v0",
+          "objectId": "0x95216aeaec225965a4ce35eb2b136e27819642e68284201feade0d68dc4f9ddf",
+          "objectTypeHash": "0x381c5cc90ae4f9e807ffbefd2190f856678a0a7d4ff518970bf95859c5c29560",
+          "domain": "flowchain.local-alpha.v0.finality-receipt.id",
+          "domainSeparator": "0x20f563bef0df073d41d9b981bbc82d8a9606a6f1055fa0c541b8bca28efaaeb1",
+          "signerRole": "verifier",
+          "signerRoleCode": 3,
+          "signerId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
+          "signerKeyId": "0x9bc6e07b6ca6b1f21697ed511d211b82186960d193036d5817f1a8a46a6daff5",
+          "publicKey": "0x02f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+          "sequence": "9",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0x0acb03f13a6705e9458fac25c44575707ee7ab8f92104da4e3216230e11b72a8",
+          "signingDigest": "0x4b2644f8ae78f7d15075e1d6037fd855b1b84e23d3d58c628e8e68dc464b6541",
+          "signature": "0x31fbb8b88c5b56888a402c748333f56ccb51300852aab105cbb80d2a176aebf501a6eadf9bb452a41d31dd20fa043eff270601243e0e5a24fb6647bdd33d10b6"
+        }
+      },
+      {
+        "name": "hardware-signal-envelope.demo.hardware-signature-envelope",
+        "objectName": "hardware-signal-envelope.demo",
+        "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
+        "function": "localSignatureEnvelopeHash",
+        "expected": {
+          "objectId": "0xde6601ee3fc7e925d2d54b1dca26cf7cb560432f066f93b3f3bf1f31b4934a10",
+          "envelopeId": "0xf278b187bcb6bc7e0abf3b198555d0b018f54c4eced2580d2805dfc710034d07",
+          "signingDigest": "0x00c4b16aa80e0960887445ac34dda98f57d451d5d07d6564affcc35d89b46f14"
+        },
+        "input": {
+          "objectId": "0xde6601ee3fc7e925d2d54b1dca26cf7cb560432f066f93b3f3bf1f31b4934a10",
+          "objectTypeHash": "0x9e89c0262e9aaa8bf0dbc60037de26f6368d42fce5dc49ee4301a663047be5ee",
+          "domainSeparator": "0x4344c72bae8d1c167094207afb2b3f64b8318b099ff3eaf5c8f5c518bf215863",
+          "signerId": "0xc3a21c4e3c455b2388d06fb384165ff7156a3d40d877a19f88d814a8a1edeaea",
+          "signerKeyId": "0x2960db74c119e17ca2323f749c1df8bfdb1b7e5eaddf640d52fda9d96b59c61b",
+          "signerRole": 4,
+          "sequence": "10",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0x35e2f19224f77e09e149fa37ef5db44d7e3f7175df36ba22c0df233457ebbcb5"
+        },
+        "envelope": {
+          "schema": "flowchain.local_signature_envelope.v0",
+          "envelopeId": "0xf278b187bcb6bc7e0abf3b198555d0b018f54c4eced2580d2805dfc710034d07",
+          "objectType": "hardware_signal_envelope",
+          "objectSchema": "flowchain.hardware_signal_envelope.v0",
+          "objectId": "0xde6601ee3fc7e925d2d54b1dca26cf7cb560432f066f93b3f3bf1f31b4934a10",
+          "objectTypeHash": "0x9e89c0262e9aaa8bf0dbc60037de26f6368d42fce5dc49ee4301a663047be5ee",
+          "domain": "flowchain.local-alpha.v0.hardware-signal-envelope.id",
+          "domainSeparator": "0x4344c72bae8d1c167094207afb2b3f64b8318b099ff3eaf5c8f5c518bf215863",
+          "signerRole": "hardware",
+          "signerRoleCode": 4,
+          "signerId": "0xc3a21c4e3c455b2388d06fb384165ff7156a3d40d877a19f88d814a8a1edeaea",
+          "signerKeyId": "0x2960db74c119e17ca2323f749c1df8bfdb1b7e5eaddf640d52fda9d96b59c61b",
+          "publicKey": "0x02e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13",
+          "sequence": "10",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0x35e2f19224f77e09e149fa37ef5db44d7e3f7175df36ba22c0df233457ebbcb5",
+          "signingDigest": "0x00c4b16aa80e0960887445ac34dda98f57d451d5d07d6564affcc35d89b46f14",
+          "signature": "0xd72b87d4d4547dff9366672f78fbe9bd6f494617dd14442b458612be200d8f2540b3684e6bc485ef763d18931393aebda3411fc550b83d7aba54a9af1384e0f5"
+        }
+      },
+      {
+        "name": "control-plane-provenance-response.demo.operator-signature-envelope",
+        "objectName": "control-plane-provenance-response.demo",
+        "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
+        "function": "localSignatureEnvelopeHash",
+        "expected": {
+          "objectId": "0xb0336e11f4e939bbf8b423c7d57cc383a9cdf4982fb90b004c6d94ea5a3ec0eb",
+          "envelopeId": "0x4580f51a5ca0eb672ce045a0e239707e977715919362612a258a01663bd2fc39",
+          "signingDigest": "0x7daa08228e60cb637c775723700f2245e414546158f4e230ac32c9a2a3e7d404"
+        },
+        "input": {
+          "objectId": "0xb0336e11f4e939bbf8b423c7d57cc383a9cdf4982fb90b004c6d94ea5a3ec0eb",
+          "objectTypeHash": "0x7a3514a376146e3a8988dd397b42da1579bf8d074a53a8e8f4d207415b84e8a7",
+          "domainSeparator": "0xfe47c0668c801d02e4e7c5af1c4131ba03a6547f329546ba23c9ba66b7e0e4e6",
+          "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+          "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+          "signerRole": 1,
+          "sequence": "11",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xba6419eff070c057f965640d866f97e4a30b170e18f2c071b327b47b8ebedcde"
+        },
+        "envelope": {
+          "schema": "flowchain.local_signature_envelope.v0",
+          "envelopeId": "0x4580f51a5ca0eb672ce045a0e239707e977715919362612a258a01663bd2fc39",
+          "objectType": "control_plane_provenance_response",
+          "objectSchema": "flowchain.control_plane_provenance_response.v0",
+          "objectId": "0xb0336e11f4e939bbf8b423c7d57cc383a9cdf4982fb90b004c6d94ea5a3ec0eb",
+          "objectTypeHash": "0x7a3514a376146e3a8988dd397b42da1579bf8d074a53a8e8f4d207415b84e8a7",
+          "domain": "flowchain.local-alpha.v0.control-plane-provenance-response.id",
+          "domainSeparator": "0xfe47c0668c801d02e4e7c5af1c4131ba03a6547f329546ba23c9ba66b7e0e4e6",
+          "signerRole": "operator",
+          "signerRoleCode": 1,
+          "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+          "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+          "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "sequence": "11",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xba6419eff070c057f965640d866f97e4a30b170e18f2c071b327b47b8ebedcde",
+          "signingDigest": "0x7daa08228e60cb637c775723700f2245e414546158f4e230ac32c9a2a3e7d404",
+          "signature": "0x1dd7f91706ecb742ab4cbde578dff7e1571eb892c3db90a358ba8b1db65c7e49153ccd063dce1ae932548fa3e9af40bacf1c0f42690895517343f7b7a3548ff4"
+        }
+      }
+    ],
+    "negative": [
+      {
+        "name": "envelope.replay-agent-account-sequence",
+        "baseEnvelope": "agent-account.demo.operator-signature-envelope",
+        "mutation": {
+          "contextReplay": true
+        },
+        "expectErrors": [
+          "replay"
+        ]
+      },
+      {
+        "name": "envelope.wrong-domain-model-passport",
+        "baseEnvelope": "model-passport.demo.operator-signature-envelope",
+        "mutation": {
+          "envelope": {
+            "domainFrom": "workReceiptId"
+          }
+        },
+        "expectErrors": [
+          "wrong-domain"
+        ]
+      },
+      {
+        "name": "envelope.missing-signer-work-receipt",
+        "baseEnvelope": "work-receipt.demo.agent-signature-envelope",
+        "mutation": {
+          "deleteEnvelopeFields": [
+            "signerId"
+          ]
+        },
+        "expectErrors": [
+          "missing-signer"
+        ]
+      },
+      {
+        "name": "envelope.zero-hash-model-artifact-root",
+        "baseEnvelope": "model-passport.demo.operator-signature-envelope",
+        "mutation": {
+          "document": {
+            "artifactRoot": "0x0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        "expectErrors": [
+          "zero-hash"
+        ]
+      },
+      {
+        "name": "envelope.malformed-id-challenge",
+        "baseEnvelope": "challenge.demo.agent-signature-envelope",
+        "mutation": {
+          "document": {
+            "challengeId": "0x1234"
+          }
+        },
+        "expectErrors": [
+          "malformed-id"
+        ]
+      },
+      {
+        "name": "envelope.malformed-dependency-memory-cell",
+        "baseEnvelope": "memory-cell.demo.agent-signature-envelope",
+        "mutation": {
+          "document": {
+            "dependencyRoot": "0x1234"
+          }
+        },
+        "expectErrors": [
+          "malformed-dependency"
+        ]
+      },
+      {
+        "name": "envelope.bad-parent-root-memory-cell",
+        "baseEnvelope": "memory-cell.demo.agent-signature-envelope",
+        "mutation": {
+          "documentFromDocumentField": {
+            "previousMemoryRoot": "currentMemoryRoot"
+          }
+        },
+        "expectErrors": [
+          "bad-parent-root"
+        ]
+      },
+      {
+        "name": "envelope.wrong-object-type-hardware",
+        "baseEnvelope": "hardware-signal-envelope.demo.hardware-signature-envelope",
+        "mutation": {
+          "envelope": {
+            "objectSchema": "flowchain.model_passport.v0",
+            "objectType": "model_passport"
+          }
+        },
+        "expectErrors": [
+          "wrong-object-type"
+        ]
+      },
+      {
+        "name": "envelope.bad-signature-agent-account",
+        "baseEnvelope": "agent-account.demo.operator-signature-envelope",
+        "mutation": {
+          "envelope": {
+            "publicKey": "0x02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+          }
+        },
+        "expectErrors": [
+          "bad-signature"
+        ]
+      },
+      {
+        "name": "envelope.bad-signature-model-passport",
+        "baseEnvelope": "model-passport.demo.operator-signature-envelope",
+        "mutation": {
+          "envelope": {
+            "publicKey": "0x02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+          }
+        },
+        "expectErrors": [
+          "bad-signature"
+        ]
+      },
+      {
+        "name": "envelope.bad-signature-work-receipt",
+        "baseEnvelope": "work-receipt.demo.agent-signature-envelope",
+        "mutation": {
+          "envelope": {
+            "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+          }
+        },
+        "expectErrors": [
+          "bad-signature"
+        ]
+      },
+      {
+        "name": "envelope.bad-signature-artifact-availability-proof",
+        "baseEnvelope": "artifact-availability-proof.demo.operator-signature-envelope",
+        "mutation": {
+          "envelope": {
+            "publicKey": "0x02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+          }
+        },
+        "expectErrors": [
+          "bad-signature"
+        ]
+      },
+      {
+        "name": "envelope.bad-signature-verifier-module",
+        "baseEnvelope": "verifier-module.demo.verifier-signature-envelope",
+        "mutation": {
+          "envelope": {
+            "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+          }
+        },
+        "expectErrors": [
+          "bad-signature"
+        ]
+      },
+      {
+        "name": "envelope.bad-signature-verifier-report",
+        "baseEnvelope": "verifier-report.demo.verifier-signature-envelope",
+        "mutation": {
+          "envelope": {
+            "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+          }
+        },
+        "expectErrors": [
+          "bad-signature"
+        ]
+      },
+      {
+        "name": "envelope.bad-signature-memory-cell",
+        "baseEnvelope": "memory-cell.demo.agent-signature-envelope",
+        "mutation": {
+          "envelope": {
+            "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+          }
+        },
+        "expectErrors": [
+          "bad-signature"
+        ]
+      },
+      {
+        "name": "envelope.bad-signature-challenge",
+        "baseEnvelope": "challenge.demo.agent-signature-envelope",
+        "mutation": {
+          "envelope": {
+            "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+          }
+        },
+        "expectErrors": [
+          "bad-signature"
+        ]
+      },
+      {
+        "name": "envelope.bad-signature-finality-receipt",
+        "baseEnvelope": "finality-receipt.demo.verifier-signature-envelope",
+        "mutation": {
+          "envelope": {
+            "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+          }
+        },
+        "expectErrors": [
+          "bad-signature"
+        ]
+      },
+      {
+        "name": "envelope.bad-signature-hardware-signal-envelope",
+        "baseEnvelope": "hardware-signal-envelope.demo.hardware-signature-envelope",
+        "mutation": {
+          "envelope": {
+            "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+          }
+        },
+        "expectErrors": [
+          "bad-signature"
+        ]
+      },
+      {
+        "name": "envelope.bad-signature-control-plane-provenance-response",
+        "baseEnvelope": "control-plane-provenance-response.demo.operator-signature-envelope",
+        "mutation": {
+          "envelope": {
+            "publicKey": "0x02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+          }
+        },
+        "expectErrors": [
+          "bad-signature"
+        ]
+      }
+    ]
+  }
+}

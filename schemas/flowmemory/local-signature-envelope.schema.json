@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowchain.local_signature_envelope.v0",
+  "title": "FlowChain Local Alpha LocalSignatureEnvelope V0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "envelopeId",
+    "objectType",
+    "objectSchema",
+    "objectId",
+    "objectTypeHash",
+    "domain",
+    "domainSeparator",
+    "signerRole",
+    "signerRoleCode",
+    "signerId",
+    "signerKeyId",
+    "publicKey",
+    "sequence",
+    "issuedAtUnixMs",
+    "expiresAtUnixMs",
+    "nonce",
+    "signingDigest",
+    "signature"
+  ],
+  "properties": {
+    "schema": { "const": "flowchain.local_signature_envelope.v0" },
+    "envelopeId": { "$ref": "#/$defs/hex32" },
+    "objectType": {
+      "enum": [
+        "agent_account",
+        "model_passport",
+        "work_receipt",
+        "artifact_availability_proof",
+        "verifier_module",
+        "verifier_report",
+        "memory_cell",
+        "challenge",
+        "finality_receipt",
+        "hardware_signal_envelope",
+        "control_plane_provenance_response"
+      ]
+    },
+    "objectSchema": { "type": "string", "pattern": "^flowchain\\.[a-z_]+\\.v0$" },
+    "objectId": { "$ref": "#/$defs/hex32" },
+    "objectTypeHash": { "$ref": "#/$defs/hex32" },
+    "domain": { "type": "string", "pattern": "^(flowchain\\.local-alpha\\.v0|flowmemory\\.v0)\\.[a-z0-9.-]+$" },
+    "domainSeparator": { "$ref": "#/$defs/hex32" },
+    "signerRole": { "enum": ["operator", "agent", "verifier", "hardware"] },
+    "signerRoleCode": { "type": "integer", "minimum": 1, "maximum": 255 },
+    "signerId": { "$ref": "#/$defs/hex32" },
+    "signerKeyId": { "$ref": "#/$defs/hex32" },
+    "publicKey": { "type": "string", "pattern": "^0x([0-9a-fA-F]{66}|[0-9a-fA-F]{130})$" },
+    "sequence": { "$ref": "#/$defs/uintString" },
+    "issuedAtUnixMs": { "$ref": "#/$defs/uintString" },
+    "expiresAtUnixMs": { "$ref": "#/$defs/uintString" },
+    "nonce": { "$ref": "#/$defs/hex32" },
+    "signingDigest": { "$ref": "#/$defs/hex32" },
+    "signature": { "type": "string", "pattern": "^0x[0-9a-fA-F]{128}$" }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "uintString": { "type": "string", "pattern": "^[0-9]+$" }
+  }
+}

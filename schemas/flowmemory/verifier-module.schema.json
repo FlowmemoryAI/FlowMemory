@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowchain.verifier_module.v0",
+  "title": "FlowChain Local Alpha VerifierModule V0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "moduleId",
+    "ownerId",
+    "codeRoot",
+    "manifestRoot",
+    "supportedModesRoot",
+    "supportedChallengeTypesRoot",
+    "verifierSetRoot",
+    "moduleVersion",
+    "status",
+    "statusCode"
+  ],
+  "properties": {
+    "schema": { "const": "flowchain.verifier_module.v0" },
+    "moduleId": { "$ref": "#/$defs/hex32" },
+    "ownerId": { "$ref": "#/$defs/hex32" },
+    "codeRoot": { "$ref": "#/$defs/hex32" },
+    "manifestRoot": { "$ref": "#/$defs/hex32" },
+    "supportedModesRoot": { "$ref": "#/$defs/hex32" },
+    "supportedChallengeTypesRoot": { "$ref": "#/$defs/hex32" },
+    "verifierSetRoot": { "$ref": "#/$defs/hex32" },
+    "moduleVersion": { "type": "integer", "minimum": 0, "maximum": 65535 },
+    "status": { "enum": ["draft", "active", "paused", "revoked"] },
+    "statusCode": { "type": "integer", "minimum": 1, "maximum": 255 }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" }
+  }
+}

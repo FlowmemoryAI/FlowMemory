@@ -1,6 +1,6 @@
 {
   "schema": "flowmemory.crypto.test-vectors.v0",
-  "vectorCount": 21,
+  "vectorCount": 33,
   "vectors": [
     {
       "name": "domain.flowPulseObservationId",
@@ -271,6 +271,190 @@
         "timestamp": 1778640000
       },
       "expected": "0x90cb545229eb785f0583ca5abafb3da199a5c68a1aa8ef140e169c024ca48e54"
+    },
+    {
+      "name": "local-alpha.agentAccountId",
+      "function": "agentAccountId",
+      "input": {
+        "namespaceId": "0x4c2eae268c3f97a510b66597873c6c08ae9e427a7c03cd383df6acfeda9bbf37",
+        "owner": "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1",
+        "policyRoot": "0x20121b5daa2be4de0d9dbcae292d1d3466a4e0a8b6cc3149ce46c30c352a1f0e",
+        "toolPermissionsRoot": "0x39079bde86c6743c81fd927a14012331688374b55118484529ce257317327120",
+        "modelAllowlistRoot": "0x00a463537f12e3419d4bf3655d28d93f3e189b9a89a3ad40c4819bbc4eb2acc9",
+        "memoryNamespaceRoot": "0x574eee506454973fb82863a3225ea78696b96907a17c360ad2c2b5234dfa2d83",
+        "spendingLimitPerEpoch": "0",
+        "nonce": "0x37e916697be966b19c0cd7aa6073e78ffb7ee5cf27a4392383f9cfe5fa5025bb"
+      },
+      "expected": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61"
+    },
+    {
+      "name": "local-alpha.modelPassportId",
+      "function": "modelPassportId",
+      "input": {
+        "providerHash": "0x1dcd953776be1cde4f3d9f516d8ecf3641d664d8c97623af60327315c5600d0a",
+        "modelFamilyHash": "0x91c830851e70677b8aa487b104e05230fdd5d2ae5ee26b5423ca223b154b58cc",
+        "versionHash": "0x7c56a7f2edbd518ffcf014b4155ec4ad47062390e3a1302550e5a080c5ef4975",
+        "licenseRoot": "0x7c4f5757bbcb3cb1c84df192e87f2ba40b9d4cacb1e62b612e604a8d831bc4ee",
+        "policyRoot": "0x519cc6db7ebafcfa1add95a09f9ef811013d86d3e76e1d4b5099f9a379a98bdb",
+        "artifactRoot": "0x14d1fb24e2da3cdb25d55912b5f7b56fde462707343f827791dfb1c3945a0a99",
+        "metadataHash": "0x198ae9ec53443e3a46f8762e4b9ee166c2927d7faec07ce2bdc8714859504d17",
+        "nonce": "0x6550e26ef27367750192911d54ae8c97af6f828e52f4b696a25f215581a34b6b"
+      },
+      "expected": "0xf1e4695d11203b1fd1702d4294b001387da6f6e66278e6018026eab22fa38879"
+    },
+    {
+      "name": "local-alpha.memoryCellId",
+      "function": "memoryCellId",
+      "input": {
+        "ownerAgentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+        "currentMemoryRoot": "0x4cddf39c05428ff95e92ad96a6a4199348dd19e9935b681ec3f111217f87dbc8",
+        "previousMemoryRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "lastDeltaRoot": "0xf8951ccd1d2827cfe0078df813223eb8b97c68adce39a9e07c6a92cb692ad010",
+        "sourceReceiptsRoot": "0xe20859136519b00db74fd38d9f4228de33eecfb3e554aaa9438ea2edc0d17e0c",
+        "dependencyRoot": "0x87e2cc37cbb9eee123e6f0a84be9eb0bec68c0e4f7e35c1c119cf4a8015d56c6",
+        "updatedAtUnixMs": "1778702400000",
+        "cellVersion": 0
+      },
+      "expected": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f"
+    },
+    {
+      "name": "local-alpha.artifactAvailabilityProofId",
+      "function": "artifactAvailabilityProofId",
+      "input": {
+        "artifactRoot": "0x14d1fb24e2da3cdb25d55912b5f7b56fde462707343f827791dfb1c3945a0a99",
+        "providerId": "0x0dc433e7afcaecae8532a1bd432c3954072ee62a73d9112e57bfd01a001c393f",
+        "locationCommitment": "0x42dca9f7b94d6d927d5af2d65be01e2180f0f7992df017410fbe70118299eccd",
+        "storageReceiptCommitment": "0x1e71bf37d72b2b1a3dafd534a5fad68b62f8e00017ca170f211e963fbbc7d59a",
+        "availabilitySampleRoot": "0xd72d47a64f960ca8af6e1746c576f4211ed4238383684a438026b10f7c9f2c60",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1810238400000",
+        "status": 7,
+        "nonce": "0xb68051d46145d6360b963e755c6950ea087bc7bbdb3ad4a0dc4508150a2c7685"
+      },
+      "expected": "0x9d5fae6b0098c96fc0ab37e75ca34cef4a9dfcf18c7153762ba75ddf563e536e"
+    },
+    {
+      "name": "local-alpha.verifierModuleId",
+      "function": "verifierModuleId",
+      "input": {
+        "ownerId": "0x5453d44b67a39bcbd94ad71b4499798ea0f5b3e27b22ce51e9343c0223a3d58a",
+        "codeRoot": "0x6900549a6f3c5becb720e7bc0176a85305dbfb1881a52ff84c269bddff77067c",
+        "manifestRoot": "0x4d491666ff5482701f6ac44230cc7929030ce7f6f6b7b021c59b211eb88e6c1e",
+        "supportedModesRoot": "0xd9bbac634f1a0edb893028ea020757da28e1aae731be0702d708098c6d53a009",
+        "supportedChallengeTypesRoot": "0x4b8175b52291488cab4145ed9b34f0dcb4f6439d212e892909a0a0c9f3da1113",
+        "verifierSetRoot": "0xc4f5360009577f8e8cb3000867f5da8cb88b899cae39ef97737e98efc18bdbf3",
+        "moduleVersion": 0,
+        "status": 2
+      },
+      "expected": "0xbb9456a90fd97dfe26d07d3a39111a43484568d9b2088e82ca64d86487e5e360"
+    },
+    {
+      "name": "local-alpha.challengeId",
+      "function": "challengeId",
+      "input": {
+        "receiptId": "0x8e89965b455212cb3767352ae3adb0bb5dd0d59fba141cb5064245d05bdbb2aa",
+        "challengerId": "0x40dc731df288781313d04725dc79f969488b910d9ed2220695c0e249477ffc57",
+        "challengeType": 7,
+        "evidenceRoot": "0x0b6a5765989e49f9763082146b15d5b7e3ef614c3d12c9cfbbdcd940164b4c56",
+        "openedAtUnixMs": "1778702400000",
+        "deadlineUnixMs": "1779307200000",
+        "status": 1,
+        "nonce": "0x3fae75c35d96efdccce46b8d8223846defbb52752d3332afc0a799b84a55020d"
+      },
+      "expected": "0x184dbda3f9e19adfe64d8ef4636dc9a3e6ab8f62761589653816dc574ffb3403"
+    },
+    {
+      "name": "local-alpha.finalityReceiptId",
+      "function": "finalityReceiptId",
+      "input": {
+        "receiptId": "0x8e89965b455212cb3767352ae3adb0bb5dd0d59fba141cb5064245d05bdbb2aa",
+        "reportId": "0x9577aa6df7026dfe6f46042d71397769591841ee8e0fd23bca3160a2032d2925",
+        "challengeRoot": "0xf8962b5f9cf19578b6fe3cebc986cd054d594c0674e1fa48387c0278c6522967",
+        "finalityState": 2,
+        "finalizedAtUnixMs": "0",
+        "finalizedBlockNumber": "0",
+        "finalizedBlockHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "policyHash": "0xa6c5cdc9afc15dea4b2de2ab4bf4fa1ec5a6acee82e1864319ad8c46d2ae826d"
+      },
+      "expected": "0x95216aeaec225965a4ce35eb2b136e27819642e68284201feade0d68dc4f9ddf"
+    },
+    {
+      "name": "local-alpha.controlPlaneProvenanceResponseId",
+      "function": "controlPlaneProvenanceResponseId",
+      "input": {
+        "requestId": "0x147deb7c7f91259726ff0b4146c5249836a162f93c14562847cc15dac768e8d7",
+        "subjectId": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f",
+        "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+        "receiptId": "0x8e89965b455212cb3767352ae3adb0bb5dd0d59fba141cb5064245d05bdbb2aa",
+        "reportId": "0x9577aa6df7026dfe6f46042d71397769591841ee8e0fd23bca3160a2032d2925",
+        "memoryCellId": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f",
+        "dependencyRoot": "0x87e2cc37cbb9eee123e6f0a84be9eb0bec68c0e4f7e35c1c119cf4a8015d56c6",
+        "responseBodyHash": "0x709a37c10de55cbcfe702a41d49e08ecdb95bfa3b7149b1d855b60ac5359f24b",
+        "issuedAtUnixMs": "1778702400000",
+        "responseVersion": 0
+      },
+      "expected": "0xb0336e11f4e939bbf8b423c7d57cc383a9cdf4982fb90b004c6d94ea5a3ec0eb"
+    },
+    {
+      "name": "local-alpha.workReceiptId",
+      "function": "workReceiptId",
+      "input": {
+        "observationId": "0xd80d0a3b317ceae266c9b7983c5a9376529f457a01469c96d8d3fd5a6c2d8a3f",
+        "receiptHash": "0xca2ebca63e004ff4b0ca9766acbb2862b45059a480d911b67dbc25e937c2e733",
+        "workerId": "0x7803fe537f4b6e4ddd47f00b97a87c06aad1e42e22b83fdb522268e393319598",
+        "workerSequence": "1",
+        "nonce": "0x3574313751905cc45384e0a3f62258d38e9c64735e29bcee180459bb16cd4039"
+      },
+      "expected": "0xb7404c2b88e7f6a1991dfc5294f8f78932cbbf00ebecf302a1139950672f81f9"
+    },
+    {
+      "name": "local-alpha.verifierReportHash",
+      "function": "verifierReportHash",
+      "input": {
+        "reportSchemaHash": "0x487a3a70cf72c079fa8645f8d732cbe286f7f3aa0abd654f212ac1c1911a20ae",
+        "observationId": "0xd80d0a3b317ceae266c9b7983c5a9376529f457a01469c96d8d3fd5a6c2d8a3f",
+        "receiptHash": "0xca2ebca63e004ff4b0ca9766acbb2862b45059a480d911b67dbc25e937c2e733",
+        "verifierId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
+        "verifierSetRoot": "0x96130fe314e14b7f7d4347094f6b5ec4338b1f7730bf505e59fd3e731753ff8b",
+        "status": 2,
+        "checksRoot": "0x48468783cf12adfeba9be8e0a5e250ab04b19d5034f7e1996610cf05f4fcef83",
+        "finalizedBlockNumber": "12345742",
+        "finalizedBlockHash": "0x1111111111111111111111111111111111111111111111111111111111111111",
+        "reportVersion": 0
+      },
+      "expected": "0x1b1c2940d6e83ee78a7e0a8285e4ce2530da1ce7964817806e61520a2e767355"
+    },
+    {
+      "name": "local-alpha.hardwareSignalEnvelopeId",
+      "function": "hardwareSignalEnvelopeId",
+      "input": {
+        "deviceId": "0xc3a21c4e3c455b2388d06fb384165ff7156a3d40d877a19f88d814a8a1edeaea",
+        "signalRoot": "0xf57eaf258fac37071f818115db61e6bb48bbdfb41424316199ed0963d59a75b3",
+        "previousSignalEnvelopeId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "channelRoot": "0x280db3544e0aec306695543b1f7a1452e29b708d6df8749c293aec13f382944d",
+        "sequence": "1",
+        "observedAtUnixMs": "1778702400000",
+        "transport": 1,
+        "nonce": "0x1b85840b67182a89cf64394167db32108e00798b043aad5c6c2cab58d8726110"
+      },
+      "expected": "0xde6601ee3fc7e925d2d54b1dca26cf7cb560432f066f93b3f3bf1f31b4934a10"
+    },
+    {
+      "name": "local-alpha.localSignatureEnvelopeHash.agent-account",
+      "function": "localSignatureEnvelopeHash",
+      "input": {
+        "objectId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+        "objectTypeHash": "0x0b32d0c8ec630542359a97b7b5c44804b7021b96433ba120572ad0609d81d029",
+        "domainSeparator": "0xff84e3bb0214d3812d1bf8521ab9d5b836c7746794e226af2a56a2efd0b65ee6",
+        "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+        "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+        "signerRole": 1,
+        "sequence": "1",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1810238400000",
+        "nonce": "0xe9b99686c583dbed5b3bf743c2a3db8a5da8c8ceea4398eb45d57c518c555034"
+      },
+      "expected": "0x55656083efaf8a511fbae76b2a1bb740b08c92959e506a14f489f0fedcef3279"
     }
   ]
 }

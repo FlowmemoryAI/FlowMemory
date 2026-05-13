@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowchain.artifact_availability_proof.v0",
+  "title": "FlowChain Local Alpha ArtifactAvailabilityProof V0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "proofId",
+    "artifactRoot",
+    "providerId",
+    "locationCommitment",
+    "storageReceiptCommitment",
+    "availabilitySampleRoot",
+    "issuedAtUnixMs",
+    "expiresAtUnixMs",
+    "status",
+    "statusCode",
+    "nonce"
+  ],
+  "properties": {
+    "schema": { "const": "flowchain.artifact_availability_proof.v0" },
+    "proofId": { "$ref": "#/$defs/hex32" },
+    "artifactRoot": { "$ref": "#/$defs/hex32" },
+    "providerId": { "$ref": "#/$defs/hex32" },
+    "locationCommitment": { "$ref": "#/$defs/hex32" },
+    "storageReceiptCommitment": { "$ref": "#/$defs/hex32" },
+    "availabilitySampleRoot": { "$ref": "#/$defs/hex32" },
+    "issuedAtUnixMs": { "$ref": "#/$defs/uintString" },
+    "expiresAtUnixMs": { "$ref": "#/$defs/uintString" },
+    "status": { "enum": ["draft", "available", "unavailable", "expired"] },
+    "statusCode": { "type": "integer", "minimum": 1, "maximum": 255 },
+    "nonce": { "$ref": "#/$defs/hex32" }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "uintString": { "type": "string", "pattern": "^[0-9]+$" }
+  }
+}

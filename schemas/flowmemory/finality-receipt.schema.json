@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowchain.finality_receipt.v0",
+  "title": "FlowChain Local Alpha FinalityReceipt V0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "finalityReceiptId",
+    "receiptId",
+    "reportId",
+    "challengeRoot",
+    "finalityState",
+    "finalityStateCode",
+    "finalizedAtUnixMs",
+    "finalizedBlockNumber",
+    "finalizedBlockHash",
+    "policyHash"
+  ],
+  "properties": {
+    "schema": { "const": "flowchain.finality_receipt.v0" },
+    "finalityReceiptId": { "$ref": "#/$defs/hex32" },
+    "receiptId": { "$ref": "#/$defs/hex32" },
+    "reportId": { "$ref": "#/$defs/hex32" },
+    "challengeRoot": { "$ref": "#/$defs/hex32" },
+    "finalityState": {
+      "enum": ["provisional", "challengeable", "challenged", "accepted", "rejected", "finalized", "superseded", "reorged"]
+    },
+    "finalityStateCode": { "type": "integer", "minimum": 1, "maximum": 255 },
+    "finalizedAtUnixMs": { "$ref": "#/$defs/uintString" },
+    "finalizedBlockNumber": { "$ref": "#/$defs/uintString" },
+    "finalizedBlockHash": { "$ref": "#/$defs/hex32" },
+    "policyHash": { "$ref": "#/$defs/hex32" }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "uintString": { "type": "string", "pattern": "^[0-9]+$" }
+  }
+}
