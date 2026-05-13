@@ -30,7 +30,7 @@ with production readiness.
 
 Production language remains blocked until a later decision records:
 
-1. source verification completed for every deployed contract;
+1. source verification completed for every deployed or redeployed contract;
 2. operational owner separation for deployer, worker admin, verifier admin, and
    emergency response;
 3. multisig or comparable account-control decision;
@@ -53,8 +53,8 @@ Production language remains blocked until a later decision records:
 
 ## Current Gaps
 
-- Source verification automation exists, but actual submission requires
-  `BASESCAN_API_KEY`.
+- Source verification is complete for the current canary addresses. Any
+  redeploy or new canary address must be verified again.
 - The canary deployer is still a single account.
 - There is no multisig, timelock, recovery, or operator separation.
 - `FlowMemoryHookAdapter` remains a hook-adjacent adapter, not a production

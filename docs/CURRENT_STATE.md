@@ -44,7 +44,7 @@ Contracts foundation:
 - `contracts/FlowMemoryHookAdapter.sol` is a compileable V0 hook-adapter scaffold. It emits `SWAP_MEMORY_SIGNAL` FlowPulse events for the launch fixture path. It is not a production Uniswap v4 hook.
 - `contracts/ArtifactRegistry.sol`, `CursorRegistry.sol`, `ReceiptVerifier.sol`, `WorkerRegistry.sol`, `VerifierRegistry.sol`, `WorkReceiptRegistry.sol`, `VerifierReportRegistry.sol`, and `WorkDebtScheduler.sol` provide local/test skeleton surfaces for commitments, cursors, work receipts, verifier reports, and work state.
 - `contracts/FLOWPULSE_SCHEMA.md` documents event fields, receipt boundaries, and URI/log-data limitations.
-- `tests/RootfieldRegistry.t.sol` and `tests/LiveV0Package.t.sol` contain 36 passing Foundry tests.
+- `tests/RootfieldRegistry.t.sol` and `tests/LiveV0Package.t.sol` contain 38 passing Foundry tests.
 - `tests/README.md` documents the current test command.
 - `contracts/STATIC_ANALYSIS.md`, `contracts/DEPLOYMENT_BOUNDARY.md`, and `contracts/ACCESS_CONTROL_REVIEW.md` define the current hardening, deployment, and access-control boundaries.
 - `infra/scripts/contracts-static-analysis.ps1` and `infra/scripts/contracts-static-analysis.sh` run the contract hardening baseline. Slither is optional by default and required only when explicitly requested.
@@ -69,6 +69,7 @@ Indexer/verifier local package:
 - `fixtures/deployments/base-canary-v0.json`, committed canary reader output, and `npm run flowmemory:canary-dashboard` now generate a separate Base canary dashboard dataset.
 - The dashboard has a separate Base canary mode at `/canary` that shows live-read canary FlowPulse observations, Rootflow transitions, canary boundaries, and raw canary JSON without replacing local fixture mode.
 - `npm run verify:base-canary:sources` produces a dry-run source verification plan for all canary contracts and writes `fixtures/deployments/base-canary-source-verification-plan.json`; `npm run verify:base-canary:sources:submit` submits after `BASESCAN_API_KEY` is configured.
+- All 10 deployed Base canary contracts are verified on BaseScan. `FlowMemoryHookAdapter` was verified against deployment-source commit `11d562c` because `main` now contains the newer v4-shaped callback path.
 - `npm run deploy:base-sepolia` and `npm run deploy:base-sepolia:broadcast` provide Foundry deploy commands for the current V0 Base Sepolia testnet contract set. They require local env values and do not commit credentials.
 - A Base mainnet V0 canary deployment exists for testing only; deployed addresses and smoke transactions are recorded in `docs/DEPLOYMENTS/2026-05-13-base-canary-v0.md`.
 
@@ -155,7 +156,7 @@ FlowChain private/local testnet snapshot:
 - Production indexer or verifier service runtime.
 - Production persistence layer, production live RPC reader, production APIs, or hosted services.
 - Broad Base mainnet reader.
-- Completed explorer source verification for the deployed canary contracts. Automation exists, but actual explorer acceptance requires `BASESCAN_API_KEY`.
+- Broad production source-verification process for future redeploys. The current Base canary addresses are verified, but future deployments must be verified again before any production claim.
 - Explorer or hardware console implementation.
 - FlowRouter firmware, manufacturing, final enclosure work, or field deployment.
 - Real Meshtastic or LoRa device integration.
