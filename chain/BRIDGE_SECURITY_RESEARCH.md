@@ -4,6 +4,14 @@ Status: research gate, no bridge implementation
 
 The local FlowMemory devnet has no live bridge and no live Base settlement. `AnchorBatchToBasePlaceholder` only models compact anchor payloads for future review.
 
+## Relationship To FlowChain Gates
+
+| Gate | Status | Bridge meaning |
+| --- | --- | --- |
+| Local/private testnet | Local-alpha target | Bridge work is limited to no-value anchor placeholders, replay-boundary docs, and fixture checks. No asset movement. |
+| Public devnet | Later research, Blocked | Public devnet may test no-value messages only after DA, replay, finality, monitoring, and emergency controls are documented. |
+| Public L1/mainnet | Explicitly later, Blocked | Any value-bearing bridge requires independent bridge/security review, incident response drills, and an accepted production decision record. |
+
 ## Bridge Assumptions To Resolve Later
 
 Before any appchain can carry value, FlowMemory must define:
