@@ -43,7 +43,14 @@ export interface RootCommitmentArtifact {
   artifactCommitment: string;
 }
 
-export type VerifierArtifact = RootfieldRegistrationArtifact | RootCommitmentArtifact;
+export interface SwapMemorySignalArtifact {
+  kind: "swap-memory-signal";
+  poolId: string;
+  hookDataHash: string;
+  memoryRoot: string;
+}
+
+export type VerifierArtifact = RootfieldRegistrationArtifact | RootCommitmentArtifact | SwapMemorySignalArtifact;
 
 export interface ArtifactResolverFixture {
   resolverPolicyId: string;
@@ -78,6 +85,14 @@ export function rootCommitment(artifact: RootCommitmentArtifact): `0x${string}` 
   return keccak256Hex(concatBytes([
     encodeBytes32(artifact.root),
     encodeBytes32(artifact.artifactCommitment),
+  ]));
+}
+
+export function swapMemorySignalCommitment(artifact: SwapMemorySignalArtifact): `0x${string}` {
+  return keccak256Hex(concatBytes([
+    encodeBytes32(artifact.poolId),
+    encodeBytes32(artifact.hookDataHash),
+    encodeBytes32(artifact.memoryRoot),
   ]));
 }
 
@@ -151,7 +166,7 @@ export function verifyObservation(
     return finalizeReport(baseReportCore(observation, resolver.resolverPolicyId, "reorged", checks, evidenceRefs, reasonCodes));
   }
 
-  if (observation.pulseType !== "1" && observation.pulseType !== "2") {
+  if (observation.pulseType !== "1" && observation.pulseType !== "2" && observation.pulseType !== "4") {
     reasonCodes.push("pulse.type.unsupported");
     return finalizeReport(baseReportCore(observation, resolver.resolverPolicyId, "unsupported", checks, evidenceRefs, reasonCodes));
   }
@@ -208,6 +223,35 @@ export function verifyObservation(
     const commitmentMatches = normalizeBytes32(observation.commitment) === expectedCommitment;
     checks.push({ id: "subject.root_matches", passed: subjectMatches });
     checks.push({ id: "commitment.root", passed: commitmentMatches });
+
+    if (!subjectMatches) {
+      reasonCodes.push("subject.mismatch");
+    }
+    if (!commitmentMatches) {
+      reasonCodes.push("commitment.mismatch");
+    }
+
+    return finalizeReport(baseReportCore(
+      observation,
+      resolver.resolverPolicyId,
+      reasonCodes.length === 0 ? "valid" : "invalid",
+      checks,
+      evidenceRefs,
+      reasonCodes,
+    ));
+  }
+
+  if (observation.pulseType === "4") {
+    if (artifact.kind !== "swap-memory-signal") {
+      reasonCodes.push("artifact.schema_mismatch");
+      return finalizeReport(baseReportCore(observation, resolver.resolverPolicyId, "invalid", checks, evidenceRefs, reasonCodes));
+    }
+
+    const expectedCommitment = swapMemorySignalCommitment(artifact);
+    const subjectMatches = normalizeBytes32(observation.subject) === normalizeBytes32(artifact.poolId);
+    const commitmentMatches = normalizeBytes32(observation.commitment) === expectedCommitment;
+    checks.push({ id: "subject.pool_matches", passed: subjectMatches });
+    checks.push({ id: "commitment.swap_memory_signal", passed: commitmentMatches });
 
     if (!subjectMatches) {
       reasonCodes.push("subject.mismatch");

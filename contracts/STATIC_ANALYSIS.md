@@ -5,10 +5,10 @@ Status: pre-production hardening setup.
 This repository now has one standard command for contract hardening checks:
 
 ```powershell
-.\infra\scripts\contracts-static-analysis.ps1
+npm run contracts:hardening
 ```
 
-On bash-compatible shells:
+The underlying platform scripts remain available:
 
 ```bash
 bash infra/scripts/contracts-static-analysis.sh
@@ -33,7 +33,7 @@ CHECK_FORGE_FMT=1 bash infra/scripts/contracts-static-analysis.sh
 Audit environments should require Slither explicitly:
 
 ```powershell
-.\infra\scripts\contracts-static-analysis.ps1 -RequireSlither
+npm run contracts:hardening:slither
 ```
 
 ```bash
@@ -43,6 +43,9 @@ REQUIRE_SLITHER=1 bash infra/scripts/contracts-static-analysis.sh
 ## Slither Triage
 
 `.slither.config.json` excludes the `timestamp` detector for V0 because the current contracts use `block.timestamp` only for advisory `registeredAt`, `updatedAt`, `submittedAt`, `scheduledAt`, and FlowPulse `occurredAt` fields plus `uint64` overflow guards. Those timestamps do not drive randomness, rewards, custody, slashing, dynamic fees, or protocol-critical authorization in the current V0 boundary.
+
+Latest local required-Slither pass on 2026-05-13 analyzed 22 contracts with
+100 detectors and found 0 results.
 
 ## Current Boundary
 

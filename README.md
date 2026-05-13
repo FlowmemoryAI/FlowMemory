@@ -61,7 +61,7 @@ FlowMemory is managed as a multi-agent program. The management layer is part of 
 - `docs/MARKETING_CLAIMS_GUARDRAILS.md`: allowed and blocked launch claims for docs and marketing
 - `infra/scripts/status-report.ps1`: read-only local worktree, PR, and issue status report
 
-Immediate major milestone: build the Rootflow V0 and Flow Memory V0 launch core. This means local contracts/tests, FlowPulse fixtures, Rootflow transitions, Flow Memory schemas, verifier reports, crypto fixtures, dashboard-readable state, and local smoke-test gates. It does not mean production deployment.
+Immediate major milestone: keep the Rootflow V0 and Flow Memory V0 launch core green. This means local contracts/tests, FlowPulse fixtures, Uniswap swap-derived memory-signal fixtures, Rootflow transitions, Flow Memory schemas, verifier reports, crypto fixtures, dashboard-readable state, Base Sepolia testnet read/deploy commands, and local smoke-test gates. It does not mean production deployment.
 
 Run the local launch-core path:
 
@@ -71,11 +71,33 @@ npm run launch:v0
 
 This regenerates local/test Rootflow and Flow Memory V0 fixtures, including `fixtures/launch-core/flowmemory-launch-v0.json`, `fixtures/launch-core/rootflow-transitions.json`, and the dashboard fixture at `fixtures/dashboard/flowmemory-dashboard-v0.json`.
 
+Run the stricter local launch-candidate gate:
+
+```powershell
+npm run launch:candidate
+```
+
+That command runs contract hardening, the launch flow, runtime schema validation, fixture drift checks, and claim guardrails.
+
+Build the dashboard after regenerating launch data:
+
+```powershell
+npm run build:production
+```
+
+Base Sepolia testnet commands require local environment values from `.env.example`:
+
+```powershell
+npm run deploy:base-sepolia
+npm run deploy:base-sepolia:broadcast
+npm run read:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --from-block <n> --to-block <n>
+```
+
 ## What Not To Claim
 
-- Do not claim FlowMemory has production contracts or deployment automation.
+- Do not claim FlowMemory has production contracts or a mainnet deployment.
 - Do not claim FlowMemory is production-ready or mainnet-ready.
-- Do not claim Uniswap v4 hook integration exists yet.
+- Do not claim the current hook adapter is a production Uniswap v4 hook.
 - Do not claim explorer, hardware console, production FlowRouter hardware, or Meshtastic integration exists yet.
 - Do not claim cryptographic proof systems, tokenomics, or appchain/L1 implementation exists yet.
 - Do not claim URI fields enforce off-chain storage. Current URI values are caller-supplied log data.
@@ -108,7 +130,10 @@ This regenerates local/test Rootflow and Flow Memory V0 fixtures, including `fix
 - Foundry tests for the Rootfield registry foundation and live V0 contract package
 - fixture-first indexer/verifier packages and local launch-core generation
 - Base Sepolia reader path with explicit RPC URL and durable checkpoint output
+- Base Sepolia deployment runner for the current V0 testnet contract set
+- FlowMemoryHookAdapter emits a `SWAP_MEMORY_SIGNAL` FlowPulse for the swap-memory fixture path
 - Flow Memory V0 schemas and generated Rootflow transition fixtures
+- runtime schema validation and generated fixture drift checks for launch-core outputs
 - fixture-backed dashboard V0
 - crypto helper package and test vectors
 - local no-value devnet prototype
@@ -117,7 +142,7 @@ This regenerates local/test Rootflow and Flow Memory V0 fixtures, including `fix
 
 ## Still Conceptual
 
-- Uniswap v4 hook integration
+- Production Uniswap v4 hook integration
 - Production indexer and verifier services
 - Production Rootflow runtime implementation
 - Production Flow Memory runtime implementation

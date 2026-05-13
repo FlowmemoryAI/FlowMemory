@@ -8,7 +8,7 @@ import { indexFlowPulseLogs, indexFlowPulseReceipts } from "../../indexer/src/in
 import { loadIndexerFixtureLogs, loadIndexerFixtureReceipts } from "../../indexer/src/fixtures.ts";
 import { loadVerifierArtifactFixture } from "../src/fixtures.ts";
 import { readVerifierReports, writeVerifierReports } from "../src/persistence.ts";
-import { verifyObservation, verifyObservations } from "../src/verifier.ts";
+import { swapMemorySignalCommitment, verifyObservation, verifyObservations } from "../src/verifier.ts";
 
 test("generates valid deterministic reports from fixture observations", () => {
   const indexerState = indexFlowPulseLogs(loadIndexerFixtureLogs());
@@ -74,8 +74,28 @@ test("generates all verifier statuses from receipt fixtures", () => {
     reorged: 1,
     unresolved: 1,
     unsupported: 1,
-    valid: 3,
+    valid: 4,
   });
+});
+
+test("validates swap-derived memory signal commitments", () => {
+  const indexerState = indexFlowPulseReceipts(loadIndexerFixtureReceipts(), {
+    finalizedBlockNumber: "123458",
+  });
+  const swapObservation = indexerState.observations.find((observation) => observation.pulseType === "4");
+  assert.ok(swapObservation);
+
+  const report = verifyObservation(swapObservation, loadVerifierArtifactFixture());
+  assert.equal(report.reportCore.status, "valid");
+  assert.deepEqual(report.reportCore.reasonCodes, []);
+  assert.equal(report.reportCore.checks.some((check) => check.id === "commitment.swap_memory_signal" && check.passed === true), true);
+
+  const resolver = loadVerifierArtifactFixture();
+  const artifact = resolver.artifactsByUri["fixture://swap-memory-valid"];
+  assert.equal(artifact.kind, "swap-memory-signal");
+  if (artifact.kind === "swap-memory-signal") {
+    assert.equal(swapMemorySignalCommitment(artifact), swapObservation.commitment);
+  }
 });
 
 test("persists deterministic verifier report JSON", () => {
@@ -95,7 +115,7 @@ test("persists deterministic verifier report JSON", () => {
 
     assert.equal(firstWrite, secondWrite);
     assert.equal(persisted.schema, "flowmemory.verifier.persistence.v0");
-    assert.equal(persisted.reports.length, 7);
+    assert.equal(persisted.reports.length, 8);
     assert.equal("createdAt" in persisted.reports[0].reportCore, false);
   } finally {
     rmSync(dir, { recursive: true, force: true });

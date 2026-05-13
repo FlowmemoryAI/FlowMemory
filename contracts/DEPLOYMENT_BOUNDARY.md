@@ -6,7 +6,7 @@ Status: V0 local and Base Sepolia readiness boundary.
 
 - Local Foundry tests.
 - Local fixture generation and indexer/verifier/dashboard flows.
-- Base Sepolia deployment preparation for the current V0 contracts.
+- Base Sepolia deployment dry runs and explicit broadcasts for the current V0 contracts.
 - Base Sepolia reads from explicit RPC URLs.
 - Public docs that describe emitted events, roots, receipts, and off-chain verification paths.
 
@@ -34,6 +34,19 @@ Before a Base Sepolia deployment transaction is sent, the PR or issue must recor
 - rollback or redeploy plan
 
 Private keys must not be committed to the repo, copied into docs, or stored in generated artifacts.
+
+## Current Commands
+
+```powershell
+npm run deploy:base-sepolia
+npm run deploy:base-sepolia:broadcast
+npm run read:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --from-block <n> --to-block <n>
+```
+
+`deploy:base-sepolia` requires `BASE_SEPOLIA_RPC_URL` and
+`BASE_SEPOLIA_DEPLOYER_KEY_HEX` from the local shell or an untracked `.env`
+loader. The example file is `.env.example`; real key material must stay
+outside Git.
 
 ## Current Contract Set
 

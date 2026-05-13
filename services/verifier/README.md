@@ -88,6 +88,13 @@ subject == root
 commitment == keccak256(abi.encode(root, artifactCommitment))
 ```
 
+For `SWAP_MEMORY_SIGNAL` (`pulseType = 4`):
+
+```text
+subject == poolId
+commitment == keccak256(abi.encode(poolId, hookDataHash, memoryRoot))
+```
+
 Unsupported pulse types return `unsupported`. Missing artifacts return `unresolved`. Subject or commitment mismatches return `invalid`.
 
 ## Reports

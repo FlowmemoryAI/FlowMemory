@@ -10,13 +10,26 @@
   ],
   "scripts": {
     "test": "npm test --prefix services/shared && npm test --prefix services/indexer && npm test --prefix services/verifier && npm test --prefix services/flowmemory",
+    "contracts:hardening": "node infra/scripts/run-contract-hardening.mjs",
+    "contracts:hardening:slither": "node infra/scripts/run-contract-hardening.mjs --require-slither",
     "index:base-sepolia": "npm run index:base-sepolia --prefix services/indexer",
+    "read:base-sepolia": "npm run index:base-sepolia --prefix services/indexer",
+    "deploy:base-sepolia": "node infra/scripts/run-base-sepolia-deploy.mjs",
+    "deploy:base-sepolia:broadcast": "node infra/scripts/run-base-sepolia-deploy.mjs --broadcast",
     "index:fixtures": "npm run index:fixtures --prefix services/indexer",
     "verify:fixtures": "npm run verify:fixtures --prefix services/verifier",
     "flowmemory:generate": "npm run generate --prefix services/flowmemory",
     "launch:v0": "npm run launch:v0 --prefix services/flowmemory",
+    "validate:launch": "npm run validate --prefix services/flowmemory",
+    "fixtures:check": "npm run fixtures:check --prefix services/flowmemory",
+    "launch:candidate": "npm run contracts:hardening && npm run launch:v0 && npm run validate:launch && npm run fixtures:check && node infra/scripts/check-unsafe-claims.mjs",
+    "build:production": "npm run launch:candidate && npm run build --prefix apps/dashboard",
     "e2e": "npm run index:fixtures && npm run verify:fixtures && npm run flowmemory:generate",
     "demo:indexer": "npm run demo --prefix services/indexer",
     "demo:verifier": "npm run demo --prefix services/verifier"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1"
   }
 }

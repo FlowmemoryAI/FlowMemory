@@ -24,8 +24,8 @@ event FlowPulse(
 - `pulseId`: Domain-separated identifier created by the emitting contract. It is not a replacement for receipt metadata.
 - `rootfieldId`: Namespace for the committed state stream.
 - `actor`: Account that caused the pulse.
-- `pulseType`: Stable numeric type. Initial reserved values are `1` for rootfield registration, `2` for root commitment, and `3` for rootfield lifecycle/status changes such as deactivation or ownership transfer.
-- `subject`: Type-specific subject. For registration and rootfield lifecycle changes this is the rootfield id. For root commitment this is the committed root.
+- `pulseType`: Stable numeric type. Current reserved values are `1` for rootfield registration, `2` for root commitment, `3` for rootfield lifecycle/status changes such as deactivation or ownership transfer, and `4` for swap-derived memory signals emitted by the V0 hook adapter.
+- `subject`: Type-specific subject. For registration and rootfield lifecycle changes this is the rootfield id. For root commitment this is the committed root. For swap-derived memory signals this is the pool id.
 - `commitment`: Type-specific hash commitment to off-chain data or metadata. Heavy AI, model, memory, artifact, and media data stays off-chain.
 - `parentPulseId`: Optional prior pulse reference for chains of work or verification.
 - `sequence`: Monotonic sequence within the rootfield namespace.
@@ -44,3 +44,12 @@ FlowPulse does not include `txHash` or `logIndex`. Those values are not availabl
 - `uri` values are advisory by convention only. The skeleton does not enforce that they are short, resolvable, or off-chain pointers, so callers and reviewers must treat the off-chain-data boundary as a design convention rather than an enforcement guarantee.
 - Verifiers must validate any referenced off-chain content against the emitted `commitment`.
 - Pulse type expansion should happen by reserving new numeric values and documenting their subject and commitment semantics before contracts depend on them.
+
+## Current Pulse Types
+
+| Type | Name | Subject | Commitment |
+| --- | --- | --- | --- |
+| `1` | `ROOTFIELD_REGISTERED` | `rootfieldId` | `keccak256(abi.encode(schemaHash, metadataHash))` |
+| `2` | `ROOT_COMMITTED` | committed root | `keccak256(abi.encode(root, artifactCommitment))` |
+| `3` | `ROOTFIELD_STATUS_CHANGED` | `rootfieldId` | type-specific status or ownership commitment |
+| `4` | `SWAP_MEMORY_SIGNAL` | Uniswap pool id | swap-memory artifact commitment checked by the V0 verifier fixture policy |

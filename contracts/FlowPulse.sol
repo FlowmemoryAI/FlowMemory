@@ -38,4 +38,5 @@ library FlowPulseTypes {
     uint8 internal constant ROOTFIELD_REGISTERED = 1;
     uint8 internal constant ROOT_COMMITTED = 2;
     uint8 internal constant ROOTFIELD_STATUS_CHANGED = 3;
+    uint8 internal constant SWAP_MEMORY_SIGNAL = 4;
 }

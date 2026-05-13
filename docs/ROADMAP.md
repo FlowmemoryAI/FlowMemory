@@ -12,6 +12,7 @@ The launch-core V0 stack means:
 
 - Contracts compile and tests run locally.
 - FlowPulse fixtures can be produced or consumed deterministically.
+- The V0 hook adapter can emit a swap-derived `SWAP_MEMORY_SIGNAL` FlowPulse for the launch fixture path.
 - Rootflow transitions link FlowPulse observations, parent state, receipts, verifier reports, and new roots.
 - Flow Memory objects expose MemorySignal, MemoryReceipt, RootfieldBundle, and AgentMemoryView shapes.
 - MemorySignals and RootflowTransitions preserve explicit `IFlowPulse.FlowPulse` contract-event semantics while keeping receipt-only fields indexer-derived.
@@ -48,7 +49,7 @@ Status: implemented as a local/test foundation; hardening still active.
 
 - Minimal Foundry config and contract tests exist.
 - `FlowPulse`, `RootfieldRegistry`, hook-adapter scaffold, artifact/cursor/worker/verifier/work registries, receipt verifier, work receipt registry, verifier report registry, and scheduler skeletons exist.
-- `forge test` currently runs 35 passing tests.
+- `forge test` currently runs 36 passing tests.
 - FlowPulse v0 and Rootfield URI/log-data decisions are documented.
 - Static-analysis runner, deployment boundary, and access-control review docs exist.
 - Define status lifecycle, ownership/recovery, and namespace policy before expanding deployment scope.
@@ -66,6 +67,8 @@ Status: implemented as fixture-first services plus generated launch-core state; 
 - Fixture-based parser and reorg-state tests exist in the indexer/verifier packages.
 - Deterministic persistence exists for fixture state and the constrained Base Sepolia reader checkpoint.
 - A Base Sepolia reader path exists for explicit RPC URLs and explicit FlowPulse contract addresses; it rejects non-Base-Sepolia chain ids.
+- Base Sepolia deploy/read commands exist for the current V0 testnet contract set.
+- Runtime schema validation and generated fixture drift checks exist for launch-core outputs.
 - Local devnet smoke-test gates exist as a no-value Rust prototype, without mainnet or production deployment.
 
 ### Phase 3: V0 Review/Audit
@@ -75,7 +78,7 @@ Status: active.
 - Define foundation PR review rules.
 - Add security reporting guidance.
 - Enforce claim guardrails in CI for README/docs/marketing surfaces.
-- Keep Slither required for audit environments, optional for ordinary local hardening runs until the toolchain is installed.
+- Keep Slither required for audit environments and available through `npm run contracts:hardening:slither`.
 - Enforce allowed-folder and forbidden-folder boundaries.
 
 ## Mid-Term Phases
@@ -138,8 +141,7 @@ The initial merge sequence has completed for repo OS, contracts foundation, cryp
 
 Next merge preference:
 
-1. Runtime schema validation and fixture-diff guardrails.
-2. Base Sepolia reader soak tests against explicit testnet deployments.
-3. Dashboard polish and explorer/hardware-console separation.
-4. Static analysis follow-up with Slither installed and findings triaged.
+1. Base Sepolia reader soak tests against explicit testnet deployments.
+2. Dashboard polish and explorer/hardware-console separation.
+3. Static analysis follow-up findings triaged for any public testnet deployment.
 5. Production-gated research only after V0 local acceptance stays green.

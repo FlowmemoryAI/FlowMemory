@@ -6,9 +6,9 @@ This file is the beginner-friendly source of truth for what exists in FlowMemory
 
 ## Repo Phase
 
-FlowMemory is in foundation hardening.
+FlowMemory is in launch-candidate V0 hardening.
 
-The bootstrap repository operating system, contracts V0 foundation, crypto V0 foundation, local indexer/verifier fixture package, dashboard V0, FlowRouter hardware POC, local no-value devnet prototype, launch-core contract-event spine, and pre-production hardening guardrails have merged into `main`.
+The bootstrap repository operating system, contracts V0 foundation, crypto V0 foundation, local indexer/verifier fixture package, dashboard V0, FlowRouter hardware POC, local no-value devnet prototype, launch-core contract-event spine, and pre-production hardening guardrails have merged into `main`. The current launch-candidate branch adds swap-derived memory signals, stricter launch validation, and Base Sepolia testnet deploy/read commands.
 
 The launch-core V0 stack now has a single runnable local command that connects contract fixtures, local indexing/verifier outputs, crypto schema vocabulary, Rootflow transitions, Flow Memory objects, generated dashboard state, local no-value devnet output, and hardware POC output without production deployment.
 
@@ -31,10 +31,10 @@ Contracts foundation:
 
 - `contracts/FlowPulse.sol` defines the FlowPulse v0 event interface and initial pulse type constants.
 - `contracts/RootfieldRegistry.sol` registers Rootfield namespaces, accepts committed roots, and emits FlowPulse events.
-- `contracts/FlowMemoryHookAdapter.sol` is a compileable V0 hook-adapter scaffold. It is not a production Uniswap v4 hook.
+- `contracts/FlowMemoryHookAdapter.sol` is a compileable V0 hook-adapter scaffold. It emits `SWAP_MEMORY_SIGNAL` FlowPulse events for the launch fixture path. It is not a production Uniswap v4 hook.
 - `contracts/ArtifactRegistry.sol`, `CursorRegistry.sol`, `ReceiptVerifier.sol`, `WorkerRegistry.sol`, `VerifierRegistry.sol`, `WorkReceiptRegistry.sol`, `VerifierReportRegistry.sol`, and `WorkDebtScheduler.sol` provide local/test skeleton surfaces for commitments, cursors, work receipts, verifier reports, and work state.
 - `contracts/FLOWPULSE_SCHEMA.md` documents event fields, receipt boundaries, and URI/log-data limitations.
-- `tests/RootfieldRegistry.t.sol` and `tests/LiveV0Package.t.sol` contain 35 passing Foundry tests.
+- `tests/RootfieldRegistry.t.sol` and `tests/LiveV0Package.t.sol` contain 36 passing Foundry tests.
 - `tests/README.md` documents the current test command.
 - `contracts/STATIC_ANALYSIS.md`, `contracts/DEPLOYMENT_BOUNDARY.md`, and `contracts/ACCESS_CONTROL_REVIEW.md` define the current hardening, deployment, and access-control boundaries.
 - `infra/scripts/contracts-static-analysis.ps1` and `infra/scripts/contracts-static-analysis.sh` run the contract hardening baseline. Slither is optional by default and required only when explicitly requested.
@@ -47,11 +47,13 @@ Crypto foundation:
 Indexer/verifier local package:
 
 - `services/shared/`, `services/indexer/`, and `services/verifier/` contain fixture-first local packages.
-- The local services test suite currently has 30 passing tests.
-- `npm run e2e` currently indexes 7 observations, writes 6 cursors, rejects 2 logs, tracks 1 duplicate, and produces 7 verifier reports.
+- The local services test suite currently has 31 passing tests.
+- `npm run e2e` currently indexes 8 observations, writes 7 cursors, rejects 2 logs, tracks 1 duplicate, and produces 8 verifier reports.
 - The verifier uses local fixture evidence only. It is not a production verifier network.
+- The verifier supports local fixture checks for rootfield registration, root commitments, and swap-derived memory-signal commitments.
 - `npm run index:base-sepolia -- --rpc-url <url> --address <contract> --from-block <n> --to-block <n>` provides a constrained Base Sepolia reader path.
 - The Base Sepolia reader requires an explicit RPC URL, rejects non-Base-Sepolia chain ids, and persists both canonical state and a durable checkpoint without storing RPC URLs or keys.
+- `npm run deploy:base-sepolia` and `npm run deploy:base-sepolia:broadcast` provide Foundry deploy commands for the current V0 Base Sepolia testnet contract set. They require local env values and do not commit credentials.
 
 Dashboard V0:
 
@@ -63,6 +65,9 @@ Dashboard V0:
 Launch-core integration:
 
 - `npm run launch:v0` runs the local end-to-end V0 flow.
+- `npm run launch:candidate` runs contract hardening, launch generation, runtime schema validation, fixture drift checks, and launch claim guardrails.
+- `npm run validate:launch` validates generated MemorySignal, MemoryReceipt, RootflowTransition, RootfieldBundle, and AgentMemoryView objects against canonical JSON schemas.
+- `npm run fixtures:check` confirms committed launch and dashboard fixtures match generated output.
 - `fixtures/launch-core/flowmemory-launch-v0.json` contains generated MemorySignal, MemoryReceipt, RootfieldBundle, AgentMemoryView, and RootflowTransition objects.
 - `fixtures/launch-core/rootflow-transitions.json` contains concrete generated RootflowTransition output.
 - `schemas/flowmemory/` contains canonical JSON schemas for MemorySignal, MemoryReceipt, RootflowTransition, RootfieldBundle, and AgentMemoryView.
@@ -104,7 +109,6 @@ Launch-core specifications:
 - Production Rootflow runtime implementation.
 - Production Flow Memory runtime implementation.
 - Hosted launch-core services.
-- Rich JSON Schema runtime validation with a dedicated validator dependency.
 - Production indexer or verifier service runtime.
 - Production persistence layer, production live RPC reader, production APIs, or hosted services.
 - Base mainnet reader.
@@ -167,9 +171,9 @@ Before assigning agents, check for dirty worktrees and avoid overlapping folders
 ## Current Operator Priorities
 
 1. Keep the generated launch-core command stable in CI.
-2. Add runtime schema validation and fixture diff guardrails before live services.
-3. Exercise the Base Sepolia reader path on explicit testnet contract addresses only.
-4. Continue contracts hardening without production deployment or token mechanics.
+2. Exercise the Base Sepolia deploy/read path on explicit testnet contract addresses only.
+3. Continue contracts hardening without production mainnet deployment or token mechanics.
+4. Keep swap-memory signal semantics narrow until a real Uniswap v4 hook issue scopes the next step.
 5. Keep dashboard work fixture-backed until a production API is explicitly scoped.
 
 ## Update Rule

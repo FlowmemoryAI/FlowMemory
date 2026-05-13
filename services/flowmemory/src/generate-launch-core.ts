@@ -32,6 +32,7 @@ const FLOWPULSE_CONTRACT_TYPE_NAMES: Record<string, FlowPulseContractTypeName> =
   "1": "ROOTFIELD_REGISTERED",
   "2": "ROOT_COMMITTED",
   "3": "ROOTFIELD_STATUS_CHANGED",
+  "4": "SWAP_MEMORY_SIGNAL",
 };
 
 type JsonObject = Record<string, unknown>;
@@ -152,6 +153,9 @@ function pulseTypeName(pulseType: string): MemorySignal["signalType"] {
   }
   if (pulseType === "2") {
     return "root_commitment";
+  }
+  if (pulseType === "4") {
+    return "swap_memory_signal";
   }
   return "unsupported_pulse";
 }

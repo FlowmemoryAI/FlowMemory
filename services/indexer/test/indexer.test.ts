@@ -35,10 +35,10 @@ test("ingests receipt fixtures and rejects reverted or malformed logs cleanly", 
     finalizedBlockNumber: "123458",
   });
 
-  assert.equal(state.observations.length, 7);
-  assert.equal(state.cursors.length, 6);
-  assert.equal(state.batches[0].observationCount, 7);
-  assert.equal(state.batches[0].cursorCount, 6);
+  assert.equal(state.observations.length, 8);
+  assert.equal(state.cursors.length, 7);
+  assert.equal(state.batches[0].observationCount, 8);
+  assert.equal(state.batches[0].cursorCount, 7);
   assert.equal(state.rejectedLogs.length, 2);
   assert.deepEqual(state.rejectedLogs.map((log) => log.reasonCode), ["receipt.reverted", "log.malformed"]);
   assert.equal(state.duplicates.length, 1);
@@ -82,7 +82,7 @@ test("persists deterministic indexer state JSON", () => {
 
     assert.equal(firstWrite, secondWrite);
     assert.equal(persisted.schema, "flowmemory.indexer.persistence.v0");
-    assert.equal(persisted.state.observations.length, 7);
+    assert.equal(persisted.state.observations.length, 8);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

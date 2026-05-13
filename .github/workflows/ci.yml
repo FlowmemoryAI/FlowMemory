@@ -130,6 +130,12 @@ jobs:
       - name: Run service e2e
         run: npm run e2e
 
+      - name: Validate launch schemas
+        run: npm run validate:launch
+
+      - name: Check generated fixture drift
+        run: npm run fixtures:check
+
   launch-core:
     name: Launch-core acceptance command
     runs-on: ubuntu-latest
@@ -156,6 +162,9 @@ jobs:
 
       - name: Run launch V0 command
         run: npm run launch:v0
+
+      - name: Validate launch schemas
+        run: npm run validate:launch
 
   crypto:
     name: Crypto
