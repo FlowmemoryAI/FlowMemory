@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowchain.bridge_credit.v0",
+  "title": "FlowChain BridgeCredit V0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "creditId",
+    "depositId",
+    "accountId",
+    "assetId",
+    "amount",
+    "creditedAtBlock",
+    "creditNonce",
+    "status",
+    "statusCode"
+  ],
+  "properties": {
+    "schema": { "const": "flowchain.bridge_credit.v0" },
+    "creditId": { "$ref": "#/$defs/hex32" },
+    "depositId": { "$ref": "#/$defs/hex32" },
+    "accountId": { "$ref": "#/$defs/hex32" },
+    "assetId": { "$ref": "#/$defs/hex32" },
+    "amount": { "$ref": "#/$defs/uintString" },
+    "creditedAtBlock": { "$ref": "#/$defs/uintString" },
+    "creditNonce": { "$ref": "#/$defs/hex32" },
+    "status": { "enum": ["pending", "credited", "rejected", "reversed"] },
+    "statusCode": { "type": "integer", "minimum": 1, "maximum": 255 }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "uintString": { "type": "string", "pattern": "^[0-9]+$" }
+  }
+}

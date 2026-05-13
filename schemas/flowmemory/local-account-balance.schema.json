@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowchain.local_account_balance.v0",
+  "title": "FlowChain LocalAccountBalance V0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "balanceId",
+    "chainId",
+    "accountId",
+    "assetId",
+    "available",
+    "locked",
+    "stateNonce",
+    "balanceRoot",
+    "status"
+  ],
+  "properties": {
+    "schema": { "const": "flowchain.local_account_balance.v0" },
+    "balanceId": { "$ref": "#/$defs/hex32" },
+    "chainId": { "$ref": "#/$defs/uintString" },
+    "accountId": { "$ref": "#/$defs/hex32" },
+    "assetId": { "$ref": "#/$defs/hex32" },
+    "available": { "$ref": "#/$defs/uintString" },
+    "locked": { "$ref": "#/$defs/uintString" },
+    "stateNonce": { "$ref": "#/$defs/uintString" },
+    "balanceRoot": { "$ref": "#/$defs/hex32" },
+    "status": { "enum": ["active", "frozen", "closed"] }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "uintString": { "type": "string", "pattern": "^[0-9]+$" }
+  }
+}

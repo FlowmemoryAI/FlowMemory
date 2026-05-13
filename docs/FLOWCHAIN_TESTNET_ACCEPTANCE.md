@@ -100,11 +100,11 @@ This document marks every major feature as one of:
 | Feature | Status | Acceptance condition |
 | --- | --- | --- |
 | Keccak typed hash helpers | Implemented | Existing `crypto/` package and vectors. |
-| Local object IDs | In flight | Active crypto work expands object IDs and schemas. |
-| Signature/envelope policy | In flight | Must cover local operators, agents, verifiers, and hardware signal issuers. |
-| Negative vector tests | In flight | Must cover wrong domain, missing signer, zero hash, malformed objects, and replay. |
-| Local operator key generation/import | Implemented local-only wrapper | `flowchain:init` writes ignored `devnet/local/operator.local.json` or imports a local operator file. Encrypted vault behavior remains missing. |
-| Encrypted local operator vault | Missing | Preferred target; at minimum document current local key boundary. |
+| Local object IDs | Implemented in crypto package | `crypto/` defines IDs, schemas, and vectors for AgentAccount, ModelPassport, WorkReceipt, ArtifactAvailabilityProof, VerifierModule, VerifierReport, MemoryCell, Challenge, FinalityReceipt, BridgeDeposit, BridgeCredit, BridgeWithdrawal, and LocalAccountBalance. |
+| Signature/envelope policy | Implemented in crypto package | `flowchain.local_transaction_envelope.v0` binds domain, chain id, nonce, signer, payload hash, validity window, and signature while preserving `payload.tx` for devnet consumers. |
+| Negative vector tests | Implemented in crypto package | `crypto/fixtures/local-transaction-vectors.json` covers wrong chain id, wrong domain, wrong signer, replayed nonce, malformed roots, malformed bridge deposit, and changed object type; Local Alpha vectors still cover missing signer, zero hashes, malformed dependency, bad parent/root, and bad signatures. |
+| Local operator key generation/import | Implemented local-only wrapper; crypto wallet added | `flowchain:init` still writes ignored `devnet/local/operator.local.json`; `npm run wallet:create --prefix crypto` creates an encrypted no-value local wallet vault. Root wrapper integration remains a follow-up. |
+| Encrypted local operator vault | Implemented in crypto package | `crypto/src/wallet.js` supports create, unlock, list public accounts, sign transaction, verify transaction, public metadata import/export, and rotate/add account. Vault files live under ignored `crypto/.wallet/` by default. |
 | Production proof systems | Later gated | No proof-circuit or audited-crypto claim. |
 | SEAL/dependency privacy | Later gated | Vocabulary and placeholders only unless reviewed separately. |
 
@@ -151,6 +151,8 @@ Current wrapper status:
 - It proves the merged launch-core, crypto helpers/vectors, local devnet,
   export, dashboard build, hardware fixture, deterministic replay, and
   claim/no-secret guardrails.
+- Crypto now contributes wallet and signed-envelope coverage through
+  `npm test --prefix crypto` and `npm run validate:vectors --prefix crypto`.
 - It does not yet prove AgentAccount, ModelPassport, native MemoryCell,
   Challenge, FinalityReceipt, or control-plane query coverage. Those rows stay
   in flight or missing until subsystem PRs land behind the wrapper.

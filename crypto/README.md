@@ -40,6 +40,20 @@ canonical JSON Schemas:
 npm run validate:local-alpha
 ```
 
+Create and use a local encrypted no-value wallet vault:
+
+```powershell
+$env:FLOWCHAIN_WALLET_PASSWORD = "replace-with-local-test-password"
+npm run wallet:create
+npm run wallet:sign
+npm run wallet:verify
+```
+
+The default vault and generated envelopes live under `crypto/.wallet/`, which is
+ignored by git. Use `wallet:list`, `wallet:unlock`, `wallet:rotate`,
+`wallet:export-public`, and `wallet:import-public` for public account metadata
+and additional local accounts.
+
 ## Read Order
 
 1. `FLOWMEMORY_CRYPTO_SPEC.md`
@@ -50,7 +64,7 @@ npm run validate:local-alpha
 6. `FLOWCHAIN_LOCAL_ALPHA_OBJECTS.md`
 7. `TEST_VECTORS.md`
 
-Runnable fixtures live in `fixtures/`. `fixtures/vectors.json` contains the current 33 package-level vectors. `fixtures/local-alpha-objects.json` contains positive and negative Local Alpha object and signed-envelope fixtures. Supporting cross-language vectors live in `test-vectors/`.
+Runnable fixtures live in `fixtures/`. `fixtures/vectors.json` contains the current 41 package-level vectors. `fixtures/local-alpha-objects.json` contains positive and negative Local Alpha object and signed-envelope fixtures. `fixtures/local-transaction-vectors.json` contains wallet-signed local transaction envelopes and negative transaction vectors. Supporting cross-language vectors live in `test-vectors/`.
 
 Validate the current vector set with:
 
@@ -68,12 +82,14 @@ The Python validator is a cross-check for the FlowPulse aggregate vector. The pr
 - `artifactRoot`: commitment to off-chain artifact bytes and metadata.
 - `reportId`: deterministic identifier for a verifier report.
 - `attestation`: signed worker or verifier envelope over a receipt, report, artifact, or root.
-- Local Alpha object IDs: canonical IDs for `AgentAccount`, `ModelPassport`, `WorkReceipt`, `ArtifactAvailabilityProof`, `VerifierModule`, `VerifierReport`, `MemoryCell`, `Challenge`, `FinalityReceipt`, hardware signal envelopes, and control-plane provenance responses.
+- Local Alpha object IDs: canonical IDs for `AgentAccount`, `ModelPassport`, `WorkReceipt`, `ArtifactAvailabilityProof`, `VerifierModule`, `VerifierReport`, `MemoryCell`, `Challenge`, `FinalityReceipt`, `BridgeDeposit`, `BridgeCredit`, `BridgeWithdrawal`, local account balances, hardware signal envelopes, and control-plane provenance responses.
 - Local Alpha signature envelopes: local operator, agent, verifier, and hardware secp256k1 test signatures over typed object IDs. These are no-value local/test keys and are not wallet custody or production key-management claims.
+- Local transaction envelopes: wallet-signed wrappers that bind domain separation, chain id, nonce, signer, payload hash, validity window, and signature while preserving `payload.tx` for devnet/control-plane consumers.
+- Local wallet vault: AES-256-GCM encrypted local test-key storage with public metadata export. It is not a production wallet or custody system.
 
 ## Implemented Helpers
 
-The package exports Keccak helpers, canonical JSON hashing, typed hash utilities, FlowPulse observation ids, cursor ids, report digests, receipt hashes, artifact/root commitments, work receipt ids, Local Alpha object ids, hardware signal envelope ids, Local Alpha signature envelope payloads, envelope validators, Merkle roots, worker/verifier signature payloads, verifier attestation envelope hashes, and local secp256k1 sign/verify helpers for tests.
+The package exports Keccak helpers, canonical JSON hashing, typed hash utilities, FlowPulse observation ids, cursor ids, report digests, receipt hashes, artifact/root commitments, work receipt ids, Local Alpha object ids, bridge/account-balance ids, hardware signal envelope ids, Local Alpha signature envelope payloads, local transaction envelope payloads, wallet vault helpers, envelope validators, Merkle roots, worker/verifier signature payloads, verifier attestation envelope hashes, and local secp256k1 sign/verify helpers for tests.
 
 The implementation is ESM JavaScript with `src/index.d.ts` declarations for TypeScript consumers.
 
@@ -99,6 +115,8 @@ Nearby Noesis/FlowChain RD crates under `E:\FlowMemory\github-research-sources\n
 ## Downstream Consumption
 
 - Chain/devnet agents should use the object ID helpers as transaction/object keys and reject zero roots, malformed IDs, wrong object types, replayed signer sequences, and bad parent/root relationships before state updates.
+- Chain/devnet agents can consume wallet-signed transaction envelopes by validating the envelope and then reading the existing devnet transaction object at `payload.tx`.
 - Services and verifiers should use `validateLocalAlphaEnvelope` before accepting object documents from local transactions, API calls, hardware packets, or fixture imports.
+- Control-plane agents should display only `flowchain.local_wallet_public_metadata.v0` account metadata and never vault ciphertext or private keys.
 - Dashboard/workbench agents should display IDs, domains, signer roles, status labels, and validation errors from these fixtures without implying production proof security.
 - Hardware agents should treat hardware signal envelopes as low-bandwidth authenticated control messages only; payloads remain off-chain and signal roots are commitments, not radio bandwidth or field-deployment claims.

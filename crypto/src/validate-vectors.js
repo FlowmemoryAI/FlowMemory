@@ -21,7 +21,15 @@ import {
   flowPulseSchemaId,
   hardwareSignalEnvelopeId,
   indexerCursorId,
+  bridgeCreditId,
+  bridgeDepositId,
+  bridgeWithdrawalId,
+  localAccountBalanceId,
+  localSignerId,
+  localSignerKeyId,
   localSignatureEnvelopeHash,
+  localTransactionEnvelopeHash,
+  localTransactionPayloadHash,
   memoryCellId,
   merkleLeafHash,
   merkleRoot,
@@ -36,6 +44,7 @@ import {
   workReceiptId,
   workerIdentity
 } from "./index.js";
+import { validateLocalTransactionFixtures } from "./validate-local-transaction-fixtures.js";
 
 const validators = Object.freeze({
   artifactFromChunks,
@@ -55,7 +64,15 @@ const validators = Object.freeze({
   flowPulseSchemaId,
   hardwareSignalEnvelopeId,
   indexerCursorId,
+  bridgeCreditId,
+  bridgeDepositId,
+  bridgeWithdrawalId,
+  localAccountBalanceId,
+  localSignerId,
+  localSignerKeyId,
   localSignatureEnvelopeHash,
+  localTransactionEnvelopeHash,
+  localTransactionPayloadHash,
   memoryCellId,
   merkleLeafHash,
   merkleRoot: ({ leaves }) => merkleRoot(leaves),
@@ -89,5 +106,8 @@ export function validateVectors(vectorPath = resolve(import.meta.dirname, "..", 
 
 if (fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const count = validateVectors(process.argv[2]);
-  console.log(`FLOWMEMORY_CRYPTO_VECTORS_OK ${count}`);
+  const transactions = validateLocalTransactionFixtures();
+  console.log(
+    `FLOWMEMORY_CRYPTO_VECTORS_OK vectors=${count} localTransactionPositive=${transactions.positive} localTransactionNegative=${transactions.negative}`
+  );
 }

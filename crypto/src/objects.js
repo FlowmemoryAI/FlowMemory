@@ -215,6 +215,102 @@ export function controlPlaneProvenanceResponseId({
   ]);
 }
 
+export function bridgeDepositId({
+  sourceChainId,
+  sourceContract,
+  txHash,
+  logIndex,
+  token,
+  amount,
+  sender,
+  flowchainRecipient,
+  nonce,
+  metadataHash = ZERO_BYTES32
+}) {
+  return typedHash(TYPE_STRINGS.bridgeDepositV0, [
+    ["uint256", sourceChainId],
+    ["address", sourceContract],
+    ["bytes32", txHash],
+    ["uint32", logIndex],
+    ["address", token],
+    ["uint256", amount],
+    ["address", sender],
+    ["bytes32", flowchainRecipient],
+    ["uint256", nonce],
+    ["bytes32", metadataHash]
+  ]);
+}
+
+export function bridgeCreditId({
+  depositId,
+  accountId,
+  assetId,
+  amount,
+  creditedAtBlock,
+  creditNonce,
+  status
+}) {
+  return typedHash(TYPE_STRINGS.bridgeCreditV0, [
+    ["bytes32", depositId],
+    ["bytes32", accountId],
+    ["bytes32", assetId],
+    ["uint256", amount],
+    ["uint64", creditedAtBlock],
+    ["bytes32", creditNonce],
+    ["uint8", status]
+  ]);
+}
+
+export function bridgeWithdrawalId({
+  accountId,
+  destinationChainId,
+  destinationAddress,
+  token,
+  amount,
+  requestedNonce,
+  feeCommitment,
+  status
+}) {
+  return typedHash(TYPE_STRINGS.bridgeWithdrawalV0, [
+    ["bytes32", accountId],
+    ["uint256", destinationChainId],
+    ["address", destinationAddress],
+    ["address", token],
+    ["uint256", amount],
+    ["bytes32", requestedNonce],
+    ["bytes32", feeCommitment],
+    ["uint8", status]
+  ]);
+}
+
+export function localAccountBalanceId({ chainId, accountId, assetId, available, locked, stateNonce, balanceRoot }) {
+  return typedHash(TYPE_STRINGS.localAccountBalanceV0, [
+    ["uint256", chainId],
+    ["bytes32", accountId],
+    ["bytes32", assetId],
+    ["uint256", available],
+    ["uint256", locked],
+    ["uint64", stateNonce],
+    ["bytes32", balanceRoot]
+  ]);
+}
+
+export function localPublicKeyHash(publicKey) {
+  return keccakUtf8(String(publicKey).toLowerCase());
+}
+
+export function localSignerId({ publicKey }) {
+  return typedHash(TYPE_STRINGS.localSignerV0, [["bytes32", localPublicKeyHash(publicKey)]]);
+}
+
+export function localSignerKeyId({ publicKey, signerRole, keyScopeHash = domainSeparator("localTransactionEnvelope") }) {
+  return typedHash(TYPE_STRINGS.localSignerKeyV0, [
+    ["bytes32", localPublicKeyHash(publicKey)],
+    ["uint8", signerRole],
+    ["bytes32", keyScopeHash]
+  ]);
+}
+
 export function localSignatureEnvelopeHash({
   objectId,
   objectTypeHash,
@@ -262,6 +358,15 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     domainName: "agentAccountId",
     signerRoles: ["operator"],
     nonzeroFields: [
+      "agentId",
+      "namespaceId",
+      "policyRoot",
+      "toolPermissionsRoot",
+      "modelAllowlistRoot",
+      "memoryNamespaceRoot",
+      "nonce"
+    ],
+    hex32Fields: [
       "agentId",
       "namespaceId",
       "policyRoot",
@@ -482,6 +587,87 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       );
     }
   },
+  "flowmemory.bridge_deposit.v0": {
+    objectType: "bridge_deposit",
+    idField: "depositId",
+    domainName: "bridgeDepositId",
+    signerRoles: ["operator"],
+    nonzeroFields: ["depositId", "txHash", "flowchainRecipient"],
+    hex32Fields: ["depositId", "txHash", "flowchainRecipient", "metadataHash"],
+    addressFields: ["sourceContract", "token", "sender"],
+    positiveUintFields: ["amount"],
+    input: (document) => ({
+      sourceChainId: document.sourceChainId,
+      sourceContract: document.sourceContract,
+      txHash: document.txHash,
+      logIndex: document.logIndex,
+      token: document.token,
+      amount: document.amount,
+      sender: document.sender,
+      flowchainRecipient: document.flowchainRecipient,
+      nonce: document.nonce,
+      metadataHash: document.metadataHash ?? ZERO_BYTES32
+    }),
+    id: bridgeDepositId
+  },
+  "flowchain.bridge_credit.v0": {
+    objectType: "bridge_credit",
+    idField: "creditId",
+    domainName: "bridgeCreditId",
+    signerRoles: ["operator"],
+    nonzeroFields: ["creditId", "depositId", "accountId", "assetId", "creditNonce"],
+    hex32Fields: ["creditId", "depositId", "accountId", "assetId", "creditNonce"],
+    positiveUintFields: ["amount"],
+    input: (document) => ({
+      depositId: document.depositId,
+      accountId: document.accountId,
+      assetId: document.assetId,
+      amount: document.amount,
+      creditedAtBlock: document.creditedAtBlock,
+      creditNonce: document.creditNonce,
+      status: document.statusCode
+    }),
+    id: bridgeCreditId
+  },
+  "flowchain.bridge_withdrawal.v0": {
+    objectType: "bridge_withdrawal",
+    idField: "withdrawalId",
+    domainName: "bridgeWithdrawalId",
+    signerRoles: ["operator"],
+    nonzeroFields: ["withdrawalId", "accountId", "requestedNonce", "feeCommitment"],
+    hex32Fields: ["withdrawalId", "accountId", "requestedNonce", "feeCommitment"],
+    addressFields: ["destinationAddress", "token"],
+    positiveUintFields: ["amount"],
+    input: (document) => ({
+      accountId: document.accountId,
+      destinationChainId: document.destinationChainId,
+      destinationAddress: document.destinationAddress,
+      token: document.token,
+      amount: document.amount,
+      requestedNonce: document.requestedNonce,
+      feeCommitment: document.feeCommitment,
+      status: document.statusCode
+    }),
+    id: bridgeWithdrawalId
+  },
+  "flowchain.local_account_balance.v0": {
+    objectType: "local_account_balance",
+    idField: "balanceId",
+    domainName: "localAccountBalanceId",
+    signerRoles: ["operator"],
+    nonzeroFields: ["balanceId", "accountId", "assetId", "balanceRoot"],
+    hex32Fields: ["balanceId", "accountId", "assetId", "balanceRoot"],
+    input: (document) => ({
+      chainId: document.chainId,
+      accountId: document.accountId,
+      assetId: document.assetId,
+      available: document.available,
+      locked: document.locked,
+      stateNonce: document.stateNonce,
+      balanceRoot: document.balanceRoot
+    }),
+    id: localAccountBalanceId
+  },
   "flowchain.hardware_signal_envelope.v0": {
     objectType: "hardware_signal_envelope",
     idField: "hardwareSignalEnvelopeId",
@@ -556,6 +742,77 @@ export function localAlphaObjectId(document) {
   return descriptor.id(descriptor.input(document));
 }
 
+export function validateLocalAlphaObjectDocument(document, context = {}) {
+  const errors = [];
+  const descriptor = localAlphaObjectDescriptor(document?.schema);
+
+  if (!descriptor) {
+    return { valid: false, errors: ["wrong-object-type"] };
+  }
+
+  if (context.expectedObjectType && descriptor.objectType !== context.expectedObjectType) {
+    errors.push("changed-object-type");
+  }
+
+  const idField = descriptor.idField;
+  if (!isHex32(document[idField])) {
+    errors.push("malformed-id");
+  }
+
+  for (const field of descriptor.hex32Fields ?? []) {
+    if (document[field] !== undefined && !isHex32(document[field])) {
+      errors.push(field.toLowerCase().includes("root") ? "malformed-root" : "malformed-id");
+      break;
+    }
+  }
+
+  for (const field of descriptor.addressFields ?? []) {
+    if (!isAddress(document[field])) {
+      errors.push("malformed-address");
+      break;
+    }
+  }
+
+  for (const field of descriptor.positiveUintFields ?? []) {
+    if (!isPositiveUint(document[field])) {
+      errors.push(descriptor.objectType === "bridge_deposit" ? "malformed-bridge-deposit" : "malformed-uint");
+      break;
+    }
+  }
+
+  for (const field of descriptor.nonzeroFields ?? []) {
+    if (document[field] === ZERO_BYTES32) {
+      errors.push(field.toLowerCase().includes("root") ? "malformed-root" : "zero-hash");
+      break;
+    }
+  }
+
+  if (descriptor.dependencyField) {
+    const dependency = document[descriptor.dependencyField];
+    if (!isHex32(dependency) || dependency === ZERO_BYTES32) {
+      errors.push("malformed-dependency");
+    }
+  }
+
+  if (descriptor.parentRootCheck && !descriptor.parentRootCheck(document)) {
+    errors.push("bad-parent-root");
+  }
+
+  try {
+    const expectedObjectId = localAlphaObjectId(document);
+    if (document[idField] !== expectedObjectId) {
+      errors.push("bad-object-id");
+    }
+  } catch (error) {
+    errors.push(classifyObjectError(error));
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors: [...new Set(errors)]
+  };
+}
+
 export function localAlphaEnvelopeReplayKey(envelope) {
   return `${envelope.signerId}:${envelope.domain}:${envelope.sequence}`;
 }
@@ -583,6 +840,8 @@ export function validateLocalAlphaEnvelope({ document, envelope, context = {} })
     errors.push("wrong-object-type");
     return { valid: false, errors };
   }
+
+  errors.push(...validateLocalAlphaObjectDocument(document).errors);
 
   if (!envelope || typeof envelope !== "object") {
     errors.push("missing-signer");
@@ -694,6 +953,32 @@ function isHex32(value) {
   try {
     hexToBytes(value, 32);
     return true;
+  } catch {
+    return false;
+  }
+}
+
+function isAddress(value) {
+  if (typeof value !== "string") {
+    return false;
+  }
+  try {
+    hexToBytes(value, 20);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function isPositiveUint(value) {
+  if (typeof value !== "string" && typeof value !== "number" && typeof value !== "bigint") {
+    return false;
+  }
+  if (typeof value === "string" && !/^[0-9]+$/.test(value)) {
+    return false;
+  }
+  try {
+    return BigInt(value) > 0n;
   } catch {
     return false;
   }
