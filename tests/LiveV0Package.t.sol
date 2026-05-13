@@ -122,6 +122,31 @@ contract LiveV0PackageTest {
         _assertTrue(cursor.active);
     }
 
+    function testCursorRegistryRejectsZeroIdsAndCommitments() public {
+        CursorRegistry registry = new CursorRegistry();
+
+        vm.expectRevert(CursorRegistry.ZeroCursorId.selector);
+        registry.registerCursor(
+            bytes32(0), keccak256("stream.zero"), keccak256("position.1"), keccak256("metadata"), ""
+        );
+
+        vm.expectRevert(CursorRegistry.ZeroStreamId.selector);
+        registry.registerCursor(
+            keccak256("cursor.zero-stream"), bytes32(0), keccak256("position.1"), keccak256("metadata"), ""
+        );
+
+        vm.expectRevert(CursorRegistry.ZeroPositionCommitment.selector);
+        registry.registerCursor(
+            keccak256("cursor.zero-position"), keccak256("stream.zero-position"), bytes32(0), keccak256("metadata"), ""
+        );
+
+        bytes32 cursorId = keccak256("cursor.advance-zero");
+        registry.registerCursor(cursorId, keccak256("stream.advance-zero"), keccak256("position.1"), bytes32(0), "");
+
+        vm.expectRevert(CursorRegistry.ZeroPositionCommitment.selector);
+        registry.advanceCursor(cursorId, bytes32(0), keccak256("metadata.2"), "");
+    }
+
     function testCursorRegistryRejectsDuplicateAndNonOwnerAdvance() public {
         CursorRegistry registry = new CursorRegistry();
         bytes32 cursorId = keccak256("cursor.beta");
@@ -133,6 +158,10 @@ contract LiveV0PackageTest {
         CursorRegistryCaller caller = new CursorRegistryCaller();
         vm.expectRevert(abi.encodeWithSelector(CursorRegistry.NotCursorOwner.selector, cursorId, address(caller)));
         caller.advanceCursor(registry, cursorId, keccak256("position.2"));
+
+        bytes32 missingCursorId = keccak256("cursor.missing");
+        vm.expectRevert(abi.encodeWithSelector(CursorRegistry.CursorNotRegistered.selector, missingCursorId));
+        registry.advanceCursor(missingCursorId, keccak256("position.2"), keccak256("metadata"), "");
     }
 
     function testWorkerAndVerifierRegistriesStoreSelfRegisteredMetadata() public {
@@ -165,6 +194,38 @@ contract LiveV0PackageTest {
         _assertTrue(verifier.status == IVerifierRegistry.VerifierStatus.Active);
         _assertTrue(verifier.updateCount == 1);
         _assertTrue(verifier.active);
+    }
+
+    function testWorkerAndVerifierRegistriesRejectDuplicateAndZeroFields() public {
+        WorkerRegistry workers = new WorkerRegistry();
+        VerifierRegistry verifiers = new VerifierRegistry();
+
+        vm.expectRevert(WorkerRegistry.ZeroOperatorId.selector);
+        workers.registerWorker(bytes32(0), keccak256("worker.role"), keccak256("worker.metadata"), "");
+
+        vm.expectRevert(WorkerRegistry.ZeroWorkerRole.selector);
+        workers.registerWorker(keccak256("worker.operator"), bytes32(0), keccak256("worker.metadata"), "");
+
+        vm.expectRevert(VerifierRegistry.ZeroOperatorId.selector);
+        verifiers.registerVerifier(bytes32(0), keccak256("verifier.role"), keccak256("verifier.metadata"), "");
+
+        vm.expectRevert(VerifierRegistry.ZeroVerifierRole.selector);
+        verifiers.registerVerifier(keccak256("verifier.operator"), bytes32(0), keccak256("verifier.metadata"), "");
+
+        workers.registerWorker(keccak256("worker.operator"), keccak256("worker.role"), keccak256("worker.metadata"), "");
+        verifiers.registerVerifier(
+            keccak256("verifier.operator"), keccak256("verifier.role"), keccak256("verifier.metadata"), ""
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(WorkerRegistry.WorkerAlreadyRegistered.selector, address(this)));
+        workers.registerWorker(
+            keccak256("worker.operator.v2"), keccak256("worker.role.v2"), keccak256("worker.metadata.v2"), ""
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(VerifierRegistry.VerifierAlreadyRegistered.selector, address(this)));
+        verifiers.registerVerifier(
+            keccak256("verifier.operator.v2"), keccak256("verifier.role.v2"), keccak256("verifier.metadata.v2"), ""
+        );
     }
 
     function testWorkerAndVerifierRegistriesDeactivateAndRejectUnregisteredUpdates() public {
@@ -244,6 +305,39 @@ contract LiveV0PackageTest {
         ArtifactRegistry registry = new ArtifactRegistry();
         bytes32 artifactId = keccak256("artifact.beta");
 
+        vm.expectRevert(ArtifactRegistry.ZeroArtifactId.selector);
+        registry.registerArtifact(
+            bytes32(0),
+            keccak256("rootfield.beta"),
+            keccak256("artifact.type"),
+            keccak256("artifact.commitment"),
+            keccak256("schema.hash"),
+            keccak256("metadata.hash"),
+            ""
+        );
+
+        vm.expectRevert(ArtifactRegistry.ZeroRootfieldId.selector);
+        registry.registerArtifact(
+            artifactId,
+            bytes32(0),
+            keccak256("artifact.type"),
+            keccak256("artifact.commitment"),
+            keccak256("schema.hash"),
+            keccak256("metadata.hash"),
+            ""
+        );
+
+        vm.expectRevert(ArtifactRegistry.ZeroArtifactType.selector);
+        registry.registerArtifact(
+            artifactId,
+            keccak256("rootfield.beta"),
+            bytes32(0),
+            keccak256("artifact.commitment"),
+            keccak256("schema.hash"),
+            keccak256("metadata.hash"),
+            ""
+        );
+
         vm.expectRevert(ArtifactRegistry.ZeroCommitmentHash.selector);
         registry.registerArtifact(
             artifactId,
@@ -251,6 +345,17 @@ contract LiveV0PackageTest {
             keccak256("artifact.type"),
             bytes32(0),
             keccak256("schema.hash"),
+            keccak256("metadata.hash"),
+            ""
+        );
+
+        vm.expectRevert(ArtifactRegistry.ZeroSchemaHash.selector);
+        registry.registerArtifact(
+            artifactId,
+            keccak256("rootfield.beta"),
+            keccak256("artifact.type"),
+            keccak256("artifact.commitment"),
+            bytes32(0),
             keccak256("metadata.hash"),
             ""
         );
@@ -281,6 +386,10 @@ contract LiveV0PackageTest {
         ArtifactRegistry registry = new ArtifactRegistry();
         ArtifactRegistryCaller caller = new ArtifactRegistryCaller();
         bytes32 artifactId = keccak256("artifact.gamma");
+        bytes32 missingArtifactId = keccak256("artifact.missing");
+
+        vm.expectRevert(abi.encodeWithSelector(ArtifactRegistry.ArtifactNotRegistered.selector, missingArtifactId));
+        registry.deprecateArtifact(missingArtifactId, keccak256("artifact.deprecated"), "");
 
         registry.registerArtifact(
             artifactId,
@@ -330,6 +439,60 @@ contract LiveV0PackageTest {
         _assertTrue(signatureWithReceiptMetadata != signatureWithoutReceiptMetadata);
     }
 
+    function testReceiptVerifierRejectsInvalidZeroFields() public {
+        ReceiptVerifier verifier = new ReceiptVerifier();
+
+        vm.expectRevert(ReceiptVerifier.ZeroReportId.selector);
+        verifier.submitReceiptReport(
+            bytes32(0),
+            keccak256("observation.id"),
+            keccak256("rootfield.alpha"),
+            keccak256("receipt.commitment"),
+            keccak256("report.hash"),
+            ""
+        );
+
+        vm.expectRevert(ReceiptVerifier.ZeroObservationId.selector);
+        verifier.submitReceiptReport(
+            keccak256("report.zero-observation"),
+            bytes32(0),
+            keccak256("rootfield.alpha"),
+            keccak256("receipt.commitment"),
+            keccak256("report.hash"),
+            ""
+        );
+
+        vm.expectRevert(ReceiptVerifier.ZeroRootfieldId.selector);
+        verifier.submitReceiptReport(
+            keccak256("report.zero-rootfield"),
+            keccak256("observation.id"),
+            bytes32(0),
+            keccak256("receipt.commitment"),
+            keccak256("report.hash"),
+            ""
+        );
+
+        vm.expectRevert(ReceiptVerifier.ZeroReceiptCommitment.selector);
+        verifier.submitReceiptReport(
+            keccak256("report.zero-receipt"),
+            keccak256("observation.id"),
+            keccak256("rootfield.alpha"),
+            bytes32(0),
+            keccak256("report.hash"),
+            ""
+        );
+
+        vm.expectRevert(ReceiptVerifier.ZeroReportHash.selector);
+        verifier.submitReceiptReport(
+            keccak256("report.zero-report-hash"),
+            keccak256("observation.id"),
+            keccak256("rootfield.alpha"),
+            keccak256("receipt.commitment"),
+            bytes32(0),
+            ""
+        );
+    }
+
     function testReceiptVerifierRejectsDuplicateReport() public {
         ReceiptVerifier verifier = new ReceiptVerifier();
         bytes32 reportId = keccak256("report.dup");
@@ -373,6 +536,71 @@ contract LiveV0PackageTest {
         _assertTrue(item.workCommitment == keccak256("completion"));
         _assertTrue(item.metadataHash == keccak256("metadata.done"));
         _assertTrue(item.status == IWorkDebtScheduler.WorkStatus.Completed);
+    }
+
+    function testWorkDebtSchedulerRejectsZeroFieldsDuplicateAndCompletedTransition() public {
+        WorkDebtScheduler scheduler = new WorkDebtScheduler();
+        bytes32 workId = keccak256("work.invalid");
+
+        vm.expectRevert(WorkDebtScheduler.ZeroWorkId.selector);
+        scheduler.scheduleWork(
+            bytes32(0),
+            address(this),
+            keccak256("rootfield.invalid"),
+            keccak256("work.commitment"),
+            keccak256("metadata.hash"),
+            ""
+        );
+
+        vm.expectRevert(WorkDebtScheduler.ZeroWorker.selector);
+        scheduler.scheduleWork(
+            workId,
+            address(0),
+            keccak256("rootfield.invalid"),
+            keccak256("work.commitment"),
+            keccak256("metadata.hash"),
+            ""
+        );
+
+        vm.expectRevert(WorkDebtScheduler.ZeroRootfieldId.selector);
+        scheduler.scheduleWork(
+            workId, address(this), bytes32(0), keccak256("work.commitment"), keccak256("metadata.hash"), ""
+        );
+
+        vm.expectRevert(WorkDebtScheduler.ZeroWorkCommitment.selector);
+        scheduler.scheduleWork(
+            workId, address(this), keccak256("rootfield.invalid"), bytes32(0), keccak256("metadata.hash"), ""
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(WorkDebtScheduler.WorkNotScheduled.selector, workId));
+        scheduler.markWorkComplete(workId, keccak256("completion"), keccak256("metadata.done"), "");
+
+        scheduler.scheduleWork(
+            workId,
+            address(this),
+            keccak256("rootfield.invalid"),
+            keccak256("work.commitment"),
+            keccak256("metadata.hash"),
+            ""
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(WorkDebtScheduler.WorkAlreadyScheduled.selector, workId));
+        scheduler.scheduleWork(
+            workId,
+            address(this),
+            keccak256("rootfield.invalid"),
+            keccak256("work.commitment.v2"),
+            keccak256("metadata.hash"),
+            ""
+        );
+
+        vm.expectRevert(WorkDebtScheduler.ZeroCompletionCommitment.selector);
+        scheduler.markWorkComplete(workId, bytes32(0), keccak256("metadata.done"), "");
+
+        scheduler.markWorkComplete(workId, keccak256("completion"), keccak256("metadata.done"), "");
+
+        vm.expectRevert(abi.encodeWithSelector(WorkDebtScheduler.WorkNotScheduledStatus.selector, workId));
+        scheduler.markWorkComplete(workId, keccak256("completion.again"), keccak256("metadata.done.again"), "");
     }
 
     function testWorkDebtSchedulerRejectsNonParticipantCompletion() public {
@@ -428,6 +656,42 @@ contract LiveV0PackageTest {
         _assertTrue(logs[0].emitter == address(registry));
     }
 
+    function testWorkReceiptRegistryRejectsNonOwnerWorkerAuthorization() public {
+        WorkReceiptRegistry registry = new WorkReceiptRegistry();
+        WorkReceiptRegistryCaller caller = new WorkReceiptRegistryCaller();
+
+        vm.expectRevert(abi.encodeWithSelector(WorkReceiptRegistry.NotOwner.selector, address(caller)));
+        caller.setWorkerAuthorization(registry, address(this), true);
+
+        vm.expectRevert(WorkReceiptRegistry.ZeroWorker.selector);
+        registry.setWorkerAuthorization(address(0), true);
+    }
+
+    function testWorkReceiptRegistryBlocksRevokedWorker() public {
+        WorkReceiptRegistry registry = new WorkReceiptRegistry();
+        bytes32 receiptId = keccak256("receipt.revoked");
+        uint8 lane = registry.MEMORY_REFRESH();
+
+        registry.setWorkerAuthorization(address(this), true);
+        _assertTrue(registry.isAuthorizedWorker(address(this)));
+
+        registry.setWorkerAuthorization(address(this), false);
+        _assertTrue(!registry.isAuthorizedWorker(address(this)));
+
+        vm.expectRevert(abi.encodeWithSelector(WorkReceiptRegistry.WorkerNotAuthorized.selector, address(this)));
+        registry.submitWorkReceipt(
+            receiptId,
+            keccak256("rootfield.revoked"),
+            lane,
+            keccak256("subject.revoked"),
+            keccak256("input.root"),
+            keccak256("output.root"),
+            keccak256("artifact.commitment"),
+            bytes32(0),
+            ""
+        );
+    }
+
     function testWorkReceiptRegistryRejectsUnauthorizedInvalidLaneAndZeroRoots() public {
         WorkReceiptRegistry registry = new WorkReceiptRegistry();
         bytes32 receiptId = keccak256("receipt.beta");
@@ -448,6 +712,45 @@ contract LiveV0PackageTest {
         );
 
         registry.setWorkerAuthorization(address(this), true);
+
+        vm.expectRevert(WorkReceiptRegistry.ZeroReceiptId.selector);
+        registry.submitWorkReceipt(
+            bytes32(0),
+            keccak256("rootfield.beta"),
+            memoryRefreshLane,
+            keccak256("subject.beta"),
+            keccak256("input.root"),
+            keccak256("output.root"),
+            keccak256("artifact.commitment"),
+            bytes32(0),
+            ""
+        );
+
+        vm.expectRevert(WorkReceiptRegistry.ZeroRootfieldId.selector);
+        registry.submitWorkReceipt(
+            receiptId,
+            bytes32(0),
+            memoryRefreshLane,
+            keccak256("subject.beta"),
+            keccak256("input.root"),
+            keccak256("output.root"),
+            keccak256("artifact.commitment"),
+            bytes32(0),
+            ""
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(WorkReceiptRegistry.InvalidWorkLane.selector, 0));
+        registry.submitWorkReceipt(
+            receiptId,
+            keccak256("rootfield.beta"),
+            0,
+            keccak256("subject.beta"),
+            keccak256("input.root"),
+            keccak256("output.root"),
+            keccak256("artifact.commitment"),
+            bytes32(0),
+            ""
+        );
 
         vm.expectRevert(abi.encodeWithSelector(WorkReceiptRegistry.InvalidWorkLane.selector, 9));
         registry.submitWorkReceipt(
@@ -471,6 +774,32 @@ contract LiveV0PackageTest {
             bytes32(0),
             keccak256("output.root"),
             keccak256("artifact.commitment"),
+            bytes32(0),
+            ""
+        );
+
+        vm.expectRevert(WorkReceiptRegistry.ZeroOutputRoot.selector);
+        registry.submitWorkReceipt(
+            receiptId,
+            keccak256("rootfield.beta"),
+            failureDiscoveryLane,
+            keccak256("subject.beta"),
+            keccak256("input.root"),
+            bytes32(0),
+            keccak256("artifact.commitment"),
+            bytes32(0),
+            ""
+        );
+
+        vm.expectRevert(WorkReceiptRegistry.ZeroArtifactCommitment.selector);
+        registry.submitWorkReceipt(
+            receiptId,
+            keccak256("rootfield.beta"),
+            failureDiscoveryLane,
+            keccak256("subject.beta"),
+            keccak256("input.root"),
+            keccak256("output.root"),
+            bytes32(0),
             bytes32(0),
             ""
         );
@@ -534,12 +863,72 @@ contract LiveV0PackageTest {
         _assertTrue(report.exists);
     }
 
+    function testVerifierReportRegistryAcceptsAllV0StatusesAsAdvisoryReports() public {
+        VerifierReportRegistry registry = new VerifierReportRegistry();
+        uint8[5] memory statuses =
+            [registry.VALID(), registry.INVALID(), registry.UNRESOLVED(), registry.UNSUPPORTED(), registry.REORGED()];
+
+        registry.setVerifierAuthorization(address(this), true);
+
+        for (uint256 i = 0; i < statuses.length; i++) {
+            bytes32 reportId = keccak256(abi.encode("verifier.report.status", i));
+            registry.submitVerifierReport(
+                reportId,
+                keccak256("rootfield.status"),
+                keccak256(abi.encode("receipt.status", i)),
+                statuses[i],
+                keccak256(abi.encode("report.digest", i)),
+                keccak256(abi.encode("evidence.commitment", i)),
+                ""
+            );
+
+            VerifierReportRegistry.VerifierReport memory report = registry.getVerifierReport(reportId);
+            _assertTrue(report.status == statuses[i]);
+            _assertTrue(report.exists);
+        }
+    }
+
+    function testVerifierReportRegistryRejectsNonOwnerVerifierAuthorization() public {
+        VerifierReportRegistry registry = new VerifierReportRegistry();
+        VerifierReportRegistryCaller caller = new VerifierReportRegistryCaller();
+
+        vm.expectRevert(abi.encodeWithSelector(VerifierReportRegistry.NotOwner.selector, address(caller)));
+        caller.setVerifierAuthorization(registry, address(this), true);
+
+        vm.expectRevert(VerifierReportRegistry.ZeroVerifier.selector);
+        registry.setVerifierAuthorization(address(0), true);
+    }
+
+    function testVerifierReportRegistryBlocksRevokedVerifier() public {
+        VerifierReportRegistry registry = new VerifierReportRegistry();
+        bytes32 reportId = keccak256("verifier.report.revoked");
+        uint8 status = registry.VALID();
+
+        registry.setVerifierAuthorization(address(this), true);
+        _assertTrue(registry.isAuthorizedVerifier(address(this)));
+
+        registry.setVerifierAuthorization(address(this), false);
+        _assertTrue(!registry.isAuthorizedVerifier(address(this)));
+
+        vm.expectRevert(abi.encodeWithSelector(VerifierReportRegistry.VerifierNotAuthorized.selector, address(this)));
+        registry.submitVerifierReport(
+            reportId,
+            keccak256("rootfield.revoked"),
+            keccak256("receipt.revoked"),
+            status,
+            keccak256("report.digest"),
+            keccak256("evidence.commitment"),
+            ""
+        );
+    }
+
     function testVerifierReportRegistryRejectsUnauthorizedInvalidStatusAndDuplicates() public {
         VerifierReportRegistry registry = new VerifierReportRegistry();
         bytes32 reportId = keccak256("verifier.report.beta");
         uint8 validStatus = registry.VALID();
         uint8 unresolvedStatus = registry.UNRESOLVED();
         uint8 reorgedStatus = registry.REORGED();
+        uint8 statusAfterReorged = reorgedStatus + 1;
 
         vm.expectRevert(abi.encodeWithSelector(VerifierReportRegistry.VerifierNotAuthorized.selector, address(this)));
         registry.submitVerifierReport(
@@ -554,6 +943,28 @@ contract LiveV0PackageTest {
 
         registry.setVerifierAuthorization(address(this), true);
 
+        vm.expectRevert(VerifierReportRegistry.ZeroReportId.selector);
+        registry.submitVerifierReport(
+            bytes32(0),
+            keccak256("rootfield.beta"),
+            keccak256("receipt.beta"),
+            validStatus,
+            keccak256("report.digest"),
+            keccak256("evidence.commitment"),
+            ""
+        );
+
+        vm.expectRevert(VerifierReportRegistry.ZeroReportTarget.selector);
+        registry.submitVerifierReport(
+            reportId,
+            bytes32(0),
+            bytes32(0),
+            validStatus,
+            keccak256("report.digest"),
+            keccak256("evidence.commitment"),
+            ""
+        );
+
         vm.expectRevert(abi.encodeWithSelector(VerifierReportRegistry.InvalidReportStatus.selector, 0));
         registry.submitVerifierReport(
             reportId,
@@ -562,6 +973,39 @@ contract LiveV0PackageTest {
             0,
             keccak256("report.digest"),
             keccak256("evidence.commitment"),
+            ""
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(VerifierReportRegistry.InvalidReportStatus.selector, statusAfterReorged));
+        registry.submitVerifierReport(
+            reportId,
+            keccak256("rootfield.beta"),
+            keccak256("receipt.beta"),
+            statusAfterReorged,
+            keccak256("report.digest"),
+            keccak256("evidence.commitment"),
+            ""
+        );
+
+        vm.expectRevert(VerifierReportRegistry.ZeroReportDigest.selector);
+        registry.submitVerifierReport(
+            reportId,
+            keccak256("rootfield.beta"),
+            keccak256("receipt.beta"),
+            validStatus,
+            bytes32(0),
+            keccak256("evidence.commitment"),
+            ""
+        );
+
+        vm.expectRevert(VerifierReportRegistry.ZeroEvidenceCommitment.selector);
+        registry.submitVerifierReport(
+            reportId,
+            keccak256("rootfield.beta"),
+            keccak256("receipt.beta"),
+            validStatus,
+            keccak256("report.digest"),
+            bytes32(0),
             ""
         );
 
@@ -633,20 +1077,11 @@ contract LiveV0PackageTest {
         bytes32 rootfieldId = keccak256("rootfield.v4");
         bytes32 commitment = keccak256("hook.commitment.v4");
         bytes32 parentPulseId = keccak256("parent.pulse");
-        IUniswapV4SwapHookLike.PoolKey memory key = IUniswapV4SwapHookLike.PoolKey({
-            currency0: address(0x1000),
-            currency1: address(0x2000),
-            fee: 3000,
-            tickSpacing: 60,
-            hooks: address(adapter)
-        });
-        IUniswapV4SwapHookLike.SwapParams memory params = IUniswapV4SwapHookLike.SwapParams({
-            zeroForOne: true,
-            amountSpecified: -1 ether,
-            sqrtPriceLimitX96: 42
-        });
-        bytes memory hookData =
-            adapter.encodeSwapHookData(rootfieldId, commitment, parentPulseId, "flowmemory://uniswap-v4/canary-after-swap");
+        IUniswapV4SwapHookLike.PoolKey memory key = _samplePoolKey(address(adapter));
+        IUniswapV4SwapHookLike.SwapParams memory params = _sampleSwapParams();
+        bytes memory hookData = adapter.encodeSwapHookData(
+            rootfieldId, commitment, parentPulseId, "flowmemory://uniswap-v4/canary-after-swap"
+        );
 
         vm.recordLogs();
         (bytes4 selector, int128 hookDelta) = adapter.afterSwap(address(this), key, params, int256(123), hookData);
@@ -660,12 +1095,24 @@ contract LiveV0PackageTest {
         _assertTrue(logs[1].topics[2] == rootfieldId);
         _assertTrue(logs[1].topics[3] == bytes32(uint256(uint160(address(this)))));
         _assertSwapPulseData(
-            logs[1].data,
-            poolId,
-            commitment,
-            parentPulseId,
-            "flowmemory://uniswap-v4/canary-after-swap"
+            logs[1].data, poolId, commitment, parentPulseId, "flowmemory://uniswap-v4/canary-after-swap"
         );
+    }
+
+    function testFlowMemoryHookAdapterUsesDefaultUriForEmptyUniswapV4HookUri() public {
+        FlowMemoryHookAdapter adapter = new FlowMemoryHookAdapter();
+        bytes32 rootfieldId = keccak256("rootfield.v4.default-uri");
+        bytes32 commitment = keccak256("hook.commitment.v4.default-uri");
+        IUniswapV4SwapHookLike.PoolKey memory key = _samplePoolKey(address(adapter));
+        IUniswapV4SwapHookLike.SwapParams memory params = _sampleSwapParams();
+        bytes memory hookData = adapter.encodeSwapHookData(rootfieldId, commitment, bytes32(0), "");
+
+        vm.recordLogs();
+        adapter.afterSwap(address(this), key, params, int256(123), hookData);
+        LiveV0Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        bytes32 poolId = keccak256(abi.encode(key.currency0, key.currency1, key.fee, key.tickSpacing, key.hooks));
+        _assertSwapPulseData(logs[1].data, poolId, commitment, bytes32(0), "flowmemory://uniswap-v4/after-swap");
     }
 
     function testFlowMemoryHookAdapterRejectsZeroCommitment() public {
@@ -692,25 +1139,46 @@ contract LiveV0PackageTest {
 
     function testFlowMemoryHookAdapterRejectsEmptyUniswapV4HookData() public {
         FlowMemoryHookAdapter adapter = new FlowMemoryHookAdapter();
-        IUniswapV4SwapHookLike.PoolKey memory key = IUniswapV4SwapHookLike.PoolKey({
-            currency0: address(0x1000),
-            currency1: address(0x2000),
-            fee: 3000,
-            tickSpacing: 60,
-            hooks: address(adapter)
-        });
-        IUniswapV4SwapHookLike.SwapParams memory params = IUniswapV4SwapHookLike.SwapParams({
-            zeroForOne: true,
-            amountSpecified: -1 ether,
-            sqrtPriceLimitX96: 42
-        });
+        IUniswapV4SwapHookLike.PoolKey memory key = _samplePoolKey(address(adapter));
+        IUniswapV4SwapHookLike.SwapParams memory params = _sampleSwapParams();
 
         vm.expectRevert(FlowMemoryHookAdapter.EmptyHookData.selector);
         adapter.afterSwap(address(this), key, params, int256(0), "");
     }
 
+    function testFlowMemoryHookAdapterRejectsInvalidUniswapV4HookInputs() public {
+        FlowMemoryHookAdapter adapter = new FlowMemoryHookAdapter();
+        IUniswapV4SwapHookLike.PoolKey memory key = _samplePoolKey(address(adapter));
+        IUniswapV4SwapHookLike.SwapParams memory params = _sampleSwapParams();
+        bytes memory validHookData =
+            adapter.encodeSwapHookData(keccak256("rootfield.v4"), keccak256("commitment.v4"), bytes32(0), "");
+
+        vm.expectRevert(FlowMemoryHookAdapter.ZeroSender.selector);
+        adapter.afterSwap(address(0), key, params, int256(0), validHookData);
+
+        bytes memory zeroRootfieldData =
+            adapter.encodeSwapHookData(bytes32(0), keccak256("commitment.v4"), bytes32(0), "");
+        vm.expectRevert(FlowMemoryHookAdapter.ZeroRootfieldId.selector);
+        adapter.afterSwap(address(this), key, params, int256(0), zeroRootfieldData);
+
+        bytes memory zeroCommitmentData =
+            adapter.encodeSwapHookData(keccak256("rootfield.v4"), bytes32(0), bytes32(0), "");
+        vm.expectRevert(FlowMemoryHookAdapter.ZeroCommitment.selector);
+        adapter.afterSwap(address(this), key, params, int256(0), zeroCommitmentData);
+    }
+
     function _assertTrue(bool condition) private pure {
         if (!condition) revert AssertionFailed();
+    }
+
+    function _samplePoolKey(address hooks) private pure returns (IUniswapV4SwapHookLike.PoolKey memory) {
+        return IUniswapV4SwapHookLike.PoolKey({
+            currency0: address(0x1000), currency1: address(0x2000), fee: 3000, tickSpacing: 60, hooks: hooks
+        });
+    }
+
+    function _sampleSwapParams() private pure returns (IUniswapV4SwapHookLike.SwapParams memory) {
+        return IUniswapV4SwapHookLike.SwapParams({zeroForOne: true, amountSpecified: -1 ether, sqrtPriceLimitX96: 42});
     }
 
     function _assertSwapPulseData(

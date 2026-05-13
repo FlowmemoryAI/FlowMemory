@@ -13,7 +13,9 @@ contract ReceiptVerifier is IReceiptVerifier {
 
     error ZeroReportId();
     error ZeroObservationId();
+    error ZeroRootfieldId();
     error ZeroReceiptCommitment();
+    error ZeroReportHash();
     error ReceiptReportAlreadySubmitted(bytes32 reportId);
     error TimestampOverflow(uint256 timestamp);
 
@@ -27,7 +29,9 @@ contract ReceiptVerifier is IReceiptVerifier {
     ) external {
         if (reportId == bytes32(0)) revert ZeroReportId();
         if (observationId == bytes32(0)) revert ZeroObservationId();
+        if (rootfieldId == bytes32(0)) revert ZeroRootfieldId();
         if (receiptCommitment == bytes32(0)) revert ZeroReceiptCommitment();
+        if (reportHash == bytes32(0)) revert ZeroReportHash();
         if (_reports[reportId].status != ReceiptStatus.Unknown) revert ReceiptReportAlreadySubmitted(reportId);
 
         _reports[reportId] = ReceiptReport({

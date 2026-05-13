@@ -6,6 +6,10 @@ Status: V0 launch hardening review.
 
 The current contracts use simple ownership or self-registration patterns. They do not implement staking, slashing, token custody, rewards, production governance, verifier consensus, or upgrade admin controls.
 
+They also do not enforce cross-contract dependency existence. For example, a work receipt or verifier report may reference a nonzero `rootfieldId` or `receiptId` that another contract has not registered. That is intentional for this optional V0 event spine: indexers and verifiers reconcile dependencies off-chain from receipts, logs, fixtures, and reports.
+
+No current contract exposes bridge finality or a challenge lifecycle. `REORGED` is an allowed verifier-report status for local/test reconciliation, not a Solidity finality proof, production bridge state, or challenge-resolution mechanism.
+
 ## RootfieldRegistry
 
 Owner model: each `rootfieldId` has one owner.
@@ -19,8 +23,10 @@ Owner-gated functions:
 Current protections:
 
 - zero rootfield id rejected
+- zero schema hash rejected
 - duplicate rootfield id rejected
 - zero root rejected
+- zero artifact commitment rejected for root submissions
 - inactive rootfield blocks root submission and transfer
 - zero new owner rejected
 - ownership transfer emits both a FlowPulse status event and a dedicated ownership event
@@ -50,9 +56,10 @@ Submitter-gated functions:
 Current protections:
 
 - zero worker/verifier rejected
+- revoked worker/verifier authorization blocks future submissions
 - duplicate report/receipt id rejected
-- invalid report status rejected
-- invalid work lane rejected
+- invalid report status rejected below and above the accepted V0 range
+- invalid work lane rejected below and above the accepted V0 range
 - zero target or commitment fields rejected
 
 Launch risk to watch:
@@ -96,6 +103,8 @@ Owner-gated functions:
 Current protections:
 
 - zero ids and zero commitments rejected
+- zero rootfield id rejected where a record belongs to a Rootfield namespace
+- zero artifact schema hash rejected
 - duplicate records rejected
 - only the stored owner can mutate the record
 
@@ -113,7 +122,7 @@ Contracts:
 
 Current boundary:
 
-- `ReceiptVerifier` accepts first-writer receipt-report commitments and does not cryptographically verify receipts.
+- `ReceiptVerifier` accepts first-writer receipt-report commitments and does not cryptographically verify receipts. It rejects zero report ids, observation ids, rootfield ids, receipt commitments, and report hashes so local-alpha reports remain reconstructable by indexers/verifiers.
 - `WorkDebtScheduler` allows any scheduler to assign work to a nonzero worker and allows scheduler or worker to mark completion.
 - `FlowMemoryHookAdapter` validates nonzero inputs and emits an observation event. It also exposes a dependency-light Uniswap v4-shaped `afterSwap` callback path, but it is not a production Uniswap v4 hook deployment.
 
