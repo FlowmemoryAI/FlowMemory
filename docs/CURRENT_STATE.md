@@ -40,6 +40,7 @@ Launch-core specifications:
 - `docs/V0_LAUNCH_ACCEPTANCE.md` maps the Rootflow and Flow Memory objective to concrete artifacts and evidence.
 - `docs/DECISIONS/rootflow-v0.md` records the V0 decision and non-goal boundaries.
 - `docs/reviews/ROOTFLOW_FLOW_MEMORY_V0_ACCEPTANCE_AUDIT.md` tracks evidence and missing work for the active launch-core goal.
+- `docs/reviews/OPEN_PR_MERGE_READINESS.md` summarizes open PR test evidence, merge order, and remaining build gaps.
 - `docs/LAUNCH_CORE_AGENT_GOALS.md` provides copy-ready goals for the contracts, crypto, indexer/verifier, dashboard, and review worktrees.
 
 ## Conceptual Or Not Implemented Yet
@@ -53,6 +54,8 @@ Launch-core specifications:
 - Canonical JSON schema package for Rootflow and Flow Memory objects.
 - End-to-end fixture-backed Rootflow acceptance run.
 - Completed launch-core acceptance audit.
+- Area-specific CI jobs for contracts, crypto, services, dashboard, devnet, and hardware checks.
+- Single generated end-to-end Rootflow/Flow Memory acceptance command.
 - Indexer or verifier service runtime.
 - Persistence layer, live RPC reader, production APIs, or hosted services.
 - Dashboard, explorer, or hardware console implementation.

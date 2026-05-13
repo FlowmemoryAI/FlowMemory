@@ -52,6 +52,7 @@ FlowMemory is managed as a multi-agent program. The management layer is part of 
 - `docs/ISSUE_BACKLOG.md`: maps issues into milestones, dependencies, and agent worktrees
 - `docs/AGENT_PROMPTS.md`: copy-ready prompts for each worktree
 - `docs/LAUNCH_CORE_AGENT_GOALS.md`: copy-ready Rootflow V0 and Flow Memory V0 launch-core goals
+- `docs/reviews/OPEN_PR_MERGE_READINESS.md`: open PR merge order, local test evidence, and remaining build gaps
 - `docs/PR_PROCESS.md`: branch, draft PR, review, merge, conflict, and issue-closing rules
 - `docs/DAILY_HQ_RUNBOOK.md`: morning review, triage, agent launch, PR monitoring, merge order, and handoff
 - `infra/scripts/status-report.ps1`: read-only local worktree, PR, and issue status report

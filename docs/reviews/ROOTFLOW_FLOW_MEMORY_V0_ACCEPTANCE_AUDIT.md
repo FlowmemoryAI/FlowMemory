@@ -67,6 +67,20 @@ GitHub checks observed:
 - PRs #57, #60, #61, and #62 currently show `Repository hygiene` passing.
 - This is not enough to prove launch acceptance. Area-specific tests and fixture commands still need explicit evidence.
 
+## Area-Specific Checks Verified Locally
+
+These checks were run from the matching PR worktrees on 2026-05-13.
+
+| PR | Worktree | Commands verified | Result |
+| --- | --- | --- | --- |
+| #57 contracts | `E:\FlowMemory\flowmemory-contracts` | `forge test`; `git diff --check origin/main...HEAD` | 33 Foundry tests passed; diff check passed. |
+| #58 chain/devnet | `E:\FlowMemory\flowmemory-chain` | `cargo test --manifest-path crates\flowmemory-devnet\Cargo.toml`; `git diff --check origin/main...HEAD` | 7 Rust tests passed; diff check passed. |
+| #56 hardware | `E:\FlowMemory\flowmemory-hardware` | `python hardware\simulator\flowrouter_sim.py --validate-file hardware\fixtures\flowrouter_sample_seed42.json`; `git diff --check origin/main...HEAD` | Fixture validation passed; diff check passed. |
+| #60 crypto | `E:\FlowMemory\flowmemory-crypto\crypto` | `npm ci`; `npm test`; `npm run validate:vectors`; `python validate_test_vectors.py`; `git diff --check origin/main...HEAD` | 13 package tests passed; 21 vectors validated; Python FlowPulse vector recompute passed; diff check passed. |
+| #61 indexer/verifier | `E:\FlowMemory\flowmemory-indexer` | `npm ci`; `npm test`; `npm run e2e`; `git diff --check origin/main...HEAD` | 24 package tests passed; e2e produced 7 observations and 7 verifier reports; diff check passed after cleanup commit `125f84f`. |
+| #62 dashboard | `E:\FlowMemory\flowmemory-dashboard\apps\dashboard` | `npm ci`; `npm test`; `npm run build`; `git diff --check origin/main...HEAD` | 4 dashboard tests passed; production build passed; diff check passed after cleanup commit `4577968`. |
+| #59 HQ | `E:\FlowMemory\flowmemory-main` | `git diff --check`; non-ASCII scan; GitHub issue/PR verification | Passed; docs and issue control plane pushed. |
+
 ## Prompt-To-Artifact Checklist
 
 | Requirement | Expected artifacts | Evidence found | Status |
@@ -98,8 +112,8 @@ Critical gaps:
 - No single end-to-end command has been verified that runs FlowPulse fixture -> indexer observation -> receipt/report -> Rootflow transition -> dashboard state.
 - `RootflowTransition` is specified but not yet confirmed as a concrete output artifact in the subsystem PRs.
 - `MemorySignal`, `MemoryReceipt`, `RootfieldBundle`, and `AgentMemoryView` are specified but not yet confirmed as canonical JSON schemas plus validated fixtures.
-- Status vocabulary is split: launch docs require `verified` and `failed`, while PR #61 appears to use `valid` and `invalid` internally. Either standardize the external V0 vocabulary or document an adapter mapping.
-- GitHub checks currently show repository hygiene only. They do not prove contract tests, crypto vector validation, indexer/verifier tests, or dashboard tests.
+- Status vocabulary is split: launch docs and crypto use `verified` and `failed`, while PR #61 verifier reports use `valid` and `invalid` internally. PR #61 includes mapping notes in `services/verifier/VERIFIER_STATUS_VOCABULARY.md`, but the end-to-end dashboard adapter still needs to be treated as an explicit integration boundary.
+- GitHub checks currently show repository hygiene only. Local area-specific checks now exist in this audit, but CI does not yet enforce them.
 - The launch-core source-of-truth docs are in PR #59 and are not merged yet.
 
 Non-critical gaps:
@@ -146,7 +160,7 @@ If any command differs from the package scripts, the PR summary must name the ac
 
 ## Merge Readiness Recommendation
 
-Current recommendation: not ready to call the active goal complete.
+Current recommendation: not ready to call the active goal complete, but the open PRs are now locally test-verified enough to begin merge sequencing.
 
 Suggested merge order:
 
