@@ -3,7 +3,10 @@
 Status: acceptance matrix for the private/local testnet package. The chain
 runtime now has a long-running local node, local transaction intake, local
 test-unit faucet records, and static local-file multi-node reconciliation.
-Control-plane query coverage and workbench runtime inspection remain in flight.
+The integrated stack adds local wallet envelopes, bridge-credit handoff,
+control-plane lifecycle queries, workbench inspection, hardware operator-signal
+fixtures, and a full-smoke wrapper. It remains a local/private test package, not
+production validator software.
 
 This document marks every major feature as one of:
 
@@ -25,7 +28,8 @@ This document marks every major feature as one of:
 | One-command private testnet aliases | Implemented for chain runtime surfaces | `package.json` now exposes `flowchain:prereq`, `flowchain:init`, `flowchain:start`, `flowchain:node`, `flowchain:node:stop`, `flowchain:node:status`, `flowchain:tx`, `flowchain:faucet`, `flowchain:node:smoke`, `flowchain:multi-node:smoke`, `flowchain:stop`, `flowchain:demo`, `flowchain:smoke`, `flowchain:full-smoke`, `flowchain:export`, `flowchain:import`, and `workbench:dev`. `control-plane:serve` remains in flight. |
 | Prerequisite check script | Implemented | `infra/scripts/flowchain-check-prereqs.ps1`. |
 | Start/stop scripts | Implemented | `flowchain:start` remains a compatibility wrapper; `flowchain:node` starts the long-running runtime; `flowchain:node:stop` and `flowchain:stop` request node shutdown through the stop file. |
-| Full smoke script | Implemented for merged surfaces | `flowchain:smoke` runs service tests, crypto tests/vectors, launch candidate, devnet tests, one-node runtime smoke, multi-node runtime smoke, deterministic replay, dashboard build, hardware fixture, unsafe-claim scan, and export no-secret scan. Control-plane query evidence remains blocked on subsystem work. |
+| Full smoke script | Implemented for merged surfaces | `flowchain:smoke` runs service tests, crypto tests/vectors, launch candidate, devnet tests, one-node runtime smoke, multi-node runtime smoke, deterministic replay, dashboard build, hardware fixture, unsafe-claim scan, and export no-secret scan. |
+| Full private/local L1 smoke gate | Implemented for local acceptance | `flowchain:full-smoke` wraps the merged smoke, control-plane smoke, and bridge local-credit smoke. |
 | Export/import state bundles | Implemented local wrapper | `flowchain:export` writes ignored export files and zip bundle; `flowchain:import` restores local state from a bundle. |
 | Troubleshooting guide | Implemented | `docs/FLOWCHAIN_TROUBLESHOOTING.md` plus script error messages. |
 
@@ -70,17 +74,17 @@ This document marks every major feature as one of:
 
 | Feature | Status | Acceptance condition |
 | --- | --- | --- |
-| Local API service | In flight | Extend `services/control-plane/`; do not create a second API surface. |
-| Health endpoint/method | In flight | Must show local-only status and source health. |
-| Chain status | In flight | Must include block, object, fixture, and capability counters. |
-| Blocks and transactions | In flight | Devnet state and control-plane handoff include blocks, pending transactions, object maps, and roots; live API methods remain control-plane work. |
+| Local API service | Implemented fixture-backed; live mode in flight | Extend `services/control-plane/`; do not create a second API surface. Issue #101 owns live-node adapters and transaction submission. |
+| Health endpoint/method | Implemented fixture-backed; live mode in flight | Must show local-only status and source health. |
+| Chain status | Implemented fixture-backed; live mode in flight | Must include block, object, fixture, and capability counters. |
+| Blocks and transactions | In flight | Required for full private testnet inspection; live local-node coverage belongs to #101. |
 | Agents and models | In flight | Must read existing devnet/fixture outputs. |
 | Receipts and artifacts | In flight | Must link memory receipts, work receipts, artifacts, and provenance. |
 | Verifier reports | In flight | Must expose reports and stable error shapes. |
 | Challenges and finality | In flight | Must expose real local objects or explicit placeholders. |
 | Memory cells | In flight | Must link memory state to receipts and verifier status. |
 | Provenance queries | In flight | Must cite source files, schema hashes, report ids, and object ids. |
-| Stable errors | In flight | JSON-RPC errors are active Local Alpha work. |
+| Stable errors | Implemented baseline; live mode in flight | JSON-RPC errors exist for the local API; #101 must preserve them for live adapters. |
 | No secrets in responses | Missing | Tests must prove secrets do not appear in API responses. |
 
 ## Workbench And Explorer
@@ -110,6 +114,18 @@ This document marks every major feature as one of:
 | Encrypted local operator vault | Implemented in crypto package | `crypto/src/wallet.js` supports create, unlock, list public accounts, sign transaction, verify transaction, public metadata import/export, and rotate/add account. Vault files live under ignored `crypto/.wallet/` by default. |
 | Production proof systems | Later gated | No proof-circuit or audited-crypto claim. |
 | SEAL/dependency privacy | Later gated | Vocabulary and placeholders only unless reviewed separately. |
+
+## Bridge Test Path
+
+| Feature | Status | Acceptance condition |
+| --- | --- | --- |
+| Test-only bridge POC | Implemented foundation | Existing bridge docs, lockbox surface, relayer package, mock fixture, and bridge schemas stay test-only. |
+| Mock bridge observation | Implemented | `npm run bridge:mock` produces deterministic observation output. |
+| Bridge tests | Implemented baseline | `npm run bridge:test` runs relayer tests; bridge Foundry tests are required when contracts change. |
+| Base Sepolia observation | In flight | #104 must expose explicit Base Sepolia observation smoke without private-key requirements. |
+| Local BridgeCredit application | In flight | #104 must apply or hand off BridgeCredit to the local runtime with replay protection. |
+| Withdrawal intent | In flight | #104 may create local test-mode withdrawal records; no mainnet release default. |
+| Production bridge | Later gated | No production bridge, audited bridge-security, or broad mainnet deposit claim. |
 
 ## Hardware And Operator Signals
 
@@ -143,14 +159,18 @@ The package is accepted only when one documented command can:
 8. Open a challenge.
 9. Resolve the challenge.
 10. Finalize the receipt.
-11. Export state.
-12. Query the state through the control-plane API.
-13. Render the state in the workbench.
-14. Rerun deterministically with the same expected roots.
+11. Observe a mock/Base Sepolia test bridge deposit and apply or hand off a
+    local BridgeCredit.
+12. Export state.
+13. Query the state through the control-plane API.
+14. Render the state in the workbench.
+15. Rerun deterministically with the same expected roots.
 
 Current wrapper status:
 
-- `npm run flowchain:smoke` is the documented command.
+- `npm run flowchain:smoke` is the merged-surface smoke command.
+- `npm run flowchain:full-smoke` is the full acceptance command for #108, now
+  present as a temporary blocker-report wrapper.
 - It proves the merged launch-core, crypto helpers/vectors, local devnet,
   native AgentAccount, ModelPassport, ArtifactAvailabilityProof,
   VerifierModule, VerifierReport, MemoryCell, Challenge, FinalityReceipt,
@@ -172,6 +192,7 @@ Required final evidence for the acceptance PR:
   subsystem exposes the runtime handoff through API methods.
 - Workbench screenshot or test/build evidence remains a follow-up until the
   dashboard subsystem renders the runtime handoff.
+- Bridge mock/local-credit smoke evidence.
 - `git diff --check`.
 
 ## Review Gate

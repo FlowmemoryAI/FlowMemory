@@ -57,8 +57,10 @@ Use this path today on a clean second computer. It validates the merged V0
 launch-core, no-value local devnet prototype, dashboard workbench, hardware
 simulator fixture, Windows wrapper layer, long-running local node mode,
 locally authorized transaction intake, local test-unit faucet records, and
-static local-file multi-node reconciliation. Control-plane and full workbench
-query coverage remain separate subsystem work.
+simulator fixture, Windows wrapper layer, long-running local node mode,
+locally authorized transaction intake, local test-unit faucet records,
+static local-file multi-node reconciliation, bridge mock/local-credit handoff,
+control-plane lifecycle queries, and workbench local-state inspection.
 
 If the repo is already cloned, run from the repo root:
 
@@ -139,6 +141,12 @@ npm run flowchain:node:smoke
 npm run flowchain:multi-node:smoke
 ```
 
+Run the full private/local L1 gate:
+
+```powershell
+npm run flowchain:full-smoke
+```
+
 Run the local workbench in a separate PowerShell window:
 
 ```powershell
@@ -182,11 +190,14 @@ Expected current result:
 - `npm run flowchain:smoke` writes
   `devnet/local/smoke/flowchain-smoke-report.json` and compares deterministic
   replay roots. It now also runs the one-node and multi-node runtime smokes.
+- `npm run flowchain:full-smoke` runs the merged smoke, control-plane smoke,
+  bridge local-credit smoke, and writes
+  `devnet/local/smoke/flowchain-full-smoke-report.json`.
 - `npm run workbench:dev` opens the existing dashboard as the local workbench.
 
-Current stop point: if a second computer needs control-plane queries,
-encrypted key storage, or full workbench inspection of private/local runtime
-entities, that remains owned by the subsystem workstreams.
+Current stop point: this package is still local/private testnet software. It is
+not production mainnet, public validator software, tokenomics, or a production
+bridge.
 
 ## Final Second-Computer Path
 
@@ -205,13 +216,13 @@ npm run flowchain:start
 npm run flowchain:node
 npm run control-plane:serve
 npm run workbench:dev
-npm run flowchain:smoke
+npm run flowchain:full-smoke
 npm run flowchain:export
 ```
 
 If `flowchain:node`, `control-plane:serve`, or `workbench:dev` are
 long-running commands, run each one in its own PowerShell window and run
-`flowchain:smoke` from a fourth window after the services are healthy.
+`flowchain:full-smoke` from a fourth window after the services are healthy.
 
 If final command names differ, this guide must be updated in the same PR that
 adds the commands. The final path must still include prerequisite checks,
@@ -239,6 +250,7 @@ npm run flowchain:demo
 npm run flowchain:smoke
 npm run flowchain:full-smoke
 npm run flowchain:export
+npm run control-plane:serve
 npm run workbench:dev
 ```
 
@@ -258,10 +270,11 @@ Current status:
 | `npm run flowchain:multi-node:smoke` | Implemented | Proves two local node processes reconcile through static local-file peer state paths; LAN mode is not exposed. |
 | `npm run flowchain:stop` | Implemented wrapper | Requests node stop and use `npm run flowchain:stop -- -ResetLocalState` for an explicit reset. |
 | `npm run flowchain:demo` | Implemented | Wraps the existing Rust devnet `demo`. |
-| `npm run flowchain:smoke` | Implemented for merged surfaces | Includes runtime smokes; control-plane query evidence remains separate. |
-| `npm run flowchain:full-smoke` | Implemented alias | Runs `flowchain:smoke`. |
+| `npm run flowchain:smoke` | Implemented for merged surfaces | Includes runtime smokes and deterministic replay. |
+| `npm run flowchain:full-smoke` | Implemented local/private acceptance wrapper | Runs merged smoke, control-plane smoke, and bridge local-credit smoke. |
 | `npm run flowchain:export` | Implemented | Writes ignored export directory and zip bundle. |
 | `npm run flowchain:import -- --BundlePath <zip> -Force` | Implemented script path | Restores local state from an exported bundle. |
+| `npm run control-plane:serve` | Implemented fixture-backed API | Live node adapters and transaction submission remain #101. |
 | `npm run workbench:dev` | Implemented | Wraps `npm run dev --prefix apps/dashboard`. |
 
 ## Local Operator Keys
