@@ -27,6 +27,20 @@ Invoke-FlowChainCommand -Label "Run crypto tests" -FilePath "npm" -ArgumentList 
 Invoke-FlowChainCommand -Label "Validate crypto vectors" -FilePath "npm" -ArgumentList @("run", "validate:vectors", "--prefix", "crypto")
 Invoke-FlowChainCommand -Label "Run launch candidate gate" -FilePath "npm" -ArgumentList @("run", "launch:candidate")
 Invoke-FlowChainCommand -Label "Run devnet tests" -FilePath "cargo" -ArgumentList @("test", "--manifest-path", "crates/flowmemory-devnet/Cargo.toml")
+Invoke-FlowChainCommand -Label "Run one-node runtime smoke" -FilePath "powershell" -ArgumentList @(
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "infra/scripts/flowchain-node-smoke.ps1"
+)
+Invoke-FlowChainCommand -Label "Run multi-node runtime smoke" -FilePath "powershell" -ArgumentList @(
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "infra/scripts/flowchain-multi-node-smoke.ps1"
+)
 
 $runAState = Join-Path $smokeRoot "run-a/state.json"
 $runAOut = Join-Path $smokeRoot "run-a/export"
@@ -92,6 +106,8 @@ $report = [ordered]@{
     runBExport = $runBOut
     launchCandidate = "passed"
     devnetTests = "passed"
+    oneNodeRuntimeSmoke = "passed"
+    multiNodeRuntimeSmoke = "passed"
     serviceTests = "passed"
     cryptoTests = "passed"
     cryptoVectors = "passed"
@@ -102,21 +118,24 @@ $report = [ordered]@{
         "rootfield namespace",
         "root commitment",
         "artifact commitment",
+        "local balance faucet record",
+        "locally authorized transaction intake",
         "work receipt",
         "verifier report",
-        "local finality placeholder export",
-        "launch-core Flow Memory objects"
-    )
-    blockedLifecycleCoverage = @(
-        "AgentAccount",
-        "ModelPassport",
         "ArtifactAvailabilityProof as native object",
         "VerifierModule",
         "MemoryCell",
         "Challenge",
         "FinalityReceipt as native object",
+        "long-running node mode with bounded smoke",
+        "static local-file peer reconciliation",
+        "local finality placeholder export",
+        "launch-core Flow Memory objects"
+    )
+    blockedLifecycleCoverage = @(
         "control-plane query evidence"
     )
+    lanMode = "not exposed; multi-node smoke uses static local-file peer state paths"
 }
 Write-FlowChainJson -Path $reportPath -Value $report
 

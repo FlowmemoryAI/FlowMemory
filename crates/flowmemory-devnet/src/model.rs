@@ -81,6 +81,16 @@ pub enum DevnetError {
     AnchorAlreadyExists(String),
     #[error("invalid event signature: {0}")]
     InvalidEventSignature(String),
+    #[error("local balance overflow for account: {0}")]
+    LocalBalanceOverflow(String),
+    #[error("local balance account does not exist: {0}")]
+    LocalBalanceMissing(String),
+    #[error("insufficient local balance for account: {0}")]
+    LocalBalanceInsufficient(String),
+    #[error("faucet record already exists: {0}")]
+    FaucetRecordAlreadyExists(String),
+    #[error("balance transfer already exists: {0}")]
+    BalanceTransferAlreadyExists(String),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -96,6 +106,12 @@ pub struct ChainState {
     pub parent_hash: String,
     #[serde(default = "default_operator_key_references")]
     pub operator_key_references: BTreeMap<String, OperatorKeyReference>,
+    #[serde(default)]
+    pub local_balances: BTreeMap<String, LocalBalance>,
+    #[serde(default)]
+    pub faucet_records: BTreeMap<String, FaucetRecord>,
+    #[serde(default)]
+    pub balance_transfers: BTreeMap<String, BalanceTransfer>,
     pub rootfields: BTreeMap<String, Rootfield>,
     #[serde(default)]
     pub agent_accounts: BTreeMap<String, AgentAccount>,
@@ -149,6 +165,41 @@ pub struct OperatorKeyReference {
     pub public_key_hint: String,
     pub secret_material_boundary: String,
     pub crypto_schema_refs: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct LocalBalance {
+    pub account_id: String,
+    pub balance: u64,
+    pub total_faucet_credited: u64,
+    pub total_sent: u64,
+    pub total_received: u64,
+    pub updated_at_block: u64,
+    pub local_only: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct FaucetRecord {
+    pub faucet_record_id: String,
+    pub account_id: String,
+    pub amount: u64,
+    pub reason: String,
+    pub credited_at_block: u64,
+    pub local_only: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct BalanceTransfer {
+    pub transfer_id: String,
+    pub from_account_id: String,
+    pub to_account_id: String,
+    pub amount: u64,
+    pub memo: String,
+    pub transferred_at_block: u64,
+    pub local_only: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -327,6 +378,12 @@ pub struct BaseAnchorPlaceholder {
     #[serde(default)]
     pub operator_key_reference_root: String,
     #[serde(default)]
+    pub local_balance_root: String,
+    #[serde(default)]
+    pub faucet_record_root: String,
+    #[serde(default)]
+    pub balance_transfer_root: String,
+    #[serde(default)]
     pub agent_account_root: String,
     #[serde(default)]
     pub model_passport_root: String,
@@ -351,6 +408,19 @@ pub struct BaseAnchorPlaceholder {
     rename_all_fields = "camelCase"
 )]
 pub enum Transaction {
+    FaucetLocalBalance {
+        faucet_record_id: String,
+        account_id: String,
+        amount: u64,
+        reason: String,
+    },
+    TransferLocalBalance {
+        transfer_id: String,
+        from_account_id: String,
+        to_account_id: String,
+        amount: u64,
+        memo: String,
+    },
     RegisterRootfield {
         rootfield_id: String,
         owner: String,
@@ -454,6 +524,16 @@ pub enum Transaction {
 pub struct TxEnvelope {
     pub tx_id: String,
     pub tx: Transaction,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub authorization: Option<LocalAuthorization>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct LocalAuthorization {
+    pub mode: String,
+    pub signer: String,
+    pub digest: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -475,6 +555,8 @@ pub struct BlockReceipt {
     pub tx_id: String,
     pub status: String,
     pub error: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub authorization: Option<LocalAuthorization>,
 }
 
 #[derive(Debug, Serialize)]
@@ -485,6 +567,9 @@ struct StateCommitmentView<'a> {
     chain_id: &'a str,
     genesis_hash: &'a str,
     operator_key_references: &'a BTreeMap<String, OperatorKeyReference>,
+    local_balances: &'a BTreeMap<String, LocalBalance>,
+    faucet_records: &'a BTreeMap<String, FaucetRecord>,
+    balance_transfers: &'a BTreeMap<String, BalanceTransfer>,
     rootfields: &'a BTreeMap<String, Rootfield>,
     agent_accounts: &'a BTreeMap<String, AgentAccount>,
     model_passports: &'a BTreeMap<String, ModelPassport>,
@@ -512,6 +597,9 @@ struct RootMapView<'a, T> {
 #[serde(rename_all = "camelCase")]
 pub struct StateMapRoots {
     pub operator_key_reference_root: String,
+    pub local_balance_root: String,
+    pub faucet_record_root: String,
+    pub balance_transfer_root: String,
     pub rootfield_state_root: String,
     pub agent_account_root: String,
     pub model_passport_root: String,
@@ -578,6 +666,9 @@ pub fn genesis_state() -> ChainState {
         parent_hash: config.genesis_hash.clone(),
         config,
         operator_key_references: default_operator_key_references(),
+        local_balances: BTreeMap::new(),
+        faucet_records: BTreeMap::new(),
+        balance_transfers: BTreeMap::new(),
         rootfields: BTreeMap::new(),
         agent_accounts: BTreeMap::new(),
         model_passports: BTreeMap::new(),
@@ -599,11 +690,31 @@ pub fn genesis_state() -> ChainState {
 
 pub fn envelope_tx(tx: Transaction) -> TxEnvelope {
     let tx_id = hash_json(TX_SCHEMA, &tx);
-    TxEnvelope { tx_id, tx }
+    TxEnvelope {
+        tx_id,
+        tx,
+        authorization: None,
+    }
 }
 
 pub fn queue_transaction(state: &mut ChainState, tx: Transaction) -> String {
     let envelope = envelope_tx(tx);
+    let tx_id = envelope.tx_id.clone();
+    state.pending_txs.push(envelope);
+    tx_id
+}
+
+pub fn queue_authorized_transaction(
+    state: &mut ChainState,
+    tx: Transaction,
+    signer: String,
+) -> String {
+    let mut envelope = envelope_tx(tx);
+    envelope.authorization = Some(LocalAuthorization {
+        mode: "local-authorized".to_string(),
+        signer,
+        digest: envelope.tx_id.clone(),
+    });
     let tx_id = envelope.tx_id.clone();
     state.pending_txs.push(envelope);
     tx_id
@@ -616,6 +727,9 @@ pub fn state_root(state: &ChainState) -> String {
         chain_id: &state.chain_id,
         genesis_hash: &state.genesis_hash,
         operator_key_references: &state.operator_key_references,
+        local_balances: &state.local_balances,
+        faucet_records: &state.faucet_records,
+        balance_transfers: &state.balance_transfers,
         rootfields: &state.rootfields,
         agent_accounts: &state.agent_accounts,
         model_passports: &state.model_passports,
@@ -646,6 +760,18 @@ pub fn state_map_roots(state: &ChainState) -> StateMapRoots {
         operator_key_reference_root: map_root(
             "flowmemory.local_devnet.operator_key_references.v0",
             &state.operator_key_references,
+        ),
+        local_balance_root: map_root(
+            "flowmemory.local_devnet.local_balances.v0",
+            &state.local_balances,
+        ),
+        faucet_record_root: map_root(
+            "flowmemory.local_devnet.faucet_records.v0",
+            &state.faucet_records,
+        ),
+        balance_transfer_root: map_root(
+            "flowmemory.local_devnet.balance_transfers.v0",
+            &state.balance_transfers,
         ),
         rootfield_state_root: map_root("flowmemory.local_devnet.rootfields.v0", &state.rootfields),
         agent_account_root: map_root(
@@ -707,6 +833,7 @@ pub fn build_block(state: &mut ChainState) -> Block {
 
     for envelope in txs {
         tx_ids.push(envelope.tx_id.clone());
+        let authorization = envelope.authorization.clone();
         let result = apply_transaction(state, &envelope.tx);
         receipts.push(BlockReceipt {
             tx_id: envelope.tx_id,
@@ -717,6 +844,7 @@ pub fn build_block(state: &mut ChainState) -> Block {
             }
             .to_string(),
             error: result.err().map(|error| error.to_string()),
+            authorization,
         });
     }
 
@@ -747,6 +875,125 @@ pub fn build_block(state: &mut ChainState) -> Block {
 
 pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(), DevnetError> {
     match tx {
+        Transaction::FaucetLocalBalance {
+            faucet_record_id,
+            account_id,
+            amount,
+            reason,
+        } => {
+            if state.faucet_records.contains_key(faucet_record_id) {
+                return Err(DevnetError::FaucetRecordAlreadyExists(
+                    faucet_record_id.clone(),
+                ));
+            }
+
+            let updated_at_block = state.next_block_number;
+            let balance = state
+                .local_balances
+                .entry(account_id.clone())
+                .or_insert_with(|| LocalBalance {
+                    account_id: account_id.clone(),
+                    balance: 0,
+                    total_faucet_credited: 0,
+                    total_sent: 0,
+                    total_received: 0,
+                    updated_at_block,
+                    local_only: true,
+                });
+            balance.balance = balance
+                .balance
+                .checked_add(*amount)
+                .ok_or_else(|| DevnetError::LocalBalanceOverflow(account_id.clone()))?;
+            balance.total_faucet_credited = balance
+                .total_faucet_credited
+                .checked_add(*amount)
+                .ok_or_else(|| DevnetError::LocalBalanceOverflow(account_id.clone()))?;
+            balance.updated_at_block = updated_at_block;
+
+            state.faucet_records.insert(
+                faucet_record_id.clone(),
+                FaucetRecord {
+                    faucet_record_id: faucet_record_id.clone(),
+                    account_id: account_id.clone(),
+                    amount: *amount,
+                    reason: reason.clone(),
+                    credited_at_block: updated_at_block,
+                    local_only: true,
+                },
+            );
+        }
+        Transaction::TransferLocalBalance {
+            transfer_id,
+            from_account_id,
+            to_account_id,
+            amount,
+            memo,
+        } => {
+            if state.balance_transfers.contains_key(transfer_id) {
+                return Err(DevnetError::BalanceTransferAlreadyExists(
+                    transfer_id.clone(),
+                ));
+            }
+
+            let from_balance = state
+                .local_balances
+                .get(from_account_id)
+                .ok_or_else(|| DevnetError::LocalBalanceMissing(from_account_id.clone()))?;
+            if from_balance.balance < *amount {
+                return Err(DevnetError::LocalBalanceInsufficient(
+                    from_account_id.clone(),
+                ));
+            }
+
+            let updated_at_block = state.next_block_number;
+            {
+                let from = state
+                    .local_balances
+                    .get_mut(from_account_id)
+                    .expect("from balance was checked above");
+                from.balance -= *amount;
+                from.total_sent = from
+                    .total_sent
+                    .checked_add(*amount)
+                    .ok_or_else(|| DevnetError::LocalBalanceOverflow(from_account_id.clone()))?;
+                from.updated_at_block = updated_at_block;
+            }
+
+            let to = state
+                .local_balances
+                .entry(to_account_id.clone())
+                .or_insert_with(|| LocalBalance {
+                    account_id: to_account_id.clone(),
+                    balance: 0,
+                    total_faucet_credited: 0,
+                    total_sent: 0,
+                    total_received: 0,
+                    updated_at_block,
+                    local_only: true,
+                });
+            to.balance = to
+                .balance
+                .checked_add(*amount)
+                .ok_or_else(|| DevnetError::LocalBalanceOverflow(to_account_id.clone()))?;
+            to.total_received = to
+                .total_received
+                .checked_add(*amount)
+                .ok_or_else(|| DevnetError::LocalBalanceOverflow(to_account_id.clone()))?;
+            to.updated_at_block = updated_at_block;
+
+            state.balance_transfers.insert(
+                transfer_id.clone(),
+                BalanceTransfer {
+                    transfer_id: transfer_id.clone(),
+                    from_account_id: from_account_id.clone(),
+                    to_account_id: to_account_id.clone(),
+                    amount: *amount,
+                    memo: memo.clone(),
+                    transferred_at_block: updated_at_block,
+                    local_only: true,
+                },
+            );
+        }
         Transaction::RegisterRootfield {
             rootfield_id,
             owner,
@@ -1215,6 +1462,9 @@ pub fn anchor_from_state(
         rootfield_state_root: &'a str,
         artifact_commitment_root: &'a str,
         operator_key_reference_root: &'a str,
+        local_balance_root: &'a str,
+        faucet_record_root: &'a str,
+        balance_transfer_root: &'a str,
         agent_account_root: &'a str,
         model_passport_root: &'a str,
         memory_cell_root: &'a str,
@@ -1239,6 +1489,9 @@ pub fn anchor_from_state(
             rootfield_state_root: &roots.rootfield_state_root,
             artifact_commitment_root: &roots.artifact_commitment_root,
             operator_key_reference_root: &roots.operator_key_reference_root,
+            local_balance_root: &roots.local_balance_root,
+            faucet_record_root: &roots.faucet_record_root,
+            balance_transfer_root: &roots.balance_transfer_root,
             agent_account_root: &roots.agent_account_root,
             model_passport_root: &roots.model_passport_root,
             memory_cell_root: &roots.memory_cell_root,
@@ -1262,6 +1515,9 @@ pub fn anchor_from_state(
         rootfield_state_root: roots.rootfield_state_root,
         artifact_commitment_root: roots.artifact_commitment_root,
         operator_key_reference_root: roots.operator_key_reference_root,
+        local_balance_root: roots.local_balance_root,
+        faucet_record_root: roots.faucet_record_root,
+        balance_transfer_root: roots.balance_transfer_root,
         agent_account_root: roots.agent_account_root,
         model_passport_root: roots.model_passport_root,
         memory_cell_root: roots.memory_cell_root,
@@ -1278,6 +1534,7 @@ pub fn demo_transactions() -> Vec<Transaction> {
     let rootfield_id = "rootfield:demo:alpha".to_string();
     let model_passport_id = "model:demo:local-alpha".to_string();
     let agent_id = "agent:demo:alpha".to_string();
+    let operator_account_id = "local-account:operator-demo".to_string();
     let verifier_id = "verifier:local-demo".to_string();
     let artifact_id = "artifact:demo:001".to_string();
     let artifact_commitment = keccak_hex(b"flowmemory.demo.artifact.v0");
@@ -1305,6 +1562,19 @@ pub fn demo_transactions() -> Vec<Transaction> {
             controller: "operator:local-demo".to_string(),
             model_passport_id: Some(model_passport_id),
             metadata_hash: keccak_hex(b"flowmemory.demo.agent.metadata"),
+        },
+        Transaction::FaucetLocalBalance {
+            faucet_record_id: "faucet:demo:operator:001".to_string(),
+            account_id: operator_account_id.clone(),
+            amount: 1_000,
+            reason: "local-test-units-for-private-devnet".to_string(),
+        },
+        Transaction::TransferLocalBalance {
+            transfer_id: "transfer:demo:operator-to-agent:001".to_string(),
+            from_account_id: operator_account_id,
+            to_account_id: agent_id.clone(),
+            amount: 100,
+            memo: "local test-unit credit for transaction intake smoke".to_string(),
         },
         Transaction::RegisterVerifierModule {
             verifier_id: verifier_id.clone(),

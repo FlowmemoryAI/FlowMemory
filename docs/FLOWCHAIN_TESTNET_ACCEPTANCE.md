@@ -1,8 +1,9 @@
 # FlowChain Testnet Acceptance
 
-Status: acceptance matrix for the private/local testnet package. The HQ/Ops
-command wrapper layer is implemented for merged surfaces; full native object,
-control-plane, and workbench acceptance remains in flight.
+Status: acceptance matrix for the private/local testnet package. The chain
+runtime now has a long-running local node, local transaction intake, local
+test-unit faucet records, and static local-file multi-node reconciliation.
+Control-plane query coverage and workbench runtime inspection remain in flight.
 
 This document marks every major feature as one of:
 
@@ -21,10 +22,10 @@ This document marks every major feature as one of:
 | Run devnet tests | Implemented | `cargo test --manifest-path crates/flowmemory-devnet/Cargo.toml`. |
 | Run service tests | Implemented | `npm test` for merged service packages. |
 | Run launch candidate gate | Implemented | `npm run launch:candidate`. |
-| One-command private testnet aliases | Implemented for merged surfaces | `package.json` now exposes `flowchain:prereq`, `flowchain:init`, `flowchain:start`, `flowchain:stop`, `flowchain:demo`, `flowchain:smoke`, `flowchain:export`, `flowchain:import`, and `workbench:dev`. `control-plane:serve` remains in flight. |
+| One-command private testnet aliases | Implemented for chain runtime surfaces | `package.json` now exposes `flowchain:prereq`, `flowchain:init`, `flowchain:start`, `flowchain:node`, `flowchain:node:stop`, `flowchain:node:status`, `flowchain:tx`, `flowchain:faucet`, `flowchain:node:smoke`, `flowchain:multi-node:smoke`, `flowchain:stop`, `flowchain:demo`, `flowchain:smoke`, `flowchain:full-smoke`, `flowchain:export`, `flowchain:import`, and `workbench:dev`. `control-plane:serve` remains in flight. |
 | Prerequisite check script | Implemented | `infra/scripts/flowchain-check-prereqs.ps1`. |
-| Start/stop scripts | Implemented bounded wrappers | `flowchain:start` prepares launch-core fixtures and state summary; `flowchain:stop` records stopped state and can reset ignored local state. Long-running node behavior remains in flight. |
-| Full smoke script | Implemented for merged surfaces | `flowchain:smoke` runs service tests, crypto tests/vectors, launch candidate, devnet tests, deterministic replay, dashboard build, hardware fixture, unsafe-claim scan, and export no-secret scan. Native object/control-plane lifecycle remains blocked. |
+| Start/stop scripts | Implemented | `flowchain:start` remains a compatibility wrapper; `flowchain:node` starts the long-running runtime; `flowchain:node:stop` and `flowchain:stop` request node shutdown through the stop file. |
+| Full smoke script | Implemented for merged surfaces | `flowchain:smoke` runs service tests, crypto tests/vectors, launch candidate, devnet tests, one-node runtime smoke, multi-node runtime smoke, deterministic replay, dashboard build, hardware fixture, unsafe-claim scan, and export no-secret scan. Control-plane query evidence remains blocked on subsystem work. |
 | Export/import state bundles | Implemented local wrapper | `flowchain:export` writes ignored export files and zip bundle; `flowchain:import` restores local state from a bundle. |
 | Troubleshooting guide | Implemented | `docs/FLOWCHAIN_TROUBLESHOOTING.md` plus script error messages. |
 
@@ -33,15 +34,16 @@ This document marks every major feature as one of:
 | Feature | Status | Acceptance condition |
 | --- | --- | --- |
 | No-value deterministic devnet | Implemented | Existing Rust devnet remains the single runtime surface. |
-| Private/local genesis/config | In flight | Chain agent must document generated config and replay behavior. |
-| Single-node local runtime | In flight | Current CLI can init/demo/run blocks and `flowchain:start` gives an obvious bounded start path; long-running node behavior is still missing. |
-| Multi-node or LAN notes | Missing | Must be optional and safe, or marked later gated. |
+| Private/local genesis/config | Implemented for chain runtime | `init` writes deterministic genesis config and operator key references; node state is under `devnet/local/state.json`; node-local identity/status files are under `devnet/local/node/`. |
+| Single-node local runtime | Implemented | `npm run flowchain:node` runs a long-running local node that persists state, ingests inbox transactions, produces interval blocks, writes logs/status, and stops through `flowchain:node:stop`. `npm run flowchain:node:smoke` proves 10+ blocks, transaction inclusion, restart persistence, and export/import. |
+| Multi-node or LAN notes | Implemented local-file mode; LAN not exposed | `npm run flowchain:multi-node:smoke` starts two local node processes and proves static local-file peer reconciliation. LAN mode is explicitly not exposed. |
 | Deterministic block production | Implemented | Current devnet models deterministic blocks and state roots. |
 | Deterministic replay | Implemented for merged demo | `flowchain:smoke` reruns the current demo twice and compares exported dashboard state roots. Full native object replay remains in flight. |
-| Transaction ingestion | In flight | Current devnet supports fixture submission; expanded object ingestion is active work. |
-| State export | Implemented | `export-fixtures` exists; full package export/import still needs the package-level smoke path. |
-| State import/snapshot restore | Implemented local wrapper | `flowchain:import` restores current devnet state from an exported bundle; richer subsystem snapshots remain future work. |
-| Health/status output | In flight | CLI summary exists; control-plane health is active work. |
+| Transaction ingestion | Implemented for chain runtime | `submit-tx`, `faucet`, `flowchain:tx`, and `flowchain:faucet` submit locally authorized JSON transactions to node inboxes or direct pending state. |
+| Local balance/faucet ledger | Implemented for no-value test units | `FaucetLocalBalance`, `TransferLocalBalance`, `localBalances`, `faucetRecords`, and `balanceTransfers` are included in state roots, blocks, exports, and smoke tests. |
+| State export | Implemented | `export-fixtures`, `export-state`, `flowchain:export`, and `flowchain:node:smoke` export runtime state. |
+| State import/snapshot restore | Implemented local wrapper | `flowchain:import` restores current devnet state from an exported bundle; `flowchain:node:smoke` proves runtime export/import root equality. |
+| Health/status output | Implemented for node/runtime | `node-status` and `flowchain:node:status` expose latest block, state root, pending transactions, local balance counts, persisted node status, and LAN boundary. Control-plane health remains in flight. |
 
 ## Native Objects
 
@@ -50,17 +52,18 @@ This document marks every major feature as one of:
 | Rootfield namespace | Implemented | Existing contracts, launch fixtures, and devnet model support this. |
 | Root commitment | Implemented | Existing contracts, fixtures, and devnet model support this. |
 | FlowPulse linkage | Implemented | Launch-core fixtures preserve contract-event semantics. |
-| AgentAccount | In flight | Active devnet/crypto work adds local object identity and state. |
-| ModelPassport | In flight | Active devnet/crypto work adds local object identity and state. |
-| WorkReceipt | In flight | Foundation exists; it must still be part of the full private testnet smoke flow. |
+| AgentAccount | Implemented in devnet | `RegisterAgent`, demo, handoff export, and `flowchain:tx` sample transaction cover local agent identity. |
+| ModelPassport | Implemented in devnet | `RegisterModelPassport`, demo, handoff export, and `flowchain:tx` sample transaction cover local model provenance. |
+| WorkReceipt | Implemented in devnet | Demo and smoke submit work receipts with dependency checks and handoff export. |
 | ToolReceipt | Missing | Explicit placeholder is acceptable for this package if documented. |
 | EvalReceipt | Missing | Explicit placeholder is acceptable for this package if documented. |
-| ArtifactAvailabilityProof | In flight | Active devnet/crypto/hardware work maps availability objects. |
-| VerifierModule | In flight | Active devnet/crypto work adds local verifier identity. |
-| VerifierReport | In flight | Existing verifier reports exist; they still must be queryable and workbench-visible in the private testnet package. |
-| MemoryCell | In flight | Active devnet/crypto/control-plane work expands local state. |
-| Challenge | In flight | Active devnet/crypto/control-plane work adds local challenge shape. |
-| FinalityReceipt | In flight | Active devnet/crypto/control-plane work adds local finality shape. |
+| ArtifactAvailabilityProof | Implemented in devnet | `MarkArtifactAvailability`, demo, smoke, roots, and handoff export cover local availability records. |
+| VerifierModule | Implemented in devnet | `RegisterVerifierModule`, verifier dependency checks, demo, smoke, roots, and handoff export cover local verifier identity. |
+| VerifierReport | Implemented in devnet | `SubmitVerifierReport`, accepted/failed status checks, demo, smoke, roots, and handoff export cover local reports. Workbench/query exposure remains subsystem work. |
+| MemoryCell | Implemented in devnet | `UpdateMemoryCell` requires an accepted verifier report and updates agent memory root; demo, smoke, roots, and handoff export cover it. |
+| Challenge | Implemented in devnet | `OpenChallenge` and `ResolveChallenge` enforce receipt/finality rules; demo, smoke, roots, and handoff export cover them. |
+| FinalityReceipt | Implemented in devnet | `FinalizeWorkReceipt` requires accepted receipts with no unresolved challenge; demo, smoke, roots, and handoff export cover it. |
+| LocalBalance/FaucetRecord | Implemented in devnet | Local no-value test-unit ledger supports transaction/faucet smoke and is included in roots, blocks, exports, and node status. |
 | DependencyAtom | Later gated | Keep as placeholder or dependency-root boundary; no SEAL proof claim. |
 
 ## Control Plane API
@@ -70,7 +73,7 @@ This document marks every major feature as one of:
 | Local API service | In flight | Extend `services/control-plane/`; do not create a second API surface. |
 | Health endpoint/method | In flight | Must show local-only status and source health. |
 | Chain status | In flight | Must include block, object, fixture, and capability counters. |
-| Blocks and transactions | Missing | Required for full private testnet inspection. |
+| Blocks and transactions | In flight | Devnet state and control-plane handoff include blocks, pending transactions, object maps, and roots; live API methods remain control-plane work. |
 | Agents and models | In flight | Must read existing devnet/fixture outputs. |
 | Receipts and artifacts | In flight | Must link memory receipts, work receipts, artifacts, and provenance. |
 | Verifier reports | In flight | Must expose reports and stable error shapes. |
@@ -86,11 +89,11 @@ This document marks every major feature as one of:
 | --- | --- | --- |
 | Existing dashboard V0 | Implemented | Fixture-backed app renders V0 Rootflow/Flow Memory and devnet data. |
 | Local private testnet workbench | In flight | Extend `apps/dashboard/`; do not build a second dashboard. |
-| Node health view | Missing | Must show local runtime/control-plane status. |
-| Blocks and transactions views | Missing | Must show deterministic local block and transaction state. |
-| Agents and models views | Missing | Must show local identity/provenance state. |
+| Node health view | In flight | Node status JSON exists; workbench rendering remains dashboard work. |
+| Blocks and transactions views | In flight | Devnet handoff includes blocks and pending transactions; workbench rendering remains dashboard work. |
+| Agents and models views | In flight | Devnet handoff includes local agents and models; workbench rendering remains dashboard work. |
 | Receipts, artifacts, reports views | In flight | Existing dashboard has V0 views; needs private testnet completeness. |
-| Memory cells, challenges, finality views | Missing | Required for full smoke inspection. |
+| Memory cells, challenges, finality views | In flight | Devnet handoff includes these objects; workbench rendering remains dashboard work. |
 | Provenance/source view | Missing | Required for second-computer debugging. |
 | Raw JSON view | Implemented | Existing dashboard has a raw JSON view; private testnet data remains part of the workbench extension. |
 | Loading/empty/error states | Missing | Required before second-computer validation. |
@@ -149,21 +152,26 @@ Current wrapper status:
 
 - `npm run flowchain:smoke` is the documented command.
 - It proves the merged launch-core, crypto helpers/vectors, local devnet,
-  export, dashboard build, hardware fixture, deterministic replay, and
-  claim/no-secret guardrails.
-- Crypto now contributes wallet and signed-envelope coverage through
+  native AgentAccount, ModelPassport, ArtifactAvailabilityProof,
+  VerifierModule, VerifierReport, MemoryCell, Challenge, FinalityReceipt,
+  local test-unit faucet records, one-node runtime behavior, static local-file
+  multi-node reconciliation, export/import, dashboard build, hardware fixture,
+  deterministic replay, and claim/no-secret guardrails.
+- Crypto contributes wallet and signed-envelope coverage through
   `npm test --prefix crypto` and `npm run validate:vectors --prefix crypto`.
-- It does not yet prove AgentAccount, ModelPassport, native MemoryCell,
-  Challenge, FinalityReceipt, or control-plane query coverage. Those rows stay
-  in flight or missing until subsystem PRs land behind the wrapper.
+- It does not yet prove live control-plane query coverage or workbench runtime
+  rendering. Those rows stay in flight until subsystem PRs land behind the
+  wrapper.
 
 Required final evidence for the acceptance PR:
 
 - Commands run.
 - Output files generated.
 - Deterministic root or fixture hash comparison.
-- Control-plane query sample.
-- Workbench screenshot or test/build evidence.
+- Control-plane query sample remains a follow-up until the control-plane
+  subsystem exposes the runtime handoff through API methods.
+- Workbench screenshot or test/build evidence remains a follow-up until the
+  dashboard subsystem renders the runtime handoff.
 - `git diff --check`.
 
 ## Review Gate
