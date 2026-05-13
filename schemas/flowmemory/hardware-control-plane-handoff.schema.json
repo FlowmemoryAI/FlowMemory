@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.hardware_control_plane_handoff.local_alpha.v0",
+  "title": "FlowMemory Hardware Control-Plane Handoff Local Alpha",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generatedAt",
+    "chainId",
+    "environment",
+    "sourceFixture",
+    "hardwareRequiredForPrivateTestnet",
+    "mode",
+    "boundary",
+    "ingest",
+    "collections",
+    "workbenchRecords",
+    "optionalSmokeRows"
+  ],
+  "properties": {
+    "schema": { "type": "string", "enum": ["flowmemory.hardware_control_plane_handoff.local_alpha.v0"] },
+    "generatedAt": { "type": "string" },
+    "chainId": { "type": "string", "enum": ["flowmemory-local-alpha"] },
+    "environment": { "type": "string", "enum": ["local-devnet-fixture"] },
+    "sourceFixture": { "type": "string", "maxLength": 128 },
+    "hardwareRequiredForPrivateTestnet": { "type": "boolean", "enum": [false] },
+    "mode": { "type": "string", "enum": ["read-only-optional-merge"] },
+    "boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "localOnly",
+        "advisory",
+        "normalNetworkReconciliationRequired",
+        "hardwareRequiredForPrivateTestnet",
+        "claimLimitations"
+      ],
+      "properties": {
+        "localOnly": { "type": "boolean", "enum": [true] },
+        "advisory": { "type": "boolean", "enum": [true] },
+        "normalNetworkReconciliationRequired": { "type": "boolean", "enum": [true] },
+        "hardwareRequiredForPrivateTestnet": { "type": "boolean", "enum": [false] },
+        "claimLimitations": { "type": "array", "items": { "type": "string", "maxLength": 180 } }
+      }
+    },
+    "ingest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stateKeys",
+        "mergePolicy",
+        "idFields",
+        "localOnly",
+        "normalNetworkReconciliationRequired"
+      ],
+      "properties": {
+        "stateKeys": { "type": "array", "items": { "type": "string", "maxLength": 64 } },
+        "mergePolicy": { "type": "string", "enum": ["replace-by-stable-id"] },
+        "idFields": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "hardwareSignals",
+            "operatorMetadata",
+            "hardwareNodes",
+            "workReceipts",
+            "verifierReports",
+            "bridgeAlerts",
+            "artifactCommitments",
+            "memoryCells",
+            "challenges",
+            "finalityReceipts",
+            "alerts"
+          ],
+          "properties": {
+            "hardwareSignals": { "type": "string", "enum": ["signalId"] },
+            "operatorMetadata": { "type": "string", "enum": ["metadataId"] },
+            "hardwareNodes": { "type": "string", "enum": ["nodeId"] },
+            "workReceipts": { "type": "string", "enum": ["receiptId"] },
+            "verifierReports": { "type": "string", "enum": ["reportId"] },
+            "bridgeAlerts": { "type": "string", "enum": ["bridgeAlertId"] },
+            "artifactCommitments": { "type": "string", "enum": ["artifactId"] },
+            "memoryCells": { "type": "string", "enum": ["memoryCellId"] },
+            "challenges": { "type": "string", "enum": ["challengeId"] },
+            "finalityReceipts": { "type": "string", "enum": ["finalityReceiptId"] },
+            "alerts": { "type": "string", "enum": ["incidentId"] }
+          }
+        },
+        "localOnly": { "type": "boolean", "enum": [true] },
+        "normalNetworkReconciliationRequired": { "type": "boolean", "enum": [true] }
+      }
+    },
+    "collections": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hardwareSignals",
+        "operatorMetadata",
+        "hardwareNodes",
+        "workReceipts",
+        "verifierReports",
+        "bridgeAlerts",
+        "artifactCommitments",
+        "memoryCells",
+        "challenges",
+        "finalityReceipts",
+        "alerts"
+      ],
+      "properties": {
+        "hardwareSignals": { "type": "array", "items": { "type": "object" } },
+        "operatorMetadata": { "type": "array", "items": { "type": "object" } },
+        "hardwareNodes": { "type": "array", "items": { "type": "object" } },
+        "workReceipts": { "type": "array", "items": { "type": "object" } },
+        "verifierReports": { "type": "array", "items": { "type": "object" } },
+        "bridgeAlerts": { "type": "array", "items": { "type": "object" } },
+        "artifactCommitments": { "type": "array", "items": { "type": "object" } },
+        "memoryCells": { "type": "array", "items": { "type": "object" } },
+        "challenges": { "type": "array", "items": { "type": "object" } },
+        "finalityReceipts": { "type": "array", "items": { "type": "object" } },
+        "alerts": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "workbenchRecords": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operatorMetadata",
+        "receipts",
+        "verifierReports",
+        "bridgeAlerts",
+        "artifacts",
+        "memoryCells",
+        "challenges",
+        "hardwareSignals",
+        "provenance"
+      ],
+      "properties": {
+        "operatorMetadata": { "type": "array", "items": { "type": "object" } },
+        "receipts": { "type": "array", "items": { "type": "object" } },
+        "verifierReports": { "type": "array", "items": { "type": "object" } },
+        "bridgeAlerts": { "type": "array", "items": { "type": "object" } },
+        "artifacts": { "type": "array", "items": { "type": "object" } },
+        "memoryCells": { "type": "array", "items": { "type": "object" } },
+        "challenges": { "type": "array", "items": { "type": "object" } },
+        "hardwareSignals": { "type": "array", "items": { "type": "object" } },
+        "provenance": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "optionalSmokeRows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "command", "requiredForChainProgress", "hardwareRequired"],
+        "properties": {
+          "label": { "type": "string", "maxLength": 96 },
+          "command": { "type": "string", "maxLength": 128 },
+          "requiredForChainProgress": { "type": "boolean", "enum": [false] },
+          "hardwareRequired": { "type": "boolean", "enum": [false] }
+        }
+      }
+    }
+  }
+}

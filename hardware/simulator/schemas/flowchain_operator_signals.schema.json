@@ -14,9 +14,11 @@
     "packetMappings",
     "signalEnvelopes",
     "hardwareSignals",
+    "operatorMetadata",
     "hardwareNodes",
     "workReceipts",
     "verifierReports",
+    "bridgeAlerts",
     "artifactCommitments",
     "memoryCells",
     "challenges",
@@ -37,11 +39,24 @@
     "sourcePaths": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["packetFixture", "operatorFixture", "operatorSchema", "mappingDoc"],
+      "required": [
+        "packetFixture",
+        "operatorFixture",
+        "operatorSchema",
+        "handoffFixture",
+        "handoffSchema",
+        "negativeReport",
+        "negativeReportSchema",
+        "mappingDoc"
+      ],
       "properties": {
         "packetFixture": { "type": "string", "maxLength": 128 },
         "operatorFixture": { "type": "string", "maxLength": 128 },
         "operatorSchema": { "type": "string", "maxLength": 128 },
+        "handoffFixture": { "type": "string", "maxLength": 128 },
+        "handoffSchema": { "type": "string", "maxLength": 128 },
+        "negativeReport": { "type": "string", "maxLength": 128 },
+        "negativeReportSchema": { "type": "string", "maxLength": 128 },
         "mappingDoc": { "type": "string", "maxLength": 128 }
       }
     },
@@ -83,30 +98,36 @@
           "sourcePacketType": {
             "type": "string",
             "enum": [
+              "device_manifest",
               "heartbeat",
               "compact_receipt_relay",
               "verifier_report_digest_relay",
               "emergency_offline_signal",
+              "bridge_alert",
               "nfc_memory_cartridge_metadata"
             ]
           },
           "flowchainSignal": {
             "type": "string",
             "enum": [
+              "operator_metadata",
               "hardware_node_status",
               "work_receipt_reference",
               "verifier_report_reference",
               "alert_challenge_input",
+              "bridge_observer_alert",
               "artifact_memory_reference"
             ]
           },
           "objectCollection": {
             "type": "string",
             "enum": [
+              "operatorMetadata",
               "hardwareNodes",
               "workReceipts",
               "verifierReports",
               "challenges",
+              "bridgeAlerts",
               "artifactCommitments"
             ]
           },
@@ -146,10 +167,12 @@
           "signalType": {
             "type": "string",
             "enum": [
+              "operator_metadata",
               "heartbeat",
               "receipt_relay",
               "verifier_digest_relay",
               "offline_alert_challenge_input",
+              "bridge_alert",
               "nfc_memory_cartridge_metadata"
             ]
           },
@@ -206,10 +229,12 @@
           "signalType": {
             "type": "string",
             "enum": [
+              "operator_metadata",
               "heartbeat",
               "receipt_relay",
               "verifier_digest_relay",
               "offline_alert_challenge_input",
+              "bridge_alert",
               "nfc_memory_cartridge_metadata"
             ]
           },
@@ -223,6 +248,44 @@
           "linkedObjectIds": { "type": "array", "items": { "type": "string", "maxLength": 96 } },
           "provenance": { "type": "object" },
           "rawEnvelope": { "type": "object" }
+        }
+      }
+    },
+    "operatorMetadata": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "metadataId",
+          "operatorId",
+          "nodeId",
+          "rootfieldId",
+          "displayName",
+          "roles",
+          "transportPreferences",
+          "hardwareRequiredForPrivateTestnet",
+          "noSecrets",
+          "radioPayloadBudgetBytes",
+          "metadataSource",
+          "observedAt",
+          "localOnly",
+          "sourcePacketType"
+        ],
+        "properties": {
+          "metadataId": { "type": "string", "maxLength": 96 },
+          "operatorId": { "type": "string", "maxLength": 96 },
+          "nodeId": { "type": "string", "maxLength": 64 },
+          "rootfieldId": { "type": "string", "maxLength": 96 },
+          "displayName": { "type": "string", "maxLength": 96 },
+          "roles": { "type": "array", "items": { "type": "string", "maxLength": 48 } },
+          "transportPreferences": { "type": "array", "items": { "type": "string", "maxLength": 48 } },
+          "hardwareRequiredForPrivateTestnet": { "type": "boolean", "enum": [false] },
+          "noSecrets": { "type": "boolean", "enum": [true] },
+          "radioPayloadBudgetBytes": { "type": "integer", "minimum": 0, "maximum": 200 },
+          "metadataSource": { "type": "string", "enum": ["device_manifest"] },
+          "observedAt": { "type": "string" },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "sourcePacketType": { "type": "string", "enum": ["device_manifest"] }
         }
       }
     },
@@ -308,6 +371,54 @@
           "resolutionState": { "type": "string", "enum": ["needs-full-report"] },
           "localOnly": { "type": "boolean", "enum": [true] },
           "sourcePacketType": { "type": "string", "enum": ["verifier_report_digest_relay"] }
+        }
+      }
+    },
+    "bridgeAlerts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "bridgeAlertId",
+          "bridgeId",
+          "rootfieldId",
+          "severity",
+          "alertCode",
+          "sourceChain",
+          "targetChain",
+          "subjectId",
+          "eventDigest",
+          "blockHint",
+          "status",
+          "resolutionState",
+          "summary",
+          "recommendedAction",
+          "payloadBytesEstimate",
+          "loraEligible",
+          "localOnly",
+          "doesNotBlockLocalChain",
+          "sourcePacketType"
+        ],
+        "properties": {
+          "bridgeAlertId": { "type": "string", "maxLength": 96 },
+          "bridgeId": { "type": "string", "maxLength": 48 },
+          "rootfieldId": { "type": "string", "maxLength": 96 },
+          "severity": { "type": "string", "enum": ["info", "warning", "critical"] },
+          "alertCode": { "type": "string", "maxLength": 64 },
+          "sourceChain": { "type": "string", "maxLength": 48 },
+          "targetChain": { "type": "string", "maxLength": 48 },
+          "subjectId": { "type": "string", "maxLength": 64 },
+          "eventDigest": { "type": "string", "maxLength": 66 },
+          "blockHint": { "type": "integer", "minimum": 0 },
+          "status": { "type": "string", "enum": ["unresolved", "pending", "verified", "failed"] },
+          "resolutionState": { "type": "string", "enum": ["operator-review-required"] },
+          "summary": { "type": "string", "maxLength": 180 },
+          "recommendedAction": { "type": "string", "maxLength": 96 },
+          "payloadBytesEstimate": { "type": "integer", "minimum": 0, "maximum": 200 },
+          "loraEligible": { "type": "boolean" },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "doesNotBlockLocalChain": { "type": "boolean", "enum": [true] },
+          "sourcePacketType": { "type": "string", "enum": ["bridge_alert"] }
         }
       }
     },
@@ -397,17 +508,29 @@
           "recommendedAction": { "type": "string", "maxLength": 96 },
           "status": { "type": "string", "enum": ["unresolved", "pending", "verified", "failed"] },
           "localOnly": { "type": "boolean", "enum": [true] },
-          "sourcePacketType": { "type": "string", "enum": ["emergency_offline_signal"] }
+          "sourcePacketType": { "type": "string", "enum": ["emergency_offline_signal", "bridge_alert"] }
         }
       }
     },
     "workbenchRecords": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["receipts", "verifierReports", "artifacts", "memoryCells", "challenges", "hardwareSignals", "provenance"],
+      "required": [
+        "operatorMetadata",
+        "receipts",
+        "verifierReports",
+        "bridgeAlerts",
+        "artifacts",
+        "memoryCells",
+        "challenges",
+        "hardwareSignals",
+        "provenance"
+      ],
       "properties": {
+        "operatorMetadata": { "type": "array", "items": { "type": "object" } },
         "receipts": { "type": "array", "items": { "type": "object" } },
         "verifierReports": { "type": "array", "items": { "type": "object" } },
+        "bridgeAlerts": { "type": "array", "items": { "type": "object" } },
         "artifacts": { "type": "array", "items": { "type": "object" } },
         "memoryCells": { "type": "array", "items": { "type": "object" } },
         "challenges": { "type": "array", "items": { "type": "object" } },
@@ -418,11 +541,22 @@
     "compatibility": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["controlPlaneStateKeys", "workbenchSectionKeys", "jsonRpcBoundary"],
+      "required": ["controlPlaneStateKeys", "workbenchSectionKeys", "jsonRpcBoundary", "flowchainFullSmokeOptionalRow"],
       "properties": {
         "controlPlaneStateKeys": { "type": "array", "items": { "type": "string", "maxLength": 64 } },
         "workbenchSectionKeys": { "type": "array", "items": { "type": "string", "maxLength": 64 } },
-        "jsonRpcBoundary": { "type": "string", "maxLength": 160 }
+        "jsonRpcBoundary": { "type": "string", "maxLength": 160 },
+        "flowchainFullSmokeOptionalRow": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["label", "command", "requiredForChainProgress", "hardwareRequired"],
+          "properties": {
+            "label": { "type": "string", "maxLength": 96 },
+            "command": { "type": "string", "maxLength": 128 },
+            "requiredForChainProgress": { "type": "boolean", "enum": [false] },
+            "hardwareRequired": { "type": "boolean", "enum": [false] }
+          }
+        }
       }
     }
   }

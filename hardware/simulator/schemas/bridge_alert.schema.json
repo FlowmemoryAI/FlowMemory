@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Bridge Alert",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "packet_type",
+    "schema_version",
+    "device_id",
+    "sequence",
+    "emitted_at",
+    "bridge_id",
+    "source_chain",
+    "target_chain",
+    "alert_code",
+    "severity",
+    "subject_id",
+    "digest",
+    "block_hint",
+    "payload_bytes_estimate",
+    "lora_eligible",
+    "verification_state",
+    "summary",
+    "operator_action"
+  ],
+  "properties": {
+    "packet_type": { "type": "string", "enum": ["bridge_alert"] },
+    "schema_version": { "type": "string" },
+    "device_id": { "type": "string", "maxLength": 32 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "emitted_at": { "type": "string" },
+    "bridge_id": { "type": "string", "maxLength": 48 },
+    "source_chain": { "type": "string", "maxLength": 48 },
+    "target_chain": { "type": "string", "maxLength": 48 },
+    "alert_code": {
+      "type": "string",
+      "enum": ["LOCKBOX_OBSERVER_LAG", "BRIDGE_DIGEST_MISMATCH", "BRIDGE_RELAY_STALE"]
+    },
+    "severity": { "type": "string", "enum": ["info", "warning", "critical"] },
+    "subject_id": { "type": "string", "maxLength": 64 },
+    "digest": { "type": "string", "maxLength": 64 },
+    "block_hint": { "type": "integer", "minimum": 0 },
+    "payload_bytes_estimate": { "type": "integer", "minimum": 0, "maximum": 200 },
+    "lora_eligible": { "type": "boolean" },
+    "verification_state": { "type": "string", "enum": ["advisory", "unresolved"] },
+    "summary": { "type": "string", "maxLength": 160 },
+    "operator_action": { "type": "string", "maxLength": 96 }
+  }
+}
