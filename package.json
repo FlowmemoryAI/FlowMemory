@@ -6,10 +6,11 @@
     "services/shared",
     "services/indexer",
     "services/verifier",
-    "services/flowmemory"
+    "services/flowmemory",
+    "services/control-plane"
   ],
   "scripts": {
-    "test": "npm test --prefix services/shared && npm test --prefix services/indexer && npm test --prefix services/verifier && npm test --prefix services/flowmemory",
+    "test": "npm test --prefix services/shared && npm test --prefix services/indexer && npm test --prefix services/verifier && npm test --prefix services/flowmemory && npm test --prefix services/control-plane",
     "contracts:hardening": "node infra/scripts/run-contract-hardening.mjs",
     "contracts:hardening:slither": "node infra/scripts/run-contract-hardening.mjs --require-slither",
     "index:base-canary": "npm run index:base-canary --prefix services/indexer",
@@ -40,7 +41,11 @@
     "workbench:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-workbench.ps1",
     "e2e": "npm run index:fixtures && npm run verify:fixtures && npm run flowmemory:generate",
     "demo:indexer": "npm run demo --prefix services/indexer",
-    "demo:verifier": "npm run demo --prefix services/verifier"
+    "demo:verifier": "npm run demo --prefix services/verifier",
+    "control-plane:test": "npm test --prefix services/control-plane",
+    "control-plane:demo": "npm run demo --prefix services/control-plane",
+    "control-plane:smoke": "npm run smoke --prefix services/control-plane",
+    "control-plane:serve": "npm run serve --prefix services/control-plane"
   },
   "devDependencies": {
     "ajv": "^8.20.0",
