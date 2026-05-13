@@ -14,7 +14,7 @@ test("indexes FlowPulse fixture logs into canonical observations", () => {
   assert.equal(state.schema, "flowmemory.indexer.state.v0");
   assert.equal(state.source, "fixture");
   assert.equal(state.observations.length, 1);
-  assert.equal(state.observations[0].observationId, "0x579e7de876bcc03e2bbf2ac8cd6a8a362b44cfca455e355933631dc7d1e80815");
+  assert.equal(state.observations[0].observationId, "0x9d958aadf8bf46f989b51e541709a73d21970e7e79643f939c9a0000b50f9a91");
   assert.equal(state.observations[0].lifecycleState, "observed");
   assert.equal(state.observations[0].duplicateKind, "unique");
   assert.equal(state.pulses.length, 1);
@@ -135,5 +135,5 @@ test("maps mocked local RPC logs into raw FlowPulse fixtures without secrets", a
   assert.deepEqual(calls, ["eth_chainId", "eth_getLogs", "eth_getTransactionReceipt"]);
   assert.equal(logs[0].chainId, "8453");
   assert.equal(logs[0].receiptStatus, "success");
-  assert.equal(indexFlowPulseLogs(logs).observations[0].observationId, "0x579e7de876bcc03e2bbf2ac8cd6a8a362b44cfca455e355933631dc7d1e80815");
+  assert.equal(indexFlowPulseLogs(logs).observations[0].observationId, "0x9d958aadf8bf46f989b51e541709a73d21970e7e79643f939c9a0000b50f9a91");
 });

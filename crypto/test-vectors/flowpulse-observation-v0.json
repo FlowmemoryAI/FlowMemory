@@ -1,0 +1,107 @@
+{
+  "schema": "flowmemory.crypto.flowpulse-observation.v0.test-vector",
+  "status": "synthetic draft vector; contains no production secrets or signatures",
+  "typeHashes": {
+    "flowPulseObservationV0": "0x6ca347f285c3fde2f3d15a8b0b032d89618a761700050ad8fc4f4032329eb7c9",
+    "flowPulseEventArgsV0": "0xf718b58c02f03b6dbc4580c0606068f89e205b3fe70738f5b04f1af15b205952",
+    "flowPulseReceiptV0": "0x89bf73fa3c44aec8ae3aab32a121925bad27d2d3e87b4d539f85434d769cc51c",
+    "artifactRootV0": "0x0c697b97c2b1158bb1cbc0b216c66e56f47677f8d2faef959160569f677e09cf",
+    "merkleLeafV0": "0x059deed0c546ef95cc993f54ac93c6975491e80d750868f74892c08c15d0408b",
+    "merkleInternalNodeV0": "0x86b0d2632b2953ba4dec85e000d0e91d9b75479f7c73b8a3f4bd22caae38e7a7",
+    "storageReceiptCommitmentV0": "0xb379598afafc29403a8bf80964117f2206c527fd0de2cfe1dbefd7051f08e44f",
+    "verifierReportV0": "0xe5d936ec5a6eaad5ab6cce4a08490a70ac27041a5334e4cf5ec1692d52219663",
+    "verifierSignatureV0": "0x242a58238785da3ab14aa8f209367b65f06d501737797e1db5b61983026ce6a4",
+    "workerSignatureV0": "0x2af0b882b42502fc02e026518c2c8c96ac730f3077184983341dbe7968d5d553",
+    "attestationEnvelopeV0": "0xc7b87c14150b5a44f23958ba00a9146bd9831292093dc4cdc601e00624b8d9e9",
+    "eip712Domain": "0xd87cd6ef79d4e2b95e15ce8abf732db51ec771f1ca2edccf22a46c729ac56472"
+  },
+  "flowPulse": {
+    "schemaId": "0xece59fcceac2b4dcd9e8732bb223b2b9cd7ae3626eeb79457b11a99f9bfc6fef",
+    "eventSignature": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+    "chainId": 8453,
+    "emittingContract": "0x1234567890abcdef1234567890abcdef12345678",
+    "rootfieldId": "0x726f6f746669656c642e62657461000000000000000000000000000000000000",
+    "actor": "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1",
+    "pulseType": 1,
+    "subject": "0x726f6f746669656c642e62657461000000000000000000000000000000000000",
+    "commitment": "0xf2909ae97d47adc4ec7106ea70cbed7f582d6e6066dd058a7bb5c637e493d5f5",
+    "parentPulseId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "sequence": 1,
+    "occurredAt": 1778640000,
+    "uri": "ipfs://metadata",
+    "uriHash": "0x573d5e91ce4505f0968237333e7faa29e5b3db0271bd53ca845f6d06315880d0",
+    "pulseId": "0x86b8325d6da0767e12097aed29aefe4820aaf4d6b7d4bb8371f1db927fda9d9d"
+  },
+  "observation": {
+    "blockNumber": 12345678,
+    "blockHash": "0x1111111111111111111111111111111111111111111111111111111111111111",
+    "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+    "transactionIndex": 7,
+    "logIndex": 3,
+    "observationId": "0xd80d0a3b317ceae266c9b7983c5a9376529f457a01469c96d8d3fd5a6c2d8a3f"
+  },
+  "receipt": {
+    "eventArgsHash": "0xd84ede2187c11d8927a683eb4a8aea41e6266e4feb0cb10eb3aeb43b857a3ed2",
+    "artifactRoot": "0xff501ac63f870de597cdc2a28dad8aeae3b52c5f1e2a658b1ea37c440b76f644",
+    "storageReceiptCommitment": "0xb341bddb79e03b03c0a6acfcc4d01d393a84d5187f02fea2fd1761c09f345da7",
+    "evidenceRoot": "0xe8e37a51ab4052012bd245722091179b164d04c550d736d0b95f81da8d7b10de",
+    "receiptVersion": 0,
+    "receiptHash": "0xca2ebca63e004ff4b0ca9766acbb2862b45059a480d911b67dbc25e937c2e733"
+  },
+  "artifact": {
+    "schemeId": "0x138660b5c871af72b8885b6fa35a598c8194d5224c9d473c67cb462ec7255491",
+    "contentMerkleRoot": "0x71d29e65fd4f25301225dcaabeb40fddabac5cbb327d4992c21a591b05eebca2",
+    "manifestCanonicalJson": "{\"byteLength\":14,\"chunkSize\":5,\"chunks\":[{\"chunkHash\":\"0x6dfc21ac0c8c2db036305d8bc6f887630d35e156f37d5a7e2275bc05bc004846\",\"index\":0,\"length\":5,\"offset\":0},{\"chunkHash\":\"0x9cfe0dc181c89029f2b16763070c20922901f0c18e094710477b8fecf8b78476\",\"index\":1,\"length\":4,\"offset\":5},{\"chunkHash\":\"0x8ec2a252e6833332e4d11a94054bb27c27c7220a2efddc664860650b61f98fc2\",\"index\":2,\"length\":5,\"offset\":9}],\"scheme\":\"FM-MERKLE-KECCAK256-BINARY-V0\",\"version\":0}",
+    "manifestHash": "0x8615b8096a0d4518a3fb74c4b08e231e955f58ac1bb934da88fbbe686553522f",
+    "metadataCanonicalJson": "{\"name\":\"flowmemory-test-artifact\",\"purpose\":\"flowpulse-observation-vector\"}",
+    "metadataHash": "0xa122871f2df16a7659cb1bd8f03f6bd5066d418310c8d611920de0bf835c4d7b",
+    "mediaTypeHash": "0x3cc4e82899630f0a4f171330a848e714845dd1eb55ac28123613ff7fcba91ccc",
+    "artifactRoot": "0xff501ac63f870de597cdc2a28dad8aeae3b52c5f1e2a658b1ea37c440b76f644"
+  },
+  "verifierReport": {
+    "reportSchemaHash": "0x487a3a70cf72c079fa8645f8d732cbe286f7f3aa0abd654f212ac1c1911a20ae",
+    "verifierId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
+    "verifierSetRoot": "0x96130fe314e14b7f7d4347094f6b5ec4338b1f7730bf505e59fd3e731753ff8b",
+    "status": 2,
+    "statusName": "verified",
+    "checksCanonicalJson": "{\"artifactRootMatchesManifest\":true,\"commitmentMatchesEvent\":true,\"cursorFromReceiptLog\":true,\"storageCommitmentWellFormed\":true,\"workerSignatureChecked\":false}",
+    "checksRoot": "0x48468783cf12adfeba9be8e0a5e250ab04b19d5034f7e1996610cf05f4fcef83",
+    "finalizedBlockNumber": 12345742,
+    "finalizedBlockHash": "0x1111111111111111111111111111111111111111111111111111111111111111",
+    "reportVersion": 0,
+    "reportId": "0x1b1c2940d6e83ee78a7e0a8285e4ce2530da1ce7964817806e61520a2e767355"
+  },
+  "verifierSignature": {
+    "verifierKeyId": "0x9bc6e07b6ca6b1f21697ed511d211b82186960d193036d5817f1a8a46a6daff5",
+    "issuedAtUnixMs": 1767225660000,
+    "expiresAtUnixMs": 1769817600000,
+    "nonce": "0xb50ddd6d6d2d9d3dc8310462bad743d6383de268350d75b6fa84d59c74687b93",
+    "eip712DomainSeparator": "0x199a93f8dae72a137df50c20b442f87315f4d7bf6b39cca9d62e07c48c58106a",
+    "structHash": "0x35b8f9982c297652622fd66fe931d9669db4847b2056cd126d92e5bd76c93315",
+    "signingDigest": "0x08334f56b2ac5a7c11bf33154907d37a05253f4d3324999e820ca166c0a39b1e",
+    "signature": null
+  },
+  "workerSignature": {
+    "workerId": "0x7803fe537f4b6e4ddd47f00b97a87c06aad1e42e22b83fdb522268e393319598",
+    "workerKeyId": "0xd2435c19a90c604a8a7e0b079be17b23846efd2313821825ebe2a9af5f3f9924",
+    "workerSequence": 1,
+    "expiresAtUnixMs": 1769817600000,
+    "artifactRoot": "0xff501ac63f870de597cdc2a28dad8aeae3b52c5f1e2a658b1ea37c440b76f644",
+    "nonce": "0x3574313751905cc45384e0a3f62258d38e9c64735e29bcee180459bb16cd4039",
+    "eip712DomainSeparator": "0xb1bd381ce93a8b36ea7e8389688cd847207acef42affdaa23743079f5614947b",
+    "structHash": "0x726e78bb0647bd8604d9f0a84ce2cd591039515dbbd1dc1bd18977e962643bee",
+    "signingDigest": "0x02a43a42d3c182a55b817835e1cdbca1238a4f86cb12e92063b710d38d85fbe3",
+    "signature": null
+  },
+  "attestationEnvelope": {
+    "subjectHash": "0x1b1c2940d6e83ee78a7e0a8285e4ce2530da1ce7964817806e61520a2e767355",
+    "subjectKind": 2,
+    "attesterId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
+    "attesterKeyId": "0x9bc6e07b6ca6b1f21697ed511d211b82186960d193036d5817f1a8a46a6daff5",
+    "verifierSetRoot": "0x96130fe314e14b7f7d4347094f6b5ec4338b1f7730bf505e59fd3e731753ff8b",
+    "issuedAtUnixMs": 1767225660000,
+    "expiresAtUnixMs": 1769817600000,
+    "nonce": "0xb50ddd6d6d2d9d3dc8310462bad743d6383de268350d75b6fa84d59c74687b93",
+    "attestationEnvelopeHash": "0x3e139c10ff22aea00c4442698f2d8650ba85f811c723cb7e4f28094d833fea80"
+  }
+}

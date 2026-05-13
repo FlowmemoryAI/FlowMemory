@@ -4,24 +4,24 @@ Date: 2026-05-12
 
 ## Status
 
-Accepted for the V0 local indexer/verifier package.
+Accepted for the V0 local indexer/verifier package and MVP foundation.
 
 ## Context
 
-FlowPulse contracts emit a `pulseId`, but contracts cannot know final receipt metadata such as `txHash`, `transactionIndex`, `logIndex`, `blockNumber`, or `blockHash` during execution. This matters for future hook work: hooks can emit events, but they cannot know final transaction metadata while running.
+FlowPulse contracts emit a `pulseId`, but contracts cannot know final receipt metadata such as `txHash`, `transactionIndex`, `logIndex`, `blockNumber`, or `blockHash` during execution. This is especially important for future Uniswap v4 hook work: hooks can emit events, but they cannot know final transaction metadata while running.
 
-The indexer needs a canonical identity for an observed FlowPulse log after receipts/logs are available. The verifier then needs deterministic report identities bound to those observations.
+The indexer needs a canonical identity for an observed FlowPulse log after receipts/logs are available. The identity must distinguish reorged occurrences, support deterministic verifier reports, and avoid treating advisory URI data as trusted evidence.
 
 ## Decision
 
 FlowMemory V0 uses separate identifiers:
 
 - `pulseId`: emitted by the contract inside the FlowPulse event.
-- `observationId`: derived by the indexer from receipt/log location after execution.
-- `cursorId`: derived by the indexer for source-set scan progress.
+- `observationId`: derived by the indexer from receipt/log metadata after execution.
+- `cursorId`: derived by the indexer for deterministic fixture scan progress.
 - `reportId`: derived by the verifier from canonical JSON report content.
 
-`pulseId` is protocol data, not canonical observation identity.
+`pulseId` is protocol data, not canonical observation identity. The canonical indexer identity is `observationId`.
 
 ## FlowPulse Event Signature
 
@@ -39,29 +39,46 @@ The `topic0` hash is:
 
 ## Observation ID
 
-The indexer derives `observationId` from:
+The indexer derives `observationId` from the crypto V0 type:
 
-- Domain: `flowmemory.flowpulse.observation.v0`
+```text
+FlowPulseObservationV0(uint256 chainId,address emittingContract,uint64 blockNumber,bytes32 blockHash,bytes32 txHash,uint32 transactionIndex,uint32 logIndex,bytes32 eventSignature,bytes32 pulseId,bytes32 rootfieldId)
+```
+
+Fields:
+
 - `chainId`
-- `sourceContract`
+- `emittingContract`
+- `blockNumber`
+- `blockHash`
 - `txHash`
+- `transactionIndex`
 - `logIndex`
+- `eventSignature`
+- `pulseId`
+- `rootfieldId`
 
 Preimage:
 
 ```text
 keccak256(abi.encode(
-  "flowmemory.flowpulse.observation.v0",
+  keccak256("FlowPulseObservationV0(uint256 chainId,address emittingContract,uint64 blockNumber,bytes32 blockHash,bytes32 txHash,uint32 transactionIndex,uint32 logIndex,bytes32 eventSignature,bytes32 pulseId,bytes32 rootfieldId)"),
   chainId,
-  sourceContract,
+  emittingContract,
+  blockNumber,
+  blockHash,
   txHash,
-  logIndex
+  transactionIndex,
+  logIndex,
+  eventSignature,
+  pulseId,
+  rootfieldId
 ))
 ```
 
-`sourceContract` is the normalized emitting contract address. `txHash` and `logIndex` are receipt/log-derived values. Decoded fields such as `pulseId`, `rootfieldId`, `actor`, `pulseType`, `subject`, `commitment`, `parentPulseId`, `sequence`, `occurredAt`, and `uri` are stored with the observation but are not part of the identity preimage.
+`blockHash` and `blockNumber` are included so a reorged log occurrence and a later re-mined occurrence can be represented as distinct observations. `eventSignature` scopes the identity to FlowPulse v0 logs, not arbitrary logs at the same receipt location.
 
-`blockHash`, `blockNumber`, `transactionIndex`, and `eventSignature` are also stored with the observation. They are used for ordering, display, finality, and reorg checks, but they are not part of the V0 `observationId` preimage.
+Decoded fields such as `actor`, `pulseType`, `subject`, `commitment`, `parentPulseId`, `sequence`, `occurredAt`, and `uri` are stored with the observation but are not part of the identity preimage. If the same `observationId` is observed with different decoded fields, that is an indexer integrity failure.
 
 ## Cursor ID
 
@@ -111,21 +128,22 @@ The V0 package models these states with fixtures. It does not implement producti
 
 ## Report ID
 
-The verifier derives `reportId` from:
+The verifier derives `reportId` from the canonical report body:
 
 ```text
 keccak256(canonical_json(reportCore))
 ```
 
-The `reportCore` includes `schema = flowmemory.verifier.report.v0`, `observationId`, observed receipt/log metadata, decoded FlowPulse fields, status, reason codes, evidence refs, resolver policy id, and verifier spec version. The report id does not include wall-clock timestamps, local file paths, signatures, or operator notes.
+The `reportCore` includes `schema = flowmemory.verifier.report.v0`, `observationId`, observed receipt/log metadata, decoded FlowPulse fields, status, reason codes, evidence refs, resolver policy id, and verifier spec version. The report id does not include signatures, wall-clock generation timestamps, local file paths, or operator notes.
 
 ## Consequences
 
 - Contracts remain unaware of receipt-only metadata.
-- Indexers can distinguish protocol pulse identity from observed-log identity.
+- Indexers can distinguish contract-emitted pulse identity from observed-log identity.
+- Reorged observations remain addressable for audits without being treated as current canonical facts.
 - Cursor progress can include block hash without changing observation identity.
-- Verifiers can produce deterministic reports bound to indexed observations.
-- Reorg and finality handling remains explicit state, not hidden inside `observationId`.
+- Verifiers can produce deterministic reports bound to receipt/log facts.
+- Dashboards and explorers can distinguish observed, verified, unresolved, unsupported, failed, reorged, stale, disputed, and superseded outcomes later without changing the observation identity.
 
 ## Out Of Scope
 

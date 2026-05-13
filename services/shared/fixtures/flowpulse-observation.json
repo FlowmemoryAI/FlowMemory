@@ -7,7 +7,10 @@
     "blockHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
     "txHash": "0x3333333333333333333333333333333333333333333333333333333333333333",
     "transactionIndex": "7",
-    "logIndex": "2"
+    "logIndex": "2",
+    "eventSignature": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+    "pulseId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "rootfieldId": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
   },
   "rawLog": {
     "chainId": "8453",
@@ -28,15 +31,15 @@
   },
   "expected": {
     "flowPulseTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
-    "observationId": "0x579e7de876bcc03e2bbf2ac8cd6a8a362b44cfca455e355933631dc7d1e80815",
-    "reportId": "0x93502ae2f02cbc1a74c56f2fe7c198239715402c56f9ba29ad341fc86e91e8d9"
+    "observationId": "0x9d958aadf8bf46f989b51e541709a73d21970e7e79643f939c9a0000b50f9a91",
+    "reportId": "0xae35a9633973459196170e08410675c18666ccc582b2700761b54619fd8e9294"
   },
   "reportCore": {
     "schema": "flowmemory.verifier.report.v0",
     "verifierSpecVersion": "0",
     "resolverPolicyId": "flowmemory.resolver.policy.v0.fixture",
     "status": "valid",
-    "observationId": "0x579e7de876bcc03e2bbf2ac8cd6a8a362b44cfca455e355933631dc7d1e80815",
+    "observationId": "0x9d958aadf8bf46f989b51e541709a73d21970e7e79643f939c9a0000b50f9a91",
     "observation": {
       "chainId": "8453",
       "emittingContract": "0x1111111111111111111111111111111111111111",

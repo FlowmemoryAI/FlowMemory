@@ -24,8 +24,8 @@ event FlowPulse(
 - `pulseId`: Domain-separated identifier created by the emitting contract. It is not a replacement for receipt metadata.
 - `rootfieldId`: Namespace for the committed state stream.
 - `actor`: Account that caused the pulse.
-- `pulseType`: Stable numeric type. Initial reserved values are `1` for rootfield registration, `2` for root commitment, and `3` for rootfield status changes.
-- `subject`: Type-specific subject. For registration this is the rootfield id. For root commitment this is the committed root.
+- `pulseType`: Stable numeric type. Initial reserved values are `1` for rootfield registration, `2` for root commitment, and `3` for rootfield lifecycle/status changes such as deactivation or ownership transfer.
+- `subject`: Type-specific subject. For registration and rootfield lifecycle changes this is the rootfield id. For root commitment this is the committed root.
 - `commitment`: Type-specific hash commitment to off-chain data or metadata. Heavy AI, model, memory, artifact, and media data stays off-chain.
 - `parentPulseId`: Optional prior pulse reference for chains of work or verification.
 - `sequence`: Monotonic sequence within the rootfield namespace.

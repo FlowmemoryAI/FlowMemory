@@ -1,0 +1,69 @@
+{
+  "input": {
+    "reportSchemaHash": "0x487a3a70cf72c079fa8645f8d732cbe286f7f3aa0abd654f212ac1c1911a20ae",
+    "observationId": "0xd80d0a3b317ceae266c9b7983c5a9376529f457a01469c96d8d3fd5a6c2d8a3f",
+    "receiptHash": "0xca2ebca63e004ff4b0ca9766acbb2862b45059a480d911b67dbc25e937c2e733",
+    "verifierId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
+    "verifierSetRoot": "0x96130fe314e14b7f7d4347094f6b5ec4338b1f7730bf505e59fd3e731753ff8b",
+    "status": 2,
+    "checksRoot": "0x48468783cf12adfeba9be8e0a5e250ab04b19d5034f7e1996610cf05f4fcef83",
+    "finalizedBlockNumber": 12345742,
+    "finalizedBlockHash": "0x1111111111111111111111111111111111111111111111111111111111111111",
+    "reportVersion": 0
+  },
+  "eip712": {
+    "deploymentId": "0xb501a54093cdfe0afe44da8cd94f376801f8d0123c5f2aef235156e326b8d1ea",
+    "chainId": 8453,
+    "verifyingContract": "0x0000000000000000000000000000000000000000"
+  },
+  "workerSignature": {
+    "input": {
+      "receiptHash": "0xca2ebca63e004ff4b0ca9766acbb2862b45059a480d911b67dbc25e937c2e733",
+      "workerId": "0x7803fe537f4b6e4ddd47f00b97a87c06aad1e42e22b83fdb522268e393319598",
+      "workerKeyId": "0xd2435c19a90c604a8a7e0b079be17b23846efd2313821825ebe2a9af5f3f9924",
+      "workerSequence": 1,
+      "expiresAtUnixMs": 1769817600000,
+      "artifactRoot": "0xff501ac63f870de597cdc2a28dad8aeae3b52c5f1e2a658b1ea37c440b76f644",
+      "nonce": "0x3574313751905cc45384e0a3f62258d38e9c64735e29bcee180459bb16cd4039"
+    },
+    "expected": {
+      "domainSeparator": "0xb1bd381ce93a8b36ea7e8389688cd847207acef42affdaa23743079f5614947b",
+      "structHash": "0x726e78bb0647bd8604d9f0a84ce2cd591039515dbbd1dc1bd18977e962643bee",
+      "signingDigest": "0x02a43a42d3c182a55b817835e1cdbca1238a4f86cb12e92063b710d38d85fbe3"
+    }
+  },
+  "verifierSignature": {
+    "input": {
+      "reportId": "0x1b1c2940d6e83ee78a7e0a8285e4ce2530da1ce7964817806e61520a2e767355",
+      "verifierId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
+      "verifierKeyId": "0x9bc6e07b6ca6b1f21697ed511d211b82186960d193036d5817f1a8a46a6daff5",
+      "verifierSetRoot": "0x96130fe314e14b7f7d4347094f6b5ec4338b1f7730bf505e59fd3e731753ff8b",
+      "issuedAtUnixMs": 1767225660000,
+      "expiresAtUnixMs": 1769817600000,
+      "nonce": "0xb50ddd6d6d2d9d3dc8310462bad743d6383de268350d75b6fa84d59c74687b93"
+    },
+    "expected": {
+      "domainSeparator": "0x199a93f8dae72a137df50c20b442f87315f4d7bf6b39cca9d62e07c48c58106a",
+      "structHash": "0x35b8f9982c297652622fd66fe931d9669db4847b2056cd126d92e5bd76c93315",
+      "signingDigest": "0x08334f56b2ac5a7c11bf33154907d37a05253f4d3324999e820ca166c0a39b1e"
+    }
+  },
+  "attestationEnvelope": {
+    "input": {
+      "subjectHash": "0x1b1c2940d6e83ee78a7e0a8285e4ce2530da1ce7964817806e61520a2e767355",
+      "subjectKind": 2,
+      "attesterId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
+      "attesterKeyId": "0x9bc6e07b6ca6b1f21697ed511d211b82186960d193036d5817f1a8a46a6daff5",
+      "verifierSetRoot": "0x96130fe314e14b7f7d4347094f6b5ec4338b1f7730bf505e59fd3e731753ff8b",
+      "issuedAtUnixMs": 1767225660000,
+      "expiresAtUnixMs": 1769817600000,
+      "nonce": "0xb50ddd6d6d2d9d3dc8310462bad743d6383de268350d75b6fa84d59c74687b93"
+    },
+    "expected": {
+      "attestationEnvelopeHash": "0x3e139c10ff22aea00c4442698f2d8650ba85f811c723cb7e4f28094d833fea80"
+    }
+  },
+  "expected": {
+    "reportId": "0x1b1c2940d6e83ee78a7e0a8285e4ce2530da1ce7964817806e61520a2e767355"
+  }
+}

@@ -1,6 +1,8 @@
 # FlowMemory Verifier V0
 
-This package is a local, fixture-first verifier. It consumes indexed FlowPulse observations, resolves only local fixture artifacts, applies deterministic commitment checks, and writes canonical verification reports. It is not a verifier network or production proof service.
+This package is a local, fixture-first verifier. It consumes indexed FlowPulse observations, resolves only local fixture artifacts, applies deterministic commitment checks, and writes canonical verification reports.
+
+It is not a verifier network, production proof service, token system, staking system, or full trustless verifier layer.
 
 ## Commands
 
@@ -42,7 +44,7 @@ The verifier does not fetch arbitrary HTTP or IPFS content. `uri` is advisory an
 
 ## Report Statuses
 
-V0 report statuses:
+The verifier report package uses these deterministic report statuses:
 
 - `valid`: supported checks passed.
 - `invalid`: supported checks ran and at least one required check failed.
@@ -51,6 +53,24 @@ V0 report statuses:
 - `reorged`: observation is removed or reorged.
 
 The status vocabulary is documented in [VERIFIER_STATUS_VOCABULARY.md](./VERIFIER_STATUS_VOCABULARY.md).
+
+## Flow Memory Status Mapping
+
+Flow Memory and dashboard surfaces may use the launch vocabulary:
+
+- `verified`
+- `unresolved`
+- `unsupported`
+- `failed`
+- `reorged`
+
+The V0 adapter rule is:
+
+- verifier `valid` maps to Flow Memory `verified`.
+- verifier `invalid` maps to Flow Memory `failed`.
+- verifier `unresolved`, `unsupported`, and `reorged` keep the same meaning.
+
+Do not silently collapse `unresolved` into `failed`; missing evidence and failed evidence are different states.
 
 ## Commitment Checks
 
@@ -116,5 +136,7 @@ JSON output is deterministic across repeated runs with the same fixtures.
 - No live artifact fetching.
 - No production database.
 - No report signing or attestations yet.
+- No zk proof implementation.
+- No API server.
 
 See [docs/INDEXER_VERIFIER_MVP.md](../../docs/INDEXER_VERIFIER_MVP.md) for the full local pipeline.

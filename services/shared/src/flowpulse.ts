@@ -99,8 +99,14 @@ export function parseFlowPulseLogFixture(
   const observationId = deriveObservationId({
     chainId: log.chainId,
     emittingContract,
+    blockNumber: log.blockNumber,
+    blockHash,
     txHash,
+    transactionIndex: log.transactionIndex,
     logIndex: log.logIndex,
+    eventSignature,
+    pulseId,
+    rootfieldId,
   });
   const sourceSetId = options.sourceSetId ?? deriveSourceSetId(log.chainId, options.sourceAddresses ?? [emittingContract]);
   const cursorId = deriveCursorId({
