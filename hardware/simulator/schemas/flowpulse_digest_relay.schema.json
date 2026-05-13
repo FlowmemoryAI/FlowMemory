@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FlowPulse Digest Relay",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["packet_type", "schema_version", "device_id", "sequence", "emitted_at", "chain", "from_block", "to_block", "event_count", "digest", "payload_bytes_estimate", "lora_eligible", "verification_state"],
+  "properties": {
+    "packet_type": { "type": "string", "enum": ["flowpulse_digest_relay"] },
+    "schema_version": { "type": "string" },
+    "device_id": { "type": "string", "maxLength": 32 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "emitted_at": { "type": "string" },
+    "chain": { "type": "string" },
+    "from_block": { "type": "integer", "minimum": 0 },
+    "to_block": { "type": "integer", "minimum": 0 },
+    "event_count": { "type": "integer", "minimum": 0 },
+    "digest": { "type": "string", "maxLength": 64 },
+    "payload_bytes_estimate": { "type": "integer", "minimum": 0, "maximum": 200 },
+    "lora_eligible": { "type": "boolean" },
+    "verification_state": { "type": "string", "enum": ["local", "advisory", "verified", "unresolved"] }
+  }
+}

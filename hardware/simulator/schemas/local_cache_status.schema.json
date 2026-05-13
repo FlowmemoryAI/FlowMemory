@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Local Cache Status",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["packet_type", "schema_version", "device_id", "sequence", "emitted_at", "cache_id", "mode", "bytes_used", "bytes_limit", "artifact_count", "receipt_count", "verified_count", "unresolved_count", "cache_digest", "health"],
+  "properties": {
+    "packet_type": { "type": "string", "enum": ["local_cache_status"] },
+    "schema_version": { "type": "string" },
+    "device_id": { "type": "string", "maxLength": 32 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "emitted_at": { "type": "string" },
+    "cache_id": { "type": "string", "maxLength": 48 },
+    "mode": { "type": "string", "enum": ["bounded-local", "read-only", "offline", "unknown"] },
+    "bytes_used": { "type": "integer", "minimum": 0 },
+    "bytes_limit": { "type": "integer", "minimum": 0 },
+    "artifact_count": { "type": "integer", "minimum": 0 },
+    "receipt_count": { "type": "integer", "minimum": 0 },
+    "verified_count": { "type": "integer", "minimum": 0 },
+    "unresolved_count": { "type": "integer", "minimum": 0 },
+    "cache_digest": { "type": "string", "maxLength": 64 },
+    "health": { "type": "string", "enum": ["healthy", "warning", "error", "unknown"] }
+  }
+}

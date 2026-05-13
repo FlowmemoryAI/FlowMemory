@@ -4,6 +4,10 @@ title: "[Bug]: "
 labels:
   - bug
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep the report scoped. Do not include live secrets, private keys, seed phrases, RPC credentials, or exploitable private details.
   - type: textarea
     id: summary
     attributes:
@@ -26,16 +30,66 @@ body:
     validations:
       required: true
   - type: textarea
-    id: reproduction
+    id: evidence
     attributes:
-      label: Reproduction Or Evidence
+      label: Evidence Or Reproduction
       description: Steps, logs, screenshots, file references, or reasoning.
     validations:
       required: false
   - type: textarea
-    id: scope
+    id: allowed_folders
     attributes:
-      label: Suspected Scope
-      description: Which area or directory is likely affected?
+      label: Allowed Folders
+      description: Which folders may be edited to fix this?
+      placeholder: |
+        - docs/
+        - .github/
     validations:
-      required: false
+      required: true
+  - type: textarea
+    id: forbidden_folders
+    attributes:
+      label: Forbidden Folders
+      description: Which folders must not be edited for this bug?
+      placeholder: |
+        - contracts/
+        - services/
+        - apps/
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: What must be true before this can close?
+      placeholder: |
+        - The stale statement is removed.
+        - The relevant docs agree with GitHub source of truth.
+        - Checks pass.
+    validations:
+      required: true
+  - type: dropdown
+    id: risk_level
+    attributes:
+      label: Risk Level
+      options:
+        - Low
+        - Medium
+        - High
+    validations:
+      required: true
+  - type: dropdown
+    id: recommended_agent_worktree
+    attributes:
+      label: Recommended Agent / Worktree
+      options:
+        - 'Review / maintenance - E:\FlowMemory\flowmemory-review'
+        - 'Protocol contracts - E:\FlowMemory\flowmemory-contracts'
+        - 'Services indexer/verifier - E:\FlowMemory\flowmemory-indexer'
+        - 'Apps dashboard/explorer - E:\FlowMemory\flowmemory-dashboard'
+        - 'Hardware - E:\FlowMemory\flowmemory-hardware'
+        - 'Research - E:\FlowMemory\flowmemory-research'
+        - 'Crypto - E:\FlowMemory\flowmemory-crypto'
+        - 'Chain/devnet research - E:\FlowMemory\flowmemory-chain'
+    validations:
+      required: true

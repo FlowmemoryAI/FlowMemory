@@ -22,6 +22,32 @@ This document captures initial security assumptions. It is not a final audit mod
 - Treat chain logs as observed facts only after receipts are available.
 - Treat hardware control channels as adversarial unless authenticated.
 
+## Cryptographic Foundation Draft
+
+The draft cryptographic foundation lives in:
+
+- `crypto/FLOWMEMORY_CRYPTO_SPEC.md`
+- `crypto/OBSERVATION_IDENTITY.md`
+- `crypto/RECEIPT_HASHING.md`
+- `crypto/MERKLE_AND_ROOTS.md`
+- `crypto/ATTESTATIONS.md`
+- `crypto/TEST_VECTORS.md`
+- `services/verifier/README.md`
+- `research/cryptography/THREAT_MODEL.md`
+- `research/cryptography/IMPLEMENTATION_PLAN.md`
+- `research/cryptography/FUTURE_ZK_ROADMAP.md`
+
+Current crypto assumptions:
+
+- FlowMemory v0 uses Keccak-256 typed hashes for Base/EVM compatibility.
+- `pulseId` is a contract-emitted logical identifier; `observationId` is derived by indexers from observed receipt and log metadata, including `txHash`, `transactionIndex`, `logIndex`, and `blockHash`.
+- `reportId` is a deterministic verifier report identifier; verifier signatures sign reports but do not make them trustless.
+- Receipt hashes do not embed signatures. Worker signatures and verifier attestations point at receipt hashes.
+- Artifact roots commit to off-chain content through explicit root schemes and Merkle formats.
+- Storage receipt commitments are challengeable availability claims, not permanent availability proofs.
+- Verifier attestations are signed verifier statements, not zk proofs and not full trustlessness.
+- Replay protection requires chain, deployment, sequence, nonce, expiry, and verifier-set domains.
+
 ## Threat Areas
 
 ### Protocol
@@ -68,6 +94,8 @@ Live V0 registries and schedulers are commitment surfaces, not complete trust sy
 - Incorrect `txHash` or `logIndex` derivation
 - Non-deterministic verification output
 - Trusting off-chain artifacts without checking commitments
+- Accepting worker signatures on the wrong chain, deployment, verifier set, or sequence
+- Treating verifier attestations as proofs instead of challengeable signed statements
 - Treat contract-emitted `pulseId` as protocol payload, not canonical observed-log identity.
 - Bind `observationId` to receipt/log metadata, including chain id, emitting contract, FlowPulse event signature, block hash, transaction hash, transaction index, and log index.
 - Treat advisory URI fields as lookup hints only; verifier reports must use explicit resolver policy and deterministic commitment checks.
@@ -80,6 +108,7 @@ Live V0 registries and schedulers are commitment surfaces, not complete trust sy
 - Weak provenance
 - Confusing model output with verified state
 - Embedding or retrieval data that cannot be traced to a receipt
+- Hashing low-entropy private metadata without salting or encryption
 
 ### Hardware
 
@@ -88,6 +117,16 @@ Live V0 registries and schedulers are commitment surfaces, not complete trust sy
 - Physical tampering
 - Unsafe power or enclosure assumptions
 - Overestimating LoRa or Meshtastic bandwidth
+- Treat FlowRouter v0 devices as physically exposed research rigs until a later identity and attestation model exists.
+- Keep hardware control surfaces local-only by default, and require explicit authentication before any radio message changes local state.
+- Treat local caches as stale or replayable unless entries are checked against commitments, receipts, or other verifiable provenance.
+- Avoid custom RF, antenna, amplifier, and production enclosure assumptions in v0; use certified commodity hardware within local radio rules.
+- Treat replayed LoRa messages as expected adversarial input until sequence, nonce, freshness, and audit rules exist.
+- Treat FCC, regional radio, antenna, duty-cycle, and equipment-authorization mistakes as project risks, not just operator mistakes.
+- Treat power, brownout, thermal throttling, fan failure, and sealed-enclosure heat buildup as safety and data-integrity risks.
+- Treat NVMe, SD card, and removable cartridge failures as cache-integrity risks; local cache is not a permanent source of truth.
+- Treat operator keys, channel keys, dashboard credentials, and cartridge labels as sensitive operational material that must not be exposed on displays, NFC tags, logs, or public MQTT.
+- Treat simulator packets, packet schemas, and generated fixtures as unsigned advisory test data until a later identity and authentication design exists.
 
 ### Supply Chain
 
@@ -95,6 +134,14 @@ Live V0 registries and schedulers are commitment surfaces, not complete trust sy
 - Unreviewed scripts
 - CI secrets exposure
 - Binary artifacts without provenance
+
+### Storage And Artifacts
+
+- Ambiguous artifact root scheme selection
+- Invalid Merkle openings
+- Unavailable off-chain artifacts
+- Locator leakage through public commitments
+- Retention claims that cannot be challenged or sampled
 
 Static analysis preparation:
 
@@ -111,3 +158,6 @@ Static analysis preparation:
 - Does it place heavy data on-chain?
 - Does it assume LoRa or Meshtastic can carry high-bandwidth traffic?
 - Are tests or verification steps included where practical?
+- Does every new receipt, root, signature, attestation, or challenge format have a domain-separated type hash?
+- Does replay protection cover chain, deployment, nonce or sequence, expiry, and verifier set where relevant?
+- Does the UI or documentation avoid claiming full trustlessness unless a proof and enforcement path exist?

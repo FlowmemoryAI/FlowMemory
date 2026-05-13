@@ -1,0 +1,10 @@
+{
+  "name": "@flowmemory/verifier-v0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "demo": "node src/demo.ts",
+    "verify:fixtures": "node src/verify-fixtures.ts",
+    "test": "node --test test/*.test.ts"
+  }
+}
