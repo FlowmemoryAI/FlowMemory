@@ -2,9 +2,9 @@
 
 Date: 2026-05-13
 
-Status: active audit, not complete.
+Status: local/test V0 launch-core integration complete.
 
-This audit tracks the launch-critical goal: build Rootflow V0 and Flow Memory V0 as a coherent local/testnet-ready V0 system. The repo is much stronger after the merged PR sequence, but the milestone is not complete until the end-to-end acceptance loop is generated and verified from one command.
+This audit tracks the launch-critical goal: build Rootflow V0 and Flow Memory V0 as a coherent local/testnet-ready V0 system. The local fixture acceptance path now exists and is verified. This does not mean production L1, production Uniswap v4 deployment, production verifier network, free storage, or AI running on-chain.
 
 ## Current Merged State
 
@@ -20,20 +20,53 @@ All previously open launch-foundation PRs have merged into `main`:
 | #61 | Indexer/verifier V0 fixtures | Shared services package, fixture indexer, fixture verifier, report schema, e2e command, and 24 service tests. |
 | #62 | Dashboard V0 | Fixture-backed Vite/React dashboard, dashboard fixture, views, tests, and production build. |
 
-## Main Smoke-Test Evidence
+## Launch-Core Evidence
+
+The single local acceptance command is:
+
+```powershell
+npm run launch:v0
+```
+
+It runs:
+
+1. FlowPulse fixture indexing.
+2. Verifier report generation.
+3. No-value local devnet handoff generation.
+4. FlowRouter hardware fixture validation.
+5. Rootflow and Flow Memory V0 generation.
+6. Dashboard fixture/runtime generation.
+
+Generated outputs:
+
+- `fixtures/launch-core/flowmemory-launch-v0.json`
+- `fixtures/launch-core/rootflow-transitions.json`
+- `fixtures/dashboard/flowmemory-dashboard-v0.json`
+- `apps/dashboard/public/data/flowmemory-dashboard-v0.json`
+- `fixtures/launch-core/generated/devnet/`
+
+Canonical schemas:
+
+- `schemas/flowmemory/memory-signal.schema.json`
+- `schemas/flowmemory/memory-receipt.schema.json`
+- `schemas/flowmemory/rootflow-transition.schema.json`
+- `schemas/flowmemory/rootfield-bundle.schema.json`
+- `schemas/flowmemory/agent-memory-view.schema.json`
+
+## Main Verification Evidence
 
 These commands were run from merged `main` on 2026-05-13.
 
 | Area | Command | Result |
 | --- | --- | --- |
+| Launch core | `npm run launch:v0` | 7 loaded FlowPulses, 7 indexed observations, 7 verifier reports, 6 Rootflow transitions, 7 MemorySignals, 7 MemoryReceipts, 1 RootfieldBundle, 1 AgentMemoryView. |
+| Services | `npm test` | 27 tests passed across shared, indexer, verifier, and FlowMemory packages. |
+| Services e2e | `npm run e2e` | Indexer -> verifier -> FlowMemory generator passed and wrote dashboard fixture. |
+| Dashboard | `npm test`; `npm run build` in `apps/dashboard` | 4 tests passed; production build passed. |
 | Contracts | `forge test` | 33 tests passed. |
-| Services | `npm test` | 24 tests passed across shared, indexer, and verifier packages. |
-| Services e2e | `npm run e2e` | 7 observations, 6 cursors, 2 rejected logs, 1 duplicate, 7 verifier reports. |
 | Crypto | `npm ci`; `npm test`; `npm run validate:vectors`; `python validate_test_vectors.py` | 13 tests passed; 21 vectors validated; Python FlowPulse recompute passed. |
-| Dashboard | `npm ci`; `npm test`; `npm run build` in `apps/dashboard` | 4 tests passed; production build passed. |
 | Devnet | `cargo test --manifest-path crates\flowmemory-devnet\Cargo.toml` | 7 tests passed. |
 | Hardware | `python hardware\simulator\flowrouter_sim.py --validate-file hardware\fixtures\flowrouter_sample_seed42.json` | Fixture validation passed. |
-| Repo hygiene | `git diff --check`; conflict marker scan | Clean after generated local artifacts were removed/restored. |
 
 ## Acceptance Matrix
 
@@ -41,51 +74,44 @@ These commands were run from merged `main` on 2026-05-13.
 | --- | --- | --- |
 | Rootfield namespaces | `RootfieldRegistry` registration and Foundry tests. | Implemented for V0 local contracts. |
 | Root commitments | `submitRoot`, counters, latest root storage, FlowPulse emission, tests. | Implemented for V0 local contracts. |
-| Parent/child memory-state transitions | `parentPulseId` and docs exist; no generated `RootflowTransition` artifact yet. | Incomplete. |
-| FlowPulse linkage | Contracts emit FlowPulse; services parse fixture logs and derive observations. | Implemented as fixture/local path. |
-| Receipt linkage | Crypto receipt/report helpers and verifier reports exist; no canonical `MemoryReceipt` fixture package yet. | Partial. |
-| Verifier status | Verifier reports use `valid`, `invalid`, `unresolved`, `unsupported`, `reorged`; docs define dashboard mapping. | Partial until adapter is implemented. |
-| Pending/verified/failed/reorged states | Indexer/verifier/dashboard all model pieces of these states. | Partial until one generated Flow Memory view normalizes them. |
-| Deterministic fixtures | Crypto, services, dashboard, devnet, hardware fixtures exist. | Implemented as separate fixtures. |
-| Dashboard-readable state | Dashboard fixture and app exist. | Implemented, but currently hand-maintained. |
-| Flow Memory schemas | `docs/FLOW_MEMORY_V0.md` specifies shapes. | Incomplete until canonical JSON schemas and validators exist. |
+| Parent/child memory-state transitions | `fixtures/launch-core/rootflow-transitions.json` contains generated RootflowTransition objects with parent pulse and parent transition links. | Implemented for local/test V0. |
+| FlowPulse linkage | Contracts emit FlowPulse; services parse fixture logs and generated MemorySignals reference pulse/observation ids. | Implemented for local/test V0. |
+| Receipt linkage | Generated MemoryReceipts link verifier reports to observations/rootfields. | Implemented for local/test V0. |
+| Verifier status | `services/flowmemory/src/status.ts` maps `valid`/`invalid` to `verified`/`failed`. | Implemented. |
+| Pending/verified/failed/reorged states | Generated dashboard fixture includes observed, pending, finalized, verified, failed, unresolved, unsupported, reorged, offline, and stale. | Implemented for local/test V0. |
+| Deterministic fixtures | Launch-core, dashboard, crypto, services, devnet, and hardware fixtures exist. | Implemented. |
+| Dashboard-readable state | Dashboard fixture is generated from services/devnet/hardware outputs. | Implemented. |
+| Flow Memory schemas | Canonical JSON schema files exist under `schemas/flowmemory/`. | Implemented for local/test V0. |
 | Verifier reports | Schema, local reports, tests, and e2e output exist. | Implemented for local fixtures. |
-| Dashboard display path | Vite dashboard renders fixture-backed views. | Implemented for local fixtures. |
-| Single acceptance command | No one command runs FlowPulse fixture -> indexer -> receipt/report -> Rootflow transition -> dashboard state. | Incomplete. |
+| Dashboard display path | Dashboard includes Flow Memory / Rootflow view and renders generated fixture data. | Implemented for local fixtures. |
+| Single acceptance command | `npm run launch:v0`. | Implemented. |
+| Area-specific CI | CI includes contracts, services/launch-core, crypto, dashboard, devnet, and hardware jobs. | Implemented. |
 
-## Build Gaps
+## Remaining Gated Work
 
-Critical launch-core gaps:
+Not part of local/test V0 completion:
 
-- Build a concrete `RootflowTransition` object and fixture output.
-- Build canonical JSON schemas and validators for `MemorySignal`, `MemoryReceipt`, `RootfieldBundle`, `AgentMemoryView`, and `RootflowTransition`.
-- Create a generated dashboard fixture from service/devnet/hardware outputs instead of relying only on `fixtures/dashboard/flowmemory-dashboard-v0.json`.
-- Add the explicit adapter from verifier report statuses `valid`/`invalid` to Flow Memory/dashboard statuses `verified`/`failed`.
-- Add a single local acceptance command that runs the complete V0 loop and leaves dashboard-readable output.
-- Add area-specific CI so GitHub enforces more than repository hygiene.
-
-Important but not launch-blocking gaps:
-
-- Live RPC indexing and durable persistence.
+- Live RPC indexing and durable production persistence.
 - Production Uniswap v4 hook deployment.
 - Production appchain/L1, sequencer, validator, bridge, or token design.
 - Hardware firmware, real Meshtastic devices, manufacturing, certification, and field deployment.
 - Trustless proof systems, verifier economics, slashing, GPU proofs, and production verifier network.
+- Runtime JSON Schema validation with a dedicated validator dependency.
 
 ## Next Three Issues
 
-1. `[launch-core/integration] Build one-command Rootflow and Flow Memory V0 acceptance pipeline`
-   - Agent/worktree: Integration or Backend/Indexer Agent in `E:\FlowMemory\flowmemory-review` or `E:\FlowMemory\flowmemory-indexer`.
-   - Owns: generated fixtures, launch command, RootflowTransition output, MemorySignal/MemoryReceipt/RootfieldBundle/AgentMemoryView generation.
+1. `[launch-core/validation] Add runtime schema validation and fixture diff guardrails`
+   - Agent/worktree: Review/Integration Agent in `E:\FlowMemory\flowmemory-review`.
+   - Owns: schema validator choice, fixture validation command, CI diff policy.
 
-2. `[launch-core/schemas] Add canonical Flow Memory and Rootflow JSON schemas`
-   - Agent/worktree: Crypto Agent in `E:\FlowMemory\flowmemory-crypto`.
-   - Owns: schemas, canonical ids, vector fixtures, validation commands, status mapping decision.
+2. `[contracts/security] Add static-analysis setup and V0 contract hardening notes`
+   - Agent/worktree: Contracts Agent in `E:\FlowMemory\flowmemory-contracts`.
+   - Owns: Slither setup issue, owner/status boundary review, test gaps.
 
-3. `[launch-core/dashboard] Replace hand-maintained dashboard fixture with generated V0 output`
+3. `[dashboard/polish] Polish generated Flow Memory / Rootflow dashboard view`
    - Agent/worktree: Dashboard Agent in `E:\FlowMemory\flowmemory-dashboard`.
-   - Owns: dashboard fixture adapter/generator, UI proof that generated Rootflow/Flow Memory objects render correctly, dashboard tests.
+   - Owns: visual polish, better filtering, generated object inspection, no live API claims.
 
 ## Current Recommendation
 
-Do not call Rootflow V0 and Flow Memory V0 complete yet. The separate building blocks are now merged and locally verified; the next job is integration, schema validation, generated dashboard state, and CI.
+Treat Rootflow V0 and Flow Memory V0 as locally integrated and fixture-complete. Keep production claims blocked until separate live indexing, deployment, proof, verifier-network, and chain decisions are made.

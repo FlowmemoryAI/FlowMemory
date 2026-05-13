@@ -4,7 +4,7 @@ export type DashboardStatus =
   | "finalized"
   | "verified"
   | "unresolved"
-  | "invalid"
+  | "failed"
   | "unsupported"
   | "reorged"
   | "offline"
@@ -132,6 +132,97 @@ export interface VerifierReport extends ProvenancedRecord {
   reportHash: string;
 }
 
+export interface RootflowTransition extends ProvenancedRecord {
+  transitionId: string;
+  rootfieldId: string;
+  observationId: string;
+  pulseId: string;
+  parentPulseId: string;
+  parentTransitionId: string | null;
+  memorySignalId: string;
+  memoryReceiptId: string | null;
+  reportId: string | null;
+  previousRoot: string;
+  attemptedRoot: string;
+  nextRoot: string;
+  blockNumber: string;
+  txHash: string;
+  sequence: string;
+  reasonCodes: string[];
+}
+
+export interface MemorySignal extends ProvenancedRecord {
+  signalId: string;
+  observationId: string;
+  pulseId: string;
+  rootfieldId: string;
+  signalType: string;
+  chainId: string;
+  emittingContract: string;
+  blockNumber: string;
+  blockHash: string;
+  txHash: string;
+  transactionIndex: string;
+  logIndex: string;
+  actor: string;
+  subject: string;
+  commitment: string;
+  parentPulseId: string;
+  sequence: string;
+  occurredAt: string;
+  uri: string;
+  summary: string;
+}
+
+export interface MemoryReceipt extends ProvenancedRecord {
+  receiptId: string;
+  reportId: string;
+  reportDigest: string;
+  observationId: string;
+  rootfieldId: string;
+  verifierStatus: string;
+  flowMemoryStatus: DashboardStatus;
+  resolverPolicyId: string;
+  verifierSpecVersion: string;
+  checksPassed: number;
+  checksTotal: number;
+  reasonCodes: string[];
+  evidenceRefs: Array<Record<string, string>>;
+}
+
+export interface RootfieldBundle extends ProvenancedRecord {
+  bundleId: string;
+  rootfieldId: string;
+  latestRoot: string;
+  latestTransitionId: string | null;
+  transitionIds: string[];
+  memorySignalIds: string[];
+  memoryReceiptIds: string[];
+  verifierReportIds: string[];
+  counts: {
+    observations: number;
+    transitions: number;
+    receipts: number;
+    verified: number;
+    failed: number;
+    unresolved: number;
+    unsupported: number;
+    reorged: number;
+  };
+}
+
+export interface AgentMemoryView extends ProvenancedRecord {
+  viewId: string;
+  rootfieldId: string;
+  latestRoot: string;
+  latestTransitionId: string | null;
+  signalIds: string[];
+  receiptIds: string[];
+  transitionIds: string[];
+  warnings: string[];
+  localOnly: true;
+}
+
 export interface DevnetBlock extends ProvenancedRecord {
   blockNumber: number;
   blockHash: string;
@@ -176,6 +267,11 @@ export interface DashboardData {
   workLanes: WorkLane[];
   workReceipts: WorkReceipt[];
   verifierReports: VerifierReport[];
+  rootflowTransitions: RootflowTransition[];
+  memorySignals: MemorySignal[];
+  memoryReceipts: MemoryReceipt[];
+  rootfieldBundles: RootfieldBundle[];
+  agentMemoryViews: AgentMemoryView[];
   devnetBlocks: DevnetBlock[];
   hardwareNodes: HardwareNode[];
   alerts: AlertIncident[];

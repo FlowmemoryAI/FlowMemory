@@ -29,6 +29,11 @@ export function validateDashboardData(payload: unknown): DashboardData {
   assertArray(candidate.workLanes, "workLanes");
   assertArray(candidate.workReceipts, "workReceipts");
   assertArray(candidate.verifierReports, "verifierReports");
+  assertArray(candidate.rootflowTransitions, "rootflowTransitions");
+  assertArray(candidate.memorySignals, "memorySignals");
+  assertArray(candidate.memoryReceipts, "memoryReceipts");
+  assertArray(candidate.rootfieldBundles, "rootfieldBundles");
+  assertArray(candidate.agentMemoryViews, "agentMemoryViews");
   assertArray(candidate.devnetBlocks, "devnetBlocks");
   assertArray(candidate.hardwareNodes, "hardwareNodes");
   assertArray(candidate.alerts, "alerts");

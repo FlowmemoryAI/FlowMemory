@@ -10,7 +10,7 @@ FlowMemory is in foundation hardening.
 
 The bootstrap repository operating system, contracts V0 foundation, crypto V0 foundation, local indexer/verifier fixture package, dashboard V0, FlowRouter hardware POC, and local no-value devnet prototype have merged into `main`.
 
-The next major target is a single runnable launch-core V0 stack that connects contract fixtures, local indexing/verifier outputs, crypto schema vocabulary, Rootflow transitions, Flow Memory objects, and dashboard-readable state without production deployment.
+The launch-core V0 stack now has a single runnable local command that connects contract fixtures, local indexing/verifier outputs, crypto schema vocabulary, Rootflow transitions, Flow Memory objects, generated dashboard state, local no-value devnet output, and hardware POC output without production deployment.
 
 Launch-critical direction: Rootflow V0 and Flow Memory V0 are the core of the next milestone. Rootflow defines memory-state transitions. Flow Memory defines the agent-facing memory objects derived from FlowPulse observations, receipts, verifier reports, and committed roots.
 
@@ -52,9 +52,18 @@ Indexer/verifier local package:
 Dashboard V0:
 
 - `apps/dashboard/` contains a Vite/React fixture-backed dashboard.
-- It renders overview, FlowPulse stream, Rootfields, work receipts, verifier reports, devnet blocks, hardware nodes, alerts, and raw JSON views.
-- The dashboard currently uses the canonical fixture at `fixtures/dashboard/flowmemory-dashboard-v0.json`.
+- It renders overview, Flow Memory / Rootflow, FlowPulse stream, Rootfields, work receipts, verifier reports, devnet blocks, hardware nodes, alerts, and raw JSON views.
+- The dashboard uses the generated canonical fixture at `fixtures/dashboard/flowmemory-dashboard-v0.json`.
 - Dashboard tests and production build pass after installing `apps/dashboard` dependencies.
+
+Launch-core integration:
+
+- `npm run launch:v0` runs the local end-to-end V0 flow.
+- `fixtures/launch-core/flowmemory-launch-v0.json` contains generated MemorySignal, MemoryReceipt, RootfieldBundle, AgentMemoryView, and RootflowTransition objects.
+- `fixtures/launch-core/rootflow-transitions.json` contains concrete generated RootflowTransition output.
+- `schemas/flowmemory/` contains canonical JSON schemas for MemorySignal, MemoryReceipt, RootflowTransition, RootfieldBundle, and AgentMemoryView.
+- `services/flowmemory/src/status.ts` implements the explicit verifier-to-Flow-Memory status adapter: `valid` -> `verified`, `invalid` -> `failed`, `unresolved` -> `unresolved`, `unsupported` -> `unsupported`, `reorged` -> `reorged`.
+- `.github/workflows/ci.yml` now includes area jobs for contracts, services/launch core, crypto, dashboard, devnet, and hardware.
 
 Local no-value devnet prototype:
 
@@ -85,15 +94,10 @@ Launch-core specifications:
 - Production ownership, upgrade, governance, fee, token, or incentive mechanics.
 - Dynamic fees or tokenomics.
 - Production Uniswap v4 hook deployment.
-- Complete Rootflow runtime implementation.
-- Complete Flow Memory runtime implementation.
-- Canonical JSON schema package for Rootflow and Flow Memory objects.
-- End-to-end fixture-backed Rootflow acceptance run.
-- Completed launch-core acceptance audit.
-- Area-specific CI jobs for contracts, crypto, services, dashboard, devnet, and hardware checks.
-- Single generated end-to-end Rootflow/Flow Memory acceptance command.
-- Generated dashboard fixture built from service/devnet/hardware outputs instead of a hand-maintained fixture.
-- External status adapter that maps verifier `valid`/`invalid` to Flow Memory/dashboard `verified`/`failed`.
+- Production Rootflow runtime implementation.
+- Production Flow Memory runtime implementation.
+- Hosted launch-core services.
+- Rich JSON Schema runtime validation with a dedicated validator dependency.
 - Production indexer or verifier service runtime.
 - Production persistence layer, production live RPC reader, production APIs, or hosted services.
 - Explorer or hardware console implementation.
@@ -153,10 +157,10 @@ Before assigning agents, check for dirty worktrees and avoid overlapping folders
 ## Current Operator Priorities
 
 1. Make Rootflow V0 and Flow Memory V0 pass the launch acceptance matrix in `docs/V0_LAUNCH_ACCEPTANCE.md`.
-2. Finish contracts foundation hardening without production deployment or token mechanics.
-3. Build deterministic local fixtures for FlowPulse, receipts, Rootflow transitions, verifier reports, and dashboard state.
-4. Define canonical crypto and JSON schema vocabulary before proof systems or verifier economics.
-5. Keep dashboard work fixture-backed until indexer/verifier outputs stabilize.
+2. Keep the generated launch-core command stable in CI.
+3. Add richer schema validation before live services.
+4. Finish contracts hardening without production deployment or token mechanics.
+5. Keep dashboard work fixture-backed until a production API is explicitly scoped.
 6. Keep chain/appchain work no-value and local until explicit gates are passed.
 
 ## Update Rule

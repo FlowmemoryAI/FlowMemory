@@ -59,6 +59,14 @@ FlowMemory is managed as a multi-agent program. The management layer is part of 
 
 Immediate major milestone: build the Rootflow V0 and Flow Memory V0 launch core. This means local contracts/tests, FlowPulse fixtures, Rootflow transitions, Flow Memory schemas, verifier reports, crypto fixtures, dashboard-readable state, and local smoke-test gates. It does not mean production deployment.
 
+Run the local launch-core path:
+
+```powershell
+npm run launch:v0
+```
+
+This regenerates local/test Rootflow and Flow Memory V0 fixtures, including `fixtures/launch-core/flowmemory-launch-v0.json`, `fixtures/launch-core/rootflow-transitions.json`, and the dashboard fixture at `fixtures/dashboard/flowmemory-dashboard-v0.json`.
+
 ## What Not To Claim
 
 - Do not claim FlowMemory has production contracts or deployment automation.

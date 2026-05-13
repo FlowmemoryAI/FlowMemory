@@ -181,4 +181,22 @@ Flow Memory V0 is launch-ready only when the local system can:
 6. Update a RootfieldBundle.
 7. Render an AgentMemoryView or dashboard equivalent.
 
+The current local/test generator is:
+
+```powershell
+npm run launch:v0
+```
+
+It writes generated Flow Memory V0 objects to:
+
+```text
+fixtures/launch-core/flowmemory-launch-v0.json
+```
+
+Canonical local/test schemas live in:
+
+```text
+schemas/flowmemory/
+```
+
 The first launch can be fixture-backed, but the boundaries must be honest and documented.

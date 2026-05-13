@@ -1,6 +1,6 @@
 # V0 Launch Acceptance Matrix
 
-Status: active milestone checklist.
+Status: local/test V0 acceptance path implemented.
 
 This matrix maps the Rootflow V0 and Flow Memory V0 goal to concrete evidence. It is intentionally strict: a PR, passing test, or useful document is only evidence if it covers the requirement named here.
 
@@ -31,22 +31,22 @@ It must not claim production L1, production mainnet readiness, full trustless ve
 
 | Requirement | Required evidence | Owner | Current state |
 | --- | --- | --- | --- |
-| Rootfield namespaces | Contract or fixture registers `rootfieldId`; docs explain namespace policy. | Contracts | Baseline exists in `RootfieldRegistry`; policy still needs hardening. |
-| Root commitments | Contract or fixture commits a nonzero root and emits/records the update. | Contracts | Baseline exists in `submitRoot`; tests need launch-grade coverage. |
-| Parent/child transitions | `RootflowTransition` includes parent pulse/root and new root. | Indexer + Crypto + Contracts | Specified in `docs/ROOTFLOW_V0.md`; implementation still required. |
-| FlowPulse linkage | Transition and memory signal reference `pulseId`. | Indexer + Dashboard | Specified; parser and display path still required. |
-| Receipt linkage | `MemoryReceipt` links signal, artifact commitment, evidence URI, and verifier report. | Crypto + Indexer | Specified in `docs/FLOW_MEMORY_V0.md`; implementation still required. |
-| Verifier statuses | Cross-agent status vocabulary exists and verifier reports use it. | Indexer + Crypto | Specified; schema/tests still required. |
-| Pending state | Fixture/report can show pending transition. | Indexer + Dashboard | Required, not complete. |
-| Verified state | Fixture/report can show verified transition. | Indexer + Crypto + Dashboard | Required, not complete. |
-| Failed state | Fixture/report can show rejected transition. | Indexer + Dashboard | Required, not complete. |
-| Reorged state | Fixture/report can show removed/superseded observation. | Indexer | Required, not complete. |
-| Deterministic fixtures | Fixtures run without private RPC keys or secrets. | Indexer + Crypto + Chain | Required, not complete. |
-| Dashboard-readable state | JSON/API/fixture shape feeds dashboard views. | Dashboard + Indexer | Required, not complete. |
-| Flow Memory schemas | `MemorySignal`, `MemoryReceipt`, `RootfieldBundle`, and `AgentMemoryView` schemas exist. | Crypto + Indexer + Dashboard | Specified; canonical schemas still required. |
-| Verifier reports | JSON schema and sample reports exist. | Indexer + Crypto | Required, not complete. |
-| Dashboard display path | Dashboard renders Rootfield, transition, signal, receipt, and status data. | Dashboard | Required, not complete. |
-| Source-of-truth docs | Current state, roadmap, decision record, and specs are updated. | HQ/Review | This PR adds the launch-core docs. |
+| Rootfield namespaces | Contract or fixture registers `rootfieldId`; docs explain namespace policy. | Contracts | Implemented for local/test V0 in `RootfieldRegistry` and tests. |
+| Root commitments | Contract or fixture commits a nonzero root and emits/records the update. | Contracts | Implemented for local/test V0 in contracts and generated fixtures. |
+| Parent/child transitions | `RootflowTransition` includes parent pulse/root and new root. | Indexer + Crypto + Contracts | Implemented in `fixtures/launch-core/rootflow-transitions.json`. |
+| FlowPulse linkage | Transition and memory signal reference `pulseId`. | Indexer + Dashboard | Implemented in generated MemorySignals and RootflowTransitions. |
+| Receipt linkage | `MemoryReceipt` links signal, artifact commitment, evidence URI, and verifier report. | Crypto + Indexer | Implemented in `fixtures/launch-core/flowmemory-launch-v0.json`. |
+| Verifier statuses | Cross-agent status vocabulary exists and verifier reports use it. | Indexer + Crypto | Implemented with explicit adapter in `services/flowmemory/src/status.ts`. |
+| Pending state | Fixture/report can show pending transition. | Indexer + Dashboard | Implemented in generated dashboard fixture. |
+| Verified state | Fixture/report can show verified transition. | Indexer + Crypto + Dashboard | Implemented in generated dashboard fixture. |
+| Failed state | Fixture/report can show rejected transition. | Indexer + Dashboard | Implemented via `invalid` -> `failed` adapter. |
+| Reorged state | Fixture/report can show removed/superseded observation. | Indexer | Implemented in generated transition/report/dashboard state. |
+| Deterministic fixtures | Fixtures run without private RPC keys or secrets. | Indexer + Crypto + Chain | Implemented; `npm run launch:v0` regenerates deterministic local fixtures. |
+| Dashboard-readable state | JSON/API/fixture shape feeds dashboard views. | Dashboard + Indexer | Implemented in generated dashboard fixture. |
+| Flow Memory schemas | `MemorySignal`, `MemoryReceipt`, `RootflowTransition`, `RootfieldBundle`, and `AgentMemoryView` schemas exist. | Crypto + Indexer + Dashboard | Implemented under `schemas/flowmemory/`. |
+| Verifier reports | JSON schema and sample reports exist. | Indexer + Crypto | Implemented in verifier package and generated MemoryReceipts. |
+| Dashboard display path | Dashboard renders Rootfield, transition, signal, receipt, and status data. | Dashboard | Implemented in Flow Memory / Rootflow dashboard view and raw JSON. |
+| Source-of-truth docs | Current state, roadmap, decision record, and specs are updated. | HQ/Review | Implemented with launch-core decision and audit updates. |
 
 ## End-To-End Acceptance Test
 
@@ -61,12 +61,11 @@ A developer must be able to run a local V0 flow:
 
 The final acceptance evidence should include:
 
-- exact commands run;
-- fixture paths;
-- output paths;
-- screenshots or dashboard verification notes when UI exists;
-- test results;
-- PR links for each subsystem.
+- command: `npm run launch:v0`;
+- fixture paths: `fixtures/launch-core/`, `fixtures/dashboard/flowmemory-dashboard-v0.json`;
+- output paths: `fixtures/launch-core/flowmemory-launch-v0.json`, `fixtures/launch-core/rootflow-transitions.json`, `apps/dashboard/public/data/flowmemory-dashboard-v0.json`;
+- test results: services, dashboard, contracts, crypto, devnet, and hardware checks;
+- GitHub CI area jobs.
 
 ## Required Agent Handoffs
 
@@ -98,9 +97,9 @@ HQ/review to all agents:
 - PR review checklist.
 - current-state updates.
 
-## Merge Readiness
+## Local/Test Completion
 
-The milestone is not ready to call complete until all of these are true:
+The local/test V0 milestone is complete when all of these remain true:
 
 - Contracts tests pass.
 - Crypto fixture validation passes.

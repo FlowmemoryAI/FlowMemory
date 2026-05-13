@@ -22,6 +22,11 @@ describe("dashboard fixture", () => {
       ...data.workLanes,
       ...data.workReceipts,
       ...data.verifierReports,
+      ...data.rootflowTransitions,
+      ...data.memorySignals,
+      ...data.memoryReceipts,
+      ...data.rootfieldBundles,
+      ...data.agentMemoryViews,
       ...data.devnetBlocks,
       ...data.hardwareNodes,
       ...data.alerts,
@@ -40,6 +45,11 @@ describe("dashboard fixture", () => {
       ...data.workLanes,
       ...data.workReceipts,
       ...data.verifierReports,
+      ...data.rootflowTransitions,
+      ...data.memorySignals,
+      ...data.memoryReceipts,
+      ...data.rootfieldBundles,
+      ...data.agentMemoryViews,
       ...data.devnetBlocks,
       ...data.hardwareNodes,
       ...data.alerts,
@@ -47,7 +57,7 @@ describe("dashboard fixture", () => {
 
     expect(records.every((record) => record.id && record.status && record.provenance.subsystem)).toBe(true);
     expect(records.every((record) => record.provenance.origin === "fixture")).toBe(true);
-    expect(records.every((record) => record.provenance.chainContext === "anvil-31337")).toBe(true);
+    expect(records.every((record) => record.provenance.chainContext === "flowmemory-local-v0")).toBe(true);
   });
 
   it("computes overview metrics and searches records", () => {
@@ -55,6 +65,6 @@ describe("dashboard fixture", () => {
     const matches = searchRecords(data.verifierReports, "commitment.mismatch");
 
     expect(metrics).toHaveLength(5);
-    expect(matches.map((match) => match.status)).toContain("invalid");
+    expect(matches.map((match) => match.status)).toContain("failed");
   });
 });

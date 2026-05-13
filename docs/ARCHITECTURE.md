@@ -92,7 +92,7 @@ Responsibilities:
 - Read receipts and logs.
 - Derive `txHash`, `logIndex`, block metadata, and observation identity.
 - Reconstruct FlowPulse streams.
-- Track pending, finalized, duplicate, invalid, unsupported, unresolved, and reorged states.
+- Track pending, finalized, duplicate, failed, unsupported, unresolved, and reorged states.
 - Resolve off-chain artifacts.
 - Verify roots, receipts, commitments, attestations, and proof placeholders against allowed evidence.
 - Produce deterministic verification reports and outputs.
@@ -133,7 +133,7 @@ Status: data model planning only.
 Responsibilities:
 
 - Define app-facing entities for operator dashboard and protocol explorer.
-- Present observed, pending, finalized, verified, invalid, unresolved, unsupported, and reorged states clearly.
+- Present observed, pending, finalized, verified, failed, unresolved, unsupported, and reorged states clearly.
 - Consume indexer/verifier outputs once local schemas stabilize.
 
 Boundaries:

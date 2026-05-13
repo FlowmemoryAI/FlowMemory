@@ -144,6 +144,18 @@ Rootflow V0 is launch-ready only when a local developer can:
 
 Passing an isolated unit test or opening a small PR is not enough.
 
+The current local/test command for this path is:
+
+```powershell
+npm run launch:v0
+```
+
+It writes generated Rootflow transitions to:
+
+```text
+fixtures/launch-core/rootflow-transitions.json
+```
+
 ## Explicit Non-Goals
 
 - No production L1 claim.

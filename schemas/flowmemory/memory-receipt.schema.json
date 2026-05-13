@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.memory_receipt.v0",
+  "title": "FlowMemory MemoryReceipt V0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "receiptId",
+    "reportId",
+    "reportDigest",
+    "observationId",
+    "rootfieldId",
+    "verifierStatus",
+    "flowMemoryStatus",
+    "resolverPolicyId",
+    "verifierSpecVersion",
+    "checksPassed",
+    "checksTotal",
+    "reasonCodes",
+    "evidenceRefs"
+  ],
+  "properties": {
+    "schema": { "const": "flowmemory.memory_receipt.v0" },
+    "receiptId": { "$ref": "#/$defs/hex32" },
+    "reportId": { "$ref": "#/$defs/hex32" },
+    "reportDigest": { "$ref": "#/$defs/hex32" },
+    "observationId": { "$ref": "#/$defs/hex32" },
+    "rootfieldId": { "$ref": "#/$defs/hex32" },
+    "verifierStatus": { "enum": ["valid", "invalid", "unresolved", "unsupported", "reorged"] },
+    "flowMemoryStatus": { "$ref": "#/$defs/flowMemoryStatus" },
+    "resolverPolicyId": { "type": "string", "minLength": 1 },
+    "verifierSpecVersion": { "type": "string", "minLength": 1 },
+    "checksPassed": { "type": "integer", "minimum": 0 },
+    "checksTotal": { "type": "integer", "minimum": 0 },
+    "reasonCodes": { "type": "array", "items": { "type": "string" } },
+    "evidenceRefs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "flowMemoryStatus": {
+      "enum": ["observed", "pending", "finalized", "verified", "unresolved", "failed", "unsupported", "reorged", "offline", "stale"]
+    }
+  }
+}
