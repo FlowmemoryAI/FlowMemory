@@ -2,13 +2,20 @@ import { useMemo, useState } from "react";
 import { Braces } from "lucide-react";
 import { SectionHeader } from "../components/SectionHeader";
 import type { DashboardData } from "../data/types";
+import type { WorkbenchSnapshot } from "../data/workbench";
 
 const DATASET_LABELS = [
   "all",
+  "workbench",
   "metadata",
   "chain",
   "flowPulseObservations",
   "rootfields",
+  "rootflowTransitions",
+  "memorySignals",
+  "memoryReceipts",
+  "rootfieldBundles",
+  "agentMemoryViews",
   "workLanes",
   "workReceipts",
   "verifierReports",
@@ -19,13 +26,13 @@ const DATASET_LABELS = [
 
 type DatasetKey = (typeof DATASET_LABELS)[number];
 
-export function RawJsonInspectorView({ data }: { data: DashboardData }) {
+export function RawJsonInspectorView({ data, workbench }: { data: DashboardData; workbench: WorkbenchSnapshot }) {
   const [dataset, setDataset] = useState<DatasetKey>("all");
 
   const rawJson = useMemo(() => {
-    const value = dataset === "all" ? data : data[dataset];
+    const value = dataset === "all" ? data : dataset === "workbench" ? workbench : data[dataset];
     return JSON.stringify(value, null, 2);
-  }, [data, dataset]);
+  }, [data, dataset, workbench]);
 
   return (
     <div className="view-stack">

@@ -5,18 +5,35 @@ import { fileURLToPath } from "node:url";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, "../../..");
 const destinationDir = resolve(repoRoot, "apps/dashboard/public/data");
-const fixtures = [
-  "flowmemory-dashboard-v0.json",
-  "flowmemory-dashboard-base-canary-v0.json",
+const fixtureCopies = [
+  {
+    label: "dashboard fixture",
+    source: resolve(repoRoot, "fixtures/dashboard/flowmemory-dashboard-v0.json"),
+    destination: resolve(destinationDir, "flowmemory-dashboard-v0.json"),
+  },
+  {
+    label: "Base canary dashboard fixture",
+    source: resolve(repoRoot, "fixtures/dashboard/flowmemory-dashboard-base-canary-v0.json"),
+    destination: resolve(destinationDir, "flowmemory-dashboard-base-canary-v0.json"),
+  },
+  {
+    label: "FlowChain local devnet state",
+    source: resolve(repoRoot, "fixtures/launch-core/generated/devnet/state.json"),
+    destination: resolve(destinationDir, "flowchain-local-devnet-state.json"),
+  },
+  {
+    label: "FlowChain local devnet dashboard state",
+    source: resolve(repoRoot, "fixtures/launch-core/generated/devnet/dashboard-state.json"),
+    destination: resolve(destinationDir, "flowchain-local-devnet-dashboard-state.json"),
+  },
 ];
 
 mkdirSync(destinationDir, { recursive: true });
 
-for (const fixture of fixtures) {
-  const source = resolve(repoRoot, "fixtures/dashboard", fixture);
-  const destination = resolve(destinationDir, fixture);
-  if (existsSync(source)) {
-    copyFileSync(source, destination);
-    console.log(`Synced dashboard fixture: ${destination}`);
+for (const fixture of fixtureCopies) {
+  if (!existsSync(fixture.source)) {
+    throw new Error(`Missing ${fixture.label}: ${fixture.source}`);
   }
+  copyFileSync(fixture.source, fixture.destination);
+  console.log(`Synced ${fixture.label}: ${fixture.destination}`);
 }

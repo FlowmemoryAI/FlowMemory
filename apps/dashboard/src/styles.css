@@ -698,6 +698,187 @@ dd {
   background: #f7f8f4;
 }
 
+.workbench-command-center {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+  gap: 14px;
+}
+
+.workbench-node-body {
+  display: grid;
+  gap: 16px;
+  padding-top: 14px;
+}
+
+.workbench-node-body h3 {
+  margin: 0 0 7px;
+  font-size: 1.22rem;
+}
+
+.workbench-node-body p,
+.workbench-section-detail,
+.boundary-copy p {
+  margin: 0;
+  color: #465047;
+  line-height: 1.48;
+}
+
+.workbench-fact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.workbench-fact-grid div {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #f7f8f4;
+}
+
+.setup-step-list {
+  display: grid;
+  padding-top: 6px;
+}
+
+.setup-step-list article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 9px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.setup-step-list article:last-child {
+  border-bottom: 0;
+}
+
+.setup-step-list strong,
+.setup-step-list code,
+.setup-step-list small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+code {
+  width: fit-content;
+  max-width: 100%;
+  margin: 5px 0;
+  padding: 3px 6px;
+  color: #25332d;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #eef1eb;
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.78rem;
+}
+
+.workbench-warning {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 9px;
+  align-items: start;
+  padding: 11px 12px;
+  color: #6b4a16;
+  border: 1px solid #d9c393;
+  border-radius: 8px;
+  background: #fbf6e8;
+}
+
+.workbench-warning strong,
+.workbench-warning span {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.workbench-layout {
+  display: grid;
+  grid-template-columns: 222px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.workbench-switcher {
+  position: sticky;
+  top: 88px;
+  display: grid;
+  gap: 7px;
+}
+
+.workbench-switch {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 38px;
+  padding: 8px 10px;
+  text-align: left;
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+.workbench-switch.active,
+.workbench-switch:hover {
+  border-color: #9fb4a8;
+  background: #eaf1eb;
+}
+
+.workbench-switch span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workbench-switch strong {
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.78rem;
+}
+
+.workbench-record-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.workbench-record-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.workbench-record {
+  display: grid;
+  gap: 11px;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #f7f8f4;
+}
+
+.workbench-record h3 {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.96rem;
+}
+
+.workbench-record p {
+  margin: 0;
+  color: #465047;
+  line-height: 1.44;
+}
+
+.workbench-boundary-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.boundary-copy {
+  display: grid;
+  gap: 9px;
+}
+
 .table-panel {
   min-width: 0;
   overflow: hidden;
@@ -1031,7 +1212,9 @@ dd {
   .overview-grid,
   .rootfield-grid,
   .hardware-grid,
-  .lane-grid {
+  .lane-grid,
+  .workbench-command-center,
+  .workbench-record-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1051,6 +1234,15 @@ dd {
   .flowmemory-hero-side {
     border-left: 0;
     border-top: 1px solid var(--line);
+  }
+
+  .workbench-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .workbench-switcher {
+    position: static;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1095,6 +1287,10 @@ dd {
     border-left: 0;
     border-top: 1px solid var(--line);
   }
+
+  .workbench-fact-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 560px) {
@@ -1103,7 +1299,8 @@ dd {
   .block-strip,
   .definition-grid,
   .lane-stats,
-  .record-facts {
+  .record-facts,
+  .workbench-switcher {
     grid-template-columns: 1fr;
   }
 
