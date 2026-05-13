@@ -6,7 +6,7 @@ FlowMemory aims to build a trustworthy memory and reliability substrate for AI a
 
 ## Near-Term Goal
 
-The near-term goal is to create a clean multi-agent workspace where protocol, service, app, hardware, research, crypto, and security work can proceed without stepping on each other.
+The near-term goal is to keep a clean multi-agent workspace where protocol, service, app, hardware, research, crypto, and security work can proceed without stepping on each other.
 
 ## Long-Term Direction
 
@@ -21,13 +21,14 @@ FlowMemory may evolve toward a dedicated appchain or L1 if the protocol, memory,
 - Favor durable documentation and decision records over hidden context.
 - Use GitHub issues and pull requests as the operational source of truth.
 
-## Non-Goals During Bootstrap
+## Current Non-Goals Unless Explicitly Scoped
 
 - No production contracts.
 - No product dashboard.
 - No hardware firmware.
 - No token mechanics.
 - No appchain/L1 implementation.
+- No production deployment automation.
 - No claims that data exists on-chain unless the design explicitly stores or commits it there.
 
 ## Success Criteria

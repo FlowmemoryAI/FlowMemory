@@ -16,7 +16,7 @@ interface IFlowPulse {
     /// @param parentPulseId Optional prior pulse being extended or referenced.
     /// @param sequence Monotonic sequence within the rootfield namespace.
     /// @param occurredAt Block timestamp observed by the emitting contract.
-    /// @param uri Optional short off-chain pointer; not a payload storage field.
+    /// @param uri Arbitrary advisory string emitted as on-chain log data.
     event FlowPulse(
         bytes32 indexed pulseId,
         bytes32 indexed rootfieldId,
