@@ -55,9 +55,10 @@ When `gh auth login` asks questions, use GitHub.com, HTTPS, and browser login.
 
 Use this path today on a clean second computer. It validates the merged V0
 launch-core, no-value local devnet prototype, dashboard workbench, hardware
-simulator fixture, and Windows wrapper layer. It does not yet prove the full
-native AgentAccount, ModelPassport, MemoryCell, Challenge, FinalityReceipt, or
-control-plane lifecycle.
+simulator fixture, Windows wrapper layer, long-running local node mode,
+locally authorized transaction intake, local test-unit faucet records, and
+static local-file multi-node reconciliation. Control-plane and full workbench
+query coverage remain separate subsystem work.
 
 If the repo is already cloned, run from the repo root:
 
@@ -104,6 +105,20 @@ Start the current bounded local stack:
 npm run flowchain:start
 ```
 
+Start a long-running local node in a separate PowerShell window:
+
+```powershell
+npm run flowchain:node
+```
+
+Submit local transactions from another PowerShell window:
+
+```powershell
+npm run flowchain:faucet
+npm run flowchain:tx
+npm run flowchain:node:status
+```
+
 Run the deterministic demo and export state:
 
 ```powershell
@@ -117,6 +132,13 @@ Run the full merged-surface smoke path:
 npm run flowchain:smoke
 ```
 
+Run just the runtime smokes:
+
+```powershell
+npm run flowchain:node:smoke
+npm run flowchain:multi-node:smoke
+```
+
 Run the local workbench in a separate PowerShell window:
 
 ```powershell
@@ -126,6 +148,7 @@ npm run workbench:dev
 Stop the current bounded local stack when done:
 
 ```powershell
+npm run flowchain:node:stop
 npm run flowchain:stop
 ```
 
@@ -140,19 +163,30 @@ Expected current result:
   `devnet/local/operator.local.json`.
 - `npm run flowchain:start` regenerates launch-core fixtures and records
   bounded stack status under `devnet/local/flowchain-stack-status.json`.
+- `npm run flowchain:node` runs the Rust node until stopped, keeps state on
+  disk, ingests JSON transactions from `devnet/local/node/inbox/`, writes
+  status under `devnet/local/node/status.json`, and produces blocks on the
+  configured interval.
+- `npm run flowchain:faucet` submits a local test-unit faucet transaction.
+- `npm run flowchain:tx` submits a sample AgentAccount/ModelPassport
+  transaction file, or a caller-provided transaction file with
+  `-- -TxFile <path>`.
+- `npm run flowchain:node:smoke` proves a node can run for at least 10 blocks,
+  include a locally authorized transaction, restart with state intact, and
+  export/import the runtime state.
+- `npm run flowchain:multi-node:smoke` starts two local node processes and
+  proves static local-file peer reconciliation. LAN mode remains not exposed.
 - `npm run flowchain:demo` writes deterministic local block/state output.
 - `npm run flowchain:export` writes ignored export files and a zip bundle under
   `devnet/local/export/`.
 - `npm run flowchain:smoke` writes
   `devnet/local/smoke/flowchain-smoke-report.json` and compares deterministic
-  replay roots.
+  replay roots. It now also runs the one-node and multi-node runtime smokes.
 - `npm run workbench:dev` opens the existing dashboard as the local workbench.
 
-Current stop point: if a second computer needs long-running node behavior,
-control-plane queries, encrypted key storage, native AgentAccount,
-ModelPassport, MemoryCell, Challenge, FinalityReceipt, or full workbench
-inspection of those entities, that is still the private/local testnet package
-target owned by the subsystem workstreams.
+Current stop point: if a second computer needs control-plane queries,
+encrypted key storage, or full workbench inspection of private/local runtime
+entities, that remains owned by the subsystem workstreams.
 
 ## Final Second-Computer Path
 
@@ -168,13 +202,14 @@ npm install --prefix crypto
 npm run flowchain:prereq
 npm run flowchain:init
 npm run flowchain:start
+npm run flowchain:node
 npm run control-plane:serve
 npm run workbench:dev
 npm run flowchain:smoke
 npm run flowchain:export
 ```
 
-If `flowchain:start`, `control-plane:serve`, or `workbench:dev` are
+If `flowchain:node`, `control-plane:serve`, or `workbench:dev` are
 long-running commands, run each one in its own PowerShell window and run
 `flowchain:smoke` from a fourth window after the services are healthy.
 
@@ -192,9 +227,17 @@ equivalents:
 npm run flowchain:prereq
 npm run flowchain:init
 npm run flowchain:start
+npm run flowchain:node
+npm run flowchain:node:stop
+npm run flowchain:node:status
+npm run flowchain:tx
+npm run flowchain:faucet
+npm run flowchain:node:smoke
+npm run flowchain:multi-node:smoke
 npm run flowchain:stop
 npm run flowchain:demo
 npm run flowchain:smoke
+npm run flowchain:full-smoke
 npm run flowchain:export
 npm run workbench:dev
 ```
@@ -205,10 +248,18 @@ Current status:
 | --- | --- | --- |
 | `npm run flowchain:prereq` | Implemented | `infra/scripts/flowchain-check-prereqs.ps1` |
 | `npm run flowchain:init` | Implemented | `infra/scripts/flowchain-init.ps1` |
-| `npm run flowchain:start` | Implemented bounded wrapper | Long-running node behavior remains missing. |
-| `npm run flowchain:stop` | Implemented bounded wrapper | Use `npm run flowchain:stop -- -ResetLocalState` for an explicit reset. |
+| `npm run flowchain:start` | Implemented compatibility wrapper | Prepares launch-core fixtures and points operators to `flowchain:node`. |
+| `npm run flowchain:node` | Implemented | Starts the long-running Rust runtime with disk state, inbox intake, interval blocks, logs, identity, and status. |
+| `npm run flowchain:node:stop` | Implemented | Writes the node stop file. |
+| `npm run flowchain:node:status` | Implemented | Reads node status and state summary. |
+| `npm run flowchain:tx` | Implemented | Submits a caller-provided transaction file or a sample AgentAccount/ModelPassport transaction. |
+| `npm run flowchain:faucet` | Implemented | Submits a local test-unit faucet transaction. |
+| `npm run flowchain:node:smoke` | Implemented | Runs bounded one-node runtime, restart, and export/import checks. |
+| `npm run flowchain:multi-node:smoke` | Implemented | Proves two local node processes reconcile through static local-file peer state paths; LAN mode is not exposed. |
+| `npm run flowchain:stop` | Implemented wrapper | Requests node stop and use `npm run flowchain:stop -- -ResetLocalState` for an explicit reset. |
 | `npm run flowchain:demo` | Implemented | Wraps the existing Rust devnet `demo`. |
-| `npm run flowchain:smoke` | Implemented for merged surfaces | Native object/control-plane smoke coverage remains missing. |
+| `npm run flowchain:smoke` | Implemented for merged surfaces | Includes runtime smokes; control-plane query evidence remains separate. |
+| `npm run flowchain:full-smoke` | Implemented alias | Runs `flowchain:smoke`. |
 | `npm run flowchain:export` | Implemented | Writes ignored export directory and zip bundle. |
 | `npm run flowchain:import -- --BundlePath <zip> -Force` | Implemented script path | Restores local state from an exported bundle. |
 | `npm run workbench:dev` | Implemented | Wraps `npm run dev --prefix apps/dashboard`. |
@@ -242,18 +293,32 @@ Until that exists, do not claim wallet support or value-bearing key management.
 
 ## Private Genesis And Runtime
 
-The current devnet starts from deterministic local state and writes default
-state under:
+The devnet starts from deterministic local state and writes default state under:
 
 ```text
 devnet/local/state.json
 ```
 
+The long-running node uses the same state file unless `-StatePath` is provided.
+The default node directory is:
+
+```text
+devnet/local/node/
+```
+
+It contains local-only identity, status, inbox, processed, rejected, and stop
+files. These files are generated runtime state and must not be committed.
+
 `devnet/local/` is ignored by git.
 
-Private/local testnet acceptance requires a documented genesis/config flow that
-can be rerun on a clean machine. The flow must say which files are generated,
-which files can be committed as fixtures, and which files are local-only.
+Static local-file peers can be smoke-tested with:
+
+```powershell
+npm run flowchain:multi-node:smoke
+```
+
+This is not LAN networking. It proves two local node processes can exchange or
+reconcile deterministic state through configured peer state paths.
 
 ## Control Plane
 
