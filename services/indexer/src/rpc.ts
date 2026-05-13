@@ -1,5 +1,6 @@
 import { FLOWPULSE_EVENT_TOPIC0, type RawFlowPulseLogFixture } from "../../shared/src/index.ts";
 
+export const BASE_MAINNET_CHAIN_ID = "8453";
 export const BASE_SEPOLIA_CHAIN_ID = "84532";
 
 export interface LocalRpcReadOptions {
@@ -130,6 +131,15 @@ export async function readBaseSepoliaFlowPulseLogs(options: LocalRpcReadOptions)
   const chainId = await readRpcChainId(fetchImpl, options.rpcUrl);
   if (chainId !== BASE_SEPOLIA_CHAIN_ID) {
     throw new Error(`expected Base Sepolia chainId ${BASE_SEPOLIA_CHAIN_ID}, received ${chainId}`);
+  }
+  return readRpcFlowPulseLogSetWithChainId(options, chainId, fetchImpl);
+}
+
+export async function readBaseMainnetCanaryFlowPulseLogs(options: LocalRpcReadOptions): Promise<RpcFlowPulseReadResult> {
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const chainId = await readRpcChainId(fetchImpl, options.rpcUrl);
+  if (chainId !== BASE_MAINNET_CHAIN_ID) {
+    throw new Error(`expected Base mainnet chainId ${BASE_MAINNET_CHAIN_ID}, received ${chainId}`);
   }
   return readRpcFlowPulseLogSetWithChainId(options, chainId, fetchImpl);
 }

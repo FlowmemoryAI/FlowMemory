@@ -71,7 +71,7 @@ export interface IndexedRootfield {
   pulseCount: number;
 }
 
-export type IndexerStateSource = "fixture" | "local-rpc-placeholder" | "base-sepolia-rpc";
+export type IndexerStateSource = "fixture" | "local-rpc-placeholder" | "base-sepolia-rpc" | "base-mainnet-canary-rpc";
 
 export interface IndexerState {
   schema: "flowmemory.indexer.state.v0";

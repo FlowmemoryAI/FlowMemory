@@ -27,6 +27,28 @@ export interface BaseSepoliaIndexerCheckpoint {
   generatedAt: string;
 }
 
+export interface BaseCanaryIndexerCheckpoint {
+  schema: "flowmemory.indexer.base_canary_checkpoint.v0";
+  network: "base-mainnet-canary";
+  chainId: "8453";
+  source: "base-mainnet-canary-rpc";
+  addresses: string[];
+  fromBlock: string;
+  toBlock: string;
+  finalizedBlockNumber?: string;
+  statePath: string;
+  observationCount: number;
+  cursorCount: number;
+  rejectedLogCount: number;
+  duplicateCount: number;
+  lastIndexedBlock: string;
+  generatedAt: string;
+  safety: {
+    acknowledgement: "base-mainnet-canary-only";
+    productionReady: false;
+  };
+}
+
 export function persistedIndexerState(state: IndexerState): PersistedIndexerState {
   return {
     schema: "flowmemory.indexer.persistence.v0",
@@ -66,6 +88,42 @@ export function baseSepoliaIndexerCheckpoint(input: {
   };
 }
 
+export function baseCanaryIndexerCheckpoint(input: {
+  addresses: string[];
+  fromBlock: string;
+  toBlock: string;
+  finalizedBlockNumber?: string;
+  statePath: string;
+  state: IndexerState;
+  generatedAt?: string;
+}): BaseCanaryIndexerCheckpoint {
+  const lastIndexedBlock = input.state.cursors.reduce((latest, cursor) => {
+    return BigInt(cursor.blockNumber) > BigInt(latest) ? cursor.blockNumber : latest;
+  }, input.fromBlock);
+
+  return {
+    schema: "flowmemory.indexer.base_canary_checkpoint.v0",
+    network: "base-mainnet-canary",
+    chainId: "8453",
+    source: "base-mainnet-canary-rpc",
+    addresses: [...input.addresses].sort((left, right) => left.localeCompare(right)),
+    fromBlock: input.fromBlock,
+    toBlock: input.toBlock,
+    finalizedBlockNumber: input.finalizedBlockNumber,
+    statePath: input.statePath,
+    observationCount: input.state.observations.length,
+    cursorCount: input.state.cursors.length,
+    rejectedLogCount: input.state.rejectedLogs.length,
+    duplicateCount: input.state.duplicates.length,
+    lastIndexedBlock,
+    generatedAt: input.generatedAt ?? new Date().toISOString(),
+    safety: {
+      acknowledgement: "base-mainnet-canary-only",
+      productionReady: false,
+    },
+  };
+}
+
 export function writeIndexerState(path: string, state: IndexerState): void {
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, `${canonicalJson(persistedIndexerState(state))}\n`, "utf8");
@@ -82,4 +140,13 @@ export function writeBaseSepoliaIndexerCheckpoint(path: string, checkpoint: Base
 
 export function readBaseSepoliaIndexerCheckpoint(path: string): BaseSepoliaIndexerCheckpoint {
   return JSON.parse(readFileSync(path, "utf8")) as BaseSepoliaIndexerCheckpoint;
+}
+
+export function writeBaseCanaryIndexerCheckpoint(path: string, checkpoint: BaseCanaryIndexerCheckpoint): void {
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, `${canonicalJson(checkpoint)}\n`, "utf8");
+}
+
+export function readBaseCanaryIndexerCheckpoint(path: string): BaseCanaryIndexerCheckpoint {
+  return JSON.parse(readFileSync(path, "utf8")) as BaseCanaryIndexerCheckpoint;
 }

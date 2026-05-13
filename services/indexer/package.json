@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "demo": "node src/demo.ts",
+    "index:base-canary": "node src/base-canary.ts",
     "index:base-sepolia": "node src/base-sepolia.ts",
     "index:fixtures": "node src/index-fixtures.ts",
     "test": "node --test test/*.test.ts"

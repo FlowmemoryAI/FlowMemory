@@ -12,6 +12,8 @@
     "test": "npm test --prefix services/shared && npm test --prefix services/indexer && npm test --prefix services/verifier && npm test --prefix services/flowmemory",
     "contracts:hardening": "node infra/scripts/run-contract-hardening.mjs",
     "contracts:hardening:slither": "node infra/scripts/run-contract-hardening.mjs --require-slither",
+    "index:base-canary": "npm run index:base-canary --prefix services/indexer",
+    "read:base-canary": "npm run index:base-canary --prefix services/indexer",
     "index:base-sepolia": "npm run index:base-sepolia --prefix services/indexer",
     "read:base-sepolia": "npm run index:base-sepolia --prefix services/indexer",
     "deploy:base-sepolia": "node infra/scripts/run-base-sepolia-deploy.mjs",

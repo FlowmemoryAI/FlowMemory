@@ -65,8 +65,9 @@ Status: implemented as fixture-first services plus generated launch-core state; 
 - Flow Memory schemas for MemorySignal, MemoryReceipt, RootfieldBundle, and AgentMemoryView exist under `schemas/flowmemory/`.
 - Generated MemorySignal and RootflowTransition fixtures expose contract-event linkage through `contractEvent` and `contractEventRef`.
 - Fixture-based parser and reorg-state tests exist in the indexer/verifier packages.
-- Deterministic persistence exists for fixture state and the constrained Base Sepolia reader checkpoint.
+- Deterministic persistence exists for fixture state, the constrained Base Sepolia reader checkpoint, and the guarded Base mainnet canary checkpoint.
 - A Base Sepolia reader path exists for explicit RPC URLs and explicit FlowPulse contract addresses; it rejects non-Base-Sepolia chain ids.
+- A guarded Base mainnet canary reader exists for explicit RPC URLs, explicit known canary addresses, and small explicit block ranges; it rejects non-Base-mainnet chain ids and marks output as canary-only.
 - Base Sepolia deploy/read commands exist for the current V0 testnet contract set.
 - A Base mainnet V0 canary deployment has been performed for testing only and is documented under `docs/DEPLOYMENTS/`.
 - Runtime schema validation and generated fixture drift checks exist for launch-core outputs.
@@ -142,7 +143,7 @@ The initial merge sequence has completed for repo OS, contracts foundation, cryp
 
 Next merge preference:
 
-1. Guarded Base canary reader and deployment-artifact ingestion.
+1. Deployment-artifact ingestion for the guarded Base canary reader output.
 2. Base Sepolia reader soak tests against explicit testnet deployments.
 3. Dashboard live/canary mode separation from generated fixtures.
 4. Static analysis follow-up findings triaged for any public testnet deployment.

@@ -70,6 +70,18 @@ Rootfield id:
 - Commitment:
   `0x30055afe075a7c6ea8557ea3a2d3c7012d9d558ebda95803726179355f98ede9`
 
+### Additional Swap-Memory Signal Observed By Reader
+
+The guarded canary reader also observed an earlier swap-memory signal emitted
+by the hook adapter during smoke testing:
+
+- Transaction: `0x5f81dc48c5d172ff3f44a333a33598f23c82be2614f4156d5dd3257a16806cc7`
+- Block: `45955507`
+- FlowPulse pulse id: `0x2d436d766f9777b7f9925d57d8b2d57def3fdfae405017104f21795e20eacef7`
+- Pulse type: `4` / `SWAP_MEMORY_SIGNAL`
+- Commitment:
+  `0x30055afe075a7c6ea8557ea3a2d3c7012d9d558ebda95803726179355f98ede9`
+
 ## State Readback
 
 `RootfieldRegistry.getRootfield(rootfieldId)` returned:
@@ -84,19 +96,41 @@ rootCount:    1
 active:       true
 ```
 
+## Guarded Reader Command
+
+The repo now includes a guarded canary reader for these live V0 canary logs. It
+requires explicit acknowledgement, explicit addresses, and a small explicit
+block range:
+
+```powershell
+npm run index:base-canary -- --acknowledge-mainnet-canary --rpc-url https://mainnet.base.org --address 0x2a7ADd68a1d45C3251E2F92fFe4926124654a97C --address 0x179Df6d52e9DeF5D02704583a2E4E5a9FF427245 --from-block 45955500 --to-block 45955540 --finalized-block 45955540
+```
+
+Observed canary smoke read for the range above:
+
+- `RootfieldRegistry`: rootfield registration and root submission FlowPulse logs.
+- `FlowMemoryHookAdapter`: two swap-memory signal FlowPulse logs.
+- Observation count: `4`.
+- Rejected log count: `0`.
+- Duplicate count: `0`.
+- Last indexed block: `45955535`.
+- Output state: `services/indexer/out/base-canary-indexer-state.json` by default.
+- Output checkpoint: `services/indexer/out/base-canary-indexer-checkpoint.json` by default.
+
+The canary reader refuses non-Base-mainnet RPC endpoints, refuses scans wider
+than 5,000 blocks, stores no RPC URLs or private keys, and marks checkpoint
+output as not production-ready.
+
 ## Important Gaps Found
 
-1. The checked-in live reader is Base Sepolia-only and intentionally rejects
-   Base mainnet chain id `8453`. A guarded Base canary reader is needed before
-   the dashboard can ingest live mainnet canary logs.
-2. The dashboard still consumes generated fixtures. It does not yet ingest a
+1. The dashboard still consumes generated fixtures. It does not yet ingest a
    deployment artifact plus live read output.
-3. Contract source verification is not automated for all deployed contracts.
-4. `FlowMemoryHookAdapter` is still an adapter scaffold. It is not a production
+2. Contract source verification is not automated for all deployed contracts.
+3. `FlowMemoryHookAdapter` is still an adapter scaffold. It is not a production
    Uniswap v4 hook wired into PoolManager permissions.
-5. Ownership is still direct deployer ownership where applicable. There is no
+4. Ownership is still direct deployer ownership where applicable. There is no
    multisig, governance, recovery, or operational key policy.
-6. Verifier and worker registry flows are deployed, but live verifier report
+5. Verifier and worker registry flows are deployed, but live verifier report
    submission, report signing, and verifier economics are not built.
 
 ## Notes
