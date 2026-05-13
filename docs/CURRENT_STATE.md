@@ -39,6 +39,7 @@ Launch-core specifications:
 - `docs/FLOW_MEMORY_V0.md` defines MemorySignal, MemoryReceipt, RootfieldBundle, AgentMemoryView, work-lane vocabulary, and dashboard display expectations.
 - `docs/V0_LAUNCH_ACCEPTANCE.md` maps the Rootflow and Flow Memory objective to concrete artifacts and evidence.
 - `docs/DECISIONS/rootflow-v0.md` records the V0 decision and non-goal boundaries.
+- `docs/reviews/ROOTFLOW_FLOW_MEMORY_V0_ACCEPTANCE_AUDIT.md` tracks evidence and missing work for the active launch-core goal.
 
 ## Conceptual Or Not Implemented Yet
 
@@ -50,6 +51,7 @@ Launch-core specifications:
 - Complete Flow Memory runtime implementation.
 - Canonical JSON schema package for Rootflow and Flow Memory objects.
 - End-to-end fixture-backed Rootflow acceptance run.
+- Completed launch-core acceptance audit.
 - Indexer or verifier service runtime.
 - Persistence layer, live RPC reader, production APIs, or hosted services.
 - Dashboard, explorer, or hardware console implementation.

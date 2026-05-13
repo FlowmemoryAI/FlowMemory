@@ -23,6 +23,7 @@ Check:
 - Any PR touching forbidden folders.
 - Rootflow and Flow Memory launch-core issues #63 through #67.
 - Evidence gaps in `docs/V0_LAUNCH_ACCEPTANCE.md`.
+- Current audit notes in `docs/reviews/ROOTFLOW_FLOW_MEMORY_V0_ACCEPTANCE_AUDIT.md`.
 
 ## Issue Triage
 
