@@ -45,7 +45,7 @@ $env:VITE_FLOWCHAIN_CONTROL_PLANE_URL="http://127.0.0.1:8787"
 npm run dev
 ```
 
-If the API is not running, the workbench marks the control-plane as offline, shows stale fixture fallback where appropriate, and keeps rendering deterministic local data. This app is for private/local validation and canary review only; it does not initiate value-bearing wallet flows.
+If the API is running, the workbench verifies `/health`, `/state`, and a read-only `/rpc` batch for blocks, transactions, object lifecycle rows, provenance, and raw local JSON. If the API is not running, the workbench marks the control-plane as offline, shows stale fixture fallback where appropriate, and keeps rendering deterministic local data. This app is for private/local validation and canary review only; it does not initiate value-bearing wallet flows.
 
 ## Data Boundary
 
@@ -75,6 +75,7 @@ Workbench fixture fallback paths:
 ```text
 apps/dashboard/public/data/flowchain-local-devnet-state.json
 apps/dashboard/public/data/flowchain-local-devnet-dashboard-state.json
+apps/dashboard/public/data/flowchain-bridge-test-deposit.json
 ```
 
 Generated local source outputs land under the fixture boundary first:
@@ -105,14 +106,17 @@ fixtures/dashboard/generated/hardware-heartbeats.json
 
 Every displayed record carries source subsystem, fixture/local origin, chain context, ID/hash, status, and last-updated metadata when available.
 
-The workbench adds local setup/API status plus object views for blocks, transactions, agents, models, receipts, memory cells, artifacts, verifier reports, challenges, finality, provenance, and raw JSON. When a current fixture does not yet contain a private-testnet object type, the view stays empty and names the expected control-plane endpoint.
+The workbench adds local setup/API status plus object views for blocks, peers, transactions, mempool, accounts, balances, faucet events, wallet public accounts, agents, models, receipts, memory cells, artifacts, verifier modules, verifier reports, challenges, finality, bridge test-lane rows, hardware signals, provenance, and raw JSON. When a current fixture does not yet contain a private-testnet object type, the view stays empty and names the expected control-plane endpoint.
+
+The action cards are API-gated. Refresh is enabled when the local API responds. Faucet, sample transaction, and bridge test-deposit actions stay disabled unless the control-plane advertises matching local-only methods; private keys and seed phrases never enter the browser.
 
 Workbench object coverage:
 
 ```text
-node/chain status, blocks, transactions, rootfields, agents, models, work receipts,
+node/chain status, peers, blocks, transactions, mempool, accounts, balances,
+faucet events, wallet public accounts, rootfields, agents, models, work receipts,
 memory cells, artifacts, verifier modules, verifier reports, challenges, finality,
-provenance/source, hardware signals, raw JSON
+bridge deposits/credits/withdrawals, provenance/source, hardware signals, raw JSON
 ```
 
 ## Status Vocabulary
