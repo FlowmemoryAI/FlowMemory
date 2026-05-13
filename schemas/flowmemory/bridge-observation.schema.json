@@ -7,6 +7,7 @@
   "required": [
     "schema",
     "observationId",
+    "replayKey",
     "observedAt",
     "mode",
     "productionReady",
@@ -16,8 +17,9 @@
   "properties": {
     "schema": { "const": "flowmemory.bridge_deposit_observation.v0" },
     "observationId": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "replayKey": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
     "observedAt": { "type": "string" },
-    "mode": { "type": "string", "enum": ["mock", "base-sepolia", "base-mainnet-canary"] },
+    "mode": { "type": "string", "enum": ["mock", "local-anvil", "base-sepolia", "base-mainnet-canary"] },
     "productionReady": { "const": false },
     "deposit": { "$ref": "bridge-deposit.schema.json" },
     "guardrails": {

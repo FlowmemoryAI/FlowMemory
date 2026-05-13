@@ -14,12 +14,24 @@ public bridge, and not approved for broad mainnet use.
 - `tests/bridge/BaseBridgeLockbox.t.sol`: Foundry coverage for token
   allowlisting, ERC-20 deposits, native deposits, caps, pause behavior,
   ownership, release, and replay protection.
-- `services/bridge-relayer/`: fixture-first observer that converts explicit
-  bridge deposit records into FlowChain bridge observation JSON.
+- `services/bridge-relayer/`: fixture-first and RPC-range observer that
+  converts explicit bridge deposit records into FlowChain bridge observation,
+  credit, withdrawal-intent, and runtime handoff JSON.
 - `fixtures/bridge/base-sepolia-mock-deposit.json`: deterministic test deposit.
+- `fixtures/bridge/local-runtime-bridge-handoff.json`: deterministic local
+  bridge handoff consumed by the runtime/control-plane agent until a direct
+  intake endpoint is merged.
 - `schemas/flowmemory/bridge-deposit.schema.json` and
   `schemas/flowmemory/bridge-observation.schema.json`: bridge object contracts.
+- `schemas/flowmemory/bridge-credit.schema.json`,
+  `schemas/flowmemory/bridge-withdrawal-intent.schema.json`, and
+  `schemas/flowmemory/bridge-runtime-handoff.schema.json`: canonical local
+  credit, test withdrawal-intent, and handoff contracts.
+- `infra/scripts/bridge-base-sepolia-observe.ps1`: env-friendly Base Sepolia
+  observation wrapper that requires no private key.
 - `infra/scripts/bridge-base-sepolia-smoke.ps1`: guarded Base Sepolia smoke.
+- `infra/scripts/bridge-local-anvil-observe.ps1`: local Anvil observation
+  wrapper for chain id `31337`.
 - `infra/scripts/bridge-base-mainnet-canary-read.ps1`: disabled-by-default
   Base mainnet canary read wrapper.
 
@@ -30,13 +42,24 @@ Base Sepolia user/test wallet
   -> BaseBridgeLockbox.lockERC20 or lockNative
   -> BridgeDeposit event
   -> bridge-relayer explicit reader/mock observer
-  -> FlowChain bridge deposit observation fixture
-  -> local control plane / workbench / devnet handoff
+  -> BridgeObservation with replay key
+  -> BridgeCredit pending/applied local object
+  -> local runtime/control-plane/workbench handoff
 ```
 
 The POC does not mint production assets on FlowChain. Local acceptance is a
 fixture/control-plane event until the private/local runtime explicitly consumes
 bridge deposit objects.
+
+The handoff includes a workbench-ready timeline:
+
+```text
+deposit observed -> credit pending -> credit applied -> withdrawal requested
+```
+
+The current workbench/control-plane packages are outside this bridge-agent
+scope. Until their bridge intake lands, `fixtures/bridge/local-runtime-bridge-handoff.json`
+is the exact file for the runtime/control-plane agent to consume.
 
 ## Risk Model
 
@@ -56,12 +79,16 @@ bridge deposit objects.
 npm install
 npm run bridge:mock
 npm run bridge:test
+npm run bridge:local-credit:smoke
 ```
 
 Expected output:
 
 ```text
 services/bridge-relayer/out/bridge-observation.json
+services/bridge-relayer/out/bridge-credit.json
+services/bridge-relayer/out/bridge-runtime-handoff.json
+fixtures/bridge/local-runtime-bridge-handoff.json
 ```
 
 ## Base Sepolia Smoke
@@ -79,6 +106,36 @@ powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base-se
 The script checks Base Sepolia chain id `84532`, requires an explicit lockbox,
 requires an explicit block range, and writes a local observation output.
 
+The root package also exposes an env-var smoke path that does not require a
+private key:
+
+```powershell
+$env:BASE_SEPOLIA_RPC_URL="<base-sepolia-rpc-url>"
+$env:BASE_BRIDGE_LOCKBOX_ADDRESS="<deployed-lockbox>"
+$env:BASE_BRIDGE_FROM_BLOCK="<from>"
+$env:BASE_BRIDGE_TO_BLOCK="<to>"
+npm run bridge:sepolia:observe
+```
+
+This command reads only `BridgeDeposit` logs from the explicit lockbox and
+range, then writes observation, credit, and handoff JSON under
+`services/bridge-relayer/out/`.
+
+## Local Anvil Observation
+
+Local Anvil is supported as a mock Base event lane with chain id `31337`.
+Deploy `BaseBridgeLockbox`, emit one or more deposits, then run:
+
+```powershell
+$env:ANVIL_BRIDGE_LOCKBOX_ADDRESS="<deployed-lockbox>"
+$env:ANVIL_BRIDGE_FROM_BLOCK="<from>"
+$env:ANVIL_BRIDGE_TO_BLOCK="<to>"
+npm run bridge:anvil:observe
+```
+
+Use `-RpcUrl` or `ANVIL_RPC_URL` if the Anvil endpoint is not
+`http://127.0.0.1:8545`.
+
 ## Base Mainnet Canary Read
 
 Only after review, and only for a tiny capped canary:
@@ -94,7 +151,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base-ma
 ```
 
 The script checks Base mainnet chain id `8453` and refuses a canary above
-`25` USD.
+`25` USD. It is read-only and prints the chain, lockbox, block range, max USD
+guardrail, and broadcast status before it reads logs.
 
 ## Commands
 
@@ -102,6 +160,9 @@ The script checks Base mainnet chain id `8453` and refuses a canary above
 forge test --match-path tests/bridge/BaseBridgeLockbox.t.sol
 npm run bridge:test
 npm run bridge:mock
+npm run bridge:sepolia:observe
+npm run bridge:local-credit:smoke
+npm run flowchain:full-smoke
 git diff --check
 ```
 

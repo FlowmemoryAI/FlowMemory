@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "mock": "node src/observe-base-lockbox.ts --fixture ../../fixtures/bridge/base-sepolia-mock-deposit.json --out out/bridge-observation.json",
+    "mock": "node src/observe-base-lockbox.ts --mode mock --fixture ../../fixtures/bridge/base-sepolia-mock-deposit.json --out out/bridge-observation.json --credit-out out/bridge-credit.json --handoff-out out/bridge-runtime-handoff.json",
+    "local-credit:smoke": "node src/observe-base-lockbox.ts --mode mock --fixture ../../fixtures/bridge/base-sepolia-mock-deposit.json --out out/local-credit-observation.json --credit-out out/local-credit.json --handoff-out ../../fixtures/bridge/local-runtime-bridge-handoff.json --withdrawal-out out/local-withdrawal-intent.json --apply-credit --withdrawal-intent",
     "test": "node --test test/*.test.ts"
   }
 }
