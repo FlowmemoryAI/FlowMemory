@@ -1,10 +1,10 @@
-# Open PR Merge Readiness
+# Historical PR Merge Readiness
 
 Date: 2026-05-13
 
-Status: active review summary.
+Status: historical review summary; all PRs listed below have merged into `main`.
 
-This file summarizes the open PRs that contain most of the currently built FlowMemory work. It distinguishes what is already merged, what is built in PR branches, and what still needs to be built after merge.
+This file preserves the merge-readiness evidence used during the integration pass. For the current post-merge build-gap audit, use `docs/reviews/ROOTFLOW_FLOW_MEMORY_V0_ACCEPTANCE_AUDIT.md`.
 
 ## Already Merged Into Main
 
@@ -13,7 +13,7 @@ This file summarizes the open PRs that contain most of the currently built FlowM
 | #1 bootstrap repository scaffolding | Merged | Repo structure, initial docs, workflow scaffolding. |
 | #2 contracts foundation | Merged | Initial `FlowPulse`, `RootfieldRegistry`, and Foundry test foundation. |
 
-## Open PRs Reviewed
+## PRs Reviewed And Merged
 
 | PR | Area | Local checks verified | Merge readiness |
 | --- | --- | --- | --- |
@@ -26,6 +26,8 @@ This file summarizes the open PRs that contain most of the currently built FlowM
 | #56 FlowRouter hardware POC | Hardware | simulator fixture validation passed; diff check passed | Ready as bounded hardware POC. Not blocking Rootflow/Flow Memory core. |
 
 ## Recommended Merge Order
+
+Completed on 2026-05-13.
 
 1. #59 HQ program manager OS.
 2. #60 crypto V0 foundation.
@@ -76,6 +78,6 @@ Not launch blockers:
 
 ## Current Bottom Line
 
-Most of the V0 foundation exists in GitHub PR branches. It is not all merged into `main` yet.
+The V0 foundation PR sequence has merged into `main`.
 
-The project is ready for a careful merge sequence, followed by one integration pass that creates the end-to-end Rootflow/Flow Memory acceptance command and generated dashboard fixture.
+The project now needs one integration pass that creates the end-to-end Rootflow/Flow Memory acceptance command and generated dashboard fixture.

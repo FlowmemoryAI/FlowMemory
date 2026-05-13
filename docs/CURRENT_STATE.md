@@ -8,7 +8,9 @@ This file is the beginner-friendly source of truth for what exists in FlowMemory
 
 FlowMemory is in foundation hardening.
 
-The bootstrap repository operating system and first contracts foundation have merged. The next major target is a runnable local V0 stack that connects contract fixtures, local indexing/verifier specs or fixtures, crypto schema vocabulary, and operator-facing data models without production deployment.
+The bootstrap repository operating system, contracts V0 foundation, crypto V0 foundation, local indexer/verifier fixture package, dashboard V0, FlowRouter hardware POC, and local no-value devnet prototype have merged into `main`.
+
+The next major target is a single runnable launch-core V0 stack that connects contract fixtures, local indexing/verifier outputs, crypto schema vocabulary, Rootflow transitions, Flow Memory objects, and dashboard-readable state without production deployment.
 
 Launch-critical direction: Rootflow V0 and Flow Memory V0 are the core of the next milestone. Rootflow defines memory-state transitions. Flow Memory defines the agent-facing memory objects derived from FlowPulse observations, receipts, verifier reports, and committed roots.
 
@@ -29,9 +31,43 @@ Contracts foundation:
 
 - `contracts/FlowPulse.sol` defines the FlowPulse v0 event interface and initial pulse type constants.
 - `contracts/RootfieldRegistry.sol` registers Rootfield namespaces, accepts committed roots, and emits FlowPulse events.
+- `contracts/FlowMemoryHookAdapter.sol` is a compileable V0 hook-adapter scaffold. It is not a production Uniswap v4 hook.
+- `contracts/ArtifactRegistry.sol`, `CursorRegistry.sol`, `ReceiptVerifier.sol`, `WorkerRegistry.sol`, `VerifierRegistry.sol`, `WorkReceiptRegistry.sol`, `VerifierReportRegistry.sol`, and `WorkDebtScheduler.sol` provide local/test skeleton surfaces for commitments, cursors, work receipts, verifier reports, and work state.
 - `contracts/FLOWPULSE_SCHEMA.md` documents event fields, receipt boundaries, and URI/log-data limitations.
-- `tests/RootfieldRegistry.t.sol` contains initial Foundry tests.
+- `tests/RootfieldRegistry.t.sol` and `tests/LiveV0Package.t.sol` contain 33 passing Foundry tests.
 - `tests/README.md` documents the current test command.
+
+Crypto foundation:
+
+- `crypto/` contains runnable Keccak-based V0 hash helpers, typed domains, receipt/report/root/artifact/work helpers, attestation helpers, fixtures, and test vectors.
+- Crypto tests currently pass with 13 Node tests, 21 vector validations, and a Python FlowPulse vector recompute.
+
+Indexer/verifier local package:
+
+- `services/shared/`, `services/indexer/`, and `services/verifier/` contain fixture-first local packages.
+- The local services test suite currently has 24 passing tests.
+- `npm run e2e` currently indexes 7 observations, writes 6 cursors, rejects 2 logs, tracks 1 duplicate, and produces 7 verifier reports.
+- The verifier uses local fixture evidence only. It is not a production verifier network.
+
+Dashboard V0:
+
+- `apps/dashboard/` contains a Vite/React fixture-backed dashboard.
+- It renders overview, FlowPulse stream, Rootfields, work receipts, verifier reports, devnet blocks, hardware nodes, alerts, and raw JSON views.
+- The dashboard currently uses the canonical fixture at `fixtures/dashboard/flowmemory-dashboard-v0.json`.
+- Dashboard tests and production build pass after installing `apps/dashboard` dependencies.
+
+Local no-value devnet prototype:
+
+- `crates/flowmemory-devnet/` contains a Rust local devnet prototype.
+- It models deterministic local transactions, blocks, state roots, and handoff output.
+- It has 7 passing Rust tests.
+- It is not a production L1, token system, sequencer, validator set, or bridge.
+
+FlowRouter hardware POC:
+
+- `hardware/` contains FlowRouter V0 POC docs, BOM/assembly/enclosure concepts, LoRa sidecar message inventory, NFC cartridge concepts, field-test notes, JSON packet schemas, and a simulator.
+- The simulator validates `hardware/fixtures/flowrouter_sample_seed42.json`.
+- Hardware is still a research POC, not manufactured or field-deployed product hardware.
 
 Launch-core specifications:
 
@@ -40,7 +76,7 @@ Launch-core specifications:
 - `docs/V0_LAUNCH_ACCEPTANCE.md` maps the Rootflow and Flow Memory objective to concrete artifacts and evidence.
 - `docs/DECISIONS/rootflow-v0.md` records the V0 decision and non-goal boundaries.
 - `docs/reviews/ROOTFLOW_FLOW_MEMORY_V0_ACCEPTANCE_AUDIT.md` tracks evidence and missing work for the active launch-core goal.
-- `docs/reviews/OPEN_PR_MERGE_READINESS.md` summarizes open PR test evidence, merge order, and remaining build gaps.
+- `docs/reviews/OPEN_PR_MERGE_READINESS.md` is now historical merge-readiness evidence for PRs that have merged.
 - `docs/LAUNCH_CORE_AGENT_GOALS.md` provides copy-ready goals for the contracts, crypto, indexer/verifier, dashboard, and review worktrees.
 
 ## Conceptual Or Not Implemented Yet
@@ -56,13 +92,15 @@ Launch-core specifications:
 - Completed launch-core acceptance audit.
 - Area-specific CI jobs for contracts, crypto, services, dashboard, devnet, and hardware checks.
 - Single generated end-to-end Rootflow/Flow Memory acceptance command.
-- Indexer or verifier service runtime.
-- Persistence layer, live RPC reader, production APIs, or hosted services.
-- Dashboard, explorer, or hardware console implementation.
-- FlowRouter hardware implementation, firmware, manufacturing, final enclosure work, or field deployment.
-- Meshtastic or LoRa integration.
+- Generated dashboard fixture built from service/devnet/hardware outputs instead of a hand-maintained fixture.
+- External status adapter that maps verifier `valid`/`invalid` to Flow Memory/dashboard `verified`/`failed`.
+- Production indexer or verifier service runtime.
+- Production persistence layer, production live RPC reader, production APIs, or hosted services.
+- Explorer or hardware console implementation.
+- FlowRouter firmware, manufacturing, final enclosure work, or field deployment.
+- Real Meshtastic or LoRa device integration.
 - Cryptographic proof systems, GPU proofs, verifier networks, or verifier economics.
-- Appchain/L1 implementation, validator planning, sequencer planning, bridge deployment, or mainnet deployment.
+- Production appchain/L1 implementation, validator planning, sequencer planning, bridge deployment, or mainnet deployment.
 
 ## Active GitHub Work Shape
 
@@ -73,7 +111,17 @@ Closed issue notes:
 - #16 was closed as not planned because its scope was folded into other architecture/status issues.
 - #39 was closed; future on-chain verifier adapter work should stay gated behind accepted verifier and crypto boundaries.
 
-Open PRs should be treated as review candidates only after their changed files match the issue's allowed folders and forbidden folders.
+As of this update there are no open PRs in `FlowmemoryAI/FlowMemory`.
+
+Recently merged PRs:
+
+- #56 FlowRouter V0 POC hardware package.
+- #57 Contracts V0 foundation.
+- #58 Local FlowMemory devnet prototype.
+- #59 FlowMemory HQ program manager OS.
+- #60 Crypto V0 foundation.
+- #61 Indexer/verifier V0 fixture package.
+- #62 Dashboard V0.
 
 ## Active Local Work
 

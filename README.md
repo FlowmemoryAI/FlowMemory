@@ -52,7 +52,7 @@ FlowMemory is managed as a multi-agent program. The management layer is part of 
 - `docs/ISSUE_BACKLOG.md`: maps issues into milestones, dependencies, and agent worktrees
 - `docs/AGENT_PROMPTS.md`: copy-ready prompts for each worktree
 - `docs/LAUNCH_CORE_AGENT_GOALS.md`: copy-ready Rootflow V0 and Flow Memory V0 launch-core goals
-- `docs/reviews/OPEN_PR_MERGE_READINESS.md`: open PR merge order, local test evidence, and remaining build gaps
+- `docs/reviews/OPEN_PR_MERGE_READINESS.md`: historical merge-readiness evidence for the merged V0 foundation PRs
 - `docs/PR_PROCESS.md`: branch, draft PR, review, merge, conflict, and issue-closing rules
 - `docs/DAILY_HQ_RUNBOOK.md`: morning review, triage, agent launch, PR monitoring, merge order, and handoff
 - `infra/scripts/status-report.ps1`: read-only local worktree, PR, and issue status report
@@ -63,7 +63,7 @@ Immediate major milestone: build the Rootflow V0 and Flow Memory V0 launch core.
 
 - Do not claim FlowMemory has production contracts or deployment automation.
 - Do not claim Uniswap v4 hook integration exists yet.
-- Do not claim indexer, verifier, dashboard, explorer, hardware console, FlowRouter hardware, or Meshtastic integration exists yet.
+- Do not claim explorer, hardware console, production FlowRouter hardware, or Meshtastic integration exists yet.
 - Do not claim cryptographic proof systems, tokenomics, or appchain/L1 implementation exists yet.
 - Do not claim URI fields enforce off-chain storage. Current URI values are caller-supplied log data.
 

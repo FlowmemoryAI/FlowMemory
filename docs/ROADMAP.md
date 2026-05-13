@@ -43,25 +43,26 @@ Status: active maintenance.
 
 ### Phase 1: V0 Contracts Foundation
 
-Status: active.
+Status: implemented as a local/test foundation; hardening still active.
 
-- Add minimal Foundry config and contract test workflow.
-- Harden existing RootfieldRegistry tests.
-- Lock FlowPulse v0 and Rootfield URI/log-data decisions.
+- Minimal Foundry config and contract tests exist.
+- `FlowPulse`, `RootfieldRegistry`, hook-adapter scaffold, artifact/cursor/worker/verifier/work registries, receipt verifier, work receipt registry, verifier report registry, and scheduler skeletons exist.
+- `forge test` currently runs 33 passing tests.
+- FlowPulse v0 and Rootfield URI/log-data decisions are documented.
 - Define status lifecycle, ownership/recovery, namespace policy, and static-analysis plan before implementation.
 - Keep dynamic fees, tokenomics, production deployment, and production hooks out of scope.
 
 ### Phase 2: V0 Local Stack
 
-Status: active as specs and local fixtures before services.
+Status: partially implemented as fixture-first services; launch-core integration still active.
 
-- Specify canonical FlowPulse observation identity.
-- Define verifier statuses and report JSON schema.
+- Canonical FlowPulse observation identity is specified and implemented in crypto/services.
+- Verifier statuses and report JSON schema exist for local fixture reports.
 - Define Rootflow transition schema and parent/child state-linking behavior.
 - Define Flow Memory schemas for MemorySignal, MemoryReceipt, RootfieldBundle, and AgentMemoryView.
-- Define fixture-based parser and reorg-state tests.
+- Fixture-based parser and reorg-state tests exist in the indexer/verifier packages.
 - Define persistence and local RPC reader boundaries only after fixture behavior stabilizes.
-- Define local devnet smoke-test gates without mainnet or production deployment.
+- Local devnet smoke-test gates exist as a no-value Rust prototype, without mainnet or production deployment.
 
 ### Phase 3: V0 Review/Audit
 
@@ -76,30 +77,31 @@ Status: active.
 
 ### Phase 4: V0 Crypto Schema Layer
 
-Status: active as launch-core schema and fixture work.
+Status: implemented for crypto V0 primitives; Flow Memory object schemas still active.
 
-- Define receipt, attestation, commitment, root, and proof vocabulary.
-- Define domain separation and replay boundaries.
+- Receipt, attestation, commitment, root, and proof vocabulary exists in `crypto/` docs and helpers.
+- Domain separation and replay boundaries exist for the V0 helper package.
 - Define canonical ids for MemorySignal, MemoryReceipt, RootflowTransition, RootfieldBundle, and verifier reports.
-- Validate test vectors through verifier specs.
+- Validate test vectors through verifier specs and keep cross-language checks passing.
 - Keep proof circuits, GPU proofs, verifier economics, and production crypto infrastructure out of scope.
 
 ### Phase 5: V0 Dashboard Data Model And Display Path
 
-Status: active as fixture-backed local display work.
+Status: implemented as a fixture-backed local app; generated fixture integration still active.
 
-- Define app-facing entities for dashboard and explorer.
-- Model observed, pending, finalized, verified, invalid, unresolved, unsupported, and reorged states.
-- Render Rootfield, Rootflow transition, MemorySignal, MemoryReceipt, verifier report, and AgentMemoryView fixtures.
+- App-facing entities exist in `apps/dashboard`.
+- Observed, pending, finalized, verified, invalid, unresolved, unsupported, reorged, offline, and stale states are modeled for display.
+- Dashboard renders local fixture views for overview, FlowPulse stream, Rootfields, work receipts, verifier reports, devnet blocks, hardware nodes, alerts, and raw JSON.
+- Next step: replace or augment the hand-maintained dashboard fixture with generated output from services/devnet/hardware.
 - Keep hosted production APIs and deployment out of scope until the local stack stabilizes.
 
 ### Phase 6: V0 Hardware POC
 
-Status: planning and bounded research.
+Status: bounded POC specs and simulator implemented; real hardware integration still future work.
 
-- Define FlowRouter v0 as research hardware.
-- Document Meshtastic/LoRa control-message candidates.
-- Explore enclosure concepts, NFC memory cartridge concepts, light-pipe indicators, and two-node demos as specs or prototypes only when scoped.
+- FlowRouter v0 is defined as research hardware.
+- Meshtastic/LoRa control-message candidates are documented.
+- Enclosure concepts, NFC memory cartridge concepts, light-pipe indicators, two-node demos, packet schemas, and simulator validation exist.
 - Keep manufacturing, firmware production, RF certification work, and field deployment out of scope.
 
 ## Research Phases
@@ -126,11 +128,12 @@ Status: blocked until explicit go/no-go decisions exist.
 
 ## Merge Order Preference
 
-1. Repo OS and review process changes.
-2. Rootflow and Flow Memory specs, current state, roadmap, architecture, and decision records.
-3. Contracts foundation hardening.
-4. Crypto schema vocabulary and test-vector validation.
-5. Indexer/verifier fixture, Rootflow transition, and report schema work.
-6. Dashboard data model and fixture-backed display path.
-7. Hardware POC specs.
-8. Research lab documents.
+The initial merge sequence has completed for repo OS, contracts foundation, crypto foundation, indexer/verifier fixtures, dashboard V0, hardware POC, and local devnet prototype.
+
+Next merge preference:
+
+1. Launch-core integration command and generated Rootflow/Flow Memory fixtures.
+2. Canonical schemas for MemorySignal, MemoryReceipt, RootflowTransition, RootfieldBundle, and AgentMemoryView.
+3. Dashboard fixture generator/adapter that consumes service/devnet/hardware outputs.
+4. Area-specific CI for contracts, crypto, services, dashboard, devnet, and hardware.
+5. Production-gated research only after V0 local acceptance is green.
