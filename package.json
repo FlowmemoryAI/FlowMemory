@@ -47,6 +47,7 @@
     "flowchain:full-smoke": "npm run flowchain:smoke && npm run control-plane:smoke",
     "flowchain:export": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-export.ps1",
     "flowchain:import": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-import.ps1",
+    "flowchain:full-smoke": "npm run flowchain:smoke && npm run control-plane:smoke && npm run bridge:local-credit:smoke",
     "workbench:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-workbench.ps1",
     "e2e": "npm run index:fixtures && npm run verify:fixtures && npm run flowmemory:generate",
     "demo:indexer": "npm run demo --prefix services/indexer",
@@ -57,6 +58,9 @@
     "control-plane:serve": "npm run serve --prefix services/control-plane",
     "bridge:test": "npm test --prefix services/bridge-relayer",
     "bridge:mock": "npm run mock --prefix services/bridge-relayer",
+    "bridge:sepolia:observe": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base-sepolia-observe.ps1",
+    "bridge:anvil:observe": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-local-anvil-observe.ps1",
+    "bridge:local-credit:smoke": "npm run local-credit:smoke --prefix services/bridge-relayer",
     "bridge:observe": "node services/bridge-relayer/src/observe-base-lockbox.ts"
   },
   "devDependencies": {
