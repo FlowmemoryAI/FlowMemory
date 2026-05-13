@@ -26,7 +26,7 @@ Acceptance checks:
 
 ## Phase 1: Test Vector Harness
 
-Status: runnable package candidate exists in `crypto/` with 21 package-level vectors and a Python FlowPulse aggregate cross-check.
+Status: runnable package candidate exists in `crypto/` with 33 package-level vectors, Local Alpha object and signed-envelope fixtures, schema-backed validation tests, and a Python FlowPulse aggregate cross-check.
 
 Deliverables:
 
@@ -34,12 +34,16 @@ Deliverables:
 - Validate `crypto/test-vectors/flowpulse-observation-v0.json`.
 - Add negative tests for swapped fields, changed type strings, wrong Merkle order, and odd-leaf handling.
 - Add equivalent vectors for empty artifact and one-chunk artifact roots.
+- Add canonical Local Alpha vectors for AgentAccount, ModelPassport, WorkReceipt, ArtifactAvailabilityProof, VerifierModule, VerifierReport, MemoryCell, Challenge, FinalityReceipt, hardware signal envelopes, and control-plane provenance responses.
+- Add local operator, agent, verifier, and hardware signature-envelope vectors and invalid vectors for replay, wrong domain, missing signer, bad signature, zero hash, malformed id, malformed dependency, bad parent/root, and wrong object type.
 
 Acceptance checks:
 
 - Local tests reproduce all vector hashes.
 - Bad vectors fail deterministically.
 - No production keys, secrets, RPC URLs, or private locators are committed.
+- The RD/research crypto boundary is explicit: nearby Noesis/FlowChain SHA-256 and proof-system scaffolds are research inputs, while FlowMemory `crypto/` remains the Keccak typed-hash package for Local Alpha.
+- Deferred RD tracks are gated in `research/cryptography/FLOWCHAIN_RD_GATES.md`: Process-Witness, SEAL/dependency privacy, Synthetic Non-Amplification, advanced encrypted compute, GPU proofs, and audited production proof systems.
 
 ## Phase 2: Shared Contract Hash Library
 

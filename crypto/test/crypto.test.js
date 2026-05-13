@@ -5,23 +5,37 @@ import test from "node:test";
 
 import {
   artifactFromChunks,
+  agentAccountId,
+  artifactAvailabilityProofId,
   attestationEnvelopeHash,
+  challengeId,
   canonicalJsonHash,
   canonicalJson,
+  controlPlaneProvenanceResponseId,
   contractPulseId,
   cursorId,
   devnetBlockHash,
+  DOMAIN_STRINGS,
   domainSeparator,
   eip712DomainSeparator,
   emptyMerkleRoot,
+  finalityReceiptId,
   flowPulseEventArgsHash,
   flowPulseEventSignature,
   flowPulseObservationId,
   flowPulseSchemaId,
+  hardwareSignalEnvelopeId,
   indexerCursorId,
+  localAlphaEnvelopeReplayKey,
+  localAlphaObjectId,
+  localSignatureEnvelopeHash,
+  localSignatureEnvelopeInput,
+  localSignatureEnvelopePayload,
   keccakUtf8,
+  memoryCellId,
   merkleLeafHash,
   merkleRoot,
+  modelPassportId,
   normalizeHex,
   publicKeyFromPrivateKey,
   receiptHash,
@@ -29,6 +43,10 @@ import {
   rootfieldNamespaceId,
   signDigest,
   storageReceiptCommitmentHash,
+  TYPE_STRINGS,
+  typedHash,
+  validateLocalAlphaEnvelope,
+  verifierModuleId,
   verifierIdentity,
   verifierReportHash,
   verifierSignaturePayload,
@@ -37,6 +55,7 @@ import {
   workerIdentity,
   workerSignaturePayload
 } from "../src/index.js";
+import { validateLocalAlphaFixtures } from "../src/validate-local-alpha-fixtures.js";
 import { validateVectors } from "../src/validate-vectors.js";
 
 const root = resolve(import.meta.dirname, "..");
@@ -48,6 +67,71 @@ function fixture(name) {
 const flowPulse = fixture("sample-flowpulse.json");
 const observation = fixture("sample-observation.json");
 const report = fixture("sample-report.json");
+const localAlphaObjects = fixture("local-alpha-objects.json");
+
+const localAlphaValidators = Object.freeze({
+  agentAccountId,
+  artifactAvailabilityProofId,
+  challengeId,
+  controlPlaneProvenanceResponseId,
+  finalityReceiptId,
+  hardwareSignalEnvelopeId,
+  localSignatureEnvelopeHash,
+  memoryCellId,
+  modelPassportId,
+  verifierModuleId,
+  verifierReportHash,
+  workReceiptId
+});
+
+function assertSchemaDocument(schemaPath, document) {
+  const schema = JSON.parse(readFileSync(resolve(root, "fixtures", schemaPath), "utf8"));
+  assert.equal(document.schema, schema.properties.schema.const);
+  assert.deepEqual(
+    Object.keys(document).sort(),
+    Object.keys(schema.properties).sort(),
+    `${document.schema} should not drift from its schema properties`
+  );
+
+  for (const key of schema.required) {
+    assert.ok(Object.hasOwn(document, key), `${document.schema} missing ${key}`);
+  }
+
+  for (const [key, definition] of Object.entries(schema.properties)) {
+    const value = document[key];
+    const resolved = definition.$ref
+      ? schema.$defs[definition.$ref.replace("#/$defs/", "")]
+      : definition;
+    if (resolved.const !== undefined) {
+      assert.equal(value, resolved.const, `${document.schema}.${key}`);
+    }
+    if (resolved.pattern) {
+      assert.match(value, new RegExp(resolved.pattern), `${document.schema}.${key}`);
+    }
+    if (resolved.enum) {
+      assert.ok(resolved.enum.includes(value), `${document.schema}.${key}`);
+    }
+    if (resolved.type === "integer") {
+      assert.equal(Number.isInteger(value), true, `${document.schema}.${key}`);
+    }
+    if (resolved.type === "object") {
+      assert.equal(value !== null && typeof value === "object" && !Array.isArray(value), true);
+    }
+  }
+}
+
+function assertNoDuplicateObjectIds(documents) {
+  const seen = new Set();
+  for (const document of documents) {
+    const idKey = Object.keys(document).find((key) => key.endsWith("Id"));
+    assert.ok(idKey, `${document.schema} should expose an id field`);
+    const id = document[idKey];
+    if (seen.has(id)) {
+      throw new Error(`duplicate object id: ${id}`);
+    }
+    seen.add(id);
+  }
+}
 
 test("canonicalJson sorts object keys recursively", () => {
   assert.equal(canonicalJson({ b: 2, a: { d: 4, c: 3 } }), '{"a":{"c":3,"d":4},"b":2}');
@@ -247,8 +331,130 @@ test("receipt-adjacent fields fail closed when changed", () => {
   assert.notEqual(wrongVerifierSet.signingDigest, report.verifierSignature.expected.signingDigest);
 });
 
+test("computes FlowChain Local Alpha object ids and validates schema documents", () => {
+  assert.equal(localAlphaObjects.schema, "flowmemory.crypto.local-alpha-object-fixtures.v0");
+  assert.match(localAlphaObjects.rdBoundary.researchCryptoCrate, /noesis-crypto$/);
+  assert.match(localAlphaObjects.rdBoundary.consumeAs, /Research vocabulary/);
+  assert.match(localAlphaObjects.rdBoundary.operatorVaultBoundary, /no-value test keys/);
+
+  for (const vector of localAlphaObjects.positive) {
+    const fn = localAlphaValidators[vector.function];
+    assert.ok(fn, `unknown local alpha object function: ${vector.function}`);
+    assert.equal(fn(vector.input), vector.expected, vector.name);
+    assert.equal(vector.document[vector.idField], vector.expected, `${vector.name} document id`);
+    assert.equal(localAlphaObjectId(vector.document), vector.expected, `${vector.name} recomputed document id`);
+    assertSchemaDocument(vector.schemaPath, vector.document);
+  }
+});
+
+test("validates FlowChain Local Alpha signed object envelopes", () => {
+  const documentsByName = new Map(localAlphaObjects.positive.map((entry) => [entry.name, entry.document]));
+  const seenSequences = new Set();
+
+  for (const vector of localAlphaObjects.envelopes.positive) {
+    const document = documentsByName.get(vector.objectName);
+    assert.ok(document, `unknown envelope object: ${vector.objectName}`);
+    assertSchemaDocument(vector.schemaPath, vector.envelope);
+    assert.equal(localSignatureEnvelopeHash(vector.input), vector.expected.envelopeId, vector.name);
+    assert.deepEqual(localSignatureEnvelopePayload(vector.input), {
+      structHash: vector.expected.envelopeId,
+      signingDigest: vector.expected.signingDigest
+    });
+    assert.deepEqual(localSignatureEnvelopeInput(vector.envelope), vector.input);
+
+    const result = validateLocalAlphaEnvelope({
+      document,
+      envelope: vector.envelope,
+      context: { seenSequences }
+    });
+    assert.deepEqual(result, { valid: true, errors: [] }, vector.name);
+    seenSequences.add(localAlphaEnvelopeReplayKey(vector.envelope));
+  }
+});
+
+test("AJV validates all Local Alpha object and envelope fixtures against canonical schemas", () => {
+  assert.deepEqual(validateLocalAlphaFixtures(), {
+    documents: 11,
+    envelopes: 11,
+    schemas: 12
+  });
+});
+
+test("Local Alpha signed envelope vectors reject replay, wrong domains, missing signer, malformed roots, and wrong types", () => {
+  const documentsByName = new Map(localAlphaObjects.positive.map((entry) => [entry.name, entry.document]));
+  const envelopesByName = new Map(localAlphaObjects.envelopes.positive.map((entry) => [entry.name, entry]));
+
+  for (const vector of localAlphaObjects.envelopes.negative) {
+    const { document, envelope, context } = mutatedEnvelopeVector(vector, documentsByName, envelopesByName);
+    const result = validateLocalAlphaEnvelope({ document, envelope, context });
+    assert.equal(result.valid, false, vector.name);
+    for (const expectedError of vector.expectErrors) {
+      assert.ok(
+        result.errors.includes(expectedError),
+        `${vector.name} expected ${expectedError}, got ${result.errors.join(", ")}`
+      );
+    }
+  }
+});
+
+test("Local Alpha object fixtures reject swapped fields, malformed hex, duplicate ids, and changed type strings", () => {
+  for (const negative of localAlphaObjects.negative) {
+    if (negative.reason === "swapped-field-rejection") {
+      const fn = localAlphaValidators[negative.function];
+      assert.notEqual(fn(negative.input), negative.mustNotEqual, negative.name);
+    }
+    if (negative.reason === "malformed-hex-rejection") {
+      const fn = localAlphaValidators[negative.function];
+      assert.throws(() => fn(negative.input), /invalid hex/, negative.name);
+    }
+    if (negative.reason === "duplicate-id-rejection") {
+      assert.throws(() => assertNoDuplicateObjectIds(negative.documents), /duplicate object id/, negative.name);
+    }
+  }
+
+  const modelPassport = localAlphaObjects.positive.find((entry) => entry.function === "modelPassportId");
+  const changedTypeString = TYPE_STRINGS.modelPassportV0.replace(
+    "FlowChainModelPassportV0",
+    "FlowChainModelPassportV1"
+  );
+  const changedTypeHash = typedHash(changedTypeString, [
+    ["bytes32", modelPassport.input.providerHash],
+    ["bytes32", modelPassport.input.modelFamilyHash],
+    ["bytes32", modelPassport.input.versionHash],
+    ["bytes32", modelPassport.input.licenseRoot],
+    ["bytes32", modelPassport.input.policyRoot],
+    ["bytes32", modelPassport.input.artifactRoot],
+    ["bytes32", modelPassport.input.metadataHash],
+    ["bytes32", modelPassport.input.nonce]
+  ]);
+
+  assert.notEqual(changedTypeHash, modelPassport.expected);
+  assert.notEqual(
+    domainSeparator("modelPassportId"),
+    domainSeparator("flowchain.local-alpha.v1.model-passport.id")
+  );
+});
+
+test("control-plane provenance response uses stable canonical JSON body hashing", () => {
+  const provenance = localAlphaObjects.positive.find(
+    (entry) => entry.function === "controlPlaneProvenanceResponseId"
+  );
+  const shuffledBody = {
+    limitations: [
+      "V0 binds IDs and commitments only.",
+      "V0 does not prove model output correctness."
+    ],
+    status: "challengeable",
+    subject: "local-alpha-memory-cell"
+  };
+
+  assert.equal(canonicalJsonHash(shuffledBody), provenance.input.responseBodyHash);
+  assert.equal(canonicalJsonHash(provenance.document.responseBody), provenance.document.responseBodyHash);
+  assert.equal(controlPlaneProvenanceResponseId(provenance.input), provenance.expected);
+});
+
 test("validates all published crypto test vectors", () => {
-  assert.equal(validateVectors(), 21);
+  assert.equal(validateVectors(), 33);
 });
 
 test("signs and verifies verifier digests with local test keys only", async () => {
@@ -264,3 +470,38 @@ test("signs and verifies verifier digests with local test keys only", async () =
   assert.equal(verifyDigest({ digest, signature, publicKey: wrongPublicKey }), false);
   assert.equal(verifyDigest({ digest: wrongDigest, signature, publicKey }), false);
 });
+
+function mutatedEnvelopeVector(vector, documentsByName, envelopesByName) {
+  const base = envelopesByName.get(vector.baseEnvelope);
+  assert.ok(base, `unknown base envelope: ${vector.baseEnvelope}`);
+  const document = structuredClone(documentsByName.get(base.objectName));
+  const envelope = structuredClone(base.envelope);
+  const mutation = vector.mutation ?? {};
+
+  if (mutation.document) {
+    Object.assign(document, mutation.document);
+  }
+  if (mutation.documentFromDocumentField) {
+    for (const [target, source] of Object.entries(mutation.documentFromDocumentField)) {
+      document[target] = document[source];
+    }
+  }
+  if (mutation.envelope) {
+    const { domainFrom, ...envelopeFields } = mutation.envelope;
+    Object.assign(envelope, envelopeFields);
+    if (domainFrom) {
+      envelope.domain = DOMAIN_STRINGS[domainFrom];
+      envelope.domainSeparator = domainSeparator(domainFrom);
+    }
+  }
+  for (const field of mutation.deleteEnvelopeFields ?? []) {
+    delete envelope[field];
+  }
+
+  const context = {};
+  if (mutation.contextReplay) {
+    context.seenSequences = new Set([localAlphaEnvelopeReplayKey(envelope)]);
+  }
+
+  return { document, envelope, context };
+}

@@ -15,7 +15,8 @@
   "scripts": {
     "test": "node --test",
     "vectors": "node src/cli.js",
-    "validate:vectors": "node src/validate-vectors.js"
+    "validate:vectors": "node src/validate-vectors.js",
+    "validate:local-alpha": "node src/validate-local-alpha-fixtures.js"
   },
   "dependencies": {
     "@noble/hashes": "2.2.0",
@@ -23,5 +24,9 @@
   },
   "engines": {
     "node": ">=20.19.0"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1"
   }
 }

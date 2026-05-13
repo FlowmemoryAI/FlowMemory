@@ -41,6 +41,26 @@ export const TYPE_STRINGS = Object.freeze({
     "FlowMemoryVerifierIdentityV0(bytes32 operatorId,bytes32 verifierKeyId,bytes32 verifierSetRoot)",
   devnetBlockHashV0:
     "FlowMemoryDevnetBlockV0(uint256 chainId,uint64 blockNumber,bytes32 parentHash,bytes32 stateRoot,uint64 timestamp)",
+  agentAccountV0:
+    "FlowChainAgentAccountV0(bytes32 namespaceId,address owner,bytes32 policyRoot,bytes32 toolPermissionsRoot,bytes32 modelAllowlistRoot,bytes32 memoryNamespaceRoot,uint256 spendingLimitPerEpoch,bytes32 nonce)",
+  modelPassportV0:
+    "FlowChainModelPassportV0(bytes32 providerHash,bytes32 modelFamilyHash,bytes32 versionHash,bytes32 licenseRoot,bytes32 policyRoot,bytes32 artifactRoot,bytes32 metadataHash,bytes32 nonce)",
+  memoryCellV0:
+    "FlowChainMemoryCellV0(bytes32 ownerAgentId,bytes32 currentMemoryRoot,bytes32 previousMemoryRoot,bytes32 lastDeltaRoot,bytes32 sourceReceiptsRoot,bytes32 dependencyRoot,uint64 updatedAtUnixMs,uint16 cellVersion)",
+  artifactAvailabilityProofV0:
+    "FlowChainArtifactAvailabilityProofV0(bytes32 artifactRoot,bytes32 providerId,bytes32 locationCommitment,bytes32 storageReceiptCommitment,bytes32 availabilitySampleRoot,uint64 issuedAtUnixMs,uint64 expiresAtUnixMs,uint8 status,bytes32 nonce)",
+  verifierModuleV0:
+    "FlowChainVerifierModuleV0(bytes32 ownerId,bytes32 codeRoot,bytes32 manifestRoot,bytes32 supportedModesRoot,bytes32 supportedChallengeTypesRoot,bytes32 verifierSetRoot,uint16 moduleVersion,uint8 status)",
+  challengeV0:
+    "FlowChainChallengeV0(bytes32 receiptId,bytes32 challengerId,uint8 challengeType,bytes32 evidenceRoot,uint64 openedAtUnixMs,uint64 deadlineUnixMs,uint8 status,bytes32 nonce)",
+  finalityReceiptV0:
+    "FlowChainFinalityReceiptV0(bytes32 receiptId,bytes32 reportId,bytes32 challengeRoot,uint8 finalityState,uint64 finalizedAtUnixMs,uint64 finalizedBlockNumber,bytes32 finalizedBlockHash,bytes32 policyHash)",
+  hardwareSignalEnvelopeV0:
+    "FlowChainHardwareSignalEnvelopeV0(bytes32 deviceId,bytes32 signalRoot,bytes32 previousSignalEnvelopeId,bytes32 channelRoot,uint64 sequence,uint64 observedAtUnixMs,uint8 transport,bytes32 nonce)",
+  controlPlaneProvenanceResponseV0:
+    "FlowChainControlPlaneProvenanceResponseV0(bytes32 requestId,bytes32 subjectId,bytes32 agentId,bytes32 receiptId,bytes32 reportId,bytes32 memoryCellId,bytes32 dependencyRoot,bytes32 responseBodyHash,uint64 issuedAtUnixMs,uint16 responseVersion)",
+  localSignatureEnvelopeV0:
+    "FlowChainLocalSignatureEnvelopeV0(bytes32 objectId,bytes32 objectTypeHash,bytes32 domainSeparator,bytes32 signerId,bytes32 signerKeyId,uint8 signerRole,uint64 sequence,uint64 issuedAtUnixMs,uint64 expiresAtUnixMs,bytes32 nonce)",
   eip712Domain:
     "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)"
 });
@@ -58,7 +78,17 @@ export const DOMAIN_STRINGS = Object.freeze({
   verifierIdentity: "flowmemory.v0.verifier.identity",
   merkleLeaf: "flowmemory.v0.merkle.leaf",
   merkleInternalNode: "flowmemory.v0.merkle.internal-node",
-  devnetBlockHash: "flowmemory.v0.devnet.block-hash"
+  devnetBlockHash: "flowmemory.v0.devnet.block-hash",
+  agentAccountId: "flowchain.local-alpha.v0.agent-account.id",
+  modelPassportId: "flowchain.local-alpha.v0.model-passport.id",
+  memoryCellId: "flowchain.local-alpha.v0.memory-cell.id",
+  artifactAvailabilityProofId: "flowchain.local-alpha.v0.artifact-availability-proof.id",
+  verifierModuleId: "flowchain.local-alpha.v0.verifier-module.id",
+  challengeId: "flowchain.local-alpha.v0.challenge.id",
+  finalityReceiptId: "flowchain.local-alpha.v0.finality-receipt.id",
+  hardwareSignalEnvelopeId: "flowchain.local-alpha.v0.hardware-signal-envelope.id",
+  controlPlaneProvenanceResponseId: "flowchain.local-alpha.v0.control-plane-provenance-response.id",
+  localSignatureEnvelope: "flowchain.local-alpha.v0.local-signature-envelope"
 });
 
 export const MERKLE_SCHEME_V0 = "FM-MERKLE-KECCAK256-BINARY-V0";
@@ -72,4 +102,59 @@ export const VERIFIER_STATUSES = Object.freeze({
   failed: 5,
   reorged: 6,
   superseded: 7
+});
+
+export const LOCAL_ALPHA_OBJECT_STATUSES = Object.freeze({
+  draft: 1,
+  active: 2,
+  paused: 3,
+  revoked: 4,
+  deprecated: 5,
+  rejected: 6,
+  available: 7,
+  unavailable: 8,
+  expired: 9
+});
+
+export const LOCAL_ALPHA_CHALLENGE_TYPES = Object.freeze({
+  missingArtifact: 1,
+  invalidArtifactRoot: 2,
+  missingModelPassport: 3,
+  memoryParentMismatch: 4,
+  policyViolation: 5,
+  deterministicReplayFailure: 6,
+  dependencyOmission: 7
+});
+
+export const LOCAL_ALPHA_CHALLENGE_STATUSES = Object.freeze({
+  open: 1,
+  submitterWins: 2,
+  challengerWins: 3,
+  unresolved: 4,
+  expired: 5
+});
+
+export const LOCAL_ALPHA_FINALITY_STATES = Object.freeze({
+  provisional: 1,
+  challengeable: 2,
+  challenged: 3,
+  accepted: 4,
+  rejected: 5,
+  finalized: 6,
+  superseded: 7,
+  reorged: 8
+});
+
+export const LOCAL_ALPHA_HARDWARE_TRANSPORTS = Object.freeze({
+  localSimulator: 1,
+  usbSerial: 2,
+  loraControl: 3,
+  meshtasticControl: 4
+});
+
+export const LOCAL_ALPHA_SIGNER_ROLES = Object.freeze({
+  operator: 1,
+  agent: 2,
+  verifier: 3,
+  hardware: 4
 });

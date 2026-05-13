@@ -185,6 +185,139 @@ export interface DevnetBlockInput {
   timestamp: number | bigint | string;
 }
 
+export interface AgentAccountInput {
+  namespaceId: Bytes32;
+  owner: Address;
+  policyRoot: Bytes32;
+  toolPermissionsRoot: Bytes32;
+  modelAllowlistRoot: Bytes32;
+  memoryNamespaceRoot: Bytes32;
+  spendingLimitPerEpoch: number | bigint | string;
+  nonce: Bytes32;
+}
+
+export interface ModelPassportInput {
+  providerHash: Bytes32;
+  modelFamilyHash: Bytes32;
+  versionHash: Bytes32;
+  licenseRoot: Bytes32;
+  policyRoot: Bytes32;
+  artifactRoot: Bytes32;
+  metadataHash: Bytes32;
+  nonce: Bytes32;
+}
+
+export interface MemoryCellInput {
+  ownerAgentId: Bytes32;
+  currentMemoryRoot: Bytes32;
+  previousMemoryRoot: Bytes32;
+  lastDeltaRoot: Bytes32;
+  sourceReceiptsRoot: Bytes32;
+  dependencyRoot: Bytes32;
+  updatedAtUnixMs: number | bigint | string;
+  cellVersion: number | bigint | string;
+}
+
+export interface ArtifactAvailabilityProofInput {
+  artifactRoot: Bytes32;
+  providerId: Bytes32;
+  locationCommitment: Bytes32;
+  storageReceiptCommitment: Bytes32;
+  availabilitySampleRoot: Bytes32;
+  issuedAtUnixMs: number | bigint | string;
+  expiresAtUnixMs: number | bigint | string;
+  status: number | bigint | string;
+  nonce: Bytes32;
+}
+
+export interface VerifierModuleInput {
+  ownerId: Bytes32;
+  codeRoot: Bytes32;
+  manifestRoot: Bytes32;
+  supportedModesRoot: Bytes32;
+  supportedChallengeTypesRoot: Bytes32;
+  verifierSetRoot: Bytes32;
+  moduleVersion: number | bigint | string;
+  status: number | bigint | string;
+}
+
+export interface ChallengeInput {
+  receiptId: Bytes32;
+  challengerId: Bytes32;
+  challengeType: number | bigint | string;
+  evidenceRoot: Bytes32;
+  openedAtUnixMs: number | bigint | string;
+  deadlineUnixMs: number | bigint | string;
+  status: number | bigint | string;
+  nonce: Bytes32;
+}
+
+export interface FinalityReceiptInput {
+  receiptId: Bytes32;
+  reportId: Bytes32;
+  challengeRoot: Bytes32;
+  finalityState: number | bigint | string;
+  finalizedAtUnixMs: number | bigint | string;
+  finalizedBlockNumber: number | bigint | string;
+  finalizedBlockHash: Bytes32;
+  policyHash: Bytes32;
+}
+
+export interface ControlPlaneProvenanceResponseInput {
+  requestId: Bytes32;
+  subjectId: Bytes32;
+  agentId: Bytes32;
+  receiptId: Bytes32;
+  reportId: Bytes32;
+  memoryCellId: Bytes32;
+  dependencyRoot: Bytes32;
+  responseBodyHash: Bytes32;
+  issuedAtUnixMs: number | bigint | string;
+  responseVersion: number | bigint | string;
+}
+
+export interface HardwareSignalEnvelopeInput {
+  deviceId: Bytes32;
+  signalRoot: Bytes32;
+  previousSignalEnvelopeId: Bytes32;
+  channelRoot: Bytes32;
+  sequence: number | bigint | string;
+  observedAtUnixMs: number | bigint | string;
+  transport: number | bigint | string;
+  nonce: Bytes32;
+}
+
+export interface LocalSignatureEnvelopeInput {
+  objectId: Bytes32;
+  objectTypeHash: Bytes32;
+  domainSeparator: Bytes32;
+  signerId: Bytes32;
+  signerKeyId: Bytes32;
+  signerRole: number | bigint | string;
+  sequence: number | bigint | string;
+  issuedAtUnixMs: number | bigint | string;
+  expiresAtUnixMs: number | bigint | string;
+  nonce: Bytes32;
+}
+
+export interface LocalSignatureEnvelopePayload {
+  structHash: Bytes32;
+  signingDigest: Bytes32;
+}
+
+export interface LocalAlphaEnvelopeValidationInput {
+  document: Record<string, unknown>;
+  envelope: Record<string, unknown>;
+  context?: {
+    seenSequences?: Set<string>;
+  };
+}
+
+export interface LocalAlphaEnvelopeValidationResult {
+  valid: boolean;
+  errors: string[];
+}
+
 export const ZERO_BYTES32: Bytes32;
 export const FLOWPULSE_SCHEMA_ID_PREIMAGE: string;
 export const FLOWPULSE_EVENT_SIGNATURE: string;
@@ -192,6 +325,12 @@ export const TYPE_STRINGS: Readonly<Record<string, string>>;
 export const DOMAIN_STRINGS: Readonly<Record<string, string>>;
 export const MERKLE_SCHEME_V0: string;
 export const VERIFIER_STATUSES: Readonly<Record<string, number>>;
+export const LOCAL_ALPHA_OBJECT_STATUSES: Readonly<Record<string, number>>;
+export const LOCAL_ALPHA_CHALLENGE_TYPES: Readonly<Record<string, number>>;
+export const LOCAL_ALPHA_CHALLENGE_STATUSES: Readonly<Record<string, number>>;
+export const LOCAL_ALPHA_FINALITY_STATES: Readonly<Record<string, number>>;
+export const LOCAL_ALPHA_HARDWARE_TRANSPORTS: Readonly<Record<string, number>>;
+export const LOCAL_ALPHA_SIGNER_ROLES: Readonly<Record<string, number>>;
 
 export function strip0x(value: string): string;
 export function bytesToHex(bytes: Uint8Array): Hex;
@@ -269,3 +408,25 @@ export function workReceiptId(input: WorkReceiptInput): Bytes32;
 export function workerIdentity(input: WorkerIdentityInput): Bytes32;
 export function verifierIdentity(input: VerifierIdentityInput): Bytes32;
 export function devnetBlockHash(input: DevnetBlockInput): Bytes32;
+export function agentAccountId(input: AgentAccountInput): Bytes32;
+export function modelPassportId(input: ModelPassportInput): Bytes32;
+export function memoryCellId(input: MemoryCellInput): Bytes32;
+export function artifactAvailabilityProofId(input: ArtifactAvailabilityProofInput): Bytes32;
+export function verifierModuleId(input: VerifierModuleInput): Bytes32;
+export function challengeId(input: ChallengeInput): Bytes32;
+export function finalityReceiptId(input: FinalityReceiptInput): Bytes32;
+export function hardwareSignalEnvelopeId(input: HardwareSignalEnvelopeInput): Bytes32;
+export function controlPlaneProvenanceResponseId(input: ControlPlaneProvenanceResponseInput): Bytes32;
+export function localSignatureEnvelopeHash(input: LocalSignatureEnvelopeInput): Bytes32;
+export const localSignatureEnvelopeId: typeof localSignatureEnvelopeHash;
+export function localSignatureEnvelopePayload(input: LocalSignatureEnvelopeInput): LocalSignatureEnvelopePayload;
+export function localAlphaObjectTypeHash(objectSchema: string): Bytes32;
+export const LOCAL_ALPHA_OBJECT_DESCRIPTORS: Readonly<Record<string, unknown>>;
+export function localAlphaObjectDescriptor(objectSchema: string): unknown;
+export function localAlphaObjectInput(document: Record<string, unknown>): unknown;
+export function localAlphaObjectId(document: Record<string, unknown>): Bytes32;
+export function localAlphaEnvelopeReplayKey(envelope: Record<string, unknown>): string;
+export function localSignatureEnvelopeInput(envelope: Record<string, unknown>): LocalSignatureEnvelopeInput;
+export function validateLocalAlphaEnvelope(
+  input: LocalAlphaEnvelopeValidationInput
+): LocalAlphaEnvelopeValidationResult;
