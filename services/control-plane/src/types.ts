@@ -16,10 +16,22 @@ export type ControlPlaneMethod =
   | "health"
   | "chain_status"
   | "devnet_state"
+  | "node_status"
+  | "peer_list"
+  | "mempool_list"
   | "block_get"
   | "block_list"
+  | "account_get"
+  | "account_list"
+  | "balance_get"
+  | "balance_list"
+  | "faucet_event_get"
+  | "faucet_event_list"
+  | "wallet_metadata_get"
+  | "wallet_metadata_list"
   | "transaction_get"
   | "transaction_list"
+  | "transaction_submit"
   | "rootfield_get"
   | "rootfield_list"
   | "artifact_get"
@@ -37,12 +49,25 @@ export type ControlPlaneMethod =
   | "memory_cell_list"
   | "agent_get"
   | "agent_list"
+  | "agent_account_get"
+  | "agent_account_list"
   | "model_get"
   | "model_list"
+  | "model_passport_get"
+  | "model_passport_list"
   | "challenge_get"
   | "challenge_list"
   | "finality_get"
   | "finality_list"
+  | "bridge_observation_submit"
+  | "bridge_observation_get"
+  | "bridge_observation_list"
+  | "bridge_deposit_get"
+  | "bridge_deposit_list"
+  | "bridge_credit_get"
+  | "bridge_credit_list"
+  | "withdrawal_get"
+  | "withdrawal_list"
   | "provenance_get"
   | "raw_json_get";
 
@@ -51,11 +76,21 @@ export interface ControlPlanePaths {
   indexerPath: string;
   verifierPath: string;
   artifactsPath: string;
+  devnetLocalStatePath: string;
+  devnetLocalLaunchStatePath: string;
+  devnetLocalIndexerHandoffPath: string;
+  devnetLocalVerifierHandoffPath: string;
+  devnetLocalControlPlaneHandoffPath: string;
   devnetPath: string;
   devnetIndexerHandoffPath: string;
   devnetVerifierHandoffPath: string;
   devnetControlPlaneHandoffPath: string;
   txFixturesPath: string;
+  runtimeStatePath: string;
+  runtimeIntakeDir: string;
+  bridgeObservationPath: string;
+  bridgeObservationIntakePath: string;
+  bridgeDepositFixturePath: string;
 }
 
 export interface DataSourceRecord {
@@ -77,6 +112,9 @@ export interface LoadedControlPlaneState {
   devnetVerifierHandoff: JsonObject | null;
   devnetControlPlaneHandoff: JsonObject | null;
   txFixtures: JsonObject | null;
+  bridgeObservation: JsonObject | null;
+  bridgeObservationIntake: JsonObject | null;
+  bridgeDepositFixture: JsonObject | null;
   sources: Record<string, DataSourceRecord>;
 }
 
