@@ -1,0 +1,57 @@
+{
+  "allCasesRejected": true,
+  "caseCount": 8,
+  "cases": [
+    {
+      "actualFailure": "heartbeat: missing required key device_id",
+      "case": "heartbeat_missing_device_id",
+      "expectedFailure": "missing required key device_id",
+      "passed": true
+    },
+    {
+      "actualFailure": "compact_receipt_relay.payload_bytes_estimate: value above maximum 200",
+      "case": "receipt_relay_payload_exceeds_control_budget",
+      "expectedFailure": "value above maximum 200",
+      "passed": true
+    },
+    {
+      "actualFailure": "nfc_memory_cartridge_metadata.contains_secrets: value True not in enum [False]",
+      "case": "nfc_metadata_claims_secret_storage",
+      "expectedFailure": "not in enum [False]",
+      "passed": true
+    },
+    {
+      "actualFailure": "operator_signals: missing required key bridgeAlerts",
+      "case": "operator_projection_missing_bridge_alerts",
+      "expectedFailure": "missing required key bridgeAlerts",
+      "passed": true
+    },
+    {
+      "actualFailure": "operator_signals.boundary.hardwareRequiredForPrivateTestnet: value True not in enum [False]",
+      "case": "operator_projection_requires_hardware",
+      "expectedFailure": "not in enum [False]",
+      "passed": true
+    },
+    {
+      "actualFailure": "operator_signals.signalEnvelopes[2].payloadBytesEstimate: value above maximum 200",
+      "case": "operator_envelope_payload_exceeds_control_budget",
+      "expectedFailure": "value above maximum 200",
+      "passed": true
+    },
+    {
+      "actualFailure": "control_plane_handoff.hardwareRequiredForPrivateTestnet: value True not in enum [False]",
+      "case": "control_plane_handoff_requires_hardware",
+      "expectedFailure": "not in enum [False]",
+      "passed": true
+    },
+    {
+      "actualFailure": "control_plane_handoff.collections: missing required key hardwareSignals",
+      "case": "control_plane_handoff_missing_hardware_signals",
+      "expectedFailure": "missing required key hardwareSignals",
+      "passed": true
+    }
+  ],
+  "generatedAt": "2026-05-13T17:02:10Z",
+  "schema": "flowmemory.hardware_negative_validation.local_alpha.v0",
+  "seed": 42
+}

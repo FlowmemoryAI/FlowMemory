@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FlowRouter Negative Validation Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "generatedAt", "seed", "caseCount", "allCasesRejected", "cases"],
+  "properties": {
+    "schema": { "type": "string", "enum": ["flowmemory.hardware_negative_validation.local_alpha.v0"] },
+    "generatedAt": { "type": "string" },
+    "seed": { "type": "integer", "minimum": 0 },
+    "caseCount": { "type": "integer", "minimum": 1 },
+    "allCasesRejected": { "type": "boolean", "enum": [true] },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["case", "expectedFailure", "actualFailure", "passed"],
+        "properties": {
+          "case": { "type": "string", "maxLength": 96 },
+          "expectedFailure": { "type": "string", "maxLength": 160 },
+          "actualFailure": { "type": "string", "maxLength": 220 },
+          "passed": { "type": "boolean", "enum": [true] }
+        }
+      }
+    }
+  }
+}

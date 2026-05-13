@@ -1,6 +1,26 @@
 {
   "generated_at": "2026-05-13T17:02:00Z",
   "packets": {
+    "bridge_alert": {
+      "alert_code": "LOCKBOX_OBSERVER_LAG",
+      "block_hint": 1200024,
+      "bridge_id": "bridge-3489980d98a3",
+      "device_id": "fr-e1e7878a2aa8",
+      "digest": "aa5bbd37b946a917cd73aa5394466e71c463cf28e5a1091c474139e23cfe236f",
+      "emitted_at": "2026-05-13T17:01:35Z",
+      "lora_eligible": true,
+      "operator_action": "review-bridge-observer-and-do-not-block-chain",
+      "packet_type": "bridge_alert",
+      "payload_bytes_estimate": 136,
+      "schema_version": "flowrouter.poc.v0",
+      "sequence": 1050,
+      "severity": "warning",
+      "source_chain": "flowchain-local-alpha",
+      "subject_id": "lockbox:dfce05f88cae",
+      "summary": "Bridge observer digest lag detected; local chain continues while operator reviews.",
+      "target_chain": "base-sepolia-sim",
+      "verification_state": "advisory"
+    },
     "compact_receipt_relay": {
       "block_hint": 1200012,
       "chain": "base-sepolia-sim",
@@ -53,6 +73,9 @@
         "heartbeat",
         "gateway_discovery",
         "compact_receipt_relay",
+        "verifier_report_digest_relay",
+        "bridge_alert",
+        "operator_metadata",
         "local_cache_status",
         "sidecar_status",
         "dashboard_feed"

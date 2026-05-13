@@ -29,6 +29,7 @@ Common fields:
 | FlowPulse digest | Compact digest | `v,type,node,seq,chain,from,to,digest32,count,flags,auth` | Sends a hash over a FlowPulse range, not events. | Digest cannot be trusted until verified by indexer/receipts. |
 | Artifact availability digest | Compact digest | `v,type,node,seq,namespace,digest32,count,bytes_class,ttl,auth` | Announces cache hints only; no artifacts. | May leak inventory metadata; needs privacy review. |
 | Compact receipt reference | Compact receipt reference | `v,type,node,seq,chain,block_hint,tx_hash_prefix/log_hint,receipt_hash,auth` | Carries short pointer and hash, not receipt body. | Prefix collisions and stale hints; full verification requires normal network path. |
+| Bridge alert digest | Compact bridge alert | `v,type,node,seq,bridge,src,dst,code,digest32,block_hint,auth` | Sends a bridge-observer alert code and digest, not bridge payloads or settlement state. | Advisory only; must not block local chain progress or imply production bridge readiness. |
 | Field diagnostic | Field diagnostic | `v,type,node,seq,temp,power_class,rssi,snr,loss,flags,auth` | Numeric summary only. | Sensor accuracy, spoofing, and replay risk. |
 | Emergency/local signal | Emergency signal | `v,type,node,seq,code,priority,ttl,location_hint?,auth` | Short code and optional coarse hint. | Abuse risk; no public emergency-service claim. |
 | Operator command warning | Operator command | `v,type,node,seq,command_id,intent,ttl,auth` | Intent marker only; no scripts or payloads. | Must not execute privileged action in v0; needs strong auth, authorization, replay protection, and audit before any future action. |
@@ -54,6 +55,10 @@ Use to say "this cache may have content matching this digest or namespace." It m
 ### Compact Receipt Reference
 
 Use as a breadcrumb for later reconciliation. It can include a chain id, block hint, short transaction/log hint, and receipt hash. It is not final proof by itself.
+
+### Bridge Alert Digest
+
+Use as a compact local operator warning when a bridge observer reports lag, mismatch, or stale relay state. It is a review hint only; the local private chain keeps running and normal bridge observer workflows must reconcile the digest.
 
 ### Field Diagnostic
 
