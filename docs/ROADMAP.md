@@ -68,6 +68,7 @@ Status: implemented as fixture-first services plus generated launch-core state; 
 - Deterministic persistence exists for fixture state and the constrained Base Sepolia reader checkpoint.
 - A Base Sepolia reader path exists for explicit RPC URLs and explicit FlowPulse contract addresses; it rejects non-Base-Sepolia chain ids.
 - Base Sepolia deploy/read commands exist for the current V0 testnet contract set.
+- A Base mainnet V0 canary deployment has been performed for testing only and is documented under `docs/DEPLOYMENTS/`.
 - Runtime schema validation and generated fixture drift checks exist for launch-core outputs.
 - Local devnet smoke-test gates exist as a no-value Rust prototype, without mainnet or production deployment.
 
@@ -141,7 +142,8 @@ The initial merge sequence has completed for repo OS, contracts foundation, cryp
 
 Next merge preference:
 
-1. Base Sepolia reader soak tests against explicit testnet deployments.
-2. Dashboard polish and explorer/hardware-console separation.
-3. Static analysis follow-up findings triaged for any public testnet deployment.
+1. Guarded Base canary reader and deployment-artifact ingestion.
+2. Base Sepolia reader soak tests against explicit testnet deployments.
+3. Dashboard live/canary mode separation from generated fixtures.
+4. Static analysis follow-up findings triaged for any public testnet deployment.
 5. Production-gated research only after V0 local acceptance stays green.
