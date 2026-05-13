@@ -32,12 +32,18 @@ This repository contains the FlowMemory V0 foundation: project operating docs, l
 
 ## Start Here
 
-For a second computer or a non-technical local test, use the beginner Windows
-installer. It installs missing tools, clones the repo, installs dependencies,
-runs the local setup, and opens the local control plane and dashboard:
+For a second computer or a non-technical local test, use the private-repo
+Windows bootstrap path. It installs Git and GitHub CLI, signs into GitHub,
+clones the repo, then runs the beginner installer:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -Command '$p=Join-Path $env:TEMP "INSTALL_FLOWCHAIN_WINDOWS.ps1"; Invoke-WebRequest "https://raw.githubusercontent.com/FlowmemoryAI/FlowMemory/main/INSTALL_FLOWCHAIN_WINDOWS.ps1" -OutFile $p; & powershell -NoProfile -ExecutionPolicy Bypass -File $p'
+winget install --id Git.Git --exact --source winget --accept-package-agreements --accept-source-agreements
+winget install --id GitHub.cli --exact --source winget --accept-package-agreements --accept-source-agreements
+$env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
+gh auth login
+gh repo clone FlowmemoryAI/FlowMemory "$env:USERPROFILE\FlowMemory\FlowMemory"
+cd "$env:USERPROFILE\FlowMemory\FlowMemory"
+powershell -ExecutionPolicy Bypass -File .\INSTALL_FLOWCHAIN_WINDOWS.ps1
 ```
 
 Detailed guide: `docs/EASY_SECOND_COMPUTER_SETUP.md`.

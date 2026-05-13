@@ -7,10 +7,17 @@ path from `docs/FLOWCHAIN_SECOND_COMPUTER_SETUP.md`.
 
 ## First Command
 
-On a clean Windows computer, the first command should be the beginner installer:
+On a clean Windows computer, the first path should be the private-repo bootstrap
+commands:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -Command '$p=Join-Path $env:TEMP "INSTALL_FLOWCHAIN_WINDOWS.ps1"; Invoke-WebRequest "https://raw.githubusercontent.com/FlowmemoryAI/FlowMemory/main/INSTALL_FLOWCHAIN_WINDOWS.ps1" -OutFile $p; & powershell -NoProfile -ExecutionPolicy Bypass -File $p'
+winget install --id Git.Git --exact --source winget --accept-package-agreements --accept-source-agreements
+winget install --id GitHub.cli --exact --source winget --accept-package-agreements --accept-source-agreements
+$env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
+gh auth login
+gh repo clone FlowmemoryAI/FlowMemory "$env:USERPROFILE\FlowMemory\FlowMemory"
+cd "$env:USERPROFILE\FlowMemory\FlowMemory"
+powershell -ExecutionPolicy Bypass -File .\INSTALL_FLOWCHAIN_WINDOWS.ps1
 ```
 
 If the repo is already cloned, run from the repo root:
@@ -41,6 +48,9 @@ or workbench commands.
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
 | `winget is missing` | Windows App Installer is missing or outdated. | Install or update **App Installer** from the Microsoft Store, then rerun `INSTALL_FLOWCHAIN_WINDOWS.ps1`. |
+| Raw GitHub installer URL returns `404` | The repo is private, so unauthenticated raw GitHub download is blocked. | Use the private-repo bootstrap commands above or sign into GitHub and download the repo ZIP. |
+| `gh` is not recognized | GitHub CLI is missing or PATH is stale after install. | Run the GitHub CLI `winget install` command above, then reopen PowerShell if needed. |
+| `gh repo clone` asks for login | The second computer is not authenticated with GitHub. | Run `gh auth login` and choose GitHub.com, HTTPS, and browser login. |
 | `git was not found on PATH` | Git for Windows is missing or PowerShell was opened before install. | Install Git for Windows, reopen PowerShell, rerun `npm run flowchain:prereq`. |
 | `node` or `npm` missing | Node.js LTS is missing or PATH is stale. | Install Node.js LTS, reopen PowerShell, run `npm install`. |
 | `cargo` or `rustc` missing | Rust toolchain is missing. | Install Rust with rustup, reopen PowerShell, run `cargo test --manifest-path crates/flowmemory-devnet/Cargo.toml`. |

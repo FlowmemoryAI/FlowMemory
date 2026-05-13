@@ -20,20 +20,30 @@ The root installer installs or verifies:
 Foundry is installed through Git Bash because Foundry's Windows installer does
 not support PowerShell directly.
 
-## Beginner Setup
+## Beginner Setup For This Private Repo
 
-Open PowerShell and run:
+This repo is private. A clean second computer cannot download the installer
+from the public raw GitHub URL until it has signed into GitHub.
+
+Open PowerShell and run these lines:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -Command '$p=Join-Path $env:TEMP "INSTALL_FLOWCHAIN_WINDOWS.ps1"; Invoke-WebRequest "https://raw.githubusercontent.com/FlowmemoryAI/FlowMemory/main/INSTALL_FLOWCHAIN_WINDOWS.ps1" -OutFile $p; & powershell -NoProfile -ExecutionPolicy Bypass -File $p'
+winget install --id Git.Git --exact --source winget --accept-package-agreements --accept-source-agreements
+winget install --id GitHub.cli --exact --source winget --accept-package-agreements --accept-source-agreements
+$env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
+gh auth login
+gh repo clone FlowmemoryAI/FlowMemory "$env:USERPROFILE\FlowMemory\FlowMemory"
+cd "$env:USERPROFILE\FlowMemory\FlowMemory"
+powershell -ExecutionPolicy Bypass -File .\INSTALL_FLOWCHAIN_WINDOWS.ps1
 ```
+
+When `gh auth login` asks questions, use GitHub.com, HTTPS, and browser login.
+Windows may ask for permission while tools install. Click **Yes** if prompted.
 
 The installer downloads this repo, installs dependencies, checks prerequisites,
 initializes local state, runs the deterministic local chain demo, runs the smoke
 path, exports a local bundle, runs the bridge mock, and opens the control plane
 and dashboard in separate PowerShell windows.
-
-Windows may ask for permission while tools install. Click **Yes** if prompted.
 
 ## Already Cloned Setup
 
