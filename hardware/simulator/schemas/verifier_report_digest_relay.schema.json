@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Verifier Report Digest Relay",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["packet_type", "schema_version", "device_id", "sequence", "emitted_at", "report_id", "subject_digest", "result", "report_digest", "payload_bytes_estimate", "lora_eligible"],
+  "properties": {
+    "packet_type": { "type": "string", "enum": ["verifier_report_digest_relay"] },
+    "schema_version": { "type": "string" },
+    "device_id": { "type": "string", "maxLength": 32 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "emitted_at": { "type": "string" },
+    "report_id": { "type": "string", "maxLength": 48 },
+    "subject_digest": { "type": "string", "maxLength": 64 },
+    "result": { "type": "string", "enum": ["valid", "invalid", "unresolved", "stale"] },
+    "report_digest": { "type": "string", "maxLength": 64 },
+    "payload_bytes_estimate": { "type": "integer", "minimum": 0, "maximum": 200 },
+    "lora_eligible": { "type": "boolean" }
+  }
+}

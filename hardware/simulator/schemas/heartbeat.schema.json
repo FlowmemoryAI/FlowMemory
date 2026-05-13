@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FlowRouter V0 Heartbeat",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["packet_type", "schema_version", "device_id", "sequence", "emitted_at", "uptime_seconds", "power_state", "network_state", "cache_state", "sidecar_state", "flowcore_state", "warnings"],
+  "properties": {
+    "packet_type": { "type": "string", "enum": ["heartbeat"] },
+    "schema_version": { "type": "string" },
+    "device_id": { "type": "string", "maxLength": 32 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "emitted_at": { "type": "string" },
+    "uptime_seconds": { "type": "integer", "minimum": 0 },
+    "power_state": { "type": "string", "enum": ["mains", "battery", "unknown"] },
+    "network_state": { "type": "string", "enum": ["online", "local-only", "offline", "degraded"] },
+    "cache_state": { "type": "string", "enum": ["healthy", "warning", "offline", "unknown"] },
+    "sidecar_state": { "type": "string", "enum": ["ready", "degraded", "offline", "unknown"] },
+    "flowcore_state": { "type": "string" },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

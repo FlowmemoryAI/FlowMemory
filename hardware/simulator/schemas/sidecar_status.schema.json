@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sidecar Status",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["packet_type", "schema_version", "device_id", "sequence", "emitted_at", "radio", "region", "modem_preset", "payload_budget_bytes", "mqtt_state", "tx_enabled", "rssi_dbm", "snr_db", "warnings"],
+  "properties": {
+    "packet_type": { "type": "string", "enum": ["sidecar_status"] },
+    "schema_version": { "type": "string" },
+    "device_id": { "type": "string", "maxLength": 32 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "emitted_at": { "type": "string" },
+    "radio": { "type": "string", "enum": ["meshtastic", "lora", "disabled"] },
+    "region": { "type": "string", "maxLength": 16 },
+    "modem_preset": { "type": "string", "maxLength": 32 },
+    "payload_budget_bytes": { "type": "integer", "minimum": 0, "maximum": 200 },
+    "mqtt_state": { "type": "string", "enum": ["disabled", "private", "public", "unknown"] },
+    "tx_enabled": { "type": "boolean" },
+    "rssi_dbm": { "type": "integer", "minimum": -200, "maximum": 0 },
+    "snr_db": { "type": "number", "minimum": -50, "maximum": 50 },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

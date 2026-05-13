@@ -1,0 +1,200 @@
+{
+  "generated_at": "2026-05-13T17:02:00Z",
+  "packets": {
+    "compact_receipt_relay": {
+      "block_hint": 1200012,
+      "chain": "base-sepolia-sim",
+      "device_id": "fr-e1e7878a2aa8",
+      "emitted_at": "2026-05-13T17:00:40Z",
+      "log_index_hint": 3,
+      "lora_eligible": true,
+      "packet_type": "compact_receipt_relay",
+      "payload_bytes_estimate": 96,
+      "receipt_digest": "fbe8a762b036d20581160b7e58a3adccf61f53c653713c439f85cc7bee5246fa",
+      "schema_version": "flowrouter.poc.v0",
+      "sequence": 1045,
+      "tx_hash_prefix": "0xea723a0a09aa25b7",
+      "verification_state": "advisory"
+    },
+    "dashboard_feed": {
+      "cache": {
+        "bytes_limit": 268435456,
+        "bytes_used": 7340032,
+        "health": "healthy",
+        "unresolved_count": 7
+      },
+      "device_id": "fr-e1e7878a2aa8",
+      "flowcore": {
+        "pattern": "solid-cobalt",
+        "state": "online"
+      },
+      "generated_at": "2026-05-13T17:01:40Z",
+      "latest_receipt_digest": "fbe8a762b036d20581160b7e58a3adccf61f53c653713c439f85cc7bee5246fa",
+      "network": {
+        "gateway_id": "gw-82a524067b14",
+        "lan": "reachable",
+        "upstream": "reachable"
+      },
+      "packet_type": "dashboard_feed",
+      "schema_version": "flowrouter.poc.v0",
+      "sidecar": {
+        "payload_budget_bytes": 160,
+        "region": "US",
+        "state": "ready"
+      },
+      "trust_labels": [
+        "local",
+        "advisory",
+        "not-chain-verified"
+      ]
+    },
+    "device_manifest": {
+      "capabilities": [
+        "heartbeat",
+        "gateway_discovery",
+        "compact_receipt_relay",
+        "local_cache_status",
+        "sidecar_status",
+        "dashboard_feed"
+      ],
+      "device_id": "fr-e1e7878a2aa8",
+      "device_role": "flowrouter-dev-kit",
+      "generated_at": "2026-05-13T17:00:00Z",
+      "hardware": {
+        "compute": "Raspberry Pi 5 8GB candidate",
+        "display": "OLED/e-paper status candidate",
+        "flowcore": "cobalt light-pipe LED candidate",
+        "nfc": "passive NFC cartridge candidate",
+        "router": "OpenWrt One candidate",
+        "sidecar": "Meshtastic USB sidecar candidate",
+        "storage": "NVMe 256GB cache candidate"
+      },
+      "packet_type": "device_manifest",
+      "schema_version": "flowrouter.poc.v0",
+      "security": {
+        "identity_mode": "simulated-key-fingerprint",
+        "state_authority": "local-only-unverified",
+        "trust_level": "advisory"
+      }
+    },
+    "emergency_offline_signal": {
+      "code": "UPSTREAM_LOSS",
+      "device_id": "fr-e1e7878a2aa8",
+      "emitted_at": "2026-05-13T17:01:30Z",
+      "last_gateway_id": "gw-82a524067b14",
+      "operator_action": "check-upstream-and-power",
+      "packet_type": "emergency_offline_signal",
+      "priority": "local",
+      "schema_version": "flowrouter.poc.v0",
+      "sequence": 1049,
+      "summary": "Upstream unavailable; LAN dashboard and local cache still reachable.",
+      "ttl_seconds": 900
+    },
+    "flowpulse_digest_relay": {
+      "chain": "base-sepolia-sim",
+      "device_id": "fr-e1e7878a2aa8",
+      "digest": "1d5a28ff5af6335dccc9412d01d434aa58bf0870011f781bd614a5266740da3b",
+      "emitted_at": "2026-05-13T17:00:20Z",
+      "event_count": 7,
+      "from_block": 1200000,
+      "lora_eligible": true,
+      "packet_type": "flowpulse_digest_relay",
+      "payload_bytes_estimate": 112,
+      "schema_version": "flowrouter.poc.v0",
+      "sequence": 1043,
+      "to_block": 1200024,
+      "verification_state": "advisory"
+    },
+    "gateway_discovery": {
+      "advertised_roles": [
+        "local-dashboard",
+        "cache-status",
+        "digest-relay"
+      ],
+      "dashboard_hint": "http://flowrouter.local/status",
+      "device_id": "fr-e1e7878a2aa8",
+      "emitted_at": "2026-05-13T17:01:00Z",
+      "gateway_id": "gw-82a524067b14",
+      "lan_reachable": true,
+      "packet_type": "gateway_discovery",
+      "schema_version": "flowrouter.poc.v0",
+      "sequence": 1047,
+      "sidecar_reachable": true,
+      "upstream_reachable": true
+    },
+    "heartbeat": {
+      "cache_state": "healthy",
+      "device_id": "fr-e1e7878a2aa8",
+      "emitted_at": "2026-05-13T17:00:10Z",
+      "flowcore_state": "online",
+      "network_state": "online",
+      "packet_type": "heartbeat",
+      "power_state": "mains",
+      "schema_version": "flowrouter.poc.v0",
+      "sequence": 1042,
+      "sidecar_state": "ready",
+      "uptime_seconds": 86442,
+      "warnings": []
+    },
+    "local_cache_status": {
+      "artifact_count": 3,
+      "bytes_limit": 268435456,
+      "bytes_used": 7340032,
+      "cache_digest": "2bac34b09472df95c9ba884e903660990e4ed701414693aaf2b8e9ddc19bfc22",
+      "cache_id": "cache-3a1ab90d4efc",
+      "device_id": "fr-e1e7878a2aa8",
+      "emitted_at": "2026-05-13T17:00:50Z",
+      "health": "healthy",
+      "mode": "bounded-local",
+      "packet_type": "local_cache_status",
+      "receipt_count": 11,
+      "schema_version": "flowrouter.poc.v0",
+      "sequence": 1046,
+      "unresolved_count": 7,
+      "verified_count": 4
+    },
+    "nfc_memory_cartridge_metadata": {
+      "cartridge_id": "cart-0cfd3cfcb210",
+      "contains_secrets": false,
+      "created_at": "2026-05-13T17:01:20Z",
+      "digest": "7bb78aa4de0935712809a8e46e13b832ba5a761416731e51aeb02d753bbca5b0",
+      "expires_at": "2026-06-13T17:00:00Z",
+      "label": "field-test-cache-alpha",
+      "packet_type": "nfc_memory_cartridge_metadata",
+      "pointer": "flowmemory://cache/4549dba629bc",
+      "schema_version": "flowrouter.poc.v0",
+      "trust_level": "untrusted-pointer"
+    },
+    "sidecar_status": {
+      "device_id": "fr-e1e7878a2aa8",
+      "emitted_at": "2026-05-13T17:01:10Z",
+      "modem_preset": "LongFast",
+      "mqtt_state": "disabled",
+      "packet_type": "sidecar_status",
+      "payload_budget_bytes": 160,
+      "radio": "meshtastic",
+      "region": "US",
+      "rssi_dbm": -91,
+      "schema_version": "flowrouter.poc.v0",
+      "sequence": 1048,
+      "snr_db": 7.25,
+      "tx_enabled": true,
+      "warnings": []
+    },
+    "verifier_report_digest_relay": {
+      "device_id": "fr-e1e7878a2aa8",
+      "emitted_at": "2026-05-13T17:00:30Z",
+      "lora_eligible": true,
+      "packet_type": "verifier_report_digest_relay",
+      "payload_bytes_estimate": 128,
+      "report_digest": "b988417bf67c48bab7208ee1fe0531d66fbcb45a1be1b853b70423239c4c8870",
+      "report_id": "vr-14d051ae590e",
+      "result": "unresolved",
+      "schema_version": "flowrouter.poc.v0",
+      "sequence": 1044,
+      "subject_digest": "1d5a28ff5af6335dccc9412d01d434aa58bf0870011f781bd614a5266740da3b"
+    }
+  },
+  "seed": 42,
+  "simulator": "flowrouter-v0-poc"
+}

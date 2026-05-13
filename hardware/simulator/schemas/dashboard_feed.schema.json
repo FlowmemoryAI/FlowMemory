@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dashboard Feed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["packet_type", "schema_version", "device_id", "generated_at", "network", "cache", "sidecar", "flowcore", "latest_receipt_digest", "trust_labels"],
+  "properties": {
+    "packet_type": { "type": "string", "enum": ["dashboard_feed"] },
+    "schema_version": { "type": "string" },
+    "device_id": { "type": "string", "maxLength": 32 },
+    "generated_at": { "type": "string" },
+    "network": { "type": "object" },
+    "cache": { "type": "object" },
+    "sidecar": { "type": "object" },
+    "flowcore": { "type": "object" },
+    "latest_receipt_digest": { "type": "string", "maxLength": 64 },
+    "trust_labels": { "type": "array", "items": { "type": "string" } }
+  }
+}

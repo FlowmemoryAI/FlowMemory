@@ -71,6 +71,16 @@ Follow-up:
 - Physical tampering
 - Unsafe power or enclosure assumptions
 - Overestimating LoRa or Meshtastic bandwidth
+- Treat FlowRouter v0 devices as physically exposed research rigs until a later identity and attestation model exists.
+- Keep hardware control surfaces local-only by default, and require explicit authentication before any radio message changes local state.
+- Treat local caches as stale or replayable unless entries are checked against commitments, receipts, or other verifiable provenance.
+- Avoid custom RF, antenna, amplifier, and production enclosure assumptions in v0; use certified commodity hardware within local radio rules.
+- Treat replayed LoRa messages as expected adversarial input until sequence, nonce, freshness, and audit rules exist.
+- Treat FCC, regional radio, antenna, duty-cycle, and equipment-authorization mistakes as project risks, not just operator mistakes.
+- Treat power, brownout, thermal throttling, fan failure, and sealed-enclosure heat buildup as safety and data-integrity risks.
+- Treat NVMe, SD card, and removable cartridge failures as cache-integrity risks; local cache is not a permanent source of truth.
+- Treat operator keys, channel keys, dashboard credentials, and cartridge labels as sensitive operational material that must not be exposed on displays, NFC tags, logs, or public MQTT.
+- Treat simulator packets, packet schemas, and generated fixtures as unsigned advisory test data until a later identity and authentication design exists.
 
 ### Supply Chain
 

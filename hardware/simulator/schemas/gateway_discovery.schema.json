@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Gateway Discovery",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["packet_type", "schema_version", "device_id", "gateway_id", "sequence", "emitted_at", "lan_reachable", "upstream_reachable", "sidecar_reachable", "dashboard_hint", "advertised_roles"],
+  "properties": {
+    "packet_type": { "type": "string", "enum": ["gateway_discovery"] },
+    "schema_version": { "type": "string" },
+    "device_id": { "type": "string", "maxLength": 32 },
+    "gateway_id": { "type": "string", "maxLength": 32 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "emitted_at": { "type": "string" },
+    "lan_reachable": { "type": "boolean" },
+    "upstream_reachable": { "type": "boolean" },
+    "sidecar_reachable": { "type": "boolean" },
+    "dashboard_hint": { "type": "string", "maxLength": 128 },
+    "advertised_roles": { "type": "array", "items": { "type": "string" } }
+  }
+}
