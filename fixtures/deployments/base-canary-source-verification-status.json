@@ -1,0 +1,97 @@
+{
+  "schema": "flowmemory.base_canary_source_verification_status.v0",
+  "verifiedAt": "2026-05-13T21:09:00Z",
+  "network": {
+    "name": "Base mainnet",
+    "chainId": "8453",
+    "environment": "mainnet"
+  },
+  "productionReady": false,
+  "notes": [
+    "All current Base canary addresses are source-verified on BaseScan.",
+    "FlowMemoryHookAdapter was verified against deployment-source commit 11d562c because main now contains a newer v4-shaped callback path added after deployment.",
+    "This report is not a production-readiness claim and does not make the adapter a production Uniswap v4 PoolManager hook."
+  ],
+  "contracts": [
+    {
+      "name": "RootfieldRegistry",
+      "address": "0x2a7ADd68a1d45C3251E2F92fFe4926124654a97C",
+      "sourceName": "contracts/RootfieldRegistry.sol:RootfieldRegistry",
+      "sourceCommit": "328f14a7ae65c38494d373b485fa400927ee7920",
+      "verified": true,
+      "url": "https://basescan.org/address/0x2a7add68a1d45c3251e2f92ffe4926124654a97c"
+    },
+    {
+      "name": "FlowMemoryHookAdapter",
+      "address": "0x179Df6d52e9DeF5D02704583a2E4E5a9FF427245",
+      "sourceName": "contracts/FlowMemoryHookAdapter.sol:FlowMemoryHookAdapter",
+      "sourceCommit": "11d562c90b8bf5d2bb7d860fa45701fd0c4fb89f",
+      "verified": true,
+      "url": "https://basescan.org/address/0x179df6d52e9def5d02704583a2e4e5a9ff427245"
+    },
+    {
+      "name": "ArtifactRegistry",
+      "address": "0x8F074d0F4e66975b740A4b7a316330c9660a485E",
+      "sourceName": "contracts/ArtifactRegistry.sol:ArtifactRegistry",
+      "sourceCommit": "328f14a7ae65c38494d373b485fa400927ee7920",
+      "verified": true,
+      "url": "https://basescan.org/address/0x8f074d0f4e66975b740a4b7a316330c9660a485e"
+    },
+    {
+      "name": "CursorRegistry",
+      "address": "0x3360689009685eade15c876855D24161b05829C1",
+      "sourceName": "contracts/CursorRegistry.sol:CursorRegistry",
+      "sourceCommit": "328f14a7ae65c38494d373b485fa400927ee7920",
+      "verified": true,
+      "url": "https://basescan.org/address/0x3360689009685eade15c876855d24161b05829c1"
+    },
+    {
+      "name": "ReceiptVerifier",
+      "address": "0x94ba7aA4562f8F8528C327378F6352350f6ddB5B",
+      "sourceName": "contracts/ReceiptVerifier.sol:ReceiptVerifier",
+      "sourceCommit": "328f14a7ae65c38494d373b485fa400927ee7920",
+      "verified": true,
+      "url": "https://basescan.org/address/0x94ba7aa4562f8f8528c327378f6352350f6ddb5b"
+    },
+    {
+      "name": "WorkerRegistry",
+      "address": "0xa8c07eF53Eeb4e57297ee35025a9cD5303fCCD29",
+      "sourceName": "contracts/WorkerRegistry.sol:WorkerRegistry",
+      "sourceCommit": "328f14a7ae65c38494d373b485fa400927ee7920",
+      "verified": true,
+      "url": "https://basescan.org/address/0xa8c07ef53eeb4e57297ee35025a9cd5303fccd29"
+    },
+    {
+      "name": "VerifierRegistry",
+      "address": "0xAf920ca7436Bb72172E27C96E0B716f01dcC5DBd",
+      "sourceName": "contracts/VerifierRegistry.sol:VerifierRegistry",
+      "sourceCommit": "328f14a7ae65c38494d373b485fa400927ee7920",
+      "verified": true,
+      "url": "https://basescan.org/address/0xaf920ca7436bb72172e27c96e0b716f01dcc5dbd"
+    },
+    {
+      "name": "WorkReceiptRegistry",
+      "address": "0x2874cee0D581E4562ac9015BfCf330f1ea58a1F3",
+      "sourceName": "contracts/WorkReceiptRegistry.sol:WorkReceiptRegistry",
+      "sourceCommit": "328f14a7ae65c38494d373b485fa400927ee7920",
+      "verified": true,
+      "url": "https://basescan.org/address/0x2874cee0d581e4562ac9015bfcf330f1ea58a1f3"
+    },
+    {
+      "name": "VerifierReportRegistry",
+      "address": "0x95bC7455AdFD60e1B908ba455c25Ae732C1Ef996",
+      "sourceName": "contracts/VerifierReportRegistry.sol:VerifierReportRegistry",
+      "sourceCommit": "328f14a7ae65c38494d373b485fa400927ee7920",
+      "verified": true,
+      "url": "https://basescan.org/address/0x95bc7455adfd60e1b908ba455c25ae732c1ef996"
+    },
+    {
+      "name": "WorkDebtScheduler",
+      "address": "0xa752e9bC7fAf39f659110D8Cf408E7707db94E34",
+      "sourceName": "contracts/WorkDebtScheduler.sol:WorkDebtScheduler",
+      "sourceCommit": "328f14a7ae65c38494d373b485fa400927ee7920",
+      "verified": true,
+      "url": "https://basescan.org/address/0xa752e9bc7faf39f659110d8cf408e7707db94e34"
+    }
+  ]
+}
