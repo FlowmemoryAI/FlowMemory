@@ -313,7 +313,7 @@ function buildMemoryReceipt(report: VerifierReport): MemoryReceipt {
   };
 }
 
-function buildLaunchCore(indexer: IndexerPersistence, verifier: VerifierPersistence, paths: LaunchCorePaths): LaunchCoreOutput {
+export function buildLaunchCore(indexer: IndexerPersistence, verifier: VerifierPersistence, paths: LaunchCorePaths): LaunchCoreOutput {
   const sortedObservations = sortObservations(indexer.state.observations);
   const reportByObservation = new Map(verifier.reports.map((report) => [report.reportCore.observationId, report]));
   const receiptByObservation = new Map<string, MemoryReceipt>();
