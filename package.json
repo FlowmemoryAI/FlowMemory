@@ -44,7 +44,7 @@
     "flowchain:multi-node:smoke": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-multi-node-smoke.ps1",
     "flowchain:demo": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-demo.ps1",
     "flowchain:smoke": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-smoke.ps1",
-    "flowchain:full-smoke": "npm run flowchain:smoke",
+    "flowchain:full-smoke": "npm run flowchain:smoke && npm run control-plane:smoke",
     "flowchain:export": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-export.ps1",
     "flowchain:import": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-import.ps1",
     "workbench:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-workbench.ps1",

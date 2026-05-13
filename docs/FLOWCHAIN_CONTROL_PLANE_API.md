@@ -1,10 +1,10 @@
 # FlowChain Local Control Plane API
 
-Status: local fixture-backed V0 contract.
+Status: local runtime-backed V0 contract with deterministic fixture fallback.
 
-This document defines the local JSON-RPC 2.0 API for the FlowChain / FlowMemory control-plane. It gives dashboard, agent, verifier, and devnet tooling one deterministic read surface for FlowMemory objects.
+This document defines the local JSON-RPC 2.0 API for the FlowChain / FlowMemory control-plane. It gives dashboard, agent, verifier, bridge, and devnet tooling one deterministic local surface for FlowMemory objects.
 
-It is not a production RPC endpoint, public L1 API, hosted service, wallet API, bridge API, token API, or verifier economics surface.
+It is not a production RPC endpoint, public L1 API, hosted service, production wallet API, production bridge API, token API, or verifier economics surface.
 
 ## Runtime Boundary
 
@@ -21,13 +21,17 @@ npm run control-plane:test
 npm run control-plane:demo
 npm run control-plane:smoke
 npm run control-plane:serve
+npm run flowchain:full-smoke
 ```
 
-The service uses deterministic local files only. It does not require secrets, wallets, RPC URLs, private keys, API keys, or production services.
+The service reads ignored local runtime files first and falls back to committed deterministic fixtures. It does not require secrets, RPC URLs, private keys, API keys, or production services.
 
 Primary data sources:
 
 ```text
+devnet/local/state.json
+devnet/local/launch-v0-state.json
+devnet/local/handoff/generated/*.json
 fixtures/launch-core/flowmemory-launch-v0.json
 fixtures/launch-core/generated/devnet/state.json
 fixtures/launch-core/generated/devnet/indexer-handoff.json
@@ -37,9 +41,12 @@ services/indexer/out/indexer-state.json
 services/verifier/out/reports.json
 services/verifier/fixtures/artifacts.json
 fixtures/handoff/sample-txs.json
+services/bridge-relayer/out/bridge-observation.json
+services/bridge-relayer/out/control-plane-observations.json
+fixtures/bridge/base-sepolia-mock-deposit.json
 ```
 
-If the generated launch-core fixture is missing, the service rebuilds the in-memory view from indexer/verifier outputs or raw fixture receipts and artifact fixtures. This recovery path is local and read-only from the API caller perspective.
+If the generated launch-core fixture is missing, the service rebuilds the in-memory view from indexer/verifier outputs or raw fixture receipts and artifact fixtures. This recovery path is local. Transaction and bridge observation write endpoints forward only into the existing local runtime or bridge-agent intake files.
 
 ## JSON-RPC Envelope
 
@@ -113,21 +120,50 @@ GET /health
 
 Params: none.
 
-Returns local stack status, fixture source status, block counters, object counters, capabilities, and limitations.
+Returns local stack status, live/fixture source status, block counters, object counters, capabilities, and limitations.
 
 Key result fields:
 
 ```json
 {
   "schema": "flowmemory.control_plane.chain_status.v0",
-  "chainId": "flowmemory-local-alpha",
-  "environment": "local-devnet-fixture",
-  "source": "fixture",
+  "chainId": "flowmemory-local-devnet-v0",
+  "environment": "private-local-devnet",
+  "source": "local-runtime-file",
   "currentBlock": "123461",
   "finalizedBlock": "123457",
   "localOnly": true
 }
 ```
+
+### `node_status`
+
+Params: none.
+
+Returns bounded local runtime status, current block, state root, pending
+transaction count, runtime mode, and source file. The current runtime reports
+`longRunningNode: false` because it is still the deterministic Rust CLI, not a
+daemon.
+
+### `peer_list`
+
+Params: none.
+
+Returns the local self peer for the single-process runtime. LAN peer discovery
+is not implemented in this package.
+
+### `mempool_list`
+
+Params:
+
+```json
+{
+  "limit": 50
+}
+```
+
+Returns pending transaction envelopes from the local devnet state or
+control-plane handoff.
 
 ### `devnet_state`
 
@@ -194,6 +230,55 @@ Params: one of:
 ```json
 { "txHash": "0x..." }
 ```
+
+### `transaction_submit`
+
+Params: one of:
+
+```json
+{ "tx": { "type": "RegisterRootfield" } }
+```
+
+```json
+{ "txs": [{ "type": "RegisterRootfield" }] }
+```
+
+```json
+{ "signedTransaction": { "tx": { "type": "RegisterRootfield" }, "signature": "0x..." } }
+```
+
+The control-plane writes a local fixture under
+`devnet/local/control-plane-intake/` and forwards it to the existing runtime
+intake path:
+
+```powershell
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- --state devnet/local/state.json submit-fixture --fixture <generated-fixture>
+```
+
+The endpoint queues transactions only. It does not produce a block by itself.
+Payloads containing secret-bearing fields such as `privateKey`, `mnemonic`,
+`seedPhrase`, `rpcUrl`, `apiKey`, or webhook credentials are rejected.
+
+### `account_list` / `account_get`
+
+Return local public account rows for operator key references and `AgentAccount`
+objects. Balances are no-value local devnet balances.
+
+### `balance_list` / `balance_get`
+
+Return explicit zero/no-value balances. The private/local runtime has no token
+value, gas accounting, staking, rewards, or faucet funds.
+
+### `faucet_event_list` / `faucet_event_get`
+
+Return a stable disabled faucet event explaining that the local devnet has no
+token value or faucet funds.
+
+### `wallet_metadata_list` / `wallet_metadata_get`
+
+Return public operator key-reference metadata only: key reference ids, operator
+ids, signature scheme labels, and verifier-set roots. No signing secret
+material is returned.
 
 ### `rootfield_get`
 
@@ -443,6 +528,11 @@ Params: one of:
 
 Returns an `AgentMemoryView` and linked `RootfieldBundle`.
 
+### `agent_account_list` / `agent_account_get`
+
+Return native private/local `AgentAccount` objects from the devnet runtime state
+or handoff files.
+
 ### `agent_list`
 
 Params:
@@ -482,6 +572,11 @@ Params: one of:
 ```json
 { "rootfieldId": "0x..." }
 ```
+
+### `model_passport_list` / `model_passport_get`
+
+Return native private/local `ModelPassport` objects from the devnet runtime
+state or handoff files.
 
 ### `challenge_get`
 
@@ -556,6 +651,42 @@ Params:
 
 All params are optional. Returns native finality receipts when present and projected local finality rows for launch-core receipts.
 
+### `bridge_observation_submit`
+
+Params: one of:
+
+```json
+{ "observation": { "schema": "flowmemory.bridge_deposit_observation.v0" } }
+```
+
+```json
+{ "deposit": { "schema": "flowmemory.bridge_deposit.v0" } }
+```
+
+Stores local bridge-agent observations in
+`services/bridge-relayer/out/control-plane-observations.json`. This is local
+observation intake only; it does not custody funds, sign releases, or implement
+production bridge security.
+
+### `bridge_observation_list` / `bridge_observation_get`
+
+Return bridge observations from bridge-relayer output, control-plane intake, or
+the committed mock deposit fixture.
+
+### `bridge_deposit_list` / `bridge_deposit_get`
+
+Return bridge deposit rows derived from bridge observations.
+
+### `bridge_credit_list` / `bridge_credit_get`
+
+Return local bridge-credit projections for observed deposits. Pending credits do
+not imply production bridge accounting.
+
+### `withdrawal_list` / `withdrawal_get`
+
+Return local withdrawal handoff rows when present. Without native withdrawal
+handoff data, `withdrawal_get` returns a stable `not_opened` placeholder.
+
 ### `provenance_get`
 
 Params: one of:
@@ -603,6 +734,9 @@ Allowed `source` values:
 - `devnetVerifierHandoff`
 - `devnetControlPlaneHandoff`
 - `txFixtures`
+- `bridgeObservation`
+- `bridgeObservationIntake`
+- `bridgeDepositFixture`
 
 Returns the raw loaded local JSON object for dashboard/workbench debug views. It does not accept arbitrary filesystem paths.
 
@@ -610,13 +744,22 @@ Returns the raw loaded local JSON object for dashboard/workbench debug views. It
 
 Dashboard agents should prefer:
 
-1. `health` and `chain_status` for source health and global counters.
-2. `block_list` and `transaction_list` for chain/devnet tables.
-3. `rootfield_list` and `rootfield_get` for Rootfield detail.
-4. `work_receipt_list`, `receipt_list`, `verifier_module_list`, and `verifier_report_list` for lifecycle tables.
-5. `receipt_get`, `work_receipt_get`, `verifier_report_get`, and `provenance_get` for detail drawers.
-6. `artifact_availability_list`, `memory_cell_list`, `agent_list`, and `model_list` for dashboard/workbench panels.
-7. `challenge_get`, `challenge_list`, `finality_get`, and `finality_list` for local fixture challenge/finality labels.
-8. `raw_json_get` for raw JSON inspection.
+1. `health`, `chain_status`, and `node_status` for source health and global counters.
+2. `block_list`, `transaction_list`, and `mempool_list` for chain/devnet tables.
+3. `account_list`, `wallet_metadata_list`, `balance_list`, and `faucet_event_list` for local account panels.
+4. `rootfield_list` and `rootfield_get` for Rootfield detail.
+5. `agent_account_list`, `model_passport_list`, `work_receipt_list`, `receipt_list`, `verifier_module_list`, and `verifier_report_list` for lifecycle tables.
+6. `receipt_get`, `work_receipt_get`, `verifier_report_get`, and `provenance_get` for detail drawers.
+7. `artifact_availability_list`, `memory_cell_list`, `agent_list`, and `model_list` for dashboard/workbench panels.
+8. `challenge_get`, `challenge_list`, `finality_get`, and `finality_list` for local challenge/finality labels.
+9. `bridge_observation_list`, `bridge_deposit_list`, `bridge_credit_list`, and `withdrawal_list` for bridge-agent inspection.
+10. `raw_json_get` for raw JSON inspection.
 
-The API is intentionally read-only for V0. Submit, challenge, wallet, live indexing, and production settlement methods require separate scoped work.
+HTTP helpers are available for browser workbench reads at `/node/status`,
+`/peers`, `/mempool`, `/blocks`, `/transactions`, `/accounts`, `/balances`,
+`/faucet/events`, `/wallets`, `/agents`, `/models`, `/work-receipts`,
+`/artifacts/availability`, `/verifier-modules`, `/verifier-reports`,
+`/memory-cells`, `/challenges`, `/finality`, `/bridge/observations`,
+`/bridge/deposits`, `/bridge/credits`, and `/withdrawals`. Write helpers are
+available at `POST /transactions` and `POST /bridge/observations`; JSON-RPC
+remains the canonical API envelope.
