@@ -70,7 +70,7 @@ powershell -ExecutionPolicy Bypass -File .\START_FLOWCHAIN_LOCAL.ps1 -NoServers
 ## Useful URLs
 
 - Dashboard/workbench: `http://127.0.0.1:5173/`
-- Control plane: `http://127.0.0.1:8675/`
+- Control plane: `http://127.0.0.1:8787/`
 
 ## Bridge Test
 

@@ -278,7 +278,7 @@ Run:
 npm run control-plane:test
 npm run control-plane:demo
 npm run control-plane:smoke
-npm run control-plane:serve -- --host 127.0.0.1 --port 8675
+npm run control-plane:serve
 ```
 
 The control-plane reads committed launch-core, indexer, verifier, artifact, transaction fixture, and local devnet handoff files first. If the generated launch-core fixture is missing, it rebuilds an in-memory view from deterministic indexer/verifier fixtures. It exposes read methods for health, chain status, blocks, transactions, rootfields, agents, models, work receipts, artifact availability, verifier modules, verifier reports, memory cells, challenges, finality, provenance, and raw JSON. It does not fetch production RPC data, store secrets, or make production API claims.

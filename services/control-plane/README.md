@@ -12,10 +12,11 @@ From the repository root:
 npm run control-plane:demo
 npm run control-plane:test
 npm run control-plane:smoke
-npm run control-plane:serve -- --host 127.0.0.1 --port 8675
+npm run control-plane:serve
 ```
 
 The demo and tests require no secrets, RPC URLs, wallets, or production services.
+The server defaults to `http://127.0.0.1:8787`.
 
 ## Methods
 
