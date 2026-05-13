@@ -9,6 +9,7 @@ import { parseBaseSepoliaReaderArgs, runBaseSepoliaReader } from "../src/base-se
 import { indexFlowPulseLogs, indexFlowPulseReceipts } from "../src/indexer.ts";
 import { loadIndexerFixtureLogs, loadIndexerFixtureReceipts } from "../src/fixtures.ts";
 import {
+  indexerStateDigest,
   readBaseCanaryIndexerCheckpoint,
   readBaseSepoliaIndexerCheckpoint,
   readIndexerState,
@@ -30,6 +31,9 @@ test("indexes FlowPulse fixture logs into canonical observations", () => {
   assert.equal(state.observations[0].duplicateKind, "unique");
   assert.equal(state.pulses.length, 1);
   assert.equal(state.rootfields.length, 1);
+  assert.equal(state.dashboardFeed.schema, "flowmemory.indexer.dashboard_feed.v0");
+  assert.equal(state.dashboardFeed.dashboardCanonicalObservationCount, 1);
+  assert.equal(state.dashboardFeed.hasIntegrityWarnings, false);
 });
 
 test("detects exact duplicate observations", () => {
@@ -38,6 +42,8 @@ test("detects exact duplicate observations", () => {
   assert.equal(state.observations.length, 2);
   assert.equal(state.observations[1].duplicateKind, "exactDuplicate");
   assert.equal(state.duplicates.length, 1);
+  assert.equal(state.dashboardFeed.duplicateKindCounts.exactDuplicate, 1);
+  assert.equal(state.dashboardFeed.hasIntegrityWarnings, true);
 });
 
 test("ingests receipt fixtures and rejects reverted or malformed logs cleanly", () => {
@@ -259,8 +265,109 @@ test("runs Base Sepolia reader and persists durable state plus checkpoint", asyn
     assert.equal(checkpoint.network, "base-sepolia");
     assert.equal(checkpoint.chainId, "84532");
     assert.equal(checkpoint.lastIndexedBlock, "123456");
+    assert.equal(checkpoint.lastScannedBlock, "123456");
+    assert.equal(checkpoint.highestObservedBlock, "123456");
+    assert.equal(checkpoint.nextFromBlock, "123457");
+    assert.equal(checkpoint.emptyRange, false);
+    assert.equal(checkpoint.stateDigest, indexerStateDigest(result.state));
+    assert.equal(checkpoint.dashboardFeed.dashboardCanonicalObservationCount, 1);
+    assert.equal(checkpoint.safety.productionReady, false);
+    assert.equal(checkpoint.safety.storesRpcUrl, false);
     assert.equal(checkpoint.observationCount, 1);
     assert.equal(checkpoint.statePath, statePath);
+    assert.equal(readFileSync(statePath, "utf8").includes("example.invalid"), false);
+    assert.equal(readFileSync(checkpointPath, "utf8").includes("example.invalid"), false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("Base Sepolia reader records RPC and ABI malformed logs in the dashboard feed", async () => {
+  const [fixtureLog] = loadIndexerFixtureLogs();
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-base-sepolia-malformed-"));
+  const statePath = join(dir, "state.json");
+  const checkpointPath = join(dir, "checkpoint.json");
+  const calls: string[] = [];
+  const fetchImpl = async (_url: string, init?: RequestInit): Promise<Response> => {
+    const body = JSON.parse(String(init?.body)) as { method: string };
+    calls.push(body.method);
+    if (body.method === "eth_chainId") {
+      return Response.json({ jsonrpc: "2.0", id: 1, result: "0x14a34" });
+    }
+    if (body.method === "eth_getLogs") {
+      return Response.json({
+        jsonrpc: "2.0",
+        id: 1,
+        result: [
+          {
+            address: fixtureLog.address,
+            topics: "not-an-array",
+            data: fixtureLog.data,
+            blockNumber: "0x1e240",
+            blockHash: fixtureLog.blockHash,
+            transactionHash: fixtureLog.transactionHash,
+            transactionIndex: "0x0",
+            logIndex: "0x0",
+          },
+          {
+            address: fixtureLog.address,
+            topics: fixtureLog.topics.slice(0, 3),
+            data: fixtureLog.data,
+            blockNumber: "0x1e240",
+            blockHash: fixtureLog.blockHash,
+            transactionHash: fixtureLog.transactionHash,
+            transactionIndex: "0x1",
+            logIndex: "0x1",
+          },
+          {
+            address: fixtureLog.address,
+            topics: fixtureLog.topics,
+            data: fixtureLog.data,
+            blockNumber: "0x1e240",
+            blockHash: fixtureLog.blockHash,
+            transactionHash: fixtureLog.transactionHash,
+            transactionIndex: "0x2",
+            logIndex: "0x2",
+          },
+        ],
+      });
+    }
+    if (body.method === "eth_getTransactionReceipt") {
+      return Response.json({ jsonrpc: "2.0", id: 1, result: { status: "0x1" } });
+    }
+    return Response.json({ jsonrpc: "2.0", id: 1, error: { code: -32601, message: "not found" } });
+  };
+
+  try {
+    const result = await runBaseSepoliaReader({
+      rpcUrl: "https://example.invalid",
+      addresses: [fixtureLog.address],
+      fromBlock: "123456",
+      toBlock: "123456",
+      outPath: statePath,
+      checkpointPath,
+      generatedAt: "2026-05-13T00:00:00.000Z",
+      fetchImpl,
+    });
+    const checkpoint = readBaseSepoliaIndexerCheckpoint(checkpointPath);
+
+    assert.deepEqual(calls, [
+      "eth_chainId",
+      "eth_getLogs",
+      "eth_getTransactionReceipt",
+      "eth_getTransactionReceipt",
+    ]);
+    assert.equal(result.state.observations.length, 1);
+    assert.equal(result.state.rejectedLogs.length, 2);
+    assert.deepEqual(result.state.rejectedLogs.map((log) => log.reasonCode), [
+      "rpc.log.malformed",
+      "log.malformed",
+    ]);
+    assert.equal(result.state.dashboardFeed.rejectedReasonCounts["rpc.log.malformed"], 1);
+    assert.equal(result.state.dashboardFeed.rejectedReasonCounts["log.malformed"], 1);
+    assert.equal(checkpoint.dashboardFeed.hasIntegrityWarnings, true);
+    assert.equal(checkpoint.dashboardFeed.rejectedLogCount, 2);
+    assert.equal(checkpoint.emptyRange, false);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -310,6 +417,9 @@ test("runs Base mainnet canary reader and persists empty scans safely", async ()
     assert.equal(checkpoint.observationCount, 0);
     assert.equal(checkpoint.rejectedLogCount, 0);
     assert.equal(checkpoint.lastIndexedBlock, "45955500");
+    assert.equal(checkpoint.highestObservedBlock, null);
+    assert.equal(checkpoint.nextFromBlock, "45955501");
+    assert.equal(checkpoint.emptyRange, true);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -456,6 +566,97 @@ test("parses Base Sepolia reader CLI args without defaulting to a public RPC", (
     () => parseBaseSepoliaReaderArgs(["--address", fixtureLog.address, "--from-block", "1", "--to-block", "2"]),
     /--rpc-url is required/,
   );
+  assert.throws(
+    () => parseBaseSepoliaReaderArgs([
+      "--rpc-url",
+      "$BASE_SEPOLIA_RPC_URL",
+      "--address",
+      fixtureLog.address,
+      "--from-block",
+      "1",
+      "--to-block",
+      "2",
+    ]),
+    /resolved URL/,
+  );
+  assert.throws(
+    () => parseBaseSepoliaReaderArgs([
+      "--rpc-url",
+      "https://user:pass@example.invalid",
+      "--address",
+      fixtureLog.address,
+      "--from-block",
+      "1",
+      "--to-block",
+      "2",
+    ]),
+    /username\/password credentials/,
+  );
+  assert.throws(
+    () => parseBaseSepoliaReaderArgs([
+      "--rpc-url",
+      "https://example.invalid",
+      "--address",
+      fixtureLog.address,
+      "--from-block",
+      "1",
+      "--to-block",
+      "10002",
+    ]),
+    /refuses broad scans/,
+  );
+});
+
+test("Base Sepolia reader supports safe checkpoint resume after empty ranges", async () => {
+  const [fixtureLog] = loadIndexerFixtureLogs();
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-base-sepolia-resume-"));
+  const statePath = join(dir, "state.json");
+  const checkpointPath = join(dir, "checkpoint.json");
+  const fetchImpl = async (_url: string, init?: RequestInit): Promise<Response> => {
+    const body = JSON.parse(String(init?.body)) as { method: string };
+    if (body.method === "eth_chainId") {
+      return Response.json({ jsonrpc: "2.0", id: 1, result: "0x14a34" });
+    }
+    if (body.method === "eth_getLogs") {
+      return Response.json({ jsonrpc: "2.0", id: 1, result: [] });
+    }
+    return Response.json({ jsonrpc: "2.0", id: 1, error: { code: -32601, message: "not found" } });
+  };
+
+  try {
+    const result = await runBaseSepoliaReader({
+      rpcUrl: "https://example.invalid",
+      addresses: [fixtureLog.address],
+      fromBlock: "123456",
+      toBlock: "123460",
+      outPath: statePath,
+      checkpointPath,
+      generatedAt: "2026-05-13T00:00:00.000Z",
+      fetchImpl,
+    });
+
+    assert.equal(result.checkpoint.observationCount, 0);
+    assert.equal(result.checkpoint.lastIndexedBlock, "123460");
+    assert.equal(result.checkpoint.nextFromBlock, "123461");
+    assert.equal(result.checkpoint.emptyRange, true);
+
+    const parsed = parseBaseSepoliaReaderArgs([
+      "--rpc-url",
+      "https://example.invalid",
+      "--address",
+      fixtureLog.address,
+      "--resume-from-checkpoint",
+      "--checkpoint-out",
+      checkpointPath,
+      "--to-block",
+      "123470",
+    ]);
+
+    assert.equal(parsed.fromBlock, "123461");
+    assert.equal(parsed.toBlock, "123470");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("parses guarded Base mainnet canary reader CLI args", () => {

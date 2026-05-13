@@ -9,6 +9,7 @@ From the repository root:
 ```powershell
 npm run index:fixtures
 npm run index:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --from-block <n> --to-block <n>
+npm run index:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --resume-from-checkpoint --to-block <n>
 npm run index:base-canary -- --acknowledge-mainnet-canary --rpc-url <base-mainnet-rpc-url> --address <canary-flowpulse-contract> --from-block <n> --to-block <n>
 npm run demo:indexer
 npm test --prefix services/indexer
@@ -38,6 +39,16 @@ Use custom output paths:
 ```powershell
 npm run index:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --from-block 123456 --to-block 123999 --finalized-block 123900 --out out/base-sepolia-state.json --checkpoint-out out/base-sepolia-checkpoint.json
 ```
+
+Resume from the previous checkpoint:
+
+```powershell
+npm run index:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --resume-from-checkpoint --to-block 124999 --checkpoint-out out/base-sepolia-checkpoint.json
+```
+
+The Base Sepolia reader refuses broad scans above the configured block span
+(`10,000` blocks by default). Use `--max-block-span <n>` only for explicit
+operator-approved testnet reads.
 
 ## Fixtures
 
@@ -168,7 +179,9 @@ The state itself declares:
 flowmemory.indexer.state.v0
 ```
 
-JSON output is deterministic and contains observations, cursors, batches, rootfields, pulses, rejected logs, and duplicate records.
+JSON output is deterministic and contains observations, cursors, batches,
+rootfields, pulses, rejected logs, duplicate records, and a dashboard feed
+summary for status/warning display.
 
 The Base Sepolia reader also writes a durable checkpoint:
 
@@ -176,7 +189,11 @@ The Base Sepolia reader also writes a durable checkpoint:
 flowmemory.indexer.base_sepolia_checkpoint.v0
 ```
 
-The checkpoint records the network, chain id, emitting addresses, scan range, finality threshold, state path, counts, and latest indexed block. It intentionally does not store RPC URLs or private keys.
+The checkpoint records the network, chain id, emitting addresses, scan range,
+finality threshold, state path, counts, `lastIndexedBlock`,
+`highestObservedBlock`, `nextFromBlock`, and `emptyRange`. It intentionally does
+not store RPC URLs or private keys. State and checkpoint writes use a temporary
+file plus rename so a partial write does not replace the last good JSON file.
 
 The Base mainnet canary reader writes:
 

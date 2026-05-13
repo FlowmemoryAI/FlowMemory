@@ -16,18 +16,53 @@
         "cursors",
         "batches",
         "rejectedLogs",
-        "duplicates"
+        "duplicates",
+        "dashboardFeed"
       ],
       "properties": {
         "schema": { "const": "flowmemory.indexer.state.v0" },
-        "source": { "enum": ["fixture", "local-rpc-placeholder", "base-sepolia-rpc"] },
+        "source": { "enum": ["fixture", "local-rpc-placeholder", "base-sepolia-rpc", "base-mainnet-canary-rpc"] },
         "observations": { "type": "array" },
         "pulses": { "type": "array" },
         "rootfields": { "type": "array" },
         "cursors": { "type": "array" },
         "batches": { "type": "array" },
         "rejectedLogs": { "type": "array" },
-        "duplicates": { "type": "array" }
+        "duplicates": { "type": "array" },
+        "dashboardFeed": {
+          "type": "object",
+          "required": [
+            "schema",
+            "source",
+            "chainId",
+            "sourceSetId",
+            "observationCount",
+            "dashboardCanonicalObservationCount",
+            "rejectedLogCount",
+            "duplicateCount",
+            "duplicateKindCounts",
+            "rejectedReasonCounts",
+            "warningCodes",
+            "hasIntegrityWarnings",
+            "observations"
+          ],
+          "properties": {
+            "schema": { "const": "flowmemory.indexer.dashboard_feed.v0" },
+            "source": { "type": "string" },
+            "chainId": { "type": "string" },
+            "sourceSetId": { "type": "string" },
+            "observationCount": { "type": "number" },
+            "dashboardCanonicalObservationCount": { "type": "number" },
+            "rejectedLogCount": { "type": "number" },
+            "duplicateCount": { "type": "number" },
+            "duplicateKindCounts": { "type": "object" },
+            "rejectedReasonCounts": { "type": "object" },
+            "warningCodes": { "type": "array" },
+            "hasIntegrityWarnings": { "type": "boolean" },
+            "observations": { "type": "array" }
+          },
+          "additionalProperties": false
+        }
       },
       "additionalProperties": false
     }

@@ -23,6 +23,9 @@ interface Vm {
 /// protocol, proxy upgrade path, token, custody system, or verifier network.
 contract DeployLaunchCandidate {
     Vm private constant VM = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+    uint256 internal constant BASE_SEPOLIA_CHAIN_ID = 84532;
+
+    error UnexpectedChain(uint256 expected, uint256 actual);
 
     struct Deployment {
         address rootfieldRegistry;
@@ -51,6 +54,10 @@ contract DeployLaunchCandidate {
     );
 
     function run() external returns (Deployment memory deployment) {
+        if (block.chainid != BASE_SEPOLIA_CHAIN_ID) {
+            revert UnexpectedChain(BASE_SEPOLIA_CHAIN_ID, block.chainid);
+        }
+
         VM.startBroadcast();
 
         deployment = Deployment({

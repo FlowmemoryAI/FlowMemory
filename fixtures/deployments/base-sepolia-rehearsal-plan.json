@@ -1,0 +1,95 @@
+{
+  "schema": "flowmemory.base_sepolia.deployment_rehearsal_plan.v0",
+  "generatedAt": "2026-05-13T23:56:47.606Z",
+  "mode": "plan-only",
+  "productionReady": false,
+  "network": {
+    "name": "Base Sepolia",
+    "chainId": "84532",
+    "explorer": "https://sepolia.basescan.org"
+  },
+  "environment": {
+    "BASE_SEPOLIA_RPC_URL": "<missing>",
+    "BASE_SEPOLIA_DEPLOYER_KEY_HEX": "<missing>",
+    "BASE_SEPOLIA_BASESCAN_API_KEY": "<missing>",
+    "BASESCAN_API_KEY": "<missing>",
+    "BASE_SEPOLIA_FLOWPULSE_ADDRESSES": "<missing>",
+    "BASE_SEPOLIA_FROM_BLOCK": "<missing>",
+    "BASE_SEPOLIA_TO_BLOCK": "<missing>",
+    "BASE_SEPOLIA_FINALIZED_BLOCK": "<missing>",
+    "BASE_SEPOLIA_REHEARSAL_PLAN_OUT": "<default>",
+    "BASE_SEPOLIA_REHEARSAL_ARTIFACT_OUT": "<default>"
+  },
+  "requiredEnv": [
+    "BASE_SEPOLIA_RPC_URL",
+    "BASE_SEPOLIA_DEPLOYER_KEY_HEX"
+  ],
+  "optionalEnv": [
+    "BASE_SEPOLIA_BASESCAN_API_KEY",
+    "BASESCAN_API_KEY",
+    "BASE_SEPOLIA_FLOWPULSE_ADDRESSES",
+    "BASE_SEPOLIA_FROM_BLOCK",
+    "BASE_SEPOLIA_TO_BLOCK",
+    "BASE_SEPOLIA_FINALIZED_BLOCK",
+    "BASE_SEPOLIA_REHEARSAL_PLAN_OUT",
+    "BASE_SEPOLIA_REHEARSAL_ARTIFACT_OUT",
+    "BASE_SEPOLIA_REHEARSAL_GENERATED_AT"
+  ],
+  "deploys": [
+    "RootfieldRegistry",
+    "FlowMemoryHookAdapter",
+    "ArtifactRegistry",
+    "CursorRegistry",
+    "ReceiptVerifier",
+    "WorkerRegistry",
+    "VerifierRegistry",
+    "WorkReceiptRegistry",
+    "VerifierReportRegistry",
+    "WorkDebtScheduler"
+  ],
+  "forgeCommand": {
+    "program": "forge",
+    "args": [
+      "script",
+      "script/DeployLaunchCandidate.s.sol:DeployLaunchCandidate",
+      "--rpc-url",
+      "$BASE_SEPOLIA_RPC_URL",
+      "--private-key",
+      "$BASE_SEPOLIA_DEPLOYER_KEY_HEX",
+      "--chain-id",
+      "84532"
+    ],
+    "broadcast": false,
+    "note": "Dry run is default. Add --broadcast only when the operator has funded the deployer and accepts testnet gas spend."
+  },
+  "writeRehearsal": {
+    "rootfieldRegistration": [
+      "cast send <RootfieldRegistry> \"registerRootfield(bytes32,bytes32,bytes32,string)\" <rootfieldId> <schemaHash> <metadataHash> <metadataURI> --rpc-url $BASE_SEPOLIA_RPC_URL --private-key $BASE_SEPOLIA_DEPLOYER_KEY_HEX",
+      "cast send <RootfieldRegistry> \"submitRoot(bytes32,bytes32,bytes32,bytes32,string)\" <rootfieldId> <root> <artifactCommitment> <parentPulseId> <evidenceURI> --rpc-url $BASE_SEPOLIA_RPC_URL --private-key $BASE_SEPOLIA_DEPLOYER_KEY_HEX"
+    ],
+    "swapMemorySignalAdapter": [
+      "cast send <FlowMemoryHookAdapter> \"afterSwap(address,bytes32,bytes32,bytes32,bytes)\" <sender> <poolId> <rootfieldId> <commitment> <hookData> --rpc-url $BASE_SEPOLIA_RPC_URL --private-key $BASE_SEPOLIA_DEPLOYER_KEY_HEX"
+    ]
+  },
+  "readRehearsal": {
+    "rootfieldReadback": "cast call <RootfieldRegistry> \"getRootfield(bytes32)\" <rootfieldId> --rpc-url $BASE_SEPOLIA_RPC_URL",
+    "flowPulseReader": "npm run index:base-sepolia -- --rpc-url $BASE_SEPOLIA_RPC_URL --address <RootfieldRegistry> --address <FlowMemoryHookAdapter> --from-block <deployBlock> --to-block <latestBlock> --finalized-block <safeFinalizedBlock>",
+    "resumeReader": "npm run index:base-sepolia -- --rpc-url $BASE_SEPOLIA_RPC_URL --address <RootfieldRegistry> --address <FlowMemoryHookAdapter> --resume-from-checkpoint --to-block <latestBlock>"
+  },
+  "verification": {
+    "apiKeyEnv": "BASE_SEPOLIA_BASESCAN_API_KEY or BASESCAN_API_KEY",
+    "command": "forge verify-contract --chain-id 84532 <address> <ContractName> --etherscan-api-key $BASE_SEPOLIA_BASESCAN_API_KEY"
+  },
+  "rollback": [
+    "Do not reuse a partially failed deployment artifact as canonical.",
+    "If a contract deployment fails before broadcast completion, discard the artifact and rerun dry-run before broadcast.",
+    "If smoke writes fail after contracts deploy, record the failed transaction hash, pause claims, and redeploy only if contract ownership or constructor inputs are wrong.",
+    "No upgrade or proxy rollback exists in V0; rollback means stop using the address set and mark it superseded in docs/DEPLOYMENTS."
+  ],
+  "boundaries": [
+    "Base Sepolia is a public testnet rehearsal, not production mainnet readiness.",
+    "The V0 hook adapter is not a production Uniswap v4 PoolManager hook.",
+    "txHash, transactionIndex, and logIndex are derived by the reader after receipts exist, never inside the hook.",
+    "No private keys, RPC credentials, or explorer API keys are written to artifacts."
+  ]
+}

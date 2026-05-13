@@ -26,9 +26,10 @@ Check:
 - Whether `docs/FLOWCHAIN_TESTNET_ACCEPTANCE.md` has stale statuses.
 - Whether command names in `docs/FLOWCHAIN_SECOND_COMPUTER_SETUP.md` still
   match `package.json`.
-- Whether any PR adds tokenomics, public validator onboarding, production
-  bridge work, production hook claims, audited-cryptography claims, or
-  production hardware claims.
+- Whether any PR adds tokenomics, public validator onboarding, bridge behavior
+  outside the private/local package, hook behavior outside canary/test
+  surfaces, completed-cryptography-audit claims, or manufactured-hardware
+  claims.
 
 Second-computer readiness check:
 
@@ -42,6 +43,87 @@ npm run flowchain:export
 
 Run `npm run flowchain:full-smoke` when the machine has the full prerequisite set,
 including Foundry, Python, dashboard dependencies, and crypto dependencies.
+
+## Launch Demo Day
+
+Primary script: `docs/LAUNCH_DEMO_RUNBOOK.md`.
+
+Use this section when preparing a beginner-facing demo or review call. The demo
+must stay inside the current local/private and guarded canary boundaries.
+
+Pre-demo gate:
+
+```powershell
+cd E:\FlowMemory\flowmemory-main
+git fetch --all --prune
+git status --short --branch
+npm run flowchain:prereq
+npm run flowchain:full-smoke
+```
+
+If full smoke cannot run, record the exact missing prerequisite or first failing
+command before proceeding.
+
+Generate demo state:
+
+```powershell
+npm run flowchain:init
+npm run flowchain:start
+npm run flowchain:demo
+npm run flowchain:export
+```
+
+Start demo services in separate PowerShell windows:
+
+```powershell
+npm run control-plane:serve
+```
+
+```powershell
+npm run workbench:dev
+```
+
+Open or preload these routes:
+
+```text
+http://127.0.0.1:5173/
+http://127.0.0.1:5173/overview
+http://127.0.0.1:5173/flowmemory
+http://127.0.0.1:5173/canary
+http://127.0.0.1:5173/raw
+```
+
+Go/no-go checks:
+
+- `/` shows the Workbench.
+- The banner says either **Local API detected.** or **Fixture fallback active.**
+  Both are valid if explained correctly.
+- `/canary` shows Base canary review data and the not-production boundary.
+- No private key, seed phrase, RPC credential, API key, or webhook URL is shown
+  on screen.
+- The speaker says "private/local no-value validation" and "guarded Base
+  canary review," not production readiness.
+
+Allowed claims:
+
+- The current package has a local/private no-value demo path.
+- The workbench renders generated V0 fixtures and can probe the local
+  control-plane API.
+- The guarded Base canary route reviews committed reader output from known V0
+  canary addresses.
+
+Blocked claims:
+
+- production readiness;
+- mainnet readiness;
+- public validators;
+- tokenomics or real-funds workflows;
+- production bridge readiness;
+- production Uniswap v4 hook deployment;
+- fully trustless verifier network;
+- audited cryptography;
+- AI/model/artifact data stored on-chain;
+- production hardware.
 
 ## During The Day
 

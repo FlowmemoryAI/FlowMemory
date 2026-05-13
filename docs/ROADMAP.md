@@ -94,11 +94,11 @@ Status: implemented as fixture-first services plus generated launch-core state; 
 - Generated MemorySignal and RootflowTransition fixtures expose contract-event linkage through `contractEvent` and `contractEventRef`.
 - Fixture-based parser and reorg-state tests exist in the indexer/verifier packages.
 - Deterministic persistence exists for fixture state, the constrained Base Sepolia reader checkpoint, and the guarded Base mainnet canary checkpoint.
-- A Base Sepolia reader path exists for explicit RPC URLs and explicit FlowPulse contract addresses; it rejects non-Base-Sepolia chain ids.
+- A Base Sepolia reader path exists for explicit RPC URLs and explicit FlowPulse contract addresses; it rejects non-Base-Sepolia chain ids, refuses broad scans by default, persists atomic checkpoint output, and supports resume from `nextFromBlock`.
 - A guarded Base mainnet canary reader exists for explicit RPC URLs, explicit known canary addresses, and small explicit block ranges; it rejects non-Base-mainnet chain ids and marks output as canary-only.
 - A separate dashboard canary mode exists for committed Base canary reader output and deployment artifacts.
 - Source verification automation exists for the canary contract set, and all current Base canary addresses are verified on BaseScan. Future redeploys still require a local `BASESCAN_API_KEY` for submission.
-- Base Sepolia deploy/read commands exist for the current V0 testnet contract set.
+- Base Sepolia plan/dry-run/broadcast/read commands and a rehearsal runbook exist for the current V0 public testnet contract set.
 - A Base mainnet V0 canary deployment has been performed for testing only and is documented under `docs/DEPLOYMENTS/`.
 - Runtime schema validation and generated fixture drift checks exist for launch-core outputs.
 - Local devnet smoke-test gates exist as a no-value Rust prototype, without mainnet or production deployment.
@@ -126,6 +126,7 @@ Status: active.
 - Add security reporting guidance.
 - Enforce claim guardrails in CI for README/docs/marketing surfaces.
 - Keep Slither required for audit environments and available through `npm run contracts:hardening:slither`.
+- Keep `docs/reviews/LAUNCH_CANDIDATE_SECURITY_BOUNDARY_REVIEW.md` current when launch-facing contract, reader, dashboard, wallet, or claim surfaces change.
 - Enforce allowed-folder and forbidden-folder boundaries.
 
 ## Mid-Term Phases
@@ -197,7 +198,7 @@ Next merge preference:
 7. Contracts settlement-spine alignment without moving runtime into Solidity.
 8. Refresh packaging scripts and root command aliases whenever subsystem command semantics change.
 9. Canary ingestion and Base Sepolia follow-ups, still gated from production claims.
-10. Base Sepolia reader soak tests against explicit testnet deployments.
+10. Base Sepolia rehearsal execution against explicit testnet deployments.
 11. Actual source verification submission for Base canary contracts when `BASESCAN_API_KEY` is available.
 12. Static analysis follow-up findings triaged for any public testnet deployment.
 13. Operator ownership separation and multisig/recovery decision before further live deployments.

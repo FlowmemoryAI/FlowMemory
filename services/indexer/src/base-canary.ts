@@ -11,6 +11,7 @@ import {
   blockArgumentToDecimalString,
   blockArgumentToRpcQuantity,
   normalizeEvmAddresses,
+  normalizeRpcUrl,
   readArgValue,
 } from "./reader-utils.ts";
 import { BASE_MAINNET_CHAIN_ID, readBaseMainnetCanaryFlowPulseLogs } from "./rpc.ts";
@@ -102,15 +103,13 @@ export function parseBaseCanaryReaderArgs(args: string[]): CliOptions {
     }
   }
 
-  if (rpcUrl.trim() === "") {
-    throw new Error("--rpc-url is required; FlowMemory does not ship a default RPC endpoint");
-  }
   if (fromBlock.trim() === "") {
     throw new Error("--from-block is required");
   }
   if (toBlock.trim() === "") {
     throw new Error("--to-block is required");
   }
+  const normalizedRpcUrl = normalizeRpcUrl(rpcUrl);
 
   assertCanaryAcknowledged(acknowledgeMainnetCanary);
 
@@ -119,7 +118,7 @@ export function parseBaseCanaryReaderArgs(args: string[]): CliOptions {
   assertCanaryBlockRange(normalizedFromBlock, normalizedToBlock);
 
   return {
-    rpcUrl,
+    rpcUrl: normalizedRpcUrl,
     addresses: normalizeEvmAddresses(addresses),
     fromBlock: normalizedFromBlock,
     toBlock: normalizedToBlock,
@@ -133,6 +132,7 @@ export function parseBaseCanaryReaderArgs(args: string[]): CliOptions {
 export async function runBaseCanaryReader(options: BaseCanaryReaderOptions): Promise<BaseCanaryReaderResult> {
   assertCanaryAcknowledged(options.acknowledgeMainnetCanary);
 
+  const rpcUrl = normalizeRpcUrl(options.rpcUrl);
   const addresses = normalizeEvmAddresses(options.addresses);
   const fromBlock = blockArgumentToDecimalString(options.fromBlock);
   const toBlock = blockArgumentToDecimalString(options.toBlock);
@@ -142,7 +142,7 @@ export async function runBaseCanaryReader(options: BaseCanaryReaderOptions): Pro
   assertCanaryBlockRange(fromBlock, toBlock);
 
   const readResult = await readBaseMainnetCanaryFlowPulseLogs({
-    rpcUrl: options.rpcUrl,
+    rpcUrl,
     addresses,
     fromBlock: blockArgumentToRpcQuantity(fromBlock),
     toBlock: blockArgumentToRpcQuantity(toBlock),
@@ -158,6 +158,7 @@ export async function runBaseCanaryReader(options: BaseCanaryReaderOptions): Pro
     finalizedBlockNumber,
     source: "base-mainnet-canary-rpc",
     sourceAddresses: addresses,
+    preRejectedLogs: readResult.rejectedLogs,
   });
   const checkpoint = baseCanaryIndexerCheckpoint({
     addresses,
@@ -203,7 +204,10 @@ if (process.argv[1]?.replaceAll("\\", "/").endsWith("/base-canary.ts")) {
         observationCount: result.checkpoint.observationCount,
         rejectedLogCount: result.checkpoint.rejectedLogCount,
         duplicateCount: result.checkpoint.duplicateCount,
+        dashboardCanonicalObservationCount: result.checkpoint.dashboardFeed.dashboardCanonicalObservationCount,
         lastIndexedBlock: result.checkpoint.lastIndexedBlock,
+        lastScannedBlock: result.checkpoint.lastScannedBlock,
+        hasIntegrityWarnings: result.checkpoint.dashboardFeed.hasIntegrityWarnings,
         productionReady: result.checkpoint.safety.productionReady,
       }, null, 2));
     })

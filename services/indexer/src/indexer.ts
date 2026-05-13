@@ -29,6 +29,9 @@ export interface IndexRejectedLog {
   logIndex: string;
   reasonCode: string;
   message: string;
+  source?: "indexer" | "rpc";
+  rawLogIndex?: number;
+  address?: string;
 }
 
 export interface IndexedCursor {
@@ -73,6 +76,42 @@ export interface IndexedRootfield {
 
 export type IndexerStateSource = "fixture" | "local-rpc-placeholder" | "base-sepolia-rpc" | "base-mainnet-canary-rpc";
 
+export interface IndexerDashboardFeedObservation {
+  observationId: string;
+  pulseId: string;
+  rootfieldId: string;
+  lifecycleState: ParsedFlowPulseObservation["lifecycleState"];
+  duplicateKind: DuplicateKind;
+  dashboardCanonical: boolean;
+  chainId: string;
+  emittingContract: string;
+  blockNumber: string;
+  blockHash: string;
+  txHash: string;
+  transactionIndex: string;
+  logIndex: string;
+  pulseType: string;
+  sequence: string;
+  occurredAt: string;
+  uri: string;
+}
+
+export interface IndexerDashboardFeed {
+  schema: "flowmemory.indexer.dashboard_feed.v0";
+  source: IndexerStateSource;
+  chainId: string;
+  sourceSetId: string;
+  observationCount: number;
+  dashboardCanonicalObservationCount: number;
+  rejectedLogCount: number;
+  duplicateCount: number;
+  duplicateKindCounts: Record<string, number>;
+  rejectedReasonCounts: Record<string, number>;
+  warningCodes: string[];
+  hasIntegrityWarnings: boolean;
+  observations: IndexerDashboardFeedObservation[];
+}
+
 export interface IndexerState {
   schema: "flowmemory.indexer.state.v0";
   source: IndexerStateSource;
@@ -87,6 +126,7 @@ export interface IndexerState {
     observationId: string;
     pulseId: string;
   }>;
+  dashboardFeed: IndexerDashboardFeed;
 }
 
 export interface IndexerStateOptions {
@@ -95,6 +135,7 @@ export interface IndexerStateOptions {
   chainId?: string;
   source?: IndexerStateSource;
   sourceAddresses?: string[];
+  preRejectedLogs?: IndexRejectedLog[];
 }
 
 function canonicalObservationJson(observation: ParsedFlowPulseObservation): string {
@@ -166,17 +207,106 @@ function duplicateKindFor(
   return "unique";
 }
 
+function sortedObservationsForFeed(observations: IndexedObservation[]): IndexedObservation[] {
+  return [...observations].sort((left, right) => {
+    const block = BigInt(left.blockNumber) - BigInt(right.blockNumber);
+    if (block !== 0n) return block < 0n ? -1 : 1;
+    const transaction = BigInt(left.transactionIndex) - BigInt(right.transactionIndex);
+    if (transaction !== 0n) return transaction < 0n ? -1 : 1;
+    const log = BigInt(left.logIndex) - BigInt(right.logIndex);
+    if (log !== 0n) return log < 0n ? -1 : 1;
+    return left.observationId.localeCompare(right.observationId);
+  });
+}
+
+function incrementCount(counts: Record<string, number>, key: string): void {
+  counts[key] = (counts[key] ?? 0) + 1;
+}
+
+function buildDashboardFeed(input: {
+  source: IndexerStateSource;
+  chainId: string;
+  sourceSetId: string;
+  observations: IndexedObservation[];
+  rejectedLogs: IndexRejectedLog[];
+  duplicates: IndexerState["duplicates"];
+}): IndexerDashboardFeed {
+  const duplicateKindCounts: Record<string, number> = {};
+  const rejectedReasonCounts: Record<string, number> = {};
+
+  for (const duplicate of input.duplicates) {
+    incrementCount(duplicateKindCounts, duplicate.kind);
+  }
+  for (const rejected of input.rejectedLogs) {
+    incrementCount(rejectedReasonCounts, rejected.reasonCode);
+  }
+
+  const warningCodes = new Set<string>();
+  for (const rejected of input.rejectedLogs) {
+    warningCodes.add(`rejected.${rejected.reasonCode}`);
+  }
+  for (const duplicate of input.duplicates) {
+    warningCodes.add(`duplicate.${duplicate.kind}`);
+  }
+  for (const observation of input.observations) {
+    if (observation.lifecycleState === "removed" || observation.lifecycleState === "reorged") {
+      warningCodes.add(`lifecycle.${observation.lifecycleState}`);
+    }
+  }
+
+  const observations = sortedObservationsForFeed(input.observations).map((observation) => ({
+    observationId: observation.observationId,
+    pulseId: observation.pulseId,
+    rootfieldId: observation.rootfieldId,
+    lifecycleState: observation.lifecycleState,
+    duplicateKind: observation.duplicateKind,
+    dashboardCanonical:
+      observation.duplicateKind !== "exactDuplicate" &&
+      observation.lifecycleState !== "removed" &&
+      observation.lifecycleState !== "reorged" &&
+      observation.lifecycleState !== "superseded",
+    chainId: observation.chainId,
+    emittingContract: observation.emittingContract,
+    blockNumber: observation.blockNumber,
+    blockHash: observation.blockHash,
+    txHash: observation.txHash,
+    transactionIndex: observation.transactionIndex,
+    logIndex: observation.logIndex,
+    pulseType: observation.pulseType,
+    sequence: observation.sequence,
+    occurredAt: observation.occurredAt,
+    uri: observation.uri,
+  }));
+
+  return {
+    schema: "flowmemory.indexer.dashboard_feed.v0",
+    source: input.source,
+    chainId: input.chainId,
+    sourceSetId: input.sourceSetId,
+    observationCount: input.observations.length,
+    dashboardCanonicalObservationCount: observations.filter((observation) => observation.dashboardCanonical).length,
+    rejectedLogCount: input.rejectedLogs.length,
+    duplicateCount: input.duplicates.length,
+    duplicateKindCounts,
+    rejectedReasonCounts,
+    warningCodes: [...warningCodes].sort(),
+    hasIntegrityWarnings: warningCodes.size > 0,
+    observations,
+  };
+}
+
 export function indexFlowPulseLogs(logs: RawFlowPulseLogFixture[], options: IndexerStateOptions = {}): IndexerState {
   const seenByObservationId = new Map<string, string>();
   const seenByPulseId = new Map<string, ParsedFlowPulseObservation>();
   const rootfields = new Map<string, IndexedRootfield>();
   const observations: IndexedObservation[] = [];
   const cursors = new Map<string, IndexedCursor>();
-  const rejectedLogs: IndexRejectedLog[] = [];
+  const rejectedLogs: IndexRejectedLog[] = [...(options.preRejectedLogs ?? [])];
   const duplicates: IndexerState["duplicates"] = [];
   const source = options.source ?? "fixture";
   const sourceAddresses = options.sourceAddresses ?? logs.map((log) => log.address);
   const sourceSetId = deriveSourceSetId(logs[0]?.chainId ?? options.chainId ?? "0", sourceAddresses);
+  const chainId = logs[0]?.chainId ?? options.chainId ?? "0";
 
   for (const log of logs) {
     if (log.receiptStatus !== "success") {
@@ -189,6 +319,7 @@ export function indexFlowPulseLogs(logs: RawFlowPulseLogFixture[], options: Inde
         logIndex: log.logIndex,
         reasonCode: "receipt.reverted",
         message: "receipt status is reverted",
+        source: "indexer",
       });
       continue;
     }
@@ -207,6 +338,7 @@ export function indexFlowPulseLogs(logs: RawFlowPulseLogFixture[], options: Inde
         logIndex: log.logIndex,
         reasonCode: "log.malformed",
         message: error instanceof Error ? error.message : "unknown parse error",
+        source: "indexer",
       });
       continue;
     }
@@ -262,6 +394,15 @@ export function indexFlowPulseLogs(logs: RawFlowPulseLogFixture[], options: Inde
     }
   }
 
+  const dashboardFeed = buildDashboardFeed({
+    source,
+    chainId,
+    sourceSetId,
+    observations,
+    rejectedLogs,
+    duplicates,
+  });
+
   return {
     schema: "flowmemory.indexer.state.v0",
     source,
@@ -291,6 +432,7 @@ export function indexFlowPulseLogs(logs: RawFlowPulseLogFixture[], options: Inde
     rootfields: [...rootfields.values()].sort((left, right) => left.rootfieldId.localeCompare(right.rootfieldId)),
     rejectedLogs,
     duplicates,
+    dashboardFeed,
   };
 }
 
