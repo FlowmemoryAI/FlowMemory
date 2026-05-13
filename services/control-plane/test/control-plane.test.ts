@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { once } from "node:events";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -11,6 +12,7 @@ import {
   type RpcErrorResponse,
   type RpcSuccessResponse,
 } from "../src/index.ts";
+import { startControlPlaneServer } from "../src/server.ts";
 import { runControlPlaneSmoke } from "../src/smoke.ts";
 
 test("dispatches JSON-RPC methods against local fixture state", () => {
@@ -169,4 +171,40 @@ test("smoke client queries the complete local lifecycle surface", () => {
   assert.equal(smoke.ok, true);
   assert.equal(smoke.methodCount, 31);
   assert.ok((smoke.responseSchemas as string[]).includes("flowmemory.control_plane.raw_json.v0"));
+});
+
+test("HTTP server exposes browser-safe health and state endpoints", async () => {
+  const server = startControlPlaneServer({ host: "127.0.0.1", port: 0 });
+
+  try {
+    await once(server, "listening");
+    const address = server.address();
+    assert.equal(typeof address, "object");
+    assert.notEqual(address, null);
+    const port = address?.port;
+
+    const health = await fetch(`http://127.0.0.1:${port}/health`, {
+      headers: { Origin: "http://127.0.0.1:5173" },
+    });
+    assert.equal(health.status, 200);
+    assert.equal(health.headers.get("access-control-allow-origin"), "*");
+    assert.equal((await health.json()).status, "ok");
+
+    const state = await fetch(`http://127.0.0.1:${port}/state`, {
+      headers: { Origin: "http://127.0.0.1:5173" },
+    });
+    assert.equal(state.status, 200);
+    assert.equal(state.headers.get("access-control-allow-origin"), "*");
+    assert.equal((await state.json()).schema, "flowmemory.control_plane.devnet_state.v0");
+  } finally {
+    await new Promise<void>((resolve, reject) => {
+      server.close((error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve();
+      });
+    });
+  }
 });

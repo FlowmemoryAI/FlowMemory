@@ -1,4 +1,4 @@
-import { createServer } from "node:http";
+import { createServer, type ServerResponse } from "node:http";
 import { fileURLToPath } from "node:url";
 
 import { dispatchJsonRpc } from "./json-rpc.ts";
@@ -7,6 +7,22 @@ import { loadControlPlaneState } from "./fixture-state.ts";
 interface ServerOptions {
   host: string;
   port: number;
+}
+
+const jsonHeaders = {
+  "access-control-allow-headers": "content-type",
+  "access-control-allow-methods": "GET,POST,OPTIONS",
+  "access-control-allow-origin": "*",
+  "content-type": "application/json",
+};
+
+function jsonResult(response: ReturnType<typeof dispatchJsonRpc>): unknown {
+  return Array.isArray(response) ? response : response?.result ?? response;
+}
+
+function writeJson(res: ServerResponse, statusCode: number, body: unknown): void {
+  res.writeHead(statusCode, jsonHeaders);
+  res.end(`${JSON.stringify(body)}\n`);
 }
 
 function parseArgs(args: string[]): ServerOptions {
@@ -44,16 +60,26 @@ function parseArgs(args: string[]): ServerOptions {
 export function startControlPlaneServer(options: ServerOptions): ReturnType<typeof createServer> {
   const state = loadControlPlaneState();
   const server = createServer((req, res) => {
+    if (req.method === "OPTIONS") {
+      res.writeHead(204, jsonHeaders);
+      res.end();
+      return;
+    }
+
     if (req.method === "GET" && req.url === "/health") {
       const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "health", method: "health" }, { state });
-      res.writeHead(200, { "content-type": "application/json" });
-      res.end(`${JSON.stringify(Array.isArray(response) ? response : response?.result ?? response)}\n`);
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
+    if (req.method === "GET" && req.url === "/state") {
+      const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "state", method: "devnet_state" }, { state });
+      writeJson(res, 200, jsonResult(response));
       return;
     }
 
     if (req.method !== "POST" || req.url !== "/rpc") {
-      res.writeHead(404, { "content-type": "application/json" });
-      res.end(JSON.stringify({ error: "not found" }));
+      writeJson(res, 404, { error: "not found" });
       return;
     }
 
@@ -67,15 +93,13 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
         const payload = JSON.parse(body) as unknown;
         const response = dispatchJsonRpc(payload, { state });
         if (response === undefined) {
-          res.writeHead(204);
+          res.writeHead(204, jsonHeaders);
           res.end();
           return;
         }
-        res.writeHead(200, { "content-type": "application/json" });
-        res.end(`${JSON.stringify(response)}\n`);
+        writeJson(res, 200, response);
       } catch (error) {
-        res.writeHead(400, { "content-type": "application/json" });
-        res.end(JSON.stringify({
+        writeJson(res, 400, {
           jsonrpc: "2.0",
           id: null,
           error: {
@@ -87,7 +111,7 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
               localOnly: true,
             },
           },
-        }));
+        });
       }
     });
   });
