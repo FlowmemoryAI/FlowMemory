@@ -61,7 +61,7 @@ FlowMemory is managed as a multi-agent program. The management layer is part of 
 - `docs/MARKETING_CLAIMS_GUARDRAILS.md`: allowed and blocked launch claims for docs and marketing
 - `infra/scripts/status-report.ps1`: read-only local worktree, PR, and issue status report
 
-Immediate major milestone: keep the Rootflow V0 and Flow Memory V0 launch core green. This means local contracts/tests, FlowPulse fixtures, Uniswap swap-derived memory-signal fixtures, Rootflow transitions, Flow Memory schemas, verifier reports, crypto fixtures, dashboard-readable state, Base Sepolia testnet read/deploy commands, and local smoke-test gates. It does not mean production deployment.
+Immediate major milestone: keep the Rootflow V0 and Flow Memory V0 launch core green while packaging the FlowChain private/local L1 testnet path for second-computer validation. This means local contracts/tests, FlowPulse fixtures, Uniswap swap-derived memory-signal fixtures, Rootflow transitions, Flow Memory schemas, verifier reports, crypto fixtures, dashboard-readable state, Base Sepolia testnet read/deploy commands, Windows-first wrapper scripts, and local smoke-test gates. It does not mean production deployment.
 
 Run the local launch-core path:
 
@@ -78,6 +78,31 @@ npm run launch:candidate
 ```
 
 That command runs contract hardening, the launch flow, runtime schema validation, fixture drift checks, and claim guardrails.
+
+Run the current FlowChain private/local wrapper path:
+
+```powershell
+npm run flowchain:prereq
+npm run flowchain:init
+npm run flowchain:start
+npm run flowchain:demo
+npm run flowchain:export
+```
+
+Run the merged-surface smoke path when Foundry, Python, dashboard dependencies,
+and crypto dependencies are installed:
+
+```powershell
+npm install --prefix apps/dashboard
+npm install --prefix crypto
+npm run flowchain:smoke
+```
+
+Run the existing dashboard as the local workbench:
+
+```powershell
+npm run workbench:dev
+```
 
 Build the dashboard after regenerating launch data:
 

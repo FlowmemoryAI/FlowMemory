@@ -27,6 +27,20 @@ cargo test --manifest-path crates/flowmemory-devnet/Cargo.toml
 
 ## Commands
 
+Windows-first root wrappers:
+
+```powershell
+npm run flowchain:init
+npm run flowchain:start
+npm run flowchain:demo
+npm run flowchain:export
+npm run flowchain:stop
+```
+
+The wrappers call the Rust CLI below and write ignored operator/status/handoff/
+export files under `devnet/local/`. The current runtime is still a
+deterministic local CLI, not a long-running node.
+
 Initialize state:
 
 ```powershell

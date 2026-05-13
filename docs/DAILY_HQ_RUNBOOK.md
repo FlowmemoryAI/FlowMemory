@@ -2,6 +2,10 @@
 
 This runbook is for the FlowMemory HQ operator. It keeps many Codex agents moving without overlapping folders or expanding into premature product work.
 
+Private/local testnet checklist companion:
+`docs/FLOWCHAIN_OPERATOR_CHECKLIST.md`. Troubleshooting companion:
+`docs/FLOWCHAIN_TROUBLESHOOTING.md`.
+
 ## Morning Review
 
 Run:
@@ -24,6 +28,41 @@ Check:
 - Rootflow and Flow Memory launch-core issues #63 through #67.
 - Evidence gaps in `docs/V0_LAUNCH_ACCEPTANCE.md`.
 - Current audit notes in `docs/reviews/ROOTFLOW_FLOW_MEMORY_V0_ACCEPTANCE_AUDIT.md`.
+
+## FlowChain Full-Testnet Push Checklist
+
+Morning:
+
+- Confirm GitHub open PRs and issues still match `docs/CURRENT_STATE.md` and
+  `docs/ISSUE_BACKLOG.md`.
+- Check all sibling worktrees for dirty changes before assigning agents.
+- Verify no two active agents are editing the same folder family or source-of-truth
+  doc without coordination.
+- Review `docs/FLOWCHAIN_TESTNET_ACCEPTANCE.md` for rows that changed from
+  missing to in flight or implemented after merges.
+- Verify root command aliases in `package.json` still match the scripts under
+  `infra/scripts/flowchain-*.ps1`.
+- Confirm the next assigned work extends the existing devnet, control-plane,
+  crypto, dashboard, contracts, hardware, or research surface instead of adding
+  a replacement system.
+- Keep production L1, tokenomics, public validator, production bridge, audited
+  cryptography, production hook, and production hardware claims blocked.
+
+Evening:
+
+- Record merged PRs, open PRs, dirty worktrees, blockers, and next smallest
+  actions for the private/local testnet package.
+- Update `docs/CURRENT_STATE.md`, `docs/ROADMAP.md`, and
+  `docs/ISSUE_BACKLOG.md` if a merge changes implemented, in-flight, missing,
+  or later-gated state.
+- Update `docs/FLOWCHAIN_SECOND_COMPUTER_SETUP.md` whenever a command lands or
+  a command name changes.
+- Check whether the second-computer path can now run farther than the previous
+  day, and name the first failing step.
+- Save or cite `devnet/local/smoke/flowchain-smoke-report.json` when full smoke
+  runs locally.
+- Require `git diff --check` in each PR summary and area tests where the touched
+  area has tests.
 
 ## Issue Triage
 

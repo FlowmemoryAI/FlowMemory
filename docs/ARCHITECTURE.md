@@ -1,6 +1,12 @@
 # Architecture
 
-FlowMemory is a layered system for commitment-oriented AI memory, verification, local operator tooling, and bounded hardware research. Only the repository operating system and initial contracts foundation are implemented. Everything else is either specification, local fixture work, or research until explicitly merged.
+FlowMemory is a layered system for commitment-oriented AI memory, verification,
+local operator tooling, and bounded hardware research. The merged repo now has
+the V0 launch-core, local deterministic devnet prototype, fixture
+indexer/verifier, dashboard, crypto helpers, hardware simulator, and HQ wrapper
+layer. Native private/local FlowChain object lifecycle, control-plane coverage,
+long-running node behavior, and full workbench coverage remain in flight until
+explicitly merged.
 
 ## Layer Map
 
@@ -14,6 +20,7 @@ FlowMemory is a layered system for commitment-oriented AI memory, verification, 
 8. Research lab
 9. Devnet/appchain research
 10. HQ program operating system
+11. FlowChain private/local testnet packaging
 
 ## Contracts
 
@@ -177,7 +184,8 @@ Boundaries:
 
 ## Devnet And Appchain Research
 
-Status: gated research only.
+Status: local no-value devnet prototype implemented; broader appchain/L1 work
+remains gated research.
 
 Responsibilities:
 
@@ -201,6 +209,28 @@ Responsibilities:
 - Keep agent prompts and PR process enforceable.
 - Maintain labels, milestones, review flow, and daily runbook.
 - Prevent agents from overlapping folders or expanding into gated work.
+
+## FlowChain Private/Local Testnet Packaging
+
+Status: Windows-first wrapper command layer implemented for merged surfaces.
+
+Responsibilities:
+
+- Provide one second-computer command path for prerequisites, init, bounded
+  start/stop, demo, smoke, export/import, and workbench dev mode.
+- Keep wrappers pointed at the existing Rust devnet, launch-core generator,
+  dashboard, hardware simulator, and guardrail scripts.
+- Record remaining subsystem blockers in `docs/FLOWCHAIN_TESTNET_ACCEPTANCE.md`
+  and `docs/ISSUE_BACKLOG.md`.
+
+Boundaries:
+
+- The wrapper layer does not create a second devnet, dashboard, crypto package,
+  verifier pipeline, object model, or setup path.
+- The current `flowchain:start` command is a bounded local CLI readiness path,
+  not a long-running node.
+- Production public-chain, token, bridge, and audited-cryptography claims remain
+  outside this milestone.
 
 ## Data Flow
 
