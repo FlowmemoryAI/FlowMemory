@@ -164,16 +164,33 @@ The script uses `fixtures/deployments/base-canary-v0.json`, requires no private
 key, redacts the API key in generated plans, and writes a non-secret report to
 `fixtures/deployments/base-canary-source-verification-plan.json` by default.
 
+## Source Verification Status
+
+Status: complete for the current Base canary deployment.
+
+- Verification date: 2026-05-13.
+- Status report:
+  `fixtures/deployments/base-canary-source-verification-status.json`.
+- `RootfieldRegistry`, `ArtifactRegistry`, `CursorRegistry`,
+  `ReceiptVerifier`, `WorkerRegistry`, `VerifierRegistry`,
+  `WorkReceiptRegistry`, `VerifierReportRegistry`, and `WorkDebtScheduler`
+  were verified against current `main` source.
+- `FlowMemoryHookAdapter` was verified against deployment-source commit
+  `11d562c` because current `main` now has the newer v4-shaped callback path
+  that was added after this canary address was deployed.
+
+This means the current canary addresses are source-verified, not that the newer
+`FlowMemoryHookAdapter` source has been redeployed or that the adapter is a
+production Uniswap v4 PoolManager hook.
+
 ## Important Gaps Found
 
-1. Contract source verification automation exists, but actual submission
-   requires `BASESCAN_API_KEY` and explorer acceptance.
-2. `FlowMemoryHookAdapter` now exposes a dependency-light Uniswap v4-shaped
+1. `FlowMemoryHookAdapter` now exposes a dependency-light Uniswap v4-shaped
    `afterSwap` callback path, but it is not a production hook deployment wired
    into PoolManager permissions.
-3. Ownership is still direct deployer ownership where applicable. There is no
+2. Ownership is still direct deployer ownership where applicable. There is no
    multisig, governance, recovery, or operational key policy.
-4. Verifier and worker registry flows are deployed, but live verifier report
+3. Verifier and worker registry flows are deployed, but live verifier report
    submission, report signing, and verifier economics are not built.
 
 ## Notes

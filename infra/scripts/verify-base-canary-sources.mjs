@@ -23,6 +23,8 @@ const submit = flags.has("--submit");
 const json = flags.has("--json");
 const watch = flags.has("--watch");
 const checkBytecode = flags.has("--check-bytecode");
+const continueOnError = flags.has("--continue-on-error");
+const delayMs = Number(valueAfter("--delay-ms", "0"));
 const artifact = JSON.parse(readFileSync(resolve(deploymentPath), "utf8"));
 
 if (artifact.schema !== "flowmemory.deployment_artifact.v0") {
@@ -64,13 +66,27 @@ function verificationArgs(contract, apiKeyValue) {
   return result;
 }
 
+function redact(value) {
+  if (!apiKey) return value;
+  return value.replaceAll(apiKey, `<${apiKeyEnv}>`);
+}
+
+function redactArgs(commandArgs) {
+  return commandArgs.map((arg) => redact(arg));
+}
+
+function sleep(milliseconds) {
+  if (milliseconds <= 0) return;
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
+}
+
 function run(command, commandArgs) {
   const result = spawnSync(command, commandArgs, {
     cwd: process.cwd(),
     stdio: "inherit",
   });
   if (result.status !== 0) {
-    throw new Error(`${command} ${commandArgs.join(" ")} failed with exit code ${result.status ?? "unknown"}`);
+    throw new Error(`${command} ${redactArgs(commandArgs).join(" ")} failed with exit code ${result.status ?? "unknown"}`);
   }
 }
 
@@ -102,6 +118,8 @@ const plan = {
   productionReady: false,
   submit,
   checkBytecode,
+  continueOnError,
+  delayMs,
   apiKeyEnv,
   contractCount: artifact.contracts.length,
   commands: artifact.contracts.map((contract) => ({
@@ -119,7 +137,26 @@ if (json || !submit) {
 }
 
 if (submit) {
+  const failures = [];
   for (const contract of artifact.contracts) {
-    run("forge", verificationArgs(contract, apiKey));
+    try {
+      run("forge", verificationArgs(contract, apiKey));
+    } catch (error) {
+      failures.push({
+        name: contract.name,
+        address: contract.address,
+        error: redact(error instanceof Error ? error.message : String(error)),
+      });
+      if (!continueOnError) {
+        throw new Error(failures.at(-1).error);
+      }
+    }
+    sleep(delayMs);
+  }
+  if (failures.length > 0) {
+    const failure = new Error(`source verification completed with ${failures.length} failure(s)`);
+    failure.failures = failures;
+    console.error(JSON.stringify({ schema: "flowmemory.base_canary_source_verification_failures.v0", failures }, null, 2));
+    process.exitCode = 1;
   }
 }
