@@ -6,3 +6,5 @@ export * from "./flowpulse.js";
 export * from "./hashes.js";
 export * from "./merkle.js";
 export * from "./objects.js";
+export * from "./transactions.js";
+export * from "./wallet.js";

@@ -16,7 +16,16 @@
     "test": "node --test",
     "vectors": "node src/cli.js",
     "validate:vectors": "node src/validate-vectors.js",
-    "validate:local-alpha": "node src/validate-local-alpha-fixtures.js"
+    "validate:local-alpha": "node src/validate-local-alpha-fixtures.js",
+    "wallet:create": "node src/wallet-cli.js create",
+    "wallet:unlock": "node src/wallet-cli.js unlock",
+    "wallet:list": "node src/wallet-cli.js list",
+    "wallet:rotate": "node src/wallet-cli.js rotate",
+    "wallet:sign": "node src/wallet-cli.js sign",
+    "wallet:verify": "node src/wallet-cli.js verify",
+    "wallet:export-public": "node src/wallet-cli.js export-public",
+    "wallet:import-public": "node src/wallet-cli.js import-public",
+    "flowchain:full-smoke": "npm test && npm run validate:vectors"
   },
   "dependencies": {
     "@noble/hashes": "2.2.0",
