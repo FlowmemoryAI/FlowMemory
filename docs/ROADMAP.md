@@ -69,7 +69,7 @@ Status: implemented as fixture-first services plus generated launch-core state; 
 - A Base Sepolia reader path exists for explicit RPC URLs and explicit FlowPulse contract addresses; it rejects non-Base-Sepolia chain ids.
 - A guarded Base mainnet canary reader exists for explicit RPC URLs, explicit known canary addresses, and small explicit block ranges; it rejects non-Base-mainnet chain ids and marks output as canary-only.
 - A separate dashboard canary mode exists for committed Base canary reader output and deployment artifacts.
-- Source verification automation exists for the canary contract set, with real submission gated by `BASESCAN_API_KEY`.
+- Source verification automation exists for the canary contract set, and all current Base canary addresses are verified on BaseScan. Future redeploys still require a local `BASESCAN_API_KEY` for submission.
 - Base Sepolia deploy/read commands exist for the current V0 testnet contract set.
 - A Base mainnet V0 canary deployment has been performed for testing only and is documented under `docs/DEPLOYMENTS/`.
 - Runtime schema validation and generated fixture drift checks exist for launch-core outputs.
