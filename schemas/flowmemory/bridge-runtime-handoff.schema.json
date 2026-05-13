@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowmemory.local/schemas/flowmemory/bridge-runtime-handoff.schema.json",
+  "title": "FlowChainBridgeRuntimeHandoff",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "handoffId",
+    "generatedAt",
+    "mode",
+    "productionReady",
+    "localOnly",
+    "observations",
+    "credits",
+    "withdrawalIntents",
+    "replayProtection",
+    "runtimeIntake",
+    "workbenchTimeline",
+    "workbenchRecords",
+    "limitations"
+  ],
+  "properties": {
+    "schema": { "const": "flowmemory.bridge_runtime_handoff.v0" },
+    "handoffId": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "generatedAt": { "type": "string" },
+    "mode": { "type": "string", "enum": ["mock", "local-anvil", "base-sepolia", "base-mainnet-canary"] },
+    "productionReady": { "const": false },
+    "localOnly": { "const": true },
+    "observations": {
+      "type": "array",
+      "items": { "$ref": "bridge-observation.schema.json" }
+    },
+    "credits": {
+      "type": "array",
+      "items": { "$ref": "bridge-credit.schema.json" }
+    },
+    "withdrawalIntents": {
+      "type": "array",
+      "items": { "$ref": "bridge-withdrawal-intent.schema.json" }
+    },
+    "replayProtection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "replayKeys", "duplicateReplayKeys"],
+      "properties": {
+        "strategy": { "const": "source-chain-contract-tx-log-deposit" },
+        "replayKeys": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+          "uniqueItems": true
+        },
+        "duplicateReplayKeys": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "runtimeIntake": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "consumer", "expectedPath", "note"],
+      "properties": {
+        "status": { "const": "handoff_file" },
+        "consumer": { "const": "flowchain-runtime-agent" },
+        "expectedPath": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    },
+    "workbenchTimeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["phase", "status", "objectId", "title", "summary"],
+        "properties": {
+          "phase": {
+            "type": "string",
+            "enum": ["deposit_observed", "credit_pending", "credit_applied", "withdrawal_requested"]
+          },
+          "status": { "type": "string", "enum": ["observed", "pending", "applied", "requested"] },
+          "objectId": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+          "title": { "type": "string" },
+          "summary": { "type": "string" }
+        }
+      }
+    },
+    "workbenchRecords": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sectionKey", "id", "kind", "title", "summary", "status", "facts", "rawRef"],
+        "properties": {
+          "sectionKey": { "type": "string", "enum": ["transactions", "receipts", "finality", "rawJson"] },
+          "id": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+          "kind": { "type": "string" },
+          "title": { "type": "string" },
+          "summary": { "type": "string" },
+          "status": { "type": "string", "enum": ["observed", "pending", "verified"] },
+          "facts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["label", "value"],
+              "properties": {
+                "label": { "type": "string" },
+                "value": { "type": "string" }
+              }
+            }
+          },
+          "rawRef": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

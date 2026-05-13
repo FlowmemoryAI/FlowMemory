@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowmemory.local/schemas/flowmemory/bridge-credit-set.schema.json",
+  "title": "FlowChainBridgeCreditSet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "creditSetId", "generatedAt", "count", "credits", "productionReady"],
+  "properties": {
+    "schema": { "const": "flowmemory.bridge_credit_set.v0" },
+    "creditSetId": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "generatedAt": { "type": "string" },
+    "count": { "type": "integer", "minimum": 0 },
+    "credits": {
+      "type": "array",
+      "items": { "$ref": "bridge-credit.schema.json" }
+    },
+    "productionReady": { "const": false }
+  }
+}

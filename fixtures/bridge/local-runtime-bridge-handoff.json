@@ -1,0 +1,213 @@
+{
+  "schema": "flowmemory.bridge_runtime_handoff.v0",
+  "handoffId": "0xb8f818f1c45a864a7134b298b993952edda161824a4120c7716ce950fe63a2ca",
+  "generatedAt": "2026-05-13T00:00:00.000Z",
+  "mode": "mock",
+  "productionReady": false,
+  "localOnly": true,
+  "observations": [
+    {
+      "schema": "flowmemory.bridge_deposit_observation.v0",
+      "observationId": "0x0430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223c",
+      "replayKey": "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09",
+      "observedAt": "2026-05-13T00:00:00.000Z",
+      "mode": "mock",
+      "productionReady": false,
+      "deposit": {
+        "schema": "flowmemory.bridge_deposit.v0",
+        "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
+        "sourceChainId": 84532,
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+        "logIndex": 0,
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "20000000",
+        "sender": "0x4444444444444444444444444444444444444444",
+        "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "nonce": "1",
+        "metadataHash": "0x6666666666666666666666666666666666666666666666666666666666666666",
+        "status": "observed"
+      },
+      "guardrails": {
+        "explicitChainId": true,
+        "explicitContract": true,
+        "explicitBlockRange": false,
+        "noSecrets": true
+      }
+    }
+  ],
+  "credits": [
+    {
+      "schema": "flowmemory.bridge_credit.v0",
+      "creditId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+      "observationId": "0x0430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223c",
+      "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
+      "replayKey": "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09",
+      "source": {
+        "chainId": 84532,
+        "contract": "0x1111111111111111111111111111111111111111",
+        "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+        "logIndex": 0
+      },
+      "token": "0x3333333333333333333333333333333333333333",
+      "amount": "20000000",
+      "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+      "status": "applied",
+      "appliedAt": "2026-05-13T00:00:00.000Z",
+      "localOnly": true,
+      "productionReady": false
+    }
+  ],
+  "withdrawalIntents": [
+    {
+      "schema": "flowmemory.bridge_withdrawal_intent.v0",
+      "withdrawalIntentId": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
+      "creditId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+      "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
+      "sourceChainId": 84532,
+      "destinationChainId": 84532,
+      "token": "0x3333333333333333333333333333333333333333",
+      "amount": "20000000",
+      "flowchainAccount": "0x5555555555555555555555555555555555555555555555555555555555555555",
+      "baseRecipient": "0x4444444444444444444444444444444444444444",
+      "status": "requested",
+      "requestedAt": "2026-05-13T00:00:00.000Z",
+      "testMode": true,
+      "broadcast": false,
+      "releasePolicy": "test_record_only",
+      "productionReady": false
+    }
+  ],
+  "replayProtection": {
+    "strategy": "source-chain-contract-tx-log-deposit",
+    "replayKeys": [
+      "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09"
+    ],
+    "duplicateReplayKeys": []
+  },
+  "runtimeIntake": {
+    "status": "handoff_file",
+    "consumer": "flowchain-runtime-agent",
+    "expectedPath": "fixtures/bridge/local-runtime-bridge-handoff.json",
+    "note": "Runtime/control-plane bridge intake is not merged in this scope. Consume this file as the deterministic bridge credit handoff."
+  },
+  "workbenchTimeline": [
+    {
+      "phase": "deposit_observed",
+      "status": "observed",
+      "objectId": "0x0430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223c",
+      "title": "Deposit observed",
+      "summary": "Observed lockbox deposit 0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269 on chain 84532."
+    },
+    {
+      "phase": "credit_pending",
+      "status": "pending",
+      "objectId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+      "title": "Credit pending",
+      "summary": "20000000 test units queued for 0x5555555555555555555555555555555555555555555555555555555555555555."
+    },
+    {
+      "phase": "credit_applied",
+      "status": "applied",
+      "objectId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+      "title": "Credit applied",
+      "summary": "20000000 test units applied in local bridge smoke state."
+    },
+    {
+      "phase": "withdrawal_requested",
+      "status": "requested",
+      "objectId": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
+      "title": "Withdrawal requested",
+      "summary": "Test-mode local-to-Base withdrawal intent recorded with no broadcast or real release."
+    }
+  ],
+  "workbenchRecords": [
+    {
+      "sectionKey": "transactions",
+      "id": "0x0430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223c",
+      "kind": "Bridge deposit observation",
+      "title": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "summary": "Deposit 0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269 observed from mock.",
+      "status": "observed",
+      "facts": [
+        {
+          "label": "chain",
+          "value": "84532"
+        },
+        {
+          "label": "lockbox",
+          "value": "0x1111111111111111111111111111111111111111"
+        },
+        {
+          "label": "log index",
+          "value": "0"
+        },
+        {
+          "label": "amount",
+          "value": "20000000"
+        }
+      ],
+      "rawRef": "0x0430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223c"
+    },
+    {
+      "sectionKey": "receipts",
+      "id": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+      "kind": "Bridge credit",
+      "title": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+      "summary": "Credit applied for deposit 0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269.",
+      "status": "verified",
+      "facts": [
+        {
+          "label": "recipient",
+          "value": "0x5555555555555555555555555555555555555555555555555555555555555555"
+        },
+        {
+          "label": "amount",
+          "value": "20000000"
+        },
+        {
+          "label": "token",
+          "value": "0x3333333333333333333333333333333333333333"
+        },
+        {
+          "label": "replay key",
+          "value": "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09"
+        }
+      ],
+      "rawRef": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6"
+    },
+    {
+      "sectionKey": "transactions",
+      "id": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
+      "kind": "Bridge withdrawal intent",
+      "title": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
+      "summary": "Test-mode withdrawal intent recorded; no mainnet or real-funds release is broadcast.",
+      "status": "pending",
+      "facts": [
+        {
+          "label": "base recipient",
+          "value": "0x4444444444444444444444444444444444444444"
+        },
+        {
+          "label": "amount",
+          "value": "20000000"
+        },
+        {
+          "label": "broadcast",
+          "value": "false"
+        },
+        {
+          "label": "policy",
+          "value": "test_record_only"
+        }
+      ],
+      "rawRef": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751"
+    }
+  ],
+  "limitations": [
+    "Bridge objects are for mock, local Anvil, and Base Sepolia test validation by default.",
+    "No production bridge readiness, audited security, or trustless finality is claimed.",
+    "Withdrawal intents are test-mode records only and do not broadcast releases.",
+    "RPC URLs and private keys are never written to bridge artifacts."
+  ]
+}
