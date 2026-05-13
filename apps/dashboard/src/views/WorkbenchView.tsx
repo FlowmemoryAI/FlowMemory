@@ -1,12 +1,18 @@
 import { useMemo, useState } from "react";
-import { Activity, Database, Network, Search, Server, Terminal } from "lucide-react";
+import { Activity, Database, Network, Play, RefreshCw, Search, Server, Terminal } from "lucide-react";
 import { EmptyState } from "../components/EmptyState";
 import { HashValue } from "../components/HashValue";
 import { ProvenanceLine } from "../components/ProvenanceLine";
 import { SectionHeader } from "../components/SectionHeader";
 import { StatusBadge } from "../components/StatusBadge";
 import type { DashboardData, DashboardStatus } from "../data/types";
-import { WORKBENCH_SECTIONS, type WorkbenchRecord, type WorkbenchSectionKey, type WorkbenchSnapshot } from "../data/workbench";
+import {
+  WORKBENCH_SECTIONS,
+  type WorkbenchAction,
+  type WorkbenchRecord,
+  type WorkbenchSectionKey,
+  type WorkbenchSnapshot,
+} from "../data/workbench";
 
 const DEFAULT_SECTION: WorkbenchSectionKey = "blocks";
 
@@ -31,9 +37,41 @@ function recordMatches(record: WorkbenchRecord, query: string): boolean {
   return JSON.stringify(record).toLowerCase().includes(normalized);
 }
 
-export function WorkbenchView({ data, workbench }: { data: DashboardData; workbench: WorkbenchSnapshot }) {
+async function runRpcAction(workbench: WorkbenchSnapshot, action: WorkbenchAction): Promise<string> {
+  const response = await fetch(`${workbench.controlPlane.url}/rpc`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: action.key,
+      method: action.method,
+      params: action.params,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`.trim());
+  }
+  const payload = (await response.json()) as unknown;
+  if (payload && typeof payload === "object" && "error" in payload) {
+    const error = payload as { error?: { message?: string } };
+    throw new Error(error.error?.message ?? "Control-plane action failed.");
+  }
+  return JSON.stringify(payload);
+}
+
+export function WorkbenchView({
+  data,
+  workbench,
+  onRefresh,
+}: {
+  data: DashboardData;
+  workbench: WorkbenchSnapshot;
+  onRefresh?: () => void;
+}) {
   const [activeSection, setActiveSection] = useState<WorkbenchSectionKey>(DEFAULT_SECTION);
   const [query, setQuery] = useState("");
+  const [actionResult, setActionResult] = useState<string | null>(null);
+  const [runningAction, setRunningAction] = useState<string | null>(null);
   const activeDefinition = WORKBENCH_SECTIONS.find((section) => section.key === activeSection) ?? WORKBENCH_SECTIONS[0];
   const activeRecords = workbench.sections[activeSection] ?? [];
   const filteredRecords = useMemo(
@@ -41,6 +79,28 @@ export function WorkbenchView({ data, workbench }: { data: DashboardData; workbe
     [activeRecords, query],
   );
   const sourceStatus: DashboardStatus = workbench.source === "control-plane" ? "verified" : "stale";
+  const handleAction = async (action: WorkbenchAction) => {
+    if (action.state !== "available") {
+      return;
+    }
+
+    if (action.key === "refresh") {
+      setActionResult("Refresh requested. Re-probing local API and synced fixtures.");
+      onRefresh?.();
+      return;
+    }
+
+    setRunningAction(action.key);
+    setActionResult(null);
+    try {
+      const result = await runRpcAction(workbench, action);
+      setActionResult(`${action.label} returned ${result}`);
+    } catch (error) {
+      setActionResult(error instanceof Error ? error.message : "Control-plane action failed.");
+    } finally {
+      setRunningAction(null);
+    }
+  };
 
   return (
     <div className="view-stack">
@@ -115,6 +175,38 @@ export function WorkbenchView({ data, workbench }: { data: DashboardData; workbe
         </section>
       ) : null}
 
+      <section className="panel workbench-actions-panel">
+        <div className="panel-heading">
+          <div>
+            <Play size={18} aria-hidden="true" />
+            <h2>Local actions</h2>
+          </div>
+          <span>API-gated</span>
+        </div>
+        <div className="workbench-actions-grid">
+          {workbench.actions.map((action) => (
+            <article key={action.key}>
+              <div>
+                <StatusBadge status={action.state === "available" ? "verified" : "pending"} compact />
+                <strong>{action.label}</strong>
+                <small>{action.detail}</small>
+                <code>{action.method}</code>
+              </div>
+              <button
+                className="button"
+                type="button"
+                disabled={action.state !== "available" || runningAction === action.key}
+                onClick={() => void handleAction(action)}
+              >
+                {action.key === "refresh" ? <RefreshCw size={15} aria-hidden="true" /> : <Play size={15} aria-hidden="true" />}
+                {runningAction === action.key ? "Running" : action.state === "available" ? "Run" : "Missing"}
+              </button>
+            </article>
+          ))}
+        </div>
+        {actionResult ? <p className="workbench-action-result">{actionResult}</p> : null}
+      </section>
+
       <section className="metric-grid" aria-label="Workbench coverage">
         <article className="metric-tile">
           <span>Data source</span>
@@ -154,11 +246,19 @@ export function WorkbenchView({ data, workbench }: { data: DashboardData; workbe
           </div>
         </article>
         <article className="metric-tile">
-          <span>Open challenges</span>
-          <strong>{workbench.sections.challenges.length}</strong>
+          <span>Accounts</span>
+          <strong>{workbench.sections.accounts.length + workbench.sections.wallets.length}</strong>
           <div>
-            <StatusBadge status={workbench.sections.challenges.length > 0 ? "pending" : "observed"} compact />
-            <small>API-ready view</small>
+            <StatusBadge status={workbench.sections.accounts.length > 0 ? "verified" : "pending"} compact />
+            <small>public records</small>
+          </div>
+        </article>
+        <article className="metric-tile">
+          <span>Bridge lane</span>
+          <strong>{workbench.sections.bridge.length}</strong>
+          <div>
+            <StatusBadge status={workbench.sections.bridge.length > 0 ? "observed" : "pending"} compact />
+            <small>test-only</small>
           </div>
         </article>
       </section>

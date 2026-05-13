@@ -3,6 +3,7 @@ import type { DashboardData, DashboardStatus, Provenance, SourceSubsystem } from
 export const DEFAULT_CONTROL_PLANE_URL = "http://127.0.0.1:8787";
 export const WORKBENCH_DEVNET_STATE_PATH = "/data/flowchain-local-devnet-state.json";
 export const WORKBENCH_DEVNET_DASHBOARD_STATE_PATH = "/data/flowchain-local-devnet-dashboard-state.json";
+export const WORKBENCH_BRIDGE_DEPOSIT_PATH = "/data/flowchain-bridge-test-deposit.json";
 
 const FIXTURE_CHAIN_CONTEXT = "flowchain-private-local-testnet";
 const CONTROL_PLANE_TIMEOUT_MS = 900;
@@ -10,7 +11,13 @@ const CONTROL_PLANE_TIMEOUT_MS = 900;
 export type WorkbenchSource = "control-plane" | "fixture-fallback";
 export type WorkbenchSectionKey =
   | "blocks"
+  | "peers"
   | "transactions"
+  | "mempool"
+  | "accounts"
+  | "balances"
+  | "faucetEvents"
+  | "wallets"
   | "rootfields"
   | "agents"
   | "models"
@@ -21,6 +28,7 @@ export type WorkbenchSectionKey =
   | "verifierReports"
   | "challenges"
   | "finality"
+  | "bridge"
   | "provenance"
   | "hardwareSignals"
   | "rawJson";
@@ -56,6 +64,7 @@ export interface ControlPlaneProbe {
   error?: string;
   health?: unknown;
   state?: unknown;
+  rpc?: Record<string, unknown>;
 }
 
 export interface WorkbenchNodeStatus {
@@ -72,20 +81,32 @@ export interface WorkbenchSetupStep {
   detail: string;
 }
 
+export interface WorkbenchAction {
+  key: "refresh" | "faucet" | "sampleTransaction" | "bridgeDeposit";
+  label: string;
+  method: string;
+  state: "available" | "missing";
+  detail: string;
+  params: UnknownRecord;
+}
+
 export interface WorkbenchSnapshot {
   source: WorkbenchSource;
   generatedAt: string;
   controlPlane: ControlPlaneProbe;
   node: WorkbenchNodeStatus;
   setupSteps: WorkbenchSetupStep[];
+  actions: WorkbenchAction[];
   sections: Record<WorkbenchSectionKey, WorkbenchRecord[]>;
   loadIssues: string[];
   raw: {
     dashboard: DashboardData;
     devnetState: unknown | null;
     devnetDashboardState: unknown | null;
+    bridgeDeposit: unknown | null;
     controlPlaneHealth: unknown | null;
     controlPlaneState: unknown | null;
+    controlPlaneRpc: Record<string, unknown> | null;
   };
 }
 
@@ -96,91 +117,133 @@ export const WORKBENCH_SECTIONS: WorkbenchSectionDefinition[] = [
     key: "blocks",
     label: "Blocks",
     detail: "Private/local chain blocks, state roots, parent hashes, and receipt counts.",
-    expectedEndpoint: "GET /blocks",
+    expectedEndpoint: "POST /rpc block_list",
+  },
+  {
+    key: "peers",
+    label: "Peers",
+    detail: "Local node peer rows when the runtime exports peer or LAN node state.",
+    expectedEndpoint: "POST /rpc peer_list",
   },
   {
     key: "transactions",
     label: "Transactions",
     detail: "Smoke-flow transaction ids and receipt application status.",
-    expectedEndpoint: "GET /transactions",
+    expectedEndpoint: "POST /rpc transaction_list",
+  },
+  {
+    key: "mempool",
+    label: "Mempool",
+    detail: "Pending local transactions waiting for deterministic block production.",
+    expectedEndpoint: "POST /rpc mempool_list",
+  },
+  {
+    key: "accounts",
+    label: "Accounts",
+    detail: "Local operator and agent account records. Browser output never includes private keys.",
+    expectedEndpoint: "POST /rpc account_list",
+  },
+  {
+    key: "balances",
+    label: "Balances",
+    detail: "No-value local balance or credit rows when explicitly exported by the runtime.",
+    expectedEndpoint: "POST /rpc balance_list",
+  },
+  {
+    key: "faucetEvents",
+    label: "Faucet Events",
+    detail: "Local faucet request history when a no-value faucet endpoint exists.",
+    expectedEndpoint: "POST /rpc faucet_event_list",
+  },
+  {
+    key: "wallets",
+    label: "Wallet Public Accounts",
+    detail: "Public wallet/operator references only. Signing material stays outside the browser.",
+    expectedEndpoint: "POST /rpc wallet_account_list",
   },
   {
     key: "rootfields",
     label: "Rootfields",
     detail: "Rootfield namespaces, owners, compact roots, schema hashes, and active state.",
-    expectedEndpoint: "GET /rootfields",
+    expectedEndpoint: "POST /rpc rootfield_list",
   },
   {
     key: "agents",
     label: "Agents",
     detail: "Operators, workers, verifier identities, and observed contract actors.",
-    expectedEndpoint: "GET /agents",
+    expectedEndpoint: "POST /rpc agent_list",
   },
   {
     key: "models",
     label: "Models",
     detail: "ModelPassport objects when the private testnet runtime exports them.",
-    expectedEndpoint: "GET /models",
+    expectedEndpoint: "POST /rpc model_list",
   },
   {
     key: "receipts",
     label: "Work Receipts",
     detail: "Work receipts from the launch fixture and local devnet handoff.",
-    expectedEndpoint: "GET /receipts",
+    expectedEndpoint: "POST /rpc work_receipt_list",
   },
   {
     key: "memoryCells",
     label: "Memory Cells",
     detail: "Native MemoryCell records or rootfield-bundle projections while the API is pending.",
-    expectedEndpoint: "GET /memory-cells",
+    expectedEndpoint: "POST /rpc memory_cell_list",
   },
   {
     key: "artifacts",
     label: "Artifacts",
     detail: "Artifact availability commitments and receipt-linked artifact URIs.",
-    expectedEndpoint: "GET /artifacts",
+    expectedEndpoint: "POST /rpc artifact_availability_list",
   },
   {
     key: "verifierModules",
     label: "Verifier Modules",
     detail: "Verifier module identities or derived module projections from local reports.",
-    expectedEndpoint: "GET /verifier-modules",
+    expectedEndpoint: "POST /rpc verifier_module_list",
   },
   {
     key: "verifierReports",
     label: "Verifier Reports",
     detail: "Verifier reports, report digests, policies, checks, and reason codes.",
-    expectedEndpoint: "GET /verifier-reports",
+    expectedEndpoint: "POST /rpc verifier_report_list",
   },
   {
     key: "challenges",
     label: "Challenges",
     detail: "Challenge lifecycle objects once the runtime/control-plane exports them.",
-    expectedEndpoint: "GET /challenges",
+    expectedEndpoint: "POST /rpc challenge_list",
   },
   {
     key: "finality",
     label: "Finality",
     detail: "Local finality distance, anchor placeholders, and latest finalized state.",
-    expectedEndpoint: "GET /finality",
+    expectedEndpoint: "POST /rpc finality_list",
+  },
+  {
+    key: "bridge",
+    label: "Bridge Test Lane",
+    detail: "Test-only bridge deposit, credit, and withdrawal rows. This is not a production bridge surface.",
+    expectedEndpoint: "POST /rpc bridge_deposit_list",
   },
   {
     key: "provenance",
     label: "Provenance / Source",
     detail: "Source paths, API probe result, and fixture fallback boundary.",
-    expectedEndpoint: "GET /raw",
+    expectedEndpoint: "POST /rpc provenance_get",
   },
   {
     key: "hardwareSignals",
     label: "Hardware Signals",
     detail: "FlowRouter, gateway, and low-bandwidth sidecar heartbeat/control-signal records.",
-    expectedEndpoint: "GET /hardware-signals",
+    expectedEndpoint: "POST /rpc hardware_signal_list",
   },
   {
     key: "rawJson",
     label: "Raw JSON",
     detail: "Loaded dashboard, devnet, and control-plane payloads for direct inspection.",
-    expectedEndpoint: "GET /raw",
+    expectedEndpoint: "POST /rpc raw_json_get",
   },
 ];
 
@@ -215,6 +278,39 @@ function collectionFrom(root: unknown, keys: string[]): UnknownRecord[] {
   return [];
 }
 
+function collectionFromRoots(roots: unknown[], keys: string[]): UnknownRecord[] {
+  for (const root of roots) {
+    const values = collectionFrom(root, keys);
+    if (values.length > 0) {
+      return values;
+    }
+  }
+
+  return [];
+}
+
+function resultRecord(value: unknown): UnknownRecord | null {
+  if (isRecord(value) && isRecord(value.result)) {
+    return value.result;
+  }
+
+  return isRecord(value) ? value : null;
+}
+
+function rpcResult(controlPlane: ControlPlaneProbe, id: string): UnknownRecord | null {
+  return resultRecord(controlPlane.rpc?.[id]);
+}
+
+function rpcCollection(controlPlane: ControlPlaneProbe, id: string, keys: string[]): UnknownRecord[] {
+  const result = rpcResult(controlPlane, id);
+  return result ? collectionFrom(result, keys) : [];
+}
+
+function rpcRaw(controlPlane: ControlPlaneProbe, id: string): unknown | null {
+  const result = rpcResult(controlPlane, id);
+  return result?.raw ?? result?.data ?? null;
+}
+
 function text(value: unknown, fallback = "not recorded"): string {
   if (value === null || value === undefined || value === "") {
     return fallback;
@@ -246,16 +342,16 @@ function stringArray(value: unknown): string[] {
 
 function statusFrom(value: unknown, fallback: DashboardStatus = "observed"): DashboardStatus {
   const normalized = text(value, fallback).toLowerCase();
-  if (normalized === "applied" || normalized === "success" || normalized === "active") {
+  if (normalized === "applied" || normalized === "success" || normalized === "active" || normalized === "available") {
     return "verified";
   }
-  if (normalized === "finalized") {
+  if (normalized === "finalized" || normalized === "local-finalized") {
     return "finalized";
   }
-  if (normalized === "failed" || normalized === "invalid" || normalized === "reverted") {
+  if (normalized === "failed" || normalized === "invalid" || normalized === "reverted" || normalized === "local-rejected") {
     return "failed";
   }
-  if (normalized === "pending" || normalized === "local-placeholder") {
+  if (normalized === "pending" || normalized === "local-placeholder" || normalized === "local-pending" || normalized === "not-opened" || normalized === "not_opened") {
     return "pending";
   }
   if (normalized === "stale" || normalized === "not-detected") {
@@ -381,6 +477,27 @@ async function fetchJsonWithTimeout(url: string, timeoutMs: number): Promise<unk
   }
 }
 
+async function postJsonWithTimeout(url: string, body: unknown, timeoutMs: number): Promise<unknown> {
+  const controller = new AbortController();
+  const timeout = globalThis.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      cache: "no-store",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`.trim());
+    }
+    return response.json();
+  } finally {
+    globalThis.clearTimeout(timeout);
+  }
+}
+
 async function fetchOptionalJson(path: string): Promise<{ value: unknown | null; error?: string }> {
   try {
     return { value: await fetchJsonWithTimeout(path, CONTROL_PLANE_TIMEOUT_MS) };
@@ -392,27 +509,69 @@ async function fetchOptionalJson(path: string): Promise<{ value: unknown | null;
   }
 }
 
+async function fetchControlPlaneRpc(url: string): Promise<Record<string, unknown>> {
+  const requests = [
+    { jsonrpc: "2.0", id: "chainStatus", method: "chain_status" },
+    { jsonrpc: "2.0", id: "devnetState", method: "devnet_state", params: { includeBlocks: true } },
+    { jsonrpc: "2.0", id: "blocks", method: "block_list", params: { includeTransactions: true, limit: 100 } },
+    { jsonrpc: "2.0", id: "transactions", method: "transaction_list", params: { limit: 100 } },
+    { jsonrpc: "2.0", id: "rootfields", method: "rootfield_list", params: { limit: 100 } },
+    { jsonrpc: "2.0", id: "agents", method: "agent_list", params: { limit: 100 } },
+    { jsonrpc: "2.0", id: "models", method: "model_list", params: { limit: 100 } },
+    { jsonrpc: "2.0", id: "workReceipts", method: "work_receipt_list", params: { limit: 100 } },
+    { jsonrpc: "2.0", id: "receipts", method: "receipt_list", params: { limit: 100 } },
+    { jsonrpc: "2.0", id: "artifacts", method: "artifact_availability_list", params: { limit: 100 } },
+    { jsonrpc: "2.0", id: "verifierModules", method: "verifier_module_list", params: { limit: 100 } },
+    { jsonrpc: "2.0", id: "verifierReports", method: "verifier_report_list", params: { limit: 100 } },
+    { jsonrpc: "2.0", id: "memoryCells", method: "memory_cell_list", params: { limit: 100 } },
+    { jsonrpc: "2.0", id: "challenges", method: "challenge_list", params: { limit: 100 } },
+    { jsonrpc: "2.0", id: "finality", method: "finality_list", params: { limit: 100 } },
+    { jsonrpc: "2.0", id: "rawDevnet", method: "raw_json_get", params: { source: "devnet" } },
+    { jsonrpc: "2.0", id: "rawTxFixtures", method: "raw_json_get", params: { source: "txFixtures" } },
+  ];
+  const response = await postJsonWithTimeout(`${url}/rpc`, requests, CONTROL_PLANE_TIMEOUT_MS);
+  if (!Array.isArray(response)) {
+    throw new Error("control-plane RPC batch did not return an array");
+  }
+
+  return Object.fromEntries(
+    response
+      .filter((entry): entry is UnknownRecord => isRecord(entry) && (typeof entry.id === "string" || typeof entry.id === "number"))
+      .map((entry) => [String(entry.id), entry]),
+  );
+}
+
 async function probeControlPlane(): Promise<ControlPlaneProbe> {
   const url = getControlPlaneUrl();
   const checkedAt = new Date().toISOString();
-  const endpoints = ["GET /health", "GET /state"];
+  const endpoints = ["GET /health", "GET /state", "POST /rpc"];
 
   try {
     const health = await fetchJsonWithTimeout(`${url}/health`, CONTROL_PLANE_TIMEOUT_MS);
     let state: unknown | undefined;
+    let rpc: Record<string, unknown> | undefined;
+    const errors: string[] = [];
 
     try {
       state = await fetchJsonWithTimeout(`${url}/state`, CONTROL_PLANE_TIMEOUT_MS);
     } catch (error) {
+      errors.push(`state endpoint was not loaded: ${error instanceof Error ? error.message : "unknown state error"}`);
+    }
+
+    try {
+      rpc = await fetchControlPlaneRpc(url);
+    } catch (error) {
+      errors.push(`RPC batch was not loaded: ${error instanceof Error ? error.message : "unknown RPC error"}`);
+    }
+
+    if (state === undefined && rpc === undefined) {
       return {
         url,
         status: "available",
         checkedAt,
         endpoints,
         health,
-        error: `Health endpoint responded, but state endpoint was not loaded: ${
-          error instanceof Error ? error.message : "unknown state error"
-        }`,
+        error: `Health endpoint responded, but no state payload was loaded: ${errors.join(" / ")}`,
       };
     }
 
@@ -423,6 +582,8 @@ async function probeControlPlane(): Promise<ControlPlaneProbe> {
       endpoints,
       health,
       state,
+      rpc,
+      error: errors.length > 0 ? errors.join(" / ") : undefined,
     };
   } catch (error) {
     return {
@@ -1001,6 +1162,375 @@ function buildHardwareSignalRecords(data: DashboardData, devnetState: unknown): 
   return [...nativeSignals, ...dashboardSignals];
 }
 
+function scalarFacts(record: UnknownRecord, preferred: string[] = []): WorkbenchFact[] {
+  const facts: WorkbenchFact[] = [];
+  const seen = new Set<string>();
+  const add = (key: string, value: unknown) => {
+    if (seen.has(key) || value === undefined || value === null || typeof value === "object") {
+      return;
+    }
+    facts.push({ label: key.replace(/([A-Z])/g, " $1").toLowerCase(), value: text(value) });
+    seen.add(key);
+  };
+
+  preferred.forEach((key) => add(key, record[key]));
+  Object.entries(record).forEach(([key, value]) => add(key, value));
+  return facts.slice(0, 6);
+}
+
+function titleFromRecord(record: UnknownRecord, fallback: string, keys: string[]): string {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "string" || typeof value === "number") {
+      return String(value);
+    }
+  }
+  return fallback;
+}
+
+function preferRpcRecords(fallback: WorkbenchRecord[], rpcRecords: WorkbenchRecord[]): WorkbenchRecord[] {
+  return rpcRecords.length > 0 ? rpcRecords : fallback;
+}
+
+function buildRpcGenericRecords(
+  controlPlane: ControlPlaneProbe,
+  id: string,
+  keys: string[],
+  kind: string,
+  primaryIdKey: string,
+): WorkbenchRecord[] {
+  return rpcCollection(controlPlane, id, keys).map((record, index) => {
+    const title = titleFromRecord(record, `${kind.toLowerCase()}:${index + 1}`, [
+      primaryIdKey,
+      "id",
+      "objectId",
+      "receiptId",
+      "reportId",
+      "rootfieldId",
+      "transactionId",
+      "txHash",
+    ]);
+
+    return makeLocalRecord(
+      "devnet",
+      controlPlane.url,
+      {
+        id: title,
+        kind,
+        title,
+        summary: text(record.extensionPoint ?? record.summary ?? record.schema, `Loaded from ${id} control-plane RPC response.`),
+        status: statusFrom(record.status ?? record.sourceStatus ?? record.finalityStatus, "observed"),
+        facts: scalarFacts(record, [primaryIdKey, "rootfieldId", "status", "source", "localOnly", "schema"]),
+        raw: record,
+      },
+      controlPlane.checkedAt,
+    );
+  });
+}
+
+function buildRpcBlockRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
+  return rpcCollection(controlPlane, "blocks", ["blocks"]).map((block, index) => {
+    const blockNumber = text(block.blockNumber, `${index + 1}`);
+    return makeLocalRecord(
+      "devnet",
+      controlPlane.url,
+      {
+        id: text(block.blockHash, `block:${blockNumber}`),
+        kind: "API Block",
+        title: `Block ${blockNumber}`,
+        summary: `${stringArray(block.txIds).length} transactions and ${text(block.receiptCount, "0")} receipts from control-plane block_list.`,
+        status: "finalized",
+        facts: [
+          { label: "block hash", value: text(block.blockHash) },
+          { label: "parent hash", value: text(block.parentHash) },
+          { label: "state root", value: text(block.stateRoot) },
+          { label: "source", value: text(block.source) },
+          { label: "transactions", value: stringArray(block.txIds).length.toString() },
+          { label: "receipts", value: text(block.receiptCount, "0") },
+        ],
+        raw: block,
+      },
+      controlPlane.checkedAt,
+    );
+  });
+}
+
+function buildRpcTransactionRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
+  return rpcCollection(controlPlane, "transactions", ["transactions"]).map((transaction) =>
+    makeLocalRecord(
+      "devnet",
+      controlPlane.url,
+      {
+        id: text(transaction.transactionId ?? transaction.txHash),
+        kind: "API Transaction",
+        title: text(transaction.txHash ?? transaction.transactionId),
+        summary: `${text(transaction.type, "local")} transaction is ${text(transaction.status, "unknown")} from ${text(transaction.source, "control-plane")}.`,
+        status: statusFrom(transaction.status, "observed"),
+        facts: [
+          { label: "block", value: text(transaction.blockNumber) },
+          { label: "tx index", value: text(transaction.transactionIndex) },
+          { label: "type", value: text(transaction.type) },
+          { label: "source", value: text(transaction.source) },
+          { label: "local only", value: text(transaction.localOnly) },
+        ],
+        raw: transaction,
+      },
+      controlPlane.checkedAt,
+    ),
+  );
+}
+
+function buildPeerRecords(controlPlane: ControlPlaneProbe, devnetState: unknown): WorkbenchRecord[] {
+  const peers = [
+    ...rpcCollection(controlPlane, "peers", ["peers", "nodes"]),
+    ...collectionFromRoots([devnetState, controlPlane.state], ["peers", "peerState", "networkPeers", "nodes"]),
+  ];
+
+  return peers.map((peer, index) =>
+    makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id: text(peer.peerId ?? peer.nodeId ?? peer.id, `peer:${index + 1}`),
+      kind: "Peer",
+      title: text(peer.peerId ?? peer.nodeId ?? peer.id, `Peer ${index + 1}`),
+      summary: text(peer.summary ?? peer.address ?? peer.transport, "Peer exported by local runtime state."),
+      status: statusFrom(peer.status ?? peer.state, "observed"),
+      facts: scalarFacts(peer, ["peerId", "nodeId", "address", "transport", "lastSeenAt", "status"]),
+      raw: peer,
+    }),
+  );
+}
+
+function buildMempoolRecords(devnetState: unknown): WorkbenchRecord[] {
+  return collectionFrom(devnetState, ["pendingTxs", "mempool", "pendingTransactions"]).map((transaction, index) =>
+    makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id: text(transaction.txId ?? transaction.transactionId ?? transaction.txHash, `pending:${index + 1}`),
+      kind: "Mempool transaction",
+      title: text(transaction.txHash ?? transaction.txId ?? transaction.transactionId, `Pending transaction ${index + 1}`),
+      summary: text(transaction.summary ?? transaction.type, "Pending local transaction waiting for block production."),
+      status: statusFrom(transaction.status, "pending"),
+      facts: scalarFacts(transaction, ["type", "from", "to", "rootfieldId", "createdAt", "status"]),
+      raw: transaction,
+    }),
+  );
+}
+
+function buildAccountRecords(devnetState: unknown): WorkbenchRecord[] {
+  const agentAccounts = collectionFrom(devnetState, ["agentAccounts", "accounts", "publicAccounts"]).map((account, index) =>
+    makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id: text(account.agentId ?? account.accountId ?? account.id, `account:${index + 1}`),
+      kind: "AgentAccount",
+      title: text(account.agentId ?? account.accountId ?? account.id, `Account ${index + 1}`),
+      summary: `Controller ${text(account.controller ?? account.owner)}; private signing material is not present in browser state.`,
+      status: account.active === false ? "stale" : statusFrom(account.status, "verified"),
+      facts: scalarFacts(account, ["controller", "modelPassportId", "memoryRoot", "rootfieldId", "active"]),
+      raw: account,
+    }),
+  );
+
+  const operatorRefs = collectionFrom(devnetState, ["operatorKeyReferences"]).map((reference, index) =>
+    makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id: text(reference.operatorId ?? reference.keyReferenceId, `operator:${index + 1}`),
+      kind: "Operator public reference",
+      title: text(reference.keyReferenceId ?? reference.operatorId, `Operator reference ${index + 1}`),
+      summary: text(reference.secretMaterialBoundary, "Secret material is not stored in dashboard or handoff output."),
+      status: "verified",
+      facts: scalarFacts(reference, ["operatorId", "workerKeyId", "verifierKeyId", "signatureScheme", "publicKeyHint"]),
+      raw: reference,
+    }),
+  );
+
+  return [...agentAccounts, ...operatorRefs];
+}
+
+function buildBalanceRecords(devnetState: unknown): WorkbenchRecord[] {
+  const balances = collectionFrom(devnetState, ["balances", "accountBalances", "ledgerBalances", "credits"]).map((balance, index) =>
+    makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id: text(balance.accountId ?? balance.owner ?? balance.id, `balance:${index + 1}`),
+      kind: "Local balance row",
+      title: text(balance.accountId ?? balance.owner ?? balance.id, `Balance row ${index + 1}`),
+      summary: text(balance.summary ?? balance.asset, "No-value local balance or credit row."),
+      status: statusFrom(balance.status, "observed"),
+      facts: scalarFacts(balance, ["accountId", "asset", "amount", "credit", "status", "source"]),
+      raw: balance,
+    }),
+  );
+
+  if (balances.length > 0) {
+    return balances;
+  }
+
+  const config = isRecord(devnetState) && isRecord(devnetState.config) ? devnetState.config : null;
+  if (config?.noValue === true) {
+    return [
+      makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+        id: "no-value-balance-boundary",
+        kind: "Balance boundary",
+        title: "No value-bearing balances",
+        summary: "The current private/local devnet state is marked no-value; no real funds, token balances, gas, rewards, or staking ledger is exposed.",
+        status: "unsupported",
+        facts: [
+          { label: "chain id", value: text(devnetState && isRecord(devnetState) ? devnetState.chainId : null) },
+          { label: "no value", value: "true" },
+          { label: "source", value: "local devnet config" },
+        ],
+        raw: config,
+      }),
+    ];
+  }
+
+  return [];
+}
+
+function buildFaucetEventRecords(devnetState: unknown): WorkbenchRecord[] {
+  return collectionFrom(devnetState, ["faucetEvents", "faucetRequests", "faucetClaims"]).map((event, index) =>
+    makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id: text(event.eventId ?? event.requestId ?? event.id, `faucet:${index + 1}`),
+      kind: "Faucet event",
+      title: text(event.requestId ?? event.eventId ?? event.id, `Faucet event ${index + 1}`),
+      summary: text(event.summary ?? event.reason, "Local no-value faucet event."),
+      status: statusFrom(event.status, "observed"),
+      facts: scalarFacts(event, ["accountId", "amount", "asset", "createdAt", "status"]),
+      raw: event,
+    }),
+  );
+}
+
+function buildWalletRecords(devnetState: unknown): WorkbenchRecord[] {
+  const walletRows = collectionFrom(devnetState, ["walletPublicAccounts", "wallets", "publicWallets"]).map((wallet, index) =>
+    makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id: text(wallet.address ?? wallet.accountId ?? wallet.id, `wallet:${index + 1}`),
+      kind: "Wallet public account",
+      title: text(wallet.address ?? wallet.accountId ?? wallet.id, `Wallet ${index + 1}`),
+      summary: "Public account metadata only; signing and private-key handling stay outside this browser app.",
+      status: statusFrom(wallet.status, "observed"),
+      facts: scalarFacts(wallet, ["address", "accountId", "role", "keyReferenceId", "status"]),
+      raw: wallet,
+    }),
+  );
+
+  const keyRefs = collectionFrom(devnetState, ["operatorKeyReferences"]).map((reference, index) =>
+    makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id: text(reference.keyReferenceId, `wallet-reference:${index + 1}`),
+      kind: "Operator key reference",
+      title: text(reference.operatorId ?? reference.keyReferenceId, `Operator public key ${index + 1}`),
+      summary: text(reference.publicKeyHint, "Public key hint only; no private key or seed phrase is present."),
+      status: "verified",
+      facts: scalarFacts(reference, ["operatorId", "workerKeyId", "verifierKeyId", "signatureScheme", "secretMaterialBoundary"]),
+      raw: reference,
+    }),
+  );
+
+  return [...walletRows, ...keyRefs];
+}
+
+function buildBridgeRecords(devnetState: unknown, bridgeDeposit: unknown | null): WorkbenchRecord[] {
+  const bridgeRows = collectionFrom(devnetState, [
+    "bridgeDeposits",
+    "bridgeCredits",
+    "bridgeWithdrawals",
+    "bridgeEvents",
+    "bridgeObservations",
+  ]).map((bridgeObject, index) =>
+    makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id: text(bridgeObject.depositId ?? bridgeObject.creditId ?? bridgeObject.withdrawalId ?? bridgeObject.id, `bridge:${index + 1}`),
+      kind: text(bridgeObject.kind ?? bridgeObject.type, "Bridge lifecycle object"),
+      title: text(bridgeObject.depositId ?? bridgeObject.creditId ?? bridgeObject.withdrawalId ?? bridgeObject.id, `Bridge object ${index + 1}`),
+      summary: text(bridgeObject.summary ?? bridgeObject.status, "Local/test bridge lifecycle row from runtime state."),
+      status: statusFrom(bridgeObject.status, "observed"),
+      facts: scalarFacts(bridgeObject, ["sourceChainId", "txHash", "amount", "sender", "flowchainRecipient", "status"]),
+      raw: bridgeObject,
+    }),
+  );
+
+  if (isRecord(bridgeDeposit)) {
+    bridgeRows.push(
+      makeRecord("devnet", WORKBENCH_BRIDGE_DEPOSIT_PATH, {
+        id: text(bridgeDeposit.depositId),
+        kind: "Test bridge deposit",
+        title: text(bridgeDeposit.depositId),
+        summary: "Deterministic Base Sepolia mock deposit for local bridge inspection only; not a production bridge or real-funds workflow.",
+        status: statusFrom(bridgeDeposit.status, "observed"),
+        facts: [
+          { label: "source chain", value: text(bridgeDeposit.sourceChainId) },
+          { label: "tx hash", value: text(bridgeDeposit.txHash) },
+          { label: "token", value: text(bridgeDeposit.token) },
+          { label: "amount", value: text(bridgeDeposit.amount) },
+          { label: "sender", value: text(bridgeDeposit.sender) },
+          { label: "recipient", value: text(bridgeDeposit.flowchainRecipient) },
+        ],
+        raw: bridgeDeposit,
+      }),
+    );
+  }
+
+  return bridgeRows;
+}
+
+function advertisedText(controlPlane: ControlPlaneProbe): string {
+  return JSON.stringify({
+    health: controlPlane.health ?? null,
+    state: controlPlane.state ?? null,
+    rpc: controlPlane.rpc ?? null,
+  }).toLowerCase();
+}
+
+function advertisedMethod(controlPlane: ControlPlaneProbe, candidates: string[]): string | null {
+  if (controlPlane.status !== "available") {
+    return null;
+  }
+  const haystack = advertisedText(controlPlane);
+  return candidates.find((candidate) => haystack.includes(candidate.toLowerCase())) ?? null;
+}
+
+function buildWorkbenchActions(controlPlane: ControlPlaneProbe): WorkbenchAction[] {
+  const faucetMethod = advertisedMethod(controlPlane, ["faucet_request", "local_faucet_request", "faucet_submit"]);
+  const txMethod = advertisedMethod(controlPlane, ["transaction_submit", "sample_transaction_submit", "submit_sample_transaction"]);
+  const bridgeMethod = advertisedMethod(controlPlane, ["bridge_deposit_get", "bridge_deposit_inspect", "bridge_test_deposit_get"]);
+  const refreshAvailable = controlPlane.status === "available";
+
+  return [
+    {
+      key: "refresh",
+      label: "Refresh state",
+      method: "devnet_state",
+      state: refreshAvailable ? "available" : "missing",
+      detail: refreshAvailable
+        ? "Reloads dashboard data and re-probes /health, /state, and /rpc."
+        : "Start the API with npm run control-plane:serve before live refresh can verify state.",
+      params: { includeBlocks: true },
+    },
+    {
+      key: "faucet",
+      label: "Submit faucet request",
+      method: faucetMethod ?? "faucet_request",
+      state: faucetMethod ? "available" : "missing",
+      detail: faucetMethod
+        ? "Uses the advertised local no-value faucet JSON-RPC method. No private keys are handled in the browser."
+        : "No local faucet method is advertised by the current control-plane API.",
+      params: { localOnly: true },
+    },
+    {
+      key: "sampleTransaction",
+      label: "Submit sample transaction",
+      method: txMethod ?? "transaction_submit",
+      state: txMethod ? "available" : "missing",
+      detail: txMethod
+        ? "Submits a local sample transaction through the advertised control-plane method."
+        : "No transaction submit method is advertised. Run npm run flowchain:demo or npm run flowchain:smoke to populate deterministic transactions.",
+      params: { sample: true, localOnly: true },
+    },
+    {
+      key: "bridgeDeposit",
+      label: "Inspect bridge test deposit",
+      method: bridgeMethod ?? "bridge_deposit_get",
+      state: bridgeMethod ? "available" : "missing",
+      detail: bridgeMethod
+        ? "Reads the advertised test bridge deposit method. This remains a local/test bridge lane."
+        : "No bridge deposit inspection method is advertised; the workbench can still show the copied deterministic mock deposit fixture.",
+      params: { localOnly: true },
+    },
+  ];
+}
+
 function topLevelKeys(value: unknown): string {
   return isRecord(value) ? Object.keys(value).sort().join(", ") : "not loaded";
 }
@@ -1010,6 +1540,7 @@ function buildRawJsonRecords(
   controlPlane: ControlPlaneProbe,
   devnetState: unknown | null,
   devnetDashboardState: unknown | null,
+  bridgeDeposit: unknown | null,
 ): WorkbenchRecord[] {
   return [
     makeRecord("indexer", data.metadata.fixturePath, {
@@ -1067,16 +1598,32 @@ function buildRawJsonRecords(
           { label: "status", value: controlPlane.status },
           { label: "health keys", value: topLevelKeys(controlPlane.health) },
           { label: "state keys", value: topLevelKeys(controlPlane.state) },
+          { label: "rpc result ids", value: controlPlane.rpc ? Object.keys(controlPlane.rpc).sort().join(", ") : "not loaded" },
           { label: "error", value: text(controlPlane.error, "none") },
         ],
         raw: {
           health: controlPlane.health ?? null,
           state: controlPlane.state ?? null,
+          rpc: controlPlane.rpc ?? null,
           error: controlPlane.error ?? null,
         },
       },
       controlPlane.checkedAt,
     ),
+    makeRecord("devnet", WORKBENCH_BRIDGE_DEPOSIT_PATH, {
+      id: "raw-bridge-test-deposit",
+      kind: "Raw JSON",
+      title: WORKBENCH_BRIDGE_DEPOSIT_PATH,
+      summary: bridgeDeposit
+        ? "Copied deterministic bridge test deposit fixture loaded for local inspection."
+        : "Bridge test deposit fixture was not loaded.",
+      status: bridgeDeposit ? "observed" : "unresolved",
+      facts: [
+        { label: "schema", value: isRecord(bridgeDeposit) ? text(bridgeDeposit.schema) : "missing" },
+        { label: "keys", value: topLevelKeys(bridgeDeposit) },
+      ],
+      raw: bridgeDeposit,
+    }),
   ];
 }
 
@@ -1223,6 +1770,7 @@ export function buildWorkbenchSnapshot(
     controlPlane?: ControlPlaneProbe;
     devnetState?: unknown | null;
     devnetDashboardState?: unknown | null;
+    bridgeDeposit?: unknown | null;
     loadIssues?: string[];
   } = {},
 ): WorkbenchSnapshot {
@@ -1232,16 +1780,24 @@ export function buildWorkbenchSnapshot(
       url: DEFAULT_CONTROL_PLANE_URL,
       status: "not-detected",
       checkedAt: new Date().toISOString(),
-      endpoints: ["GET /health", "GET /state"],
+      endpoints: ["GET /health", "GET /state", "POST /rpc"],
       error: "not probed",
     } satisfies ControlPlaneProbe);
-  const controlPlaneState = extractControlPlaneState(controlPlane.state);
+  const rpcDevnetState = rpcRaw(controlPlane, "rawDevnet");
+  const rpcDevnetSummary = rpcResult(controlPlane, "devnetState");
+  const controlPlaneState = rpcDevnetState ?? extractControlPlaneState(controlPlane.state) ?? rpcDevnetSummary;
   const activeDevnetState = controlPlaneState ?? options.devnetState ?? null;
-  const source: WorkbenchSource = controlPlane.status === "available" && controlPlaneState ? "control-plane" : "fixture-fallback";
+  const source: WorkbenchSource = controlPlane.status === "available" && (controlPlaneState !== null || controlPlane.rpc) ? "control-plane" : "fixture-fallback";
 
   const sections: Record<WorkbenchSectionKey, WorkbenchRecord[]> = {
     blocks: buildBlockRecords(data, activeDevnetState),
+    peers: buildPeerRecords(controlPlane, activeDevnetState),
     transactions: buildTransactionRecords(data, activeDevnetState),
+    mempool: buildMempoolRecords(activeDevnetState),
+    accounts: buildAccountRecords(activeDevnetState),
+    balances: buildBalanceRecords(activeDevnetState),
+    faucetEvents: buildFaucetEventRecords(activeDevnetState),
+    wallets: buildWalletRecords(activeDevnetState),
     rootfields: buildRootfieldRecords(data, activeDevnetState),
     agents: buildAgentRecords(data, activeDevnetState),
     models: buildModelRecords(activeDevnetState),
@@ -1252,13 +1808,30 @@ export function buildWorkbenchSnapshot(
     verifierReports: buildVerifierRecords(data, activeDevnetState),
     challenges: buildChallengeRecords(activeDevnetState),
     finality: buildFinalityRecords(data, activeDevnetState),
+    bridge: buildBridgeRecords(activeDevnetState, options.bridgeDeposit ?? null),
     provenance: [],
     hardwareSignals: buildHardwareSignalRecords(data, activeDevnetState),
     rawJson: [],
   };
 
+  sections.blocks = preferRpcRecords(sections.blocks, buildRpcBlockRecords(controlPlane));
+  sections.transactions = preferRpcRecords(sections.transactions, buildRpcTransactionRecords(controlPlane));
+  sections.rootfields = preferRpcRecords(sections.rootfields, buildRpcGenericRecords(controlPlane, "rootfields", ["rootfields"], "Rootfield", "rootfieldId"));
+  sections.agents = preferRpcRecords(sections.agents, buildRpcGenericRecords(controlPlane, "agents", ["agents"], "Agent", "agentId"));
+  sections.models = preferRpcRecords(sections.models, buildRpcGenericRecords(controlPlane, "models", ["models"], "ModelPassport", "modelId"));
+  sections.receipts = preferRpcRecords(sections.receipts, buildRpcGenericRecords(controlPlane, "workReceipts", ["workReceipts"], "WorkReceipt", "receiptId"));
+  sections.artifacts = preferRpcRecords(sections.artifacts, buildRpcGenericRecords(controlPlane, "artifacts", ["artifacts"], "Artifact availability", "availabilityId"));
+  sections.verifierModules = preferRpcRecords(
+    sections.verifierModules,
+    buildRpcGenericRecords(controlPlane, "verifierModules", ["verifierModules"], "VerifierModule", "moduleId"),
+  );
+  sections.verifierReports = preferRpcRecords(sections.verifierReports, buildRpcGenericRecords(controlPlane, "verifierReports", ["reports"], "VerifierReport", "reportId"));
+  sections.memoryCells = preferRpcRecords(sections.memoryCells, buildRpcGenericRecords(controlPlane, "memoryCells", ["memoryCells"], "MemoryCell", "memoryCellId"));
+  sections.challenges = preferRpcRecords(sections.challenges, buildRpcGenericRecords(controlPlane, "challenges", ["challenges"], "Challenge", "challengeId"));
+  sections.finality = preferRpcRecords(sections.finality, buildRpcGenericRecords(controlPlane, "finality", ["finality"], "Finality receipt", "finalityReceiptId"));
+
   sections.provenance = buildProvenanceRecords(data, controlPlane, options.devnetState ?? null, options.devnetDashboardState ?? null);
-  sections.rawJson = buildRawJsonRecords(data, controlPlane, options.devnetState ?? null, options.devnetDashboardState ?? null);
+  sections.rawJson = buildRawJsonRecords(data, controlPlane, options.devnetState ?? null, options.devnetDashboardState ?? null, options.bridgeDeposit ?? null);
   const displayedSections = source === "control-plane" ? relabelDevnetRecordsAsControlPlane(sections, controlPlane) : sections;
 
   return {
@@ -1267,25 +1840,29 @@ export function buildWorkbenchSnapshot(
     controlPlane,
     node: buildNodeStatus(data, activeDevnetState, controlPlane),
     setupSteps: buildSetupSteps(controlPlane),
+    actions: buildWorkbenchActions(controlPlane),
     sections: displayedSections,
     loadIssues: options.loadIssues ?? [],
     raw: {
       dashboard: data,
       devnetState: options.devnetState ?? null,
       devnetDashboardState: options.devnetDashboardState ?? null,
+      bridgeDeposit: options.bridgeDeposit ?? null,
       controlPlaneHealth: controlPlane.health ?? null,
       controlPlaneState: controlPlane.state ?? null,
+      controlPlaneRpc: controlPlane.rpc ?? null,
     },
   };
 }
 
 export async function fetchWorkbenchSnapshot(data: DashboardData): Promise<WorkbenchSnapshot> {
-  const [controlPlane, devnetStateResult, devnetDashboardStateResult] = await Promise.all([
+  const [controlPlane, devnetStateResult, devnetDashboardStateResult, bridgeDepositResult] = await Promise.all([
     probeControlPlane(),
     fetchOptionalJson(WORKBENCH_DEVNET_STATE_PATH),
     fetchOptionalJson(WORKBENCH_DEVNET_DASHBOARD_STATE_PATH),
+    fetchOptionalJson(WORKBENCH_BRIDGE_DEPOSIT_PATH),
   ]);
-  const loadIssues = [devnetStateResult.error, devnetDashboardStateResult.error].filter(
+  const loadIssues = [devnetStateResult.error, devnetDashboardStateResult.error, bridgeDepositResult.error].filter(
     (issue): issue is string => typeof issue === "string" && issue.length > 0,
   );
 
@@ -1293,6 +1870,7 @@ export async function fetchWorkbenchSnapshot(data: DashboardData): Promise<Workb
     controlPlane,
     devnetState: devnetStateResult.value,
     devnetDashboardState: devnetDashboardStateResult.value,
+    bridgeDeposit: bridgeDepositResult.value,
     loadIssues,
   });
 }
