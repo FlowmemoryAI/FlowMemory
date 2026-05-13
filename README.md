@@ -38,7 +38,10 @@ Every contributor and agent should read:
 2. `docs/START_HERE.md`
 3. `docs/FLOWMEMORY_HQ_CONTEXT.md`
 4. `docs/CURRENT_STATE.md`
-5. `docs/DAILY_HQ_RUNBOOK.md` if operating HQ or coordinating agents
+5. `docs/ROOTFLOW_V0.md`
+6. `docs/FLOW_MEMORY_V0.md`
+7. `docs/V0_LAUNCH_ACCEPTANCE.md`
+8. `docs/DAILY_HQ_RUNBOOK.md` if operating HQ or coordinating agents
 
 Then work only inside the assigned scope.
 
@@ -46,13 +49,13 @@ Then work only inside the assigned scope.
 
 FlowMemory is managed as a multi-agent program. The management layer is part of the repo and should be kept current before large subsystem work begins.
 
-- `docs/ISSUE_BACKLOG.md`: maps issues #6-#55 into milestones, dependencies, and agent worktrees
+- `docs/ISSUE_BACKLOG.md`: maps issues into milestones, dependencies, and agent worktrees
 - `docs/AGENT_PROMPTS.md`: copy-ready prompts for each worktree
 - `docs/PR_PROCESS.md`: branch, draft PR, review, merge, conflict, and issue-closing rules
 - `docs/DAILY_HQ_RUNBOOK.md`: morning review, triage, agent launch, PR monitoring, merge order, and handoff
 - `infra/scripts/status-report.ps1`: read-only local worktree, PR, and issue status report
 
-Immediate major milestone: build a runnable local V0 stack. This means local contracts/tests, FlowPulse fixtures, indexer/verifier schemas, crypto vocabulary, app data model, and local smoke-test gates. It does not mean production deployment.
+Immediate major milestone: build the Rootflow V0 and Flow Memory V0 launch core. This means local contracts/tests, FlowPulse fixtures, Rootflow transitions, Flow Memory schemas, verifier reports, crypto fixtures, dashboard-readable state, and local smoke-test gates. It does not mean production deployment.
 
 ## What Not To Claim
 
@@ -91,6 +94,8 @@ Immediate major milestone: build a runnable local V0 stack. This means local con
 
 - Uniswap v4 hook integration
 - Indexer and verifier services
+- Complete Rootflow runtime implementation
+- Complete Flow Memory runtime implementation
 - FlowRouter hardware implementation
 - Meshtastic integration
 - Dashboard, explorer, and hardware console applications

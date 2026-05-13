@@ -7,6 +7,7 @@ This file maps existing GitHub issues #6-#55 into program milestones and agent w
 ## Milestones
 
 - V0 Repo OS: management layer, docs, templates, labels, scripts, review process.
+- Rootflow and Flow Memory V0 Launch Core: cross-agent launch target for Rootfield namespaces, Rootflow transitions, Flow Memory schemas, deterministic fixtures, verifier reports, and dashboard-readable state.
 - V0 Contracts Foundation: FlowPulse, RootfieldRegistry, contract test hardening, contract-boundary decisions.
 - V0 Local Stack: local fixtures, indexer/verifier schemas, local devnet gates, persistence boundary, live-reader boundary.
 - V0 Hardware POC: FlowRouter, Meshtastic/LoRa, enclosure, indicators, NFC cartridge, hardware demo planning.
@@ -33,6 +34,18 @@ This file maps existing GitHub issues #6-#55 into program milestones and agent w
 | #15 `[docs/architecture] Add Rootflow and Rootfield glossary and boundary notes` | Open | Review/HQ - `flowmemory-review` | #8 | Architecture vocabulary; no contract changes. |
 | #16 `[docs/architecture] Map observed, committed, and verified state boundaries` | Closed | Review/HQ - `flowmemory-review` | Folded into #14/#15 | Closed as not planned; keep as historical note. |
 | #48 `[infrastructure] Ignore generated Foundry artifacts` | Open | Review/HQ - `flowmemory-review` | #6 | `.gitignore` or docs hygiene only. |
+
+## Rootflow And Flow Memory V0 Launch Core
+
+Primary milestone: make `docs/V0_LAUNCH_ACCEPTANCE.md` pass with concrete implementation evidence.
+
+| Issue | State | Agent/worktree | Dependencies | Notes |
+| --- | --- | --- | --- | --- |
+| #63 `[launch-core/contracts] Build Rootflow V0 contract support and coverage` | Open | Contracts - `flowmemory-contracts` | #6, #7, #8, #22 | Launch epic for contracts-side evidence; no production hook or deployment. |
+| #64 `[launch-core/crypto] Define Rootflow and Flow Memory V0 canonical schemas and fixtures` | Open | Crypto - `flowmemory-crypto` | #17, #40, #45 helpful | Canonical ids, schemas, fixtures, and validation; no proof circuits. |
+| #65 `[launch-core/indexer] Implement Rootflow V0 fixture engine and verifier reports` | Open | Indexer - `flowmemory-indexer` | #13, #14, #43, #44, #45, #64 | Must output dashboard-readable Rootflow and Flow Memory fixture state. |
+| #66 `[launch-core/dashboard] Render Rootflow and Flow Memory V0 fixture state` | Open | Dashboard - `flowmemory-dashboard` | #19, #65 | Fixture-backed display path; no hosted production API. |
+| #67 `[launch-core/review] Audit Rootflow and Flow Memory V0 acceptance across PRs` | Open | Review/HQ - `flowmemory-review` | #63, #64, #65, #66 | Acceptance audit and merge readiness; no subsystem implementation. |
 
 ## V0 Contracts Foundation
 
@@ -118,7 +131,8 @@ P0 sequence:
 1. #10, #20, #9
 2. #6, #7, #8
 3. #13, #14, #17
-4. #43, #44, #45, #49, #51
+4. #63, #64, #65, #66, #67
+5. #43, #44, #45, #49, #51
 
 P1 sequence:
 

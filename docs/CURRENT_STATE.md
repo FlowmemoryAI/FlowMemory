@@ -10,6 +10,8 @@ FlowMemory is in foundation hardening.
 
 The bootstrap repository operating system and first contracts foundation have merged. The next major target is a runnable local V0 stack that connects contract fixtures, local indexing/verifier specs or fixtures, crypto schema vocabulary, and operator-facing data models without production deployment.
 
+Launch-critical direction: Rootflow V0 and Flow Memory V0 are the core of the next milestone. Rootflow defines memory-state transitions. Flow Memory defines the agent-facing memory objects derived from FlowPulse observations, receipts, verifier reports, and committed roots.
+
 ## Implemented In The Merged Repo
 
 Repository operating system:
@@ -31,12 +33,23 @@ Contracts foundation:
 - `tests/RootfieldRegistry.t.sol` contains initial Foundry tests.
 - `tests/README.md` documents the current test command.
 
+Launch-core specifications:
+
+- `docs/ROOTFLOW_V0.md` defines the Rootflow V0 transition model, status vocabulary, agent ownership, and launch acceptance.
+- `docs/FLOW_MEMORY_V0.md` defines MemorySignal, MemoryReceipt, RootfieldBundle, AgentMemoryView, work-lane vocabulary, and dashboard display expectations.
+- `docs/V0_LAUNCH_ACCEPTANCE.md` maps the Rootflow and Flow Memory objective to concrete artifacts and evidence.
+- `docs/DECISIONS/rootflow-v0.md` records the V0 decision and non-goal boundaries.
+
 ## Conceptual Or Not Implemented Yet
 
 - Production protocol deployment.
 - Production ownership, upgrade, governance, fee, token, or incentive mechanics.
 - Dynamic fees or tokenomics.
 - Production Uniswap v4 hook deployment.
+- Complete Rootflow runtime implementation.
+- Complete Flow Memory runtime implementation.
+- Canonical JSON schema package for Rootflow and Flow Memory objects.
+- End-to-end fixture-backed Rootflow acceptance run.
 - Indexer or verifier service runtime.
 - Persistence layer, live RPC reader, production APIs, or hosted services.
 - Dashboard, explorer, or hardware console implementation.
@@ -85,12 +98,12 @@ Before assigning agents, check for dirty worktrees and avoid overlapping folders
 
 ## Current Operator Priorities
 
-1. Keep current-state, roadmap, architecture, backlog, and review docs aligned with GitHub.
+1. Make Rootflow V0 and Flow Memory V0 pass the launch acceptance matrix in `docs/V0_LAUNCH_ACCEPTANCE.md`.
 2. Finish contracts foundation hardening without production deployment or token mechanics.
-3. Specify the local indexer/verifier loop before building runtime services.
-4. Define crypto vocabulary before proof systems or verifier economics.
-5. Define hardware and dashboard scopes before implementation.
-6. Keep chain/appchain work research-only and no-value until explicit gates are passed.
+3. Build deterministic local fixtures for FlowPulse, receipts, Rootflow transitions, verifier reports, and dashboard state.
+4. Define canonical crypto and JSON schema vocabulary before proof systems or verifier economics.
+5. Keep dashboard work fixture-backed until indexer/verifier outputs stabilize.
+6. Keep chain/appchain work no-value and local until explicit gates are passed.
 
 ## Update Rule
 

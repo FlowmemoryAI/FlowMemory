@@ -15,12 +15,45 @@ Read first:
 - docs/ROADMAP.md
 - docs/ARCHITECTURE.md
 - docs/ISSUE_BACKLOG.md
+- docs/ROOTFLOW_V0.md
+- docs/FLOW_MEMORY_V0.md
+- docs/V0_LAUNCH_ACCEPTANCE.md
 
 Work only on the assigned GitHub issue. Copy the issue's objective, allowed folders, forbidden folders, acceptance criteria, risk level, and recommended worktree into your local plan before editing.
 
 Do not build outside scope. Do not add tokenomics, dynamic fees, production deployment, production Uniswap v4 hook deployment, production L1/appchain, hardware manufacturing, GPU proofs, verifier economics, or full dashboard implementation unless the issue explicitly allows it.
 
 Before finishing, run git status --short --branch and git diff --check. Run area-specific tests or checks when they exist. End with changed files, checks run, risks, assumptions, and follow-up issues.
+```
+
+## Launch-Core Rootflow And Flow Memory Add-On
+
+Use this add-on when the user or assigned issue mentions Rootflow V0, Flow Memory V0, launch core, memory signals, Rootfield bundles, verifier reports, or dashboard-readable state.
+
+```text
+You are contributing to the Rootflow V0 and Flow Memory V0 launch core.
+
+This task is not complete just because a small PR is opened. Continue until your assigned subsystem produces concrete evidence for docs/V0_LAUNCH_ACCEPTANCE.md.
+
+Rootflow V0 must connect:
+- Rootfield namespace
+- FlowPulse pulseId
+- parent pulse or parent root
+- new root
+- receipt id
+- verifier report id
+- status
+- source observation
+
+Flow Memory V0 must expose:
+- MemorySignal
+- MemoryReceipt
+- RootfieldBundle
+- AgentMemoryView
+
+Use deterministic local fixtures before live production integrations. Do not claim production L1, production mainnet readiness, full trustless verification, free storage, or AI running on-chain.
+
+Before finishing, name exactly which launch acceptance rows your work satisfies and which rows remain incomplete.
 ```
 
 ## Contracts Agent
@@ -53,6 +86,7 @@ Prompt suffix:
 ```text
 Assigned issue: #<issue>.
 Keep this to contracts foundation hardening. Do not add deployment scripts, tokenomics, dynamic fees, production hooks, or governance mechanics unless a separate accepted issue explicitly scopes them.
+If this issue is part of Rootflow V0, keep contract state compact and emit enough FlowPulse/Rootfield data for indexer-derived Rootflow transitions without pretending the contract knows txHash or logIndex.
 ```
 
 ## Indexer/Verifier Agent
@@ -84,6 +118,7 @@ Prompt suffix:
 ```text
 Assigned issue: #<issue>.
 Keep receipt metadata derived from receipts/logs only. Do not build live production indexing, hosted services, verifier economics, or APIs unless explicitly scoped.
+If this issue is part of Rootflow V0 or Flow Memory V0, produce or consume deterministic fixtures for MemorySignal, MemoryReceipt, RootflowTransition, verifier report, and AgentMemoryView handoff.
 ```
 
 ## Crypto Agent
@@ -114,6 +149,7 @@ Prompt suffix:
 ```text
 Assigned issue: #<issue>.
 Define vocabulary, schemas, domain separation, and validation boundaries. Do not implement a proof system or verifier network unless a later accepted issue explicitly scopes it.
+If this issue is part of Rootflow V0 or Flow Memory V0, define canonical ids, hash inputs, JSON schemas, and test vectors for MemorySignal, MemoryReceipt, RootflowTransition, RootfieldBundle, and verifier reports.
 ```
 
 ## Chain/Devnet Research Agent
@@ -171,7 +207,7 @@ Prompt suffix:
 
 ```text
 Assigned issue: #<issue>.
-Define operator and explorer data models before UI. Do not scaffold a full dashboard or production API unless a later issue explicitly scopes that build.
+Define operator and explorer data models before UI. Fixture-backed local display paths are allowed when explicitly scoped by the Rootflow V0 or Flow Memory V0 launch goal. Do not scaffold hosted production APIs or deployment unless a later issue explicitly scopes that build.
 ```
 
 ## Hardware Agent

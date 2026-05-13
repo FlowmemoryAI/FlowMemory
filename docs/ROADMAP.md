@@ -4,17 +4,19 @@ This roadmap is the project-management view of FlowMemory. Use GitHub issues for
 
 Production L1, tokenomics, mainnet deployment, production Uniswap v4 hook deployment, hardware manufacturing, and full dashboard implementation are later gated work. They are not approved by this roadmap.
 
-## Immediate Major Milestone: Runnable Local V0 Stack
+## Immediate Major Milestone: Rootflow And Flow Memory V0 Launch Core
 
 Goal: make a local developer able to run the smallest FlowMemory loop without production deployment.
 
-The local V0 stack means:
+The launch-core V0 stack means:
 
 - Contracts compile and tests run locally.
 - FlowPulse fixtures can be produced or consumed deterministically.
+- Rootflow transitions link FlowPulse observations, parent state, receipts, verifier reports, and new roots.
+- Flow Memory objects expose MemorySignal, MemoryReceipt, RootfieldBundle, and AgentMemoryView shapes.
 - Indexer/verifier specs define observation identity, reorg states, and report shape.
 - Crypto vocabulary defines receipts, attestations, roots, commitments, and proof boundaries.
-- Dashboard planning has a data model for observed, pending, verified, failed, unsupported, and reorged states.
+- Dashboard can consume fixture-backed observed, pending, verified, failed, unsupported, and reorged states.
 - Hardware and research tracks have bounded specs but do not block local software validation.
 
 Non-goals:
@@ -25,7 +27,7 @@ Non-goals:
 - No production L1/appchain.
 - No production hook deployment.
 - No hardware manufacturing.
-- No full dashboard app.
+- No hosted production dashboard or production API.
 
 ## Near-Term Phases
 
@@ -55,6 +57,8 @@ Status: active as specs and local fixtures before services.
 
 - Specify canonical FlowPulse observation identity.
 - Define verifier statuses and report JSON schema.
+- Define Rootflow transition schema and parent/child state-linking behavior.
+- Define Flow Memory schemas for MemorySignal, MemoryReceipt, RootfieldBundle, and AgentMemoryView.
 - Define fixture-based parser and reorg-state tests.
 - Define persistence and local RPC reader boundaries only after fixture behavior stabilizes.
 - Define local devnet smoke-test gates without mainnet or production deployment.
@@ -72,20 +76,22 @@ Status: active.
 
 ### Phase 4: V0 Crypto Schema Layer
 
-Status: planning.
+Status: active as launch-core schema and fixture work.
 
 - Define receipt, attestation, commitment, root, and proof vocabulary.
 - Define domain separation and replay boundaries.
+- Define canonical ids for MemorySignal, MemoryReceipt, RootflowTransition, RootfieldBundle, and verifier reports.
 - Validate test vectors through verifier specs.
 - Keep proof circuits, GPU proofs, verifier economics, and production crypto infrastructure out of scope.
 
-### Phase 5: V0 Dashboard Data Model
+### Phase 5: V0 Dashboard Data Model And Display Path
 
-Status: planning.
+Status: active as fixture-backed local display work.
 
 - Define app-facing entities for dashboard and explorer.
 - Model observed, pending, finalized, verified, invalid, unresolved, unsupported, and reorged states.
-- Keep frontend scaffolding and production APIs out of scope until the local stack stabilizes.
+- Render Rootfield, Rootflow transition, MemorySignal, MemoryReceipt, verifier report, and AgentMemoryView fixtures.
+- Keep hosted production APIs and deployment out of scope until the local stack stabilizes.
 
 ### Phase 6: V0 Hardware POC
 
@@ -121,10 +127,10 @@ Status: blocked until explicit go/no-go decisions exist.
 ## Merge Order Preference
 
 1. Repo OS and review process changes.
-2. Current state, roadmap, architecture, and decision records.
+2. Rootflow and Flow Memory specs, current state, roadmap, architecture, and decision records.
 3. Contracts foundation hardening.
-4. Indexer/verifier fixture and schema work.
-5. Crypto schema vocabulary and test-vector validation.
-6. Dashboard data model.
+4. Crypto schema vocabulary and test-vector validation.
+5. Indexer/verifier fixture, Rootflow transition, and report schema work.
+6. Dashboard data model and fixture-backed display path.
 7. Hardware POC specs.
 8. Research lab documents.

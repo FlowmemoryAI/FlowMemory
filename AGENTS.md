@@ -8,6 +8,7 @@ These instructions apply to every agent, assistant, script, and human operating 
 - Read `docs/START_HERE.md` before starting any task.
 - Read `docs/FLOWMEMORY_HQ_CONTEXT.md` before making design or implementation choices.
 - Read `docs/CURRENT_STATE.md` immediately before working so you understand what exists and what does not.
+- Read `docs/ROOTFLOW_V0.md`, `docs/FLOW_MEMORY_V0.md`, and `docs/V0_LAUNCH_ACCEPTANCE.md` before working on launch-core Rootflow, Flow Memory, verifier, receipt, dashboard, or memory-signal tasks.
 - If local context conflicts with GitHub, stop and reconcile the difference before editing.
 
 ## Scope Discipline
@@ -25,7 +26,7 @@ These instructions apply to every agent, assistant, script, and human operating 
 - Use `docs/PR_PROCESS.md` for branch naming, draft PRs, merge order, dirty worktrees, and issue closing.
 - Use `docs/DAILY_HQ_RUNBOOK.md` for morning review, triage, monitoring, and handoff.
 - Use `infra/scripts/status-report.ps1` for read-only local worktree, PR, and issue status.
-- The immediate major milestone is a runnable local V0 stack. Do not reinterpret that as approval for production deployment.
+- The immediate major milestone is the Rootflow V0 and Flow Memory V0 launch core. Do not reinterpret that as approval for production deployment.
 
 ## Engineering Rules
 

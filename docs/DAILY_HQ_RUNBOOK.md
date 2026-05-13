@@ -21,6 +21,8 @@ Check:
 - Blocked issues.
 - Issues missing labels or milestones.
 - Any PR touching forbidden folders.
+- Rootflow and Flow Memory launch-core issues #63 through #67.
+- Evidence gaps in `docs/V0_LAUNCH_ACCEPTANCE.md`.
 
 ## Issue Triage
 
@@ -36,12 +38,13 @@ For each issue:
 Priority order:
 
 1. Repo OS and review process.
-2. Contracts foundation hardening.
-3. Indexer/verifier fixture and schema work.
-4. Crypto vocabulary.
-5. Dashboard data model.
-6. Hardware POC specs.
-7. Research gates.
+2. Rootflow and Flow Memory V0 launch-core issues #63 through #67.
+3. Contracts foundation hardening.
+4. Crypto vocabulary and deterministic fixtures.
+5. Indexer/verifier fixture and schema work.
+6. Dashboard fixture-backed display path.
+7. Hardware POC specs.
+8. Research gates.
 
 ## Starting Agents
 
@@ -66,6 +69,7 @@ For each open PR:
 - Check area-specific tests or documented absence.
 - Check for scope creep.
 - Check whether docs/current state need updates.
+- Check whether the PR satisfies named rows in `docs/V0_LAUNCH_ACCEPTANCE.md`.
 
 Reject or send back any PR that adds:
 
@@ -83,11 +87,11 @@ Reject or send back any PR that adds:
 Prefer:
 
 1. Repo OS, labels, milestones, PR process, runbook.
-2. Current-state, roadmap, architecture, decision records.
+2. Rootflow and Flow Memory specs, current-state, roadmap, architecture, decision records.
 3. Contracts test/config hardening.
-4. Indexer/verifier fixture/spec changes.
-5. Crypto vocabulary.
-6. Dashboard data model.
+4. Crypto vocabulary and launch-core fixtures.
+5. Indexer/verifier fixture/spec changes.
+6. Dashboard fixture-backed display path.
 7. Hardware scope docs.
 8. Research docs.
 

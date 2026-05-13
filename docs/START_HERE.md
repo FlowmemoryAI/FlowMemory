@@ -7,8 +7,9 @@ This is the first document to read after `AGENTS.md`.
 1. `AGENTS.md`
 2. `docs/FLOWMEMORY_HQ_CONTEXT.md`
 3. `docs/CURRENT_STATE.md`
-4. The task-specific document or issue
-5. Any relevant decision records in `docs/DECISIONS/`
+4. `docs/ROOTFLOW_V0.md`, `docs/FLOW_MEMORY_V0.md`, and `docs/V0_LAUNCH_ACCEPTANCE.md` for launch-core work
+5. The task-specific document or issue
+6. Any relevant decision records in `docs/DECISIONS/`
 
 ## Before You Edit
 

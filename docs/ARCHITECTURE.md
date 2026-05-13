@@ -6,13 +6,14 @@ FlowMemory is a layered system for commitment-oriented AI memory, verification, 
 
 1. Contracts foundation
 2. Integration harness and local fixtures
-3. Indexer/verifier
-4. Crypto schema layer
-5. Dashboard and operator apps
-6. Hardware and control signaling
-7. Research lab
-8. Devnet/appchain research
-9. HQ program operating system
+3. Rootflow and Flow Memory launch core
+4. Indexer/verifier
+5. Crypto schema layer
+6. Dashboard and operator apps
+7. Hardware and control signaling
+8. Research lab
+9. Devnet/appchain research
+10. HQ program operating system
 
 ## Contracts
 
@@ -56,6 +57,31 @@ Boundaries:
 - No mainnet deployment.
 - No production RPC credentials.
 - No hosted services.
+
+## Rootflow And Flow Memory
+
+Status: launch-critical V0 specification, with implementation expected across contracts, crypto, indexer/verifier, and dashboard PRs.
+
+Primary docs:
+
+- `docs/ROOTFLOW_V0.md`
+- `docs/FLOW_MEMORY_V0.md`
+- `docs/V0_LAUNCH_ACCEPTANCE.md`
+- `docs/DECISIONS/rootflow-v0.md`
+
+Responsibilities:
+
+- Define Rootflow transitions from observed FlowPulse events to committed memory roots.
+- Define Flow Memory objects for AI agents and dashboards.
+- Link Rootfield namespaces, root commitments, parent state, receipts, verifier reports, and statuses.
+- Preserve the distinction between compact on-chain commitments and off-chain memory/artifact data.
+
+Boundaries:
+
+- Rootflow is not a production L1.
+- Flow Memory is not unlimited on-chain storage.
+- V0 verification is local/testnet readiness, not a full trustless verifier network.
+- Dashboard-readable state may be fixture-backed until services stabilize.
 
 ## Indexer And Verifier
 
@@ -174,11 +200,12 @@ Responsibilities:
 1. A local or future deployed contract action emits FlowPulse and updates compact on-chain state.
 2. The local harness or chain client produces receipts and logs.
 3. The indexer reads logs and receipts, then derives `txHash`, `logIndex`, block metadata, and observation identity.
-4. The verifier consumes indexed observations and checks commitments against allowed off-chain evidence.
-5. Crypto schemas define report digests, attestations, commitments, and domain separation.
-6. Dashboard models consume observation and verification states.
-7. Hardware sidecars may exchange compact control messages or receipt references, but not heavy data.
-8. Research artifacts stay off-chain and become protocol-relevant only through explicit commitments or accepted decision records.
+4. The indexer constructs MemorySignal and Rootflow transition candidates.
+5. The verifier consumes indexed observations and checks commitments against allowed off-chain evidence.
+6. Crypto schemas define receipt ids, report digests, attestations, commitments, transition ids, and domain separation.
+7. Dashboard models consume Rootfield, Rootflow, MemorySignal, MemoryReceipt, and AgentMemoryView states.
+8. Hardware sidecars may exchange compact control messages or receipt references, but not heavy data.
+9. Research artifacts stay off-chain and become protocol-relevant only through explicit commitments or accepted decision records.
 
 ## Source Of Truth Flow
 
