@@ -48,6 +48,19 @@ Follow-up:
 
 - Consider bounded `bytes32` commitments, CID/hash-only fields, URI length caps, or a URI validation policy before treating this skeleton as an enforceable off-chain-data boundary.
 
+#### Live V0 Contract Skeletons
+
+Live V0 registries and schedulers are commitment surfaces, not complete trust systems:
+
+- CursorRegistry stores cursor commitments but does not define canonical indexer identity or reorg policy.
+- ReceiptVerifier stores receipt report commitments but does not cryptographically verify receipts on-chain.
+- WorkerRegistry and VerifierRegistry are self-registration surfaces without staking, rewards, slashing, Sybil resistance, or production authorization guarantees.
+- ArtifactRegistry stores artifact commitments, type/schema/metadata hashes, owner, submitter, and status only; raw artifacts and sensitive payloads remain off-chain.
+- WorkReceiptRegistry and VerifierReportRegistry use owner-controlled allowlists in v0. Those allowlists are local testing policy, not decentralized governance or a production verifier network.
+- WorkDebtScheduler stores compact work state without token debt, dynamic fees, rewards, or external calls.
+- FlowMemoryHookAdapter is a compileable scaffold only; it is not a production Uniswap v4 hook and cannot know `txHash` or `logIndex`.
+- These contracts are not production audited and are not mainnet-ready.
+
 ### Indexers And Verifiers
 
 - Log parsing errors
@@ -55,6 +68,10 @@ Follow-up:
 - Incorrect `txHash` or `logIndex` derivation
 - Non-deterministic verification output
 - Trusting off-chain artifacts without checking commitments
+- Treat contract-emitted `pulseId` as protocol payload, not canonical observed-log identity.
+- Bind `observationId` to receipt/log metadata, including chain id, emitting contract, FlowPulse event signature, block hash, transaction hash, transaction index, and log index.
+- Treat advisory URI fields as lookup hints only; verifier reports must use explicit resolver policy and deterministic commitment checks.
+- Do not store secrets, RPC credentials, API keys, seed phrases, or webhook URLs in indexer/verifier env files.
 
 ### AI Memory
 
@@ -78,6 +95,12 @@ Follow-up:
 - Unreviewed scripts
 - CI secrets exposure
 - Binary artifacts without provenance
+
+Static analysis preparation:
+
+- Slither was not available in the local PATH during the Live V0 package pass.
+- Track setup in GitHub issue #24 before adding a CI gate.
+- Candidate command once installed: `slither . --filter-paths "tests|script"`.
 
 ## PR Security Checklist
 
