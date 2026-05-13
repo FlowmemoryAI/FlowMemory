@@ -5,7 +5,14 @@ The initial contract tests use Foundry without `forge-std` so they can run befor
 Run from the repository root:
 
 ```powershell
-forge test --root . --contracts . --match-path tests/RootfieldRegistry.t.sol --out E:\tmp\flowmemory-forge-out --cache-path E:\tmp\flowmemory-forge-cache -vv
+forge test
 ```
 
-When root-level config is in scope, add a `foundry.toml` that sets `src = "contracts"` and `test = "tests"` so the command can become `forge test`.
+`foundry.toml` sets `contracts/` as the source directory and `tests/` as the test directory. Build output goes to `out/` and cache data goes to `cache/`, which should remain generated artifacts.
+
+Run a specific suite when iterating:
+
+```powershell
+forge test --match-contract RootfieldRegistryTest
+forge test --match-contract LiveV0PackageTest
+```
