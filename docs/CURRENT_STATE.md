@@ -6,7 +6,9 @@ This file is the beginner-friendly source of truth for what exists in FlowMemory
 
 ## Repo Phase
 
-FlowMemory is in launch-candidate V0 hardening.
+FlowMemory is in launch-candidate V0 hardening, with the next coordination
+target defined as a FlowChain private/local L1 testnet package for
+second-computer validation.
 
 The bootstrap repository operating system, contracts V0 foundation, crypto V0 foundation, local indexer/verifier fixture package, dashboard V0, FlowRouter hardware POC, local no-value devnet prototype, launch-core contract-event spine, and pre-production hardening guardrails have merged into `main`. The launch-candidate work added swap-derived memory signals, stricter launch validation, and Base Sepolia testnet deploy/read commands.
 
@@ -14,7 +16,13 @@ On 2026-05-13 a small Base mainnet canary deployment was broadcast for V0 testin
 
 The launch-core V0 stack now has a single runnable local command that connects contract fixtures, local indexing/verifier outputs, crypto schema vocabulary, Rootflow transitions, Flow Memory objects, generated dashboard state, local no-value devnet output, and hardware POC output without production deployment.
 
-Launch-critical direction: Rootflow V0 and Flow Memory V0 are the core of the next milestone. Rootflow defines memory-state transitions. Flow Memory defines the agent-facing memory objects derived from FlowPulse observations, receipts, verifier reports, and committed roots.
+Launch-critical direction: keep Rootflow V0 and Flow Memory V0 green while
+packaging the next private/local testnet milestone. Rootflow defines
+memory-state transitions. Flow Memory defines the agent-facing memory objects
+derived from FlowPulse observations, receipts, verifier reports, and committed
+roots. The FlowChain private/local testnet target must build on those surfaces;
+it is not approval for production mainnet, public validators, tokenomics,
+audited cryptography, or production bridge work.
 
 ## Implemented In The Merged Repo
 
@@ -101,10 +109,36 @@ Launch-core specifications:
 - `docs/ROOTFLOW_V0.md` defines the Rootflow V0 transition model, status vocabulary, agent ownership, and launch acceptance.
 - `docs/FLOW_MEMORY_V0.md` defines MemorySignal, MemoryReceipt, RootfieldBundle, AgentMemoryView, work-lane vocabulary, and dashboard display expectations.
 - `docs/V0_LAUNCH_ACCEPTANCE.md` maps the Rootflow and Flow Memory objective to concrete artifacts and evidence.
+- `docs/FLOWCHAIN_FULL_PRIVATE_TESTNET.md` defines the next private/local testnet package target and build-on-existing boundaries.
+- `docs/FLOWCHAIN_SECOND_COMPUTER_SETUP.md` names the current merged second-computer command path and the root-level FlowChain wrapper commands.
+- `docs/FLOWCHAIN_TESTNET_ACCEPTANCE.md` marks private/local testnet features as implemented, in flight, missing, or later gated.
+- `docs/FLOWCHAIN_AGENT_INTEGRATION_MAP.md` maps the next-wave worktree ownership and cross-agent handoffs.
+- `docs/FLOWCHAIN_TROUBLESHOOTING.md` and `docs/FLOWCHAIN_OPERATOR_CHECKLIST.md` provide the Windows-first second-computer troubleshooting and operator checklist layer.
 - `docs/DECISIONS/rootflow-v0.md` records the V0 decision and non-goal boundaries.
 - `docs/reviews/ROOTFLOW_FLOW_MEMORY_V0_ACCEPTANCE_AUDIT.md` tracks evidence and missing work for the active launch-core goal.
 - `docs/reviews/OPEN_PR_MERGE_READINESS.md` is now historical merge-readiness evidence for PRs that have merged.
 - `docs/LAUNCH_CORE_AGENT_GOALS.md` provides copy-ready goals for the contracts, crypto, indexer/verifier, dashboard, and review worktrees.
+
+FlowChain private/local testnet snapshot:
+
+- Implemented: V0 launch-core generation and validation, no-value deterministic
+  Rust devnet prototype, contract event/settlement spine, crypto V0 helpers and
+  vectors, fixture indexer/verifier, fixture-backed dashboard, hardware POC
+  simulator, Base Sepolia reader/deploy commands, guarded canary reader, and
+  Windows-first root wrapper commands for prerequisite checks, init, bounded
+  start/stop, demo, smoke, export/import, and workbench dev mode.
+- In flight: native private-testnet object lifecycle, local control-plane API,
+  private-testnet object IDs and envelopes, workbench extension, optional
+  hardware operator signal fixtures, and advanced L1 research gates.
+- Missing: long-running local runtime start behavior, private genesis/config
+  package beyond the deterministic devnet genesis, full native object
+  lifecycle coverage, full control-plane method coverage, full workbench entity
+  coverage, no-secret API checks, and second-computer smoke evidence for the
+  unmerged native object/control-plane/workbench surfaces.
+- Later gated: production L1/mainnet, public validators, tokenomics,
+  production bridge, production hook deployment, audited cryptography,
+  proof-circuit infrastructure, production hardware, and hosted production
+  services.
 
 ## Conceptual Or Not Implemented Yet
 
@@ -135,7 +169,10 @@ Closed issue notes:
 - #16 was closed as not planned because its scope was folded into other architecture/status issues.
 - #39 was closed; future on-chain verifier adapter work should stay gated behind accepted verifier and crypto boundaries.
 
-As of this update there are no open PRs in `FlowmemoryAI/FlowMemory`.
+As of the 2026-05-13 HQ review for the private/local testnet next wave, GitHub
+shows open draft PRs #71 and #73, plus open canary follow-up issues #76 through
+#79. Local sibling worktrees contain unmerged Local Alpha work; those changes
+are useful context but are not source of truth until merged.
 
 Recently merged PRs:
 
@@ -179,10 +216,11 @@ Before assigning agents, check for dirty worktrees and avoid overlapping folders
 ## Current Operator Priorities
 
 1. Keep the generated launch-core command stable in CI.
-2. Exercise the guarded Base canary reader against the documented V0 canary addresses and feed its output into the next dashboard canary-ingestion issue.
-3. Exercise the Base Sepolia deploy/read path on explicit testnet contract addresses only.
-4. Continue contracts hardening without production mainnet deployment or token mechanics.
-5. Keep dashboard work fixture-backed until a production API is explicitly scoped.
+2. Keep the new root wrapper path usable on Windows: `flowchain:prereq`, `flowchain:init`, `flowchain:start`, `flowchain:demo`, `flowchain:smoke`, `flowchain:export`, and `workbench:dev`.
+3. Convert the remaining V0/local-alpha surfaces into one FlowChain private/local L1 testnet package for second-computer validation.
+4. Land the missing subsystem pieces behind the wrappers: long-running runtime behavior, control-plane serve/query coverage, native object lifecycle, and workbench entity coverage.
+5. Exercise the guarded Base canary reader against the documented V0 canary addresses and feed its output into the next dashboard canary-ingestion issue.
+6. Keep production mainnet, public validator, tokenomics, audited-cryptography, and production bridge claims out of scope.
 
 ## Update Rule
 

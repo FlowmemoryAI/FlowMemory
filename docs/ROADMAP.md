@@ -2,34 +2,61 @@
 
 This roadmap is the project-management view of FlowMemory. Use GitHub issues for execution and `docs/DECISIONS/` for durable decisions.
 
-Production L1, tokenomics, mainnet deployment, production Uniswap v4 hook deployment, hardware manufacturing, and full dashboard implementation are later gated work. They are not approved by this roadmap.
+No production L1, tokenomics, mainnet deployment, production Uniswap v4 hook
+deployment, hardware manufacturing, or production bridge work is approved by
+this roadmap; those areas remain later gated work.
 
-## Immediate Major Milestone: Rootflow And Flow Memory V0 Launch Core
+## Immediate Major Milestone: FlowChain Private/Local Testnet Package
 
-Goal: make a local developer able to run the smallest FlowMemory loop without production deployment.
+Goal: make a clean second computer able to run the FlowChain private/local L1
+testnet package for second-computer validation, building on the existing V0
+launch-core, local devnet, contracts spine, crypto package, fixture
+indexer/verifier, dashboard, hardware simulator, and research gates.
 
-The launch-core V0 stack means:
+The private/local package must preserve the launch-core V0 stack and add one
+obvious second-computer path for:
 
-- Contracts compile and tests run locally.
-- FlowPulse fixtures can be produced or consumed deterministically.
-- The V0 hook adapter can emit a swap-derived `SWAP_MEMORY_SIGNAL` FlowPulse for the launch fixture path.
-- Rootflow transitions link FlowPulse observations, parent state, receipts, verifier reports, and new roots.
-- Flow Memory objects expose MemorySignal, MemoryReceipt, RootfieldBundle, and AgentMemoryView shapes.
-- MemorySignals and RootflowTransitions preserve explicit `IFlowPulse.FlowPulse` contract-event semantics while keeping receipt-only fields indexer-derived.
-- Indexer/verifier specs define observation identity, reorg states, and report shape.
-- Crypto vocabulary defines receipts, attestations, roots, commitments, and proof boundaries.
-- Dashboard can consume fixture-backed observed, pending, verified, failed, unsupported, and reorged states.
-- Hardware and research tracks have bounded specs but do not block local software validation.
+- prerequisite checks and install commands;
+- local operator key generation or import guidance;
+- private/local genesis initialization;
+- single-node local runtime start;
+- local runtime stop/reset behavior;
+- deterministic block and state-root production;
+- native object transactions for agents, models, receipts, artifacts, verifier reports, memory cells, challenges, and finality;
+- local control-plane API queries;
+- local workbench inspection through the existing dashboard surface;
+- export/import or snapshot bundles;
+- a full deterministic smoke command.
+
+The required source-of-truth planning docs are:
+
+- `docs/FLOWCHAIN_FULL_PRIVATE_TESTNET.md`
+- `docs/FLOWCHAIN_SECOND_COMPUTER_SETUP.md`
+- `docs/FLOWCHAIN_TESTNET_ACCEPTANCE.md`
+- `docs/FLOWCHAIN_AGENT_INTEGRATION_MAP.md`
+
+Completion gate: the milestone is not accepted until `docs/FLOWCHAIN_TESTNET_ACCEPTANCE.md`
+marks the private/local package path implemented and records the exact commands,
+generated outputs, deterministic replay evidence, control-plane query evidence,
+workbench evidence, and `git diff --check` result. The HQ wrapper command layer
+now exists, but the native object lifecycle, long-running runtime behavior,
+control-plane coverage, and workbench entity coverage still have to land behind
+those wrappers.
 
 Non-goals:
 
 - No tokenomics.
-- No dynamic fees.
-- No production deployments.
-- No production L1/appchain.
+- No public validator onboarding.
+- No production mainnet or production L1 claim.
+- No production bridge.
 - No production hook deployment.
 - No hardware manufacturing.
+- No audited-cryptography claim.
 - No hosted production dashboard or production API.
+
+Rootflow V0 and Flow Memory V0 remain launch-critical baseline requirements.
+The private/local testnet milestone is not allowed to fork or duplicate those
+surfaces.
 
 ## Near-Term Phases
 
@@ -73,7 +100,22 @@ Status: implemented as fixture-first services plus generated launch-core state; 
 - Runtime schema validation and generated fixture drift checks exist for launch-core outputs.
 - Local devnet smoke-test gates exist as a no-value Rust prototype, without mainnet or production deployment.
 
-### Phase 3: V0 Review/Audit
+### Phase 3: FlowChain Private/Local Testnet Package
+
+Status: active packaging and next-wave build coordination. The Windows-first
+root wrapper layer exists for current merged surfaces; subsystem completion is
+still required for the full private/local object lifecycle.
+
+- Extend the existing Rust devnet into the single private/local runtime surface.
+- Extend the existing service packages into one local control-plane API.
+- Extend the existing crypto package with object IDs, envelopes, schemas, and vectors for private testnet objects.
+- Extend the existing dashboard into the local workbench/explorer.
+- Keep hardware signals optional and fixture-backed.
+- Keep contracts as optional settlement/event spine, not the core private runtime.
+- Keep Windows-first second-computer setup, scripts, command aliases, smoke tests, and troubleshooting current as subsystem commands land.
+- Keep all production mainnet, tokenomics, public validator, audited-cryptography, and bridge claims blocked.
+
+### Phase 4: V0 Review/Audit
 
 Status: active.
 
@@ -85,7 +127,7 @@ Status: active.
 
 ## Mid-Term Phases
 
-### Phase 4: V0 Crypto Schema Layer
+### Phase 5: V0 Crypto Schema Layer
 
 Status: implemented for crypto V0 primitives and local Flow Memory object schemas.
 
@@ -95,7 +137,7 @@ Status: implemented for crypto V0 primitives and local Flow Memory object schema
 - Validate test vectors through verifier specs and keep cross-language checks passing.
 - Keep proof circuits, GPU proofs, verifier economics, and production crypto infrastructure out of scope.
 
-### Phase 5: V0 Dashboard Data Model And Display Path
+### Phase 6: V0 Dashboard Data Model And Display Path
 
 Status: implemented as a generated fixture-backed local app.
 
@@ -106,7 +148,7 @@ Status: implemented as a generated fixture-backed local app.
 - The dashboard fixture is generated from services, local devnet, and hardware POC outputs by `npm run launch:v0`.
 - Keep hosted production APIs and deployment out of scope until the local stack stabilizes.
 
-### Phase 6: V0 Hardware POC
+### Phase 7: V0 Hardware POC
 
 Status: bounded POC specs and simulator implemented; real hardware integration still future work.
 
@@ -117,7 +159,7 @@ Status: bounded POC specs and simulator implemented; real hardware integration s
 
 ## Research Phases
 
-### Phase 7: V0 Research Lab
+### Phase 8: V0 Research Lab
 
 Status: research-only.
 
@@ -126,7 +168,7 @@ Status: research-only.
 - Compare Base settlement anchors and local devnet smoke-test requirements.
 - Research bridge/security review requirements before any chain design.
 
-### Phase 8: Later Gated Work
+### Phase 9: Later Gated Work
 
 Status: blocked until explicit go/no-go decisions exist.
 
@@ -143,8 +185,12 @@ The initial merge sequence has completed for repo OS, contracts foundation, cryp
 
 Next merge preference:
 
-1. Deployment-artifact ingestion for the guarded Base canary reader output.
-2. Base Sepolia reader soak tests against explicit testnet deployments.
-3. Dashboard live/canary mode separation from generated fixtures.
-4. Static analysis follow-up findings triaged for any public testnet deployment.
-5. Production-gated research only after V0 local acceptance stays green.
+1. HQ private/local testnet acceptance and setup docs.
+2. Chain/devnet private testnet runtime extension.
+3. Crypto object identity, envelope, and vector extension for the same object set.
+4. Control-plane API over existing fixture/devnet outputs.
+5. Dashboard/workbench extension of the existing app.
+6. Optional hardware signal fixtures after API/object labels are stable.
+7. Contracts settlement-spine alignment without moving runtime into Solidity.
+8. Refresh packaging scripts and root command aliases whenever subsystem command semantics change.
+9. Canary ingestion and Base Sepolia follow-ups, still gated from production claims.
