@@ -38,6 +38,7 @@ V0 uses certified router/radio hardware and off-the-shelf compute. It does not i
 ## Directory Map
 
 - `FLOWROUTER_V0_SCOPE.md`: scope, non-goals, hardware assumptions, and tier definitions.
+- `FLOWCHAIN_LOCAL_ALPHA_SIGNALS.md`: FlowRouter packet mapping into local-alpha FlowChain operator-signal objects.
 - `BOM.md`: research BOM candidates and tier summaries.
 - `ASSEMBLY.md`: safe prototype assembly sequence.
 - `PRINTING_GUIDE.md`: enclosure and material constraints before CAD.
@@ -57,5 +58,6 @@ V0 uses certified router/radio hardware and off-the-shelf compute. It does not i
 - A local operator can tell whether the node has upstream internet, LAN availability, cache health, power/thermal status, and sidecar status.
 - A second node can receive compact Meshtastic status or digest messages during degraded IP connectivity.
 - Cached state is clearly marked local-only until verified through normal network, indexer, or chain-derived paths.
+- Hardware packets can be projected into local-alpha `hardwareSignals`, `hardwareNodes`, `workReceipts`, `verifierReports`, `alerts`, `challenges`, `artifactCommitments`, and `memoryCells` without blocking the main local chain flow.
 - The prototype can be measured for thermal, power, serviceability, and enclosure-fit constraints.
 - The docs make it difficult to overclaim bandwidth, production readiness, trustlessness, or regulatory status.

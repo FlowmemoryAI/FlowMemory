@@ -25,6 +25,11 @@ SCHEMA_FILES = {
     "dashboard_feed": "dashboard_feed.schema.json",
 }
 
+OPERATOR_SIGNALS_SCHEMA_FILE = "flowchain_operator_signals.schema.json"
+ZERO_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000"
+HARDWARE_ROOTFIELD_ID = "rootfield:hardware:flowrouter-local-alpha"
+HARDWARE_CHAIN_CONTEXT = "flowchain-private-local-testnet"
+
 
 def digest(seed: int, label: str, length: int = 64) -> str:
     return hashlib.sha256(f"flowrouter-v0:{seed}:{label}".encode("utf-8")).hexdigest()[:length]
@@ -32,6 +37,10 @@ def digest(seed: int, label: str, length: int = 64) -> str:
 
 def short_id(seed: int, label: str) -> str:
     return digest(seed, label, 12)
+
+
+def ensure_hex(value: str) -> str:
+    return value if value.startswith("0x") else f"0x{value}"
 
 
 def iso_tick(offset_seconds: int) -> str:
@@ -262,6 +271,513 @@ def build_packets(seed: int) -> dict[str, Any]:
     }
 
 
+def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> dict[str, Any]:
+    packet_set = packets if packets is not None else build_packets(seed)
+    heartbeat = packet_set["heartbeat"]
+    receipt = packet_set["compact_receipt_relay"]
+    verifier = packet_set["verifier_report_digest_relay"]
+    emergency = packet_set["emergency_offline_signal"]
+    cartridge = packet_set["nfc_memory_cartridge_metadata"]
+    dashboard = packet_set["dashboard_feed"]
+
+    device_id = heartbeat["device_id"]
+    generated_at = dashboard["generated_at"]
+    packet_fixture_path = f"hardware/fixtures/flowrouter_sample_seed{seed}.json"
+    operator_fixture_path = f"fixtures/hardware/flowrouter_local_alpha_seed{seed}.json"
+    worker_id = f"hardware-node:{device_id}"
+    verifier_id = f"hardware-relay:{device_id}"
+    receipt_id = f"receipt:hardware:{short_id(seed, 'work-receipt-ref')}"
+    verifier_report_id = f"report:hardware:{short_id(seed, 'verifier-report-ref')}"
+    alert_id = f"hw-alert-{short_id(seed, 'offline-alert')}"
+    challenge_id = f"challenge:hardware:{short_id(seed, 'offline-challenge')}"
+    artifact_id = f"artifact:hardware:{short_id(seed, 'cartridge-artifact-ref')}"
+    memory_cell_id = f"memory:hardware:{short_id(seed, 'cartridge-memory-ref')}"
+    finality_receipt_id = f"finality:hardware:{short_id(seed, 'receipt-finality')}"
+
+    provenance = {
+        "subsystem": "hardware",
+        "origin": "fixture",
+        "chainContext": HARDWARE_CHAIN_CONTEXT,
+        "fixturePath": operator_fixture_path,
+        "capturedAt": generated_at,
+        "localPathHint": packet_fixture_path,
+    }
+
+    hardware_node = {
+        "id": device_id,
+        "nodeId": device_id,
+        "callsign": "FlowRouter local-alpha fixture",
+        "role": "router",
+        "firmware": "flowrouter.poc.v0",
+        "transport": "local-wifi+meshtastic-sidecar-sim",
+        "lastHeartbeatAt": heartbeat["emitted_at"],
+        "linkedWorkLaneId": "CHECKPOINT_STORAGE",
+        "locationHint": "local lab fixture",
+        "status": "verified" if heartbeat["network_state"] == "online" else "stale",
+        "powerState": heartbeat["power_state"],
+        "cacheState": heartbeat["cache_state"],
+        "sidecarState": heartbeat["sidecar_state"],
+        "flowcoreState": heartbeat["flowcore_state"],
+        "warnings": heartbeat["warnings"],
+        "localOnly": True,
+        "sourcePacketType": "heartbeat",
+        "provenance": provenance,
+    }
+
+    work_receipt = {
+        "receiptId": receipt_id,
+        "rootfieldId": HARDWARE_ROOTFIELD_ID,
+        "workerId": worker_id,
+        "inputRoot": ZERO_HASH,
+        "outputRoot": ensure_hex(receipt["receipt_digest"]),
+        "artifactCommitment": ensure_hex(cartridge["digest"]),
+        "ruleSet": "flowmemory.hardware.operator_signal.local_alpha.v0",
+        "status": "unresolved",
+        "receiptDigest": ensure_hex(receipt["receipt_digest"]),
+        "chain": receipt["chain"],
+        "locatorHint": {
+            "blockHint": receipt["block_hint"],
+            "txHashPrefix": receipt["tx_hash_prefix"],
+            "logIndexHint": receipt["log_index_hint"],
+        },
+        "resolutionState": "needs-normal-network-reconciliation",
+        "payloadBytesEstimate": receipt["payload_bytes_estimate"],
+        "loraEligible": receipt["lora_eligible"],
+        "localOnly": True,
+        "sourcePacketType": "compact_receipt_relay",
+    }
+
+    verifier_report = {
+        "reportId": verifier_report_id,
+        "relayReportId": verifier["report_id"],
+        "rootfieldId": HARDWARE_ROOTFIELD_ID,
+        "receiptId": receipt_id,
+        "verifierId": verifier_id,
+        "reportDigest": ensure_hex(verifier["report_digest"]),
+        "subjectDigest": ensure_hex(verifier["subject_digest"]),
+        "status": verifier["result"],
+        "reasonCodes": ["hardware_digest_relay_only"],
+        "resolutionState": "needs-full-report",
+        "payloadBytesEstimate": verifier["payload_bytes_estimate"],
+        "loraEligible": verifier["lora_eligible"],
+        "localOnly": True,
+        "sourcePacketType": "verifier_report_digest_relay",
+    }
+
+    artifact = {
+        "artifactId": artifact_id,
+        "rootfieldId": HARDWARE_ROOTFIELD_ID,
+        "commitment": ensure_hex(cartridge["digest"]),
+        "uriHint": cartridge["pointer"],
+        "status": "observed",
+        "availabilityStatus": "metadata-only",
+        "cartridgeId": cartridge["cartridge_id"],
+        "label": cartridge["label"],
+        "expiresAt": cartridge["expires_at"],
+        "containsSecrets": cartridge["contains_secrets"],
+        "trustLevel": cartridge["trust_level"],
+        "localOnly": True,
+        "sourcePacketType": "nfc_memory_cartridge_metadata",
+    }
+
+    memory_cell = {
+        "memoryCellId": memory_cell_id,
+        "rootfieldId": HARDWARE_ROOTFIELD_ID,
+        "currentRoot": ensure_hex(cartridge["digest"]),
+        "latestRoot": ensure_hex(cartridge["digest"]),
+        "receiptId": receipt_id,
+        "artifactId": artifact_id,
+        "status": "observed",
+        "summary": "NFC cartridge metadata pointer projected into a local memory cell candidate.",
+        "updatedAt": cartridge["created_at"],
+        "resolutionState": "untrusted-metadata-only",
+        "localOnly": True,
+        "sourcePacketType": "nfc_memory_cartridge_metadata",
+    }
+
+    challenge = {
+        "challengeId": challenge_id,
+        "targetId": receipt_id,
+        "receiptId": receipt_id,
+        "reportId": verifier_report_id,
+        "openedBy": worker_id,
+        "status": "pending",
+        "reason": "offline-alert-candidate",
+        "summary": emergency["summary"],
+        "openedAt": emergency["emitted_at"],
+        "ttlSeconds": emergency["ttl_seconds"],
+        "recommendedAction": emergency["operator_action"],
+        "doesNotExecuteRemoteAction": True,
+        "localOnly": True,
+        "sourcePacketType": "emergency_offline_signal",
+    }
+
+    finality_receipt = {
+        "finalityReceiptId": finality_receipt_id,
+        "objectId": receipt_id,
+        "receiptId": receipt_id,
+        "rootfieldId": HARDWARE_ROOTFIELD_ID,
+        "finalityStatus": "local-pending",
+        "settlement": "local-fixture",
+        "status": "pending",
+        "localOnly": True,
+        "sourcePacketType": "compact_receipt_relay",
+    }
+
+    alert = {
+        "id": alert_id,
+        "incidentId": alert_id,
+        "severity": "warning",
+        "title": emergency["code"],
+        "summary": emergency["summary"],
+        "openedAt": emergency["emitted_at"],
+        "linkedObjectIds": [device_id, receipt_id, challenge_id],
+        "recommendedAction": emergency["operator_action"],
+        "status": "unresolved",
+        "localOnly": True,
+        "sourcePacketType": "emergency_offline_signal",
+        "provenance": provenance,
+    }
+
+    def signal_envelope(
+        label: str,
+        signal_type: str,
+        packet: dict[str, Any],
+        object_refs: list[dict[str, str]],
+        status: str,
+    ) -> dict[str, Any]:
+        packet_type = packet["packet_type"]
+        sequence = packet.get("sequence", seed)
+        return {
+            "schema": "flowmemory.hardware_operator_signal_envelope.local_alpha.v0",
+            "envelopeId": f"hw-env-{short_id(seed, f'{label}-envelope')}",
+            "signalId": f"hw-sig-{short_id(seed, f'{label}-signal')}",
+            "signalType": signal_type,
+            "sourcePacketType": packet_type,
+            "sourcePacketId": f"{packet_type}:{sequence}",
+            "observedAt": packet.get("emitted_at", packet.get("created_at", generated_at)),
+            "status": status,
+            "localOnly": True,
+            "payloadBytesEstimate": packet.get("payload_bytes_estimate", 0),
+            "loraEligible": packet.get("lora_eligible", False),
+            "objectRefs": object_refs,
+            "provenance": provenance,
+        }
+
+    def workbench_record(
+        record_id: str,
+        kind: str,
+        title: str,
+        summary: str,
+        status: str,
+        facts: list[dict[str, str]],
+        raw: dict[str, Any],
+    ) -> dict[str, Any]:
+        return {
+            "id": record_id,
+            "kind": kind,
+            "title": title,
+            "summary": summary,
+            "status": status,
+            "facts": facts,
+            "provenance": provenance,
+            "raw": raw,
+        }
+
+    signal_envelopes = [
+        signal_envelope(
+            "heartbeat",
+            "heartbeat",
+            heartbeat,
+            [{"collection": "hardwareNodes", "objectId": device_id}],
+            "observed",
+        ),
+        signal_envelope(
+            "receipt-relay",
+            "receipt_relay",
+            receipt,
+            [{"collection": "workReceipts", "objectId": receipt_id}],
+            "unresolved",
+        ),
+        signal_envelope(
+            "verifier-digest-relay",
+            "verifier_digest_relay",
+            verifier,
+            [{"collection": "verifierReports", "objectId": verifier_report_id}],
+            "unresolved",
+        ),
+        signal_envelope(
+            "offline-alert-challenge",
+            "offline_alert_challenge_input",
+            emergency,
+            [
+                {"collection": "alerts", "objectId": alert_id},
+                {"collection": "challenges", "objectId": challenge_id},
+            ],
+            "pending",
+        ),
+        signal_envelope(
+            "nfc-memory-cartridge",
+            "nfc_memory_cartridge_metadata",
+            cartridge,
+            [
+                {"collection": "artifactCommitments", "objectId": artifact_id},
+                {"collection": "memoryCells", "objectId": memory_cell_id},
+            ],
+            "observed",
+        ),
+    ]
+
+    signal_summaries = {
+        "heartbeat": "FlowRouter heartbeat and coarse node state.",
+        "receipt_relay": "Compact WorkReceipt digest relay awaiting normal reconciliation.",
+        "verifier_digest_relay": "Compact VerifierReport digest relay awaiting the full report.",
+        "offline_alert_challenge_input": "Offline alert that can seed a local challenge candidate.",
+        "nfc_memory_cartridge_metadata": "NFC metadata pointer projected into artifact and memory references.",
+    }
+    hardware_signals = [
+        {
+            "id": envelope["signalId"],
+            "signalId": envelope["signalId"],
+            "envelopeId": envelope["envelopeId"],
+            "nodeId": device_id,
+            "signalType": envelope["signalType"],
+            "sourcePacketType": envelope["sourcePacketType"],
+            "summary": signal_summaries[envelope["signalType"]],
+            "status": envelope["status"],
+            "transport": "local-simulator" if not envelope["loraEligible"] else "meshtastic-control-sim",
+            "receivedAt": envelope["observedAt"],
+            "localOnly": True,
+            "loraEligible": envelope["loraEligible"],
+            "linkedObjectIds": [ref["objectId"] for ref in envelope["objectRefs"]],
+            "provenance": provenance,
+            "rawEnvelope": envelope,
+        }
+        for envelope in signal_envelopes
+    ]
+
+    return {
+        "schema": "flowmemory.hardware_operator_signals.local_alpha.v0",
+        "generatedAt": generated_at,
+        "chainId": "flowmemory-local-alpha",
+        "environment": "local-devnet-fixture",
+        "source": "fixture",
+        "sourcePaths": {
+            "packetFixture": packet_fixture_path,
+            "operatorFixture": operator_fixture_path,
+            "operatorSchema": "hardware/simulator/schemas/flowchain_operator_signals.schema.json",
+            "mappingDoc": "hardware/flowrouter/FLOWCHAIN_LOCAL_ALPHA_SIGNALS.md",
+        },
+        "boundary": {
+            "localOnly": True,
+            "advisory": True,
+            "normalNetworkReconciliationRequired": True,
+            "hardwareRequiredForPrivateTestnet": False,
+            "claimLimitations": [
+                "Hardware-originated references are hints until reconciled by normal indexer, receipt, and verifier paths.",
+                "LoRa and Meshtastic packets carry compact control signals, not artifacts, model data, media, or raw memory.",
+                "NFC cartridge metadata is an untrusted pointer until checked against expected commitments.",
+                "Emergency offline signals are operator alerts or challenge inputs only; they do not execute remote actions.",
+            ],
+        },
+        "packetMappings": [
+            {
+                "sourcePacketType": "heartbeat",
+                "flowchainSignal": "hardware_node_status",
+                "objectCollection": "hardwareNodes",
+                "objectRef": device_id,
+                "localAlphaRole": "shows FlowRouter reachability and coarse device state",
+                "trustBoundary": "local advisory status, not hardware attestation",
+            },
+            {
+                "sourcePacketType": "compact_receipt_relay",
+                "flowchainSignal": "work_receipt_reference",
+                "objectCollection": "workReceipts",
+                "objectRef": receipt_id,
+                "localAlphaRole": "points the workbench at a WorkReceipt candidate",
+                "trustBoundary": "digest and locator hints require normal receipt reconciliation",
+            },
+            {
+                "sourcePacketType": "verifier_report_digest_relay",
+                "flowchainSignal": "verifier_report_reference",
+                "objectCollection": "verifierReports",
+                "objectRef": verifier_report_id,
+                "localAlphaRole": "points the workbench at a VerifierReport candidate",
+                "trustBoundary": "digest relay is not the full verifier report",
+            },
+            {
+                "sourcePacketType": "emergency_offline_signal",
+                "flowchainSignal": "alert_challenge_input",
+                "objectCollection": "challenges",
+                "objectRef": challenge_id,
+                "localAlphaRole": "creates an operator alert and optional challenge input",
+                "trustBoundary": "local operator attention only; no public emergency-service claim",
+            },
+            {
+                "sourcePacketType": "nfc_memory_cartridge_metadata",
+                "flowchainSignal": "artifact_memory_reference",
+                "objectCollection": "artifactCommitments",
+                "objectRef": artifact_id,
+                "localAlphaRole": "connects cartridge metadata to an artifact or memory reference",
+                "trustBoundary": "untrusted metadata pointer, not a secret store or proof",
+            },
+        ],
+        "signalEnvelopes": signal_envelopes,
+        "hardwareSignals": hardware_signals,
+        "hardwareNodes": [hardware_node],
+        "workReceipts": [work_receipt],
+        "verifierReports": [verifier_report],
+        "artifactCommitments": [artifact],
+        "memoryCells": [memory_cell],
+        "challenges": [challenge],
+        "finalityReceipts": [finality_receipt],
+        "alerts": [alert],
+        "workbenchRecords": {
+            "receipts": [
+                workbench_record(
+                    receipt_id,
+                    "Hardware WorkReceipt relay",
+                    receipt_id,
+                    "Compact hardware receipt relay awaiting normal network reconciliation.",
+                    "unresolved",
+                    [
+                        {"label": "rootfield", "value": HARDWARE_ROOTFIELD_ID},
+                        {"label": "receipt digest", "value": ensure_hex(receipt["receipt_digest"])},
+                        {"label": "block hint", "value": str(receipt["block_hint"])},
+                        {"label": "tx prefix", "value": receipt["tx_hash_prefix"]},
+                    ],
+                    work_receipt,
+                )
+            ],
+            "verifierReports": [
+                workbench_record(
+                    verifier_report_id,
+                    "Hardware VerifierReport relay",
+                    verifier_report_id,
+                    "Compact verifier report digest relay; full report is still required.",
+                    "unresolved",
+                    [
+                        {"label": "relay report id", "value": verifier["report_id"]},
+                        {"label": "report digest", "value": ensure_hex(verifier["report_digest"])},
+                        {"label": "subject digest", "value": ensure_hex(verifier["subject_digest"])},
+                        {"label": "result", "value": verifier["result"]},
+                    ],
+                    verifier_report,
+                )
+            ],
+            "artifacts": [
+                workbench_record(
+                    artifact_id,
+                    "NFC cartridge artifact reference",
+                    cartridge["label"],
+                    "NFC cartridge metadata pointer; content is untrusted until commitment checks pass.",
+                    "observed",
+                    [
+                        {"label": "cartridge", "value": cartridge["cartridge_id"]},
+                        {"label": "pointer", "value": cartridge["pointer"]},
+                        {"label": "commitment", "value": ensure_hex(cartridge["digest"])},
+                        {"label": "expires", "value": cartridge["expires_at"]},
+                    ],
+                    artifact,
+                )
+            ],
+            "memoryCells": [
+                workbench_record(
+                    memory_cell_id,
+                    "Hardware memory cell candidate",
+                    memory_cell_id,
+                    "Projected from NFC cartridge metadata for local operator inspection.",
+                    "observed",
+                    [
+                        {"label": "rootfield", "value": HARDWARE_ROOTFIELD_ID},
+                        {"label": "latest root", "value": ensure_hex(cartridge["digest"])},
+                        {"label": "receipt", "value": receipt_id},
+                        {"label": "artifact", "value": artifact_id},
+                    ],
+                    memory_cell,
+                )
+            ],
+            "challenges": [
+                workbench_record(
+                    challenge_id,
+                    "Offline alert challenge candidate",
+                    emergency["code"],
+                    emergency["summary"],
+                    "pending",
+                    [
+                        {"label": "target", "value": receipt_id},
+                        {"label": "report", "value": verifier_report_id},
+                        {"label": "ttl seconds", "value": str(emergency["ttl_seconds"])},
+                        {"label": "action", "value": emergency["operator_action"]},
+                    ],
+                    challenge,
+                )
+            ],
+            "hardwareSignals": [
+                workbench_record(
+                    signal["signalId"],
+                    "Hardware operator signal",
+                    signal["signalType"],
+                    signal["summary"],
+                    signal["status"],
+                    [
+                        {"label": "node", "value": signal["nodeId"]},
+                        {"label": "transport", "value": signal["transport"]},
+                        {"label": "source packet", "value": signal["sourcePacketType"]},
+                        {"label": "linked objects", "value": ", ".join(signal["linkedObjectIds"])},
+                    ],
+                    signal,
+                )
+                for signal in hardware_signals
+            ],
+            "provenance": [
+                workbench_record(
+                    "hardware-operator-signal-fixture",
+                    "Hardware operator signal fixture",
+                    operator_fixture_path,
+                    "Deterministic optional hardware signal projection for control-plane/workbench import.",
+                    "verified",
+                    [
+                        {"label": "packet fixture", "value": packet_fixture_path},
+                        {"label": "schema", "value": "flowmemory.hardware_operator_signals.local_alpha.v0"},
+                        {"label": "seed", "value": str(seed)},
+                        {"label": "hardware required", "value": "false"},
+                    ],
+                    {
+                        "sourcePaths": {
+                            "packetFixture": packet_fixture_path,
+                            "operatorFixture": operator_fixture_path,
+                        }
+                    },
+                )
+            ],
+        },
+        "compatibility": {
+            "controlPlaneStateKeys": [
+                "hardwareSignals",
+                "hardwareNodes",
+                "workReceipts",
+                "verifierReports",
+                "artifactCommitments",
+                "memoryCells",
+                "challenges",
+                "finalityReceipts",
+                "alerts",
+            ],
+            "workbenchSectionKeys": [
+                "receipts",
+                "verifierReports",
+                "artifacts",
+                "memoryCells",
+                "challenges",
+                "hardwareSignals",
+                "provenance",
+            ],
+            "jsonRpcBoundary": "Read-only fixture data; no submit, wallet, live indexing, or production settlement method is implied.",
+        },
+    }
+
+
 class ValidationError(Exception):
     pass
 
@@ -337,6 +853,11 @@ def validate_packets(packets: dict[str, Any], schema_dir: Path) -> None:
         validate_value(schema, packet, name)
 
 
+def validate_operator_signals(operator_signals: dict[str, Any], schema_dir: Path) -> None:
+    schema = json.loads((schema_dir / OPERATOR_SIGNALS_SCHEMA_FILE).read_text(encoding="utf-8"))
+    validate_value(schema, operator_signals, "operator_signals")
+
+
 def output_document(seed: int) -> dict[str, Any]:
     return {
         "simulator": "flowrouter-v0-poc",
@@ -350,20 +871,36 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--seed", type=int, default=42, help="deterministic seed")
     parser.add_argument("--out", type=Path, help="write generated JSON to this path")
+    parser.add_argument("--operator-out", type=Path, help="write FlowChain local-alpha operator signal JSON to this path")
     parser.add_argument("--validate-file", type=Path, help="validate an existing simulator JSON file")
+    parser.add_argument("--validate-operator-file", type=Path, help="validate an existing FlowChain local-alpha operator signal JSON file")
     args = parser.parse_args()
 
     schema_dir = Path(__file__).resolve().parent / "schemas"
 
     try:
+        if args.validate_operator_file:
+            operator_doc = json.loads(args.validate_operator_file.read_text(encoding="utf-8"))
+            validate_operator_signals(operator_doc, schema_dir)
+            print(f"valid: {args.validate_operator_file}")
+            return 0
+
         if args.validate_file:
             doc = json.loads(args.validate_file.read_text(encoding="utf-8"))
             validate_packets(doc["packets"], schema_dir)
             print(f"valid: {args.validate_file}")
             return 0
 
-        doc = output_document(args.seed)
+        packets = build_packets(args.seed)
+        doc = {
+            "simulator": "flowrouter-v0-poc",
+            "seed": args.seed,
+            "generated_at": iso_tick(120),
+            "packets": packets,
+        }
         validate_packets(doc["packets"], schema_dir)
+        operator_doc = build_operator_signals(args.seed, packets)
+        validate_operator_signals(operator_doc, schema_dir)
         encoded = json.dumps(doc, indent=2, sort_keys=True) + "\n"
         if args.out:
             args.out.parent.mkdir(parents=True, exist_ok=True)
@@ -371,6 +908,10 @@ def main() -> int:
             print(f"wrote: {args.out}")
         else:
             sys.stdout.write(encoded)
+        if args.operator_out:
+            args.operator_out.parent.mkdir(parents=True, exist_ok=True)
+            args.operator_out.write_text(json.dumps(operator_doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            print(f"wrote: {args.operator_out}")
         return 0
     except (KeyError, json.JSONDecodeError, OSError, ValidationError) as exc:
         print(f"error: {exc}", file=sys.stderr)
