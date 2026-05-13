@@ -12,7 +12,7 @@ interface ServerOptions {
 function parseArgs(args: string[]): ServerOptions {
   const options: ServerOptions = {
     host: "127.0.0.1",
-    port: 8675,
+    port: 8787,
   };
 
   for (let index = 0; index < args.length; index += 1) {

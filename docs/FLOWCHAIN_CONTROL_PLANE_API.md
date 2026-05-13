@@ -20,7 +20,7 @@ Commands:
 npm run control-plane:test
 npm run control-plane:demo
 npm run control-plane:smoke
-npm run control-plane:serve -- --host 127.0.0.1 --port 8675
+npm run control-plane:serve
 ```
 
 The service uses deterministic local files only. It does not require secrets, wallets, RPC URLs, private keys, API keys, or production services.

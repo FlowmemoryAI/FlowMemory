@@ -429,7 +429,7 @@ Write-Host ""
 Write-Host "FlowChain local/private setup is ready." -ForegroundColor Green
 Write-Host "Repository: $repoDirectory"
 Write-Host "Dashboard: http://127.0.0.1:5173/"
-Write-Host "Control plane: http://127.0.0.1:8675/"
+Write-Host "Control plane: http://127.0.0.1:8787/"
 Write-Host ""
 Write-Host "To rerun later:"
 Write-Host "cd `"$repoDirectory`""

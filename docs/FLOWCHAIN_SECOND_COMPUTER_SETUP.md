@@ -166,7 +166,7 @@ npm install --prefix crypto
 npm run flowchain:prereq
 npm run flowchain:init
 npm run flowchain:start
-npm run control-plane:serve -- --host 127.0.0.1 --port 8675
+npm run control-plane:serve
 npm run workbench:dev
 npm run flowchain:smoke
 npm run flowchain:export
@@ -266,7 +266,7 @@ truth yet.
 Expected command once merged:
 
 ```powershell
-npm run control-plane:serve -- --host 127.0.0.1 --port 8675
+npm run control-plane:serve
 ```
 
 The API must not return secrets.

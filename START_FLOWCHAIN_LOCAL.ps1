@@ -49,7 +49,7 @@ if (-not $NoServers) {
         "-ExecutionPolicy",
         "Bypass",
         "-Command",
-        "Set-Location -LiteralPath '$PSScriptRoot'; npm run control-plane:serve -- --host 127.0.0.1 --port 8675"
+        "Set-Location -LiteralPath '$PSScriptRoot'; npm run control-plane:serve"
     )
 
     Start-Process powershell.exe -ArgumentList @(
@@ -64,4 +64,4 @@ if (-not $NoServers) {
 Write-Host ""
 Write-Host "FlowChain local setup completed." -ForegroundColor Green
 Write-Host "Dashboard usually opens at http://127.0.0.1:5173/"
-Write-Host "Control plane listens on http://127.0.0.1:8675/ when the server window is running."
+Write-Host "Control plane listens on http://127.0.0.1:8787/ when the server window is running."
