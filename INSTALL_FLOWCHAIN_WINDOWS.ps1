@@ -112,6 +112,44 @@ function Test-Python {
     return $false
 }
 
+function Test-MsvcBuildTools {
+    Refresh-Path
+
+    if (Get-Command link.exe -ErrorAction SilentlyContinue) {
+        return $true
+    }
+
+    $programFilesX86 = [Environment]::GetFolderPath("ProgramFilesX86")
+    $vswhere = if ([string]::IsNullOrWhiteSpace($programFilesX86)) {
+        $null
+    } else {
+        Join-Path $programFilesX86 "Microsoft Visual Studio\Installer\vswhere.exe"
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($vswhere) -and (Test-Path -LiteralPath $vswhere)) {
+        $installPath = (& $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath 2>$null | Select-Object -First 1)
+        if (-not [string]::IsNullOrWhiteSpace($installPath)) {
+            return $true
+        }
+    }
+
+    $candidateRoots = @(
+        (Join-Path $env:ProgramFiles "Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC"),
+        (Join-Path $env:ProgramFiles "Microsoft Visual Studio\2022\Community\VC\Tools\MSVC")
+    )
+    if (-not [string]::IsNullOrWhiteSpace($programFilesX86)) {
+        $candidateRoots += Join-Path $programFilesX86 "Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC"
+    }
+
+    foreach ($root in $candidateRoots) {
+        if (Test-Path -LiteralPath $root) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
 function Install-WingetPackage {
     param(
         [string]$DisplayName,
@@ -219,6 +257,39 @@ function Install-Rust {
     Write-Ok "Rust and Cargo installed"
 }
 
+function Install-MsvcBuildTools {
+    if (Test-MsvcBuildTools) {
+        Write-Ok "Visual Studio Build Tools C++ workload is already installed"
+        return
+    }
+
+    if ($SkipToolInstall) {
+        Write-Warn "Visual Studio Build Tools C++ workload is missing, and -SkipToolInstall was set"
+        return
+    }
+
+    Write-Step "Install Visual Studio Build Tools C++ workload"
+    Invoke-Checked "winget" @(
+        "install",
+        "--id",
+        "Microsoft.VisualStudio.2022.BuildTools",
+        "--exact",
+        "--source",
+        "winget",
+        "--accept-package-agreements",
+        "--accept-source-agreements",
+        "--override",
+        "--quiet --wait --norestart --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+    )
+    Refresh-Path
+
+    if (-not (Test-MsvcBuildTools)) {
+        throw "Visual Studio Build Tools installed, but the C++ workload was not detected. Reboot or reopen PowerShell, then rerun this installer."
+    }
+
+    Write-Ok "Visual Studio Build Tools C++ workload installed"
+}
+
 function Get-GitBash {
     Refresh-Path
 
@@ -290,6 +361,7 @@ function Show-ToolStatus {
         @{ Name = "npm"; Available = (Test-Tool "npm") },
         @{ Name = "cargo"; Available = (Test-Tool "cargo") },
         @{ Name = "rustc"; Available = (Test-Tool "rustc") },
+        @{ Name = "msvc-build-tools"; Available = (Test-MsvcBuildTools) },
         @{ Name = "forge"; Available = (Test-Tool "forge") },
         @{ Name = "python3"; Available = (Test-Python) }
     )
@@ -328,6 +400,7 @@ function Install-Tools {
 
     Install-Python
     Install-Rust
+    Install-MsvcBuildTools
     Install-Foundry
 }
 

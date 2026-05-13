@@ -20,6 +20,8 @@ installer installs or verifies them for the user:
 - Git for Windows.
 - Node.js LTS with npm.
 - Rust toolchain with Cargo.
+- Visual Studio Build Tools with the C++ workload, which Rust needs on
+  Windows to compile the local devnet crate.
 - Foundry.
 - Python 3.
 
