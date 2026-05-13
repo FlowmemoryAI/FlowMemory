@@ -2,7 +2,7 @@
 
 FlowMemory is a Base-native AI memory, neural-geometry, reliability, decentralized hardware, and future appchain/L1 research project.
 
-This repository has completed the initial bootstrap and contracts-foundation passes. It contains project context, collaboration rules, planning documents, GitHub templates, a CI scaffold, worktree setup, placeholder work areas, and an initial FlowPulse/Rootfield contracts foundation. Do not treat the current repo as containing production product features yet.
+This repository contains the FlowMemory V0 foundation: project operating docs, local/test contracts, fixture-first services, Rootflow and Flow Memory launch-core generation, a fixture-backed dashboard, crypto helpers, a local no-value devnet prototype, and FlowRouter hardware POC materials. Do not treat the current repo as containing production product features yet.
 
 ## What FlowMemory Is Exploring
 
@@ -41,7 +41,9 @@ Every contributor and agent should read:
 5. `docs/ROOTFLOW_V0.md`
 6. `docs/FLOW_MEMORY_V0.md`
 7. `docs/V0_LAUNCH_ACCEPTANCE.md`
-8. `docs/DAILY_HQ_RUNBOOK.md` if operating HQ or coordinating agents
+8. `docs/PRODUCTION_READINESS_CHECKLIST.md`
+9. `docs/MARKETING_CLAIMS_GUARDRAILS.md`
+10. `docs/DAILY_HQ_RUNBOOK.md` if operating HQ or coordinating agents
 
 Then work only inside the assigned scope.
 
@@ -55,6 +57,8 @@ FlowMemory is managed as a multi-agent program. The management layer is part of 
 - `docs/reviews/OPEN_PR_MERGE_READINESS.md`: historical merge-readiness evidence for the merged V0 foundation PRs
 - `docs/PR_PROCESS.md`: branch, draft PR, review, merge, conflict, and issue-closing rules
 - `docs/DAILY_HQ_RUNBOOK.md`: morning review, triage, agent launch, PR monitoring, merge order, and handoff
+- `docs/PRODUCTION_READINESS_CHECKLIST.md`: blocking checklist before any production language is allowed
+- `docs/MARKETING_CLAIMS_GUARDRAILS.md`: allowed and blocked launch claims for docs and marketing
 - `infra/scripts/status-report.ps1`: read-only local worktree, PR, and issue status report
 
 Immediate major milestone: build the Rootflow V0 and Flow Memory V0 launch core. This means local contracts/tests, FlowPulse fixtures, Rootflow transitions, Flow Memory schemas, verifier reports, crypto fixtures, dashboard-readable state, and local smoke-test gates. It does not mean production deployment.
@@ -70,6 +74,7 @@ This regenerates local/test Rootflow and Flow Memory V0 fixtures, including `fix
 ## What Not To Claim
 
 - Do not claim FlowMemory has production contracts or deployment automation.
+- Do not claim FlowMemory is production-ready or mainnet-ready.
 - Do not claim Uniswap v4 hook integration exists yet.
 - Do not claim explorer, hardware console, production FlowRouter hardware, or Meshtastic integration exists yet.
 - Do not claim cryptographic proof systems, tokenomics, or appchain/L1 implementation exists yet.
@@ -86,6 +91,7 @@ This regenerates local/test Rootflow and Flow Memory V0 fixtures, including `fix
 - `inbox/`: staging area for imported prompts, notes, and unsorted context
 - `research/`: future AI memory, neural geometry, and appchain/L1 research
 - `services/`: future indexer, verifier, worker, and API services
+- `schemas/flowmemory/`: canonical Flow Memory and Rootflow JSON schemas
 
 ## Implemented Foundation
 
@@ -95,20 +101,29 @@ This regenerates local/test Rootflow and Flow Memory V0 fixtures, including `fix
 - Worktree setup script
 - `contracts/FlowPulse.sol`
 - `contracts/RootfieldRegistry.sol`
+- contract skeletons for artifacts, cursors, workers, verifiers, receipts, verifier reports, hook adapter, and work scheduling
+- contracts hardening docs and static-analysis runner
 - `contracts/FLOWPULSE_SCHEMA.md`
 - `tests/RootfieldRegistry.t.sol`
-- Initial Foundry tests for the Rootfield registry foundation
+- Foundry tests for the Rootfield registry foundation and live V0 contract package
+- fixture-first indexer/verifier packages and local launch-core generation
+- Base Sepolia reader path with explicit RPC URL and durable checkpoint output
+- Flow Memory V0 schemas and generated Rootflow transition fixtures
+- fixture-backed dashboard V0
+- crypto helper package and test vectors
+- local no-value devnet prototype
+- FlowRouter hardware POC docs, schemas, and simulator fixture
 - Documented URI/log-data limitations for the current contract skeleton
 
 ## Still Conceptual
 
 - Uniswap v4 hook integration
-- Indexer and verifier services
-- Complete Rootflow runtime implementation
-- Complete Flow Memory runtime implementation
+- Production indexer and verifier services
+- Production Rootflow runtime implementation
+- Production Flow Memory runtime implementation
 - FlowRouter hardware implementation
 - Meshtastic integration
-- Dashboard, explorer, and hardware console applications
+- Explorer and hardware console applications
 - Cryptographic proof systems
 - Appchain/L1 design and implementation
 

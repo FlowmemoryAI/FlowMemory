@@ -1,11 +1,18 @@
 import { FLOWPULSE_EVENT_TOPIC0, type RawFlowPulseLogFixture } from "../../shared/src/index.ts";
 
+export const BASE_SEPOLIA_CHAIN_ID = "84532";
+
 export interface LocalRpcReadOptions {
   rpcUrl: string;
   addresses: string[];
   fromBlock: string;
   toBlock: string;
   fetchImpl?: typeof fetch;
+}
+
+export interface RpcFlowPulseReadResult {
+  chainId: string;
+  logs: RawFlowPulseLogFixture[];
 }
 
 interface JsonRpcResponse<T> {
@@ -67,10 +74,16 @@ async function rpc<T>(fetchImpl: typeof fetch, rpcUrl: string, method: string, p
   return payload.result;
 }
 
-export async function readLocalRpcFlowPulseLogs(options: LocalRpcReadOptions): Promise<RawFlowPulseLogFixture[]> {
-  const fetchImpl = options.fetchImpl ?? fetch;
-  const chainIdQuantity = await rpc<string>(fetchImpl, options.rpcUrl, "eth_chainId", []);
-  const chainId = quantityToDecimalString(chainIdQuantity);
+async function readRpcChainId(fetchImpl: typeof fetch, rpcUrl: string): Promise<string> {
+  const chainIdQuantity = await rpc<string>(fetchImpl, rpcUrl, "eth_chainId", []);
+  return quantityToDecimalString(chainIdQuantity);
+}
+
+async function readRpcFlowPulseLogSetWithChainId(
+  options: LocalRpcReadOptions,
+  chainId: string,
+  fetchImpl: typeof fetch,
+): Promise<RpcFlowPulseReadResult> {
   const logs = await rpc<RpcLog[]>(fetchImpl, options.rpcUrl, "eth_getLogs", [{
     address: options.addresses,
     fromBlock: options.fromBlock,
@@ -96,5 +109,27 @@ export async function readLocalRpcFlowPulseLogs(options: LocalRpcReadOptions): P
     });
   }
 
-  return rawLogs;
+  return {
+    chainId,
+    logs: rawLogs,
+  };
+}
+
+export async function readLocalRpcFlowPulseLogs(options: LocalRpcReadOptions): Promise<RawFlowPulseLogFixture[]> {
+  return (await readRpcFlowPulseLogSet(options)).logs;
+}
+
+export async function readRpcFlowPulseLogSet(options: LocalRpcReadOptions): Promise<RpcFlowPulseReadResult> {
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const chainId = await readRpcChainId(fetchImpl, options.rpcUrl);
+  return readRpcFlowPulseLogSetWithChainId(options, chainId, fetchImpl);
+}
+
+export async function readBaseSepoliaFlowPulseLogs(options: LocalRpcReadOptions): Promise<RpcFlowPulseReadResult> {
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const chainId = await readRpcChainId(fetchImpl, options.rpcUrl);
+  if (chainId !== BASE_SEPOLIA_CHAIN_ID) {
+    throw new Error(`expected Base Sepolia chainId ${BASE_SEPOLIA_CHAIN_ID}, received ${chainId}`);
+  }
+  return readRpcFlowPulseLogSetWithChainId(options, chainId, fetchImpl);
 }

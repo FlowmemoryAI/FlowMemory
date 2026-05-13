@@ -20,7 +20,7 @@
       ],
       "properties": {
         "schema": { "const": "flowmemory.indexer.state.v0" },
-        "source": { "enum": ["fixture", "local-rpc-placeholder"] },
+        "source": { "enum": ["fixture", "local-rpc-placeholder", "base-sepolia-rpc"] },
         "observations": { "type": "array" },
         "pulses": { "type": "array" },
         "rootfields": { "type": "array" },

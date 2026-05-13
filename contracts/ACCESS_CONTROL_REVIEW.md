@@ -1,0 +1,131 @@
+# Contracts Access-Control Review
+
+Status: V0 launch hardening review.
+
+## Summary
+
+The current contracts use simple ownership or self-registration patterns. They do not implement staking, slashing, token custody, rewards, production governance, verifier consensus, or upgrade admin controls.
+
+## RootfieldRegistry
+
+Owner model: each `rootfieldId` has one owner.
+
+Owner-gated functions:
+
+- `submitRoot`
+- `deactivateRootfield`
+- `transferRootfieldOwnership`
+
+Current protections:
+
+- zero rootfield id rejected
+- duplicate rootfield id rejected
+- zero root rejected
+- inactive rootfield blocks root submission and transfer
+- zero new owner rejected
+- ownership transfer emits both a FlowPulse status event and a dedicated ownership event
+
+Launch risk to watch:
+
+- current ownership transfer uses `parentPulseId = bytes32(0)` by design; future versions may require explicit parent linkage.
+- URI fields are advisory event data, not trusted storage pointers.
+
+## Owner-Allowlist Registries
+
+Contracts:
+
+- `VerifierReportRegistry`
+- `WorkReceiptRegistry`
+
+Owner-gated functions:
+
+- `setVerifierAuthorization`
+- `setWorkerAuthorization`
+
+Submitter-gated functions:
+
+- `submitVerifierReport` requires an authorized verifier.
+- `submitWorkReceipt` requires an authorized worker.
+
+Current protections:
+
+- zero worker/verifier rejected
+- duplicate report/receipt id rejected
+- invalid report status rejected
+- invalid work lane rejected
+- zero target or commitment fields rejected
+
+Launch risk to watch:
+
+- deployer is permanent owner in V0; there is no multisig, timelock, or owner transfer.
+- allowlists are coordination controls, not decentralized verifier consensus.
+
+## Self-Registration Registries
+
+Contracts:
+
+- `WorkerRegistry`
+- `VerifierRegistry`
+
+Owner model: the registering address controls its own metadata lifecycle.
+
+Current protections:
+
+- duplicate registration rejected
+- zero operator id rejected
+- zero role rejected
+- inactive records cannot update again
+
+Launch risk to watch:
+
+- registration does not prove work quality, correctness, identity, or stake.
+
+## Per-Record Owner Registries
+
+Contracts:
+
+- `ArtifactRegistry`
+- `CursorRegistry`
+
+Owner-gated functions:
+
+- `deprecateArtifact`
+- `advanceCursor`
+
+Current protections:
+
+- zero ids and zero commitments rejected
+- duplicate records rejected
+- only the stored owner can mutate the record
+
+Launch risk to watch:
+
+- advisory URI strings are emitted as logs and are not validated content availability proofs.
+
+## Open Submission Contracts
+
+Contracts:
+
+- `ReceiptVerifier`
+- `WorkDebtScheduler`
+- `FlowMemoryHookAdapter`
+
+Current boundary:
+
+- `ReceiptVerifier` accepts first-writer receipt-report commitments and does not cryptographically verify receipts.
+- `WorkDebtScheduler` allows any scheduler to assign work to a nonzero worker and allows scheduler or worker to mark completion.
+- `FlowMemoryHookAdapter` validates nonzero inputs and emits an observation event; it is not a production Uniswap v4 hook.
+
+Launch risk to watch:
+
+- open submission is acceptable for V0 commitments only if docs and demos treat outputs as untrusted until off-chain verifier reports exist.
+
+## Required Review Before Expanding
+
+Before adding rewards, staking, slashing, custody, dynamic fees, production hook permissions, or appchain/L1 settlement:
+
+- create a threat model issue
+- require a separate review worktree
+- require event tests for every state transition
+- require static analysis with Slither
+- update this access-control review
