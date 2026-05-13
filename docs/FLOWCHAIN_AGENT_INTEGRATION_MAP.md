@@ -29,16 +29,14 @@ or setup flow.
 
 ## Current Coordination Facts
 
-- The merged repo has a stable V0 launch-core path and no-value local devnet
-  prototype.
-- HQ/Ops has added the Windows-first root wrapper layer for the current merged
+- The repo has a stable V0 launch-core path and no-value local devnet runtime.
+- HQ/Ops has added the Windows-first root wrapper layer for the current
   surfaces: prerequisite check, init, bounded start/stop, demo, smoke,
-  export/import, and workbench dev mode.
-- Active sibling worktrees contain unmerged Local Alpha work for devnet object
-  transitions, control-plane API, crypto object identity, hardware signal
-  projection, and research gates.
-- Unmerged worktree changes are not final source of truth. Treat them as
-  in-flight context until reviewed and merged.
+  full-smoke, export/import, control-plane serve, and workbench dev mode.
+- The current integration branch includes Local Alpha work for devnet object
+  transitions, control-plane API, crypto object identity, dashboard workbench
+  polish, and the real Uniswap v4 afterSwap hook candidate. It becomes source
+  of truth only after review and merge.
 - GitHub remains the source of truth for issues, pull requests, reviews, and
   final history.
 
@@ -60,13 +58,13 @@ or setup flow.
 ## Integration Sequence
 
 1. Keep `npm run launch:candidate` green as the V0 baseline.
-2. Land or refresh Local Alpha devnet object lifecycle work.
-3. Land or refresh crypto object identity and vectors for the same object set.
-4. Land control-plane API on top of existing fixture/devnet outputs.
-5. Extend the existing dashboard into a private testnet workbench.
+2. Keep Local Alpha devnet object lifecycle work green.
+3. Keep crypto object identity, envelopes, and vectors for the same object set green.
+4. Keep control-plane API on top of existing fixture/devnet outputs green.
+5. Keep extending the existing dashboard into a private testnet workbench.
 6. Add optional hardware signal fixtures after object/API labels are stable.
 7. Keep packaging scripts and root command aliases aligned as subsystem commands land.
-8. Run the second-computer smoke path and update acceptance evidence.
+8. Run `npm run flowchain:full-smoke` and update acceptance evidence.
 
 ## Duplicate-Work Stops
 

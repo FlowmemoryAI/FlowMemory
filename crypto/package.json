@@ -16,7 +16,10 @@
     "test": "node --test",
     "vectors": "node src/cli.js",
     "validate:vectors": "node src/validate-vectors.js",
-    "validate:local-alpha": "node src/validate-local-alpha-fixtures.js"
+    "validate:local-alpha": "node src/validate-local-alpha-fixtures.js",
+    "wallet:create": "node src/wallet-cli.js create",
+    "wallet:sign": "node src/wallet-cli.js sign",
+    "wallet:verify": "node src/wallet-cli.js verify"
   },
   "dependencies": {
     "@noble/hashes": "2.2.0",

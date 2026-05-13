@@ -1,8 +1,8 @@
 # FlowChain Local Control Plane API
 
-Status: local fixture-backed V0 contract.
+Status: local runtime/fixture-backed V0 contract.
 
-This document defines the local JSON-RPC 2.0 API for the FlowChain / FlowMemory control-plane. It gives dashboard, agent, verifier, and devnet tooling one deterministic read surface for FlowMemory objects.
+This document defines the local JSON-RPC 2.0 API for the FlowChain / FlowMemory control-plane. It gives dashboard, agent, verifier, and devnet tooling one deterministic local surface for FlowMemory objects, local runtime status, local file-backed transaction intake, and bridge-observation intake.
 
 It is not a production RPC endpoint, public L1 API, hosted service, wallet API, bridge API, token API, or verifier economics surface.
 
@@ -23,11 +23,13 @@ npm run control-plane:smoke
 npm run control-plane:serve
 ```
 
-The service uses deterministic local files only. It does not require secrets, wallets, RPC URLs, private keys, API keys, or production services.
+The service uses deterministic local files only. It does not require secrets, RPC URLs, private keys, API keys, or production services. Wallet metadata returned by this API is browser-safe public metadata only.
 
 Primary data sources:
 
 ```text
+devnet/local/state.json
+devnet/local/launch-v0-state.json
 fixtures/launch-core/flowmemory-launch-v0.json
 fixtures/launch-core/generated/devnet/state.json
 fixtures/launch-core/generated/devnet/indexer-handoff.json
@@ -37,9 +39,19 @@ services/indexer/out/indexer-state.json
 services/verifier/out/reports.json
 services/verifier/fixtures/artifacts.json
 fixtures/handoff/sample-txs.json
+services/bridge-relayer/out/bridge-observation.json
 ```
 
-If the generated launch-core fixture is missing, the service rebuilds the in-memory view from indexer/verifier outputs or raw fixture receipts and artifact fixtures. This recovery path is local and read-only from the API caller perspective.
+If local runtime state is missing, the service falls back to generated launch-core and committed fixtures. If the generated launch-core fixture is missing, the service rebuilds the in-memory view from indexer/verifier outputs or raw fixture receipts and artifact fixtures.
+
+Mutable local intake methods write ignored files only:
+
+```text
+devnet/local/intake/transactions.ndjson
+devnet/local/intake/bridge-observations.ndjson
+```
+
+All JSON-RPC responses and local intake payloads are scanned for private-key, mnemonic, seed phrase, RPC credential, API key, and webhook-shaped material.
 
 ## JSON-RPC Envelope
 
@@ -141,6 +153,22 @@ Params:
 
 Returns local no-value devnet state, handoff summaries, rootfield counts, work receipt counts, report counts, and optional block data.
 
+### `node_status`
+
+Params: none.
+
+Returns local node/control-plane status, runtime state source, latest block, latest root, object counters, and missing optional sources.
+
+### `peer_list`
+
+Params:
+
+```json
+{ "limit": 50 }
+```
+
+Returns local/private peer inventory when present. Current single-node mode returns local-only peer rows or an empty local list; it does not imply public validators.
+
 ### `block_list`
 
 Params:
@@ -194,6 +222,92 @@ Params: one of:
 ```json
 { "txHash": "0x..." }
 ```
+
+### `transaction_submit`
+
+Params:
+
+```json
+{
+  "signedTransaction": "{...}",
+  "transaction": {
+    "schema": "flowchain.local_transaction_envelope.v0"
+  },
+  "submittedBy": "local-operator"
+}
+```
+
+Accepts a production-shaped local test transaction envelope or plain local test object, rejects secret-shaped material, and appends an intake row to `devnet/local/intake/transactions.ndjson`. It does not broadcast to a public chain.
+
+### `mempool_list`
+
+Params:
+
+```json
+{ "limit": 50 }
+```
+
+Returns pending local transaction/intake rows.
+
+### `account_list`
+
+Params:
+
+```json
+{ "limit": 50 }
+```
+
+Returns local account/controller metadata, including devnet `AgentAccount` rows and projected local operator rows.
+
+### `account_get`
+
+Params:
+
+```json
+{ "accountId": "agent:demo:alpha" }
+```
+
+Returns one local account row.
+
+### `balance_get`
+
+Params:
+
+```json
+{ "accountId": "local-balance:demo:agent-alpha" }
+```
+
+Returns a no-value local test-unit balance record. This is not a token balance, reward, fee account, or bridge asset.
+
+### `faucet_event_list`
+
+Params:
+
+```json
+{ "limit": 50 }
+```
+
+Returns no-value local faucet records used by smoke tests.
+
+### `wallet_metadata_list`
+
+Params:
+
+```json
+{ "limit": 50 }
+```
+
+Returns browser-safe public wallet/operator metadata only. It must not include private key material.
+
+### `wallet_metadata_get`
+
+Params:
+
+```json
+{ "walletId": "agent:demo:alpha" }
+```
+
+Returns one public wallet/operator metadata row.
 
 ### `rootfield_get`
 
@@ -556,6 +670,61 @@ Params:
 
 All params are optional. Returns native finality receipts when present and projected local finality rows for launch-core receipts.
 
+### `bridge_observation_list`
+
+Params:
+
+```json
+{ "limit": 50 }
+```
+
+Returns local bridge observation rows from fixture or intake files. These are private/local test objects, not production bridge events.
+
+### `bridge_observation_get`
+
+Params: one of:
+
+```json
+{ "depositId": "0x..." }
+```
+
+```json
+{ "observationId": "0x..." }
+```
+
+### `bridge_observation_submit`
+
+Params:
+
+```json
+{
+  "observation": {
+    "schema": "flowmemory.bridge_deposit_observation.v0"
+  }
+}
+```
+
+Rejects secret-shaped material and writes an ignored local intake row to `devnet/local/intake/bridge-observations.ndjson`.
+
+HTTP bridge observation endpoints are also available:
+
+```text
+GET /bridge/observations
+POST /bridge/observations
+```
+
+### `bridge_deposit_list`, `bridge_deposit_get`
+
+Expose local bridge-deposit test objects. These do not imply a production bridge, withdrawal, lockbox, or asset claim.
+
+### `bridge_credit_list`, `bridge_credit_get`
+
+Expose local bridge-credit test objects. These are no-value local accounting objects only.
+
+### `withdrawal_list`, `withdrawal_get`
+
+Expose local bridge-withdrawal test objects. These do not release funds and do not imply bridge readiness.
+
 ### `provenance_get`
 
 Params: one of:
@@ -610,13 +779,15 @@ Returns the raw loaded local JSON object for dashboard/workbench debug views. It
 
 Dashboard agents should prefer:
 
-1. `health` and `chain_status` for source health and global counters.
-2. `block_list` and `transaction_list` for chain/devnet tables.
-3. `rootfield_list` and `rootfield_get` for Rootfield detail.
-4. `work_receipt_list`, `receipt_list`, `verifier_module_list`, and `verifier_report_list` for lifecycle tables.
-5. `receipt_get`, `work_receipt_get`, `verifier_report_get`, and `provenance_get` for detail drawers.
-6. `artifact_availability_list`, `memory_cell_list`, `agent_list`, and `model_list` for dashboard/workbench panels.
-7. `challenge_get`, `challenge_list`, `finality_get`, and `finality_list` for local fixture challenge/finality labels.
-8. `raw_json_get` for raw JSON inspection.
+1. `health`, `node_status`, and `chain_status` for source health and global counters.
+2. `block_list`, `transaction_list`, and `mempool_list` for chain/devnet tables.
+3. `account_list`, `balance_get`, `faucet_event_list`, and `wallet_metadata_list` for local identity and public metadata panels.
+4. `rootfield_list` and `rootfield_get` for Rootfield detail.
+5. `work_receipt_list`, `receipt_list`, `verifier_module_list`, and `verifier_report_list` for lifecycle tables.
+6. `receipt_get`, `work_receipt_get`, `verifier_report_get`, and `provenance_get` for detail drawers.
+7. `artifact_availability_list`, `memory_cell_list`, `agent_list`, and `model_list` for dashboard/workbench panels.
+8. `challenge_get`, `challenge_list`, `finality_get`, and `finality_list` for local challenge/finality labels.
+9. `bridge_observation_list`, `bridge_deposit_list`, `bridge_credit_list`, and `withdrawal_list` for local bridge-shaped test panels.
+10. `raw_json_get` for raw JSON inspection.
 
-The API is intentionally read-only for V0. Submit, challenge, wallet, live indexing, and production settlement methods require separate scoped work.
+The API is local-only for V0. The submit methods are local file intake, not public chain broadcast. Live indexing, production settlement, production wallet custody, and production bridge methods require separate scoped work.

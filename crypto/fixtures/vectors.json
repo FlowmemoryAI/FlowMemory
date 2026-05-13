@@ -1,6 +1,6 @@
 {
   "schema": "flowmemory.crypto.test-vectors.v0",
-  "vectorCount": 33,
+  "vectorCount": 38,
   "vectors": [
     {
       "name": "domain.flowPulseObservationId",
@@ -455,6 +455,89 @@
         "nonce": "0xe9b99686c583dbed5b3bf743c2a3db8a5da8c8ceea4398eb45d57c518c555034"
       },
       "expected": "0x55656083efaf8a511fbae76b2a1bb740b08c92959e506a14f489f0fedcef3279"
+    },
+    {
+      "name": "local-alpha.bridgeDepositId",
+      "function": "bridgeDepositId",
+      "input": {
+        "sourceChainId": 84532,
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+        "logIndex": 0,
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "20000000",
+        "sender": "0x4444444444444444444444444444444444444444",
+        "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "nonce": "1",
+        "metadataHash": "0x6666666666666666666666666666666666666666666666666666666666666666"
+      },
+      "expected": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe"
+    },
+    {
+      "name": "local-alpha.bridgeCreditId",
+      "function": "bridgeCreditId",
+      "input": {
+        "depositId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+        "recipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "assetId": "0x4b000bcf935e50d5fb7eacb8a8f4c226ad36a19810a389a39dae72ad1ec012e3",
+        "amount": "20000000",
+        "creditedAtBlockNumber": "3",
+        "creditedAtUnixMs": "1778702400000",
+        "status": 3,
+        "nonce": "0xbef2dad8fd23f339439a0c731866be73a74379128394f7beb6dc01cb4dbbcc91"
+      },
+      "expected": "0xb1d6d957acf4a61f52f1046c792815eab6e1b21f706c4aba88cb0efe2200d1cb"
+    },
+    {
+      "name": "local-alpha.bridgeWithdrawalId",
+      "function": "bridgeWithdrawalId",
+      "input": {
+        "accountId": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "destinationChainId": 84532,
+        "destinationContract": "0x7777777777777777777777777777777777777777",
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "5000000",
+        "recipient": "0x4444444444444444444444444444444444444444",
+        "requestedAtBlockNumber": "5",
+        "requestedAtUnixMs": "1778702400000",
+        "status": 4,
+        "nonce": "0x90a33185cd5337c093753c06818955d98ac711a9352d397ab3ccc5aee91921d2",
+        "metadataHash": "0xce908e6f85c929fed22796952391e6a53b656f92d31c1c5e7fb89883c7eeabe5"
+      },
+      "expected": "0x7612720b0b5c872c2325305a3dda6642f7cdabec1c20043663e4346cff5f7805"
+    },
+    {
+      "name": "local-alpha.localBalanceRecordId",
+      "function": "localBalanceRecordId",
+      "input": {
+        "accountId": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "assetId": "0x4b000bcf935e50d5fb7eacb8a8f4c226ad36a19810a389a39dae72ad1ec012e3",
+        "availableAmount": "15000000",
+        "lockedAmount": "5000000",
+        "lastCreditId": "0xb1d6d957acf4a61f52f1046c792815eab6e1b21f706c4aba88cb0efe2200d1cb",
+        "lastWithdrawalId": "0x7612720b0b5c872c2325305a3dda6642f7cdabec1c20043663e4346cff5f7805",
+        "stateRoot": "0xb49b915dddc40d2e762bec262f248b465d87a881b99b14a67642fbd377704b56",
+        "updatedAtBlockNumber": "5",
+        "nonce": "0x2d8034d0391a31483bc8f710ac19a333f617683632197ced2b9ff2b0ac03fdb7"
+      },
+      "expected": "0x7b4331b20142a093153ea7d07d226dbf824deaff3b517a203edd7f058de1b076"
+    },
+    {
+      "name": "local-alpha.localTransactionEnvelopeHash",
+      "function": "localTransactionEnvelopeHash",
+      "input": {
+        "chainId": "31337",
+        "domainSeparator": "0xff516fcab184623fe60f12b4d1e0430a57e6d18685d1356887ada50f5f20b36c",
+        "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+        "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+        "signerRole": 1,
+        "nonce": "1",
+        "payloadHash": "0x485a6896d8ee1c67440b6dddf723f0378c4f51d7448e487effe5f337656f0908",
+        "objectId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+        "objectTypeHash": "0x97bcbbe7a3f24fdb7cab668fc751ca8757b59b3fe8ed71674fdaca140a22d408",
+        "issuedAtUnixMs": "1778702400000"
+      },
+      "expected": "0xb8de3add81640848961aa8e0ba73c5c2ff3e30aed480dbba8e70d1345dba6210"
     }
   ]
 }

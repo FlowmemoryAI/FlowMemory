@@ -39,9 +39,10 @@ Completion gate: the milestone is not accepted until `docs/FLOWCHAIN_TESTNET_ACC
 marks the private/local package path implemented and records the exact commands,
 generated outputs, deterministic replay evidence, control-plane query evidence,
 workbench evidence, and `git diff --check` result. The HQ wrapper command layer
-now exists, but the native object lifecycle, long-running runtime behavior,
-control-plane coverage, and workbench entity coverage still have to land behind
-those wrappers.
+now includes `npm run flowchain:full-smoke`, which is the acceptance gate for
+the current private/local package. Long-running multi-process node behavior,
+LAN peer mode, and production/keystore-backed custody behavior remain later
+local-runtime work.
 
 Non-goals:
 
@@ -75,8 +76,8 @@ Status: active maintenance.
 Status: implemented as a local/test foundation; hardening still active.
 
 - Minimal Foundry config and contract tests exist.
-- `FlowPulse`, `RootfieldRegistry`, hook-adapter scaffold, artifact/cursor/worker/verifier/work registries, receipt verifier, work receipt registry, verifier report registry, and scheduler skeletons exist.
-- `forge test` currently runs 36 passing tests.
+- `FlowPulse`, `RootfieldRegistry`, hook-adapter scaffold, afterSwap hook candidate/planner, artifact/cursor/worker/verifier/work registries, receipt verifier, work receipt registry, verifier report registry, and scheduler skeletons exist.
+- `forge test` currently runs 70 passing tests.
 - FlowPulse v0 and Rootfield URI/log-data decisions are documented.
 - Static-analysis runner, deployment boundary, and access-control review docs exist.
 - Define status lifecycle, ownership/recovery, and namespace policy before expanding deployment scope.
@@ -105,8 +106,8 @@ Status: implemented as fixture-first services plus generated launch-core state; 
 ### Phase 3: FlowChain Private/Local Testnet Package
 
 Status: active packaging and next-wave build coordination. The Windows-first
-root wrapper layer exists for current merged surfaces; subsystem completion is
-still required for the full private/local object lifecycle.
+root wrapper layer and full-smoke command exist for the current private/local
+object lifecycle; subsystem polish remains active behind the same surfaces.
 
 - Extend the existing Rust devnet into the single private/local runtime surface.
 - Extend the existing service packages into one local control-plane API.

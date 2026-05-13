@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Activity, Database, Network, Search, Server, Terminal } from "lucide-react";
+import { Activity, Database, Network, PlayCircle, Search, Server, Terminal } from "lucide-react";
 import { EmptyState } from "../components/EmptyState";
 import { HashValue } from "../components/HashValue";
 import { ProvenanceLine } from "../components/ProvenanceLine";
@@ -8,7 +8,7 @@ import { StatusBadge } from "../components/StatusBadge";
 import type { DashboardData, DashboardStatus } from "../data/types";
 import { WORKBENCH_SECTIONS, type WorkbenchRecord, type WorkbenchSectionKey, type WorkbenchSnapshot } from "../data/workbench";
 
-const DEFAULT_SECTION: WorkbenchSectionKey = "blocks";
+const DEFAULT_SECTION: WorkbenchSectionKey = "nodeStatus";
 
 function displayValue(value: string) {
   if (value.startsWith("0x") && value.length > 18) {
@@ -31,9 +31,14 @@ function recordMatches(record: WorkbenchRecord, query: string): boolean {
   return JSON.stringify(record).toLowerCase().includes(normalized);
 }
 
+function missingStateDetail(activeDefinition: (typeof WORKBENCH_SECTIONS)[number]): string {
+  return `${activeDefinition.missingService} did not provide records for ${activeDefinition.expectedEndpoint}. Run ${activeDefinition.missingCommand} locally, then refresh this dashboard.`;
+}
+
 export function WorkbenchView({ data, workbench }: { data: DashboardData; workbench: WorkbenchSnapshot }) {
   const [activeSection, setActiveSection] = useState<WorkbenchSectionKey>(DEFAULT_SECTION);
   const [query, setQuery] = useState("");
+  const [actionResult, setActionResult] = useState<string | null>(null);
   const activeDefinition = WORKBENCH_SECTIONS.find((section) => section.key === activeSection) ?? WORKBENCH_SECTIONS[0];
   const activeRecords = workbench.sections[activeSection] ?? [];
   const filteredRecords = useMemo(
@@ -41,6 +46,21 @@ export function WorkbenchView({ data, workbench }: { data: DashboardData; workbe
     [activeRecords, query],
   );
   const sourceStatus: DashboardStatus = workbench.source === "control-plane" ? "verified" : "stale";
+
+  const runLocalAction = async (endpoint: string, label: string) => {
+    const [method, path] = endpoint.split(/\s+/, 2);
+    setActionResult(`${label}: sending ${endpoint}`);
+
+    try {
+      const response = await fetch(`${workbench.controlPlane.url}${path}`, {
+        method,
+        headers: { Accept: "application/json" },
+      });
+      setActionResult(`${label}: ${response.status} ${response.statusText || "response"}`.trim());
+    } catch (error) {
+      setActionResult(`${label}: ${error instanceof Error ? error.message : "request failed"}`);
+    }
+  };
 
   return (
     <div className="view-stack">
@@ -105,6 +125,44 @@ export function WorkbenchView({ data, workbench }: { data: DashboardData; workbe
         </article>
       </section>
 
+      <section className="panel workbench-api-panel">
+        <div className="panel-heading">
+          <div>
+            <Network size={18} aria-hidden="true" />
+            <h2>Control-plane endpoints and local actions</h2>
+          </div>
+          <span>{workbench.controlPlane.endpoints.length} advertised/probed</span>
+        </div>
+        <div className="endpoint-strip" aria-label="Control-plane endpoint status">
+          {workbench.controlPlane.endpoints.map((endpoint) => (
+            <span key={endpoint}>{endpoint}</span>
+          ))}
+        </div>
+        {workbench.actions.length > 0 ? (
+          <div className="local-action-grid">
+            {workbench.actions.map((action) => (
+              <article key={action.endpoint}>
+                <div>
+                  <strong>{action.label}</strong>
+                  <code>{action.endpoint}</code>
+                  <small>{action.boundary}</small>
+                </div>
+                <button className="button" type="button" onClick={() => runLocalAction(action.endpoint, action.label)}>
+                  <PlayCircle size={15} aria-hidden="true" />
+                  Run
+                </button>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            title="No browser-safe local actions are advertised"
+            detail={`The dashboard only renders action buttons after ${workbench.controlPlane.url}/health or /state advertises a matching POST endpoint. Start ${activeDefinition.missingCommand} if you expect local actions.`}
+          />
+        )}
+        {actionResult ? <p className="action-result">{actionResult}</p> : null}
+      </section>
+
       {workbench.loadIssues.length > 0 ? (
         <section className="workbench-warning" role="status">
           <Activity size={18} aria-hidden="true" />
@@ -125,19 +183,24 @@ export function WorkbenchView({ data, workbench }: { data: DashboardData; workbe
           </div>
         </article>
         <article className="metric-tile">
-          <span>Blocks</span>
-          <strong>{workbench.sections.blocks.length}</strong>
+          <span>Node views</span>
+          <strong>{workbench.sections.nodeStatus.length}</strong>
           <div>
-            <StatusBadge status={workbench.sections.blocks.length > 0 ? "finalized" : "pending"} compact />
-            <small>state-root records</small>
+            <StatusBadge status={workbench.node.status} compact />
+            <small>health and state</small>
           </div>
         </article>
         <article className="metric-tile">
-          <span>Transactions</span>
-          <strong>{workbench.sections.transactions.length}</strong>
+          <span>Chain objects</span>
+          <strong>
+            {workbench.sections.blocks.length +
+              workbench.sections.transactions.length +
+              workbench.sections.mempool.length +
+              workbench.sections.accounts.length}
+          </strong>
           <div>
             <StatusBadge status={workbench.sections.transactions.length > 0 ? "verified" : "pending"} compact />
-            <small>receipt-linked</small>
+            <small>blocks txs accounts</small>
           </div>
         </article>
         <article className="metric-tile">
@@ -213,7 +276,7 @@ export function WorkbenchView({ data, workbench }: { data: DashboardData; workbe
           ) : (
             <EmptyState
               title={`No ${activeDefinition.label.toLowerCase()} in the current source`}
-              detail={`The workbench view is wired for ${activeDefinition.expectedEndpoint}; deterministic fallback data will appear here when the existing runtime or control-plane exports it.`}
+              detail={missingStateDetail(activeDefinition)}
             />
           )}
         </article>

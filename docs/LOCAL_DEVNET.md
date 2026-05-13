@@ -1,10 +1,10 @@
 # FlowMemory Local Devnet
 
-Status: runnable no-value local runtime
+Status: runnable no-value private/local runtime
 
-The local FlowMemory devnet is a Rust CLI that models FlowMemory appchain-style state transitions without production consensus, tokenomics, bridge assets, public validator onboarding, or mainnet claims.
+The local FlowMemory devnet is a Rust CLI that models FlowMemory appchain-style state transitions without production consensus, tokenomics, bridge assets, public validator onboarding, or mainnet claims. It is the current private/local FlowChain runtime surface for second-computer validation.
 
-It is local/no-value only. It has no balances, rewards, staking, gas economics, bridge security, or production deployment behavior.
+It is local/no-value only. It has local test-unit balance and faucet records for runtime smoke and dashboard/control-plane testing, but those records are not tokens, rewards, staking, gas economics, bridge assets, or production deployment behavior.
 
 ## Framework Decision
 
@@ -35,6 +35,7 @@ Windows-first root wrappers:
 npm run flowchain:init
 npm run flowchain:start
 npm run flowchain:demo
+npm run flowchain:full-smoke
 npm run flowchain:export
 npm run flowchain:stop
 ```
@@ -97,11 +98,22 @@ cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- start --blocks 
 
 `run --blocks 3` is an alias for `start --blocks 3`.
 
+Run the single-node runtime for at least 10 persisted local blocks:
+
+```powershell
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- start --blocks 10
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- inspect-state --summary
+```
+
+The second command reloads `devnet/local/state.json`, so it verifies the latest block height and parent hash survived process restart.
+
 Run the full smoke flow:
 
 ```powershell
 cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- smoke
 ```
+
+`smoke` now builds the native object lifecycle, writes state and handoff files, produces 10 deterministic local blocks, and proves deterministic single-node reconciliation by replaying the same flow twice and comparing block hashes, latest parent hash, state root, and map roots. LAN and multi-node networking are not exposed in this crate yet.
 
 Import a FlowPulse observation fixture:
 
@@ -147,20 +159,22 @@ The demo:
 3. Registers a rootfield.
 4. Registers a model passport.
 5. Registers an agent account.
-6. Registers a verifier module identity.
-7. Submits an artifact commitment.
-8. Marks artifact availability with a local proof/status object.
-9. Commits a latest root.
-10. Submits a work receipt.
-11. Submits an accepted verifier report.
-12. Updates a memory cell from the accepted receipt.
-13. Opens and resolves a challenge.
-14. Finalizes the work receipt.
-15. Builds block 1.
-16. Creates a Base settlement anchor placeholder with deterministic map roots.
-17. Builds block 2.
-18. Writes state to `devnet/local/state.json`.
-19. Exports dashboard, indexer, verifier, control-plane, config, key-reference, and full-state handoff files to `fixtures/handoff/generated/`.
+6. Creates a local no-value test-unit balance record for the agent.
+7. Credits that balance with a local no-value faucet record.
+8. Registers a verifier module identity.
+9. Submits an artifact commitment.
+10. Marks artifact availability with a local proof/status object.
+11. Commits a latest root.
+12. Submits a work receipt.
+13. Submits an accepted verifier report.
+14. Updates a memory cell from the accepted receipt.
+15. Opens and resolves a challenge.
+16. Finalizes the work receipt.
+17. Builds block 1.
+18. Creates a Base settlement anchor placeholder with deterministic map roots.
+19. Builds block 2.
+20. Writes state to `devnet/local/state.json`.
+21. Exports dashboard, indexer, verifier, control-plane, config, key-reference, and full-state handoff files to `fixtures/handoff/generated/`.
 
 ## State Model
 
@@ -170,6 +184,8 @@ The prototype stores:
 - `operatorKeyReferences`
 - `rootfields`
 - `agentAccounts`
+- `localTestUnitBalances`
+- `faucetRecords`
 - `modelPassports`
 - `memoryCells`
 - `challenges`
@@ -185,7 +201,7 @@ The prototype stores:
 - `blocks`
 - `pendingTxs`
 
-There are no token balances and no gas accounting.
+`localTestUnitBalances` and `faucetRecords` are deterministic, no-value local records for runtime testing only. They are not token balances and there is no gas accounting.
 
 ## Transaction Types
 
@@ -193,6 +209,8 @@ Supported local transactions:
 
 - `RegisterRootfield`
 - `RegisterAgent`
+- `CreateLocalTestUnitBalance`
+- `FaucetLocalTestUnits`
 - `RegisterModelPassport`
 - `CommitRoot`
 - `SubmitArtifactCommitment`
@@ -211,6 +229,8 @@ Supported local transactions:
 ## Local Lifecycle Rules
 
 - Agent and model records are identity/provenance records only; they do not hold balances.
+- Local test-unit balance records are no-value runtime fixtures only; they do not create a token, monetary claim, fee market, staking role, reward, or bridge asset.
+- Faucet records require an existing local test-unit balance, a unique faucet record id, and a positive amount.
 - Work receipts must reference an existing artifact commitment in the same rootfield.
 - Verifier reports must reference an existing active verifier module and an existing receipt in the same rootfield.
 - Memory cells can be created or updated only from an existing work receipt with an accepted local verifier report.
@@ -234,7 +254,7 @@ Each block has:
 
 The devnet uses deterministic logical time and canonical JSON with Keccak-256. Tests prove the same inputs produce the same state root and block hash.
 
-`inspect-state --summary`, exported handoff files, and Base anchor placeholders include deterministic roots for the local maps, including operator key references, agent accounts, model passports, memory cells, challenges, finality receipts, artifact availability proofs, verifier modules, work receipts, and verifier reports.
+`inspect-state --summary`, exported handoff files, and Base anchor placeholders include deterministic roots for the local maps, including operator key references, agent accounts, local test-unit balances, faucet records, model passports, memory cells, challenges, finality receipts, artifact availability proofs, verifier modules, work receipts, and verifier reports.
 
 ## Persistence
 
@@ -261,6 +281,12 @@ Generated exports:
 The generated dashboard, indexer, verifier, and state outputs include the expanded local object maps and deterministic map roots. These are local prototype outputs. Review before committing generated copies.
 
 The control-plane handoff contains the current chain id, latest block, blocks, pending transactions, object maps, deterministic map roots, genesis config, and operator key references. It is intended for local services to consume without reading ignored `devnet/local/` files.
+
+Control-plane and dashboard agents should read:
+
+- `objects.localTestUnitBalances` and `objects.faucetRecords` from `control-plane-handoff.json`.
+- Top-level `localTestUnitBalances` and `faucetRecords` from `dashboard-state.json`.
+- `mapRoots.localTestUnitBalanceRoot` and `mapRoots.faucetRecordRoot` anywhere map-root reconciliation is needed.
 
 ## Non-Goals
 

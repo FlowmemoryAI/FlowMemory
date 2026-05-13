@@ -14,12 +14,22 @@ export type JsonObject = { [key: string]: JsonValue | undefined };
 
 export type ControlPlaneMethod =
   | "health"
+  | "node_status"
+  | "peer_list"
   | "chain_status"
   | "devnet_state"
   | "block_get"
   | "block_list"
+  | "mempool_list"
   | "transaction_get"
   | "transaction_list"
+  | "transaction_submit"
+  | "account_get"
+  | "account_list"
+  | "balance_get"
+  | "faucet_event_list"
+  | "wallet_metadata_get"
+  | "wallet_metadata_list"
   | "rootfield_get"
   | "rootfield_list"
   | "artifact_get"
@@ -43,6 +53,15 @@ export type ControlPlaneMethod =
   | "challenge_list"
   | "finality_get"
   | "finality_list"
+  | "bridge_observation_get"
+  | "bridge_observation_list"
+  | "bridge_observation_submit"
+  | "bridge_deposit_get"
+  | "bridge_deposit_list"
+  | "bridge_credit_get"
+  | "bridge_credit_list"
+  | "withdrawal_get"
+  | "withdrawal_list"
   | "provenance_get"
   | "raw_json_get";
 
@@ -51,11 +70,16 @@ export interface ControlPlanePaths {
   indexerPath: string;
   verifierPath: string;
   artifactsPath: string;
+  localDevnetPath: string;
+  localDevnetLaunchPath: string;
   devnetPath: string;
   devnetIndexerHandoffPath: string;
   devnetVerifierHandoffPath: string;
   devnetControlPlaneHandoffPath: string;
   txFixturesPath: string;
+  txIntakePath: string;
+  bridgeObservationPath: string;
+  bridgeObservationIntakePath: string;
 }
 
 export interface DataSourceRecord {
@@ -77,6 +101,9 @@ export interface LoadedControlPlaneState {
   devnetVerifierHandoff: JsonObject | null;
   devnetControlPlaneHandoff: JsonObject | null;
   txFixtures: JsonObject | null;
+  txIntake: JsonObject[];
+  bridgeObservations: JsonObject[];
+  paths: ControlPlanePaths;
   sources: Record<string, DataSourceRecord>;
 }
 

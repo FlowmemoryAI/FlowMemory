@@ -105,14 +105,15 @@ npm run flowchain:demo
 npm run flowchain:export
 ```
 
-Run the merged-surface smoke path when Foundry, Python, Visual Studio Build
-Tools C++ workload, dashboard dependencies, and crypto dependencies are
+Run the private/local acceptance smoke path when Foundry, Python, Visual Studio
+Build Tools C++ workload, dashboard dependencies, and crypto dependencies are
 installed:
 
 ```powershell
 npm install --prefix apps/dashboard
 npm install --prefix crypto
 npm run flowchain:smoke
+npm run flowchain:full-smoke
 ```
 
 Run the existing dashboard as the local workbench:

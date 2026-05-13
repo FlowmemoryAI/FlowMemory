@@ -61,6 +61,10 @@ pre-hashed before entering the typed object.
 | MemoryCell | `memoryCellId` | `memoryCellV0` | `memoryCellId` | `memoryCellId` |
 | Challenge | `challengeId` | `challengeV0` | `challengeId` | `challengeId` |
 | FinalityReceipt | `finalityReceiptId` | `finalityReceiptV0` | `finalityReceiptId` | `finalityReceiptId` |
+| BridgeDeposit | `depositId` | `bridgeDepositV0` | `bridgeDepositId` | `bridgeDepositId` |
+| BridgeCredit | `creditId` | `bridgeCreditV0` | `bridgeCreditId` | `bridgeCreditId` |
+| BridgeWithdrawal | `withdrawalId` | `bridgeWithdrawalV0` | `bridgeWithdrawalId` | `bridgeWithdrawalId` |
+| Local balance record | `balanceRecordId` | `localBalanceRecordV0` | `localBalanceRecordId` | `localBalanceRecordId` |
 | HardwareSignalEnvelope | `hardwareSignalEnvelopeId` | `hardwareSignalEnvelopeV0` | `hardwareSignalEnvelopeId` | `hardwareSignalEnvelopeId` |
 | Control-plane provenance response | `provenanceResponseId` | `controlPlaneProvenanceResponseV0` | `controlPlaneProvenanceResponseId` | `controlPlaneProvenanceResponseId` |
 
@@ -76,6 +80,13 @@ second receipt/report identity system.
 domain separator, signer ID, signer key ID, signer role, sequence, validity
 window, and nonce. The signing digest is the local EIP-712 style digest over
 that struct hash and the object domain separator.
+
+`LocalTransactionEnvelope` uses `localTransactionEnvelopeV0` and
+`localTransactionEnvelopeHash`. It signs the local chain id, transaction domain
+separator, signer ID, signer key ID, signer role, transaction nonce, canonical
+JSON payload hash, object ID, object type hash, and issue time. The transaction
+domain is chain-bound as
+`flowchain.local-alpha.v0.local-transaction-envelope:chain:<chainId>`.
 
 Runnable definitions live in `crypto/src/objects.js`.
 
@@ -103,8 +114,13 @@ schemas/flowmemory/verifier-module.schema.json
 schemas/flowmemory/verifier-report.schema.json
 schemas/flowmemory/challenge.schema.json
 schemas/flowmemory/finality-receipt.schema.json
+schemas/flowmemory/bridge-deposit.schema.json
+schemas/flowmemory/bridge-credit.schema.json
+schemas/flowmemory/bridge-withdrawal.schema.json
+schemas/flowmemory/local-balance-record.schema.json
 schemas/flowmemory/hardware-signal-envelope.schema.json
 schemas/flowmemory/local-signature-envelope.schema.json
+schemas/flowmemory/local-transaction-envelope.schema.json
 schemas/flowmemory/control-plane-provenance-response.schema.json
 ```
 
@@ -119,6 +135,16 @@ Local Alpha accepts four signer roles:
 | `verifier` | local verifier module/report signer | Signs verifier modules, verifier reports, and finality receipts as testnet statements, not trustless proofs. |
 | `hardware` | FlowRouter or simulator device key | Signs low-bandwidth control envelopes only. Heavy payloads remain off-chain. |
 
+## Local Test Wallet Boundary
+
+`crypto/src/wallet.js` implements an encrypted local test vault for private/local
+smoke runs. It supports create, unlock, public account listing, public metadata
+export, transaction signing, verification, account addition, and key rotation.
+The vault encrypts private keys with scrypt plus AES-256-GCM. Public metadata
+exports intentionally omit private keys, mnemonics, seed material, and
+ciphertext. This is a local test utility, not production custody or audited key
+management.
+
 Envelope validation requires:
 
 - `objectSchema`, `objectType`, and `objectTypeHash` match the document schema.
@@ -131,10 +157,11 @@ Envelope validation requires:
 - the caller supplies replay context and rejects repeated signer/domain/sequence tuples.
 - critical object hashes are nonzero, dependency roots are well-formed, parent/root relationships are coherent, and the object type is not swapped.
 
-The fixture validator covers invalid vectors for replay, wrong domain, missing
-signer, bad signature, zero hash, malformed ID, malformed dependency, bad
-parent/root, and wrong object type. Every Local Alpha object envelope also has a
-valid fixture and a bad-signature invalid fixture.
+The fixture validator covers invalid vectors for replay, wrong chain id, wrong
+domain, wrong signer, missing signer, bad signature, zero hash, malformed ID,
+malformed dependency, malformed bridge deposit, bad parent/root, and wrong
+object type. Every Local Alpha object envelope also has a valid fixture and a
+bad-signature invalid fixture.
 
 ## Consumer Rules
 
@@ -178,6 +205,7 @@ V0 also proves:
 - domain/type-string separation for each object class;
 - malformed hex rejection for bytes32/address fields;
 - canonical JSON stability for pre-hashed control-plane response bodies;
+- chain-bound transaction envelope signatures over payload hashes and nonces;
 - duplicate ID detection in fixture validation;
 - explicit finality and challenge state labels for local/test consumers.
 

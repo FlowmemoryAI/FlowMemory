@@ -35,10 +35,10 @@ Status vocabulary for this milestone:
 | Area | Existing surface to extend | Current merged status | Active work to treat as in flight |
 | --- | --- | --- | --- |
 | Launch core | `npm run launch:v0`, `npm run launch:candidate`, `fixtures/launch-core/`, `schemas/flowmemory/` | Implemented local/test V0 foundation | Keep as the compatibility baseline for private testnet objects. |
-| Devnet/runtime | `crates/flowmemory-devnet/`, `docs/LOCAL_DEVNET.md` | Implemented no-value deterministic prototype | Local Alpha work expands native object transitions and lifecycle tests. |
-| Contracts spine | `contracts/`, `tests/`, FlowPulse and registry skeletons | Implemented local/test settlement/event foundation | Contracts work should remain optional settlement/event spine. |
+| Devnet/runtime | `crates/flowmemory-devnet/`, `docs/LOCAL_DEVNET.md` | Implemented no-value deterministic runtime with native object lifecycle and 10-block smoke replay. | Continue polishing long-running and LAN boundaries without creating a second runtime. |
+| Contracts spine | `contracts/`, `tests/`, FlowPulse, registry skeletons, hook adapter, and afterSwap hook candidate/planner | Implemented local/test settlement/event foundation plus real hook-path candidate. | Contracts work should remain optional settlement/event spine. |
 | Crypto/object identity | `crypto/`, `crypto/fixtures/`, `schemas/flowmemory/` | Implemented V0 hash helpers and vectors | Local Alpha work adds object IDs for agent, model, memory, challenge, and finality objects. |
-| Indexer/verifier/control plane | `services/indexer/`, `services/verifier/`, `services/flowmemory/` | Implemented fixture-first indexer/verifier and generator | Local Alpha work adds `services/control-plane/` as the local API. |
+| Indexer/verifier/control plane | `services/indexer/`, `services/verifier/`, `services/flowmemory/`, `services/control-plane/` | Implemented fixture-first indexer/verifier/generator plus local control-plane API and smoke client. | Continue extending the same control-plane surface. |
 | Dashboard/workbench | `apps/dashboard/` and generated dashboard fixtures | Implemented fixture-backed dashboard V0 | Workbench work should extend this app, not create a second dashboard. |
 | Hardware/operator signals | `hardware/`, `fixtures/hardware/`, simulator | Implemented FlowRouter POC and simulator | Local Alpha work maps optional operator signals into private testnet views. |
 | Research gates | `research/`, `docs/DECISIONS/` | Implemented research docs and guardrails | Local Alpha research gates Process-Witness, SEAL, private state, and public L1 work. |
@@ -53,18 +53,19 @@ change only if the second-computer setup guide names the chosen commands.
 | Clone repo | `git clone https://github.com/FlowmemoryAI/FlowMemory.git` | Implemented by GitHub. |
 | Install JS dependencies | `npm install` | Implemented for current npm workspaces. Dashboard still needs its own install unless package metadata changes. |
 | Test devnet | `cargo test --manifest-path crates/flowmemory-devnet/Cargo.toml` | Implemented. |
-| Test service packages | `npm test` | Implemented for merged service packages; control-plane tests are active unmerged work. |
+| Test service packages | `npm test` | Implemented for merged service packages, including control-plane tests. |
 | Run launch candidate gate | `npm run launch:candidate` | Implemented V0 local/test gate. |
 | Initialize private testnet | `npm run flowchain:init` | Implemented wrapper over the existing devnet `init`; also writes ignored local operator metadata under `devnet/local/`. |
 | Start private testnet | `npm run flowchain:start` | Implemented bounded wrapper that prepares launch-core fixtures and inspects local state. Current devnet is still CLI/demo oriented, not a long-running node. |
 | Run deterministic demo | `npm run flowchain:demo` | Implemented wrapper over the existing devnet `demo`. |
-| Run full smoke test | `npm run flowchain:smoke` | Implemented for merged surfaces: services, crypto tests/vectors, launch candidate, devnet tests, deterministic replay, dashboard build, hardware fixture, unsafe-claim scan, and no-secret export scan. Native object/control-plane coverage remains blocked on subsystem work. |
+| Run smoke test | `npm run flowchain:smoke` | Implemented for current private/local surfaces: services, crypto tests/vectors, launch candidate, devnet tests, control-plane smoke client, deterministic replay, dashboard build, hardware fixture, unsafe-claim scan, and no-secret export scan. |
+| Run full acceptance smoke | `npm run flowchain:full-smoke` | Implemented wrapper over `flowchain:smoke` plus `git diff --check` and a generated full-smoke report. This is the current local acceptance gate. |
 | Export state | `npm run flowchain:export` | Implemented wrapper over `export-fixtures`; writes ignored export bundles under `devnet/local/export/`. |
 | Import state | `npm run flowchain:import -- --BundlePath <zip> -Force` | Implemented script path for local state restore from an exported bundle. |
 | Start local workbench | `npm run workbench:dev` | Implemented wrapper over the existing dashboard dev server. |
 | Prerequisite check | `npm run flowchain:prereq` | Implemented Windows-first prerequisite and dependency-state check. |
 | Stop private testnet | `npm run flowchain:stop` | Implemented operator-state wrapper; can reset ignored local state with `-ResetLocalState`. |
-| Start control plane | documented local API command | In flight in `services/control-plane/`; active command is `npm run control-plane:serve` in the control-plane worktree. |
+| Start control plane | `npm run control-plane:serve` | Implemented local API service for private/local inspection. |
 
 ## Target Native Objects
 
@@ -117,10 +118,11 @@ Current HQ/Ops completion for this pass:
 
 - The second-computer command names now exist at the repo root.
 - The commands exercise the current merged launch-core, Rust devnet,
-  dashboard, hardware simulator, export, import, and claim-guardrail surfaces.
-- The full private object lifecycle is still owned by the chain, crypto,
-  control-plane, and dashboard workstreams named in
-  `docs/FLOWCHAIN_AGENT_INTEGRATION_MAP.md`.
+  dashboard, hardware simulator, export, import, control-plane smoke, and
+  claim-guardrail surfaces.
+- The full private/local object lifecycle is exercised by the devnet and
+  control-plane smoke path. Remaining work should polish these same surfaces
+  rather than creating parallel runtimes.
 
 ## Non-Goals
 

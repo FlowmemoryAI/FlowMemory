@@ -16,8 +16,13 @@ These schemas are the canonical local/test V0 shapes for generated Flow Memory a
 - `verifier-report.schema.json`
 - `challenge.schema.json`
 - `finality-receipt.schema.json`
+- `bridge-deposit.schema.json`
+- `bridge-credit.schema.json`
+- `bridge-withdrawal.schema.json`
+- `local-balance-record.schema.json`
 - `hardware-signal-envelope.schema.json`
 - `local-signature-envelope.schema.json`
+- `local-transaction-envelope.schema.json`
 - `control-plane-provenance-response.schema.json`
 
 `memory-signal.schema.json` also embeds the `flowmemory.flowpulse_contract_event.v0`
@@ -37,6 +42,10 @@ without importing research-only SHA-256 or proof-system scaffolds.
 agent, verifier, and hardware signature envelope that wraps these object IDs.
 The schema is paired with the validator in `crypto/src/objects.js`; consumers
 should validate both JSON shape and recomputed cryptographic fields.
+
+`local-transaction-envelope.schema.json` describes the chain-bound local/private
+transaction envelope consumed by the private L1 package. It binds the chain id,
+domain separator, nonce, signer, payload hash, object ID, and signature.
 
 Run the canonical Local Alpha schema/fixture check from the crypto package:
 

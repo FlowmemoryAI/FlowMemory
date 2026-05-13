@@ -1,5 +1,6 @@
+import { findSecret } from "../../shared/src/index.ts";
 import { CONTROL_PLANE_METHODS, callControlPlaneMethod } from "./methods.ts";
-import { JSON_RPC_ERROR_CODES, ControlPlaneError, methodNotFound, rpcError } from "./errors.ts";
+import { JSON_RPC_ERROR_CODES, ControlPlaneError, methodNotFound, rpcError, secretRejected } from "./errors.ts";
 import type {
   ControlPlaneContext,
   JsonValue,
@@ -58,6 +59,10 @@ export function dispatchJsonRpc(
 
   try {
     const result = callControlPlaneMethod(request.method, request.params as JsonValue | undefined, context);
+    const finding = findSecret(result);
+    if (finding !== null) {
+      throw secretRejected("control-plane response contained secret-shaped material", finding);
+    }
     if (!("id" in request)) {
       return undefined;
     }

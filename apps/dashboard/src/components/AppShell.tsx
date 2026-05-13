@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   Activity,
   Bell,
@@ -42,6 +42,20 @@ const NAV_ITEMS = [
 ];
 
 export function AppShell({ data, canaryData, workbench, children }: AppShellProps) {
+  const location = useLocation();
+  const isCanaryRoute = location.pathname.startsWith("/canary");
+  const activeData = isCanaryRoute && canaryData ? canaryData : data;
+  const bannerMode = isCanaryRoute
+    ? {
+        lead: "Canary-only review active.",
+        detail:
+          "This route uses the guarded Base canary fixture and keeps local fixture/V0 workbench views separate. It is not a production launch or production-readiness claim.",
+      }
+    : {
+        lead: workbench.source === "control-plane" ? "Local API detected." : "Fixture fallback active.",
+        detail: `Runtime JSON is loaded from ${data.metadata.runtimeDataPath}; control-plane integration probes ${workbench.controlPlane.url} and falls back to deterministic fixture data when unavailable.`,
+      };
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -73,22 +87,19 @@ export function AppShell({ data, canaryData, workbench, children }: AppShellProp
       <div className="workspace">
         <header className="topbar">
           <div>
-            <span className="eyebrow">local operator surface</span>
-            <h2>{data.chain.name}</h2>
+            <span className="eyebrow">{isCanaryRoute ? "guarded canary surface" : "local operator surface"}</span>
+            <h2>{activeData.chain.name}</h2>
           </div>
           <div className="topbar-meta" aria-label="Data provenance">
-            <span>chain {data.chain.chainId}</span>
-            <span>{workbench.controlPlane.status}</span>
-            <span>{data.chain.source}</span>
-            <span>updated {new Date(data.chain.lastUpdated).toLocaleString()}</span>
+            <span>chain {activeData.chain.chainId}</span>
+            <span>{isCanaryRoute ? activeData.metadata.mode : workbench.controlPlane.status}</span>
+            <span>{activeData.chain.source}</span>
+            <span>updated {new Date(activeData.chain.lastUpdated).toLocaleString()}</span>
           </div>
         </header>
         <div className="fixture-banner" role="note">
-          <strong>{workbench.source === "control-plane" ? "Local API detected." : "Fixture fallback active."}</strong>
-          <span>
-            Runtime JSON is loaded from {data.metadata.runtimeDataPath}; control-plane integration probes{" "}
-            {workbench.controlPlane.url} and falls back to deterministic fixture data when unavailable.
-          </span>
+          <strong>{bannerMode.lead}</strong>
+          <span>{bannerMode.detail}</span>
         </div>
         <main className="content">{children}</main>
       </div>

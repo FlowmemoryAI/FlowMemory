@@ -19,7 +19,7 @@
   "genesisHash": "0x0f23c892cbd2d00c10839d97ddab833698a83f8df8d6df27ceac03cfdd4b7bc9",
   "nextBlockNumber": 3,
   "logicalTime": 1778688002,
-  "parentHash": "0x54ba8fe6b5d3781a91ebd45a2ab215dd51ff2f835afe1c72d1843384fffb3919",
+  "parentHash": "0xeca4065a019501355c54c1d7ecc4859e4be6355c9ccaa2ce7188822bebc88c82",
   "operatorKeyReferences": {
     "operator-key:local-devnet:alpha": {
       "schema": "flowmemory.local_devnet.operator_key_reference.v0",
@@ -57,6 +57,28 @@
       "metadataHash": "0x62348f90982ee812382bb97c0c6930e0e80583d0eeb40b4ae3c3395ca44cec1c",
       "memoryRoot": "0xf82cda830e2aa175d9813982009a59ec8a288b691a55205a22d7007fcc3a41ae",
       "active": true
+    }
+  },
+  "localTestUnitBalances": {
+    "local-balance:demo:agent-alpha": {
+      "accountId": "local-balance:demo:agent-alpha",
+      "owner": "agent:demo:alpha",
+      "units": 1000,
+      "totalFaucetUnits": 1000,
+      "lastFaucetRecordId": "faucet:demo:001",
+      "updatedAtBlock": 1,
+      "noValue": true
+    }
+  },
+  "faucetRecords": {
+    "faucet:demo:001": {
+      "faucetRecordId": "faucet:demo:001",
+      "accountId": "local-balance:demo:agent-alpha",
+      "recipient": "agent:demo:alpha",
+      "amountUnits": 1000,
+      "reason": "local-smoke-no-value-test-units",
+      "creditedAtBlock": 1,
+      "noValue": true
     }
   },
   "modelPassports": {
@@ -105,7 +127,7 @@
       "finalityStatus": "finalized",
       "challengeCount": 1,
       "finalizedAtBlock": 1,
-      "stateRoot": "0x5b55ae15cf9ff5f7c18f8dce05da5ed0f780e4103607819129ce09f1ed7744a7"
+      "stateRoot": "0x2cff83eaf83ea3ae2e9b248ca6ac2b32e23fa3f9ca067c4a9c93e72ef5679d33"
     }
   },
   "artifactCommitments": {
@@ -163,22 +185,24 @@
   "importedObservations": {},
   "importedVerifierReports": {},
   "baseAnchors": {
-    "0x2e2c83de6aab8190d169ad3348c62ce0cf0d4dcd6e83932c7beda822b4736a64": {
-      "anchorId": "0x2e2c83de6aab8190d169ad3348c62ce0cf0d4dcd6e83932c7beda822b4736a64",
+    "0xd1112ed01fdf86d0caa079d7668a5c3e0482f6da36d8831f1e12a21bf2a77885": {
+      "anchorId": "0xd1112ed01fdf86d0caa079d7668a5c3e0482f6da36d8831f1e12a21bf2a77885",
       "appchainChainId": "flowmemory-local-devnet-v0",
       "blockRangeStart": 1,
       "blockRangeEnd": 1,
-      "stateRoot": "0xd92ec8176ad55060b37898d4235612d0874ae5da6a5edbf69717b704c484e016",
+      "stateRoot": "0xd4bf806a2f91cd8255b2c55db91cb59c9f941d9ec92614dcb86dbd926184630c",
       "workReceiptRoot": "0x8b3ef5650c9eea2f608ad9c7cb73df3c289fc0ac72ed04f46e6ae4bce0a1f023",
       "verifierReportRoot": "0x4facd21e55423e182eba87355482a35daa93f53190fbd3a8d2969f9d55bc5373",
       "rootfieldStateRoot": "0xb72a851dca1103410484e3272945bae5e87fc39b8f32f77d2991959b60d3bfbf",
       "artifactCommitmentRoot": "0xb772a9f7273032fd3ba2da8b6476d4715bbbafbd2a7eed21ecd0d558bde3beab",
       "operatorKeyReferenceRoot": "0x8457aa3ed0f4238834a8f3925f25ccca805828d8427c3ef67590a45659b22a40",
       "agentAccountRoot": "0xcf31230bfff347f79e19a55f4d1ff5fa486b0b1ad4754ce22b93de4b259a3ca7",
+      "localTestUnitBalanceRoot": "0x167041ef195b5dde2d2cade6ecb26c9a0a596e9ed21ff7bfb02d33c9d2be8d15",
+      "faucetRecordRoot": "0x2277503a52fab3f9e49b40debfb7d641abee75cf268aa56da403fdcf4fad6cee",
       "modelPassportRoot": "0x326aa6b0b372d29d24d747fe0879adfd7aaea206373b24ae2ab77d56357e9529",
       "memoryCellRoot": "0x1b4e91099dd8d867201bd880437197ae6c031e538341aaa3cd2046e5706a2c25",
       "challengeRoot": "0x16da3d2bf2dcd801bc5deb3987dc01342cb957031ad01408ea77bf5d1583656f",
-      "finalityReceiptRoot": "0x8b8f5ff0d8c0a2f799958098165e8a6ff3c8f822f57147d1e1e7d2199ae1e347",
+      "finalityReceiptRoot": "0x990b60fd5f91eb725b65d36a1324e00be255daaa4bc0fbbe163343c3934b120a",
       "artifactAvailabilityProofRoot": "0xfb4b693c45014aae0947f35696e9d864e7b26ac6fd39c1df5edb3e0dcf9bd928",
       "verifierModuleRoot": "0xd6ddd8a2d0f5812d64679656c69983a2e0aecd36bd36199d900245658ae4626c",
       "previousAnchorId": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -195,6 +219,8 @@
         "0x2cffda58c783dc026978b06a681587b19d9536ae4e158a69be855da1200f3189",
         "0x75e63a0257621b8ef7412c6455a19d848996905e21f5ba79ccb0870d6e82eb25",
         "0x6f55c155425b968de01092be7d276f0c24430a2994910881938bc13c72f8892f",
+        "0xafd3991af8b9e4eadfa3810f82d74701b7518269ae7ba5d0e3e450844445b03b",
+        "0xec7019403fec03ea2ea4b090bc5ee1c63017ed9834bff5fb87ce2fe5d5794919",
         "0x05abb39c720d8ee1cd9253e32efaa595f5d5b2fcef4a908f61ab4a6bfa315359",
         "0xb9f435aceb1bedb86dce821743769b28c02a42002c9cd41f2df1ea0279462ab2",
         "0x27aeba6c55c764222964764cb2bfbb69fb6fa56cb84714d6e98240ceb6e9d01d",
@@ -219,6 +245,16 @@
         },
         {
           "txId": "0x6f55c155425b968de01092be7d276f0c24430a2994910881938bc13c72f8892f",
+          "status": "applied",
+          "error": null
+        },
+        {
+          "txId": "0xafd3991af8b9e4eadfa3810f82d74701b7518269ae7ba5d0e3e450844445b03b",
+          "status": "applied",
+          "error": null
+        },
+        {
+          "txId": "0xec7019403fec03ea2ea4b090bc5ee1c63017ed9834bff5fb87ce2fe5d5794919",
           "status": "applied",
           "error": null
         },
@@ -273,13 +309,13 @@
           "error": null
         }
       ],
-      "stateRoot": "0xd92ec8176ad55060b37898d4235612d0874ae5da6a5edbf69717b704c484e016",
-      "blockHash": "0x1e6f848e67c93fcd23091891ec704f5ed58989956789acd3368bce883ad493f9"
+      "stateRoot": "0xd4bf806a2f91cd8255b2c55db91cb59c9f941d9ec92614dcb86dbd926184630c",
+      "blockHash": "0x78c6b0c6b56eae99d2d693878a2239620c713cff50fcb94ba6df3fc6ed08be56"
     },
     {
       "schema": "flowmemory.local_devnet.block.v0",
       "blockNumber": 2,
-      "parentHash": "0x1e6f848e67c93fcd23091891ec704f5ed58989956789acd3368bce883ad493f9",
+      "parentHash": "0x78c6b0c6b56eae99d2d693878a2239620c713cff50fcb94ba6df3fc6ed08be56",
       "logicalTime": 1778688001,
       "txIds": [
         "0x8f719c880f17b5d4fb6d9efd54ac276d0dd8050d11c2c7870c36a79b66bc49d7"
@@ -291,8 +327,8 @@
           "error": null
         }
       ],
-      "stateRoot": "0x75373cc47666ed9bcad605ce0f5d0aeb1bc8100a1087840d755205aef8a6bb50",
-      "blockHash": "0x54ba8fe6b5d3781a91ebd45a2ab215dd51ff2f835afe1c72d1843384fffb3919"
+      "stateRoot": "0x55cab7c41a999da527bdd026a772edb5e4804b070014cccc72622e09ce3e699f",
+      "blockHash": "0xeca4065a019501355c54c1d7ecc4859e4be6355c9ccaa2ce7188822bebc88c82"
     }
   ],
   "pendingTxs": []

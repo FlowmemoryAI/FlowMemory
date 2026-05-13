@@ -105,8 +105,9 @@ function Write-FlowChainJson {
         New-Item -ItemType Directory -Force -Path $parent | Out-Null
     }
 
-    $body = $Value | ConvertTo-Json -Depth $Depth
-    Set-Content -LiteralPath $Path -Value $body -Encoding UTF8
+    $body = ($Value | ConvertTo-Json -Depth $Depth) + [Environment]::NewLine
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText($Path, $body, $utf8NoBom)
 }
 
 function Assert-FlowChainNoSecretText {

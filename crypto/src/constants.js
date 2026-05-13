@@ -55,12 +55,22 @@ export const TYPE_STRINGS = Object.freeze({
     "FlowChainChallengeV0(bytes32 receiptId,bytes32 challengerId,uint8 challengeType,bytes32 evidenceRoot,uint64 openedAtUnixMs,uint64 deadlineUnixMs,uint8 status,bytes32 nonce)",
   finalityReceiptV0:
     "FlowChainFinalityReceiptV0(bytes32 receiptId,bytes32 reportId,bytes32 challengeRoot,uint8 finalityState,uint64 finalizedAtUnixMs,uint64 finalizedBlockNumber,bytes32 finalizedBlockHash,bytes32 policyHash)",
+  bridgeDepositV0:
+    "FlowChainBridgeDepositV0(uint256 sourceChainId,address sourceContract,bytes32 txHash,uint32 logIndex,address token,uint256 amount,address sender,bytes32 flowchainRecipient,uint256 nonce,bytes32 metadataHash)",
+  bridgeCreditV0:
+    "FlowChainBridgeCreditV0(bytes32 depositId,bytes32 recipient,bytes32 assetId,uint256 amount,uint64 creditedAtBlockNumber,uint64 creditedAtUnixMs,uint8 status,bytes32 nonce)",
+  bridgeWithdrawalV0:
+    "FlowChainBridgeWithdrawalV0(bytes32 accountId,uint256 destinationChainId,address destinationContract,address token,uint256 amount,address recipient,uint64 requestedAtBlockNumber,uint64 requestedAtUnixMs,uint8 status,bytes32 nonce,bytes32 metadataHash)",
+  localBalanceRecordV0:
+    "FlowChainLocalBalanceRecordV0(bytes32 accountId,bytes32 assetId,uint256 availableAmount,uint256 lockedAmount,bytes32 lastCreditId,bytes32 lastWithdrawalId,bytes32 stateRoot,uint64 updatedAtBlockNumber,bytes32 nonce)",
   hardwareSignalEnvelopeV0:
     "FlowChainHardwareSignalEnvelopeV0(bytes32 deviceId,bytes32 signalRoot,bytes32 previousSignalEnvelopeId,bytes32 channelRoot,uint64 sequence,uint64 observedAtUnixMs,uint8 transport,bytes32 nonce)",
   controlPlaneProvenanceResponseV0:
     "FlowChainControlPlaneProvenanceResponseV0(bytes32 requestId,bytes32 subjectId,bytes32 agentId,bytes32 receiptId,bytes32 reportId,bytes32 memoryCellId,bytes32 dependencyRoot,bytes32 responseBodyHash,uint64 issuedAtUnixMs,uint16 responseVersion)",
   localSignatureEnvelopeV0:
     "FlowChainLocalSignatureEnvelopeV0(bytes32 objectId,bytes32 objectTypeHash,bytes32 domainSeparator,bytes32 signerId,bytes32 signerKeyId,uint8 signerRole,uint64 sequence,uint64 issuedAtUnixMs,uint64 expiresAtUnixMs,bytes32 nonce)",
+  localTransactionEnvelopeV0:
+    "FlowChainLocalTransactionEnvelopeV0(uint256 chainId,bytes32 domainSeparator,bytes32 signerId,bytes32 signerKeyId,uint8 signerRole,uint64 nonce,bytes32 payloadHash,bytes32 objectId,bytes32 objectTypeHash,uint64 issuedAtUnixMs)",
   eip712Domain:
     "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)"
 });
@@ -86,9 +96,14 @@ export const DOMAIN_STRINGS = Object.freeze({
   verifierModuleId: "flowchain.local-alpha.v0.verifier-module.id",
   challengeId: "flowchain.local-alpha.v0.challenge.id",
   finalityReceiptId: "flowchain.local-alpha.v0.finality-receipt.id",
+  bridgeDepositId: "flowchain.local-alpha.v0.bridge-deposit.id",
+  bridgeCreditId: "flowchain.local-alpha.v0.bridge-credit.id",
+  bridgeWithdrawalId: "flowchain.local-alpha.v0.bridge-withdrawal.id",
+  localBalanceRecordId: "flowchain.local-alpha.v0.local-balance-record.id",
   hardwareSignalEnvelopeId: "flowchain.local-alpha.v0.hardware-signal-envelope.id",
   controlPlaneProvenanceResponseId: "flowchain.local-alpha.v0.control-plane-provenance-response.id",
-  localSignatureEnvelope: "flowchain.local-alpha.v0.local-signature-envelope"
+  localSignatureEnvelope: "flowchain.local-alpha.v0.local-signature-envelope",
+  localTransactionEnvelope: "flowchain.local-alpha.v0.local-transaction-envelope"
 });
 
 export const MERKLE_SCHEME_V0 = "FM-MERKLE-KECCAK256-BINARY-V0";
@@ -157,4 +172,14 @@ export const LOCAL_ALPHA_SIGNER_ROLES = Object.freeze({
   agent: 2,
   verifier: 3,
   hardware: 4
+});
+
+export const LOCAL_ALPHA_BRIDGE_STATUSES = Object.freeze({
+  observed: 1,
+  acceptedLocal: 2,
+  credited: 3,
+  withdrawalRequested: 4,
+  released: 5,
+  rejected: 6,
+  failed: 7
 });

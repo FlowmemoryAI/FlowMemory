@@ -376,6 +376,137 @@
         "issuedAtUnixMs": "1778702400000",
         "responseVersion": 0
       }
+    },
+    {
+      "name": "bridge-deposit.demo",
+      "schemaPath": "../../schemas/flowmemory/bridge-deposit.schema.json",
+      "function": "bridgeDepositId",
+      "idField": "depositId",
+      "input": {
+        "sourceChainId": 84532,
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+        "logIndex": 0,
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "20000000",
+        "sender": "0x4444444444444444444444444444444444444444",
+        "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "nonce": "1",
+        "metadataHash": "0x6666666666666666666666666666666666666666666666666666666666666666"
+      },
+      "expected": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+      "document": {
+        "schema": "flowmemory.bridge_deposit.v0",
+        "depositId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+        "sourceChainId": 84532,
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+        "logIndex": 0,
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "20000000",
+        "sender": "0x4444444444444444444444444444444444444444",
+        "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "nonce": "1",
+        "metadataHash": "0x6666666666666666666666666666666666666666666666666666666666666666",
+        "status": "observed"
+      }
+    },
+    {
+      "name": "bridge-credit.demo",
+      "schemaPath": "../../schemas/flowmemory/bridge-credit.schema.json",
+      "function": "bridgeCreditId",
+      "idField": "creditId",
+      "input": {
+        "depositId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+        "recipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "assetId": "0x4b000bcf935e50d5fb7eacb8a8f4c226ad36a19810a389a39dae72ad1ec012e3",
+        "amount": "20000000",
+        "creditedAtBlockNumber": "3",
+        "creditedAtUnixMs": "1778702400000",
+        "status": 3,
+        "nonce": "0xbef2dad8fd23f339439a0c731866be73a74379128394f7beb6dc01cb4dbbcc91"
+      },
+      "expected": "0xb1d6d957acf4a61f52f1046c792815eab6e1b21f706c4aba88cb0efe2200d1cb",
+      "document": {
+        "schema": "flowchain.bridge_credit.v0",
+        "creditId": "0xb1d6d957acf4a61f52f1046c792815eab6e1b21f706c4aba88cb0efe2200d1cb",
+        "depositId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+        "recipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "assetId": "0x4b000bcf935e50d5fb7eacb8a8f4c226ad36a19810a389a39dae72ad1ec012e3",
+        "amount": "20000000",
+        "creditedAtBlockNumber": "3",
+        "creditedAtUnixMs": "1778702400000",
+        "status": "credited",
+        "statusCode": 3,
+        "nonce": "0xbef2dad8fd23f339439a0c731866be73a74379128394f7beb6dc01cb4dbbcc91"
+      }
+    },
+    {
+      "name": "bridge-withdrawal.demo",
+      "schemaPath": "../../schemas/flowmemory/bridge-withdrawal.schema.json",
+      "function": "bridgeWithdrawalId",
+      "idField": "withdrawalId",
+      "input": {
+        "accountId": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "destinationChainId": 84532,
+        "destinationContract": "0x7777777777777777777777777777777777777777",
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "5000000",
+        "recipient": "0x4444444444444444444444444444444444444444",
+        "requestedAtBlockNumber": "5",
+        "requestedAtUnixMs": "1778702400000",
+        "status": 4,
+        "nonce": "0x90a33185cd5337c093753c06818955d98ac711a9352d397ab3ccc5aee91921d2",
+        "metadataHash": "0xce908e6f85c929fed22796952391e6a53b656f92d31c1c5e7fb89883c7eeabe5"
+      },
+      "expected": "0x7612720b0b5c872c2325305a3dda6642f7cdabec1c20043663e4346cff5f7805",
+      "document": {
+        "schema": "flowchain.bridge_withdrawal.v0",
+        "withdrawalId": "0x7612720b0b5c872c2325305a3dda6642f7cdabec1c20043663e4346cff5f7805",
+        "accountId": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "destinationChainId": 84532,
+        "destinationContract": "0x7777777777777777777777777777777777777777",
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "5000000",
+        "recipient": "0x4444444444444444444444444444444444444444",
+        "requestedAtBlockNumber": "5",
+        "requestedAtUnixMs": "1778702400000",
+        "status": "withdrawal_requested",
+        "statusCode": 4,
+        "nonce": "0x90a33185cd5337c093753c06818955d98ac711a9352d397ab3ccc5aee91921d2",
+        "metadataHash": "0xce908e6f85c929fed22796952391e6a53b656f92d31c1c5e7fb89883c7eeabe5"
+      }
+    },
+    {
+      "name": "local-balance-record.demo",
+      "schemaPath": "../../schemas/flowmemory/local-balance-record.schema.json",
+      "function": "localBalanceRecordId",
+      "idField": "balanceRecordId",
+      "input": {
+        "accountId": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "assetId": "0x4b000bcf935e50d5fb7eacb8a8f4c226ad36a19810a389a39dae72ad1ec012e3",
+        "availableAmount": "15000000",
+        "lockedAmount": "5000000",
+        "lastCreditId": "0xb1d6d957acf4a61f52f1046c792815eab6e1b21f706c4aba88cb0efe2200d1cb",
+        "lastWithdrawalId": "0x7612720b0b5c872c2325305a3dda6642f7cdabec1c20043663e4346cff5f7805",
+        "stateRoot": "0xb49b915dddc40d2e762bec262f248b465d87a881b99b14a67642fbd377704b56",
+        "updatedAtBlockNumber": "5",
+        "nonce": "0x2d8034d0391a31483bc8f710ac19a333f617683632197ced2b9ff2b0ac03fdb7"
+      },
+      "expected": "0x7b4331b20142a093153ea7d07d226dbf824deaff3b517a203edd7f058de1b076",
+      "document": {
+        "schema": "flowchain.local_balance_record.v0",
+        "balanceRecordId": "0x7b4331b20142a093153ea7d07d226dbf824deaff3b517a203edd7f058de1b076",
+        "accountId": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "assetId": "0x4b000bcf935e50d5fb7eacb8a8f4c226ad36a19810a389a39dae72ad1ec012e3",
+        "availableAmount": "15000000",
+        "lockedAmount": "5000000",
+        "lastCreditId": "0xb1d6d957acf4a61f52f1046c792815eab6e1b21f706c4aba88cb0efe2200d1cb",
+        "lastWithdrawalId": "0x7612720b0b5c872c2325305a3dda6642f7cdabec1c20043663e4346cff5f7805",
+        "stateRoot": "0xb49b915dddc40d2e762bec262f248b465d87a881b99b14a67642fbd377704b56",
+        "updatedAtBlockNumber": "5",
+        "nonce": "0x2d8034d0391a31483bc8f710ac19a333f617683632197ced2b9ff2b0ac03fdb7"
+      }
     }
   ],
   "negative": [
@@ -928,6 +1059,182 @@
           "signingDigest": "0x7daa08228e60cb637c775723700f2245e414546158f4e230ac32c9a2a3e7d404",
           "signature": "0x1dd7f91706ecb742ab4cbde578dff7e1571eb892c3db90a358ba8b1db65c7e49153ccd063dce1ae932548fa3e9af40bacf1c0f42690895517343f7b7a3548ff4"
         }
+      },
+      {
+        "name": "bridge-deposit.demo.operator-signature-envelope",
+        "objectName": "bridge-deposit.demo",
+        "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
+        "function": "localSignatureEnvelopeHash",
+        "expected": {
+          "objectId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+          "envelopeId": "0xf4d73516e6e1978377ec89b71bac6153ada4c24c785b5edb227be1dac9f91caa",
+          "signingDigest": "0x026773a8db7a39ff087deec82ef7b7de2f4e625cae798932e8118db88595e538"
+        },
+        "input": {
+          "objectId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+          "objectTypeHash": "0x97bcbbe7a3f24fdb7cab668fc751ca8757b59b3fe8ed71674fdaca140a22d408",
+          "domainSeparator": "0x49a259504a71742e27acd328bf9cdf393dd693611dab3a0f2702a76341e5c4f7",
+          "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+          "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+          "signerRole": 1,
+          "sequence": "12",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0x6acb09a72f4a049d9af5fa1dabc65d14d244880dd627d4228dec417e4980c21a"
+        },
+        "envelope": {
+          "schema": "flowchain.local_signature_envelope.v0",
+          "envelopeId": "0xf4d73516e6e1978377ec89b71bac6153ada4c24c785b5edb227be1dac9f91caa",
+          "objectType": "bridge_deposit",
+          "objectSchema": "flowmemory.bridge_deposit.v0",
+          "objectId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+          "objectTypeHash": "0x97bcbbe7a3f24fdb7cab668fc751ca8757b59b3fe8ed71674fdaca140a22d408",
+          "domain": "flowchain.local-alpha.v0.bridge-deposit.id",
+          "domainSeparator": "0x49a259504a71742e27acd328bf9cdf393dd693611dab3a0f2702a76341e5c4f7",
+          "signerRole": "operator",
+          "signerRoleCode": 1,
+          "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+          "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+          "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "sequence": "12",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0x6acb09a72f4a049d9af5fa1dabc65d14d244880dd627d4228dec417e4980c21a",
+          "signingDigest": "0x026773a8db7a39ff087deec82ef7b7de2f4e625cae798932e8118db88595e538",
+          "signature": "0x370a10d1535bc74d1c88bd994686b4dc281774a18b8a18288a407c0754ff95d84a83466b97c4800becd4ae17e6d4c3de6693b352f09ac3e2bca9fe6823970ce9"
+        }
+      },
+      {
+        "name": "bridge-credit.demo.operator-signature-envelope",
+        "objectName": "bridge-credit.demo",
+        "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
+        "function": "localSignatureEnvelopeHash",
+        "expected": {
+          "objectId": "0xb1d6d957acf4a61f52f1046c792815eab6e1b21f706c4aba88cb0efe2200d1cb",
+          "envelopeId": "0x1815b0ab82b9c3fb97a4e02f7a5037e10150de5865b6f723653641634ee0e657",
+          "signingDigest": "0x2ea1ae02896d6b50239a0e3a99dc33df8f106970e9a17555ccfb9639467360c5"
+        },
+        "input": {
+          "objectId": "0xb1d6d957acf4a61f52f1046c792815eab6e1b21f706c4aba88cb0efe2200d1cb",
+          "objectTypeHash": "0x5c492a94b36aa3beb3b9ceb9dc5124464beeba9ac9fd2d04f88118cf73f3e912",
+          "domainSeparator": "0x4aa3ae071cb71e1c9b0cce8162ac5a6406fc00efc0ee507089092cfcfbb33506",
+          "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+          "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+          "signerRole": 1,
+          "sequence": "13",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xf4b9163f67593a26ed9b11f3fe26e8faae0fafea4937bca3197d72ef23d82736"
+        },
+        "envelope": {
+          "schema": "flowchain.local_signature_envelope.v0",
+          "envelopeId": "0x1815b0ab82b9c3fb97a4e02f7a5037e10150de5865b6f723653641634ee0e657",
+          "objectType": "bridge_credit",
+          "objectSchema": "flowchain.bridge_credit.v0",
+          "objectId": "0xb1d6d957acf4a61f52f1046c792815eab6e1b21f706c4aba88cb0efe2200d1cb",
+          "objectTypeHash": "0x5c492a94b36aa3beb3b9ceb9dc5124464beeba9ac9fd2d04f88118cf73f3e912",
+          "domain": "flowchain.local-alpha.v0.bridge-credit.id",
+          "domainSeparator": "0x4aa3ae071cb71e1c9b0cce8162ac5a6406fc00efc0ee507089092cfcfbb33506",
+          "signerRole": "operator",
+          "signerRoleCode": 1,
+          "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+          "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+          "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "sequence": "13",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xf4b9163f67593a26ed9b11f3fe26e8faae0fafea4937bca3197d72ef23d82736",
+          "signingDigest": "0x2ea1ae02896d6b50239a0e3a99dc33df8f106970e9a17555ccfb9639467360c5",
+          "signature": "0x3b81e339c1e7559afffa0c51c9225168925b12f99cd08301e56204863af8b9fb62b1b2aaa2e09f004f0284e1b30ee358c4977cdc82dc260048abef4cc1a94c8a"
+        }
+      },
+      {
+        "name": "bridge-withdrawal.demo.agent-signature-envelope",
+        "objectName": "bridge-withdrawal.demo",
+        "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
+        "function": "localSignatureEnvelopeHash",
+        "expected": {
+          "objectId": "0x7612720b0b5c872c2325305a3dda6642f7cdabec1c20043663e4346cff5f7805",
+          "envelopeId": "0x0ae32c66cf666bbeb354e7581db661ce417376a01212c5f368733eeb21be94d8",
+          "signingDigest": "0xc39c5ee1133bf52ae94f438b1da2a3d697c0313626b0276e0a4ff3c73e855ffa"
+        },
+        "input": {
+          "objectId": "0x7612720b0b5c872c2325305a3dda6642f7cdabec1c20043663e4346cff5f7805",
+          "objectTypeHash": "0xef86851dbdc4b959a0f0538dffda519a385f0f27f0cc1757d5d90be513915246",
+          "domainSeparator": "0x83587b5c98812cd130f24e2c1aaf4bdcafd7700ccda6c7d0845c2adf4a1c2d77",
+          "signerId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+          "signerKeyId": "0x0cd3ace447934998e0819d90cf89904776a2407e816541c1c43b99d38c351893",
+          "signerRole": 2,
+          "sequence": "14",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xf92e0a6709a05b38048336f55670194b0b6f3b5a00082faadf903a11920efeb5"
+        },
+        "envelope": {
+          "schema": "flowchain.local_signature_envelope.v0",
+          "envelopeId": "0x0ae32c66cf666bbeb354e7581db661ce417376a01212c5f368733eeb21be94d8",
+          "objectType": "bridge_withdrawal",
+          "objectSchema": "flowchain.bridge_withdrawal.v0",
+          "objectId": "0x7612720b0b5c872c2325305a3dda6642f7cdabec1c20043663e4346cff5f7805",
+          "objectTypeHash": "0xef86851dbdc4b959a0f0538dffda519a385f0f27f0cc1757d5d90be513915246",
+          "domain": "flowchain.local-alpha.v0.bridge-withdrawal.id",
+          "domainSeparator": "0x83587b5c98812cd130f24e2c1aaf4bdcafd7700ccda6c7d0845c2adf4a1c2d77",
+          "signerRole": "agent",
+          "signerRoleCode": 2,
+          "signerId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+          "signerKeyId": "0x0cd3ace447934998e0819d90cf89904776a2407e816541c1c43b99d38c351893",
+          "publicKey": "0x02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",
+          "sequence": "14",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xf92e0a6709a05b38048336f55670194b0b6f3b5a00082faadf903a11920efeb5",
+          "signingDigest": "0xc39c5ee1133bf52ae94f438b1da2a3d697c0313626b0276e0a4ff3c73e855ffa",
+          "signature": "0xdf7c57cf2294d9439f235160908f30d469347aa11049fb9bb4023fd78cae4fd6621f9ccdb391e7a47e4b39849a5571310b1c210d12646f0273a140f43e19f017"
+        }
+      },
+      {
+        "name": "local-balance-record.demo.operator-signature-envelope",
+        "objectName": "local-balance-record.demo",
+        "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
+        "function": "localSignatureEnvelopeHash",
+        "expected": {
+          "objectId": "0x7b4331b20142a093153ea7d07d226dbf824deaff3b517a203edd7f058de1b076",
+          "envelopeId": "0x9ac7e8c7ea1673066666f16b9d95de904ba487a40679e4464b4a8a903688f512",
+          "signingDigest": "0x793f34c30ebc1d305ba4f153999a411948a0bc139a540b8faaf0f3e1c7d10b98"
+        },
+        "input": {
+          "objectId": "0x7b4331b20142a093153ea7d07d226dbf824deaff3b517a203edd7f058de1b076",
+          "objectTypeHash": "0x70eff29faa99904e952128eb87e6d95d13548d1b44f4be4c97d036d84811d569",
+          "domainSeparator": "0x27332aee7fa8158fd74963ab7b7e042c0f9418391856a3f32d9c8daf6272e92a",
+          "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+          "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+          "signerRole": 1,
+          "sequence": "15",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xa9b262a6b6c28c5451ff4bb0cd011276c6fdc9d6027ab62749cf36620bbcee80"
+        },
+        "envelope": {
+          "schema": "flowchain.local_signature_envelope.v0",
+          "envelopeId": "0x9ac7e8c7ea1673066666f16b9d95de904ba487a40679e4464b4a8a903688f512",
+          "objectType": "local_balance_record",
+          "objectSchema": "flowchain.local_balance_record.v0",
+          "objectId": "0x7b4331b20142a093153ea7d07d226dbf824deaff3b517a203edd7f058de1b076",
+          "objectTypeHash": "0x70eff29faa99904e952128eb87e6d95d13548d1b44f4be4c97d036d84811d569",
+          "domain": "flowchain.local-alpha.v0.local-balance-record.id",
+          "domainSeparator": "0x27332aee7fa8158fd74963ab7b7e042c0f9418391856a3f32d9c8daf6272e92a",
+          "signerRole": "operator",
+          "signerRoleCode": 1,
+          "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+          "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+          "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "sequence": "15",
+          "issuedAtUnixMs": "1778702400000",
+          "expiresAtUnixMs": "1810238400000",
+          "nonce": "0xa9b262a6b6c28c5451ff4bb0cd011276c6fdc9d6027ab62749cf36620bbcee80",
+          "signingDigest": "0x793f34c30ebc1d305ba4f153999a411948a0bc139a540b8faaf0f3e1c7d10b98",
+          "signature": "0xbed71407cff68fc06c6fe72d3a6c0f68786fcd8b91995340e73f07f037b349d62ff6bea3eb45520d3c1651b9375686d4b8a4b73609946ffea9d7fd918938b3e2"
+        }
       }
     ],
     "negative": [
@@ -1156,6 +1463,175 @@
         },
         "expectErrors": [
           "bad-signature"
+        ]
+      },
+      {
+        "name": "envelope.malformed-bridge-deposit-zero-amount",
+        "baseEnvelope": "bridge-deposit.demo.operator-signature-envelope",
+        "mutation": {
+          "document": {
+            "amount": "0"
+          }
+        },
+        "expectErrors": [
+          "malformed-bridge-deposit"
+        ]
+      },
+      {
+        "name": "envelope.bad-signature-bridge-deposit",
+        "baseEnvelope": "bridge-deposit.demo.operator-signature-envelope",
+        "mutation": {
+          "envelope": {
+            "publicKey": "0x02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+          }
+        },
+        "expectErrors": [
+          "bad-signature"
+        ]
+      },
+      {
+        "name": "envelope.bad-signature-bridge-credit",
+        "baseEnvelope": "bridge-credit.demo.operator-signature-envelope",
+        "mutation": {
+          "envelope": {
+            "publicKey": "0x02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+          }
+        },
+        "expectErrors": [
+          "bad-signature"
+        ]
+      },
+      {
+        "name": "envelope.bad-signature-bridge-withdrawal",
+        "baseEnvelope": "bridge-withdrawal.demo.agent-signature-envelope",
+        "mutation": {
+          "envelope": {
+            "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+          }
+        },
+        "expectErrors": [
+          "bad-signature"
+        ]
+      },
+      {
+        "name": "envelope.bad-signature-local-balance-record",
+        "baseEnvelope": "local-balance-record.demo.operator-signature-envelope",
+        "mutation": {
+          "envelope": {
+            "publicKey": "0x02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+          }
+        },
+        "expectErrors": [
+          "bad-signature"
+        ]
+      }
+    ]
+  },
+  "transactions": {
+    "positive": [
+      {
+        "name": "local-transaction.bridge-deposit.operator-signature",
+        "objectName": "bridge-deposit.demo",
+        "schemaPath": "../../schemas/flowmemory/local-transaction-envelope.schema.json",
+        "function": "localTransactionEnvelopeHash",
+        "expected": {
+          "envelopeId": "0xb8de3add81640848961aa8e0ba73c5c2ff3e30aed480dbba8e70d1345dba6210",
+          "signingDigest": "0x0c702b64fef1434b9de56fbc01e47db9ef6f3565bc1a58babb2dbdd72d65ca14",
+          "payloadHash": "0x485a6896d8ee1c67440b6dddf723f0378c4f51d7448e487effe5f337656f0908"
+        },
+        "input": {
+          "chainId": "31337",
+          "domainSeparator": "0xff516fcab184623fe60f12b4d1e0430a57e6d18685d1356887ada50f5f20b36c",
+          "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+          "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+          "signerRole": 1,
+          "nonce": "1",
+          "payloadHash": "0x485a6896d8ee1c67440b6dddf723f0378c4f51d7448e487effe5f337656f0908",
+          "objectId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+          "objectTypeHash": "0x97bcbbe7a3f24fdb7cab668fc751ca8757b59b3fe8ed71674fdaca140a22d408",
+          "issuedAtUnixMs": "1778702400000"
+        },
+        "envelope": {
+          "schema": "flowchain.local_transaction_envelope.v0",
+          "envelopeId": "0xb8de3add81640848961aa8e0ba73c5c2ff3e30aed480dbba8e70d1345dba6210",
+          "domain": "flowchain.local-alpha.v0.local-transaction-envelope:chain:31337",
+          "domainSeparator": "0xff516fcab184623fe60f12b4d1e0430a57e6d18685d1356887ada50f5f20b36c",
+          "chainId": "31337",
+          "nonce": "1",
+          "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+          "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
+          "signerRole": "operator",
+          "signerRoleCode": 1,
+          "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "objectSchema": "flowmemory.bridge_deposit.v0",
+          "objectType": "bridge_deposit",
+          "objectTypeHash": "0x97bcbbe7a3f24fdb7cab668fc751ca8757b59b3fe8ed71674fdaca140a22d408",
+          "objectId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+          "payloadHash": "0x485a6896d8ee1c67440b6dddf723f0378c4f51d7448e487effe5f337656f0908",
+          "issuedAtUnixMs": "1778702400000",
+          "signingDigest": "0x0c702b64fef1434b9de56fbc01e47db9ef6f3565bc1a58babb2dbdd72d65ca14",
+          "signature": "0x51d06d784e2c0fb703a9c1e8ad7186eb777176bdf79bfddc4284020015a1c72d0059bf0b962bf5cdaa4b7e007e6a6b770551f24699ac938303be5203b3b24631"
+        }
+      }
+    ],
+    "negative": [
+      {
+        "name": "transaction.wrong-chain-id",
+        "baseTransaction": "local-transaction.bridge-deposit.operator-signature",
+        "mutation": {
+          "context": {
+            "chainId": "31338"
+          }
+        },
+        "expectErrors": [
+          "wrong-chain-id"
+        ]
+      },
+      {
+        "name": "transaction.wrong-domain",
+        "baseTransaction": "local-transaction.bridge-deposit.operator-signature",
+        "mutation": {
+          "envelope": {
+            "domain": "flowchain.local-alpha.v0.local-transaction-envelope:chain:999"
+          }
+        },
+        "expectErrors": [
+          "wrong-domain"
+        ]
+      },
+      {
+        "name": "transaction.wrong-signer",
+        "baseTransaction": "local-transaction.bridge-deposit.operator-signature",
+        "mutation": {
+          "envelope": {
+            "signerRole": "agent",
+            "signerRoleCode": 2
+          }
+        },
+        "expectErrors": [
+          "wrong-signer"
+        ]
+      },
+      {
+        "name": "transaction.replayed-nonce",
+        "baseTransaction": "local-transaction.bridge-deposit.operator-signature",
+        "mutation": {
+          "contextReplay": true
+        },
+        "expectErrors": [
+          "replay"
+        ]
+      },
+      {
+        "name": "transaction.changed-object-type",
+        "baseTransaction": "local-transaction.bridge-deposit.operator-signature",
+        "mutation": {
+          "envelope": {
+            "objectType": "memory_cell"
+          }
+        },
+        "expectErrors": [
+          "wrong-object-type"
         ]
       }
     ]

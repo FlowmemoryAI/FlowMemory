@@ -263,6 +263,56 @@ export interface FinalityReceiptInput {
   policyHash: Bytes32;
 }
 
+export interface BridgeDepositInput {
+  sourceChainId: number | bigint | string;
+  sourceContract: Address;
+  txHash: Bytes32;
+  logIndex: number | bigint | string;
+  token: Address;
+  amount: number | bigint | string;
+  sender: Address;
+  flowchainRecipient: Bytes32;
+  nonce: number | bigint | string;
+  metadataHash: Bytes32;
+}
+
+export interface BridgeCreditInput {
+  depositId: Bytes32;
+  recipient: Bytes32;
+  assetId: Bytes32;
+  amount: number | bigint | string;
+  creditedAtBlockNumber: number | bigint | string;
+  creditedAtUnixMs: number | bigint | string;
+  status: number | bigint | string;
+  nonce: Bytes32;
+}
+
+export interface BridgeWithdrawalInput {
+  accountId: Bytes32;
+  destinationChainId: number | bigint | string;
+  destinationContract: Address;
+  token: Address;
+  amount: number | bigint | string;
+  recipient: Address;
+  requestedAtBlockNumber: number | bigint | string;
+  requestedAtUnixMs: number | bigint | string;
+  status: number | bigint | string;
+  nonce: Bytes32;
+  metadataHash: Bytes32;
+}
+
+export interface LocalBalanceRecordInput {
+  accountId: Bytes32;
+  assetId: Bytes32;
+  availableAmount: number | bigint | string;
+  lockedAmount: number | bigint | string;
+  lastCreditId: Bytes32;
+  lastWithdrawalId: Bytes32;
+  stateRoot: Bytes32;
+  updatedAtBlockNumber: number | bigint | string;
+  nonce: Bytes32;
+}
+
 export interface ControlPlaneProvenanceResponseInput {
   requestId: Bytes32;
   subjectId: Bytes32;
@@ -305,6 +355,24 @@ export interface LocalSignatureEnvelopePayload {
   signingDigest: Bytes32;
 }
 
+export interface LocalTransactionEnvelopeInput {
+  chainId: number | bigint | string;
+  domainSeparator: Bytes32;
+  signerId: Bytes32;
+  signerKeyId: Bytes32;
+  signerRole: number | bigint | string;
+  nonce: number | bigint | string;
+  payloadHash: Bytes32;
+  objectId: Bytes32;
+  objectTypeHash: Bytes32;
+  issuedAtUnixMs: number | bigint | string;
+}
+
+export interface LocalTransactionEnvelopePayload {
+  structHash: Bytes32;
+  signingDigest: Bytes32;
+}
+
 export interface LocalAlphaEnvelopeValidationInput {
   document: Record<string, unknown>;
   envelope: Record<string, unknown>;
@@ -331,6 +399,7 @@ export const LOCAL_ALPHA_CHALLENGE_STATUSES: Readonly<Record<string, number>>;
 export const LOCAL_ALPHA_FINALITY_STATES: Readonly<Record<string, number>>;
 export const LOCAL_ALPHA_HARDWARE_TRANSPORTS: Readonly<Record<string, number>>;
 export const LOCAL_ALPHA_SIGNER_ROLES: Readonly<Record<string, number>>;
+export const LOCAL_ALPHA_BRIDGE_STATUSES: Readonly<Record<string, number>>;
 
 export function strip0x(value: string): string;
 export function bytesToHex(bytes: Uint8Array): Hex;
@@ -415,6 +484,10 @@ export function artifactAvailabilityProofId(input: ArtifactAvailabilityProofInpu
 export function verifierModuleId(input: VerifierModuleInput): Bytes32;
 export function challengeId(input: ChallengeInput): Bytes32;
 export function finalityReceiptId(input: FinalityReceiptInput): Bytes32;
+export function bridgeDepositId(input: BridgeDepositInput): Bytes32;
+export function bridgeCreditId(input: BridgeCreditInput): Bytes32;
+export function bridgeWithdrawalId(input: BridgeWithdrawalInput): Bytes32;
+export function localBalanceRecordId(input: LocalBalanceRecordInput): Bytes32;
 export function hardwareSignalEnvelopeId(input: HardwareSignalEnvelopeInput): Bytes32;
 export function controlPlaneProvenanceResponseId(input: ControlPlaneProvenanceResponseInput): Bytes32;
 export function localSignatureEnvelopeHash(input: LocalSignatureEnvelopeInput): Bytes32;
@@ -430,3 +503,75 @@ export function localSignatureEnvelopeInput(envelope: Record<string, unknown>): 
 export function validateLocalAlphaEnvelope(
   input: LocalAlphaEnvelopeValidationInput
 ): LocalAlphaEnvelopeValidationResult;
+
+export function localTransactionEnvelopeHash(input: LocalTransactionEnvelopeInput): Bytes32;
+export const localTransactionEnvelopeId: typeof localTransactionEnvelopeHash;
+export function localTransactionEnvelopePayload(input: LocalTransactionEnvelopeInput): LocalTransactionEnvelopePayload;
+export function localTransactionEnvelopeInput(envelope: Record<string, unknown>): LocalTransactionEnvelopeInput;
+export function localTransactionReplayKey(envelope: Record<string, unknown>): string;
+export function localTransactionDomain(chainId: number | bigint | string): string;
+export function localTransactionDomainSeparator(chainId: number | bigint | string): Bytes32;
+export function buildUnsignedLocalTransactionEnvelope(input: {
+  document: Record<string, unknown>;
+  chainId: number | bigint | string;
+  nonce: number | bigint | string;
+  signerId: Bytes32;
+  signerKeyId: Bytes32;
+  signerRole: string;
+  publicKey: Hex;
+  issuedAtUnixMs: number | bigint | string;
+}): Record<string, unknown>;
+export function validateLocalTransactionEnvelope(input: {
+  document: Record<string, unknown>;
+  envelope: Record<string, unknown>;
+  context?: {
+    chainId?: number | bigint | string;
+    expectedSignerId?: Bytes32;
+    seenNonces?: Set<string>;
+  };
+}): LocalAlphaEnvelopeValidationResult;
+
+export function createEncryptedTestVault(input?: {
+  password: string;
+  label?: string;
+  signerRole?: string;
+  createdAtUnixMs?: number | bigint | string;
+  privateKey?: Hex;
+}): Record<string, unknown>;
+export function unlockEncryptedTestVault(input: {
+  vault: Record<string, unknown>;
+  password: string;
+}): Record<string, unknown>;
+export function listVaultPublicAccounts(vaultOrSession: Record<string, unknown>): Array<Record<string, unknown>>;
+export function exportVaultPublicMetadata(vaultOrSession: Record<string, unknown>): Record<string, unknown>;
+export function addEncryptedTestVaultAccount(input: {
+  vault: Record<string, unknown>;
+  password: string;
+  label?: string;
+  signerRole?: string;
+  createdAtUnixMs?: number | bigint | string;
+  privateKey?: Hex;
+  signerId?: Bytes32;
+}): Record<string, unknown>;
+export function rotateEncryptedTestVaultAccount(input: {
+  vault: Record<string, unknown>;
+  password: string;
+  signerKeyId: Bytes32;
+  label?: string;
+  createdAtUnixMs?: number | bigint | string;
+  privateKey?: Hex;
+}): Record<string, unknown>;
+export function signLocalTransactionWithVault(input: {
+  vault: Record<string, unknown>;
+  password: string;
+  signerKeyId: Bytes32;
+  document: Record<string, unknown>;
+  chainId: number | bigint | string;
+  nonce: number | bigint | string;
+  issuedAtUnixMs?: number | bigint | string;
+}): Promise<Record<string, unknown>>;
+export function verifyLocalTransactionSignature(input: {
+  document: Record<string, unknown>;
+  envelope: Record<string, unknown>;
+  context?: Record<string, unknown>;
+}): LocalAlphaEnvelopeValidationResult;

@@ -4,7 +4,7 @@ import { AlertTriangle, RefreshCw } from "lucide-react";
 import { AppShell } from "./components/AppShell";
 import { DEFAULT_CANARY_DASHBOARD_DATA_PATH, fetchDashboardData } from "./data/loadDashboardData";
 import type { DashboardData } from "./data/types";
-import { buildWorkbenchSnapshot, fetchWorkbenchSnapshot, type WorkbenchSnapshot } from "./data/workbench";
+import { DEFAULT_CONTROL_PLANE_URL, buildWorkbenchSnapshot, fetchWorkbenchSnapshot, type WorkbenchSnapshot } from "./data/workbench";
 import { AlertsView } from "./views/AlertsView";
 import { CanaryDeploymentView } from "./views/CanaryDeploymentView";
 import { DevnetBlocksView } from "./views/DevnetBlocksView";
@@ -25,6 +25,10 @@ function LoadingState() {
         <div className="skeleton-line skeleton-title" />
         <div className="skeleton-line" />
         <div className="skeleton-line skeleton-short" />
+        <p className="boot-hint">
+          Loading dashboard fixtures and probing {DEFAULT_CONTROL_PLANE_URL}/health plus /state. If this stays offline,
+          start the local service with <code>npm run flowchain:start</code>.
+        </p>
         <div className="boot-grid">
           <div />
           <div />
@@ -43,6 +47,10 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
         <div>
           <h1>Dashboard fixture failed to load</h1>
           <p>{message}</p>
+          <p>
+            Run <code>npm run launch:v0</code> or <code>npm run sync:fixtures --prefix apps/dashboard</code> to refresh
+            local dashboard data, then retry.
+          </p>
           <button className="button button-primary" type="button" onClick={onRetry}>
             <RefreshCw size={16} aria-hidden="true" />
             Retry fixture load
