@@ -387,6 +387,9 @@
         "sourceContract": "0x1111111111111111111111111111111111111111",
         "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
         "logIndex": 0,
+        "sourceBlockNumber": "5000",
+        "sourceBlockHash": "0x7777777777777777777777777777777777777777777777777777777777777777",
+        "transactionIndex": 0,
         "token": "0x3333333333333333333333333333333333333333",
         "amount": "20000000",
         "sender": "0x4444444444444444444444444444444444444444",
@@ -402,6 +405,9 @@
         "sourceContract": "0x1111111111111111111111111111111111111111",
         "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
         "logIndex": 0,
+        "sourceBlockNumber": "5000",
+        "sourceBlockHash": "0x7777777777777777777777777777777777777777777777777777777777777777",
+        "transactionIndex": 0,
         "token": "0x3333333333333333333333333333333333333333",
         "amount": "20000000",
         "sender": "0x4444444444444444444444444444444444444444",
@@ -1535,9 +1541,9 @@
         "schemaPath": "../../schemas/flowmemory/local-transaction-envelope.schema.json",
         "function": "localTransactionEnvelopeHash",
         "expected": {
-          "envelopeId": "0xb8de3add81640848961aa8e0ba73c5c2ff3e30aed480dbba8e70d1345dba6210",
-          "signingDigest": "0x0c702b64fef1434b9de56fbc01e47db9ef6f3565bc1a58babb2dbdd72d65ca14",
-          "payloadHash": "0x485a6896d8ee1c67440b6dddf723f0378c4f51d7448e487effe5f337656f0908"
+          "envelopeId": "0x11a8286288f46a7164e627d66a09f4e63f0d8c48bce2cf00df7b9fd9388aaf8e",
+          "signingDigest": "0x6d02b95313e31b9e13f0f223bde4a78ce215cc18d0ebbdd55568d2d58b6ec78a",
+          "payloadHash": "0x8e9dc6a1c3249e51eb8da32a47b122ef362fb59928e98877d432e1c3b899c48e"
         },
         "input": {
           "chainId": "31337",
@@ -1546,14 +1552,14 @@
           "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
           "signerRole": 1,
           "nonce": "1",
-          "payloadHash": "0x485a6896d8ee1c67440b6dddf723f0378c4f51d7448e487effe5f337656f0908",
+          "payloadHash": "0x8e9dc6a1c3249e51eb8da32a47b122ef362fb59928e98877d432e1c3b899c48e",
           "objectId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
           "objectTypeHash": "0x97bcbbe7a3f24fdb7cab668fc751ca8757b59b3fe8ed71674fdaca140a22d408",
           "issuedAtUnixMs": "1778702400000"
         },
         "envelope": {
           "schema": "flowchain.local_transaction_envelope.v0",
-          "envelopeId": "0xb8de3add81640848961aa8e0ba73c5c2ff3e30aed480dbba8e70d1345dba6210",
+          "envelopeId": "0x11a8286288f46a7164e627d66a09f4e63f0d8c48bce2cf00df7b9fd9388aaf8e",
           "domain": "flowchain.local-alpha.v0.local-transaction-envelope:chain:31337",
           "domainSeparator": "0xff516fcab184623fe60f12b4d1e0430a57e6d18685d1356887ada50f5f20b36c",
           "chainId": "31337",
@@ -1567,10 +1573,10 @@
           "objectType": "bridge_deposit",
           "objectTypeHash": "0x97bcbbe7a3f24fdb7cab668fc751ca8757b59b3fe8ed71674fdaca140a22d408",
           "objectId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
-          "payloadHash": "0x485a6896d8ee1c67440b6dddf723f0378c4f51d7448e487effe5f337656f0908",
+          "payloadHash": "0x8e9dc6a1c3249e51eb8da32a47b122ef362fb59928e98877d432e1c3b899c48e",
           "issuedAtUnixMs": "1778702400000",
-          "signingDigest": "0x0c702b64fef1434b9de56fbc01e47db9ef6f3565bc1a58babb2dbdd72d65ca14",
-          "signature": "0x51d06d784e2c0fb703a9c1e8ad7186eb777176bdf79bfddc4284020015a1c72d0059bf0b962bf5cdaa4b7e007e6a6b770551f24699ac938303be5203b3b24631"
+          "signingDigest": "0x6d02b95313e31b9e13f0f223bde4a78ce215cc18d0ebbdd55568d2d58b6ec78a",
+          "signature": "0xe5b909398cd6e4f09f897c4588f94df7ea8c35aaf4680ec5ee56184b12a381371055850a7e0cf37e71cce901bcdb15bd3db09d85aa6b3fb47923e77ea54d3fa3"
         }
       }
     ],

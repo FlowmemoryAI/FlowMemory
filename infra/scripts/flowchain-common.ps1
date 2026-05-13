@@ -78,6 +78,21 @@ function Invoke-FlowChainCommand {
     }
 }
 
+function Join-FlowChainProcessArguments {
+    param(
+        [string[]] $ArgumentList = @()
+    )
+
+    return ($ArgumentList | ForEach-Object {
+        if ($_.IndexOfAny([char[]] @(" ", "`t", '"')) -ge 0) {
+            '"' + ($_.Replace('"', '\"')) + '"'
+        }
+        else {
+            $_
+        }
+    }) -join " "
+}
+
 function Set-FlowChainCargoTargetDir {
     param(
         [Parameter(Mandatory = $true)]

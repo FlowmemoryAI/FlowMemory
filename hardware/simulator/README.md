@@ -10,13 +10,33 @@ The simulator emits deterministic FlowRouter V0 proof-of-concept packets for das
 python hardware/simulator/flowrouter_sim.py --seed 42 --out hardware/fixtures/flowrouter_sample_seed42.json
 ```
 
-## Generate Local-Alpha Operator Signals
+## Generate Canonical Fixtures
 
 ```powershell
-python hardware/simulator/flowrouter_sim.py --seed 42 --out hardware/fixtures/flowrouter_sample_seed42.json --operator-out fixtures/hardware/flowrouter_local_alpha_seed42.json
+python hardware/simulator/flowrouter_sim.py --generate-fixtures --seed 42
 ```
 
-This is also the simulator smoke command: generation validates the raw packet fixture and the local-alpha operator projection before writing either output file.
+This writes the raw packet fixture, the local-alpha operator projection, the control-plane handoff fixture, and the negative validation report.
+
+The PowerShell wrapper is:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File hardware/simulator/flowrouter-generate-fixtures.ps1
+```
+
+## Simulator Smoke
+
+```powershell
+python hardware/simulator/flowrouter_sim.py --smoke --seed 42
+```
+
+The smoke command validates all canonical fixtures, compares them against deterministic regenerated output, and runs negative validation cases.
+
+The PowerShell wrapper is:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File hardware/simulator/flowrouter-smoke.ps1
+```
 
 ## Validate Existing Fixture
 
@@ -30,6 +50,19 @@ python hardware/simulator/flowrouter_sim.py --validate-file hardware/fixtures/fl
 python hardware/simulator/flowrouter_sim.py --validate-operator-file fixtures/hardware/flowrouter_local_alpha_seed42.json
 ```
 
+## Validate Control-Plane Handoff
+
+```powershell
+python hardware/simulator/flowrouter_sim.py --validate-handoff-file fixtures/hardware/flowrouter_control_plane_handoff_seed42.json
+```
+
+## Validate Negative Cases
+
+```powershell
+python hardware/simulator/flowrouter_sim.py --run-negative-cases --seed 42
+python hardware/simulator/flowrouter_sim.py --validate-negative-report-file fixtures/hardware/flowrouter_negative_validation_seed42.json
+```
+
 ## Packet Types
 
 - Device manifest
@@ -37,6 +70,7 @@ python hardware/simulator/flowrouter_sim.py --validate-operator-file fixtures/ha
 - FlowPulse digest relay
 - Verifier report digest relay
 - Compact receipt relay
+- Bridge alert
 - Local cache status
 - Gateway discovery
 - Sidecar status
@@ -49,10 +83,12 @@ The packets are JSON versions of compact, binary-inspired fields. They are not p
 
 The local-alpha projection is a `flowmemory.hardware_operator_signals.local_alpha.v0` document. It uses camelCase, a top-level `schema`, local-only `signalEnvelopes`, a direct `hardwareSignals` view, and workbench/control-plane-ready collections:
 
+- `device_manifest` -> `operatorMetadata`
 - `heartbeat` -> `hardwareNodes`
 - `compact_receipt_relay` -> `workReceipts`
 - `verifier_report_digest_relay` -> `verifierReports`
 - `emergency_offline_signal` -> `alerts` and `challenges`
+- `bridge_alert` -> `bridgeAlerts` and `alerts`
 - `nfc_memory_cartridge_metadata` -> `artifactCommitments` and `memoryCells`
 
-It also includes `workbenchRecords` grouped by `receipts`, `verifierReports`, `artifacts`, `memoryCells`, `challenges`, `hardwareSignals`, and `provenance`. These projection objects are local-only and advisory until reconciled through normal FlowMemory indexer, receipt, verifier, or operator workflows.
+It also includes `workbenchRecords` grouped by `operatorMetadata`, `receipts`, `verifierReports`, `bridgeAlerts`, `artifacts`, `memoryCells`, `challenges`, `hardwareSignals`, and `provenance`. The companion `flowmemory.hardware_control_plane_handoff.local_alpha.v0` fixture carries the same state keys under `collections` plus an optional `flowchain:full-smoke` row that runs `python hardware/simulator/flowrouter_sim.py --smoke`. These projection objects are local-only and advisory until reconciled through normal FlowMemory indexer, receipt, verifier, or operator workflows.

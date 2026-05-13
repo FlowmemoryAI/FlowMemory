@@ -1,5 +1,6 @@
 param(
     [switch] $SkipDashboardBuild,
+    [switch] $SkipBridge,
     [switch] $SkipHardware
 )
 
@@ -89,6 +90,14 @@ finally {
     $env:FLOWMEMORY_TEST_WALLET_PASSWORD = $previousWalletPassword
 }
 
+if (-not $SkipBridge) {
+    Invoke-FlowChainCommand -Label "Run bridge local-credit handoff smoke" -FilePath "npm" -ArgumentList @("run", "bridge:local-credit:smoke")
+}
+
+if (-not $SkipHardware) {
+    Invoke-FlowChainCommand -Label "Run FlowRouter operator-signal smoke" -FilePath "npm" -ArgumentList @("run", "flowchain:hardware:smoke")
+}
+
 Assert-FlowChainNoSecretFiles -Path $fullSmokeRoot
 Invoke-FlowChainCommand -Label "Check working tree patch whitespace" -FilePath "git" -ArgumentList @("diff", "--check")
 
@@ -118,8 +127,10 @@ $report = [ordered]@{
     controlPlaneSmoke = $smokeReport.controlPlaneSmoke
     localWalletCli = "passed"
     localTransactionEnvelope = $walletEnvelopePath
+    bridgeLocalCreditSmoke = $(if ($SkipBridge) { "skipped" } else { "passed" })
     dashboardBuild = $smokeReport.dashboardBuild
     hardwareFixture = $smokeReport.hardwareFixture
+    hardwareOperatorSignals = $(if ($SkipHardware) { "skipped" } else { "passed" })
     noSecretExportScan = $smokeReport.noSecretExportScan
     gitDiffCheck = "passed"
     acceptanceCoverage = [ordered]@{
@@ -129,6 +140,8 @@ $report = [ordered]@{
         workbenchBuild = $smokeReport.dashboardBuild
         deterministicReplay = "passed"
         walletEnvelope = "passed"
+        bridgeLocalCredit = $(if ($SkipBridge) { "skipped" } else { "passed" })
+        hardwareOperatorSignals = $(if ($SkipHardware) { "skipped" } else { "passed" })
         noSecretExportScan = "passed"
         unsafeClaimScan = "passed"
     }

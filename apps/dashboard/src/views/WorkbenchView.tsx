@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Activity, Database, Network, PlayCircle, Search, Server, Terminal } from "lucide-react";
+import { Activity, Database, Network, PlayCircle, RefreshCw, Search, Server, Terminal } from "lucide-react";
 import { EmptyState } from "../components/EmptyState";
 import { HashValue } from "../components/HashValue";
 import { ProvenanceLine } from "../components/ProvenanceLine";
@@ -9,6 +9,12 @@ import type { DashboardData, DashboardStatus } from "../data/types";
 import { WORKBENCH_SECTIONS, type WorkbenchRecord, type WorkbenchSectionKey, type WorkbenchSnapshot } from "../data/workbench";
 
 const DEFAULT_SECTION: WorkbenchSectionKey = "nodeStatus";
+
+interface WorkbenchViewProps {
+  data: DashboardData;
+  workbench: WorkbenchSnapshot;
+  onRefresh?: () => void;
+}
 
 function displayValue(value: string) {
   if (value.startsWith("0x") && value.length > 18) {
@@ -35,7 +41,7 @@ function missingStateDetail(activeDefinition: (typeof WORKBENCH_SECTIONS)[number
   return `${activeDefinition.missingService} did not provide records for ${activeDefinition.expectedEndpoint}. Run ${activeDefinition.missingCommand} locally, then refresh this dashboard.`;
 }
 
-export function WorkbenchView({ data, workbench }: { data: DashboardData; workbench: WorkbenchSnapshot }) {
+export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps) {
   const [activeSection, setActiveSection] = useState<WorkbenchSectionKey>(DEFAULT_SECTION);
   const [query, setQuery] = useState("");
   const [actionResult, setActionResult] = useState<string | null>(null);
@@ -69,10 +75,18 @@ export function WorkbenchView({ data, workbench }: { data: DashboardData; workbe
         title="Local explorer workbench"
         detail="Usable browser surface for inspecting the private/local L1 testnet shape. It probes the local control-plane API when available and otherwise renders deterministic committed fixtures; value-bearing wallet flows are not included."
         action={
-          <label className="search-box">
-            <Search size={16} aria-hidden="true" />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search current workbench view" />
-          </label>
+          <div className="workbench-header-actions">
+            <label className="search-box">
+              <Search size={16} aria-hidden="true" />
+              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search current workbench view" />
+            </label>
+            {onRefresh ? (
+              <button className="button" type="button" onClick={onRefresh} title="Refresh local workbench data">
+                <RefreshCw size={15} aria-hidden="true" />
+                Refresh
+              </button>
+            ) : null}
+          </div>
         }
       />
 

@@ -289,6 +289,13 @@ small {
   min-width: min(520px, 100%);
 }
 
+.workbench-header-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
 .filter-row {
   display: grid;
   grid-template-columns: minmax(240px, 1fr) 150px;

@@ -87,4 +87,3 @@ End each HQ/Ops handoff with:
 - Tests or checks run.
 - Current second-computer next command.
 - Risks, assumptions, and follow-ups.
-

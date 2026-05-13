@@ -266,6 +266,70 @@ fn every_core_transaction_type_can_be_applied() {
 }
 
 #[test]
+fn local_faucet_and_transfer_update_test_unit_ledger() {
+    let mut state = genesis_state();
+    apply_transaction(
+        &mut state,
+        &Transaction::CreateLocalTestUnitBalance {
+            account_id: "local-account:alice".to_string(),
+            owner: "operator:alice".to_string(),
+        },
+    )
+    .unwrap();
+    apply_transaction(
+        &mut state,
+        &Transaction::CreateLocalTestUnitBalance {
+            account_id: "local-account:bob".to_string(),
+            owner: "operator:bob".to_string(),
+        },
+    )
+    .unwrap();
+    apply_transaction(
+        &mut state,
+        &Transaction::FaucetLocalTestUnits {
+            faucet_record_id: "faucet:unit:001".to_string(),
+            account_id: "local-account:alice".to_string(),
+            recipient: "operator:alice".to_string(),
+            amount_units: 50,
+            reason: "unit-test".to_string(),
+        },
+    )
+    .unwrap();
+    apply_transaction(
+        &mut state,
+        &Transaction::TransferLocalTestUnits {
+            transfer_id: "transfer:unit:001".to_string(),
+            from_account_id: "local-account:alice".to_string(),
+            to_account_id: "local-account:bob".to_string(),
+            amount_units: 20,
+            memo: "unit-test-transfer".to_string(),
+        },
+    )
+    .unwrap();
+
+    assert_eq!(state.local_test_unit_balances["local-account:alice"].units, 30);
+    assert_eq!(state.local_test_unit_balances["local-account:bob"].units, 20);
+    assert_eq!(state.faucet_records.len(), 1);
+    assert_eq!(state.balance_transfers.len(), 1);
+
+    assert_eq!(
+        apply_transaction(
+            &mut state,
+            &Transaction::TransferLocalTestUnits {
+                transfer_id: "transfer:unit:002".to_string(),
+                from_account_id: "local-account:bob".to_string(),
+                to_account_id: "local-account:alice".to_string(),
+                amount_units: 30,
+                memo: "too-much".to_string(),
+            },
+        ),
+        Err(DevnetError::LocalTestUnitBalanceInsufficient(
+            "local-account:bob".to_string()
+        ))
+    );
+}
+
+#[test]
 fn duplicate_ids_are_rejected_for_new_objects() {
     let mut state = genesis_state();
     apply_transaction(&mut state, &register_rootfield_tx("rootfield:dup")).unwrap();
@@ -780,9 +844,183 @@ fn cli_export_import_state_round_trip_is_deterministic() {
 }
 
 #[test]
+fn cli_node_runs_ten_blocks_and_includes_authorized_inbox_tx() {
+    let temp = temp_dir("cli-node");
+    let state = temp.join("state.json");
+    let node_dir = temp.join("node");
+
+    let faucet = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "--node-dir",
+            node_dir.to_str().expect("node dir"),
+            "faucet",
+            "--account",
+            "local-account:cli-node",
+            "--amount",
+            "9",
+            "--reason",
+            "cli-node-test",
+            "--authorized-by",
+            "local-test-operator",
+        ])
+        .status()
+        .expect("submit faucet");
+    assert!(faucet.success());
+
+    let node = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "--node-dir",
+            node_dir.to_str().expect("node dir"),
+            "node",
+            "--node-id",
+            "node:test:cli",
+            "--block-ms",
+            "1",
+            "--max-blocks",
+            "10",
+        ])
+        .status()
+        .expect("run node");
+    assert!(node.success());
+
+    let output = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "--node-dir",
+            node_dir.to_str().expect("node dir"),
+            "node-status",
+        ])
+        .output()
+        .expect("node status");
+    assert!(output.status.success());
+    let summary: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("status summary json");
+    assert_eq!(summary["state"]["blocks"], 10);
+    assert_eq!(summary["state"]["localBalances"], 1);
+    assert_eq!(summary["state"]["faucetRecords"], 1);
+    let state_body = std::fs::read_to_string(&state).expect("state body");
+    let state_json: serde_json::Value = serde_json::from_str(&state_body).expect("state json");
+    assert_eq!(
+        state_json["blocks"][0]["receipts"][0]["authorization"]["signer"],
+        "local-test-operator"
+    );
+    assert!(node_dir.join("node-identity.json").exists());
+    assert!(node_dir.join("status.json").exists());
+
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
+fn cli_static_peer_sync_reconciles_two_local_node_states() {
+    let temp = temp_dir("cli-peer-sync");
+    let state_a = temp.join("state-a.json");
+    let state_b = temp.join("state-b.json");
+    let node_a = temp.join("node-a");
+    let node_b = temp.join("node-b");
+    let peer_b = temp.join("node-b-peers.json");
+
+    let faucet = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state_a.to_str().expect("state a"),
+            "--node-dir",
+            node_a.to_str().expect("node a"),
+            "faucet",
+            "--account",
+            "local-account:peer-sync",
+            "--amount",
+            "11",
+            "--reason",
+            "peer-sync-test",
+            "--authorized-by",
+            "local-test-operator",
+        ])
+        .status()
+        .expect("submit faucet to node a");
+    assert!(faucet.success());
+
+    let node_a_status = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state_a.to_str().expect("state a"),
+            "--node-dir",
+            node_a.to_str().expect("node a"),
+            "node",
+            "--node-id",
+            "node:test:a",
+            "--block-ms",
+            "1",
+            "--max-blocks",
+            "2",
+        ])
+        .status()
+        .expect("run node a");
+    assert!(node_a_status.success());
+
+    std::fs::write(
+        &peer_b,
+        format!(
+            "{{\"schema\":\"flowmemory.local_devnet.static_peers.v0\",\"nodeId\":\"node:test:b\",\"peers\":[{{\"nodeId\":\"node:test:a\",\"statePath\":\"{}\"}}]}}\n",
+            state_a.to_string_lossy().replace('\\', "\\\\")
+        ),
+    )
+    .expect("write peer config");
+
+    let node_b_status = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state_b.to_str().expect("state b"),
+            "--node-dir",
+            node_b.to_str().expect("node b"),
+            "node",
+            "--node-id",
+            "node:test:b",
+            "--block-ms",
+            "1",
+            "--max-blocks",
+            "1",
+            "--peer-config",
+            peer_b.to_str().expect("peer config"),
+        ])
+        .status()
+        .expect("run node b");
+    assert!(node_b_status.success());
+
+    let summary_a = inspect_summary(&state_a, &node_a);
+    let summary_b = inspect_summary(&state_b, &node_b);
+    assert_eq!(
+        summary_a["state"]["stateRoot"],
+        summary_b["state"]["stateRoot"]
+    );
+    assert_eq!(summary_b["state"]["localBalances"], 1);
+
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
 fn zero_hash_constant_is_hex_32_bytes() {
     assert_eq!(ZERO_HASH.len(), 66);
     assert!(ZERO_HASH.starts_with("0x"));
+}
+
+fn inspect_summary(state: &std::path::Path, node_dir: &std::path::Path) -> serde_json::Value {
+    let output = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "--node-dir",
+            node_dir.to_str().expect("node dir"),
+            "node-status",
+        ])
+        .output()
+        .expect("inspect node status");
+    assert!(output.status.success());
+    serde_json::from_slice(&output.stdout).expect("status json")
 }
 
 fn temp_dir(name: &str) -> std::path::PathBuf {

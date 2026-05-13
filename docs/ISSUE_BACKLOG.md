@@ -36,8 +36,8 @@ state; update this index after issue or milestone changes.
 Primary milestone: make the FlowChain private/local L1 testnet package for
 second-computer validation runnable from a clean Windows machine.
 
-These rows are proposed next-wave issue groupings unless a GitHub issue number
-is named. They should become GitHub issues before implementation work starts.
+GitHub milestone #7 now tracks the full-L1 workstream. The live HQ issue/PR
+and ownership matrix is `docs/FLOWCHAIN_HQ_INTEGRATION_STATUS.md`.
 
 Remaining gaps for this milestone:
 
@@ -50,8 +50,10 @@ Remaining gaps for this milestone:
   and raw JSON.
 - Workbench views for the same private/local testnet entities.
 - No-secret checks for control-plane responses.
+- Test bridge observation and local-credit smoke path.
 - Full deterministic second-computer smoke evidence for native private/local
-  objects after chain, crypto, control-plane, and dashboard work lands.
+  objects after chain, crypto, control-plane, dashboard, bridge, and hardware
+  work lands.
 
 Implemented HQ/Ops packaging layer:
 
@@ -61,6 +63,8 @@ Implemented HQ/Ops packaging layer:
 - `infra/scripts/flowchain-stop.ps1`
 - `infra/scripts/flowchain-demo.ps1`
 - `infra/scripts/flowchain-smoke.ps1`
+- `infra/scripts/flowchain-full-smoke.ps1` as the temporary full-L1
+  blocker-report wrapper.
 - `infra/scripts/flowchain-export.ps1`
 - `infra/scripts/flowchain-import.ps1`
 - `infra/scripts/flowchain-workbench.ps1`
@@ -74,75 +78,73 @@ Dependency order:
    vectors for the same object set.
 3. Control plane reads the existing devnet, launch-core, and verifier outputs
    without creating a second API model.
-4. Dashboard extends the existing app to consume control-plane or deterministic
+4. Contracts and bridge stabilize the test-only settlement/bridge event path
+   without production bridge claims.
+5. Dashboard extends the existing app to consume control-plane or deterministic
    fixture output.
-5. Hardware contributes optional advisory signal fixtures only after object and
+6. Hardware contributes optional advisory signal fixtures only after object and
    API labels are stable.
-6. Packaging keeps root command aliases and Windows scripts aligned as command
+7. Packaging keeps root command aliases and Windows scripts aligned as command
    semantics evolve.
 
 ### Chain / Devnet
 
 | Issue | State | Agent/worktree | Dependencies | Notes |
 | --- | --- | --- | --- | --- |
-| Proposed `[chain] Extend devnet into private FlowChain testnet runtime` | Proposed | Chain - `flowmemory-chain` | Current `crates/flowmemory-devnet/`, crypto object IDs | Extend existing Rust devnet only; add genesis/config, deterministic object lifecycle, export/import, and full smoke path. |
-| Proposed `[chain] Add deterministic private testnet smoke fixture` | Proposed | Chain - `flowmemory-chain` | Runtime extension | Must prove agent, model, receipt, artifact, verifier report, memory, challenge, finality, export, and replay. |
-| Proposed `[chain] Document LAN/private-node boundaries` | Proposed | Chain - `flowmemory-chain` | Runtime start behavior | LAN is optional; no public validator or production consensus claim. |
+| #99 `[chain] Make FlowChain private/local L1 runtime runnable` | Open | Chain - `flowmemory-chain` on `agent/full-l1-runtime` | Current Rust devnet, #100 envelope/object IDs | Long-running node, transaction intake, local test-unit ledger, restart persistence, export/import, one-node and multi-process smoke. |
 
 ### Control Plane / Indexer
 
 | Issue | State | Agent/worktree | Dependencies | Notes |
 | --- | --- | --- | --- | --- |
-| Proposed `[indexer] Expose private FlowChain testnet control plane` | Proposed | Indexer - `flowmemory-indexer` | Chain handoff, crypto object IDs | Extend `services/control-plane/` and existing indexer/verifier outputs; no second API. |
-| Proposed `[indexer] Add control-plane full-smoke client` | Proposed | Indexer - `flowmemory-indexer` | Control-plane methods | Query health, chain, blocks, txs, agents, models, receipts, artifacts, verifier reports, challenges, finality, memory, provenance, raw JSON. |
-| Proposed `[indexer/security] Add no-secret response checks` | Proposed | Indexer - `flowmemory-indexer` | Control-plane API | Tests must prevent keys, RPC URLs, API keys, seed phrases, and private locators from appearing in responses. |
+| #101 `[indexer] Expose full FlowChain local control plane and full-smoke client` | Open; draft PR #114 | Indexer - `flowmemory-indexer` on `agent/full-l1-control-plane` | #99 chain handoff, #100 object IDs, #104 bridge objects | Live-node adapters, full lifecycle queries, transaction submission, bridge observation intake, `control-plane:smoke`, and no-secret response scans. |
 
 ### Crypto / RD
 
 | Issue | State | Agent/worktree | Dependencies | Notes |
 | --- | --- | --- | --- | --- |
-| Proposed `[crypto] Define private testnet object envelopes and vectors` | Proposed | Crypto - `flowmemory-crypto` | Existing `crypto/`, `schemas/flowmemory/` | AgentAccount, ModelPassport, MemoryCell, ArtifactAvailabilityProof, VerifierModule, Challenge, FinalityReceipt, provenance response. |
-| Proposed `[crypto] Define local signer and envelope policy` | Proposed | Crypto - `flowmemory-crypto` | Object IDs | Local operators, agents, verifiers, hardware signal issuers; no production wallet or audited-crypto claim. |
-| Proposed `[crypto] Add negative vector coverage` | Proposed | Crypto - `flowmemory-crypto` | Envelope policy | Replay, wrong domain, missing signer, zero hash, malformed object, duplicate IDs. |
+| #100 `[crypto] Add wallet, signed envelopes, and object IDs for full local L1` | Open | Crypto - `flowmemory-crypto` on `agent/full-l1-crypto-wallet` | Existing `crypto/`, schemas, #99 runtime object model | Canonical envelopes, wallet/vault, object IDs, bridge objects, positive/negative vectors, and no-secret exports. |
 
 ### Dashboard / Workbench
 
 | Issue | State | Agent/worktree | Dependencies | Notes |
 | --- | --- | --- | --- | --- |
-| Proposed `[dashboard] Build local FlowChain testnet workbench` | Proposed | Dashboard - `flowmemory-dashboard` | Control-plane API or deterministic fixture fallback | Extend existing dashboard; show node health, blocks, transactions, agents, models, receipts, memory cells, artifacts, reports, challenges, finality, provenance, raw JSON. |
-| Proposed `[dashboard] Add local setup/status panel` | Proposed | Dashboard - `flowmemory-dashboard` | Packaging command names | Show expected local commands and service states; no marketing landing page. |
-| #76 `[dashboard] Add canary deployment artifact ingestion and live/canary mode` | Open | Dashboard - `flowmemory-dashboard` | Guarded canary reader output | Canary mode must stay separate from private/local testnet and production claims. |
+| #102 `[dashboard] Extend workbench for live FlowChain local L1 state` | Open; draft PR #112 | Dashboard - `flowmemory-dashboard` on `agent/full-l1-workbench` | #101 API, #99 runtime handoff | Live workbench over node, tx, account, object lifecycle, bridge, hardware, provenance, and raw JSON state. |
+| #76 `[dashboard] Add canary deployment artifact ingestion and live/canary mode` | Closed | Dashboard - `flowmemory-dashboard` | Guarded canary reader output | Canary mode is historical follow-up evidence, not active private/local testnet work. |
+
+### Bridge
+
+| Issue | State | Agent/worktree | Dependencies | Notes |
+| --- | --- | --- | --- | --- |
+| #104 `[bridge] Build test bridge observation and local credit path` | Open; draft PR #113 | Bridge - `flowmemory-bridge-full` on `agent/full-l1-bridge` | #100 bridge IDs, #101 intake, #103 lockbox/events | Mock/Base Sepolia observation, BridgeObservation/BridgeCredit objects, local-credit smoke, withdrawal intent, explicit real-funds guardrails. |
 
 ### Hardware
 
 | Issue | State | Agent/worktree | Dependencies | Notes |
 | --- | --- | --- | --- | --- |
-| Proposed `[hardware] Add optional private testnet operator signal fixtures` | Proposed | Hardware - `flowmemory-hardware` | Crypto/control-plane labels | Heartbeat, receipt relay, verifier digest relay, offline alert/challenge input, NFC cartridge metadata. |
-| Proposed `[hardware] Validate simulator projection for workbench ingestion` | Proposed | Hardware - `flowmemory-hardware` | Hardware fixture schema | Hardware remains optional and advisory; no manufacturing, RF, broadband, validator, or trustlessness claim. |
+| #105 `[hardware] Add optional operator-signal fixtures for FlowChain local L1` | Open | Hardware - `flowmemory-hardware` on `agent/full-l1-hardware` | #101/#102 labels, #100 optional signer vocabulary | Heartbeat, receipt relay, verifier digest relay, offline/challenge alert, bridge alert, NFC metadata, deterministic simulator fixtures. |
 
 ### Contracts
 
 | Issue | State | Agent/worktree | Dependencies | Notes |
 | --- | --- | --- | --- | --- |
-| Proposed `[contracts] Align settlement spine with private testnet objects` | Proposed | Contracts - `flowmemory-contracts` | Object model and FlowPulse semantics | Contracts remain optional event/settlement spine; do not move private runtime into Solidity. |
+| #103 `[contracts] Harden settlement and bridge event spine for FlowChain local L1` | Open; draft PR #110 | Contracts - `flowmemory-contracts` on `agent/full-l1-contracts` | #100 object/bridge vocabulary, #104 relayer handoff | Harden BaseBridgeLockbox, settlement/event tests, dry-run scripts, stable bridge event schema. |
 | #78 `[contracts] Build real Uniswap v4 hook path beyond HookAdapter scaffold` | Open | Contracts - `flowmemory-contracts` | Hook boundary and deployment decisions | Must remain outside private testnet core and must not claim production hook readiness. |
-| #79 `[contracts/security] Define ownership and operator policy for deployed V0 surfaces` | Open | Contracts - `flowmemory-contracts` | Access-control review | Policy only until implementation is scoped. |
+| #79 `[contracts/security] Define ownership and operator policy for deployed V0 surfaces` | Closed | Contracts - `flowmemory-contracts` | Access-control review | Historical canary follow-up; keep future policy changes scoped in new issues. |
 
 ### Research
 
 | Issue | State | Agent/worktree | Dependencies | Notes |
 | --- | --- | --- | --- | --- |
-| Proposed `[research] Gate advanced FlowChain L1 research for private testnet` | Proposed | Research - `flowmemory-research` | Existing research docs and decisions | Local testnet, public devnet, and public L1 gates; Process-Witness, SEAL, encrypted compute, bridge/security blocked until reviewed. |
-| Proposed `[research] Define dependency atom placeholder boundary` | Proposed | Research - `flowmemory-research` | Crypto object vocabulary | Placeholder or dependency-root vocabulary only; no proof claim. |
+| #106 `[research] Lock FlowChain local consensus, storage, wallet, and bridge decisions` | Open | Research - `flowmemory-research` on `agent/full-l1-research-consensus` | Existing research docs and decisions | Concrete V0 local consensus, transaction/state, storage, wallet, bridge, and full-L1 acceptance gates. |
 
 ### Review / HQ / Packaging
 
 | Issue | State | Agent/worktree | Dependencies | Notes |
 | --- | --- | --- | --- | --- |
-| Proposed `[hq] Define FlowChain private testnet acceptance plan` | Proposed | Review/HQ - `flowmemory-review` | Dispatch target | Docs-only acceptance, setup, integration map, roadmap, backlog. |
-| Proposed `[ops] Maintain Windows private testnet run scripts` | Implemented locally; keep open until merged | Review/HQ or packaging owner | Command names from chain/control-plane/dashboard | Prereq check, init, bounded start/stop, demo, smoke, export/import, and workbench scripts now exist; update when subsystem commands change. |
-| Proposed `[hq] Create second-computer validation checklist` | Implemented locally; keep open until merged | Review/HQ - `flowmemory-review` | Smoke command and workbench | `docs/FLOWCHAIN_SECOND_COMPUTER_SETUP.md`, `docs/FLOWCHAIN_TROUBLESHOOTING.md`, and `docs/FLOWCHAIN_OPERATOR_CHECKLIST.md` record commands, outputs, limitations, and follow-ups. |
-| #77 `[ops/security] Automate source verification for V0 canary contracts` | Open | Review/HQ or Contracts/Ops | Canary deployment docs | Canary follow-up only; not private testnet production readiness. |
+| #107 `[hq] Maintain full-L1 integration matrix, merge order, and smoke evidence` | Open | Review/HQ - `flowmemory-review` on `agent/full-l1-hq-integration` | GitHub milestone #7, active worktrees | Live issue/PR matrix, branch ownership, merge order, second-computer setup, and follow-up prompts. |
+| #108 `[ops] Implement final flowchain:full-smoke gate for full local L1 acceptance` | Open | Review/HQ wrapper plus subsystem owners | #99-#105 subsystem commands | Temporary wrapper exists; final gate must initialize, run, query, bridge-smoke, export/import, and compare deterministic roots. |
+| #77 `[ops/security] Automate source verification for V0 canary contracts` | Closed | Review/HQ or Contracts/Ops | Canary deployment docs | Historical canary follow-up only; not private testnet production readiness. |
 
 ## V0 Repo OS
 

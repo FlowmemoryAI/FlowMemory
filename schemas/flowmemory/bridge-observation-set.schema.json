@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowmemory.local/schemas/flowmemory/bridge-observation-set.schema.json",
+  "title": "FlowChainBridgeObservationSet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "observationSetId",
+    "observedAt",
+    "mode",
+    "productionReady",
+    "count",
+    "observations"
+  ],
+  "properties": {
+    "schema": { "const": "flowmemory.bridge_observation_set.v0" },
+    "observationSetId": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "observedAt": { "type": "string" },
+    "mode": { "type": "string", "enum": ["mock", "local-anvil", "base-sepolia", "base-mainnet-canary"] },
+    "productionReady": { "const": false },
+    "count": { "type": "integer", "minimum": 0 },
+    "observations": {
+      "type": "array",
+      "items": { "$ref": "bridge-observation.schema.json" }
+    }
+  }
+}

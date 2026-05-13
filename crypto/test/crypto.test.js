@@ -107,18 +107,23 @@ const localAlphaValidators = Object.freeze({
 
 function assertSchemaDocument(schemaPath, document) {
   const schema = JSON.parse(readFileSync(resolve(root, "fixtures", schemaPath), "utf8"));
-  assert.equal(document.schema, schema.properties.schema.const);
+  const schemaVariant = Array.isArray(schema.oneOf)
+    ? schema.oneOf.find((variant) => variant.properties?.schema?.const === document.schema)
+    : schema;
+
+  assert.ok(schemaVariant, `${document.schema} schema variant not found in ${schemaPath}`);
+  assert.equal(document.schema, schemaVariant.properties.schema.const);
   assert.deepEqual(
     Object.keys(document).sort(),
-    Object.keys(schema.properties).sort(),
+    Object.keys(schemaVariant.properties).sort(),
     `${document.schema} should not drift from its schema properties`
   );
 
-  for (const key of schema.required) {
+  for (const key of schemaVariant.required) {
     assert.ok(Object.hasOwn(document, key), `${document.schema} missing ${key}`);
   }
 
-  for (const [key, definition] of Object.entries(schema.properties)) {
+  for (const [key, definition] of Object.entries(schemaVariant.properties)) {
     const value = document[key];
     const resolved = definition.$ref
       ? schema.$defs[definition.$ref.replace("#/$defs/", "")]

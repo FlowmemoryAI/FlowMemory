@@ -19,7 +19,7 @@
   "genesisHash": "0x0f23c892cbd2d00c10839d97ddab833698a83f8df8d6df27ceac03cfdd4b7bc9",
   "nextBlockNumber": 3,
   "logicalTime": 1778688002,
-  "parentHash": "0xeca4065a019501355c54c1d7ecc4859e4be6355c9ccaa2ce7188822bebc88c82",
+  "parentHash": "0x6fc3297759b76c4c907d7590525390ae77af11a1db76c6383fb016a289e2600b",
   "operatorKeyReferences": {
     "operator-key:local-devnet:alpha": {
       "schema": "flowmemory.local_devnet.operator_key_reference.v0",
@@ -81,6 +81,7 @@
       "noValue": true
     }
   },
+  "balanceTransfers": {},
   "modelPassports": {
     "model:demo:local-alpha": {
       "modelPassportId": "model:demo:local-alpha",
@@ -127,7 +128,7 @@
       "finalityStatus": "finalized",
       "challengeCount": 1,
       "finalizedAtBlock": 1,
-      "stateRoot": "0x2cff83eaf83ea3ae2e9b248ca6ac2b32e23fa3f9ca067c4a9c93e72ef5679d33"
+      "stateRoot": "0x9a04c063ceb652a89bcdeba147cc36ceeecce9e8a0c6161a5d13b6363a9b5af2"
     }
   },
   "artifactCommitments": {
@@ -185,12 +186,12 @@
   "importedObservations": {},
   "importedVerifierReports": {},
   "baseAnchors": {
-    "0xd1112ed01fdf86d0caa079d7668a5c3e0482f6da36d8831f1e12a21bf2a77885": {
-      "anchorId": "0xd1112ed01fdf86d0caa079d7668a5c3e0482f6da36d8831f1e12a21bf2a77885",
+    "0x7dd81dfdeac346efaef81a3d62e064ab7b5ec4f00f2e2c0fd19745d876ae438d": {
+      "anchorId": "0x7dd81dfdeac346efaef81a3d62e064ab7b5ec4f00f2e2c0fd19745d876ae438d",
       "appchainChainId": "flowmemory-local-devnet-v0",
       "blockRangeStart": 1,
       "blockRangeEnd": 1,
-      "stateRoot": "0xd4bf806a2f91cd8255b2c55db91cb59c9f941d9ec92614dcb86dbd926184630c",
+      "stateRoot": "0x01313a55fdb9736570aa707b5ebf030fc1bf4212df721f7bb17612ad5de2502a",
       "workReceiptRoot": "0x8b3ef5650c9eea2f608ad9c7cb73df3c289fc0ac72ed04f46e6ae4bce0a1f023",
       "verifierReportRoot": "0x4facd21e55423e182eba87355482a35daa93f53190fbd3a8d2969f9d55bc5373",
       "rootfieldStateRoot": "0xb72a851dca1103410484e3272945bae5e87fc39b8f32f77d2991959b60d3bfbf",
@@ -199,10 +200,11 @@
       "agentAccountRoot": "0xcf31230bfff347f79e19a55f4d1ff5fa486b0b1ad4754ce22b93de4b259a3ca7",
       "localTestUnitBalanceRoot": "0x167041ef195b5dde2d2cade6ecb26c9a0a596e9ed21ff7bfb02d33c9d2be8d15",
       "faucetRecordRoot": "0x2277503a52fab3f9e49b40debfb7d641abee75cf268aa56da403fdcf4fad6cee",
+      "balanceTransferRoot": "0x9b6e249f769a93bc9f34a90156e028d1a830badcd8ccdc5b1487d512cdbf0a6d",
       "modelPassportRoot": "0x326aa6b0b372d29d24d747fe0879adfd7aaea206373b24ae2ab77d56357e9529",
       "memoryCellRoot": "0x1b4e91099dd8d867201bd880437197ae6c031e538341aaa3cd2046e5706a2c25",
       "challengeRoot": "0x16da3d2bf2dcd801bc5deb3987dc01342cb957031ad01408ea77bf5d1583656f",
-      "finalityReceiptRoot": "0x990b60fd5f91eb725b65d36a1324e00be255daaa4bc0fbbe163343c3934b120a",
+      "finalityReceiptRoot": "0xb2d8234d12f255669267722c21a3841257ca49f304863a7145e7e708a47b3132",
       "artifactAvailabilityProofRoot": "0xfb4b693c45014aae0947f35696e9d864e7b26ac6fd39c1df5edb3e0dcf9bd928",
       "verifierModuleRoot": "0xd6ddd8a2d0f5812d64679656c69983a2e0aecd36bd36199d900245658ae4626c",
       "previousAnchorId": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -309,13 +311,13 @@
           "error": null
         }
       ],
-      "stateRoot": "0xd4bf806a2f91cd8255b2c55db91cb59c9f941d9ec92614dcb86dbd926184630c",
-      "blockHash": "0x78c6b0c6b56eae99d2d693878a2239620c713cff50fcb94ba6df3fc6ed08be56"
+      "stateRoot": "0x01313a55fdb9736570aa707b5ebf030fc1bf4212df721f7bb17612ad5de2502a",
+      "blockHash": "0xb2251f1db0005e7e665f849a1f0bc2de35f65b263cb4d7aaa870f73f9551eb5c"
     },
     {
       "schema": "flowmemory.local_devnet.block.v0",
       "blockNumber": 2,
-      "parentHash": "0x78c6b0c6b56eae99d2d693878a2239620c713cff50fcb94ba6df3fc6ed08be56",
+      "parentHash": "0xb2251f1db0005e7e665f849a1f0bc2de35f65b263cb4d7aaa870f73f9551eb5c",
       "logicalTime": 1778688001,
       "txIds": [
         "0x8f719c880f17b5d4fb6d9efd54ac276d0dd8050d11c2c7870c36a79b66bc49d7"
@@ -327,8 +329,8 @@
           "error": null
         }
       ],
-      "stateRoot": "0x55cab7c41a999da527bdd026a772edb5e4804b070014cccc72622e09ce3e699f",
-      "blockHash": "0xeca4065a019501355c54c1d7ecc4859e4be6355c9ccaa2ce7188822bebc88c82"
+      "stateRoot": "0x00ab998a4d1f28200177680699c941b06ee536c0b70a1b35e20849de241740c0",
+      "blockHash": "0x6fc3297759b76c4c907d7590525390ae77af11a1db76c6383fb016a289e2600b"
     }
   ],
   "pendingTxs": []

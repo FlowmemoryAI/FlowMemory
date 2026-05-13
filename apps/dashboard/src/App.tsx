@@ -115,7 +115,7 @@ export default function App() {
   return (
     <AppShell data={data} canaryData={canaryData} workbench={workbench}>
       <Routes>
-        <Route path="/" element={<WorkbenchView data={data} workbench={workbench} />} />
+        <Route path="/" element={<WorkbenchView data={data} workbench={workbench} onRefresh={() => setVersion((current) => current + 1)} />} />
         <Route path="/overview" element={<OverviewView data={data} />} />
         <Route path="/canary" element={<CanaryDeploymentView data={canaryData} />} />
         <Route path="/flowmemory" element={<FlowMemoryView data={data} />} />

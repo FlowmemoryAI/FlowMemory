@@ -27,10 +27,14 @@ pub enum DevnetError {
     LocalTestUnitBalanceMissing(String),
     #[error("local test-unit balance overflow: {0}")]
     LocalTestUnitBalanceOverflow(String),
+    #[error("insufficient local test-unit balance: {0}")]
+    LocalTestUnitBalanceInsufficient(String),
     #[error("faucet record already exists: {0}")]
     FaucetRecordAlreadyExists(String),
     #[error("faucet amount must be greater than zero: {0}")]
     FaucetAmountMustBePositive(String),
+    #[error("balance transfer already exists: {0}")]
+    BalanceTransferAlreadyExists(String),
     #[error("model passport already exists: {0}")]
     ModelPassportAlreadyExists(String),
     #[error("model passport does not exist: {0}")]
@@ -113,6 +117,8 @@ pub struct ChainState {
     pub local_test_unit_balances: BTreeMap<String, LocalTestUnitBalance>,
     #[serde(default)]
     pub faucet_records: BTreeMap<String, FaucetRecord>,
+    #[serde(default)]
+    pub balance_transfers: BTreeMap<String, BalanceTransfer>,
     #[serde(default)]
     pub model_passports: BTreeMap<String, ModelPassport>,
     #[serde(default)]
@@ -210,6 +216,18 @@ pub struct FaucetRecord {
     pub amount_units: u64,
     pub reason: String,
     pub credited_at_block: u64,
+    pub no_value: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct BalanceTransfer {
+    pub transfer_id: String,
+    pub from_account_id: String,
+    pub to_account_id: String,
+    pub amount_units: u64,
+    pub memo: String,
+    pub transferred_at_block: u64,
     pub no_value: bool,
 }
 
@@ -371,6 +389,8 @@ pub struct BaseAnchorPlaceholder {
     #[serde(default)]
     pub faucet_record_root: String,
     #[serde(default)]
+    pub balance_transfer_root: String,
+    #[serde(default)]
     pub model_passport_root: String,
     #[serde(default)]
     pub memory_cell_root: String,
@@ -415,6 +435,13 @@ pub enum Transaction {
         recipient: String,
         amount_units: u64,
         reason: String,
+    },
+    TransferLocalTestUnits {
+        transfer_id: String,
+        from_account_id: String,
+        to_account_id: String,
+        amount_units: u64,
+        memo: String,
     },
     RegisterModelPassport {
         model_passport_id: String,
@@ -507,6 +534,16 @@ pub enum Transaction {
 pub struct TxEnvelope {
     pub tx_id: String,
     pub tx: Transaction,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub authorization: Option<LocalAuthorization>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct LocalAuthorization {
+    pub mode: String,
+    pub signer: String,
+    pub digest: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -528,6 +565,8 @@ pub struct BlockReceipt {
     pub tx_id: String,
     pub status: String,
     pub error: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub authorization: Option<LocalAuthorization>,
 }
 
 #[derive(Debug, Serialize)]
@@ -542,6 +581,7 @@ struct StateCommitmentView<'a> {
     agent_accounts: &'a BTreeMap<String, AgentAccount>,
     local_test_unit_balances: &'a BTreeMap<String, LocalTestUnitBalance>,
     faucet_records: &'a BTreeMap<String, FaucetRecord>,
+    balance_transfers: &'a BTreeMap<String, BalanceTransfer>,
     model_passports: &'a BTreeMap<String, ModelPassport>,
     memory_cells: &'a BTreeMap<String, MemoryCell>,
     challenges: &'a BTreeMap<String, Challenge>,
@@ -571,6 +611,7 @@ pub struct StateMapRoots {
     pub agent_account_root: String,
     pub local_test_unit_balance_root: String,
     pub faucet_record_root: String,
+    pub balance_transfer_root: String,
     pub model_passport_root: String,
     pub memory_cell_root: String,
     pub challenge_root: String,
@@ -639,6 +680,7 @@ pub fn genesis_state() -> ChainState {
         agent_accounts: BTreeMap::new(),
         local_test_unit_balances: BTreeMap::new(),
         faucet_records: BTreeMap::new(),
+        balance_transfers: BTreeMap::new(),
         model_passports: BTreeMap::new(),
         memory_cells: BTreeMap::new(),
         challenges: BTreeMap::new(),
@@ -658,11 +700,31 @@ pub fn genesis_state() -> ChainState {
 
 pub fn envelope_tx(tx: Transaction) -> TxEnvelope {
     let tx_id = hash_json(TX_SCHEMA, &tx);
-    TxEnvelope { tx_id, tx }
+    TxEnvelope {
+        tx_id,
+        tx,
+        authorization: None,
+    }
 }
 
 pub fn queue_transaction(state: &mut ChainState, tx: Transaction) -> String {
     let envelope = envelope_tx(tx);
+    let tx_id = envelope.tx_id.clone();
+    state.pending_txs.push(envelope);
+    tx_id
+}
+
+pub fn queue_authorized_transaction(
+    state: &mut ChainState,
+    tx: Transaction,
+    signer: String,
+) -> String {
+    let mut envelope = envelope_tx(tx);
+    envelope.authorization = Some(LocalAuthorization {
+        mode: "local-authorized".to_string(),
+        signer,
+        digest: envelope.tx_id.clone(),
+    });
     let tx_id = envelope.tx_id.clone();
     state.pending_txs.push(envelope);
     tx_id
@@ -679,6 +741,7 @@ pub fn state_root(state: &ChainState) -> String {
         agent_accounts: &state.agent_accounts,
         local_test_unit_balances: &state.local_test_unit_balances,
         faucet_records: &state.faucet_records,
+        balance_transfers: &state.balance_transfers,
         model_passports: &state.model_passports,
         memory_cells: &state.memory_cells,
         challenges: &state.challenges,
@@ -720,6 +783,10 @@ pub fn state_map_roots(state: &ChainState) -> StateMapRoots {
         faucet_record_root: map_root(
             "flowmemory.local_devnet.faucet_records.v0",
             &state.faucet_records,
+        ),
+        balance_transfer_root: map_root(
+            "flowmemory.local_devnet.balance_transfers.v0",
+            &state.balance_transfers,
         ),
         model_passport_root: map_root(
             "flowmemory.local_devnet.model_passports.v0",
@@ -776,6 +843,7 @@ pub fn build_block(state: &mut ChainState) -> Block {
 
     for envelope in txs {
         tx_ids.push(envelope.tx_id.clone());
+        let authorization = envelope.authorization.clone();
         let result = apply_transaction(state, &envelope.tx);
         receipts.push(BlockReceipt {
             tx_id: envelope.tx_id,
@@ -786,6 +854,7 @@ pub fn build_block(state: &mut ChainState) -> Block {
             }
             .to_string(),
             error: result.err().map(|error| error.to_string()),
+            authorization,
         });
     }
 
@@ -924,6 +993,66 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
                     amount_units: *amount_units,
                     reason: reason.clone(),
                     credited_at_block: state.next_block_number,
+                    no_value: true,
+                },
+            );
+        }
+        Transaction::TransferLocalTestUnits {
+            transfer_id,
+            from_account_id,
+            to_account_id,
+            amount_units,
+            memo,
+        } => {
+            if state.balance_transfers.contains_key(transfer_id) {
+                return Err(DevnetError::BalanceTransferAlreadyExists(
+                    transfer_id.clone(),
+                ));
+            }
+            if *amount_units == 0 {
+                return Err(DevnetError::FaucetAmountMustBePositive(
+                    transfer_id.clone(),
+                ));
+            }
+
+            let from_balance = state
+                .local_test_unit_balances
+                .get(from_account_id)
+                .ok_or_else(|| DevnetError::LocalTestUnitBalanceMissing(from_account_id.clone()))?;
+            if from_balance.units < *amount_units {
+                return Err(DevnetError::LocalTestUnitBalanceInsufficient(
+                    from_account_id.clone(),
+                ));
+            }
+
+            {
+                let from_balance = state
+                    .local_test_unit_balances
+                    .get_mut(from_account_id)
+                    .expect("source local test-unit balance was checked above");
+                from_balance.units -= *amount_units;
+                from_balance.updated_at_block = state.next_block_number;
+            }
+
+            let to_balance = state
+                .local_test_unit_balances
+                .get_mut(to_account_id)
+                .ok_or_else(|| DevnetError::LocalTestUnitBalanceMissing(to_account_id.clone()))?;
+            to_balance.units = to_balance
+                .units
+                .checked_add(*amount_units)
+                .ok_or_else(|| DevnetError::LocalTestUnitBalanceOverflow(to_account_id.clone()))?;
+            to_balance.updated_at_block = state.next_block_number;
+
+            state.balance_transfers.insert(
+                transfer_id.clone(),
+                BalanceTransfer {
+                    transfer_id: transfer_id.clone(),
+                    from_account_id: from_account_id.clone(),
+                    to_account_id: to_account_id.clone(),
+                    amount_units: *amount_units,
+                    memo: memo.clone(),
+                    transferred_at_block: state.next_block_number,
                     no_value: true,
                 },
             );
@@ -1350,6 +1479,7 @@ pub fn anchor_from_state(
         agent_account_root: &'a str,
         local_test_unit_balance_root: &'a str,
         faucet_record_root: &'a str,
+        balance_transfer_root: &'a str,
         model_passport_root: &'a str,
         memory_cell_root: &'a str,
         challenge_root: &'a str,
@@ -1376,6 +1506,7 @@ pub fn anchor_from_state(
             agent_account_root: &roots.agent_account_root,
             local_test_unit_balance_root: &roots.local_test_unit_balance_root,
             faucet_record_root: &roots.faucet_record_root,
+            balance_transfer_root: &roots.balance_transfer_root,
             model_passport_root: &roots.model_passport_root,
             memory_cell_root: &roots.memory_cell_root,
             challenge_root: &roots.challenge_root,
@@ -1401,6 +1532,7 @@ pub fn anchor_from_state(
         agent_account_root: roots.agent_account_root,
         local_test_unit_balance_root: roots.local_test_unit_balance_root,
         faucet_record_root: roots.faucet_record_root,
+        balance_transfer_root: roots.balance_transfer_root,
         model_passport_root: roots.model_passport_root,
         memory_cell_root: roots.memory_cell_root,
         challenge_root: roots.challenge_root,

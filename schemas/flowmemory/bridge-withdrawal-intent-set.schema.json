@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowmemory.local/schemas/flowmemory/bridge-withdrawal-intent-set.schema.json",
+  "title": "FlowChainBridgeWithdrawalIntentSet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "withdrawalIntentSetId",
+    "generatedAt",
+    "count",
+    "withdrawalIntents",
+    "productionReady"
+  ],
+  "properties": {
+    "schema": { "const": "flowmemory.bridge_withdrawal_intent_set.v0" },
+    "withdrawalIntentSetId": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "generatedAt": { "type": "string" },
+    "count": { "type": "integer", "minimum": 0 },
+    "withdrawalIntents": {
+      "type": "array",
+      "items": { "$ref": "bridge-withdrawal-intent.schema.json" }
+    },
+    "productionReady": { "const": false }
+  }
+}

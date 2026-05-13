@@ -24,6 +24,29 @@
       "status": "unresolved",
       "summary": "Upstream unavailable; LAN dashboard and local cache still reachable.",
       "title": "UPSTREAM_LOSS"
+    },
+    {
+      "id": "hw-alert-008de71ad207",
+      "incidentId": "hw-alert-008de71ad207",
+      "linkedObjectIds": [
+        "bridge-alert:hardware:8662b11ba0d4"
+      ],
+      "localOnly": true,
+      "openedAt": "2026-05-13T17:01:35Z",
+      "provenance": {
+        "capturedAt": "2026-05-13T17:01:40Z",
+        "chainContext": "flowchain-private-local-testnet",
+        "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+        "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+        "origin": "fixture",
+        "subsystem": "hardware"
+      },
+      "recommendedAction": "review-bridge-observer-and-do-not-block-chain",
+      "severity": "warning",
+      "sourcePacketType": "bridge_alert",
+      "status": "unresolved",
+      "summary": "Bridge observer digest lag detected; local chain continues while operator reviews.",
+      "title": "LOCKBOX_OBSERVER_LAG"
     }
   ],
   "artifactCommitments": [
@@ -49,12 +72,44 @@
       "Hardware-originated references are hints until reconciled by normal indexer, receipt, and verifier paths.",
       "LoRa and Meshtastic packets carry compact control signals, not artifacts, model data, media, or raw memory.",
       "NFC cartridge metadata is an untrusted pointer until checked against expected commitments.",
-      "Emergency offline signals are operator alerts or challenge inputs only; they do not execute remote actions."
+      "Emergency offline signals are operator alerts or challenge inputs only; they do not execute remote actions.",
+      "Bridge alerts are operator review hints and must not block local chain progress."
     ],
     "hardwareRequiredForPrivateTestnet": false,
     "localOnly": true,
     "normalNetworkReconciliationRequired": true
   },
+  "bridgeAlerts": [
+    {
+      "alertCode": "LOCKBOX_OBSERVER_LAG",
+      "blockHint": 1200024,
+      "bridgeAlertId": "bridge-alert:hardware:8662b11ba0d4",
+      "bridgeId": "bridge-3489980d98a3",
+      "doesNotBlockLocalChain": true,
+      "eventDigest": "0xaa5bbd37b946a917cd73aa5394466e71c463cf28e5a1091c474139e23cfe236f",
+      "localOnly": true,
+      "loraEligible": true,
+      "payloadBytesEstimate": 136,
+      "provenance": {
+        "capturedAt": "2026-05-13T17:01:40Z",
+        "chainContext": "flowchain-private-local-testnet",
+        "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+        "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+        "origin": "fixture",
+        "subsystem": "hardware"
+      },
+      "recommendedAction": "review-bridge-observer-and-do-not-block-chain",
+      "resolutionState": "operator-review-required",
+      "rootfieldId": "rootfield:hardware:flowrouter-local-alpha",
+      "severity": "warning",
+      "sourceChain": "flowchain-local-alpha",
+      "sourcePacketType": "bridge_alert",
+      "status": "unresolved",
+      "subjectId": "lockbox:dfce05f88cae",
+      "summary": "Bridge observer digest lag detected; local chain continues while operator reviews.",
+      "targetChain": "base-sepolia-sim"
+    }
+  ],
   "chainId": "flowmemory-local-alpha",
   "challenges": [
     {
@@ -77,19 +132,29 @@
   "compatibility": {
     "controlPlaneStateKeys": [
       "hardwareSignals",
+      "operatorMetadata",
       "hardwareNodes",
       "workReceipts",
       "verifierReports",
+      "bridgeAlerts",
       "artifactCommitments",
       "memoryCells",
       "challenges",
       "finalityReceipts",
       "alerts"
     ],
+    "flowchainFullSmokeOptionalRow": {
+      "command": "python hardware/simulator/flowrouter_sim.py --smoke",
+      "hardwareRequired": false,
+      "label": "Validate optional hardware operator signal fixtures",
+      "requiredForChainProgress": false
+    },
     "jsonRpcBoundary": "Read-only fixture data; no submit, wallet, live indexing, or production settlement method is implied.",
     "workbenchSectionKeys": [
+      "operatorMetadata",
       "receipts",
       "verifierReports",
+      "bridgeAlerts",
       "artifacts",
       "memoryCells",
       "challenges",
@@ -142,6 +207,58 @@
     }
   ],
   "hardwareSignals": [
+    {
+      "envelopeId": "hw-env-adac8a11bc47",
+      "id": "hw-sig-583c993be535",
+      "linkedObjectIds": [
+        "operator-metadata:hardware:874d3583a3b5"
+      ],
+      "localOnly": true,
+      "loraEligible": false,
+      "nodeId": "fr-e1e7878a2aa8",
+      "provenance": {
+        "capturedAt": "2026-05-13T17:01:40Z",
+        "chainContext": "flowchain-private-local-testnet",
+        "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+        "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+        "origin": "fixture",
+        "subsystem": "hardware"
+      },
+      "rawEnvelope": {
+        "envelopeId": "hw-env-adac8a11bc47",
+        "localOnly": true,
+        "loraEligible": false,
+        "objectRefs": [
+          {
+            "collection": "operatorMetadata",
+            "objectId": "operator-metadata:hardware:874d3583a3b5"
+          }
+        ],
+        "observedAt": "2026-05-13T17:00:00Z",
+        "payloadBytesEstimate": 0,
+        "provenance": {
+          "capturedAt": "2026-05-13T17:01:40Z",
+          "chainContext": "flowchain-private-local-testnet",
+          "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+          "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+          "origin": "fixture",
+          "subsystem": "hardware"
+        },
+        "schema": "flowmemory.hardware_operator_signal_envelope.local_alpha.v0",
+        "signalId": "hw-sig-583c993be535",
+        "signalType": "operator_metadata",
+        "sourcePacketId": "device_manifest:42",
+        "sourcePacketType": "device_manifest",
+        "status": "observed"
+      },
+      "receivedAt": "2026-05-13T17:00:00Z",
+      "signalId": "hw-sig-583c993be535",
+      "signalType": "operator_metadata",
+      "sourcePacketType": "device_manifest",
+      "status": "observed",
+      "summary": "Local operator metadata for optional hardware fixture ingestion.",
+      "transport": "local-simulator"
+    },
     {
       "envelopeId": "hw-env-69eab6533abb",
       "id": "hw-sig-cd45a2ab8b1d",
@@ -356,6 +473,63 @@
       "transport": "local-simulator"
     },
     {
+      "envelopeId": "hw-env-6b84ec9e2c77",
+      "id": "hw-sig-590bff4da4b1",
+      "linkedObjectIds": [
+        "bridge-alert:hardware:8662b11ba0d4",
+        "hw-alert-008de71ad207"
+      ],
+      "localOnly": true,
+      "loraEligible": true,
+      "nodeId": "fr-e1e7878a2aa8",
+      "provenance": {
+        "capturedAt": "2026-05-13T17:01:40Z",
+        "chainContext": "flowchain-private-local-testnet",
+        "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+        "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+        "origin": "fixture",
+        "subsystem": "hardware"
+      },
+      "rawEnvelope": {
+        "envelopeId": "hw-env-6b84ec9e2c77",
+        "localOnly": true,
+        "loraEligible": true,
+        "objectRefs": [
+          {
+            "collection": "bridgeAlerts",
+            "objectId": "bridge-alert:hardware:8662b11ba0d4"
+          },
+          {
+            "collection": "alerts",
+            "objectId": "hw-alert-008de71ad207"
+          }
+        ],
+        "observedAt": "2026-05-13T17:01:35Z",
+        "payloadBytesEstimate": 136,
+        "provenance": {
+          "capturedAt": "2026-05-13T17:01:40Z",
+          "chainContext": "flowchain-private-local-testnet",
+          "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+          "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+          "origin": "fixture",
+          "subsystem": "hardware"
+        },
+        "schema": "flowmemory.hardware_operator_signal_envelope.local_alpha.v0",
+        "signalId": "hw-sig-590bff4da4b1",
+        "signalType": "bridge_alert",
+        "sourcePacketId": "bridge_alert:1050",
+        "sourcePacketType": "bridge_alert",
+        "status": "unresolved"
+      },
+      "receivedAt": "2026-05-13T17:01:35Z",
+      "signalId": "hw-sig-590bff4da4b1",
+      "signalType": "bridge_alert",
+      "sourcePacketType": "bridge_alert",
+      "status": "unresolved",
+      "summary": "Compact bridge observer alert that does not block local chain progress.",
+      "transport": "meshtastic-control-sim"
+    },
+    {
       "envelopeId": "hw-env-3787edd45bfa",
       "id": "hw-sig-97f6fef1f868",
       "linkedObjectIds": [
@@ -429,7 +603,47 @@
       "updatedAt": "2026-05-13T17:01:20Z"
     }
   ],
+  "operatorMetadata": [
+    {
+      "displayName": "Local hardware operator fixture",
+      "hardwareRequiredForPrivateTestnet": false,
+      "localOnly": true,
+      "metadataId": "operator-metadata:hardware:874d3583a3b5",
+      "metadataSource": "device_manifest",
+      "noSecrets": true,
+      "nodeId": "fr-e1e7878a2aa8",
+      "observedAt": "2026-05-13T17:00:00Z",
+      "operatorId": "operator:local:717ffb1268b0",
+      "provenance": {
+        "capturedAt": "2026-05-13T17:01:40Z",
+        "chainContext": "flowchain-private-local-testnet",
+        "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+        "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+        "origin": "fixture",
+        "subsystem": "hardware"
+      },
+      "radioPayloadBudgetBytes": 160,
+      "roles": [
+        "hardware_observer",
+        "fixture_relay"
+      ],
+      "rootfieldId": "rootfield:hardware:flowrouter-local-alpha",
+      "sourcePacketType": "device_manifest",
+      "transportPreferences": [
+        "local-simulator",
+        "meshtastic-control-sim"
+      ]
+    }
+  ],
   "packetMappings": [
+    {
+      "flowchainSignal": "operator_metadata",
+      "localAlphaRole": "names the local optional hardware operator fixture issuer",
+      "objectCollection": "operatorMetadata",
+      "objectRef": "operator-metadata:hardware:874d3583a3b5",
+      "sourcePacketType": "device_manifest",
+      "trustBoundary": "local metadata only; no wallet, secret, or production operator claim"
+    },
     {
       "flowchainSignal": "hardware_node_status",
       "localAlphaRole": "shows FlowRouter reachability and coarse device state",
@@ -463,6 +677,14 @@
       "trustBoundary": "local operator attention only; no public emergency-service claim"
     },
     {
+      "flowchainSignal": "bridge_observer_alert",
+      "localAlphaRole": "surfaces bridge-observer lag without blocking the local chain",
+      "objectCollection": "bridgeAlerts",
+      "objectRef": "bridge-alert:hardware:8662b11ba0d4",
+      "sourcePacketType": "bridge_alert",
+      "trustBoundary": "digest alert only; no production bridge readiness or settlement claim"
+    },
+    {
       "flowchainSignal": "artifact_memory_reference",
       "localAlphaRole": "connects cartridge metadata to an artifact or memory reference",
       "objectCollection": "artifactCommitments",
@@ -473,6 +695,33 @@
   ],
   "schema": "flowmemory.hardware_operator_signals.local_alpha.v0",
   "signalEnvelopes": [
+    {
+      "envelopeId": "hw-env-adac8a11bc47",
+      "localOnly": true,
+      "loraEligible": false,
+      "objectRefs": [
+        {
+          "collection": "operatorMetadata",
+          "objectId": "operator-metadata:hardware:874d3583a3b5"
+        }
+      ],
+      "observedAt": "2026-05-13T17:00:00Z",
+      "payloadBytesEstimate": 0,
+      "provenance": {
+        "capturedAt": "2026-05-13T17:01:40Z",
+        "chainContext": "flowchain-private-local-testnet",
+        "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+        "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+        "origin": "fixture",
+        "subsystem": "hardware"
+      },
+      "schema": "flowmemory.hardware_operator_signal_envelope.local_alpha.v0",
+      "signalId": "hw-sig-583c993be535",
+      "signalType": "operator_metadata",
+      "sourcePacketId": "device_manifest:42",
+      "sourcePacketType": "device_manifest",
+      "status": "observed"
+    },
     {
       "envelopeId": "hw-env-69eab6533abb",
       "localOnly": true,
@@ -586,6 +835,37 @@
       "status": "pending"
     },
     {
+      "envelopeId": "hw-env-6b84ec9e2c77",
+      "localOnly": true,
+      "loraEligible": true,
+      "objectRefs": [
+        {
+          "collection": "bridgeAlerts",
+          "objectId": "bridge-alert:hardware:8662b11ba0d4"
+        },
+        {
+          "collection": "alerts",
+          "objectId": "hw-alert-008de71ad207"
+        }
+      ],
+      "observedAt": "2026-05-13T17:01:35Z",
+      "payloadBytesEstimate": 136,
+      "provenance": {
+        "capturedAt": "2026-05-13T17:01:40Z",
+        "chainContext": "flowchain-private-local-testnet",
+        "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+        "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+        "origin": "fixture",
+        "subsystem": "hardware"
+      },
+      "schema": "flowmemory.hardware_operator_signal_envelope.local_alpha.v0",
+      "signalId": "hw-sig-590bff4da4b1",
+      "signalType": "bridge_alert",
+      "sourcePacketId": "bridge_alert:1050",
+      "sourcePacketType": "bridge_alert",
+      "status": "unresolved"
+    },
+    {
       "envelopeId": "hw-env-3787edd45bfa",
       "localOnly": true,
       "loraEligible": false,
@@ -619,7 +899,11 @@
   ],
   "source": "fixture",
   "sourcePaths": {
+    "handoffFixture": "fixtures/hardware/flowrouter_control_plane_handoff_seed42.json",
+    "handoffSchema": "schemas/flowmemory/hardware-control-plane-handoff.schema.json",
     "mappingDoc": "hardware/flowrouter/FLOWCHAIN_LOCAL_ALPHA_SIGNALS.md",
+    "negativeReport": "fixtures/hardware/flowrouter_negative_validation_seed42.json",
+    "negativeReportSchema": "hardware/simulator/schemas/negative_validation_report.schema.json",
     "operatorFixture": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
     "operatorSchema": "hardware/simulator/schemas/flowchain_operator_signals.schema.json",
     "packetFixture": "hardware/fixtures/flowrouter_sample_seed42.json"
@@ -719,6 +1003,70 @@
         "title": "field-test-cache-alpha"
       }
     ],
+    "bridgeAlerts": [
+      {
+        "facts": [
+          {
+            "label": "bridge",
+            "value": "bridge-3489980d98a3"
+          },
+          {
+            "label": "source",
+            "value": "flowchain-local-alpha"
+          },
+          {
+            "label": "target",
+            "value": "base-sepolia-sim"
+          },
+          {
+            "label": "digest",
+            "value": "0xaa5bbd37b946a917cd73aa5394466e71c463cf28e5a1091c474139e23cfe236f"
+          }
+        ],
+        "id": "bridge-alert:hardware:8662b11ba0d4",
+        "kind": "Hardware bridge alert",
+        "provenance": {
+          "capturedAt": "2026-05-13T17:01:40Z",
+          "chainContext": "flowchain-private-local-testnet",
+          "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+          "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+          "origin": "fixture",
+          "subsystem": "hardware"
+        },
+        "raw": {
+          "alertCode": "LOCKBOX_OBSERVER_LAG",
+          "blockHint": 1200024,
+          "bridgeAlertId": "bridge-alert:hardware:8662b11ba0d4",
+          "bridgeId": "bridge-3489980d98a3",
+          "doesNotBlockLocalChain": true,
+          "eventDigest": "0xaa5bbd37b946a917cd73aa5394466e71c463cf28e5a1091c474139e23cfe236f",
+          "localOnly": true,
+          "loraEligible": true,
+          "payloadBytesEstimate": 136,
+          "provenance": {
+            "capturedAt": "2026-05-13T17:01:40Z",
+            "chainContext": "flowchain-private-local-testnet",
+            "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+            "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+            "origin": "fixture",
+            "subsystem": "hardware"
+          },
+          "recommendedAction": "review-bridge-observer-and-do-not-block-chain",
+          "resolutionState": "operator-review-required",
+          "rootfieldId": "rootfield:hardware:flowrouter-local-alpha",
+          "severity": "warning",
+          "sourceChain": "flowchain-local-alpha",
+          "sourcePacketType": "bridge_alert",
+          "status": "unresolved",
+          "subjectId": "lockbox:dfce05f88cae",
+          "summary": "Bridge observer digest lag detected; local chain continues while operator reviews.",
+          "targetChain": "base-sepolia-sim"
+        },
+        "status": "unresolved",
+        "summary": "Bridge observer digest lag detected; local chain continues while operator reviews.",
+        "title": "LOCKBOX_OBSERVER_LAG"
+      }
+    ],
     "challenges": [
       {
         "facts": [
@@ -771,6 +1119,91 @@
       }
     ],
     "hardwareSignals": [
+      {
+        "facts": [
+          {
+            "label": "node",
+            "value": "fr-e1e7878a2aa8"
+          },
+          {
+            "label": "transport",
+            "value": "local-simulator"
+          },
+          {
+            "label": "source packet",
+            "value": "device_manifest"
+          },
+          {
+            "label": "linked objects",
+            "value": "operator-metadata:hardware:874d3583a3b5"
+          }
+        ],
+        "id": "hw-sig-583c993be535",
+        "kind": "Hardware operator signal",
+        "provenance": {
+          "capturedAt": "2026-05-13T17:01:40Z",
+          "chainContext": "flowchain-private-local-testnet",
+          "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+          "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+          "origin": "fixture",
+          "subsystem": "hardware"
+        },
+        "raw": {
+          "envelopeId": "hw-env-adac8a11bc47",
+          "id": "hw-sig-583c993be535",
+          "linkedObjectIds": [
+            "operator-metadata:hardware:874d3583a3b5"
+          ],
+          "localOnly": true,
+          "loraEligible": false,
+          "nodeId": "fr-e1e7878a2aa8",
+          "provenance": {
+            "capturedAt": "2026-05-13T17:01:40Z",
+            "chainContext": "flowchain-private-local-testnet",
+            "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+            "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+            "origin": "fixture",
+            "subsystem": "hardware"
+          },
+          "rawEnvelope": {
+            "envelopeId": "hw-env-adac8a11bc47",
+            "localOnly": true,
+            "loraEligible": false,
+            "objectRefs": [
+              {
+                "collection": "operatorMetadata",
+                "objectId": "operator-metadata:hardware:874d3583a3b5"
+              }
+            ],
+            "observedAt": "2026-05-13T17:00:00Z",
+            "payloadBytesEstimate": 0,
+            "provenance": {
+              "capturedAt": "2026-05-13T17:01:40Z",
+              "chainContext": "flowchain-private-local-testnet",
+              "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+              "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+              "origin": "fixture",
+              "subsystem": "hardware"
+            },
+            "schema": "flowmemory.hardware_operator_signal_envelope.local_alpha.v0",
+            "signalId": "hw-sig-583c993be535",
+            "signalType": "operator_metadata",
+            "sourcePacketId": "device_manifest:42",
+            "sourcePacketType": "device_manifest",
+            "status": "observed"
+          },
+          "receivedAt": "2026-05-13T17:00:00Z",
+          "signalId": "hw-sig-583c993be535",
+          "signalType": "operator_metadata",
+          "sourcePacketType": "device_manifest",
+          "status": "observed",
+          "summary": "Local operator metadata for optional hardware fixture ingestion.",
+          "transport": "local-simulator"
+        },
+        "status": "observed",
+        "summary": "Local operator metadata for optional hardware fixture ingestion.",
+        "title": "operator_metadata"
+      },
       {
         "facts": [
           {
@@ -1124,6 +1557,96 @@
           },
           {
             "label": "transport",
+            "value": "meshtastic-control-sim"
+          },
+          {
+            "label": "source packet",
+            "value": "bridge_alert"
+          },
+          {
+            "label": "linked objects",
+            "value": "bridge-alert:hardware:8662b11ba0d4, hw-alert-008de71ad207"
+          }
+        ],
+        "id": "hw-sig-590bff4da4b1",
+        "kind": "Hardware operator signal",
+        "provenance": {
+          "capturedAt": "2026-05-13T17:01:40Z",
+          "chainContext": "flowchain-private-local-testnet",
+          "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+          "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+          "origin": "fixture",
+          "subsystem": "hardware"
+        },
+        "raw": {
+          "envelopeId": "hw-env-6b84ec9e2c77",
+          "id": "hw-sig-590bff4da4b1",
+          "linkedObjectIds": [
+            "bridge-alert:hardware:8662b11ba0d4",
+            "hw-alert-008de71ad207"
+          ],
+          "localOnly": true,
+          "loraEligible": true,
+          "nodeId": "fr-e1e7878a2aa8",
+          "provenance": {
+            "capturedAt": "2026-05-13T17:01:40Z",
+            "chainContext": "flowchain-private-local-testnet",
+            "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+            "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+            "origin": "fixture",
+            "subsystem": "hardware"
+          },
+          "rawEnvelope": {
+            "envelopeId": "hw-env-6b84ec9e2c77",
+            "localOnly": true,
+            "loraEligible": true,
+            "objectRefs": [
+              {
+                "collection": "bridgeAlerts",
+                "objectId": "bridge-alert:hardware:8662b11ba0d4"
+              },
+              {
+                "collection": "alerts",
+                "objectId": "hw-alert-008de71ad207"
+              }
+            ],
+            "observedAt": "2026-05-13T17:01:35Z",
+            "payloadBytesEstimate": 136,
+            "provenance": {
+              "capturedAt": "2026-05-13T17:01:40Z",
+              "chainContext": "flowchain-private-local-testnet",
+              "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+              "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+              "origin": "fixture",
+              "subsystem": "hardware"
+            },
+            "schema": "flowmemory.hardware_operator_signal_envelope.local_alpha.v0",
+            "signalId": "hw-sig-590bff4da4b1",
+            "signalType": "bridge_alert",
+            "sourcePacketId": "bridge_alert:1050",
+            "sourcePacketType": "bridge_alert",
+            "status": "unresolved"
+          },
+          "receivedAt": "2026-05-13T17:01:35Z",
+          "signalId": "hw-sig-590bff4da4b1",
+          "signalType": "bridge_alert",
+          "sourcePacketType": "bridge_alert",
+          "status": "unresolved",
+          "summary": "Compact bridge observer alert that does not block local chain progress.",
+          "transport": "meshtastic-control-sim"
+        },
+        "status": "unresolved",
+        "summary": "Compact bridge observer alert that does not block local chain progress.",
+        "title": "bridge_alert"
+      },
+      {
+        "facts": [
+          {
+            "label": "node",
+            "value": "fr-e1e7878a2aa8"
+          },
+          {
+            "label": "transport",
             "value": "local-simulator"
           },
           {
@@ -1256,6 +1779,71 @@
         "title": "memory:hardware:9f8165ee1a5a"
       }
     ],
+    "operatorMetadata": [
+      {
+        "facts": [
+          {
+            "label": "operator",
+            "value": "operator:local:717ffb1268b0"
+          },
+          {
+            "label": "node",
+            "value": "fr-e1e7878a2aa8"
+          },
+          {
+            "label": "hardware required",
+            "value": "false"
+          },
+          {
+            "label": "payload budget",
+            "value": "160"
+          }
+        ],
+        "id": "operator-metadata:hardware:874d3583a3b5",
+        "kind": "Hardware operator metadata",
+        "provenance": {
+          "capturedAt": "2026-05-13T17:01:40Z",
+          "chainContext": "flowchain-private-local-testnet",
+          "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+          "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+          "origin": "fixture",
+          "subsystem": "hardware"
+        },
+        "raw": {
+          "displayName": "Local hardware operator fixture",
+          "hardwareRequiredForPrivateTestnet": false,
+          "localOnly": true,
+          "metadataId": "operator-metadata:hardware:874d3583a3b5",
+          "metadataSource": "device_manifest",
+          "noSecrets": true,
+          "nodeId": "fr-e1e7878a2aa8",
+          "observedAt": "2026-05-13T17:00:00Z",
+          "operatorId": "operator:local:717ffb1268b0",
+          "provenance": {
+            "capturedAt": "2026-05-13T17:01:40Z",
+            "chainContext": "flowchain-private-local-testnet",
+            "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
+            "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
+            "origin": "fixture",
+            "subsystem": "hardware"
+          },
+          "radioPayloadBudgetBytes": 160,
+          "roles": [
+            "hardware_observer",
+            "fixture_relay"
+          ],
+          "rootfieldId": "rootfield:hardware:flowrouter-local-alpha",
+          "sourcePacketType": "device_manifest",
+          "transportPreferences": [
+            "local-simulator",
+            "meshtastic-control-sim"
+          ]
+        },
+        "status": "observed",
+        "summary": "Local-only metadata for the optional hardware signal fixture issuer.",
+        "title": "Local hardware operator fixture"
+      }
+    ],
     "provenance": [
       {
         "facts": [
@@ -1288,6 +1876,7 @@
         },
         "raw": {
           "sourcePaths": {
+            "handoffFixture": "fixtures/hardware/flowrouter_control_plane_handoff_seed42.json",
             "operatorFixture": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
             "packetFixture": "hardware/fixtures/flowrouter_sample_seed42.json"
           }

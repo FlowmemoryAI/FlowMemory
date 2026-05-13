@@ -1,36 +1,86 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "flowchain.bridge_credit.v0",
-  "title": "FlowChain Local Alpha BridgeCredit V0",
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "schema",
-    "creditId",
-    "depositId",
-    "recipient",
-    "assetId",
-    "amount",
-    "creditedAtBlockNumber",
-    "creditedAtUnixMs",
-    "status",
-    "statusCode",
-    "nonce"
+  "$id": "https://flowmemory.local/schemas/flowmemory/bridge-credit.schema.json",
+  "title": "FlowChainBridgeCredit",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "creditId",
+        "depositId",
+        "recipient",
+        "assetId",
+        "amount",
+        "creditedAtBlockNumber",
+        "creditedAtUnixMs",
+        "status",
+        "statusCode",
+        "nonce"
+      ],
+      "properties": {
+        "schema": { "const": "flowchain.bridge_credit.v0" },
+        "creditId": { "$ref": "#/$defs/hex32" },
+        "depositId": { "$ref": "#/$defs/hex32" },
+        "recipient": { "$ref": "#/$defs/hex32" },
+        "assetId": { "$ref": "#/$defs/hex32" },
+        "amount": { "$ref": "#/$defs/uintString" },
+        "creditedAtBlockNumber": { "$ref": "#/$defs/uintString" },
+        "creditedAtUnixMs": { "$ref": "#/$defs/uintString" },
+        "status": { "enum": ["credited"] },
+        "statusCode": { "const": 3 },
+        "nonce": { "$ref": "#/$defs/hex32" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "creditId",
+        "observationId",
+        "depositId",
+        "replayKey",
+        "source",
+        "token",
+        "amount",
+        "flowchainRecipient",
+        "status",
+        "localOnly",
+        "productionReady"
+      ],
+      "properties": {
+        "schema": { "const": "flowmemory.bridge_credit.v0" },
+        "creditId": { "$ref": "#/$defs/hex32" },
+        "observationId": { "$ref": "#/$defs/hex32" },
+        "depositId": { "$ref": "#/$defs/hex32" },
+        "replayKey": { "$ref": "#/$defs/hex32" },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["chainId", "contract", "txHash", "logIndex"],
+          "properties": {
+            "chainId": { "type": "integer", "enum": [31337, 84532, 8453] },
+            "contract": { "$ref": "#/$defs/address" },
+            "txHash": { "$ref": "#/$defs/hex32" },
+            "logIndex": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "token": { "$ref": "#/$defs/address" },
+        "amount": { "$ref": "#/$defs/uintString" },
+        "flowchainRecipient": { "$ref": "#/$defs/hex32" },
+        "status": { "type": "string", "enum": ["pending", "applied", "rejected"] },
+        "pendingReason": { "type": "string" },
+        "appliedAt": { "type": "string" },
+        "rejectionReason": { "type": "string" },
+        "localOnly": { "const": true },
+        "productionReady": { "const": false }
+      }
+    }
   ],
-  "properties": {
-    "schema": { "const": "flowchain.bridge_credit.v0" },
-    "creditId": { "$ref": "#/$defs/hex32" },
-    "depositId": { "$ref": "#/$defs/hex32" },
-    "recipient": { "$ref": "#/$defs/hex32" },
-    "assetId": { "$ref": "#/$defs/hex32" },
-    "amount": { "$ref": "#/$defs/uintString" },
-    "creditedAtBlockNumber": { "$ref": "#/$defs/uintString" },
-    "creditedAtUnixMs": { "$ref": "#/$defs/uintString" },
-    "status": { "enum": ["credited"] },
-    "statusCode": { "const": 3 },
-    "nonce": { "$ref": "#/$defs/hex32" }
-  },
   "$defs": {
+    "address": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
     "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
     "uintString": { "type": "string", "pattern": "^[0-9]+$" }
   }

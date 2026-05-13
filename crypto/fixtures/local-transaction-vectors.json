@@ -1,0 +1,291 @@
+{
+  "schema": "flowmemory.crypto.local-transaction-vectors.v0",
+  "chainId": "31337",
+  "publicWalletMetadata": {
+    "schema": "flowchain.local_wallet_public_metadata.v0",
+    "vaultId": "0x999558b9e2477f6420ab4b9ad3008c4dbd276aaac611ec5575def8c9a98fc384",
+    "createdAtUnixMs": "1778702400000",
+    "updatedAtUnixMs": "1778702400000",
+    "accounts": [
+      {
+        "accountId": "0xcefa89096f0b2208885ab27cc7479d0615e344356c8c78b56e793b9041bbfeb1",
+        "signerId": "0xcefa89096f0b2208885ab27cc7479d0615e344356c8c78b56e793b9041bbfeb1",
+        "signerKeyId": "0x011c875680a5f90e1513ec2c05e22c9dab1d83e22d554cb2c61e14199da746a1",
+        "signerRole": "operator",
+        "signerRoleCode": 1,
+        "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "label": "fixture-operator",
+        "status": "active",
+        "createdAtUnixMs": "1778702400000",
+        "nextNonce": "3"
+      }
+    ]
+  },
+  "positive": [
+    {
+      "name": "transaction.register-agent.operator-signature",
+      "payload": {
+        "schema": "flowmemory.local_devnet.tx_payload.v0",
+        "objectType": "agent_account",
+        "object": {
+          "schema": "flowchain.agent_account.v0",
+          "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+          "namespaceId": "0x4c2eae268c3f97a510b66597873c6c08ae9e427a7c03cd383df6acfeda9bbf37",
+          "owner": "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1",
+          "policyRoot": "0x20121b5daa2be4de0d9dbcae292d1d3466a4e0a8b6cc3149ce46c30c352a1f0e",
+          "toolPermissionsRoot": "0x39079bde86c6743c81fd927a14012331688374b55118484529ce257317327120",
+          "modelAllowlistRoot": "0x00a463537f12e3419d4bf3655d28d93f3e189b9a89a3ad40c4819bbc4eb2acc9",
+          "memoryNamespaceRoot": "0x574eee506454973fb82863a3225ea78696b96907a17c360ad2c2b5234dfa2d83",
+          "spendingLimitPerEpoch": "0",
+          "status": "active",
+          "nonce": "0x37e916697be966b19c0cd7aa6073e78ffb7ee5cf27a4392383f9cfe5fa5025bb"
+        },
+        "tx": {
+          "type": "RegisterAgent",
+          "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+          "controller": "operator:local-wallet-vector",
+          "modelPassportId": null,
+          "metadataHash": "0x0dee06bd221366280f62239c3df48eea9414e3bc1c9fc86796d5a546ba26fc7a"
+        }
+      },
+      "input": {
+        "chainId": "31337",
+        "nonce": "1",
+        "signerId": "0xcefa89096f0b2208885ab27cc7479d0615e344356c8c78b56e793b9041bbfeb1",
+        "signerKeyId": "0x011c875680a5f90e1513ec2c05e22c9dab1d83e22d554cb2c61e14199da746a1",
+        "signerRole": 1,
+        "payloadHash": "0x3659032f06fcb8573d47c109237dbba39fce5809c041123327767d3af17bb2b2",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1810238400000",
+        "domainSeparator": "0x12aff8820bbfec739f09eeac1e8a497ef87a9930ef07b5a09ff8e3a67a2b5677"
+      },
+      "expected": {
+        "payloadHash": "0x3659032f06fcb8573d47c109237dbba39fce5809c041123327767d3af17bb2b2",
+        "envelopeId": "0xfba94617ac6fbae608393c67570280d7123b27dabb0c1f31427808ad955a7c46",
+        "signingDigest": "0x9ff2d8b2153b38d76ecd81334ab06bd16f31f004be03d5b9e29042dd09cd296f"
+      },
+      "envelope": {
+        "schema": "flowchain.local_transaction_envelope.v0",
+        "envelopeId": "0xfba94617ac6fbae608393c67570280d7123b27dabb0c1f31427808ad955a7c46",
+        "domain": "flowchain.local.v0.transaction-envelope",
+        "domainSeparator": "0x12aff8820bbfec739f09eeac1e8a497ef87a9930ef07b5a09ff8e3a67a2b5677",
+        "chainId": "31337",
+        "nonce": "1",
+        "payloadHash": "0x3659032f06fcb8573d47c109237dbba39fce5809c041123327767d3af17bb2b2",
+        "payload": {
+          "schema": "flowmemory.local_devnet.tx_payload.v0",
+          "objectType": "agent_account",
+          "object": {
+            "schema": "flowchain.agent_account.v0",
+            "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+            "namespaceId": "0x4c2eae268c3f97a510b66597873c6c08ae9e427a7c03cd383df6acfeda9bbf37",
+            "owner": "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1",
+            "policyRoot": "0x20121b5daa2be4de0d9dbcae292d1d3466a4e0a8b6cc3149ce46c30c352a1f0e",
+            "toolPermissionsRoot": "0x39079bde86c6743c81fd927a14012331688374b55118484529ce257317327120",
+            "modelAllowlistRoot": "0x00a463537f12e3419d4bf3655d28d93f3e189b9a89a3ad40c4819bbc4eb2acc9",
+            "memoryNamespaceRoot": "0x574eee506454973fb82863a3225ea78696b96907a17c360ad2c2b5234dfa2d83",
+            "spendingLimitPerEpoch": "0",
+            "status": "active",
+            "nonce": "0x37e916697be966b19c0cd7aa6073e78ffb7ee5cf27a4392383f9cfe5fa5025bb"
+          },
+          "tx": {
+            "type": "RegisterAgent",
+            "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+            "controller": "operator:local-wallet-vector",
+            "modelPassportId": null,
+            "metadataHash": "0x0dee06bd221366280f62239c3df48eea9414e3bc1c9fc86796d5a546ba26fc7a"
+          }
+        },
+        "signer": {
+          "accountId": "0xcefa89096f0b2208885ab27cc7479d0615e344356c8c78b56e793b9041bbfeb1",
+          "signerId": "0xcefa89096f0b2208885ab27cc7479d0615e344356c8c78b56e793b9041bbfeb1",
+          "signerKeyId": "0x011c875680a5f90e1513ec2c05e22c9dab1d83e22d554cb2c61e14199da746a1",
+          "signerRole": "operator",
+          "signerRoleCode": 1,
+          "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        },
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1810238400000",
+        "signingDigest": "0x9ff2d8b2153b38d76ecd81334ab06bd16f31f004be03d5b9e29042dd09cd296f",
+        "signature": "0xcc2ce2a8edb0190940ae3c9c4878de831ecba19aad57c031c721737877cf226038096b32d5554221c14d5c0d44d72fdf0dfa529d64b350b90b1d1d8a32663b24"
+      }
+    },
+    {
+      "name": "transaction.bridge-deposit.operator-signature",
+      "payload": {
+        "schema": "flowmemory.local_devnet.tx_payload.v0",
+        "objectType": "bridge_deposit",
+        "object": {
+          "schema": "flowmemory.bridge_deposit.v0",
+          "depositId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+          "sourceChainId": 84532,
+          "sourceContract": "0x1111111111111111111111111111111111111111",
+          "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+          "logIndex": 0,
+          "token": "0x3333333333333333333333333333333333333333",
+          "amount": "20000000",
+          "sender": "0x4444444444444444444444444444444444444444",
+          "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+          "nonce": "1",
+          "metadataHash": "0x6666666666666666666666666666666666666666666666666666666666666666",
+          "status": "observed"
+        },
+        "tx": {
+          "type": "ImportBridgeDeposit",
+          "depositId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+          "sourceChainId": 84532,
+          "amount": "20000000",
+          "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555"
+        }
+      },
+      "input": {
+        "chainId": "31337",
+        "nonce": "2",
+        "signerId": "0xcefa89096f0b2208885ab27cc7479d0615e344356c8c78b56e793b9041bbfeb1",
+        "signerKeyId": "0x011c875680a5f90e1513ec2c05e22c9dab1d83e22d554cb2c61e14199da746a1",
+        "signerRole": 1,
+        "payloadHash": "0x2d2a18d5508b23b17d25a2f7522a0b5fc57eb762e25ebb2b9d7a2faa947158a4",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1810238400000",
+        "domainSeparator": "0x12aff8820bbfec739f09eeac1e8a497ef87a9930ef07b5a09ff8e3a67a2b5677"
+      },
+      "expected": {
+        "payloadHash": "0x2d2a18d5508b23b17d25a2f7522a0b5fc57eb762e25ebb2b9d7a2faa947158a4",
+        "envelopeId": "0xd6195c2f24da099f9c0fe8e40d80e4824ed045f40b18c4b6b0c42c67eb9de856",
+        "signingDigest": "0xd6379c1be2d89c5f17e6c6a3a033fc717aab692e39197a29ab5a64e4a132a839"
+      },
+      "envelope": {
+        "schema": "flowchain.local_transaction_envelope.v0",
+        "envelopeId": "0xd6195c2f24da099f9c0fe8e40d80e4824ed045f40b18c4b6b0c42c67eb9de856",
+        "domain": "flowchain.local.v0.transaction-envelope",
+        "domainSeparator": "0x12aff8820bbfec739f09eeac1e8a497ef87a9930ef07b5a09ff8e3a67a2b5677",
+        "chainId": "31337",
+        "nonce": "2",
+        "payloadHash": "0x2d2a18d5508b23b17d25a2f7522a0b5fc57eb762e25ebb2b9d7a2faa947158a4",
+        "payload": {
+          "schema": "flowmemory.local_devnet.tx_payload.v0",
+          "objectType": "bridge_deposit",
+          "object": {
+            "schema": "flowmemory.bridge_deposit.v0",
+            "depositId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+            "sourceChainId": 84532,
+            "sourceContract": "0x1111111111111111111111111111111111111111",
+            "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+            "logIndex": 0,
+            "token": "0x3333333333333333333333333333333333333333",
+            "amount": "20000000",
+            "sender": "0x4444444444444444444444444444444444444444",
+            "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+            "nonce": "1",
+            "metadataHash": "0x6666666666666666666666666666666666666666666666666666666666666666",
+            "status": "observed"
+          },
+          "tx": {
+            "type": "ImportBridgeDeposit",
+            "depositId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+            "sourceChainId": 84532,
+            "amount": "20000000",
+            "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555"
+          }
+        },
+        "signer": {
+          "accountId": "0xcefa89096f0b2208885ab27cc7479d0615e344356c8c78b56e793b9041bbfeb1",
+          "signerId": "0xcefa89096f0b2208885ab27cc7479d0615e344356c8c78b56e793b9041bbfeb1",
+          "signerKeyId": "0x011c875680a5f90e1513ec2c05e22c9dab1d83e22d554cb2c61e14199da746a1",
+          "signerRole": "operator",
+          "signerRoleCode": 1,
+          "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        },
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1810238400000",
+        "signingDigest": "0xd6379c1be2d89c5f17e6c6a3a033fc717aab692e39197a29ab5a64e4a132a839",
+        "signature": "0x336c2428f7841d8b76c5fbf37f07d7f8c0e6632debf2247d52cba8cbc1fc45d137eac8cc746c6edbc1539abf0786f9149a38badd4b381be5c1741d8e35aa93e8"
+      }
+    }
+  ],
+  "negative": [
+    {
+      "name": "transaction.wrong-chain-id",
+      "baseEnvelope": "transaction.register-agent.operator-signature",
+      "mutation": {
+        "envelope": {
+          "chainId": "31338"
+        }
+      },
+      "expectErrors": [
+        "wrong-chain-id"
+      ]
+    },
+    {
+      "name": "transaction.wrong-domain",
+      "baseEnvelope": "transaction.register-agent.operator-signature",
+      "mutation": {
+        "envelope": {
+          "domain": "flowchain.local.v0.wrong-transaction-envelope",
+          "domainSeparator": "0xff84e3bb0214d3812d1bf8521ab9d5b836c7746794e226af2a56a2efd0b65ee6"
+        }
+      },
+      "expectErrors": [
+        "wrong-domain"
+      ]
+    },
+    {
+      "name": "transaction.wrong-signer",
+      "baseEnvelope": "transaction.register-agent.operator-signature",
+      "mutation": {
+        "signer": {
+          "signerId": "0xc08e9afda6b71e85507d1e84d73dd290a79d9319620ecfd784d1cd00d7c24500"
+        }
+      },
+      "expectErrors": [
+        "wrong-signer"
+      ]
+    },
+    {
+      "name": "transaction.replayed-nonce",
+      "baseEnvelope": "transaction.register-agent.operator-signature",
+      "mutation": {
+        "contextReplay": true
+      },
+      "expectErrors": [
+        "replay"
+      ]
+    },
+    {
+      "name": "transaction.malformed-root-agent-policy",
+      "baseEnvelope": "transaction.register-agent.operator-signature",
+      "mutation": {
+        "payloadObject": {
+          "policyRoot": "0x1234"
+        }
+      },
+      "expectErrors": [
+        "malformed-root"
+      ]
+    },
+    {
+      "name": "transaction.malformed-bridge-deposit-zero-amount",
+      "baseEnvelope": "transaction.bridge-deposit.operator-signature",
+      "mutation": {
+        "payloadObject": {
+          "amount": "0"
+        }
+      },
+      "expectErrors": [
+        "malformed-bridge-deposit"
+      ]
+    },
+    {
+      "name": "transaction.changed-object-type",
+      "baseEnvelope": "transaction.register-agent.operator-signature",
+      "mutation": {
+        "payload": {
+          "objectType": "model_passport"
+        }
+      },
+      "expectErrors": [
+        "changed-object-type"
+      ]
+    }
+  ]
+}

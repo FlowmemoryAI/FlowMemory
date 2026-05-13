@@ -11,7 +11,11 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$ToBlock,
 
-    [string]$Out = "services/bridge-relayer/out/base-sepolia-bridge-observation.json"
+    [string]$Out = "services/bridge-relayer/out/base-sepolia-bridge-observation.json",
+
+    [string]$CreditOut = "services/bridge-relayer/out/base-sepolia-bridge-credit.json",
+
+    [string]$HandoffOut = "services/bridge-relayer/out/base-sepolia-bridge-handoff.json"
 )
 
 $ErrorActionPreference = "Stop"
@@ -19,12 +23,13 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location -LiteralPath $repoRoot
 
-npm run bridge:observe -- `
-    --mode base-sepolia `
-    --rpc-url $RpcUrl `
-    --lockbox-address $LockboxAddress `
-    --from-block $FromBlock `
-    --to-block $ToBlock `
-    --out $Out
+powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "bridge-base-sepolia-observe.ps1") `
+    -RpcUrl $RpcUrl `
+    -LockboxAddress $LockboxAddress `
+    -FromBlock $FromBlock `
+    -ToBlock $ToBlock `
+    -Out $Out `
+    -CreditOut $CreditOut `
+    -HandoffOut $HandoffOut
 
-Write-Host "Base Sepolia bridge smoke wrote $Out" -ForegroundColor Green
+Write-Host "Base Sepolia bridge smoke wrote $Out and $HandoffOut" -ForegroundColor Green

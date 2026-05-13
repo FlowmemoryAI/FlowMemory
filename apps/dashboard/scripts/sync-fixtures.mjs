@@ -26,6 +26,11 @@ const fixtureCopies = [
     source: resolve(repoRoot, "fixtures/launch-core/generated/devnet/dashboard-state.json"),
     destination: resolve(destinationDir, "flowchain-local-devnet-dashboard-state.json"),
   },
+  {
+    label: "FlowChain bridge test deposit",
+    source: resolve(repoRoot, "fixtures/bridge/base-sepolia-mock-deposit.json"),
+    destination: resolve(destinationDir, "flowchain-bridge-test-deposit.json"),
+  },
 ];
 
 mkdirSync(destinationDir, { recursive: true });
