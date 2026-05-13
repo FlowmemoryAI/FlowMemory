@@ -7,12 +7,16 @@ Committed examples:
 - `sample-txs.json`: local transaction fixture for the Rust devnet.
 - `sample-flowpulse-observation.json`: synthetic FlowPulse observation import fixture.
 - `sample-verifier-report.json`: synthetic verifier report import fixture.
+- `local-operator-key-reference.json`: local operator/worker/verifier key reference boundary with no signing secret.
 
 Generated examples:
 
 - `generated/dashboard-state.json`
 - `generated/indexer-handoff.json`
 - `generated/verifier-handoff.json`
+- `generated/control-plane-handoff.json`
+- `generated/genesis-config.json`
+- `generated/operator-key-references.json`
 - `generated/state.json`
 
 Generated outputs are produced by:
