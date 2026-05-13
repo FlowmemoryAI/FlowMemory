@@ -2,12 +2,13 @@
 pragma solidity ^0.8.24;
 
 import {IFlowPulse, FlowPulseTypes} from "./FlowPulse.sol";
+import {IRootfieldRegistry} from "./interfaces/IRootfieldRegistry.sol";
 
 /// @title RootfieldRegistry
 /// @notice Minimal registry for Rootfield commitment namespaces.
 /// @dev This foundation intentionally excludes dynamic fees, tokenomics,
 /// upgrade hooks, and receipt-only metadata such as txHash and logIndex.
-contract RootfieldRegistry is IFlowPulse {
+contract RootfieldRegistry is IFlowPulse, IRootfieldRegistry {
     struct Rootfield {
         address owner;
         bytes32 schemaHash;

@@ -40,6 +40,10 @@ Audit environments should require Slither explicitly:
 REQUIRE_SLITHER=1 bash infra/scripts/contracts-static-analysis.sh
 ```
 
+## Slither Triage
+
+`.slither.config.json` excludes the `timestamp` detector for V0 because the current contracts use `block.timestamp` only for advisory `registeredAt`, `updatedAt`, `submittedAt`, `scheduledAt`, and FlowPulse `occurredAt` fields plus `uint64` overflow guards. Those timestamps do not drive randomness, rewards, custody, slashing, dynamic fees, or protocol-critical authorization in the current V0 boundary.
+
 ## Current Boundary
 
 The contracts are V0 launch foundations for FlowPulse, Rootfield, receipts, workers, verifiers, cursors, and hook-adapter events. They are not a production L1, production verifier network, token system, custody system, fee system, or production Uniswap v4 hook deployment.
