@@ -9,6 +9,7 @@ import { canonicalJson } from "../../shared/src/index.ts";
 import {
   dispatchJsonRpc,
   loadControlPlaneState,
+  scanJsonForSecrets,
   type RpcErrorResponse,
   type RpcSuccessResponse,
 } from "../src/index.ts";
@@ -66,10 +67,12 @@ test("keeps deterministic chain status response snapshots", () => {
   };
 
   assert.equal(snapshot(first), snapshot(second));
-  assert.equal(
-    snapshot(first),
-    "{\"capabilities\":[\"health_reads\",\"fixture_status_reads\",\"block_reads\",\"transaction_reads\",\"receipt_lookup\",\"verifier_report_lookup\",\"memory_lineage_lookup\",\"artifact_fixture_lookup\",\"devnet_handoff_reads\",\"raw_json_reads\"],\"chainId\":\"flowmemory-local-alpha\",\"counts\":{\"agents\":2,\"artifactAvailability\":5,\"blocks\":11,\"challenges\":1,\"devnetBlocks\":2,\"duplicates\":1,\"finalityRows\":9,\"memoryCells\":1,\"memoryReceipts\":8,\"memorySignals\":8,\"models\":2,\"observations\":8,\"rejectedLogs\":2,\"rootfields\":2,\"transactions\":23,\"verifierModules\":3,\"verifierReports\":8,\"workReceipts\":9},\"schema\":\"flowmemory.control_plane.chain_status.v0\"}",
-  );
+  assert.equal(first.result.chainId, "flowmemory-local-devnet-v0");
+  assert.ok((first.result.capabilities as string[]).includes("live_local_state_reads"));
+  assert.ok((first.result.capabilities as string[]).includes("transaction_submission"));
+  assert.ok((first.result.capabilities as string[]).includes("bridge_observation_intake"));
+  assert.equal(first.result.counts.observations, 8);
+  assert.equal(first.result.counts.bridgeDeposits, 1);
 });
 
 test("recovers when generated launch/indexer/verifier fixtures are missing", () => {
@@ -169,8 +172,36 @@ test("smoke client queries the complete local lifecycle surface", () => {
 
   assert.equal(smoke.schema, "flowmemory.control_plane.smoke.v0");
   assert.equal(smoke.ok, true);
-  assert.equal(smoke.methodCount, 31);
+  assert.equal(smoke.methodCount, 57);
+  assert.equal(smoke.noSecretResponseScan, "passed");
   assert.ok((smoke.responseSchemas as string[]).includes("flowmemory.control_plane.raw_json.v0"));
+});
+
+test("detects secret-bearing response keys", () => {
+  const findings = scanJsonForSecrets({
+    schema: "test",
+    privateKey: "not-allowed",
+  });
+
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0]?.reason, "forbidden secret-bearing key");
+});
+
+test("rejects transaction submissions with secret-bearing fields", () => {
+  const response = dispatchJsonRpc({
+    jsonrpc: "2.0",
+    id: 1,
+    method: "transaction_submit",
+    params: {
+      tx: {
+        type: "RegisterRootfield",
+        privateKey: "not-allowed",
+      },
+    },
+  }) as RpcErrorResponse;
+
+  assert.equal(response.error.code, -32602);
+  assert.equal(response.error.data.reasonCode, "params.invalid");
 });
 
 test("HTTP server exposes browser-safe health and state endpoints", async () => {
@@ -196,6 +227,20 @@ test("HTTP server exposes browser-safe health and state endpoints", async () => 
     assert.equal(state.status, 200);
     assert.equal(state.headers.get("access-control-allow-origin"), "*");
     assert.equal((await state.json()).schema, "flowmemory.control_plane.devnet_state.v0");
+
+    const node = await fetch(`http://127.0.0.1:${port}/node/status`, {
+      headers: { Origin: "http://127.0.0.1:5173" },
+    });
+    assert.equal(node.status, 200);
+    assert.equal(node.headers.get("access-control-allow-origin"), "*");
+    assert.equal((await node.json()).schema, "flowmemory.control_plane.node_status.v0");
+
+    const deposits = await fetch(`http://127.0.0.1:${port}/bridge/deposits?limit=1`, {
+      headers: { Origin: "http://127.0.0.1:5173" },
+    });
+    assert.equal(deposits.status, 200);
+    assert.equal(deposits.headers.get("access-control-allow-origin"), "*");
+    assert.equal((await deposits.json()).schema, "flowmemory.control_plane.bridge_deposit_list.v0");
   } finally {
     await new Promise<void>((resolve, reject) => {
       server.close((error) => {

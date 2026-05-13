@@ -1,8 +1,14 @@
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+
 import { canonicalJson, keccak256Hex } from "../../shared/src/index.ts";
 import { invalidParams, methodNotFound, objectNotFound } from "./errors.ts";
-import { loadControlPlaneState } from "./fixture-state.ts";
+import { controlPlanePaths, loadControlPlaneState, repoRoot } from "./fixture-state.ts";
+import { scanJsonForSecrets } from "./no-secret.ts";
+import { extractSubmittedTransactions, submitTransactionsToRuntime } from "./runtime-intake.ts";
 import type {
   ControlPlaneContext,
+  ControlPlanePaths,
   ControlPlaneMethod,
   JsonObject,
   JsonValue,
@@ -15,6 +21,14 @@ type MethodHandler = (params: JsonValue | undefined, context: ControlPlaneContex
 
 function stateFor(context: ControlPlaneContext): LoadedControlPlaneState {
   return context.state ?? loadControlPlaneState(context.paths);
+}
+
+function pathsFor(context: ControlPlaneContext): ControlPlanePaths {
+  return controlPlanePaths(context.paths);
+}
+
+function repoPath(path: string): string {
+  return resolve(repoRoot(), path);
 }
 
 function asObjectParams(params: JsonValue | undefined, method: string): JsonObject {
@@ -100,7 +114,29 @@ function stableId(schema: string, value: JsonValue): string {
   return keccak256Hex(new TextEncoder().encode(canonicalJson({ schema, value })));
 }
 
+function devnetSourceKind(state: LoadedControlPlaneState): string {
+  const path = state.sources.devnet?.path ?? "";
+  return path.startsWith("devnet/local/") ? "local-runtime-file" : "committed-fixture";
+}
+
+function devnetSourcePath(state: LoadedControlPlaneState): string {
+  return state.sources.devnet?.path ?? "fixtures/launch-core/generated/devnet/state.json";
+}
+
+function handoffSourcePath(state: LoadedControlPlaneState, name: "devnetIndexerHandoff" | "devnetVerifierHandoff" | "devnetControlPlaneHandoff"): string {
+  return state.sources[name]?.path ?? "fixtures/launch-core/generated/devnet/state.json";
+}
+
 function latestBlock(state: LoadedControlPlaneState): { blockNumber: string; blockHash: string } {
+  const devnetBlocks = devnetBlocksArray(state);
+  const devnetLatest = devnetBlocks[devnetBlocks.length - 1];
+  if (devnetLatest !== undefined) {
+    return {
+      blockNumber: stringValue(devnetLatest.blockNumber) ?? "0",
+      blockHash: stringValue(devnetLatest.blockHash) ?? ZERO_ROOT,
+    };
+  }
+
   const latest = [...state.indexer.state.observations].sort((left, right) => {
     const block = BigInt(right.blockNumber) - BigInt(left.blockNumber);
     if (block !== 0n) {
@@ -120,6 +156,12 @@ function latestBlock(state: LoadedControlPlaneState): { blockNumber: string; blo
 }
 
 function finalizedBlock(state: LoadedControlPlaneState): string {
+  const devnetBlocks = devnetBlocksArray(state);
+  const devnetLatest = devnetBlocks[devnetBlocks.length - 1];
+  if (devnetLatest !== undefined) {
+    return stringValue(devnetLatest.blockNumber) ?? "0";
+  }
+
   const finalized = state.indexer.state.observations
     .filter((observation) => observation.lifecycleState === "finalized")
     .map((observation) => BigInt(observation.blockNumber));
@@ -250,6 +292,244 @@ function devnetFinalityReceipts(state: LoadedControlPlaneState): Record<string, 
   return devnetMap(state, "finalityReceipts");
 }
 
+function devnetOperatorKeyReferences(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return devnetMap(state, "operatorKeyReferences");
+}
+
+function devnetBaseAnchors(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return devnetMap(state, "baseAnchors");
+}
+
+function pendingTxRows(state: LoadedControlPlaneState): JsonObject[] {
+  const pending = asJsonArray(state.devnet?.pendingTxs).length > 0
+    ? asJsonArray(state.devnet?.pendingTxs)
+    : asJsonArray(state.devnetControlPlaneHandoff?.pendingTxs);
+  return pending
+    .map((entry) => asJsonObject(entry))
+    .filter((entry): entry is JsonObject => entry !== null)
+    .map((entry) => ({
+      schema: "flowmemory.control_plane.mempool_tx.v0",
+      txId: stringValue(entry.txId) ?? stableId("flowmemory.control_plane.mempool_tx.v0", entry),
+      transactionId: stringValue(entry.txId) ?? stableId("flowmemory.control_plane.mempool_tx.v0", entry),
+      tx: asJsonObject(entry.tx) ?? entry,
+      source: "local-devnet-pending",
+      localOnly: true,
+    }));
+}
+
+function publicWalletRows(state: LoadedControlPlaneState): JsonObject[] {
+  const rows: JsonObject[] = [];
+  for (const [keyReferenceId, value] of Object.entries(devnetOperatorKeyReferences(state))) {
+    const reference = asJsonObject(value) ?? {};
+    rows.push({
+      schema: "flowmemory.control_plane.wallet_public_metadata.v0",
+      walletId: keyReferenceId,
+      accountId: stringValue(reference.operatorId) ?? keyReferenceId,
+      keyReferenceId,
+      signatureScheme: stringValue(reference.signatureScheme) ?? "local-fixture",
+      verifierSetRoot: stringValue(reference.verifierSetRoot) ?? null,
+      publicKeyHint: stringValue(reference.publicKeyHint) ?? null,
+      secretMaterialBoundary: stringValue(reference.secretMaterialBoundary) ?? "no signing secret material is exposed by the control plane",
+      source: "local-devnet",
+      localOnly: true,
+    });
+  }
+  return rows.sort((left, right) => String(left.walletId).localeCompare(String(right.walletId)));
+}
+
+function accountRows(state: LoadedControlPlaneState): JsonObject[] {
+  const rows: JsonObject[] = [];
+  for (const wallet of publicWalletRows(state)) {
+    rows.push({
+      schema: "flowmemory.control_plane.account.v0",
+      accountId: wallet.accountId,
+      accountType: "operator",
+      walletPublicMetadata: wallet,
+      balance: "0",
+      asset: "FLOWCHAIN_NO_VALUE",
+      spendable: false,
+      source: "local-devnet",
+      localOnly: true,
+    });
+  }
+  for (const [agentId, value] of Object.entries(devnetAgentAccounts(state))) {
+    const agent = asJsonObject(value) ?? {};
+    rows.push({
+      schema: "flowmemory.control_plane.account.v0",
+      accountId: agentId,
+      accountType: "AgentAccount",
+      controller: stringValue(agent.controller) ?? null,
+      agentAccount: agent,
+      balance: "0",
+      asset: "FLOWCHAIN_NO_VALUE",
+      spendable: false,
+      source: "local-devnet",
+      localOnly: true,
+    });
+  }
+  return rows.sort((left, right) => String(left.accountId).localeCompare(String(right.accountId)));
+}
+
+function balanceRows(state: LoadedControlPlaneState): JsonObject[] {
+  return accountRows(state).map((account) => ({
+    schema: "flowmemory.control_plane.balance.v0",
+    accountId: account.accountId,
+    accountType: account.accountType,
+    asset: "FLOWCHAIN_NO_VALUE",
+    balance: "0",
+    spendable: false,
+    noValue: true,
+    limitations: [
+      "The private/local devnet has no token value, gas accounting, staking, faucet funds, or bridge asset balances.",
+    ],
+    localOnly: true,
+  }));
+}
+
+function faucetEventRows(_state: LoadedControlPlaneState): JsonObject[] {
+  return [{
+    schema: "flowmemory.control_plane.faucet_event.v0",
+    eventId: "faucet:disabled:no-value-local-devnet",
+    status: "disabled_no_value",
+    amount: "0",
+    asset: "FLOWCHAIN_NO_VALUE",
+    recipient: null,
+    reason: "The private/local devnet has no token value and no faucet funds.",
+    localOnly: true,
+  }];
+}
+
+function bridgeObservationFromDeposit(deposit: JsonObject): JsonObject {
+  return {
+    schema: "flowmemory.bridge_deposit_observation.v0",
+    observationId: stableId("flowmemory.bridge_deposit_observation.mock_projection.v0", deposit),
+    observedAt: "2026-05-13T00:00:00.000Z",
+    mode: "mock",
+    productionReady: false,
+    deposit,
+    guardrails: {
+      explicitChainId: true,
+      explicitContract: true,
+      explicitBlockRange: false,
+      noSecrets: true,
+    },
+    source: "bridge-fixture-projection",
+    localOnly: true,
+  };
+}
+
+function bridgeObservationRows(state: LoadedControlPlaneState): JsonObject[] {
+  const rows: JsonObject[] = [];
+  const loaded = asJsonObject(state.bridgeObservation);
+  if (loaded !== null && loaded.schema === "flowmemory.bridge_deposit_observation.v0") {
+    rows.push({
+      ...loaded,
+      source: "bridge-relayer-output",
+      localOnly: true,
+    });
+  }
+
+  const intake = asJsonArray(state.bridgeObservationIntake?.observations)
+    .map((entry) => asJsonObject(entry))
+    .filter((entry): entry is JsonObject => entry !== null);
+  rows.push(...intake.map((entry) => ({
+    ...entry,
+    source: "control-plane-bridge-intake",
+    localOnly: true,
+  })));
+
+  const fixtureDeposit = asJsonObject(state.bridgeDepositFixture);
+  if (fixtureDeposit !== null) {
+    const projected = bridgeObservationFromDeposit(fixtureDeposit);
+    if (!rows.some((row) => row.observationId === projected.observationId)) {
+      rows.push(projected);
+    }
+  }
+
+  return rows.sort((left, right) => String(left.observationId).localeCompare(String(right.observationId)));
+}
+
+function bridgeDepositRows(state: LoadedControlPlaneState): JsonObject[] {
+  return bridgeObservationRows(state).map((observation) => {
+    const deposit = asJsonObject(observation.deposit) ?? {};
+    return {
+      schema: "flowmemory.control_plane.bridge_deposit.v0",
+      depositId: stringValue(deposit.depositId) ?? stableId("flowmemory.control_plane.bridge_deposit.v0", deposit),
+      observationId: observation.observationId,
+      status: stringValue(deposit.status) ?? "observed",
+      sourceChainId: deposit.sourceChainId ?? null,
+      sourceContract: stringValue(deposit.sourceContract) ?? null,
+      txHash: stringValue(deposit.txHash) ?? null,
+      logIndex: deposit.logIndex ?? null,
+      token: stringValue(deposit.token) ?? null,
+      amount: stringValue(deposit.amount) ?? "0",
+      sender: stringValue(deposit.sender) ?? null,
+      flowchainRecipient: stringValue(deposit.flowchainRecipient) ?? null,
+      nonce: stringValue(deposit.nonce) ?? null,
+      deposit,
+      observation,
+      productionReady: false,
+      localOnly: true,
+    };
+  });
+}
+
+function bridgeCreditRows(state: LoadedControlPlaneState): JsonObject[] {
+  return bridgeDepositRows(state).map((deposit) => ({
+    schema: "flowmemory.control_plane.bridge_credit.v0",
+    creditId: stableId("flowmemory.control_plane.bridge_credit.v0", stringValue(deposit.depositId) ?? ""),
+    depositId: deposit.depositId,
+    recipient: deposit.flowchainRecipient,
+    amount: deposit.amount,
+    token: deposit.token,
+    status: deposit.status === "accepted_local" ? "credited_local" : "pending_deposit_observation",
+    noValueAccounting: true,
+    limitations: [
+      "Bridge credits are local observation records only; no production bridge custody or withdrawal finality is implied.",
+    ],
+    localOnly: true,
+  }));
+}
+
+function withdrawalRows(state: LoadedControlPlaneState): JsonObject[] {
+  return Object.entries(firstDevnetMap(state, ["withdrawals", "bridgeWithdrawals"])).map(([withdrawalId, value]) => {
+    const withdrawal = asJsonObject(value) ?? {};
+    return {
+      schema: "flowmemory.control_plane.withdrawal.v0",
+      withdrawalId,
+      status: stringValue(withdrawal.status) ?? "local",
+      withdrawal,
+      source: "local-devnet",
+      productionReady: false,
+      localOnly: true,
+    };
+  }).sort((left, right) => String(left.withdrawalId).localeCompare(String(right.withdrawalId)));
+}
+
+function writeBridgeObservationIntake(paths: ControlPlanePaths, observation: JsonObject): JsonObject {
+  const path = repoPath(paths.bridgeObservationIntakePath);
+  const existing = existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) as JsonObject : null;
+  const observations = asJsonArray(existing?.observations)
+    .map((entry) => asJsonObject(entry))
+    .filter((entry): entry is JsonObject => entry !== null);
+  const normalized = {
+    ...observation,
+    schema: "flowmemory.bridge_deposit_observation.v0",
+    observationId: stringValue(observation.observationId) ?? stableId("flowmemory.bridge_deposit_observation.intake.v0", observation),
+    productionReady: false,
+    localOnly: true,
+  };
+  const next = observations.filter((entry) => entry.observationId !== normalized.observationId);
+  next.push(normalized);
+  const payload = {
+    schema: "flowmemory.control_plane.bridge_observation_intake.v0",
+    observations: next.sort((left, right) => String(left.observationId).localeCompare(String(right.observationId))),
+  };
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, `${JSON.stringify(payload, null, 2)}\n`);
+  return normalized;
+}
+
 function transactionRows(state: LoadedControlPlaneState): JsonObject[] {
   const rows: JsonObject[] = [];
   const txFixtures = txFixtureRows(state);
@@ -280,6 +560,24 @@ function transactionRows(state: LoadedControlPlaneState): JsonObject[] {
         source: "local-devnet",
         localOnly: true,
       });
+    });
+  }
+
+  for (const pending of pendingTxRows(state)) {
+    const tx = asJsonObject(pending.tx);
+    rows.push({
+      schema: "flowmemory.control_plane.transaction.v0",
+      transactionId: stringValue(pending.txId) ?? stringValue(pending.transactionId) ?? stableId("flowmemory.control_plane.pending_transaction.v0", pending),
+      txHash: stringValue(pending.txId) ?? stringValue(pending.transactionId) ?? stableId("flowmemory.control_plane.pending_transaction.v0", pending),
+      blockNumber: null,
+      blockHash: null,
+      transactionIndex: null,
+      status: "pending",
+      type: stringValue(tx?.type) ?? "unknown",
+      payload: tx,
+      receipt: null,
+      source: "local-devnet-mempool",
+      localOnly: true,
     });
   }
 
@@ -707,10 +1005,12 @@ function finalityRows(state: LoadedControlPlaneState): JsonObject[] {
 function health(_params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
   const state = stateFor(context);
   const missing = Object.values(state.sources).filter((source) => source.status === "missing").map((source) => source.name);
+  const required = new Set(["launchCore", "indexer", "verifier", "artifacts", "devnet", "txFixtures"]);
+  const missingRequired = missing.filter((name) => required.has(name));
   return {
     schema: "flowmemory.control_plane.health.v0",
     service: "flowmemory-control-plane-v0",
-    status: missing.length === 0 ? "ok" : "degraded",
+    status: missingRequired.length === 0 ? "ok" : "degraded",
     localOnly: true,
     checks: {
       launchCore: state.sources.launchCore.status,
@@ -720,6 +1020,9 @@ function health(_params: JsonValue | undefined, context: ControlPlaneContext): J
       devnet: state.sources.devnet.status,
       devnetControlPlaneHandoff: state.sources.devnetControlPlaneHandoff.status,
       txFixtures: state.sources.txFixtures.status,
+      bridgeObservation: state.sources.bridgeObservation.status,
+      bridgeObservationIntake: state.sources.bridgeObservationIntake.status,
+      bridgeDepositFixture: state.sources.bridgeDepositFixture.status,
     },
     counts: {
       observations: state.indexer.state.observations.length,
@@ -727,8 +1030,70 @@ function health(_params: JsonValue | undefined, context: ControlPlaneContext): J
       rootfields: rootfieldRows(state).length,
       blocks: blockRows(state).length,
       transactions: transactionRows(state).length,
+      pendingTransactions: pendingTxRows(state).length,
+      bridgeDeposits: bridgeDepositRows(state).length,
     },
-    missingOptionalSources: missing,
+    missingRequiredSources: missingRequired,
+    missingOptionalSources: missing.filter((name) => !required.has(name)),
+  };
+}
+
+function nodeStatus(_params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const latest = latestBlock(state);
+  return {
+    schema: "flowmemory.control_plane.node_status.v0",
+    chainId: typeof state.devnet?.chainId === "string" ? state.devnet.chainId : "flowmemory-local-devnet-v0",
+    networkId: stringValue(asJsonObject(state.devnet?.config)?.networkId) ?? "flowmemory-private-local",
+    runtimeMode: "bounded-local-cli",
+    longRunningNode: false,
+    source: devnetSourceKind(state),
+    stateSource: state.sources.devnet,
+    currentBlock: latest.blockNumber,
+    currentBlockHash: latest.blockHash,
+    stateRoot: stringValue(state.devnetControlPlaneHandoff?.stateRoot)
+      ?? stringValue(state.devnetIndexerHandoff?.stateRoot)
+      ?? stringValue(state.devnet?.parentHash)
+      ?? ZERO_ROOT,
+    pendingTransactions: pendingTxRows(state).length,
+    peerCount: 0,
+    noValue: true,
+    localOnly: true,
+  };
+}
+
+function peerList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  asObjectParams(params, "peer_list");
+  return {
+    schema: "flowmemory.control_plane.peer_list.v0",
+    count: 1,
+    peers: [{
+      schema: "flowmemory.control_plane.peer.v0",
+      peerId: "local-single-process",
+      status: "self",
+      transport: "local-cli",
+      latestBlock: latestBlock(state).blockNumber,
+      localOnly: true,
+    }],
+    limitations: [
+      "The current private/local runtime is a single-process deterministic CLI; LAN peer discovery is not implemented.",
+    ],
+    localOnly: true,
+  };
+}
+
+function mempoolList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "mempool_list");
+  const limit = pageLimit(objectParams);
+  const rows = pendingTxRows(state).slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.mempool_list.v0",
+    count: rows.length,
+    nextCursor: null,
+    transactions: rows,
+    localOnly: true,
   };
 }
 
@@ -738,10 +1103,10 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
 
   return {
     schema: "flowmemory.control_plane.chain_status.v0",
-    chainId: "flowmemory-local-alpha",
-    settlementContext: "local fixture stack over FlowPulse and local no-value devnet handoff",
-    environment: "local-devnet-fixture",
-    source: "fixture",
+    chainId: typeof state.devnet?.chainId === "string" ? state.devnet.chainId : "flowmemory-local-alpha",
+    settlementContext: "local fixture stack over FlowPulse and local no-value devnet runtime state",
+    environment: "private-local-devnet",
+    source: devnetSourceKind(state),
     currentBlock: latest.blockNumber,
     currentBlockHash: latest.blockHash,
     finalizedBlock: finalizedBlock(state),
@@ -765,18 +1130,40 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
       finalityRows: finalityRows(state).length,
       blocks: blockRows(state).length,
       transactions: transactionRows(state).length,
+      pendingTransactions: pendingTxRows(state).length,
       devnetBlocks: devnetBlocksArray(state).length,
+      accounts: accountRows(state).length,
+      balances: balanceRows(state).length,
+      faucetEvents: faucetEventRows(state).length,
+      walletPublicMetadata: publicWalletRows(state).length,
+      bridgeObservations: bridgeObservationRows(state).length,
+      bridgeDeposits: bridgeDepositRows(state).length,
+      bridgeCredits: bridgeCreditRows(state).length,
+      withdrawals: withdrawalRows(state).length,
     },
     capabilities: [
       "health_reads",
-      "fixture_status_reads",
+      "live_local_state_reads",
+      "fixture_fallback_reads",
+      "node_status_reads",
+      "peer_reads",
+      "mempool_reads",
       "block_reads",
       "transaction_reads",
+      "transaction_submission",
+      "account_reads",
+      "balance_reads",
+      "faucet_event_reads",
+      "wallet_public_metadata_reads",
       "receipt_lookup",
       "verifier_report_lookup",
       "memory_lineage_lookup",
       "artifact_fixture_lookup",
       "devnet_handoff_reads",
+      "bridge_observation_intake",
+      "bridge_deposit_reads",
+      "bridge_credit_reads",
+      "withdrawal_reads",
       "raw_json_reads",
     ],
     limitations: [
@@ -816,10 +1203,12 @@ function devnetState(params: JsonValue | undefined, context: ControlPlaneContext
     memoryCellCount: Object.keys(devnetMemoryCells(state)).length,
     challengeCount: Object.keys(devnetChallenges(state)).length,
     finalityReceiptCount: Object.keys(devnetFinalityReceipts(state)).length,
-    baseAnchorCount: state.devnet?.baseAnchors && typeof state.devnet.baseAnchors === "object" && !Array.isArray(state.devnet.baseAnchors)
-      ? Object.keys(state.devnet.baseAnchors).length
-      : 0,
+    pendingTransactionCount: pendingTxRows(state).length,
+    baseAnchorCount: Object.keys(devnetBaseAnchors(state)).length,
     blocks: includeBlocks ? blocks : undefined,
+    pendingTransactions: includeBlocks ? pendingTxRows(state) : undefined,
+    mapRoots: state.devnetControlPlaneHandoff?.mapRoots ?? state.devnetIndexerHandoff?.mapRoots ?? null,
+    sourceKind: devnetSourceKind(state),
     source: state.sources.devnet,
     indexerHandoff: state.devnetIndexerHandoff === null ? null : {
       schema: state.devnetIndexerHandoff.schema,
@@ -877,8 +1266,8 @@ function blockGet(params: JsonValue | undefined, context: ControlPlaneContext): 
     provenance: {
       sources: [
         block.source === "local-devnet"
-          ? provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.block.v0")
-          : provenanceSource("indexer", "services/indexer/out/indexer-state.json", "flowmemory.indexer.persistence.v0"),
+          ? provenanceSource("devnet", devnetSourcePath(state), "flowmemory.local_devnet.block.v0")
+          : provenanceSource("indexer", state.sources.indexer.path, "flowmemory.indexer.persistence.v0"),
       ],
     },
     localOnly: true,
@@ -924,10 +1313,157 @@ function transactionGet(params: JsonValue | undefined, context: ControlPlaneCont
     provenance: {
       sources: [
         transaction.source === "local-devnet"
-          ? provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.block.v0")
-          : provenanceSource("indexer", "services/indexer/out/indexer-state.json", "flowmemory.indexer.persistence.v0"),
+          ? provenanceSource("devnet", devnetSourcePath(state), "flowmemory.local_devnet.block.v0")
+          : provenanceSource("indexer", state.sources.indexer.path, "flowmemory.indexer.persistence.v0"),
       ],
     },
+    localOnly: true,
+  };
+}
+
+function transactionSubmit(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "transaction_submit");
+  const txs = extractSubmittedTransactions(objectParams);
+  const findings = scanJsonForSecrets(txs as JsonValue);
+  if (findings.length > 0) {
+    throw invalidParams("transaction_submit payload contains forbidden secret-bearing fields", { findings });
+  }
+  try {
+    const submission = submitTransactionsToRuntime(pathsFor(context), txs);
+    return {
+      ...submission,
+      submissionId: stableId("flowmemory.control_plane.transaction_submission.v0", txs),
+    };
+  } catch (error) {
+    throw invalidParams(error instanceof Error ? error.message : "transaction_submit failed");
+  }
+}
+
+function accountList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "account_list");
+  const limit = pageLimit(objectParams);
+  const accountType = optionalString(objectParams, "accountType");
+  const rows = accountRows(state)
+    .filter((account) => accountType === undefined || account.accountType === accountType)
+    .slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.account_list.v0",
+    count: rows.length,
+    nextCursor: null,
+    accounts: rows,
+    localOnly: true,
+  };
+}
+
+function accountGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "account_get");
+  const accountId = requiredString(objectParams, ["accountId", "agentId", "operatorId"], "account_get");
+  const account = accountRows(state).find((candidate) => {
+    return candidate.accountId === accountId
+      || asJsonObject(candidate.agentAccount)?.agentId === accountId
+      || asJsonObject(candidate.walletPublicMetadata)?.accountId === accountId;
+  });
+  if (account === undefined) {
+    throw objectNotFound(`account not found: ${accountId}`, { accountId });
+  }
+  return {
+    schema: "flowmemory.control_plane.account_detail.v0",
+    account,
+    balance: balanceRows(state).find((candidate) => candidate.accountId === account.accountId) ?? null,
+    localOnly: true,
+  };
+}
+
+function balanceList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "balance_list");
+  const limit = pageLimit(objectParams);
+  const accountId = optionalString(objectParams, "accountId");
+  const rows = balanceRows(state)
+    .filter((balance) => accountId === undefined || balance.accountId === accountId)
+    .slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.balance_list.v0",
+    count: rows.length,
+    nextCursor: null,
+    balances: rows,
+    localOnly: true,
+  };
+}
+
+function balanceGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "balance_get");
+  const accountId = requiredString(objectParams, ["accountId", "agentId", "operatorId"], "balance_get");
+  const balance = balanceRows(state).find((candidate) => candidate.accountId === accountId);
+  if (balance === undefined) {
+    throw objectNotFound(`balance not found: ${accountId}`, { accountId });
+  }
+  return {
+    schema: "flowmemory.control_plane.balance_detail.v0",
+    balance,
+    localOnly: true,
+  };
+}
+
+function faucetEventList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "faucet_event_list");
+  const limit = pageLimit(objectParams);
+  const rows = faucetEventRows(state).slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.faucet_event_list.v0",
+    count: rows.length,
+    nextCursor: null,
+    faucetEvents: rows,
+    localOnly: true,
+  };
+}
+
+function faucetEventGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "faucet_event_get");
+  const eventId = requiredString(objectParams, ["eventId"], "faucet_event_get");
+  const event = faucetEventRows(state).find((candidate) => candidate.eventId === eventId);
+  if (event === undefined) {
+    throw objectNotFound(`faucet event not found: ${eventId}`, { eventId });
+  }
+  return {
+    schema: "flowmemory.control_plane.faucet_event_detail.v0",
+    faucetEvent: event,
+    localOnly: true,
+  };
+}
+
+function walletMetadataList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "wallet_metadata_list");
+  const limit = pageLimit(objectParams);
+  const rows = publicWalletRows(state).slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.wallet_metadata_list.v0",
+    count: rows.length,
+    nextCursor: null,
+    wallets: rows,
+    localOnly: true,
+  };
+}
+
+function walletMetadataGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "wallet_metadata_get");
+  const walletId = requiredString(objectParams, ["walletId", "accountId", "keyReferenceId"], "wallet_metadata_get");
+  const wallet = publicWalletRows(state).find((candidate) => {
+    return candidate.walletId === walletId || candidate.accountId === walletId || candidate.keyReferenceId === walletId;
+  });
+  if (wallet === undefined) {
+    throw objectNotFound(`wallet metadata not found: ${walletId}`, { walletId });
+  }
+  return {
+    schema: "flowmemory.control_plane.wallet_metadata_detail.v0",
+    wallet,
     localOnly: true,
   };
 }
@@ -953,7 +1489,7 @@ function rootfieldGet(params: JsonValue | undefined, context: ControlPlaneContex
     provenance: {
       sources: [
         bundle ? provenanceSource("flowmemory", "fixtures/launch-core/flowmemory-launch-v0.json", bundle.schema) : null,
-        devnetRootfield ? provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.rootfield.v0") : null,
+        devnetRootfield ? provenanceSource("devnet", devnetSourcePath(state), "flowmemory.local_devnet.rootfield.v0") : null,
       ].filter((entry): entry is JsonObject => entry !== null),
     },
     localOnly: true,
@@ -1015,7 +1551,7 @@ function artifactGet(params: JsonValue | undefined, context: ControlPlaneContext
         artifact: entry,
         resolverPolicyId: "flowmemory.local_devnet.artifact_commitment.v0",
         provenance: {
-          sources: [provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.artifact_commitment.v0")],
+          sources: [provenanceSource("devnet", devnetSourcePath(state), "flowmemory.local_devnet.artifact_commitment.v0")],
         },
         localOnly: true,
       };
@@ -1065,7 +1601,7 @@ function artifactAvailabilityGet(params: JsonValue | undefined, context: Control
         sources: [provenanceSource("verifier", "services/verifier/fixtures/artifacts.json", "flowmemory.verifier.artifact_fixture.v0")],
       }
       : {
-        sources: [provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.artifact_commitment.v0")],
+        sources: [provenanceSource("devnet", devnetSourcePath(state), "flowmemory.local_devnet.artifact_commitment.v0")],
       },
     localOnly: true,
   };
@@ -1100,7 +1636,7 @@ function receiptGet(params: JsonValue | undefined, context: ControlPlaneContext)
       transition: null,
       verifierReport: null,
       provenance: {
-        sources: [provenanceSource("devnet", "fixtures/launch-core/generated/devnet/verifier-handoff.json", "flowmemory.local_devnet.work_receipt.v0")],
+        sources: [provenanceSource("devnet", handoffSourcePath(state, "devnetVerifierHandoff"), "flowmemory.local_devnet.work_receipt.v0")],
       },
       localOnly: true,
     };
@@ -1204,8 +1740,8 @@ function verifierModuleGet(params: JsonValue | undefined, context: ControlPlaneC
     provenance: {
       sources: [
         verifierModule.source === "local-devnet"
-          ? provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.verifier_module.v0")
-          : provenanceSource("verifier", "services/verifier/out/reports.json", "flowmemory.verifier.persistence.v0"),
+          ? provenanceSource("devnet", devnetSourcePath(state), "flowmemory.local_devnet.verifier_module.v0")
+          : provenanceSource("verifier", state.sources.verifier.path, "flowmemory.verifier.persistence.v0"),
       ],
     },
     localOnly: true,
@@ -1235,7 +1771,7 @@ function verifierReportGet(params: JsonValue | undefined, context: ControlPlaneC
       report: devnetReport,
       memoryReceipt: null,
       provenance: {
-        sources: [provenanceSource("devnet", "fixtures/launch-core/generated/devnet/verifier-handoff.json", "flowmemory.local_devnet.verifier_report.v0")],
+        sources: [provenanceSource("devnet", handoffSourcePath(state, "devnetVerifierHandoff"), "flowmemory.local_devnet.verifier_report.v0")],
       },
       localOnly: true,
     };
@@ -1250,9 +1786,31 @@ function verifierReportList(params: JsonValue | undefined, context: ControlPlane
   const rootfieldId = optionalString(objectParams, "rootfieldId");
   const status = optionalString(objectParams, "status");
   const limit = pageLimit(objectParams);
-  const reports = state.verifier.reports
-    .filter((report) => rootfieldId === undefined || report.reportCore.observation.rootfieldId === rootfieldId)
-    .filter((report) => status === undefined || report.reportCore.status === status)
+  const reports = [
+    ...Object.entries(devnetReports(state)).map(([reportId, value]) => {
+      const report = asJsonObject(value) ?? {};
+      return {
+        schema: "flowmemory.control_plane.verifier_report_row.v0",
+        reportId,
+        rootfieldId: stringValue(report.rootfieldId) ?? null,
+        status: stringValue(report.status) ?? "local",
+        report,
+        source: "local-devnet",
+        localOnly: true,
+      };
+    }),
+    ...state.verifier.reports.map((report) => ({
+      schema: "flowmemory.control_plane.verifier_report_row.v0",
+      reportId: report.reportId,
+      rootfieldId: report.reportCore.observation.rootfieldId,
+      status: report.reportCore.status,
+      report,
+      source: "verifier-fixture",
+      localOnly: true,
+    })),
+  ]
+    .filter((report) => rootfieldId === undefined || report.rootfieldId === rootfieldId)
+    .filter((report) => status === undefined || report.status === status)
     .slice(0, limit);
 
   return {
@@ -1364,6 +1922,53 @@ function agentList(params: JsonValue | undefined, context: ControlPlaneContext):
   };
 }
 
+function agentAccountList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "agent_account_list");
+  const limit = pageLimit(objectParams);
+  const status = optionalString(objectParams, "status");
+  const rows = Object.entries(devnetAgentAccounts(state))
+    .map(([agentId, value]) => {
+      const agent = asJsonObject(value) ?? {};
+      return {
+        schema: "flowmemory.control_plane.agent_account.v0",
+        agentId,
+        status: stringValue(agent.status) ?? (agent.active === false ? "inactive" : "active"),
+        agentAccount: agent,
+        account: accountRows(state).find((account) => account.accountId === agentId) ?? null,
+        source: "local-devnet",
+        localOnly: true,
+      };
+    })
+    .filter((agent) => status === undefined || agent.status === status)
+    .slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.agent_account_list.v0",
+    count: rows.length,
+    nextCursor: null,
+    agentAccounts: rows,
+    localOnly: true,
+  };
+}
+
+function agentAccountGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "agent_account_get");
+  const agentId = requiredString(objectParams, ["agentId", "accountId"], "agent_account_get");
+  const agent = Object.entries(devnetAgentAccounts(state)).find(([id, value]) => id === agentId || asJsonObject(value)?.agentId === agentId);
+  if (agent === undefined) {
+    throw objectNotFound(`agent account not found: ${agentId}`, { agentId });
+  }
+  return {
+    schema: "flowmemory.control_plane.agent_account_detail.v0",
+    agentId: agent[0],
+    agentAccount: agent[1] as JsonObject,
+    account: accountRows(state).find((candidate) => candidate.accountId === agent[0]) ?? null,
+    provenance: provenanceForObject(state, agent[0]),
+    localOnly: true,
+  };
+}
+
 function modelList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
   const state = stateFor(context);
   const objectParams = asObjectParams(params, "model_list");
@@ -1383,6 +1988,53 @@ function modelList(params: JsonValue | undefined, context: ControlPlaneContext):
   };
 }
 
+function modelPassportList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "model_passport_list");
+  const limit = pageLimit(objectParams);
+  const status = optionalString(objectParams, "status");
+  const rows = Object.entries(devnetModels(state))
+    .map(([modelId, value]) => {
+      const model = asJsonObject(value) ?? {};
+      return {
+        schema: "flowmemory.control_plane.model_passport.v0",
+        modelId,
+        status: stringValue(model.status) ?? (model.active === false ? "inactive" : "active"),
+        modelPassport: model,
+        source: "local-devnet",
+        localOnly: true,
+      };
+    })
+    .filter((model) => status === undefined || model.status === status)
+    .slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.model_passport_list.v0",
+    count: rows.length,
+    nextCursor: null,
+    modelPassports: rows,
+    localOnly: true,
+  };
+}
+
+function modelPassportGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "model_passport_get");
+  const modelId = requiredString(objectParams, ["modelId", "modelPassportId"], "model_passport_get");
+  const model = Object.entries(devnetModels(state)).find(([id, value]) => {
+    const passport = asJsonObject(value);
+    return id === modelId || passport?.modelPassportId === modelId;
+  });
+  if (model === undefined) {
+    throw objectNotFound(`model passport not found: ${modelId}`, { modelId });
+  }
+  return {
+    schema: "flowmemory.control_plane.model_passport_detail.v0",
+    modelId: model[0],
+    modelPassport: model[1] as JsonObject,
+    localOnly: true,
+  };
+}
+
 function modelGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
   const state = stateFor(context);
   const objectParams = asObjectParams(params, "model_get");
@@ -1397,7 +2049,7 @@ function modelGet(params: JsonValue | undefined, context: ControlPlaneContext): 
     provenance: {
       sources: [
         model.source === "local-devnet"
-          ? provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.model_passport.v0")
+          ? provenanceSource("devnet", devnetSourcePath(state), "flowmemory.local_devnet.model_passport.v0")
           : provenanceSource("flowmemory", "fixtures/launch-core/flowmemory-launch-v0.json", "flowmemory.agent_memory_view.v0", "Projected model row; no ModelPassport fixture exists yet."),
       ],
     },
@@ -1550,6 +2202,170 @@ function finalityList(params: JsonValue | undefined, context: ControlPlaneContex
   };
 }
 
+function bridgeObservationSubmit(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "bridge_observation_submit");
+  const findings = scanJsonForSecrets(objectParams);
+  if (findings.length > 0) {
+    throw invalidParams("bridge_observation_submit payload contains forbidden secret-bearing fields", { findings });
+  }
+  const observationParam = asJsonObject(objectParams.observation);
+  const depositParam = asJsonObject(objectParams.deposit);
+  if (observationParam === null && depositParam === null) {
+    throw invalidParams("bridge_observation_submit requires observation or deposit");
+  }
+  const observation = observationParam ?? bridgeObservationFromDeposit(depositParam ?? {});
+  const stored = writeBridgeObservationIntake(pathsFor(context), observation);
+  return {
+    schema: "flowmemory.control_plane.bridge_observation_submission.v0",
+    observation: stored,
+    accepted: true,
+    productionReady: false,
+    localOnly: true,
+  };
+}
+
+function bridgeObservationList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "bridge_observation_list");
+  const limit = pageLimit(objectParams);
+  const mode = optionalString(objectParams, "mode");
+  const rows = bridgeObservationRows(state)
+    .filter((observation) => mode === undefined || observation.mode === mode)
+    .slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.bridge_observation_list.v0",
+    count: rows.length,
+    nextCursor: null,
+    observations: rows,
+    localOnly: true,
+  };
+}
+
+function bridgeObservationGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "bridge_observation_get");
+  const observationId = requiredString(objectParams, ["observationId", "depositId"], "bridge_observation_get");
+  const observation = bridgeObservationRows(state).find((candidate) => {
+    return candidate.observationId === observationId || asJsonObject(candidate.deposit)?.depositId === observationId;
+  });
+  if (observation === undefined) {
+    throw objectNotFound(`bridge observation not found: ${observationId}`, { observationId });
+  }
+  return {
+    schema: "flowmemory.control_plane.bridge_observation.v0",
+    observation,
+    localOnly: true,
+  };
+}
+
+function bridgeDepositList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "bridge_deposit_list");
+  const limit = pageLimit(objectParams);
+  const status = optionalString(objectParams, "status");
+  const rows = bridgeDepositRows(state)
+    .filter((deposit) => status === undefined || deposit.status === status)
+    .slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.bridge_deposit_list.v0",
+    count: rows.length,
+    nextCursor: null,
+    deposits: rows,
+    localOnly: true,
+  };
+}
+
+function bridgeDepositGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "bridge_deposit_get");
+  const depositId = requiredString(objectParams, ["depositId", "observationId", "txHash"], "bridge_deposit_get");
+  const deposit = bridgeDepositRows(state).find((candidate) => {
+    return candidate.depositId === depositId || candidate.observationId === depositId || candidate.txHash === depositId;
+  });
+  if (deposit === undefined) {
+    throw objectNotFound(`bridge deposit not found: ${depositId}`, { depositId });
+  }
+  return {
+    schema: "flowmemory.control_plane.bridge_deposit_detail.v0",
+    deposit,
+    localOnly: true,
+  };
+}
+
+function bridgeCreditList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "bridge_credit_list");
+  const limit = pageLimit(objectParams);
+  const status = optionalString(objectParams, "status");
+  const rows = bridgeCreditRows(state)
+    .filter((credit) => status === undefined || credit.status === status)
+    .slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.bridge_credit_list.v0",
+    count: rows.length,
+    nextCursor: null,
+    credits: rows,
+    localOnly: true,
+  };
+}
+
+function bridgeCreditGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "bridge_credit_get");
+  const creditId = requiredString(objectParams, ["creditId", "depositId"], "bridge_credit_get");
+  const credit = bridgeCreditRows(state).find((candidate) => candidate.creditId === creditId || candidate.depositId === creditId);
+  if (credit === undefined) {
+    throw objectNotFound(`bridge credit not found: ${creditId}`, { creditId });
+  }
+  return {
+    schema: "flowmemory.control_plane.bridge_credit_detail.v0",
+    credit,
+    localOnly: true,
+  };
+}
+
+function withdrawalList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "withdrawal_list");
+  const limit = pageLimit(objectParams);
+  const status = optionalString(objectParams, "status");
+  const rows = withdrawalRows(state)
+    .filter((withdrawal) => status === undefined || withdrawal.status === status)
+    .slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.withdrawal_list.v0",
+    count: rows.length,
+    nextCursor: null,
+    withdrawals: rows,
+    extensionPoint: rows.length === 0 ? "No local withdrawal handoff objects exist yet; production bridge withdrawals remain out of scope." : undefined,
+    localOnly: true,
+  };
+}
+
+function withdrawalGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "withdrawal_get");
+  const withdrawalId = requiredString(objectParams, ["withdrawalId", "depositId", "creditId"], "withdrawal_get");
+  const withdrawal = withdrawalRows(state).find((candidate) => candidate.withdrawalId === withdrawalId);
+  if (withdrawal === undefined) {
+    return {
+      schema: "flowmemory.control_plane.withdrawal_detail.v0",
+      withdrawalId,
+      status: "not_opened",
+      withdrawal: null,
+      extensionPoint: "No local withdrawal object exists for this id. Production bridge withdrawal handling is not implemented.",
+      productionReady: false,
+      localOnly: true,
+    };
+  }
+  return {
+    schema: "flowmemory.control_plane.withdrawal_detail.v0",
+    withdrawal,
+    productionReady: false,
+    localOnly: true,
+  };
+}
+
 function findObject(state: LoadedControlPlaneState, key: string): { type: string; object: JsonObject } {
   const receipt = receiptByAnyId(state, key);
   if (receipt !== undefined) {
@@ -1623,6 +2439,18 @@ function findObject(state: LoadedControlPlaneState, key: string): { type: string
   if (devnetFinality !== undefined) {
     return { type: "devnet_finality_receipt", object: devnetFinality as JsonObject };
   }
+  const account = accountRows(state).find((candidate) => candidate.accountId === key);
+  if (account !== undefined) {
+    return { type: "account", object: account };
+  }
+  const bridgeDeposit = bridgeDepositRows(state).find((candidate) => candidate.depositId === key || candidate.observationId === key || candidate.txHash === key);
+  if (bridgeDeposit !== undefined) {
+    return { type: "bridge_deposit", object: bridgeDeposit };
+  }
+  const bridgeCredit = bridgeCreditRows(state).find((candidate) => candidate.creditId === key || candidate.depositId === key);
+  if (bridgeCredit !== undefined) {
+    return { type: "bridge_credit", object: bridgeCredit };
+  }
 
   throw objectNotFound(`object not found: ${key}`, { id: key });
 }
@@ -1649,31 +2477,31 @@ function provenanceForObject(state: LoadedControlPlaneState, key: string): JsonO
     sources.push(provenanceSource("flowmemory", "fixtures/launch-core/flowmemory-launch-v0.json", "flowmemory.launch_core.v0"));
   }
   if (selectedReceipt !== undefined || report !== undefined) {
-    sources.push(provenanceSource("verifier", "services/verifier/out/reports.json", "flowmemory.verifier.persistence.v0"));
+    sources.push(provenanceSource("verifier", state.sources.verifier.path, "flowmemory.verifier.persistence.v0"));
   }
   if (selectedSignal !== undefined) {
-    sources.push(provenanceSource("indexer", "services/indexer/out/indexer-state.json", "flowmemory.indexer.persistence.v0"));
+    sources.push(provenanceSource("indexer", state.sources.indexer.path, "flowmemory.indexer.persistence.v0"));
   }
   if (block !== undefined || transaction !== undefined) {
     const source = block?.source ?? transaction?.source;
     sources.push(source === "local-devnet"
-      ? provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.state.v0")
-      : provenanceSource("indexer", "services/indexer/out/indexer-state.json", "flowmemory.indexer.persistence.v0"));
+      ? provenanceSource("devnet", devnetSourcePath(state), "flowmemory.local_devnet.state.v0")
+      : provenanceSource("indexer", state.sources.indexer.path, "flowmemory.indexer.persistence.v0"));
   }
   if (model !== undefined) {
     sources.push(model.source === "local-devnet"
-      ? provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.model_passport.v0")
+      ? provenanceSource("devnet", devnetSourcePath(state), "flowmemory.local_devnet.model_passport.v0")
       : provenanceSource("flowmemory", "fixtures/launch-core/flowmemory-launch-v0.json", "flowmemory.agent_memory_view.v0", "Projected model row."));
   }
   if (verifierModule !== undefined) {
     sources.push(verifierModule.source === "local-devnet"
-      ? provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.verifier_module.v0")
-      : provenanceSource("verifier", "services/verifier/out/reports.json", "flowmemory.verifier.persistence.v0"));
+      ? provenanceSource("devnet", devnetSourcePath(state), "flowmemory.local_devnet.verifier_module.v0")
+      : provenanceSource("verifier", state.sources.verifier.path, "flowmemory.verifier.persistence.v0"));
   }
   if (artifactAvailability !== undefined) {
     sources.push(artifactAvailability.source === "verifier-fixture"
       ? provenanceSource("verifier", "services/verifier/fixtures/artifacts.json", "flowmemory.verifier.artifact_fixture.v0")
-      : provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.artifact_commitment.v0"));
+      : provenanceSource("devnet", devnetSourcePath(state), "flowmemory.local_devnet.artifact_commitment.v0"));
   }
 
   links.receiptId = selectedReceipt?.receiptId;
@@ -1701,7 +2529,7 @@ function provenanceForObject(state: LoadedControlPlaneState, key: string): JsonO
       ?? devnetChallenges(state)[key]
       ?? devnetFinalityReceipts(state)[key];
     if (devnetTarget !== undefined) {
-      sources.push(provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.state.v0"));
+      sources.push(provenanceSource("devnet", devnetSourcePath(state), "flowmemory.local_devnet.state.v0"));
     }
   }
 
@@ -1760,6 +2588,9 @@ function rawJsonGet(params: JsonValue | undefined, context: ControlPlaneContext)
     devnetVerifierHandoff: state.devnetVerifierHandoff,
     devnetControlPlaneHandoff: state.devnetControlPlaneHandoff,
     txFixtures: state.txFixtures,
+    bridgeObservation: state.bridgeObservation,
+    bridgeObservationIntake: state.bridgeObservationIntake,
+    bridgeDepositFixture: state.bridgeDepositFixture,
   };
 
   if (!Object.prototype.hasOwnProperty.call(allowed, source)) {
@@ -1786,10 +2617,22 @@ export const CONTROL_PLANE_METHODS: Record<ControlPlaneMethod, MethodHandler> = 
   health,
   chain_status: chainStatus,
   devnet_state: devnetState,
+  node_status: nodeStatus,
+  peer_list: peerList,
+  mempool_list: mempoolList,
   block_get: blockGet,
   block_list: blockList,
+  account_get: accountGet,
+  account_list: accountList,
+  balance_get: balanceGet,
+  balance_list: balanceList,
+  faucet_event_get: faucetEventGet,
+  faucet_event_list: faucetEventList,
+  wallet_metadata_get: walletMetadataGet,
+  wallet_metadata_list: walletMetadataList,
   transaction_get: transactionGet,
   transaction_list: transactionList,
+  transaction_submit: transactionSubmit,
   rootfield_get: rootfieldGet,
   rootfield_list: rootfieldList,
   artifact_get: artifactGet,
@@ -1807,12 +2650,25 @@ export const CONTROL_PLANE_METHODS: Record<ControlPlaneMethod, MethodHandler> = 
   memory_cell_list: memoryCellList,
   agent_get: agentGet,
   agent_list: agentList,
+  agent_account_get: agentAccountGet,
+  agent_account_list: agentAccountList,
   model_get: modelGet,
   model_list: modelList,
+  model_passport_get: modelPassportGet,
+  model_passport_list: modelPassportList,
   challenge_get: challengeGet,
   challenge_list: challengeList,
   finality_get: finalityGet,
   finality_list: finalityList,
+  bridge_observation_submit: bridgeObservationSubmit,
+  bridge_observation_get: bridgeObservationGet,
+  bridge_observation_list: bridgeObservationList,
+  bridge_deposit_get: bridgeDepositGet,
+  bridge_deposit_list: bridgeDepositList,
+  bridge_credit_get: bridgeCreditGet,
+  bridge_credit_list: bridgeCreditList,
+  withdrawal_get: withdrawalGet,
+  withdrawal_list: withdrawalList,
   provenance_get: provenanceGet,
   raw_json_get: rawJsonGet,
 };

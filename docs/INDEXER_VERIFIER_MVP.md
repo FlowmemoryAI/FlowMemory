@@ -270,7 +270,7 @@ Those are future protocol decisions, not part of this local package.
 
 ## Local Control Plane
 
-`services/control-plane` exposes the fixture-backed FlowChain / FlowMemory JSON-RPC 2.0 read API documented in `docs/FLOWCHAIN_CONTROL_PLANE_API.md`.
+`services/control-plane` exposes the FlowChain / FlowMemory JSON-RPC 2.0 API documented in `docs/FLOWCHAIN_CONTROL_PLANE_API.md`. It now reads ignored `devnet/local/` runtime state and handoff files first, then falls back to committed deterministic fixtures.
 
 Run:
 
@@ -281,7 +281,7 @@ npm run control-plane:smoke
 npm run control-plane:serve
 ```
 
-The control-plane reads committed launch-core, indexer, verifier, artifact, transaction fixture, and local devnet handoff files first. If the generated launch-core fixture is missing, it rebuilds an in-memory view from deterministic indexer/verifier fixtures. It exposes read methods for health, chain status, blocks, transactions, rootfields, agents, models, work receipts, artifact availability, verifier modules, verifier reports, memory cells, challenges, finality, provenance, and raw JSON. It does not fetch production RPC data, store secrets, or make production API claims.
+The control-plane exposes methods for health, chain status, node status, peers, mempool, blocks, transactions, transaction submission, accounts, balances, faucet status, wallet public metadata, rootfields, agents, agent accounts, models, model passports, work receipts, artifact availability, verifier modules, verifier reports, memory cells, challenges, finality, bridge observations/deposits/credits/withdrawals, provenance, and raw JSON. `transaction_submit` forwards local test transactions to the existing Rust devnet `submit-fixture` intake path. `bridge_observation_submit` stores bridge-agent observations under `services/bridge-relayer/out/`. The smoke client queries every lifecycle object and runs no-secret response scanning. The package does not fetch production RPC data, store secrets, or make production API claims.
 
 ## Open Questions
 

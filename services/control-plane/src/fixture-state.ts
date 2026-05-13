@@ -31,11 +31,21 @@ export const DEFAULT_CONTROL_PLANE_PATHS: ControlPlanePaths = {
   indexerPath: "services/indexer/out/indexer-state.json",
   verifierPath: "services/verifier/out/reports.json",
   artifactsPath: "services/verifier/fixtures/artifacts.json",
+  devnetLocalStatePath: "devnet/local/state.json",
+  devnetLocalLaunchStatePath: "devnet/local/launch-v0-state.json",
+  devnetLocalIndexerHandoffPath: "devnet/local/handoff/generated/indexer-handoff.json",
+  devnetLocalVerifierHandoffPath: "devnet/local/handoff/generated/verifier-handoff.json",
+  devnetLocalControlPlaneHandoffPath: "devnet/local/handoff/generated/control-plane-handoff.json",
   devnetPath: "fixtures/launch-core/generated/devnet/state.json",
   devnetIndexerHandoffPath: "fixtures/launch-core/generated/devnet/indexer-handoff.json",
   devnetVerifierHandoffPath: "fixtures/launch-core/generated/devnet/verifier-handoff.json",
   devnetControlPlaneHandoffPath: "fixtures/launch-core/generated/devnet/control-plane-handoff.json",
   txFixturesPath: "fixtures/handoff/sample-txs.json",
+  runtimeStatePath: "devnet/local/state.json",
+  runtimeIntakeDir: "devnet/local/control-plane-intake",
+  bridgeObservationPath: "services/bridge-relayer/out/bridge-observation.json",
+  bridgeObservationIntakePath: "services/bridge-relayer/out/control-plane-observations.json",
+  bridgeDepositFixturePath: "fixtures/bridge/base-sepolia-mock-deposit.json",
 };
 
 function resolveRepoPath(path: string): string {
@@ -145,6 +155,23 @@ function loadOptionalSource(
   return value;
 }
 
+function loadFirstOptionalSource(
+  name: string,
+  paths: string[],
+  sources: Record<string, DataSourceRecord>,
+): JsonObject | null {
+  for (const path of paths) {
+    const value = maybeReadJson(path);
+    if (value !== null) {
+      sources[name] = sourceRecord(name, path, "loaded");
+      return value;
+    }
+  }
+
+  sources[name] = sourceRecord(name, paths[0] ?? "", "missing", paths.slice(1).join(", "));
+  return null;
+}
+
 export function controlPlanePaths(overrides: Partial<ControlPlanePaths> = {}): ControlPlanePaths {
   return {
     ...DEFAULT_CONTROL_PLANE_PATHS,
@@ -159,11 +186,27 @@ export function loadControlPlaneState(overrides: Partial<ControlPlanePaths> = {}
   const indexer = loadOrBuildIndexer(paths.indexerPath, sources);
   const verifier = loadOrBuildVerifier(paths.verifierPath, indexer, artifacts, sources);
   const launchCore = loadOrBuildLaunchCore(paths, indexer, verifier, sources);
-  const devnet = loadOptionalSource("devnet", paths.devnetPath, sources);
-  const devnetIndexerHandoff = loadOptionalSource("devnetIndexerHandoff", paths.devnetIndexerHandoffPath, sources);
-  const devnetVerifierHandoff = loadOptionalSource("devnetVerifierHandoff", paths.devnetVerifierHandoffPath, sources);
-  const devnetControlPlaneHandoff = loadOptionalSource("devnetControlPlaneHandoff", paths.devnetControlPlaneHandoffPath, sources);
+  const devnet = loadFirstOptionalSource("devnet", [
+    paths.devnetLocalStatePath,
+    paths.devnetLocalLaunchStatePath,
+    paths.devnetPath,
+  ], sources);
+  const devnetIndexerHandoff = loadFirstOptionalSource("devnetIndexerHandoff", [
+    paths.devnetLocalIndexerHandoffPath,
+    paths.devnetIndexerHandoffPath,
+  ], sources);
+  const devnetVerifierHandoff = loadFirstOptionalSource("devnetVerifierHandoff", [
+    paths.devnetLocalVerifierHandoffPath,
+    paths.devnetVerifierHandoffPath,
+  ], sources);
+  const devnetControlPlaneHandoff = loadFirstOptionalSource("devnetControlPlaneHandoff", [
+    paths.devnetLocalControlPlaneHandoffPath,
+    paths.devnetControlPlaneHandoffPath,
+  ], sources);
   const txFixtures = loadOptionalSource("txFixtures", paths.txFixturesPath, sources);
+  const bridgeObservation = loadOptionalSource("bridgeObservation", paths.bridgeObservationPath, sources);
+  const bridgeObservationIntake = loadOptionalSource("bridgeObservationIntake", paths.bridgeObservationIntakePath, sources);
+  const bridgeDepositFixture = loadOptionalSource("bridgeDepositFixture", paths.bridgeDepositFixturePath, sources);
 
   return {
     schema: "flowmemory.control_plane.state.v0",
@@ -176,6 +219,9 @@ export function loadControlPlaneState(overrides: Partial<ControlPlanePaths> = {}
     devnetVerifierHandoff,
     devnetControlPlaneHandoff,
     txFixtures,
+    bridgeObservation,
+    bridgeObservationIntake,
+    bridgeDepositFixture,
     sources,
   };
 }
