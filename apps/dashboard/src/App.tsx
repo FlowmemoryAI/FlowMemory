@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { AppShell } from "./components/AppShell";
-import { fetchDashboardData } from "./data/loadDashboardData";
+import { DEFAULT_CANARY_DASHBOARD_DATA_PATH, fetchDashboardData } from "./data/loadDashboardData";
 import type { DashboardData } from "./data/types";
 import { AlertsView } from "./views/AlertsView";
+import { CanaryDeploymentView } from "./views/CanaryDeploymentView";
 import { DevnetBlocksView } from "./views/DevnetBlocksView";
 import { FlowMemoryView } from "./views/FlowMemoryView";
 import { FlowPulseStreamView } from "./views/FlowPulseStreamView";
@@ -52,22 +53,27 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
 
 export default function App() {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [canaryData, setCanaryData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
 
-    fetchDashboardData()
-      .then((nextData) => {
+    Promise.all([
+      fetchDashboardData(),
+      fetchDashboardData(DEFAULT_CANARY_DASHBOARD_DATA_PATH),
+    ])
+      .then(([nextData, nextCanaryData]) => {
         if (!cancelled) {
           setData(nextData);
+          setCanaryData(nextCanaryData);
           setError(null);
         }
       })
       .catch((nextError: unknown) => {
         if (!cancelled) {
-          setError(nextError instanceof Error ? nextError.message : "Unknown fixture load error.");
+          setError(nextError instanceof Error ? nextError.message : "Unknown dashboard data load error.");
         }
       });
 
@@ -80,14 +86,15 @@ export default function App() {
     return <ErrorState message={error} onRetry={() => setVersion((current) => current + 1)} />;
   }
 
-  if (data === null) {
+  if (data === null || canaryData === null) {
     return <LoadingState />;
   }
 
   return (
-    <AppShell data={data}>
+    <AppShell data={data} canaryData={canaryData}>
       <Routes>
         <Route path="/" element={<OverviewView data={data} />} />
+        <Route path="/canary" element={<CanaryDeploymentView data={canaryData} />} />
         <Route path="/flowmemory" element={<FlowMemoryView data={data} />} />
         <Route path="/flowpulse" element={<FlowPulseStreamView data={data} />} />
         <Route path="/rootfields" element={<RootfieldsView data={data} />} />

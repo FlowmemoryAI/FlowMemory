@@ -105,10 +105,37 @@ export interface DashboardChainContext {
 export interface FixtureMetadata {
   schema: "flowmemory.dashboard.fixture.v0";
   generatedAt: string;
-  mode: "fixture";
+  mode: "fixture" | "canary";
   description: string;
   fixturePath: string;
   runtimeDataPath: string;
+  canary?: {
+    deploymentArtifactPath: string;
+    indexerStatePath: string;
+    checkpointPath: string;
+    docsPath: string;
+    productionReady: false;
+    readWindow: {
+      fromBlock: string;
+      toBlock: string;
+      finalizedBlock?: string;
+    };
+    counts: {
+      observations: number;
+      rejectedLogs: number;
+      duplicates: number;
+      contracts: number;
+    };
+    contracts: Array<{
+      name: string;
+      sourceName: string;
+      address: string;
+      deployTx: string;
+      block: string;
+      emitsFlowPulse: boolean;
+    }>;
+    boundaries: string[];
+  };
   futureGeneratedPaths: {
     indexer: string;
     verifier: string;
@@ -276,7 +303,7 @@ export interface AgentMemoryView extends ProvenancedRecord {
   receiptIds: string[];
   transitionIds: string[];
   warnings: string[];
-  localOnly: true;
+  localOnly: boolean;
 }
 
 export interface DevnetBlock extends ProvenancedRecord {

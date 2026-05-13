@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "generate": "node src/generate-launch-core.ts",
+    "generate:canary-dashboard": "node src/generate-canary-dashboard.ts",
     "launch:v0": "node src/launch-v0.ts",
     "validate": "node src/validate-launch-core.ts",
     "fixtures:check": "node src/check-fixture-drift.ts",

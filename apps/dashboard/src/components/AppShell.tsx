@@ -8,6 +8,7 @@ import {
   BrainCircuit,
   Boxes,
   ClipboardCheck,
+  RadioReceiver,
   LayoutDashboard,
   Network,
   RadioTower,
@@ -18,11 +19,13 @@ import { StatusBadge } from "./StatusBadge";
 
 interface AppShellProps {
   data: DashboardData;
+  canaryData?: DashboardData;
   children: ReactNode;
 }
 
 const NAV_ITEMS = [
   { to: "/", label: "Overview", icon: LayoutDashboard },
+  { to: "/canary", label: "Base canary", icon: RadioReceiver },
   { to: "/flowmemory", label: "Flow Memory", icon: BrainCircuit },
   { to: "/flowpulse", label: "FlowPulse", icon: Activity },
   { to: "/rootfields", label: "Rootfields", icon: Boxes },
@@ -34,7 +37,7 @@ const NAV_ITEMS = [
   { to: "/raw", label: "Raw JSON", icon: Braces },
 ];
 
-export function AppShell({ data, children }: AppShellProps) {
+export function AppShell({ data, canaryData, children }: AppShellProps) {
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -58,6 +61,7 @@ export function AppShell({ data, children }: AppShellProps) {
         <div className="sidebar-footer">
           <StatusBadge status="observed" compact />
           <span>{data.metadata.mode} data</span>
+          {canaryData ? <span>{canaryData.metadata.mode} data ready</span> : null}
           <small>{data.chain.name}</small>
         </div>
       </aside>

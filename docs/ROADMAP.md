@@ -95,6 +95,8 @@ Status: implemented as fixture-first services plus generated launch-core state; 
 - Deterministic persistence exists for fixture state, the constrained Base Sepolia reader checkpoint, and the guarded Base mainnet canary checkpoint.
 - A Base Sepolia reader path exists for explicit RPC URLs and explicit FlowPulse contract addresses; it rejects non-Base-Sepolia chain ids.
 - A guarded Base mainnet canary reader exists for explicit RPC URLs, explicit known canary addresses, and small explicit block ranges; it rejects non-Base-mainnet chain ids and marks output as canary-only.
+- A separate dashboard canary mode exists for committed Base canary reader output and deployment artifacts.
+- Source verification automation exists for the canary contract set, with real submission gated by `BASESCAN_API_KEY`.
 - Base Sepolia deploy/read commands exist for the current V0 testnet contract set.
 - A Base mainnet V0 canary deployment has been performed for testing only and is documented under `docs/DEPLOYMENTS/`.
 - Runtime schema validation and generated fixture drift checks exist for launch-core outputs.
@@ -194,3 +196,8 @@ Next merge preference:
 7. Contracts settlement-spine alignment without moving runtime into Solidity.
 8. Refresh packaging scripts and root command aliases whenever subsystem command semantics change.
 9. Canary ingestion and Base Sepolia follow-ups, still gated from production claims.
+10. Base Sepolia reader soak tests against explicit testnet deployments.
+11. Actual source verification submission for Base canary contracts when `BASESCAN_API_KEY` is available.
+12. Static analysis follow-up findings triaged for any public testnet deployment.
+13. Operator ownership separation and multisig/recovery decision before further live deployments.
+14. Production-gated research only after V0 local acceptance stays green.

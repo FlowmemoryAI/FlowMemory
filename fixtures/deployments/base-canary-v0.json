@@ -1,0 +1,124 @@
+{
+  "schema": "flowmemory.deployment_artifact.v0",
+  "name": "base-canary-v0",
+  "status": "canary-only",
+  "productionReady": false,
+  "network": {
+    "name": "Base mainnet",
+    "chainId": "8453",
+    "environment": "mainnet",
+    "rpcLabel": "public Base RPC"
+  },
+  "deployer": "0x3A6fBA5a78216ba3a8DA8d8F501dee2C8186aFf9",
+  "deployedAt": "2026-05-13T00:00:00.000Z",
+  "docsPath": "docs/DEPLOYMENTS/2026-05-13-base-canary-v0.md",
+  "readWindow": {
+    "fromBlock": "45955500",
+    "toBlock": "45955540",
+    "finalizedBlock": "45955540"
+  },
+  "rootfield": {
+    "rootfieldId": "0x19c830e926bfd3ce06d71ed0ef2e90ddc73accf4367b0defea835dc1cd3b3114",
+    "owner": "0x3A6fBA5a78216ba3a8DA8d8F501dee2C8186aFf9",
+    "schemaHash": "0x0b4537a7fa7cdd45fd6ff2052f1e4f9087a40b09fb6fe06a686ac67ac96fa5c3",
+    "metadataHash": "0x5f2a82ffa386793a2a67971ab801b2633b76954a95ee873e463730e6442ef90d",
+    "latestRoot": "0x4a7b8601c06c20bcc7b69c05c51980c12dbd50cbd95a59f460d40555bfc37ce3"
+  },
+  "contracts": [
+    {
+      "name": "RootfieldRegistry",
+      "sourceName": "contracts/RootfieldRegistry.sol:RootfieldRegistry",
+      "address": "0x2a7ADd68a1d45C3251E2F92fFe4926124654a97C",
+      "deployTx": "0x9ef9cb563646921e8f8dd71ad237054b8ee5b0c8e8ecc0c3b1577661844d6108",
+      "block": "45955460",
+      "emitsFlowPulse": true
+    },
+    {
+      "name": "FlowMemoryHookAdapter",
+      "sourceName": "contracts/FlowMemoryHookAdapter.sol:FlowMemoryHookAdapter",
+      "address": "0x179Df6d52e9DeF5D02704583a2E4E5a9FF427245",
+      "deployTx": "0xab22f1b9a19c090c63d4b3a4e100cf80571f5142ab91620fbc76d739d1f318b9",
+      "block": "45955461",
+      "emitsFlowPulse": true
+    },
+    {
+      "name": "ArtifactRegistry",
+      "sourceName": "contracts/ArtifactRegistry.sol:ArtifactRegistry",
+      "address": "0x8F074d0F4e66975b740A4b7a316330c9660a485E",
+      "deployTx": "0xbd07e7d0280a20344521628b13353152da859e62fdcdb4355bf04b50a4176b0b",
+      "block": "45955462",
+      "emitsFlowPulse": false
+    },
+    {
+      "name": "CursorRegistry",
+      "sourceName": "contracts/CursorRegistry.sol:CursorRegistry",
+      "address": "0x3360689009685eade15c876855D24161b05829C1",
+      "deployTx": "0x7eecbb949a617bff8fc8c0749a3332e1e2d2fe7b17f0cf3d7522155f5675cee9",
+      "block": "45955463",
+      "emitsFlowPulse": false
+    },
+    {
+      "name": "ReceiptVerifier",
+      "sourceName": "contracts/ReceiptVerifier.sol:ReceiptVerifier",
+      "address": "0x94ba7aA4562f8F8528C327378F6352350f6ddB5B",
+      "deployTx": "0x3b29454ebb4104e38a0f886a4a370f26d3e3bc5ab22bbfb921374fa904e38e95",
+      "block": "45955464",
+      "emitsFlowPulse": false
+    },
+    {
+      "name": "WorkerRegistry",
+      "sourceName": "contracts/WorkerRegistry.sol:WorkerRegistry",
+      "address": "0xa8c07eF53Eeb4e57297ee35025a9cD5303fCCD29",
+      "deployTx": "0x213a1ba85d6e998937c907699be83b7cd7db9eba4e43f937f94ad7b62bf3cfde",
+      "block": "45955465",
+      "emitsFlowPulse": false
+    },
+    {
+      "name": "VerifierRegistry",
+      "sourceName": "contracts/VerifierRegistry.sol:VerifierRegistry",
+      "address": "0xAf920ca7436Bb72172E27C96E0B716f01dcC5DBd",
+      "deployTx": "0x87696577de6522f885a67c9df98fd8942387e7e7c735f3215f067b2cbc913d2f",
+      "block": "45955466",
+      "emitsFlowPulse": false
+    },
+    {
+      "name": "WorkReceiptRegistry",
+      "sourceName": "contracts/WorkReceiptRegistry.sol:WorkReceiptRegistry",
+      "address": "0x2874cee0D581E4562ac9015BfCf330f1ea58a1F3",
+      "deployTx": "0xa278992a28c2a1ad9e4c78998dbbfb43399e55182ca93f8aac40e9447b2f854f",
+      "block": "45955467",
+      "emitsFlowPulse": false
+    },
+    {
+      "name": "VerifierReportRegistry",
+      "sourceName": "contracts/VerifierReportRegistry.sol:VerifierReportRegistry",
+      "address": "0x95bC7455AdFD60e1B908ba455c25Ae732C1Ef996",
+      "deployTx": "0x9def1a9338bf65e04bc43fd3f4ef1bb973ebdf1ee4b351a77157c396da6af074",
+      "block": "45955468",
+      "emitsFlowPulse": false
+    },
+    {
+      "name": "WorkDebtScheduler",
+      "sourceName": "contracts/WorkDebtScheduler.sol:WorkDebtScheduler",
+      "address": "0xa752e9bC7fAf39f659110D8Cf408E7707db94E34",
+      "deployTx": "0x139e3b89b0c674c6031d34fbfafb2649e114443ed7b98b9722d59bc19ffb6bdc",
+      "block": "45955469",
+      "emitsFlowPulse": false
+    }
+  ],
+  "sourceVerification": {
+    "compilerVersion": "v0.8.24+commit.e11b9ed9",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "chainId": "8453",
+    "verifier": "etherscan",
+    "apiKeyEnv": "BASESCAN_API_KEY"
+  },
+  "boundaries": [
+    "Canary deployment for V0 testing only.",
+    "Not a production protocol launch.",
+    "Not a production Uniswap v4 hook deployment.",
+    "Not a production verifier network.",
+    "No token, fee, custody, governance, multisig, or upgrade policy is implied."
+  ]
+}
