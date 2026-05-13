@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import test from "node:test";
 
 import {
@@ -8,10 +9,14 @@ import {
   agentAccountId,
   artifactAvailabilityProofId,
   attestationEnvelopeHash,
+  bridgeCreditId,
+  bridgeDepositId,
+  bridgeWithdrawalId,
   challengeId,
   canonicalJsonHash,
   canonicalJson,
   controlPlaneProvenanceResponseId,
+  createWalletVault,
   contractPulseId,
   cursorId,
   devnetBlockHash,
@@ -19,18 +24,29 @@ import {
   domainSeparator,
   eip712DomainSeparator,
   emptyMerkleRoot,
+  exportWalletPublicMetadata,
   finalityReceiptId,
   flowPulseEventArgsHash,
   flowPulseEventSignature,
   flowPulseObservationId,
   flowPulseSchemaId,
   hardwareSignalEnvelopeId,
+  importWalletPublicMetadata,
   indexerCursorId,
+  listWalletPublicAccounts,
   localAlphaEnvelopeReplayKey,
   localAlphaObjectId,
+  localAccountBalanceId,
+  localSignerId,
+  localSignerKeyId,
   localSignatureEnvelopeHash,
   localSignatureEnvelopeInput,
   localSignatureEnvelopePayload,
+  localTransactionEnvelopeHash,
+  localTransactionEnvelopeInput,
+  localTransactionEnvelopePayload,
+  localTransactionPayloadHash,
+  localTransactionReplayKey,
   keccakUtf8,
   memoryCellId,
   merkleLeafHash,
@@ -41,21 +57,27 @@ import {
   receiptHash,
   rootCommitment,
   rootfieldNamespaceId,
+  rotateWalletAccount,
+  signWalletTransaction,
   signDigest,
   storageReceiptCommitmentHash,
   TYPE_STRINGS,
   typedHash,
+  unlockWalletVault,
   validateLocalAlphaEnvelope,
+  validateLocalTransactionEnvelope,
   verifierModuleId,
   verifierIdentity,
   verifierReportHash,
   verifierSignaturePayload,
+  verifyWalletTransaction,
   verifyDigest,
   workReceiptId,
   workerIdentity,
   workerSignaturePayload
 } from "../src/index.js";
 import { validateLocalAlphaFixtures } from "../src/validate-local-alpha-fixtures.js";
+import { validateLocalTransactionFixtures } from "../src/validate-local-transaction-fixtures.js";
 import { validateVectors } from "../src/validate-vectors.js";
 
 const root = resolve(import.meta.dirname, "..");
@@ -68,14 +90,19 @@ const flowPulse = fixture("sample-flowpulse.json");
 const observation = fixture("sample-observation.json");
 const report = fixture("sample-report.json");
 const localAlphaObjects = fixture("local-alpha-objects.json");
+const localTransactionVectors = fixture("local-transaction-vectors.json");
 
 const localAlphaValidators = Object.freeze({
   agentAccountId,
   artifactAvailabilityProofId,
+  bridgeCreditId,
+  bridgeDepositId,
+  bridgeWithdrawalId,
   challengeId,
   controlPlaneProvenanceResponseId,
   finalityReceiptId,
   hardwareSignalEnvelopeId,
+  localAccountBalanceId,
   localSignatureEnvelopeHash,
   memoryCellId,
   modelPassportId,
@@ -374,9 +401,9 @@ test("validates FlowChain Local Alpha signed object envelopes", () => {
 
 test("AJV validates all Local Alpha object and envelope fixtures against canonical schemas", () => {
   assert.deepEqual(validateLocalAlphaFixtures(), {
-    documents: 11,
+    documents: 15,
     envelopes: 11,
-    schemas: 12
+    schemas: 16
   });
 });
 
@@ -453,8 +480,55 @@ test("control-plane provenance response uses stable canonical JSON body hashing"
   assert.equal(controlPlaneProvenanceResponseId(provenance.input), provenance.expected);
 });
 
+test("validates canonical local transaction envelope vectors and negative cases", () => {
+  assert.deepEqual(validateLocalTransactionFixtures(), {
+    positive: 2,
+    negative: 7
+  });
+
+  const vector = localTransactionVectors.positive.find(
+    (entry) => entry.name === "transaction.register-agent.operator-signature"
+  );
+  assert.ok(vector);
+  assert.equal(localTransactionPayloadHash(vector.payload), vector.expected.payloadHash);
+  assert.equal(localTransactionEnvelopeHash(vector.input), vector.expected.envelopeId);
+  assert.deepEqual(localTransactionEnvelopePayload(vector.input), {
+    structHash: vector.expected.envelopeId,
+    signingDigest: vector.expected.signingDigest
+  });
+  assert.deepEqual(localTransactionEnvelopeInput(vector.envelope), vector.input);
+  assert.equal(
+    localSignerId({ publicKey: vector.envelope.signer.publicKey }),
+    vector.envelope.signer.signerId
+  );
+  assert.equal(
+    localSignerKeyId({
+      publicKey: vector.envelope.signer.publicKey,
+      signerRole: vector.envelope.signer.signerRoleCode,
+      keyScopeHash: vector.input.domainSeparator
+    }),
+    vector.envelope.signer.signerKeyId
+  );
+
+  const result = validateLocalTransactionEnvelope({
+    envelope: vector.envelope,
+    context: { expectedChainId: localTransactionVectors.chainId }
+  });
+  assert.deepEqual(result, { valid: true, errors: [] });
+
+  const replay = validateLocalTransactionEnvelope({
+    envelope: vector.envelope,
+    context: {
+      expectedChainId: localTransactionVectors.chainId,
+      seenNonces: new Set([localTransactionReplayKey(vector.envelope)])
+    }
+  });
+  assert.equal(replay.valid, false);
+  assert.ok(replay.errors.includes("replay"));
+});
+
 test("validates all published crypto test vectors", () => {
-  assert.equal(validateVectors(), 33);
+  assert.equal(validateVectors(), 41);
 });
 
 test("signs and verifies verifier digests with local test keys only", async () => {
@@ -469,6 +543,62 @@ test("signs and verifies verifier digests with local test keys only", async () =
   assert.equal(verifyDigest({ digest, signature, publicKey }), true);
   assert.equal(verifyDigest({ digest, signature, publicKey: wrongPublicKey }), false);
   assert.equal(verifyDigest({ digest: wrongDigest, signature, publicKey }), false);
+});
+
+test("creates an encrypted local wallet and signs a transaction without public secret leakage", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowchain-wallet-"));
+  const vaultPath = join(dir, "wallet.local.json");
+  const publicPath = join(dir, "wallet-public.json");
+  const password = "local test password";
+
+  try {
+    const created = createWalletVault({
+      password,
+      vaultPath,
+      label: "test-operator",
+      signerRole: "operator",
+      now: 1778702400000
+    });
+    assert.equal(created.accounts.length, 1);
+    assert.equal(existsSync(vaultPath), true);
+    assert.doesNotMatch(JSON.stringify(created), /privateKey|encrypted|cipher|authTag/i);
+    assert.doesNotMatch(readFileSync(vaultPath, "utf8"), /privateKey/);
+
+    const unlocked = unlockWalletVault({ password, vaultPath });
+    assert.equal(unlocked.secret.accounts.length, 1);
+    assert.match(unlocked.secret.accounts[0].privateKey, /^0x[0-9a-f]{64}$/i);
+
+    const rotated = rotateWalletAccount({
+      password,
+      vaultPath,
+      label: "test-agent",
+      signerRole: "agent",
+      now: 1778702401000
+    });
+    assert.equal(rotated.accounts.length, 2);
+    assert.equal(listWalletPublicAccounts({ vaultPath }).accounts.length, 2);
+
+    const envelope = await signWalletTransaction({
+      password,
+      vaultPath,
+      payload: localTransactionVectors.positive[0].payload,
+      chainId: localTransactionVectors.chainId,
+      issuedAtUnixMs: "1778702402000",
+      expiresAtUnixMs: "1810238400000"
+    });
+    assert.equal(verifyWalletTransaction({ envelope, expectedChainId: localTransactionVectors.chainId }).valid, true);
+    assert.equal(envelope.payload.tx.type, "RegisterAgent");
+    assert.doesNotMatch(JSON.stringify(envelope), /privateKey/);
+
+    const exported = exportWalletPublicMetadata({ vaultPath, outPath: publicPath });
+    assert.doesNotMatch(JSON.stringify(exported), /privateKey|encrypted|cipher|authTag/i);
+    const imported = importWalletPublicMetadata({ vaultPath, inPath: publicPath, now: 1778702403000 });
+    assert.equal(imported.importedAccounts.length, 2);
+
+    assert.throws(() => unlockWalletVault({ password: "wrong password", vaultPath }));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 function mutatedEnvelopeVector(vector, documentsByName, envelopesByName) {

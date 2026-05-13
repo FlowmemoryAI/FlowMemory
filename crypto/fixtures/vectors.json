@@ -1,6 +1,6 @@
 {
   "schema": "flowmemory.crypto.test-vectors.v0",
-  "vectorCount": 33,
+  "vectorCount": 41,
   "vectors": [
     {
       "name": "domain.flowPulseObservationId",
@@ -455,6 +455,129 @@
         "nonce": "0xe9b99686c583dbed5b3bf743c2a3db8a5da8c8ceea4398eb45d57c518c555034"
       },
       "expected": "0x55656083efaf8a511fbae76b2a1bb740b08c92959e506a14f489f0fedcef3279"
+    },
+    {
+      "name": "local-alpha.bridgeDepositId",
+      "function": "bridgeDepositId",
+      "input": {
+        "sourceChainId": 84532,
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+        "logIndex": 0,
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "20000000",
+        "sender": "0x4444444444444444444444444444444444444444",
+        "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "nonce": "1",
+        "metadataHash": "0x6666666666666666666666666666666666666666666666666666666666666666"
+      },
+      "expected": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe"
+    },
+    {
+      "name": "local-alpha.bridgeCreditId",
+      "function": "bridgeCreditId",
+      "input": {
+        "depositId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+        "accountId": "0x3a0c10e2146f38d2aaa70d6f82dda6c0113a511bd1c59041ff37db9a6b974e26",
+        "assetId": "0x9944b8d9cc8dbe786e454a56b94942547de59922ed90e4215bcd9bd28f4fb380",
+        "amount": "20000000",
+        "creditedAtBlock": "12",
+        "creditNonce": "0x7174065548573c03817f74d76ba74d9d941e7443ee0181d91c07eb1918b0ae2a",
+        "status": 2
+      },
+      "expected": "0x1a53633e8374a6ffff7345d6bccd6f2d0a4a88fb934c314fe5e52658f14ff44b"
+    },
+    {
+      "name": "local-alpha.bridgeWithdrawalId",
+      "function": "bridgeWithdrawalId",
+      "input": {
+        "accountId": "0x3a0c10e2146f38d2aaa70d6f82dda6c0113a511bd1c59041ff37db9a6b974e26",
+        "destinationChainId": 84532,
+        "destinationAddress": "0x7777777777777777777777777777777777777777",
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "5000000",
+        "requestedNonce": "0x984406f4b1efbab3c153b2bef95ef4802cf21b5241ca6749bc1e8b1e6f514995",
+        "feeCommitment": "0xcea2019a6c82969409853d0833763a9f8bb1a511b9aeffb921de63b3fde00fbd",
+        "status": 1
+      },
+      "expected": "0xcf85bb6ebdfd6a1d4bfa473756c31517337c6d0192422b5c19d3c6dc6d6b71f8"
+    },
+    {
+      "name": "local-alpha.localAccountBalanceId",
+      "function": "localAccountBalanceId",
+      "input": {
+        "chainId": "31337",
+        "accountId": "0x3a0c10e2146f38d2aaa70d6f82dda6c0113a511bd1c59041ff37db9a6b974e26",
+        "assetId": "0x9944b8d9cc8dbe786e454a56b94942547de59922ed90e4215bcd9bd28f4fb380",
+        "available": "15000000",
+        "locked": "5000000",
+        "stateNonce": "3",
+        "balanceRoot": "0xa37f075197cb91b751eb04a107a5d0648019384c5be4d00d1a2f1adefb6e060e"
+      },
+      "expected": "0xbd81721c37e43aababd0c181897a6d036ab435d3f0f5dafcd9d68be494fe81f5"
+    },
+    {
+      "name": "local.signerId",
+      "function": "localSignerId",
+      "input": {
+        "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+      },
+      "expected": "0xcefa89096f0b2208885ab27cc7479d0615e344356c8c78b56e793b9041bbfeb1"
+    },
+    {
+      "name": "local.signerKeyId",
+      "function": "localSignerKeyId",
+      "input": {
+        "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "signerRole": 1,
+        "keyScopeHash": "0x12aff8820bbfec739f09eeac1e8a497ef87a9930ef07b5a09ff8e3a67a2b5677"
+      },
+      "expected": "0x011c875680a5f90e1513ec2c05e22c9dab1d83e22d554cb2c61e14199da746a1"
+    },
+    {
+      "name": "local.transactionPayloadHash.register-agent",
+      "function": "localTransactionPayloadHash",
+      "input": {
+        "schema": "flowmemory.local_devnet.tx_payload.v0",
+        "objectType": "agent_account",
+        "object": {
+          "schema": "flowchain.agent_account.v0",
+          "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+          "namespaceId": "0x4c2eae268c3f97a510b66597873c6c08ae9e427a7c03cd383df6acfeda9bbf37",
+          "owner": "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1",
+          "policyRoot": "0x20121b5daa2be4de0d9dbcae292d1d3466a4e0a8b6cc3149ce46c30c352a1f0e",
+          "toolPermissionsRoot": "0x39079bde86c6743c81fd927a14012331688374b55118484529ce257317327120",
+          "modelAllowlistRoot": "0x00a463537f12e3419d4bf3655d28d93f3e189b9a89a3ad40c4819bbc4eb2acc9",
+          "memoryNamespaceRoot": "0x574eee506454973fb82863a3225ea78696b96907a17c360ad2c2b5234dfa2d83",
+          "spendingLimitPerEpoch": "0",
+          "status": "active",
+          "nonce": "0x37e916697be966b19c0cd7aa6073e78ffb7ee5cf27a4392383f9cfe5fa5025bb"
+        },
+        "tx": {
+          "type": "RegisterAgent",
+          "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+          "controller": "operator:local-wallet-vector",
+          "modelPassportId": null,
+          "metadataHash": "0x0dee06bd221366280f62239c3df48eea9414e3bc1c9fc86796d5a546ba26fc7a"
+        }
+      },
+      "expected": "0x3659032f06fcb8573d47c109237dbba39fce5809c041123327767d3af17bb2b2"
+    },
+    {
+      "name": "local.transactionEnvelopeHash.register-agent",
+      "function": "localTransactionEnvelopeHash",
+      "input": {
+        "chainId": "31337",
+        "nonce": "1",
+        "signerId": "0xcefa89096f0b2208885ab27cc7479d0615e344356c8c78b56e793b9041bbfeb1",
+        "signerKeyId": "0x011c875680a5f90e1513ec2c05e22c9dab1d83e22d554cb2c61e14199da746a1",
+        "signerRole": 1,
+        "payloadHash": "0x3659032f06fcb8573d47c109237dbba39fce5809c041123327767d3af17bb2b2",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1810238400000",
+        "domainSeparator": "0x12aff8820bbfec739f09eeac1e8a497ef87a9930ef07b5a09ff8e3a67a2b5677"
+      },
+      "expected": "0xfba94617ac6fbae608393c67570280d7123b27dabb0c1f31427808ad955a7c46"
     }
   ]
 }

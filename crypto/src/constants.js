@@ -59,8 +59,22 @@ export const TYPE_STRINGS = Object.freeze({
     "FlowChainHardwareSignalEnvelopeV0(bytes32 deviceId,bytes32 signalRoot,bytes32 previousSignalEnvelopeId,bytes32 channelRoot,uint64 sequence,uint64 observedAtUnixMs,uint8 transport,bytes32 nonce)",
   controlPlaneProvenanceResponseV0:
     "FlowChainControlPlaneProvenanceResponseV0(bytes32 requestId,bytes32 subjectId,bytes32 agentId,bytes32 receiptId,bytes32 reportId,bytes32 memoryCellId,bytes32 dependencyRoot,bytes32 responseBodyHash,uint64 issuedAtUnixMs,uint16 responseVersion)",
+  bridgeDepositV0:
+    "FlowChainBridgeDepositV0(uint256 sourceChainId,address sourceContract,bytes32 txHash,uint32 logIndex,address token,uint256 amount,address sender,bytes32 flowchainRecipient,uint256 nonce,bytes32 metadataHash)",
+  bridgeCreditV0:
+    "FlowChainBridgeCreditV0(bytes32 depositId,bytes32 accountId,bytes32 assetId,uint256 amount,uint64 creditedAtBlock,bytes32 creditNonce,uint8 status)",
+  bridgeWithdrawalV0:
+    "FlowChainBridgeWithdrawalV0(bytes32 accountId,uint256 destinationChainId,address destinationAddress,address token,uint256 amount,bytes32 requestedNonce,bytes32 feeCommitment,uint8 status)",
+  localAccountBalanceV0:
+    "FlowChainLocalAccountBalanceV0(uint256 chainId,bytes32 accountId,bytes32 assetId,uint256 available,uint256 locked,uint64 stateNonce,bytes32 balanceRoot)",
+  localSignerV0:
+    "FlowChainLocalSignerV0(bytes32 publicKeyHash)",
+  localSignerKeyV0:
+    "FlowChainLocalSignerKeyV0(bytes32 publicKeyHash,uint8 signerRole,bytes32 keyScopeHash)",
   localSignatureEnvelopeV0:
     "FlowChainLocalSignatureEnvelopeV0(bytes32 objectId,bytes32 objectTypeHash,bytes32 domainSeparator,bytes32 signerId,bytes32 signerKeyId,uint8 signerRole,uint64 sequence,uint64 issuedAtUnixMs,uint64 expiresAtUnixMs,bytes32 nonce)",
+  localTransactionEnvelopeV0:
+    "FlowChainLocalTransactionEnvelopeV0(uint256 chainId,uint64 nonce,bytes32 signerId,bytes32 signerKeyId,uint8 signerRole,bytes32 payloadHash,uint64 issuedAtUnixMs,uint64 expiresAtUnixMs,bytes32 domainSeparator)",
   eip712Domain:
     "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)"
 });
@@ -86,9 +100,16 @@ export const DOMAIN_STRINGS = Object.freeze({
   verifierModuleId: "flowchain.local-alpha.v0.verifier-module.id",
   challengeId: "flowchain.local-alpha.v0.challenge.id",
   finalityReceiptId: "flowchain.local-alpha.v0.finality-receipt.id",
+  bridgeDepositId: "flowchain.local-alpha.v0.bridge-deposit.id",
+  bridgeCreditId: "flowchain.local-alpha.v0.bridge-credit.id",
+  bridgeWithdrawalId: "flowchain.local-alpha.v0.bridge-withdrawal.id",
+  localAccountBalanceId: "flowchain.local-alpha.v0.local-account-balance.id",
+  localSignerId: "flowchain.local.v0.signer.id",
+  localSignerKeyId: "flowchain.local.v0.signer-key.id",
   hardwareSignalEnvelopeId: "flowchain.local-alpha.v0.hardware-signal-envelope.id",
   controlPlaneProvenanceResponseId: "flowchain.local-alpha.v0.control-plane-provenance-response.id",
-  localSignatureEnvelope: "flowchain.local-alpha.v0.local-signature-envelope"
+  localSignatureEnvelope: "flowchain.local-alpha.v0.local-signature-envelope",
+  localTransactionEnvelope: "flowchain.local.v0.transaction-envelope"
 });
 
 export const MERKLE_SCHEME_V0 = "FM-MERKLE-KECCAK256-BINARY-V0";

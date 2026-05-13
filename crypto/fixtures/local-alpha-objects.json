@@ -376,6 +376,126 @@
         "issuedAtUnixMs": "1778702400000",
         "responseVersion": 0
       }
+    },
+    {
+      "name": "bridge-deposit.demo",
+      "schemaPath": "../../schemas/flowmemory/bridge-deposit.schema.json",
+      "function": "bridgeDepositId",
+      "idField": "depositId",
+      "input": {
+        "sourceChainId": 84532,
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+        "logIndex": 0,
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "20000000",
+        "sender": "0x4444444444444444444444444444444444444444",
+        "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "nonce": "1",
+        "metadataHash": "0x6666666666666666666666666666666666666666666666666666666666666666"
+      },
+      "expected": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+      "document": {
+        "schema": "flowmemory.bridge_deposit.v0",
+        "depositId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+        "sourceChainId": 84532,
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+        "logIndex": 0,
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "20000000",
+        "sender": "0x4444444444444444444444444444444444444444",
+        "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "nonce": "1",
+        "metadataHash": "0x6666666666666666666666666666666666666666666666666666666666666666",
+        "status": "observed"
+      }
+    },
+    {
+      "name": "bridge-credit.demo",
+      "schemaPath": "../../schemas/flowmemory/bridge-credit.schema.json",
+      "function": "bridgeCreditId",
+      "idField": "creditId",
+      "input": {
+        "depositId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+        "accountId": "0x3a0c10e2146f38d2aaa70d6f82dda6c0113a511bd1c59041ff37db9a6b974e26",
+        "assetId": "0x9944b8d9cc8dbe786e454a56b94942547de59922ed90e4215bcd9bd28f4fb380",
+        "amount": "20000000",
+        "creditedAtBlock": "12",
+        "creditNonce": "0x7174065548573c03817f74d76ba74d9d941e7443ee0181d91c07eb1918b0ae2a",
+        "status": 2
+      },
+      "expected": "0x1a53633e8374a6ffff7345d6bccd6f2d0a4a88fb934c314fe5e52658f14ff44b",
+      "document": {
+        "schema": "flowchain.bridge_credit.v0",
+        "creditId": "0x1a53633e8374a6ffff7345d6bccd6f2d0a4a88fb934c314fe5e52658f14ff44b",
+        "depositId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+        "accountId": "0x3a0c10e2146f38d2aaa70d6f82dda6c0113a511bd1c59041ff37db9a6b974e26",
+        "assetId": "0x9944b8d9cc8dbe786e454a56b94942547de59922ed90e4215bcd9bd28f4fb380",
+        "amount": "20000000",
+        "creditedAtBlock": "12",
+        "creditNonce": "0x7174065548573c03817f74d76ba74d9d941e7443ee0181d91c07eb1918b0ae2a",
+        "status": "credited",
+        "statusCode": 2
+      }
+    },
+    {
+      "name": "bridge-withdrawal.demo",
+      "schemaPath": "../../schemas/flowmemory/bridge-withdrawal.schema.json",
+      "function": "bridgeWithdrawalId",
+      "idField": "withdrawalId",
+      "input": {
+        "accountId": "0x3a0c10e2146f38d2aaa70d6f82dda6c0113a511bd1c59041ff37db9a6b974e26",
+        "destinationChainId": 84532,
+        "destinationAddress": "0x7777777777777777777777777777777777777777",
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "5000000",
+        "requestedNonce": "0x984406f4b1efbab3c153b2bef95ef4802cf21b5241ca6749bc1e8b1e6f514995",
+        "feeCommitment": "0xcea2019a6c82969409853d0833763a9f8bb1a511b9aeffb921de63b3fde00fbd",
+        "status": 1
+      },
+      "expected": "0xcf85bb6ebdfd6a1d4bfa473756c31517337c6d0192422b5c19d3c6dc6d6b71f8",
+      "document": {
+        "schema": "flowchain.bridge_withdrawal.v0",
+        "withdrawalId": "0xcf85bb6ebdfd6a1d4bfa473756c31517337c6d0192422b5c19d3c6dc6d6b71f8",
+        "accountId": "0x3a0c10e2146f38d2aaa70d6f82dda6c0113a511bd1c59041ff37db9a6b974e26",
+        "destinationChainId": 84532,
+        "destinationAddress": "0x7777777777777777777777777777777777777777",
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "5000000",
+        "requestedNonce": "0x984406f4b1efbab3c153b2bef95ef4802cf21b5241ca6749bc1e8b1e6f514995",
+        "feeCommitment": "0xcea2019a6c82969409853d0833763a9f8bb1a511b9aeffb921de63b3fde00fbd",
+        "status": "requested",
+        "statusCode": 1
+      }
+    },
+    {
+      "name": "local-account-balance.demo",
+      "schemaPath": "../../schemas/flowmemory/local-account-balance.schema.json",
+      "function": "localAccountBalanceId",
+      "idField": "balanceId",
+      "input": {
+        "chainId": "31337",
+        "accountId": "0x3a0c10e2146f38d2aaa70d6f82dda6c0113a511bd1c59041ff37db9a6b974e26",
+        "assetId": "0x9944b8d9cc8dbe786e454a56b94942547de59922ed90e4215bcd9bd28f4fb380",
+        "available": "15000000",
+        "locked": "5000000",
+        "stateNonce": "3",
+        "balanceRoot": "0xa37f075197cb91b751eb04a107a5d0648019384c5be4d00d1a2f1adefb6e060e"
+      },
+      "expected": "0xbd81721c37e43aababd0c181897a6d036ab435d3f0f5dafcd9d68be494fe81f5",
+      "document": {
+        "schema": "flowchain.local_account_balance.v0",
+        "balanceId": "0xbd81721c37e43aababd0c181897a6d036ab435d3f0f5dafcd9d68be494fe81f5",
+        "chainId": "31337",
+        "accountId": "0x3a0c10e2146f38d2aaa70d6f82dda6c0113a511bd1c59041ff37db9a6b974e26",
+        "assetId": "0x9944b8d9cc8dbe786e454a56b94942547de59922ed90e4215bcd9bd28f4fb380",
+        "available": "15000000",
+        "locked": "5000000",
+        "stateNonce": "3",
+        "balanceRoot": "0xa37f075197cb91b751eb04a107a5d0648019384c5be4d00d1a2f1adefb6e060e",
+        "status": "active"
+      }
     }
   ],
   "negative": [

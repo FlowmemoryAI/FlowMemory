@@ -16,8 +16,14 @@ These schemas are the canonical local/test V0 shapes for generated Flow Memory a
 - `verifier-report.schema.json`
 - `challenge.schema.json`
 - `finality-receipt.schema.json`
+- `bridge-deposit.schema.json`
+- `bridge-credit.schema.json`
+- `bridge-withdrawal.schema.json`
+- `local-account-balance.schema.json`
 - `hardware-signal-envelope.schema.json`
 - `local-signature-envelope.schema.json`
+- `local-transaction-envelope.schema.json`
+- `local-wallet-public-metadata.schema.json`
 - `control-plane-provenance-response.schema.json`
 
 `memory-signal.schema.json` also embeds the `flowmemory.flowpulse_contract_event.v0`
@@ -38,9 +44,20 @@ agent, verifier, and hardware signature envelope that wraps these object IDs.
 The schema is paired with the validator in `crypto/src/objects.js`; consumers
 should validate both JSON shape and recomputed cryptographic fields.
 
+`local-transaction-envelope.schema.json` describes the wallet-signed local
+transaction wrapper. It binds the transaction payload hash to a domain,
+chain-id, signer metadata, nonce, validity window, and secp256k1 signature
+while preserving `payload.tx` as the devnet-consumable transaction object.
+
+`local-wallet-public-metadata.schema.json` is the only wallet metadata shape
+that should be exported to control-plane or workbench agents. It contains
+public account IDs, signer key IDs, roles, public keys, labels, and next nonce
+only; encrypted vault ciphertext and private keys stay local.
+
 Run the canonical Local Alpha schema/fixture check from the crypto package:
 
 ```powershell
 cd E:\FlowMemory\flowmemory-crypto\crypto
 npm run validate:local-alpha
+npm run validate:vectors
 ```
