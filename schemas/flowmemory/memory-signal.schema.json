@@ -26,7 +26,8 @@
     "sequence",
     "occurredAt",
     "uri",
-    "summary"
+    "summary",
+    "contractEvent"
   ],
   "properties": {
     "schema": { "const": "flowmemory.memory_signal.v0" },
@@ -50,11 +51,89 @@
     "sequence": { "type": "string", "pattern": "^[0-9]+$" },
     "occurredAt": { "type": "string", "format": "date-time" },
     "uri": { "type": "string" },
-    "summary": { "type": "string" }
+    "summary": { "type": "string" },
+    "contractEvent": { "$ref": "#/$defs/flowPulseContractEvent" }
   },
   "$defs": {
     "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
     "address": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+    "flowPulseContractTypeName": {
+      "enum": ["ROOTFIELD_REGISTERED", "ROOT_COMMITTED", "ROOTFIELD_STATUS_CHANGED", "UNKNOWN_FLOWPULSE_TYPE"]
+    },
+    "flowPulseContractEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "interfaceName",
+        "eventName",
+        "eventSignatureText",
+        "eventTopic0",
+        "expectedTopic0",
+        "topicMatchesContract",
+        "sourceContract",
+        "pulseTypeId",
+        "pulseTypeName",
+        "indexed",
+        "payload",
+        "receiptLocator",
+        "receiptDerivedFields"
+      ],
+      "properties": {
+        "schema": { "const": "flowmemory.flowpulse_contract_event.v0" },
+        "interfaceName": { "const": "IFlowPulse" },
+        "eventName": { "const": "FlowPulse" },
+        "eventSignatureText": { "const": "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)" },
+        "eventTopic0": { "$ref": "#/$defs/hex32" },
+        "expectedTopic0": { "$ref": "#/$defs/hex32" },
+        "topicMatchesContract": { "type": "boolean" },
+        "sourceContract": { "$ref": "#/$defs/address" },
+        "pulseTypeId": { "type": "string", "pattern": "^[0-9]+$" },
+        "pulseTypeName": { "$ref": "#/$defs/flowPulseContractTypeName" },
+        "indexed": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["pulseId", "rootfieldId", "actor"],
+          "properties": {
+            "pulseId": { "$ref": "#/$defs/hex32" },
+            "rootfieldId": { "$ref": "#/$defs/hex32" },
+            "actor": { "$ref": "#/$defs/address" }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["subject", "commitment", "parentPulseId", "sequence", "occurredAt", "uri"],
+          "properties": {
+            "subject": { "$ref": "#/$defs/hex32" },
+            "commitment": { "$ref": "#/$defs/hex32" },
+            "parentPulseId": { "$ref": "#/$defs/hex32" },
+            "sequence": { "type": "string", "pattern": "^[0-9]+$" },
+            "occurredAt": { "type": "string", "format": "date-time" },
+            "uri": { "type": "string" }
+          }
+        },
+        "receiptLocator": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["chainId", "blockNumber", "blockHash", "txHash", "transactionIndex", "logIndex", "receiptStatus"],
+          "properties": {
+            "chainId": { "type": "string", "minLength": 1 },
+            "blockNumber": { "type": "string", "pattern": "^[0-9]+$" },
+            "blockHash": { "$ref": "#/$defs/hex32" },
+            "txHash": { "$ref": "#/$defs/hex32" },
+            "transactionIndex": { "type": "string", "pattern": "^[0-9]+$" },
+            "logIndex": { "type": "string", "pattern": "^[0-9]+$" },
+            "receiptStatus": { "enum": ["success", "reverted", "unknown"] }
+          }
+        },
+        "receiptDerivedFields": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    },
     "flowMemoryStatus": {
       "enum": ["observed", "pending", "finalized", "verified", "unresolved", "failed", "unsupported", "reorged", "offline", "stale"]
     }

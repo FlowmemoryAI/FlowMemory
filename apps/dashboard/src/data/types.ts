@@ -30,6 +30,59 @@ export interface Provenance {
   localPathHint?: string;
 }
 
+export type FlowPulseContractTypeName =
+  | "ROOTFIELD_REGISTERED"
+  | "ROOT_COMMITTED"
+  | "ROOTFIELD_STATUS_CHANGED"
+  | "UNKNOWN_FLOWPULSE_TYPE";
+
+export interface FlowPulseContractEvent {
+  schema: "flowmemory.flowpulse_contract_event.v0";
+  interfaceName: "IFlowPulse";
+  eventName: "FlowPulse";
+  eventSignatureText: string;
+  eventTopic0: string;
+  expectedTopic0: string;
+  topicMatchesContract: boolean;
+  sourceContract: string;
+  pulseTypeId: string;
+  pulseTypeName: FlowPulseContractTypeName;
+  indexed: {
+    pulseId: string;
+    rootfieldId: string;
+    actor: string;
+  };
+  payload: {
+    subject: string;
+    commitment: string;
+    parentPulseId: string;
+    sequence: string;
+    occurredAt: string;
+    uri: string;
+  };
+  receiptLocator: {
+    chainId: string;
+    blockNumber: string;
+    blockHash: string;
+    txHash: string;
+    transactionIndex: string;
+    logIndex: string;
+    receiptStatus: string;
+  };
+  receiptDerivedFields: string[];
+}
+
+export interface FlowPulseContractEventRef {
+  signalId: string;
+  eventName: "FlowPulse";
+  eventTopic0: string;
+  sourceContract: string;
+  pulseTypeId: string;
+  pulseTypeName: FlowPulseContractTypeName;
+  txHash: string;
+  logIndex: string;
+}
+
 export interface ProvenancedRecord {
   id: string;
   status: DashboardStatus;
@@ -149,6 +202,7 @@ export interface RootflowTransition extends ProvenancedRecord {
   txHash: string;
   sequence: string;
   reasonCodes: string[];
+  contractEventRef: FlowPulseContractEventRef;
 }
 
 export interface MemorySignal extends ProvenancedRecord {
@@ -172,6 +226,7 @@ export interface MemorySignal extends ProvenancedRecord {
   occurredAt: string;
   uri: string;
   summary: string;
+  contractEvent: FlowPulseContractEvent;
 }
 
 export interface MemoryReceipt extends ProvenancedRecord {

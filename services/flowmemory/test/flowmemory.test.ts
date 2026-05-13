@@ -64,6 +64,23 @@ test("generates concrete Rootflow and Flow Memory V0 outputs", () => {
     assert.equal(launchCore.rootfieldBundles.length, 1);
     assert.equal(launchCore.agentMemoryViews.length, 1);
 
+    const firstSignal = launchCore.memorySignals[0];
+    assert.equal(firstSignal.contractEvent.interfaceName, "IFlowPulse");
+    assert.equal(firstSignal.contractEvent.eventName, "FlowPulse");
+    assert.equal(firstSignal.contractEvent.indexed.pulseId, firstSignal.pulseId);
+    assert.equal(firstSignal.contractEvent.indexed.rootfieldId, firstSignal.rootfieldId);
+    assert.equal(firstSignal.contractEvent.payload.commitment, firstSignal.commitment);
+    assert.equal(firstSignal.contractEvent.receiptLocator.txHash, firstSignal.txHash);
+    assert.equal(firstSignal.contractEvent.topicMatchesContract, true);
+
+    const unsupportedSignal = launchCore.memorySignals.find((signal) => signal.contractEvent.pulseTypeId === "99");
+    assert.equal(unsupportedSignal?.contractEvent.pulseTypeName, "UNKNOWN_FLOWPULSE_TYPE");
+
+    const firstTransition = launchCore.rootflowTransitions[0];
+    assert.equal(firstTransition.contractEventRef.signalId, firstTransition.memorySignalId);
+    assert.equal(firstTransition.contractEventRef.eventName, "FlowPulse");
+    assert.equal(firstTransition.contractEventRef.txHash, firstTransition.txHash);
+
     const transitionStatuses = new Set(launchCore.rootflowTransitions.map((transition) => transition.status));
     assert.ok(transitionStatuses.has("verified"));
     assert.ok(transitionStatuses.has("failed"));

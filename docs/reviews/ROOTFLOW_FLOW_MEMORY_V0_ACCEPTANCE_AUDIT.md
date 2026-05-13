@@ -45,6 +45,20 @@ Generated outputs:
 - `apps/dashboard/public/data/flowmemory-dashboard-v0.json`
 - `fixtures/launch-core/generated/devnet/`
 
+Launch-hardening evidence:
+
+- Generated `MemorySignal` objects now embed `contractEvent` data for
+  `IFlowPulse.FlowPulse`, including event signature text, topic0, pulse type,
+  indexed fields, payload fields, and receipt-derived locator fields.
+- Generated `RootflowTransition` objects now include `contractEventRef` so a
+  dashboard or reviewer can map each transition back to the contract event
+  semantics that produced the signal.
+- The Flow Memory / Rootflow dashboard view now includes a contract-event spine,
+  transition status counts, root bundle summary, and agent memory warnings for
+  launch demo review.
+- `docs/reviews/V0_BOUNDARY_CLAIMS_AUDIT.md` records the latest review pass for
+  blocked production, storage, trustlessness, hardware, and AI-on-chain claims.
+
 Canonical schemas:
 
 - `schemas/flowmemory/memory-signal.schema.json`
@@ -76,6 +90,7 @@ These commands were run from merged `main` on 2026-05-13.
 | Root commitments | `submitRoot`, counters, latest root storage, FlowPulse emission, tests. | Implemented for V0 local contracts. |
 | Parent/child memory-state transitions | `fixtures/launch-core/rootflow-transitions.json` contains generated RootflowTransition objects with parent pulse and parent transition links. | Implemented for local/test V0. |
 | FlowPulse linkage | Contracts emit FlowPulse; services parse fixture logs and generated MemorySignals reference pulse/observation ids. | Implemented for local/test V0. |
+| Contract event semantics | Generated MemorySignals and RootflowTransitions expose `IFlowPulse.FlowPulse` event metadata, indexed fields, payload fields, and receipt locator fields. | Implemented for local/test V0. |
 | Receipt linkage | Generated MemoryReceipts link verifier reports to observations/rootfields. | Implemented for local/test V0. |
 | Verifier status | `services/flowmemory/src/status.ts` maps `valid`/`invalid` to `verified`/`failed`. | Implemented. |
 | Pending/verified/failed/reorged states | Generated dashboard fixture includes observed, pending, finalized, verified, failed, unresolved, unsupported, reorged, offline, and stale. | Implemented for local/test V0. |
@@ -108,9 +123,9 @@ Not part of local/test V0 completion:
    - Agent/worktree: Contracts Agent in `E:\FlowMemory\flowmemory-contracts`.
    - Owns: Slither setup issue, owner/status boundary review, test gaps.
 
-3. `[dashboard/polish] Polish generated Flow Memory / Rootflow dashboard view`
+3. `[dashboard/polish] Add deeper generated object inspection`
    - Agent/worktree: Dashboard Agent in `E:\FlowMemory\flowmemory-dashboard`.
-   - Owns: visual polish, better filtering, generated object inspection, no live API claims.
+   - Owns: drilldown views, generated object inspection, no live API claims.
 
 ## Current Recommendation
 

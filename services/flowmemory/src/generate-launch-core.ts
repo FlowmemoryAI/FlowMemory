@@ -12,6 +12,9 @@ import {
 } from "./status.ts";
 import type {
   AgentMemoryView,
+  FlowPulseContractEvent,
+  FlowPulseContractEventRef,
+  FlowPulseContractTypeName,
   LaunchCoreOutput,
   MemoryReceipt,
   MemorySignal,
@@ -23,6 +26,13 @@ const ZERO_ROOT = "0x00000000000000000000000000000000000000000000000000000000000
 const GENERATED_AT = "2026-05-13T17:02:00.000Z";
 const CHAIN_CONTEXT = "flowmemory-local-v0";
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
+const FLOWPULSE_EVENT_SIGNATURE_TEXT = "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)";
+const FLOWPULSE_EVENT_TOPIC0 = keccak256Hex(new TextEncoder().encode(FLOWPULSE_EVENT_SIGNATURE_TEXT));
+const FLOWPULSE_CONTRACT_TYPE_NAMES: Record<string, FlowPulseContractTypeName> = {
+  "1": "ROOTFIELD_REGISTERED",
+  "2": "ROOT_COMMITTED",
+  "3": "ROOTFIELD_STATUS_CHANGED",
+};
 
 type JsonObject = Record<string, unknown>;
 
@@ -146,6 +156,10 @@ function pulseTypeName(pulseType: string): MemorySignal["signalType"] {
   return "unsupported_pulse";
 }
 
+function contractPulseTypeName(pulseType: string): FlowPulseContractTypeName {
+  return FLOWPULSE_CONTRACT_TYPE_NAMES[pulseType] ?? "UNKNOWN_FLOWPULSE_TYPE";
+}
+
 function isoFromUnixSeconds(value: string): string {
   const seconds = Number(value);
   if (!Number.isFinite(seconds)) {
@@ -172,6 +186,65 @@ function sortObservations(observations: IndexedObservation[]): IndexedObservatio
   });
 }
 
+function buildFlowPulseContractEvent(observation: IndexedObservation): FlowPulseContractEvent {
+  const occurredAt = isoFromUnixSeconds(observation.occurredAt);
+
+  return {
+    schema: "flowmemory.flowpulse_contract_event.v0",
+    interfaceName: "IFlowPulse",
+    eventName: "FlowPulse",
+    eventSignatureText: FLOWPULSE_EVENT_SIGNATURE_TEXT,
+    eventTopic0: observation.eventSignature,
+    expectedTopic0: FLOWPULSE_EVENT_TOPIC0,
+    topicMatchesContract: observation.eventSignature.toLowerCase() === FLOWPULSE_EVENT_TOPIC0.toLowerCase(),
+    sourceContract: observation.emittingContract,
+    pulseTypeId: observation.pulseType,
+    pulseTypeName: contractPulseTypeName(observation.pulseType),
+    indexed: {
+      pulseId: observation.pulseId,
+      rootfieldId: observation.rootfieldId,
+      actor: observation.actor,
+    },
+    payload: {
+      subject: observation.subject,
+      commitment: observation.commitment,
+      parentPulseId: observation.parentPulseId,
+      sequence: observation.sequence,
+      occurredAt,
+      uri: observation.uri,
+    },
+    receiptLocator: {
+      chainId: observation.chainId,
+      blockNumber: observation.blockNumber,
+      blockHash: observation.blockHash,
+      txHash: observation.txHash,
+      transactionIndex: observation.transactionIndex,
+      logIndex: observation.logIndex,
+      receiptStatus: observation.receiptStatus,
+    },
+    receiptDerivedFields: [
+      "blockHash",
+      "txHash",
+      "transactionIndex",
+      "logIndex",
+      "receiptStatus",
+    ],
+  };
+}
+
+function buildContractEventRef(signal: MemorySignal): FlowPulseContractEventRef {
+  return {
+    signalId: signal.signalId,
+    eventName: signal.contractEvent.eventName,
+    eventTopic0: signal.contractEvent.eventTopic0,
+    sourceContract: signal.contractEvent.sourceContract,
+    pulseTypeId: signal.contractEvent.pulseTypeId,
+    pulseTypeName: signal.contractEvent.pulseTypeName,
+    txHash: signal.contractEvent.receiptLocator.txHash,
+    logIndex: signal.contractEvent.receiptLocator.logIndex,
+  };
+}
+
 function buildMemorySignal(observation: IndexedObservation, status: FlowMemoryStatus): MemorySignal {
   const signalCore = {
     observationId: observation.observationId,
@@ -180,6 +253,7 @@ function buildMemorySignal(observation: IndexedObservation, status: FlowMemorySt
     pulseType: observation.pulseType,
     sequence: observation.sequence,
   };
+  const contractEvent = buildFlowPulseContractEvent(observation);
 
   return {
     schema: "flowmemory.memory_signal.v0",
@@ -204,6 +278,7 @@ function buildMemorySignal(observation: IndexedObservation, status: FlowMemorySt
     occurredAt: isoFromUnixSeconds(observation.occurredAt),
     uri: observation.uri,
     summary: `${pulseTypeName(observation.pulseType).replaceAll("_", " ")} pulse ${observation.sequence}`,
+    contractEvent,
   };
 }
 
@@ -301,6 +376,7 @@ function buildLaunchCore(indexer: IndexerPersistence, verifier: VerifierPersiste
       txHash: observation.txHash,
       sequence: observation.sequence,
       reasonCodes: receipt?.reasonCodes ?? [],
+      contractEventRef: buildContractEventRef(signal),
     };
 
     rootflowTransitions.push(transition);

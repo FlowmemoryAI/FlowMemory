@@ -20,7 +20,17 @@
       "blockNumber": "123456",
       "txHash": "0x3333333333333333333333333333333333333333333333333333333333333333",
       "sequence": "1",
-      "reasonCodes": []
+      "reasonCodes": [],
+      "contractEventRef": {
+        "signalId": "0xec2a80963190d2fa4d0eae023e735eeaf770cf33496eabdea696f3c7dda071eb",
+        "eventName": "FlowPulse",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "1",
+        "pulseTypeName": "ROOTFIELD_REGISTERED",
+        "txHash": "0x3333333333333333333333333333333333333333333333333333333333333333",
+        "logIndex": "2"
+      }
     },
     {
       "schema": "flowmemory.rootflow_transition.v0",
@@ -40,7 +50,17 @@
       "blockNumber": "123457",
       "txHash": "0x3333333333333333333333333333333333333333333333333333333333333334",
       "sequence": "2",
-      "reasonCodes": []
+      "reasonCodes": [],
+      "contractEventRef": {
+        "signalId": "0xc595baea5e90a5f06ff49d8afeea0996eb39e13b3794903b8142dc9daf3a2df0",
+        "eventName": "FlowPulse",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "2",
+        "pulseTypeName": "ROOT_COMMITTED",
+        "txHash": "0x3333333333333333333333333333333333333333333333333333333333333334",
+        "logIndex": "3"
+      }
     },
     {
       "schema": "flowmemory.rootflow_transition.v0",
@@ -62,7 +82,17 @@
       "sequence": "2",
       "reasonCodes": [
         "observation.reorged"
-      ]
+      ],
+      "contractEventRef": {
+        "signalId": "0x4699ec901e15d260417fd6a9a86357c179ac55b631df05f28b29f28d5a5f3b61",
+        "eventName": "FlowPulse",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "2",
+        "pulseTypeName": "ROOT_COMMITTED",
+        "txHash": "0x3333333333333333333333333333333333333333333333333333333333333335",
+        "logIndex": "4"
+      }
     },
     {
       "schema": "flowmemory.rootflow_transition.v0",
@@ -84,7 +114,17 @@
       "sequence": "3",
       "reasonCodes": [
         "commitment.mismatch"
-      ]
+      ],
+      "contractEventRef": {
+        "signalId": "0xe32d6eeeff9c6bafadca56b980d58159afe8ffb29184458fa589c890829b9627",
+        "eventName": "FlowPulse",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "2",
+        "pulseTypeName": "ROOT_COMMITTED",
+        "txHash": "0x3333333333333333333333333333333333333333333333333333333333333336",
+        "logIndex": "5"
+      }
     },
     {
       "schema": "flowmemory.rootflow_transition.v0",
@@ -106,7 +146,17 @@
       "sequence": "4",
       "reasonCodes": [
         "artifact.unavailable"
-      ]
+      ],
+      "contractEventRef": {
+        "signalId": "0xfdc7756ac00683bc3e85bb3a9c2bd01f9719667b2d739818591fe697ee45d6c4",
+        "eventName": "FlowPulse",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "2",
+        "pulseTypeName": "ROOT_COMMITTED",
+        "txHash": "0x3333333333333333333333333333333333333333333333333333333333333337",
+        "logIndex": "6"
+      }
     },
     {
       "schema": "flowmemory.rootflow_transition.v0",
@@ -128,7 +178,17 @@
       "sequence": "5",
       "reasonCodes": [
         "pulse.type.unsupported"
-      ]
+      ],
+      "contractEventRef": {
+        "signalId": "0x74f686fdd91352713b0e1f74f8218d8e41359b67634f8c8be6cbafe15f7f95d5",
+        "eventName": "FlowPulse",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "pulseTypeId": "99",
+        "pulseTypeName": "UNKNOWN_FLOWPULSE_TYPE",
+        "txHash": "0x3333333333333333333333333333333333333333333333333333333333333338",
+        "logIndex": "7"
+      }
     }
   ]
 }

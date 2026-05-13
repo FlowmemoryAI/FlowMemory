@@ -22,7 +22,8 @@
     "blockNumber",
     "txHash",
     "sequence",
-    "reasonCodes"
+    "reasonCodes",
+    "contractEventRef"
   ],
   "properties": {
     "schema": { "const": "flowmemory.rootflow_transition.v0" },
@@ -42,10 +43,30 @@
     "blockNumber": { "type": "string", "pattern": "^[0-9]+$" },
     "txHash": { "$ref": "#/$defs/hex32" },
     "sequence": { "type": "string", "pattern": "^[0-9]+$" },
-    "reasonCodes": { "type": "array", "items": { "type": "string" } }
+    "reasonCodes": { "type": "array", "items": { "type": "string" } },
+    "contractEventRef": { "$ref": "#/$defs/flowPulseContractEventRef" }
   },
   "$defs": {
     "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "address": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+    "flowPulseContractTypeName": {
+      "enum": ["ROOTFIELD_REGISTERED", "ROOT_COMMITTED", "ROOTFIELD_STATUS_CHANGED", "UNKNOWN_FLOWPULSE_TYPE"]
+    },
+    "flowPulseContractEventRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["signalId", "eventName", "eventTopic0", "sourceContract", "pulseTypeId", "pulseTypeName", "txHash", "logIndex"],
+      "properties": {
+        "signalId": { "$ref": "#/$defs/hex32" },
+        "eventName": { "const": "FlowPulse" },
+        "eventTopic0": { "$ref": "#/$defs/hex32" },
+        "sourceContract": { "$ref": "#/$defs/address" },
+        "pulseTypeId": { "type": "string", "pattern": "^[0-9]+$" },
+        "pulseTypeName": { "$ref": "#/$defs/flowPulseContractTypeName" },
+        "txHash": { "$ref": "#/$defs/hex32" },
+        "logIndex": { "type": "string", "pattern": "^[0-9]+$" }
+      }
+    },
     "flowMemoryStatus": {
       "enum": ["observed", "pending", "finalized", "verified", "unresolved", "failed", "unsupported", "reorged", "offline", "stale"]
     }

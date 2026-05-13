@@ -35,6 +35,7 @@ It must not claim production L1, production mainnet readiness, full trustless ve
 | Root commitments | Contract or fixture commits a nonzero root and emits/records the update. | Contracts | Implemented for local/test V0 in contracts and generated fixtures. |
 | Parent/child transitions | `RootflowTransition` includes parent pulse/root and new root. | Indexer + Crypto + Contracts | Implemented in `fixtures/launch-core/rootflow-transitions.json`. |
 | FlowPulse linkage | Transition and memory signal reference `pulseId`. | Indexer + Dashboard | Implemented in generated MemorySignals and RootflowTransitions. |
+| Contract event semantics | Generated MemorySignals preserve `IFlowPulse.FlowPulse` event signature, indexed fields, payload fields, pulse type, and receipt-derived locator fields. | Contracts + Indexer + Dashboard | Implemented with `contractEvent` and `contractEventRef` fields in launch-core fixtures and dashboard data. |
 | Receipt linkage | `MemoryReceipt` links signal, artifact commitment, evidence URI, and verifier report. | Crypto + Indexer | Implemented in `fixtures/launch-core/flowmemory-launch-v0.json`. |
 | Verifier statuses | Cross-agent status vocabulary exists and verifier reports use it. | Indexer + Crypto | Implemented with explicit adapter in `services/flowmemory/src/status.ts`. |
 | Pending state | Fixture/report can show pending transition. | Indexer + Dashboard | Implemented in generated dashboard fixture. |
@@ -75,6 +76,7 @@ Contracts to indexer:
 - RootfieldRegistry ABI.
 - local deployment or fixture event output.
 - contract tests showing root registration and root commitment.
+- pulse type semantics for `ROOTFIELD_REGISTERED`, `ROOT_COMMITTED`, and `ROOTFIELD_STATUS_CHANGED`.
 
 Crypto to indexer:
 
