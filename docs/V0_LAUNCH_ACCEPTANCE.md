@@ -14,6 +14,7 @@ The local/testnet-ready V0 system must support:
 - Root commitments.
 - Parent/child memory-state transitions.
 - FlowPulse linkage.
+- Uniswap swap-derived memory-signal linkage.
 - Receipt linkage.
 - Verifier statuses.
 - `pending`, `verified`, `failed`, and `reorged` states.
@@ -35,6 +36,7 @@ It must not claim production L1, production mainnet readiness, full trustless ve
 | Root commitments | Contract or fixture commits a nonzero root and emits/records the update. | Contracts | Implemented for local/test V0 in contracts and generated fixtures. |
 | Parent/child transitions | `RootflowTransition` includes parent pulse/root and new root. | Indexer + Crypto + Contracts | Implemented in `fixtures/launch-core/rootflow-transitions.json`. |
 | FlowPulse linkage | Transition and memory signal reference `pulseId`. | Indexer + Dashboard | Implemented in generated MemorySignals and RootflowTransitions. |
+| Swap-memory linkage | Hook-adapter or fixture emits `SWAP_MEMORY_SIGNAL` and Flow Memory exposes `swap_memory_signal`. | Contracts + Indexer + Verifier + Dashboard | Implemented in `FlowMemoryHookAdapter`, receipt fixtures, verifier fixtures, generated launch-core data, and dashboard tests. |
 | Contract event semantics | Generated MemorySignals preserve `IFlowPulse.FlowPulse` event signature, indexed fields, payload fields, pulse type, and receipt-derived locator fields. | Contracts + Indexer + Dashboard | Implemented with `contractEvent` and `contractEventRef` fields in launch-core fixtures and dashboard data. |
 | Receipt linkage | `MemoryReceipt` links signal, artifact commitment, evidence URI, and verifier report. | Crypto + Indexer | Implemented in `fixtures/launch-core/flowmemory-launch-v0.json`. |
 | Verifier statuses | Cross-agent status vocabulary exists and verifier reports use it. | Indexer + Crypto | Implemented with explicit adapter in `services/flowmemory/src/status.ts`. |
@@ -43,6 +45,8 @@ It must not claim production L1, production mainnet readiness, full trustless ve
 | Failed state | Fixture/report can show rejected transition. | Indexer + Dashboard | Implemented via `invalid` -> `failed` adapter. |
 | Reorged state | Fixture/report can show removed/superseded observation. | Indexer | Implemented in generated transition/report/dashboard state. |
 | Deterministic fixtures | Fixtures run without private RPC keys or secrets. | Indexer + Crypto + Chain | Implemented; `npm run launch:v0` regenerates deterministic local fixtures. |
+| Runtime schema validation | Launch-core JSON passes canonical schemas. | Flow Memory | Implemented with `npm run validate:launch`. |
+| Fixture drift guard | Generated fixtures match committed dashboard/runtime artifacts. | Flow Memory + Dashboard | Implemented with `npm run fixtures:check`. |
 | Dashboard-readable state | JSON/API/fixture shape feeds dashboard views. | Dashboard + Indexer | Implemented in generated dashboard fixture. |
 | Flow Memory schemas | `MemorySignal`, `MemoryReceipt`, `RootflowTransition`, `RootfieldBundle`, and `AgentMemoryView` schemas exist. | Crypto + Indexer + Dashboard | Implemented under `schemas/flowmemory/`. |
 | Verifier reports | JSON schema and sample reports exist. | Indexer + Crypto | Implemented in verifier package and generated MemoryReceipts. |
@@ -63,6 +67,7 @@ A developer must be able to run a local V0 flow:
 The final acceptance evidence should include:
 
 - command: `npm run launch:v0`;
+- stricter gate: `npm run launch:candidate`;
 - fixture paths: `fixtures/launch-core/`, `fixtures/dashboard/flowmemory-dashboard-v0.json`;
 - output paths: `fixtures/launch-core/flowmemory-launch-v0.json`, `fixtures/launch-core/rootflow-transitions.json`, `apps/dashboard/public/data/flowmemory-dashboard-v0.json`;
 - test results: services, dashboard, contracts, crypto, devnet, and hardware checks;
@@ -76,7 +81,7 @@ Contracts to indexer:
 - RootfieldRegistry ABI.
 - local deployment or fixture event output.
 - contract tests showing root registration and root commitment.
-- pulse type semantics for `ROOTFIELD_REGISTERED`, `ROOT_COMMITTED`, and `ROOTFIELD_STATUS_CHANGED`.
+- pulse type semantics for `ROOTFIELD_REGISTERED`, `ROOT_COMMITTED`, `ROOTFIELD_STATUS_CHANGED`, and `SWAP_MEMORY_SIGNAL`.
 
 Crypto to indexer:
 

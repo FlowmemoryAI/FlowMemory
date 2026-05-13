@@ -17,6 +17,7 @@ export function FlowMemoryView({ data }: { data: DashboardData }) {
   const latestView = data.agentMemoryViews[0];
   const latestBundle = data.rootfieldBundles[0];
   const contractEventCount = data.memorySignals.filter((signal) => signal.contractEvent.topicMatchesContract).length;
+  const swapMemorySignalCount = data.memorySignals.filter((signal) => signal.signalType === "swap_memory_signal").length;
   const statusCounts = useMemo(
     () => data.rootflowTransitions.reduce<Record<string, number>>((counts, transition) => {
       counts[transition.status] = (counts[transition.status] ?? 0) + 1;
@@ -110,6 +111,14 @@ export function FlowMemoryView({ data }: { data: DashboardData }) {
           <div>
             <StatusBadge status="verified" compact />
             <small>topic0 matched</small>
+          </div>
+        </article>
+        <article className="metric-tile">
+          <span>Swap memory signals</span>
+          <strong>{swapMemorySignalCount}</strong>
+          <div>
+            <StatusBadge status={swapMemorySignalCount > 0 ? "verified" : "pending"} compact />
+            <small>Uniswap adapter path</small>
           </div>
         </article>
       </section>

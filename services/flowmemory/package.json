@@ -5,6 +5,8 @@
   "scripts": {
     "generate": "node src/generate-launch-core.ts",
     "launch:v0": "node src/launch-v0.ts",
+    "validate": "node src/validate-launch-core.ts",
+    "fixtures:check": "node src/check-fixture-drift.ts",
     "test": "node --test test/*.test.ts"
   }
 }

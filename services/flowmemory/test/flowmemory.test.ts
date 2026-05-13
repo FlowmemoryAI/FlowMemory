@@ -58,9 +58,9 @@ test("generates concrete Rootflow and Flow Memory V0 outputs", () => {
     assert.equal(launchCore.schema, "flowmemory.launch_core.v0");
     assert.equal(launchCore.statusAdapter.valid, "verified");
     assert.equal(launchCore.statusAdapter.invalid, "failed");
-    assert.equal(launchCore.memorySignals.length, 7);
-    assert.equal(launchCore.memoryReceipts.length, 7);
-    assert.equal(launchCore.rootflowTransitions.length, 6);
+    assert.equal(launchCore.memorySignals.length, 8);
+    assert.equal(launchCore.memoryReceipts.length, 8);
+    assert.equal(launchCore.rootflowTransitions.length, 7);
     assert.equal(launchCore.rootfieldBundles.length, 1);
     assert.equal(launchCore.agentMemoryViews.length, 1);
 
@@ -75,6 +75,8 @@ test("generates concrete Rootflow and Flow Memory V0 outputs", () => {
 
     const unsupportedSignal = launchCore.memorySignals.find((signal) => signal.contractEvent.pulseTypeId === "99");
     assert.equal(unsupportedSignal?.contractEvent.pulseTypeName, "UNKNOWN_FLOWPULSE_TYPE");
+    const swapSignal = launchCore.memorySignals.find((signal) => signal.signalType === "swap_memory_signal");
+    assert.equal(swapSignal?.contractEvent.pulseTypeName, "SWAP_MEMORY_SIGNAL");
 
     const firstTransition = launchCore.rootflowTransitions[0];
     assert.equal(firstTransition.contractEventRef.signalId, firstTransition.memorySignalId);

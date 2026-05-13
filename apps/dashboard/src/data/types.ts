@@ -34,6 +34,7 @@ export type FlowPulseContractTypeName =
   | "ROOTFIELD_REGISTERED"
   | "ROOT_COMMITTED"
   | "ROOTFIELD_STATUS_CHANGED"
+  | "SWAP_MEMORY_SIGNAL"
   | "UNKNOWN_FLOWPULSE_TYPE";
 
 export interface FlowPulseContractEvent {

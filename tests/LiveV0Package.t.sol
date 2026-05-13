@@ -99,6 +99,8 @@ contract WorkDebtSchedulerCaller {
 
 contract LiveV0PackageTest {
     LiveV0Vm private constant vm = LiveV0Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+    bytes32 private constant FLOWPULSE_SIGNATURE =
+        keccak256("FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)");
 
     error AssertionFailed();
 
@@ -589,16 +591,40 @@ contract LiveV0PackageTest {
     function testFlowMemoryHookAdapterEmitsObservationAndReturnsSelector() public {
         FlowMemoryHookAdapter adapter = new FlowMemoryHookAdapter();
         bytes memory hookData = abi.encode(keccak256("artifact.commitment"));
+        bytes32 poolId = keccak256("pool.alpha");
+        bytes32 rootfieldId = keccak256("rootfield.alpha");
+        bytes32 commitment = keccak256("hook.commitment");
 
         vm.recordLogs();
-        bytes4 selector = adapter.afterSwap(
-            address(this), keccak256("pool.alpha"), keccak256("rootfield.alpha"), keccak256("hook.commitment"), hookData
-        );
+        bytes4 selector = adapter.afterSwap(address(this), poolId, rootfieldId, commitment, hookData);
         LiveV0Vm.Log[] memory logs = vm.getRecordedLogs();
 
         _assertTrue(selector == adapter.AFTER_SWAP_SELECTOR());
-        _assertTrue(logs.length == 1);
+        _assertTrue(logs.length == 2);
         _assertTrue(logs[0].emitter == address(adapter));
+        _assertTrue(logs[1].emitter == address(adapter));
+        _assertTrue(logs[1].topics.length == 4);
+        _assertTrue(logs[1].topics[0] == FLOWPULSE_SIGNATURE);
+        _assertTrue(logs[1].topics[2] == rootfieldId);
+        _assertTrue(logs[1].topics[3] == bytes32(uint256(uint160(address(this)))));
+
+        (
+            uint8 pulseType,
+            bytes32 subject,
+            bytes32 flowPulseCommitment,
+            bytes32 parentPulseId,
+            uint64 sequence,
+            uint64 occurredAt,
+            string memory uri
+        ) = abi.decode(logs[1].data, (uint8, bytes32, bytes32, bytes32, uint64, uint64, string));
+
+        _assertTrue(pulseType == 4);
+        _assertTrue(subject == poolId);
+        _assertTrue(flowPulseCommitment == commitment);
+        _assertTrue(parentPulseId == bytes32(0));
+        _assertTrue(sequence == 1);
+        _assertTrue(occurredAt > 0);
+        _assertTrue(keccak256(bytes(uri)) == keccak256("flowmemory://uniswap-v4/after-swap"));
     }
 
     function testFlowMemoryHookAdapterRejectsZeroCommitment() public {
@@ -606,6 +632,21 @@ contract LiveV0PackageTest {
 
         vm.expectRevert(FlowMemoryHookAdapter.ZeroCommitment.selector);
         adapter.afterSwap(address(this), keccak256("pool.alpha"), keccak256("rootfield.alpha"), bytes32(0), "");
+    }
+
+    function testFlowMemoryHookAdapterRejectsZeroSwapInputs() public {
+        FlowMemoryHookAdapter adapter = new FlowMemoryHookAdapter();
+
+        vm.expectRevert(FlowMemoryHookAdapter.ZeroSender.selector);
+        adapter.afterSwap(
+            address(0), keccak256("pool.alpha"), keccak256("rootfield.alpha"), keccak256("commitment"), ""
+        );
+
+        vm.expectRevert(FlowMemoryHookAdapter.ZeroPoolId.selector);
+        adapter.afterSwap(address(this), bytes32(0), keccak256("rootfield.alpha"), keccak256("commitment"), "");
+
+        vm.expectRevert(FlowMemoryHookAdapter.ZeroRootfieldId.selector);
+        adapter.afterSwap(address(this), keccak256("pool.alpha"), bytes32(0), keccak256("commitment"), "");
     }
 
     function _assertTrue(bool condition) private pure {

@@ -19,7 +19,7 @@ Flow Memory V0 answers:
 ## Launch Flow
 
 ```text
-Uniswap v4 or fixture activity
+Uniswap v4 adapter or fixture activity
 -> FlowPulse
 -> indexed observation
 -> MemorySignal
@@ -43,7 +43,7 @@ Minimum V0 fields:
   "signalId": "bytes32-or-hex-string",
   "pulseId": "bytes32-or-hex-string",
   "rootfieldId": "bytes32-or-hex-string",
-  "signalType": "root_commitment|swap_activity|failure|repair|evaluation|hardware_heartbeat|unsupported",
+  "signalType": "rootfield_registration|root_commitment|swap_memory_signal|unsupported_pulse",
   "subject": "bytes32-or-hex-string",
   "commitment": "bytes32-or-hex-string",
   "contractEvent": {
@@ -79,6 +79,12 @@ receipt-derived locator fields. `IFlowPulse` emits `pulseId`, `rootfieldId`,
 `actor`, `pulseType`, `subject`, `commitment`, `parentPulseId`, `sequence`,
 `occurredAt`, and `uri`; the indexer adds `txHash`, `logIndex`, block metadata,
 and receipt status after receipts/logs exist.
+
+`swap_memory_signal` is the V0 name for a swap-derived signal. The current
+contract path is `FlowMemoryHookAdapter.afterSwap`, which emits a FlowPulse with
+`pulseType = 4`, `subject = poolId`, and a caller-supplied memory commitment.
+The adapter cannot know `txHash` or `logIndex`; those fields are added by the
+indexer after receipts/logs exist.
 
 ### MemoryReceipt
 
@@ -208,6 +214,12 @@ The current local/test generator is:
 
 ```powershell
 npm run launch:v0
+```
+
+The stricter local launch-candidate gate is:
+
+```powershell
+npm run launch:candidate
 ```
 
 It writes generated Flow Memory V0 objects to:

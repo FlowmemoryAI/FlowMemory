@@ -50,6 +50,7 @@ The fixture set covers:
 
 - valid rootfield registration
 - valid root commit
+- valid swap-derived memory signal
 - duplicate observation
 - removed/reorg-style log
 - invalid commitment input

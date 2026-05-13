@@ -10,6 +10,8 @@ Current launch target:
 - fixture-backed dashboard
 - Base Sepolia reader path for FlowPulse logs
 - contract hardening baseline
+- runtime schema validation and fixture-drift guardrails
+- Base Sepolia testnet deploy/read commands
 - clear claim boundaries
 
 Current launch target is not:
@@ -30,6 +32,7 @@ Current launch target is not:
 - `forge build` passes.
 - Static-analysis baseline script passes.
 - Slither findings are captured before any public testnet deployment.
+- `npm run contracts:hardening:slither` passes in audit environments before public testnet deployment.
 - Deployment boundary is documented in `contracts/DEPLOYMENT_BOUNDARY.md`.
 - Access-control boundary is documented in `contracts/ACCESS_CONTROL_REVIEW.md`.
 - Event tests cover every launch-critical state transition.
@@ -48,6 +51,9 @@ Current launch target is not:
 ## Flow Memory And Rootflow Gates
 
 - `npm run launch:v0` passes.
+- `npm run launch:candidate` passes.
+- `npm run validate:launch` passes.
+- `npm run fixtures:check` passes.
 - MemorySignal, MemoryReceipt, RootfieldBundle, AgentMemoryView, and RootflowTransition schemas are present.
 - Rootflow transitions preserve parent/child linkage.
 - Contract-event linkage remains explicit.
@@ -58,6 +64,7 @@ Current launch target is not:
 
 - Dashboard tests pass.
 - Dashboard production build passes.
+- `npm run build:production` passes before a public demo build is cut.
 - Dashboard uses generated fixtures until a production API is explicitly scoped.
 - Dashboard copy does not imply production deployment, production L1, full trustless verification, free storage, or AI running on-chain.
 

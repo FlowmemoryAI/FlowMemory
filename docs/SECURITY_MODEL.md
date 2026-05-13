@@ -145,9 +145,9 @@ Live V0 registries and schedulers are commitment surfaces, not complete trust sy
 
 Static analysis preparation:
 
-- Slither was not available in the local PATH during the Live V0 package pass.
-- Track setup in GitHub issue #24 before adding a CI gate.
-- Candidate command once installed: `slither . --filter-paths "tests|script"`.
+- The baseline hardening runner is `npm run contracts:hardening`.
+- Audit environments should run `npm run contracts:hardening:slither`.
+- Slither findings must be attached to the relevant PR or issue before any public testnet deployment.
 
 ## PR Security Checklist
 

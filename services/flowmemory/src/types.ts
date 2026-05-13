@@ -4,6 +4,7 @@ export type FlowPulseContractTypeName =
   | "ROOTFIELD_REGISTERED"
   | "ROOT_COMMITTED"
   | "ROOTFIELD_STATUS_CHANGED"
+  | "SWAP_MEMORY_SIGNAL"
   | "UNKNOWN_FLOWPULSE_TYPE";
 
 export interface FlowPulseContractEvent {
@@ -59,7 +60,7 @@ export interface MemorySignal {
   observationId: string;
   pulseId: string;
   rootfieldId: string;
-  signalType: "rootfield_registration" | "root_commitment" | "unsupported_pulse";
+  signalType: "rootfield_registration" | "root_commitment" | "swap_memory_signal" | "unsupported_pulse";
   status: FlowMemoryStatus;
   chainId: string;
   emittingContract: string;
