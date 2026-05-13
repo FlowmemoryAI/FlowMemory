@@ -1,6 +1,6 @@
 # Indexer Verifier MVP
 
-This document describes the runnable FlowMemory Indexer + Verifier V0 local package. It advances issues #13, #14, #43, #44, #45, #46, #47, #54, and #55 by proving the off-chain path with fixtures, pure functions, local JSON persistence, CLIs, and tests.
+This document describes the runnable FlowMemory Indexer + Verifier V0 local package. It advances issues #13, #14, #43, #44, #45, #46, #47, #54, and #55 by proving the off-chain path with fixtures, pure functions, local JSON persistence, CLIs, and tests. It now also includes a constrained Base Sepolia reader path for explicit FlowPulse contract addresses.
 
 V0 is non-production. It does not include tokenomics, a verifier network, production RPC deployment, a production database, proof infrastructure, or chain/L1 implementation.
 
@@ -15,11 +15,12 @@ Run from the repository root:
 ```powershell
 npm test
 npm run index:fixtures
+npm run index:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --from-block <n> --to-block <n>
 npm run verify:fixtures
 npm run e2e
 ```
 
-The commands require no secrets and no live RPC.
+The fixture commands require no secrets and no live RPC. The Base Sepolia command requires an explicit RPC URL, refuses non-Base-Sepolia chain ids, and does not store the RPC URL in output artifacts.
 
 ## FlowPulse Input
 
@@ -80,6 +81,33 @@ Contracts do not know `txHash`, `transactionIndex`, `logIndex`, or final block m
 9. Persist deterministic JSON to `services/indexer/out/indexer-state.json`.
 
 Malformed logs are rejected with deterministic reason codes and do not become verifier inputs.
+
+## Base Sepolia Reader Path
+
+`services/indexer/src/base-sepolia.ts` provides the first live testnet reader path.
+
+It requires:
+
+- `--rpc-url`
+- one or more `--address` values
+- `--from-block`
+- `--to-block`
+
+It enforces:
+
+- `eth_chainId` must be Base Sepolia (`84532`)
+- block values must be explicit decimal or `0x` quantities
+- emitting addresses must be explicit EVM addresses
+- output files must not contain RPC URLs or private keys
+
+It writes:
+
+```text
+services/indexer/out/base-sepolia-indexer-state.json
+services/indexer/out/base-sepolia-indexer-checkpoint.json
+```
+
+This is a testnet reader boundary, not a production mainnet indexer.
 
 ## Identity Model
 
@@ -232,6 +260,8 @@ Those are future protocol decisions, not part of this local package.
 ## Handoff Outputs
 
 - Dashboard-friendly indexer state: `services/indexer/out/indexer-state.json`
+- Base Sepolia reader state: `services/indexer/out/base-sepolia-indexer-state.json`
+- Base Sepolia checkpoint: `services/indexer/out/base-sepolia-indexer-checkpoint.json`
 - Chain/devnet-friendly verifier report fixture: `services/verifier/out/reports.json`
 - Indexer state JSON schema: `services/indexer/fixtures/indexer-state.schema.json`
 - Verifier report JSON schema: `services/verifier/fixtures/verification-report.schema.json`
@@ -241,8 +271,8 @@ Those are future protocol decisions, not part of this local package.
 ## Open Questions
 
 - What exact artifact canonicalization format should produce `artifactCommitment`?
-- What finality depth should a future Base RPC indexer use?
-- Should live RPC indexing persist cursors before or after report generation?
+- What finality depth should a future production Base RPC indexer use?
+- Should live RPC indexing persist cursors before or after report generation in hosted service mode?
 - Should future attestations use EIP-712, raw digest signatures, or another envelope?
 - How should dashboards display pulse duplicates versus exact duplicate observations?
 
@@ -251,21 +281,23 @@ Those are future protocol decisions, not part of this local package.
 What changed:
 
 - Added a runnable fixture-first indexer/verifier package with CLIs, persistence, schemas, and tests.
+- Added a constrained Base Sepolia reader with durable local state and checkpoint output.
 - Defined contract `pulseId`, indexer `observationId`, indexer `cursorId`, and verifier `reportId`.
 - Defined V0 lifecycle states, duplicate behavior, resolver policy boundaries, and report statuses.
 
 Why it changed:
 
-- The service layer needs a deterministic off-chain path before live RPC, production storage, verifier networking, or on-chain attestations.
+- The service layer needs a deterministic off-chain path and a constrained testnet read path before production storage, verifier networking, or on-chain attestations.
 
 Checks:
 
 - `npm test`
 - `npm run index:fixtures`
+- `npm run index:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --from-block <n> --to-block <n>`
 - `npm run verify:fixtures`
 - `npm run e2e`
 
 Risks and follow-ups:
 
 - V0 fixtures are synthetic and do not claim production reorg handling.
-- Live RPC, durable database storage, artifact canonicalization, report signing, and attestations need separate scoped issues.
+- Durable database storage, artifact canonicalization, report signing, attestations, and production live indexing need separate scoped issues.

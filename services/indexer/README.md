@@ -8,6 +8,7 @@ From the repository root:
 
 ```powershell
 npm run index:fixtures
+npm run index:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --from-block <n> --to-block <n>
 npm run demo:indexer
 npm test --prefix services/indexer
 ```
@@ -22,6 +23,19 @@ Use a custom output path:
 
 ```powershell
 npm run index:fixtures -- --out out/custom-state.json
+```
+
+`npm run index:base-sepolia` writes:
+
+```text
+services/indexer/out/base-sepolia-indexer-state.json
+services/indexer/out/base-sepolia-indexer-checkpoint.json
+```
+
+Use custom output paths:
+
+```powershell
+npm run index:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --from-block 123456 --to-block 123999 --finalized-block 123900 --out out/base-sepolia-state.json --checkpoint-out out/base-sepolia-checkpoint.json
 ```
 
 ## Fixtures
@@ -154,14 +168,24 @@ flowmemory.indexer.state.v0
 
 JSON output is deterministic and contains observations, cursors, batches, rootfields, pulses, rejected logs, and duplicate records.
 
+The Base Sepolia reader also writes a durable checkpoint:
+
+```text
+flowmemory.indexer.base_sepolia_checkpoint.v0
+```
+
+The checkpoint records the network, chain id, emitting addresses, scan range, finality threshold, state path, counts, and latest indexed block. It intentionally does not store RPC URLs or private keys.
+
 The JSON schema fixture lives at:
 
 ```text
 services/indexer/fixtures/indexer-state.schema.json
 ```
 
-## Local RPC Boundary
+## RPC Boundary
 
 `readLocalRpcFlowPulseLogs` maps explicit JSON-RPC responses into the same raw fixture shape. It has no default RPC URL, no env file, no secrets, and tests use mocked fetch responses. Future live RPC indexing should be handled by a separate scoped issue.
+
+`readBaseSepoliaFlowPulseLogs` is the current live reader boundary. It requires an explicit RPC URL and refuses endpoints unless `eth_chainId` returns Base Sepolia (`84532`). It is not a Base mainnet reader and does not make production-mainnet readiness claims.
 
 See [docs/INDEXER_VERIFIER_MVP.md](../../docs/INDEXER_VERIFIER_MVP.md) for the full pipeline.

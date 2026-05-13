@@ -17,6 +17,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
       - name: Check required bootstrap paths
         shell: bash
         run: |
@@ -87,6 +92,9 @@ jobs:
             fi
           done
 
+      - name: Check launch claim guardrails
+        run: node infra/scripts/check-unsafe-claims.mjs
+
   contracts:
     name: Contracts
     runs-on: ubuntu-latest
@@ -97,8 +105,8 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
-      - name: Run Foundry tests
-        run: forge test
+      - name: Run contract hardening baseline
+        run: bash infra/scripts/contracts-static-analysis.sh
 
   services:
     name: Services and launch core

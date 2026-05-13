@@ -43,7 +43,7 @@ export interface IndexedCursor {
 
 export interface IndexedBatch {
   schema: "flowmemory.indexer.batch.v0";
-  source: "fixture" | "local-rpc-placeholder";
+  source: IndexerStateSource;
   sourceSetId: string;
   observationCount: number;
   cursorCount: number;
@@ -71,9 +71,11 @@ export interface IndexedRootfield {
   pulseCount: number;
 }
 
+export type IndexerStateSource = "fixture" | "local-rpc-placeholder" | "base-sepolia-rpc";
+
 export interface IndexerState {
   schema: "flowmemory.indexer.state.v0";
-  source: "fixture" | "local-rpc-placeholder";
+  source: IndexerStateSource;
   observations: IndexedObservation[];
   pulses: IndexedPulse[];
   rootfields: IndexedRootfield[];
@@ -90,6 +92,8 @@ export interface IndexerState {
 export interface IndexerStateOptions {
   finalizedBlockNumber?: string | number | bigint;
   canonicalBlockHashes?: Record<string, string>;
+  chainId?: string;
+  source?: IndexerStateSource;
   sourceAddresses?: string[];
 }
 
@@ -170,8 +174,9 @@ export function indexFlowPulseLogs(logs: RawFlowPulseLogFixture[], options: Inde
   const cursors = new Map<string, IndexedCursor>();
   const rejectedLogs: IndexRejectedLog[] = [];
   const duplicates: IndexerState["duplicates"] = [];
+  const source = options.source ?? "fixture";
   const sourceAddresses = options.sourceAddresses ?? logs.map((log) => log.address);
-  const sourceSetId = deriveSourceSetId(logs[0]?.chainId ?? "0", sourceAddresses);
+  const sourceSetId = deriveSourceSetId(logs[0]?.chainId ?? options.chainId ?? "0", sourceAddresses);
 
   for (const log of logs) {
     if (log.receiptStatus !== "success") {
@@ -259,10 +264,10 @@ export function indexFlowPulseLogs(logs: RawFlowPulseLogFixture[], options: Inde
 
   return {
     schema: "flowmemory.indexer.state.v0",
-    source: "fixture",
+    source,
     batches: [{
       schema: "flowmemory.indexer.batch.v0",
-      source: "fixture",
+      source,
       sourceSetId,
       observationCount: observations.length,
       cursorCount: cursors.size,

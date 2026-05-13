@@ -8,7 +8,7 @@ This file is the beginner-friendly source of truth for what exists in FlowMemory
 
 FlowMemory is in foundation hardening.
 
-The bootstrap repository operating system, contracts V0 foundation, crypto V0 foundation, local indexer/verifier fixture package, dashboard V0, FlowRouter hardware POC, and local no-value devnet prototype have merged into `main`.
+The bootstrap repository operating system, contracts V0 foundation, crypto V0 foundation, local indexer/verifier fixture package, dashboard V0, FlowRouter hardware POC, local no-value devnet prototype, launch-core contract-event spine, and pre-production hardening guardrails have merged into `main`.
 
 The launch-core V0 stack now has a single runnable local command that connects contract fixtures, local indexing/verifier outputs, crypto schema vocabulary, Rootflow transitions, Flow Memory objects, generated dashboard state, local no-value devnet output, and hardware POC output without production deployment.
 
@@ -34,8 +34,10 @@ Contracts foundation:
 - `contracts/FlowMemoryHookAdapter.sol` is a compileable V0 hook-adapter scaffold. It is not a production Uniswap v4 hook.
 - `contracts/ArtifactRegistry.sol`, `CursorRegistry.sol`, `ReceiptVerifier.sol`, `WorkerRegistry.sol`, `VerifierRegistry.sol`, `WorkReceiptRegistry.sol`, `VerifierReportRegistry.sol`, and `WorkDebtScheduler.sol` provide local/test skeleton surfaces for commitments, cursors, work receipts, verifier reports, and work state.
 - `contracts/FLOWPULSE_SCHEMA.md` documents event fields, receipt boundaries, and URI/log-data limitations.
-- `tests/RootfieldRegistry.t.sol` and `tests/LiveV0Package.t.sol` contain 33 passing Foundry tests.
+- `tests/RootfieldRegistry.t.sol` and `tests/LiveV0Package.t.sol` contain 35 passing Foundry tests.
 - `tests/README.md` documents the current test command.
+- `contracts/STATIC_ANALYSIS.md`, `contracts/DEPLOYMENT_BOUNDARY.md`, and `contracts/ACCESS_CONTROL_REVIEW.md` define the current hardening, deployment, and access-control boundaries.
+- `infra/scripts/contracts-static-analysis.ps1` and `infra/scripts/contracts-static-analysis.sh` run the contract hardening baseline. Slither is optional by default and required only when explicitly requested.
 
 Crypto foundation:
 
@@ -45,9 +47,11 @@ Crypto foundation:
 Indexer/verifier local package:
 
 - `services/shared/`, `services/indexer/`, and `services/verifier/` contain fixture-first local packages.
-- The local services test suite currently has 24 passing tests.
+- The local services test suite currently has 30 passing tests.
 - `npm run e2e` currently indexes 7 observations, writes 6 cursors, rejects 2 logs, tracks 1 duplicate, and produces 7 verifier reports.
 - The verifier uses local fixture evidence only. It is not a production verifier network.
+- `npm run index:base-sepolia -- --rpc-url <url> --address <contract> --from-block <n> --to-block <n>` provides a constrained Base Sepolia reader path.
+- The Base Sepolia reader requires an explicit RPC URL, rejects non-Base-Sepolia chain ids, and persists both canonical state and a durable checkpoint without storing RPC URLs or keys.
 
 Dashboard V0:
 
@@ -66,6 +70,7 @@ Launch-core integration:
 - Generated RootflowTransitions include `contractEventRef` so reviewers and dashboards can trace each transition back to the contract event that produced the MemorySignal.
 - `services/flowmemory/src/status.ts` implements the explicit verifier-to-Flow-Memory status adapter: `valid` -> `verified`, `invalid` -> `failed`, `unresolved` -> `unresolved`, `unsupported` -> `unsupported`, `reorged` -> `reorged`.
 - `.github/workflows/ci.yml` now includes area jobs for contracts, services/launch core, crypto, dashboard, devnet, and hardware.
+- CI repository hygiene now runs `node infra/scripts/check-unsafe-claims.mjs` to block unsafe positive production, mainnet, free-storage, trustless-verifier, ISP-replacement, and AI-on-chain claims in README/docs/marketing surfaces.
 
 Local no-value devnet prototype:
 
@@ -102,6 +107,7 @@ Launch-core specifications:
 - Rich JSON Schema runtime validation with a dedicated validator dependency.
 - Production indexer or verifier service runtime.
 - Production persistence layer, production live RPC reader, production APIs, or hosted services.
+- Base mainnet reader.
 - Explorer or hardware console implementation.
 - FlowRouter firmware, manufacturing, final enclosure work, or field deployment.
 - Real Meshtastic or LoRa device integration.
@@ -129,6 +135,7 @@ Recently merged PRs:
 - #61 Indexer/verifier V0 fixture package.
 - #62 Dashboard V0.
 - #68 Launch-core FlowMemory V0 integration.
+- #69 Contract event spine for launch-core Flow Memory objects.
 
 ## Active Local Work
 
@@ -161,9 +168,9 @@ Before assigning agents, check for dirty worktrees and avoid overlapping folders
 
 1. Keep the generated launch-core command stable in CI.
 2. Add runtime schema validation and fixture diff guardrails before live services.
-3. Finish contracts hardening without production deployment or token mechanics.
-4. Keep dashboard work fixture-backed until a production API is explicitly scoped.
-5. Keep chain/appchain work no-value and local until explicit gates are passed.
+3. Exercise the Base Sepolia reader path on explicit testnet contract addresses only.
+4. Continue contracts hardening without production deployment or token mechanics.
+5. Keep dashboard work fixture-backed until a production API is explicitly scoped.
 
 ## Update Rule
 

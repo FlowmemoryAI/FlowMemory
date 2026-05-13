@@ -30,6 +30,8 @@ contract RootfieldRegistryTest {
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
     bytes32 private constant FLOWPULSE_SIGNATURE =
         keccak256("FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)");
+    bytes32 private constant OWNERSHIP_TRANSFERRED_SIGNATURE =
+        keccak256("RootfieldOwnershipTransferred(bytes32,address,address,string)");
 
     RootfieldRegistry private registry;
 
@@ -296,12 +298,67 @@ contract RootfieldRegistryTest {
         _assertTrue(rootfield.pulseCount == 3);
     }
 
+    function testTransferRootfieldOwnershipEmitsStatusPulseAndOwnershipEvent() public {
+        bytes32 rootfieldId = keccak256("rootfield.transfer.events");
+        RootfieldRegistryCaller newOwner = new RootfieldRegistryCaller();
+        registry.registerRootfield(rootfieldId, keccak256("schema.v0"), keccak256("metadata"), "");
+
+        vm.recordLogs();
+        bytes32 pulseId = registry.transferRootfieldOwnership(rootfieldId, address(newOwner), "rootfield://transfer");
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        _assertTrue(logs.length == 2);
+        _assertTrue(logs[0].emitter == address(registry));
+        _assertTrue(logs[0].topics[0] == FLOWPULSE_SIGNATURE);
+        _assertTrue(logs[0].topics[1] == pulseId);
+        _assertTrue(logs[0].topics[2] == rootfieldId);
+        _assertTrue(logs[0].topics[3] == bytes32(uint256(uint160(address(this)))));
+
+        (
+            uint8 pulseType,
+            bytes32 subject,
+            bytes32 commitment,
+            bytes32 parentPulseId,
+            uint64 sequence,
+            uint64 occurredAt,
+            string memory uri
+        ) = abi.decode(logs[0].data, (uint8, bytes32, bytes32, bytes32, uint64, uint64, string));
+
+        _assertTrue(pulseType == 3);
+        _assertTrue(subject == rootfieldId);
+        _assertTrue(commitment == keccak256(abi.encode(address(this), address(newOwner))));
+        _assertTrue(parentPulseId == bytes32(0));
+        _assertTrue(sequence == 2);
+        _assertTrue(occurredAt > 0);
+        _assertTrue(keccak256(bytes(uri)) == keccak256("rootfield://transfer"));
+
+        _assertTrue(logs[1].emitter == address(registry));
+        _assertTrue(logs[1].topics[0] == OWNERSHIP_TRANSFERRED_SIGNATURE);
+        _assertTrue(logs[1].topics[1] == rootfieldId);
+        _assertTrue(logs[1].topics[2] == bytes32(uint256(uint160(address(this)))));
+        _assertTrue(logs[1].topics[3] == bytes32(uint256(uint160(address(newOwner)))));
+
+        string memory evidenceURI = abi.decode(logs[1].data, (string));
+        _assertTrue(keccak256(bytes(evidenceURI)) == keccak256("rootfield://transfer"));
+    }
+
     function testCannotTransferRootfieldToZeroOwner() public {
         bytes32 rootfieldId = keccak256("rootfield.transfer.zero");
         registry.registerRootfield(rootfieldId, keccak256("schema.v0"), keccak256("metadata"), "");
 
         vm.expectRevert(RootfieldRegistry.ZeroRootfieldOwner.selector);
         registry.transferRootfieldOwnership(rootfieldId, address(0), "");
+    }
+
+    function testCannotTransferInactiveRootfieldOwnership() public {
+        bytes32 rootfieldId = keccak256("rootfield.transfer.inactive");
+        bytes32 registrationPulseId =
+            registry.registerRootfield(rootfieldId, keccak256("schema.v0"), keccak256("metadata"), "");
+        registry.deactivateRootfield(rootfieldId, registrationPulseId, "rootfield://deactivate");
+        RootfieldRegistryCaller newOwner = new RootfieldRegistryCaller();
+
+        vm.expectRevert(abi.encodeWithSelector(RootfieldRegistry.RootfieldInactive.selector, rootfieldId));
+        registry.transferRootfieldOwnership(rootfieldId, address(newOwner), "");
     }
 
     function _assertTrue(bool condition) private pure {
