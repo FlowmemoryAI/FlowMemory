@@ -198,10 +198,12 @@ fn run(cli: Cli) -> Result<()> {
             print_json(&DemoSummary::from_demo(cli.state, out_dir, &demo))?;
         }
         Command::Smoke { out_dir } => {
-            let first = build_demo_state();
-            let second = build_demo_state();
+            let first = build_smoke_state(10);
+            let second = build_smoke_state(10);
             let deterministic_replay = first.first_block_hash == second.first_block_hash
                 && first.second_block_hash == second.second_block_hash
+                && first.state.parent_hash == second.state.parent_hash
+                && first.state.blocks.len() == second.state.blocks.len()
                 && state_root(&first.state) == state_root(&second.state)
                 && state_map_roots(&first.state) == state_map_roots(&second.state);
             save_state(&cli.state, &first.state)?;
@@ -259,6 +261,14 @@ fn build_demo_state() -> DemoRun {
         first_block_hash: first.block_hash,
         second_block_hash: second.block_hash,
     }
+}
+
+fn build_smoke_state(min_blocks: usize) -> DemoRun {
+    let mut demo = build_demo_state();
+    while demo.state.blocks.len() < min_blocks {
+        build_block(&mut demo.state);
+    }
+    demo
 }
 
 fn transactions_from_fixture(path: &Path) -> Result<Vec<Transaction>> {
@@ -376,6 +386,8 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "blockHeight": state.blocks.len(),
         "rootfields": state.rootfields,
         "agentAccounts": state.agent_accounts,
+        "localTestUnitBalances": state.local_test_unit_balances,
+        "faucetRecords": state.faucet_records,
         "modelPassports": state.model_passports,
         "memoryCells": state.memory_cells,
         "challenges": state.challenges,
@@ -394,6 +406,8 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "importedObservations": state.imported_observations,
         "operatorKeyReferences": state.operator_key_references,
         "agentAccounts": state.agent_accounts,
+        "localTestUnitBalances": state.local_test_unit_balances,
+        "faucetRecords": state.faucet_records,
         "memoryCells": state.memory_cells,
         "challenges": state.challenges,
         "finalityReceipts": state.finality_receipts,
@@ -407,6 +421,8 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "schema": "flowmemory.verifier_handoff.local_devnet.v0",
         "genesisConfig": state.config,
         "operatorKeyReferences": state.operator_key_references,
+        "localTestUnitBalances": state.local_test_unit_balances,
+        "faucetRecords": state.faucet_records,
         "verifierModules": state.verifier_modules,
         "workReceipts": state.work_receipts,
         "verifierReports": state.verifier_reports,
@@ -431,6 +447,8 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "objects": {
             "rootfields": state.rootfields,
             "agentAccounts": state.agent_accounts,
+            "localTestUnitBalances": state.local_test_unit_balances,
+            "faucetRecords": state.faucet_records,
             "modelPassports": state.model_passports,
             "memoryCells": state.memory_cells,
             "challenges": state.challenges,
@@ -518,6 +536,8 @@ struct StateSummary {
     blocks: usize,
     rootfields: usize,
     agent_accounts: usize,
+    local_test_unit_balances: usize,
+    faucet_records: usize,
     model_passports: usize,
     memory_cells: usize,
     challenges: usize,
@@ -547,6 +567,8 @@ impl StateSummary {
             blocks: state.blocks.len(),
             rootfields: state.rootfields.len(),
             agent_accounts: state.agent_accounts.len(),
+            local_test_unit_balances: state.local_test_unit_balances.len(),
+            faucet_records: state.faucet_records.len(),
             model_passports: state.model_passports.len(),
             memory_cells: state.memory_cells.len(),
             challenges: state.challenges.len(),
@@ -657,6 +679,10 @@ struct DemoSummary {
     state_root: String,
     agent_id: String,
     agent_registered: bool,
+    local_balance_account_id: String,
+    local_balance_units: u64,
+    faucet_record_id: String,
+    faucet_record_created: bool,
     work_receipt_id: String,
     work_receipt_submitted: bool,
     verifier_report_id: String,
@@ -681,6 +707,15 @@ impl DemoSummary {
             state_root: state_root(&demo.state),
             agent_id: "agent:demo:alpha".to_string(),
             agent_registered: demo.state.agent_accounts.contains_key("agent:demo:alpha"),
+            local_balance_account_id: "local-balance:demo:agent-alpha".to_string(),
+            local_balance_units: demo
+                .state
+                .local_test_unit_balances
+                .get("local-balance:demo:agent-alpha")
+                .map(|balance| balance.units)
+                .unwrap_or(0),
+            faucet_record_id: "faucet:demo:001".to_string(),
+            faucet_record_created: demo.state.faucet_records.contains_key("faucet:demo:001"),
             work_receipt_id: "receipt:demo:001".to_string(),
             work_receipt_submitted: demo.state.work_receipts.contains_key("receipt:demo:001"),
             verifier_report_id: "report:demo:001".to_string(),
@@ -714,6 +749,8 @@ struct SmokeSummary {
     state_path: PathBuf,
     out_dir: PathBuf,
     state_root: String,
+    block_height: usize,
+    latest_block_hash: String,
     deterministic_replay: bool,
     checks: SmokeChecks,
     handoff_files: Vec<String>,
@@ -725,6 +762,9 @@ struct SmokeChecks {
     genesis_config_initialized: bool,
     operator_key_reference_present: bool,
     agent_registered: bool,
+    local_test_unit_balance_created: bool,
+    faucet_record_created: bool,
+    local_test_unit_balance_units: u64,
     model_registered: bool,
     work_receipt_submitted: bool,
     artifact_available: bool,
@@ -749,11 +789,24 @@ impl SmokeSummary {
             state_path,
             out_dir,
             state_root: state_root(&demo.state),
+            block_height: demo.state.blocks.len(),
+            latest_block_hash: demo.state.parent_hash.clone(),
             deterministic_replay,
             checks: SmokeChecks {
                 genesis_config_initialized: demo.state.config.no_value,
                 operator_key_reference_present: !demo.state.operator_key_references.is_empty(),
                 agent_registered: demo.state.agent_accounts.contains_key("agent:demo:alpha"),
+                local_test_unit_balance_created: demo
+                    .state
+                    .local_test_unit_balances
+                    .contains_key("local-balance:demo:agent-alpha"),
+                faucet_record_created: demo.state.faucet_records.contains_key("faucet:demo:001"),
+                local_test_unit_balance_units: demo
+                    .state
+                    .local_test_unit_balances
+                    .get("local-balance:demo:agent-alpha")
+                    .map(|balance| balance.units)
+                    .unwrap_or(0),
                 model_registered: demo
                     .state
                     .model_passports

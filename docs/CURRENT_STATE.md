@@ -42,9 +42,11 @@ Contracts foundation:
 - `contracts/FlowPulse.sol` defines the FlowPulse v0 event interface and initial pulse type constants.
 - `contracts/RootfieldRegistry.sol` registers Rootfield namespaces, accepts committed roots, and emits FlowPulse events.
 - `contracts/FlowMemoryHookAdapter.sol` is a compileable V0 hook-adapter scaffold. It emits `SWAP_MEMORY_SIGNAL` FlowPulse events for the launch fixture path. It is not a production Uniswap v4 hook.
+- `contracts/FlowMemoryAfterSwapHook.sol` is a PoolManager-gated Uniswap v4 `afterSwap` hook candidate for the real hook path. It emits FlowPulse without custody, fee override, or `txHash`/`logIndex` assumptions.
+- `contracts/FlowMemoryHookPlanner.sol` records the afterSwap-only permission flag, address-mining target, CREATE2 planning helpers, and Base Sepolia planning constants.
 - `contracts/ArtifactRegistry.sol`, `CursorRegistry.sol`, `ReceiptVerifier.sol`, `WorkerRegistry.sol`, `VerifierRegistry.sol`, `WorkReceiptRegistry.sol`, `VerifierReportRegistry.sol`, and `WorkDebtScheduler.sol` provide local/test skeleton surfaces for commitments, cursors, work receipts, verifier reports, and work state.
 - `contracts/FLOWPULSE_SCHEMA.md` documents event fields, receipt boundaries, and URI/log-data limitations.
-- `tests/RootfieldRegistry.t.sol` and `tests/LiveV0Package.t.sol` contain 38 passing Foundry tests.
+- Foundry tests currently cover the registry/hook/receipt surfaces, including afterSwap hook boundaries and CREATE2 planning.
 - `tests/README.md` documents the current test command.
 - `contracts/STATIC_ANALYSIS.md`, `contracts/DEPLOYMENT_BOUNDARY.md`, and `contracts/ACCESS_CONTROL_REVIEW.md` define the current hardening, deployment, and access-control boundaries.
 - `infra/scripts/contracts-static-analysis.ps1` and `infra/scripts/contracts-static-analysis.sh` run the contract hardening baseline. Slither is optional by default and required only when explicitly requested.
@@ -52,15 +54,17 @@ Contracts foundation:
 Crypto foundation:
 
 - `crypto/` contains runnable Keccak-based V0 hash helpers, typed domains, receipt/report/root/artifact/work helpers, attestation helpers, fixtures, and test vectors.
-- Crypto tests currently pass with 13 Node tests, 21 vector validations, and a Python FlowPulse vector recompute.
+- Crypto tests currently pass with local object, signed-envelope, wallet, and vector coverage: 21 Node tests, 38 vector validations, and 15 local-alpha documents with 15 signature envelopes plus 1 local transaction envelope.
 
 Indexer/verifier local package:
 
-- `services/shared/`, `services/indexer/`, and `services/verifier/` contain fixture-first local packages.
-- The local services test suite currently has 31 passing tests.
+- `services/shared/`, `services/indexer/`, `services/verifier/`, `services/flowmemory/`, `services/control-plane/`, and `services/bridge-relayer/` contain fixture-first local packages.
+- The local services test suite currently passes across the shared, indexer, verifier, Flow Memory, control-plane, and bridge-relayer packages.
 - `npm run e2e` currently indexes 8 observations, writes 7 cursors, rejects 2 logs, tracks 1 duplicate, and produces 8 verifier reports.
 - The verifier uses local fixture evidence only. It is not a production verifier network.
 - The verifier supports local fixture checks for rootfield registration, root commitments, and swap-derived memory-signal commitments.
+- The control-plane API prefers live local runtime state from `devnet/local/`, falls back to deterministic fixtures, and exposes a 49-method local smoke client for node status, blocks, transactions, accounts, balances, wallets, Rootfields, receipts, verifier reports, memory cells, challenges, finality, bridge observations, bridge deposits, bridge credits, withdrawals, provenance, and raw JSON.
+- Control-plane transaction and bridge-observation intake writes local ignored files under `devnet/local/intake/` and rejects private-key, mnemonic, seed phrase, RPC credential, API key, and webhook-shaped material.
 - `npm run index:base-sepolia -- --rpc-url <url> --address <contract> --from-block <n> --to-block <n>` provides a constrained Base Sepolia reader path.
 - The Base Sepolia reader requires an explicit RPC URL, rejects non-Base-Sepolia chain ids, and persists both canonical state and a durable checkpoint without storing RPC URLs or keys.
 - `npm run index:base-canary -- --acknowledge-mainnet-canary --rpc-url <url> --address <contract> --from-block <n> --to-block <n>` provides a guarded Base mainnet canary reader path for the documented V0 canary deployment only.
@@ -98,9 +102,9 @@ Launch-core integration:
 Local no-value devnet prototype:
 
 - `crates/flowmemory-devnet/` contains a Rust local devnet prototype.
-- It models deterministic local transactions, blocks, state roots, and handoff output.
-- It has 7 passing Rust tests.
-- It is not a production L1, token system, sequencer, validator set, or bridge.
+- It models deterministic local transactions, blocks, state roots, handoff output, and native local objects for agent accounts, model passports, work receipts, verifier reports, memory cells, challenges, finality receipts, artifact availability, and no-value local test-unit/faucet records.
+- It has 20 passing Rust tests.
+- It is not a production L1, value-bearing token system, sequencer, validator set, or bridge.
 
 FlowRouter hardware POC:
 
@@ -126,19 +130,20 @@ Launch-core specifications:
 FlowChain private/local testnet snapshot:
 
 - Implemented: V0 launch-core generation and validation, no-value deterministic
-  Rust devnet prototype, contract event/settlement spine, crypto V0 helpers and
-  vectors, fixture indexer/verifier, fixture-backed dashboard, hardware POC
+  Rust devnet prototype, native private/local object lifecycle, local
+  control-plane API and smoke client, contract event/settlement spine,
+  Uniswap v4 afterSwap hook candidate/planner, crypto V0 helpers and vectors,
+  fixture indexer/verifier, fixture-backed dashboard/workbench, hardware POC
   simulator, Base Sepolia reader/deploy commands, guarded canary reader, and
   Windows-first root wrapper commands for prerequisite checks, init, bounded
-  start/stop, demo, smoke, export/import, and workbench dev mode.
-- In flight: native private-testnet object lifecycle, local control-plane API,
-  private-testnet object IDs and envelopes, workbench extension, optional
-  hardware operator signal fixtures, and advanced L1 research gates.
-- Missing: long-running local runtime start behavior, private genesis/config
-  package beyond the deterministic devnet genesis, full native object
-  lifecycle coverage, full control-plane method coverage, full workbench entity
-  coverage, no-secret API checks, and second-computer smoke evidence for the
-  unmerged native object/control-plane/workbench surfaces.
+  start/stop, demo, smoke, full smoke, export/import, and workbench dev mode.
+- In flight: private-testnet object IDs and envelopes for newest local balance
+  and bridge-shaped surfaces, workbench polish, optional hardware operator
+  signal fixtures, Base Sepolia hook deployment runbook, and advanced L1
+  research gates.
+- Missing: long-running multi-process node behavior, LAN peer mode, encrypted
+  local operator vault, and second-computer smoke evidence for the latest
+  full-smoke branch.
 - Later gated: production L1/mainnet, public validators, tokenomics,
   production bridge, production hook deployment, audited cryptography,
   proof-circuit infrastructure, production hardware, and hosted production
@@ -219,9 +224,9 @@ Before assigning agents, check for dirty worktrees and avoid overlapping folders
 ## Current Operator Priorities
 
 1. Keep the generated launch-core command stable in CI.
-2. Keep the new root wrapper path usable on Windows: `flowchain:prereq`, `flowchain:init`, `flowchain:start`, `flowchain:demo`, `flowchain:smoke`, `flowchain:export`, and `workbench:dev`.
-3. Convert the remaining V0/local-alpha surfaces into one FlowChain private/local L1 testnet package for second-computer validation.
-4. Land the missing subsystem pieces behind the wrappers: long-running runtime behavior, control-plane serve/query coverage, native object lifecycle, and workbench entity coverage.
+2. Keep the new root wrapper path usable on Windows: `flowchain:prereq`, `flowchain:init`, `flowchain:start`, `flowchain:demo`, `flowchain:smoke`, `flowchain:full-smoke`, `flowchain:export`, and `workbench:dev`.
+3. Use `npm run flowchain:full-smoke` as the private/local package acceptance gate before claiming a branch is demo-ready.
+4. Keep improving the missing subsystem pieces behind the wrappers: long-running runtime behavior, LAN peer mode, encrypted local operator vault, workbench polish, and Base Sepolia hook deployment planning.
 5. Keep the guarded Base canary reader and dashboard canary artifacts fresh when canary smoke actions change.
 6. Exercise the Base Sepolia deploy/read path on explicit testnet contract addresses only.
 7. Continue contracts hardening without production mainnet deployment or token mechanics.

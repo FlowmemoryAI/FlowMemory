@@ -12,6 +12,12 @@ Local mock:
 npm run bridge:mock
 ```
 
+The control plane can read `services/bridge-relayer/out/bridge-observation.json`
+and can intake additional local bridge-agent observations through JSON-RPC
+`bridge_observation_submit` or HTTP `POST /bridge/observations`. Readbacks are
+available through `bridge_observation_list`, `bridge_deposit_list`,
+`bridge_credit_list`, and `withdrawal_list`.
+
 Base Sepolia guarded smoke:
 
 ```powershell

@@ -78,7 +78,13 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
       return;
     }
 
-    if (req.method !== "POST" || req.url !== "/rpc") {
+    if (req.method === "GET" && req.url === "/bridge/observations") {
+      const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "bridge-observations", method: "bridge_observation_list" }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
+    if (req.method !== "POST" || (req.url !== "/rpc" && req.url !== "/bridge/observations")) {
       writeJson(res, 404, { error: "not found" });
       return;
     }
@@ -91,7 +97,10 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
     req.on("end", () => {
       try {
         const payload = JSON.parse(body) as unknown;
-        const response = dispatchJsonRpc(payload, { state });
+        const rpcPayload = req.url === "/bridge/observations"
+          ? { jsonrpc: "2.0", id: "bridge-observation-submit", method: "bridge_observation_submit", params: { observation: payload } }
+          : payload;
+        const response = dispatchJsonRpc(rpcPayload, { state });
         if (response === undefined) {
           res.writeHead(204, jsonHeaders);
           res.end();

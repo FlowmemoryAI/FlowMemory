@@ -40,7 +40,7 @@ npm run flowchain:demo
 npm run flowchain:export
 ```
 
-Run `npm run flowchain:smoke` when the machine has the full prerequisite set,
+Run `npm run flowchain:full-smoke` when the machine has the full prerequisite set,
 including Foundry, Python, dashboard dependencies, and crypto dependencies.
 
 ## During The Day
@@ -71,6 +71,7 @@ Run before handoff when dependencies are installed:
 
 ```powershell
 npm run flowchain:smoke
+npm run flowchain:full-smoke
 git diff --check
 ```
 

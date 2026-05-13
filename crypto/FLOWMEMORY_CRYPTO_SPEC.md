@@ -138,8 +138,8 @@ The current package implements:
 - deterministic verifier reports
 - verifier signature envelopes
 - reorg-aware status handling
-- FlowChain Local Alpha object identity for agent accounts, model passports, work receipts, artifact availability proofs, verifier modules, verifier reports, memory cells, challenges, finality receipts, hardware signal envelopes, and control-plane provenance responses
-- Local Alpha operator, agent, verifier, and hardware signature envelope payloads and validators for replay, wrong domain, missing signer, zero hash, malformed id, malformed dependency, bad parent/root, and wrong object type checks
+- FlowChain Local Alpha object identity for agent accounts, model passports, work receipts, artifact availability proofs, verifier modules, verifier reports, memory cells, challenges, finality receipts, bridge deposits, bridge credits, bridge withdrawals, local balance records, hardware signal envelopes, and control-plane provenance responses
+- Local Alpha operator, agent, verifier, and hardware signature envelope payloads plus chain-bound local transaction envelopes and validators for replay, wrong chain id, wrong domain, wrong signer, missing signer, zero hash, malformed id, malformed dependency, malformed bridge deposit, bad parent/root, and wrong object type checks
 - test vectors and cross-language conformance tests
 
 The runnable package in `crypto/src/` currently implements the v0 hash utilities and tests them against fixtures in `crypto/fixtures/`.
@@ -151,7 +151,7 @@ MVP should remain verifier-attested for:
 - storage provider claims
 - model or worker behavior
 - final status labels before proof systems exist
-- local operator-vault policy; current fixture keys are deterministic no-value test keys and do not represent wallet custody, production account control, or transferable value
+- local encrypted test-vault policy; committed fixtures expose deterministic no-value public keys only and do not represent wallet custody, production account control, or transferable value
 
 ## Future Split
 

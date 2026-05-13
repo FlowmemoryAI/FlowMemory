@@ -42,9 +42,16 @@ export function validateLocalAlphaFixtures(fixturePath = defaultFixturePath) {
     envelopeCount += 1;
   }
 
+  let transactionCount = 0;
+  for (const vector of fixture.transactions?.positive ?? []) {
+    validateDocument(vector.schemaPath, vector.envelope, vector.name);
+    transactionCount += 1;
+  }
+
   return {
     documents: documentCount,
     envelopes: envelopeCount,
+    transactions: transactionCount,
     schemas: validators.size
   };
 }
@@ -56,6 +63,6 @@ function readJson(path) {
 if (fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const result = validateLocalAlphaFixtures(process.argv[2]);
   console.log(
-    `FLOWCHAIN_LOCAL_ALPHA_FIXTURES_OK documents=${result.documents} envelopes=${result.envelopes} schemas=${result.schemas}`
+    `FLOWCHAIN_LOCAL_ALPHA_FIXTURES_OK documents=${result.documents} envelopes=${result.envelopes} transactions=${result.transactions} schemas=${result.schemas}`
   );
 }

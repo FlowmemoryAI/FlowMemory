@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowchain.bridge_withdrawal.v0",
+  "title": "FlowChain Local Alpha BridgeWithdrawal V0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "withdrawalId",
+    "accountId",
+    "destinationChainId",
+    "destinationContract",
+    "token",
+    "amount",
+    "recipient",
+    "requestedAtBlockNumber",
+    "requestedAtUnixMs",
+    "status",
+    "statusCode",
+    "nonce",
+    "metadataHash"
+  ],
+  "properties": {
+    "schema": { "const": "flowchain.bridge_withdrawal.v0" },
+    "withdrawalId": { "$ref": "#/$defs/hex32" },
+    "accountId": { "$ref": "#/$defs/hex32" },
+    "destinationChainId": { "type": "integer", "enum": [84532, 8453] },
+    "destinationContract": { "$ref": "#/$defs/address" },
+    "token": { "$ref": "#/$defs/address" },
+    "amount": { "$ref": "#/$defs/uintString" },
+    "recipient": { "$ref": "#/$defs/address" },
+    "requestedAtBlockNumber": { "$ref": "#/$defs/uintString" },
+    "requestedAtUnixMs": { "$ref": "#/$defs/uintString" },
+    "status": { "enum": ["withdrawal_requested", "released", "rejected", "failed"] },
+    "statusCode": { "type": "integer", "minimum": 4, "maximum": 7 },
+    "nonce": { "$ref": "#/$defs/hex32" },
+    "metadataHash": { "$ref": "#/$defs/hex32" }
+  },
+  "$defs": {
+    "address": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "uintString": { "type": "string", "pattern": "^[0-9]+$" }
+  }
+}

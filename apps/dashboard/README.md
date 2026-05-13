@@ -105,14 +105,18 @@ fixtures/dashboard/generated/hardware-heartbeats.json
 
 Every displayed record carries source subsystem, fixture/local origin, chain context, ID/hash, status, and last-updated metadata when available.
 
-The workbench adds local setup/API status plus object views for blocks, transactions, agents, models, receipts, memory cells, artifacts, verifier reports, challenges, finality, provenance, and raw JSON. When a current fixture does not yet contain a private-testnet object type, the view stays empty and names the expected control-plane endpoint.
+The workbench adds local setup/API status plus object views for node status, peers, blocks, transactions, mempool, accounts, balances, faucet events, wallet public metadata, agents, models, receipts, memory cells, artifacts, verifier modules/reports, challenges, finality, private/local bridge deposits/credits/withdrawals, hardware signals, provenance, and raw JSON. When a current fixture does not yet contain a private-testnet object type, the view stays empty and names the expected control-plane endpoint plus the local command/service that should provide it.
+
+Browser actions are hidden unless the local control-plane advertises the matching POST endpoint through `/health` or `/state`. The dashboard never asks for private keys in the browser.
 
 Workbench object coverage:
 
 ```text
-node/chain status, blocks, transactions, rootfields, agents, models, work receipts,
+node/chain status, peers, blocks, transactions, mempool, accounts, balances,
+faucet events, wallet public metadata, rootfields, agents, models, work receipts,
 memory cells, artifacts, verifier modules, verifier reports, challenges, finality,
-provenance/source, hardware signals, raw JSON
+bridge deposits, bridge credits, bridge withdrawals, provenance/source,
+hardware signals, raw JSON
 ```
 
 ## Status Vocabulary

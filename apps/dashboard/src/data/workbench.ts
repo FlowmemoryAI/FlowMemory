@@ -9,8 +9,15 @@ const CONTROL_PLANE_TIMEOUT_MS = 900;
 
 export type WorkbenchSource = "control-plane" | "fixture-fallback";
 export type WorkbenchSectionKey =
+  | "nodeStatus"
+  | "peers"
   | "blocks"
   | "transactions"
+  | "mempool"
+  | "accounts"
+  | "balances"
+  | "faucetEvents"
+  | "walletMetadata"
   | "rootfields"
   | "agents"
   | "models"
@@ -21,6 +28,9 @@ export type WorkbenchSectionKey =
   | "verifierReports"
   | "challenges"
   | "finality"
+  | "bridgeDeposits"
+  | "bridgeCredits"
+  | "bridgeWithdrawals"
   | "provenance"
   | "hardwareSignals"
   | "rawJson";
@@ -46,6 +56,8 @@ export interface WorkbenchSectionDefinition {
   label: string;
   detail: string;
   expectedEndpoint: string;
+  missingCommand: string;
+  missingService: string;
 }
 
 export interface ControlPlaneProbe {
@@ -72,12 +84,20 @@ export interface WorkbenchSetupStep {
   detail: string;
 }
 
+export interface WorkbenchAction {
+  label: string;
+  endpoint: string;
+  detail: string;
+  boundary: string;
+}
+
 export interface WorkbenchSnapshot {
   source: WorkbenchSource;
   generatedAt: string;
   controlPlane: ControlPlaneProbe;
   node: WorkbenchNodeStatus;
   setupSteps: WorkbenchSetupStep[];
+  actions: WorkbenchAction[];
   sections: Record<WorkbenchSectionKey, WorkbenchRecord[]>;
   loadIssues: string[];
   raw: {
@@ -93,94 +113,231 @@ type UnknownRecord = Record<string, unknown>;
 
 export const WORKBENCH_SECTIONS: WorkbenchSectionDefinition[] = [
   {
+    key: "nodeStatus",
+    label: "Node Status",
+    detail: "Runtime health, chain head, genesis, state root, and local API availability.",
+    expectedEndpoint: "GET /health + GET /state",
+    missingCommand: "npm run flowchain:start",
+    missingService: "FlowChain control-plane API on http://127.0.0.1:8787",
+  },
+  {
+    key: "peers",
+    label: "Peers",
+    detail: "Private/local peer inventory when the control-plane exposes network state.",
+    expectedEndpoint: "GET /peers",
+    missingCommand: "npm run flowchain:start",
+    missingService: "FlowChain peer service /peers",
+  },
+  {
     key: "blocks",
     label: "Blocks",
     detail: "Private/local chain blocks, state roots, parent hashes, and receipt counts.",
     expectedEndpoint: "GET /blocks",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain state export /blocks",
   },
   {
     key: "transactions",
     label: "Transactions",
     detail: "Smoke-flow transaction ids and receipt application status.",
     expectedEndpoint: "GET /transactions",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain state export /transactions",
+  },
+  {
+    key: "mempool",
+    label: "Mempool",
+    detail: "Pending local transaction pool before deterministic block production.",
+    expectedEndpoint: "GET /mempool",
+    missingCommand: "npm run flowchain:start",
+    missingService: "FlowChain control-plane /mempool",
+  },
+  {
+    key: "accounts",
+    label: "Accounts",
+    detail: "Public account/controller metadata for local agent and operator identities.",
+    expectedEndpoint: "GET /accounts",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain account registry /accounts",
+  },
+  {
+    key: "balances",
+    label: "Balances",
+    detail: "No-value local balance or credit metadata when exported by the private testnet API.",
+    expectedEndpoint: "GET /balances",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain no-value balance view /balances",
+  },
+  {
+    key: "faucetEvents",
+    label: "Faucet Events",
+    detail: "Local faucet or no-value credit events for demo accounts only.",
+    expectedEndpoint: "GET /faucet-events",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain local faucet event view /faucet-events",
+  },
+  {
+    key: "walletMetadata",
+    label: "Wallet Metadata",
+    detail: "Public key references and browser-safe wallet metadata. Private keys are never read here.",
+    expectedEndpoint: "GET /wallets/public",
+    missingCommand: "npm run flowchain:init",
+    missingService: "FlowChain public wallet metadata /wallets/public",
   },
   {
     key: "rootfields",
     label: "Rootfields",
     detail: "Rootfield namespaces, owners, compact roots, schema hashes, and active state.",
     expectedEndpoint: "GET /rootfields",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain rootfield registry /rootfields",
   },
   {
     key: "agents",
     label: "Agents",
     detail: "Operators, workers, verifier identities, and observed contract actors.",
     expectedEndpoint: "GET /agents",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain agent registry /agents",
   },
   {
     key: "models",
     label: "Models",
     detail: "ModelPassport objects when the private testnet runtime exports them.",
     expectedEndpoint: "GET /models",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain model registry /models",
   },
   {
     key: "receipts",
     label: "Work Receipts",
     detail: "Work receipts from the launch fixture and local devnet handoff.",
     expectedEndpoint: "GET /receipts",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain receipt view /receipts",
   },
   {
     key: "memoryCells",
     label: "Memory Cells",
     detail: "Native MemoryCell records or rootfield-bundle projections while the API is pending.",
     expectedEndpoint: "GET /memory-cells",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain memory-cell registry /memory-cells",
   },
   {
     key: "artifacts",
     label: "Artifacts",
     detail: "Artifact availability commitments and receipt-linked artifact URIs.",
     expectedEndpoint: "GET /artifacts",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain artifact registry /artifacts",
   },
   {
     key: "verifierModules",
     label: "Verifier Modules",
     detail: "Verifier module identities or derived module projections from local reports.",
     expectedEndpoint: "GET /verifier-modules",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain verifier module registry /verifier-modules",
   },
   {
     key: "verifierReports",
     label: "Verifier Reports",
     detail: "Verifier reports, report digests, policies, checks, and reason codes.",
     expectedEndpoint: "GET /verifier-reports",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain verifier report view /verifier-reports",
   },
   {
     key: "challenges",
     label: "Challenges",
     detail: "Challenge lifecycle objects once the runtime/control-plane exports them.",
     expectedEndpoint: "GET /challenges",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain challenge registry /challenges",
   },
   {
     key: "finality",
     label: "Finality",
     detail: "Local finality distance, anchor placeholders, and latest finalized state.",
     expectedEndpoint: "GET /finality",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain finality view /finality",
+  },
+  {
+    key: "bridgeDeposits",
+    label: "Bridge Deposits",
+    detail: "Private/local bridge-deposit test objects only; this is not a production bridge.",
+    expectedEndpoint: "GET /bridge/deposits",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain bridge deposit view /bridge/deposits",
+  },
+  {
+    key: "bridgeCredits",
+    label: "Bridge Credits",
+    detail: "Private/local bridge-credit test objects only; no real-funds flow is available.",
+    expectedEndpoint: "GET /bridge/credits",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain bridge credit view /bridge/credits",
+  },
+  {
+    key: "bridgeWithdrawals",
+    label: "Bridge Withdrawals",
+    detail: "Private/local bridge-withdrawal test objects only; production bridge work is out of scope.",
+    expectedEndpoint: "GET /bridge/withdrawals",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain bridge withdrawal view /bridge/withdrawals",
   },
   {
     key: "provenance",
     label: "Provenance / Source",
     detail: "Source paths, API probe result, and fixture fallback boundary.",
     expectedEndpoint: "GET /raw",
+    missingCommand: "npm run dev --prefix apps/dashboard",
+    missingService: "Dashboard fixture and control-plane probe",
   },
   {
     key: "hardwareSignals",
     label: "Hardware Signals",
     detail: "FlowRouter, gateway, and low-bandwidth sidecar heartbeat/control-signal records.",
     expectedEndpoint: "GET /hardware-signals",
+    missingCommand: "npm run flowchain:smoke",
+    missingService: "FlowChain hardware signal export /hardware-signals",
   },
   {
     key: "rawJson",
     label: "Raw JSON",
     detail: "Loaded dashboard, devnet, and control-plane payloads for direct inspection.",
     expectedEndpoint: "GET /raw",
+    missingCommand: "npm run dev --prefix apps/dashboard",
+    missingService: "Dashboard raw JSON inspector",
+  },
+];
+
+const WORKBENCH_ACTIONS: WorkbenchAction[] = [
+  {
+    label: "Run smoke",
+    endpoint: "POST /smoke",
+    detail: "Ask the local control-plane to run the deterministic private/local object smoke path.",
+    boundary: "Uses a local API endpoint only; no browser key material is collected.",
+  },
+  {
+    label: "Produce block",
+    endpoint: "POST /blocks",
+    detail: "Request deterministic local block production when the runtime advertises that action.",
+    boundary: "No value-bearing transaction signing happens in the browser.",
+  },
+  {
+    label: "Request demo faucet",
+    endpoint: "POST /faucet",
+    detail: "Create a local no-value faucet/credit event for demo accounts when supported.",
+    boundary: "Demo credits only; this is not a token or real-funds faucet.",
+  },
+  {
+    label: "Refresh bridge demo",
+    endpoint: "POST /bridge/smoke",
+    detail: "Populate private/local bridge lifecycle test objects when the control-plane exposes them.",
+    boundary: "Private/local bridge fixtures only; production bridge work remains out of scope.",
   },
 ];
 
@@ -360,6 +517,58 @@ function extractControlPlaneState(state: unknown): unknown {
   return state;
 }
 
+function normalizeEndpointHint(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  const methodMatch = /^(GET|POST|PUT|PATCH|DELETE|OPTIONS)\s+\/[A-Za-z0-9/_:.-]+$/i.exec(trimmed);
+  if (methodMatch) {
+    return `${methodMatch[1].toUpperCase()} ${trimmed.slice(methodMatch[1].length).trim()}`;
+  }
+
+  if (/^\/[A-Za-z0-9/_:.-]+$/.test(trimmed)) {
+    return `GET ${trimmed}`;
+  }
+
+  return null;
+}
+
+function collectEndpointHints(payload: unknown, depth = 0): string[] {
+  if (depth > 4) {
+    return [];
+  }
+
+  const normalized = normalizeEndpointHint(payload);
+  if (normalized) {
+    return [normalized];
+  }
+
+  if (Array.isArray(payload)) {
+    return payload.flatMap((item) => collectEndpointHints(item, depth + 1));
+  }
+
+  if (!isRecord(payload)) {
+    return [];
+  }
+
+  const directMethod = typeof payload.method === "string" ? payload.method.toUpperCase() : null;
+  const directPath = typeof payload.path === "string" ? payload.path : typeof payload.route === "string" ? payload.route : null;
+  const direct = directMethod && directPath ? normalizeEndpointHint(`${directMethod} ${directPath}`) : null;
+
+  return [
+    direct,
+    ...Object.entries(payload)
+      .filter(([key]) => ["actions", "capabilities", "endpoints", "links", "routes"].includes(key))
+      .flatMap(([, value]) => collectEndpointHints(value, depth + 1)),
+  ].filter((item): item is string => item !== null);
+}
+
+function uniqueEndpoints(...sources: Array<string[] | undefined>): string[] {
+  return [...new Set(sources.flatMap((source) => source ?? []))].sort((left, right) => left.localeCompare(right));
+}
+
 function getControlPlaneUrl(): string {
   const env = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env;
   const configured = env?.VITE_FLOWCHAIN_CONTROL_PLANE_URL?.trim();
@@ -395,7 +604,7 @@ async function fetchOptionalJson(path: string): Promise<{ value: unknown | null;
 async function probeControlPlane(): Promise<ControlPlaneProbe> {
   const url = getControlPlaneUrl();
   const checkedAt = new Date().toISOString();
-  const endpoints = ["GET /health", "GET /state"];
+  const defaultEndpoints = ["GET /health", "GET /state"];
 
   try {
     const health = await fetchJsonWithTimeout(`${url}/health`, CONTROL_PLANE_TIMEOUT_MS);
@@ -408,7 +617,7 @@ async function probeControlPlane(): Promise<ControlPlaneProbe> {
         url,
         status: "available",
         checkedAt,
-        endpoints,
+        endpoints: uniqueEndpoints(defaultEndpoints, collectEndpointHints(health)),
         health,
         error: `Health endpoint responded, but state endpoint was not loaded: ${
           error instanceof Error ? error.message : "unknown state error"
@@ -420,7 +629,7 @@ async function probeControlPlane(): Promise<ControlPlaneProbe> {
       url,
       status: "available",
       checkedAt,
-      endpoints,
+      endpoints: uniqueEndpoints(defaultEndpoints, collectEndpointHints(health), collectEndpointHints(state)),
       health,
       state,
     };
@@ -429,10 +638,214 @@ async function probeControlPlane(): Promise<ControlPlaneProbe> {
       url,
       status: "not-detected",
       checkedAt,
-      endpoints,
+      endpoints: defaultEndpoints,
       error: error instanceof Error ? error.message : "control-plane API not detected",
     };
   }
+}
+
+function buildLocalActions(controlPlane: ControlPlaneProbe): WorkbenchAction[] {
+  if (controlPlane.status !== "available") {
+    return [];
+  }
+
+  const advertised = new Set(controlPlane.endpoints.map((endpoint) => endpoint.toUpperCase()));
+  return WORKBENCH_ACTIONS.filter((action) => advertised.has(action.endpoint.toUpperCase()));
+}
+
+function buildNodeStatusRecords(data: DashboardData, devnetState: unknown, controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
+  const node = buildNodeStatus(data, devnetState, controlPlane);
+  const devnet = isRecord(devnetState) ? devnetState : {};
+  const config = isRecord(devnet.config) ? devnet.config : {};
+
+  return [
+    makeLocalRecord(
+      "devnet",
+      controlPlane.url,
+      {
+        id: "local-control-plane",
+        kind: "Control-plane API",
+        title: node.title,
+        summary: node.summary,
+        status: node.status,
+        facts: [
+          ...node.facts,
+          { label: "health endpoint", value: controlPlane.status === "available" ? "responded" : "not detected" },
+          { label: "state endpoint", value: controlPlane.state ? "loaded" : "not loaded" },
+          { label: "error", value: text(controlPlane.error, "none") },
+        ],
+        raw: { controlPlane, node },
+      },
+      controlPlane.checkedAt,
+    ),
+    makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id: "local-chain-state",
+      kind: "Private/local chain",
+      title: text(devnet.chainId ?? data.chain.chainId),
+      summary: "Committed local chain state used by the workbench when the API is offline or partial.",
+      status: devnetState ? "finalized" : "stale",
+      facts: [
+        { label: "genesis hash", value: text(devnet.genesisHash ?? config.genesisHash) },
+        { label: "next block", value: text(devnet.nextBlockNumber) },
+        { label: "logical time", value: text(devnet.logicalTime ?? config.genesisLogicalTime) },
+        { label: "consensus", value: text(config.consensus, "local deterministic") },
+        { label: "no value", value: text(config.noValue, "true") },
+      ],
+      raw: devnetState,
+    }),
+  ];
+}
+
+function buildPeerRecords(devnetState: unknown): WorkbenchRecord[] {
+  return collectionFrom(devnetState, ["peers", "networkPeers", "peerState", "nodes"]).map((peer, index) => {
+    const id = text(peer.peerId ?? peer.nodeId ?? peer.id ?? peer.address, `peer:${index + 1}`);
+    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id,
+      kind: "Peer",
+      title: id,
+      summary: text(peer.summary ?? peer.role, "Private/local peer exported by the control-plane."),
+      status: statusFrom(peer.status, "observed"),
+      facts: [
+        { label: "address", value: text(peer.address ?? peer.multiaddr ?? peer.url) },
+        { label: "role", value: text(peer.role) },
+        { label: "last seen", value: text(peer.lastSeenAt ?? peer.lastSeen) },
+        { label: "height", value: text(peer.blockHeight ?? peer.height) },
+      ],
+      raw: peer,
+    });
+  });
+}
+
+function buildMempoolRecords(devnetState: unknown): WorkbenchRecord[] {
+  return collectionFrom(devnetState, ["pendingTxs", "mempool", "txPool", "pendingTransactions"]).map((tx, index) => {
+    const id = text(tx.txId ?? tx.hash ?? tx.id, `pending-tx:${index + 1}`);
+    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id,
+      kind: "Pending transaction",
+      title: id,
+      summary: text(tx.summary ?? tx.kind, "Pending local transaction waiting for deterministic block production."),
+      status: statusFrom(tx.status, "pending"),
+      facts: [
+        { label: "from", value: text(tx.from ?? tx.sender ?? tx.agentId) },
+        { label: "type", value: text(tx.type ?? tx.kind) },
+        { label: "received", value: text(tx.receivedAt ?? tx.createdAt) },
+        { label: "nonce", value: text(tx.nonce) },
+      ],
+      raw: tx,
+    });
+  });
+}
+
+function buildAccountRecords(devnetState: unknown): WorkbenchRecord[] {
+  return collectionFrom(devnetState, ["agentAccounts", "accounts", "accountRegistry"]).map((account, index) => {
+    const id = text(account.accountId ?? account.agentId ?? account.id ?? account.controller, `account:${index + 1}`);
+    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id,
+      kind: "Account",
+      title: id,
+      summary: `Controller ${text(account.controller)} with model ${text(account.modelPassportId ?? account.modelId)}.`,
+      status: account.active === false ? "stale" : statusFrom(account.status, "verified"),
+      facts: [
+        { label: "controller", value: text(account.controller) },
+        { label: "model", value: text(account.modelPassportId ?? account.modelId) },
+        { label: "metadata hash", value: text(account.metadataHash) },
+        { label: "memory root", value: text(account.memoryRoot) },
+        { label: "active", value: text(account.active) },
+      ],
+      raw: account,
+    });
+  });
+}
+
+function buildBalanceRecords(devnetState: unknown): WorkbenchRecord[] {
+  return collectionFrom(devnetState, ["balances", "accountBalances", "balanceSheet", "credits", "creditBalances"]).map((balance, index) => {
+    const id = text(balance.balanceId ?? balance.accountId ?? balance.agentId ?? balance.id, `balance:${index + 1}`);
+    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id,
+      kind: "No-value balance",
+      title: id,
+      summary: text(balance.summary, "Local no-value balance or credit metadata exported by the private testnet API."),
+      status: statusFrom(balance.status, "observed"),
+      facts: [
+        { label: "account", value: text(balance.accountId ?? balance.agentId) },
+        { label: "amount", value: text(balance.amount ?? balance.balance ?? balance.credits) },
+        { label: "unit", value: text(balance.unit, "no-value local credit") },
+        { label: "updated", value: text(balance.updatedAt ?? balance.blockNumber) },
+      ],
+      raw: balance,
+    });
+  });
+}
+
+function buildFaucetEventRecords(devnetState: unknown): WorkbenchRecord[] {
+  return collectionFrom(devnetState, ["faucetEvents", "faucetClaims", "faucetCredits", "faucet"]).map((event, index) => {
+    const id = text(event.eventId ?? event.faucetEventId ?? event.txId ?? event.id, `faucet-event:${index + 1}`);
+    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id,
+      kind: "Faucet event",
+      title: id,
+      summary: text(event.summary, "Local no-value faucet event exported by the control-plane."),
+      status: statusFrom(event.status, "observed"),
+      facts: [
+        { label: "account", value: text(event.accountId ?? event.agentId ?? event.wallet) },
+        { label: "amount", value: text(event.amount ?? event.credits) },
+        { label: "block", value: text(event.blockNumber) },
+        { label: "created", value: text(event.createdAt ?? event.timestamp) },
+      ],
+      raw: event,
+    });
+  });
+}
+
+function buildWalletMetadataRecords(devnetState: unknown): WorkbenchRecord[] {
+  return collectionFrom(devnetState, ["wallets", "walletMetadata", "publicWallets", "operatorKeyReferences"]).map((wallet, index) => {
+    const id = text(wallet.walletId ?? wallet.keyReferenceId ?? wallet.operatorId ?? wallet.id, `wallet:${index + 1}`);
+    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id,
+      kind: "Public wallet metadata",
+      title: id,
+      summary: text(
+        wallet.secretMaterialBoundary ?? wallet.summary,
+        "Public wallet/key metadata only. Private keys are intentionally outside browser state.",
+      ),
+      status: statusFrom(wallet.status, "verified"),
+      facts: [
+        { label: "operator", value: text(wallet.operatorId ?? wallet.controller) },
+        { label: "worker key", value: text(wallet.workerKeyId) },
+        { label: "verifier key", value: text(wallet.verifierKeyId) },
+        { label: "scheme", value: text(wallet.signatureScheme) },
+        { label: "public hint", value: text(wallet.publicKeyHint) },
+      ],
+      raw: wallet,
+    });
+  });
+}
+
+function buildBridgeRecords(devnetState: unknown, kind: "deposits" | "credits" | "withdrawals"): WorkbenchRecord[] {
+  const keyMap = {
+    deposits: ["bridgeDeposits", "deposits"],
+    credits: ["bridgeCredits", "bridgeCreditEvents"],
+    withdrawals: ["bridgeWithdrawals", "withdrawals"],
+  } satisfies Record<typeof kind, string[]>;
+
+  return collectionFrom(devnetState, keyMap[kind]).map((event, index) => {
+    const id = text(event.bridgeEventId ?? event.depositId ?? event.creditId ?? event.withdrawalId ?? event.id, `bridge-${kind}:${index + 1}`);
+    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id,
+      kind: `Bridge ${kind.slice(0, -1)}`,
+      title: id,
+      summary: text(event.summary, "Private/local bridge lifecycle object exported by the control-plane."),
+      status: statusFrom(event.status, "pending"),
+      facts: [
+        { label: "account", value: text(event.accountId ?? event.wallet ?? event.recipient) },
+        { label: "amount", value: text(event.amount) },
+        { label: "source", value: text(event.sourceChain ?? event.fromChain) },
+        { label: "destination", value: text(event.destinationChain ?? event.toChain) },
+        { label: "block", value: text(event.blockNumber) },
+      ],
+      raw: event,
+    });
+  });
 }
 
 function buildBlockRecords(data: DashboardData, devnetState: unknown): WorkbenchRecord[] {
@@ -1240,8 +1653,15 @@ export function buildWorkbenchSnapshot(
   const source: WorkbenchSource = controlPlane.status === "available" && controlPlaneState ? "control-plane" : "fixture-fallback";
 
   const sections: Record<WorkbenchSectionKey, WorkbenchRecord[]> = {
+    nodeStatus: buildNodeStatusRecords(data, activeDevnetState, controlPlane),
+    peers: buildPeerRecords(activeDevnetState),
     blocks: buildBlockRecords(data, activeDevnetState),
     transactions: buildTransactionRecords(data, activeDevnetState),
+    mempool: buildMempoolRecords(activeDevnetState),
+    accounts: buildAccountRecords(activeDevnetState),
+    balances: buildBalanceRecords(activeDevnetState),
+    faucetEvents: buildFaucetEventRecords(activeDevnetState),
+    walletMetadata: buildWalletMetadataRecords(activeDevnetState),
     rootfields: buildRootfieldRecords(data, activeDevnetState),
     agents: buildAgentRecords(data, activeDevnetState),
     models: buildModelRecords(activeDevnetState),
@@ -1252,6 +1672,9 @@ export function buildWorkbenchSnapshot(
     verifierReports: buildVerifierRecords(data, activeDevnetState),
     challenges: buildChallengeRecords(activeDevnetState),
     finality: buildFinalityRecords(data, activeDevnetState),
+    bridgeDeposits: buildBridgeRecords(activeDevnetState, "deposits"),
+    bridgeCredits: buildBridgeRecords(activeDevnetState, "credits"),
+    bridgeWithdrawals: buildBridgeRecords(activeDevnetState, "withdrawals"),
     provenance: [],
     hardwareSignals: buildHardwareSignalRecords(data, activeDevnetState),
     rawJson: [],
@@ -1267,6 +1690,7 @@ export function buildWorkbenchSnapshot(
     controlPlane,
     node: buildNodeStatus(data, activeDevnetState, controlPlane),
     setupSteps: buildSetupSteps(controlPlane),
+    actions: buildLocalActions(controlPlane),
     sections: displayedSections,
     loadIssues: options.loadIssues ?? [],
     raw: {

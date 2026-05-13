@@ -6,3 +6,4 @@ export * from "./hex.ts";
 export * from "./keccak.ts";
 export * from "./observation.ts";
 export * from "./report.ts";
+export * from "./secret-scan.ts";

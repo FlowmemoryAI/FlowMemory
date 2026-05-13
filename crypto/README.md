@@ -40,6 +40,19 @@ canonical JSON Schemas:
 npm run validate:local-alpha
 ```
 
+Create and use a local encrypted no-value test vault:
+
+```powershell
+$env:FLOWMEMORY_TEST_WALLET_PASSWORD="local-test-password"
+npm run wallet:create -- --vault .\tmp-local-vault.json
+npm run wallet:sign -- --vault .\tmp-local-vault.json --document .\fixtures\some-object.json --chain-id 31337 --nonce 1 --out .\tmp-envelope.json
+npm run wallet:verify -- --document .\fixtures\some-object.json --envelope .\tmp-envelope.json --chain-id 31337
+```
+
+The wallet commands are for local/private testnet smoke use only. Public exports
+contain signer metadata and public keys; private keys, mnemonics, seed material,
+and ciphertext are not exported as public metadata.
+
 ## Read Order
 
 1. `FLOWMEMORY_CRYPTO_SPEC.md`
@@ -50,7 +63,7 @@ npm run validate:local-alpha
 6. `FLOWCHAIN_LOCAL_ALPHA_OBJECTS.md`
 7. `TEST_VECTORS.md`
 
-Runnable fixtures live in `fixtures/`. `fixtures/vectors.json` contains the current 33 package-level vectors. `fixtures/local-alpha-objects.json` contains positive and negative Local Alpha object and signed-envelope fixtures. Supporting cross-language vectors live in `test-vectors/`.
+Runnable fixtures live in `fixtures/`. `fixtures/vectors.json` contains the current 38 package-level vectors. `fixtures/local-alpha-objects.json` contains positive and negative Local Alpha object, signed-envelope, and transaction-envelope fixtures. Supporting cross-language vectors live in `test-vectors/`.
 
 Validate the current vector set with:
 
@@ -68,12 +81,13 @@ The Python validator is a cross-check for the FlowPulse aggregate vector. The pr
 - `artifactRoot`: commitment to off-chain artifact bytes and metadata.
 - `reportId`: deterministic identifier for a verifier report.
 - `attestation`: signed worker or verifier envelope over a receipt, report, artifact, or root.
-- Local Alpha object IDs: canonical IDs for `AgentAccount`, `ModelPassport`, `WorkReceipt`, `ArtifactAvailabilityProof`, `VerifierModule`, `VerifierReport`, `MemoryCell`, `Challenge`, `FinalityReceipt`, hardware signal envelopes, and control-plane provenance responses.
+- Local Alpha object IDs: canonical IDs for `AgentAccount`, `ModelPassport`, `WorkReceipt`, `ArtifactAvailabilityProof`, `VerifierModule`, `VerifierReport`, `MemoryCell`, `Challenge`, `FinalityReceipt`, `BridgeDeposit`, `BridgeCredit`, `BridgeWithdrawal`, local balance records, hardware signal envelopes, and control-plane provenance responses.
 - Local Alpha signature envelopes: local operator, agent, verifier, and hardware secp256k1 test signatures over typed object IDs. These are no-value local/test keys and are not wallet custody or production key-management claims.
+- Local transaction envelopes: chain-bound signed envelopes over canonical JSON payload hashes, object IDs, signer IDs, signer key IDs, signer roles, nonces, and domain separators.
 
 ## Implemented Helpers
 
-The package exports Keccak helpers, canonical JSON hashing, typed hash utilities, FlowPulse observation ids, cursor ids, report digests, receipt hashes, artifact/root commitments, work receipt ids, Local Alpha object ids, hardware signal envelope ids, Local Alpha signature envelope payloads, envelope validators, Merkle roots, worker/verifier signature payloads, verifier attestation envelope hashes, and local secp256k1 sign/verify helpers for tests.
+The package exports Keccak helpers, canonical JSON hashing, typed hash utilities, FlowPulse observation ids, cursor ids, report digests, receipt hashes, artifact/root commitments, work receipt ids, Local Alpha object ids, bridge/balance object ids, hardware signal envelope ids, Local Alpha signature and transaction envelope payloads, envelope validators, Merkle roots, encrypted local test-vault helpers, worker/verifier signature payloads, verifier attestation envelope hashes, and local secp256k1 sign/verify helpers for tests.
 
 The implementation is ESM JavaScript with `src/index.d.ts` declarations for TypeScript consumers.
 

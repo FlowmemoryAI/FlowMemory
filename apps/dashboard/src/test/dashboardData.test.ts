@@ -116,6 +116,10 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.blocks).toHaveLength(2);
     expect(workbench.sections.transactions.length).toBeGreaterThanOrEqual(6);
     expect(workbench.sections.transactions.every((transaction) => transaction.status === "finalized")).toBe(true);
+    expect(workbench.sections.nodeStatus.length).toBeGreaterThan(0);
+    expect(workbench.sections.mempool).toHaveLength(0);
+    expect(workbench.sections.accounts.length).toBeGreaterThan(0);
+    expect(workbench.sections.walletMetadata.length).toBeGreaterThan(0);
     expect(workbench.sections.rootfields.length).toBeGreaterThan(0);
     expect(workbench.sections.agents.length).toBeGreaterThan(0);
     expect(workbench.sections.receipts.length).toBeGreaterThan(data.workReceipts.length);
@@ -128,7 +132,11 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.rawJson.map((record) => record.id)).toContain("raw-dashboard-fixture");
     expect(workbench.sections.models.length).toBeGreaterThan(0);
     expect(workbench.sections.challenges.length).toBeGreaterThan(0);
+    expect(workbench.sections.bridgeDeposits).toHaveLength(0);
+    expect(workbench.sections.bridgeCredits).toHaveLength(0);
+    expect(workbench.sections.bridgeWithdrawals).toHaveLength(0);
     expect(workbench.node.status).toBe("offline");
+    expect(workbench.actions).toEqual([]);
 
     for (const section of WORKBENCH_SECTIONS) {
       expect(workbench.sections[section.key], `${section.key} should be a defined workbench view`).toBeDefined();
@@ -154,6 +162,23 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.blocks[0].provenance.origin).toBe("local");
     expect(workbench.sections.blocks[0].provenance.localPathHint).toBe("http://127.0.0.1:8787");
     expect(workbench.sections.provenance.find((record) => record.id === "control-plane-api")?.status).toBe("verified");
+  });
+
+  it("only exposes local actions when the control-plane advertises matching endpoints", () => {
+    const workbench = buildWorkbenchSnapshot(data, {
+      controlPlane: {
+        url: "http://127.0.0.1:8787",
+        status: "available",
+        checkedAt: "2026-05-13T15:00:00.000Z",
+        endpoints: ["GET /health", "GET /state", "POST /smoke", "POST /faucet"],
+        health: { status: "ok" },
+        state: devnetState,
+      },
+      devnetState,
+      devnetDashboardState,
+    });
+
+    expect(workbench.actions.map((action) => action.endpoint)).toEqual(["POST /smoke", "POST /faucet"]);
   });
 
   it("fetches control-plane state while keeping deterministic fixture payloads available", async () => {
@@ -198,6 +223,8 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Local explorer workbench");
     expect(html).toContain("Node and API status");
     expect(html).toContain("Control-plane offline");
+    expect(html).toContain("Wallet Metadata");
+    expect(html).toContain("Bridge Deposits");
     expect(html).toContain("Rootfields");
     expect(html).toContain("Verifier Modules");
     expect(html).toContain("Hardware Signals");
