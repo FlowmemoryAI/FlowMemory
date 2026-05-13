@@ -18,6 +18,15 @@ These instructions apply to every agent, assistant, script, and human operating 
 - Do not build product features during bootstrap, planning, or research tasks.
 - When blocked, document the blocker and the smallest useful next step.
 
+## HQ Program Management
+
+- Use `docs/ISSUE_BACKLOG.md` to understand issue dependencies and milestone placement.
+- Use `docs/AGENT_PROMPTS.md` when launching or briefing a worktree agent.
+- Use `docs/PR_PROCESS.md` for branch naming, draft PRs, merge order, dirty worktrees, and issue closing.
+- Use `docs/DAILY_HQ_RUNBOOK.md` for morning review, triage, monitoring, and handoff.
+- Use `infra/scripts/status-report.ps1` for read-only local worktree, PR, and issue status.
+- The immediate major milestone is a runnable local V0 stack. Do not reinterpret that as approval for production deployment.
+
 ## Engineering Rules
 
 - Do not hardcode secrets, tokens, private keys, seed phrases, RPC credentials, API keys, or webhook URLs.

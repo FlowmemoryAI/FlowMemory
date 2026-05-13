@@ -16,7 +16,9 @@ This is the first document to read after `AGENTS.md`.
 - Check the current branch and working tree.
 - Read the files you plan to edit.
 - Identify whether the task is docs, protocol, service, app, hardware, research, crypto, infra, or security work.
+- If working from an issue, copy its allowed folders, forbidden folders, acceptance criteria, risk level, and recommended worktree into your local plan before editing.
 - If the task touches architecture, security assumptions, public schemas, or cross-agent workflow, update docs in the same pull request.
+- If local files disagree with GitHub issue or pull request state, stop and reconcile the difference before editing.
 
 ## Multi-Agent Worktree Setup
 
@@ -91,6 +93,8 @@ codex
 - Check `git status --short --branch` before starting and before handing off work.
 - Avoid assigning two agents to edit the same files at the same time.
 - Use `git worktree list` from `E:\FlowMemory\flowmemory-main` to inspect all local worktrees.
+- Long-running bucket agents should post or record short handoffs that name touched files, checks run, unresolved risks, and the next smallest safe task.
+- Review agents should avoid product implementation and should work in docs, templates, scripts, and issue/PR hygiene unless an issue explicitly assigns a narrower technical scope.
 
 ## During Work
 

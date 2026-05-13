@@ -2,12 +2,12 @@ name: Research
 description: Track AI memory, neural geometry, protocol, reliability, or appchain/L1 research.
 title: "[Research]: "
 labels:
-  - research
+  - documentation
 body:
   - type: markdown
     attributes:
       value: |
-        Use this for research questions, hypotheses, experiments, and literature notes.
+        Use this for research questions, hypotheses, experiments, and literature notes. Mark unknowns as unknowns.
   - type: textarea
     id: question
     attributes:
@@ -16,19 +16,67 @@ body:
     validations:
       required: true
   - type: textarea
-    id: context
+    id: allowed_folders
     attributes:
-      label: Context
-      description: What project context or prior work matters?
+      label: Allowed Folders
+      description: Which folders may be edited?
+      placeholder: |
+        - research/
+        - docs/DECISIONS/
+        - docs/ARCHITECTURE.md
     validations:
       required: true
   - type: textarea
-    id: method
+    id: forbidden_folders
     attributes:
-      label: Proposed Method
-      description: How should the research be conducted?
+      label: Forbidden Folders
+      description: Which folders or claims are out of scope?
+      placeholder: |
+        - contracts/
+        - services/
+        - apps/
+        - production deployment plans
     validations:
-      required: false
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What project context, prior work, or source material matters?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: What must be true before this can close?
+      placeholder: |
+        - Hypotheses are separated from accepted decisions.
+        - Unknowns are listed.
+        - Follow-up implementation issues are separate.
+    validations:
+      required: true
+  - type: dropdown
+    id: risk_level
+    attributes:
+      label: Risk Level
+      options:
+        - Low
+        - Medium
+        - High
+    validations:
+      required: true
+  - type: dropdown
+    id: recommended_agent_worktree
+    attributes:
+      label: Recommended Agent / Worktree
+      options:
+        - 'Research - E:\FlowMemory\flowmemory-research'
+        - 'Review / maintenance - E:\FlowMemory\flowmemory-review'
+        - 'Crypto - E:\FlowMemory\flowmemory-crypto'
+        - 'Chain/devnet research - E:\FlowMemory\flowmemory-chain'
+    validations:
+      required: true
   - type: textarea
     id: output
     attributes:

@@ -1,55 +1,130 @@
 # Roadmap
 
-This roadmap is directional. Use issues and decision records for committed work.
+This roadmap is the project-management view of FlowMemory. Use GitHub issues for execution and `docs/DECISIONS/` for durable decisions.
 
-## Phase 0: Repository Readiness
+Production L1, tokenomics, mainnet deployment, production Uniswap v4 hook deployment, hardware manufacturing, and full dashboard implementation are later gated work. They are not approved by this roadmap.
 
-- Establish agent instructions and shared context.
-- Create work-area directories.
-- Add issue and pull request templates.
-- Add conservative CI.
-- Record architecture, security, roadmap, and current state docs.
+## Immediate Major Milestone: Runnable Local V0 Stack
 
-## Phase 1: Protocol Definitions
+Goal: make a local developer able to run the smallest FlowMemory loop without production deployment.
 
-- Define FlowPulse event vocabulary.
-- Define Rootflow and Rootfield commitment semantics.
-- Decide what data is on-chain, off-chain, or derived.
-- Draft receipt, attestation, proof, and root formats.
-- Document Uniswap v4 hook constraints and Base assumptions.
+The local V0 stack means:
 
-## Phase 2: Minimal Indexer And Verifier Loop
+- Contracts compile and tests run locally.
+- FlowPulse fixtures can be produced or consumed deterministically.
+- Indexer/verifier specs define observation identity, reorg states, and report shape.
+- Crypto vocabulary defines receipts, attestations, roots, commitments, and proof boundaries.
+- Dashboard planning has a data model for observed, pending, verified, failed, unsupported, and reorged states.
+- Hardware and research tracks have bounded specs but do not block local software validation.
 
-- Read chain receipts and logs.
-- Derive `txHash` and `logIndex` from observed logs.
-- Reconstruct FlowPulse activity.
-- Verify commitments against off-chain artifacts.
-- Produce deterministic verification reports.
+Non-goals:
 
-## Phase 3: Applications
+- No tokenomics.
+- No dynamic fees.
+- No production deployments.
+- No production L1/appchain.
+- No production hook deployment.
+- No hardware manufacturing.
+- No full dashboard app.
 
-- Build an operator dashboard.
-- Build a protocol explorer.
-- Build a hardware console.
-- Make verification state visible and understandable.
+## Near-Term Phases
 
-## Phase 4: Hardware Research
+### Phase 0: V0 Repo OS
 
-- Define FlowRouter hardware scope.
-- Validate Meshtastic and LoRa control-signaling use cases.
-- Prototype device identity and compact receipt exchange.
-- Develop and test 3D-printed enclosures.
+Status: active maintenance.
 
-## Phase 5: AI Memory And Neural Geometry Research
+- Keep source-of-truth docs accurate.
+- Keep agent prompts, PR process, daily runbook, and issue backlog current.
+- Keep issue templates and PR templates enforcing scope boundaries.
+- Keep status scripts read-only and safe.
+- Keep labels and milestones aligned with agent ownership.
 
-- Define memory artifact formats and commitments.
-- Explore embedding, retrieval, continuity, and reliability metrics.
-- Connect research artifacts to verifiable receipts.
-- Keep heavy artifacts off-chain.
+### Phase 1: V0 Contracts Foundation
 
-## Phase 6: Appchain/L1 Research
+Status: active.
 
-- Define why an appchain or L1 would be needed.
-- Compare Base-native, appchain, and L1 tradeoffs.
-- Model validator, data availability, verification, and hardware implications.
-- Produce a go/no-go decision record before implementation.
+- Add minimal Foundry config and contract test workflow.
+- Harden existing RootfieldRegistry tests.
+- Lock FlowPulse v0 and Rootfield URI/log-data decisions.
+- Define status lifecycle, ownership/recovery, namespace policy, and static-analysis plan before implementation.
+- Keep dynamic fees, tokenomics, production deployment, and production hooks out of scope.
+
+### Phase 2: V0 Local Stack
+
+Status: active as specs and local fixtures before services.
+
+- Specify canonical FlowPulse observation identity.
+- Define verifier statuses and report JSON schema.
+- Define fixture-based parser and reorg-state tests.
+- Define persistence and local RPC reader boundaries only after fixture behavior stabilizes.
+- Define local devnet smoke-test gates without mainnet or production deployment.
+
+### Phase 3: V0 Review/Audit
+
+Status: active.
+
+- Define foundation PR review rules.
+- Add security reporting guidance.
+- Add static-analysis planning before claiming audit readiness.
+- Enforce allowed-folder and forbidden-folder boundaries.
+
+## Mid-Term Phases
+
+### Phase 4: V0 Crypto Schema Layer
+
+Status: planning.
+
+- Define receipt, attestation, commitment, root, and proof vocabulary.
+- Define domain separation and replay boundaries.
+- Validate test vectors through verifier specs.
+- Keep proof circuits, GPU proofs, verifier economics, and production crypto infrastructure out of scope.
+
+### Phase 5: V0 Dashboard Data Model
+
+Status: planning.
+
+- Define app-facing entities for dashboard and explorer.
+- Model observed, pending, finalized, verified, invalid, unresolved, unsupported, and reorged states.
+- Keep frontend scaffolding and production APIs out of scope until the local stack stabilizes.
+
+### Phase 6: V0 Hardware POC
+
+Status: planning and bounded research.
+
+- Define FlowRouter v0 as research hardware.
+- Document Meshtastic/LoRa control-message candidates.
+- Explore enclosure concepts, NFC memory cartridge concepts, light-pipe indicators, and two-node demos as specs or prototypes only when scoped.
+- Keep manufacturing, firmware production, RF certification work, and field deployment out of scope.
+
+## Research Phases
+
+### Phase 7: V0 Research Lab
+
+Status: research-only.
+
+- Define AI memory artifact taxonomy.
+- Define no-value devnet/appchain research criteria.
+- Compare Base settlement anchors and local devnet smoke-test requirements.
+- Research bridge/security review requirements before any chain design.
+
+### Phase 8: Later Gated Work
+
+Status: blocked until explicit go/no-go decisions exist.
+
+- Production L1 or appchain.
+- Tokenomics or value-bearing systems.
+- Mainnet deployment.
+- Production Uniswap v4 hook deployment.
+- Verifier networks, staking, slashing, or incentives.
+- Hardware manufacturing or production decentralized internet claims.
+
+## Merge Order Preference
+
+1. Repo OS and review process changes.
+2. Current state, roadmap, architecture, and decision records.
+3. Contracts foundation hardening.
+4. Indexer/verifier fixture and schema work.
+5. Crypto schema vocabulary and test-vector validation.
+6. Dashboard data model.
+7. Hardware POC specs.
+8. Research lab documents.
