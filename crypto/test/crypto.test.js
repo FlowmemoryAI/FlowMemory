@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import test from "node:test";
 
 import {
@@ -9,6 +8,7 @@ import {
   agentAccountId,
   artifactAvailabilityProofId,
   attestationEnvelopeHash,
+  addEncryptedTestVaultAccount,
   bridgeCreditId,
   bridgeDepositId,
   bridgeWithdrawalId,
@@ -16,7 +16,6 @@ import {
   canonicalJsonHash,
   canonicalJson,
   controlPlaneProvenanceResponseId,
-  createWalletVault,
   contractPulseId,
   cursorId,
   devnetBlockHash,
@@ -24,28 +23,25 @@ import {
   domainSeparator,
   eip712DomainSeparator,
   emptyMerkleRoot,
-  exportWalletPublicMetadata,
   finalityReceiptId,
   flowPulseEventArgsHash,
   flowPulseEventSignature,
   flowPulseObservationId,
   flowPulseSchemaId,
+  createEncryptedTestVault,
+  exportVaultPublicMetadata,
   hardwareSignalEnvelopeId,
-  importWalletPublicMetadata,
   indexerCursorId,
-  listWalletPublicAccounts,
+  listVaultPublicAccounts,
+  localBalanceRecordId,
   localAlphaEnvelopeReplayKey,
   localAlphaObjectId,
-  localAccountBalanceId,
-  localSignerId,
-  localSignerKeyId,
   localSignatureEnvelopeHash,
   localSignatureEnvelopeInput,
   localSignatureEnvelopePayload,
   localTransactionEnvelopeHash,
   localTransactionEnvelopeInput,
   localTransactionEnvelopePayload,
-  localTransactionPayloadHash,
   localTransactionReplayKey,
   keccakUtf8,
   memoryCellId,
@@ -57,27 +53,25 @@ import {
   receiptHash,
   rootCommitment,
   rootfieldNamespaceId,
-  rotateWalletAccount,
-  signWalletTransaction,
+  rotateEncryptedTestVaultAccount,
+  signLocalTransactionWithVault,
   signDigest,
   storageReceiptCommitmentHash,
   TYPE_STRINGS,
   typedHash,
-  unlockWalletVault,
+  unlockEncryptedTestVault,
   validateLocalAlphaEnvelope,
   validateLocalTransactionEnvelope,
   verifierModuleId,
   verifierIdentity,
   verifierReportHash,
   verifierSignaturePayload,
-  verifyWalletTransaction,
   verifyDigest,
   workReceiptId,
   workerIdentity,
   workerSignaturePayload
 } from "../src/index.js";
 import { validateLocalAlphaFixtures } from "../src/validate-local-alpha-fixtures.js";
-import { validateLocalTransactionFixtures } from "../src/validate-local-transaction-fixtures.js";
 import { validateVectors } from "../src/validate-vectors.js";
 
 const root = resolve(import.meta.dirname, "..");
@@ -90,7 +84,6 @@ const flowPulse = fixture("sample-flowpulse.json");
 const observation = fixture("sample-observation.json");
 const report = fixture("sample-report.json");
 const localAlphaObjects = fixture("local-alpha-objects.json");
-const localTransactionVectors = fixture("local-transaction-vectors.json");
 
 const localAlphaValidators = Object.freeze({
   agentAccountId,
@@ -102,8 +95,9 @@ const localAlphaValidators = Object.freeze({
   controlPlaneProvenanceResponseId,
   finalityReceiptId,
   hardwareSignalEnvelopeId,
-  localAccountBalanceId,
+  localBalanceRecordId,
   localSignatureEnvelopeHash,
+  localTransactionEnvelopeHash,
   memoryCellId,
   modelPassportId,
   verifierModuleId,
@@ -407,18 +401,57 @@ test("validates FlowChain Local Alpha signed object envelopes", () => {
 test("AJV validates all Local Alpha object and envelope fixtures against canonical schemas", () => {
   assert.deepEqual(validateLocalAlphaFixtures(), {
     documents: 15,
-    envelopes: 11,
-    schemas: 16
+    envelopes: 15,
+    transactions: 1,
+    schemas: 17
   });
 });
 
-test("Local Alpha signed envelope vectors reject replay, wrong domains, missing signer, malformed roots, and wrong types", () => {
+test("Local Alpha signed envelope vectors reject replay, wrong domains, missing signer, malformed roots, malformed bridge deposits, and wrong types", () => {
   const documentsByName = new Map(localAlphaObjects.positive.map((entry) => [entry.name, entry.document]));
   const envelopesByName = new Map(localAlphaObjects.envelopes.positive.map((entry) => [entry.name, entry]));
 
   for (const vector of localAlphaObjects.envelopes.negative) {
     const { document, envelope, context } = mutatedEnvelopeVector(vector, documentsByName, envelopesByName);
     const result = validateLocalAlphaEnvelope({ document, envelope, context });
+    assert.equal(result.valid, false, vector.name);
+    for (const expectedError of vector.expectErrors) {
+      assert.ok(
+        result.errors.includes(expectedError),
+        `${vector.name} expected ${expectedError}, got ${result.errors.join(", ")}`
+      );
+    }
+  }
+});
+
+test("validates canonical local transaction envelopes and negative vectors", () => {
+  const documentsByName = new Map(localAlphaObjects.positive.map((entry) => [entry.name, entry.document]));
+  const transactionsByName = new Map(localAlphaObjects.transactions.positive.map((entry) => [entry.name, entry]));
+  const seenNonces = new Set();
+
+  for (const vector of localAlphaObjects.transactions.positive) {
+    const document = documentsByName.get(vector.objectName);
+    assert.ok(document, `unknown transaction object: ${vector.objectName}`);
+    assertSchemaDocument(vector.schemaPath, vector.envelope);
+    assert.equal(localTransactionEnvelopeHash(vector.input), vector.expected.envelopeId, vector.name);
+    assert.deepEqual(localTransactionEnvelopePayload(vector.input), {
+      structHash: vector.expected.envelopeId,
+      signingDigest: vector.expected.signingDigest
+    });
+    assert.deepEqual(localTransactionEnvelopeInput(vector.envelope), vector.input);
+
+    const result = validateLocalTransactionEnvelope({
+      document,
+      envelope: vector.envelope,
+      context: { chainId: vector.envelope.chainId, seenNonces }
+    });
+    assert.deepEqual(result, { valid: true, errors: [] }, vector.name);
+    seenNonces.add(localTransactionReplayKey(vector.envelope));
+  }
+
+  for (const vector of localAlphaObjects.transactions.negative) {
+    const { document, envelope, context } = mutatedTransactionVector(vector, documentsByName, transactionsByName);
+    const result = validateLocalTransactionEnvelope({ document, envelope, context });
     assert.equal(result.valid, false, vector.name);
     for (const expectedError of vector.expectErrors) {
       assert.ok(
@@ -485,55 +518,79 @@ test("control-plane provenance response uses stable canonical JSON body hashing"
   assert.equal(controlPlaneProvenanceResponseId(provenance.input), provenance.expected);
 });
 
-test("validates canonical local transaction envelope vectors and negative cases", () => {
-  assert.deepEqual(validateLocalTransactionFixtures(), {
-    positive: 2,
-    negative: 7
+test("local encrypted test vault creates, unlocks, lists, signs, verifies, exports public metadata, and rotates accounts", async () => {
+  const password = "local-test-password";
+  const memoryCell = localAlphaObjects.positive.find((entry) => entry.name === "memory-cell.demo").document;
+  const vault = createEncryptedTestVault({
+    password,
+    label: "operator",
+    signerRole: "operator",
+    privateKey: "0x0000000000000000000000000000000000000000000000000000000000000001",
+    createdAtUnixMs: "1778702400000"
   });
 
-  const vector = localTransactionVectors.positive.find(
-    (entry) => entry.name === "transaction.register-agent.operator-signature"
-  );
-  assert.ok(vector);
-  assert.equal(localTransactionPayloadHash(vector.payload), vector.expected.payloadHash);
-  assert.equal(localTransactionEnvelopeHash(vector.input), vector.expected.envelopeId);
-  assert.deepEqual(localTransactionEnvelopePayload(vector.input), {
-    structHash: vector.expected.envelopeId,
-    signingDigest: vector.expected.signingDigest
-  });
-  assert.deepEqual(localTransactionEnvelopeInput(vector.envelope), vector.input);
-  assert.equal(
-    localSignerId({ publicKey: vector.envelope.signer.publicKey }),
-    vector.envelope.signer.signerId
-  );
-  assert.equal(
-    localSignerKeyId({
-      publicKey: vector.envelope.signer.publicKey,
-      signerRole: vector.envelope.signer.signerRoleCode,
-      keyScopeHash: vector.input.domainSeparator
+  assert.doesNotMatch(JSON.stringify(vault), /privateKey|mnemonic|seed/i);
+  assert.equal(listVaultPublicAccounts(vault).length, 1);
+  assert.equal(unlockEncryptedTestVault({ vault, password }).accounts.length, 1);
+  await assert.rejects(
+    () => signLocalTransactionWithVault({
+      vault,
+      password: "wrong-password",
+      signerKeyId: vault.publicAccounts[0].signerKeyId,
+      document: memoryCell,
+      chainId: "31337",
+      nonce: "1"
     }),
-    vector.envelope.signer.signerKeyId
+    /authenticate|decrypt|Unsupported/i
   );
 
-  const result = validateLocalTransactionEnvelope({
-    envelope: vector.envelope,
-    context: { expectedChainId: localTransactionVectors.chainId }
+  const expandedVault = addEncryptedTestVaultAccount({
+    vault,
+    password,
+    label: "agent",
+    signerRole: "agent",
+    privateKey: "0x0000000000000000000000000000000000000000000000000000000000000002",
+    createdAtUnixMs: "1778702400001"
   });
-  assert.deepEqual(result, { valid: true, errors: [] });
+  assert.equal(listVaultPublicAccounts(expandedVault).length, 2);
 
-  const replay = validateLocalTransactionEnvelope({
-    envelope: vector.envelope,
-    context: {
-      expectedChainId: localTransactionVectors.chainId,
-      seenNonces: new Set([localTransactionReplayKey(vector.envelope)])
-    }
+  const agentKey = listVaultPublicAccounts(expandedVault).find((account) => account.signerRole === "agent");
+  const envelope = await signLocalTransactionWithVault({
+    vault: expandedVault,
+    password,
+    signerKeyId: agentKey.signerKeyId,
+    document: memoryCell,
+    chainId: "31337",
+    nonce: "7",
+    issuedAtUnixMs: "1778702400002"
   });
-  assert.equal(replay.valid, false);
-  assert.ok(replay.errors.includes("replay"));
+  assert.deepEqual(validateLocalTransactionEnvelope({
+    document: memoryCell,
+    envelope,
+    context: { chainId: "31337", expectedSignerId: agentKey.signerId }
+  }), { valid: true, errors: [] });
+
+  const publicExport = exportVaultPublicMetadata(expandedVault);
+  assert.doesNotMatch(JSON.stringify(publicExport), /privateKey|mnemonic|ciphertext/i);
+  assert.equal(publicExport.publicAccounts.length, 2);
+
+  const rotatedVault = rotateEncryptedTestVaultAccount({
+    vault: expandedVault,
+    password,
+    signerKeyId: agentKey.signerKeyId,
+    privateKey: "0x0000000000000000000000000000000000000000000000000000000000000005",
+    createdAtUnixMs: "1778702400003"
+  });
+  const rotatedAccounts = listVaultPublicAccounts(rotatedVault).filter(
+    (account) => account.signerId === agentKey.signerId
+  );
+  assert.equal(rotatedAccounts.length, 2);
+  assert.equal(rotatedAccounts.some((account) => account.active === false), true);
+  assert.equal(rotatedAccounts.some((account) => account.rotatedFromSignerKeyId === agentKey.signerKeyId), true);
 });
 
 test("validates all published crypto test vectors", () => {
-  assert.equal(validateVectors(), 41);
+  assert.equal(validateVectors(), 38);
 });
 
 test("signs and verifies verifier digests with local test keys only", async () => {
@@ -548,62 +605,6 @@ test("signs and verifies verifier digests with local test keys only", async () =
   assert.equal(verifyDigest({ digest, signature, publicKey }), true);
   assert.equal(verifyDigest({ digest, signature, publicKey: wrongPublicKey }), false);
   assert.equal(verifyDigest({ digest: wrongDigest, signature, publicKey }), false);
-});
-
-test("creates an encrypted local wallet and signs a transaction without public secret leakage", async () => {
-  const dir = mkdtempSync(join(tmpdir(), "flowchain-wallet-"));
-  const vaultPath = join(dir, "wallet.local.json");
-  const publicPath = join(dir, "wallet-public.json");
-  const password = "local test password";
-
-  try {
-    const created = createWalletVault({
-      password,
-      vaultPath,
-      label: "test-operator",
-      signerRole: "operator",
-      now: 1778702400000
-    });
-    assert.equal(created.accounts.length, 1);
-    assert.equal(existsSync(vaultPath), true);
-    assert.doesNotMatch(JSON.stringify(created), /privateKey|encrypted|cipher|authTag/i);
-    assert.doesNotMatch(readFileSync(vaultPath, "utf8"), /privateKey/);
-
-    const unlocked = unlockWalletVault({ password, vaultPath });
-    assert.equal(unlocked.secret.accounts.length, 1);
-    assert.match(unlocked.secret.accounts[0].privateKey, /^0x[0-9a-f]{64}$/i);
-
-    const rotated = rotateWalletAccount({
-      password,
-      vaultPath,
-      label: "test-agent",
-      signerRole: "agent",
-      now: 1778702401000
-    });
-    assert.equal(rotated.accounts.length, 2);
-    assert.equal(listWalletPublicAccounts({ vaultPath }).accounts.length, 2);
-
-    const envelope = await signWalletTransaction({
-      password,
-      vaultPath,
-      payload: localTransactionVectors.positive[0].payload,
-      chainId: localTransactionVectors.chainId,
-      issuedAtUnixMs: "1778702402000",
-      expiresAtUnixMs: "1810238400000"
-    });
-    assert.equal(verifyWalletTransaction({ envelope, expectedChainId: localTransactionVectors.chainId }).valid, true);
-    assert.equal(envelope.payload.tx.type, "RegisterAgent");
-    assert.doesNotMatch(JSON.stringify(envelope), /privateKey/);
-
-    const exported = exportWalletPublicMetadata({ vaultPath, outPath: publicPath });
-    assert.doesNotMatch(JSON.stringify(exported), /privateKey|encrypted|cipher|authTag/i);
-    const imported = importWalletPublicMetadata({ vaultPath, inPath: publicPath, now: 1778702403000 });
-    assert.equal(imported.importedAccounts.length, 2);
-
-    assert.throws(() => unlockWalletVault({ password: "wrong password", vaultPath }));
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
 });
 
 function mutatedEnvelopeVector(vector, documentsByName, envelopesByName) {
@@ -636,6 +637,28 @@ function mutatedEnvelopeVector(vector, documentsByName, envelopesByName) {
   const context = {};
   if (mutation.contextReplay) {
     context.seenSequences = new Set([localAlphaEnvelopeReplayKey(envelope)]);
+  }
+
+  return { document, envelope, context };
+}
+
+function mutatedTransactionVector(vector, documentsByName, transactionsByName) {
+  const base = transactionsByName.get(vector.baseTransaction);
+  assert.ok(base, `unknown base transaction: ${vector.baseTransaction}`);
+  const document = structuredClone(documentsByName.get(base.objectName));
+  const envelope = structuredClone(base.envelope);
+  const mutation = vector.mutation ?? {};
+
+  if (mutation.document) {
+    Object.assign(document, mutation.document);
+  }
+  if (mutation.envelope) {
+    Object.assign(envelope, mutation.envelope);
+  }
+
+  const context = mutation.context ? { ...mutation.context } : {};
+  if (mutation.contextReplay) {
+    context.seenNonces = new Set([localTransactionReplayKey(envelope)]);
   }
 
   return { document, envelope, context };

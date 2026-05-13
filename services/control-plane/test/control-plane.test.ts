@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { once } from "node:events";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -9,7 +9,6 @@ import { canonicalJson } from "../../shared/src/index.ts";
 import {
   dispatchJsonRpc,
   loadControlPlaneState,
-  scanJsonForSecrets,
   type RpcErrorResponse,
   type RpcSuccessResponse,
 } from "../src/index.ts";
@@ -54,8 +53,15 @@ test("validates malformed requests and bad params with stable codes", () => {
 });
 
 test("keeps deterministic chain status response snapshots", () => {
-  const first = dispatchJsonRpc({ jsonrpc: "2.0", id: 1, method: "chain_status" }) as RpcSuccessResponse;
-  const second = dispatchJsonRpc({ jsonrpc: "2.0", id: 2, method: "chain_status" }) as RpcSuccessResponse;
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-snapshot-"));
+  const state = loadControlPlaneState({
+    localDevnetPath: join(dir, "missing-local-state.json"),
+    localDevnetLaunchPath: join(dir, "missing-local-launch-state.json"),
+    txIntakePath: join(dir, "transactions.ndjson"),
+    bridgeObservationIntakePath: join(dir, "bridge-observations.ndjson"),
+  });
+  const first = dispatchJsonRpc({ jsonrpc: "2.0", id: 1, method: "chain_status" }, { state }) as RpcSuccessResponse;
+  const second = dispatchJsonRpc({ jsonrpc: "2.0", id: 2, method: "chain_status" }, { state }) as RpcSuccessResponse;
   const snapshot = (response: RpcSuccessResponse) => {
     const result = response.result;
     return canonicalJson({
@@ -67,12 +73,11 @@ test("keeps deterministic chain status response snapshots", () => {
   };
 
   assert.equal(snapshot(first), snapshot(second));
-  assert.equal(first.result.chainId, "flowmemory-local-devnet-v0");
-  assert.ok((first.result.capabilities as string[]).includes("live_local_state_reads"));
-  assert.ok((first.result.capabilities as string[]).includes("transaction_submission"));
-  assert.ok((first.result.capabilities as string[]).includes("bridge_observation_intake"));
-  assert.equal(first.result.counts.observations, 8);
-  assert.ok(first.result.counts.bridgeDeposits >= 1);
+  assert.equal(
+    snapshot(first),
+    "{\"capabilities\":[\"health_reads\",\"node_status_reads\",\"peer_reads\",\"local_runtime_status_reads\",\"block_reads\",\"transaction_reads\",\"local_transaction_file_intake\",\"mempool_reads\",\"account_reads\",\"balance_reads\",\"faucet_event_reads\",\"wallet_public_metadata_reads\",\"receipt_lookup\",\"verifier_report_lookup\",\"memory_lineage_lookup\",\"artifact_fixture_lookup\",\"bridge_observation_file_intake\",\"bridge_deposit_reads\",\"bridge_credit_reads\",\"withdrawal_reads\",\"devnet_handoff_reads\",\"no_secret_response_checks\",\"raw_json_reads\"],\"chainId\":\"flowmemory-local-devnet-v0\",\"counts\":{\"accounts\":2,\"agents\":2,\"artifactAvailability\":5,\"balances\":2,\"blocks\":11,\"bridgeCredits\":1,\"bridgeDeposits\":1,\"challenges\":1,\"devnetBlocks\":2,\"duplicates\":1,\"faucetEvents\":1,\"finalityRows\":9,\"memoryCells\":1,\"memoryReceipts\":8,\"memorySignals\":8,\"mempool\":0,\"models\":2,\"observations\":8,\"rejectedLogs\":2,\"rootfields\":2,\"transactions\":25,\"verifierModules\":3,\"verifierReports\":8,\"walletPublicMetadata\":2,\"withdrawals\":1,\"workReceipts\":9},\"schema\":\"flowmemory.control_plane.chain_status.v0\"}",
+  );
+  rmSync(dir, { recursive: true, force: true });
 });
 
 test("recovers when generated launch/indexer/verifier fixtures are missing", () => {
@@ -167,41 +172,121 @@ test("exposes artifact, devnet, challenge, and finality read methods", () => {
   assert.equal(finality.result.status, "local-finalized");
 });
 
+test("prefers devnet/local runtime state over committed devnet fixtures", () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-local-runtime-"));
+  const localRuntimePath = join(dir, "launch-v0-state.json");
+  try {
+    writeFileSync(localRuntimePath, JSON.stringify({
+      schema: "flowmemory.local_devnet.state.v0",
+      chainId: "flowmemory-local-devnet-v0",
+      blocks: [],
+    }));
+    const state = loadControlPlaneState({
+      localDevnetPath: join(dir, "missing-state.json"),
+      localDevnetLaunchPath: localRuntimePath,
+    });
+
+    assert.equal(state.sources.devnet.path, localRuntimePath);
+    assert.equal(state.sources.devnet.status, "recovered");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("submits local transactions to the file-backed runtime intake path", () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-intake-"));
+  try {
+    const state = loadControlPlaneState({ txIntakePath: join(dir, "transactions.ndjson") });
+    const response = dispatchJsonRpc(
+      {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "transaction_submit",
+        params: {
+          transaction: {
+            schema: "flowmemory.test_transaction.v0",
+            action: "test",
+          },
+        },
+      },
+      { state },
+    ) as RpcSuccessResponse;
+    const mempool = dispatchJsonRpc({ jsonrpc: "2.0", id: 2, method: "mempool_list" }, { state }) as RpcSuccessResponse;
+
+    assert.equal(response.result.accepted, true);
+    assert.equal(mempool.result.count, 1);
+    assert.equal(mempool.result.transactions[0].source, "local-file-intake");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("exposes account, wallet, bridge deposit, credit, and withdrawal reads", () => {
+  const state = loadControlPlaneState();
+  const accounts = dispatchJsonRpc({ jsonrpc: "2.0", id: 1, method: "account_list" }, { state }) as RpcSuccessResponse;
+  const accountId = accounts.result.accounts[0].accountId as string;
+  const deposits = dispatchJsonRpc({ jsonrpc: "2.0", id: 2, method: "bridge_deposit_list" }, { state }) as RpcSuccessResponse;
+  const depositId = deposits.result.deposits[0].depositId as string;
+  const credits = dispatchJsonRpc({ jsonrpc: "2.0", id: 3, method: "bridge_credit_list" }, { state }) as RpcSuccessResponse;
+  const creditId = credits.result.credits[0].creditId as string;
+  const withdrawals = dispatchJsonRpc({ jsonrpc: "2.0", id: 4, method: "withdrawal_list" }, { state }) as RpcSuccessResponse;
+  const withdrawalId = withdrawals.result.withdrawals[0].withdrawalId as string;
+
+  assert.equal((dispatchJsonRpc({ jsonrpc: "2.0", id: 5, method: "account_get", params: { accountId } }, { state }) as RpcSuccessResponse).result.schema, "flowmemory.control_plane.account_detail.v0");
+  assert.equal((dispatchJsonRpc({ jsonrpc: "2.0", id: 6, method: "wallet_metadata_get", params: { walletId: accountId } }, { state }) as RpcSuccessResponse).result.schema, "flowmemory.control_plane.wallet_public_metadata_detail.v0");
+  assert.equal((dispatchJsonRpc({ jsonrpc: "2.0", id: 7, method: "balance_get", params: { accountId } }, { state }) as RpcSuccessResponse).result.noValue, true);
+  assert.equal((dispatchJsonRpc({ jsonrpc: "2.0", id: 8, method: "bridge_deposit_get", params: { depositId } }, { state }) as RpcSuccessResponse).result.schema, "flowmemory.control_plane.bridge_deposit_detail.v0");
+  assert.equal((dispatchJsonRpc({ jsonrpc: "2.0", id: 9, method: "bridge_credit_get", params: { creditId } }, { state }) as RpcSuccessResponse).result.schema, "flowmemory.control_plane.bridge_credit_detail.v0");
+  assert.equal((dispatchJsonRpc({ jsonrpc: "2.0", id: 10, method: "withdrawal_get", params: { withdrawalId } }, { state }) as RpcSuccessResponse).result.schema, "flowmemory.control_plane.withdrawal_detail.v0");
+});
+
+test("rejects secret-shaped intake and responses before returning them", () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-secret-"));
+  try {
+    const secretFixturePath = join(dir, "tx-fixtures.json");
+    writeFileSync(secretFixturePath, JSON.stringify({ privateKey: `0x${"1".repeat(64)}` }));
+    const state = loadControlPlaneState({
+      txFixturesPath: secretFixturePath,
+      txIntakePath: join(dir, "transactions.ndjson"),
+    });
+    const submit = dispatchJsonRpc(
+      {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "transaction_submit",
+        params: {
+          transaction: {
+            schema: "flowmemory.test_transaction.v0",
+            privateKey: `0x${"1".repeat(64)}`,
+          },
+        },
+      },
+      { state },
+    ) as RpcErrorResponse;
+    const raw = dispatchJsonRpc(
+      { jsonrpc: "2.0", id: 2, method: "raw_json_get", params: { source: "txFixtures" } },
+      { state },
+    ) as RpcErrorResponse;
+
+    assert.equal(submit.error.data.reasonCode, "secret.rejected");
+    assert.equal(raw.error.data.reasonCode, "secret.rejected");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("smoke client queries the complete local lifecycle surface", () => {
-  const smoke = runControlPlaneSmoke();
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-smoke-"));
+  const smoke = runControlPlaneSmoke({
+    txIntakePath: join(dir, "transactions.ndjson"),
+    bridgeObservationIntakePath: join(dir, "bridge-observations.ndjson"),
+  });
 
   assert.equal(smoke.schema, "flowmemory.control_plane.smoke.v0");
   assert.equal(smoke.ok, true);
-  assert.equal(smoke.methodCount, 57);
-  assert.equal(smoke.noSecretResponseScan, "passed");
+  assert.equal(smoke.methodCount, 49);
   assert.ok((smoke.responseSchemas as string[]).includes("flowmemory.control_plane.raw_json.v0"));
-});
-
-test("detects secret-bearing response keys", () => {
-  const findings = scanJsonForSecrets({
-    schema: "test",
-    privateKey: "not-allowed",
-  });
-
-  assert.equal(findings.length, 1);
-  assert.equal(findings[0]?.reason, "forbidden secret-bearing key");
-});
-
-test("rejects transaction submissions with secret-bearing fields", () => {
-  const response = dispatchJsonRpc({
-    jsonrpc: "2.0",
-    id: 1,
-    method: "transaction_submit",
-    params: {
-      tx: {
-        type: "RegisterRootfield",
-        privateKey: "not-allowed",
-      },
-    },
-  }) as RpcErrorResponse;
-
-  assert.equal(response.error.code, -32602);
-  assert.equal(response.error.data.reasonCode, "params.invalid");
+  rmSync(dir, { recursive: true, force: true });
 });
 
 test("HTTP server exposes browser-safe health and state endpoints", async () => {
@@ -228,19 +313,21 @@ test("HTTP server exposes browser-safe health and state endpoints", async () => 
     assert.equal(state.headers.get("access-control-allow-origin"), "*");
     assert.equal((await state.json()).schema, "flowmemory.control_plane.devnet_state.v0");
 
-    const node = await fetch(`http://127.0.0.1:${port}/node/status`, {
-      headers: { Origin: "http://127.0.0.1:5173" },
+    const rpc = await fetch(`http://127.0.0.1:${port}/rpc`, {
+      method: "POST",
+      headers: { "content-type": "application/json", Origin: "http://127.0.0.1:5173" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "node_status" }),
     });
-    assert.equal(node.status, 200);
-    assert.equal(node.headers.get("access-control-allow-origin"), "*");
-    assert.equal((await node.json()).schema, "flowmemory.control_plane.node_status.v0");
+    assert.equal(rpc.status, 200);
+    assert.equal(rpc.headers.get("access-control-allow-origin"), "*");
+    assert.equal((await rpc.json()).result.schema, "flowmemory.control_plane.node_status.v0");
 
-    const deposits = await fetch(`http://127.0.0.1:${port}/bridge/deposits?limit=1`, {
+    const bridge = await fetch(`http://127.0.0.1:${port}/bridge/observations`, {
       headers: { Origin: "http://127.0.0.1:5173" },
     });
-    assert.equal(deposits.status, 200);
-    assert.equal(deposits.headers.get("access-control-allow-origin"), "*");
-    assert.equal((await deposits.json()).schema, "flowmemory.control_plane.bridge_deposit_list.v0");
+    assert.equal(bridge.status, 200);
+    assert.equal(bridge.headers.get("access-control-allow-origin"), "*");
+    assert.equal((await bridge.json()).schema, "flowmemory.control_plane.bridge_observation_list.v0");
   } finally {
     await new Promise<void>((resolve, reject) => {
       server.close((error) => {

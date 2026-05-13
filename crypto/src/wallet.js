@@ -1,326 +1,284 @@
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { publicKeyFromPrivateKey, signDigest } from "./attestations.js";
-import { bytesToHex, hexToBytes } from "./encoding.js";
+import { bytesToHex } from "./encoding.js";
 import { keccakUtf8 } from "./hashes.js";
+import { publicKeyFromPrivateKey, signDigest } from "./attestations.js";
 import {
-  createLocalTransactionEnvelope,
-  localSignerPublicMetadata,
+  buildUnsignedLocalTransactionEnvelope,
   validateLocalTransactionEnvelope
 } from "./transactions.js";
+import { LOCAL_ALPHA_SIGNER_ROLES } from "./constants.js";
 
-const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const VAULT_SCHEMA = "flowmemory.crypto.local-test-vault.v0";
+const VAULT_SECRETS_SCHEMA = "flowmemory.crypto.local-test-vault-secrets.v0";
+const PUBLIC_EXPORT_SCHEMA = "flowmemory.crypto.local-test-vault-public-metadata.v0";
 
-export const DEFAULT_WALLET_PATH = resolve(packageRoot, ".wallet", "flowchain-wallet.local.json");
-export const WALLET_SCHEMA = "flowchain.local_wallet_vault.v0";
-export const WALLET_PUBLIC_METADATA_SCHEMA = "flowchain.local_wallet_public_metadata.v0";
-
-const DEFAULT_KDF = Object.freeze({
-  name: "scrypt",
-  salt: null,
-  N: 16384,
-  r: 8,
-  p: 1,
-  keyLength: 32
-});
-
-const CIPHER = "aes-256-gcm";
-
-export function createWalletVault({
+export function createEncryptedTestVault({
   password,
-  vaultPath = DEFAULT_WALLET_PATH,
-  label = "flowchain-local-operator",
+  label = "local-operator",
   signerRole = "operator",
-  force = false,
-  now = Date.now()
-}) {
-  assertPassword(password);
-  if (existsSync(vaultPath) && !force) {
-    throw new Error(`wallet vault already exists: ${vaultPath}`);
-  }
-
-  const account = createWalletAccount({ label, signerRole, now });
-  const publicMetadata = buildPublicMetadata({
-    accounts: [publicAccount(account)],
-    createdAtUnixMs: String(now),
-    updatedAtUnixMs: String(now)
+  createdAtUnixMs = Date.now().toString(),
+  privateKey
+} = {}) {
+  requirePassword(password);
+  const account = createVaultAccount({ label, signerRole, createdAtUnixMs, privateKey });
+  return encryptVaultSecrets({
+    password,
+    publicAccounts: [publicAccount(account)],
+    secrets: {
+      schema: VAULT_SECRETS_SCHEMA,
+      accounts: [account]
+    },
+    createdAtUnixMs
   });
-  const secret = {
-    schema: "flowchain.local_wallet_secret.v0",
-    accounts: [account]
+}
+
+export function unlockEncryptedTestVault({ vault, password }) {
+  requirePassword(password);
+  const secrets = decryptVaultSecrets({ vault, password });
+  return {
+    schema: "flowmemory.crypto.local-test-vault-session.v0",
+    vaultId: vault.vaultId,
+    createdAtUnixMs: vault.createdAtUnixMs,
+    publicAccounts: vault.publicAccounts,
+    accounts: secrets.accounts
   };
-  const vault = encryptVault({ publicMetadata, secret, password });
-  writeVault(vaultPath, vault);
-  return vault.public;
 }
 
-export function unlockWalletVault({ password, vaultPath = DEFAULT_WALLET_PATH }) {
-  assertPassword(password);
-  const vault = readVault(vaultPath);
-  const secret = decryptVault({ vault, password });
-  return { vault, publicMetadata: vault.public, secret };
+export function listVaultPublicAccounts(vaultOrSession) {
+  return structuredClone(vaultOrSession.publicAccounts ?? []);
 }
 
-export function listWalletPublicAccounts({ vaultPath = DEFAULT_WALLET_PATH } = {}) {
-  return readVault(vaultPath).public;
+export function exportVaultPublicMetadata(vaultOrSession) {
+  return {
+    schema: PUBLIC_EXPORT_SCHEMA,
+    vaultId: vaultOrSession.vaultId,
+    createdAtUnixMs: vaultOrSession.createdAtUnixMs,
+    publicAccounts: listVaultPublicAccounts(vaultOrSession),
+    boundary: "Public local test metadata only. Secret key material is excluded."
+  };
 }
 
-export function rotateWalletAccount({
+export function addEncryptedTestVaultAccount({
+  vault,
   password,
-  vaultPath = DEFAULT_WALLET_PATH,
-  label = "flowchain-local-account",
-  signerRole = "operator",
-  now = Date.now()
+  label = "local-account",
+  signerRole = "agent",
+  createdAtUnixMs = Date.now().toString(),
+  privateKey,
+  signerId
 }) {
-  const { vault, publicMetadata, secret } = unlockWalletVault({ password, vaultPath });
-  const account = createWalletAccount({ label, signerRole, now });
-  secret.accounts.push(account);
-  publicMetadata.accounts.push(publicAccount(account));
-  publicMetadata.updatedAtUnixMs = String(now);
-  const updated = encryptVault({ publicMetadata, secret, password, previousVault: vault });
-  writeVault(vaultPath, updated);
-  return updated.public;
+  const secrets = decryptVaultSecrets({ vault, password });
+  const account = createVaultAccount({ label, signerRole, createdAtUnixMs, privateKey, signerId });
+  const accounts = [...secrets.accounts, account];
+  return encryptVaultSecrets({
+    password,
+    vaultId: vault.vaultId,
+    createdAtUnixMs: vault.createdAtUnixMs,
+    publicAccounts: accounts.map(publicAccount),
+    secrets: {
+      schema: VAULT_SECRETS_SCHEMA,
+      accounts
+    }
+  });
 }
 
-export async function signWalletTransaction({
+export function rotateEncryptedTestVaultAccount({
+  vault,
   password,
-  payload,
-  vaultPath = DEFAULT_WALLET_PATH,
-  accountId,
-  chainId = "31337",
-  nonce,
-  issuedAtUnixMs = Date.now(),
-  expiresAtUnixMs = Number(issuedAtUnixMs) + 86_400_000
+  signerKeyId,
+  label,
+  createdAtUnixMs = Date.now().toString(),
+  privateKey
 }) {
-  const { vault, publicMetadata, secret } = unlockWalletVault({ password, vaultPath });
-  const account = selectSecretAccount(secret.accounts, accountId);
-  const publicEntry = publicMetadata.accounts.find((entry) => entry.accountId === account.accountId);
-  if (!publicEntry) {
-    throw new Error(`wallet public metadata is missing account ${account.accountId}`);
+  const secrets = decryptVaultSecrets({ vault, password });
+  const index = secrets.accounts.findIndex((account) => account.signerKeyId === signerKeyId);
+  if (index === -1) {
+    throw new Error(`unknown signer key id: ${signerKeyId}`);
   }
 
-  const selectedNonce = String(nonce ?? account.nextNonce ?? publicEntry.nextNonce ?? "1");
-  const signer = {
-    accountId: publicEntry.accountId,
-    signerId: publicEntry.signerId,
-    signerKeyId: publicEntry.signerKeyId,
-    signerRole: publicEntry.signerRole,
-    signerRoleCode: publicEntry.signerRoleCode,
-    publicKey: publicEntry.publicKey
-  };
-  const unsigned = createLocalTransactionEnvelope({
+  const previous = { ...secrets.accounts[index], active: false, rotatedAtUnixMs: createdAtUnixMs };
+  const replacement = createVaultAccount({
+    label: label ?? previous.label,
+    signerRole: previous.signerRole,
+    createdAtUnixMs,
+    privateKey,
+    signerId: previous.signerId,
+    rotatedFromSignerKeyId: previous.signerKeyId
+  });
+  const accounts = [...secrets.accounts.slice(0, index), previous, replacement, ...secrets.accounts.slice(index + 1)];
+
+  return encryptVaultSecrets({
+    password,
+    vaultId: vault.vaultId,
+    createdAtUnixMs: vault.createdAtUnixMs,
+    publicAccounts: accounts.map(publicAccount),
+    secrets: {
+      schema: VAULT_SECRETS_SCHEMA,
+      accounts
+    }
+  });
+}
+
+export async function signLocalTransactionWithVault({
+  vault,
+  password,
+  signerKeyId,
+  document,
+  chainId,
+  nonce,
+  issuedAtUnixMs = Date.now().toString()
+}) {
+  const session = unlockEncryptedTestVault({ vault, password });
+  const account = session.accounts.find(
+    (candidate) => candidate.signerKeyId === signerKeyId && candidate.active !== false
+  );
+  if (!account) {
+    throw new Error(`unknown active signer key id: ${signerKeyId}`);
+  }
+
+  const unsigned = buildUnsignedLocalTransactionEnvelope({
+    document,
     chainId,
-    nonce: selectedNonce,
-    payload,
-    signer,
-    issuedAtUnixMs: String(issuedAtUnixMs),
-    expiresAtUnixMs: String(expiresAtUnixMs)
+    nonce,
+    signerId: account.signerId,
+    signerKeyId: account.signerKeyId,
+    signerRole: account.signerRole,
+    publicKey: account.publicKey,
+    issuedAtUnixMs
   });
   const signature = await signDigest({ digest: unsigned.signingDigest, privateKey: account.privateKey });
-  const envelope = { ...unsigned, signature };
-
-  const nextNonce = (BigInt(selectedNonce) + 1n).toString();
-  account.nextNonce = nextNonce;
-  publicEntry.nextNonce = nextNonce;
-  publicMetadata.updatedAtUnixMs = String(issuedAtUnixMs);
-  const updated = encryptVault({ publicMetadata, secret, password, previousVault: vault });
-  writeVault(vaultPath, updated);
-
-  return envelope;
-}
-
-export function verifyWalletTransaction({ envelope, expectedChainId, seenNonces, expectedSignerId } = {}) {
-  return validateLocalTransactionEnvelope({
-    envelope,
-    context: {
-      expectedChainId,
-      expectedSignerId,
-      seenNonces
-    }
-  });
-}
-
-export function exportWalletPublicMetadata({ vaultPath = DEFAULT_WALLET_PATH, outPath } = {}) {
-  const metadata = listWalletPublicAccounts({ vaultPath });
-  assertPublicMetadataHasNoSecrets(metadata);
-  if (outPath) {
-    writeJson(outPath, metadata);
-  }
-  return metadata;
-}
-
-export function importWalletPublicMetadata({ vaultPath = DEFAULT_WALLET_PATH, metadata, inPath, now = Date.now() }) {
-  const imported = metadata ?? readJson(inPath);
-  assertPublicMetadataHasNoSecrets(imported);
-  if (imported?.schema !== WALLET_PUBLIC_METADATA_SCHEMA) {
-    throw new Error("unsupported wallet public metadata schema");
-  }
-
-  const vault = readVault(vaultPath);
-  const existing = vault.public.importedAccounts ?? [];
-  const byAccount = new Map(existing.map((entry) => [entry.accountId, entry]));
-  for (const account of imported.accounts ?? []) {
-    byAccount.set(account.accountId, {
-      ...account,
-      importedFromVaultId: imported.vaultId,
-      importedAtUnixMs: String(now)
-    });
-  }
-  vault.public.importedAccounts = [...byAccount.values()].sort((a, b) =>
-    String(a.accountId).localeCompare(String(b.accountId))
-  );
-  vault.public.updatedAtUnixMs = String(now);
-  writeVault(vaultPath, vault);
-  return vault.public;
-}
-
-export function createWalletAccount({ label, signerRole = "operator", now = Date.now() }) {
-  const privateKey = randomPrivateKey();
-  const publicKey = publicKeyFromPrivateKey(privateKey);
-  const publicMetadata = localSignerPublicMetadata({ publicKey, signerRole });
   return {
-    ...publicMetadata,
-    label,
-    status: "active",
-    createdAtUnixMs: String(now),
-    nextNonce: "1",
-    privateKey
+    ...unsigned,
+    signature
   };
 }
 
-export function assertPublicMetadataHasNoSecrets(metadata) {
-  const body = JSON.stringify(metadata);
-  if (/"privateKey"|"encrypted"|"authTag"|"iv"|"cipher"/i.test(body)) {
-    throw new Error("public wallet metadata must not contain vault ciphertext or private key material");
-  }
+export function verifyLocalTransactionSignature({ document, envelope, context }) {
+  return validateLocalTransactionEnvelope({ document, envelope, context });
 }
 
-function buildPublicMetadata({ accounts, createdAtUnixMs, updatedAtUnixMs }) {
-  const vaultId = keccakUtf8(
-    `flowchain.local.wallet.v0:${createdAtUnixMs}:${accounts.map((account) => account.publicKey).join(":")}`
-  );
+function encryptVaultSecrets({
+  password,
+  publicAccounts,
+  secrets,
+  createdAtUnixMs,
+  vaultId = randomBytes32()
+}) {
+  requirePassword(password);
+  const salt = randomBytes(16);
+  const iv = randomBytes(12);
+  const kdf = {
+    name: "scrypt",
+    salt: bytesToHex(salt),
+    N: 16384,
+    r: 8,
+    p: 1,
+    keyLength: 32
+  };
+  const key = scryptSync(password, salt, kdf.keyLength, { N: kdf.N, r: kdf.r, p: kdf.p });
+  const cipher = createCipheriv("aes-256-gcm", key, iv);
+  const ciphertext = Buffer.concat([
+    cipher.update(JSON.stringify(secrets), "utf8"),
+    cipher.final()
+  ]);
+
   return {
-    schema: WALLET_PUBLIC_METADATA_SCHEMA,
+    schema: VAULT_SCHEMA,
     vaultId,
     createdAtUnixMs,
-    updatedAtUnixMs,
-    accounts
-  };
-}
-
-function publicAccount(account) {
-  const {
-    privateKey: _privateKey,
-    ...publicFields
-  } = account;
-  return publicFields;
-}
-
-function encryptVault({ publicMetadata, secret, password, previousVault }) {
-  const kdf = {
-    ...DEFAULT_KDF,
-    salt: bytesToHex(randomBytes(16))
-  };
-  const key = deriveKey(password, kdf);
-  const iv = randomBytes(12);
-  const cipher = createCipheriv(CIPHER, key, iv);
-  const plaintext = Buffer.from(JSON.stringify(secret), "utf8");
-  const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
-  const authTag = cipher.getAuthTag();
-
-  return {
-    schema: WALLET_SCHEMA,
-    version: 1,
-    createdAtUnixMs: previousVault?.createdAtUnixMs ?? publicMetadata.createdAtUnixMs,
-    updatedAtUnixMs: publicMetadata.updatedAtUnixMs,
     kdf,
     cipher: {
-      name: CIPHER,
+      name: "aes-256-gcm",
       iv: bytesToHex(iv),
-      authTag: bytesToHex(authTag)
+      authTag: bytesToHex(cipher.getAuthTag())
     },
-    encrypted: bytesToHex(ciphertext),
-    public: publicMetadata
+    ciphertext: bytesToHex(ciphertext),
+    publicAccounts
   };
 }
 
-function decryptVault({ vault, password }) {
-  if (vault.schema !== WALLET_SCHEMA) {
-    throw new Error("unsupported wallet vault schema");
+function decryptVaultSecrets({ vault, password }) {
+  requirePassword(password);
+  if (vault?.schema !== VAULT_SCHEMA) {
+    throw new Error("unsupported local test vault schema");
   }
-  const key = deriveKey(password, vault.kdf);
-  const decipher = createDecipheriv(CIPHER, key, hexToBytes(vault.cipher.iv));
-  decipher.setAuthTag(hexToBytes(vault.cipher.authTag));
+  const salt = Buffer.from(vault.kdf.salt.slice(2), "hex");
+  const key = scryptSync(password, salt, vault.kdf.keyLength, {
+    N: vault.kdf.N,
+    r: vault.kdf.r,
+    p: vault.kdf.p
+  });
+  const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(vault.cipher.iv.slice(2), "hex"));
+  decipher.setAuthTag(Buffer.from(vault.cipher.authTag.slice(2), "hex"));
   const plaintext = Buffer.concat([
-    decipher.update(hexToBytes(vault.encrypted)),
+    decipher.update(Buffer.from(vault.ciphertext.slice(2), "hex")),
     decipher.final()
   ]);
-  return JSON.parse(plaintext.toString("utf8"));
+  const secrets = JSON.parse(plaintext.toString("utf8"));
+  if (secrets.schema !== VAULT_SECRETS_SCHEMA || !Array.isArray(secrets.accounts)) {
+    throw new Error("invalid local test vault payload");
+  }
+  return secrets;
 }
 
-function deriveKey(password, kdf) {
-  if (kdf?.name !== "scrypt") {
-    throw new Error("unsupported wallet kdf");
+function createVaultAccount({
+  label,
+  signerRole,
+  createdAtUnixMs,
+  privateKey = randomPrivateKey(),
+  signerId,
+  rotatedFromSignerKeyId
+}) {
+  if (LOCAL_ALPHA_SIGNER_ROLES[signerRole] === undefined) {
+    throw new Error(`unsupported signer role: ${signerRole}`);
   }
-  return scryptSync(String(password), hexToBytes(kdf.salt), kdf.keyLength, {
-    N: kdf.N,
-    r: kdf.r,
-    p: kdf.p
-  });
-}
-
-function randomPrivateKey() {
-  for (let attempt = 0; attempt < 100; attempt += 1) {
-    const candidate = bytesToHex(randomBytes(32));
-    if (candidate !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
-      try {
-        publicKeyFromPrivateKey(candidate);
-        return candidate;
-      } catch {
-        // Try another candidate.
-      }
-    }
-  }
-  throw new Error("failed to generate a valid secp256k1 private key");
-}
-
-function selectSecretAccount(accounts, accountId) {
-  if (!accounts?.length) {
-    throw new Error("wallet contains no accounts");
-  }
-  if (!accountId) {
-    return accounts[0];
-  }
-  const account = accounts.find((entry) => entry.accountId === accountId || entry.signerId === accountId);
-  if (!account) {
-    throw new Error(`wallet account not found: ${accountId}`);
+  const publicKey = publicKeyFromPrivateKey(privateKey);
+  const publicKeyHash = keccakUtf8(publicKey);
+  const account = {
+    label,
+    signerRole,
+    signerRoleCode: LOCAL_ALPHA_SIGNER_ROLES[signerRole],
+    signerId: signerId ?? keccakUtf8(`flowchain.local-alpha.signer:${publicKey}`),
+    signerKeyId: keccakUtf8(`flowchain.local-alpha.signer-key:${publicKey}`),
+    publicKey,
+    publicKeyHash,
+    createdAtUnixMs,
+    active: true,
+    privateKey
+  };
+  if (rotatedFromSignerKeyId) {
+    account.rotatedFromSignerKeyId = rotatedFromSignerKeyId;
   }
   return account;
 }
 
-function readVault(vaultPath) {
-  return readJson(vaultPath);
+function publicAccount(account) {
+  const {
+    privateKey,
+    ...metadata
+  } = account;
+  return metadata;
 }
 
-function writeVault(vaultPath, vault) {
-  mkdirSync(dirname(vaultPath), { recursive: true });
-  writeFileSync(vaultPath, `${JSON.stringify(vault, null, 2)}\n`, { mode: 0o600 });
+function randomPrivateKey() {
+  for (;;) {
+    const candidate = bytesToHex(randomBytes(32));
+    try {
+      publicKeyFromPrivateKey(candidate);
+      return candidate;
+    } catch {
+      // Try again if random bytes are outside the secp256k1 private-key range.
+    }
+  }
 }
 
-function readJson(path) {
-  return JSON.parse(readFileSync(resolve(path), "utf8"));
+function randomBytes32() {
+  return bytesToHex(randomBytes(32));
 }
 
-function writeJson(path, value) {
-  mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`, { mode: 0o600 });
-}
-
-function assertPassword(password) {
-  if (!password || String(password).length < 8) {
-    throw new Error("wallet password must be at least 8 characters");
+function requirePassword(password) {
+  if (typeof password !== "string" || password.length < 8) {
+    throw new Error("local test vault password must be at least 8 characters");
   }
 }

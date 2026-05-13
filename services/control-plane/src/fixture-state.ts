@@ -17,6 +17,7 @@ import {
   type ArtifactResolverFixture,
   type PersistedVerifierReports,
 } from "../../verifier/src/index.ts";
+import { makeObservation, validateDeposit } from "../../bridge-relayer/src/observe-base-lockbox.ts";
 import type {
   ControlPlanePaths,
   DataSourceRecord,
@@ -31,29 +32,24 @@ export const DEFAULT_CONTROL_PLANE_PATHS: ControlPlanePaths = {
   indexerPath: "services/indexer/out/indexer-state.json",
   verifierPath: "services/verifier/out/reports.json",
   artifactsPath: "services/verifier/fixtures/artifacts.json",
-  devnetLocalStatePath: "devnet/local/state.json",
-  devnetLocalLaunchStatePath: "devnet/local/launch-v0-state.json",
-  devnetLocalIndexerHandoffPath: "devnet/local/handoff/generated/indexer-handoff.json",
-  devnetLocalVerifierHandoffPath: "devnet/local/handoff/generated/verifier-handoff.json",
-  devnetLocalControlPlaneHandoffPath: "devnet/local/handoff/generated/control-plane-handoff.json",
+  localDevnetPath: "devnet/local/state.json",
+  localDevnetLaunchPath: "devnet/local/launch-v0-state.json",
   devnetPath: "fixtures/launch-core/generated/devnet/state.json",
   devnetIndexerHandoffPath: "fixtures/launch-core/generated/devnet/indexer-handoff.json",
   devnetVerifierHandoffPath: "fixtures/launch-core/generated/devnet/verifier-handoff.json",
   devnetControlPlaneHandoffPath: "fixtures/launch-core/generated/devnet/control-plane-handoff.json",
   txFixturesPath: "fixtures/handoff/sample-txs.json",
-  runtimeStatePath: "devnet/local/state.json",
-  runtimeIntakeDir: "devnet/local/control-plane-intake",
+  txIntakePath: "devnet/local/intake/transactions.ndjson",
   bridgeObservationPath: "services/bridge-relayer/out/bridge-observation.json",
-  bridgeObservationIntakePath: "services/bridge-relayer/out/control-plane-observations.json",
-  bridgeDepositFixturePath: "fixtures/bridge/base-sepolia-mock-deposit.json",
+  bridgeObservationIntakePath: "devnet/local/intake/bridge-observations.ndjson",
 };
 
-function resolveRepoPath(path: string): string {
+export function resolveControlPlanePath(path: string): string {
   return isAbsolute(path) ? path : resolve(REPO_ROOT, path);
 }
 
 function readJson<T>(path: string): T {
-  return JSON.parse(readFileSync(resolveRepoPath(path), "utf8")) as T;
+  return JSON.parse(readFileSync(resolveControlPlanePath(path), "utf8")) as T;
 }
 
 function sourceRecord(
@@ -72,14 +68,26 @@ function sourceRecord(
 }
 
 function maybeReadJson(path: string): JsonObject | null {
-  if (!existsSync(resolveRepoPath(path))) {
+  if (!existsSync(resolveControlPlanePath(path))) {
     return null;
   }
   return readJson<JsonObject>(path);
 }
 
+function readNdjson(path: string): JsonObject[] {
+  const resolved = resolveControlPlanePath(path);
+  if (!existsSync(resolved)) {
+    return [];
+  }
+  return readFileSync(resolved, "utf8")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .map((line) => JSON.parse(line) as JsonObject);
+}
+
 function loadOrBuildIndexer(path: string, sources: Record<string, DataSourceRecord>): PersistedIndexerState {
-  if (existsSync(resolveRepoPath(path))) {
+  if (existsSync(resolveControlPlanePath(path))) {
     sources.indexer = sourceRecord("indexer", path, "loaded");
     return readJson<PersistedIndexerState>(path);
   }
@@ -97,7 +105,7 @@ function loadOrBuildVerifier(
   resolver: ArtifactResolverFixture,
   sources: Record<string, DataSourceRecord>,
 ): PersistedVerifierReports {
-  if (existsSync(resolveRepoPath(path))) {
+  if (existsSync(resolveControlPlanePath(path))) {
     sources.verifier = sourceRecord("verifier", path, "loaded");
     return readJson<PersistedVerifierReports>(path);
   }
@@ -108,7 +116,7 @@ function loadOrBuildVerifier(
 }
 
 function loadArtifacts(path: string, sources: Record<string, DataSourceRecord>): ArtifactResolverFixture {
-  if (existsSync(resolveRepoPath(path))) {
+  if (existsSync(resolveControlPlanePath(path))) {
     sources.artifacts = sourceRecord("artifacts", path, "loaded");
     return readJson<ArtifactResolverFixture>(path);
   }
@@ -136,7 +144,7 @@ function loadOrBuildLaunchCore(
   verifier: PersistedVerifierReports,
   sources: Record<string, DataSourceRecord>,
 ): LaunchCoreOutput {
-  if (existsSync(resolveRepoPath(paths.launchCorePath))) {
+  if (existsSync(resolveControlPlanePath(paths.launchCorePath))) {
     sources.launchCore = sourceRecord("launchCore", paths.launchCorePath, "loaded");
     return readJson<LaunchCoreOutput>(paths.launchCorePath);
   }
@@ -155,21 +163,51 @@ function loadOptionalSource(
   return value;
 }
 
-function loadFirstOptionalSource(
-  name: string,
-  paths: string[],
-  sources: Record<string, DataSourceRecord>,
-): JsonObject | null {
-  for (const path of paths) {
+function loadDevnetSource(paths: ControlPlanePaths, sources: Record<string, DataSourceRecord>): JsonObject | null {
+  for (const [path, recovery] of [
+    [paths.localDevnetPath, undefined],
+    [paths.localDevnetLaunchPath, "loaded from devnet/local launch runtime state"],
+    [paths.devnetPath, "loaded committed devnet fixture fallback"],
+  ] as const) {
     const value = maybeReadJson(path);
     if (value !== null) {
-      sources[name] = sourceRecord(name, path, "loaded");
+      sources.devnet = sourceRecord("devnet", path, path === paths.localDevnetPath ? "loaded" : "recovered", recovery);
       return value;
     }
   }
-
-  sources[name] = sourceRecord(name, paths[0] ?? "", "missing", paths.slice(1).join(", "));
+  sources.devnet = sourceRecord("devnet", paths.localDevnetPath, "missing");
   return null;
+}
+
+function loadTxIntake(path: string, sources: Record<string, DataSourceRecord>): JsonObject[] {
+  const rows = readNdjson(path);
+  sources.txIntake = sourceRecord("txIntake", path, rows.length === 0 ? "missing" : "loaded");
+  return rows;
+}
+
+function loadBridgeObservations(paths: ControlPlanePaths, sources: Record<string, DataSourceRecord>): JsonObject[] {
+  const observations: JsonObject[] = [];
+  const persisted = maybeReadJson(paths.bridgeObservationPath);
+  if (persisted !== null) {
+    observations.push(persisted);
+    sources.bridgeObservation = sourceRecord("bridgeObservation", paths.bridgeObservationPath, "loaded");
+  } else {
+    const bridgeFixturePath = "fixtures/bridge/base-sepolia-mock-deposit.json";
+    const fixture = maybeReadJson(bridgeFixturePath);
+    if (fixture !== null) {
+      observations.push(makeObservation(validateDeposit(fixture), "mock") as unknown as JsonObject);
+      sources.bridgeObservation = sourceRecord("bridgeObservation", bridgeFixturePath, "recovered", "built from committed mock bridge deposit fixture");
+    } else {
+      sources.bridgeObservation = sourceRecord("bridgeObservation", paths.bridgeObservationPath, "missing");
+    }
+  }
+
+  const intakeRows = readNdjson(paths.bridgeObservationIntakePath);
+  if (intakeRows.length > 0) {
+    observations.push(...intakeRows);
+  }
+  sources.bridgeObservationIntake = sourceRecord("bridgeObservationIntake", paths.bridgeObservationIntakePath, intakeRows.length === 0 ? "missing" : "loaded");
+  return observations;
 }
 
 export function controlPlanePaths(overrides: Partial<ControlPlanePaths> = {}): ControlPlanePaths {
@@ -186,27 +224,13 @@ export function loadControlPlaneState(overrides: Partial<ControlPlanePaths> = {}
   const indexer = loadOrBuildIndexer(paths.indexerPath, sources);
   const verifier = loadOrBuildVerifier(paths.verifierPath, indexer, artifacts, sources);
   const launchCore = loadOrBuildLaunchCore(paths, indexer, verifier, sources);
-  const devnet = loadFirstOptionalSource("devnet", [
-    paths.devnetLocalStatePath,
-    paths.devnetLocalLaunchStatePath,
-    paths.devnetPath,
-  ], sources);
-  const devnetIndexerHandoff = loadFirstOptionalSource("devnetIndexerHandoff", [
-    paths.devnetLocalIndexerHandoffPath,
-    paths.devnetIndexerHandoffPath,
-  ], sources);
-  const devnetVerifierHandoff = loadFirstOptionalSource("devnetVerifierHandoff", [
-    paths.devnetLocalVerifierHandoffPath,
-    paths.devnetVerifierHandoffPath,
-  ], sources);
-  const devnetControlPlaneHandoff = loadFirstOptionalSource("devnetControlPlaneHandoff", [
-    paths.devnetLocalControlPlaneHandoffPath,
-    paths.devnetControlPlaneHandoffPath,
-  ], sources);
+  const devnet = loadDevnetSource(paths, sources);
+  const devnetIndexerHandoff = loadOptionalSource("devnetIndexerHandoff", paths.devnetIndexerHandoffPath, sources);
+  const devnetVerifierHandoff = loadOptionalSource("devnetVerifierHandoff", paths.devnetVerifierHandoffPath, sources);
+  const devnetControlPlaneHandoff = loadOptionalSource("devnetControlPlaneHandoff", paths.devnetControlPlaneHandoffPath, sources);
   const txFixtures = loadOptionalSource("txFixtures", paths.txFixturesPath, sources);
-  const bridgeObservation = loadOptionalSource("bridgeObservation", paths.bridgeObservationPath, sources);
-  const bridgeObservationIntake = loadOptionalSource("bridgeObservationIntake", paths.bridgeObservationIntakePath, sources);
-  const bridgeDepositFixture = loadOptionalSource("bridgeDepositFixture", paths.bridgeDepositFixturePath, sources);
+  const txIntake = loadTxIntake(paths.txIntakePath, sources);
+  const bridgeObservations = loadBridgeObservations(paths, sources);
 
   return {
     schema: "flowmemory.control_plane.state.v0",
@@ -219,9 +243,9 @@ export function loadControlPlaneState(overrides: Partial<ControlPlanePaths> = {}
     devnetVerifierHandoff,
     devnetControlPlaneHandoff,
     txFixtures,
-    bridgeObservation,
-    bridgeObservationIntake,
-    bridgeDepositFixture,
+    txIntake,
+    bridgeObservations,
+    paths,
     sources,
   };
 }

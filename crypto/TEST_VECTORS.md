@@ -2,18 +2,15 @@
 
 Status: draft v0.
 
-The test vectors are synthetic and contain no production secrets. Signatures are
-no-value local/test signatures with public keys only; private keys are not
-committed in fixtures or public exports.
+The test vectors are synthetic and contain no production secrets or signatures.
 
 ## Vector Files
 
 - `fixtures/sample-flowpulse.json`: FlowPulse event args and expected `pulseId` / `eventArgsHash`.
 - `fixtures/sample-observation.json`: observation metadata, artifact/storage inputs, and expected `observationId` / `receiptHash`.
 - `fixtures/sample-report.json`: verifier report, worker signature payload, verifier signature payload, and attestation envelope expectations.
-- `fixtures/local-alpha-objects.json`: positive and negative fixtures for FlowChain Local Alpha object identity, signed-envelope validation, and schema validation.
-- `fixtures/local-transaction-vectors.json`: wallet-signed local transaction envelopes, public wallet metadata, and negative vectors for chain id, domain, signer, nonce replay, malformed roots, malformed bridge deposits, and changed object type.
-- `fixtures/vectors.json`: 41 package-level vectors for domains, canonical JSON, observation ids, receipts, artifacts, Merkle roots, reports, attestations, cursors, identities, root commitments, work receipts, devnet block hashes, Local Alpha object ids, bridge/account objects, signer IDs, local transaction payloads, hardware signal envelopes, and local signature envelopes.
+- `fixtures/local-alpha-objects.json`: positive and negative fixtures for FlowChain Local Alpha object identity, signed-envelope validation, transaction-envelope validation, and schema validation.
+- `fixtures/vectors.json`: 38 package-level vectors for domains, canonical JSON, observation ids, receipts, artifacts, Merkle roots, reports, attestations, cursors, identities, root commitments, work receipts, devnet block hashes, Local Alpha object ids, bridge/balance ids, hardware signal envelopes, local signature envelopes, and local transaction envelopes.
 - `test-vectors/flowpulse-observation-v0.json`: FlowPulse-specific observation, receipt, artifact, report, worker signature digest, and verifier signature digest.
 
 ## FlowPulse Observation Vector Highlights
@@ -53,9 +50,9 @@ An implementation should reproduce:
 - Merkle root and artifact root
 - deterministic verifier report id
 - EIP-712 signing digests without requiring test private keys
-- Local Alpha object IDs for AgentAccount, ModelPassport, WorkReceipt, ArtifactAvailabilityProof, VerifierModule, VerifierReport, MemoryCell, Challenge, FinalityReceipt, BridgeDeposit, BridgeCredit, BridgeWithdrawal, local account balance, hardware signal envelopes, and control-plane provenance responses
+- Local Alpha object IDs for AgentAccount, ModelPassport, WorkReceipt, ArtifactAvailabilityProof, VerifierModule, VerifierReport, MemoryCell, Challenge, FinalityReceipt, BridgeDeposit, BridgeCredit, BridgeWithdrawal, local balance records, hardware signal envelopes, and control-plane provenance responses
 - Local Alpha signature envelope IDs and signing digests for local operator, agent, verifier, and hardware no-value test keys
-- Local transaction envelope IDs, payload hashes, signing digests, and public signer metadata
+- Local transaction envelope IDs, payload hashes, and signing digests for chain-bound local transaction submission
 
 Run the package test suite:
 
@@ -73,7 +70,7 @@ npm run validate:vectors
 Expected output:
 
 ```text
-FLOWMEMORY_CRYPTO_VECTORS_OK vectors=41 localTransactionPositive=2 localTransactionNegative=7
+FLOWMEMORY_CRYPTO_VECTORS_OK 38
 ```
 
 Validate the Local Alpha object documents and signature envelopes against the
@@ -86,7 +83,7 @@ npm run validate:local-alpha
 Expected output:
 
 ```text
-FLOWCHAIN_LOCAL_ALPHA_FIXTURES_OK documents=15 envelopes=11 schemas=16
+FLOWCHAIN_LOCAL_ALPHA_FIXTURES_OK documents=11 envelopes=11 schemas=12
 ```
 
 Print the sample vector summary:
@@ -120,14 +117,12 @@ FLOWPULSE_VECTOR_RECOMPUTE_OK
 - duplicate Local Alpha object IDs should be rejected by fixture validation
 - canonical JSON key order should not change the control-plane provenance response body hash
 - replayed Local Alpha signer/domain/sequence tuples should be rejected
-- replayed local transaction signer/domain/nonce tuples should be rejected
-- wrong local transaction chain id, domain, and signer should be rejected
-- malformed bridge deposits inside local transaction payloads should be rejected
 - wrong signature domains should be rejected
 - missing local operator/agent/verifier/hardware signer fields should be rejected
 - each Local Alpha object envelope has a bad-signature invalid vector
-- zero critical hashes, malformed object IDs, malformed dependency roots, bad parent/root relationships, and wrong object types should be rejected
+- zero critical hashes, malformed object IDs, malformed dependency roots, bad parent/root relationships, malformed bridge deposits, and wrong object types should be rejected
+- wrong local transaction chain ids, domains, signers, replayed nonces, and changed object types should be rejected
 - expired worker signature should be rejected by verifier policy
 - reorged observation should not mutate into a verified report
 
-The package tests cover the hash, schema, malformed hex, duplicate, type-string, canonical JSON, signed-envelope, transaction-envelope, wallet public-metadata, replay, wrong-chain-id, wrong-domain, wrong-signer, missing-signer, bad-signature, zero-hash, malformed-dependency, malformed-root, malformed bridge-deposit, bad-parent/root, and wrong-object-type checks. Expiry and reorg-to-report policy are verifier-service responsibilities because they require policy context, not just hash recomputation.
+The package tests cover the hash, schema, malformed hex, duplicate, type-string, canonical JSON, signed-envelope, transaction-envelope, replay, wrong-chain-id, wrong-domain, wrong-signer, missing-signer, bad-signature, zero-hash, malformed-dependency, malformed-bridge-deposit, bad-parent/root, and wrong-object-type checks. Expiry and reorg-to-report policy are verifier-service responsibilities because they require policy context, not just hash recomputation.

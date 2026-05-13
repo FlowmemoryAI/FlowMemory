@@ -24,8 +24,6 @@ Check:
 - Whether open PRs touch overlapping folders.
 - Whether docs still match GitHub issue and PR state.
 - Whether `docs/FLOWCHAIN_TESTNET_ACCEPTANCE.md` has stale statuses.
-- Whether `docs/FLOWCHAIN_HQ_INTEGRATION_STATUS.md` matches GitHub milestone
-  #7, open PRs, and active full-L1 branches.
 - Whether command names in `docs/FLOWCHAIN_SECOND_COMPUTER_SETUP.md` still
   match `package.json`.
 - Whether any PR adds tokenomics, public validator onboarding, production
@@ -42,15 +40,8 @@ npm run flowchain:demo
 npm run flowchain:export
 ```
 
-Run `npm run flowchain:smoke` when the machine has the full prerequisite set,
+Run `npm run flowchain:full-smoke` when the machine has the full prerequisite set,
 including Foundry, Python, dashboard dependencies, and crypto dependencies.
-
-Run the temporary full-L1 gate in blocker-report mode after wrapper or issue
-map changes:
-
-```powershell
-npm run flowchain:full-smoke -- -SkipMergedSmoke -AllowIncomplete
-```
 
 ## During The Day
 
@@ -80,7 +71,7 @@ Run before handoff when dependencies are installed:
 
 ```powershell
 npm run flowchain:smoke
-npm run flowchain:full-smoke -- -AllowIncomplete
+npm run flowchain:full-smoke
 git diff --check
 ```
 

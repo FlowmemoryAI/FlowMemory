@@ -10,25 +10,27 @@
         "schema",
         "creditId",
         "depositId",
-        "accountId",
+        "recipient",
         "assetId",
         "amount",
-        "creditedAtBlock",
-        "creditNonce",
+        "creditedAtBlockNumber",
+        "creditedAtUnixMs",
         "status",
-        "statusCode"
+        "statusCode",
+        "nonce"
       ],
       "properties": {
         "schema": { "const": "flowchain.bridge_credit.v0" },
         "creditId": { "$ref": "#/$defs/hex32" },
         "depositId": { "$ref": "#/$defs/hex32" },
-        "accountId": { "$ref": "#/$defs/hex32" },
+        "recipient": { "$ref": "#/$defs/hex32" },
         "assetId": { "$ref": "#/$defs/hex32" },
         "amount": { "$ref": "#/$defs/uintString" },
-        "creditedAtBlock": { "$ref": "#/$defs/uintString" },
-        "creditNonce": { "$ref": "#/$defs/hex32" },
-        "status": { "enum": ["pending", "credited", "rejected", "reversed"] },
-        "statusCode": { "type": "integer", "minimum": 1, "maximum": 255 }
+        "creditedAtBlockNumber": { "$ref": "#/$defs/uintString" },
+        "creditedAtUnixMs": { "$ref": "#/$defs/uintString" },
+        "status": { "enum": ["credited"] },
+        "statusCode": { "const": 3 },
+        "nonce": { "$ref": "#/$defs/hex32" }
       }
     },
     {

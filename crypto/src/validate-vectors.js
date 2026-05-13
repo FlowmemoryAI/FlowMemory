@@ -8,6 +8,9 @@ import {
   agentAccountId,
   artifactAvailabilityProofId,
   attestationEnvelopeHash,
+  bridgeCreditId,
+  bridgeDepositId,
+  bridgeWithdrawalId,
   challengeId,
   canonicalJsonHash,
   controlPlaneProvenanceResponseId,
@@ -21,15 +24,9 @@ import {
   flowPulseSchemaId,
   hardwareSignalEnvelopeId,
   indexerCursorId,
-  bridgeCreditId,
-  bridgeDepositId,
-  bridgeWithdrawalId,
-  localAccountBalanceId,
-  localSignerId,
-  localSignerKeyId,
   localSignatureEnvelopeHash,
+  localBalanceRecordId,
   localTransactionEnvelopeHash,
-  localTransactionPayloadHash,
   memoryCellId,
   merkleLeafHash,
   merkleRoot,
@@ -44,13 +41,15 @@ import {
   workReceiptId,
   workerIdentity
 } from "./index.js";
-import { validateLocalTransactionFixtures } from "./validate-local-transaction-fixtures.js";
 
 const validators = Object.freeze({
   artifactFromChunks,
   agentAccountId,
   artifactAvailabilityProofId,
   attestationEnvelopeHash,
+  bridgeCreditId,
+  bridgeDepositId,
+  bridgeWithdrawalId,
   challengeId,
   canonicalJsonHash,
   controlPlaneProvenanceResponseId,
@@ -64,15 +63,9 @@ const validators = Object.freeze({
   flowPulseSchemaId,
   hardwareSignalEnvelopeId,
   indexerCursorId,
-  bridgeCreditId,
-  bridgeDepositId,
-  bridgeWithdrawalId,
-  localAccountBalanceId,
-  localSignerId,
-  localSignerKeyId,
   localSignatureEnvelopeHash,
+  localBalanceRecordId,
   localTransactionEnvelopeHash,
-  localTransactionPayloadHash,
   memoryCellId,
   merkleLeafHash,
   merkleRoot: ({ leaves }) => merkleRoot(leaves),
@@ -106,8 +99,5 @@ export function validateVectors(vectorPath = resolve(import.meta.dirname, "..", 
 
 if (fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const count = validateVectors(process.argv[2]);
-  const transactions = validateLocalTransactionFixtures();
-  console.log(
-    `FLOWMEMORY_CRYPTO_VECTORS_OK vectors=${count} localTransactionPositive=${transactions.positive} localTransactionNegative=${transactions.negative}`
-  );
+  console.log(`FLOWMEMORY_CRYPTO_VECTORS_OK ${count}`);
 }

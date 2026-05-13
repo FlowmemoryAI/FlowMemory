@@ -3,9 +3,8 @@
 Status: fixture-first bridge observer for local/Base Sepolia testing.
 
 This package converts explicit `BaseBridgeLockbox` deposit records into
-FlowChain bridge observation, credit, withdrawal-intent, and local runtime
-handoff JSON. It does not custody funds, sign releases, run a production
-relayer, or prove finality.
+FlowChain bridge observation JSON. It does not custody funds, sign releases, run
+a production relayer, or prove finality.
 
 Local mock:
 
@@ -13,17 +12,11 @@ Local mock:
 npm run bridge:mock
 ```
 
-Local credit smoke:
-
-```powershell
-npm run bridge:local-credit:smoke
-```
-
-This writes the current runtime-agent handoff file:
-
-```text
-fixtures/bridge/local-runtime-bridge-handoff.json
-```
+The control plane can read `services/bridge-relayer/out/bridge-observation.json`
+and can intake additional local bridge-agent observations through JSON-RPC
+`bridge_observation_submit` or HTTP `POST /bridge/observations`. Readbacks are
+available through `bridge_observation_list`, `bridge_deposit_list`,
+`bridge_credit_list`, and `withdrawal_list`.
 
 Base Sepolia guarded smoke:
 
@@ -33,29 +26,6 @@ powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base-se
   -LockboxAddress <deployed-lockbox> `
   -FromBlock <from> `
   -ToBlock <to>
-```
-
-Base Sepolia observation from root package env vars:
-
-```powershell
-$env:BASE_SEPOLIA_RPC_URL="<base-sepolia-rpc-url>"
-$env:BASE_BRIDGE_LOCKBOX_ADDRESS="<deployed-lockbox>"
-$env:BASE_BRIDGE_FROM_BLOCK="<from>"
-$env:BASE_BRIDGE_TO_BLOCK="<to>"
-npm run bridge:sepolia:observe
-```
-
-No private key is required. The command reads `BridgeDeposit` logs over an
-explicit block range and writes observation, credit, and handoff JSON under
-`services/bridge-relayer/out/`.
-
-Local Anvil observation uses the same log decoder with chain id `31337`:
-
-```powershell
-$env:ANVIL_BRIDGE_LOCKBOX_ADDRESS="<deployed-lockbox>"
-$env:ANVIL_BRIDGE_FROM_BLOCK="<from>"
-$env:ANVIL_BRIDGE_TO_BLOCK="<to>"
-npm run bridge:anvil:observe
 ```
 
 Base mainnet canary reads are disabled unless the operator explicitly passes

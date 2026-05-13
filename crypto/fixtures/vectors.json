@@ -1,6 +1,6 @@
 {
   "schema": "flowmemory.crypto.test-vectors.v0",
-  "vectorCount": 41,
+  "vectorCount": 38,
   "vectors": [
     {
       "name": "domain.flowPulseObservationId",
@@ -478,106 +478,66 @@
       "function": "bridgeCreditId",
       "input": {
         "depositId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
-        "accountId": "0x3a0c10e2146f38d2aaa70d6f82dda6c0113a511bd1c59041ff37db9a6b974e26",
-        "assetId": "0x9944b8d9cc8dbe786e454a56b94942547de59922ed90e4215bcd9bd28f4fb380",
+        "recipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "assetId": "0x4b000bcf935e50d5fb7eacb8a8f4c226ad36a19810a389a39dae72ad1ec012e3",
         "amount": "20000000",
-        "creditedAtBlock": "12",
-        "creditNonce": "0x7174065548573c03817f74d76ba74d9d941e7443ee0181d91c07eb1918b0ae2a",
-        "status": 2
+        "creditedAtBlockNumber": "3",
+        "creditedAtUnixMs": "1778702400000",
+        "status": 3,
+        "nonce": "0xbef2dad8fd23f339439a0c731866be73a74379128394f7beb6dc01cb4dbbcc91"
       },
-      "expected": "0x1a53633e8374a6ffff7345d6bccd6f2d0a4a88fb934c314fe5e52658f14ff44b"
+      "expected": "0xb1d6d957acf4a61f52f1046c792815eab6e1b21f706c4aba88cb0efe2200d1cb"
     },
     {
       "name": "local-alpha.bridgeWithdrawalId",
       "function": "bridgeWithdrawalId",
       "input": {
-        "accountId": "0x3a0c10e2146f38d2aaa70d6f82dda6c0113a511bd1c59041ff37db9a6b974e26",
+        "accountId": "0x5555555555555555555555555555555555555555555555555555555555555555",
         "destinationChainId": 84532,
-        "destinationAddress": "0x7777777777777777777777777777777777777777",
+        "destinationContract": "0x7777777777777777777777777777777777777777",
         "token": "0x3333333333333333333333333333333333333333",
         "amount": "5000000",
-        "requestedNonce": "0x984406f4b1efbab3c153b2bef95ef4802cf21b5241ca6749bc1e8b1e6f514995",
-        "feeCommitment": "0xcea2019a6c82969409853d0833763a9f8bb1a511b9aeffb921de63b3fde00fbd",
-        "status": 1
+        "recipient": "0x4444444444444444444444444444444444444444",
+        "requestedAtBlockNumber": "5",
+        "requestedAtUnixMs": "1778702400000",
+        "status": 4,
+        "nonce": "0x90a33185cd5337c093753c06818955d98ac711a9352d397ab3ccc5aee91921d2",
+        "metadataHash": "0xce908e6f85c929fed22796952391e6a53b656f92d31c1c5e7fb89883c7eeabe5"
       },
-      "expected": "0xcf85bb6ebdfd6a1d4bfa473756c31517337c6d0192422b5c19d3c6dc6d6b71f8"
+      "expected": "0x7612720b0b5c872c2325305a3dda6642f7cdabec1c20043663e4346cff5f7805"
     },
     {
-      "name": "local-alpha.localAccountBalanceId",
-      "function": "localAccountBalanceId",
+      "name": "local-alpha.localBalanceRecordId",
+      "function": "localBalanceRecordId",
       "input": {
-        "chainId": "31337",
-        "accountId": "0x3a0c10e2146f38d2aaa70d6f82dda6c0113a511bd1c59041ff37db9a6b974e26",
-        "assetId": "0x9944b8d9cc8dbe786e454a56b94942547de59922ed90e4215bcd9bd28f4fb380",
-        "available": "15000000",
-        "locked": "5000000",
-        "stateNonce": "3",
-        "balanceRoot": "0xa37f075197cb91b751eb04a107a5d0648019384c5be4d00d1a2f1adefb6e060e"
+        "accountId": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "assetId": "0x4b000bcf935e50d5fb7eacb8a8f4c226ad36a19810a389a39dae72ad1ec012e3",
+        "availableAmount": "15000000",
+        "lockedAmount": "5000000",
+        "lastCreditId": "0xb1d6d957acf4a61f52f1046c792815eab6e1b21f706c4aba88cb0efe2200d1cb",
+        "lastWithdrawalId": "0x7612720b0b5c872c2325305a3dda6642f7cdabec1c20043663e4346cff5f7805",
+        "stateRoot": "0xb49b915dddc40d2e762bec262f248b465d87a881b99b14a67642fbd377704b56",
+        "updatedAtBlockNumber": "5",
+        "nonce": "0x2d8034d0391a31483bc8f710ac19a333f617683632197ced2b9ff2b0ac03fdb7"
       },
-      "expected": "0xbd81721c37e43aababd0c181897a6d036ab435d3f0f5dafcd9d68be494fe81f5"
+      "expected": "0x7b4331b20142a093153ea7d07d226dbf824deaff3b517a203edd7f058de1b076"
     },
     {
-      "name": "local.signerId",
-      "function": "localSignerId",
-      "input": {
-        "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
-      },
-      "expected": "0xcefa89096f0b2208885ab27cc7479d0615e344356c8c78b56e793b9041bbfeb1"
-    },
-    {
-      "name": "local.signerKeyId",
-      "function": "localSignerKeyId",
-      "input": {
-        "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
-        "signerRole": 1,
-        "keyScopeHash": "0x12aff8820bbfec739f09eeac1e8a497ef87a9930ef07b5a09ff8e3a67a2b5677"
-      },
-      "expected": "0x011c875680a5f90e1513ec2c05e22c9dab1d83e22d554cb2c61e14199da746a1"
-    },
-    {
-      "name": "local.transactionPayloadHash.register-agent",
-      "function": "localTransactionPayloadHash",
-      "input": {
-        "schema": "flowmemory.local_devnet.tx_payload.v0",
-        "objectType": "agent_account",
-        "object": {
-          "schema": "flowchain.agent_account.v0",
-          "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
-          "namespaceId": "0x4c2eae268c3f97a510b66597873c6c08ae9e427a7c03cd383df6acfeda9bbf37",
-          "owner": "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1",
-          "policyRoot": "0x20121b5daa2be4de0d9dbcae292d1d3466a4e0a8b6cc3149ce46c30c352a1f0e",
-          "toolPermissionsRoot": "0x39079bde86c6743c81fd927a14012331688374b55118484529ce257317327120",
-          "modelAllowlistRoot": "0x00a463537f12e3419d4bf3655d28d93f3e189b9a89a3ad40c4819bbc4eb2acc9",
-          "memoryNamespaceRoot": "0x574eee506454973fb82863a3225ea78696b96907a17c360ad2c2b5234dfa2d83",
-          "spendingLimitPerEpoch": "0",
-          "status": "active",
-          "nonce": "0x37e916697be966b19c0cd7aa6073e78ffb7ee5cf27a4392383f9cfe5fa5025bb"
-        },
-        "tx": {
-          "type": "RegisterAgent",
-          "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
-          "controller": "operator:local-wallet-vector",
-          "modelPassportId": null,
-          "metadataHash": "0x0dee06bd221366280f62239c3df48eea9414e3bc1c9fc86796d5a546ba26fc7a"
-        }
-      },
-      "expected": "0x3659032f06fcb8573d47c109237dbba39fce5809c041123327767d3af17bb2b2"
-    },
-    {
-      "name": "local.transactionEnvelopeHash.register-agent",
+      "name": "local-alpha.localTransactionEnvelopeHash",
       "function": "localTransactionEnvelopeHash",
       "input": {
         "chainId": "31337",
-        "nonce": "1",
-        "signerId": "0xcefa89096f0b2208885ab27cc7479d0615e344356c8c78b56e793b9041bbfeb1",
-        "signerKeyId": "0x011c875680a5f90e1513ec2c05e22c9dab1d83e22d554cb2c61e14199da746a1",
+        "domainSeparator": "0xff516fcab184623fe60f12b4d1e0430a57e6d18685d1356887ada50f5f20b36c",
+        "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+        "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
         "signerRole": 1,
-        "payloadHash": "0x3659032f06fcb8573d47c109237dbba39fce5809c041123327767d3af17bb2b2",
-        "issuedAtUnixMs": "1778702400000",
-        "expiresAtUnixMs": "1810238400000",
-        "domainSeparator": "0x12aff8820bbfec739f09eeac1e8a497ef87a9930ef07b5a09ff8e3a67a2b5677"
+        "nonce": "1",
+        "payloadHash": "0x485a6896d8ee1c67440b6dddf723f0378c4f51d7448e487effe5f337656f0908",
+        "objectId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+        "objectTypeHash": "0x97bcbbe7a3f24fdb7cab668fc751ca8757b59b3fe8ed71674fdaca140a22d408",
+        "issuedAtUnixMs": "1778702400000"
       },
-      "expected": "0xfba94617ac6fbae608393c67570280d7123b27dabb0c1f31427808ad955a7c46"
+      "expected": "0xb8de3add81640848961aa8e0ba73c5c2ff3e30aed480dbba8e70d1345dba6210"
     }
   ]
 }

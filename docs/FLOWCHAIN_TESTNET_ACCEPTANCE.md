@@ -1,12 +1,9 @@
 # FlowChain Testnet Acceptance
 
-Status: acceptance matrix for the private/local testnet package. The chain
-runtime now has a long-running local node, local transaction intake, local
-test-unit faucet records, and static local-file multi-node reconciliation.
-The integrated stack adds local wallet envelopes, bridge-credit handoff,
-control-plane lifecycle queries, workbench inspection, hardware operator-signal
-fixtures, and a full-smoke wrapper. It remains a local/private test package, not
-production validator software.
+Status: acceptance matrix for the private/local testnet package. The HQ/Ops
+command wrapper layer and full-smoke gate are implemented for current
+private/local surfaces. Workbench polish and longer-running runtime behavior
+remain active, but the local object/control-plane path is no longer blocked.
 
 This document marks every major feature as one of:
 
@@ -25,11 +22,10 @@ This document marks every major feature as one of:
 | Run devnet tests | Implemented | `cargo test --manifest-path crates/flowmemory-devnet/Cargo.toml`. |
 | Run service tests | Implemented | `npm test` for merged service packages. |
 | Run launch candidate gate | Implemented | `npm run launch:candidate`. |
-| One-command private testnet aliases | Implemented for chain runtime surfaces | `package.json` now exposes `flowchain:prereq`, `flowchain:init`, `flowchain:start`, `flowchain:node`, `flowchain:node:stop`, `flowchain:node:status`, `flowchain:tx`, `flowchain:faucet`, `flowchain:node:smoke`, `flowchain:multi-node:smoke`, `flowchain:stop`, `flowchain:demo`, `flowchain:smoke`, `flowchain:full-smoke`, `flowchain:export`, `flowchain:import`, and `workbench:dev`. `control-plane:serve` remains in flight. |
+| One-command private testnet aliases | Implemented for merged surfaces | `package.json` now exposes `flowchain:prereq`, `flowchain:init`, `flowchain:start`, `flowchain:stop`, `flowchain:demo`, `flowchain:smoke`, `flowchain:full-smoke`, `flowchain:export`, `flowchain:import`, `control-plane:serve`, and `workbench:dev`. |
 | Prerequisite check script | Implemented | `infra/scripts/flowchain-check-prereqs.ps1`. |
-| Start/stop scripts | Implemented | `flowchain:start` remains a compatibility wrapper; `flowchain:node` starts the long-running runtime; `flowchain:node:stop` and `flowchain:stop` request node shutdown through the stop file. |
-| Full smoke script | Implemented for merged surfaces | `flowchain:smoke` runs service tests, crypto tests/vectors, launch candidate, devnet tests, one-node runtime smoke, multi-node runtime smoke, deterministic replay, dashboard build, hardware fixture, unsafe-claim scan, and export no-secret scan. |
-| Full private/local L1 smoke gate | Implemented for local acceptance | `flowchain:full-smoke` wraps the merged smoke, control-plane smoke, and bridge local-credit smoke. |
+| Start/stop scripts | Implemented bounded wrappers | `flowchain:start` prepares launch-core fixtures and state summary; `flowchain:stop` records stopped state and can reset ignored local state. Long-running node behavior remains in flight. |
+| Full smoke script | Implemented for current private/local surfaces | `flowchain:full-smoke` runs the smoke gate, control-plane smoke client, deterministic replay, dashboard build, hardware fixture, unsafe-claim scan, export no-secret scan, and `git diff --check`. |
 | Export/import state bundles | Implemented local wrapper | `flowchain:export` writes ignored export files and zip bundle; `flowchain:import` restores local state from a bundle. |
 | Troubleshooting guide | Implemented | `docs/FLOWCHAIN_TROUBLESHOOTING.md` plus script error messages. |
 
@@ -38,16 +34,15 @@ This document marks every major feature as one of:
 | Feature | Status | Acceptance condition |
 | --- | --- | --- |
 | No-value deterministic devnet | Implemented | Existing Rust devnet remains the single runtime surface. |
-| Private/local genesis/config | Implemented for chain runtime | `init` writes deterministic genesis config and operator key references; node state is under `devnet/local/state.json`; node-local identity/status files are under `devnet/local/node/`. |
-| Single-node local runtime | Implemented | `npm run flowchain:node` runs a long-running local node that persists state, ingests inbox transactions, produces interval blocks, writes logs/status, and stops through `flowchain:node:stop`. `npm run flowchain:node:smoke` proves 10+ blocks, transaction inclusion, restart persistence, and export/import. |
-| Multi-node or LAN notes | Implemented local-file mode; LAN not exposed | `npm run flowchain:multi-node:smoke` starts two local node processes and proves static local-file peer reconciliation. LAN mode is explicitly not exposed. |
+| Private/local genesis/config | Implemented local boundary | `flowchain:init` and devnet exports write deterministic local genesis/config references. |
+| Single-node local runtime | Implemented bounded local runtime | Current CLI can init/demo/run blocks and `flowchain:start` gives an obvious bounded start path; long-running node behavior remains future polish. |
+| Multi-node or LAN notes | Missing | Must be optional and safe, or marked later gated. |
 | Deterministic block production | Implemented | Current devnet models deterministic blocks and state roots. |
-| Deterministic replay | Implemented for merged demo | `flowchain:smoke` reruns the current demo twice and compares exported dashboard state roots. Full native object replay remains in flight. |
-| Transaction ingestion | Implemented for chain runtime | `submit-tx`, `faucet`, `flowchain:tx`, and `flowchain:faucet` submit locally authorized JSON transactions to node inboxes or direct pending state. |
-| Local balance/faucet ledger | Implemented for no-value test units | `FaucetLocalBalance`, `TransferLocalBalance`, `localBalances`, `faucetRecords`, and `balanceTransfers` are included in state roots, blocks, exports, and smoke tests. |
-| State export | Implemented | `export-fixtures`, `export-state`, `flowchain:export`, and `flowchain:node:smoke` export runtime state. |
-| State import/snapshot restore | Implemented local wrapper | `flowchain:import` restores current devnet state from an exported bundle; `flowchain:node:smoke` proves runtime export/import root equality. |
-| Health/status output | Implemented for node/runtime | `node-status` and `flowchain:node:status` expose latest block, state root, pending transactions, local balance counts, persisted node status, and LAN boundary. Control-plane health remains in flight. |
+| Deterministic replay | Implemented | `flowchain:smoke` reruns the native object demo twice and compares block hashes, latest parent hash, state root, and map roots. |
+| Transaction ingestion | Implemented local fixture path | Current devnet supports fixture submission plus deterministic demo transactions for the local object lifecycle. |
+| State export | Implemented | `export-fixtures` exists and is exercised by the package-level smoke path. |
+| State import/snapshot restore | Implemented local wrapper | `flowchain:import` restores current devnet state from an exported bundle; richer subsystem snapshots remain future work. |
+| Health/status output | Implemented local control-plane path | CLI summary and `control-plane:smoke` exercise local health/status queries. |
 
 ## Native Objects
 
@@ -56,36 +51,35 @@ This document marks every major feature as one of:
 | Rootfield namespace | Implemented | Existing contracts, launch fixtures, and devnet model support this. |
 | Root commitment | Implemented | Existing contracts, fixtures, and devnet model support this. |
 | FlowPulse linkage | Implemented | Launch-core fixtures preserve contract-event semantics. |
-| AgentAccount | Implemented in devnet | `RegisterAgent`, demo, handoff export, and `flowchain:tx` sample transaction cover local agent identity. |
-| ModelPassport | Implemented in devnet | `RegisterModelPassport`, demo, handoff export, and `flowchain:tx` sample transaction cover local model provenance. |
-| WorkReceipt | Implemented in devnet | Demo and smoke submit work receipts with dependency checks and handoff export. |
+| AgentAccount | Implemented | Devnet demo and smoke register/query local agent state. |
+| ModelPassport | Implemented | Devnet demo and smoke register/query local model passport state. |
+| WorkReceipt | Implemented | Work receipts are part of the devnet and control-plane smoke flow. |
 | ToolReceipt | Missing | Explicit placeholder is acceptable for this package if documented. |
 | EvalReceipt | Missing | Explicit placeholder is acceptable for this package if documented. |
-| ArtifactAvailabilityProof | Implemented in devnet | `MarkArtifactAvailability`, demo, smoke, roots, and handoff export cover local availability records. |
-| VerifierModule | Implemented in devnet | `RegisterVerifierModule`, verifier dependency checks, demo, smoke, roots, and handoff export cover local verifier identity. |
-| VerifierReport | Implemented in devnet | `SubmitVerifierReport`, accepted/failed status checks, demo, smoke, roots, and handoff export cover local reports. Workbench/query exposure remains subsystem work. |
-| MemoryCell | Implemented in devnet | `UpdateMemoryCell` requires an accepted verifier report and updates agent memory root; demo, smoke, roots, and handoff export cover it. |
-| Challenge | Implemented in devnet | `OpenChallenge` and `ResolveChallenge` enforce receipt/finality rules; demo, smoke, roots, and handoff export cover them. |
-| FinalityReceipt | Implemented in devnet | `FinalizeWorkReceipt` requires accepted receipts with no unresolved challenge; demo, smoke, roots, and handoff export cover it. |
-| LocalBalance/FaucetRecord | Implemented in devnet | Local no-value test-unit ledger supports transaction/faucet smoke and is included in roots, blocks, exports, and node status. |
+| ArtifactAvailabilityProof | Implemented | Local artifact availability objects are included in devnet state, export, and smoke. |
+| VerifierModule | Implemented | Local verifier module identity is included in devnet state, export, and smoke. |
+| VerifierReport | Implemented | Verifier reports are queryable through the local control-plane smoke path. |
+| MemoryCell | Implemented | Memory cells update only from accepted receipts with accepted verifier reports. |
+| Challenge | Implemented | Challenge open/resolve lifecycle is included in devnet smoke. |
+| FinalityReceipt | Implemented | Finality receipts are included in devnet smoke and export. |
 | DependencyAtom | Later gated | Keep as placeholder or dependency-root boundary; no SEAL proof claim. |
 
 ## Control Plane API
 
 | Feature | Status | Acceptance condition |
 | --- | --- | --- |
-| Local API service | Implemented fixture-backed; live mode in flight | Extend `services/control-plane/`; do not create a second API surface. Issue #101 owns live-node adapters and transaction submission. |
-| Health endpoint/method | Implemented fixture-backed; live mode in flight | Must show local-only status and source health. |
-| Chain status | Implemented fixture-backed; live mode in flight | Must include block, object, fixture, and capability counters. |
-| Blocks and transactions | In flight | Required for full private testnet inspection; live local-node coverage belongs to #101. |
-| Agents and models | In flight | Must read existing devnet/fixture outputs. |
-| Receipts and artifacts | In flight | Must link memory receipts, work receipts, artifacts, and provenance. |
-| Verifier reports | In flight | Must expose reports and stable error shapes. |
-| Challenges and finality | In flight | Must expose real local objects or explicit placeholders. |
-| Memory cells | In flight | Must link memory state to receipts and verifier status. |
-| Provenance queries | In flight | Must cite source files, schema hashes, report ids, and object ids. |
-| Stable errors | Implemented baseline; live mode in flight | JSON-RPC errors exist for the local API; #101 must preserve them for live adapters. |
-| No secrets in responses | Missing | Tests must prove secrets do not appear in API responses. |
+| Local API service | Implemented | `services/control-plane/` is the single local API surface. |
+| Health endpoint/method | Implemented | `control-plane:smoke` exercises local-only health/status. |
+| Chain status | Implemented | Control-plane state includes block, object, fixture, and capability counters. |
+| Blocks and transactions | Implemented | Required block and transaction queries are part of `control-plane:smoke`. |
+| Agents and models | Implemented | Control-plane reads current devnet/fixture outputs. |
+| Receipts and artifacts | Implemented | Control-plane links memory receipts, work receipts, artifacts, and provenance. |
+| Verifier reports | Implemented | Control-plane exposes verifier reports through stable local queries. |
+| Challenges and finality | Implemented | Control-plane exposes real local challenge and finality objects. |
+| Memory cells | Implemented | Control-plane links memory state to receipts and verifier status. |
+| Provenance queries | Implemented | Control-plane provenance queries cite source files, schema hashes, report ids, and object ids. |
+| Stable errors | Implemented local baseline | JSON-RPC smoke covers known local methods and errors. |
+| No secrets in responses | Implemented local export gate | Full smoke scans generated local exports and the control-plane client path avoids returning local operator secrets. |
 
 ## Workbench And Explorer
 
@@ -93,12 +87,12 @@ This document marks every major feature as one of:
 | --- | --- | --- |
 | Existing dashboard V0 | Implemented | Fixture-backed app renders V0 Rootflow/Flow Memory and devnet data. |
 | Local private testnet workbench | In flight | Extend `apps/dashboard/`; do not build a second dashboard. |
-| Node health view | In flight | Node status JSON exists; workbench rendering remains dashboard work. |
-| Blocks and transactions views | In flight | Devnet handoff includes blocks and pending transactions; workbench rendering remains dashboard work. |
-| Agents and models views | In flight | Devnet handoff includes local agents and models; workbench rendering remains dashboard work. |
+| Node health view | In flight | Workbench source includes node/control-plane state; UI polish remains active. |
+| Blocks and transactions views | In flight | Workbench source includes deterministic block and transaction state; UI polish remains active. |
+| Agents and models views | In flight | Workbench source includes local identity/provenance state; UI polish remains active. |
 | Receipts, artifacts, reports views | In flight | Existing dashboard has V0 views; needs private testnet completeness. |
-| Memory cells, challenges, finality views | In flight | Devnet handoff includes these objects; workbench rendering remains dashboard work. |
-| Provenance/source view | Missing | Required for second-computer debugging. |
+| Memory cells, challenges, finality views | In flight | Workbench source includes these local objects; UI polish remains active. |
+| Provenance/source view | In flight | Workbench source includes provenance/source data; UI polish remains active. |
 | Raw JSON view | Implemented | Existing dashboard has a raw JSON view; private testnet data remains part of the workbench extension. |
 | Loading/empty/error states | Missing | Required before second-computer validation. |
 
@@ -107,25 +101,13 @@ This document marks every major feature as one of:
 | Feature | Status | Acceptance condition |
 | --- | --- | --- |
 | Keccak typed hash helpers | Implemented | Existing `crypto/` package and vectors. |
-| Local object IDs | Implemented in crypto package | `crypto/` defines IDs, schemas, and vectors for AgentAccount, ModelPassport, WorkReceipt, ArtifactAvailabilityProof, VerifierModule, VerifierReport, MemoryCell, Challenge, FinalityReceipt, BridgeDeposit, BridgeCredit, BridgeWithdrawal, and LocalAccountBalance. |
-| Signature/envelope policy | Implemented in crypto package | `flowchain.local_transaction_envelope.v0` binds domain, chain id, nonce, signer, payload hash, validity window, and signature while preserving `payload.tx` for devnet consumers. |
-| Negative vector tests | Implemented in crypto package | `crypto/fixtures/local-transaction-vectors.json` covers wrong chain id, wrong domain, wrong signer, replayed nonce, malformed roots, malformed bridge deposit, and changed object type; Local Alpha vectors still cover missing signer, zero hashes, malformed dependency, bad parent/root, and bad signatures. |
-| Local operator key generation/import | Implemented local-only wrapper; crypto wallet added | `flowchain:init` still writes ignored `devnet/local/operator.local.json`; `npm run wallet:create --prefix crypto` creates an encrypted no-value local wallet vault. Root wrapper integration remains a follow-up. |
-| Encrypted local operator vault | Implemented in crypto package | `crypto/src/wallet.js` supports create, unlock, list public accounts, sign transaction, verify transaction, public metadata import/export, and rotate/add account. Vault files live under ignored `crypto/.wallet/` by default. |
+| Local object IDs | Implemented | Crypto helpers and schemas cover the current local-alpha object set, including bridge and local-balance records. |
+| Signature/envelope policy | Implemented local baseline | Local signature envelopes and chain-bound transaction envelopes cover local operators, agents, verifiers, and hardware signal issuers. |
+| Negative vector tests | Implemented | Tests cover wrong chain id, wrong domain, wrong signer, missing signer, zero hash, malformed objects, replay, changed object type, and bad signatures. |
+| Local operator key generation/import | Implemented local-only wrapper | `flowchain:init` writes ignored `devnet/local/operator.local.json` or imports a local operator file. Encrypted vault behavior remains missing. |
+| Encrypted local operator vault | Implemented local test vault | Crypto wallet CLI can create an encrypted local test vault, sign a local transaction envelope, and verify it. This is not production custody. |
 | Production proof systems | Later gated | No proof-circuit or audited-crypto claim. |
 | SEAL/dependency privacy | Later gated | Vocabulary and placeholders only unless reviewed separately. |
-
-## Bridge Test Path
-
-| Feature | Status | Acceptance condition |
-| --- | --- | --- |
-| Test-only bridge POC | Implemented foundation | Existing bridge docs, lockbox surface, relayer package, mock fixture, and bridge schemas stay test-only. |
-| Mock bridge observation | Implemented | `npm run bridge:mock` produces deterministic observation output. |
-| Bridge tests | Implemented baseline | `npm run bridge:test` runs relayer tests; bridge Foundry tests are required when contracts change. |
-| Base Sepolia observation | In flight | #104 must expose explicit Base Sepolia observation smoke without private-key requirements. |
-| Local BridgeCredit application | In flight | #104 must apply or hand off BridgeCredit to the local runtime with replay protection. |
-| Withdrawal intent | In flight | #104 may create local test-mode withdrawal records; no mainnet release default. |
-| Production bridge | Later gated | No production bridge, audited bridge-security, or broad mainnet deposit claim. |
 
 ## Hardware And Operator Signals
 
@@ -159,40 +141,26 @@ The package is accepted only when one documented command can:
 8. Open a challenge.
 9. Resolve the challenge.
 10. Finalize the receipt.
-11. Observe a mock/Base Sepolia test bridge deposit and apply or hand off a
-    local BridgeCredit.
-12. Export state.
-13. Query the state through the control-plane API.
-14. Render the state in the workbench.
-15. Rerun deterministically with the same expected roots.
+11. Export state.
+12. Query the state through the control-plane API.
+13. Render the state in the workbench.
+14. Rerun deterministically with the same expected roots.
 
 Current wrapper status:
 
-- `npm run flowchain:smoke` is the merged-surface smoke command.
-- `npm run flowchain:full-smoke` is the full acceptance command for #108, now
-  present as a temporary blocker-report wrapper.
+- `npm run flowchain:full-smoke` is the documented acceptance command.
 - It proves the merged launch-core, crypto helpers/vectors, local devnet,
-  native AgentAccount, ModelPassport, ArtifactAvailabilityProof,
-  VerifierModule, VerifierReport, MemoryCell, Challenge, FinalityReceipt,
-  local test-unit faucet records, one-node runtime behavior, static local-file
-  multi-node reconciliation, export/import, dashboard build, hardware fixture,
-  deterministic replay, and claim/no-secret guardrails.
-- Crypto contributes wallet and signed-envelope coverage through
-  `npm test --prefix crypto` and `npm run validate:vectors --prefix crypto`.
-- It does not yet prove live control-plane query coverage or workbench runtime
-  rendering. Those rows stay in flight until subsystem PRs land behind the
-  wrapper.
+  export, dashboard build, hardware fixture, deterministic replay,
+  control-plane query coverage, native local object lifecycle, and
+  claim/no-secret guardrails.
 
 Required final evidence for the acceptance PR:
 
 - Commands run.
 - Output files generated.
 - Deterministic root or fixture hash comparison.
-- Control-plane query sample remains a follow-up until the control-plane
-  subsystem exposes the runtime handoff through API methods.
-- Workbench screenshot or test/build evidence remains a follow-up until the
-  dashboard subsystem renders the runtime handoff.
-- Bridge mock/local-credit smoke evidence.
+- Control-plane query sample.
+- Workbench screenshot or test/build evidence.
 - `git diff --check`.
 
 ## Review Gate

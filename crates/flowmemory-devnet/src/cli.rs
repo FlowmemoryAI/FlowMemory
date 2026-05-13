@@ -25,9 +25,7 @@ pub struct Cli {
 pub enum Command {
     Init,
     ResetLocal,
-    Start {
-        blocks: u64,
-    },
+    Start { blocks: u64 },
     Node {
         node_id: String,
         block_ms: u64,
@@ -52,27 +50,13 @@ pub enum Command {
         authorized_by: Option<String>,
         direct: bool,
     },
-    SubmitFixture {
-        fixture: PathBuf,
-    },
-    InspectState {
-        summary: bool,
-    },
-    ExportFixtures {
-        out_dir: PathBuf,
-    },
-    ExportState {
-        out: PathBuf,
-    },
-    ImportState {
-        from: PathBuf,
-    },
-    Demo {
-        out_dir: PathBuf,
-    },
-    Smoke {
-        out_dir: PathBuf,
-    },
+    SubmitFixture { fixture: PathBuf },
+    InspectState { summary: bool },
+    ExportFixtures { out_dir: PathBuf },
+    ExportState { out: PathBuf },
+    ImportState { from: PathBuf },
+    Demo { out_dir: PathBuf },
+    Smoke { out_dir: PathBuf },
 }
 
 pub fn run_cli() -> Result<()> {
@@ -265,8 +249,8 @@ fn run(cli: Cli) -> Result<()> {
         }
         Command::NodeStop => {
             request_node_stop(&cli.node_dir)?;
-            let stop_path = stop_file(&cli.node_dir);
             let state = load_or_genesis(&cli.state)?;
+            let stop_path = stop_file(&cli.node_dir);
             write_node_status(
                 &cli.node_dir,
                 &NodeStatus::from_state(
@@ -354,16 +338,26 @@ fn run(cli: Cli) -> Result<()> {
                     "reason": &reason
                 }),
             );
-            let tx = Transaction::FaucetLocalBalance {
-                faucet_record_id,
-                account_id,
-                amount,
-                reason,
-            };
+            let owner = authorized_by
+                .clone()
+                .unwrap_or_else(|| "local-test-operator".to_string());
+            let txs = vec![
+                Transaction::CreateLocalTestUnitBalance {
+                    account_id: account_id.clone(),
+                    owner: owner.clone(),
+                },
+                Transaction::FaucetLocalTestUnits {
+                    faucet_record_id,
+                    account_id,
+                    recipient: owner,
+                    amount_units: amount,
+                    reason,
+                },
+            ];
             let queued = if direct {
-                queue_txs_direct(&cli.state, vec![tx], authorized_by)?
+                queue_txs_direct(&cli.state, txs, authorized_by)?
             } else {
-                write_txs_to_inbox(&cli.node_dir, vec![tx], authorized_by)?
+                write_txs_to_inbox(&cli.node_dir, txs, authorized_by)?
             };
             print_json(&QueuedTransactions { queued })?;
         }
@@ -415,10 +409,12 @@ fn run(cli: Cli) -> Result<()> {
             print_json(&DemoSummary::from_demo(cli.state, out_dir, &demo))?;
         }
         Command::Smoke { out_dir } => {
-            let first = build_demo_state();
-            let second = build_demo_state();
+            let first = build_smoke_state(10);
+            let second = build_smoke_state(10);
             let deterministic_replay = first.first_block_hash == second.first_block_hash
                 && first.second_block_hash == second.second_block_hash
+                && first.state.parent_hash == second.state.parent_hash
+                && first.state.blocks.len() == second.state.blocks.len()
                 && state_root(&first.state) == state_root(&second.state)
                 && state_map_roots(&first.state) == state_map_roots(&second.state);
             save_state(&cli.state, &first.state)?;
@@ -433,6 +429,20 @@ fn run(cli: Cli) -> Result<()> {
         }
     }
     Ok(())
+}
+
+fn build_blocks(
+    state: &mut crate::model::ChainState,
+    blocks: u64,
+) -> Result<Vec<crate::model::Block>> {
+    if blocks == 0 {
+        return Err(anyhow!("--blocks must be greater than zero"));
+    }
+    let mut produced = Vec::with_capacity(blocks as usize);
+    for _ in 0..blocks {
+        produced.push(build_block(state));
+    }
+    Ok(produced)
 }
 
 #[derive(Debug)]
@@ -844,18 +854,40 @@ fn file_safe_id(id: &str) -> String {
         .collect()
 }
 
-fn build_blocks(
-    state: &mut crate::model::ChainState,
-    blocks: u64,
-) -> Result<Vec<crate::model::Block>> {
-    if blocks == 0 {
-        return Err(anyhow!("--blocks must be greater than zero"));
+fn transactions_from_inbox_file(
+    path: &Path,
+) -> Result<Vec<(Transaction, Option<LocalAuthorization>)>> {
+    let body = fs::read_to_string(path)
+        .with_context(|| format!("failed to read inbox transaction {}", path.display()))?;
+    let value: Value = serde_json::from_str(body.trim_start_matches('\u{feff}'))
+        .with_context(|| format!("failed to parse inbox transaction {}", path.display()))?;
+    let authorization = authorization_from_value(value.get("authorization"))?;
+
+    if value.get("txs").is_some() {
+        let txs: Vec<Transaction> = serde_json::from_value(value["txs"].clone())
+            .with_context(|| format!("failed to parse txs in {}", path.display()))?;
+        return Ok(txs
+            .into_iter()
+            .map(|tx| (tx, authorization.clone()))
+            .collect());
     }
-    let mut produced = Vec::with_capacity(blocks as usize);
-    for _ in 0..blocks {
-        produced.push(build_block(state));
+
+    if value.get("tx").is_some() {
+        let tx = serde_json::from_value(value["tx"].clone())
+            .with_context(|| format!("failed to parse tx in {}", path.display()))?;
+        return Ok(vec![(tx, authorization)]);
     }
-    Ok(produced)
+
+    transactions_from_fixture(path).map(|txs| txs.into_iter().map(|tx| (tx, None)).collect())
+}
+
+fn authorization_from_value(value: Option<&Value>) -> Result<Option<LocalAuthorization>> {
+    match value {
+        Some(Value::Null) | None => Ok(None),
+        Some(value) => serde_json::from_value(value.clone())
+            .map(Some)
+            .context("failed to parse local authorization"),
+    }
 }
 
 struct DemoRun {
@@ -885,6 +917,14 @@ fn build_demo_state() -> DemoRun {
         first_block_hash: first.block_hash,
         second_block_hash: second.block_hash,
     }
+}
+
+fn build_smoke_state(min_blocks: usize) -> DemoRun {
+    let mut demo = build_demo_state();
+    while demo.state.blocks.len() < min_blocks {
+        build_block(&mut demo.state);
+    }
+    demo
 }
 
 fn transactions_from_fixture(path: &Path) -> Result<Vec<Transaction>> {
@@ -920,42 +960,6 @@ fn transactions_from_fixture(path: &Path) -> Result<Vec<Transaction>> {
         "unsupported fixture shape in {}: expected tx, txs, FlowPulse observation, or verifier report fixture",
         path.display()
     ))
-}
-
-fn transactions_from_inbox_file(
-    path: &Path,
-) -> Result<Vec<(Transaction, Option<LocalAuthorization>)>> {
-    let body = fs::read_to_string(path)
-        .with_context(|| format!("failed to read inbox transaction {}", path.display()))?;
-    let value: Value = serde_json::from_str(body.trim_start_matches('\u{feff}'))
-        .with_context(|| format!("failed to parse inbox transaction {}", path.display()))?;
-    let authorization = authorization_from_value(value.get("authorization"))?;
-
-    if value.get("txs").is_some() {
-        let txs: Vec<Transaction> = serde_json::from_value(value["txs"].clone())
-            .with_context(|| format!("failed to parse txs in {}", path.display()))?;
-        return Ok(txs
-            .into_iter()
-            .map(|tx| (tx, authorization.clone()))
-            .collect());
-    }
-
-    if value.get("tx").is_some() {
-        let tx = serde_json::from_value(value["tx"].clone())
-            .with_context(|| format!("failed to parse tx in {}", path.display()))?;
-        return Ok(vec![(tx, authorization)]);
-    }
-
-    transactions_from_fixture(path).map(|txs| txs.into_iter().map(|tx| (tx, None)).collect())
-}
-
-fn authorization_from_value(value: Option<&Value>) -> Result<Option<LocalAuthorization>> {
-    match value {
-        Some(Value::Null) | None => Ok(None),
-        Some(value) => serde_json::from_value(value.clone())
-            .map(Some)
-            .context("failed to parse local authorization"),
-    }
 }
 
 fn observation_from_flowpulse_fixture(value: &Value) -> Result<ImportedFlowPulseObservation> {
@@ -1036,11 +1040,11 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "stateRoot": state_root(state),
         "mapRoots": map_roots,
         "blockHeight": state.blocks.len(),
-        "localBalances": state.local_balances,
-        "faucetRecords": state.faucet_records,
-        "balanceTransfers": state.balance_transfers,
         "rootfields": state.rootfields,
         "agentAccounts": state.agent_accounts,
+        "localTestUnitBalances": state.local_test_unit_balances,
+        "faucetRecords": state.faucet_records,
+        "balanceTransfers": state.balance_transfers,
         "modelPassports": state.model_passports,
         "memoryCells": state.memory_cells,
         "challenges": state.challenges,
@@ -1058,10 +1062,10 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "genesisConfig": state.config,
         "importedObservations": state.imported_observations,
         "operatorKeyReferences": state.operator_key_references,
-        "localBalances": state.local_balances,
+        "agentAccounts": state.agent_accounts,
+        "localTestUnitBalances": state.local_test_unit_balances,
         "faucetRecords": state.faucet_records,
         "balanceTransfers": state.balance_transfers,
-        "agentAccounts": state.agent_accounts,
         "memoryCells": state.memory_cells,
         "challenges": state.challenges,
         "finalityReceipts": state.finality_receipts,
@@ -1075,7 +1079,7 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "schema": "flowmemory.verifier_handoff.local_devnet.v0",
         "genesisConfig": state.config,
         "operatorKeyReferences": state.operator_key_references,
-        "localBalances": state.local_balances,
+        "localTestUnitBalances": state.local_test_unit_balances,
         "faucetRecords": state.faucet_records,
         "balanceTransfers": state.balance_transfers,
         "verifierModules": state.verifier_modules,
@@ -1100,11 +1104,11 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "blocks": state.blocks,
         "pendingTxs": state.pending_txs,
         "objects": {
-            "localBalances": state.local_balances,
-            "faucetRecords": state.faucet_records,
-            "balanceTransfers": state.balance_transfers,
             "rootfields": state.rootfields,
             "agentAccounts": state.agent_accounts,
+            "localTestUnitBalances": state.local_test_unit_balances,
+            "faucetRecords": state.faucet_records,
+            "balanceTransfers": state.balance_transfers,
             "modelPassports": state.model_passports,
             "memoryCells": state.memory_cells,
             "challenges": state.challenges,
@@ -1192,8 +1196,9 @@ struct NodeStatus {
     latest_block_hash: String,
     state_root: String,
     pending_txs: usize,
-    local_balances: usize,
+    local_test_unit_balances: usize,
     faucet_records: usize,
+    balance_transfers: usize,
     static_peer_sync: Option<PeerSyncEvent>,
     last_ingested_txs: usize,
     last_rejected_inbox_files: usize,
@@ -1230,8 +1235,9 @@ impl NodeStatus {
                 .unwrap_or_else(|| state.parent_hash.clone()),
             state_root: state_root(state),
             pending_txs: state.pending_txs.len(),
-            local_balances: state.local_balances.len(),
+            local_test_unit_balances: state.local_test_unit_balances.len(),
             faucet_records: state.faucet_records.len(),
+            balance_transfers: state.balance_transfers.len(),
             static_peer_sync,
             last_ingested_txs,
             last_rejected_inbox_files,
@@ -1308,13 +1314,14 @@ struct StateSummary {
     state_root: String,
     map_roots: crate::model::StateMapRoots,
     operator_key_references: usize,
-    local_balances: usize,
-    faucet_records: usize,
-    balance_transfers: usize,
     pending_txs: usize,
     blocks: usize,
     rootfields: usize,
     agent_accounts: usize,
+    local_balances: usize,
+    local_test_unit_balances: usize,
+    faucet_records: usize,
+    balance_transfers: usize,
     model_passports: usize,
     memory_cells: usize,
     challenges: usize,
@@ -1340,13 +1347,14 @@ impl StateSummary {
             state_root: state_root(state),
             map_roots: state_map_roots(state),
             operator_key_references: state.operator_key_references.len(),
-            local_balances: state.local_balances.len(),
-            faucet_records: state.faucet_records.len(),
-            balance_transfers: state.balance_transfers.len(),
             pending_txs: state.pending_txs.len(),
             blocks: state.blocks.len(),
             rootfields: state.rootfields.len(),
             agent_accounts: state.agent_accounts.len(),
+            local_balances: state.local_test_unit_balances.len(),
+            local_test_unit_balances: state.local_test_unit_balances.len(),
+            faucet_records: state.faucet_records.len(),
+            balance_transfers: state.balance_transfers.len(),
             model_passports: state.model_passports.len(),
             memory_cells: state.memory_cells.len(),
             challenges: state.challenges.len(),
@@ -1457,7 +1465,10 @@ struct DemoSummary {
     state_root: String,
     agent_id: String,
     agent_registered: bool,
-    local_balance_credited: bool,
+    local_balance_account_id: String,
+    local_balance_units: u64,
+    faucet_record_id: String,
+    faucet_record_created: bool,
     work_receipt_id: String,
     work_receipt_submitted: bool,
     verifier_report_id: String,
@@ -1482,7 +1493,15 @@ impl DemoSummary {
             state_root: state_root(&demo.state),
             agent_id: "agent:demo:alpha".to_string(),
             agent_registered: demo.state.agent_accounts.contains_key("agent:demo:alpha"),
-            local_balance_credited: demo.state.local_balances.contains_key("agent:demo:alpha"),
+            local_balance_account_id: "local-balance:demo:agent-alpha".to_string(),
+            local_balance_units: demo
+                .state
+                .local_test_unit_balances
+                .get("local-balance:demo:agent-alpha")
+                .map(|balance| balance.units)
+                .unwrap_or(0),
+            faucet_record_id: "faucet:demo:001".to_string(),
+            faucet_record_created: demo.state.faucet_records.contains_key("faucet:demo:001"),
             work_receipt_id: "receipt:demo:001".to_string(),
             work_receipt_submitted: demo.state.work_receipts.contains_key("receipt:demo:001"),
             verifier_report_id: "report:demo:001".to_string(),
@@ -1516,6 +1535,8 @@ struct SmokeSummary {
     state_path: PathBuf,
     out_dir: PathBuf,
     state_root: String,
+    block_height: usize,
+    latest_block_hash: String,
     deterministic_replay: bool,
     checks: SmokeChecks,
     handoff_files: Vec<String>,
@@ -1526,9 +1547,10 @@ struct SmokeSummary {
 struct SmokeChecks {
     genesis_config_initialized: bool,
     operator_key_reference_present: bool,
-    local_balance_credited: bool,
-    local_balance_transferred: bool,
     agent_registered: bool,
+    local_test_unit_balance_created: bool,
+    faucet_record_created: bool,
+    local_test_unit_balance_units: u64,
     model_registered: bool,
     work_receipt_submitted: bool,
     artifact_available: bool,
@@ -1553,20 +1575,24 @@ impl SmokeSummary {
             state_path,
             out_dir,
             state_root: state_root(&demo.state),
+            block_height: demo.state.blocks.len(),
+            latest_block_hash: demo.state.parent_hash.clone(),
             deterministic_replay,
             checks: SmokeChecks {
                 genesis_config_initialized: demo.state.config.no_value,
                 operator_key_reference_present: !demo.state.operator_key_references.is_empty(),
-                local_balance_credited: demo
-                    .state
-                    .local_balances
-                    .get("agent:demo:alpha")
-                    .is_some_and(|balance| balance.balance == 100),
-                local_balance_transferred: demo
-                    .state
-                    .balance_transfers
-                    .contains_key("transfer:demo:operator-to-agent:001"),
                 agent_registered: demo.state.agent_accounts.contains_key("agent:demo:alpha"),
+                local_test_unit_balance_created: demo
+                    .state
+                    .local_test_unit_balances
+                    .contains_key("local-balance:demo:agent-alpha"),
+                faucet_record_created: demo.state.faucet_records.contains_key("faucet:demo:001"),
+                local_test_unit_balance_units: demo
+                    .state
+                    .local_test_unit_balances
+                    .get("local-balance:demo:agent-alpha")
+                    .map(|balance| balance.units)
+                    .unwrap_or(0),
                 model_registered: demo
                     .state
                     .model_passports

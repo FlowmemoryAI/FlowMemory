@@ -11,6 +11,7 @@ import {
   canonicalJson,
   deriveObservationId,
   deriveReportId,
+  findSecret,
   isVerifierStatus,
   keccak256Utf8,
   normalizeAddress,
@@ -95,4 +96,16 @@ test("canonical JSON sorts object keys while preserving array order", () => {
 
 test("derives deterministic verifier report id from canonical report core", () => {
   assert.equal(deriveReportId(fixture.reportCore), fixture.expected.reportId);
+});
+
+test("detects secret-shaped response material without rejecting ordinary hashes", () => {
+  assert.equal(findSecret({ stateRoot: `0x${"1".repeat(64)}` }), null);
+  assert.equal(findSecret({ privateKey: `0x${"1".repeat(64)}` })?.reasonCode, "secret.key_name");
+  assert.equal(findSecret({ rpc: "https://user:pass@example.invalid" })?.reasonCode, "secret.rpc_credential");
+  assert.equal(findSecret({ token: "sk-test_1234567890abcdefghijklmnop" })?.reasonCode, "secret.api_key");
+  assert.equal(findSecret({ url: "https://hooks.slack.com/services/T000/B000/XXXX" })?.reasonCode, "secret.webhook_url");
+  assert.equal(
+    findSecret({ phrase: "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" })?.reasonCode,
+    "secret.mnemonic",
+  );
 });

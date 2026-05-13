@@ -64,7 +64,7 @@ pre-hashed before entering the typed object.
 | BridgeDeposit | `depositId` | `bridgeDepositV0` | `bridgeDepositId` | `bridgeDepositId` |
 | BridgeCredit | `creditId` | `bridgeCreditV0` | `bridgeCreditId` | `bridgeCreditId` |
 | BridgeWithdrawal | `withdrawalId` | `bridgeWithdrawalV0` | `bridgeWithdrawalId` | `bridgeWithdrawalId` |
-| LocalAccountBalance | `balanceId` | `localAccountBalanceV0` | `localAccountBalanceId` | `localAccountBalanceId` |
+| Local balance record | `balanceRecordId` | `localBalanceRecordV0` | `localBalanceRecordId` | `localBalanceRecordId` |
 | HardwareSignalEnvelope | `hardwareSignalEnvelopeId` | `hardwareSignalEnvelopeV0` | `hardwareSignalEnvelopeId` | `hardwareSignalEnvelopeId` |
 | Control-plane provenance response | `provenanceResponseId` | `controlPlaneProvenanceResponseV0` | `controlPlaneProvenanceResponseId` | `controlPlaneProvenanceResponseId` |
 
@@ -82,18 +82,11 @@ window, and nonce. The signing digest is the local EIP-712 style digest over
 that struct hash and the object domain separator.
 
 `LocalTransactionEnvelope` uses `localTransactionEnvelopeV0` and
-`localTransactionEnvelopeHash`. It signs the chain id, nonce, signer ID, signer
-key ID, signer role, canonical payload hash, validity window, and transaction
-domain separator. The JSON payload preserves `payload.tx` so the existing
-devnet transaction model can unwrap and submit the same transaction object after
-envelope validation.
-
-`BridgeDeposit` intentionally keeps the existing
-`flowmemory.bridge_deposit.v0` schema used by the bridge observer. The crypto
-ID is a typed hash over the Base source chain id, source contract, tx hash,
-log index, token, amount, sender, FlowChain recipient, nonce, and metadata
-hash. `BridgeCredit` and `BridgeWithdrawal` are local FlowChain objects that
-record no-production bridge accounting for private/local testing only.
+`localTransactionEnvelopeHash`. It signs the local chain id, transaction domain
+separator, signer ID, signer key ID, signer role, transaction nonce, canonical
+JSON payload hash, object ID, object type hash, and issue time. The transaction
+domain is chain-bound as
+`flowchain.local-alpha.v0.local-transaction-envelope:chain:<chainId>`.
 
 Runnable definitions live in `crypto/src/objects.js`.
 
@@ -124,11 +117,10 @@ schemas/flowmemory/finality-receipt.schema.json
 schemas/flowmemory/bridge-deposit.schema.json
 schemas/flowmemory/bridge-credit.schema.json
 schemas/flowmemory/bridge-withdrawal.schema.json
-schemas/flowmemory/local-account-balance.schema.json
+schemas/flowmemory/local-balance-record.schema.json
 schemas/flowmemory/hardware-signal-envelope.schema.json
 schemas/flowmemory/local-signature-envelope.schema.json
 schemas/flowmemory/local-transaction-envelope.schema.json
-schemas/flowmemory/local-wallet-public-metadata.schema.json
 schemas/flowmemory/control-plane-provenance-response.schema.json
 ```
 
@@ -143,6 +135,16 @@ Local Alpha accepts four signer roles:
 | `verifier` | local verifier module/report signer | Signs verifier modules, verifier reports, and finality receipts as testnet statements, not trustless proofs. |
 | `hardware` | FlowRouter or simulator device key | Signs low-bandwidth control envelopes only. Heavy payloads remain off-chain. |
 
+## Local Test Wallet Boundary
+
+`crypto/src/wallet.js` implements an encrypted local test vault for private/local
+smoke runs. It supports create, unlock, public account listing, public metadata
+export, transaction signing, verification, account addition, and key rotation.
+The vault encrypts private keys with scrypt plus AES-256-GCM. Public metadata
+exports intentionally omit private keys, mnemonics, seed material, and
+ciphertext. This is a local test utility, not production custody or audited key
+management.
+
 Envelope validation requires:
 
 - `objectSchema`, `objectType`, and `objectTypeHash` match the document schema.
@@ -155,45 +157,11 @@ Envelope validation requires:
 - the caller supplies replay context and rejects repeated signer/domain/sequence tuples.
 - critical object hashes are nonzero, dependency roots are well-formed, parent/root relationships are coherent, and the object type is not swapped.
 
-The fixture validator covers invalid vectors for replay, wrong domain, missing
-signer, bad signature, zero hash, malformed ID, malformed dependency, bad
-parent/root, and wrong object type. Every Local Alpha object envelope also has a
-valid fixture and a bad-signature invalid fixture.
-
-Local transaction envelope validation additionally requires:
-
-- `domain` and `domainSeparator` match `flowchain.local.v0.transaction-envelope`.
-- the context-supplied chain id matches the envelope chain id.
-- `payloadHash` recomputes from canonical JSON.
-- `signerId` and `signerKeyId` derive from the public key and signer role.
-- the caller supplies replay context and rejects repeated signer/domain/nonce tuples.
-- object documents embedded under `payload.object` pass the same object ID and root checks.
-- the secp256k1 signature verifies against the transaction signing digest.
-
-The transaction vectors cover wrong chain id, wrong domain, wrong signer,
-replayed nonce, malformed roots, malformed bridge deposit, and changed object
-type.
-
-## Local Wallet Boundary
-
-`crypto/src/wallet.js` provides an encrypted local vault for no-value test keys.
-It supports create, unlock, list public accounts, sign transaction, verify
-transaction, public metadata import/export, and rotate/create additional
-accounts. The vault uses scrypt plus AES-256-GCM and stores private keys only in
-the encrypted blob. The export shape is
-`flowchain.local_wallet_public_metadata.v0`, which contains public account IDs,
-signer IDs, key IDs, roles, public keys, labels, and nonces only.
-
-The CLI entry point is `crypto/src/wallet-cli.js` and is exposed through:
-
-```powershell
-npm run wallet:create --prefix crypto
-npm run wallet:sign --prefix crypto
-npm run wallet:verify --prefix crypto
-```
-
-Set `FLOWCHAIN_WALLET_PASSWORD` for non-interactive use. The default vault path
-is `crypto/.wallet/flowchain-wallet.local.json`, which is ignored by git.
+The fixture validator covers invalid vectors for replay, wrong chain id, wrong
+domain, wrong signer, missing signer, bad signature, zero hash, malformed ID,
+malformed dependency, malformed bridge deposit, bad parent/root, and wrong
+object type. Every Local Alpha object envelope also has a valid fixture and a
+bad-signature invalid fixture.
 
 ## Consumer Rules
 
@@ -237,7 +205,7 @@ V0 also proves:
 - domain/type-string separation for each object class;
 - malformed hex rejection for bytes32/address fields;
 - canonical JSON stability for pre-hashed control-plane response bodies;
-- local wallet-signed transaction envelope verification without exposing private keys;
+- chain-bound transaction envelope signatures over payload hashes and nonces;
 - duplicate ID detection in fixture validation;
 - explicit finality and challenge state labels for local/test consumers.
 

@@ -3,7 +3,6 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import canaryFixture from "../../../../fixtures/dashboard/flowmemory-dashboard-base-canary-v0.json";
 import fixture from "../../../../fixtures/dashboard/flowmemory-dashboard-v0.json";
-import bridgeDeposit from "../../../../fixtures/bridge/base-sepolia-mock-deposit.json";
 import devnetDashboardState from "../../../../fixtures/launch-core/generated/devnet/dashboard-state.json";
 import devnetState from "../../../../fixtures/launch-core/generated/devnet/state.json";
 import { validateDashboardData } from "../data/loadDashboardData";
@@ -12,7 +11,6 @@ import { computeOverviewMetrics, searchRecords } from "../data/selectors";
 import type { DashboardData, ProvenancedRecord } from "../data/types";
 import {
   DEFAULT_CONTROL_PLANE_URL,
-  WORKBENCH_BRIDGE_DEPOSIT_PATH,
   WORKBENCH_DEVNET_DASHBOARD_STATE_PATH,
   WORKBENCH_DEVNET_STATE_PATH,
   WORKBENCH_SECTIONS,
@@ -118,9 +116,10 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.blocks).toHaveLength(2);
     expect(workbench.sections.transactions.length).toBeGreaterThanOrEqual(6);
     expect(workbench.sections.transactions.every((transaction) => transaction.status === "finalized")).toBe(true);
+    expect(workbench.sections.nodeStatus.length).toBeGreaterThan(0);
+    expect(workbench.sections.mempool).toHaveLength(0);
     expect(workbench.sections.accounts.length).toBeGreaterThan(0);
-    expect(workbench.sections.wallets.length).toBeGreaterThan(0);
-    expect(workbench.sections.balances.map((record) => record.id)).toContain("no-value-balance-boundary");
+    expect(workbench.sections.walletMetadata.length).toBeGreaterThan(0);
     expect(workbench.sections.rootfields.length).toBeGreaterThan(0);
     expect(workbench.sections.agents.length).toBeGreaterThan(0);
     expect(workbench.sections.receipts.length).toBeGreaterThan(data.workReceipts.length);
@@ -133,7 +132,11 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.rawJson.map((record) => record.id)).toContain("raw-dashboard-fixture");
     expect(workbench.sections.models.length).toBeGreaterThan(0);
     expect(workbench.sections.challenges.length).toBeGreaterThan(0);
+    expect(workbench.sections.bridgeDeposits).toHaveLength(0);
+    expect(workbench.sections.bridgeCredits).toHaveLength(0);
+    expect(workbench.sections.bridgeWithdrawals).toHaveLength(0);
     expect(workbench.node.status).toBe("offline");
+    expect(workbench.actions).toEqual([]);
 
     for (const section of WORKBENCH_SECTIONS) {
       expect(workbench.sections[section.key], `${section.key} should be a defined workbench view`).toBeDefined();
@@ -161,6 +164,23 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.provenance.find((record) => record.id === "control-plane-api")?.status).toBe("verified");
   });
 
+  it("only exposes local actions when the control-plane advertises matching endpoints", () => {
+    const workbench = buildWorkbenchSnapshot(data, {
+      controlPlane: {
+        url: "http://127.0.0.1:8787",
+        status: "available",
+        checkedAt: "2026-05-13T15:00:00.000Z",
+        endpoints: ["GET /health", "GET /state", "POST /smoke", "POST /faucet"],
+        health: { status: "ok" },
+        state: devnetState,
+      },
+      devnetState,
+      devnetDashboardState,
+    });
+
+    expect(workbench.actions.map((action) => action.endpoint)).toEqual(["POST /smoke", "POST /faucet"]);
+  });
+
   it("fetches control-plane state while keeping deterministic fixture payloads available", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
@@ -171,35 +191,11 @@ describe("dashboard fixture", () => {
       if (url.endsWith("/state")) {
         return Response.json({ state: devnetState });
       }
-      if (url.endsWith("/rpc")) {
-        return Response.json([
-          { jsonrpc: "2.0", id: "chainStatus", result: { schema: "flowmemory.control_plane.chain_status.v0", capabilities: ["raw_json_reads"] } },
-          { jsonrpc: "2.0", id: "devnetState", result: { schema: "flowmemory.control_plane.devnet_state.v0", blocks: devnetState.blocks } },
-          { jsonrpc: "2.0", id: "blocks", result: { blocks: devnetState.blocks } },
-          { jsonrpc: "2.0", id: "transactions", result: { transactions: [] } },
-          { jsonrpc: "2.0", id: "rootfields", result: { rootfields: [] } },
-          { jsonrpc: "2.0", id: "agents", result: { agents: [] } },
-          { jsonrpc: "2.0", id: "models", result: { models: [] } },
-          { jsonrpc: "2.0", id: "workReceipts", result: { workReceipts: [] } },
-          { jsonrpc: "2.0", id: "receipts", result: { receipts: [] } },
-          { jsonrpc: "2.0", id: "artifacts", result: { artifacts: [] } },
-          { jsonrpc: "2.0", id: "verifierModules", result: { verifierModules: [] } },
-          { jsonrpc: "2.0", id: "verifierReports", result: { reports: [] } },
-          { jsonrpc: "2.0", id: "memoryCells", result: { memoryCells: [] } },
-          { jsonrpc: "2.0", id: "challenges", result: { challenges: [] } },
-          { jsonrpc: "2.0", id: "finality", result: { finality: [] } },
-          { jsonrpc: "2.0", id: "rawDevnet", result: { raw: devnetState } },
-          { jsonrpc: "2.0", id: "rawTxFixtures", result: { raw: { txs: [] } } },
-        ]);
-      }
       if (url === WORKBENCH_DEVNET_STATE_PATH) {
         return Response.json(devnetState);
       }
       if (url === WORKBENCH_DEVNET_DASHBOARD_STATE_PATH) {
         return Response.json(devnetDashboardState);
-      }
-      if (url === WORKBENCH_BRIDGE_DEPOSIT_PATH) {
-        return Response.json(bridgeDeposit);
       }
 
       return new Response("not found", { status: 404 });
@@ -211,12 +207,9 @@ describe("dashboard fixture", () => {
     expect(workbench.source).toBe("control-plane");
     expect(workbench.raw.controlPlaneHealth).toEqual({ status: "ok" });
     expect(workbench.raw.controlPlaneState).toEqual({ state: devnetState });
-    expect(workbench.raw.controlPlaneRpc?.rawDevnet).toBeDefined();
     expect(workbench.raw.devnetState).toEqual(devnetState);
-    expect(workbench.raw.bridgeDeposit).toEqual(bridgeDeposit);
     expect(workbench.loadIssues).toEqual([]);
     expect(fetchMock).toHaveBeenCalledWith("http://127.0.0.1:8787/health", expect.any(Object));
-    expect(fetchMock).toHaveBeenCalledWith("http://127.0.0.1:8787/rpc", expect.any(Object));
     expect(fetchMock).toHaveBeenCalledWith(WORKBENCH_DEVNET_STATE_PATH, expect.any(Object));
   });
 
@@ -229,10 +222,9 @@ describe("dashboard fixture", () => {
 
     expect(html).toContain("Local explorer workbench");
     expect(html).toContain("Node and API status");
-    expect(html).toContain("Local actions");
     expect(html).toContain("Control-plane offline");
-    expect(html).toContain("Wallet Public Accounts");
-    expect(html).toContain("Bridge Test Lane");
+    expect(html).toContain("Wallet Metadata");
+    expect(html).toContain("Bridge Deposits");
     expect(html).toContain("Rootfields");
     expect(html).toContain("Verifier Modules");
     expect(html).toContain("Hardware Signals");

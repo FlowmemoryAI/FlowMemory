@@ -249,6 +249,8 @@ fn every_core_transaction_type_can_be_applied() {
     );
     assert_eq!(state.rootfields.len(), 1);
     assert_eq!(state.agent_accounts.len(), 1);
+    assert_eq!(state.local_test_unit_balances.len(), 1);
+    assert_eq!(state.faucet_records.len(), 1);
     assert_eq!(state.model_passports.len(), 1);
     assert_eq!(state.memory_cells.len(), 1);
     assert_eq!(state.challenges.len(), 1);
@@ -268,43 +270,60 @@ fn local_faucet_and_transfer_update_test_unit_ledger() {
     let mut state = genesis_state();
     apply_transaction(
         &mut state,
-        &Transaction::FaucetLocalBalance {
+        &Transaction::CreateLocalTestUnitBalance {
+            account_id: "local-account:alice".to_string(),
+            owner: "operator:alice".to_string(),
+        },
+    )
+    .unwrap();
+    apply_transaction(
+        &mut state,
+        &Transaction::CreateLocalTestUnitBalance {
+            account_id: "local-account:bob".to_string(),
+            owner: "operator:bob".to_string(),
+        },
+    )
+    .unwrap();
+    apply_transaction(
+        &mut state,
+        &Transaction::FaucetLocalTestUnits {
             faucet_record_id: "faucet:unit:001".to_string(),
             account_id: "local-account:alice".to_string(),
-            amount: 50,
+            recipient: "operator:alice".to_string(),
+            amount_units: 50,
             reason: "unit-test".to_string(),
         },
     )
     .unwrap();
     apply_transaction(
         &mut state,
-        &Transaction::TransferLocalBalance {
+        &Transaction::TransferLocalTestUnits {
             transfer_id: "transfer:unit:001".to_string(),
             from_account_id: "local-account:alice".to_string(),
             to_account_id: "local-account:bob".to_string(),
-            amount: 20,
+            amount_units: 20,
             memo: "unit-test-transfer".to_string(),
         },
     )
     .unwrap();
 
-    assert_eq!(state.local_balances["local-account:alice"].balance, 30);
-    assert_eq!(state.local_balances["local-account:bob"].balance, 20);
+    assert_eq!(state.local_test_unit_balances["local-account:alice"].units, 30);
+    assert_eq!(state.local_test_unit_balances["local-account:bob"].units, 20);
     assert_eq!(state.faucet_records.len(), 1);
     assert_eq!(state.balance_transfers.len(), 1);
 
     assert_eq!(
         apply_transaction(
             &mut state,
-            &Transaction::TransferLocalBalance {
+            &Transaction::TransferLocalTestUnits {
                 transfer_id: "transfer:unit:002".to_string(),
                 from_account_id: "local-account:bob".to_string(),
                 to_account_id: "local-account:alice".to_string(),
-                amount: 30,
+                amount_units: 30,
                 memo: "too-much".to_string(),
             },
         ),
-        Err(DevnetError::LocalBalanceInsufficient(
+        Err(DevnetError::LocalTestUnitBalanceInsufficient(
             "local-account:bob".to_string()
         ))
     );
@@ -329,6 +348,23 @@ fn duplicate_ids_are_rejected_for_new_objects() {
     assert_eq!(
         apply_transaction(&mut state, &agent),
         Err(DevnetError::AgentAlreadyExists("agent:dup".to_string()))
+    );
+
+    let balance = create_balance_tx("local-balance:dup", "agent:dup");
+    apply_transaction(&mut state, &balance).unwrap();
+    assert_eq!(
+        apply_transaction(&mut state, &balance),
+        Err(DevnetError::LocalTestUnitBalanceAlreadyExists(
+            "local-balance:dup".to_string()
+        ))
+    );
+    let faucet = faucet_tx("faucet:dup", "local-balance:dup", "agent:dup", 10);
+    apply_transaction(&mut state, &faucet).unwrap();
+    assert_eq!(
+        apply_transaction(&mut state, &faucet),
+        Err(DevnetError::FaucetRecordAlreadyExists(
+            "faucet:dup".to_string()
+        ))
     );
 
     let verifier = register_verifier_module_tx("verifier:dup");
@@ -383,6 +419,64 @@ fn duplicate_ids_are_rejected_for_new_objects() {
         apply_transaction(&mut state, &finality),
         Err(DevnetError::FinalityReceiptAlreadyExists(
             "finality:dup".to_string()
+        ))
+    );
+}
+
+#[test]
+fn local_test_unit_faucet_updates_balance_without_value_claims() {
+    let mut state = genesis_state();
+    apply_transaction(
+        &mut state,
+        &create_balance_tx("local-balance:test", "agent:test"),
+    )
+    .unwrap();
+    apply_transaction(
+        &mut state,
+        &faucet_tx("faucet:test:001", "local-balance:test", "agent:test", 25),
+    )
+    .unwrap();
+
+    let balance = state
+        .local_test_unit_balances
+        .get("local-balance:test")
+        .expect("balance");
+    assert_eq!(balance.units, 25);
+    assert_eq!(balance.total_faucet_units, 25);
+    assert_eq!(
+        balance.last_faucet_record_id.as_deref(),
+        Some("faucet:test:001")
+    );
+    assert!(balance.no_value);
+    assert!(
+        state
+            .faucet_records
+            .get("faucet:test:001")
+            .expect("faucet record")
+            .no_value
+    );
+
+    assert_eq!(
+        apply_transaction(
+            &mut state,
+            &faucet_tx("faucet:test:zero", "local-balance:test", "agent:test", 0),
+        ),
+        Err(DevnetError::FaucetAmountMustBePositive(
+            "faucet:test:zero".to_string()
+        ))
+    );
+    assert_eq!(
+        apply_transaction(
+            &mut state,
+            &faucet_tx(
+                "faucet:test:missing",
+                "local-balance:missing",
+                "agent:test",
+                1
+            ),
+        ),
+        Err(DevnetError::LocalTestUnitBalanceMissing(
+            "local-balance:missing".to_string()
         ))
     );
 }
@@ -559,10 +653,76 @@ fn cli_smoke_runs_full_flow() {
     let summary: serde_json::Value =
         serde_json::from_slice(&output.stdout).expect("smoke summary json");
     assert_eq!(summary["deterministicReplay"], true);
+    assert_eq!(summary["blockHeight"], 10);
     assert_eq!(summary["checks"]["genesisConfigInitialized"], true);
     assert_eq!(summary["checks"]["operatorKeyReferencePresent"], true);
+    assert_eq!(summary["checks"]["localTestUnitBalanceCreated"], true);
+    assert_eq!(summary["checks"]["faucetRecordCreated"], true);
+    assert_eq!(summary["checks"]["localTestUnitBalanceUnits"], 1000);
     assert_eq!(summary["checks"]["receiptFinalized"], true);
     assert!(out_dir.join("control-plane-handoff.json").exists());
+
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
+fn cli_start_runs_10_blocks_and_state_survives_restart() {
+    let temp = temp_dir("start-10-restart");
+    let state = temp.join("state.json");
+
+    let first = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "start",
+            "--blocks",
+            "10",
+        ])
+        .output()
+        .expect("start 10 blocks");
+    assert!(first.status.success());
+
+    let inspect = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "inspect-state",
+            "--summary",
+        ])
+        .output()
+        .expect("inspect after restart");
+    assert!(inspect.status.success());
+    let summary: serde_json::Value =
+        serde_json::from_slice(&inspect.stdout).expect("inspect summary");
+    assert_eq!(summary["blocks"], 10);
+    assert_eq!(summary["nextBlockNumber"], 11);
+
+    let second = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "start",
+            "--blocks",
+            "1",
+        ])
+        .output()
+        .expect("start one more block");
+    assert!(second.status.success());
+
+    let inspect_again = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "inspect-state",
+            "--summary",
+        ])
+        .output()
+        .expect("inspect after second restart");
+    assert!(inspect_again.status.success());
+    let summary_again: serde_json::Value =
+        serde_json::from_slice(&inspect_again.stdout).expect("inspect summary again");
+    assert_eq!(summary_again["blocks"], 11);
+    assert_eq!(summary_again["nextBlockNumber"], 12);
 
     std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
 }
@@ -959,6 +1119,28 @@ fn register_agent_tx(agent_id: &str, model_passport_id: Option<&str>) -> Transac
         controller: "operator:test".to_string(),
         model_passport_id: model_passport_id.map(ToOwned::to_owned),
         metadata_hash: keccak_hex(format!("agent-metadata:{agent_id}").as_bytes()),
+    }
+}
+
+fn create_balance_tx(account_id: &str, owner: &str) -> Transaction {
+    Transaction::CreateLocalTestUnitBalance {
+        account_id: account_id.to_string(),
+        owner: owner.to_string(),
+    }
+}
+
+fn faucet_tx(
+    faucet_record_id: &str,
+    account_id: &str,
+    recipient: &str,
+    amount_units: u64,
+) -> Transaction {
+    Transaction::FaucetLocalTestUnits {
+        faucet_record_id: faucet_record_id.to_string(),
+        account_id: account_id.to_string(),
+        recipient: recipient.to_string(),
+        amount_units,
+        reason: "unit-test-no-value".to_string(),
     }
 }
 

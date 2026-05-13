@@ -39,11 +39,15 @@
         "memory_cell",
         "challenge",
         "finality_receipt",
+        "bridge_deposit",
+        "bridge_credit",
+        "bridge_withdrawal",
+        "local_balance_record",
         "hardware_signal_envelope",
         "control_plane_provenance_response"
       ]
     },
-    "objectSchema": { "type": "string", "pattern": "^flowchain\\.[a-z_]+\\.v0$" },
+    "objectSchema": { "type": "string", "pattern": "^(flowchain|flowmemory)\\.[a-z_]+\\.v0$" },
     "objectId": { "$ref": "#/$defs/hex32" },
     "objectTypeHash": { "$ref": "#/$defs/hex32" },
     "domain": { "type": "string", "pattern": "^(flowchain\\.local-alpha\\.v0|flowmemory\\.v0)\\.[a-z0-9.-]+$" },

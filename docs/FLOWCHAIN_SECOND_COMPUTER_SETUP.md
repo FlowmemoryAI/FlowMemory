@@ -3,8 +3,8 @@
 Status: Windows-first setup guide for the private/local testnet milestone.
 
 This guide is intentionally conservative. It names the commands that work in
-the merged V0 repo today, what those commands currently prove, and what remains
-blocked behind subsystem work.
+the V0 repo today, what those commands currently prove, and what remains gated
+for later production work.
 
 Correct target:
 
@@ -53,14 +53,11 @@ PowerShell windows.
 
 When `gh auth login` asks questions, use GitHub.com, HTTPS, and browser login.
 
-Use this path today on a clean second computer. It validates the merged V0
-launch-core, no-value local devnet prototype, dashboard workbench, hardware
-simulator fixture, Windows wrapper layer, long-running local node mode,
-locally authorized transaction intake, local test-unit faucet records, and
-simulator fixture, Windows wrapper layer, long-running local node mode,
-locally authorized transaction intake, local test-unit faucet records,
-static local-file multi-node reconciliation, bridge mock/local-credit handoff,
-control-plane lifecycle queries, and workbench local-state inspection.
+Use this path today on a clean second computer. It validates the V0
+launch-core, no-value local devnet runtime, native local object lifecycle,
+control-plane smoke client, dashboard workbench, hardware simulator fixture,
+crypto local-alpha vectors, encrypted local test-vault CLI, and Windows wrapper
+layer.
 
 If the repo is already cloned, run from the repo root:
 
@@ -107,20 +104,6 @@ Start the current bounded local stack:
 npm run flowchain:start
 ```
 
-Start a long-running local node in a separate PowerShell window:
-
-```powershell
-npm run flowchain:node
-```
-
-Submit local transactions from another PowerShell window:
-
-```powershell
-npm run flowchain:faucet
-npm run flowchain:tx
-npm run flowchain:node:status
-```
-
 Run the deterministic demo and export state:
 
 ```powershell
@@ -128,22 +111,10 @@ npm run flowchain:demo
 npm run flowchain:export
 ```
 
-Run the full merged-surface smoke path:
+Run the private/local acceptance smoke path:
 
 ```powershell
 npm run flowchain:smoke
-```
-
-Run just the runtime smokes:
-
-```powershell
-npm run flowchain:node:smoke
-npm run flowchain:multi-node:smoke
-```
-
-Run the full private/local L1 gate:
-
-```powershell
 npm run flowchain:full-smoke
 ```
 
@@ -156,7 +127,6 @@ npm run workbench:dev
 Stop the current bounded local stack when done:
 
 ```powershell
-npm run flowchain:node:stop
 npm run flowchain:stop
 ```
 
@@ -171,33 +141,21 @@ Expected current result:
   `devnet/local/operator.local.json`.
 - `npm run flowchain:start` regenerates launch-core fixtures and records
   bounded stack status under `devnet/local/flowchain-stack-status.json`.
-- `npm run flowchain:node` runs the Rust node until stopped, keeps state on
-  disk, ingests JSON transactions from `devnet/local/node/inbox/`, writes
-  status under `devnet/local/node/status.json`, and produces blocks on the
-  configured interval.
-- `npm run flowchain:faucet` submits a local test-unit faucet transaction.
-- `npm run flowchain:tx` submits a sample AgentAccount/ModelPassport
-  transaction file, or a caller-provided transaction file with
-  `-- -TxFile <path>`.
-- `npm run flowchain:node:smoke` proves a node can run for at least 10 blocks,
-  include a locally authorized transaction, restart with state intact, and
-  export/import the runtime state.
-- `npm run flowchain:multi-node:smoke` starts two local node processes and
-  proves static local-file peer reconciliation. LAN mode remains not exposed.
 - `npm run flowchain:demo` writes deterministic local block/state output.
 - `npm run flowchain:export` writes ignored export files and a zip bundle under
   `devnet/local/export/`.
 - `npm run flowchain:smoke` writes
   `devnet/local/smoke/flowchain-smoke-report.json` and compares deterministic
-  replay roots. It now also runs the one-node and multi-node runtime smokes.
-- `npm run flowchain:full-smoke` runs the merged smoke, control-plane smoke,
-  bridge local-credit smoke, and writes
-  `devnet/local/smoke/flowchain-full-smoke-report.json`.
+  replay roots.
+- `npm run flowchain:full-smoke` also exercises the crypto wallet CLI, verifies
+  a signed local transaction envelope, runs `git diff --check`, and writes
+  `devnet/local/full-smoke/flowchain-full-smoke-report.json`.
 - `npm run workbench:dev` opens the existing dashboard as the local workbench.
 
-Current stop point: this package is still local/private testnet software. It is
-not production mainnet, public validator software, tokenomics, or a production
-bridge.
+Current stop point: if a second computer needs long-running multi-process node
+behavior, LAN peer mode, production custody, production bridge behavior, or
+public validator behavior, those remain later gated work. Workbench polish can
+continue behind the same local data surfaces.
 
 ## Final Second-Computer Path
 
@@ -213,14 +171,13 @@ npm install --prefix crypto
 npm run flowchain:prereq
 npm run flowchain:init
 npm run flowchain:start
-npm run flowchain:node
 npm run control-plane:serve
 npm run workbench:dev
 npm run flowchain:full-smoke
 npm run flowchain:export
 ```
 
-If `flowchain:node`, `control-plane:serve`, or `workbench:dev` are
+If `flowchain:start`, `control-plane:serve`, or `workbench:dev` are
 long-running commands, run each one in its own PowerShell window and run
 `flowchain:full-smoke` from a fourth window after the services are healthy.
 
@@ -238,19 +195,11 @@ equivalents:
 npm run flowchain:prereq
 npm run flowchain:init
 npm run flowchain:start
-npm run flowchain:node
-npm run flowchain:node:stop
-npm run flowchain:node:status
-npm run flowchain:tx
-npm run flowchain:faucet
-npm run flowchain:node:smoke
-npm run flowchain:multi-node:smoke
 npm run flowchain:stop
 npm run flowchain:demo
 npm run flowchain:smoke
 npm run flowchain:full-smoke
 npm run flowchain:export
-npm run control-plane:serve
 npm run workbench:dev
 ```
 
@@ -260,96 +209,73 @@ Current status:
 | --- | --- | --- |
 | `npm run flowchain:prereq` | Implemented | `infra/scripts/flowchain-check-prereqs.ps1` |
 | `npm run flowchain:init` | Implemented | `infra/scripts/flowchain-init.ps1` |
-| `npm run flowchain:start` | Implemented compatibility wrapper | Prepares launch-core fixtures and points operators to `flowchain:node`. |
-| `npm run flowchain:node` | Implemented | Starts the long-running Rust runtime with disk state, inbox intake, interval blocks, logs, identity, and status. |
-| `npm run flowchain:node:stop` | Implemented | Writes the node stop file. |
-| `npm run flowchain:node:status` | Implemented | Reads node status and state summary. |
-| `npm run flowchain:tx` | Implemented | Submits a caller-provided transaction file or a sample AgentAccount/ModelPassport transaction. |
-| `npm run flowchain:faucet` | Implemented | Submits a local test-unit faucet transaction. |
-| `npm run flowchain:node:smoke` | Implemented | Runs bounded one-node runtime, restart, and export/import checks. |
-| `npm run flowchain:multi-node:smoke` | Implemented | Proves two local node processes reconcile through static local-file peer state paths; LAN mode is not exposed. |
-| `npm run flowchain:stop` | Implemented wrapper | Requests node stop and use `npm run flowchain:stop -- -ResetLocalState` for an explicit reset. |
+| `npm run flowchain:start` | Implemented bounded wrapper | Long-running node behavior remains missing. |
+| `npm run flowchain:stop` | Implemented bounded wrapper | Use `npm run flowchain:stop -- -ResetLocalState` for an explicit reset. |
 | `npm run flowchain:demo` | Implemented | Wraps the existing Rust devnet `demo`. |
-| `npm run flowchain:smoke` | Implemented for merged surfaces | Includes runtime smokes and deterministic replay. |
-| `npm run flowchain:full-smoke` | Implemented local/private acceptance wrapper | Runs merged smoke, control-plane smoke, and bridge local-credit smoke. |
+| `npm run flowchain:smoke` | Implemented for current private/local surfaces | Runs service tests, crypto validation, launch candidate, devnet tests, control-plane smoke, deterministic replay, dashboard build, hardware fixture, unsafe-claim scan, and no-secret export scan. |
+| `npm run flowchain:full-smoke` | Implemented acceptance gate | Wraps smoke, wallet CLI sign/verify, full-smoke report, no-secret scan, and `git diff --check`. |
 | `npm run flowchain:export` | Implemented | Writes ignored export directory and zip bundle. |
 | `npm run flowchain:import -- --BundlePath <zip> -Force` | Implemented script path | Restores local state from an exported bundle. |
-| `npm run control-plane:serve` | Implemented fixture-backed API | Live node adapters and transaction submission remain #101. |
 | `npm run workbench:dev` | Implemented | Wraps `npm run dev --prefix apps/dashboard`. |
 
 ## Local Operator Keys
 
-Second-computer validation needs local operator identity, but the merged repo
-does not yet include a production wallet or encrypted operator vault.
+Second-computer validation needs local operator identity, but the repo does not
+include a production wallet or custody system.
 
 Current wrapper behavior:
 
 - `npm run flowchain:init` writes `devnet/local/operator.local.json`.
 - The file is ignored by git through `devnet/local/`.
 - The file is for private/local validation only and must not be committed.
+- `npm run flowchain:full-smoke` also uses the crypto wallet CLI to create an
+  encrypted local test vault, sign a local transaction envelope, and verify it
+  without exporting secret key material.
 - To import an existing local-only operator file, run:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-init.ps1 -ImportOperatorKeyPath <path-to-local-operator-json> -Force
 ```
 
-Acceptance target:
+Remaining non-production target:
 
 - Generate or import local operator, agent, verifier, and optional hardware
   signal keys.
 - Store private key material outside committed fixtures.
-- Prefer an encrypted local vault or platform keystore-backed file.
+- Prefer a platform keystore-backed file before any public/value-bearing use.
 - Make lock, unlock, import, export, rotate, and corrupt-vault states explicit.
 - Keep public state reconstructable without private secrets.
 
-Until that exists, do not claim wallet support or value-bearing key management.
+Do not claim production wallet support or value-bearing key management.
 
 ## Private Genesis And Runtime
 
-The devnet starts from deterministic local state and writes default state under:
+The current devnet starts from deterministic local state and writes default
+state under:
 
 ```text
 devnet/local/state.json
 ```
 
-The long-running node uses the same state file unless `-StatePath` is provided.
-The default node directory is:
-
-```text
-devnet/local/node/
-```
-
-It contains local-only identity, status, inbox, processed, rejected, and stop
-files. These files are generated runtime state and must not be committed.
-
 `devnet/local/` is ignored by git.
 
-Static local-file peers can be smoke-tested with:
-
-```powershell
-npm run flowchain:multi-node:smoke
-```
-
-This is not LAN networking. It proves two local node processes can exchange or
-reconcile deterministic state through configured peer state paths.
+Private/local testnet acceptance requires a documented genesis/config flow that
+can be rerun on a clean machine. The flow must say which files are generated,
+which files can be committed as fixtures, and which files are local-only.
 
 ## Control Plane
 
-The target package needs a documented local API for health, chain status,
-blocks, transactions, agents, models, receipts, artifacts, verifier reports,
-challenges, finality, memory cells, provenance, and raw JSON.
-
-Active Local Alpha work defines a fixture-backed JSON-RPC control plane under
-`services/control-plane/`, but that work is not merged in the current source of
-truth yet.
-
-Expected command once merged:
+The local package includes a documented API for health, chain status, blocks,
+transactions, accounts, balances, wallets, agents, models, receipts, artifacts,
+verifier reports, challenges, finality, memory cells, bridge observations,
+provenance, and raw JSON.
 
 ```powershell
 npm run control-plane:serve
 ```
 
-The API must not return secrets.
+The API must not return secrets. The control-plane smoke client and response
+scanner are part of `npm run flowchain:full-smoke`.
 
 ## Workbench
 
@@ -390,7 +316,7 @@ If setup fails on a second computer, check:
 
 ## Completion Rule
 
-This setup guide is complete for the HQ/Ops wrapper layer. The overall
-private/local testnet package is complete only when the target one-command path
-runs the full native-object smoke flow on a clean second computer, proves
-control-plane and workbench coverage, and replays deterministically.
+This setup guide is complete for the HQ/Ops wrapper layer and current
+private/local acceptance gate. The next evidence step is running
+`npm run flowchain:full-smoke` on a clean second computer and recording the
+generated report.

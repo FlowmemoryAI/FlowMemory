@@ -1,20 +1,20 @@
 import { useMemo, useState } from "react";
-import { Activity, Database, Network, Play, RefreshCw, Search, Server, Terminal } from "lucide-react";
+import { Activity, Database, Network, PlayCircle, RefreshCw, Search, Server, Terminal } from "lucide-react";
 import { EmptyState } from "../components/EmptyState";
 import { HashValue } from "../components/HashValue";
 import { ProvenanceLine } from "../components/ProvenanceLine";
 import { SectionHeader } from "../components/SectionHeader";
 import { StatusBadge } from "../components/StatusBadge";
 import type { DashboardData, DashboardStatus } from "../data/types";
-import {
-  WORKBENCH_SECTIONS,
-  type WorkbenchAction,
-  type WorkbenchRecord,
-  type WorkbenchSectionKey,
-  type WorkbenchSnapshot,
-} from "../data/workbench";
+import { WORKBENCH_SECTIONS, type WorkbenchRecord, type WorkbenchSectionKey, type WorkbenchSnapshot } from "../data/workbench";
 
-const DEFAULT_SECTION: WorkbenchSectionKey = "blocks";
+const DEFAULT_SECTION: WorkbenchSectionKey = "nodeStatus";
+
+interface WorkbenchViewProps {
+  data: DashboardData;
+  workbench: WorkbenchSnapshot;
+  onRefresh?: () => void;
+}
 
 function displayValue(value: string) {
   if (value.startsWith("0x") && value.length > 18) {
@@ -37,41 +37,14 @@ function recordMatches(record: WorkbenchRecord, query: string): boolean {
   return JSON.stringify(record).toLowerCase().includes(normalized);
 }
 
-async function runRpcAction(workbench: WorkbenchSnapshot, action: WorkbenchAction): Promise<string> {
-  const response = await fetch(`${workbench.controlPlane.url}/rpc`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: action.key,
-      method: action.method,
-      params: action.params,
-    }),
-  });
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}`.trim());
-  }
-  const payload = (await response.json()) as unknown;
-  if (payload && typeof payload === "object" && "error" in payload) {
-    const error = payload as { error?: { message?: string } };
-    throw new Error(error.error?.message ?? "Control-plane action failed.");
-  }
-  return JSON.stringify(payload);
+function missingStateDetail(activeDefinition: (typeof WORKBENCH_SECTIONS)[number]): string {
+  return `${activeDefinition.missingService} did not provide records for ${activeDefinition.expectedEndpoint}. Run ${activeDefinition.missingCommand} locally, then refresh this dashboard.`;
 }
 
-export function WorkbenchView({
-  data,
-  workbench,
-  onRefresh,
-}: {
-  data: DashboardData;
-  workbench: WorkbenchSnapshot;
-  onRefresh?: () => void;
-}) {
+export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps) {
   const [activeSection, setActiveSection] = useState<WorkbenchSectionKey>(DEFAULT_SECTION);
   const [query, setQuery] = useState("");
   const [actionResult, setActionResult] = useState<string | null>(null);
-  const [runningAction, setRunningAction] = useState<string | null>(null);
   const activeDefinition = WORKBENCH_SECTIONS.find((section) => section.key === activeSection) ?? WORKBENCH_SECTIONS[0];
   const activeRecords = workbench.sections[activeSection] ?? [];
   const filteredRecords = useMemo(
@@ -79,26 +52,19 @@ export function WorkbenchView({
     [activeRecords, query],
   );
   const sourceStatus: DashboardStatus = workbench.source === "control-plane" ? "verified" : "stale";
-  const handleAction = async (action: WorkbenchAction) => {
-    if (action.state !== "available") {
-      return;
-    }
 
-    if (action.key === "refresh") {
-      setActionResult("Refresh requested. Re-probing local API and synced fixtures.");
-      onRefresh?.();
-      return;
-    }
+  const runLocalAction = async (endpoint: string, label: string) => {
+    const [method, path] = endpoint.split(/\s+/, 2);
+    setActionResult(`${label}: sending ${endpoint}`);
 
-    setRunningAction(action.key);
-    setActionResult(null);
     try {
-      const result = await runRpcAction(workbench, action);
-      setActionResult(`${action.label} returned ${result}`);
+      const response = await fetch(`${workbench.controlPlane.url}${path}`, {
+        method,
+        headers: { Accept: "application/json" },
+      });
+      setActionResult(`${label}: ${response.status} ${response.statusText || "response"}`.trim());
     } catch (error) {
-      setActionResult(error instanceof Error ? error.message : "Control-plane action failed.");
-    } finally {
-      setRunningAction(null);
+      setActionResult(`${label}: ${error instanceof Error ? error.message : "request failed"}`);
     }
   };
 
@@ -109,10 +75,18 @@ export function WorkbenchView({
         title="Local explorer workbench"
         detail="Usable browser surface for inspecting the private/local L1 testnet shape. It probes the local control-plane API when available and otherwise renders deterministic committed fixtures; value-bearing wallet flows are not included."
         action={
-          <label className="search-box">
-            <Search size={16} aria-hidden="true" />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search current workbench view" />
-          </label>
+          <div className="workbench-header-actions">
+            <label className="search-box">
+              <Search size={16} aria-hidden="true" />
+              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search current workbench view" />
+            </label>
+            {onRefresh ? (
+              <button className="button" type="button" onClick={onRefresh} title="Refresh local workbench data">
+                <RefreshCw size={15} aria-hidden="true" />
+                Refresh
+              </button>
+            ) : null}
+          </div>
         }
       />
 
@@ -165,6 +139,44 @@ export function WorkbenchView({
         </article>
       </section>
 
+      <section className="panel workbench-api-panel">
+        <div className="panel-heading">
+          <div>
+            <Network size={18} aria-hidden="true" />
+            <h2>Control-plane endpoints and local actions</h2>
+          </div>
+          <span>{workbench.controlPlane.endpoints.length} advertised/probed</span>
+        </div>
+        <div className="endpoint-strip" aria-label="Control-plane endpoint status">
+          {workbench.controlPlane.endpoints.map((endpoint) => (
+            <span key={endpoint}>{endpoint}</span>
+          ))}
+        </div>
+        {workbench.actions.length > 0 ? (
+          <div className="local-action-grid">
+            {workbench.actions.map((action) => (
+              <article key={action.endpoint}>
+                <div>
+                  <strong>{action.label}</strong>
+                  <code>{action.endpoint}</code>
+                  <small>{action.boundary}</small>
+                </div>
+                <button className="button" type="button" onClick={() => runLocalAction(action.endpoint, action.label)}>
+                  <PlayCircle size={15} aria-hidden="true" />
+                  Run
+                </button>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            title="No browser-safe local actions are advertised"
+            detail={`The dashboard only renders action buttons after ${workbench.controlPlane.url}/health or /state advertises a matching POST endpoint. Start ${activeDefinition.missingCommand} if you expect local actions.`}
+          />
+        )}
+        {actionResult ? <p className="action-result">{actionResult}</p> : null}
+      </section>
+
       {workbench.loadIssues.length > 0 ? (
         <section className="workbench-warning" role="status">
           <Activity size={18} aria-hidden="true" />
@@ -174,38 +186,6 @@ export function WorkbenchView({
           </div>
         </section>
       ) : null}
-
-      <section className="panel workbench-actions-panel">
-        <div className="panel-heading">
-          <div>
-            <Play size={18} aria-hidden="true" />
-            <h2>Local actions</h2>
-          </div>
-          <span>API-gated</span>
-        </div>
-        <div className="workbench-actions-grid">
-          {workbench.actions.map((action) => (
-            <article key={action.key}>
-              <div>
-                <StatusBadge status={action.state === "available" ? "verified" : "pending"} compact />
-                <strong>{action.label}</strong>
-                <small>{action.detail}</small>
-                <code>{action.method}</code>
-              </div>
-              <button
-                className="button"
-                type="button"
-                disabled={action.state !== "available" || runningAction === action.key}
-                onClick={() => void handleAction(action)}
-              >
-                {action.key === "refresh" ? <RefreshCw size={15} aria-hidden="true" /> : <Play size={15} aria-hidden="true" />}
-                {runningAction === action.key ? "Running" : action.state === "available" ? "Run" : "Missing"}
-              </button>
-            </article>
-          ))}
-        </div>
-        {actionResult ? <p className="workbench-action-result">{actionResult}</p> : null}
-      </section>
 
       <section className="metric-grid" aria-label="Workbench coverage">
         <article className="metric-tile">
@@ -217,19 +197,24 @@ export function WorkbenchView({
           </div>
         </article>
         <article className="metric-tile">
-          <span>Blocks</span>
-          <strong>{workbench.sections.blocks.length}</strong>
+          <span>Node views</span>
+          <strong>{workbench.sections.nodeStatus.length}</strong>
           <div>
-            <StatusBadge status={workbench.sections.blocks.length > 0 ? "finalized" : "pending"} compact />
-            <small>state-root records</small>
+            <StatusBadge status={workbench.node.status} compact />
+            <small>health and state</small>
           </div>
         </article>
         <article className="metric-tile">
-          <span>Transactions</span>
-          <strong>{workbench.sections.transactions.length}</strong>
+          <span>Chain objects</span>
+          <strong>
+            {workbench.sections.blocks.length +
+              workbench.sections.transactions.length +
+              workbench.sections.mempool.length +
+              workbench.sections.accounts.length}
+          </strong>
           <div>
             <StatusBadge status={workbench.sections.transactions.length > 0 ? "verified" : "pending"} compact />
-            <small>receipt-linked</small>
+            <small>blocks txs accounts</small>
           </div>
         </article>
         <article className="metric-tile">
@@ -246,19 +231,11 @@ export function WorkbenchView({
           </div>
         </article>
         <article className="metric-tile">
-          <span>Accounts</span>
-          <strong>{workbench.sections.accounts.length + workbench.sections.wallets.length}</strong>
+          <span>Open challenges</span>
+          <strong>{workbench.sections.challenges.length}</strong>
           <div>
-            <StatusBadge status={workbench.sections.accounts.length > 0 ? "verified" : "pending"} compact />
-            <small>public records</small>
-          </div>
-        </article>
-        <article className="metric-tile">
-          <span>Bridge lane</span>
-          <strong>{workbench.sections.bridge.length}</strong>
-          <div>
-            <StatusBadge status={workbench.sections.bridge.length > 0 ? "observed" : "pending"} compact />
-            <small>test-only</small>
+            <StatusBadge status={workbench.sections.challenges.length > 0 ? "pending" : "observed"} compact />
+            <small>API-ready view</small>
           </div>
         </article>
       </section>
@@ -313,7 +290,7 @@ export function WorkbenchView({
           ) : (
             <EmptyState
               title={`No ${activeDefinition.label.toLowerCase()} in the current source`}
-              detail={`The workbench view is wired for ${activeDefinition.expectedEndpoint}; deterministic fallback data will appear here when the existing runtime or control-plane exports it.`}
+              detail={missingStateDetail(activeDefinition)}
             />
           )}
         </article>

@@ -6,6 +6,7 @@ export const JSON_RPC_ERROR_CODES = {
   invalidParams: -32602,
   internalError: -32603,
   objectNotFound: -32004,
+  secretRejected: -32040,
 } as const;
 
 export class ControlPlaneError extends Error {
@@ -32,6 +33,10 @@ export function objectNotFound(message: string, details?: JsonValue): ControlPla
 
 export function methodNotFound(message: string, details?: JsonValue): ControlPlaneError {
   return new ControlPlaneError(JSON_RPC_ERROR_CODES.methodNotFound, message, "method.not_found", details);
+}
+
+export function secretRejected(message: string, details?: JsonValue): ControlPlaneError {
+  return new ControlPlaneError(JSON_RPC_ERROR_CODES.secretRejected, message, "secret.rejected", details);
 }
 
 export function rpcError(error: unknown): RpcErrorObject {

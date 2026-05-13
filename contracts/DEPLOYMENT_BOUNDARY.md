@@ -11,6 +11,8 @@ For the private/local FlowChain testnet package, these Solidity contracts are op
 - Local Foundry tests.
 - Local fixture generation and indexer/verifier/dashboard flows.
 - Base Sepolia deployment dry runs and explicit broadcasts for the current V0 contracts.
+- Base Sepolia planning for a Uniswap v4 `afterSwap`-only hook address,
+  including CREATE2 salt mining for the exact hook flag target.
 - Base Sepolia reads from explicit RPC URLs.
 - Guarded Base mainnet canary reads and source-verification dry runs for the documented V0 canary addresses only.
 - Public docs that describe emitted events, roots, receipts, and off-chain verification paths.
@@ -37,6 +39,31 @@ Base anchoring is placeholder/research until separately approved. A future ancho
 FlowPulse events intentionally omit `txHash` and `logIndex`; indexers derive those values after receipts and logs exist. URI fields are advisory caller-supplied log data unless a future contract explicitly validates format, length, resolvability, or content hash linkage.
 
 No current Solidity contract exposes a challenge lifecycle or finality state machine. `VerifierReportRegistry.REORGED` is an advisory report status for off-chain reconciliation, not a bridge finality proof or challenge resolution path.
+
+## Uniswap V4 Hook Path Boundary
+
+The contract set now includes a production-shaped but not production-deployed
+Uniswap v4 hook path:
+
+- `FlowMemoryHookAdapter` remains the dependency-light fixture/canary adapter.
+- `FlowMemoryAfterSwapHook` is the real-path hook candidate. Its v4-shaped
+  `afterSwap` callback is restricted to the configured PoolManager, emits the
+  same `SWAP_MEMORY_SIGNAL` FlowPulse semantics, returns zero hook delta, and
+  exposes no token custody, dynamic fee, LP fee override, before-swap, pool
+  creation, or liquidity-position path.
+- `FlowMemoryHookPlanner` defines the exact permission target:
+  `AFTER_SWAP_FLAG` only, `0x40` in the low hook bits. It rejects addresses with
+  extra custom-accounting or dynamic-fee-adjacent flags such as
+  `AFTER_SWAP_RETURNS_DELTA_FLAG`.
+- Base Sepolia planning targets chain id `84532`, Uniswap v4 PoolManager
+  `0x9a13F98Cb987694C9F086b1F5eB990EeA8264Ec3`, and the standard CREATE2
+  deployer `0x4e59b44847b379578588920cA78FbF26c0B4956C`.
+
+Before any Base Sepolia hook broadcast, the PR or issue must record the mined
+salt, computed hook address, init code hash, constructor args, deployer, target
+chain, PoolManager address, source verification plan, and post-deploy reader
+range. A mined/testnet hook address is still not a production hook deployment
+or a Base mainnet approval.
 
 ## Private/Local FlowChain Mirror Map
 
@@ -116,6 +143,11 @@ submission uses `npm run verify:base-canary:sources:submit` and requires
 
 - `RootfieldRegistry`: Rootfield namespaces and root commitment pulses.
 - `FlowMemoryHookAdapter`: dependency-light hook-adapter plus Uniswap v4-shaped afterSwap callback path, not a production Uniswap hook deployment.
+- `FlowMemoryAfterSwapHook`: PoolManager-gated, afterSwap-only hook candidate
+  for Base Sepolia planning; returns zero hook delta and has no custody or fee
+  mechanics.
+- `FlowMemoryHookPlanner`: pure hook flag, CREATE2 address, and Base Sepolia
+  planning helper; it does not deploy contracts or store secrets.
 - `ReceiptVerifier`: compact receipt-report commitments, not cryptographic receipt verification.
 - `VerifierReportRegistry`: owner-authorized verifier report commitments.
 - `WorkReceiptRegistry`: owner-authorized worker receipt commitments.
