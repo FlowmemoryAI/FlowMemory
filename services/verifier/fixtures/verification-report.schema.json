@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.verifier.report.v0",
+  "type": "object",
+  "required": ["reportId", "reportDigest", "reportCore"],
+  "properties": {
+    "reportId": { "type": "string", "pattern": "^0x[0-9a-f]{64}$" },
+    "reportDigest": { "type": "string", "pattern": "^0x[0-9a-f]{64}$" },
+    "reportCore": {
+      "type": "object",
+      "required": [
+        "schema",
+        "verifierSpecVersion",
+        "resolverPolicyId",
+        "status",
+        "observationId",
+        "observation",
+        "flowPulse",
+        "checks",
+        "evidenceRefs",
+        "reasonCodes"
+      ],
+      "properties": {
+        "schema": { "const": "flowmemory.verifier.report.v0" },
+        "verifierSpecVersion": { "type": "string" },
+        "resolverPolicyId": { "type": "string" },
+        "status": { "enum": ["valid", "invalid", "unresolved", "unsupported", "reorged"] },
+        "observationId": { "type": "string", "pattern": "^0x[0-9a-f]{64}$" },
+        "observation": { "type": "object" },
+        "flowPulse": { "type": "object" },
+        "checks": { "type": "array" },
+        "evidenceRefs": { "type": "array" },
+        "reasonCodes": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

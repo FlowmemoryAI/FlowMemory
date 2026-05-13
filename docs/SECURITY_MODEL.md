@@ -22,6 +22,32 @@ This document captures initial security assumptions. It is not a final audit mod
 - Treat chain logs as observed facts only after receipts are available.
 - Treat hardware control channels as adversarial unless authenticated.
 
+## Cryptographic Foundation Draft
+
+The draft cryptographic foundation lives in:
+
+- `crypto/FLOWMEMORY_CRYPTO_SPEC.md`
+- `crypto/OBSERVATION_IDENTITY.md`
+- `crypto/RECEIPT_HASHING.md`
+- `crypto/MERKLE_AND_ROOTS.md`
+- `crypto/ATTESTATIONS.md`
+- `crypto/TEST_VECTORS.md`
+- `services/verifier/README.md`
+- `research/cryptography/THREAT_MODEL.md`
+- `research/cryptography/IMPLEMENTATION_PLAN.md`
+- `research/cryptography/FUTURE_ZK_ROADMAP.md`
+
+Current crypto assumptions:
+
+- FlowMemory v0 uses Keccak-256 typed hashes for Base/EVM compatibility.
+- `pulseId` is a contract-emitted logical identifier; `observationId` is derived by indexers from observed receipt and log metadata, including `txHash`, `transactionIndex`, `logIndex`, and `blockHash`.
+- `reportId` is a deterministic verifier report identifier; verifier signatures sign reports but do not make them trustless.
+- Receipt hashes do not embed signatures. Worker signatures and verifier attestations point at receipt hashes.
+- Artifact roots commit to off-chain content through explicit root schemes and Merkle formats.
+- Storage receipt commitments are challengeable availability claims, not permanent availability proofs.
+- Verifier attestations are signed verifier statements, not zk proofs and not full trustlessness.
+- Replay protection requires chain, deployment, sequence, nonce, expiry, and verifier-set domains.
+
 ## Threat Areas
 
 ### Protocol
@@ -48,6 +74,19 @@ Follow-up:
 
 - Consider bounded `bytes32` commitments, CID/hash-only fields, URI length caps, or a URI validation policy before treating this skeleton as an enforceable off-chain-data boundary.
 
+#### Live V0 Contract Skeletons
+
+Live V0 registries and schedulers are commitment surfaces, not complete trust systems:
+
+- CursorRegistry stores cursor commitments but does not define canonical indexer identity or reorg policy.
+- ReceiptVerifier stores receipt report commitments but does not cryptographically verify receipts on-chain.
+- WorkerRegistry and VerifierRegistry are self-registration surfaces without staking, rewards, slashing, Sybil resistance, or production authorization guarantees.
+- ArtifactRegistry stores artifact commitments, type/schema/metadata hashes, owner, submitter, and status only; raw artifacts and sensitive payloads remain off-chain.
+- WorkReceiptRegistry and VerifierReportRegistry use owner-controlled allowlists in v0. Those allowlists are local testing policy, not decentralized governance or a production verifier network.
+- WorkDebtScheduler stores compact work state without token debt, dynamic fees, rewards, or external calls.
+- FlowMemoryHookAdapter is a compileable scaffold only; it is not a production Uniswap v4 hook and cannot know `txHash` or `logIndex`.
+- These contracts are not production audited and are not mainnet-ready.
+
 ### Indexers And Verifiers
 
 - Log parsing errors
@@ -55,6 +94,12 @@ Follow-up:
 - Incorrect `txHash` or `logIndex` derivation
 - Non-deterministic verification output
 - Trusting off-chain artifacts without checking commitments
+- Accepting worker signatures on the wrong chain, deployment, verifier set, or sequence
+- Treating verifier attestations as proofs instead of challengeable signed statements
+- Treat contract-emitted `pulseId` as protocol payload, not canonical observed-log identity.
+- Bind `observationId` to receipt/log metadata, including chain id, emitting contract, FlowPulse event signature, block hash, transaction hash, transaction index, and log index.
+- Treat advisory URI fields as lookup hints only; verifier reports must use explicit resolver policy and deterministic commitment checks.
+- Do not store secrets, RPC credentials, API keys, seed phrases, or webhook URLs in indexer/verifier env files.
 
 ### AI Memory
 
@@ -63,6 +108,7 @@ Follow-up:
 - Weak provenance
 - Confusing model output with verified state
 - Embedding or retrieval data that cannot be traced to a receipt
+- Hashing low-entropy private metadata without salting or encryption
 
 ### Hardware
 
@@ -89,6 +135,20 @@ Follow-up:
 - CI secrets exposure
 - Binary artifacts without provenance
 
+### Storage And Artifacts
+
+- Ambiguous artifact root scheme selection
+- Invalid Merkle openings
+- Unavailable off-chain artifacts
+- Locator leakage through public commitments
+- Retention claims that cannot be challenged or sampled
+
+Static analysis preparation:
+
+- Slither was not available in the local PATH during the Live V0 package pass.
+- Track setup in GitHub issue #24 before adding a CI gate.
+- Candidate command once installed: `slither . --filter-paths "tests|script"`.
+
 ## PR Security Checklist
 
 - Does this change introduce or require secrets?
@@ -98,3 +158,6 @@ Follow-up:
 - Does it place heavy data on-chain?
 - Does it assume LoRa or Meshtastic can carry high-bandwidth traffic?
 - Are tests or verification steps included where practical?
+- Does every new receipt, root, signature, attestation, or challenge format have a domain-separated type hash?
+- Does replay protection cover chain, deployment, nonce or sequence, expiry, and verifier set where relevant?
+- Does the UI or documentation avoid claiming full trustlessness unless a proof and enforcement path exist?

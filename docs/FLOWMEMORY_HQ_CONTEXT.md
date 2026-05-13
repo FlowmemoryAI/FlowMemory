@@ -24,11 +24,13 @@ FlowMemory is expected to explore Base-native protocol mechanics and Uniswap v4 
 
 ### FlowPulse Events
 
-FlowPulse events are the intended event stream for protocol activity, work lifecycle, routing signals, memory updates, and reliability checkpoints. The exact event schema is not implemented yet and should be designed before contracts or indexers depend on it.
+FlowPulse events are the intended event stream for protocol activity, work lifecycle, routing signals, memory updates, and reliability checkpoints. A v0 schema and Solidity interface now exist in `contracts/FLOWPULSE_SCHEMA.md` and `contracts/FlowPulse.sol`; future schema changes should be versioned and documented before contracts, indexers, or verifiers depend on them.
 
 ### Rootflow And Rootfield
 
 Rootflow and Rootfield refer to state commitment concepts for FlowMemory. They should be treated as commitment layers, not as unlimited data storage. Agents should define what is committed, what stays off-chain, and how verifiers reconstruct or challenge the claimed state.
+
+`contracts/RootfieldRegistry.sol` is the current Rootfield foundation. It registers Rootfield namespaces, accepts committed roots, and emits FlowPulse events. It is not a production protocol deployment and does not implement hook integration, tokenomics, fees, upgrades, governance, verifier policy, or production ownership controls.
 
 ### AI Memory And Neural Geometry
 
@@ -50,6 +52,7 @@ Meshtastic and LoRa are low-bandwidth control signaling paths. They are useful f
 - Indexers and verifiers derive `txHash` and `logIndex` after reading receipts and logs.
 - Heavy AI, model, memory, and artifact data stays off-chain.
 - On-chain state stores roots, receipts, commitments, attestations, proofs, and work state.
+- `metadataURI` and `evidenceURI` values in the current RootfieldRegistry are arbitrary strings emitted as on-chain log bytes. The contract does not enforce short-pointer behavior or off-chain-storage boundaries.
 - Meshtastic and LoRa are low-bandwidth control signaling paths, not normal internet bandwidth.
 
 ## Intended Work Areas

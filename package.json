@@ -1,0 +1,18 @@
+{
+  "name": "flowmemory-services-v0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "services/shared",
+    "services/indexer",
+    "services/verifier"
+  ],
+  "scripts": {
+    "test": "npm test --prefix services/shared && npm test --prefix services/indexer && npm test --prefix services/verifier",
+    "index:fixtures": "npm run index:fixtures --prefix services/indexer",
+    "verify:fixtures": "npm run verify:fixtures --prefix services/verifier",
+    "e2e": "npm run index:fixtures && npm run verify:fixtures",
+    "demo:indexer": "npm run demo --prefix services/indexer",
+    "demo:verifier": "npm run demo --prefix services/verifier"
+  }
+}
