@@ -2,6 +2,24 @@
 
 Agents may be assigned one of these roles. Each role should still read `AGENTS.md`, `docs/START_HERE.md`, `docs/FLOWMEMORY_HQ_CONTEXT.md`, and `docs/CURRENT_STATE.md`.
 
+## Shared Folder Boundary Rules
+
+- Work only in the folders named by the issue or assignment.
+- Treat issue "Allowed folders" as the write boundary, not just a suggestion.
+- Do not edit forbidden folders even for cleanup unless the issue is updated first.
+- Cross-link docs instead of moving code or expanding scope.
+- If a task appears to need another agent's folder, stop and create or request a follow-up issue.
+
+## Recommended Worktrees
+
+- `E:\FlowMemory\flowmemory-contracts`: protocol contracts work
+- `E:\FlowMemory\flowmemory-indexer`: services, indexer, and verifier work
+- `E:\FlowMemory\flowmemory-dashboard`: apps, dashboard, explorer, and console work
+- `E:\FlowMemory\flowmemory-hardware`: hardware, FlowRouter, LoRa, and Meshtastic work
+- `E:\FlowMemory\flowmemory-research`: AI memory, neural geometry, reliability, and appchain/L1 research
+- `E:\FlowMemory\flowmemory-crypto`: receipts, attestations, roots, proofs, and commitment-format work
+- `E:\FlowMemory\flowmemory-review`: review, docs maintenance, templates, and repo hygiene
+
 ## Bootstrap Agent
 
 Scope:
@@ -12,6 +30,8 @@ Scope:
 - CI hygiene
 
 Do not build product features.
+
+Default worktree: `E:\FlowMemory\flowmemory-review`
 
 ## Protocol Contracts Agent
 
@@ -25,6 +45,8 @@ Scope:
 
 Must document event and storage assumptions.
 
+Default worktree: `E:\FlowMemory\flowmemory-contracts`
+
 ## Services Agent
 
 Scope:
@@ -37,6 +59,8 @@ Scope:
 
 Must derive `txHash` and `logIndex` from receipts and logs, not from hook execution assumptions.
 
+Default worktree: `E:\FlowMemory\flowmemory-indexer`
+
 ## Apps Agent
 
 Scope:
@@ -47,6 +71,8 @@ Scope:
 - Hardware console
 
 Must distinguish observed, verified, pending, and failed states in UI.
+
+Default worktree: `E:\FlowMemory\flowmemory-dashboard`
 
 ## Hardware Agent
 
@@ -60,6 +86,8 @@ Scope:
 
 Must treat radio links as low-bandwidth control signaling.
 
+Default worktree: `E:\FlowMemory\flowmemory-hardware`
+
 ## Research Agent
 
 Scope:
@@ -71,6 +99,8 @@ Scope:
 - Appchain/L1 research
 
 Must separate hypotheses, experiments, and accepted decisions.
+
+Default worktree: `E:\FlowMemory\flowmemory-research`
 
 ## Crypto Agent
 
@@ -85,6 +115,8 @@ Scope:
 
 Must document threat assumptions and verification requirements.
 
+Default worktree: `E:\FlowMemory\flowmemory-crypto`
+
 ## Infra Agent
 
 Scope:
@@ -96,6 +128,8 @@ Scope:
 
 Must avoid leaking secrets through scripts, logs, or CI output.
 
+Default worktree: `E:\FlowMemory\flowmemory-review`
+
 ## Security Agent
 
 Scope:
@@ -106,6 +140,8 @@ Scope:
 - Protocol and hardware risk analysis
 
 Must create actionable issues or PR comments for findings.
+
+Default worktree: `E:\FlowMemory\flowmemory-review`
 
 ## Handoff Format
 

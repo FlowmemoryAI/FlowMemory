@@ -26,7 +26,15 @@ contract RootfieldRegistry is IFlowPulse {
     error RootfieldNotRegistered(bytes32 rootfieldId);
     error RootfieldInactive(bytes32 rootfieldId);
     error NotRootfieldOwner(bytes32 rootfieldId, address caller);
+    error ZeroRootfieldOwner();
     error TimestampOverflow(uint256 timestamp);
+
+    event RootfieldDeactivated(
+        bytes32 indexed rootfieldId, address indexed owner, bytes32 indexed parentPulseId, string reasonURI
+    );
+    event RootfieldOwnershipTransferred(
+        bytes32 indexed rootfieldId, address indexed previousOwner, address indexed newOwner, string evidenceURI
+    );
 
     function registerRootfield(
         bytes32 rootfieldId,
@@ -91,6 +99,59 @@ contract RootfieldRegistry is IFlowPulse {
         });
     }
 
+    function deactivateRootfield(bytes32 rootfieldId, bytes32 parentPulseId, string calldata reasonURI)
+        external
+        returns (bytes32 pulseId)
+    {
+        Rootfield storage rootfield = _requireRootfieldOwner(rootfieldId);
+        if (!rootfield.active) {
+            revert RootfieldInactive(rootfieldId);
+        }
+
+        rootfield.active = false;
+
+        pulseId = _emitFlowPulse({
+            rootfieldId: rootfieldId,
+            actor: msg.sender,
+            pulseType: FlowPulseTypes.ROOTFIELD_STATUS_CHANGED,
+            subject: rootfieldId,
+            commitment: keccak256(abi.encode(rootfieldId, false)),
+            parentPulseId: parentPulseId,
+            uri: reasonURI
+        });
+
+        emit RootfieldDeactivated(rootfieldId, msg.sender, parentPulseId, reasonURI);
+    }
+
+    function transferRootfieldOwnership(bytes32 rootfieldId, address newOwner, string calldata evidenceURI)
+        external
+        returns (bytes32 pulseId)
+    {
+        if (newOwner == address(0)) {
+            revert ZeroRootfieldOwner();
+        }
+
+        Rootfield storage rootfield = _requireRootfieldOwner(rootfieldId);
+        if (!rootfield.active) {
+            revert RootfieldInactive(rootfieldId);
+        }
+
+        address previousOwner = rootfield.owner;
+        rootfield.owner = newOwner;
+
+        pulseId = _emitFlowPulse({
+            rootfieldId: rootfieldId,
+            actor: previousOwner,
+            pulseType: FlowPulseTypes.ROOTFIELD_STATUS_CHANGED,
+            subject: rootfieldId,
+            commitment: keccak256(abi.encode(previousOwner, newOwner)),
+            parentPulseId: bytes32(0),
+            uri: evidenceURI
+        });
+
+        emit RootfieldOwnershipTransferred(rootfieldId, previousOwner, newOwner, evidenceURI);
+    }
+
     function getRootfield(bytes32 rootfieldId) external view returns (Rootfield memory) {
         return _rootfields[rootfieldId];
     }
@@ -136,7 +197,9 @@ contract RootfieldRegistry is IFlowPulse {
             )
         );
 
-        emit FlowPulse(pulseId, rootfieldId, actor, pulseType, subject, commitment, parentPulseId, sequence, occurredAt, uri);
+        emit FlowPulse(
+            pulseId, rootfieldId, actor, pulseType, subject, commitment, parentPulseId, sequence, occurredAt, uri
+        );
     }
 
     function _nextSequence(bytes32 rootfieldId) private returns (uint64 sequence) {

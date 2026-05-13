@@ -1,0 +1,10 @@
+{
+  "name": "@flowmemory/indexer-v0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "demo": "node src/demo.ts",
+    "index:fixtures": "node src/index-fixtures.ts",
+    "test": "node --test test/*.test.ts"
+  }
+}
