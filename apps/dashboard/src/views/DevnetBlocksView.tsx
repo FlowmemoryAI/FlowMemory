@@ -97,4 +97,3 @@ export function DevnetBlocksView({ data }: { data: DashboardData }) {
     </div>
   );
 }
-

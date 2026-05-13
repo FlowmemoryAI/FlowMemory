@@ -113,4 +113,3 @@ export function VerifierReportsView({ data }: { data: DashboardData }) {
     </div>
   );
 }
-

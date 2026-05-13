@@ -46,4 +46,3 @@ export async function fetchDashboardData(
 
   return validateDashboardData(await response.json());
 }
-

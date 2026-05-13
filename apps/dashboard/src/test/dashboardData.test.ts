@@ -58,4 +58,3 @@ describe("dashboard fixture", () => {
     expect(matches.map((match) => match.status)).toContain("invalid");
   });
 });
-

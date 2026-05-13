@@ -14,4 +14,3 @@ export function StatusBadge({ status, compact = false }: StatusBadgeProps) {
     </span>
   );
 }
-

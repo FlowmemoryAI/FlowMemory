@@ -39,4 +39,3 @@ export function ProvenanceLine({ provenance, lastUpdated }: { provenance: Proven
     </div>
   );
 }
-

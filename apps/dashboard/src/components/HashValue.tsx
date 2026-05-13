@@ -21,4 +21,3 @@ export function HashValue({ value, label, trim = "medium" }: HashValueProps) {
     </span>
   );
 }
-

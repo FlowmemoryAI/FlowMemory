@@ -120,4 +120,3 @@ export function FlowPulseStreamView({ data }: { data: DashboardData }) {
     </div>
   );
 }
-

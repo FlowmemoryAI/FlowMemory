@@ -89,4 +89,3 @@ export function HardwareNodesView({ data }: { data: DashboardData }) {
     </div>
   );
 }
-

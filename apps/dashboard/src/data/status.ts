@@ -46,4 +46,3 @@ export function isDashboardStatus(value: string): value is DashboardStatus {
 export function statusClassName(status: DashboardStatus): string {
   return `status-badge status-${status}`;
 }
-

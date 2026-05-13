@@ -91,4 +91,3 @@ export function RootfieldsView({ data }: { data: DashboardData }) {
     </div>
   );
 }
-

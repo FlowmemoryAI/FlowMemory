@@ -16,4 +16,3 @@ export function EmptyState({ title, detail }: EmptyStateProps) {
     </div>
   );
 }
-

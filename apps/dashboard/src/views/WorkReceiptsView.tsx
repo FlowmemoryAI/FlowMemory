@@ -119,4 +119,3 @@ export function WorkReceiptsView({ data }: { data: DashboardData }) {
     </div>
   );
 }
-

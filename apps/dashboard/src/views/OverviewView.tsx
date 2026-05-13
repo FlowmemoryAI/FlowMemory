@@ -164,4 +164,3 @@ export function OverviewView({ data }: { data: DashboardData }) {
     </div>
   );
 }
-

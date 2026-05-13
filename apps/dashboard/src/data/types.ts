@@ -180,4 +180,3 @@ export interface DashboardData {
   hardwareNodes: HardwareNode[];
   alerts: AlertIncident[];
 }
-

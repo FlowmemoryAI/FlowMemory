@@ -69,4 +69,3 @@ export function AlertsView({ data }: { data: DashboardData }) {
     </div>
   );
 }
-

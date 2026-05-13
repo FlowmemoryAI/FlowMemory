@@ -55,4 +55,3 @@ export function RawJsonInspectorView({ data }: { data: DashboardData }) {
     </div>
   );
 }
-

@@ -12,4 +12,3 @@ mkdirSync(destinationDir, { recursive: true });
 copyFileSync(source, destination);
 
 console.log(`Synced dashboard fixture: ${destination}`);
-

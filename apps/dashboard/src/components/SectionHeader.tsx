@@ -19,4 +19,3 @@ export function SectionHeader({ eyebrow, title, detail, action }: SectionHeaderP
     </header>
   );
 }
-

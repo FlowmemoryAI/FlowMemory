@@ -84,4 +84,3 @@ export function AppShell({ data, children }: AppShellProps) {
     </div>
   );
 }
-

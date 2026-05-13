@@ -75,4 +75,3 @@ observed, pending, finalized, verified, unresolved, invalid, unsupported, reorge
 ```
 
 These are app-facing display states for local fixture inspection. They should stay aligned with indexer and verifier terminology as those packages mature.
-
