@@ -44,7 +44,7 @@ export function getOpenAlerts(data: DashboardData): AlertIncident[] {
 }
 
 export function getVerifierRiskReports(data: DashboardData): VerifierReport[] {
-  const riskStatuses: DashboardStatus[] = ["invalid", "unresolved", "unsupported", "reorged", "stale"];
+  const riskStatuses: DashboardStatus[] = ["failed", "unresolved", "unsupported", "reorged", "stale"];
   return data.verifierReports.filter((report) => riskStatuses.includes(report.status));
 }
 

@@ -5,13 +5,16 @@
   "workspaces": [
     "services/shared",
     "services/indexer",
-    "services/verifier"
+    "services/verifier",
+    "services/flowmemory"
   ],
   "scripts": {
-    "test": "npm test --prefix services/shared && npm test --prefix services/indexer && npm test --prefix services/verifier",
+    "test": "npm test --prefix services/shared && npm test --prefix services/indexer && npm test --prefix services/verifier && npm test --prefix services/flowmemory",
     "index:fixtures": "npm run index:fixtures --prefix services/indexer",
     "verify:fixtures": "npm run verify:fixtures --prefix services/verifier",
-    "e2e": "npm run index:fixtures && npm run verify:fixtures",
+    "flowmemory:generate": "npm run generate --prefix services/flowmemory",
+    "launch:v0": "npm run launch:v0 --prefix services/flowmemory",
+    "e2e": "npm run index:fixtures && npm run verify:fixtures && npm run flowmemory:generate",
     "demo:indexer": "npm run demo --prefix services/indexer",
     "demo:verifier": "npm run demo --prefix services/verifier"
   }

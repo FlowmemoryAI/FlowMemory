@@ -6,6 +6,7 @@ import { fetchDashboardData } from "./data/loadDashboardData";
 import type { DashboardData } from "./data/types";
 import { AlertsView } from "./views/AlertsView";
 import { DevnetBlocksView } from "./views/DevnetBlocksView";
+import { FlowMemoryView } from "./views/FlowMemoryView";
 import { FlowPulseStreamView } from "./views/FlowPulseStreamView";
 import { HardwareNodesView } from "./views/HardwareNodesView";
 import { OverviewView } from "./views/OverviewView";
@@ -87,6 +88,7 @@ export default function App() {
     <AppShell data={data}>
       <Routes>
         <Route path="/" element={<OverviewView data={data} />} />
+        <Route path="/flowmemory" element={<FlowMemoryView data={data} />} />
         <Route path="/flowpulse" element={<FlowPulseStreamView data={data} />} />
         <Route path="/rootfields" element={<RootfieldsView data={data} />} />
         <Route path="/work" element={<WorkReceiptsView data={data} />} />

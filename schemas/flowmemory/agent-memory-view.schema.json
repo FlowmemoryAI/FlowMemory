@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.agent_memory_view.v0",
+  "title": "FlowMemory AgentMemoryView V0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "viewId",
+    "rootfieldId",
+    "status",
+    "latestRoot",
+    "latestTransitionId",
+    "signalIds",
+    "receiptIds",
+    "transitionIds",
+    "warnings",
+    "localOnly"
+  ],
+  "properties": {
+    "schema": { "const": "flowmemory.agent_memory_view.v0" },
+    "viewId": { "$ref": "#/$defs/hex32" },
+    "rootfieldId": { "$ref": "#/$defs/hex32" },
+    "status": { "$ref": "#/$defs/flowMemoryStatus" },
+    "latestRoot": { "$ref": "#/$defs/hex32" },
+    "latestTransitionId": { "anyOf": [{ "$ref": "#/$defs/hex32" }, { "type": "null" }] },
+    "signalIds": { "type": "array", "items": { "$ref": "#/$defs/hex32" } },
+    "receiptIds": { "type": "array", "items": { "$ref": "#/$defs/hex32" } },
+    "transitionIds": { "type": "array", "items": { "$ref": "#/$defs/hex32" } },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "localOnly": { "const": true }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "flowMemoryStatus": {
+      "enum": ["observed", "pending", "finalized", "verified", "unresolved", "failed", "unsupported", "reorged", "offline", "stale"]
+    }
+  }
+}

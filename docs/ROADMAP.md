@@ -54,12 +54,12 @@ Status: implemented as a local/test foundation; hardening still active.
 
 ### Phase 2: V0 Local Stack
 
-Status: partially implemented as fixture-first services; launch-core integration still active.
+Status: implemented as fixture-first services plus generated launch-core state; production services still gated.
 
 - Canonical FlowPulse observation identity is specified and implemented in crypto/services.
 - Verifier statuses and report JSON schema exist for local fixture reports.
-- Define Rootflow transition schema and parent/child state-linking behavior.
-- Define Flow Memory schemas for MemorySignal, MemoryReceipt, RootfieldBundle, and AgentMemoryView.
+- Rootflow transition schema and parent/child state-linking behavior exist as generated local fixtures.
+- Flow Memory schemas for MemorySignal, MemoryReceipt, RootfieldBundle, and AgentMemoryView exist under `schemas/flowmemory/`.
 - Fixture-based parser and reorg-state tests exist in the indexer/verifier packages.
 - Define persistence and local RPC reader boundaries only after fixture behavior stabilizes.
 - Local devnet smoke-test gates exist as a no-value Rust prototype, without mainnet or production deployment.
@@ -77,22 +77,22 @@ Status: active.
 
 ### Phase 4: V0 Crypto Schema Layer
 
-Status: implemented for crypto V0 primitives; Flow Memory object schemas still active.
+Status: implemented for crypto V0 primitives and local Flow Memory object schemas.
 
 - Receipt, attestation, commitment, root, and proof vocabulary exists in `crypto/` docs and helpers.
 - Domain separation and replay boundaries exist for the V0 helper package.
-- Define canonical ids for MemorySignal, MemoryReceipt, RootflowTransition, RootfieldBundle, and verifier reports.
+- Canonical ids for MemorySignal, MemoryReceipt, RootflowTransition, RootfieldBundle, AgentMemoryView, and verifier reports exist in local V0 fixtures.
 - Validate test vectors through verifier specs and keep cross-language checks passing.
 - Keep proof circuits, GPU proofs, verifier economics, and production crypto infrastructure out of scope.
 
 ### Phase 5: V0 Dashboard Data Model And Display Path
 
-Status: implemented as a fixture-backed local app; generated fixture integration still active.
+Status: implemented as a generated fixture-backed local app.
 
 - App-facing entities exist in `apps/dashboard`.
-- Observed, pending, finalized, verified, invalid, unresolved, unsupported, reorged, offline, and stale states are modeled for display.
-- Dashboard renders local fixture views for overview, FlowPulse stream, Rootfields, work receipts, verifier reports, devnet blocks, hardware nodes, alerts, and raw JSON.
-- Next step: replace or augment the hand-maintained dashboard fixture with generated output from services/devnet/hardware.
+- Observed, pending, finalized, verified, failed, unresolved, unsupported, reorged, offline, and stale states are modeled for display.
+- Dashboard renders local fixture views for overview, Flow Memory / Rootflow, FlowPulse stream, Rootfields, work receipts, verifier reports, devnet blocks, hardware nodes, alerts, and raw JSON.
+- The dashboard fixture is generated from services, local devnet, and hardware POC outputs by `npm run launch:v0`.
 - Keep hosted production APIs and deployment out of scope until the local stack stabilizes.
 
 ### Phase 6: V0 Hardware POC
@@ -132,8 +132,8 @@ The initial merge sequence has completed for repo OS, contracts foundation, cryp
 
 Next merge preference:
 
-1. Launch-core integration command and generated Rootflow/Flow Memory fixtures.
-2. Canonical schemas for MemorySignal, MemoryReceipt, RootflowTransition, RootfieldBundle, and AgentMemoryView.
-3. Dashboard fixture generator/adapter that consumes service/devnet/hardware outputs.
-4. Area-specific CI for contracts, crypto, services, dashboard, devnet, and hardware.
-5. Production-gated research only after V0 local acceptance is green.
+1. Runtime schema validation and fixture-diff guardrails.
+2. Live RPC indexing boundary after fixture behavior remains stable.
+3. Dashboard polish and explorer/hardware-console separation.
+4. Static analysis and contract hardening.
+5. Production-gated research only after V0 local acceptance stays green.

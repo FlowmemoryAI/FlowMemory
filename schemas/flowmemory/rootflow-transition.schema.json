@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.rootflow_transition.v0",
+  "title": "FlowMemory RootflowTransition V0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "transitionId",
+    "rootfieldId",
+    "observationId",
+    "pulseId",
+    "parentPulseId",
+    "parentTransitionId",
+    "memorySignalId",
+    "memoryReceiptId",
+    "reportId",
+    "previousRoot",
+    "attemptedRoot",
+    "nextRoot",
+    "status",
+    "blockNumber",
+    "txHash",
+    "sequence",
+    "reasonCodes"
+  ],
+  "properties": {
+    "schema": { "const": "flowmemory.rootflow_transition.v0" },
+    "transitionId": { "$ref": "#/$defs/hex32" },
+    "rootfieldId": { "$ref": "#/$defs/hex32" },
+    "observationId": { "$ref": "#/$defs/hex32" },
+    "pulseId": { "$ref": "#/$defs/hex32" },
+    "parentPulseId": { "$ref": "#/$defs/hex32" },
+    "parentTransitionId": { "anyOf": [{ "$ref": "#/$defs/hex32" }, { "type": "null" }] },
+    "memorySignalId": { "$ref": "#/$defs/hex32" },
+    "memoryReceiptId": { "anyOf": [{ "$ref": "#/$defs/hex32" }, { "type": "null" }] },
+    "reportId": { "anyOf": [{ "$ref": "#/$defs/hex32" }, { "type": "null" }] },
+    "previousRoot": { "$ref": "#/$defs/hex32" },
+    "attemptedRoot": { "$ref": "#/$defs/hex32" },
+    "nextRoot": { "$ref": "#/$defs/hex32" },
+    "status": { "$ref": "#/$defs/flowMemoryStatus" },
+    "blockNumber": { "type": "string", "pattern": "^[0-9]+$" },
+    "txHash": { "$ref": "#/$defs/hex32" },
+    "sequence": { "type": "string", "pattern": "^[0-9]+$" },
+    "reasonCodes": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "flowMemoryStatus": {
+      "enum": ["observed", "pending", "finalized", "verified", "unresolved", "failed", "unsupported", "reorged", "offline", "stale"]
+    }
+  }
+}

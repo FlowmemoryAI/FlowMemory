@@ -39,6 +39,9 @@ jobs:
             "tests/RootfieldRegistry.t.sol"
             "contracts"
             "services"
+            "services/flowmemory"
+            "schemas/flowmemory"
+            "fixtures/launch-core"
             "apps"
             "hardware"
             "research"
@@ -83,3 +86,156 @@ jobs:
               exit 1
             fi
           done
+
+  contracts:
+    name: Contracts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Run Foundry tests
+        run: forge test
+
+  services:
+    name: Services and launch core
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install services dependencies
+        run: npm ci
+
+      - name: Run service tests
+        run: npm test
+
+      - name: Run service e2e
+        run: npm run e2e
+
+  launch-core:
+    name: Launch-core acceptance command
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install services dependencies
+        run: npm ci
+
+      - name: Run launch V0 command
+        run: npm run launch:v0
+
+  crypto:
+    name: Crypto
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: crypto
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: crypto/package-lock.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install crypto dependencies
+        run: npm ci
+
+      - name: Install Python crypto dependencies
+        run: python -m pip install pycryptodome
+
+      - name: Run crypto tests
+        run: npm test
+
+      - name: Validate crypto vectors
+        run: npm run validate:vectors
+
+      - name: Recompute Python FlowPulse vector
+        run: python validate_test_vectors.py
+
+  dashboard:
+    name: Dashboard
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/dashboard
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/dashboard/package-lock.json
+
+      - name: Install dashboard dependencies
+        run: npm ci
+
+      - name: Run dashboard tests
+        run: npm test
+
+      - name: Build dashboard
+        run: npm run build
+
+  devnet:
+    name: Local devnet
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Run devnet tests
+        run: cargo test --manifest-path crates/flowmemory-devnet/Cargo.toml
+
+  hardware:
+    name: Hardware POC
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate FlowRouter simulator fixture
+        run: python hardware/simulator/flowrouter_sim.py --validate-file hardware/fixtures/flowrouter_sample_seed42.json

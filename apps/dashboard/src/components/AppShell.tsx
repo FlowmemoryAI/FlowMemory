@@ -5,6 +5,7 @@ import {
   Bell,
   Binary,
   Braces,
+  BrainCircuit,
   Boxes,
   ClipboardCheck,
   LayoutDashboard,
@@ -22,6 +23,7 @@ interface AppShellProps {
 
 const NAV_ITEMS = [
   { to: "/", label: "Overview", icon: LayoutDashboard },
+  { to: "/flowmemory", label: "Flow Memory", icon: BrainCircuit },
   { to: "/flowpulse", label: "FlowPulse", icon: Activity },
   { to: "/rootfields", label: "Rootfields", icon: Boxes },
   { to: "/work", label: "Work lanes", icon: ClipboardCheck },
