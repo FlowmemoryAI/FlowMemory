@@ -7,10 +7,11 @@
     "services/indexer",
     "services/verifier",
     "services/flowmemory",
-    "services/control-plane"
+    "services/control-plane",
+    "services/bridge-relayer"
   ],
   "scripts": {
-    "test": "npm test --prefix services/shared && npm test --prefix services/indexer && npm test --prefix services/verifier && npm test --prefix services/flowmemory && npm test --prefix services/control-plane",
+    "test": "npm test --prefix services/shared && npm test --prefix services/indexer && npm test --prefix services/verifier && npm test --prefix services/flowmemory && npm test --prefix services/control-plane && npm test --prefix services/bridge-relayer",
     "contracts:hardening": "node infra/scripts/run-contract-hardening.mjs",
     "contracts:hardening:slither": "node infra/scripts/run-contract-hardening.mjs --require-slither",
     "index:base-canary": "npm run index:base-canary --prefix services/indexer",
@@ -45,7 +46,10 @@
     "control-plane:test": "npm test --prefix services/control-plane",
     "control-plane:demo": "npm run demo --prefix services/control-plane",
     "control-plane:smoke": "npm run smoke --prefix services/control-plane",
-    "control-plane:serve": "npm run serve --prefix services/control-plane"
+    "control-plane:serve": "npm run serve --prefix services/control-plane",
+    "bridge:test": "npm test --prefix services/bridge-relayer",
+    "bridge:mock": "npm run mock --prefix services/bridge-relayer",
+    "bridge:observe": "node services/bridge-relayer/src/observe-base-lockbox.ts"
   },
   "devDependencies": {
     "ajv": "^8.20.0",

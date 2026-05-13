@@ -27,6 +27,17 @@ URLs in committed files.
 
 ## Current Merged Setup Path
 
+For the release integration branch, the easiest setup path is:
+
+```powershell
+git clone -b release/flowchain-private-testnet https://github.com/FlowmemoryAI/FlowMemory.git
+cd FlowMemory
+powershell -ExecutionPolicy Bypass -File .\START_FLOWCHAIN_LOCAL.ps1
+```
+
+This wraps the manual commands below and opens the control plane and workbench
+in separate PowerShell windows.
+
 Use this path today on a clean second computer. It validates the merged V0
 launch-core, no-value local devnet prototype, dashboard workbench, hardware
 simulator fixture, and Windows wrapper layer. It does not yet prove the full

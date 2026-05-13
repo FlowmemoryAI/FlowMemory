@@ -1,0 +1,9 @@
+{
+  "name": "@flowmemory/bridge-relayer-v0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "mock": "node src/observe-base-lockbox.ts --fixture ../../fixtures/bridge/base-sepolia-mock-deposit.json --out out/bridge-observation.json",
+    "test": "node --test test/*.test.ts"
+  }
+}

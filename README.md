@@ -32,6 +32,17 @@ This repository contains the FlowMemory V0 foundation: project operating docs, l
 
 ## Start Here
 
+For a second computer or a non-technical local test, use the beginner setup
+guide:
+
+```powershell
+git clone -b release/flowchain-private-testnet https://github.com/FlowmemoryAI/FlowMemory.git
+cd FlowMemory
+powershell -ExecutionPolicy Bypass -File .\START_FLOWCHAIN_LOCAL.ps1
+```
+
+Detailed guide: `docs/EASY_SECOND_COMPUTER_SETUP.md`.
+
 Every contributor and agent should read:
 
 1. `AGENTS.md`

@@ -11,15 +11,15 @@
     "noValue": true,
     "consensus": "single-process deterministic local block production",
     "cryptoSchemaRefs": [
-      "crypto/FLOWMEMORY_CRYPTO_SPEC.md#signature-boundaries",
-      "crypto/ATTESTATIONS.md#local-test-keys-only"
+      "crypto/FLOWMEMORY_CRYPTO_SPEC.md#domain-separation",
+      "crypto/ATTESTATIONS.md#local-signature-helpers"
     ]
   },
   "chainId": "flowmemory-local-devnet-v0",
   "genesisHash": "0x0f23c892cbd2d00c10839d97ddab833698a83f8df8d6df27ceac03cfdd4b7bc9",
   "nextBlockNumber": 3,
   "logicalTime": 1778688002,
-  "parentHash": "0x3b7b4834931980ed28931449ce97e63c69f485715a12598fd8e914738acbbff9",
+  "parentHash": "0x54ba8fe6b5d3781a91ebd45a2ab215dd51ff2f835afe1c72d1843384fffb3919",
   "operatorKeyReferences": {
     "operator-key:local-devnet:alpha": {
       "schema": "flowmemory.local_devnet.operator_key_reference.v0",
@@ -32,8 +32,8 @@
       "publicKeyHint": "local fixture boundary; no public key registry is implemented",
       "secretMaterialBoundary": "no signing secret material is stored in devnet state or handoff output",
       "cryptoSchemaRefs": [
-        "crypto/FLOWMEMORY_CRYPTO_SPEC.md#signature-boundaries",
-        "crypto/ATTESTATIONS.md#local-test-keys-only"
+        "crypto/FLOWMEMORY_CRYPTO_SPEC.md#domain-separation",
+        "crypto/ATTESTATIONS.md#local-signature-helpers"
       ]
     }
   },
@@ -105,7 +105,7 @@
       "finalityStatus": "finalized",
       "challengeCount": 1,
       "finalizedAtBlock": 1,
-      "stateRoot": "0xd1aa623e1b368f3bdf9bd45ae97eef8e35ba1a4cb5b6ac9fbc6c1ab29570cdcc"
+      "stateRoot": "0x5b55ae15cf9ff5f7c18f8dce05da5ed0f780e4103607819129ce09f1ed7744a7"
     }
   },
   "artifactCommitments": {
@@ -163,22 +163,22 @@
   "importedObservations": {},
   "importedVerifierReports": {},
   "baseAnchors": {
-    "0x632509a4e0eb4812f0817795eae3fb1f3465f61c08035d1eea767df078f31bf1": {
-      "anchorId": "0x632509a4e0eb4812f0817795eae3fb1f3465f61c08035d1eea767df078f31bf1",
+    "0x2e2c83de6aab8190d169ad3348c62ce0cf0d4dcd6e83932c7beda822b4736a64": {
+      "anchorId": "0x2e2c83de6aab8190d169ad3348c62ce0cf0d4dcd6e83932c7beda822b4736a64",
       "appchainChainId": "flowmemory-local-devnet-v0",
       "blockRangeStart": 1,
       "blockRangeEnd": 1,
-      "stateRoot": "0xfb51bb3269aa022e5d4e8271d4776d27f02cca6cabea24daddd555b97190d01b",
+      "stateRoot": "0xd92ec8176ad55060b37898d4235612d0874ae5da6a5edbf69717b704c484e016",
       "workReceiptRoot": "0x8b3ef5650c9eea2f608ad9c7cb73df3c289fc0ac72ed04f46e6ae4bce0a1f023",
       "verifierReportRoot": "0x4facd21e55423e182eba87355482a35daa93f53190fbd3a8d2969f9d55bc5373",
       "rootfieldStateRoot": "0xb72a851dca1103410484e3272945bae5e87fc39b8f32f77d2991959b60d3bfbf",
       "artifactCommitmentRoot": "0xb772a9f7273032fd3ba2da8b6476d4715bbbafbd2a7eed21ecd0d558bde3beab",
-      "operatorKeyReferenceRoot": "0x2bf060a51a0f896b3dc709d8dffe471ee30b8ec178ba4db3d4f8c2f1c9621f18",
+      "operatorKeyReferenceRoot": "0x8457aa3ed0f4238834a8f3925f25ccca805828d8427c3ef67590a45659b22a40",
       "agentAccountRoot": "0xcf31230bfff347f79e19a55f4d1ff5fa486b0b1ad4754ce22b93de4b259a3ca7",
       "modelPassportRoot": "0x326aa6b0b372d29d24d747fe0879adfd7aaea206373b24ae2ab77d56357e9529",
       "memoryCellRoot": "0x1b4e91099dd8d867201bd880437197ae6c031e538341aaa3cd2046e5706a2c25",
       "challengeRoot": "0x16da3d2bf2dcd801bc5deb3987dc01342cb957031ad01408ea77bf5d1583656f",
-      "finalityReceiptRoot": "0x4f232719218263bad1968e456f2bdcfdb174821c5c92eba60353cfd9261191e8",
+      "finalityReceiptRoot": "0x8b8f5ff0d8c0a2f799958098165e8a6ff3c8f822f57147d1e1e7d2199ae1e347",
       "artifactAvailabilityProofRoot": "0xfb4b693c45014aae0947f35696e9d864e7b26ac6fd39c1df5edb3e0dcf9bd928",
       "verifierModuleRoot": "0xd6ddd8a2d0f5812d64679656c69983a2e0aecd36bd36199d900245658ae4626c",
       "previousAnchorId": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -273,13 +273,13 @@
           "error": null
         }
       ],
-      "stateRoot": "0xfb51bb3269aa022e5d4e8271d4776d27f02cca6cabea24daddd555b97190d01b",
-      "blockHash": "0xbcf4f0971717e7ee790bfef9ebb0c9e9a94fbd0bb0a05b938119629fd417c449"
+      "stateRoot": "0xd92ec8176ad55060b37898d4235612d0874ae5da6a5edbf69717b704c484e016",
+      "blockHash": "0x1e6f848e67c93fcd23091891ec704f5ed58989956789acd3368bce883ad493f9"
     },
     {
       "schema": "flowmemory.local_devnet.block.v0",
       "blockNumber": 2,
-      "parentHash": "0xbcf4f0971717e7ee790bfef9ebb0c9e9a94fbd0bb0a05b938119629fd417c449",
+      "parentHash": "0x1e6f848e67c93fcd23091891ec704f5ed58989956789acd3368bce883ad493f9",
       "logicalTime": 1778688001,
       "txIds": [
         "0x8f719c880f17b5d4fb6d9efd54ac276d0dd8050d11c2c7870c36a79b66bc49d7"
@@ -291,8 +291,8 @@
           "error": null
         }
       ],
-      "stateRoot": "0xe1c51bcfc1049256a956ca3f714ea313ddce07b59adb0070fc1cacb368f18be9",
-      "blockHash": "0x3b7b4834931980ed28931449ce97e63c69f485715a12598fd8e914738acbbff9"
+      "stateRoot": "0x75373cc47666ed9bcad605ce0f5d0aeb1bc8100a1087840d755205aef8a6bb50",
+      "blockHash": "0x54ba8fe6b5d3781a91ebd45a2ab215dd51ff2f835afe1c72d1843384fffb3919"
     }
   ],
   "pendingTxs": []
