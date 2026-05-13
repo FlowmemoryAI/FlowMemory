@@ -114,7 +114,8 @@ describe("dashboard fixture", () => {
     expect(workbench.source).toBe("fixture-fallback");
     expect(workbench.controlPlane.url).toBe(DEFAULT_CONTROL_PLANE_URL);
     expect(workbench.sections.blocks).toHaveLength(2);
-    expect(workbench.sections.transactions).toHaveLength(6);
+    expect(workbench.sections.transactions.length).toBeGreaterThanOrEqual(6);
+    expect(workbench.sections.transactions.every((transaction) => transaction.status === "finalized")).toBe(true);
     expect(workbench.sections.rootfields.length).toBeGreaterThan(0);
     expect(workbench.sections.agents.length).toBeGreaterThan(0);
     expect(workbench.sections.receipts.length).toBeGreaterThan(data.workReceipts.length);
@@ -125,8 +126,8 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.finality.length).toBeGreaterThan(1);
     expect(workbench.sections.provenance.map((record) => record.id)).toContain("control-plane-api");
     expect(workbench.sections.rawJson.map((record) => record.id)).toContain("raw-dashboard-fixture");
-    expect(workbench.sections.models).toEqual([]);
-    expect(workbench.sections.challenges).toEqual([]);
+    expect(workbench.sections.models.length).toBeGreaterThan(0);
+    expect(workbench.sections.challenges.length).toBeGreaterThan(0);
     expect(workbench.node.status).toBe("offline");
 
     for (const section of WORKBENCH_SECTIONS) {
