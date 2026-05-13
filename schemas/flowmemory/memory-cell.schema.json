@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowchain.memory_cell.v0",
+  "title": "FlowChain Local Alpha MemoryCell V0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "memoryCellId",
+    "ownerAgentId",
+    "currentMemoryRoot",
+    "previousMemoryRoot",
+    "lastDeltaRoot",
+    "sourceReceiptsRoot",
+    "dependencyRoot",
+    "status",
+    "updatedAtUnixMs",
+    "cellVersion"
+  ],
+  "properties": {
+    "schema": { "const": "flowchain.memory_cell.v0" },
+    "memoryCellId": { "$ref": "#/$defs/hex32" },
+    "ownerAgentId": { "$ref": "#/$defs/hex32" },
+    "currentMemoryRoot": { "$ref": "#/$defs/hex32" },
+    "previousMemoryRoot": { "$ref": "#/$defs/hex32" },
+    "lastDeltaRoot": { "$ref": "#/$defs/hex32" },
+    "sourceReceiptsRoot": { "$ref": "#/$defs/hex32" },
+    "dependencyRoot": { "$ref": "#/$defs/hex32" },
+    "status": { "enum": ["active", "frozen", "superseded", "reorged"] },
+    "updatedAtUnixMs": { "$ref": "#/$defs/uintString" },
+    "cellVersion": { "type": "integer", "minimum": 0, "maximum": 65535 }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "uintString": { "type": "string", "pattern": "^[0-9]+$" }
+  }
+}

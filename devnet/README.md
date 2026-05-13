@@ -13,7 +13,8 @@ devnet/local/state.json
 Use:
 
 ```powershell
-cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- demo
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- init
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- smoke
 ```
 
 See [docs/LOCAL_DEVNET.md](../docs/LOCAL_DEVNET.md) for full commands.

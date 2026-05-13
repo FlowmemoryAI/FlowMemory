@@ -24,6 +24,10 @@ contract RootfieldRegistryCaller {
     function deactivateRootfield(RootfieldRegistry registry, bytes32 rootfieldId) external {
         registry.deactivateRootfield(rootfieldId, bytes32(0), "rootfield://deactivate");
     }
+
+    function transferRootfieldOwnership(RootfieldRegistry registry, bytes32 rootfieldId, address newOwner) external {
+        registry.transferRootfieldOwnership(rootfieldId, newOwner, "rootfield://transfer");
+    }
 }
 
 contract RootfieldRegistryTest {
@@ -176,6 +180,11 @@ contract RootfieldRegistryTest {
         registry.registerRootfield(bytes32(0), keccak256("schema.v0"), keccak256("metadata"), "");
     }
 
+    function testCannotRegisterZeroSchemaHash() public {
+        vm.expectRevert(RootfieldRegistry.ZeroSchemaHash.selector);
+        registry.registerRootfield(keccak256("rootfield.zero-schema"), bytes32(0), keccak256("metadata"), "");
+    }
+
     function testCannotRegisterDuplicateRootfieldId() public {
         bytes32 rootfieldId = keccak256("rootfield.gamma");
         registry.registerRootfield(rootfieldId, keccak256("schema.v0"), keccak256("metadata"), "");
@@ -206,11 +215,26 @@ contract RootfieldRegistryTest {
         registry.submitRoot(rootfieldId, bytes32(0), keccak256("artifact"), bytes32(0), "");
     }
 
+    function testCannotSubmitZeroArtifactCommitment() public {
+        bytes32 rootfieldId = keccak256("rootfield.zero-artifact");
+        registry.registerRootfield(rootfieldId, keccak256("schema.v0"), keccak256("metadata"), "");
+
+        vm.expectRevert(RootfieldRegistry.ZeroArtifactCommitment.selector);
+        registry.submitRoot(rootfieldId, keccak256("root"), bytes32(0), bytes32(0), "");
+    }
+
     function testCannotSubmitUnregisteredRootfield() public {
         bytes32 rootfieldId = keccak256("rootfield.missing");
 
         vm.expectRevert(abi.encodeWithSelector(RootfieldRegistry.RootfieldNotRegistered.selector, rootfieldId));
         registry.submitRoot(rootfieldId, keccak256("root"), keccak256("artifact"), bytes32(0), "");
+    }
+
+    function testCannotDeactivateUnregisteredRootfield() public {
+        bytes32 rootfieldId = keccak256("rootfield.deactivate.missing");
+
+        vm.expectRevert(abi.encodeWithSelector(RootfieldRegistry.RootfieldNotRegistered.selector, rootfieldId));
+        registry.deactivateRootfield(rootfieldId, bytes32(0), "");
     }
 
     function testOnlyRootfieldOwnerCanSubmitRoot() public {
@@ -264,6 +288,16 @@ contract RootfieldRegistryTest {
         registry.submitRoot(rootfieldId, keccak256("root"), keccak256("artifact"), pulseId, "");
     }
 
+    function testCannotDeactivateInactiveRootfield() public {
+        bytes32 rootfieldId = keccak256("rootfield.deactivate.inactive");
+        bytes32 registrationPulseId =
+            registry.registerRootfield(rootfieldId, keccak256("schema.v0"), keccak256("metadata"), "");
+        registry.deactivateRootfield(rootfieldId, registrationPulseId, "rootfield://deactivate");
+
+        vm.expectRevert(abi.encodeWithSelector(RootfieldRegistry.RootfieldInactive.selector, rootfieldId));
+        registry.deactivateRootfield(rootfieldId, registrationPulseId, "rootfield://deactivate-again");
+    }
+
     function testOnlyRootfieldOwnerCanDeactivateRootfield() public {
         bytes32 rootfieldId = keccak256("rootfield.deactivate.owner");
         registry.registerRootfield(rootfieldId, keccak256("schema.v0"), keccak256("metadata"), "");
@@ -296,6 +330,18 @@ contract RootfieldRegistryTest {
         _assertTrue(rootfield.latestRoot == keccak256("root.new-owner"));
         _assertTrue(rootfield.rootCount == 1);
         _assertTrue(rootfield.pulseCount == 3);
+    }
+
+    function testOnlyRootfieldOwnerCanTransferRootfieldOwnership() public {
+        bytes32 rootfieldId = keccak256("rootfield.transfer.owner");
+        RootfieldRegistryCaller caller = new RootfieldRegistryCaller();
+        RootfieldRegistryCaller newOwner = new RootfieldRegistryCaller();
+        registry.registerRootfield(rootfieldId, keccak256("schema.v0"), keccak256("metadata"), "");
+
+        vm.expectRevert(
+            abi.encodeWithSelector(RootfieldRegistry.NotRootfieldOwner.selector, rootfieldId, address(caller))
+        );
+        caller.transferRootfieldOwnership(registry, rootfieldId, address(newOwner));
     }
 
     function testTransferRootfieldOwnershipEmitsStatusPulseAndOwnershipEvent() public {
@@ -348,6 +394,14 @@ contract RootfieldRegistryTest {
 
         vm.expectRevert(RootfieldRegistry.ZeroRootfieldOwner.selector);
         registry.transferRootfieldOwnership(rootfieldId, address(0), "");
+    }
+
+    function testCannotTransferUnregisteredRootfieldOwnership() public {
+        bytes32 rootfieldId = keccak256("rootfield.transfer.missing");
+        RootfieldRegistryCaller newOwner = new RootfieldRegistryCaller();
+
+        vm.expectRevert(abi.encodeWithSelector(RootfieldRegistry.RootfieldNotRegistered.selector, rootfieldId));
+        registry.transferRootfieldOwnership(rootfieldId, address(newOwner), "");
     }
 
     function testCannotTransferInactiveRootfieldOwnership() public {

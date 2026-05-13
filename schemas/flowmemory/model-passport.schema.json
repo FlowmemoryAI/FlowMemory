@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowchain.model_passport.v0",
+  "title": "FlowChain Local Alpha ModelPassport V0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "modelId",
+    "providerHash",
+    "modelFamilyHash",
+    "versionHash",
+    "licenseRoot",
+    "policyRoot",
+    "artifactRoot",
+    "metadataHash",
+    "status",
+    "nonce"
+  ],
+  "properties": {
+    "schema": { "const": "flowchain.model_passport.v0" },
+    "modelId": { "$ref": "#/$defs/hex32" },
+    "providerHash": { "$ref": "#/$defs/hex32" },
+    "modelFamilyHash": { "$ref": "#/$defs/hex32" },
+    "versionHash": { "$ref": "#/$defs/hex32" },
+    "licenseRoot": { "$ref": "#/$defs/hex32" },
+    "policyRoot": { "$ref": "#/$defs/hex32" },
+    "artifactRoot": { "$ref": "#/$defs/hex32" },
+    "metadataHash": { "$ref": "#/$defs/hex32" },
+    "status": { "enum": ["draft", "active", "deprecated", "rejected"] },
+    "nonce": { "$ref": "#/$defs/hex32" }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" }
+  }
+}

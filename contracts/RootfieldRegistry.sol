@@ -22,7 +22,9 @@ contract RootfieldRegistry is IFlowPulse, IRootfieldRegistry {
     mapping(bytes32 rootfieldId => Rootfield rootfield) private _rootfields;
 
     error ZeroRootfieldId();
+    error ZeroSchemaHash();
     error ZeroRoot();
+    error ZeroArtifactCommitment();
     error RootfieldAlreadyRegistered(bytes32 rootfieldId);
     error RootfieldNotRegistered(bytes32 rootfieldId);
     error RootfieldInactive(bytes32 rootfieldId);
@@ -45,6 +47,9 @@ contract RootfieldRegistry is IFlowPulse, IRootfieldRegistry {
     ) external returns (bytes32 pulseId) {
         if (rootfieldId == bytes32(0)) {
             revert ZeroRootfieldId();
+        }
+        if (schemaHash == bytes32(0)) {
+            revert ZeroSchemaHash();
         }
         if (_rootfields[rootfieldId].owner != address(0)) {
             revert RootfieldAlreadyRegistered(rootfieldId);
@@ -84,6 +89,9 @@ contract RootfieldRegistry is IFlowPulse, IRootfieldRegistry {
         }
         if (root == bytes32(0)) {
             revert ZeroRoot();
+        }
+        if (artifactCommitment == bytes32(0)) {
+            revert ZeroArtifactCommitment();
         }
 
         rootfield.latestRoot = root;

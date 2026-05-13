@@ -5,3 +5,4 @@ export * from "./encoding.js";
 export * from "./flowpulse.js";
 export * from "./hashes.js";
 export * from "./merkle.js";
+export * from "./objects.js";

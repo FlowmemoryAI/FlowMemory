@@ -1,7 +1,103 @@
 {
+  "artifactAvailabilityProofs": {
+    "availability:demo:001": {
+      "artifactId": "artifact:demo:001",
+      "checkedAtBlock": 1,
+      "commitment": "0x4de1ac0e70ce73c0a03df255d1ea2a7bbcb40f05c60f1b0c1b73e0b4577c537a",
+      "proofDigest": "0xf5826d75505fd87288a6219067d4febfd25226cf6e70c85288317770b02d6527",
+      "proofId": "availability:demo:001",
+      "rootfieldId": "rootfield:demo:alpha",
+      "status": "available",
+      "storageBackend": "fixture-local"
+    }
+  },
+  "challenges": {
+    "challenge:demo:001": {
+      "challengeId": "challenge:demo:001",
+      "challenger": "reviewer:local-demo",
+      "evidenceHash": "0xcc0312e21517151c7422f9b7c0c2ec611388eadfd89a07f6199adf617c4b461c",
+      "openedAtBlock": 1,
+      "reasonCode": "local-review",
+      "receiptId": "receipt:demo:001",
+      "resolution": "dismissed",
+      "resolvedAtBlock": 1,
+      "status": "resolved"
+    }
+  },
+  "finalityReceipts": {
+    "finality:demo:001": {
+      "challengeCount": 1,
+      "finalityReceiptId": "finality:demo:001",
+      "finalityStatus": "finalized",
+      "finalizedAtBlock": 1,
+      "finalizedBy": "operator:local-demo",
+      "receiptId": "receipt:demo:001",
+      "rootfieldId": "rootfield:demo:alpha",
+      "stateRoot": "0x5b55ae15cf9ff5f7c18f8dce05da5ed0f780e4103607819129ce09f1ed7744a7"
+    }
+  },
+  "genesisConfig": {
+    "blockTimeSeconds": 1,
+    "chainId": "flowmemory-local-devnet-v0",
+    "consensus": "single-process deterministic local block production",
+    "cryptoSchemaRefs": [
+      "crypto/FLOWMEMORY_CRYPTO_SPEC.md#domain-separation",
+      "crypto/ATTESTATIONS.md#local-signature-helpers"
+    ],
+    "genesisHash": "0x0f23c892cbd2d00c10839d97ddab833698a83f8df8d6df27ceac03cfdd4b7bc9",
+    "genesisLogicalTime": 1778688000,
+    "networkId": "flowmemory-private-local",
+    "noValue": true,
+    "operatorKeyReferenceId": "operator-key:local-devnet:alpha",
+    "schema": "flowmemory.local_devnet.config.v0"
+  },
   "importedVerifierReports": {},
+  "mapRoots": {
+    "agentAccountRoot": "0xcf31230bfff347f79e19a55f4d1ff5fa486b0b1ad4754ce22b93de4b259a3ca7",
+    "artifactAvailabilityProofRoot": "0xfb4b693c45014aae0947f35696e9d864e7b26ac6fd39c1df5edb3e0dcf9bd928",
+    "artifactCommitmentRoot": "0xb772a9f7273032fd3ba2da8b6476d4715bbbafbd2a7eed21ecd0d558bde3beab",
+    "baseAnchorRoot": "0xd61259ffaad6d352bd8f2e1b498c46b9d62b3c77ff22eeacd028bbb0cc66c5bd",
+    "challengeRoot": "0x16da3d2bf2dcd801bc5deb3987dc01342cb957031ad01408ea77bf5d1583656f",
+    "finalityReceiptRoot": "0x8b8f5ff0d8c0a2f799958098165e8a6ff3c8f822f57147d1e1e7d2199ae1e347",
+    "importedObservationRoot": "0x99cb1b939d5a09f800f72e4c5a2b92988571126e1f6f93549f4893b3f7de7880",
+    "importedVerifierReportRoot": "0x6070b1015f000dd509c7b276d2ad68d8a9d188ef1a961c2f573346eb75ea5ad7",
+    "memoryCellRoot": "0x1b4e91099dd8d867201bd880437197ae6c031e538341aaa3cd2046e5706a2c25",
+    "modelPassportRoot": "0x326aa6b0b372d29d24d747fe0879adfd7aaea206373b24ae2ab77d56357e9529",
+    "operatorKeyReferenceRoot": "0x8457aa3ed0f4238834a8f3925f25ccca805828d8427c3ef67590a45659b22a40",
+    "rootfieldStateRoot": "0xb72a851dca1103410484e3272945bae5e87fc39b8f32f77d2991959b60d3bfbf",
+    "verifierModuleRoot": "0xd6ddd8a2d0f5812d64679656c69983a2e0aecd36bd36199d900245658ae4626c",
+    "verifierReportRoot": "0x4facd21e55423e182eba87355482a35daa93f53190fbd3a8d2969f9d55bc5373",
+    "workReceiptRoot": "0x8b3ef5650c9eea2f608ad9c7cb73df3c289fc0ac72ed04f46e6ae4bce0a1f023"
+  },
+  "operatorKeyReferences": {
+    "operator-key:local-devnet:alpha": {
+      "cryptoSchemaRefs": [
+        "crypto/FLOWMEMORY_CRYPTO_SPEC.md#domain-separation",
+        "crypto/ATTESTATIONS.md#local-signature-helpers"
+      ],
+      "keyReferenceId": "operator-key:local-devnet:alpha",
+      "operatorId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+      "publicKeyHint": "local fixture boundary; no public key registry is implemented",
+      "schema": "flowmemory.local_devnet.operator_key_reference.v0",
+      "secretMaterialBoundary": "no signing secret material is stored in devnet state or handoff output",
+      "signatureScheme": "eip712-secp256k1-fixture-digest-only",
+      "verifierKeyId": "0xeaead587bf631e8926cf1a88ea5404f2211a339b77be7b9ffc08be420ce85551",
+      "verifierSetRoot": "0xbecddfb2cac22961206303e4f1255f58786e62503fbd54d875be915b68cc9635",
+      "workerKeyId": "0xc4cc0a4e778d201e59a442e969596ef8758fa62eb72c7ae4cb468c5493fc924d"
+    }
+  },
   "schema": "flowmemory.verifier_handoff.local_devnet.v0",
-  "stateRoot": "0x3e1f5fddd84f9d460ee30a380ff700b17611891b8c03eb320edf1baefe003ef9",
+  "stateRoot": "0x75373cc47666ed9bcad605ce0f5d0aeb1bc8100a1087840d755205aef8a6bb50",
+  "verifierModules": {
+    "verifier:local-demo": {
+      "active": true,
+      "metadataHash": "0x965eb2a0dfe118a94ded4ef151bf0fd970cd77350cd88d1b758b23fe0ffe2d14",
+      "moduleHash": "0x91830f85b951a7e7a1d99f48270faa05769561bd1f7ae34b783d759a35e833be",
+      "operator": "operator:local-demo",
+      "ruleSet": "flowmemory.work.rule_set.local_demo.v0",
+      "verifierId": "verifier:local-demo"
+    }
+  },
   "verifierReports": {
     "report:demo:001": {
       "reasonCodes": [],

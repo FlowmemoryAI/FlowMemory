@@ -6,10 +6,12 @@
     "services/shared",
     "services/indexer",
     "services/verifier",
-    "services/flowmemory"
+    "services/flowmemory",
+    "services/control-plane",
+    "services/bridge-relayer"
   ],
   "scripts": {
-    "test": "npm test --prefix services/shared && npm test --prefix services/indexer && npm test --prefix services/verifier && npm test --prefix services/flowmemory",
+    "test": "npm test --prefix services/shared && npm test --prefix services/indexer && npm test --prefix services/verifier && npm test --prefix services/flowmemory && npm test --prefix services/control-plane && npm test --prefix services/bridge-relayer",
     "contracts:hardening": "node infra/scripts/run-contract-hardening.mjs",
     "contracts:hardening:slither": "node infra/scripts/run-contract-hardening.mjs --require-slither",
     "index:base-canary": "npm run index:base-canary --prefix services/indexer",
@@ -29,9 +31,25 @@
     "fixtures:check": "npm run fixtures:check --prefix services/flowmemory",
     "launch:candidate": "npm run contracts:hardening && npm run launch:v0 && npm run validate:launch && npm run fixtures:check && node infra/scripts/check-unsafe-claims.mjs",
     "build:production": "npm run launch:candidate && npm run build --prefix apps/dashboard",
+    "flowchain:prereq": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-check-prereqs.ps1",
+    "flowchain:init": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-init.ps1",
+    "flowchain:start": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-start.ps1",
+    "flowchain:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-stop.ps1",
+    "flowchain:demo": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-demo.ps1",
+    "flowchain:smoke": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-smoke.ps1",
+    "flowchain:export": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-export.ps1",
+    "flowchain:import": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-import.ps1",
+    "workbench:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-workbench.ps1",
     "e2e": "npm run index:fixtures && npm run verify:fixtures && npm run flowmemory:generate",
     "demo:indexer": "npm run demo --prefix services/indexer",
-    "demo:verifier": "npm run demo --prefix services/verifier"
+    "demo:verifier": "npm run demo --prefix services/verifier",
+    "control-plane:test": "npm test --prefix services/control-plane",
+    "control-plane:demo": "npm run demo --prefix services/control-plane",
+    "control-plane:smoke": "npm run smoke --prefix services/control-plane",
+    "control-plane:serve": "npm run serve --prefix services/control-plane",
+    "bridge:test": "npm test --prefix services/bridge-relayer",
+    "bridge:mock": "npm run mock --prefix services/bridge-relayer",
+    "bridge:observe": "node services/bridge-relayer/src/observe-base-lockbox.ts"
   },
   "devDependencies": {
     "ajv": "^8.20.0",

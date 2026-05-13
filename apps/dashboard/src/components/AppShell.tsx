@@ -10,21 +10,25 @@ import {
   ClipboardCheck,
   RadioReceiver,
   LayoutDashboard,
+  Monitor,
   Network,
   RadioTower,
   ShieldCheck,
 } from "lucide-react";
 import type { DashboardData } from "../data/types";
+import type { WorkbenchSnapshot } from "../data/workbench";
 import { StatusBadge } from "./StatusBadge";
 
 interface AppShellProps {
   data: DashboardData;
   canaryData?: DashboardData;
+  workbench: WorkbenchSnapshot;
   children: ReactNode;
 }
 
 const NAV_ITEMS = [
-  { to: "/", label: "Overview", icon: LayoutDashboard },
+  { to: "/", label: "Workbench", icon: Monitor },
+  { to: "/overview", label: "Overview", icon: LayoutDashboard },
   { to: "/canary", label: "Base canary", icon: RadioReceiver },
   { to: "/flowmemory", label: "Flow Memory", icon: BrainCircuit },
   { to: "/flowpulse", label: "FlowPulse", icon: Activity },
@@ -37,7 +41,7 @@ const NAV_ITEMS = [
   { to: "/raw", label: "Raw JSON", icon: Braces },
 ];
 
-export function AppShell({ data, canaryData, children }: AppShellProps) {
+export function AppShell({ data, canaryData, workbench, children }: AppShellProps) {
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -47,7 +51,7 @@ export function AppShell({ data, canaryData, children }: AppShellProps) {
           </div>
           <div>
             <span className="brand-kicker">FlowMemory</span>
-            <strong>Dashboard V0</strong>
+            <strong>Workbench V0</strong>
           </div>
         </div>
         <nav className="nav-list" aria-label="Dashboard views">
@@ -59,8 +63,8 @@ export function AppShell({ data, canaryData, children }: AppShellProps) {
           ))}
         </nav>
         <div className="sidebar-footer">
-          <StatusBadge status="observed" compact />
-          <span>{data.metadata.mode} data</span>
+          <StatusBadge status={workbench.source === "control-plane" ? "verified" : "stale"} compact />
+          <span>{workbench.source}</span>
           {canaryData ? <span>{canaryData.metadata.mode} data ready</span> : null}
           <small>{data.chain.name}</small>
         </div>
@@ -74,15 +78,16 @@ export function AppShell({ data, canaryData, children }: AppShellProps) {
           </div>
           <div className="topbar-meta" aria-label="Data provenance">
             <span>chain {data.chain.chainId}</span>
+            <span>{workbench.controlPlane.status}</span>
             <span>{data.chain.source}</span>
             <span>updated {new Date(data.chain.lastUpdated).toLocaleString()}</span>
           </div>
         </header>
         <div className="fixture-banner" role="note">
-          <strong>Fixture/local data only.</strong>
+          <strong>{workbench.source === "control-plane" ? "Local API detected." : "Fixture fallback active."}</strong>
           <span>
-            Runtime JSON is loaded from {data.metadata.runtimeDataPath}; future generated outputs should land in the
-            documented fixture boundary before becoming live APIs.
+            Runtime JSON is loaded from {data.metadata.runtimeDataPath}; control-plane integration probes{" "}
+            {workbench.controlPlane.url} and falls back to deterministic fixture data when unavailable.
           </span>
         </div>
         <main className="content">{children}</main>

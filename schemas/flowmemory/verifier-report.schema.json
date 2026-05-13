@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowchain.verifier_report.v0",
+  "title": "FlowChain Local Alpha VerifierReport V0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "reportId",
+    "reportSchemaHash",
+    "observationId",
+    "receiptHash",
+    "verifierId",
+    "verifierSetRoot",
+    "status",
+    "statusCode",
+    "checksRoot",
+    "finalizedBlockNumber",
+    "finalizedBlockHash",
+    "reportVersion"
+  ],
+  "properties": {
+    "schema": { "const": "flowchain.verifier_report.v0" },
+    "reportId": { "$ref": "#/$defs/hex32" },
+    "reportSchemaHash": { "$ref": "#/$defs/hex32" },
+    "observationId": { "$ref": "#/$defs/hex32" },
+    "receiptHash": { "$ref": "#/$defs/hex32" },
+    "verifierId": { "$ref": "#/$defs/hex32" },
+    "verifierSetRoot": { "$ref": "#/$defs/hex32" },
+    "status": { "enum": ["observed", "verified", "unresolved", "unsupported", "failed", "reorged", "superseded"] },
+    "statusCode": { "type": "integer", "minimum": 1, "maximum": 255 },
+    "checksRoot": { "$ref": "#/$defs/hex32" },
+    "finalizedBlockNumber": { "$ref": "#/$defs/uintString" },
+    "finalizedBlockHash": { "$ref": "#/$defs/hex32" },
+    "reportVersion": { "type": "integer", "minimum": 0, "maximum": 65535 }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "uintString": { "type": "string", "pattern": "^[0-9]+$" }
+  }
+}

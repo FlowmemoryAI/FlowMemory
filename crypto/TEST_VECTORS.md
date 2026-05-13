@@ -9,7 +9,8 @@ The test vectors are synthetic and contain no production secrets or signatures.
 - `fixtures/sample-flowpulse.json`: FlowPulse event args and expected `pulseId` / `eventArgsHash`.
 - `fixtures/sample-observation.json`: observation metadata, artifact/storage inputs, and expected `observationId` / `receiptHash`.
 - `fixtures/sample-report.json`: verifier report, worker signature payload, verifier signature payload, and attestation envelope expectations.
-- `fixtures/vectors.json`: 21 package-level vectors for domains, canonical JSON, observation ids, receipts, artifacts, Merkle roots, reports, attestations, cursors, identities, root commitments, work receipts, and devnet block hashes.
+- `fixtures/local-alpha-objects.json`: positive and negative fixtures for FlowChain Local Alpha object identity, signed-envelope validation, and schema validation.
+- `fixtures/vectors.json`: 33 package-level vectors for domains, canonical JSON, observation ids, receipts, artifacts, Merkle roots, reports, attestations, cursors, identities, root commitments, work receipts, devnet block hashes, Local Alpha object ids, hardware signal envelopes, and local signature envelopes.
 - `test-vectors/flowpulse-observation-v0.json`: FlowPulse-specific observation, receipt, artifact, report, worker signature digest, and verifier signature digest.
 
 ## FlowPulse Observation Vector Highlights
@@ -49,6 +50,8 @@ An implementation should reproduce:
 - Merkle root and artifact root
 - deterministic verifier report id
 - EIP-712 signing digests without requiring test private keys
+- Local Alpha object IDs for AgentAccount, ModelPassport, WorkReceipt, ArtifactAvailabilityProof, VerifierModule, VerifierReport, MemoryCell, Challenge, FinalityReceipt, hardware signal envelopes, and control-plane provenance responses
+- Local Alpha signature envelope IDs and signing digests for local operator, agent, verifier, and hardware no-value test keys
 
 Run the package test suite:
 
@@ -66,7 +69,20 @@ npm run validate:vectors
 Expected output:
 
 ```text
-FLOWMEMORY_CRYPTO_VECTORS_OK 21
+FLOWMEMORY_CRYPTO_VECTORS_OK 33
+```
+
+Validate the Local Alpha object documents and signature envelopes against the
+canonical JSON Schemas:
+
+```powershell
+npm run validate:local-alpha
+```
+
+Expected output:
+
+```text
+FLOWCHAIN_LOCAL_ALPHA_FIXTURES_OK documents=11 envelopes=11 schemas=12
 ```
 
 Print the sample vector summary:
@@ -94,7 +110,17 @@ FLOWPULSE_VECTOR_RECOMPUTE_OK
 - changed `uri` should change `eventArgsHash`
 - swapped Merkle leaves should change `contentMerkleRoot` and therefore any recomputed `artifactRoot`
 - wrong verifier set root should change verifier signing digest
+- swapped Local Alpha object fields should change object IDs
+- changed Local Alpha type/domain strings should change object IDs or domain separators
+- malformed hex in Local Alpha fixtures should fail before an ID is accepted
+- duplicate Local Alpha object IDs should be rejected by fixture validation
+- canonical JSON key order should not change the control-plane provenance response body hash
+- replayed Local Alpha signer/domain/sequence tuples should be rejected
+- wrong signature domains should be rejected
+- missing local operator/agent/verifier/hardware signer fields should be rejected
+- each Local Alpha object envelope has a bad-signature invalid vector
+- zero critical hashes, malformed object IDs, malformed dependency roots, bad parent/root relationships, and wrong object types should be rejected
 - expired worker signature should be rejected by verifier policy
 - reorged observation should not mutate into a verified report
 
-The package tests cover the first five checks. Expiry and reorg-to-report policy are verifier-service responsibilities because they require policy context, not just hash recomputation.
+The package tests cover the hash, schema, malformed hex, duplicate, type-string, canonical JSON, signed-envelope, replay, wrong-domain, missing-signer, bad-signature, zero-hash, malformed-dependency, bad-parent/root, and wrong-object-type checks. Expiry and reorg-to-report policy are verifier-service responsibilities because they require policy context, not just hash recomputation.
