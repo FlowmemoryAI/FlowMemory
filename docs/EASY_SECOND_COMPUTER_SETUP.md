@@ -7,26 +7,41 @@ not public validator software, and not a production bridge.
 
 ## Install These First
 
-1. Git for Windows
-2. Node.js LTS
-3. Rust with Cargo
-4. Foundry
-5. Python 3
+Nothing manually for the normal Windows path.
 
-## One-Command Setup
+The root installer installs or verifies:
+
+1. Git for Windows
+2. Node.js LTS with npm
+3. Python 3
+4. Rust with Cargo
+5. Foundry
+
+Foundry is installed through Git Bash because Foundry's Windows installer does
+not support PowerShell directly.
+
+## Beginner Setup
 
 Open PowerShell and run:
 
 ```powershell
-git clone -b release/flowchain-private-testnet https://github.com/FlowmemoryAI/FlowMemory.git
-cd FlowMemory
-powershell -ExecutionPolicy Bypass -File .\START_FLOWCHAIN_LOCAL.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -Command '$p=Join-Path $env:TEMP "INSTALL_FLOWCHAIN_WINDOWS.ps1"; Invoke-WebRequest "https://raw.githubusercontent.com/FlowmemoryAI/FlowMemory/main/INSTALL_FLOWCHAIN_WINDOWS.ps1" -OutFile $p; & powershell -NoProfile -ExecutionPolicy Bypass -File $p'
 ```
 
-The script installs dependencies, checks prerequisites, initializes local state,
-runs the deterministic local chain demo, runs the smoke path, exports a local
-bundle, runs the bridge mock, and opens the control plane and dashboard in
-separate PowerShell windows.
+The installer downloads this repo, installs dependencies, checks prerequisites,
+initializes local state, runs the deterministic local chain demo, runs the smoke
+path, exports a local bundle, runs the bridge mock, and opens the control plane
+and dashboard in separate PowerShell windows.
+
+Windows may ask for permission while tools install. Click **Yes** if prompted.
+
+## Already Cloned Setup
+
+If the repo is already cloned:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\INSTALL_FLOWCHAIN_WINDOWS.ps1
+```
 
 ## Faster Re-Run
 

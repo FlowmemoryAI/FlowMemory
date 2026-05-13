@@ -14,35 +14,50 @@ FlowChain private/local L1 testnet package for second-computer validation.
 
 ## Prerequisites
 
-Install these on the second computer:
+For the normal Windows path, do not manually install these first. The root
+installer installs or verifies them for the user:
 
 - Git for Windows.
 - Node.js LTS with npm.
 - Rust toolchain with Cargo.
-- Foundry, if running contract hardening or `npm run launch:candidate`.
-- Python 3, if validating hardware simulator fixtures.
+- Foundry.
+- Python 3.
+
+Foundry is special on Windows. Foundry's installer does not support PowerShell
+directly, so `INSTALL_FLOWCHAIN_WINDOWS.ps1` uses Git Bash for that step after
+Git is installed.
 
 Do not put private keys, RPC credentials, API keys, seed phrases, or webhook
 URLs in committed files.
 
 ## Current Merged Setup Path
 
-For the release integration branch, the easiest setup path is:
+The beginner setup path is:
 
 ```powershell
-git clone -b release/flowchain-private-testnet https://github.com/FlowmemoryAI/FlowMemory.git
-cd FlowMemory
-powershell -ExecutionPolicy Bypass -File .\START_FLOWCHAIN_LOCAL.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -Command '$p=Join-Path $env:TEMP "INSTALL_FLOWCHAIN_WINDOWS.ps1"; Invoke-WebRequest "https://raw.githubusercontent.com/FlowmemoryAI/FlowMemory/main/INSTALL_FLOWCHAIN_WINDOWS.ps1" -OutFile $p; & powershell -NoProfile -ExecutionPolicy Bypass -File $p'
 ```
 
-This wraps the manual commands below and opens the control plane and workbench
-in separate PowerShell windows.
+This installs missing tools, clones or updates the repo, wraps the manual
+commands below, and opens the control plane and workbench in separate
+PowerShell windows.
 
 Use this path today on a clean second computer. It validates the merged V0
 launch-core, no-value local devnet prototype, dashboard workbench, hardware
 simulator fixture, and Windows wrapper layer. It does not yet prove the full
 native AgentAccount, ModelPassport, MemoryCell, Challenge, FinalityReceipt, or
 control-plane lifecycle.
+
+If the repo is already cloned, run from the repo root:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\INSTALL_FLOWCHAIN_WINDOWS.ps1
+```
+
+## Manual Developer Path
+
+Use this only when intentionally installing tools yourself or debugging the
+installer.
 
 Clone and install:
 

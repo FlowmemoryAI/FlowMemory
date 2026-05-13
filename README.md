@@ -32,13 +32,12 @@ This repository contains the FlowMemory V0 foundation: project operating docs, l
 
 ## Start Here
 
-For a second computer or a non-technical local test, use the beginner setup
-guide:
+For a second computer or a non-technical local test, use the beginner Windows
+installer. It installs missing tools, clones the repo, installs dependencies,
+runs the local setup, and opens the local control plane and dashboard:
 
 ```powershell
-git clone -b release/flowchain-private-testnet https://github.com/FlowmemoryAI/FlowMemory.git
-cd FlowMemory
-powershell -ExecutionPolicy Bypass -File .\START_FLOWCHAIN_LOCAL.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -Command '$p=Join-Path $env:TEMP "INSTALL_FLOWCHAIN_WINDOWS.ps1"; Invoke-WebRequest "https://raw.githubusercontent.com/FlowmemoryAI/FlowMemory/main/INSTALL_FLOWCHAIN_WINDOWS.ps1" -OutFile $p; & powershell -NoProfile -ExecutionPolicy Bypass -File $p'
 ```
 
 Detailed guide: `docs/EASY_SECOND_COMPUTER_SETUP.md`.
