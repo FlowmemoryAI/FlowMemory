@@ -8,7 +8,9 @@ This file is the beginner-friendly source of truth for what exists in FlowMemory
 
 FlowMemory is in launch-candidate V0 hardening.
 
-The bootstrap repository operating system, contracts V0 foundation, crypto V0 foundation, local indexer/verifier fixture package, dashboard V0, FlowRouter hardware POC, local no-value devnet prototype, launch-core contract-event spine, and pre-production hardening guardrails have merged into `main`. The current launch-candidate branch adds swap-derived memory signals, stricter launch validation, and Base Sepolia testnet deploy/read commands.
+The bootstrap repository operating system, contracts V0 foundation, crypto V0 foundation, local indexer/verifier fixture package, dashboard V0, FlowRouter hardware POC, local no-value devnet prototype, launch-core contract-event spine, and pre-production hardening guardrails have merged into `main`. The launch-candidate work added swap-derived memory signals, stricter launch validation, and Base Sepolia testnet deploy/read commands.
+
+On 2026-05-13 a small Base mainnet canary deployment was broadcast for V0 testing. It is documented in `docs/DEPLOYMENTS/2026-05-13-base-canary-v0.md`. This is not a production launch and does not change the production/mainnet-readiness guardrails.
 
 The launch-core V0 stack now has a single runnable local command that connects contract fixtures, local indexing/verifier outputs, crypto schema vocabulary, Rootflow transitions, Flow Memory objects, generated dashboard state, local no-value devnet output, and hardware POC output without production deployment.
 
@@ -54,6 +56,7 @@ Indexer/verifier local package:
 - `npm run index:base-sepolia -- --rpc-url <url> --address <contract> --from-block <n> --to-block <n>` provides a constrained Base Sepolia reader path.
 - The Base Sepolia reader requires an explicit RPC URL, rejects non-Base-Sepolia chain ids, and persists both canonical state and a durable checkpoint without storing RPC URLs or keys.
 - `npm run deploy:base-sepolia` and `npm run deploy:base-sepolia:broadcast` provide Foundry deploy commands for the current V0 Base Sepolia testnet contract set. They require local env values and do not commit credentials.
+- A Base mainnet V0 canary deployment exists for testing only; deployed addresses and smoke transactions are recorded in `docs/DEPLOYMENTS/2026-05-13-base-canary-v0.md`.
 
 Dashboard V0:
 
@@ -112,6 +115,8 @@ Launch-core specifications:
 - Production indexer or verifier service runtime.
 - Production persistence layer, production live RPC reader, production APIs, or hosted services.
 - Base mainnet reader.
+- Dashboard ingestion of the Base mainnet canary deployment.
+- Contract source verification automation for the deployed canary contracts.
 - Explorer or hardware console implementation.
 - FlowRouter firmware, manufacturing, final enclosure work, or field deployment.
 - Real Meshtastic or LoRa device integration.
@@ -171,9 +176,9 @@ Before assigning agents, check for dirty worktrees and avoid overlapping folders
 ## Current Operator Priorities
 
 1. Keep the generated launch-core command stable in CI.
-2. Exercise the Base Sepolia deploy/read path on explicit testnet contract addresses only.
-3. Continue contracts hardening without production mainnet deployment or token mechanics.
-4. Keep swap-memory signal semantics narrow until a real Uniswap v4 hook issue scopes the next step.
+2. Build a guarded Base canary reader path for the deployed V0 canary addresses.
+3. Exercise the Base Sepolia deploy/read path on explicit testnet contract addresses only.
+4. Continue contracts hardening without production mainnet deployment or token mechanics.
 5. Keep dashboard work fixture-backed until a production API is explicitly scoped.
 
 ## Update Rule
