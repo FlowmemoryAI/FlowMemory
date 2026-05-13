@@ -7,6 +7,26 @@ path from `docs/FLOWCHAIN_SECOND_COMPUTER_SETUP.md`.
 
 ## First Command
 
+On a clean Windows computer, the first command should be the beginner installer:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -Command '$p=Join-Path $env:TEMP "INSTALL_FLOWCHAIN_WINDOWS.ps1"; Invoke-WebRequest "https://raw.githubusercontent.com/FlowmemoryAI/FlowMemory/main/INSTALL_FLOWCHAIN_WINDOWS.ps1" -OutFile $p; & powershell -NoProfile -ExecutionPolicy Bypass -File $p'
+```
+
+If the repo is already cloned, run from the repo root:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\INSTALL_FLOWCHAIN_WINDOWS.ps1
+```
+
+To only check installed tools:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\INSTALL_FLOWCHAIN_WINDOWS.ps1 -CheckOnly
+```
+
+## Repo Command Check
+
 From the repo root:
 
 ```powershell
@@ -20,10 +40,11 @@ or workbench commands.
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
+| `winget is missing` | Windows App Installer is missing or outdated. | Install or update **App Installer** from the Microsoft Store, then rerun `INSTALL_FLOWCHAIN_WINDOWS.ps1`. |
 | `git was not found on PATH` | Git for Windows is missing or PowerShell was opened before install. | Install Git for Windows, reopen PowerShell, rerun `npm run flowchain:prereq`. |
 | `node` or `npm` missing | Node.js LTS is missing or PATH is stale. | Install Node.js LTS, reopen PowerShell, run `npm install`. |
 | `cargo` or `rustc` missing | Rust toolchain is missing. | Install Rust with rustup, reopen PowerShell, run `cargo test --manifest-path crates/flowmemory-devnet/Cargo.toml`. |
-| `forge is required` | Foundry is missing. | Install Foundry before `npm run launch:candidate` or `npm run flowchain:smoke`. |
+| `forge is required` | Foundry is missing. | Run `powershell -ExecutionPolicy Bypass -File .\INSTALL_FLOWCHAIN_WINDOWS.ps1`; the installer uses Git Bash for Foundry. |
 | Dashboard dependency error | Dashboard deps are separate from root npm workspaces. | Run `npm install --prefix apps/dashboard`. |
 | Crypto dependency error during strict prereq | Crypto deps are separate from root npm workspaces. | Run `npm install --prefix crypto`. |
 | Workbench does not open | Vite dev server did not start or the port changed. | Run `npm run workbench:dev` again and use the URL printed by Vite. |
