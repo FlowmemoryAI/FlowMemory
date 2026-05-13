@@ -124,4 +124,3 @@ export function keccak256Hex(bytes: Uint8Array): `0x${string}` {
 export function keccak256Utf8(value: string): `0x${string}` {
   return keccak256Hex(new TextEncoder().encode(value));
 }
-

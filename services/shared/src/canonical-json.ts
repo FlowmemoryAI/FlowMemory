@@ -22,4 +22,3 @@ function normalize(value: JsonValue): JsonValue {
 export function canonicalJson(value: JsonValue): string {
   return JSON.stringify(normalize(value));
 }
-

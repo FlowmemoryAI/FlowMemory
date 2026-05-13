@@ -98,4 +98,3 @@ export async function readLocalRpcFlowPulseLogs(options: LocalRpcReadOptions): P
 
   return rawLogs;
 }
-

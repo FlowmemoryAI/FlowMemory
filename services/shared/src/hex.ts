@@ -41,4 +41,3 @@ export function normalizeAddress(value: string): Hex {
 export function normalizeBytes32(value: string): Hex {
   return normalizeHex(value, 32);
 }
-
