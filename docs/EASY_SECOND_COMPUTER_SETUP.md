@@ -46,6 +46,16 @@ initializes local state, runs the deterministic local chain demo, runs the smoke
 path, exports a local bundle, runs the bridge mock, and opens the control plane
 and dashboard in separate PowerShell windows.
 
+The current installer uses the merged-surface smoke path. The full local L1
+acceptance wrapper is:
+
+```powershell
+npm run flowchain:full-smoke -- -AllowIncomplete
+```
+
+It reports the remaining subsystem blockers until issues #99 through #108 are
+finished.
+
 ## Already Cloned Setup
 
 If the repo is already cloned:

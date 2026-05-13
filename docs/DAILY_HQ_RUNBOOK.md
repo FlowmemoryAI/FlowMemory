@@ -35,6 +35,8 @@ Morning:
 
 - Confirm GitHub open PRs and issues still match `docs/CURRENT_STATE.md` and
   `docs/ISSUE_BACKLOG.md`.
+- Confirm `docs/FLOWCHAIN_HQ_INTEGRATION_STATUS.md` matches GitHub milestone
+  #7, issues #99-#108, and open PRs.
 - Check all sibling worktrees for dirty changes before assigning agents.
 - Verify no two active agents are editing the same folder family or source-of-truth
   doc without coordination.
@@ -42,11 +44,14 @@ Morning:
   missing to in flight or implemented after merges.
 - Verify root command aliases in `package.json` still match the scripts under
   `infra/scripts/flowchain-*.ps1`.
+- Verify `npm run flowchain:full-smoke -- -AllowIncomplete -SkipMergedSmoke`
+  still reports missing subsystem commands with owning issue numbers until
+  #108 is ready to pass.
 - Confirm the next assigned work extends the existing devnet, control-plane,
   crypto, dashboard, contracts, hardware, or research surface instead of adding
   a replacement system.
-- Keep production L1, tokenomics, public validator, production bridge, audited
-  cryptography, production hook, and production hardware claims blocked.
+- Keep public-chain launch, tokenomics, public validator, value-bearing bridge,
+  audited-cryptography, production hook, and production hardware claims blocked.
 
 Evening:
 
@@ -61,6 +66,8 @@ Evening:
   day, and name the first failing step.
 - Save or cite `devnet/local/smoke/flowchain-smoke-report.json` when full smoke
   runs locally.
+- Save or cite `devnet/local/smoke/flowchain-full-smoke-report.json` when the
+  full-L1 wrapper is run, even if it is expected to report blockers.
 - Require `git diff --check` in each PR summary and area tests where the touched
   area has tests.
 
