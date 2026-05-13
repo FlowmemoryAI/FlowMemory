@@ -12,6 +12,7 @@ This directory contains the FlowRouter V0 proof-of-concept hardware package. It 
 - `simulator/`: deterministic FlowRouter POC packet generator and schema validator.
 - `fixtures/`: generated sample packet feeds for tests and future dashboard/service consumers.
 - `field-tests/`: field-test plans and logs for controlled hardware experiments.
+- `../fixtures/hardware/`: generated local-alpha FlowRouter operator-signal projection for dashboard, workbench, or control-plane consumers.
 
 ## V0 Purpose
 
@@ -27,6 +28,7 @@ FlowRouter V0 is a local FlowMemory gateway POC. It can model or test:
 - NFC Memory Cartridge metadata.
 - FlowCore light-pipe status.
 - Enclosure measurement direction.
+- FlowChain local-alpha operator signals derived from hardware packets, including optional control-plane/workbench fixture collections.
 
 ## V0 Non-Goals
 
@@ -49,5 +51,14 @@ Generate and validate deterministic simulator output:
 python hardware/simulator/flowrouter_sim.py --seed 42 --out hardware/fixtures/flowrouter_sample_seed42.json
 python hardware/simulator/flowrouter_sim.py --validate-file hardware/fixtures/flowrouter_sample_seed42.json
 ```
+
+Generate and validate the local-alpha FlowChain operator-signal projection:
+
+```powershell
+python hardware/simulator/flowrouter_sim.py --seed 42 --out hardware/fixtures/flowrouter_sample_seed42.json --operator-out fixtures/hardware/flowrouter_local_alpha_seed42.json
+python hardware/simulator/flowrouter_sim.py --validate-operator-file fixtures/hardware/flowrouter_local_alpha_seed42.json
+```
+
+The operator projection emits `flowmemory.hardware_operator_signals.local_alpha.v0`, with local-only `signalEnvelopes`, a direct `hardwareSignals` view, control-plane-style collections, and `workbenchRecords`. Hardware remains optional for the private/local testnet path.
 
 The simulator uses only the Python standard library.
