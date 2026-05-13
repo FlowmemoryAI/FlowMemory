@@ -4,6 +4,7 @@ import { AlertTriangle, RefreshCw } from "lucide-react";
 import { AppShell } from "./components/AppShell";
 import { DEFAULT_CANARY_DASHBOARD_DATA_PATH, fetchDashboardData } from "./data/loadDashboardData";
 import type { DashboardData } from "./data/types";
+import { buildWorkbenchSnapshot, fetchWorkbenchSnapshot, type WorkbenchSnapshot } from "./data/workbench";
 import { AlertsView } from "./views/AlertsView";
 import { CanaryDeploymentView } from "./views/CanaryDeploymentView";
 import { DevnetBlocksView } from "./views/DevnetBlocksView";
@@ -14,6 +15,7 @@ import { OverviewView } from "./views/OverviewView";
 import { RawJsonInspectorView } from "./views/RawJsonInspectorView";
 import { RootfieldsView } from "./views/RootfieldsView";
 import { VerifierReportsView } from "./views/VerifierReportsView";
+import { WorkbenchView } from "./views/WorkbenchView";
 import { WorkReceiptsView } from "./views/WorkReceiptsView";
 
 function LoadingState() {
@@ -54,6 +56,7 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
 export default function App() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [canaryData, setCanaryData] = useState<DashboardData | null>(null);
+  const [workbench, setWorkbench] = useState<WorkbenchSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
 
@@ -64,10 +67,17 @@ export default function App() {
       fetchDashboardData(),
       fetchDashboardData(DEFAULT_CANARY_DASHBOARD_DATA_PATH),
     ])
-      .then(([nextData, nextCanaryData]) => {
+      .then(async ([nextData, nextCanaryData]) => {
+        const nextWorkbench = await fetchWorkbenchSnapshot(nextData).catch((nextError: unknown) =>
+          buildWorkbenchSnapshot(nextData, {
+            loadIssues: [nextError instanceof Error ? nextError.message : "Unknown workbench load error."],
+          }),
+        );
+
         if (!cancelled) {
           setData(nextData);
           setCanaryData(nextCanaryData);
+          setWorkbench(nextWorkbench);
           setError(null);
         }
       })
@@ -90,10 +100,15 @@ export default function App() {
     return <LoadingState />;
   }
 
+  if (workbench === null) {
+    return <LoadingState />;
+  }
+
   return (
-    <AppShell data={data} canaryData={canaryData}>
+    <AppShell data={data} canaryData={canaryData} workbench={workbench}>
       <Routes>
-        <Route path="/" element={<OverviewView data={data} />} />
+        <Route path="/" element={<WorkbenchView data={data} workbench={workbench} />} />
+        <Route path="/overview" element={<OverviewView data={data} />} />
         <Route path="/canary" element={<CanaryDeploymentView data={canaryData} />} />
         <Route path="/flowmemory" element={<FlowMemoryView data={data} />} />
         <Route path="/flowpulse" element={<FlowPulseStreamView data={data} />} />
@@ -103,7 +118,7 @@ export default function App() {
         <Route path="/devnet" element={<DevnetBlocksView data={data} />} />
         <Route path="/hardware" element={<HardwareNodesView data={data} />} />
         <Route path="/alerts" element={<AlertsView data={data} />} />
-        <Route path="/raw" element={<RawJsonInspectorView data={data} />} />
+        <Route path="/raw" element={<RawJsonInspectorView data={data} workbench={workbench} />} />
       </Routes>
     </AppShell>
   );

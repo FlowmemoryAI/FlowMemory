@@ -1,0 +1,130 @@
+{
+  "schema": "flowmemory.local_devnet.state.v0",
+  "chainId": "flowmemory-local-devnet-v0",
+  "genesisHash": "0x0f23c892cbd2d00c10839d97ddab833698a83f8df8d6df27ceac03cfdd4b7bc9",
+  "nextBlockNumber": 3,
+  "logicalTime": 1778688002,
+  "parentHash": "0x7515374a9b020a6d271820031738a5190cb0fc374adcd74a88a32c0fd0d5c7a6",
+  "rootfields": {
+    "rootfield:demo:alpha": {
+      "rootfieldId": "rootfield:demo:alpha",
+      "owner": "operator:local-demo",
+      "schemaHash": "0x5909a6dc30ffe1fcd89eebc118f6d2096c4d4c3ccdcc851dc0e4386fe997c6d7",
+      "metadataHash": "0x514006e494877d3d6a69848ed6264b152ebe6b73b1112d8ff1b9b48860509a2f",
+      "latestRoot": "0xbdb66f777635a2426a834652f8efee40db4f3e0b9ddd2af15f15fd065a7fe4f4",
+      "pulseCount": 2,
+      "rootCount": 1,
+      "active": true
+    }
+  },
+  "artifactCommitments": {
+    "artifact:demo:001": {
+      "artifactId": "artifact:demo:001",
+      "rootfieldId": "rootfield:demo:alpha",
+      "commitment": "0x4de1ac0e70ce73c0a03df255d1ea2a7bbcb40f05c60f1b0c1b73e0b4577c537a",
+      "uriHint": "fixture://artifact/demo/001"
+    }
+  },
+  "workReceipts": {
+    "receipt:demo:001": {
+      "receiptId": "receipt:demo:001",
+      "rootfieldId": "rootfield:demo:alpha",
+      "workerId": "worker:local-demo",
+      "inputRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "outputRoot": "0xbdb66f777635a2426a834652f8efee40db4f3e0b9ddd2af15f15fd065a7fe4f4",
+      "artifactCommitment": "0x4de1ac0e70ce73c0a03df255d1ea2a7bbcb40f05c60f1b0c1b73e0b4577c537a",
+      "ruleSet": "flowmemory.work.rule_set.local_demo.v0"
+    }
+  },
+  "verifierReports": {
+    "report:demo:001": {
+      "reportId": "report:demo:001",
+      "rootfieldId": "rootfield:demo:alpha",
+      "receiptId": "receipt:demo:001",
+      "verifierId": "verifier:local-demo",
+      "reportDigest": "0xe75619ea62e7a6d9593debe0123d366ae0f0104cff86d9a69391fb5c1e074f4c",
+      "status": "verified",
+      "reasonCodes": []
+    }
+  },
+  "importedObservations": {},
+  "importedVerifierReports": {},
+  "baseAnchors": {
+    "0x08530e63dacb23a630bbbbd56ffc4dead54aca6d7e7ee7d920d7376eb9340ae7": {
+      "anchorId": "0x08530e63dacb23a630bbbbd56ffc4dead54aca6d7e7ee7d920d7376eb9340ae7",
+      "appchainChainId": "flowmemory-local-devnet-v0",
+      "blockRangeStart": 1,
+      "blockRangeEnd": 1,
+      "stateRoot": "0x76ec5260c34184b6bb54ca406a43fc1f9591a47f37f71583a7620ef4a4065aff",
+      "workReceiptRoot": "0x8b3ef5650c9eea2f608ad9c7cb73df3c289fc0ac72ed04f46e6ae4bce0a1f023",
+      "verifierReportRoot": "0x4facd21e55423e182eba87355482a35daa93f53190fbd3a8d2969f9d55bc5373",
+      "rootfieldStateRoot": "0xb72a851dca1103410484e3272945bae5e87fc39b8f32f77d2991959b60d3bfbf",
+      "artifactCommitmentRoot": "0xb772a9f7273032fd3ba2da8b6476d4715bbbafbd2a7eed21ecd0d558bde3beab",
+      "previousAnchorId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "finalityStatus": "local-placeholder"
+    }
+  },
+  "blocks": [
+    {
+      "schema": "flowmemory.local_devnet.block.v0",
+      "blockNumber": 1,
+      "parentHash": "0x0f23c892cbd2d00c10839d97ddab833698a83f8df8d6df27ceac03cfdd4b7bc9",
+      "logicalTime": 1778688000,
+      "txIds": [
+        "0x2cffda58c783dc026978b06a681587b19d9536ae4e158a69be855da1200f3189",
+        "0xb9f435aceb1bedb86dce821743769b28c02a42002c9cd41f2df1ea0279462ab2",
+        "0xef6df43993478d8f14d609732c7260fa08861ecc17e74137b83beda8d50931d2",
+        "0x73b81134901c2ce13e575f161d82a404c6f7cd1ef2e8ee17beb6697062175c46",
+        "0x3ac0b196a212a0e77d0a0c4b60e2283d2994b09993971b95427996700f5b92aa"
+      ],
+      "receipts": [
+        {
+          "txId": "0x2cffda58c783dc026978b06a681587b19d9536ae4e158a69be855da1200f3189",
+          "status": "applied",
+          "error": null
+        },
+        {
+          "txId": "0xb9f435aceb1bedb86dce821743769b28c02a42002c9cd41f2df1ea0279462ab2",
+          "status": "applied",
+          "error": null
+        },
+        {
+          "txId": "0xef6df43993478d8f14d609732c7260fa08861ecc17e74137b83beda8d50931d2",
+          "status": "applied",
+          "error": null
+        },
+        {
+          "txId": "0x73b81134901c2ce13e575f161d82a404c6f7cd1ef2e8ee17beb6697062175c46",
+          "status": "applied",
+          "error": null
+        },
+        {
+          "txId": "0x3ac0b196a212a0e77d0a0c4b60e2283d2994b09993971b95427996700f5b92aa",
+          "status": "applied",
+          "error": null
+        }
+      ],
+      "stateRoot": "0x76ec5260c34184b6bb54ca406a43fc1f9591a47f37f71583a7620ef4a4065aff",
+      "blockHash": "0xf76ac3652230cae4a4b5afcd54b0dcec9219f20ad71e21c497264668fb30f235"
+    },
+    {
+      "schema": "flowmemory.local_devnet.block.v0",
+      "blockNumber": 2,
+      "parentHash": "0xf76ac3652230cae4a4b5afcd54b0dcec9219f20ad71e21c497264668fb30f235",
+      "logicalTime": 1778688001,
+      "txIds": [
+        "0x8f719c880f17b5d4fb6d9efd54ac276d0dd8050d11c2c7870c36a79b66bc49d7"
+      ],
+      "receipts": [
+        {
+          "txId": "0x8f719c880f17b5d4fb6d9efd54ac276d0dd8050d11c2c7870c36a79b66bc49d7",
+          "status": "applied",
+          "error": null
+        }
+      ],
+      "stateRoot": "0x3e1f5fddd84f9d460ee30a380ff700b17611891b8c03eb320edf1baefe003ef9",
+      "blockHash": "0x7515374a9b020a6d271820031738a5190cb0fc374adcd74a88a32c0fd0d5c7a6"
+    }
+  ],
+  "pendingTxs": []
+}
