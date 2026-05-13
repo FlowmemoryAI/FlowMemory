@@ -309,7 +309,7 @@ small {
 
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -793,6 +793,55 @@ code {
   overflow-wrap: anywhere;
 }
 
+.workbench-actions-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.workbench-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.workbench-actions-grid article {
+  display: grid;
+  gap: 10px;
+  align-content: space-between;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #f7f8f4;
+}
+
+.workbench-actions-grid article > div {
+  display: grid;
+  gap: 7px;
+}
+
+.workbench-actions-grid strong,
+.workbench-actions-grid small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.workbench-actions-grid .button {
+  justify-content: center;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.workbench-action-result {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #465047;
+  line-height: 1.45;
+}
+
 .workbench-layout {
   display: grid;
   grid-template-columns: 222px minmax(0, 1fr);
@@ -1214,6 +1263,7 @@ code {
   .hardware-grid,
   .lane-grid,
   .workbench-command-center,
+  .workbench-actions-grid,
   .workbench-record-grid {
     grid-template-columns: 1fr;
   }
