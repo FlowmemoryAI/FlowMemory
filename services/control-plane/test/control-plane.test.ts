@@ -433,6 +433,12 @@ test("smoke client ignores stale local devnet blocks without transactions", () =
         txIds: [],
         receipts: [],
       }],
+      tokenDefinitions: {},
+      tokenBalances: {},
+      dexPools: {},
+      lpPositions: {},
+      swapReceipts: {},
+      bridgeCredits: {},
     }));
 
     const smoke = runControlPlaneSmoke({
@@ -444,6 +450,7 @@ test("smoke client ignores stale local devnet blocks without transactions", () =
     assert.equal(smoke.schema, "flowmemory.control_plane.smoke.v0");
     assert.equal(smoke.ok, true);
     assert.equal(typeof (smoke.queried as Record<string, unknown>).txId, "string");
+    assert.equal(typeof (smoke.queried as Record<string, unknown>).tokenId, "string");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
