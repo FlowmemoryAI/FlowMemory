@@ -4,6 +4,17 @@ import { dirname } from "node:path";
 import { canonicalJson, findSecret, keccak256Hex } from "../../shared/src/index.ts";
 import { invalidParams, methodNotFound, objectNotFound, secretRejected } from "./errors.ts";
 import { loadControlPlaneState, resolveControlPlanePath } from "./fixture-state.ts";
+import {
+  pilotCapStatus,
+  pilotCreditList,
+  pilotDepositObservationList,
+  pilotEmergencyStatus,
+  pilotPauseStatus,
+  pilotReleaseEvidenceList,
+  pilotRetryStatus,
+  pilotStatus,
+  pilotWithdrawalIntentList,
+} from "./pilot.ts";
 import type {
   ControlPlaneContext,
   ControlPlaneMethod,
@@ -1218,6 +1229,7 @@ function health(_params: JsonValue | undefined, context: ControlPlaneContext): J
       devnetControlPlaneHandoff: state.sources.devnetControlPlaneHandoff.status,
       txFixtures: state.sources.txFixtures.status,
       bridgeObservation: state.sources.bridgeObservation.status,
+      bridgeRuntimeHandoff: state.sources.bridgeRuntimeHandoff.status,
     },
     counts: {
       observations: state.indexer.state.observations.length,
@@ -1228,6 +1240,7 @@ function health(_params: JsonValue | undefined, context: ControlPlaneContext): J
       mempool: mempoolRows(state).length,
       bridgeDeposits: bridgeDepositRows(state).length,
       bridgeCredits: bridgeCreditRows(state).length,
+      pilotStatus: 1,
       tokens: tokenRows(state).length,
       tokenBalances: tokenBalanceRows(state).length,
       pools: poolRows(state).length,
@@ -1284,6 +1297,7 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
       bridgeDeposits: bridgeDepositRows(state).length,
       bridgeCredits: bridgeCreditRows(state).length,
       withdrawals: withdrawalRows(state).length,
+      pilotStatus: 1,
       devnetBlocks: devnetBlocksArray(state).length,
     },
     capabilities: [
@@ -1313,6 +1327,8 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
       "bridge_deposit_reads",
       "bridge_credit_reads",
       "withdrawal_reads",
+      "real_value_pilot_reads",
+      "real_value_pilot_operator_steps",
       "devnet_handoff_reads",
       "no_secret_response_checks",
       "raw_json_reads",
@@ -2940,6 +2956,7 @@ function rawJsonGet(params: JsonValue | undefined, context: ControlPlaneContext)
     txFixtures: state.txFixtures,
     txIntake: txIntakeRows(state) as unknown as JsonValue,
     bridgeObservations: bridgeObservationRows(state) as unknown as JsonValue,
+    bridgeRuntimeHandoff: state.bridgeRuntimeHandoff,
   };
 
   if (!Object.prototype.hasOwnProperty.call(allowed, source)) {
@@ -2967,6 +2984,15 @@ export const CONTROL_PLANE_METHODS: Record<ControlPlaneMethod, MethodHandler> = 
   node_status: nodeStatus,
   peer_list: peerList,
   chain_status: chainStatus,
+  pilot_status: pilotStatus,
+  pilot_deposit_observation_list: pilotDepositObservationList,
+  pilot_credit_list: pilotCreditList,
+  pilot_withdrawal_intent_list: pilotWithdrawalIntentList,
+  pilot_release_evidence_list: pilotReleaseEvidenceList,
+  pilot_cap_status: pilotCapStatus,
+  pilot_pause_status: pilotPauseStatus,
+  pilot_retry_status: pilotRetryStatus,
+  pilot_emergency_status: pilotEmergencyStatus,
   devnet_state: devnetState,
   block_get: blockGet,
   block_list: blockList,

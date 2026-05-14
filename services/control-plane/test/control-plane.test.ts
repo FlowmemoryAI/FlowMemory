@@ -9,6 +9,7 @@ import { canonicalJson } from "../../shared/src/index.ts";
 import {
   dispatchJsonRpc,
   loadControlPlaneState,
+  type JsonObject,
   type RpcErrorResponse,
   type RpcSuccessResponse,
 } from "../src/index.ts";
@@ -75,7 +76,7 @@ test("keeps deterministic chain status response snapshots", () => {
   assert.equal(snapshot(first), snapshot(second));
   assert.equal(
     snapshot(first),
-    "{\"capabilities\":[\"health_reads\",\"node_status_reads\",\"peer_reads\",\"local_runtime_status_reads\",\"block_reads\",\"transaction_reads\",\"local_transaction_file_intake\",\"mempool_reads\",\"account_reads\",\"balance_reads\",\"faucet_event_reads\",\"wallet_public_metadata_reads\",\"token_reads\",\"token_balance_reads\",\"dex_pool_reads\",\"lp_position_reads\",\"swap_reads\",\"product_flow_status_reads\",\"receipt_lookup\",\"verifier_report_lookup\",\"memory_lineage_lookup\",\"artifact_fixture_lookup\",\"bridge_observation_file_intake\",\"bridge_deposit_reads\",\"bridge_credit_reads\",\"withdrawal_reads\",\"devnet_handoff_reads\",\"no_secret_response_checks\",\"raw_json_reads\"],\"chainId\":\"flowmemory-local-devnet-v0\",\"counts\":{\"accounts\":2,\"agents\":2,\"artifactAvailability\":5,\"balances\":2,\"blocks\":11,\"bridgeCredits\":1,\"bridgeDeposits\":1,\"challenges\":1,\"devnetBlocks\":2,\"duplicates\":1,\"faucetEvents\":1,\"finalityRows\":9,\"lpPositions\":0,\"memoryCells\":1,\"memoryReceipts\":8,\"memorySignals\":8,\"mempool\":0,\"models\":2,\"observations\":8,\"pools\":0,\"rejectedLogs\":2,\"rootfields\":2,\"swaps\":0,\"tokenBalances\":1,\"tokens\":1,\"transactions\":25,\"verifierModules\":3,\"verifierReports\":8,\"walletPublicMetadata\":2,\"withdrawals\":1,\"workReceipts\":9},\"schema\":\"flowmemory.control_plane.chain_status.v0\"}",
+    "{\"capabilities\":[\"health_reads\",\"node_status_reads\",\"peer_reads\",\"local_runtime_status_reads\",\"block_reads\",\"transaction_reads\",\"local_transaction_file_intake\",\"mempool_reads\",\"account_reads\",\"balance_reads\",\"faucet_event_reads\",\"wallet_public_metadata_reads\",\"token_reads\",\"token_balance_reads\",\"dex_pool_reads\",\"lp_position_reads\",\"swap_reads\",\"product_flow_status_reads\",\"receipt_lookup\",\"verifier_report_lookup\",\"memory_lineage_lookup\",\"artifact_fixture_lookup\",\"bridge_observation_file_intake\",\"bridge_deposit_reads\",\"bridge_credit_reads\",\"withdrawal_reads\",\"real_value_pilot_reads\",\"real_value_pilot_operator_steps\",\"devnet_handoff_reads\",\"no_secret_response_checks\",\"raw_json_reads\"],\"chainId\":\"flowmemory-local-devnet-v0\",\"counts\":{\"accounts\":2,\"agents\":2,\"artifactAvailability\":5,\"balances\":2,\"blocks\":11,\"bridgeCredits\":1,\"bridgeDeposits\":1,\"challenges\":1,\"devnetBlocks\":2,\"duplicates\":1,\"faucetEvents\":1,\"finalityRows\":9,\"lpPositions\":0,\"memoryCells\":1,\"memoryReceipts\":8,\"memorySignals\":8,\"mempool\":0,\"models\":2,\"observations\":8,\"pilotStatus\":1,\"pools\":0,\"rejectedLogs\":2,\"rootfields\":2,\"swaps\":0,\"tokenBalances\":1,\"tokens\":1,\"transactions\":25,\"verifierModules\":3,\"verifierReports\":8,\"walletPublicMetadata\":2,\"withdrawals\":1,\"workReceipts\":9},\"schema\":\"flowmemory.control_plane.chain_status.v0\"}",
   );
   rmSync(dir, { recursive: true, force: true });
 });
@@ -406,6 +407,186 @@ test("rejects secret-shaped intake and responses before returning them", () => {
   }
 });
 
+test("exposes real-value pilot lifecycle reads and operator next steps", () => {
+  const state = loadControlPlaneState();
+  const status = dispatchJsonRpc({ jsonrpc: "2.0", id: 1, method: "pilot_status" }, { state }) as RpcSuccessResponse;
+  const deposits = dispatchJsonRpc({ jsonrpc: "2.0", id: 2, method: "pilot_deposit_observation_list" }, { state }) as RpcSuccessResponse;
+  const credits = dispatchJsonRpc({ jsonrpc: "2.0", id: 3, method: "pilot_credit_list" }, { state }) as RpcSuccessResponse;
+  const withdrawals = dispatchJsonRpc({ jsonrpc: "2.0", id: 4, method: "pilot_withdrawal_intent_list" }, { state }) as RpcSuccessResponse;
+  const releases = dispatchJsonRpc({ jsonrpc: "2.0", id: 5, method: "pilot_release_evidence_list" }, { state }) as RpcSuccessResponse;
+
+  assert.equal(status.result.schema, "flowmemory.control_plane.real_value_pilot_status.v0");
+  assert.equal(status.result.cappedOwnerTesting, true);
+  assert.equal(status.result.broadPublicReadiness, false);
+  assert.equal(status.result.browserStoresSecrets, false);
+  assert.match(String(status.result.nextOperatorStep.command), /^npm run /);
+  assert.equal((status.result.lifecycle as JsonObject[]).some((step) => step.phase === "base_deposit_observed"), true);
+  assert.equal(deposits.result.schema, "flowmemory.control_plane.real_value_pilot_deposit_observation_list.v0");
+  assert.equal(credits.result.schema, "flowmemory.control_plane.real_value_pilot_credit_list.v0");
+  assert.equal(withdrawals.result.schema, "flowmemory.control_plane.real_value_pilot_withdrawal_intent_list.v0");
+  assert.equal(releases.result.schema, "flowmemory.control_plane.real_value_pilot_release_evidence_list.v0");
+  assert.ok((deposits.result.depositObservations as JsonObject[]).length > 0);
+  assert.ok((credits.result.credits as JsonObject[]).length > 0);
+  assert.ok((withdrawals.result.withdrawalIntents as JsonObject[]).length > 0);
+  assert.ok((releases.result.releaseEvidence as JsonObject[]).length > 0);
+});
+
+test("pilot lifecycle can represent a live Base 8453 evidence bundle", () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-pilot-live-"));
+  try {
+    const handoffPath = join(dir, "pilot-handoff.json");
+    writeFileSync(handoffPath, JSON.stringify({
+      schema: "flowmemory.bridge_runtime_handoff.v0",
+      handoffId: `0x${"a".repeat(64)}`,
+      generatedAt: "2026-05-14T00:00:00.000Z",
+      mode: "base-mainnet-canary",
+      productionReady: false,
+      localOnly: true,
+      observations: [{
+        schema: "flowmemory.bridge_deposit_observation.v0",
+        observationId: `0x${"b".repeat(64)}`,
+        replayKey: `0x${"c".repeat(64)}`,
+        observedAt: "2026-05-14T00:00:00.000Z",
+        mode: "base-mainnet-canary",
+        productionReady: false,
+        deposit: {
+          schema: "flowmemory.bridge_deposit.v0",
+          depositId: `0x${"d".repeat(64)}`,
+          sourceChainId: 8453,
+          sourceContract: `0x${"1".repeat(40)}`,
+          txHash: `0x${"2".repeat(64)}`,
+          logIndex: 0,
+          token: `0x${"3".repeat(40)}`,
+          amount: "1000000",
+          sender: `0x${"4".repeat(40)}`,
+          flowchainRecipient: `0x${"5".repeat(64)}`,
+          nonce: "1",
+          status: "observed",
+        },
+        guardrails: {
+          explicitChainId: true,
+          explicitContract: true,
+          explicitBlockRange: true,
+          noSecrets: true,
+          maxUsd: 20,
+        },
+      }],
+      credits: [{
+        schema: "flowmemory.bridge_credit.v0",
+        creditId: `0x${"e".repeat(64)}`,
+        observationId: `0x${"b".repeat(64)}`,
+        depositId: `0x${"d".repeat(64)}`,
+        replayKey: `0x${"c".repeat(64)}`,
+        source: {
+          chainId: 8453,
+          contract: `0x${"1".repeat(40)}`,
+          txHash: `0x${"2".repeat(64)}`,
+          logIndex: 0,
+        },
+        token: `0x${"3".repeat(40)}`,
+        amount: "1000000",
+        flowchainRecipient: `0x${"5".repeat(64)}`,
+        status: "applied",
+        appliedAt: "2026-05-14T00:00:01.000Z",
+        localOnly: true,
+        productionReady: false,
+      }],
+      withdrawalIntents: [{
+        schema: "flowmemory.bridge_withdrawal_intent.v0",
+        withdrawalIntentId: `0x${"6".repeat(64)}`,
+        creditId: `0x${"e".repeat(64)}`,
+        depositId: `0x${"d".repeat(64)}`,
+        sourceChainId: 8453,
+        destinationChainId: 8453,
+        token: `0x${"3".repeat(40)}`,
+        amount: "1000000",
+        flowchainAccount: `0x${"5".repeat(64)}`,
+        baseRecipient: `0x${"4".repeat(40)}`,
+        status: "requested",
+        requestedAt: "2026-05-14T00:00:02.000Z",
+        testMode: true,
+        broadcast: false,
+        releasePolicy: "operator_release_evidence_required",
+        productionReady: false,
+      }],
+      releaseEvidence: [{
+        releaseEvidenceId: `0x${"7".repeat(64)}`,
+        withdrawalIntentId: `0x${"6".repeat(64)}`,
+        creditId: `0x${"e".repeat(64)}`,
+        depositId: `0x${"d".repeat(64)}`,
+        status: "recorded",
+        releaseTxHash: `0x${"8".repeat(64)}`,
+        recordedAt: "2026-05-14T00:00:03.000Z",
+      }],
+      replayProtection: {
+        strategy: "source-chain-contract-tx-log-deposit",
+        replayKeys: [`0x${"c".repeat(64)}`],
+        duplicateReplayKeys: [],
+      },
+      runtimeIntake: {
+        status: "handoff_file",
+        consumer: "flowchain-runtime-agent",
+        expectedPath: "fixtures/bridge/local-runtime-bridge-handoff.json",
+        note: "test",
+      },
+      workbenchTimeline: [],
+      workbenchRecords: [],
+      limitations: [],
+    }));
+    const state = loadControlPlaneState({
+      bridgeRuntimeHandoffPath: handoffPath,
+      bridgeObservationPath: join(dir, "missing-observation.json"),
+      bridgeObservationIntakePath: join(dir, "bridge-observations.ndjson"),
+    });
+    const status = dispatchJsonRpc({ jsonrpc: "2.0", id: 1, method: "pilot_status" }, { state }) as RpcSuccessResponse;
+
+    assert.equal(status.result.state, "live");
+    assert.equal(status.result.counts.baseMainnetDeposits, 1);
+    assert.equal(status.result.capStatus.withinCap, true);
+    assert.equal(status.result.nextOperatorStep.command, "npm run flowchain:export");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("rejects secret-shaped bridge and pilot-adjacent intake material", () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-pilot-secrets-"));
+  try {
+    const state = loadControlPlaneState({
+      bridgeObservationIntakePath: join(dir, "bridge-observations.ndjson"),
+    });
+    const secretCases: JsonObject[] = [
+      { privateKey: `0x${"1".repeat(64)}` },
+      { seedPhrase: "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" },
+      { mnemonic: "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" },
+      { rpcCredential: "https://user:pass@example.invalid" },
+      { apiKey: "sk-1234567890abcdefghijklmnop" },
+      { webhookUrl: "https://hooks.slack.com/services/T000/B000/XXXXXXXXXXXXXXXXXXXXXXXX" },
+    ];
+
+    for (const secret of secretCases) {
+      const response = dispatchJsonRpc(
+        {
+          jsonrpc: "2.0",
+          id: Object.keys(secret)[0],
+          method: "bridge_observation_submit",
+          params: {
+            observation: {
+              schema: "flowmemory.bridge_deposit_observation.v0",
+              observationId: `0x${"9".repeat(64)}`,
+              ...secret,
+            },
+          },
+        },
+        { state },
+      ) as RpcErrorResponse;
+      assert.equal(response.error.data.reasonCode, "secret.rejected");
+    }
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("smoke client queries the complete local lifecycle surface", () => {
   const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-smoke-"));
   const smoke = runControlPlaneSmoke({
@@ -415,7 +596,8 @@ test("smoke client queries the complete local lifecycle surface", () => {
 
   assert.equal(smoke.schema, "flowmemory.control_plane.smoke.v0");
   assert.equal(smoke.ok, true);
-  assert.equal(smoke.methodCount, 57);
+  assert.equal(smoke.methodCount, 66);
+  assert.ok((smoke.responseSchemas as string[]).includes("flowmemory.control_plane.real_value_pilot_status.v0"));
   assert.ok((smoke.responseSchemas as string[]).includes("flowmemory.control_plane.raw_json.v0"));
   rmSync(dir, { recursive: true, force: true });
 });
@@ -509,6 +691,22 @@ test("HTTP server exposes browser-safe health and state endpoints", async () => 
     assert.equal(bridge.status, 200);
     assert.equal(bridge.headers.get("access-control-allow-origin"), "*");
     assert.equal((await bridge.json()).schema, "flowmemory.control_plane.bridge_observation_list.v0");
+
+    const pilotDeposits = await fetch(`http://127.0.0.1:${port}/pilot/deposits?limit=1`, {
+      headers: { Origin: "http://127.0.0.1:5173" },
+    });
+    assert.equal(pilotDeposits.status, 200);
+    assert.equal(pilotDeposits.headers.get("access-control-allow-origin"), "*");
+    const pilotDepositBody = await pilotDeposits.json();
+    assert.equal(pilotDepositBody.schema, "flowmemory.control_plane.real_value_pilot_deposit_observation_list.v0");
+    assert.equal(pilotDepositBody.count, 1);
+
+    const badPilotDeposits = await fetch(`http://127.0.0.1:${port}/pilot/deposits?limit=0`, {
+      headers: { Origin: "http://127.0.0.1:5173" },
+    });
+    assert.equal(badPilotDeposits.status, 200);
+    const badPilotDepositBody = await badPilotDeposits.json();
+    assert.equal(badPilotDepositBody.error.data.reasonCode, "params.invalid");
   } finally {
     await new Promise<void>((resolve, reject) => {
       server.close((error) => {

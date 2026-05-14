@@ -18,6 +18,7 @@ These schemas are the canonical local/test V0 shapes for generated Flow Memory a
 - `finality-receipt.schema.json`
 - `bridge-deposit.schema.json`
 - `bridge-credit.schema.json`
+- `control-plane-real-value-pilot-status.schema.json`
 - `bridge-withdrawal.schema.json`
 - `local-balance-record.schema.json`
 - `hardware-signal-envelope.schema.json`

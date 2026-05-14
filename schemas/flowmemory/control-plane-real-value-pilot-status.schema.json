@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowmemory.local/schemas/flowmemory/control-plane-real-value-pilot-status.schema.json",
+  "title": "FlowMemoryControlPlaneRealValuePilotStatus",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "pilotId",
+    "label",
+    "state",
+    "stateReason",
+    "generatedAt",
+    "baseChainId",
+    "cappedOwnerTesting",
+    "broadPublicReadiness",
+    "productionReady",
+    "browserStoresSecrets",
+    "nextOperatorStep",
+    "counts",
+    "lifecycle",
+    "depositObservations",
+    "credits",
+    "withdrawalIntents",
+    "releaseEvidence",
+    "capStatus",
+    "pauseStatus",
+    "retryStatus",
+    "emergencyStatus",
+    "localOnly"
+  ],
+  "properties": {
+    "schema": { "const": "flowmemory.control_plane.real_value_pilot_status.v0" },
+    "pilotId": { "$ref": "#/$defs/hex32" },
+    "label": { "const": "FlowChain capped owner real-value pilot" },
+    "state": { "$ref": "#/$defs/pilotState" },
+    "stateReason": { "type": "string" },
+    "generatedAt": { "type": "string" },
+    "baseChainId": { "const": 8453 },
+    "cappedOwnerTesting": { "const": true },
+    "broadPublicReadiness": { "const": false },
+    "productionReady": { "const": false },
+    "browserStoresSecrets": { "const": false },
+    "nextOperatorStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "command", "reason"],
+      "properties": {
+        "label": { "type": "string" },
+        "command": { "type": "string", "pattern": "^npm run " },
+        "reason": { "type": "string" }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "depositObservations",
+        "baseMainnetDeposits",
+        "credits",
+        "appliedCredits",
+        "withdrawalIntents",
+        "releaseEvidence"
+      ],
+      "properties": {
+        "depositObservations": { "type": "integer", "minimum": 0 },
+        "baseMainnetDeposits": { "type": "integer", "minimum": 0 },
+        "credits": { "type": "integer", "minimum": 0 },
+        "appliedCredits": { "type": "integer", "minimum": 0 },
+        "withdrawalIntents": { "type": "integer", "minimum": 0 },
+        "releaseEvidence": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "lifecycle": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["schema", "phase", "state", "title", "summary", "nextOperatorCommand"],
+        "properties": {
+          "schema": { "const": "flowmemory.control_plane.real_value_pilot_lifecycle_step.v0" },
+          "phase": {
+            "type": "string",
+            "enum": [
+              "base_deposit_observed",
+              "local_credit_applied",
+              "replay_retry_checked",
+              "withdrawal_intent_recorded",
+              "release_evidence_recorded",
+              "caps_enforced",
+              "pause_clear",
+              "emergency_clear"
+            ]
+          },
+          "state": { "$ref": "#/$defs/pilotState" },
+          "title": { "type": "string" },
+          "summary": { "type": "string" },
+          "evidenceIds": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "nextOperatorCommand": { "type": "string", "pattern": "^npm run " }
+        }
+      }
+    },
+    "depositObservations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/pilotObject" }
+    },
+    "credits": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/pilotObject" }
+    },
+    "withdrawalIntents": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/pilotObject" }
+    },
+    "releaseEvidence": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/pilotObject" }
+    },
+    "capStatus": { "$ref": "#/$defs/pilotStatusObject" },
+    "pauseStatus": { "$ref": "#/$defs/pilotStatusObject" },
+    "retryStatus": { "$ref": "#/$defs/pilotStatusObject" },
+    "emergencyStatus": { "$ref": "#/$defs/pilotStatusObject" },
+    "localOnly": { "const": true }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "pilotState": { "type": "string", "enum": ["live", "degraded", "error"] },
+    "pilotObject": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["schema", "localOnly", "productionReady"],
+      "properties": {
+        "schema": { "type": "string", "pattern": "^flowmemory\\.control_plane\\.real_value_pilot_" },
+        "localOnly": { "const": true },
+        "productionReady": { "const": false }
+      }
+    },
+    "pilotStatusObject": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["schema", "state", "localOnly", "productionReady"],
+      "properties": {
+        "schema": { "type": "string", "pattern": "^flowmemory\\.control_plane\\.real_value_pilot_" },
+        "state": { "$ref": "#/$defs/pilotState" },
+        "localOnly": { "const": true },
+        "productionReady": { "const": false }
+      }
+    }
+  }
+}

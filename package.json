@@ -50,6 +50,7 @@
     "flowchain:product-e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-product-e2e.ps1",
     "flowchain:l1-e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-full-smoke.ps1",
     "flowchain:real-value-pilot:e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-real-value-pilot-e2e.ps1",
+    "flowchain:real-value-pilot:control-dashboard": "npm run real-value-pilot:e2e --prefix services/control-plane",
     "flowchain:export": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-export.ps1",
     "flowchain:import": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-import.ps1",
     "workbench:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-workbench.ps1",

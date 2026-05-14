@@ -13,6 +13,7 @@ npm run control-plane:demo
 npm run control-plane:test
 npm run control-plane:smoke
 npm run control-plane:serve
+npm run flowchain:real-value-pilot:control-dashboard
 ```
 
 The demo and tests require no secrets, RPC URLs, wallets, or production services.
@@ -26,6 +27,15 @@ The dispatcher supports:
 - `node_status`
 - `peer_list`
 - `chain_status`
+- `pilot_status`
+- `pilot_deposit_observation_list`
+- `pilot_credit_list`
+- `pilot_withdrawal_intent_list`
+- `pilot_release_evidence_list`
+- `pilot_cap_status`
+- `pilot_pause_status`
+- `pilot_retry_status`
+- `pilot_emergency_status`
 - `devnet_state`
 - `block_get`
 - `block_list`
@@ -103,11 +113,14 @@ The loader reads local runtime state first, then committed deterministic outputs
 - `services/verifier/fixtures/artifacts.json`
 - `fixtures/handoff/sample-txs.json`
 - `services/bridge-relayer/out/bridge-observation.json`
+- `fixtures/bridge/local-runtime-bridge-handoff.json`
 
 If the launch-core fixture is missing, the loader rebuilds the in-memory view from indexer/verifier outputs or the raw fixture receipts and artifact resolver. It does not fetch from live RPC or write production state.
 
 `transaction_submit` accepts signed local test transaction envelopes only and writes them to `devnet/local/intake/transactions.ndjson` by default. `bridge_observation_submit` writes bridge-agent observations to `devnet/local/intake/bridge-observations.ndjson`. These files are local runtime intake, not committed fixtures.
 
-`npm run control-plane:smoke` runs an in-process JSON-RPC client over the complete local lifecycle surface: health, node status, peers, chain status, blocks, transactions, mempool, accounts, balances, tokens, token balances, pools, LP positions, swaps, product-flow status, faucet events, wallet public metadata, rootfields, agents, models, work receipts, artifact availability, verifier modules, verifier reports, memory cells, challenges, finality, bridge observations, bridge deposits, bridge credits, withdrawals, provenance, and raw JSON.
+`npm run control-plane:smoke` runs an in-process JSON-RPC client over the complete local lifecycle surface: health, node status, peers, chain status, real-value pilot status/list/status methods, blocks, transactions, mempool, accounts, balances, tokens, token balances, pools, LP positions, swaps, product-flow status, faucet events, wallet public metadata, rootfields, agents, models, work receipts, artifact availability, verifier modules, verifier reports, memory cells, challenges, finality, bridge observations, bridge deposits, bridge credits, withdrawals, provenance, and raw JSON.
+
+`npm run flowchain:real-value-pilot:control-dashboard` verifies that the API exposes the capped owner-testing pilot lifecycle, rejects secret-shaped material, and that the dashboard source renders the pilot evidence and next operator command without browser secret storage. The root `flowchain:real-value-pilot:e2e` command is the upstream final HQ pilot gate and depends on proof commands from multiple owner branches.
 
 All JSON-RPC responses are scanned before return and rejected if they contain private-key, mnemonic, seed phrase, RPC credential, API key, or webhook URL shaped material.

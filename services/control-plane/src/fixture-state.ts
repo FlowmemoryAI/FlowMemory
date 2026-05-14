@@ -41,6 +41,7 @@ export const DEFAULT_CONTROL_PLANE_PATHS: ControlPlanePaths = {
   txFixturesPath: "fixtures/handoff/sample-txs.json",
   txIntakePath: "devnet/local/intake/transactions.ndjson",
   bridgeObservationPath: "services/bridge-relayer/out/bridge-observation.json",
+  bridgeRuntimeHandoffPath: "fixtures/bridge/local-runtime-bridge-handoff.json",
   bridgeObservationIntakePath: "devnet/local/intake/bridge-observations.ndjson",
 };
 
@@ -231,6 +232,7 @@ export function loadControlPlaneState(overrides: Partial<ControlPlanePaths> = {}
   const txFixtures = loadOptionalSource("txFixtures", paths.txFixturesPath, sources);
   const txIntake = loadTxIntake(paths.txIntakePath, sources);
   const bridgeObservations = loadBridgeObservations(paths, sources);
+  const bridgeRuntimeHandoff = loadOptionalSource("bridgeRuntimeHandoff", paths.bridgeRuntimeHandoffPath, sources);
 
   return {
     schema: "flowmemory.control_plane.state.v0",
@@ -245,6 +247,7 @@ export function loadControlPlaneState(overrides: Partial<ControlPlanePaths> = {}
     txFixtures,
     txIntake,
     bridgeObservations,
+    bridgeRuntimeHandoff,
     paths,
     sources,
   };

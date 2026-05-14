@@ -97,9 +97,9 @@ the proof is branch-local or verified from `main`.
 | Local runtime applies each pilot bridge credit exactly once and preserves state across restart/export/import. | Chain runtime | `npm run flowchain:real-value-pilot:runtime` | Missing dedicated pilot command. |
 | Operator wallet can sign pilot acknowledgements, withdrawal intents, release evidence, and emergency messages without committing secrets. | Wallet/operator | `npm run flowchain:real-value-pilot:wallet` | Missing dedicated pilot command. |
 | Wallet verification rejects wrong chain ID, wrong contract, wrong operator, mutated payload, replay nonce, expired message, and missing cap fields. | Wallet/operator | `npm run flowchain:real-value-pilot:wallet` | Missing dedicated pilot command. |
-| API exposes pilot status, observations, credits, withdrawal intents, release evidence, cap status, pause status, retry state, and emergency state. | Control plane/dashboard | `npm run flowchain:real-value-pilot:control-dashboard` | Missing dedicated pilot command. |
-| Dashboard labels the flow as capped owner testing and shows live/degraded/error state plus exact next operator commands. | Control plane/dashboard | `npm run flowchain:real-value-pilot:control-dashboard` | Missing dedicated pilot command. |
-| Browser stores no private keys or RPC credentials. | Control plane/dashboard + Wallet/operator | `npm run flowchain:real-value-pilot:control-dashboard`; `npm run flowchain:real-value-pilot:wallet` | Missing dedicated pilot commands. |
+| API exposes pilot status, observations, credits, withdrawal intents, release evidence, cap status, pause status, retry state, and emergency state. | Control plane/dashboard | `npm run flowchain:real-value-pilot:control-dashboard` | Branch command added here; local proof passes, pending PR merge. |
+| Dashboard labels the flow as capped owner testing and shows live/degraded/error state plus exact next operator commands. | Control plane/dashboard | `npm run flowchain:real-value-pilot:control-dashboard` | Branch command added here; local proof passes, pending PR merge. |
+| Browser stores no private keys or RPC credentials. | Control plane/dashboard + Wallet/operator | `npm run flowchain:real-value-pilot:control-dashboard`; `npm run flowchain:real-value-pilot:wallet` | Control-dashboard branch proof passes; wallet proof command still missing. |
 | Ops path verifies required env, tiny caps, explicit owner ack, emergency stop, export evidence, restart recovery, and no-secret scans. | Ops/installer | `npm run flowchain:real-value-pilot:ops` | Missing dedicated pilot command. |
 | Final pilot gate runs baseline commands plus every available dedicated proof command. | HQ/Ops | `npm run flowchain:real-value-pilot:e2e` | Exists on `main`; strict mode still fails until subsystem commands land. |
 
@@ -116,7 +116,7 @@ from `main`.
 | Bridge relayer | `agent/real-value-pilot-bridge` checklist reports the bridge proof complete; service-local `pilot:e2e` exists. | Rebase onto `14f378b`, expose `flowchain:real-value-pilot:bridge`, rerun evidence, and open a PR. |
 | Chain runtime | `agent/real-value-pilot-chain` checklist reports runtime credit/replay/restart/export proof complete through the direct wrapper; root package command is missing. | Rebase onto `14f378b`, expose `flowchain:real-value-pilot:runtime`, rerun evidence, and open a PR. |
 | Wallet/operator | `agent/real-value-pilot-wallet` checklist reports wallet/operator schemas, signing, validation, negative cases, scans, and product evidence complete. | Rebase onto `14f378b`, expose `flowchain:real-value-pilot:wallet`, rerun evidence, and open a PR. |
-| Control plane/dashboard | `agent/real-value-pilot-control-dashboard` checklist reports API/dashboard proof complete and has branch-local `flowchain:real-value-pilot:control-dashboard`. | Rebase onto `14f378b`, rerun evidence, and open a PR. |
+| Control plane/dashboard | `agent/real-value-pilot-control-dashboard` is rebased onto `f384236`; checklist, command matrix, and proof JSON report API/dashboard proof complete with branch-local `flowchain:real-value-pilot:control-dashboard`. | Open a PR for issue #137 so the proof command lands on `main`. |
 | Ops/installer | `agent/real-value-pilot-ops` checklist reports ops proof complete; root lifecycle commands exist branch-locally, but `flowchain:real-value-pilot:ops` is missing. | Rebase onto `14f378b`, expose `flowchain:real-value-pilot:ops`, rerun evidence, and open a PR. |
 
 ## Owner Go/No-Go Checklist
@@ -148,7 +148,7 @@ in committed files, or if any document presents the pilot as public readiness.
 - Dedicated real-value bridge relayer gate does not exist; tracked by issue #138.
 - Dedicated real-value runtime gate does not exist; tracked by issue #134.
 - Dedicated real-value wallet/operator gate does not exist; tracked by issue #136.
-- Dedicated real-value control-plane/dashboard gate does not exist; tracked by issue #137.
+- Dedicated real-value control-plane/dashboard gate exists branch-locally and passes; tracked by issue #137 until merged.
 - Dedicated real-value ops/installer gate does not exist; tracked by issue #135.
 - Issue #130 is closed by PR #132; the release-gate boundary is now on `main`.
 - Issue #131 is closed by PR #132; default `contracts:hardening` skips optional
