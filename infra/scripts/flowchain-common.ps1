@@ -96,11 +96,21 @@ function Join-FlowChainProcessArguments {
 function Set-FlowChainCargoTargetDir {
     param(
         [Parameter(Mandatory = $true)]
-        [string] $RepoRoot
+        [string] $RepoRoot,
+
+        [string] $Purpose = "local"
     )
 
-    $targetDir = Join-Path $RepoRoot "crates/flowmemory-devnet/target"
+    $safePurpose = ($Purpose -replace '[^A-Za-z0-9_.-]', '-').Trim("-")
+    if ([string]::IsNullOrWhiteSpace($safePurpose)) {
+        $safePurpose = "local"
+    }
+
+    # Keep Cargo outputs away from the default crate target so a running local
+    # node cannot lock flowmemory-devnet.exe and break setup on Windows.
+    $targetDir = Join-Path $RepoRoot "devnet/local/cargo-target/$safePurpose-$PID"
     $env:CARGO_TARGET_DIR = $targetDir
+    New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
     return $targetDir
 }
 
