@@ -90,6 +90,31 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
       return;
     }
 
+    const requestUrl = req.url === undefined ? null : new URL(req.url, "http://127.0.0.1");
+    const pilotRoutes: Record<string, { method: string; list: boolean }> = {
+      "/pilot/status": { method: "pilot_status", list: false },
+      "/pilot/deposits": { method: "pilot_deposit_observation_list", list: true },
+      "/pilot/credits": { method: "pilot_credit_list", list: true },
+      "/pilot/withdrawal-intents": { method: "pilot_withdrawal_intent_list", list: true },
+      "/pilot/release-evidence": { method: "pilot_release_evidence_list", list: true },
+      "/pilot/cap-status": { method: "pilot_cap_status", list: false },
+      "/pilot/pause-status": { method: "pilot_pause_status", list: false },
+      "/pilot/retry-status": { method: "pilot_retry_status", list: false },
+      "/pilot/emergency-status": { method: "pilot_emergency_status", list: false },
+    };
+    const pilotRoute = requestUrl === null ? undefined : pilotRoutes[requestUrl.pathname];
+    if (req.method === "GET" && pilotRoute !== undefined) {
+      const limit = requestUrl?.searchParams.get("limit");
+      const response = dispatchJsonRpc({
+        jsonrpc: "2.0",
+        id: `pilot:${requestUrl?.pathname}`,
+        method: pilotRoute.method,
+        params: pilotRoute.list && limit !== null ? { limit: Number(limit) } : undefined,
+      }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
     if (req.method === "GET" && req.url === "/bridge/observations") {
       const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "bridge-observations", method: "bridge_observation_list" }, { state });
       writeJson(res, 200, jsonResult(response));

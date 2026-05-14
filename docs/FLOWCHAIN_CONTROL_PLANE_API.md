@@ -40,6 +40,7 @@ services/verifier/out/reports.json
 services/verifier/fixtures/artifacts.json
 fixtures/handoff/sample-txs.json
 services/bridge-relayer/out/bridge-observation.json
+fixtures/bridge/local-runtime-bridge-handoff.json
 ```
 
 If local runtime state is missing, the service falls back to generated launch-core and committed fixtures. If the generated launch-core fixture is missing, the service rebuilds the in-memory view from indexer/verifier outputs or raw fixture receipts and artifact fixtures.
@@ -126,6 +127,7 @@ Browser-safe summary endpoints are also available:
 ```text
 GET /explorer/summary
 GET /product-flow/status
+GET /pilot/status
 ```
 
 ### `chain_status`
@@ -411,6 +413,69 @@ Get params:
 Params: none.
 
 Returns product-testnet readiness counters and stage labels for wallet, funding, transfer, token launch, DEX pool, liquidity, swap, bridge credit, and explorer visibility. This is a local acceptance/readiness view only; it does not claim production L1 or real-funds bridge readiness.
+
+### Real-value pilot methods
+
+The pilot methods expose a read-only, browser-safe projection of the capped owner-testing bridge lifecycle. They are for operator evidence review only. They do not expose private keys, seed phrases, mnemonics, RPC credentials, API keys, webhook URLs, wallet custody, public bridge readiness, or production release authority.
+
+The control-plane builds the pilot view from bridge observations, local runtime bridge handoff data, and local devnet/control-plane handoff maps when present. Base mainnet pilot evidence is identified as chain ID `8453`; mock, local-anvil, and Base Sepolia evidence can still render as degraded operator state.
+
+`pilot_status`
+
+Params: none.
+
+Returns:
+
+```json
+{
+  "schema": "flowmemory.control_plane.real_value_pilot_status.v0",
+  "label": "FlowChain capped owner real-value pilot",
+  "state": "degraded",
+  "baseChainId": 8453,
+  "cappedOwnerTesting": true,
+  "broadPublicReadiness": false,
+  "browserStoresSecrets": false,
+  "nextOperatorStep": {
+    "command": "npm run bridge:observe -- --mode base-mainnet-canary --rpc-url <FLOWCHAIN_BASE8453_RPC_URL> --lockbox-address <FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS> --from-block <n> --to-block <n> --acknowledge-real-funds --max-usd 25"
+  }
+}
+```
+
+The result includes lifecycle rows for Base deposit observation, local credit application, replay/retry checks, withdrawal intent, release evidence, caps, pause, and emergency state.
+
+List methods:
+
+- `pilot_deposit_observation_list`
+- `pilot_credit_list`
+- `pilot_withdrawal_intent_list`
+- `pilot_release_evidence_list`
+
+Each list accepts optional `{ "limit": 50 }`, capped from `1` to `100`, and returns `localOnly: true`, `productionReady: false`, and `cappedOwnerTesting: true`.
+
+Status methods:
+
+- `pilot_cap_status`
+- `pilot_pause_status`
+- `pilot_retry_status`
+- `pilot_emergency_status`
+
+Each status response includes an exact `state` (`live`, `degraded`, or `error` where applicable) and an operator command for the next safe local step.
+
+Browser-safe HTTP mirrors are also available:
+
+```text
+GET /pilot/status
+GET /pilot/deposits?limit=50
+GET /pilot/credits?limit=50
+GET /pilot/withdrawal-intents?limit=50
+GET /pilot/release-evidence?limit=50
+GET /pilot/cap-status
+GET /pilot/pause-status
+GET /pilot/retry-status
+GET /pilot/emergency-status
+```
+
+The four HTTP list endpoints accept the same `limit` bound as the JSON-RPC list methods. Invalid limits return the standard JSON-RPC invalid params error envelope as JSON.
 
 ### `faucet_event_list`
 
@@ -907,6 +972,7 @@ Allowed `source` values:
 - `txFixtures`
 - `txIntake`
 - `bridgeObservations`
+- `bridgeRuntimeHandoff`
 
 Returns the raw loaded local JSON object for dashboard/workbench debug views. It does not accept arbitrary filesystem paths.
 
@@ -923,7 +989,8 @@ Dashboard agents should prefer:
 7. `artifact_availability_list`, `memory_cell_list`, `agent_list`, and `model_list` for dashboard/workbench panels.
 8. `challenge_get`, `challenge_list`, `finality_get`, and `finality_list` for local challenge/finality labels.
 9. `token_list`, `token_balance_list`, `pool_list`, `lp_position_list`, `swap_list`, and `product_flow_status` for product-testnet token/DEX/explorer panels.
-10. `bridge_observation_list`, `bridge_deposit_list`, `bridge_credit_list`, and `withdrawal_list` for local bridge-shaped test panels.
-11. `raw_json_get` for raw JSON inspection.
+10. `pilot_status`, the four pilot list methods, and the four pilot status methods for capped owner-testing real-value pilot evidence.
+11. `bridge_observation_list`, `bridge_deposit_list`, `bridge_credit_list`, and `withdrawal_list` for local bridge-shaped test panels.
+12. `raw_json_get` for raw JSON inspection.
 
 The API is local-only for V0. The submit methods are local file intake, not public chain broadcast. Live indexing, production settlement, production wallet custody, and production bridge methods require separate scoped work.

@@ -25,6 +25,7 @@ export type WorkbenchSectionKey =
   | "liquidityPositions"
   | "swaps"
   | "explorerRecords"
+  | "realValuePilot"
   | "rootfields"
   | "agents"
   | "models"
@@ -75,6 +76,7 @@ export interface ControlPlaneProbe {
   error?: string;
   health?: unknown;
   state?: unknown;
+  pilotStatus?: unknown;
 }
 
 export interface WorkbenchNodeStatus {
@@ -112,6 +114,7 @@ export interface WorkbenchSnapshot {
     devnetState: unknown | null;
     devnetDashboardState: unknown | null;
     bridgeTestDeposit: unknown | null;
+    controlPlanePilotStatus: unknown | null;
     controlPlaneHealth: unknown | null;
     controlPlaneState: unknown | null;
   };
@@ -239,6 +242,14 @@ export const WORKBENCH_SECTIONS: WorkbenchSectionDefinition[] = [
     expectedEndpoint: "GET /explorer",
     missingCommand: "npm run flowchain:product-e2e",
     missingService: "FlowChain explorer API /explorer",
+  },
+  {
+    key: "realValuePilot",
+    label: "Real-Value Pilot",
+    detail: "Capped owner-testing lifecycle for Base deposit observation, local credit, replay/retry status, withdrawal intent, release evidence, caps, pause, and emergency state.",
+    expectedEndpoint: "GET /pilot/status + POST /rpc pilot_status",
+    missingCommand: "npm run control-plane:serve",
+    missingService: "FlowChain real-value pilot control-plane /pilot/status",
   },
   {
     key: "rootfields",
@@ -483,7 +494,7 @@ function stringArray(value: unknown): string[] {
 
 function statusFrom(value: unknown, fallback: DashboardStatus = "observed"): DashboardStatus {
   const normalized = text(value, fallback).toLowerCase();
-  if (normalized === "applied" || normalized === "success" || normalized === "active") {
+  if (normalized === "applied" || normalized === "success" || normalized === "active" || normalized === "live") {
     return "verified";
   }
   if (normalized === "finalized") {
@@ -492,8 +503,11 @@ function statusFrom(value: unknown, fallback: DashboardStatus = "observed"): Das
   if (normalized === "failed" || normalized === "invalid" || normalized === "reverted") {
     return "failed";
   }
-  if (normalized === "pending" || normalized === "local-placeholder") {
+  if (normalized === "pending" || normalized === "local-placeholder" || normalized === "degraded") {
     return "pending";
+  }
+  if (normalized === "error") {
+    return "failed";
   }
   if (normalized === "stale" || normalized === "not-detected") {
     return "stale";
@@ -684,11 +698,18 @@ async function fetchOptionalJson(path: string): Promise<{ value: unknown | null;
 async function probeControlPlane(): Promise<ControlPlaneProbe> {
   const url = getControlPlaneUrl();
   const checkedAt = new Date().toISOString();
-  const defaultEndpoints = ["GET /health", "GET /state"];
+  const defaultEndpoints = ["GET /health", "GET /state", "GET /pilot/status"];
 
   try {
     const health = await fetchJsonWithTimeout(`${url}/health`, CONTROL_PLANE_TIMEOUT_MS);
     let state: unknown | undefined;
+    let pilotStatus: unknown | undefined;
+
+    try {
+      pilotStatus = await fetchJsonWithTimeout(`${url}/pilot/status`, CONTROL_PLANE_TIMEOUT_MS);
+    } catch {
+      pilotStatus = undefined;
+    }
 
     try {
       state = await fetchJsonWithTimeout(`${url}/state`, CONTROL_PLANE_TIMEOUT_MS);
@@ -699,6 +720,7 @@ async function probeControlPlane(): Promise<ControlPlaneProbe> {
         checkedAt,
         endpoints: uniqueEndpoints(defaultEndpoints, collectEndpointHints(health)),
         health,
+        pilotStatus,
         error: `Health endpoint responded, but state endpoint was not loaded: ${
           error instanceof Error ? error.message : "unknown state error"
         }`,
@@ -712,6 +734,7 @@ async function probeControlPlane(): Promise<ControlPlaneProbe> {
       endpoints: uniqueEndpoints(defaultEndpoints, collectEndpointHints(health), collectEndpointHints(state)),
       health,
       state,
+      pilotStatus,
     };
   } catch (error) {
     return {
@@ -1077,6 +1100,131 @@ function buildBridgeRecords(
       raw: event,
     });
   });
+}
+
+function commandFromStep(step: unknown): string {
+  return isRecord(step) ? text(step.command, "npm run flowchain:real-value-pilot:e2e") : "npm run flowchain:real-value-pilot:e2e";
+}
+
+function buildPilotRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
+  const pilot = isRecord(controlPlane.pilotStatus) ? controlPlane.pilotStatus : null;
+  const records: WorkbenchRecord[] = [];
+
+  if (!pilot) {
+    records.push(
+      makeLocalRecord(
+        "devnet",
+        controlPlane.url,
+        {
+          id: "real-value-pilot-api",
+          kind: "Pilot status",
+          title: "Pilot API not detected",
+          summary: "The real-value pilot control-plane status is unavailable; the dashboard is waiting for the local API endpoint.",
+          status: controlPlane.status === "available" ? "pending" : "offline",
+          facts: [
+            { label: "state", value: controlPlane.status === "available" ? "degraded" : "offline" },
+            { label: "scope", value: "capped owner testing" },
+            { label: "public readiness", value: "false" },
+            { label: "next command", value: "npm run control-plane:serve" },
+          ],
+          raw: controlPlane,
+        },
+        controlPlane.checkedAt,
+      ),
+    );
+    return records;
+  }
+
+  const nextStep = isRecord(pilot.nextOperatorStep) ? pilot.nextOperatorStep : {};
+  const lifecycle = collectionFrom(pilot, ["lifecycle"]);
+  const capStatus = isRecord(pilot.capStatus) ? pilot.capStatus : null;
+  const pauseStatus = isRecord(pilot.pauseStatus) ? pilot.pauseStatus : null;
+  const retryStatus = isRecord(pilot.retryStatus) ? pilot.retryStatus : null;
+  const emergencyStatus = isRecord(pilot.emergencyStatus) ? pilot.emergencyStatus : null;
+  const state = text(pilot.state, "degraded");
+
+  records.push(
+    makeLocalRecord(
+      "devnet",
+      controlPlane.url,
+      {
+        id: text(pilot.pilotId, "real-value-pilot-status"),
+        kind: "Pilot status",
+        title: `Pilot ${state}`,
+        summary: text(pilot.stateReason, "Capped owner-testing pilot status is loaded from the local control-plane API."),
+        status: statusFrom(state, "pending"),
+        facts: [
+          { label: "state", value: state },
+          { label: "base chain", value: text(pilot.baseChainId, "8453") },
+          { label: "scope", value: text(pilot.label, "FlowChain capped owner real-value pilot") },
+          { label: "public readiness", value: text(pilot.broadPublicReadiness, "false") },
+          { label: "browser stores secrets", value: text(pilot.browserStoresSecrets, "false") },
+          { label: "next command", value: commandFromStep(nextStep) },
+        ],
+        raw: pilot,
+      },
+      controlPlane.checkedAt,
+    ),
+  );
+
+  lifecycle.forEach((step, index) => {
+    records.push(
+      makeLocalRecord(
+        "devnet",
+        controlPlane.url,
+        {
+          id: text(step.phase, `pilot-step:${index + 1}`),
+          kind: "Pilot lifecycle",
+          title: text(step.title, "Pilot lifecycle step"),
+          summary: text(step.summary, "Pilot lifecycle state exported by the control-plane."),
+          status: statusFrom(step.state, "pending"),
+          facts: [
+            { label: "state", value: text(step.state) },
+            { label: "phase", value: text(step.phase) },
+            { label: "next command", value: text(step.nextOperatorCommand, commandFromStep(nextStep)) },
+            { label: "evidence", value: stringArray(step.evidenceIds).join(", ") || "not recorded" },
+          ],
+          raw: step,
+        },
+        controlPlane.checkedAt,
+      ),
+    );
+  });
+
+  [
+    { id: "pilot-cap-status", title: "Cap status", raw: capStatus },
+    { id: "pilot-pause-status", title: "Pause status", raw: pauseStatus },
+    { id: "pilot-retry-status", title: "Retry status", raw: retryStatus },
+    { id: "pilot-emergency-status", title: "Emergency status", raw: emergencyStatus },
+  ].forEach((item) => {
+    const raw = item.raw;
+    if (!raw) {
+      return;
+    }
+    records.push(
+      makeLocalRecord(
+        "devnet",
+        controlPlane.url,
+        {
+          id: item.id,
+          kind: "Pilot guardrail",
+          title: item.title,
+          summary: `Pilot ${item.title.toLowerCase()} is ${text(raw.state, "degraded")}.`,
+          status: statusFrom(raw.state, "pending"),
+          facts: [
+            { label: "state", value: text(raw.state) },
+            { label: "status", value: text(raw.status ?? raw.withinCap ?? raw.active) },
+            { label: "next command", value: text(raw.nextOperatorCommand, commandFromStep(nextStep)) },
+            { label: "production ready", value: text(raw.productionReady, "false") },
+          ],
+          raw,
+        },
+        controlPlane.checkedAt,
+      ),
+    );
+  });
+
+  return records;
 }
 
 function buildBlockRecords(data: DashboardData, devnetState: unknown): WorkbenchRecord[] {
@@ -1967,6 +2115,7 @@ export function buildWorkbenchSnapshot(
     bridgeDeposits: buildBridgeRecords(activeDevnetState, "deposits", bridgeTestDeposit),
     bridgeCredits: buildBridgeRecords(activeDevnetState, "credits", bridgeTestDeposit),
     bridgeWithdrawals: buildBridgeRecords(activeDevnetState, "withdrawals", bridgeTestDeposit),
+    realValuePilot: buildPilotRecords(controlPlane),
     provenance: [],
     hardwareSignals: buildHardwareSignalRecords(data, activeDevnetState),
     rawJson: [],
@@ -2002,6 +2151,7 @@ export function buildWorkbenchSnapshot(
       devnetState: options.devnetState ?? null,
       devnetDashboardState: options.devnetDashboardState ?? null,
       bridgeTestDeposit,
+      controlPlanePilotStatus: controlPlane.pilotStatus ?? null,
       controlPlaneHealth: controlPlane.health ?? null,
       controlPlaneState: controlPlane.state ?? null,
     },

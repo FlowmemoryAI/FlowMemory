@@ -58,6 +58,10 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
   const sourceStatus: DashboardStatus = workbench.source === "control-plane" ? "verified" : "stale";
   const bridgeRecordCount =
     workbench.sections.bridgeDeposits.length + workbench.sections.bridgeCredits.length + workbench.sections.bridgeWithdrawals.length;
+  const pilotRecords = workbench.sections.realValuePilot;
+  const pilotOverview = pilotRecords[0];
+  const pilotState = pilotOverview?.facts.find((fact) => fact.label === "state")?.value ?? "degraded";
+  const pilotNextCommand = pilotOverview?.facts.find((fact) => fact.label === "next command")?.value ?? "npm run control-plane:serve";
   const productSurfaces: Array<{
     key: WorkbenchSectionKey;
     label: string;
@@ -105,6 +109,14 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
       command: "npm run flowchain:product-e2e",
       count: workbench.sections.explorerRecords.length,
       Icon: Database,
+    },
+    {
+      key: "realValuePilot",
+      label: "Real-value pilot",
+      detail: "Capped owner testing lifecycle and next operator command.",
+      command: "npm run flowchain:real-value-pilot:e2e",
+      count: pilotRecords.length,
+      Icon: ShieldAlert,
     },
     {
       key: "bridgeDeposits",
@@ -204,8 +216,8 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
 
       <section className="workbench-boundary-strip" aria-label="Local testnet boundary">
         <article>
-          <strong>Local/testnet only</strong>
-          <span>No production mainnet, token sale, audited custody, or production bridge claim is made by this workbench.</span>
+          <strong>Capped owner testing</strong>
+          <span>The real-value pilot surface is for capped project-owner validation only; it is not broad public readiness.</span>
         </article>
         <article>
           <strong>Browser key boundary</strong>
@@ -216,6 +228,43 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
           <span>
             Run <code>npm run flowchain:start</code>, then <code>npm run control-plane:serve</code>, then refresh.
           </span>
+        </article>
+      </section>
+
+      <section className="pilot-status-panel" aria-label="Real-value pilot status">
+        <article>
+          <div className="panel-heading">
+            <div>
+              <ShieldAlert size={18} aria-hidden="true" />
+              <h2>Real-value pilot</h2>
+            </div>
+            <StatusBadge status={pilotOverview?.status ?? "pending"} compact />
+          </div>
+          <div className="pilot-status-body">
+            <div>
+              <span className="eyebrow">capped owner testing</span>
+              <h3>{pilotState}</h3>
+              <p>{pilotOverview?.summary ?? "Pilot status is waiting on the local control-plane API."}</p>
+            </div>
+            <dl className="workbench-fact-grid">
+              <div>
+                <dt>next command</dt>
+                <dd>{displayValue(pilotNextCommand)}</dd>
+              </div>
+              <div>
+                <dt>public readiness</dt>
+                <dd>false</dd>
+              </div>
+              <div>
+                <dt>browser secrets</dt>
+                <dd>not stored</dd>
+              </div>
+              <div>
+                <dt>evidence rows</dt>
+                <dd>{pilotRecords.length}</dd>
+              </div>
+            </dl>
+          </div>
         </article>
       </section>
 
@@ -339,10 +388,10 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
         </article>
         <article className="metric-tile">
           <span>Bridge/explorer</span>
-          <strong>{bridgeRecordCount + workbench.sections.explorerRecords.length}</strong>
+          <strong>{bridgeRecordCount + workbench.sections.explorerRecords.length + pilotRecords.length}</strong>
           <div>
-            <StatusBadge status={statusForCount(bridgeRecordCount + workbench.sections.explorerRecords.length)} compact />
-            <small>test records only</small>
+            <StatusBadge status={statusForCount(bridgeRecordCount + workbench.sections.explorerRecords.length + pilotRecords.length)} compact />
+            <small>pilot and bridge evidence</small>
           </div>
         </article>
       </section>

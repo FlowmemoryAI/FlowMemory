@@ -17,6 +17,15 @@ export type ControlPlaneMethod =
   | "node_status"
   | "peer_list"
   | "chain_status"
+  | "pilot_status"
+  | "pilot_deposit_observation_list"
+  | "pilot_credit_list"
+  | "pilot_withdrawal_intent_list"
+  | "pilot_release_evidence_list"
+  | "pilot_cap_status"
+  | "pilot_pause_status"
+  | "pilot_retry_status"
+  | "pilot_emergency_status"
   | "devnet_state"
   | "block_get"
   | "block_list"
@@ -90,6 +99,7 @@ export interface ControlPlanePaths {
   txFixturesPath: string;
   txIntakePath: string;
   bridgeObservationPath: string;
+  bridgeRuntimeHandoffPath: string;
   bridgeObservationIntakePath: string;
 }
 
@@ -114,6 +124,7 @@ export interface LoadedControlPlaneState {
   txFixtures: JsonObject | null;
   txIntake: JsonObject[];
   bridgeObservations: JsonObject[];
+  bridgeRuntimeHandoff: JsonObject | null;
   paths: ControlPlanePaths;
   sources: Record<string, DataSourceRecord>;
 }

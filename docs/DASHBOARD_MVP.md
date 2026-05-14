@@ -1,6 +1,6 @@
 # Dashboard MVP
 
-FlowMemory Dashboard V0 is a local React/Vite operator app under `apps/dashboard/`. It visualizes fixture data for the first app-facing explorer surface and acts as the local FlowChain workbench when the control-plane API is running. The workbench now has Product Testnet V1 surfaces for wallet public state, local balances, token launch records, token balances, DEX pools, liquidity, swaps, explorer records, and bridge-test records. It does not introduce production wallet custody, production tokenomics, production DEX claims, or live value-bearing bridge claims.
+FlowMemory Dashboard V0 is a local React/Vite operator app under `apps/dashboard/`. It visualizes fixture data for the first app-facing explorer surface and acts as the local FlowChain workbench when the control-plane API is running. The workbench now has Product Testnet V1 surfaces for wallet public state, local balances, token launch records, token balances, DEX pools, liquidity, swaps, explorer records, bridge-test records, and capped owner-testing real-value pilot evidence. It does not introduce production wallet custody, production tokenomics, production DEX claims, broad public readiness, or production bridge claims.
 
 ## Scope
 
@@ -9,6 +9,7 @@ The MVP covers local inspection of:
 - Local control-plane health and state from `http://127.0.0.1:8787/health`, `/state`, and `/rpc`
 - Node status, peers, mempool, accounts, local balances, faucet events, public wallet references, and setup status
 - Product Testnet V1 wallet/account public state, local/test token launch records, token balances, DEX pools, liquidity positions, swaps, and unified explorer rollups
+- Real-value pilot status for capped owner testing: Base deposit observation, local credit, replay/retry, withdrawal intent, release evidence, caps, pause, emergency state, and exact next operator command
 - FlowPulse observations from indexer-style receipt/log data
 - Rootfield registry state
 - Work lanes and work receipts
@@ -70,6 +71,7 @@ When `npm run control-plane:serve` is running, the workbench probes:
 ```text
 GET http://127.0.0.1:8787/health
 GET http://127.0.0.1:8787/state
+GET http://127.0.0.1:8787/pilot/status
 POST http://127.0.0.1:8787/rpc
 ```
 
@@ -83,6 +85,14 @@ control-plane advertises the matching endpoint. The workbench may display empty
 tables with exact recovery commands until runtime/control-plane agents export
 those objects.
 
+The real-value pilot panel is explicitly labeled `capped owner testing`. It
+renders the control-plane `live`, `degraded`, or `error` state exactly, shows
+the next operator command from the API, and displays whether public readiness is
+false and whether the browser stores secrets. The browser must not write private
+keys, mnemonics, seed phrases, RPC credentials, API keys, or webhooks to
+localStorage/sessionStorage; it only consumes browser-safe control-plane
+responses and fixture data.
+
 ## Non-Goals
 
 - No backend service required for V0
@@ -93,6 +103,7 @@ those objects.
 - No production token launch, production liquidity, or production swap claim
 - No production monitoring claims
 - No production bridge or real-funds claim
+- No broad public readiness claim for the capped owner-testing pilot
 - No secrets or RPC credentials
 - No contract, service, or hardware behavior changes
 

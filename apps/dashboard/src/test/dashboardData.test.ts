@@ -144,6 +144,8 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.bridgeDeposits.length).toBeGreaterThan(0);
     expect(workbench.sections.bridgeCredits).toHaveLength(0);
     expect(workbench.sections.bridgeWithdrawals).toHaveLength(0);
+    expect(workbench.sections.realValuePilot.length).toBeGreaterThan(0);
+    expect(workbench.sections.realValuePilot[0].facts.find((fact) => fact.label === "scope")?.value).toBe("capped owner testing");
     expect(workbench.sections.explorerRecords.length).toBeGreaterThan(0);
     expect(workbench.node.status).toBe("offline");
     expect(workbench.actions).toEqual([]);
@@ -162,6 +164,34 @@ describe("dashboard fixture", () => {
         endpoints: ["GET /health", "GET /state"],
         health: { status: "ok" },
         state: devnetState,
+        pilotStatus: {
+          schema: "flowmemory.control_plane.real_value_pilot_status.v0",
+          pilotId: `0x${"a".repeat(64)}`,
+          label: "FlowChain capped owner real-value pilot",
+          state: "degraded",
+          stateReason: "Only mock/local/Base Sepolia bridge observations are visible.",
+          baseChainId: 8453,
+          cappedOwnerTesting: true,
+          broadPublicReadiness: false,
+          productionReady: false,
+          browserStoresSecrets: false,
+          nextOperatorStep: {
+            label: "Observe Base 8453 deposit",
+            command: "npm run bridge:observe -- --mode base-mainnet-canary --acknowledge-real-funds --max-usd 25",
+            reason: "No Base 8453 pilot deposit has been loaded.",
+          },
+          lifecycle: [{
+            phase: "base_deposit_observed",
+            state: "degraded",
+            title: "Observe Base 8453 deposit",
+            summary: "No Base 8453 pilot deposit has been loaded.",
+            nextOperatorCommand: "npm run bridge:observe -- --mode base-mainnet-canary --acknowledge-real-funds --max-usd 25",
+          }],
+          capStatus: { state: "degraded", withinCap: true, productionReady: false },
+          pauseStatus: { state: "live", status: "unpaused", productionReady: false },
+          retryStatus: { state: "live", duplicateReplayKeys: [], productionReady: false },
+          emergencyStatus: { state: "live", status: "standby", productionReady: false },
+        },
       },
       devnetState,
       devnetDashboardState,
@@ -171,6 +201,8 @@ describe("dashboard fixture", () => {
     expect(workbench.node.status).toBe("verified");
     expect(workbench.sections.blocks[0].provenance.origin).toBe("local");
     expect(workbench.sections.blocks[0].provenance.localPathHint).toBe("http://127.0.0.1:8787");
+    expect(workbench.sections.realValuePilot[0].title).toBe("Pilot degraded");
+    expect(workbench.sections.realValuePilot[0].summary).toContain("Only mock/local/Base Sepolia");
     expect(workbench.sections.provenance.find((record) => record.id === "control-plane-api")?.status).toBe("verified");
   });
 
@@ -201,6 +233,23 @@ describe("dashboard fixture", () => {
       if (url.endsWith("/state")) {
         return Response.json({ state: devnetState });
       }
+      if (url.endsWith("/pilot/status")) {
+        return Response.json({
+          schema: "flowmemory.control_plane.real_value_pilot_status.v0",
+          state: "degraded",
+          label: "FlowChain capped owner real-value pilot",
+          stateReason: "Waiting for Base 8453 deposit.",
+          baseChainId: 8453,
+          cappedOwnerTesting: true,
+          broadPublicReadiness: false,
+          productionReady: false,
+          browserStoresSecrets: false,
+          nextOperatorStep: {
+            command: "npm run bridge:observe -- --mode base-mainnet-canary --acknowledge-real-funds --max-usd 25",
+          },
+          lifecycle: [],
+        });
+      }
       if (url === WORKBENCH_DEVNET_STATE_PATH) {
         return Response.json(devnetState);
       }
@@ -220,10 +269,12 @@ describe("dashboard fixture", () => {
     expect(workbench.source).toBe("control-plane");
     expect(workbench.raw.controlPlaneHealth).toEqual({ status: "ok" });
     expect(workbench.raw.controlPlaneState).toEqual({ state: devnetState });
+    expect(workbench.raw.controlPlanePilotStatus).toMatchObject({ state: "degraded" });
     expect(workbench.raw.devnetState).toEqual(devnetState);
     expect(workbench.raw.bridgeTestDeposit).toEqual(bridgeTestDeposit);
     expect(workbench.loadIssues).toEqual([]);
     expect(fetchMock).toHaveBeenCalledWith("http://127.0.0.1:8787/health", expect.any(Object));
+    expect(fetchMock).toHaveBeenCalledWith("http://127.0.0.1:8787/pilot/status", expect.any(Object));
     expect(fetchMock).toHaveBeenCalledWith(WORKBENCH_DEVNET_STATE_PATH, expect.any(Object));
     expect(fetchMock).toHaveBeenCalledWith(WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH, expect.any(Object));
   });
@@ -239,6 +290,9 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Local explorer workbench");
     expect(html).toContain("Node and API status");
     expect(html).toContain("Control-plane offline");
+    expect(html).toContain("Real-value pilot");
+    expect(html).toContain("capped owner testing");
+    expect(html).toContain("public readiness");
     expect(html).toContain("Wallet Metadata");
     expect(html).toContain("Token Launch");
     expect(html).toContain("Token Balances");
