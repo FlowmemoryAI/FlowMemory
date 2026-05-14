@@ -268,6 +268,190 @@ export function localBalanceRecordId({
   ]);
 }
 
+export function productTransferId({
+  fromAccountId,
+  toAccountId,
+  assetId,
+  amount,
+  accountNonce,
+  deadlineBlock,
+  memoHash
+}) {
+  return typedHash(TYPE_STRINGS.productTransferV0, [
+    ["bytes32", fromAccountId],
+    ["bytes32", toAccountId],
+    ["bytes32", assetId],
+    ["uint256", amount],
+    ["uint64", accountNonce],
+    ["uint64", deadlineBlock],
+    ["bytes32", memoHash]
+  ]);
+}
+
+export function productTokenLaunchId({
+  issuerAccountId,
+  tokenId,
+  symbolHash,
+  nameHash,
+  metadataHash,
+  decimals,
+  initialSupply,
+  recipientAccountId,
+  accountNonce,
+  launchPolicyHash
+}) {
+  return typedHash(TYPE_STRINGS.productTokenLaunchV0, [
+    ["bytes32", issuerAccountId],
+    ["bytes32", tokenId],
+    ["bytes32", symbolHash],
+    ["bytes32", nameHash],
+    ["bytes32", metadataHash],
+    ["uint8", decimals],
+    ["uint256", initialSupply],
+    ["bytes32", recipientAccountId],
+    ["uint64", accountNonce],
+    ["bytes32", launchPolicyHash]
+  ]);
+}
+
+export function productPoolCreateId({
+  creatorAccountId,
+  poolId,
+  baseAssetId,
+  quoteAssetId,
+  feeBps,
+  tickSpacing,
+  metadataHash,
+  accountNonce
+}) {
+  return typedHash(TYPE_STRINGS.productPoolCreateV0, [
+    ["bytes32", creatorAccountId],
+    ["bytes32", poolId],
+    ["bytes32", baseAssetId],
+    ["bytes32", quoteAssetId],
+    ["uint32", feeBps],
+    ["uint32", tickSpacing],
+    ["bytes32", metadataHash],
+    ["uint64", accountNonce]
+  ]);
+}
+
+export function productAddLiquidityId({
+  providerAccountId,
+  poolId,
+  baseAmount,
+  quoteAmount,
+  minLiquidityTokens,
+  deadlineBlock,
+  accountNonce
+}) {
+  return typedHash(TYPE_STRINGS.productAddLiquidityV0, [
+    ["bytes32", providerAccountId],
+    ["bytes32", poolId],
+    ["uint256", baseAmount],
+    ["uint256", quoteAmount],
+    ["uint256", minLiquidityTokens],
+    ["uint64", deadlineBlock],
+    ["uint64", accountNonce]
+  ]);
+}
+
+export function productRemoveLiquidityId({
+  providerAccountId,
+  poolId,
+  liquidityTokens,
+  minBaseAmount,
+  minQuoteAmount,
+  deadlineBlock,
+  accountNonce
+}) {
+  return typedHash(TYPE_STRINGS.productRemoveLiquidityV0, [
+    ["bytes32", providerAccountId],
+    ["bytes32", poolId],
+    ["uint256", liquidityTokens],
+    ["uint256", minBaseAmount],
+    ["uint256", minQuoteAmount],
+    ["uint64", deadlineBlock],
+    ["uint64", accountNonce]
+  ]);
+}
+
+export function productSwapId({
+  traderAccountId,
+  poolId,
+  assetInId,
+  assetOutId,
+  amountIn,
+  minAmountOut,
+  deadlineBlock,
+  accountNonce
+}) {
+  return typedHash(TYPE_STRINGS.productSwapV0, [
+    ["bytes32", traderAccountId],
+    ["bytes32", poolId],
+    ["bytes32", assetInId],
+    ["bytes32", assetOutId],
+    ["uint256", amountIn],
+    ["uint256", minAmountOut],
+    ["uint64", deadlineBlock],
+    ["uint64", accountNonce]
+  ]);
+}
+
+export function productBridgeCreditAckId({
+  creditId,
+  depositId,
+  accountId,
+  assetId,
+  amount,
+  acknowledgedAtBlockNumber,
+  accountNonce
+}) {
+  return typedHash(TYPE_STRINGS.productBridgeCreditAckV0, [
+    ["bytes32", creditId],
+    ["bytes32", depositId],
+    ["bytes32", accountId],
+    ["bytes32", assetId],
+    ["uint256", amount],
+    ["uint64", acknowledgedAtBlockNumber],
+    ["uint64", accountNonce]
+  ]);
+}
+
+export function bridgeWithdrawalIntentId({
+  creditId,
+  depositId,
+  sourceChainId,
+  destinationChainId,
+  token,
+  amount,
+  flowchainAccount,
+  baseRecipient,
+  status,
+  requestedAt,
+  testMode,
+  broadcast,
+  releasePolicy,
+  productionReady
+}) {
+  return typedHash(TYPE_STRINGS.bridgeWithdrawalIntentV0, [
+    ["bytes32", creditId],
+    ["bytes32", depositId],
+    ["uint256", sourceChainId],
+    ["uint256", destinationChainId],
+    ["address", token],
+    ["uint256", amount],
+    ["bytes32", flowchainAccount],
+    ["address", baseRecipient],
+    ["bytes32", keccakUtf8(status)],
+    ["bytes32", keccakUtf8(requestedAt)],
+    ["uint8", booleanCode(testMode)],
+    ["uint8", booleanCode(broadcast)],
+    ["bytes32", keccakUtf8(releasePolicy)],
+    ["uint8", booleanCode(productionReady)]
+  ]);
+}
+
 export function hardwareSignalEnvelopeId({
   deviceId,
   signalRoot,
@@ -683,6 +867,201 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       return BigInt(document.availableAmount) >= 0n && BigInt(document.lockedAmount) >= 0n;
     }
   },
+  "flowchain.product_transfer.v0": {
+    objectType: "product_transfer",
+    idField: "transferId",
+    domainName: "productTransferId",
+    signerRoles: ["agent"],
+    nonzeroFields: ["transferId", "fromAccountId", "toAccountId", "assetId"],
+    input: (document) => ({
+      fromAccountId: document.fromAccountId,
+      toAccountId: document.toAccountId,
+      assetId: document.assetId,
+      amount: document.amount,
+      accountNonce: document.accountNonce,
+      deadlineBlock: document.deadlineBlock,
+      memoHash: document.memoHash
+    }),
+    id: productTransferId,
+    parentRootCheck(document) {
+      return document.fromAccountId !== document.toAccountId && BigInt(document.amount) > 0n;
+    }
+  },
+  "flowchain.product_token_launch.v0": {
+    objectType: "product_token_launch",
+    idField: "tokenLaunchId",
+    domainName: "productTokenLaunchId",
+    signerRoles: ["agent"],
+    nonzeroFields: [
+      "tokenLaunchId",
+      "issuerAccountId",
+      "tokenId",
+      "symbolHash",
+      "nameHash",
+      "metadataHash",
+      "recipientAccountId",
+      "launchPolicyHash"
+    ],
+    input: (document) => ({
+      issuerAccountId: document.issuerAccountId,
+      tokenId: document.tokenId,
+      symbolHash: document.symbolHash,
+      nameHash: document.nameHash,
+      metadataHash: document.metadataHash,
+      decimals: document.decimals,
+      initialSupply: document.initialSupply,
+      recipientAccountId: document.recipientAccountId,
+      accountNonce: document.accountNonce,
+      launchPolicyHash: document.launchPolicyHash
+    }),
+    id: productTokenLaunchId,
+    parentRootCheck(document) {
+      return Number.isInteger(document.decimals) && document.decimals <= 18 && BigInt(document.initialSupply) > 0n;
+    }
+  },
+  "flowchain.product_pool_create.v0": {
+    objectType: "product_pool_create",
+    idField: "poolCreateId",
+    domainName: "productPoolCreateId",
+    signerRoles: ["agent"],
+    nonzeroFields: ["poolCreateId", "creatorAccountId", "poolId", "baseAssetId", "quoteAssetId", "metadataHash"],
+    input: (document) => ({
+      creatorAccountId: document.creatorAccountId,
+      poolId: document.poolId,
+      baseAssetId: document.baseAssetId,
+      quoteAssetId: document.quoteAssetId,
+      feeBps: document.feeBps,
+      tickSpacing: document.tickSpacing,
+      metadataHash: document.metadataHash,
+      accountNonce: document.accountNonce
+    }),
+    id: productPoolCreateId,
+    parentRootCheck(document) {
+      return (
+        document.baseAssetId !== document.quoteAssetId &&
+        Number.isInteger(document.feeBps) &&
+        document.feeBps >= 0 &&
+        document.feeBps <= 10000 &&
+        Number.isInteger(document.tickSpacing) &&
+        document.tickSpacing > 0
+      );
+    }
+  },
+  "flowchain.product_add_liquidity.v0": {
+    objectType: "product_add_liquidity",
+    idField: "addLiquidityId",
+    domainName: "productAddLiquidityId",
+    signerRoles: ["agent"],
+    nonzeroFields: ["addLiquidityId", "providerAccountId", "poolId"],
+    input: (document) => ({
+      providerAccountId: document.providerAccountId,
+      poolId: document.poolId,
+      baseAmount: document.baseAmount,
+      quoteAmount: document.quoteAmount,
+      minLiquidityTokens: document.minLiquidityTokens,
+      deadlineBlock: document.deadlineBlock,
+      accountNonce: document.accountNonce
+    }),
+    id: productAddLiquidityId,
+    parentRootCheck(document) {
+      return BigInt(document.baseAmount) > 0n && BigInt(document.quoteAmount) > 0n;
+    }
+  },
+  "flowchain.product_remove_liquidity.v0": {
+    objectType: "product_remove_liquidity",
+    idField: "removeLiquidityId",
+    domainName: "productRemoveLiquidityId",
+    signerRoles: ["agent"],
+    nonzeroFields: ["removeLiquidityId", "providerAccountId", "poolId"],
+    input: (document) => ({
+      providerAccountId: document.providerAccountId,
+      poolId: document.poolId,
+      liquidityTokens: document.liquidityTokens,
+      minBaseAmount: document.minBaseAmount,
+      minQuoteAmount: document.minQuoteAmount,
+      deadlineBlock: document.deadlineBlock,
+      accountNonce: document.accountNonce
+    }),
+    id: productRemoveLiquidityId,
+    parentRootCheck(document) {
+      return BigInt(document.liquidityTokens) > 0n;
+    }
+  },
+  "flowchain.product_swap.v0": {
+    objectType: "product_swap",
+    idField: "swapId",
+    domainName: "productSwapId",
+    signerRoles: ["agent"],
+    nonzeroFields: ["swapId", "traderAccountId", "poolId", "assetInId", "assetOutId"],
+    input: (document) => ({
+      traderAccountId: document.traderAccountId,
+      poolId: document.poolId,
+      assetInId: document.assetInId,
+      assetOutId: document.assetOutId,
+      amountIn: document.amountIn,
+      minAmountOut: document.minAmountOut,
+      deadlineBlock: document.deadlineBlock,
+      accountNonce: document.accountNonce
+    }),
+    id: productSwapId,
+    parentRootCheck(document) {
+      return document.assetInId !== document.assetOutId && BigInt(document.amountIn) > 0n;
+    }
+  },
+  "flowchain.product_bridge_credit_ack.v0": {
+    objectType: "product_bridge_credit_ack",
+    idField: "bridgeCreditAckId",
+    domainName: "productBridgeCreditAckId",
+    signerRoles: ["agent"],
+    nonzeroFields: ["bridgeCreditAckId", "creditId", "depositId", "accountId", "assetId"],
+    input: (document) => ({
+      creditId: document.creditId,
+      depositId: document.depositId,
+      accountId: document.accountId,
+      assetId: document.assetId,
+      amount: document.amount,
+      acknowledgedAtBlockNumber: document.acknowledgedAtBlockNumber,
+      accountNonce: document.accountNonce
+    }),
+    id: productBridgeCreditAckId,
+    parentRootCheck(document) {
+      return BigInt(document.amount) > 0n;
+    }
+  },
+  "flowmemory.bridge_withdrawal_intent.v0": {
+    objectType: "bridge_withdrawal_intent",
+    idField: "withdrawalIntentId",
+    domainName: "bridgeWithdrawalIntentId",
+    signerRoles: ["agent"],
+    nonzeroFields: ["withdrawalIntentId", "creditId", "depositId", "flowchainAccount"],
+    input: (document) => ({
+      creditId: document.creditId,
+      depositId: document.depositId,
+      sourceChainId: document.sourceChainId,
+      destinationChainId: document.destinationChainId,
+      token: document.token,
+      amount: document.amount,
+      flowchainAccount: document.flowchainAccount,
+      baseRecipient: document.baseRecipient,
+      status: document.status,
+      requestedAt: document.requestedAt,
+      testMode: document.testMode,
+      broadcast: document.broadcast,
+      releasePolicy: document.releasePolicy,
+      productionReady: document.productionReady
+    }),
+    id: bridgeWithdrawalIntentId,
+    parentRootCheck(document) {
+      return (
+        [31337, 8453, 84532].includes(document.sourceChainId) &&
+        [31337, 8453, 84532].includes(document.destinationChainId) &&
+        BigInt(document.amount) > 0n &&
+        document.testMode === true &&
+        document.broadcast === false &&
+        document.productionReady === false
+      );
+    }
+  },
   "flowchain.hardware_signal_envelope.v0": {
     objectType: "hardware_signal_envelope",
     idField: "hardwareSignalEnvelopeId",
@@ -911,4 +1290,8 @@ function classifyObjectError(error) {
     return "malformed-id";
   }
   return "invalid-object";
+}
+
+function booleanCode(value) {
+  return value === true ? 1 : 0;
 }

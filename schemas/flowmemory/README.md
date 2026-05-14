@@ -23,6 +23,7 @@ These schemas are the canonical local/test V0 shapes for generated Flow Memory a
 - `hardware-signal-envelope.schema.json`
 - `local-signature-envelope.schema.json`
 - `local-transaction-envelope.schema.json`
+- `product-transaction.schema.json`
 - `control-plane-provenance-response.schema.json`
 
 `memory-signal.schema.json` also embeds the `flowmemory.flowpulse_contract_event.v0`
@@ -46,6 +47,12 @@ should validate both JSON shape and recomputed cryptographic fields.
 `local-transaction-envelope.schema.json` describes the chain-bound local/private
 transaction envelope consumed by the private L1 package. It binds the chain id,
 domain separator, nonce, signer, payload hash, object ID, and signature.
+
+`product-transaction.schema.json` describes the Product Testnet V1 wallet
+transaction documents that can be wrapped by `local-transaction-envelope`:
+transfer, token launch, pool create, add liquidity, remove liquidity, swap, and
+bridge credit acknowledgement. Bridge withdrawal intent uses
+`bridge-withdrawal-intent.schema.json` and the same local transaction envelope.
 
 Run the canonical Local Alpha schema/fixture check from the crypto package:
 

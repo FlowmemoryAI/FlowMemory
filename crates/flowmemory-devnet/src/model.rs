@@ -12,6 +12,7 @@ pub const GENESIS_HASH: &str = "0x0f23c892cbd2d00c10839d97ddab833698a83f8df8d6df
 pub const ZERO_HASH: &str = "0x0000000000000000000000000000000000000000000000000000000000000000";
 pub const FLOWPULSE_TOPIC0: &str =
     "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43";
+pub const LOCAL_TEST_UNIT_ASSET_ID: &str = "asset:flowchain-local-test-unit";
 
 #[derive(Debug, Error, PartialEq, Eq)]
 pub enum DevnetError {
@@ -35,6 +36,48 @@ pub enum DevnetError {
     FaucetAmountMustBePositive(String),
     #[error("balance transfer already exists: {0}")]
     BalanceTransferAlreadyExists(String),
+    #[error("deterministic {kind} id mismatch: expected {expected}, got {actual}")]
+    DeterministicIdMismatch {
+        kind: String,
+        expected: String,
+        actual: String,
+    },
+    #[error("token already exists: {0}")]
+    TokenAlreadyExists(String),
+    #[error("token symbol already exists: {0}")]
+    TokenSymbolAlreadyExists(String),
+    #[error("token does not exist: {0}")]
+    TokenMissing(String),
+    #[error("token amount must be greater than zero: {0}")]
+    TokenAmountMustBePositive(String),
+    #[error("token balance overflow: {0}")]
+    TokenBalanceOverflow(String),
+    #[error("insufficient token balance: {0}")]
+    TokenBalanceInsufficient(String),
+    #[error("token mint already exists: {0}")]
+    TokenMintAlreadyExists(String),
+    #[error("pool already exists: {0}")]
+    PoolAlreadyExists(String),
+    #[error("pool does not exist: {0}")]
+    PoolMissing(String),
+    #[error("pool asset is invalid: {0}")]
+    PoolInvalidAsset(String),
+    #[error("pool reserves are insufficient: {0}")]
+    PoolReserveInsufficient(String),
+    #[error("pool reserve overflow: {0}")]
+    PoolReserveOverflow(String),
+    #[error("liquidity receipt already exists: {0}")]
+    LiquidityReceiptAlreadyExists(String),
+    #[error("liquidity amount is below minimum: {0}")]
+    LiquidityBelowMinimum(String),
+    #[error("LP position does not exist: {0}")]
+    LpPositionMissing(String),
+    #[error("insufficient LP position: {0}")]
+    LpPositionInsufficient(String),
+    #[error("swap receipt already exists: {0}")]
+    SwapReceiptAlreadyExists(String),
+    #[error("swap output is below minimum: {0}")]
+    SwapSlippageExceeded(String),
     #[error("model passport already exists: {0}")]
     ModelPassportAlreadyExists(String),
     #[error("model passport does not exist: {0}")]
@@ -119,6 +162,20 @@ pub struct ChainState {
     pub faucet_records: BTreeMap<String, FaucetRecord>,
     #[serde(default)]
     pub balance_transfers: BTreeMap<String, BalanceTransfer>,
+    #[serde(default)]
+    pub token_definitions: BTreeMap<String, LocalTestToken>,
+    #[serde(default)]
+    pub token_balances: BTreeMap<String, LocalTestTokenBalance>,
+    #[serde(default)]
+    pub token_mint_receipts: BTreeMap<String, LocalTestTokenMintReceipt>,
+    #[serde(default)]
+    pub dex_pools: BTreeMap<String, DexPool>,
+    #[serde(default)]
+    pub lp_positions: BTreeMap<String, LpPosition>,
+    #[serde(default)]
+    pub liquidity_receipts: BTreeMap<String, LiquidityReceipt>,
+    #[serde(default)]
+    pub swap_receipts: BTreeMap<String, SwapReceipt>,
     #[serde(default)]
     pub model_passports: BTreeMap<String, ModelPassport>,
     #[serde(default)]
@@ -228,6 +285,110 @@ pub struct BalanceTransfer {
     pub amount_units: u64,
     pub memo: String,
     pub transferred_at_block: u64,
+    pub no_value: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct LocalTestToken {
+    pub token_id: String,
+    pub symbol: String,
+    pub name: String,
+    pub decimals: u8,
+    pub launcher_account_id: String,
+    pub total_supply_units: u64,
+    pub launched_at_block: u64,
+    pub no_value: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct LocalTestTokenBalance {
+    pub token_balance_id: String,
+    pub token_id: String,
+    pub account_id: String,
+    pub units: u64,
+    pub updated_at_block: u64,
+    pub no_value: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct LocalTestTokenMintReceipt {
+    pub mint_id: String,
+    pub token_id: String,
+    pub to_account_id: String,
+    pub amount_units: u64,
+    pub reason: String,
+    pub minted_at_block: u64,
+    pub no_value: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct DexPool {
+    pub pool_id: String,
+    pub base_asset_id: String,
+    pub quote_asset_id: String,
+    pub created_by_account_id: String,
+    pub reserve_base_units: u64,
+    pub reserve_quote_units: u64,
+    pub total_lp_units: u64,
+    pub created_at_block: u64,
+    pub updated_at_block: u64,
+    pub last_liquidity_receipt_id: Option<String>,
+    pub last_swap_receipt_id: Option<String>,
+    pub no_value: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct LpPosition {
+    pub lp_position_id: String,
+    pub pool_id: String,
+    pub owner_account_id: String,
+    pub lp_units: u64,
+    pub base_units_deposited: u64,
+    pub quote_units_deposited: u64,
+    pub base_units_withdrawn: u64,
+    pub quote_units_withdrawn: u64,
+    pub updated_at_block: u64,
+    pub no_value: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct LiquidityReceipt {
+    pub liquidity_id: String,
+    pub pool_id: String,
+    pub provider_account_id: String,
+    pub action: String,
+    pub base_amount_units: u64,
+    pub quote_amount_units: u64,
+    pub lp_units: u64,
+    pub reserve_base_before: u64,
+    pub reserve_quote_before: u64,
+    pub reserve_base_after: u64,
+    pub reserve_quote_after: u64,
+    pub executed_at_block: u64,
+    pub no_value: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct SwapReceipt {
+    pub swap_id: String,
+    pub pool_id: String,
+    pub trader_account_id: String,
+    pub asset_in_id: String,
+    pub asset_out_id: String,
+    pub amount_in_units: u64,
+    pub amount_out_units: u64,
+    pub reserve_base_before: u64,
+    pub reserve_quote_before: u64,
+    pub reserve_base_after: u64,
+    pub reserve_quote_after: u64,
+    pub executed_at_block: u64,
     pub no_value: bool,
 }
 
@@ -391,6 +552,20 @@ pub struct BaseAnchorPlaceholder {
     #[serde(default)]
     pub balance_transfer_root: String,
     #[serde(default)]
+    pub token_definition_root: String,
+    #[serde(default)]
+    pub token_balance_root: String,
+    #[serde(default)]
+    pub token_mint_receipt_root: String,
+    #[serde(default)]
+    pub dex_pool_root: String,
+    #[serde(default)]
+    pub lp_position_root: String,
+    #[serde(default)]
+    pub liquidity_receipt_root: String,
+    #[serde(default)]
+    pub swap_receipt_root: String,
+    #[serde(default)]
     pub model_passport_root: String,
     #[serde(default)]
     pub memory_cell_root: String,
@@ -442,6 +617,51 @@ pub enum Transaction {
         to_account_id: String,
         amount_units: u64,
         memo: String,
+    },
+    LaunchToken {
+        token_id: String,
+        symbol: String,
+        name: String,
+        decimals: u8,
+        initial_owner_account_id: String,
+        initial_supply_units: u64,
+    },
+    MintLocalTestToken {
+        mint_id: String,
+        token_id: String,
+        to_account_id: String,
+        amount_units: u64,
+        reason: String,
+    },
+    CreatePool {
+        pool_id: String,
+        base_asset_id: String,
+        quote_asset_id: String,
+        created_by_account_id: String,
+    },
+    AddLiquidity {
+        liquidity_id: String,
+        pool_id: String,
+        provider_account_id: String,
+        base_amount_units: u64,
+        quote_amount_units: u64,
+        min_lp_units: u64,
+    },
+    RemoveLiquidity {
+        liquidity_id: String,
+        pool_id: String,
+        provider_account_id: String,
+        lp_units: u64,
+        min_base_amount_units: u64,
+        min_quote_amount_units: u64,
+    },
+    SwapExactIn {
+        swap_id: String,
+        pool_id: String,
+        trader_account_id: String,
+        asset_in_id: String,
+        amount_in_units: u64,
+        min_amount_out_units: u64,
     },
     RegisterModelPassport {
         model_passport_id: String,
@@ -582,6 +802,13 @@ struct StateCommitmentView<'a> {
     local_test_unit_balances: &'a BTreeMap<String, LocalTestUnitBalance>,
     faucet_records: &'a BTreeMap<String, FaucetRecord>,
     balance_transfers: &'a BTreeMap<String, BalanceTransfer>,
+    token_definitions: &'a BTreeMap<String, LocalTestToken>,
+    token_balances: &'a BTreeMap<String, LocalTestTokenBalance>,
+    token_mint_receipts: &'a BTreeMap<String, LocalTestTokenMintReceipt>,
+    dex_pools: &'a BTreeMap<String, DexPool>,
+    lp_positions: &'a BTreeMap<String, LpPosition>,
+    liquidity_receipts: &'a BTreeMap<String, LiquidityReceipt>,
+    swap_receipts: &'a BTreeMap<String, SwapReceipt>,
     model_passports: &'a BTreeMap<String, ModelPassport>,
     memory_cells: &'a BTreeMap<String, MemoryCell>,
     challenges: &'a BTreeMap<String, Challenge>,
@@ -612,6 +839,13 @@ pub struct StateMapRoots {
     pub local_test_unit_balance_root: String,
     pub faucet_record_root: String,
     pub balance_transfer_root: String,
+    pub token_definition_root: String,
+    pub token_balance_root: String,
+    pub token_mint_receipt_root: String,
+    pub dex_pool_root: String,
+    pub lp_position_root: String,
+    pub liquidity_receipt_root: String,
+    pub swap_receipt_root: String,
     pub model_passport_root: String,
     pub memory_cell_root: String,
     pub challenge_root: String,
@@ -681,6 +915,13 @@ pub fn genesis_state() -> ChainState {
         local_test_unit_balances: BTreeMap::new(),
         faucet_records: BTreeMap::new(),
         balance_transfers: BTreeMap::new(),
+        token_definitions: BTreeMap::new(),
+        token_balances: BTreeMap::new(),
+        token_mint_receipts: BTreeMap::new(),
+        dex_pools: BTreeMap::new(),
+        lp_positions: BTreeMap::new(),
+        liquidity_receipts: BTreeMap::new(),
+        swap_receipts: BTreeMap::new(),
         model_passports: BTreeMap::new(),
         memory_cells: BTreeMap::new(),
         challenges: BTreeMap::new(),
@@ -730,6 +971,102 @@ pub fn queue_authorized_transaction(
     tx_id
 }
 
+pub fn normalize_token_symbol(symbol: &str) -> String {
+    symbol.trim().to_ascii_uppercase()
+}
+
+pub fn deterministic_token_id(symbol: &str) -> String {
+    hash_json(
+        "flowmemory.local_devnet.token_id.v0",
+        &serde_json::json!({
+            "symbol": normalize_token_symbol(symbol)
+        }),
+    )
+}
+
+pub fn deterministic_token_balance_id(token_id: &str, account_id: &str) -> String {
+    hash_json(
+        "flowmemory.local_devnet.token_balance_id.v0",
+        &serde_json::json!({
+            "tokenId": token_id,
+            "accountId": account_id
+        }),
+    )
+}
+
+pub fn deterministic_token_mint_id(
+    token_id: &str,
+    to_account_id: &str,
+    amount_units: u64,
+    reason: &str,
+) -> String {
+    hash_json(
+        "flowmemory.local_devnet.token_mint_id.v0",
+        &serde_json::json!({
+            "tokenId": token_id,
+            "toAccountId": to_account_id,
+            "amountUnits": amount_units,
+            "reason": reason
+        }),
+    )
+}
+
+pub fn deterministic_pool_id(base_asset_id: &str, quote_asset_id: &str) -> String {
+    hash_json(
+        "flowmemory.local_devnet.dex_pool_id.v0",
+        &serde_json::json!({
+            "baseAssetId": base_asset_id,
+            "quoteAssetId": quote_asset_id
+        }),
+    )
+}
+
+pub fn deterministic_lp_position_id(pool_id: &str, owner_account_id: &str) -> String {
+    hash_json(
+        "flowmemory.local_devnet.lp_position_id.v0",
+        &serde_json::json!({
+            "poolId": pool_id,
+            "ownerAccountId": owner_account_id
+        }),
+    )
+}
+
+pub fn deterministic_liquidity_id(
+    pool_id: &str,
+    provider_account_id: &str,
+    action: &str,
+    nonce: &str,
+) -> String {
+    hash_json(
+        "flowmemory.local_devnet.liquidity_id.v0",
+        &serde_json::json!({
+            "poolId": pool_id,
+            "providerAccountId": provider_account_id,
+            "action": action,
+            "nonce": nonce
+        }),
+    )
+}
+
+pub fn deterministic_swap_id(
+    pool_id: &str,
+    trader_account_id: &str,
+    asset_in_id: &str,
+    amount_in_units: u64,
+    nonce: &str,
+) -> String {
+    hash_json(
+        "flowmemory.local_devnet.swap_id.v0",
+        &serde_json::json!({
+            "poolId": pool_id,
+            "traderAccountId": trader_account_id,
+            "assetInId": asset_in_id,
+            "amountInUnits": amount_in_units,
+            "nonce": nonce
+        }),
+    )
+}
+
 pub fn state_root(state: &ChainState) -> String {
     let view = StateCommitmentView {
         schema: STATE_SCHEMA,
@@ -742,6 +1079,13 @@ pub fn state_root(state: &ChainState) -> String {
         local_test_unit_balances: &state.local_test_unit_balances,
         faucet_records: &state.faucet_records,
         balance_transfers: &state.balance_transfers,
+        token_definitions: &state.token_definitions,
+        token_balances: &state.token_balances,
+        token_mint_receipts: &state.token_mint_receipts,
+        dex_pools: &state.dex_pools,
+        lp_positions: &state.lp_positions,
+        liquidity_receipts: &state.liquidity_receipts,
+        swap_receipts: &state.swap_receipts,
         model_passports: &state.model_passports,
         memory_cells: &state.memory_cells,
         challenges: &state.challenges,
@@ -787,6 +1131,31 @@ pub fn state_map_roots(state: &ChainState) -> StateMapRoots {
         balance_transfer_root: map_root(
             "flowmemory.local_devnet.balance_transfers.v0",
             &state.balance_transfers,
+        ),
+        token_definition_root: map_root(
+            "flowmemory.local_devnet.token_definitions.v0",
+            &state.token_definitions,
+        ),
+        token_balance_root: map_root(
+            "flowmemory.local_devnet.token_balances.v0",
+            &state.token_balances,
+        ),
+        token_mint_receipt_root: map_root(
+            "flowmemory.local_devnet.token_mint_receipts.v0",
+            &state.token_mint_receipts,
+        ),
+        dex_pool_root: map_root("flowmemory.local_devnet.dex_pools.v0", &state.dex_pools),
+        lp_position_root: map_root(
+            "flowmemory.local_devnet.lp_positions.v0",
+            &state.lp_positions,
+        ),
+        liquidity_receipt_root: map_root(
+            "flowmemory.local_devnet.liquidity_receipts.v0",
+            &state.liquidity_receipts,
+        ),
+        swap_receipt_root: map_root(
+            "flowmemory.local_devnet.swap_receipts.v0",
+            &state.swap_receipts,
         ),
         model_passport_root: map_root(
             "flowmemory.local_devnet.model_passports.v0",
@@ -1010,9 +1379,7 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
                 ));
             }
             if *amount_units == 0 {
-                return Err(DevnetError::FaucetAmountMustBePositive(
-                    transfer_id.clone(),
-                ));
+                return Err(DevnetError::FaucetAmountMustBePositive(transfer_id.clone()));
             }
 
             let from_balance = state
@@ -1053,6 +1420,517 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
                     amount_units: *amount_units,
                     memo: memo.clone(),
                     transferred_at_block: state.next_block_number,
+                    no_value: true,
+                },
+            );
+        }
+        Transaction::LaunchToken {
+            token_id,
+            symbol,
+            name,
+            decimals,
+            initial_owner_account_id,
+            initial_supply_units,
+        } => {
+            let normalized_symbol = normalize_token_symbol(symbol);
+            ensure_expected_id(
+                "token",
+                token_id,
+                &deterministic_token_id(&normalized_symbol),
+            )?;
+            if *initial_supply_units == 0 {
+                return Err(DevnetError::TokenAmountMustBePositive(token_id.clone()));
+            }
+            if !state
+                .local_test_unit_balances
+                .contains_key(initial_owner_account_id)
+            {
+                return Err(DevnetError::LocalTestUnitBalanceMissing(
+                    initial_owner_account_id.clone(),
+                ));
+            }
+            if state.token_definitions.contains_key(token_id) {
+                return Err(DevnetError::TokenAlreadyExists(token_id.clone()));
+            }
+            if state
+                .token_definitions
+                .values()
+                .any(|token| token.symbol == normalized_symbol)
+            {
+                return Err(DevnetError::TokenSymbolAlreadyExists(normalized_symbol));
+            }
+
+            state.token_definitions.insert(
+                token_id.clone(),
+                LocalTestToken {
+                    token_id: token_id.clone(),
+                    symbol: normalize_token_symbol(symbol),
+                    name: name.clone(),
+                    decimals: *decimals,
+                    launcher_account_id: initial_owner_account_id.clone(),
+                    total_supply_units: *initial_supply_units,
+                    launched_at_block: state.next_block_number,
+                    no_value: true,
+                },
+            );
+            credit_asset_units(
+                state,
+                initial_owner_account_id,
+                token_id,
+                *initial_supply_units,
+            )?;
+            let mint_id = deterministic_token_mint_id(
+                token_id,
+                initial_owner_account_id,
+                *initial_supply_units,
+                "initial-supply",
+            );
+            state.token_mint_receipts.insert(
+                mint_id.clone(),
+                LocalTestTokenMintReceipt {
+                    mint_id,
+                    token_id: token_id.clone(),
+                    to_account_id: initial_owner_account_id.clone(),
+                    amount_units: *initial_supply_units,
+                    reason: "initial-supply".to_string(),
+                    minted_at_block: state.next_block_number,
+                    no_value: true,
+                },
+            );
+        }
+        Transaction::MintLocalTestToken {
+            mint_id,
+            token_id,
+            to_account_id,
+            amount_units,
+            reason,
+        } => {
+            ensure_expected_id(
+                "token mint",
+                mint_id,
+                &deterministic_token_mint_id(token_id, to_account_id, *amount_units, reason),
+            )?;
+            if *amount_units == 0 {
+                return Err(DevnetError::TokenAmountMustBePositive(mint_id.clone()));
+            }
+            if !state.local_test_unit_balances.contains_key(to_account_id) {
+                return Err(DevnetError::LocalTestUnitBalanceMissing(
+                    to_account_id.clone(),
+                ));
+            }
+            if state.token_mint_receipts.contains_key(mint_id) {
+                return Err(DevnetError::TokenMintAlreadyExists(mint_id.clone()));
+            }
+            let current_supply = state
+                .token_definitions
+                .get(token_id)
+                .ok_or_else(|| DevnetError::TokenMissing(token_id.clone()))?
+                .total_supply_units
+                .checked_add(*amount_units)
+                .ok_or_else(|| DevnetError::TokenBalanceOverflow(token_id.clone()))?;
+            credit_asset_units(state, to_account_id, token_id, *amount_units)?;
+            state
+                .token_definitions
+                .get_mut(token_id)
+                .expect("token was checked before mint")
+                .total_supply_units = current_supply;
+            state.token_mint_receipts.insert(
+                mint_id.clone(),
+                LocalTestTokenMintReceipt {
+                    mint_id: mint_id.clone(),
+                    token_id: token_id.clone(),
+                    to_account_id: to_account_id.clone(),
+                    amount_units: *amount_units,
+                    reason: reason.clone(),
+                    minted_at_block: state.next_block_number,
+                    no_value: true,
+                },
+            );
+        }
+        Transaction::CreatePool {
+            pool_id,
+            base_asset_id,
+            quote_asset_id,
+            created_by_account_id,
+        } => {
+            ensure_expected_id(
+                "pool",
+                pool_id,
+                &deterministic_pool_id(base_asset_id, quote_asset_id),
+            )?;
+            ensure_pool_assets_are_valid(state, base_asset_id, quote_asset_id)?;
+            if !state
+                .local_test_unit_balances
+                .contains_key(created_by_account_id)
+            {
+                return Err(DevnetError::LocalTestUnitBalanceMissing(
+                    created_by_account_id.clone(),
+                ));
+            }
+            if state.dex_pools.contains_key(pool_id) {
+                return Err(DevnetError::PoolAlreadyExists(pool_id.clone()));
+            }
+            state.dex_pools.insert(
+                pool_id.clone(),
+                DexPool {
+                    pool_id: pool_id.clone(),
+                    base_asset_id: base_asset_id.clone(),
+                    quote_asset_id: quote_asset_id.clone(),
+                    created_by_account_id: created_by_account_id.clone(),
+                    reserve_base_units: 0,
+                    reserve_quote_units: 0,
+                    total_lp_units: 0,
+                    created_at_block: state.next_block_number,
+                    updated_at_block: state.next_block_number,
+                    last_liquidity_receipt_id: None,
+                    last_swap_receipt_id: None,
+                    no_value: true,
+                },
+            );
+        }
+        Transaction::AddLiquidity {
+            liquidity_id,
+            pool_id,
+            provider_account_id,
+            base_amount_units,
+            quote_amount_units,
+            min_lp_units,
+        } => {
+            ensure_expected_id(
+                "add liquidity",
+                liquidity_id,
+                &deterministic_liquidity_id(
+                    pool_id,
+                    provider_account_id,
+                    "add",
+                    &format!("{base_amount_units}:{quote_amount_units}:{min_lp_units}"),
+                ),
+            )?;
+            if state.liquidity_receipts.contains_key(liquidity_id) {
+                return Err(DevnetError::LiquidityReceiptAlreadyExists(
+                    liquidity_id.clone(),
+                ));
+            }
+            if *base_amount_units == 0 || *quote_amount_units == 0 {
+                return Err(DevnetError::TokenAmountMustBePositive(liquidity_id.clone()));
+            }
+            let pool = state
+                .dex_pools
+                .get(pool_id)
+                .ok_or_else(|| DevnetError::PoolMissing(pool_id.clone()))?;
+            let reserve_base_before = pool.reserve_base_units;
+            let reserve_quote_before = pool.reserve_quote_units;
+            let total_lp_before = pool.total_lp_units;
+            let lp_units = liquidity_units_for_add(pool, *base_amount_units, *quote_amount_units)?;
+            if lp_units == 0 || lp_units < *min_lp_units {
+                return Err(DevnetError::LiquidityBelowMinimum(liquidity_id.clone()));
+            }
+            ensure_asset_units_available(
+                state,
+                provider_account_id,
+                &pool.base_asset_id,
+                *base_amount_units,
+            )?;
+            ensure_asset_units_available(
+                state,
+                provider_account_id,
+                &pool.quote_asset_id,
+                *quote_amount_units,
+            )?;
+            let base_asset_id = pool.base_asset_id.clone();
+            let quote_asset_id = pool.quote_asset_id.clone();
+
+            debit_asset_units(
+                state,
+                provider_account_id,
+                &base_asset_id,
+                *base_amount_units,
+            )?;
+            debit_asset_units(
+                state,
+                provider_account_id,
+                &quote_asset_id,
+                *quote_amount_units,
+            )?;
+
+            let reserve_base_after =
+                checked_pool_add(pool_id, reserve_base_before, *base_amount_units)?;
+            let reserve_quote_after =
+                checked_pool_add(pool_id, reserve_quote_before, *quote_amount_units)?;
+            let total_lp_after = checked_pool_add(pool_id, total_lp_before, lp_units)?;
+            let pool = state
+                .dex_pools
+                .get_mut(pool_id)
+                .expect("pool was checked before liquidity mutation");
+            pool.reserve_base_units = reserve_base_after;
+            pool.reserve_quote_units = reserve_quote_after;
+            pool.total_lp_units = total_lp_after;
+            pool.updated_at_block = state.next_block_number;
+            pool.last_liquidity_receipt_id = Some(liquidity_id.clone());
+
+            let lp_position_id = deterministic_lp_position_id(pool_id, provider_account_id);
+            let position = state
+                .lp_positions
+                .entry(lp_position_id.clone())
+                .or_insert_with(|| LpPosition {
+                    lp_position_id,
+                    pool_id: pool_id.clone(),
+                    owner_account_id: provider_account_id.clone(),
+                    lp_units: 0,
+                    base_units_deposited: 0,
+                    quote_units_deposited: 0,
+                    base_units_withdrawn: 0,
+                    quote_units_withdrawn: 0,
+                    updated_at_block: state.next_block_number,
+                    no_value: true,
+                });
+            position.lp_units = position
+                .lp_units
+                .checked_add(lp_units)
+                .ok_or_else(|| DevnetError::PoolReserveOverflow(pool_id.clone()))?;
+            position.base_units_deposited = position
+                .base_units_deposited
+                .checked_add(*base_amount_units)
+                .ok_or_else(|| DevnetError::PoolReserveOverflow(pool_id.clone()))?;
+            position.quote_units_deposited = position
+                .quote_units_deposited
+                .checked_add(*quote_amount_units)
+                .ok_or_else(|| DevnetError::PoolReserveOverflow(pool_id.clone()))?;
+            position.updated_at_block = state.next_block_number;
+
+            state.liquidity_receipts.insert(
+                liquidity_id.clone(),
+                LiquidityReceipt {
+                    liquidity_id: liquidity_id.clone(),
+                    pool_id: pool_id.clone(),
+                    provider_account_id: provider_account_id.clone(),
+                    action: "add".to_string(),
+                    base_amount_units: *base_amount_units,
+                    quote_amount_units: *quote_amount_units,
+                    lp_units,
+                    reserve_base_before,
+                    reserve_quote_before,
+                    reserve_base_after,
+                    reserve_quote_after,
+                    executed_at_block: state.next_block_number,
+                    no_value: true,
+                },
+            );
+        }
+        Transaction::RemoveLiquidity {
+            liquidity_id,
+            pool_id,
+            provider_account_id,
+            lp_units,
+            min_base_amount_units,
+            min_quote_amount_units,
+        } => {
+            ensure_expected_id(
+                "remove liquidity",
+                liquidity_id,
+                &deterministic_liquidity_id(
+                    pool_id,
+                    provider_account_id,
+                    "remove",
+                    &format!("{lp_units}:{min_base_amount_units}:{min_quote_amount_units}"),
+                ),
+            )?;
+            if state.liquidity_receipts.contains_key(liquidity_id) {
+                return Err(DevnetError::LiquidityReceiptAlreadyExists(
+                    liquidity_id.clone(),
+                ));
+            }
+            if *lp_units == 0 {
+                return Err(DevnetError::TokenAmountMustBePositive(liquidity_id.clone()));
+            }
+            let pool = state
+                .dex_pools
+                .get(pool_id)
+                .ok_or_else(|| DevnetError::PoolMissing(pool_id.clone()))?;
+            let reserve_base_before = pool.reserve_base_units;
+            let reserve_quote_before = pool.reserve_quote_units;
+            if pool.total_lp_units == 0 {
+                return Err(DevnetError::PoolReserveInsufficient(pool_id.clone()));
+            }
+            let lp_position_id = deterministic_lp_position_id(pool_id, provider_account_id);
+            let position = state
+                .lp_positions
+                .get(&lp_position_id)
+                .ok_or_else(|| DevnetError::LpPositionMissing(lp_position_id.clone()))?;
+            if position.lp_units < *lp_units {
+                return Err(DevnetError::LpPositionInsufficient(lp_position_id));
+            }
+            let base_amount_units =
+                proportional_amount(reserve_base_before, *lp_units, pool.total_lp_units, pool_id)?;
+            let quote_amount_units = proportional_amount(
+                reserve_quote_before,
+                *lp_units,
+                pool.total_lp_units,
+                pool_id,
+            )?;
+            if base_amount_units < *min_base_amount_units
+                || quote_amount_units < *min_quote_amount_units
+            {
+                return Err(DevnetError::LiquidityBelowMinimum(liquidity_id.clone()));
+            }
+            let base_asset_id = pool.base_asset_id.clone();
+            let quote_asset_id = pool.quote_asset_id.clone();
+            let total_lp_before = pool.total_lp_units;
+
+            {
+                let position = state
+                    .lp_positions
+                    .get_mut(&deterministic_lp_position_id(pool_id, provider_account_id))
+                    .expect("LP position was checked before liquidity mutation");
+                position.lp_units -= *lp_units;
+                position.base_units_withdrawn = position
+                    .base_units_withdrawn
+                    .checked_add(base_amount_units)
+                    .ok_or_else(|| DevnetError::PoolReserveOverflow(pool_id.clone()))?;
+                position.quote_units_withdrawn = position
+                    .quote_units_withdrawn
+                    .checked_add(quote_amount_units)
+                    .ok_or_else(|| DevnetError::PoolReserveOverflow(pool_id.clone()))?;
+                position.updated_at_block = state.next_block_number;
+            }
+
+            let reserve_base_after = reserve_base_before
+                .checked_sub(base_amount_units)
+                .ok_or_else(|| DevnetError::PoolReserveInsufficient(pool_id.clone()))?;
+            let reserve_quote_after = reserve_quote_before
+                .checked_sub(quote_amount_units)
+                .ok_or_else(|| DevnetError::PoolReserveInsufficient(pool_id.clone()))?;
+            let pool = state
+                .dex_pools
+                .get_mut(pool_id)
+                .expect("pool was checked before liquidity mutation");
+            pool.reserve_base_units = reserve_base_after;
+            pool.reserve_quote_units = reserve_quote_after;
+            pool.total_lp_units = total_lp_before
+                .checked_sub(*lp_units)
+                .ok_or_else(|| DevnetError::PoolReserveInsufficient(pool_id.clone()))?;
+            pool.updated_at_block = state.next_block_number;
+            pool.last_liquidity_receipt_id = Some(liquidity_id.clone());
+
+            credit_asset_units(
+                state,
+                provider_account_id,
+                &base_asset_id,
+                base_amount_units,
+            )?;
+            credit_asset_units(
+                state,
+                provider_account_id,
+                &quote_asset_id,
+                quote_amount_units,
+            )?;
+
+            state.liquidity_receipts.insert(
+                liquidity_id.clone(),
+                LiquidityReceipt {
+                    liquidity_id: liquidity_id.clone(),
+                    pool_id: pool_id.clone(),
+                    provider_account_id: provider_account_id.clone(),
+                    action: "remove".to_string(),
+                    base_amount_units,
+                    quote_amount_units,
+                    lp_units: *lp_units,
+                    reserve_base_before,
+                    reserve_quote_before,
+                    reserve_base_after,
+                    reserve_quote_after,
+                    executed_at_block: state.next_block_number,
+                    no_value: true,
+                },
+            );
+        }
+        Transaction::SwapExactIn {
+            swap_id,
+            pool_id,
+            trader_account_id,
+            asset_in_id,
+            amount_in_units,
+            min_amount_out_units,
+        } => {
+            ensure_expected_id(
+                "swap",
+                swap_id,
+                &deterministic_swap_id(
+                    pool_id,
+                    trader_account_id,
+                    asset_in_id,
+                    *amount_in_units,
+                    &min_amount_out_units.to_string(),
+                ),
+            )?;
+            if state.swap_receipts.contains_key(swap_id) {
+                return Err(DevnetError::SwapReceiptAlreadyExists(swap_id.clone()));
+            }
+            if *amount_in_units == 0 {
+                return Err(DevnetError::TokenAmountMustBePositive(swap_id.clone()));
+            }
+            let pool = state
+                .dex_pools
+                .get(pool_id)
+                .ok_or_else(|| DevnetError::PoolMissing(pool_id.clone()))?;
+            let reserve_base_before = pool.reserve_base_units;
+            let reserve_quote_before = pool.reserve_quote_units;
+            let (asset_out_id, amount_out_units, reserve_base_after, reserve_quote_after) =
+                if asset_in_id == &pool.base_asset_id {
+                    let amount_out = quote_out_for_base_in(pool, *amount_in_units)?;
+                    (
+                        pool.quote_asset_id.clone(),
+                        amount_out,
+                        checked_pool_add(pool_id, reserve_base_before, *amount_in_units)?,
+                        reserve_quote_before
+                            .checked_sub(amount_out)
+                            .ok_or_else(|| DevnetError::PoolReserveInsufficient(pool_id.clone()))?,
+                    )
+                } else if asset_in_id == &pool.quote_asset_id {
+                    let amount_out = base_out_for_quote_in(pool, *amount_in_units)?;
+                    (
+                        pool.base_asset_id.clone(),
+                        amount_out,
+                        reserve_base_before
+                            .checked_sub(amount_out)
+                            .ok_or_else(|| DevnetError::PoolReserveInsufficient(pool_id.clone()))?,
+                        checked_pool_add(pool_id, reserve_quote_before, *amount_in_units)?,
+                    )
+                } else {
+                    return Err(DevnetError::PoolInvalidAsset(asset_in_id.clone()));
+                };
+            if amount_out_units == 0 || amount_out_units < *min_amount_out_units {
+                return Err(DevnetError::SwapSlippageExceeded(swap_id.clone()));
+            }
+            ensure_asset_units_available(state, trader_account_id, asset_in_id, *amount_in_units)?;
+
+            debit_asset_units(state, trader_account_id, asset_in_id, *amount_in_units)?;
+            credit_asset_units(state, trader_account_id, &asset_out_id, amount_out_units)?;
+
+            let pool = state
+                .dex_pools
+                .get_mut(pool_id)
+                .expect("pool was checked before swap mutation");
+            pool.reserve_base_units = reserve_base_after;
+            pool.reserve_quote_units = reserve_quote_after;
+            pool.updated_at_block = state.next_block_number;
+            pool.last_swap_receipt_id = Some(swap_id.clone());
+
+            state.swap_receipts.insert(
+                swap_id.clone(),
+                SwapReceipt {
+                    swap_id: swap_id.clone(),
+                    pool_id: pool_id.clone(),
+                    trader_account_id: trader_account_id.clone(),
+                    asset_in_id: asset_in_id.clone(),
+                    asset_out_id,
+                    amount_in_units: *amount_in_units,
+                    amount_out_units,
+                    reserve_base_before,
+                    reserve_quote_before,
+                    reserve_base_after,
+                    reserve_quote_after,
+                    executed_at_block: state.next_block_number,
                     no_value: true,
                 },
             );
@@ -1438,6 +2316,225 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
     Ok(())
 }
 
+fn ensure_expected_id(kind: &str, actual: &str, expected: &str) -> Result<(), DevnetError> {
+    if actual != expected {
+        return Err(DevnetError::DeterministicIdMismatch {
+            kind: kind.to_string(),
+            expected: expected.to_string(),
+            actual: actual.to_string(),
+        });
+    }
+    Ok(())
+}
+
+fn ensure_pool_assets_are_valid(
+    state: &ChainState,
+    base_asset_id: &str,
+    quote_asset_id: &str,
+) -> Result<(), DevnetError> {
+    if base_asset_id == quote_asset_id {
+        return Err(DevnetError::PoolInvalidAsset(base_asset_id.to_string()));
+    }
+    ensure_asset_exists(state, base_asset_id)?;
+    ensure_asset_exists(state, quote_asset_id)?;
+    Ok(())
+}
+
+fn ensure_asset_exists(state: &ChainState, asset_id: &str) -> Result<(), DevnetError> {
+    if asset_id == LOCAL_TEST_UNIT_ASSET_ID || state.token_definitions.contains_key(asset_id) {
+        return Ok(());
+    }
+    Err(DevnetError::TokenMissing(asset_id.to_string()))
+}
+
+fn ensure_asset_units_available(
+    state: &ChainState,
+    account_id: &str,
+    asset_id: &str,
+    amount_units: u64,
+) -> Result<(), DevnetError> {
+    let available = asset_units(state, account_id, asset_id)?;
+    if available < amount_units {
+        if asset_id == LOCAL_TEST_UNIT_ASSET_ID {
+            return Err(DevnetError::LocalTestUnitBalanceInsufficient(
+                account_id.to_string(),
+            ));
+        }
+        return Err(DevnetError::TokenBalanceInsufficient(
+            deterministic_token_balance_id(asset_id, account_id),
+        ));
+    }
+    Ok(())
+}
+
+fn asset_units(state: &ChainState, account_id: &str, asset_id: &str) -> Result<u64, DevnetError> {
+    if asset_id == LOCAL_TEST_UNIT_ASSET_ID {
+        return state
+            .local_test_unit_balances
+            .get(account_id)
+            .map(|balance| balance.units)
+            .ok_or_else(|| DevnetError::LocalTestUnitBalanceMissing(account_id.to_string()));
+    }
+    ensure_asset_exists(state, asset_id)?;
+    let balance_id = deterministic_token_balance_id(asset_id, account_id);
+    Ok(state
+        .token_balances
+        .get(&balance_id)
+        .map(|balance| balance.units)
+        .unwrap_or(0))
+}
+
+fn debit_asset_units(
+    state: &mut ChainState,
+    account_id: &str,
+    asset_id: &str,
+    amount_units: u64,
+) -> Result<(), DevnetError> {
+    ensure_asset_units_available(state, account_id, asset_id, amount_units)?;
+    if asset_id == LOCAL_TEST_UNIT_ASSET_ID {
+        let balance = state
+            .local_test_unit_balances
+            .get_mut(account_id)
+            .ok_or_else(|| DevnetError::LocalTestUnitBalanceMissing(account_id.to_string()))?;
+        balance.units -= amount_units;
+        balance.updated_at_block = state.next_block_number;
+        return Ok(());
+    }
+
+    let balance_id = deterministic_token_balance_id(asset_id, account_id);
+    let balance = state
+        .token_balances
+        .get_mut(&balance_id)
+        .ok_or_else(|| DevnetError::TokenBalanceInsufficient(balance_id.clone()))?;
+    balance.units -= amount_units;
+    balance.updated_at_block = state.next_block_number;
+    Ok(())
+}
+
+fn credit_asset_units(
+    state: &mut ChainState,
+    account_id: &str,
+    asset_id: &str,
+    amount_units: u64,
+) -> Result<(), DevnetError> {
+    if amount_units == 0 {
+        return Err(DevnetError::TokenAmountMustBePositive(asset_id.to_string()));
+    }
+    if asset_id == LOCAL_TEST_UNIT_ASSET_ID {
+        let balance = state
+            .local_test_unit_balances
+            .get_mut(account_id)
+            .ok_or_else(|| DevnetError::LocalTestUnitBalanceMissing(account_id.to_string()))?;
+        balance.units = balance
+            .units
+            .checked_add(amount_units)
+            .ok_or_else(|| DevnetError::LocalTestUnitBalanceOverflow(account_id.to_string()))?;
+        balance.updated_at_block = state.next_block_number;
+        return Ok(());
+    }
+
+    ensure_asset_exists(state, asset_id)?;
+    let balance_id = deterministic_token_balance_id(asset_id, account_id);
+    let balance = state
+        .token_balances
+        .entry(balance_id.clone())
+        .or_insert_with(|| LocalTestTokenBalance {
+            token_balance_id: balance_id,
+            token_id: asset_id.to_string(),
+            account_id: account_id.to_string(),
+            units: 0,
+            updated_at_block: state.next_block_number,
+            no_value: true,
+        });
+    balance.units = balance
+        .units
+        .checked_add(amount_units)
+        .ok_or_else(|| DevnetError::TokenBalanceOverflow(balance.token_balance_id.clone()))?;
+    balance.updated_at_block = state.next_block_number;
+    Ok(())
+}
+
+fn checked_pool_add(pool_id: &str, left: u64, right: u64) -> Result<u64, DevnetError> {
+    left.checked_add(right)
+        .ok_or_else(|| DevnetError::PoolReserveOverflow(pool_id.to_string()))
+}
+
+fn liquidity_units_for_add(
+    pool: &DexPool,
+    base_amount_units: u64,
+    quote_amount_units: u64,
+) -> Result<u64, DevnetError> {
+    if pool.total_lp_units == 0 {
+        return Ok(base_amount_units.min(quote_amount_units));
+    }
+    if pool.reserve_base_units == 0 || pool.reserve_quote_units == 0 {
+        return Err(DevnetError::PoolReserveInsufficient(pool.pool_id.clone()));
+    }
+    let by_base = (base_amount_units as u128)
+        .checked_mul(pool.total_lp_units as u128)
+        .ok_or_else(|| DevnetError::PoolReserveOverflow(pool.pool_id.clone()))?
+        / pool.reserve_base_units as u128;
+    let by_quote = (quote_amount_units as u128)
+        .checked_mul(pool.total_lp_units as u128)
+        .ok_or_else(|| DevnetError::PoolReserveOverflow(pool.pool_id.clone()))?
+        / pool.reserve_quote_units as u128;
+    u64::try_from(by_base.min(by_quote))
+        .map_err(|_| DevnetError::PoolReserveOverflow(pool.pool_id.clone()))
+}
+
+fn proportional_amount(
+    reserve_units: u64,
+    lp_units: u64,
+    total_lp_units: u64,
+    pool_id: &str,
+) -> Result<u64, DevnetError> {
+    if total_lp_units == 0 {
+        return Err(DevnetError::PoolReserveInsufficient(pool_id.to_string()));
+    }
+    let amount = (reserve_units as u128)
+        .checked_mul(lp_units as u128)
+        .ok_or_else(|| DevnetError::PoolReserveOverflow(pool_id.to_string()))?
+        / total_lp_units as u128;
+    u64::try_from(amount).map_err(|_| DevnetError::PoolReserveOverflow(pool_id.to_string()))
+}
+
+fn quote_out_for_base_in(pool: &DexPool, amount_in_units: u64) -> Result<u64, DevnetError> {
+    constant_product_out(
+        pool.reserve_base_units,
+        pool.reserve_quote_units,
+        amount_in_units,
+        &pool.pool_id,
+    )
+}
+
+fn base_out_for_quote_in(pool: &DexPool, amount_in_units: u64) -> Result<u64, DevnetError> {
+    constant_product_out(
+        pool.reserve_quote_units,
+        pool.reserve_base_units,
+        amount_in_units,
+        &pool.pool_id,
+    )
+}
+
+fn constant_product_out(
+    reserve_in_units: u64,
+    reserve_out_units: u64,
+    amount_in_units: u64,
+    pool_id: &str,
+) -> Result<u64, DevnetError> {
+    if reserve_in_units == 0 || reserve_out_units == 0 {
+        return Err(DevnetError::PoolReserveInsufficient(pool_id.to_string()));
+    }
+    let numerator = (reserve_out_units as u128)
+        .checked_mul(amount_in_units as u128)
+        .ok_or_else(|| DevnetError::PoolReserveOverflow(pool_id.to_string()))?;
+    let denominator = (reserve_in_units as u128)
+        .checked_add(amount_in_units as u128)
+        .ok_or_else(|| DevnetError::PoolReserveOverflow(pool_id.to_string()))?;
+    u64::try_from(numerator / denominator)
+        .map_err(|_| DevnetError::PoolReserveOverflow(pool_id.to_string()))
+}
+
 pub fn anchor_from_state(
     state: &ChainState,
     appchain_chain_id: &str,
@@ -1480,6 +2577,13 @@ pub fn anchor_from_state(
         local_test_unit_balance_root: &'a str,
         faucet_record_root: &'a str,
         balance_transfer_root: &'a str,
+        token_definition_root: &'a str,
+        token_balance_root: &'a str,
+        token_mint_receipt_root: &'a str,
+        dex_pool_root: &'a str,
+        lp_position_root: &'a str,
+        liquidity_receipt_root: &'a str,
+        swap_receipt_root: &'a str,
         model_passport_root: &'a str,
         memory_cell_root: &'a str,
         challenge_root: &'a str,
@@ -1507,6 +2611,13 @@ pub fn anchor_from_state(
             local_test_unit_balance_root: &roots.local_test_unit_balance_root,
             faucet_record_root: &roots.faucet_record_root,
             balance_transfer_root: &roots.balance_transfer_root,
+            token_definition_root: &roots.token_definition_root,
+            token_balance_root: &roots.token_balance_root,
+            token_mint_receipt_root: &roots.token_mint_receipt_root,
+            dex_pool_root: &roots.dex_pool_root,
+            lp_position_root: &roots.lp_position_root,
+            liquidity_receipt_root: &roots.liquidity_receipt_root,
+            swap_receipt_root: &roots.swap_receipt_root,
             model_passport_root: &roots.model_passport_root,
             memory_cell_root: &roots.memory_cell_root,
             challenge_root: &roots.challenge_root,
@@ -1533,6 +2644,13 @@ pub fn anchor_from_state(
         local_test_unit_balance_root: roots.local_test_unit_balance_root,
         faucet_record_root: roots.faucet_record_root,
         balance_transfer_root: roots.balance_transfer_root,
+        token_definition_root: roots.token_definition_root,
+        token_balance_root: roots.token_balance_root,
+        token_mint_receipt_root: roots.token_mint_receipt_root,
+        dex_pool_root: roots.dex_pool_root,
+        lp_position_root: roots.lp_position_root,
+        liquidity_receipt_root: roots.liquidity_receipt_root,
+        swap_receipt_root: roots.swap_receipt_root,
         model_passport_root: roots.model_passport_root,
         memory_cell_root: roots.memory_cell_root,
         challenge_root: roots.challenge_root,
@@ -1658,6 +2776,95 @@ pub fn demo_transactions() -> Vec<Transaction> {
             receipt_id,
             finalized_by: "operator:local-demo".to_string(),
             finality_status: "finalized".to_string(),
+        },
+    ]
+}
+
+pub fn product_demo_transactions() -> Vec<Transaction> {
+    let alice = "local-account:product:alice".to_string();
+    let bob = "local-account:product:bob".to_string();
+    let token_id = deterministic_token_id("FLOWT");
+    let pool_id = deterministic_pool_id(LOCAL_TEST_UNIT_ASSET_ID, &token_id);
+    let add_liquidity_id = deterministic_liquidity_id(
+        &pool_id,
+        &alice,
+        "add",
+        &format!("{}:{}:{}", 5_000_u64, 500_000_u64, 1_u64),
+    );
+    let swap_id = deterministic_swap_id(
+        &pool_id,
+        &bob,
+        LOCAL_TEST_UNIT_ASSET_ID,
+        100,
+        &9_000_u64.to_string(),
+    );
+    let remove_liquidity_id = deterministic_liquidity_id(
+        &pool_id,
+        &alice,
+        "remove",
+        &format!("{}:{}:{}", 100_u64, 1_u64, 1_u64),
+    );
+
+    vec![
+        Transaction::CreateLocalTestUnitBalance {
+            account_id: alice.clone(),
+            owner: "operator:product:alice".to_string(),
+        },
+        Transaction::CreateLocalTestUnitBalance {
+            account_id: bob.clone(),
+            owner: "operator:product:bob".to_string(),
+        },
+        Transaction::FaucetLocalTestUnits {
+            faucet_record_id: "faucet:product:alice".to_string(),
+            account_id: alice.clone(),
+            recipient: "operator:product:alice".to_string(),
+            amount_units: 10_000,
+            reason: "product-smoke-no-value-test-units".to_string(),
+        },
+        Transaction::FaucetLocalTestUnits {
+            faucet_record_id: "faucet:product:bob".to_string(),
+            account_id: bob.clone(),
+            recipient: "operator:product:bob".to_string(),
+            amount_units: 1_000,
+            reason: "product-smoke-no-value-test-units".to_string(),
+        },
+        Transaction::LaunchToken {
+            token_id: token_id.clone(),
+            symbol: "FLOWT".to_string(),
+            name: "FlowChain Product Test Token".to_string(),
+            decimals: 6,
+            initial_owner_account_id: alice.clone(),
+            initial_supply_units: 1_000_000,
+        },
+        Transaction::CreatePool {
+            pool_id: pool_id.clone(),
+            base_asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            quote_asset_id: token_id.clone(),
+            created_by_account_id: alice.clone(),
+        },
+        Transaction::AddLiquidity {
+            liquidity_id: add_liquidity_id,
+            pool_id: pool_id.clone(),
+            provider_account_id: alice.clone(),
+            base_amount_units: 5_000,
+            quote_amount_units: 500_000,
+            min_lp_units: 1,
+        },
+        Transaction::SwapExactIn {
+            swap_id,
+            pool_id: pool_id.clone(),
+            trader_account_id: bob.clone(),
+            asset_in_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            amount_in_units: 100,
+            min_amount_out_units: 9_000,
+        },
+        Transaction::RemoveLiquidity {
+            liquidity_id: remove_liquidity_id,
+            pool_id,
+            provider_account_id: alice,
+            lp_units: 100,
+            min_base_amount_units: 1,
+            min_quote_amount_units: 1,
         },
     ]
 }

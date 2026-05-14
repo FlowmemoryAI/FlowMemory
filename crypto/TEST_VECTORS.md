@@ -10,7 +10,8 @@ The test vectors are synthetic and contain no production secrets or signatures.
 - `fixtures/sample-observation.json`: observation metadata, artifact/storage inputs, and expected `observationId` / `receiptHash`.
 - `fixtures/sample-report.json`: verifier report, worker signature payload, verifier signature payload, and attestation envelope expectations.
 - `fixtures/local-alpha-objects.json`: positive and negative fixtures for FlowChain Local Alpha object identity, signed-envelope validation, transaction-envelope validation, and schema validation.
-- `fixtures/vectors.json`: 38 package-level vectors for domains, canonical JSON, observation ids, receipts, artifacts, Merkle roots, reports, attestations, cursors, identities, root commitments, work receipts, devnet block hashes, Local Alpha object ids, bridge/balance ids, hardware signal envelopes, local signature envelopes, and local transaction envelopes.
+- `fixtures/vectors.json`: 46 package-level vectors for domains, canonical JSON, observation ids, receipts, artifacts, Merkle roots, reports, attestations, cursors, identities, root commitments, work receipts, devnet block hashes, Local Alpha object ids, bridge/balance ids, Product Testnet V1 transaction ids, hardware signal envelopes, local signature envelopes, and local transaction envelopes.
+- `fixtures/product-testnet-transactions.json`: canonical Product Testnet V1 wallet transaction documents and signed local transaction envelopes for transfer, token launch, pool create, add liquidity, remove liquidity, swap, bridge credit acknowledgement, and bridge withdrawal intent.
 - `test-vectors/flowpulse-observation-v0.json`: FlowPulse-specific observation, receipt, artifact, report, worker signature digest, and verifier signature digest.
 
 ## FlowPulse Observation Vector Highlights
@@ -51,6 +52,7 @@ An implementation should reproduce:
 - deterministic verifier report id
 - EIP-712 signing digests without requiring test private keys
 - Local Alpha object IDs for AgentAccount, ModelPassport, WorkReceipt, ArtifactAvailabilityProof, VerifierModule, VerifierReport, MemoryCell, Challenge, FinalityReceipt, BridgeDeposit, BridgeCredit, BridgeWithdrawal, local balance records, hardware signal envelopes, and control-plane provenance responses
+- Product Testnet V1 transaction IDs for transfer, token launch, DEX pool create, add liquidity, remove liquidity, swap, bridge credit acknowledgement, and bridge withdrawal intent
 - Local Alpha signature envelope IDs and signing digests for local operator, agent, verifier, and hardware no-value test keys
 - Local transaction envelope IDs, payload hashes, and signing digests for chain-bound local transaction submission
 
@@ -70,7 +72,7 @@ npm run validate:vectors
 Expected output:
 
 ```text
-FLOWMEMORY_CRYPTO_VECTORS_OK 38
+FLOWMEMORY_CRYPTO_VECTORS_OK 46
 ```
 
 Validate the Local Alpha object documents and signature envelopes against the
@@ -83,7 +85,7 @@ npm run validate:local-alpha
 Expected output:
 
 ```text
-FLOWCHAIN_LOCAL_ALPHA_FIXTURES_OK documents=11 envelopes=11 schemas=12
+FLOWCHAIN_LOCAL_ALPHA_FIXTURES_OK documents=15 envelopes=15 transactions=1 schemas=17
 ```
 
 Print the sample vector summary:
@@ -122,6 +124,7 @@ FLOWPULSE_VECTOR_RECOMPUTE_OK
 - each Local Alpha object envelope has a bad-signature invalid vector
 - zero critical hashes, malformed object IDs, malformed dependency roots, bad parent/root relationships, malformed bridge deposits, and wrong object types should be rejected
 - wrong local transaction chain ids, domains, signers, replayed nonces, and changed object types should be rejected
+- Product Testnet V1 wrong chain, replay, wrong nonce/domain, payload mutation, malformed signer, missing signer, wrong object type, and invalid amount vectors should be rejected
 - expired worker signature should be rejected by verifier policy
 - reorged observation should not mutate into a verified report
 

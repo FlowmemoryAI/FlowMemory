@@ -3,6 +3,7 @@ import type { DashboardData, DashboardStatus, Provenance, SourceSubsystem } from
 export const DEFAULT_CONTROL_PLANE_URL = "http://127.0.0.1:8787";
 export const WORKBENCH_DEVNET_STATE_PATH = "/data/flowchain-local-devnet-state.json";
 export const WORKBENCH_DEVNET_DASHBOARD_STATE_PATH = "/data/flowchain-local-devnet-dashboard-state.json";
+export const WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH = "/data/flowchain-bridge-test-deposit.json";
 
 const FIXTURE_CHAIN_CONTEXT = "flowchain-private-local-testnet";
 const CONTROL_PLANE_TIMEOUT_MS = 900;
@@ -18,6 +19,12 @@ export type WorkbenchSectionKey =
   | "balances"
   | "faucetEvents"
   | "walletMetadata"
+  | "tokenLaunches"
+  | "tokenBalances"
+  | "dexPools"
+  | "liquidityPositions"
+  | "swaps"
+  | "explorerRecords"
   | "rootfields"
   | "agents"
   | "models"
@@ -104,6 +111,7 @@ export interface WorkbenchSnapshot {
     dashboard: DashboardData;
     devnetState: unknown | null;
     devnetDashboardState: unknown | null;
+    bridgeTestDeposit: unknown | null;
     controlPlaneHealth: unknown | null;
     controlPlaneState: unknown | null;
   };
@@ -162,9 +170,9 @@ export const WORKBENCH_SECTIONS: WorkbenchSectionDefinition[] = [
   },
   {
     key: "balances",
-    label: "Balances",
+    label: "Local Balances",
     detail: "No-value local balance or credit metadata when exported by the private testnet API.",
-    expectedEndpoint: "GET /balances",
+    expectedEndpoint: "GET /balances + GET /accounts/:id/balances",
     missingCommand: "npm run flowchain:smoke",
     missingService: "FlowChain no-value balance view /balances",
   },
@@ -183,6 +191,54 @@ export const WORKBENCH_SECTIONS: WorkbenchSectionDefinition[] = [
     expectedEndpoint: "GET /wallets/public",
     missingCommand: "npm run flowchain:init",
     missingService: "FlowChain public wallet metadata /wallets/public",
+  },
+  {
+    key: "tokenLaunches",
+    label: "Token Launch",
+    detail: "Local/testnet token definition and launch receipts. This surface does not represent tokenomics or a production coin sale.",
+    expectedEndpoint: "GET /tokens + GET /token-launches",
+    missingCommand: "npm run flowchain:product-e2e",
+    missingService: "FlowChain product-testnet token launch view /tokens",
+  },
+  {
+    key: "tokenBalances",
+    label: "Token Balances",
+    detail: "Browser-safe token balances for local/testnet accounts. Private keys and signing secrets stay outside browser storage.",
+    expectedEndpoint: "GET /token-balances",
+    missingCommand: "npm run flowchain:product-e2e",
+    missingService: "FlowChain token balance view /token-balances",
+  },
+  {
+    key: "dexPools",
+    label: "DEX Pools",
+    detail: "Local/testnet pool definitions, reserve state, quote metadata, and status for the product-testnet DEX path.",
+    expectedEndpoint: "GET /dex/pools",
+    missingCommand: "npm run flowchain:product-e2e",
+    missingService: "FlowChain DEX pool view /dex/pools",
+  },
+  {
+    key: "liquidityPositions",
+    label: "Liquidity",
+    detail: "Local/testnet LP positions and add/remove liquidity receipts.",
+    expectedEndpoint: "GET /dex/liquidity",
+    missingCommand: "npm run flowchain:product-e2e",
+    missingService: "FlowChain liquidity position view /dex/liquidity",
+  },
+  {
+    key: "swaps",
+    label: "Swaps",
+    detail: "Local/testnet swap receipts and balance deltas for the DEX path.",
+    expectedEndpoint: "GET /dex/swaps",
+    missingCommand: "npm run flowchain:product-e2e",
+    missingService: "FlowChain swap receipt view /dex/swaps",
+  },
+  {
+    key: "explorerRecords",
+    label: "Explorer Records",
+    detail: "Unified explorer rollup for blocks, transactions, receipts, token records, pool records, swap records, and bridge records.",
+    expectedEndpoint: "GET /explorer",
+    missingCommand: "npm run flowchain:product-e2e",
+    missingService: "FlowChain explorer API /explorer",
   },
   {
     key: "rootfields",
@@ -338,6 +394,30 @@ const WORKBENCH_ACTIONS: WorkbenchAction[] = [
     endpoint: "POST /bridge/smoke",
     detail: "Populate private/local bridge lifecycle test objects when the control-plane exposes them.",
     boundary: "Private/local bridge fixtures only; production bridge work remains out of scope.",
+  },
+  {
+    label: "Launch test token",
+    endpoint: "POST /tokens/launch",
+    detail: "Request a local/testnet token-launch transaction through the control-plane when it is explicitly advertised.",
+    boundary: "No production tokenomics and no private key material in browser storage.",
+  },
+  {
+    label: "Create test pool",
+    endpoint: "POST /dex/pools",
+    detail: "Request a local/testnet DEX pool create transaction through the control-plane when it is explicitly advertised.",
+    boundary: "Local DEX testing only; no production market or real asset liquidity claim.",
+  },
+  {
+    label: "Add test liquidity",
+    endpoint: "POST /dex/liquidity",
+    detail: "Request a local/testnet liquidity transaction through the control-plane when it is explicitly advertised.",
+    boundary: "Local no-value liquidity only.",
+  },
+  {
+    label: "Run test swap",
+    endpoint: "POST /dex/swaps",
+    detail: "Request a local/testnet swap transaction through the control-plane when it is explicitly advertised.",
+    boundary: "Local no-value swap only; this is not a production DEX route.",
   },
 ];
 
@@ -758,19 +838,28 @@ function buildAccountRecords(devnetState: unknown): WorkbenchRecord[] {
 }
 
 function buildBalanceRecords(devnetState: unknown): WorkbenchRecord[] {
-  return collectionFrom(devnetState, ["balances", "accountBalances", "balanceSheet", "credits", "creditBalances"]).map((balance, index) => {
+  return collectionFrom(devnetState, [
+    "localTestUnitBalances",
+    "balances",
+    "accountBalances",
+    "balanceSheet",
+    "credits",
+    "creditBalances",
+  ]).map((balance, index) => {
     const id = text(balance.balanceId ?? balance.accountId ?? balance.agentId ?? balance.id, `balance:${index + 1}`);
     return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
       id,
-      kind: "No-value balance",
+      kind: "Local test-unit balance",
       title: id,
       summary: text(balance.summary, "Local no-value balance or credit metadata exported by the private testnet API."),
       status: statusFrom(balance.status, "observed"),
       facts: [
         { label: "account", value: text(balance.accountId ?? balance.agentId) },
-        { label: "amount", value: text(balance.amount ?? balance.balance ?? balance.credits) },
-        { label: "unit", value: text(balance.unit, "no-value local credit") },
-        { label: "updated", value: text(balance.updatedAt ?? balance.blockNumber) },
+        { label: "owner", value: text(balance.owner ?? balance.controller) },
+        { label: "amount", value: text(balance.amount ?? balance.balance ?? balance.credits ?? balance.units) },
+        { label: "unit", value: text(balance.unit, "no-value local test unit") },
+        { label: "faucet total", value: text(balance.totalFaucetUnits) },
+        { label: "updated", value: text(balance.updatedAt ?? balance.updatedAtBlock ?? balance.blockNumber) },
       ],
       raw: balance,
     });
@@ -778,8 +867,8 @@ function buildBalanceRecords(devnetState: unknown): WorkbenchRecord[] {
 }
 
 function buildFaucetEventRecords(devnetState: unknown): WorkbenchRecord[] {
-  return collectionFrom(devnetState, ["faucetEvents", "faucetClaims", "faucetCredits", "faucet"]).map((event, index) => {
-    const id = text(event.eventId ?? event.faucetEventId ?? event.txId ?? event.id, `faucet-event:${index + 1}`);
+  return collectionFrom(devnetState, ["faucetRecords", "faucetEvents", "faucetClaims", "faucetCredits", "faucet"]).map((event, index) => {
+    const id = text(event.eventId ?? event.faucetRecordId ?? event.faucetEventId ?? event.txId ?? event.id, `faucet-event:${index + 1}`);
     return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
       id,
       kind: "Faucet event",
@@ -788,8 +877,9 @@ function buildFaucetEventRecords(devnetState: unknown): WorkbenchRecord[] {
       status: statusFrom(event.status, "observed"),
       facts: [
         { label: "account", value: text(event.accountId ?? event.agentId ?? event.wallet) },
-        { label: "amount", value: text(event.amount ?? event.credits) },
-        { label: "block", value: text(event.blockNumber) },
+        { label: "recipient", value: text(event.recipient) },
+        { label: "amount", value: text(event.amount ?? event.amountUnits ?? event.credits) },
+        { label: "block", value: text(event.blockNumber ?? event.creditedAtBlock) },
         { label: "created", value: text(event.createdAt ?? event.timestamp) },
       ],
       raw: event,
@@ -798,11 +888,11 @@ function buildFaucetEventRecords(devnetState: unknown): WorkbenchRecord[] {
 }
 
 function buildWalletMetadataRecords(devnetState: unknown): WorkbenchRecord[] {
-  return collectionFrom(devnetState, ["wallets", "walletMetadata", "publicWallets", "operatorKeyReferences"]).map((wallet, index) => {
+  return collectionFrom(devnetState, ["wallets", "walletMetadata", "publicWallets", "publicAccounts", "operatorKeyReferences"]).map((wallet, index) => {
     const id = text(wallet.walletId ?? wallet.keyReferenceId ?? wallet.operatorId ?? wallet.id, `wallet:${index + 1}`);
     return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
       id,
-      kind: "Public wallet metadata",
+      kind: "Public wallet/account metadata",
       title: id,
       summary: text(
         wallet.secretMaterialBoundary ?? wallet.summary,
@@ -821,26 +911,167 @@ function buildWalletMetadataRecords(devnetState: unknown): WorkbenchRecord[] {
   });
 }
 
-function buildBridgeRecords(devnetState: unknown, kind: "deposits" | "credits" | "withdrawals"): WorkbenchRecord[] {
+function buildTokenLaunchRecords(devnetState: unknown): WorkbenchRecord[] {
+  return collectionFrom(devnetState, ["tokenLaunches", "tokenDefinitions", "tokens", "localTokens", "launchedTokens"]).map((token, index) => {
+    const id = text(token.tokenId ?? token.launchId ?? token.id ?? token.symbol, `token-launch:${index + 1}`);
+    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id,
+      kind: "Token launch",
+      title: text(token.symbol ?? token.name ?? id),
+      summary: text(
+        token.summary,
+        "Local/testnet token definition exported for the Product Testnet V1 token-launch surface.",
+      ),
+      status: token.active === false ? "stale" : statusFrom(token.status, token.active === true ? "verified" : "observed"),
+      facts: [
+        { label: "token id", value: id },
+        { label: "name", value: text(token.name) },
+        { label: "symbol", value: text(token.symbol) },
+        { label: "issuer", value: text(token.issuer ?? token.owner ?? token.creator) },
+        { label: "supply", value: text(token.initialSupply ?? token.supply ?? token.totalSupply) },
+        { label: "block", value: text(token.blockNumber ?? token.launchedAtBlock) },
+      ],
+      raw: token,
+    });
+  });
+}
+
+function buildTokenBalanceRecords(devnetState: unknown): WorkbenchRecord[] {
+  return collectionFrom(devnetState, [
+    "tokenBalances",
+    "tokenAccountBalances",
+    "accountTokenBalances",
+    "tokenLedger",
+    "tokenHoldings",
+  ]).map((balance, index) => {
+    const id = text(
+      balance.balanceId ?? balance.tokenBalanceId ?? balance.id ?? `${text(balance.accountId)}:${text(balance.tokenId ?? balance.symbol)}`,
+      `token-balance:${index + 1}`,
+    );
+    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id,
+      kind: "Token balance",
+      title: id,
+      summary: text(balance.summary, "Local/testnet token balance exported by the runtime/control-plane."),
+      status: statusFrom(balance.status, "observed"),
+      facts: [
+        { label: "account", value: text(balance.accountId ?? balance.owner ?? balance.wallet) },
+        { label: "token", value: text(balance.tokenId ?? balance.symbol) },
+        { label: "amount", value: text(balance.amount ?? balance.balance ?? balance.units) },
+        { label: "locked", value: text(balance.locked ?? balance.reserved, "0") },
+        { label: "updated", value: text(balance.updatedAt ?? balance.updatedAtBlock ?? balance.blockNumber) },
+      ],
+      raw: balance,
+    });
+  });
+}
+
+function buildDexPoolRecords(devnetState: unknown): WorkbenchRecord[] {
+  return collectionFrom(devnetState, ["dexPools", "pools", "ammPools", "liquidityPools"]).map((pool, index) => {
+    const id = text(pool.poolId ?? pool.id ?? `${text(pool.baseToken ?? pool.tokenA)}:${text(pool.quoteToken ?? pool.tokenB)}`, `pool:${index + 1}`);
+    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id,
+      kind: "DEX pool",
+      title: id,
+      summary: text(pool.summary, "Local/testnet DEX pool exported by the Product Testnet V1 runtime."),
+      status: statusFrom(pool.status, pool.active === false ? "stale" : "observed"),
+      facts: [
+        { label: "base", value: text(pool.baseToken ?? pool.tokenA) },
+        { label: "quote", value: text(pool.quoteToken ?? pool.tokenB) },
+        { label: "reserve base", value: text(pool.reserveBase ?? pool.reserveA) },
+        { label: "reserve quote", value: text(pool.reserveQuote ?? pool.reserveB) },
+        { label: "lp supply", value: text(pool.lpSupply ?? pool.totalShares) },
+        { label: "fee bps", value: text(pool.feeBps ?? pool.fee, "local default") },
+      ],
+      raw: pool,
+    });
+  });
+}
+
+function buildLiquidityPositionRecords(devnetState: unknown): WorkbenchRecord[] {
+  return collectionFrom(devnetState, [
+    "liquidityPositions",
+    "lpPositions",
+    "positions",
+    "liquidityEvents",
+    "liquidityReceipts",
+  ]).map((position, index) => {
+    const id = text(position.positionId ?? position.lpPositionId ?? position.id, `liquidity:${index + 1}`);
+    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id,
+      kind: "Liquidity position",
+      title: id,
+      summary: text(position.summary, "Local/testnet liquidity position or liquidity receipt."),
+      status: statusFrom(position.status, "observed"),
+      facts: [
+        { label: "owner", value: text(position.owner ?? position.accountId ?? position.wallet) },
+        { label: "pool", value: text(position.poolId) },
+        { label: "shares", value: text(position.shares ?? position.lpTokens) },
+        { label: "amount base", value: text(position.amountBase ?? position.amountA) },
+        { label: "amount quote", value: text(position.amountQuote ?? position.amountB) },
+        { label: "block", value: text(position.blockNumber ?? position.updatedAtBlock) },
+      ],
+      raw: position,
+    });
+  });
+}
+
+function buildSwapRecords(devnetState: unknown): WorkbenchRecord[] {
+  return collectionFrom(devnetState, ["swaps", "swapReceipts", "swapEvents", "dexSwaps"]).map((swap, index) => {
+    const id = text(swap.swapId ?? swap.receiptId ?? swap.txId ?? swap.id, `swap:${index + 1}`);
+    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id,
+      kind: "Swap",
+      title: id,
+      summary: text(swap.summary, "Local/testnet swap receipt exported by the DEX runtime/control-plane."),
+      status: statusFrom(swap.status, "observed"),
+      facts: [
+        { label: "trader", value: text(swap.trader ?? swap.accountId ?? swap.wallet) },
+        { label: "pool", value: text(swap.poolId) },
+        { label: "token in", value: text(swap.tokenIn) },
+        { label: "amount in", value: text(swap.amountIn) },
+        { label: "token out", value: text(swap.tokenOut) },
+        { label: "amount out", value: text(swap.amountOut) },
+      ],
+      raw: swap,
+    });
+  });
+}
+
+function bridgeFixtureRecords(kind: "deposits" | "credits" | "withdrawals", bridgeTestDeposit: unknown | null): UnknownRecord[] {
+  if (kind !== "deposits" || !isRecord(bridgeTestDeposit)) {
+    return [];
+  }
+
+  return [bridgeTestDeposit];
+}
+
+function buildBridgeRecords(
+  devnetState: unknown,
+  kind: "deposits" | "credits" | "withdrawals",
+  bridgeTestDeposit: unknown | null = null,
+): WorkbenchRecord[] {
   const keyMap = {
     deposits: ["bridgeDeposits", "deposits"],
     credits: ["bridgeCredits", "bridgeCreditEvents"],
     withdrawals: ["bridgeWithdrawals", "withdrawals"],
   } satisfies Record<typeof kind, string[]>;
 
-  return collectionFrom(devnetState, keyMap[kind]).map((event, index) => {
+  return [...collectionFrom(devnetState, keyMap[kind]), ...bridgeFixtureRecords(kind, bridgeTestDeposit)].map((event, index) => {
     const id = text(event.bridgeEventId ?? event.depositId ?? event.creditId ?? event.withdrawalId ?? event.id, `bridge-${kind}:${index + 1}`);
-    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+    const fixturePath = event === bridgeTestDeposit ? WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH : WORKBENCH_DEVNET_STATE_PATH;
+    return makeRecord("devnet", fixturePath, {
       id,
       kind: `Bridge ${kind.slice(0, -1)}`,
       title: id,
-      summary: text(event.summary, "Private/local bridge lifecycle object exported by the control-plane."),
+      summary: text(event.summary, "Private/local or Base Sepolia bridge lifecycle test object exported for workbench inspection."),
       status: statusFrom(event.status, "pending"),
       facts: [
-        { label: "account", value: text(event.accountId ?? event.wallet ?? event.recipient) },
+        { label: "account", value: text(event.accountId ?? event.wallet ?? event.recipient ?? event.flowchainRecipient) },
         { label: "amount", value: text(event.amount) },
-        { label: "source", value: text(event.sourceChain ?? event.fromChain) },
+        { label: "source", value: text(event.sourceChain ?? event.sourceChainId ?? event.fromChain) },
         { label: "destination", value: text(event.destinationChain ?? event.toChain) },
+        { label: "tx hash", value: text(event.txHash) },
         { label: "block", value: text(event.blockNumber) },
       ],
       raw: event,
@@ -949,6 +1180,29 @@ function buildTransactionRecords(data: DashboardData, devnetState: unknown): Wor
       raw: observation,
     }),
   );
+}
+
+function buildExplorerRecords(data: DashboardData, devnetState: unknown, bridgeTestDeposit: unknown | null): WorkbenchRecord[] {
+  const explorerRecords = [
+    ...buildBlockRecords(data, devnetState).slice(0, 4),
+    ...buildTransactionRecords(data, devnetState).slice(0, 8),
+    ...buildReceiptRecords(data, devnetState).slice(0, 6),
+    ...buildTokenLaunchRecords(devnetState).slice(0, 4),
+    ...buildTokenBalanceRecords(devnetState).slice(0, 4),
+    ...buildDexPoolRecords(devnetState).slice(0, 4),
+    ...buildLiquidityPositionRecords(devnetState).slice(0, 4),
+    ...buildSwapRecords(devnetState).slice(0, 4),
+    ...buildBridgeRecords(devnetState, "deposits", bridgeTestDeposit).slice(0, 4),
+    ...buildBridgeRecords(devnetState, "credits", bridgeTestDeposit).slice(0, 4),
+    ...buildBridgeRecords(devnetState, "withdrawals", bridgeTestDeposit).slice(0, 4),
+  ];
+
+  return explorerRecords.map((record) => ({
+    ...record,
+    id: `explorer:${record.kind}:${record.id}`,
+    kind: `Explorer ${record.kind}`,
+    summary: `Explorer index projection: ${record.summary}`,
+  }));
 }
 
 function buildRootfieldRecords(data: DashboardData, devnetState: unknown): WorkbenchRecord[] {
@@ -1423,6 +1677,7 @@ function buildRawJsonRecords(
   controlPlane: ControlPlaneProbe,
   devnetState: unknown | null,
   devnetDashboardState: unknown | null,
+  bridgeTestDeposit: unknown | null,
 ): WorkbenchRecord[] {
   return [
     makeRecord("indexer", data.metadata.fixturePath, {
@@ -1464,6 +1719,20 @@ function buildRawJsonRecords(
       ],
       raw: devnetDashboardState,
     }),
+    makeRecord("devnet", WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH, {
+      id: "raw-bridge-test-deposit",
+      kind: "Raw JSON",
+      title: WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH,
+      summary: bridgeTestDeposit
+        ? "Bridge test-deposit fixture loaded for the local/testnet bridge record surface."
+        : "Bridge test-deposit fixture was not loaded.",
+      status: bridgeTestDeposit ? "verified" : "unresolved",
+      facts: [
+        { label: "schema", value: isRecord(bridgeTestDeposit) ? text(bridgeTestDeposit.schema) : "missing" },
+        { label: "keys", value: topLevelKeys(bridgeTestDeposit) },
+      ],
+      raw: bridgeTestDeposit,
+    }),
     makeLocalRecord(
       "indexer",
       controlPlane.url,
@@ -1498,6 +1767,7 @@ function buildProvenanceRecords(
   controlPlane: ControlPlaneProbe,
   devnetState: unknown | null,
   devnetDashboardState: unknown | null,
+  bridgeTestDeposit: unknown | null,
 ): WorkbenchRecord[] {
   return [
     makeLocalRecord(
@@ -1560,6 +1830,20 @@ function buildProvenanceRecords(
         { label: "source", value: "fixtures/launch-core/generated/devnet/dashboard-state.json" },
       ],
       raw: devnetDashboardState,
+    }),
+    makeRecord("devnet", WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH, {
+      id: "bridge-test-deposit-fixture",
+      kind: "Bridge fixture",
+      title: WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH,
+      summary: bridgeTestDeposit
+        ? "Existing bridge test-deposit fixture is available for bridge/explorer views."
+        : "Bridge test-deposit fixture was not loaded.",
+      status: bridgeTestDeposit ? "verified" : "unresolved",
+      facts: [
+        { label: "schema", value: isRecord(bridgeTestDeposit) ? text(bridgeTestDeposit.schema) : "missing" },
+        { label: "source", value: "fixtures/bridge/test deposit runtime copy" },
+      ],
+      raw: bridgeTestDeposit,
     }),
   ];
 }
@@ -1636,6 +1920,7 @@ export function buildWorkbenchSnapshot(
     controlPlane?: ControlPlaneProbe;
     devnetState?: unknown | null;
     devnetDashboardState?: unknown | null;
+    bridgeTestDeposit?: unknown | null;
     loadIssues?: string[];
   } = {},
 ): WorkbenchSnapshot {
@@ -1650,6 +1935,7 @@ export function buildWorkbenchSnapshot(
     } satisfies ControlPlaneProbe);
   const controlPlaneState = extractControlPlaneState(controlPlane.state);
   const activeDevnetState = controlPlaneState ?? options.devnetState ?? null;
+  const bridgeTestDeposit = options.bridgeTestDeposit ?? null;
   const source: WorkbenchSource = controlPlane.status === "available" && controlPlaneState ? "control-plane" : "fixture-fallback";
 
   const sections: Record<WorkbenchSectionKey, WorkbenchRecord[]> = {
@@ -1662,6 +1948,12 @@ export function buildWorkbenchSnapshot(
     balances: buildBalanceRecords(activeDevnetState),
     faucetEvents: buildFaucetEventRecords(activeDevnetState),
     walletMetadata: buildWalletMetadataRecords(activeDevnetState),
+    tokenLaunches: buildTokenLaunchRecords(activeDevnetState),
+    tokenBalances: buildTokenBalanceRecords(activeDevnetState),
+    dexPools: buildDexPoolRecords(activeDevnetState),
+    liquidityPositions: buildLiquidityPositionRecords(activeDevnetState),
+    swaps: buildSwapRecords(activeDevnetState),
+    explorerRecords: buildExplorerRecords(data, activeDevnetState, bridgeTestDeposit),
     rootfields: buildRootfieldRecords(data, activeDevnetState),
     agents: buildAgentRecords(data, activeDevnetState),
     models: buildModelRecords(activeDevnetState),
@@ -1672,16 +1964,28 @@ export function buildWorkbenchSnapshot(
     verifierReports: buildVerifierRecords(data, activeDevnetState),
     challenges: buildChallengeRecords(activeDevnetState),
     finality: buildFinalityRecords(data, activeDevnetState),
-    bridgeDeposits: buildBridgeRecords(activeDevnetState, "deposits"),
-    bridgeCredits: buildBridgeRecords(activeDevnetState, "credits"),
-    bridgeWithdrawals: buildBridgeRecords(activeDevnetState, "withdrawals"),
+    bridgeDeposits: buildBridgeRecords(activeDevnetState, "deposits", bridgeTestDeposit),
+    bridgeCredits: buildBridgeRecords(activeDevnetState, "credits", bridgeTestDeposit),
+    bridgeWithdrawals: buildBridgeRecords(activeDevnetState, "withdrawals", bridgeTestDeposit),
     provenance: [],
     hardwareSignals: buildHardwareSignalRecords(data, activeDevnetState),
     rawJson: [],
   };
 
-  sections.provenance = buildProvenanceRecords(data, controlPlane, options.devnetState ?? null, options.devnetDashboardState ?? null);
-  sections.rawJson = buildRawJsonRecords(data, controlPlane, options.devnetState ?? null, options.devnetDashboardState ?? null);
+  sections.provenance = buildProvenanceRecords(
+    data,
+    controlPlane,
+    options.devnetState ?? null,
+    options.devnetDashboardState ?? null,
+    bridgeTestDeposit,
+  );
+  sections.rawJson = buildRawJsonRecords(
+    data,
+    controlPlane,
+    options.devnetState ?? null,
+    options.devnetDashboardState ?? null,
+    bridgeTestDeposit,
+  );
   const displayedSections = source === "control-plane" ? relabelDevnetRecordsAsControlPlane(sections, controlPlane) : sections;
 
   return {
@@ -1697,6 +2001,7 @@ export function buildWorkbenchSnapshot(
       dashboard: data,
       devnetState: options.devnetState ?? null,
       devnetDashboardState: options.devnetDashboardState ?? null,
+      bridgeTestDeposit,
       controlPlaneHealth: controlPlane.health ?? null,
       controlPlaneState: controlPlane.state ?? null,
     },
@@ -1704,12 +2009,13 @@ export function buildWorkbenchSnapshot(
 }
 
 export async function fetchWorkbenchSnapshot(data: DashboardData): Promise<WorkbenchSnapshot> {
-  const [controlPlane, devnetStateResult, devnetDashboardStateResult] = await Promise.all([
+  const [controlPlane, devnetStateResult, devnetDashboardStateResult, bridgeTestDepositResult] = await Promise.all([
     probeControlPlane(),
     fetchOptionalJson(WORKBENCH_DEVNET_STATE_PATH),
     fetchOptionalJson(WORKBENCH_DEVNET_DASHBOARD_STATE_PATH),
+    fetchOptionalJson(WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH),
   ]);
-  const loadIssues = [devnetStateResult.error, devnetDashboardStateResult.error].filter(
+  const loadIssues = [devnetStateResult.error, devnetDashboardStateResult.error, bridgeTestDepositResult.error].filter(
     (issue): issue is string => typeof issue === "string" && issue.length > 0,
   );
 
@@ -1717,6 +2023,7 @@ export async function fetchWorkbenchSnapshot(data: DashboardData): Promise<Workb
     controlPlane,
     devnetState: devnetStateResult.value,
     devnetDashboardState: devnetDashboardStateResult.value,
+    bridgeTestDeposit: bridgeTestDepositResult.value,
     loadIssues,
   });
 }

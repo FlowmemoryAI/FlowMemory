@@ -150,6 +150,9 @@ export function validateLocalTransactionEnvelope({
   if (context.chainId !== undefined && String(envelope.chainId) !== String(context.chainId)) {
     errors.push("wrong-chain-id");
   }
+  if (context.expectedNonce !== undefined && String(envelope.nonce) !== String(context.expectedNonce)) {
+    errors.push("wrong-nonce");
+  }
   if (envelope.domain !== expectedDomain || envelope.domainSeparator !== expectedDomainSeparator) {
     errors.push("wrong-domain");
   }
@@ -185,6 +188,22 @@ export function validateLocalTransactionEnvelope({
   try {
     const expectedObjectId = localAlphaObjectId(document);
     const expectedPayloadHash = canonicalJsonHash(document);
+    const idField = descriptor.idField;
+    if (!isHex32(document[idField]) || !isHex32(envelope.objectId) || !isHex32(envelope.envelopeId)) {
+      errors.push("malformed-id");
+    }
+    if (document[idField] !== expectedObjectId) {
+      errors.push("bad-object-id");
+    }
+    for (const field of descriptor.nonzeroFields ?? []) {
+      if (document[field] === ZERO_BYTES32 || envelope.objectId === ZERO_BYTES32) {
+        errors.push("zero-hash");
+        break;
+      }
+    }
+    if (descriptor.parentRootCheck && !descriptor.parentRootCheck(document)) {
+      errors.push("invalid-transaction");
+    }
     if (envelope.objectId !== expectedObjectId) {
       errors.push("bad-object-id");
     }
@@ -220,4 +239,8 @@ export function validateLocalTransactionEnvelope({
     valid: errors.length === 0,
     errors: [...new Set(errors)]
   };
+}
+
+function isHex32(value) {
+  return typeof value === "string" && /^0x[0-9a-fA-F]{64}$/.test(value);
 }

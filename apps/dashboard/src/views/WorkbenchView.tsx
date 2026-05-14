@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Activity, Database, Network, PlayCircle, RefreshCw, Search, Server, Terminal } from "lucide-react";
+import { Activity, Coins, Database, ListChecks, Network, PlayCircle, RefreshCw, Repeat2, Search, Server, ShieldAlert, Terminal, Wallet } from "lucide-react";
 import { EmptyState } from "../components/EmptyState";
 import { HashValue } from "../components/HashValue";
 import { ProvenanceLine } from "../components/ProvenanceLine";
@@ -41,6 +41,10 @@ function missingStateDetail(activeDefinition: (typeof WORKBENCH_SECTIONS)[number
   return `${activeDefinition.missingService} did not provide records for ${activeDefinition.expectedEndpoint}. Run ${activeDefinition.missingCommand} locally, then refresh this dashboard.`;
 }
 
+function statusForCount(count: number): DashboardStatus {
+  return count > 0 ? "verified" : "pending";
+}
+
 export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps) {
   const [activeSection, setActiveSection] = useState<WorkbenchSectionKey>(DEFAULT_SECTION);
   const [query, setQuery] = useState("");
@@ -52,6 +56,65 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
     [activeRecords, query],
   );
   const sourceStatus: DashboardStatus = workbench.source === "control-plane" ? "verified" : "stale";
+  const bridgeRecordCount =
+    workbench.sections.bridgeDeposits.length + workbench.sections.bridgeCredits.length + workbench.sections.bridgeWithdrawals.length;
+  const productSurfaces: Array<{
+    key: WorkbenchSectionKey;
+    label: string;
+    detail: string;
+    command: string;
+    count: number;
+    Icon: typeof Wallet;
+  }> = [
+    {
+      key: "walletMetadata",
+      label: "Wallet public state",
+      detail: "Public account/key references only. Signing secrets stay outside browser storage.",
+      command: "npm run flowchain:init",
+      count: workbench.sections.walletMetadata.length + workbench.sections.accounts.length,
+      Icon: Wallet,
+    },
+    {
+      key: "balances",
+      label: "Local balances",
+      detail: "No-value local test units from faucet or bridge-credit flows.",
+      command: "npm run flowchain:faucet",
+      count: workbench.sections.balances.length + workbench.sections.faucetEvents.length,
+      Icon: Coins,
+    },
+    {
+      key: "tokenLaunches",
+      label: "Token launch",
+      detail: "Local/testnet token definitions and launch receipts.",
+      command: "npm run flowchain:product-e2e",
+      count: workbench.sections.tokenLaunches.length + workbench.sections.tokenBalances.length,
+      Icon: ListChecks,
+    },
+    {
+      key: "dexPools",
+      label: "DEX pools",
+      detail: "Pool reserves, liquidity positions, and swap receipt visibility.",
+      command: "npm run flowchain:product-e2e",
+      count: workbench.sections.dexPools.length + workbench.sections.liquidityPositions.length + workbench.sections.swaps.length,
+      Icon: Repeat2,
+    },
+    {
+      key: "explorerRecords",
+      label: "Explorer records",
+      detail: "Blocks, transactions, receipts, token, DEX, and bridge rollups.",
+      command: "npm run flowchain:product-e2e",
+      count: workbench.sections.explorerRecords.length,
+      Icon: Database,
+    },
+    {
+      key: "bridgeDeposits",
+      label: "Bridge records",
+      detail: "Local/Anvil/Base Sepolia test records only; real-funds bridge remains blocked.",
+      command: "npm run bridge:local-credit:smoke",
+      count: bridgeRecordCount,
+      Icon: ShieldAlert,
+    },
+  ];
 
   const runLocalAction = async (endpoint: string, label: string) => {
     const [method, path] = endpoint.split(/\s+/, 2);
@@ -73,7 +136,7 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
       <SectionHeader
         eyebrow="flowchain private/local testnet"
         title="Local explorer workbench"
-        detail="Usable browser surface for inspecting the private/local L1 testnet shape. It probes the local control-plane API when available and otherwise renders deterministic committed fixtures; value-bearing wallet flows are not included."
+        detail="Product Testnet V1 browser surface for local node/API, wallet public state, balances, token launch, DEX, explorer, and bridge-test records. It probes the local control-plane API when available, falls back to deterministic fixtures, and never stores private keys in browser localStorage."
         action={
           <div className="workbench-header-actions">
             <label className="search-box">
@@ -137,6 +200,40 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
             ))}
           </div>
         </article>
+      </section>
+
+      <section className="workbench-boundary-strip" aria-label="Local testnet boundary">
+        <article>
+          <strong>Local/testnet only</strong>
+          <span>No production mainnet, token sale, audited custody, or production bridge claim is made by this workbench.</span>
+        </article>
+        <article>
+          <strong>Browser key boundary</strong>
+          <span>The UI reads public wallet/account metadata and calls advertised local endpoints; private keys are not written to localStorage.</span>
+        </article>
+        <article>
+          <strong>Offline recovery</strong>
+          <span>
+            Run <code>npm run flowchain:start</code>, then <code>npm run control-plane:serve</code>, then refresh.
+          </span>
+        </article>
+      </section>
+
+      <section className="product-surface-grid" aria-label="Product Testnet V1 workbench surfaces">
+        {productSurfaces.map(({ key, label, detail, command, count, Icon }) => (
+          <button className="product-surface" key={key} type="button" onClick={() => setActiveSection(key)}>
+            <span className="product-surface-icon">
+              <Icon size={18} aria-hidden="true" />
+            </span>
+            <span>
+              <strong>{label}</strong>
+              <small>{detail}</small>
+              <code>{command}</code>
+            </span>
+            <StatusBadge status={statusForCount(count)} compact />
+            <b>{count}</b>
+          </button>
+        ))}
       </section>
 
       <section className="panel workbench-api-panel">
@@ -218,24 +315,34 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
           </div>
         </article>
         <article className="metric-tile">
-          <span>Smoke objects</span>
+          <span>Token/DEX objects</span>
           <strong>
-            {workbench.sections.receipts.length +
-              workbench.sections.artifacts.length +
-              workbench.sections.verifierReports.length +
-              workbench.sections.memoryCells.length}
+            {workbench.sections.tokenLaunches.length +
+              workbench.sections.tokenBalances.length +
+              workbench.sections.dexPools.length +
+              workbench.sections.liquidityPositions.length +
+              workbench.sections.swaps.length}
           </strong>
           <div>
-            <StatusBadge status="observed" compact />
-            <small>fixtures plus projections</small>
+            <StatusBadge
+              status={statusForCount(
+                workbench.sections.tokenLaunches.length +
+                  workbench.sections.tokenBalances.length +
+                  workbench.sections.dexPools.length +
+                  workbench.sections.liquidityPositions.length +
+                  workbench.sections.swaps.length,
+              )}
+              compact
+            />
+            <small>product-testnet path</small>
           </div>
         </article>
         <article className="metric-tile">
-          <span>Open challenges</span>
-          <strong>{workbench.sections.challenges.length}</strong>
+          <span>Bridge/explorer</span>
+          <strong>{bridgeRecordCount + workbench.sections.explorerRecords.length}</strong>
           <div>
-            <StatusBadge status={workbench.sections.challenges.length > 0 ? "pending" : "observed"} compact />
-            <small>API-ready view</small>
+            <StatusBadge status={statusForCount(bridgeRecordCount + workbench.sections.explorerRecords.length)} compact />
+            <small>test records only</small>
           </div>
         </article>
       </section>
@@ -306,13 +413,18 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
         </div>
         <div className="boundary-copy">
           <p>
-            This screen is an explorer/workbench for private/local validation. It uses existing V0 dashboard state,
-            launch-core devnet output, and future control-plane API responses; it does not introduce a new fixture
-            system or a separate dashboard surface.
+            This screen is an explorer/workbench for private/local Product Testnet V1 validation. It uses existing V0
+            dashboard state, launch-core devnet output, bridge test-deposit fixtures, and future control-plane API
+            responses; it does not introduce a new fixture system or a separate dashboard surface.
           </p>
           <p>
             The integration point is the local control-plane API at <code>{workbench.controlPlane.url}</code>. Until that
             service is running, the API status is intentionally shown as fixture fallback.
+          </p>
+          <p>
+            Recovery commands: <code>npm run flowchain:prereq</code> <code>npm run flowchain:init</code>{" "}
+            <code>npm run flowchain:start</code> <code>npm run control-plane:serve</code>{" "}
+            <code>npm run workbench:dev</code> <code>npm run flowchain:product-e2e</code>.
           </p>
         </div>
       </section>

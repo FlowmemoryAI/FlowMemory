@@ -313,6 +313,98 @@ export interface LocalBalanceRecordInput {
   nonce: Bytes32;
 }
 
+export interface ProductTransferInput {
+  fromAccountId: Bytes32;
+  toAccountId: Bytes32;
+  assetId: Bytes32;
+  amount: number | bigint | string;
+  accountNonce: number | bigint | string;
+  deadlineBlock: number | bigint | string;
+  memoHash: Bytes32;
+}
+
+export interface ProductTokenLaunchInput {
+  issuerAccountId: Bytes32;
+  tokenId: Bytes32;
+  symbolHash: Bytes32;
+  nameHash: Bytes32;
+  metadataHash: Bytes32;
+  decimals: number | bigint | string;
+  initialSupply: number | bigint | string;
+  recipientAccountId: Bytes32;
+  accountNonce: number | bigint | string;
+  launchPolicyHash: Bytes32;
+}
+
+export interface ProductPoolCreateInput {
+  creatorAccountId: Bytes32;
+  poolId: Bytes32;
+  baseAssetId: Bytes32;
+  quoteAssetId: Bytes32;
+  feeBps: number | bigint | string;
+  tickSpacing: number | bigint | string;
+  metadataHash: Bytes32;
+  accountNonce: number | bigint | string;
+}
+
+export interface ProductAddLiquidityInput {
+  providerAccountId: Bytes32;
+  poolId: Bytes32;
+  baseAmount: number | bigint | string;
+  quoteAmount: number | bigint | string;
+  minLiquidityTokens: number | bigint | string;
+  deadlineBlock: number | bigint | string;
+  accountNonce: number | bigint | string;
+}
+
+export interface ProductRemoveLiquidityInput {
+  providerAccountId: Bytes32;
+  poolId: Bytes32;
+  liquidityTokens: number | bigint | string;
+  minBaseAmount: number | bigint | string;
+  minQuoteAmount: number | bigint | string;
+  deadlineBlock: number | bigint | string;
+  accountNonce: number | bigint | string;
+}
+
+export interface ProductSwapInput {
+  traderAccountId: Bytes32;
+  poolId: Bytes32;
+  assetInId: Bytes32;
+  assetOutId: Bytes32;
+  amountIn: number | bigint | string;
+  minAmountOut: number | bigint | string;
+  deadlineBlock: number | bigint | string;
+  accountNonce: number | bigint | string;
+}
+
+export interface ProductBridgeCreditAckInput {
+  creditId: Bytes32;
+  depositId: Bytes32;
+  accountId: Bytes32;
+  assetId: Bytes32;
+  amount: number | bigint | string;
+  acknowledgedAtBlockNumber: number | bigint | string;
+  accountNonce: number | bigint | string;
+}
+
+export interface BridgeWithdrawalIntentInput {
+  creditId: Bytes32;
+  depositId: Bytes32;
+  sourceChainId: number | bigint | string;
+  destinationChainId: number | bigint | string;
+  token: Address;
+  amount: number | bigint | string;
+  flowchainAccount: Bytes32;
+  baseRecipient: Address;
+  status: string;
+  requestedAt: string;
+  testMode: boolean;
+  broadcast: boolean;
+  releasePolicy: string;
+  productionReady: boolean;
+}
+
 export interface ControlPlaneProvenanceResponseInput {
   requestId: Bytes32;
   subjectId: Bytes32;
@@ -488,6 +580,14 @@ export function bridgeDepositId(input: BridgeDepositInput): Bytes32;
 export function bridgeCreditId(input: BridgeCreditInput): Bytes32;
 export function bridgeWithdrawalId(input: BridgeWithdrawalInput): Bytes32;
 export function localBalanceRecordId(input: LocalBalanceRecordInput): Bytes32;
+export function productTransferId(input: ProductTransferInput): Bytes32;
+export function productTokenLaunchId(input: ProductTokenLaunchInput): Bytes32;
+export function productPoolCreateId(input: ProductPoolCreateInput): Bytes32;
+export function productAddLiquidityId(input: ProductAddLiquidityInput): Bytes32;
+export function productRemoveLiquidityId(input: ProductRemoveLiquidityInput): Bytes32;
+export function productSwapId(input: ProductSwapInput): Bytes32;
+export function productBridgeCreditAckId(input: ProductBridgeCreditAckInput): Bytes32;
+export function bridgeWithdrawalIntentId(input: BridgeWithdrawalIntentInput): Bytes32;
 export function hardwareSignalEnvelopeId(input: HardwareSignalEnvelopeInput): Bytes32;
 export function controlPlaneProvenanceResponseId(input: ControlPlaneProvenanceResponseInput): Bytes32;
 export function localSignatureEnvelopeHash(input: LocalSignatureEnvelopeInput): Bytes32;
@@ -526,6 +626,7 @@ export function validateLocalTransactionEnvelope(input: {
   envelope: Record<string, unknown>;
   context?: {
     chainId?: number | bigint | string;
+    expectedNonce?: number | bigint | string;
     expectedSignerId?: Bytes32;
     seenNonces?: Set<string>;
   };

@@ -1,6 +1,9 @@
 use flowmemory_devnet::model::{
-    DevnetError, FLOWPULSE_TOPIC0, Transaction, ZERO_HASH, apply_transaction, build_block,
-    demo_transactions, genesis_state, queue_transaction, state_map_roots, state_root,
+    DevnetError, FLOWPULSE_TOPIC0, LOCAL_TEST_UNIT_ASSET_ID, Transaction, ZERO_HASH,
+    apply_transaction, build_block, demo_transactions, deterministic_liquidity_id,
+    deterministic_lp_position_id, deterministic_pool_id, deterministic_swap_id,
+    deterministic_token_balance_id, deterministic_token_id, genesis_state,
+    product_demo_transactions, queue_transaction, state_map_roots, state_root,
 };
 use flowmemory_devnet::{canonical_json, keccak_hex};
 use std::process::Command;
@@ -307,8 +310,14 @@ fn local_faucet_and_transfer_update_test_unit_ledger() {
     )
     .unwrap();
 
-    assert_eq!(state.local_test_unit_balances["local-account:alice"].units, 30);
-    assert_eq!(state.local_test_unit_balances["local-account:bob"].units, 20);
+    assert_eq!(
+        state.local_test_unit_balances["local-account:alice"].units,
+        30
+    );
+    assert_eq!(
+        state.local_test_unit_balances["local-account:bob"].units,
+        20
+    );
     assert_eq!(state.faucet_records.len(), 1);
     assert_eq!(state.balance_transfers.len(), 1);
 
@@ -327,6 +336,319 @@ fn local_faucet_and_transfer_update_test_unit_ledger() {
             "local-account:bob".to_string()
         ))
     );
+}
+
+#[test]
+fn token_launch_pool_liquidity_swap_and_remove_update_product_state() {
+    let mut state = genesis_state();
+    setup_product_test_accounts(&mut state);
+
+    let token_id = deterministic_token_id("FLOWT");
+    let pool_id = deterministic_pool_id(LOCAL_TEST_UNIT_ASSET_ID, &token_id);
+    let alice = "local-account:product:alice";
+    let bob = "local-account:product:bob";
+    let add_liquidity_id = deterministic_liquidity_id(
+        &pool_id,
+        alice,
+        "add",
+        &format!("{}:{}:{}", 5_000, 500_000, 1),
+    );
+    let swap_id = deterministic_swap_id(
+        &pool_id,
+        bob,
+        LOCAL_TEST_UNIT_ASSET_ID,
+        100,
+        &9_000_u64.to_string(),
+    );
+    let remove_liquidity_id =
+        deterministic_liquidity_id(&pool_id, alice, "remove", &format!("{}:{}:{}", 100, 1, 1));
+
+    apply_transaction(
+        &mut state,
+        &Transaction::LaunchToken {
+            token_id: token_id.clone(),
+            symbol: "flowt".to_string(),
+            name: "FlowChain Product Test Token".to_string(),
+            decimals: 6,
+            initial_owner_account_id: alice.to_string(),
+            initial_supply_units: 1_000_000,
+        },
+    )
+    .unwrap();
+    apply_transaction(
+        &mut state,
+        &Transaction::CreatePool {
+            pool_id: pool_id.clone(),
+            base_asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            quote_asset_id: token_id.clone(),
+            created_by_account_id: alice.to_string(),
+        },
+    )
+    .unwrap();
+    apply_transaction(
+        &mut state,
+        &Transaction::AddLiquidity {
+            liquidity_id: add_liquidity_id.clone(),
+            pool_id: pool_id.clone(),
+            provider_account_id: alice.to_string(),
+            base_amount_units: 5_000,
+            quote_amount_units: 500_000,
+            min_lp_units: 1,
+        },
+    )
+    .unwrap();
+    apply_transaction(
+        &mut state,
+        &Transaction::SwapExactIn {
+            swap_id: swap_id.clone(),
+            pool_id: pool_id.clone(),
+            trader_account_id: bob.to_string(),
+            asset_in_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            amount_in_units: 100,
+            min_amount_out_units: 9_000,
+        },
+    )
+    .unwrap();
+    apply_transaction(
+        &mut state,
+        &Transaction::RemoveLiquidity {
+            liquidity_id: remove_liquidity_id.clone(),
+            pool_id: pool_id.clone(),
+            provider_account_id: alice.to_string(),
+            lp_units: 100,
+            min_base_amount_units: 1,
+            min_quote_amount_units: 1,
+        },
+    )
+    .unwrap();
+
+    let pool = state.dex_pools.get(&pool_id).expect("pool");
+    assert_eq!(pool.reserve_base_units, 4_998);
+    assert_eq!(pool.reserve_quote_units, 480_394);
+    assert_eq!(pool.total_lp_units, 4_900);
+    assert_eq!(
+        pool.last_liquidity_receipt_id.as_deref(),
+        Some(remove_liquidity_id.as_str())
+    );
+    assert_eq!(pool.last_swap_receipt_id.as_deref(), Some(swap_id.as_str()));
+
+    let alice_lp_id = deterministic_lp_position_id(&pool_id, alice);
+    let position = state.lp_positions.get(&alice_lp_id).expect("LP position");
+    assert_eq!(position.lp_units, 4_900);
+    assert_eq!(position.base_units_deposited, 5_000);
+    assert_eq!(position.base_units_withdrawn, 102);
+    assert_eq!(state.liquidity_receipts.len(), 2);
+
+    let bob_token_balance_id = deterministic_token_balance_id(&token_id, bob);
+    assert_eq!(state.token_balances[&bob_token_balance_id].units, 9_803);
+    assert_eq!(state.swap_receipts[&swap_id].amount_out_units, 9_803);
+
+    let roots = state_map_roots(&state);
+    assert!(roots.token_definition_root.starts_with("0x"));
+    assert!(roots.dex_pool_root.starts_with("0x"));
+    assert!(roots.swap_receipt_root.starts_with("0x"));
+}
+
+#[test]
+fn token_and_dex_reject_duplicate_zero_insufficient_and_slippage_failures() {
+    let mut state = genesis_state();
+    setup_product_test_accounts(&mut state);
+
+    let token_id = deterministic_token_id("FLOWT");
+    let bad_token_id = deterministic_token_id("WRONG");
+    assert_eq!(
+        apply_transaction(
+            &mut state,
+            &Transaction::LaunchToken {
+                token_id: bad_token_id,
+                symbol: "FLOWT".to_string(),
+                name: "Wrong ID".to_string(),
+                decimals: 6,
+                initial_owner_account_id: "local-account:product:alice".to_string(),
+                initial_supply_units: 1_000,
+            },
+        ),
+        Err(DevnetError::DeterministicIdMismatch {
+            kind: "token".to_string(),
+            expected: token_id.clone(),
+            actual: deterministic_token_id("WRONG"),
+        })
+    );
+
+    apply_transaction(
+        &mut state,
+        &Transaction::LaunchToken {
+            token_id: token_id.clone(),
+            symbol: "FLOWT".to_string(),
+            name: "FlowChain Product Test Token".to_string(),
+            decimals: 6,
+            initial_owner_account_id: "local-account:product:alice".to_string(),
+            initial_supply_units: 1_000_000,
+        },
+    )
+    .unwrap();
+    assert_eq!(
+        apply_transaction(
+            &mut state,
+            &Transaction::LaunchToken {
+                token_id: token_id.clone(),
+                symbol: "FLOWT".to_string(),
+                name: "Duplicate".to_string(),
+                decimals: 6,
+                initial_owner_account_id: "local-account:product:alice".to_string(),
+                initial_supply_units: 1,
+            },
+        ),
+        Err(DevnetError::TokenAlreadyExists(token_id.clone()))
+    );
+
+    let pool_id = deterministic_pool_id(LOCAL_TEST_UNIT_ASSET_ID, &token_id);
+    apply_transaction(
+        &mut state,
+        &Transaction::CreatePool {
+            pool_id: pool_id.clone(),
+            base_asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            quote_asset_id: token_id.clone(),
+            created_by_account_id: "local-account:product:alice".to_string(),
+        },
+    )
+    .unwrap();
+    assert_eq!(
+        apply_transaction(
+            &mut state,
+            &Transaction::CreatePool {
+                pool_id: pool_id.clone(),
+                base_asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+                quote_asset_id: token_id.clone(),
+                created_by_account_id: "local-account:product:alice".to_string(),
+            },
+        ),
+        Err(DevnetError::PoolAlreadyExists(pool_id.clone()))
+    );
+
+    let zero_liquidity_id =
+        deterministic_liquidity_id(&pool_id, "local-account:product:alice", "add", "0:1:1");
+    assert_eq!(
+        apply_transaction(
+            &mut state,
+            &Transaction::AddLiquidity {
+                liquidity_id: zero_liquidity_id.clone(),
+                pool_id: pool_id.clone(),
+                provider_account_id: "local-account:product:alice".to_string(),
+                base_amount_units: 0,
+                quote_amount_units: 1,
+                min_lp_units: 1,
+            },
+        ),
+        Err(DevnetError::TokenAmountMustBePositive(zero_liquidity_id))
+    );
+
+    let too_much_liquidity_id = deterministic_liquidity_id(
+        &pool_id,
+        "local-account:product:bob",
+        "add",
+        &format!("{}:{}:{}", 2_000, 1, 1),
+    );
+    assert_eq!(
+        apply_transaction(
+            &mut state,
+            &Transaction::AddLiquidity {
+                liquidity_id: too_much_liquidity_id,
+                pool_id: pool_id.clone(),
+                provider_account_id: "local-account:product:bob".to_string(),
+                base_amount_units: 2_000,
+                quote_amount_units: 1,
+                min_lp_units: 1,
+            },
+        ),
+        Err(DevnetError::LocalTestUnitBalanceInsufficient(
+            "local-account:product:bob".to_string()
+        ))
+    );
+
+    let add_liquidity_id = deterministic_liquidity_id(
+        &pool_id,
+        "local-account:product:alice",
+        "add",
+        &format!("{}:{}:{}", 5_000, 500_000, 1),
+    );
+    apply_transaction(
+        &mut state,
+        &Transaction::AddLiquidity {
+            liquidity_id: add_liquidity_id,
+            pool_id: pool_id.clone(),
+            provider_account_id: "local-account:product:alice".to_string(),
+            base_amount_units: 5_000,
+            quote_amount_units: 500_000,
+            min_lp_units: 1,
+        },
+    )
+    .unwrap();
+
+    let slippage_swap_id = deterministic_swap_id(
+        &pool_id,
+        "local-account:product:bob",
+        LOCAL_TEST_UNIT_ASSET_ID,
+        100,
+        &50_000_u64.to_string(),
+    );
+    assert_eq!(
+        apply_transaction(
+            &mut state,
+            &Transaction::SwapExactIn {
+                swap_id: slippage_swap_id.clone(),
+                pool_id: pool_id.clone(),
+                trader_account_id: "local-account:product:bob".to_string(),
+                asset_in_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+                amount_in_units: 100,
+                min_amount_out_units: 50_000,
+            },
+        ),
+        Err(DevnetError::SwapSlippageExceeded(slippage_swap_id))
+    );
+
+    let missing_pool_swap_id = deterministic_swap_id(
+        "pool:missing",
+        "local-account:product:bob",
+        LOCAL_TEST_UNIT_ASSET_ID,
+        1,
+        &1_u64.to_string(),
+    );
+    assert_eq!(
+        apply_transaction(
+            &mut state,
+            &Transaction::SwapExactIn {
+                swap_id: missing_pool_swap_id,
+                pool_id: "pool:missing".to_string(),
+                trader_account_id: "local-account:product:bob".to_string(),
+                asset_in_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+                amount_in_units: 1,
+                min_amount_out_units: 1,
+            },
+        ),
+        Err(DevnetError::PoolMissing("pool:missing".to_string()))
+    );
+}
+
+#[test]
+fn product_demo_transactions_apply_in_one_block_with_receipts() {
+    let mut state = genesis_state();
+    for tx in product_demo_transactions() {
+        queue_transaction(&mut state, tx);
+    }
+
+    let block = build_block(&mut state);
+    assert_eq!(block.receipts.len(), 9);
+    assert!(
+        block
+            .receipts
+            .iter()
+            .all(|receipt| receipt.status == "applied")
+    );
+    assert_eq!(state.token_definitions.len(), 1);
+    assert_eq!(state.dex_pools.len(), 1);
+    assert_eq!(state.liquidity_receipts.len(), 2);
+    assert_eq!(state.swap_receipts.len(), 1);
 }
 
 #[test]
@@ -661,6 +983,45 @@ fn cli_smoke_runs_full_flow() {
     assert_eq!(summary["checks"]["localTestUnitBalanceUnits"], 1000);
     assert_eq!(summary["checks"]["receiptFinalized"], true);
     assert!(out_dir.join("control-plane-handoff.json").exists());
+
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
+fn cli_product_smoke_exports_token_and_dex_handoff() {
+    let temp = temp_dir("cli-product-smoke");
+    let state = temp.join("state.json");
+    let out_dir = temp.join("handoff");
+
+    let output = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "product-smoke",
+            "--out-dir",
+            out_dir.to_str().expect("out path"),
+        ])
+        .output()
+        .expect("run product smoke");
+    assert!(output.status.success());
+
+    let summary: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("product smoke summary json");
+    assert_eq!(summary["deterministicReplay"], true);
+    assert_eq!(summary["checks"]["localAccountsFunded"], true);
+    assert_eq!(summary["checks"]["tokenLaunched"], true);
+    assert_eq!(summary["checks"]["poolCreated"], true);
+    assert_eq!(summary["checks"]["liquidityAdded"], true);
+    assert_eq!(summary["checks"]["swapExecuted"], true);
+    assert_eq!(summary["checks"]["liquidityRemoved"], true);
+    assert_eq!(summary["checks"]["productReceiptsQueryable"], true);
+    assert!(out_dir.join("control-plane-handoff.json").exists());
+
+    let control_plane_body =
+        std::fs::read_to_string(out_dir.join("control-plane-handoff.json")).expect("handoff body");
+    assert!(control_plane_body.contains("tokenDefinitions"));
+    assert!(control_plane_body.contains("dexPools"));
+    assert!(control_plane_body.contains("swapReceipts"));
 
     std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
 }
@@ -1090,6 +1451,39 @@ fn setup_receipt_with_report_status(
     apply_transaction(
         state,
         &verifier_report_tx("report:status", "receipt:status", rootfield_id, status),
+    )
+    .unwrap();
+}
+
+fn setup_product_test_accounts(state: &mut flowmemory_devnet::model::ChainState) {
+    apply_transaction(
+        state,
+        &create_balance_tx("local-account:product:alice", "operator:product:alice"),
+    )
+    .unwrap();
+    apply_transaction(
+        state,
+        &create_balance_tx("local-account:product:bob", "operator:product:bob"),
+    )
+    .unwrap();
+    apply_transaction(
+        state,
+        &faucet_tx(
+            "faucet:product:alice",
+            "local-account:product:alice",
+            "operator:product:alice",
+            10_000,
+        ),
+    )
+    .unwrap();
+    apply_transaction(
+        state,
+        &faucet_tx(
+            "faucet:product:bob",
+            "local-account:product:bob",
+            "operator:product:bob",
+            1_000,
+        ),
     )
     .unwrap();
 }

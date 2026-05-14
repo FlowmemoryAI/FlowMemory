@@ -2,7 +2,8 @@ use crate::hash::{hash_json, normalize_value};
 use crate::model::{
     FLOWPULSE_TOPIC0, ImportedFlowPulseObservation, ImportedVerifierReport, LocalAuthorization,
     Transaction, build_block, demo_transactions, envelope_tx, genesis_state,
-    queue_authorized_transaction, queue_transaction, state_map_roots, state_root,
+    product_demo_transactions, queue_authorized_transaction, queue_transaction, state_map_roots,
+    state_root,
 };
 use crate::storage::{default_state_path, load_or_genesis, load_state, reset_state, save_state};
 use anyhow::{Context, Result, anyhow};
@@ -25,7 +26,9 @@ pub struct Cli {
 pub enum Command {
     Init,
     ResetLocal,
-    Start { blocks: u64 },
+    Start {
+        blocks: u64,
+    },
     Node {
         node_id: String,
         block_ms: u64,
@@ -50,13 +53,30 @@ pub enum Command {
         authorized_by: Option<String>,
         direct: bool,
     },
-    SubmitFixture { fixture: PathBuf },
-    InspectState { summary: bool },
-    ExportFixtures { out_dir: PathBuf },
-    ExportState { out: PathBuf },
-    ImportState { from: PathBuf },
-    Demo { out_dir: PathBuf },
-    Smoke { out_dir: PathBuf },
+    SubmitFixture {
+        fixture: PathBuf,
+    },
+    InspectState {
+        summary: bool,
+    },
+    ExportFixtures {
+        out_dir: PathBuf,
+    },
+    ExportState {
+        out: PathBuf,
+    },
+    ImportState {
+        from: PathBuf,
+    },
+    Demo {
+        out_dir: PathBuf,
+    },
+    Smoke {
+        out_dir: PathBuf,
+    },
+    ProductSmoke {
+        out_dir: PathBuf,
+    },
 }
 
 pub fn run_cli() -> Result<()> {
@@ -171,6 +191,11 @@ fn parse_args(args: Vec<String>) -> Result<Cli> {
                 .map(PathBuf::from)
                 .unwrap_or_else(|_| PathBuf::from("fixtures/handoff/generated")),
         },
+        "product-demo" | "product-smoke" => Command::ProductSmoke {
+            out_dir: option_value(&positional[1..], "--out-dir")
+                .map(PathBuf::from)
+                .unwrap_or_else(|_| PathBuf::from("fixtures/handoff/generated-product")),
+        },
         unknown => return Err(anyhow!("unknown command '{unknown}'")),
     };
 
@@ -215,7 +240,7 @@ fn option_u64(args: &[String], name: &str) -> Result<Option<u64>> {
 
 fn print_help() {
     println!(
-        "flowmemory-devnet --state <path> --node-dir <path> <command>\n\nCommands:\n  init\n  reset-local\n  node [--node-id <id>] [--block-ms <ms>] [--max-blocks <n>] [--peer-config <path>]\n  node-stop\n  node-status\n  tick [--node-id <id>] [--peer-config <path>]\n  submit-tx --tx-file <path> [--authorized-by <id>] [--direct]\n  faucet --account <id> --amount <n> [--reason <text>] [--authorized-by <id>] [--direct]\n  start|run [--blocks <n>]\n  run-block\n  submit-fixture --fixture <path>\n  inspect|inspect-state [--summary]\n  export|export-fixtures [--out-dir <path>]\n  export-state [--out <path>]\n  import-state --from <path>\n  demo [--out-dir <path>]\n  smoke [--out-dir <path>]\n"
+        "flowmemory-devnet --state <path> --node-dir <path> <command>\n\nCommands:\n  init\n  reset-local\n  node [--node-id <id>] [--block-ms <ms>] [--max-blocks <n>] [--peer-config <path>]\n  node-stop\n  node-status\n  tick [--node-id <id>] [--peer-config <path>]\n  submit-tx --tx-file <path> [--authorized-by <id>] [--direct]\n  faucet --account <id> --amount <n> [--reason <text>] [--authorized-by <id>] [--direct]\n  start|run [--blocks <n>]\n  run-block\n  submit-fixture --fixture <path>\n  inspect|inspect-state [--summary]\n  export|export-fixtures [--out-dir <path>]\n  export-state [--out <path>]\n  import-state --from <path>\n  demo [--out-dir <path>]\n  smoke [--out-dir <path>]\n  product-demo|product-smoke [--out-dir <path>]\n"
     );
 }
 
@@ -421,6 +446,24 @@ fn run(cli: Cli) -> Result<()> {
             write_runtime_boundary_files(&cli.state, &first.state)?;
             export_handoff(&first.state, &out_dir)?;
             print_json(&SmokeSummary::from_demo(
+                cli.state,
+                out_dir,
+                &first,
+                deterministic_replay,
+            ))?;
+        }
+        Command::ProductSmoke { out_dir } => {
+            let first = build_product_smoke_state();
+            let second = build_product_smoke_state();
+            let deterministic_replay = first.first_block_hash == second.first_block_hash
+                && first.second_block_hash == second.second_block_hash
+                && first.state.parent_hash == second.state.parent_hash
+                && state_root(&first.state) == state_root(&second.state)
+                && state_map_roots(&first.state) == state_map_roots(&second.state);
+            save_state(&cli.state, &first.state)?;
+            write_runtime_boundary_files(&cli.state, &first.state)?;
+            export_handoff(&first.state, &out_dir)?;
+            print_json(&ProductSmokeSummary::from_demo(
                 cli.state,
                 out_dir,
                 &first,
@@ -927,6 +970,29 @@ fn build_smoke_state(min_blocks: usize) -> DemoRun {
     demo
 }
 
+fn build_product_smoke_state() -> DemoRun {
+    let mut state = genesis_state();
+    for tx in product_demo_transactions() {
+        queue_transaction(&mut state, tx);
+    }
+    let first = build_block(&mut state);
+    let appchain_chain_id = state.chain_id.clone();
+    queue_transaction(
+        &mut state,
+        Transaction::AnchorBatchToBasePlaceholder {
+            appchain_chain_id,
+            finality_status: "local-product-testnet-placeholder".to_string(),
+        },
+    );
+    let second = build_block(&mut state);
+
+    DemoRun {
+        state,
+        first_block_hash: first.block_hash,
+        second_block_hash: second.block_hash,
+    }
+}
+
 fn transactions_from_fixture(path: &Path) -> Result<Vec<Transaction>> {
     let body = fs::read_to_string(path)
         .with_context(|| format!("failed to read fixture {}", path.display()))?;
@@ -1045,6 +1111,13 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "localTestUnitBalances": state.local_test_unit_balances,
         "faucetRecords": state.faucet_records,
         "balanceTransfers": state.balance_transfers,
+        "tokenDefinitions": state.token_definitions,
+        "tokenBalances": state.token_balances,
+        "tokenMintReceipts": state.token_mint_receipts,
+        "dexPools": state.dex_pools,
+        "lpPositions": state.lp_positions,
+        "liquidityReceipts": state.liquidity_receipts,
+        "swapReceipts": state.swap_receipts,
         "modelPassports": state.model_passports,
         "memoryCells": state.memory_cells,
         "challenges": state.challenges,
@@ -1066,6 +1139,13 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "localTestUnitBalances": state.local_test_unit_balances,
         "faucetRecords": state.faucet_records,
         "balanceTransfers": state.balance_transfers,
+        "tokenDefinitions": state.token_definitions,
+        "tokenBalances": state.token_balances,
+        "tokenMintReceipts": state.token_mint_receipts,
+        "dexPools": state.dex_pools,
+        "lpPositions": state.lp_positions,
+        "liquidityReceipts": state.liquidity_receipts,
+        "swapReceipts": state.swap_receipts,
         "memoryCells": state.memory_cells,
         "challenges": state.challenges,
         "finalityReceipts": state.finality_receipts,
@@ -1082,6 +1162,13 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "localTestUnitBalances": state.local_test_unit_balances,
         "faucetRecords": state.faucet_records,
         "balanceTransfers": state.balance_transfers,
+        "tokenDefinitions": state.token_definitions,
+        "tokenBalances": state.token_balances,
+        "tokenMintReceipts": state.token_mint_receipts,
+        "dexPools": state.dex_pools,
+        "lpPositions": state.lp_positions,
+        "liquidityReceipts": state.liquidity_receipts,
+        "swapReceipts": state.swap_receipts,
         "verifierModules": state.verifier_modules,
         "workReceipts": state.work_receipts,
         "verifierReports": state.verifier_reports,
@@ -1109,6 +1196,13 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
             "localTestUnitBalances": state.local_test_unit_balances,
             "faucetRecords": state.faucet_records,
             "balanceTransfers": state.balance_transfers,
+            "tokenDefinitions": state.token_definitions,
+            "tokenBalances": state.token_balances,
+            "tokenMintReceipts": state.token_mint_receipts,
+            "dexPools": state.dex_pools,
+            "lpPositions": state.lp_positions,
+            "liquidityReceipts": state.liquidity_receipts,
+            "swapReceipts": state.swap_receipts,
             "modelPassports": state.model_passports,
             "memoryCells": state.memory_cells,
             "challenges": state.challenges,
@@ -1199,6 +1293,13 @@ struct NodeStatus {
     local_test_unit_balances: usize,
     faucet_records: usize,
     balance_transfers: usize,
+    token_definitions: usize,
+    token_balances: usize,
+    token_mint_receipts: usize,
+    dex_pools: usize,
+    lp_positions: usize,
+    liquidity_receipts: usize,
+    swap_receipts: usize,
     static_peer_sync: Option<PeerSyncEvent>,
     last_ingested_txs: usize,
     last_rejected_inbox_files: usize,
@@ -1238,6 +1339,13 @@ impl NodeStatus {
             local_test_unit_balances: state.local_test_unit_balances.len(),
             faucet_records: state.faucet_records.len(),
             balance_transfers: state.balance_transfers.len(),
+            token_definitions: state.token_definitions.len(),
+            token_balances: state.token_balances.len(),
+            token_mint_receipts: state.token_mint_receipts.len(),
+            dex_pools: state.dex_pools.len(),
+            lp_positions: state.lp_positions.len(),
+            liquidity_receipts: state.liquidity_receipts.len(),
+            swap_receipts: state.swap_receipts.len(),
             static_peer_sync,
             last_ingested_txs,
             last_rejected_inbox_files,
@@ -1322,6 +1430,13 @@ struct StateSummary {
     local_test_unit_balances: usize,
     faucet_records: usize,
     balance_transfers: usize,
+    token_definitions: usize,
+    token_balances: usize,
+    token_mint_receipts: usize,
+    dex_pools: usize,
+    lp_positions: usize,
+    liquidity_receipts: usize,
+    swap_receipts: usize,
     model_passports: usize,
     memory_cells: usize,
     challenges: usize,
@@ -1355,6 +1470,13 @@ impl StateSummary {
             local_test_unit_balances: state.local_test_unit_balances.len(),
             faucet_records: state.faucet_records.len(),
             balance_transfers: state.balance_transfers.len(),
+            token_definitions: state.token_definitions.len(),
+            token_balances: state.token_balances.len(),
+            token_mint_receipts: state.token_mint_receipts.len(),
+            dex_pools: state.dex_pools.len(),
+            lp_positions: state.lp_positions.len(),
+            liquidity_receipts: state.liquidity_receipts.len(),
+            swap_receipts: state.swap_receipts.len(),
             model_passports: state.model_passports.len(),
             memory_cells: state.memory_cells.len(),
             challenges: state.challenges.len(),
@@ -1624,6 +1746,123 @@ impl SmokeSummary {
                     .state
                     .finality_receipts
                     .contains_key("finality:demo:001"),
+                base_anchor_created: !demo.state.base_anchors.is_empty(),
+            },
+            handoff_files: handoff_files(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ProductSmokeSummary {
+    schema: String,
+    state_path: PathBuf,
+    out_dir: PathBuf,
+    state_root: String,
+    block_height: usize,
+    latest_block_hash: String,
+    deterministic_replay: bool,
+    checks: ProductSmokeChecks,
+    handoff_files: Vec<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ProductSmokeChecks {
+    local_accounts_funded: bool,
+    token_launched: bool,
+    initial_supply_assigned: bool,
+    pool_created: bool,
+    liquidity_added: bool,
+    swap_executed: bool,
+    liquidity_removed: bool,
+    product_receipts_queryable: bool,
+    no_value_boundary: bool,
+    base_anchor_created: bool,
+}
+
+impl ProductSmokeSummary {
+    fn from_demo(
+        state_path: PathBuf,
+        out_dir: PathBuf,
+        demo: &DemoRun,
+        deterministic_replay: bool,
+    ) -> Self {
+        let token_id = crate::model::deterministic_token_id("FLOWT");
+        let pool_id =
+            crate::model::deterministic_pool_id(crate::model::LOCAL_TEST_UNIT_ASSET_ID, &token_id);
+        let lp_position_id =
+            crate::model::deterministic_lp_position_id(&pool_id, "local-account:product:alice");
+        let token_balance_id =
+            crate::model::deterministic_token_balance_id(&token_id, "local-account:product:alice");
+        let bob_token_balance_id =
+            crate::model::deterministic_token_balance_id(&token_id, "local-account:product:bob");
+        let alice_funded = demo
+            .state
+            .local_test_unit_balances
+            .get("local-account:product:alice")
+            .is_some_and(|balance| balance.units > 0);
+        let bob_funded = demo
+            .state
+            .local_test_unit_balances
+            .get("local-account:product:bob")
+            .is_some_and(|balance| balance.units > 0);
+        let pool_created = demo
+            .state
+            .dex_pools
+            .get(&pool_id)
+            .is_some_and(|pool| pool.reserve_base_units > 0 && pool.reserve_quote_units > 0);
+        let liquidity_added = demo
+            .state
+            .lp_positions
+            .get(&lp_position_id)
+            .is_some_and(|position| position.base_units_deposited > 0);
+        let liquidity_removed = demo
+            .state
+            .lp_positions
+            .get(&lp_position_id)
+            .is_some_and(|position| position.base_units_withdrawn > 0);
+
+        Self {
+            schema: "flowmemory.local_devnet.product_smoke_summary.v0".to_string(),
+            state_path,
+            out_dir,
+            state_root: state_root(&demo.state),
+            block_height: demo.state.blocks.len(),
+            latest_block_hash: demo.state.parent_hash.clone(),
+            deterministic_replay,
+            checks: ProductSmokeChecks {
+                local_accounts_funded: alice_funded && bob_funded,
+                token_launched: demo.state.token_definitions.contains_key(&token_id),
+                initial_supply_assigned: demo
+                    .state
+                    .token_balances
+                    .get(&token_balance_id)
+                    .is_some_and(|balance| balance.units > 0),
+                pool_created,
+                liquidity_added,
+                swap_executed: demo
+                    .state
+                    .swap_receipts
+                    .values()
+                    .any(|receipt| receipt.pool_id == pool_id)
+                    && demo
+                        .state
+                        .token_balances
+                        .get(&bob_token_balance_id)
+                        .is_some_and(|balance| balance.units > 0),
+                liquidity_removed,
+                product_receipts_queryable: !demo.state.token_mint_receipts.is_empty()
+                    && !demo.state.liquidity_receipts.is_empty()
+                    && !demo.state.swap_receipts.is_empty(),
+                no_value_boundary: demo.state.config.no_value
+                    && demo
+                        .state
+                        .token_definitions
+                        .values()
+                        .all(|token| token.no_value)
+                    && demo.state.dex_pools.values().all(|pool| pool.no_value),
                 base_anchor_created: !demo.state.base_anchors.is_empty(),
             },
             handoff_files: handoff_files(),

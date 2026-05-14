@@ -257,6 +257,41 @@ function devnetOperatorKeyReferences(state: LoadedControlPlaneState): Record<str
   return firstDevnetMap(state, ["operatorKeyReferences", "walletPublicMetadata", "wallets"]);
 }
 
+function devnetProductEntries(
+  state: LoadedControlPlaneState,
+  keys: string[],
+  idFields: string[],
+): Array<{ id: string; object: JsonObject; sourceKey: string }> {
+  const rows = new Map<string, { id: string; object: JsonObject; sourceKey: string }>();
+  for (const sourceKey of keys) {
+    for (const [mapId, value] of Object.entries(devnetMap(state, sourceKey))) {
+      const object = asJsonObject(value) ?? {};
+      const id = idFields
+        .map((field) => stringValue(object[field]))
+        .find((candidate): candidate is string => candidate !== null)
+        ?? mapId;
+      rows.set(id, { id, object, sourceKey });
+    }
+  }
+  return [...rows.values()].sort((left, right) => left.id.localeCompare(right.id));
+}
+
+function devnetProductMapCount(state: LoadedControlPlaneState, keys: string[]): number {
+  return devnetProductEntries(state, keys, ["id"]).length;
+}
+
+function devnetLocalTestUnitBalances(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return firstDevnetMap(state, ["localTestUnitBalances", "localBalances"]);
+}
+
+function devnetBalanceTransfers(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return devnetMap(state, "balanceTransfers");
+}
+
+function productSource(sourceKey: string): string {
+  return `local-devnet:${sourceKey}`;
+}
+
 function devnetPeers(state: LoadedControlPlaneState): JsonObject[] {
   return asJsonArray(state.devnet?.peers)
     .map((entry) => asJsonObject(entry))
@@ -379,12 +414,17 @@ function mempoolRows(state: LoadedControlPlaneState): JsonObject[] {
       transaction: tx,
       source: "local-devnet",
       localOnly: true,
-    }));
+  }));
   const intake = txIntakeRows(state).map((entry) => ({
     schema: "flowmemory.control_plane.mempool_transaction.v0",
     transactionId: stringValue(entry.txId) ?? stringValue(entry.intakeId) ?? stableId("flowmemory.control_plane.mempool.intake.v0", entry),
     status: stringValue(entry.status) ?? "accepted_local",
-    transaction: entry,
+    transaction: asJsonObject(asJsonObject(entry.signedEnvelope)?.tx)
+      ?? asJsonObject(asJsonObject(entry.signedEnvelope)?.transaction)
+      ?? asJsonObject(asJsonObject(entry.signedEnvelope)?.payload)
+      ?? asJsonObject(entry.transaction)
+      ?? entry,
+    signedEnvelope: asJsonObject(entry.signedEnvelope) ?? undefined,
     source: "local-file-intake",
     localOnly: true,
   }));
@@ -417,17 +457,42 @@ function bridgeDepositRows(state: LoadedControlPlaneState): JsonObject[] {
 }
 
 function bridgeCreditRows(state: LoadedControlPlaneState): JsonObject[] {
-  return bridgeDepositRows(state).map((deposit) => ({
-    schema: "flowmemory.control_plane.bridge_credit.v0",
-    creditId: stableId("flowmemory.control_plane.bridge_credit.v0", deposit.depositId),
-    depositId: deposit.depositId,
-    accountId: deposit.flowchainRecipient,
-    amount: deposit.amount ?? "0",
-    token: deposit.token ?? null,
-    status: deposit.status === "rejected" ? "rejected" : "pending_local_credit",
-    source: "bridge-deposit-projection",
-    localOnly: true,
-  }));
+  const rows = new Map<string, JsonObject>();
+  for (const entry of devnetProductEntries(state, ["bridgeCredits", "bridgeCreditReceipts", "runtimeBridgeCredits"], ["creditId", "bridgeCreditId", "id", "depositId"])) {
+    const credit = entry.object;
+    const creditId = entry.id;
+    rows.set(creditId, {
+      schema: "flowmemory.control_plane.bridge_credit.v0",
+      creditId,
+      depositId: stringValue(credit.depositId) ?? null,
+      accountId: stringValue(credit.accountId) ?? stringValue(credit.recipient) ?? stringValue(credit.flowchainRecipient) ?? null,
+      amount: stringValue(credit.amount) ?? stringValue(credit.amountUnits) ?? stringValue(credit.units) ?? "0",
+      token: credit.token ?? credit.tokenId ?? credit.assetId ?? null,
+      status: stringValue(credit.status) ?? "local_credit",
+      credit,
+      source: productSource(entry.sourceKey),
+      localOnly: true,
+    });
+  }
+
+  for (const deposit of bridgeDepositRows(state)) {
+    const creditId = stableId("flowmemory.control_plane.bridge_credit.v0", deposit.depositId);
+    if (!rows.has(creditId)) {
+      rows.set(creditId, {
+        schema: "flowmemory.control_plane.bridge_credit.v0",
+        creditId,
+        depositId: deposit.depositId,
+        accountId: deposit.flowchainRecipient,
+        amount: deposit.amount ?? "0",
+        token: deposit.token ?? null,
+        status: deposit.status === "rejected" ? "rejected" : "pending_local_credit",
+        source: "bridge-deposit-projection",
+        localOnly: true,
+      });
+    }
+  }
+
+  return [...rows.values()].sort((left, right) => String(left.creditId).localeCompare(String(right.creditId)));
 }
 
 function withdrawalRows(state: LoadedControlPlaneState): JsonObject[] {
@@ -455,6 +520,176 @@ function withdrawalRows(state: LoadedControlPlaneState): JsonObject[] {
     source: "bridge-credit-projection",
     localOnly: true,
   }));
+}
+
+function tokenRows(state: LoadedControlPlaneState): JsonObject[] {
+  const rows = devnetProductEntries(
+    state,
+    ["tokens", "tokenDefinitions", "tokenLaunches", "localTokens", "launchedTokens"],
+    ["tokenId", "assetId", "symbol", "address", "id"],
+  ).map((entry) => {
+    const token = entry.object;
+    return {
+      schema: "flowmemory.control_plane.token.v0",
+      tokenId: entry.id,
+      symbol: stringValue(token.symbol) ?? stringValue(token.ticker) ?? entry.id,
+      name: stringValue(token.name) ?? null,
+      decimals: token.decimals ?? null,
+      totalSupply: stringValue(token.totalSupply) ?? stringValue(token.supply) ?? stringValue(token.initialSupply) ?? null,
+      owner: stringValue(token.owner) ?? stringValue(token.creator) ?? stringValue(token.issuer) ?? null,
+      status: stringValue(token.status) ?? "local",
+      token,
+      source: productSource(entry.sourceKey),
+      noValue: true,
+      localOnly: true,
+    };
+  });
+
+  if (rows.length > 0) {
+    return rows;
+  }
+
+  const localBalances = devnetLocalTestUnitBalances(state);
+  if (Object.keys(localBalances).length === 0) {
+    return [];
+  }
+
+  return [{
+    schema: "flowmemory.control_plane.token.v0",
+    tokenId: "local-test-unit",
+    symbol: "LTU",
+    name: "Local Test Unit",
+    decimals: 0,
+    totalSupply: Object.values(localBalances)
+      .map((entry) => BigInt(stringValue(asJsonObject(entry)?.units) ?? "0"))
+      .reduce((sum, units) => sum + units, 0n)
+      .toString(),
+    owner: "local-faucet",
+    status: "projected_local_unit",
+    token: {
+      schema: "flowmemory.local_test_unit.projected.v0",
+      noValue: true,
+    },
+    source: "local-test-unit-balance-projection",
+    noValue: true,
+    localOnly: true,
+  }];
+}
+
+function tokenBalanceRows(state: LoadedControlPlaneState): JsonObject[] {
+  const rows = devnetProductEntries(
+    state,
+    ["tokenBalances", "localTokenBalances", "accountTokenBalances"],
+    ["balanceId", "tokenBalanceId", "positionId", "id"],
+  ).map((entry) => {
+    const balance = entry.object;
+    const accountId = stringValue(balance.accountId) ?? stringValue(balance.owner) ?? stringValue(balance.walletId) ?? null;
+    const tokenId = stringValue(balance.tokenId) ?? stringValue(balance.assetId) ?? stringValue(balance.symbol) ?? null;
+    return {
+      schema: "flowmemory.control_plane.token_balance.v0",
+      balanceId: entry.id,
+      accountId,
+      tokenId,
+      amount: stringValue(balance.amount) ?? stringValue(balance.units) ?? stringValue(balance.balance) ?? "0",
+      status: stringValue(balance.status) ?? "local",
+      balance,
+      source: productSource(entry.sourceKey),
+      noValue: true,
+      localOnly: true,
+    };
+  });
+
+  if (rows.length > 0) {
+    return rows.sort((left, right) => String(left.balanceId).localeCompare(String(right.balanceId)));
+  }
+
+  return Object.entries(devnetLocalTestUnitBalances(state)).map(([balanceId, value]) => {
+    const balance = asJsonObject(value) ?? {};
+    return {
+      schema: "flowmemory.control_plane.token_balance.v0",
+      balanceId,
+      accountId: stringValue(balance.owner) ?? stringValue(balance.accountId) ?? balanceId,
+      tokenId: "local-test-unit",
+      amount: stringValue(balance.units) ?? stringValue(balance.amountUnits) ?? "0",
+      status: "projected_local_unit",
+      balance,
+      source: "local-test-unit-balance-projection",
+      noValue: true,
+      localOnly: true,
+    };
+  }).sort((left, right) => String(left.balanceId).localeCompare(String(right.balanceId)));
+}
+
+function poolRows(state: LoadedControlPlaneState): JsonObject[] {
+  return devnetProductEntries(
+    state,
+    ["pools", "dexPools", "liquidityPools", "ammPools"],
+    ["poolId", "id", "address"],
+  ).map((entry) => {
+    const pool = entry.object;
+    return {
+      schema: "flowmemory.control_plane.pool.v0",
+      poolId: entry.id,
+      token0: stringValue(pool.token0) ?? stringValue(pool.tokenA) ?? stringValue(pool.baseToken) ?? null,
+      token1: stringValue(pool.token1) ?? stringValue(pool.tokenB) ?? stringValue(pool.quoteToken) ?? null,
+      reserve0: stringValue(pool.reserve0) ?? stringValue(pool.reserveA) ?? null,
+      reserve1: stringValue(pool.reserve1) ?? stringValue(pool.reserveB) ?? null,
+      lpSupply: stringValue(pool.lpSupply) ?? stringValue(pool.totalLiquidity) ?? null,
+      status: stringValue(pool.status) ?? "local",
+      pool,
+      source: productSource(entry.sourceKey),
+      noValue: true,
+      localOnly: true,
+    };
+  });
+}
+
+function lpPositionRows(state: LoadedControlPlaneState): JsonObject[] {
+  return devnetProductEntries(
+    state,
+    ["lpPositions", "liquidityPositions", "poolPositions"],
+    ["positionId", "lpPositionId", "id"],
+  ).map((entry) => {
+    const position = entry.object;
+    return {
+      schema: "flowmemory.control_plane.lp_position.v0",
+      positionId: entry.id,
+      poolId: stringValue(position.poolId) ?? null,
+      accountId: stringValue(position.accountId) ?? stringValue(position.owner) ?? stringValue(position.walletId) ?? null,
+      liquidity: stringValue(position.liquidity) ?? stringValue(position.lpTokens) ?? stringValue(position.amount) ?? "0",
+      status: stringValue(position.status) ?? "local",
+      position,
+      source: productSource(entry.sourceKey),
+      noValue: true,
+      localOnly: true,
+    };
+  });
+}
+
+function swapRows(state: LoadedControlPlaneState): JsonObject[] {
+  return devnetProductEntries(
+    state,
+    ["swaps", "swapReceipts", "dexSwaps"],
+    ["swapId", "receiptId", "txId", "transactionId", "id"],
+  ).map((entry) => {
+    const swap = entry.object;
+    return {
+      schema: "flowmemory.control_plane.swap.v0",
+      swapId: entry.id,
+      txId: stringValue(swap.txId) ?? stringValue(swap.transactionId) ?? null,
+      poolId: stringValue(swap.poolId) ?? null,
+      accountId: stringValue(swap.accountId) ?? stringValue(swap.trader) ?? stringValue(swap.owner) ?? null,
+      tokenIn: stringValue(swap.tokenIn) ?? stringValue(swap.inputToken) ?? null,
+      tokenOut: stringValue(swap.tokenOut) ?? stringValue(swap.outputToken) ?? null,
+      amountIn: stringValue(swap.amountIn) ?? stringValue(swap.inputAmount) ?? "0",
+      amountOut: stringValue(swap.amountOut) ?? stringValue(swap.outputAmount) ?? "0",
+      status: stringValue(swap.status) ?? "local",
+      swap,
+      source: productSource(entry.sourceKey),
+      noValue: true,
+      localOnly: true,
+    };
+  });
 }
 
 function transactionRows(state: LoadedControlPlaneState): JsonObject[] {
@@ -981,6 +1216,12 @@ function health(_params: JsonValue | undefined, context: ControlPlaneContext): J
       transactions: transactionRows(state).length,
       mempool: mempoolRows(state).length,
       bridgeDeposits: bridgeDepositRows(state).length,
+      bridgeCredits: bridgeCreditRows(state).length,
+      tokens: tokenRows(state).length,
+      tokenBalances: tokenBalanceRows(state).length,
+      pools: poolRows(state).length,
+      lpPositions: lpPositionRows(state).length,
+      swaps: swapRows(state).length,
     },
     missingOptionalSources: missing,
   };
@@ -1024,6 +1265,11 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
       balances: nodeAccountRows(state).length,
       faucetEvents: 1,
       walletPublicMetadata: walletMetadataRows(state).length,
+      tokens: tokenRows(state).length,
+      tokenBalances: tokenBalanceRows(state).length,
+      pools: poolRows(state).length,
+      lpPositions: lpPositionRows(state).length,
+      swaps: swapRows(state).length,
       bridgeDeposits: bridgeDepositRows(state).length,
       bridgeCredits: bridgeCreditRows(state).length,
       withdrawals: withdrawalRows(state).length,
@@ -1042,6 +1288,12 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
       "balance_reads",
       "faucet_event_reads",
       "wallet_public_metadata_reads",
+      "token_reads",
+      "token_balance_reads",
+      "dex_pool_reads",
+      "lp_position_reads",
+      "swap_reads",
+      "product_flow_status_reads",
       "receipt_lookup",
       "verifier_report_lookup",
       "memory_lineage_lookup",
@@ -1091,6 +1343,19 @@ function devnetState(params: JsonValue | undefined, context: ControlPlaneContext
     memoryCellCount: Object.keys(devnetMemoryCells(state)).length,
     challengeCount: Object.keys(devnetChallenges(state)).length,
     finalityReceiptCount: Object.keys(devnetFinalityReceipts(state)).length,
+    tokenCount: tokenRows(state).length,
+    tokenBalanceCount: tokenBalanceRows(state).length,
+    poolCount: poolRows(state).length,
+    lpPositionCount: lpPositionRows(state).length,
+    swapCount: swapRows(state).length,
+    nativeProductMapCounts: {
+      tokens: devnetProductMapCount(state, ["tokens", "tokenDefinitions", "tokenLaunches", "localTokens", "launchedTokens"]),
+      tokenBalances: devnetProductMapCount(state, ["tokenBalances", "localTokenBalances", "accountTokenBalances"]),
+      pools: devnetProductMapCount(state, ["pools", "dexPools", "liquidityPools", "ammPools"]),
+      lpPositions: devnetProductMapCount(state, ["lpPositions", "liquidityPositions", "poolPositions"]),
+      swaps: devnetProductMapCount(state, ["swaps", "swapReceipts", "dexSwaps"]),
+      bridgeCredits: devnetProductMapCount(state, ["bridgeCredits", "bridgeCreditReceipts", "runtimeBridgeCredits"]),
+    },
     baseAnchorCount: state.devnet?.baseAnchors && typeof state.devnet.baseAnchors === "object" && !Array.isArray(state.devnet.baseAnchors)
       ? Object.keys(state.devnet.baseAnchors).length
       : 0,
@@ -1222,17 +1487,58 @@ function mempoolList(params: JsonValue | undefined, context: ControlPlaneContext
   };
 }
 
+function parseSignedEnvelope(value: JsonValue | undefined, label: string): JsonObject | null {
+  if (value === undefined) {
+    return null;
+  }
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value) as JsonValue;
+      const object = asJsonObject(parsed);
+      if (object === null) {
+        throw new Error("parsed value was not an object");
+      }
+      return object;
+    } catch (error) {
+      throw invalidParams(`${label} must be a JSON object or JSON-encoded signed envelope object`, {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+  const object = asJsonObject(value);
+  if (object === null) {
+    throw invalidParams(`${label} must be a signed envelope object`);
+  }
+  return object;
+}
+
+function signedEnvelopeForSubmit(params: JsonObject): JsonObject {
+  if (params.transaction !== undefined || params.tx !== undefined || params.txs !== undefined) {
+    throw invalidParams("transaction_submit accepts signed envelopes only; use signedTransaction or signedEnvelope");
+  }
+  const envelope = parseSignedEnvelope(params.signedEnvelope, "signedEnvelope")
+    ?? parseSignedEnvelope(params.signedTransaction, "signedTransaction");
+  if (envelope === null) {
+    throw invalidParams("transaction_submit requires signedTransaction or signedEnvelope");
+  }
+
+  const transaction = asJsonObject(envelope.tx) ?? asJsonObject(envelope.transaction) ?? asJsonObject(envelope.payload);
+  const signature = envelope.signature ?? envelope.signatures ?? envelope.proof ?? envelope.authorization;
+  const hasSignature = typeof signature === "string"
+    || Array.isArray(signature)
+    || asJsonObject(signature) !== null;
+  if (transaction === null || !hasSignature) {
+    throw invalidParams("signed envelope must include tx/transaction/payload and signature/signatures/proof/authorization");
+  }
+  return envelope;
+}
+
 function transactionSubmit(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
   const state = stateFor(context);
   const objectParams = asObjectParams(params, "transaction_submit");
-  const signedTransaction = optionalString(objectParams, "signedTransaction");
-  const transaction = asJsonObject(objectParams.transaction);
-  if (signedTransaction === undefined && transaction === null) {
-    throw invalidParams("transaction_submit requires signedTransaction or transaction");
-  }
+  const signedEnvelope = signedEnvelopeForSubmit(objectParams);
   const intakePayload: JsonObject = {
-    signedTransaction,
-    transaction,
+    signedEnvelope,
     submittedBy: optionalString(objectParams, "submittedBy") ?? "local-control-plane",
   };
   const finding = findSecret(intakePayload);
@@ -1314,6 +1620,223 @@ function balanceGet(params: JsonValue | undefined, context: ControlPlaneContext)
     amount: "0",
     unit: "no-value-local-credit",
     noValue: true,
+    localOnly: true,
+  };
+}
+
+function tokenList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "token_list");
+  const limit = pageLimit(objectParams);
+  const status = optionalString(objectParams, "status");
+  const rows = tokenRows(state)
+    .filter((token) => status === undefined || token.status === status)
+    .slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.token_list.v0",
+    count: rows.length,
+    nextCursor: null,
+    tokens: rows,
+    localOnly: true,
+  };
+}
+
+function tokenGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "token_get");
+  const key = requiredString(objectParams, ["tokenId", "assetId", "symbol"], "token_get");
+  const token = tokenRows(state).find((row) => row.tokenId === key || row.symbol === key || asJsonObject(row.token)?.assetId === key);
+  if (token === undefined) {
+    throw objectNotFound(`token not found: ${key}`, { id: key });
+  }
+  return {
+    schema: "flowmemory.control_plane.token_detail.v0",
+    token,
+    provenance: {
+      sources: [provenanceSource("devnet", "devnet/local/state.json", "flowmemory.local_devnet.token.v0")],
+    },
+    localOnly: true,
+  };
+}
+
+function tokenBalanceList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "token_balance_list");
+  const limit = pageLimit(objectParams);
+  const accountId = optionalString(objectParams, "accountId");
+  const tokenId = optionalString(objectParams, "tokenId");
+  const rows = tokenBalanceRows(state)
+    .filter((balance) => accountId === undefined || balance.accountId === accountId)
+    .filter((balance) => tokenId === undefined || balance.tokenId === tokenId)
+    .slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.token_balance_list.v0",
+    count: rows.length,
+    nextCursor: null,
+    balances: rows,
+    localOnly: true,
+  };
+}
+
+function tokenBalanceGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "token_balance_get");
+  const key = requiredString(objectParams, ["balanceId", "tokenBalanceId", "accountId"], "token_balance_get");
+  const tokenId = optionalString(objectParams, "tokenId");
+  const balance = tokenBalanceRows(state).find((row) => {
+    const keyMatches = row.balanceId === key || row.accountId === key;
+    return keyMatches && (tokenId === undefined || row.tokenId === tokenId);
+  });
+  if (balance === undefined) {
+    throw objectNotFound(`token balance not found: ${key}`, { id: key, tokenId });
+  }
+  return {
+    schema: "flowmemory.control_plane.token_balance_detail.v0",
+    balance,
+    localOnly: true,
+  };
+}
+
+function poolList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "pool_list");
+  const limit = pageLimit(objectParams);
+  const tokenId = optionalString(objectParams, "tokenId");
+  const rows = poolRows(state)
+    .filter((pool) => tokenId === undefined || pool.token0 === tokenId || pool.token1 === tokenId)
+    .slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.pool_list.v0",
+    count: rows.length,
+    nextCursor: null,
+    pools: rows,
+    localOnly: true,
+  };
+}
+
+function poolGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "pool_get");
+  const poolId = requiredString(objectParams, ["poolId", "address"], "pool_get");
+  const pool = poolRows(state).find((row) => row.poolId === poolId || asJsonObject(row.pool)?.address === poolId);
+  if (pool === undefined) {
+    throw objectNotFound(`pool not found: ${poolId}`, { poolId });
+  }
+  return {
+    schema: "flowmemory.control_plane.pool_detail.v0",
+    pool,
+    localOnly: true,
+  };
+}
+
+function lpPositionList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "lp_position_list");
+  const limit = pageLimit(objectParams);
+  const accountId = optionalString(objectParams, "accountId");
+  const poolId = optionalString(objectParams, "poolId");
+  const rows = lpPositionRows(state)
+    .filter((position) => accountId === undefined || position.accountId === accountId)
+    .filter((position) => poolId === undefined || position.poolId === poolId)
+    .slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.lp_position_list.v0",
+    count: rows.length,
+    nextCursor: null,
+    positions: rows,
+    localOnly: true,
+  };
+}
+
+function lpPositionGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "lp_position_get");
+  const key = requiredString(objectParams, ["positionId", "lpPositionId", "accountId"], "lp_position_get");
+  const position = lpPositionRows(state).find((row) => row.positionId === key || row.accountId === key);
+  if (position === undefined) {
+    throw objectNotFound(`LP position not found: ${key}`, { id: key });
+  }
+  return {
+    schema: "flowmemory.control_plane.lp_position_detail.v0",
+    position,
+    localOnly: true,
+  };
+}
+
+function swapList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "swap_list");
+  const limit = pageLimit(objectParams);
+  const accountId = optionalString(objectParams, "accountId");
+  const poolId = optionalString(objectParams, "poolId");
+  const rows = swapRows(state)
+    .filter((swap) => accountId === undefined || swap.accountId === accountId)
+    .filter((swap) => poolId === undefined || swap.poolId === poolId)
+    .slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.swap_list.v0",
+    count: rows.length,
+    nextCursor: null,
+    swaps: rows,
+    localOnly: true,
+  };
+}
+
+function swapGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "swap_get");
+  const key = requiredString(objectParams, ["swapId", "receiptId", "txId", "transactionId"], "swap_get");
+  const swap = swapRows(state).find((row) => row.swapId === key || row.txId === key);
+  if (swap === undefined) {
+    throw objectNotFound(`swap not found: ${key}`, { id: key });
+  }
+  return {
+    schema: "flowmemory.control_plane.swap_detail.v0",
+    swap,
+    localOnly: true,
+  };
+}
+
+function productFlowStatus(_params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const counts = {
+    wallets: walletMetadataRows(state).length,
+    accounts: nodeAccountRows(state).length,
+    localBalances: Object.keys(devnetLocalTestUnitBalances(state)).length,
+    balanceTransfers: Object.keys(devnetBalanceTransfers(state)).length,
+    tokens: tokenRows(state).length,
+    nativeTokens: devnetProductMapCount(state, ["tokens", "tokenDefinitions", "tokenLaunches", "localTokens", "launchedTokens"]),
+    tokenBalances: tokenBalanceRows(state).length,
+    pools: poolRows(state).length,
+    lpPositions: lpPositionRows(state).length,
+    swaps: swapRows(state).length,
+    bridgeDeposits: bridgeDepositRows(state).length,
+    bridgeCredits: bridgeCreditRows(state).length,
+    blocks: blockRows(state).length,
+    transactions: transactionRows(state).length,
+  };
+  const stages = [
+    { stage: "wallet", ready: counts.wallets > 0 || counts.accounts > 0 },
+    { stage: "funding", ready: counts.localBalances > 0 || counts.bridgeCredits > 0 || counts.tokenBalances > 0 },
+    { stage: "transfer", ready: counts.balanceTransfers > 0 },
+    { stage: "token_launch", ready: counts.nativeTokens > 0 },
+    { stage: "dex_pool", ready: counts.pools > 0 },
+    { stage: "liquidity", ready: counts.lpPositions > 0 },
+    { stage: "swap", ready: counts.swaps > 0 },
+    { stage: "bridge_credit", ready: counts.bridgeCredits > 0 },
+    { stage: "explorer", ready: counts.blocks > 0 && counts.transactions > 0 },
+  ].map((entry) => ({
+    schema: "flowmemory.control_plane.product_flow_stage.v0",
+    stage: entry.stage,
+    status: entry.ready ? "ready" : "missing",
+    localOnly: true,
+  }));
+  return {
+    schema: "flowmemory.control_plane.product_flow_status.v0",
+    status: stages.every((stage) => stage.status === "ready") ? "ready_local_product_testnet" : "incomplete_local_product_testnet",
+    counts,
+    stages,
+    missingStages: stages.filter((stage) => stage.status !== "ready").map((stage) => stage.stage),
     localOnly: true,
   };
 }
@@ -2201,6 +2724,26 @@ function findObject(state: LoadedControlPlaneState, key: string): { type: string
   if (withdrawal !== undefined) {
     return { type: "withdrawal", object: withdrawal };
   }
+  const token = tokenRows(state).find((candidate) => candidate.tokenId === key || candidate.symbol === key);
+  if (token !== undefined) {
+    return { type: "token", object: token };
+  }
+  const tokenBalance = tokenBalanceRows(state).find((candidate) => candidate.balanceId === key || candidate.accountId === key);
+  if (tokenBalance !== undefined) {
+    return { type: "token_balance", object: tokenBalance };
+  }
+  const pool = poolRows(state).find((candidate) => candidate.poolId === key);
+  if (pool !== undefined) {
+    return { type: "pool", object: pool };
+  }
+  const lpPosition = lpPositionRows(state).find((candidate) => candidate.positionId === key || candidate.accountId === key);
+  if (lpPosition !== undefined) {
+    return { type: "lp_position", object: lpPosition };
+  }
+  const swap = swapRows(state).find((candidate) => candidate.swapId === key || candidate.txId === key);
+  if (swap !== undefined) {
+    return { type: "swap", object: swap };
+  }
   const devnetReceipt = devnetWorkReceipts(state)[key];
   if (devnetReceipt !== undefined) {
     return { type: "devnet_work_receipt", object: devnetReceipt as JsonObject };
@@ -2247,6 +2790,11 @@ function provenanceForObject(state: LoadedControlPlaneState, key: string): JsonO
   const model = modelRows(state).find((candidate) => candidate.modelId === key || candidate.rootfieldId === key);
   const verifierModule = verifierModuleRows(state).find((candidate) => candidate.moduleId === key || candidate.verifierId === key || candidate.resolverPolicyId === key);
   const artifactAvailability = artifactAvailabilityRows(state).find((candidate) => candidate.availabilityId === key || candidate.artifactId === key || candidate.uri === key || candidate.commitment === key);
+  const token = tokenRows(state).find((candidate) => candidate.tokenId === key || candidate.symbol === key);
+  const tokenBalance = tokenBalanceRows(state).find((candidate) => candidate.balanceId === key || candidate.accountId === key);
+  const pool = poolRows(state).find((candidate) => candidate.poolId === key);
+  const lpPosition = lpPositionRows(state).find((candidate) => candidate.positionId === key || candidate.accountId === key);
+  const swap = swapRows(state).find((candidate) => candidate.swapId === key || candidate.txId === key);
   const selectedReceipt = receipt ?? (report ? receiptByAnyId(state, report.reportId) : undefined);
   const selectedSignal = signal ?? (selectedReceipt ? signalByObservation(state, selectedReceipt.observationId) : undefined);
   const selectedTransition = transition ?? (selectedReceipt ? transitionByAnyId(state, selectedReceipt.receiptId) : undefined);
@@ -2281,6 +2829,9 @@ function provenanceForObject(state: LoadedControlPlaneState, key: string): JsonO
       ? provenanceSource("verifier", "services/verifier/fixtures/artifacts.json", "flowmemory.verifier.artifact_fixture.v0")
       : provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.artifact_commitment.v0"));
   }
+  if (token !== undefined || tokenBalance !== undefined || pool !== undefined || lpPosition !== undefined || swap !== undefined) {
+    sources.push(provenanceSource("devnet", "devnet/local/state.json", "flowmemory.local_devnet.product_objects.v0", "Product rows are read from devnet state or control-plane handoff maps."));
+  }
 
   links.receiptId = selectedReceipt?.receiptId;
   links.reportId = selectedReceipt?.reportId ?? report?.reportId;
@@ -2294,6 +2845,11 @@ function provenanceForObject(state: LoadedControlPlaneState, key: string): JsonO
   links.modelId = model?.modelId;
   links.verifierModuleId = verifierModule?.moduleId;
   links.artifactAvailabilityId = artifactAvailability?.availabilityId;
+  links.tokenId = token?.tokenId ?? tokenBalance?.tokenId ?? pool?.token0 ?? swap?.tokenIn;
+  links.balanceId = tokenBalance?.balanceId;
+  links.poolId = pool?.poolId ?? lpPosition?.poolId ?? swap?.poolId;
+  links.lpPositionId = lpPosition?.positionId;
+  links.swapId = swap?.swapId;
   links.artifactUris = report?.reportCore.evidenceRefs.map((entry) => entry.uri).filter((value): value is string => typeof value === "string")
     ?? (selectedReceipt?.evidenceRefs.map((entry) => entry.uri).filter((value): value is string => typeof value === "string") ?? []);
 
@@ -2305,7 +2861,12 @@ function provenanceForObject(state: LoadedControlPlaneState, key: string): JsonO
       ?? devnetAgentAccounts(state)[key]
       ?? devnetMemoryCells(state)[key]
       ?? devnetChallenges(state)[key]
-      ?? devnetFinalityReceipts(state)[key];
+      ?? devnetFinalityReceipts(state)[key]
+      ?? tokenRows(state).find((candidate) => candidate.tokenId === key || candidate.symbol === key)
+      ?? tokenBalanceRows(state).find((candidate) => candidate.balanceId === key || candidate.accountId === key)
+      ?? poolRows(state).find((candidate) => candidate.poolId === key)
+      ?? lpPositionRows(state).find((candidate) => candidate.positionId === key || candidate.accountId === key)
+      ?? swapRows(state).find((candidate) => candidate.swapId === key || candidate.txId === key);
     if (devnetTarget !== undefined) {
       sources.push(provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.state.v0"));
     }
@@ -2405,6 +2966,17 @@ export const CONTROL_PLANE_METHODS: Record<ControlPlaneMethod, MethodHandler> = 
   account_get: accountGet,
   account_list: accountList,
   balance_get: balanceGet,
+  token_get: tokenGet,
+  token_list: tokenList,
+  token_balance_get: tokenBalanceGet,
+  token_balance_list: tokenBalanceList,
+  pool_get: poolGet,
+  pool_list: poolList,
+  lp_position_get: lpPositionGet,
+  lp_position_list: lpPositionList,
+  swap_get: swapGet,
+  swap_list: swapList,
+  product_flow_status: productFlowStatus,
   faucet_event_list: faucetEventList,
   wallet_metadata_get: walletMetadataGet,
   wallet_metadata_list: walletMetadataList,

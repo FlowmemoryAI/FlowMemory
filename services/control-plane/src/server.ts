@@ -78,6 +78,18 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
       return;
     }
 
+    if (req.method === "GET" && req.url === "/explorer/summary") {
+      const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "explorer-summary", method: "chain_status" }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
+    if (req.method === "GET" && req.url === "/product-flow/status") {
+      const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "product-flow-status", method: "product_flow_status" }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
     if (req.method === "GET" && req.url === "/bridge/observations") {
       const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "bridge-observations", method: "bridge_observation_list" }, { state });
       writeJson(res, 200, jsonResult(response));

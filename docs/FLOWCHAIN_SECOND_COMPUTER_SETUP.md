@@ -3,8 +3,8 @@
 Status: Windows-first setup guide for the private/local testnet milestone.
 
 This guide is intentionally conservative. It names the commands that work in
-the V0 repo today, what those commands currently prove, and what remains gated
-for later production work.
+the repo today, what those commands currently prove, and what remains gated for
+later production work.
 
 Correct target:
 
@@ -54,10 +54,11 @@ PowerShell windows.
 When `gh auth login` asks questions, use GitHub.com, HTTPS, and browser login.
 
 Use this path today on a clean second computer. It validates the V0
-launch-core, no-value local devnet runtime, native local object lifecycle,
+launch-core, local devnet runtime, native local object lifecycle, token launch
+records, DEX pool/liquidity/swap records, bridge-test credit records,
 control-plane smoke client, dashboard workbench, hardware simulator fixture,
-crypto local-alpha vectors, encrypted local test-vault CLI, and Windows wrapper
-layer.
+crypto product transaction vectors, encrypted local test-vault CLI, and
+Windows wrapper layer.
 
 If the repo is already cloned, run from the repo root:
 
@@ -116,6 +117,7 @@ Run the private/local acceptance smoke path:
 ```powershell
 npm run flowchain:smoke
 npm run flowchain:full-smoke
+npm run flowchain:product-e2e
 ```
 
 Run the local workbench in a separate PowerShell window:
@@ -150,12 +152,16 @@ Expected current result:
 - `npm run flowchain:full-smoke` also exercises the crypto wallet CLI, verifies
   a signed local transaction envelope, runs `git diff --check`, and writes
   `devnet/local/full-smoke/flowchain-full-smoke-report.json`.
+- `npm run flowchain:product-e2e` is the stricter user-facing gate. It proves
+  local account funding, token launch, pool creation, liquidity, swap receipts,
+  bridge-test credit visibility, control-plane query surfaces, workbench
+  product surfaces, and no-secret response boundaries.
 - `npm run workbench:dev` opens the existing dashboard as the local workbench.
 
-Current stop point: if a second computer needs long-running multi-process node
-behavior, LAN peer mode, production custody, production bridge behavior, or
-public validator behavior, those remain later gated work. Workbench polish can
-continue behind the same local data surfaces.
+Current stop point: if a second computer needs production custody, production
+bridge behavior, public validator behavior, or audited real-value use, those
+remain later gated work. Workbench polish can continue behind the same local
+data surfaces.
 
 ## Final Second-Computer Path
 
@@ -173,13 +179,13 @@ npm run flowchain:init
 npm run flowchain:start
 npm run control-plane:serve
 npm run workbench:dev
-npm run flowchain:full-smoke
+npm run flowchain:product-e2e
 npm run flowchain:export
 ```
 
 If `flowchain:start`, `control-plane:serve`, or `workbench:dev` are
 long-running commands, run each one in its own PowerShell window and run
-`flowchain:full-smoke` from a fourth window after the services are healthy.
+`flowchain:product-e2e` from a fourth window after the services are healthy.
 
 If final command names differ, this guide must be updated in the same PR that
 adds the commands. The final path must still include prerequisite checks,
@@ -199,6 +205,7 @@ npm run flowchain:stop
 npm run flowchain:demo
 npm run flowchain:smoke
 npm run flowchain:full-smoke
+npm run flowchain:product-e2e
 npm run flowchain:export
 npm run workbench:dev
 ```
@@ -214,6 +221,7 @@ Current status:
 | `npm run flowchain:demo` | Implemented | Wraps the existing Rust devnet `demo`. |
 | `npm run flowchain:smoke` | Implemented for current private/local surfaces | Runs service tests, crypto validation, launch candidate, devnet tests, control-plane smoke, deterministic replay, dashboard build, hardware fixture, unsafe-claim scan, and no-secret export scan. |
 | `npm run flowchain:full-smoke` | Implemented acceptance gate | Wraps smoke, wallet CLI sign/verify, full-smoke report, no-secret scan, and `git diff --check`. |
+| `npm run flowchain:product-e2e` | Implemented product testnet gate | Wraps the full smoke and proves local account funding, token launch, DEX pool/liquidity/swap receipts, bridge-test records, control-plane product queries, workbench product surfaces, and no-secret API boundaries. |
 | `npm run flowchain:export` | Implemented | Writes ignored export directory and zip bundle. |
 | `npm run flowchain:import -- --BundlePath <zip> -Force` | Implemented script path | Restores local state from an exported bundle. |
 | `npm run workbench:dev` | Implemented | Wraps `npm run dev --prefix apps/dashboard`. |

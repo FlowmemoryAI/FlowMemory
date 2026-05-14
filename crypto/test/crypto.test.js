@@ -12,6 +12,7 @@ import {
   bridgeCreditId,
   bridgeDepositId,
   bridgeWithdrawalId,
+  bridgeWithdrawalIntentId,
   challengeId,
   canonicalJsonHash,
   canonicalJson,
@@ -48,6 +49,13 @@ import {
   merkleLeafHash,
   merkleRoot,
   modelPassportId,
+  productAddLiquidityId,
+  productBridgeCreditAckId,
+  productPoolCreateId,
+  productRemoveLiquidityId,
+  productSwapId,
+  productTokenLaunchId,
+  productTransferId,
   normalizeHex,
   publicKeyFromPrivateKey,
   receiptHash,
@@ -72,6 +80,7 @@ import {
   workerSignaturePayload
 } from "../src/index.js";
 import { validateLocalAlphaFixtures } from "../src/validate-local-alpha-fixtures.js";
+import { validateProductTestnetFixtures } from "../src/validate-product-testnet-fixtures.js";
 import { validateVectors } from "../src/validate-vectors.js";
 
 const root = resolve(import.meta.dirname, "..");
@@ -84,6 +93,7 @@ const flowPulse = fixture("sample-flowpulse.json");
 const observation = fixture("sample-observation.json");
 const report = fixture("sample-report.json");
 const localAlphaObjects = fixture("local-alpha-objects.json");
+const productTestnetTransactions = fixture("product-testnet-transactions.json");
 
 const localAlphaValidators = Object.freeze({
   agentAccountId,
@@ -91,6 +101,7 @@ const localAlphaValidators = Object.freeze({
   bridgeCreditId,
   bridgeDepositId,
   bridgeWithdrawalId,
+  bridgeWithdrawalIntentId,
   challengeId,
   controlPlaneProvenanceResponseId,
   finalityReceiptId,
@@ -98,6 +109,13 @@ const localAlphaValidators = Object.freeze({
   localBalanceRecordId,
   localSignatureEnvelopeHash,
   localTransactionEnvelopeHash,
+  productAddLiquidityId,
+  productBridgeCreditAckId,
+  productPoolCreateId,
+  productRemoveLiquidityId,
+  productSwapId,
+  productTokenLaunchId,
+  productTransferId,
   memoryCellId,
   modelPassportId,
   verifierModuleId,
@@ -462,6 +480,60 @@ test("validates canonical local transaction envelopes and negative vectors", () 
   }
 });
 
+test("validates Product Testnet V1 wallet transaction documents, envelopes, and negative vectors", () => {
+  assert.equal(productTestnetTransactions.schema, "flowmemory.crypto.product-testnet-transaction-fixtures.v0");
+  assert.doesNotMatch(JSON.stringify(productTestnetTransactions.publicMetadata), /privateKey|mnemonic|seed|ciphertext/i);
+
+  const documentsByName = new Map();
+  for (const vector of productTestnetTransactions.documents.positive) {
+    const fn = localAlphaValidators[vector.function];
+    assert.ok(fn, `unknown product transaction function: ${vector.function}`);
+    assert.equal(fn(vector.input), vector.expected, vector.name);
+    assert.equal(vector.document[vector.idField], vector.expected, `${vector.name} document id`);
+    assert.equal(localAlphaObjectId(vector.document), vector.expected, `${vector.name} recomputed document id`);
+    assertSchemaDocument(vector.schemaPath, vector.document);
+    documentsByName.set(vector.name, vector.document);
+  }
+
+  const transactionsByName = new Map();
+  for (const vector of productTestnetTransactions.transactions.positive) {
+    const document = documentsByName.get(vector.objectName);
+    assert.ok(document, `unknown product transaction document: ${vector.objectName}`);
+    assertSchemaDocument(vector.schemaPath, vector.envelope);
+    assert.equal(localTransactionEnvelopeHash(vector.input), vector.expected.envelopeId, vector.name);
+    assert.deepEqual(localTransactionEnvelopePayload(vector.input), {
+      structHash: vector.expected.envelopeId,
+      signingDigest: vector.expected.signingDigest
+    });
+    assert.deepEqual(localTransactionEnvelopeInput(vector.envelope), vector.input);
+    assert.deepEqual(validateLocalTransactionEnvelope({
+      document,
+      envelope: vector.envelope,
+      context: { chainId: productTestnetTransactions.chainId, expectedNonce: vector.envelope.nonce }
+    }), { valid: true, errors: [] }, vector.name);
+    transactionsByName.set(vector.name, vector);
+  }
+
+  for (const vector of productTestnetTransactions.transactions.negative) {
+    const { document, envelope, context } = mutatedTransactionVector(vector, documentsByName, transactionsByName);
+    const result = validateLocalTransactionEnvelope({ document, envelope, context });
+    assert.equal(result.valid, false, vector.name);
+    for (const expectedError of vector.expectErrors) {
+      assert.ok(
+        result.errors.includes(expectedError),
+        `${vector.name} expected ${expectedError}, got ${result.errors.join(", ")}`
+      );
+    }
+  }
+
+  assert.deepEqual(validateProductTestnetFixtures(), {
+    documents: 8,
+    transactions: 8,
+    negativeTransactions: 9,
+    schemas: 3
+  });
+});
+
 test("Local Alpha object fixtures reject swapped fields, malformed hex, duplicate ids, and changed type strings", () => {
   for (const negative of localAlphaObjects.negative) {
     if (negative.reason === "swapped-field-rejection") {
@@ -590,7 +662,7 @@ test("local encrypted test vault creates, unlocks, lists, signs, verifies, expor
 });
 
 test("validates all published crypto test vectors", () => {
-  assert.equal(validateVectors(), 38);
+  assert.equal(validateVectors(), 46);
 });
 
 test("signs and verifies verifier digests with local test keys only", async () => {
@@ -654,6 +726,9 @@ function mutatedTransactionVector(vector, documentsByName, transactionsByName) {
   }
   if (mutation.envelope) {
     Object.assign(envelope, mutation.envelope);
+  }
+  for (const field of mutation.deleteEnvelopeFields ?? []) {
+    delete envelope[field];
   }
 
   const context = mutation.context ? { ...mutation.context } : {};

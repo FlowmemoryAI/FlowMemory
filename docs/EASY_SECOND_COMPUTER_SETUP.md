@@ -42,19 +42,18 @@ When `gh auth login` asks questions, use GitHub.com, HTTPS, and browser login.
 Windows may ask for permission while tools install. Click **Yes** if prompted.
 
 The installer downloads this repo, installs dependencies, checks prerequisites,
-initializes local state, runs the deterministic local chain demo, runs the smoke
-path, exports a local bundle, runs the bridge mock, and opens the control plane
-and dashboard in separate PowerShell windows.
+initializes local state, runs the deterministic local chain demo, runs the
+product testnet E2E gate, exports a local bundle, runs the bridge mock, and
+opens the control plane and dashboard in separate PowerShell windows.
 
-The current installer uses the merged-surface smoke path. The full local L1
-acceptance wrapper is:
+The current installer uses the product testnet acceptance wrapper:
 
 ```powershell
-npm run flowchain:full-smoke -- -AllowIncomplete
+npm run flowchain:product-e2e
 ```
 
-It reports the remaining subsystem blockers until issues #99 through #108 are
-finished.
+That gate must pass before the setup should be treated as ready for a local
+second-computer test.
 
 ## Already Cloned Setup
 

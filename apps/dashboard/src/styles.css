@@ -740,6 +740,85 @@ dd {
   gap: 14px;
 }
 
+.workbench-boundary-strip {
+  display: grid;
+  grid-template-columns: 1.05fr 1.15fr 1.2fr;
+  gap: 10px;
+}
+
+.workbench-boundary-strip article {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #cfd7cd;
+  border-radius: 8px;
+  background: #f9faf6;
+}
+
+.workbench-boundary-strip strong {
+  font-size: 0.82rem;
+}
+
+.workbench-boundary-strip span {
+  color: #4c554c;
+  font-size: 0.84rem;
+  line-height: 1.42;
+}
+
+.product-surface-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1.2fr;
+  gap: 10px;
+}
+
+.product-surface {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: start;
+  min-width: 0;
+  min-height: 118px;
+  padding: 12px;
+  text-align: left;
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+.product-surface:hover {
+  border-color: #9fb4a8;
+  background: #eaf1eb;
+}
+
+.product-surface-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: #235f52;
+  border: 1px solid #bfd1c7;
+  border-radius: 7px;
+  background: #edf5ef;
+}
+
+.product-surface strong,
+.product-surface small,
+.product-surface code {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.product-surface small {
+  margin-top: 4px;
+  line-height: 1.36;
+}
+
+.product-surface b {
+  color: var(--ink);
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 1.1rem;
+  line-height: 1.1;
+}
+
 .workbench-node-body {
   display: grid;
   gap: 16px;
@@ -1309,6 +1388,8 @@ code {
   .hardware-grid,
   .lane-grid,
   .canary-operator-strip,
+  .workbench-boundary-strip,
+  .product-surface-grid,
   .local-action-grid,
   .workbench-command-center,
   .workbench-record-grid {
