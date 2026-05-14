@@ -27,10 +27,21 @@ type WalletCreateResult = WalletStatus & {
   alreadyExists?: boolean;
   vaultPath?: string;
   note?: string;
+  message?: string;
 };
 
 interface WalletViewProps {
   workbench: WorkbenchSnapshot;
+}
+
+type WalletApiResult<T> = {
+  payload: T;
+  url: string;
+};
+
+class WalletApiError extends Error {
+  status?: number;
+  url?: string;
 }
 
 function shortId(value: string): string {
@@ -45,8 +56,72 @@ function accountId(account: WalletAccount | null | undefined): string {
   return safeText(account?.accountId ?? account?.address ?? account?.signerId, "");
 }
 
+function isLoopbackHost(value: string): boolean {
+  return value === "127.0.0.1" || value === "localhost" || value === "::1";
+}
+
+function walletApiCandidates(primaryUrl: string): string[] {
+  const candidates: string[] = [];
+  const browserHost = typeof window !== "undefined" ? window.location.hostname : "";
+
+  if (browserHost && !isLoopbackHost(browserHost)) {
+    candidates.push(`http://${browserHost}:8795`, `http://${browserHost}:8794`, `http://${browserHost}:8787`);
+  }
+
+  candidates.push(primaryUrl);
+
+  if (!browserHost || isLoopbackHost(browserHost)) {
+    candidates.push("http://127.0.0.1:8794", "http://127.0.0.1:8795", "http://127.0.0.1:8787");
+  }
+
+  return [...new Set(candidates.map((candidate) => candidate.replace(/\/+$/, "")))];
+}
+
+async function readJsonPayload(response: Response): Promise<unknown> {
+  const body = await response.text();
+  if (body.trim().length === 0) {
+    return {};
+  }
+  try {
+    return JSON.parse(body) as unknown;
+  } catch {
+    return { message: body };
+  }
+}
+
+async function fetchWalletApi<T>(urls: string[], path: string, init?: RequestInit): Promise<WalletApiResult<T>> {
+  let lastError: Error | null = null;
+
+  for (const url of urls) {
+    try {
+      const response = await fetch(`${url}${path}`, init);
+      const payload = await readJsonPayload(response);
+      if (!response.ok) {
+        const error = new WalletApiError(safeText((payload as { message?: string }).message, `${path} failed with ${response.status}`));
+        error.status = response.status;
+        error.url = url;
+        lastError = error;
+        if (response.status === 404) {
+          continue;
+        }
+        throw error;
+      }
+      return { payload: payload as T, url };
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error("wallet API unavailable");
+      if (error instanceof WalletApiError && error.status !== 404) {
+        throw error;
+      }
+    }
+  }
+
+  throw lastError ?? new Error("wallet API unavailable");
+}
+
 export function WalletView({ workbench }: WalletViewProps) {
   const controlPlaneUrl = workbench.controlPlane.url;
+  const apiCandidates = useMemo(() => walletApiCandidates(controlPlaneUrl), [controlPlaneUrl]);
+  const [walletApiUrl, setWalletApiUrl] = useState(controlPlaneUrl);
   const [status, setStatus] = useState<WalletStatus | null>(null);
   const [result, setResult] = useState<WalletCreateResult | null>(null);
   const [label, setLabel] = useState("flowchain-operator");
@@ -63,17 +138,16 @@ export function WalletView({ workbench }: WalletViewProps) {
     { label: "key scheme", value: safeText(activeAccount?.keyScheme, "secp256k1") },
     { label: "chain id", value: safeText(activeAccount?.chainId, "31337") },
     { label: "next nonce", value: safeText(activeAccount?.nextNonce, "0") },
+    { label: "wallet api", value: walletApiUrl },
     { label: "metadata", value: safeText(result?.metadataPath ?? status?.metadataPath) },
     { label: "vault", value: safeText(result?.vaultPath) },
-  ], [activeAccount, activeAccountId, result, status]);
+  ], [activeAccount, activeAccountId, result, status, walletApiUrl]);
 
   async function loadStatus() {
     try {
-      const response = await fetch(`${controlPlaneUrl}/wallets/operator`);
-      if (!response.ok) {
-        throw new Error(`wallet status failed with ${response.status}`);
-      }
-      setStatus(await response.json() as WalletStatus);
+      const { payload, url } = await fetchWalletApi<WalletStatus>(apiCandidates, "/wallets/operator");
+      setWalletApiUrl(url);
+      setStatus(payload);
       setMessage(null);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "wallet status unavailable");
@@ -82,7 +156,7 @@ export function WalletView({ workbench }: WalletViewProps) {
 
   useEffect(() => {
     void loadStatus();
-  }, [controlPlaneUrl]);
+  }, [apiCandidates]);
 
   async function createWallet() {
     if (!canCreate) {
@@ -91,7 +165,7 @@ export function WalletView({ workbench }: WalletViewProps) {
     setLoading(true);
     setMessage(null);
     try {
-      const response = await fetch(`${controlPlaneUrl}/wallets/create`, {
+      const { payload, url } = await fetchWalletApi<WalletCreateResult>(apiCandidates, "/wallets/create", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -101,10 +175,7 @@ export function WalletView({ workbench }: WalletViewProps) {
           replace,
         }),
       });
-      const payload = await response.json() as WalletCreateResult;
-      if (!response.ok) {
-        throw new Error(safeText((payload as { message?: string }).message, `wallet creation failed with ${response.status}`));
-      }
+      setWalletApiUrl(url);
       setResult(payload);
       setStatus(payload);
       setPassphrase("");
