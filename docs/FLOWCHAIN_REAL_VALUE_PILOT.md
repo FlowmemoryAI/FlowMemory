@@ -59,6 +59,26 @@ devnet/local/real-value-pilot/flowchain-real-value-pilot-e2e-report.json
 The report must show `status: "passed"` before the owner can mark the capped
 pilot go. Until then, missing proof rows are blockers, not warnings.
 
+## Release-Gate Boundary
+
+This section is the issue #130 boundary for real-value pilot PRs. It does not
+approve live operation by itself; it defines the minimum evidence that must be
+present before a PR may claim a capped owner-pilot step is ready.
+
+| Activity | Merge requirement before claiming ready | Approval owner |
+| --- | --- | --- |
+| Base public-network observer reads. | Observer command verifies `eth_chainId == 0x2105`, rejects broad ranges, rejects unapproved lockbox addresses, records confirmation depth, and writes no-secret evidence. | Bridge + Ops + HQ |
+| Supported-asset deposit. | Contracts prove allowlist, per-deposit cap, total pilot cap, pause, replay, and deterministic event inputs; ops proves tiny nonzero cap env and exact owner acknowledgement. | Contracts + Ops + Owner |
+| Bridge release or recovery path. | Contracts prove authorized release/recovery and replay blocking; wallet proves signed release evidence; ops proves emergency stop and revoke/recovery command path. | Contracts + Wallet + Ops + Owner |
+| Local credit application. | Runtime proves each pilot credit applies exactly once, duplicate replay is rejected or idempotent with evidence, and restart/export/import preserve deterministic roots. | Chain runtime + Bridge |
+| Control-plane and dashboard display. | API/dashboard prove capped owner labels, live/degraded/error state, exact next command, redaction, and no browser secret storage. | Control plane/dashboard + Wallet |
+| Token launch, tokenomics, broad DEX liquidity, or open swap claims. | Out of scope for the capped owner pilot. A separate accepted issue, docs update, threat model, and owner approval are required before any PR may make these claims. | Owner + HQ + Security |
+| Open validators, public L1/mainnet readiness, audited cryptography, or production bridge custody. | Out of scope for this pilot. A separate production-readiness review, security review, and accepted release plan are required before any PR may make these claims. | Owner + HQ + Security |
+
+Every PR touching a pilot proof row must list the exact issue, allowed folders,
+forbidden folders, commands run, report paths, unresolved blockers, and whether
+the proof is branch-local or verified from `main`.
+
 ## Integration Matrix
 
 | Required proof | Owning agent | Required command | Current state |

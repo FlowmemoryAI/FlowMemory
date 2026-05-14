@@ -53,6 +53,12 @@ and `NOTES.md`.
   webhooks.
 - [ ] Owner has reviewed caps, stop/recovery path, and exact commands.
 
+## Release-Gate Boundary
+
+- [x] Branch documents issue #130 capped owner-pilot boundary in
+  `docs/FLOWCHAIN_REAL_VALUE_PILOT.md`.
+- [ ] Issue #130 boundary is reviewed and accepted on GitHub.
+
 ## Baseline Check Result
 
 `npm run flowchain:product-e2e` initially failed inside

@@ -13,6 +13,10 @@ Last updated: 2026-05-14.
   useful context, not merged source of truth.
 - Issue #130 is the active gate issue for defining release boundaries before
   public-network pilot work.
+- PR #132 now expands `docs/FLOWCHAIN_REAL_VALUE_PILOT.md` with the issue #130
+  release-gate boundary for observer reads, deposits, release/recovery, local
+  credit application, dashboard display, and explicitly out-of-scope public
+  readiness claims.
 - Issue #131 is the active contracts/static-analysis issue for reconciling
   local Slither findings that block product and L1 E2E evidence.
 - PR #132 now includes an allowed `infra/scripts/` fix for #131: the default

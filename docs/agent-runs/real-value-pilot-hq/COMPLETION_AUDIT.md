@@ -42,7 +42,7 @@ are true on `main`:
 | Existing `npm run flowchain:product-e2e` remains passing, or failure is documented with owner and next action. | Initially failed under local Slither. After the allowed `infra/scripts/` static-analysis policy update, `npm run flowchain:product-e2e` passed and wrote `devnet/local/product-e2e/flowchain-product-e2e-report.json`. | Complete on branch; not yet on `main`. |
 | Open a PR with exact commands run and current blockers. | Draft PR #132 opened: https://github.com/FlowmemoryAI/FlowMemory/pull/132. | Complete. |
 | PR CI state. | `gh pr view 132` showed all CI checks successful and merge state `CLEAN` after push. | Complete for current PR. |
-| GitHub blocker state. | `gh issue view 130`, `gh issue view 131`, and `infra/scripts/status-report.ps1` show issues #130 and #131 open. PR #132 now contains a branch-local #131 policy fix. | Not complete; blockers remain open until reviewed/merged. |
+| GitHub blocker state. | `gh issue view 130`, `gh issue view 131`, and `infra/scripts/status-report.ps1` show issues #130 and #131 open. PR #132 now contains a branch-local #130 boundary doc expansion and #131 policy fix. | Not complete; blockers remain open until reviewed/merged. |
 | Final success: `flowchain:real-value-pilot:e2e` passes on `main`. | `origin/main` lacks the script; branch gate fails by design because dedicated subsystem proof commands are missing. | Not complete. |
 | Final success: `flowchain:l1-e2e` passes on `main`. | `origin/main` lacks the script. The branch alias now passes locally after the static-analysis policy update. | Complete on branch; missing on `main`. |
 
@@ -107,8 +107,8 @@ truth until the work lands in reviewed PRs and merges to `main`.
 ## Uncovered Or Incomplete Requirements
 
 - The new gates are not on `main`; PR #132 is still draft and unmerged.
-- GitHub issue #130 is still open, so the accepted release-gate boundary is not
-  complete.
+- GitHub issue #130 is still open. This branch contains the release-gate
+  boundary doc expansion, but it is not accepted until reviewed and merged.
 - GitHub issue #131 is still open. This branch contains a policy fix and local
   product/L1 E2E now passes, but `main` is unchanged until PR #132 merges.
 - `flowchain:real-value-pilot:e2e` does not pass without `-AllowIncomplete`.
@@ -127,7 +127,8 @@ truth until the work lands in reviewed PRs and merges to `main`.
 ## Next Concrete Actions
 
 1. Keep PR #132 open as the HQ gate/documentation branch until reviewed.
-2. Close issue #130 by accepting the capped owner-pilot release boundary.
+2. Review and merge the issue #130 release-gate boundary, or request narrower
+   acceptance language before subsystem proof PRs claim readiness.
 3. Review and merge the #131 static-analysis policy fix, or replace it with a
    contracts-owned fix if the owner chooses to require Slither findings in the
    default gate.

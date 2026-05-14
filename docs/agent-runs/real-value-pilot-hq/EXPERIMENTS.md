@@ -42,6 +42,7 @@ Last updated: 2026-05-14.
 | `npm run flowchain:product-e2e` | Passed | Product Testnet V1 E2E passed and wrote `devnet/local/product-e2e/flowchain-product-e2e-report.json`. |
 | `npm run flowchain:l1-e2e` | Passed | Current alias to `flowchain-full-smoke.ps1` passed and wrote `devnet/local/full-smoke/flowchain-full-smoke-report.json`. |
 | Post static-analysis docs checks | Passed | `node infra/scripts/check-unsafe-claims.mjs`, `git diff --check`, and `npm run flowchain:real-value-pilot:e2e -- -AllowIncomplete` passed after recording the static-analysis policy evidence. |
+| Post release-boundary docs checks | Passed | `node infra/scripts/check-unsafe-claims.mjs`, `git diff --check`, and `npm run flowchain:real-value-pilot:e2e -- -AllowIncomplete` passed after adding the issue #130 release-gate boundary. |
 
 ## Static Analysis Policy Update
 
