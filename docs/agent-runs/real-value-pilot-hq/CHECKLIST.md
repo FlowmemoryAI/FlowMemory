@@ -20,7 +20,7 @@ Last updated: 2026-05-14.
 - [x] Run `git diff --check`.
 - [x] Run the new pilot gate in incomplete mode.
 - [x] Run `npm run flowchain:product-e2e`, or document why it was not practical.
-- [ ] Open a draft PR with exact commands run and current blockers.
+- [x] Open a draft PR with exact commands run and current blockers.
 
 ## Gate Blocker Rows
 
@@ -60,3 +60,5 @@ Owner: contracts / static-analysis policy.
 Next action: contracts owner should either address the Slither findings or
 update the accepted static-analysis policy in a contracts-scoped PR. This HQ
 branch does not edit `contracts/`.
+
+Draft PR: https://github.com/FlowmemoryAI/FlowMemory/pull/132

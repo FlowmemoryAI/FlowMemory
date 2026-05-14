@@ -45,3 +45,4 @@ Last updated: 2026-05-14.
   existing findings in `contracts/bridge/BaseBridgeLockbox.sol`.
 - The product E2E failure is not caused by the HQ docs/script changes in this
   branch; the next action belongs to the contracts/static-analysis owner.
+- Draft PR opened: https://github.com/FlowmemoryAI/FlowMemory/pull/132.
