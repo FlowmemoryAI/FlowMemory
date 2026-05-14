@@ -18,6 +18,8 @@ import { runControlPlaneSmoke } from "../src/smoke.ts";
 
 const EXPECTED_CHAIN_CAPABILITIES = [
   "health_reads",
+  "rpc_discovery_reads",
+  "rpc_readiness_reads",
   "node_status_reads",
   "peer_reads",
   "local_runtime_status_reads",
@@ -117,6 +119,47 @@ test("keeps deterministic chain status response snapshots", () => {
   assert.equal(typeof ((first.result as JsonObject).counts as JsonObject).bridgeDeposits, "number");
   assert.equal(typeof ((first.result as JsonObject).counts as JsonObject).withdrawals, "number");
   rmSync(dir, { recursive: true, force: true });
+});
+
+test("exposes RPC discovery and readiness without leaking env values", () => {
+  const envNames = [
+    "FLOWCHAIN_RPC_PUBLIC_URL",
+    "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+    "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+    "FLOWCHAIN_RPC_TLS_TERMINATED",
+    "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+  ] as const;
+  const originalEnv = new Map(envNames.map((name) => [name, process.env[name]]));
+  try {
+    for (const name of envNames) {
+      delete process.env[name];
+    }
+    const response = dispatchJsonRpc({ jsonrpc: "2.0", id: 1, method: "rpc_discover" }) as RpcSuccessResponse;
+    const readiness = dispatchJsonRpc({ jsonrpc: "2.0", id: 2, method: "rpc_readiness" }) as RpcSuccessResponse;
+    const methodNames = (response.result.methods as JsonObject[]).map((entry) => entry.method);
+
+    assert.equal(response.result.schema, "flowchain.rpc.discovery.v0");
+    assert.equal(response.result.protocol, "JSON-RPC 2.0");
+    assert.ok(methodNames.includes("transaction_submit"));
+    assert.ok(methodNames.includes("bridge_credit_status"));
+    assert.ok(methodNames.includes("rpc_readiness"));
+    assert.equal(response.result.compatibility.evmJsonRpcCompatible, false);
+    assert.equal(response.result.productionReady, false);
+
+    assert.equal(readiness.result.schema, "flowchain.rpc.readiness.v0");
+    assert.equal(readiness.result.envValuesPrinted, false);
+    assert.equal(readiness.result.noSecrets, true);
+    assert.equal(readiness.result.productionReady, false);
+    assert.ok((readiness.result.missingProductionEnvNames as string[]).includes("FLOWCHAIN_RPC_PUBLIC_URL"));
+  } finally {
+    for (const [name, value] of originalEnv) {
+      if (value === undefined) {
+        delete process.env[name];
+      } else {
+        process.env[name] = value;
+      }
+    }
+  }
 });
 
 test("recovers when generated launch/indexer/verifier fixtures are missing", () => {
@@ -981,6 +1024,8 @@ test("smoke client queries the complete local lifecycle surface", () => {
   const responseSchemas = smoke.responseSchemas as string[];
   assert.equal(smoke.methodCount, responseSchemas.length);
   for (const expectedSchema of [
+    "flowchain.rpc.discovery.v0",
+    "flowchain.rpc.readiness.v0",
     "flowmemory.control_plane.real_value_pilot_status.v0",
     "flowmemory.control_plane.real_value_pilot_deposit_observation_list.v0",
     "flowmemory.control_plane.real_value_pilot_credit_list.v0",
@@ -1053,6 +1098,20 @@ test("HTTP server exposes browser-safe health and state endpoints", async () => 
     assert.equal(health.status, 200);
     assert.equal(health.headers.get("access-control-allow-origin"), "*");
     assert.equal((await health.json()).status, "ok");
+
+    const rpcDiscover = await fetch(`http://127.0.0.1:${port}/rpc/discover`, {
+      headers: { Origin: "http://127.0.0.1:5173" },
+    });
+    assert.equal(rpcDiscover.status, 200);
+    assert.equal(rpcDiscover.headers.get("access-control-allow-origin"), "*");
+    assert.equal((await rpcDiscover.json()).schema, "flowchain.rpc.discovery.v0");
+
+    const rpcReadiness = await fetch(`http://127.0.0.1:${port}/rpc/readiness`, {
+      headers: { Origin: "http://127.0.0.1:5173" },
+    });
+    assert.equal(rpcReadiness.status, 200);
+    assert.equal(rpcReadiness.headers.get("access-control-allow-origin"), "*");
+    assert.equal((await rpcReadiness.json()).schema, "flowchain.rpc.readiness.v0");
 
     const state = await fetch(`http://127.0.0.1:${port}/state`, {
       headers: { Origin: "http://127.0.0.1:5173" },

@@ -13,6 +13,8 @@ export type JsonValue =
 export type JsonObject = { [key: string]: JsonValue | undefined };
 
 export type ControlPlaneMethod =
+  | "rpc_discover"
+  | "rpc_readiness"
   | "health"
   | "node_status"
   | "peer_list"

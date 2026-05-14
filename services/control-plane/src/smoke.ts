@@ -63,6 +63,8 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
   }
 
   const requests = [
+    { jsonrpc: "2.0", id: "rpcDiscover", method: "rpc_discover" },
+    { jsonrpc: "2.0", id: "rpcReadiness", method: "rpc_readiness" },
     { jsonrpc: "2.0", id: "health", method: "health" },
     { jsonrpc: "2.0", id: "node", method: "node_status" },
     { jsonrpc: "2.0", id: "peers", method: "peer_list", params: { limit: 10 } },

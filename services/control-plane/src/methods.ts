@@ -1390,6 +1390,143 @@ function health(_params: JsonValue | undefined, context: ControlPlaneContext): J
   };
 }
 
+function rpcMethodRows(): JsonObject[] {
+  return Object.keys(CONTROL_PLANE_METHODS)
+    .sort()
+    .map((method) => ({
+      schema: "flowmemory.control_plane.rpc_method.v0",
+      method,
+      category: rpcMethodCategory(method),
+      mode: method === "transaction_submit" || method === "bridge_observation_submit" ? "local-file-intake" : "read",
+      stable: true,
+      localOnly: true,
+      productionReady: false,
+    }));
+}
+
+function rpcMethodCategory(method: string): string {
+  if (method.startsWith("rpc_")) return "rpc";
+  if (method.startsWith("node_") || method.startsWith("peer_") || method.startsWith("chain_")) return "node";
+  if (method.startsWith("block_") || method.startsWith("transaction_") || method.startsWith("mempool_")) return "ledger";
+  if (method.startsWith("account_") || method.startsWith("balance_") || method.startsWith("wallet_")) return "wallet";
+  if (method.startsWith("token_") || method.startsWith("pool_") || method.startsWith("lp_") || method.startsWith("swap_")) return "assets-dex";
+  if (method.startsWith("bridge_") || method.startsWith("withdrawal_") || method.startsWith("pilot_")) return "bridge";
+  if (method.startsWith("rootfield_") || method.startsWith("receipt_") || method.startsWith("work_") || method.startsWith("memory_")) return "flowmemory";
+  if (method.startsWith("verifier_") || method.startsWith("challenge_") || method.startsWith("finality_")) return "verification";
+  if (method.startsWith("artifact_")) return "storage";
+  return "general";
+}
+
+function rpcDiscover(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  asObjectParams(params, "rpc_discover");
+  const state = stateFor(context);
+  const methods = rpcMethodRows();
+  return {
+    schema: "flowchain.rpc.discovery.v0",
+    protocol: "JSON-RPC 2.0",
+    service: "flowmemory-control-plane-v0",
+    rpcPath: "/rpc",
+    chainId: typeof state.devnet?.chainId === "string" ? state.devnet.chainId : "flowmemory-local-devnet-v0",
+    methodCount: methods.length,
+    methods,
+    httpMirrors: [
+      "/health",
+      "/state",
+      "/chain/status",
+      "/explorer/summary",
+      "/bridge/live-readiness",
+      "/bridge/status",
+      "/wallets/balances",
+      "/wallets/transfers",
+    ],
+    compatibility: {
+      evmJsonRpcCompatible: false,
+      solanaJsonRpcCompatible: false,
+      flowchainJsonRpcCompatible: true,
+    },
+    boundaries: [
+      "This endpoint describes the current FlowChain control-plane RPC surface.",
+      "Current methods are local-runtime-first and fixture-backed fallback unless hosted deployment gates are added.",
+      "Public production RPC readiness must be proven by rpc_readiness and live-product gates.",
+    ],
+    localOnly: true,
+    productionReady: false,
+  };
+}
+
+function rpcReadiness(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  asObjectParams(params, "rpc_readiness");
+  const state = stateFor(context);
+  const missing = Object.values(state.sources).filter((source) => source.status === "missing").map((source) => source.name);
+  const degraded = Object.values(state.sources).filter((source) => source.status === "degraded").map((source) => source.name);
+  const runtimeLoaded = state.devnet !== null && state.sources.devnet?.status !== "missing" && state.sources.devnet?.status !== "degraded";
+  const liveBridgeReadiness = bridgeLiveReadiness(undefined, { state }) as JsonObject;
+  const missingProductionEnvNames = [
+    "FLOWCHAIN_RPC_PUBLIC_URL",
+    "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+    "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+    "FLOWCHAIN_RPC_TLS_TERMINATED",
+    "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+  ].filter((name) => typeof process.env[name] !== "string" || process.env[name]?.trim().length === 0);
+  const issues: JsonObject[] = [];
+  if (!runtimeLoaded) {
+    issues.push({
+      reasonCode: "runtime_state_not_loaded",
+      status: "blocked",
+      sourceStatus: state.sources.devnet?.status ?? "missing",
+    });
+  }
+  if (degraded.length > 0) {
+    issues.push({
+      reasonCode: "degraded_sources",
+      status: "blocked",
+      sources: degraded,
+    });
+  }
+  if (missingProductionEnvNames.length > 0) {
+    issues.push({
+      reasonCode: "missing_public_rpc_deployment_env",
+      status: "blocked",
+      missingEnvNames: missingProductionEnvNames,
+    });
+  }
+  if (liveBridgeReadiness.failClosedStatus !== "READY_FOR_OPERATOR_LIVE_PILOT") {
+    issues.push({
+      reasonCode: "bridge_live_readiness_not_ready",
+      status: "blocked",
+      missingEnvNames: liveBridgeReadiness.missingEnvNames,
+    });
+  }
+
+  return {
+    schema: "flowchain.rpc.readiness.v0",
+    service: "flowmemory-control-plane-v0",
+    rpcPath: "/rpc",
+    status: issues.length === 0 ? "READY_FOR_CONFIGURED_OWNER_RPC_DEPLOYMENT" : "BLOCKED",
+    localRuntimeReadable: runtimeLoaded,
+    publicRpcReady: issues.length === 0,
+    walletUsableAgainstRpc: runtimeLoaded,
+    explorerUsableAgainstRpc: runtimeLoaded,
+    bridgeRelayerUsableAgainstRpc: runtimeLoaded,
+    methodCount: rpcMethodRows().length,
+    sourceStatuses: state.sources,
+    missingOptionalSources: missing,
+    degradedSources: degraded,
+    missingProductionEnvNames,
+    bridgeLiveReadiness: {
+      failClosedStatus: liveBridgeReadiness.failClosedStatus,
+      readyForOperatorLivePilot: liveBridgeReadiness.readyForOperatorLivePilot,
+      missingEnvNames: liveBridgeReadiness.missingEnvNames,
+      envValuesPrinted: false,
+    },
+    issues,
+    envValuesPrinted: false,
+    noSecrets: true,
+    localOnly: true,
+    productionReady: false,
+  };
+}
+
 function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
   const state = stateFor(context);
   const latest = latestBlock(state);
@@ -1468,6 +1605,8 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
     },
     capabilities: [
       "health_reads",
+      "rpc_discovery_reads",
+      "rpc_readiness_reads",
       "node_status_reads",
       "peer_reads",
       "local_runtime_status_reads",
@@ -3206,6 +3345,8 @@ function rawJsonGet(params: JsonValue | undefined, context: ControlPlaneContext)
 }
 
 export const CONTROL_PLANE_METHODS: Record<ControlPlaneMethod, MethodHandler> = {
+  rpc_discover: rpcDiscover,
+  rpc_readiness: rpcReadiness,
   health,
   node_status: nodeStatus,
   peer_list: peerList,

@@ -198,6 +198,18 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
       return;
     }
 
+    if (req.method === "GET" && req.url === "/rpc/discover") {
+      const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "rpc-discover", method: "rpc_discover" }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
+    if (req.method === "GET" && req.url === "/rpc/readiness") {
+      const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "rpc-readiness", method: "rpc_readiness" }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
     if (req.method === "GET" && req.url === "/state") {
       const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "state", method: "devnet_state" }, { state });
       writeJson(res, 200, jsonResult(response));

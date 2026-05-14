@@ -89,6 +89,7 @@
     "flowchain:bridge:evidence:export": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-evidence-export.ps1",
     "flowchain:bridge:emergency-stop": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base8453-control.ps1 -Action EmergencyStop",
     "flowchain:control-plane:smoke": "npm run control-plane:smoke",
+    "flowchain:rpc:e2e": "npm run rpc:e2e --prefix services/control-plane",
     "flowchain:dashboard:build": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-workbench.ps1 -BuildOnly",
     "flowchain:dashboard:verify": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-workbench.ps1 -BuildOnly",
     "flowchain:export": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-export.ps1",

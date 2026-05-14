@@ -12,6 +12,7 @@ From the repository root:
 npm run control-plane:demo
 npm run control-plane:test
 npm run control-plane:smoke
+npm run flowchain:rpc:e2e
 npm run control-plane:serve
 npm run flowchain:real-value-pilot:control-dashboard
 ```
@@ -24,6 +25,8 @@ The server defaults to `http://127.0.0.1:8787`.
 The dispatcher supports:
 
 - `health`
+- `rpc_discover`
+- `rpc_readiness`
 - `node_status`
 - `peer_list`
 - `chain_status`
@@ -119,7 +122,9 @@ If the launch-core fixture is missing, the loader rebuilds the in-memory view fr
 
 `transaction_submit` accepts signed local test transaction envelopes only and writes them to `devnet/local/intake/transactions.ndjson` by default. `bridge_observation_submit` writes bridge-agent observations to `devnet/local/intake/bridge-observations.ndjson`. These files are local runtime intake, not committed fixtures.
 
-`npm run control-plane:smoke` runs an in-process JSON-RPC client over the complete local lifecycle surface: health, node status, peers, chain status, real-value pilot status/list/status methods, blocks, transactions, mempool, accounts, balances, tokens, token balances, pools, LP positions, swaps, product-flow status, faucet events, wallet public metadata, rootfields, agents, models, work receipts, artifact availability, verifier modules, verifier reports, memory cells, challenges, finality, bridge observations, bridge deposits, bridge credits, withdrawals, provenance, and raw JSON.
+`npm run control-plane:smoke` runs an in-process JSON-RPC client over the complete local lifecycle surface: RPC discovery/readiness, health, node status, peers, chain status, real-value pilot status/list/status methods, blocks, transactions, mempool, accounts, balances, tokens, token balances, pools, LP positions, swaps, product-flow status, faucet events, wallet public metadata, rootfields, agents, models, work receipts, artifact availability, verifier modules, verifier reports, memory cells, challenges, finality, bridge observations, bridge deposits, bridge credits, withdrawals, provenance, and raw JSON.
+
+`npm run flowchain:rpc:e2e` verifies the FlowChain-native JSON-RPC discovery and readiness methods, required method coverage, no-secret report boundary, and writes `devnet/local/rpc-e2e/flowchain-rpc-e2e-report.json`. It intentionally reports public RPC readiness as blocked until the explicit public RPC deployment inputs are configured.
 
 `npm run flowchain:real-value-pilot:control-dashboard` verifies that the API exposes the capped owner-testing pilot lifecycle, rejects secret-shaped material, and that the dashboard source renders the pilot evidence and next operator command without browser secret storage. The root `flowchain:real-value-pilot:e2e` command is the upstream final HQ pilot gate and depends on proof commands from multiple owner branches.
 

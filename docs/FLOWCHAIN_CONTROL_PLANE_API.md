@@ -20,6 +20,7 @@ Commands:
 npm run control-plane:test
 npm run control-plane:demo
 npm run control-plane:smoke
+npm run flowchain:rpc:e2e
 npm run control-plane:serve
 ```
 
@@ -125,9 +126,52 @@ GET /health
 Browser-safe summary endpoints are also available:
 
 ```text
+GET /rpc/discover
+GET /rpc/readiness
 GET /explorer/summary
 GET /product-flow/status
 GET /pilot/status
+```
+
+### `rpc_discover`
+
+Params: none.
+
+Returns the FlowChain-native JSON-RPC method inventory for wallets, explorers,
+relayers, and deployment checks. This method is intentionally not EVM JSON-RPC
+or Solana JSON-RPC compatibility. It reports the supported FlowChain methods,
+their categories, read/write mode, local-only boundary, and current production
+readiness status.
+
+HTTP mirror:
+
+```text
+GET /rpc/discover
+```
+
+### `rpc_readiness`
+
+Params: none.
+
+Returns a fail-closed machine-readable readiness object for the FlowChain RPC.
+It reports whether active runtime state is readable, whether wallet/explorer/
+bridge consumers can use the current RPC, and which public deployment inputs
+are missing. It returns environment variable names only, never values.
+
+Public RPC deployment inputs currently checked by name:
+
+```text
+FLOWCHAIN_RPC_PUBLIC_URL
+FLOWCHAIN_RPC_ALLOWED_ORIGINS
+FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE
+FLOWCHAIN_RPC_TLS_TERMINATED
+FLOWCHAIN_RPC_STATE_BACKUP_PATH
+```
+
+HTTP mirror:
+
+```text
+GET /rpc/readiness
 ```
 
 ### `chain_status`
