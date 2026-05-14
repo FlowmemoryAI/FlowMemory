@@ -1,0 +1,21 @@
+# Production L1 Consensus Checklist
+
+- [x] Tracking files created.
+- [x] Existing Rust devnet consensus gaps mapped.
+- [x] Validator public identity format implemented.
+- [x] Genesis authority set implemented and exported.
+- [x] Proposer identity included in block headers.
+- [x] Block proposal validates parent, height, timestamp, proposer, stable transaction ordering, and duplicate transaction ids.
+- [x] Block validation covers chain id, genesis hash, block hash, tx root, receipt root, event root, state root, proposer, and bridge replay keys.
+- [x] Fork choice handles competing valid blocks, invalid branches, unknown parents/stale branches via rejection evidence, finalized conflicts, and deterministic tie-breaks.
+- [x] Misbehavior evidence records duplicate proposals, invalid parent, wrong chain id, wrong genesis hash, invalid proposer, and invalid root.
+- [x] Local/private finality rule implemented with receipt/certificate shape and finalized height/hash/root queries.
+- [x] Export/import preserves finalized height and finalized root.
+- [x] Control-plane/runtime handoff output includes consensus and finality fields.
+- [x] Runnable consensus commands implemented.
+- [x] Required proof docs written.
+- [x] `devnet/local/consensus-smoke/consensus-report.json` generated.
+- [x] `cargo test --manifest-path crates/flowmemory-devnet/Cargo.toml` passes.
+- [x] `npm run flowchain:consensus:smoke` passes if added.
+- [x] `npm run flowchain:multi-node:smoke` checked if available.
+- [x] `git diff --check` passes.

@@ -15,6 +15,8 @@ Use:
 ```powershell
 cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- init
 cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- smoke
+npm run flowchain:consensus:smoke
+npm run flowchain:consensus:live-l1:verify
 ```
 
 See [docs/LOCAL_DEVNET.md](../docs/LOCAL_DEVNET.md) for full commands.

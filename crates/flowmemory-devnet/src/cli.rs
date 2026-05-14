@@ -1,19 +1,25 @@
-use crate::hash::{hash_json, normalize_value};
+use crate::hash::{hash_json, keccak_hex, normalize_value};
 use crate::model::{
-    FLOWPULSE_TOPIC0, ImportedFlowPulseObservation, ImportedVerifierReport, LocalAuthorization,
-    Transaction, build_block, demo_transactions, envelope_tx, genesis_state,
-    product_demo_transactions, queue_authorized_transaction, queue_transaction, state_map_roots,
-    state_root,
+    BridgeLifecycleEvidence, FLOWPULSE_TOPIC0, ImportedFlowPulseObservation,
+    ImportedVerifierReport, LOCAL_PRIVATE_AUTHORITY_SET_ID, LOCAL_PRIVATE_VALIDATOR_ID,
+    LocalAuthorization, Transaction, ZERO_HASH, build_block, choose_canonical_fork,
+    consensus_state_root, demo_transactions, envelope_tx, finalized_hash, finalized_height,
+    finalized_state_root, genesis_state, product_demo_transactions, propose_block,
+    queue_authorized_transaction, queue_transaction, record_block_proposal_validation,
+    record_block_validation, record_duplicate_proposal_evidence, record_fork_choice_evidence,
+    state_map_roots, state_root, validate_bridge_lifecycle_evidence, validate_chain,
 };
 use crate::storage::{default_state_path, load_or_genesis, load_state, reset_state, save_state};
 use anyhow::{Context, Result, anyhow};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::collections::BTreeMap;
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::thread;
 use std::time::Duration;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Debug)]
 pub struct Cli {
@@ -75,6 +81,24 @@ pub enum Command {
         out_dir: PathBuf,
     },
     ProductSmoke {
+        out_dir: PathBuf,
+    },
+    ConsensusValidate,
+    ValidatorSet,
+    FinalityStatus,
+    ForkChoiceTest {
+        out: Option<PathBuf>,
+    },
+    WriteFinalityProof {
+        out: PathBuf,
+    },
+    ConsensusSmoke {
+        out_dir: PathBuf,
+    },
+    LiveL1ConsensusReport {
+        out_dir: PathBuf,
+    },
+    VerifyLiveL1Consensus {
         out_dir: PathBuf,
     },
 }
@@ -196,6 +220,32 @@ fn parse_args(args: Vec<String>) -> Result<Cli> {
                 .map(PathBuf::from)
                 .unwrap_or_else(|_| PathBuf::from("fixtures/handoff/generated-product")),
         },
+        "consensus-validate" | "validate-chain" => Command::ConsensusValidate,
+        "validator-set" => Command::ValidatorSet,
+        "finality-status" => Command::FinalityStatus,
+        "fork-choice-test" => Command::ForkChoiceTest {
+            out: option_value_optional(&positional[1..], "--out").map(PathBuf::from),
+        },
+        "write-finality-proof" => Command::WriteFinalityProof {
+            out: option_value(&positional[1..], "--out")
+                .map(PathBuf::from)
+                .unwrap_or_else(|_| PathBuf::from("devnet/local/finality-proof.json")),
+        },
+        "consensus-smoke" => Command::ConsensusSmoke {
+            out_dir: option_value(&positional[1..], "--out-dir")
+                .map(PathBuf::from)
+                .unwrap_or_else(|_| PathBuf::from("devnet/local/consensus-smoke")),
+        },
+        "live-l1-consensus-report" => Command::LiveL1ConsensusReport {
+            out_dir: option_value(&positional[1..], "--out-dir")
+                .map(PathBuf::from)
+                .unwrap_or_else(|_| PathBuf::from("devnet/local/live-l1-consensus")),
+        },
+        "live-l1-consensus-verify" | "verify-live-l1-consensus" => Command::VerifyLiveL1Consensus {
+            out_dir: option_value(&positional[1..], "--out-dir")
+                .map(PathBuf::from)
+                .unwrap_or_else(|_| PathBuf::from("devnet/local/live-l1-consensus")),
+        },
         unknown => return Err(anyhow!("unknown command '{unknown}'")),
     };
 
@@ -240,7 +290,7 @@ fn option_u64(args: &[String], name: &str) -> Result<Option<u64>> {
 
 fn print_help() {
     println!(
-        "flowmemory-devnet --state <path> --node-dir <path> <command>\n\nCommands:\n  init\n  reset-local\n  node [--node-id <id>] [--block-ms <ms>] [--max-blocks <n>] [--peer-config <path>]\n  node-stop\n  node-status\n  tick [--node-id <id>] [--peer-config <path>]\n  submit-tx --tx-file <path> [--authorized-by <id>] [--direct]\n  faucet --account <id> --amount <n> [--reason <text>] [--authorized-by <id>] [--direct]\n  start|run [--blocks <n>]\n  run-block\n  submit-fixture --fixture <path>\n  inspect|inspect-state [--summary]\n  export|export-fixtures [--out-dir <path>]\n  export-state [--out <path>]\n  import-state --from <path>\n  demo [--out-dir <path>]\n  smoke [--out-dir <path>]\n  product-demo|product-smoke [--out-dir <path>]\n"
+        "flowmemory-devnet --state <path> --node-dir <path> <command>\n\nCommands:\n  init\n  reset-local\n  node [--node-id <id>] [--block-ms <ms>] [--max-blocks <n>] [--peer-config <path>]\n  node-stop\n  node-status\n  tick [--node-id <id>] [--peer-config <path>]\n  submit-tx --tx-file <path> [--authorized-by <id>] [--direct]\n  faucet --account <id> --amount <n> [--reason <text>] [--authorized-by <id>] [--direct]\n  start|run [--blocks <n>]\n  run-block\n  submit-fixture --fixture <path>\n  inspect|inspect-state [--summary]\n  export|export-fixtures [--out-dir <path>]\n  export-state [--out <path>]\n  import-state --from <path>\n  demo [--out-dir <path>]\n  smoke [--out-dir <path>]\n  product-demo|product-smoke [--out-dir <path>]\n  consensus-validate|validate-chain\n  validator-set\n  finality-status\n  fork-choice-test [--out <path>]\n  write-finality-proof --out <path>\n  consensus-smoke [--out-dir <path>]\n  live-l1-consensus-report [--out-dir <path>]\n  live-l1-consensus-verify [--out-dir <path>]\n"
     );
 }
 
@@ -470,6 +520,64 @@ fn run(cli: Cli) -> Result<()> {
                 deterministic_replay,
             ))?;
         }
+        Command::ConsensusValidate => {
+            let state = load_or_genesis(&cli.state)?;
+            let report = validate_chain(&state);
+            print_json(&report)?;
+            if !report.valid {
+                return Err(anyhow!("consensus validation failed"));
+            }
+        }
+        Command::ValidatorSet => {
+            let state = load_or_genesis(&cli.state)?;
+            print_json(&ValidatorSetSummary::from_state(&state))?;
+        }
+        Command::FinalityStatus => {
+            let state = load_or_genesis(&cli.state)?;
+            print_json(&FinalityStatusSummary::from_state(&state))?;
+        }
+        Command::ForkChoiceTest { out } => {
+            let proof = build_fork_choice_proof();
+            if let Some(path) = out {
+                write_json(path, &proof)?;
+            }
+            print_json(&proof)?;
+        }
+        Command::WriteFinalityProof { out } => {
+            let state = load_or_genesis(&cli.state)?;
+            let proof = FinalityProofOutput::from_state(&state);
+            write_json(out.clone(), &proof)?;
+            print_json(&FinalityProofSummary {
+                schema: "flowmemory.local_devnet.finality_proof_summary.v0".to_string(),
+                out,
+                finalized_height: proof.finalized_height,
+                finalized_hash: proof.finalized_hash,
+                finalized_state_root: proof.finalized_state_root,
+            })?;
+        }
+        Command::ConsensusSmoke { out_dir } => {
+            let smoke = run_consensus_smoke(&out_dir)?;
+            save_state(&cli.state, &smoke.state)?;
+            write_runtime_boundary_files(&cli.state, &smoke.state)?;
+            export_handoff(&smoke.state, &out_dir.join("handoff"))?;
+            print_json(&smoke.report)?;
+        }
+        Command::LiveL1ConsensusReport { out_dir } => {
+            let state = load_or_genesis(&cli.state)?;
+            let output = write_live_l1_consensus_report(&state, &out_dir)?;
+            print_json(&output.report)?;
+        }
+        Command::VerifyLiveL1Consensus { out_dir } => {
+            let state = load_or_genesis(&cli.state)?;
+            let verification = verify_live_l1_consensus_report(&state, &out_dir)?;
+            print_json(&verification)?;
+            if verification.status != "passed" {
+                return Err(anyhow!(
+                    "live L1 consensus readiness verification failed: {}",
+                    verification.reason
+                ));
+            }
+        }
     }
     Ok(())
 }
@@ -611,7 +719,9 @@ fn run_node(options: NodeRunOptions) -> Result<()> {
                 "blockNumber": block.block_number,
                 "blockHash": block.block_hash,
                 "txs": block.tx_ids.len(),
-                "stateRoot": block.state_root
+                "stateRoot": block.state_root,
+                "finalizedHeight": finalized_height(&state),
+                "finalizedHash": finalized_hash(&state)
             }))?
         );
 
@@ -804,6 +914,9 @@ fn sync_from_peers(
         if peer_state.chain_id != state.chain_id {
             continue;
         }
+        if !validate_chain(&peer_state).valid {
+            continue;
+        }
         if should_adopt_peer_state(state, &peer_state) {
             let adopted_state_root = state_root(&peer_state);
             let adopted_block_height = peer_state.blocks.len();
@@ -829,7 +942,8 @@ fn should_adopt_peer_state(
         return true;
     }
     if peer_height == local_height && peer_height > 0 {
-        return state_root(peer) < state_root(local);
+        return peer.consensus_state.canonical_head_hash
+            < local.consensus_state.canonical_head_hash;
     }
     false
 }
@@ -849,6 +963,8 @@ fn write_node_identity(
             "mode": "local-file-private-testnet",
             "statePath": state_path,
             "peerConfig": peer_config,
+            "authoritySet": "private-local-authority-set",
+            "validatorSetSource": "genesis validator metadata; public only",
             "localOnly": true,
             "lanMode": "not exposed; static local-file peers only"
         }),
@@ -1103,6 +1219,13 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "schema": "flowmemory.dashboard_state.local_devnet.v0",
         "genesisConfig": state.config,
         "operatorKeyReferences": state.operator_key_references,
+        "validatorSet": state.validator_set,
+        "authoritySet": state.authority_set,
+        "consensusState": state.consensus_state,
+        "chainFinalityReceipts": state.chain_finality_receipts,
+        "forkEvidence": state.fork_evidence,
+        "misbehaviorEvidence": state.misbehavior_evidence,
+        "consensusStateRoot": consensus_state_root(state),
         "stateRoot": state_root(state),
         "mapRoots": map_roots,
         "blockHeight": state.blocks.len(),
@@ -1127,6 +1250,8 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "verifierModules": state.verifier_modules,
         "workReceipts": state.work_receipts,
         "verifierReports": state.verifier_reports,
+        "bridgeReplayKeys": state.bridge_replay_keys,
+        "bridgeCredits": state.bridge_credits,
         "baseAnchors": state.base_anchors,
     });
 
@@ -1135,6 +1260,12 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "genesisConfig": state.config,
         "importedObservations": state.imported_observations,
         "operatorKeyReferences": state.operator_key_references,
+        "validatorSet": state.validator_set,
+        "authoritySet": state.authority_set,
+        "consensusState": state.consensus_state,
+        "chainFinalityReceipts": state.chain_finality_receipts,
+        "forkEvidence": state.fork_evidence,
+        "misbehaviorEvidence": state.misbehavior_evidence,
         "agentAccounts": state.agent_accounts,
         "localTestUnitBalances": state.local_test_unit_balances,
         "faucetRecords": state.faucet_records,
@@ -1150,15 +1281,24 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "challenges": state.challenges,
         "finalityReceipts": state.finality_receipts,
         "artifactAvailabilityProofs": state.artifact_availability_proofs,
+        "bridgeReplayKeys": state.bridge_replay_keys,
+        "bridgeCredits": state.bridge_credits,
         "blocks": state.blocks,
         "mapRoots": state_map_roots(state),
         "stateRoot": state_root(state),
+        "consensusStateRoot": consensus_state_root(state),
     });
 
     let verifier = serde_json::json!({
         "schema": "flowmemory.verifier_handoff.local_devnet.v0",
         "genesisConfig": state.config,
         "operatorKeyReferences": state.operator_key_references,
+        "validatorSet": state.validator_set,
+        "authoritySet": state.authority_set,
+        "consensusState": state.consensus_state,
+        "chainFinalityReceipts": state.chain_finality_receipts,
+        "forkEvidence": state.fork_evidence,
+        "misbehaviorEvidence": state.misbehavior_evidence,
         "localTestUnitBalances": state.local_test_unit_balances,
         "faucetRecords": state.faucet_records,
         "balanceTransfers": state.balance_transfers,
@@ -1175,17 +1315,35 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "challenges": state.challenges,
         "finalityReceipts": state.finality_receipts,
         "artifactAvailabilityProofs": state.artifact_availability_proofs,
+        "bridgeReplayKeys": state.bridge_replay_keys,
+        "bridgeCredits": state.bridge_credits,
         "importedVerifierReports": state.imported_verifier_reports,
         "mapRoots": state_map_roots(state),
         "stateRoot": state_root(state),
+        "consensusStateRoot": consensus_state_root(state),
     });
 
     let control_plane = serde_json::json!({
         "schema": "flowmemory.control_plane_handoff.local_devnet.v0",
         "genesisConfig": state.config,
         "operatorKeyReferences": state.operator_key_references,
+        "validatorSet": state.validator_set,
+        "authoritySet": state.authority_set,
         "chainId": state.chain_id,
         "stateRoot": state_root(state),
+        "consensusStateRoot": consensus_state_root(state),
+        "consensus": {
+            "state": state.consensus_state,
+            "finalityReceipts": state.chain_finality_receipts,
+            "forkEvidence": state.fork_evidence,
+            "misbehaviorEvidence": state.misbehavior_evidence
+        },
+        "finality": {
+            "finalizedHeight": finalized_height(state),
+            "finalizedHash": finalized_hash(state),
+            "finalizedStateRoot": finalized_state_root(state),
+            "latestFinalityReceiptId": state.consensus_state.latest_finality_receipt_id
+        },
         "mapRoots": state_map_roots(state),
         "latestBlock": state.blocks.last(),
         "blocks": state.blocks,
@@ -1212,6 +1370,8 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
             "verifierModules": state.verifier_modules,
             "workReceipts": state.work_receipts,
             "verifierReports": state.verifier_reports,
+            "bridgeReplayKeys": state.bridge_replay_keys,
+            "bridgeCredits": state.bridge_credits,
             "baseAnchors": state.base_anchors
         }
     });
@@ -1225,6 +1385,15 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         out_dir.join("operator-key-references.json"),
         &state.operator_key_references,
     )?;
+    write_json(
+        out_dir.join("validator-set.json"),
+        &ValidatorSetSummary::from_state(state),
+    )?;
+    write_json(out_dir.join("consensus-state.json"), &state.consensus_state)?;
+    write_json(
+        out_dir.join("finality-status.json"),
+        &FinalityStatusSummary::from_state(state),
+    )?;
     write_json(out_dir.join("state.json"), state)?;
     Ok(())
 }
@@ -1235,6 +1404,15 @@ fn write_runtime_boundary_files(state_path: &Path, state: &crate::model::ChainSt
     write_json(
         out_dir.join("operator-key-references.json"),
         &state.operator_key_references,
+    )?;
+    write_json(
+        out_dir.join("validator-set.json"),
+        &ValidatorSetSummary::from_state(state),
+    )?;
+    write_json(out_dir.join("consensus-state.json"), &state.consensus_state)?;
+    write_json(
+        out_dir.join("finality-status.json"),
+        &FinalityStatusSummary::from_state(state),
     )?;
     Ok(())
 }
@@ -1269,6 +1447,727 @@ fn string_at(values: &[Value], index: usize, label: &str) -> Result<String> {
         .ok_or_else(|| anyhow!("missing string value {label}"))
 }
 
+#[derive(Debug)]
+struct ConsensusSmokeRun {
+    state: crate::model::ChainState,
+    report: ConsensusSmokeReport,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ConsensusSmokeReport {
+    schema: String,
+    validator_set: serde_json::Value,
+    finalized_height: u64,
+    finalized_hash: String,
+    finalized_state_root: String,
+    canonical_head: String,
+    consensus_state_root: String,
+    rejected_forks: Vec<crate::model::ForkEvidence>,
+    misbehavior_evidence: Vec<crate::model::MisbehaviorEvidence>,
+    bridge_replay_key: String,
+    bridge_replay_final: bool,
+    validation: crate::model::ConsensusValidationReport,
+    command_evidence: Vec<String>,
+    output_files: Vec<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ValidatorSetSummary {
+    schema: String,
+    authority_set: crate::model::AuthoritySet,
+    validators: BTreeMap<String, crate::model::ValidatorIdentity>,
+    validator_set_root: String,
+    authority_set_root: String,
+}
+
+impl ValidatorSetSummary {
+    fn from_state(state: &crate::model::ChainState) -> Self {
+        let roots = state_map_roots(state);
+        Self {
+            schema: "flowmemory.local_devnet.validator_set_summary.v0".to_string(),
+            authority_set: state.authority_set.clone(),
+            validators: state.validator_set.clone(),
+            validator_set_root: roots.validator_set_root,
+            authority_set_root: roots.authority_set_root,
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct FinalityStatusSummary {
+    schema: String,
+    finalized_height: u64,
+    finalized_hash: String,
+    finalized_state_root: String,
+    canonical_height: u64,
+    canonical_head_hash: String,
+    latest_finality_receipt_id: Option<String>,
+    consensus_state_root: String,
+}
+
+impl FinalityStatusSummary {
+    fn from_state(state: &crate::model::ChainState) -> Self {
+        Self {
+            schema: "flowmemory.local_devnet.finality_status.v0".to_string(),
+            finalized_height: finalized_height(state),
+            finalized_hash: finalized_hash(state),
+            finalized_state_root: finalized_state_root(state),
+            canonical_height: state.consensus_state.canonical_height,
+            canonical_head_hash: state.consensus_state.canonical_head_hash.clone(),
+            latest_finality_receipt_id: state.consensus_state.latest_finality_receipt_id.clone(),
+            consensus_state_root: consensus_state_root(state),
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct FinalityProofOutput {
+    schema: String,
+    consensus_state: crate::model::ConsensusState,
+    latest_finality_receipt: Option<crate::model::ConsensusFinalityReceipt>,
+    finalized_height: u64,
+    finalized_hash: String,
+    finalized_state_root: String,
+    consensus_state_root: String,
+}
+
+impl FinalityProofOutput {
+    fn from_state(state: &crate::model::ChainState) -> Self {
+        let latest_finality_receipt = state
+            .consensus_state
+            .latest_finality_receipt_id
+            .as_ref()
+            .and_then(|id| state.chain_finality_receipts.get(id))
+            .cloned();
+        Self {
+            schema: "flowmemory.local_devnet.finality_proof.v0".to_string(),
+            consensus_state: state.consensus_state.clone(),
+            latest_finality_receipt,
+            finalized_height: finalized_height(state),
+            finalized_hash: finalized_hash(state),
+            finalized_state_root: finalized_state_root(state),
+            consensus_state_root: consensus_state_root(state),
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct FinalityProofSummary {
+    schema: String,
+    out: PathBuf,
+    finalized_height: u64,
+    finalized_hash: String,
+    finalized_state_root: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ForkChoiceProof {
+    schema: String,
+    parent_hash: String,
+    candidate_hashes: Vec<String>,
+    canonical_head: String,
+    rejected_forks: Vec<crate::model::ForkEvidence>,
+    deterministic_tie_breaker: String,
+}
+
+fn run_consensus_smoke(out_dir: &Path) -> Result<ConsensusSmokeRun> {
+    fs::create_dir_all(out_dir)?;
+    let mut state = genesis_state();
+    queue_transaction(
+        &mut state,
+        consensus_rootfield_tx("rootfield:consensus:accepted"),
+    );
+    let _accepted = build_block(&mut state);
+
+    let fork_proof = build_fork_choice_proof();
+    let fork_parent = genesis_state();
+    let proposal_a = propose_block(
+        &fork_parent,
+        vec![envelope_tx(consensus_rootfield_tx("rootfield:fork:a"))],
+        LOCAL_PRIVATE_VALIDATOR_ID,
+    )?;
+    let proposal_b = propose_block(
+        &fork_parent,
+        vec![envelope_tx(consensus_rootfield_tx("rootfield:fork:b"))],
+        LOCAL_PRIVATE_VALIDATOR_ID,
+    )?;
+    record_duplicate_proposal_evidence(&mut state, &proposal_a.block, &proposal_b.block);
+    let outcome = choose_canonical_fork(
+        &fork_parent,
+        &[proposal_a.block.clone(), proposal_b.block.clone()],
+    );
+    record_fork_choice_evidence(&mut state, &outcome);
+
+    let valid_next = propose_block(
+        &state,
+        vec![envelope_tx(consensus_rootfield_tx(
+            "rootfield:consensus:next",
+        ))],
+        LOCAL_PRIVATE_VALIDATOR_ID,
+    )?
+    .block;
+    let mut wrong_parent = valid_next.clone();
+    wrong_parent.parent_hash = keccak_hex(b"wrong-parent");
+    let _ = record_block_validation(&mut state, &wrong_parent);
+    let mut wrong_genesis = valid_next.clone();
+    wrong_genesis.genesis_hash = keccak_hex(b"wrong-genesis");
+    let _ = record_block_validation(&mut state, &wrong_genesis);
+    let mut invalid_proposer = valid_next.clone();
+    invalid_proposer.proposer_id = "validator:local-private:intruder".to_string();
+    let _ = record_block_validation(&mut state, &invalid_proposer);
+    let mut invalid_root = propose_block(
+        &state,
+        vec![envelope_tx(consensus_rootfield_tx(
+            "rootfield:consensus:bad-root",
+        ))],
+        LOCAL_PRIVATE_VALIDATOR_ID,
+    )?;
+    invalid_root.block.state_root = keccak_hex(b"invalid-state-root");
+    let _ = record_block_proposal_validation(&mut state, &invalid_root);
+
+    let replay_key = "bridge-replay:consensus-smoke:001".to_string();
+    queue_transaction(&mut state, bridge_replay_tx(&replay_key));
+    let _bridge_block = build_block(&mut state);
+    queue_transaction(&mut state, bridge_replay_tx(&replay_key));
+    let _duplicate_bridge_block = build_block(&mut state);
+    let _empty_finality_block = build_block(&mut state);
+
+    let validation = validate_chain(&state);
+    let finality_proof = FinalityProofOutput::from_state(&state);
+    let snapshot = out_dir.join("state-snapshot.json");
+    let report_path = out_dir.join("consensus-report.json");
+    let finality_proof_path = out_dir.join("finality-proof.json");
+    let fork_proof_path = out_dir.join("fork-choice-proof.json");
+
+    write_json(snapshot.clone(), &state)?;
+    let imported = load_state(&snapshot)?;
+    if imported.consensus_state.finalized_height != state.consensus_state.finalized_height
+        || imported.consensus_state.finalized_state_root
+            != state.consensus_state.finalized_state_root
+    {
+        return Err(anyhow!("consensus snapshot did not preserve finality"));
+    }
+    write_json(finality_proof_path.clone(), &finality_proof)?;
+    write_json(fork_proof_path.clone(), &fork_proof)?;
+
+    let report = ConsensusSmokeReport {
+        schema: "flowmemory.local_devnet.consensus_smoke_report.v0".to_string(),
+        validator_set: serde_json::json!({
+            "authoritySet": state.authority_set,
+            "validators": state.validator_set
+        }),
+        finalized_height: finalized_height(&state),
+        finalized_hash: finalized_hash(&state),
+        finalized_state_root: finalized_state_root(&state),
+        canonical_head: state.consensus_state.canonical_head_hash.clone(),
+        consensus_state_root: consensus_state_root(&state),
+        rejected_forks: state.fork_evidence.clone(),
+        misbehavior_evidence: state.misbehavior_evidence.clone(),
+        bridge_replay_key: replay_key.clone(),
+        bridge_replay_final: crate::model::bridge_replay_key_is_final(&state, &replay_key),
+        validation,
+        command_evidence: vec![
+            "cargo test --manifest-path crates/flowmemory-devnet/Cargo.toml".to_string(),
+            "cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- consensus-smoke"
+                .to_string(),
+            "npm run flowchain:consensus:smoke".to_string(),
+        ],
+        output_files: vec![
+            report_path.to_string_lossy().to_string(),
+            finality_proof_path.to_string_lossy().to_string(),
+            fork_proof_path.to_string_lossy().to_string(),
+            snapshot.to_string_lossy().to_string(),
+        ],
+    };
+    write_json(report_path, &report)?;
+    Ok(ConsensusSmokeRun { state, report })
+}
+
+fn build_fork_choice_proof() -> ForkChoiceProof {
+    let parent = genesis_state();
+    let proposal_a = propose_block(
+        &parent,
+        vec![envelope_tx(consensus_rootfield_tx(
+            "rootfield:fork-choice:a",
+        ))],
+        LOCAL_PRIVATE_VALIDATOR_ID,
+    )
+    .expect("fork-choice proposal A");
+    let proposal_b = propose_block(
+        &parent,
+        vec![envelope_tx(consensus_rootfield_tx(
+            "rootfield:fork-choice:b",
+        ))],
+        LOCAL_PRIVATE_VALIDATOR_ID,
+    )
+    .expect("fork-choice proposal B");
+    let outcome = choose_canonical_fork(
+        &parent,
+        &[proposal_a.block.clone(), proposal_b.block.clone()],
+    );
+    let canonical_head = outcome
+        .canonical_head
+        .as_ref()
+        .map(|block| block.block_hash.clone())
+        .unwrap_or_else(|| ZERO_HASH.to_string());
+    ForkChoiceProof {
+        schema: "flowmemory.local_devnet.fork_choice_proof.v0".to_string(),
+        parent_hash: parent.parent_hash,
+        candidate_hashes: vec![proposal_a.block.block_hash, proposal_b.block.block_hash],
+        canonical_head,
+        rejected_forks: outcome.rejected,
+        deterministic_tie_breaker: "highest height, then lexicographically lowest block hash"
+            .to_string(),
+    }
+}
+
+fn consensus_rootfield_tx(rootfield_id: &str) -> Transaction {
+    Transaction::RegisterRootfield {
+        rootfield_id: rootfield_id.to_string(),
+        owner: "operator:consensus-smoke".to_string(),
+        schema_hash: keccak_hex(format!("schema:{rootfield_id}").as_bytes()),
+        metadata_hash: keccak_hex(format!("metadata:{rootfield_id}").as_bytes()),
+    }
+}
+
+fn bridge_replay_tx(replay_key: &str) -> Transaction {
+    Transaction::RecordBridgeReplayKey {
+        replay_key: replay_key.to_string(),
+        source_chain_id: "base-sepolia-or-mock-local".to_string(),
+        source_tx_hash: keccak_hex(format!("source-tx:{replay_key}").as_bytes()),
+        source_log_index: "0".to_string(),
+        local_object_id: format!("bridge-object:{replay_key}"),
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LiveL1ConsensusOutput {
+    report_path: PathBuf,
+    bridge_lifecycle_evidence_path: PathBuf,
+    report: LiveL1ConsensusReport,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LiveL1ConsensusReport {
+    schema: String,
+    generated_at_unix_seconds: String,
+    current_consensus_mode: String,
+    consensus_mode_detail: String,
+    validator_set_source: String,
+    authority_set_id: String,
+    validators: Vec<LiveValidatorReportEntry>,
+    block_signing_status: LiveBlockSigningStatus,
+    finality_rule: LiveFinalityRuleReport,
+    fork_choice: LiveForkChoiceReport,
+    peer_mode: LivePeerModeReport,
+    bridge_lifecycle_evidence: LiveBridgeLifecycleReport,
+    private_live_pilot: LiveReadinessDecision,
+    public_l1: LiveReadinessDecision,
+    readiness_claims: LiveReadinessClaims,
+    source_truth_notes: Vec<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LiveValidatorReportEntry {
+    validator_id: String,
+    account_ref: String,
+    consensus_public_key: String,
+    consensus_key_id: String,
+    roles: Vec<String>,
+    weight: u64,
+    active: bool,
+    key_scope: String,
+    bridge_key_separation: String,
+    wallet_key_separation: String,
+    secret_material_exported: bool,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LiveBlockSigningStatus {
+    status: String,
+    latest_block_hash: String,
+    latest_block_height: u64,
+    proposer_id: String,
+    proof_type: String,
+    proof_digest: String,
+    signature_present: bool,
+    validation_status: String,
+    secret_material_exported: bool,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LiveFinalityRuleReport {
+    rule: String,
+    finalized_height: u64,
+    finalized_hash: String,
+    finalized_state_root: String,
+    latest_finality_receipt_id: Option<String>,
+    public_live_finality_claimed: bool,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LiveForkChoiceReport {
+    rule: String,
+    blocked_reason_for_public_l1: String,
+    evidence_count: usize,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LivePeerModeReport {
+    mode: String,
+    network_exposure: String,
+    public_peer_discovery: bool,
+    static_peer_sync_only: bool,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LiveBridgeLifecycleReport {
+    evidence_path: PathBuf,
+    evidence_id: String,
+    credit_id: String,
+    credit_included_in_block: u64,
+    credit_block_hash: String,
+    state_root_changed_after_credit: bool,
+    finality_status: String,
+    transfer_after_credit_block: u64,
+    spendable_under_finality_rule: bool,
+    production_bridge_claimed: bool,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LiveReadinessDecision {
+    acceptable: bool,
+    status: String,
+    reasons: Vec<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LiveReadinessClaims {
+    claims_public_live_finality: bool,
+    acceptable_for_private_live_pilot: bool,
+    acceptable_for_public_l1: bool,
+    production_ready: bool,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LiveL1ConsensusVerifySummary {
+    schema: String,
+    status: String,
+    report_path: PathBuf,
+    bridge_lifecycle_evidence_path: PathBuf,
+    acceptable_for_private_live_pilot: bool,
+    acceptable_for_public_l1: bool,
+    reason: String,
+}
+
+fn write_live_l1_consensus_report(
+    state: &crate::model::ChainState,
+    out_dir: &Path,
+) -> Result<LiveL1ConsensusOutput> {
+    fs::create_dir_all(out_dir)?;
+    let bridge_lifecycle_evidence_path = out_dir.join("bridge-lifecycle-evidence.json");
+    let bridge_evidence = build_bridge_lifecycle_evidence_sample()?;
+    write_json(bridge_lifecycle_evidence_path.clone(), &bridge_evidence)?;
+    let report_path = out_dir.join("consensus-finality-report.json");
+    let report =
+        LiveL1ConsensusReport::from_state(state, &bridge_lifecycle_evidence_path, &bridge_evidence);
+    write_json(report_path.clone(), &report)?;
+    Ok(LiveL1ConsensusOutput {
+        report_path,
+        bridge_lifecycle_evidence_path,
+        report,
+    })
+}
+
+fn verify_live_l1_consensus_report(
+    state: &crate::model::ChainState,
+    out_dir: &Path,
+) -> Result<LiveL1ConsensusVerifySummary> {
+    fs::create_dir_all(out_dir)?;
+    let report_path = out_dir.join("consensus-finality-report.json");
+    let bridge_lifecycle_evidence_path = out_dir.join("bridge-lifecycle-evidence.json");
+    if report_path.exists() {
+        let existing = fs::read_to_string(&report_path)
+            .with_context(|| format!("failed to read {}", report_path.display()))?;
+        let existing_json: Value = serde_json::from_str(&existing)
+            .with_context(|| format!("invalid JSON in {}", report_path.display()))?;
+        if report_claims_public_live_finality(&existing_json) {
+            return Ok(LiveL1ConsensusVerifySummary {
+                schema: "flowmemory.local_devnet.live_l1_consensus_verify.v0".to_string(),
+                status: "failed".to_string(),
+                report_path,
+                bridge_lifecycle_evidence_path,
+                acceptable_for_private_live_pilot: false,
+                acceptable_for_public_l1: false,
+                reason: "existing report claims public/live L1 finality while this code is single-process local/private"
+                    .to_string(),
+            });
+        }
+    }
+
+    let output = write_live_l1_consensus_report(state, out_dir)?;
+    let report_json = serde_json::to_value(&output.report)?;
+    let unsafe_claim = report_claims_public_live_finality(&report_json);
+    let status = if unsafe_claim { "failed" } else { "passed" };
+    Ok(LiveL1ConsensusVerifySummary {
+        schema: "flowmemory.local_devnet.live_l1_consensus_verify.v0".to_string(),
+        status: status.to_string(),
+        report_path: output.report_path,
+        bridge_lifecycle_evidence_path: output.bridge_lifecycle_evidence_path,
+        acceptable_for_private_live_pilot: output.report.private_live_pilot.acceptable,
+        acceptable_for_public_l1: output.report.public_l1.acceptable,
+        reason: if unsafe_claim {
+            "generated report contains an unsafe public/live L1 finality claim".to_string()
+        } else {
+            "report is honest: private/local single-authority pilot only; public L1 blocked"
+                .to_string()
+        },
+    })
+}
+
+fn report_claims_public_live_finality(value: &Value) -> bool {
+    bool_pointer(value, "/readinessClaims/claimsPublicLiveFinality")
+        || bool_pointer(value, "/readinessClaims/acceptableForPublicL1")
+        || bool_pointer(value, "/readinessClaims/productionReady")
+        || bool_pointer(value, "/publicL1/acceptable")
+        || bool_pointer(value, "/acceptableForPublicL1")
+        || bool_pointer(value, "/claimsPublicLiveFinality")
+        || bool_pointer(value, "/productionReady")
+}
+
+fn bool_pointer(value: &Value, pointer: &str) -> bool {
+    value
+        .pointer(pointer)
+        .and_then(Value::as_bool)
+        .unwrap_or(false)
+}
+
+impl LiveL1ConsensusReport {
+    fn from_state(
+        state: &crate::model::ChainState,
+        bridge_lifecycle_evidence_path: &Path,
+        bridge_evidence: &BridgeLifecycleEvidence,
+    ) -> Self {
+        let validation = validate_chain(state);
+        let latest = state.blocks.last();
+        let validators = state
+            .validator_set
+            .values()
+            .map(|validator| LiveValidatorReportEntry {
+                validator_id: validator.validator_id.clone(),
+                account_ref: validator.account_ref.clone(),
+                consensus_public_key: validator.consensus_public_key.clone(),
+                consensus_key_id: validator.consensus_key_id.clone(),
+                roles: validator.roles.clone(),
+                weight: validator.weight,
+                active: validator.active,
+                key_scope: validator.key_scope.clone(),
+                bridge_key_separation: validator.bridge_key_separation.clone(),
+                wallet_key_separation: validator.wallet_key_separation.clone(),
+                secret_material_exported: false,
+            })
+            .collect::<Vec<_>>();
+        let block_signing_status = latest
+            .map(|block| LiveBlockSigningStatus {
+                status: "local-authority-proof-present".to_string(),
+                latest_block_hash: block.block_hash.clone(),
+                latest_block_height: block.block_number,
+                proposer_id: block.proposer_id.clone(),
+                proof_type: block.authority_proof.proof_type.clone(),
+                proof_digest: block.authority_proof.digest.clone(),
+                signature_present: !block.authority_proof.signature.is_empty()
+                    && block.authority_proof.signature != ZERO_HASH,
+                validation_status: if validation.valid {
+                    "valid".to_string()
+                } else {
+                    "invalid".to_string()
+                },
+                secret_material_exported: false,
+            })
+            .unwrap_or_else(|| LiveBlockSigningStatus {
+                status: "no-block-produced-yet".to_string(),
+                latest_block_hash: state.parent_hash.clone(),
+                latest_block_height: 0,
+                proposer_id: LOCAL_PRIVATE_VALIDATOR_ID.to_string(),
+                proof_type: "none".to_string(),
+                proof_digest: ZERO_HASH.to_string(),
+                signature_present: false,
+                validation_status: if validation.valid {
+                    "valid-genesis".to_string()
+                } else {
+                    "invalid".to_string()
+                },
+                secret_material_exported: false,
+            });
+        Self {
+            schema: "flowmemory.local_devnet.live_l1_consensus_finality_report.v0".to_string(),
+            generated_at_unix_seconds: now_unix_seconds(),
+            current_consensus_mode: "single-process-private-local-authority-set".to_string(),
+            consensus_mode_detail:
+                "One local authority proposes, signs, validates, and immediately finalizes local blocks in this process. This is honest private/local pilot consensus, not public decentralization."
+                    .to_string(),
+            validator_set_source:
+                "crates/flowmemory-devnet/src/model.rs default genesis validator set; dashboard-safe public metadata only"
+                    .to_string(),
+            authority_set_id: LOCAL_PRIVATE_AUTHORITY_SET_ID.to_string(),
+            validators,
+            block_signing_status,
+            finality_rule: LiveFinalityRuleReport {
+                rule: state.consensus_state.finality_rule.clone(),
+                finalized_height: finalized_height(state),
+                finalized_hash: finalized_hash(state),
+                finalized_state_root: finalized_state_root(state),
+                latest_finality_receipt_id: state.consensus_state.latest_finality_receipt_id.clone(),
+                public_live_finality_claimed: false,
+            },
+            fork_choice: LiveForkChoiceReport {
+                rule:
+                    "valid highest height; tie-break lexicographically lowest canonical block hash for static local-file peer sync"
+                        .to_string(),
+                blocked_reason_for_public_l1:
+                    "No public peer discovery, no production BFT network, no staking/slashing, and only one local authority."
+                        .to_string(),
+                evidence_count: state.fork_evidence.len(),
+            },
+            peer_mode: LivePeerModeReport {
+                mode: "single-process-local-file-private".to_string(),
+                network_exposure: "not publicly exposed; optional static local-file peers only"
+                    .to_string(),
+                public_peer_discovery: false,
+                static_peer_sync_only: true,
+            },
+            bridge_lifecycle_evidence: LiveBridgeLifecycleReport {
+                evidence_path: bridge_lifecycle_evidence_path.to_path_buf(),
+                evidence_id: bridge_evidence.evidence_id.clone(),
+                credit_id: bridge_evidence.credit_id.clone(),
+                credit_included_in_block: bridge_evidence.credit_included_in_block,
+                credit_block_hash: bridge_evidence.credit_block_hash.clone(),
+                state_root_changed_after_credit: bridge_evidence.state_root_changed_after_credit,
+                finality_status: bridge_evidence.finality.status.clone(),
+                transfer_after_credit_block: bridge_evidence
+                    .transfer_after_credit
+                    .transfer_block_number,
+                spendable_under_finality_rule: bridge_evidence
+                    .transfer_after_credit
+                    .spendable_under_finality_rule,
+                production_bridge_claimed: false,
+            },
+            private_live_pilot: LiveReadinessDecision {
+                acceptable: true,
+                status: "acceptable-with-private-local-scope".to_string(),
+                reasons: vec![
+                    "single local authority is explicit".to_string(),
+                    "validator metadata exports public references only".to_string(),
+                    "bridge credit spend evidence requires block inclusion, state-root change, authority proof, and local finality receipt".to_string(),
+                    "network exposure is local/private only".to_string(),
+                ],
+            },
+            public_l1: LiveReadinessDecision {
+                acceptable: false,
+                status: "blocked".to_string(),
+                reasons: vec![
+                    "single authority and single process".to_string(),
+                    "no public validator onboarding or independent validator set".to_string(),
+                    "no production BFT finality, peer discovery, staking, slashing, or audited cryptography".to_string(),
+                    "bridge evidence is private/local pilot evidence and does not claim production bridge security".to_string(),
+                ],
+            },
+            readiness_claims: LiveReadinessClaims {
+                claims_public_live_finality: false,
+                acceptable_for_private_live_pilot: true,
+                acceptable_for_public_l1: false,
+                production_ready: false,
+            },
+            source_truth_notes: vec![
+                "Requested production-l1 protocol schemas and GENESIS_PROOF.md are absent from this worktree and origin/main; sibling unmerged protocol worktree was read as supplemental context only.".to_string(),
+                "This report blocks public/live-L1 claims until those protocol artifacts and real multi-validator mechanics are merged and wired.".to_string(),
+            ],
+        }
+    }
+}
+
+fn build_bridge_lifecycle_evidence_sample() -> Result<BridgeLifecycleEvidence> {
+    let mut state = genesis_state();
+    let receiver = "local-account:bridge:receiver";
+    let sink = "local-account:bridge:sink";
+    queue_transaction(
+        &mut state,
+        Transaction::CreateLocalTestUnitBalance {
+            account_id: sink.to_string(),
+            owner: "operator:bridge:sink".to_string(),
+        },
+    );
+    let _setup_block = build_block(&mut state);
+
+    let credit_id = keccak_hex(b"flowmemory.live_l1.bridge.credit.001");
+    let replay_key = keccak_hex(b"flowmemory.live_l1.bridge.replay.001");
+    queue_transaction(
+        &mut state,
+        Transaction::ApplyBridgeCredit {
+            credit_id: credit_id.clone(),
+            replay_key,
+            source_chain_id: "8453".to_string(),
+            source_tx_hash: keccak_hex(b"flowmemory.live_l1.bridge.source_tx.001"),
+            source_log_index: "0".to_string(),
+            recipient_account_id: receiver.to_string(),
+            amount_units: 25,
+            evidence_hash: keccak_hex(b"flowmemory.live_l1.bridge.evidence.001"),
+        },
+    );
+    let credit_block = build_block(&mut state);
+    let finality_receipt_id = state
+        .consensus_state
+        .latest_finality_receipt_id
+        .clone()
+        .ok_or_else(|| anyhow!("credit block did not produce a finality receipt"))?;
+    let transfer_id = "bridge-spend:live-l1:001".to_string();
+    let memo = format!(
+        "credit={credit_id};finality={finality_receipt_id};stateRoot={}",
+        credit_block.state_root
+    );
+    queue_transaction(
+        &mut state,
+        Transaction::SpendBridgeCreditLocalTestUnits {
+            transfer_id: transfer_id.clone(),
+            credit_id: credit_id.clone(),
+            finality_receipt_id,
+            credited_block_hash: credit_block.block_hash,
+            credited_state_root: credit_block.state_root,
+            from_account_id: receiver.to_string(),
+            to_account_id: sink.to_string(),
+            amount_units: 10,
+            memo,
+        },
+    );
+    let _spend_block = build_block(&mut state);
+    validate_bridge_lifecycle_evidence(&state, &credit_id, &transfer_id, true)
+        .map_err(|error| anyhow!("bridge lifecycle evidence validation failed: {error}"))
+}
+
+fn now_unix_seconds() -> String {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_secs().to_string())
+        .unwrap_or_else(|_| "0".to_string())
+}
+
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct QueuedTransactions {
@@ -1289,6 +2188,10 @@ struct NodeStatus {
     next_block_number: u64,
     latest_block_hash: String,
     state_root: String,
+    consensus_state_root: String,
+    finalized_height: u64,
+    finalized_hash: String,
+    finalized_state_root: String,
     pending_txs: usize,
     local_test_unit_balances: usize,
     faucet_records: usize,
@@ -1300,6 +2203,8 @@ struct NodeStatus {
     lp_positions: usize,
     liquidity_receipts: usize,
     swap_receipts: usize,
+    bridge_replay_keys: usize,
+    bridge_credits: usize,
     static_peer_sync: Option<PeerSyncEvent>,
     last_ingested_txs: usize,
     last_rejected_inbox_files: usize,
@@ -1335,6 +2240,10 @@ impl NodeStatus {
                 .map(|block| block.block_hash.clone())
                 .unwrap_or_else(|| state.parent_hash.clone()),
             state_root: state_root(state),
+            consensus_state_root: consensus_state_root(state),
+            finalized_height: finalized_height(state),
+            finalized_hash: finalized_hash(state),
+            finalized_state_root: finalized_state_root(state),
             pending_txs: state.pending_txs.len(),
             local_test_unit_balances: state.local_test_unit_balances.len(),
             faucet_records: state.faucet_records.len(),
@@ -1346,6 +2255,8 @@ impl NodeStatus {
             lp_positions: state.lp_positions.len(),
             liquidity_receipts: state.liquidity_receipts.len(),
             swap_receipts: state.swap_receipts.len(),
+            bridge_replay_keys: state.bridge_replay_keys.len(),
+            bridge_credits: state.bridge_credits.len(),
             static_peer_sync,
             last_ingested_txs,
             last_rejected_inbox_files,
@@ -1420,8 +2331,16 @@ struct StateSummary {
     logical_time: u64,
     parent_hash: String,
     state_root: String,
+    consensus_state_root: String,
+    finalized_height: u64,
+    finalized_hash: String,
+    finalized_state_root: String,
     map_roots: crate::model::StateMapRoots,
     operator_key_references: usize,
+    validators: usize,
+    chain_finality_receipts: usize,
+    fork_evidence: usize,
+    misbehavior_evidence: usize,
     pending_txs: usize,
     blocks: usize,
     rootfields: usize,
@@ -1449,6 +2368,8 @@ struct StateSummary {
     imported_observations: usize,
     imported_verifier_reports: usize,
     base_anchors: usize,
+    bridge_replay_keys: usize,
+    bridge_credits: usize,
 }
 
 impl StateSummary {
@@ -1460,8 +2381,16 @@ impl StateSummary {
             logical_time: state.logical_time,
             parent_hash: state.parent_hash.clone(),
             state_root: state_root(state),
+            consensus_state_root: consensus_state_root(state),
+            finalized_height: finalized_height(state),
+            finalized_hash: finalized_hash(state),
+            finalized_state_root: finalized_state_root(state),
             map_roots: state_map_roots(state),
             operator_key_references: state.operator_key_references.len(),
+            validators: state.validator_set.len(),
+            chain_finality_receipts: state.chain_finality_receipts.len(),
+            fork_evidence: state.fork_evidence.len(),
+            misbehavior_evidence: state.misbehavior_evidence.len(),
             pending_txs: state.pending_txs.len(),
             blocks: state.blocks.len(),
             rootfields: state.rootfields.len(),
@@ -1489,6 +2418,8 @@ impl StateSummary {
             imported_observations: state.imported_observations.len(),
             imported_verifier_reports: state.imported_verifier_reports.len(),
             base_anchors: state.base_anchors.len(),
+            bridge_replay_keys: state.bridge_replay_keys.len(),
+            bridge_credits: state.bridge_credits.len(),
         }
     }
 }
@@ -1501,6 +2432,8 @@ struct RunSummary {
     block_hashes: Vec<String>,
     next_block_number: u64,
     state_root: String,
+    finalized_height: u64,
+    finalized_hash: String,
 }
 
 impl RunSummary {
@@ -1511,6 +2444,8 @@ impl RunSummary {
             block_hashes: blocks.into_iter().map(|block| block.block_hash).collect(),
             next_block_number: state.next_block_number,
             state_root: state_root(state),
+            finalized_height: finalized_height(state),
+            finalized_hash: finalized_hash(state),
         }
     }
 }
@@ -1521,6 +2456,10 @@ struct ExportSummary {
     schema: String,
     out_dir: PathBuf,
     state_root: String,
+    consensus_state_root: String,
+    finalized_height: u64,
+    finalized_hash: String,
+    finalized_state_root: String,
     map_roots: crate::model::StateMapRoots,
     files: Vec<String>,
 }
@@ -1531,6 +2470,10 @@ impl ExportSummary {
             schema: "flowmemory.local_devnet.export_summary.v0".to_string(),
             out_dir,
             state_root: state_root(state),
+            consensus_state_root: consensus_state_root(state),
+            finalized_height: finalized_height(state),
+            finalized_hash: finalized_hash(state),
+            finalized_state_root: finalized_state_root(state),
             map_roots: state_map_roots(state),
             files: handoff_files(),
         }
@@ -1543,6 +2486,9 @@ struct ExportStateSummary {
     schema: String,
     out: PathBuf,
     state_root: String,
+    finalized_height: u64,
+    finalized_hash: String,
+    finalized_state_root: String,
 }
 
 impl ExportStateSummary {
@@ -1551,6 +2497,9 @@ impl ExportStateSummary {
             schema: "flowmemory.local_devnet.export_state_summary.v0".to_string(),
             out,
             state_root: state_root(state),
+            finalized_height: finalized_height(state),
+            finalized_hash: finalized_hash(state),
+            finalized_state_root: finalized_state_root(state),
         }
     }
 }
@@ -1562,6 +2511,9 @@ struct ImportStateSummary {
     from: PathBuf,
     state_path: PathBuf,
     state_root: String,
+    finalized_height: u64,
+    finalized_hash: String,
+    finalized_state_root: String,
     map_roots: crate::model::StateMapRoots,
 }
 
@@ -1572,6 +2524,9 @@ impl ImportStateSummary {
             from,
             state_path,
             state_root: state_root(state),
+            finalized_height: finalized_height(state),
+            finalized_hash: finalized_hash(state),
+            finalized_state_root: finalized_state_root(state),
             map_roots: state_map_roots(state),
         }
     }
@@ -1585,6 +2540,9 @@ struct DemoSummary {
     first_block_hash: String,
     second_block_hash: String,
     state_root: String,
+    finalized_height: u64,
+    finalized_hash: String,
+    finalized_state_root: String,
     agent_id: String,
     agent_registered: bool,
     local_balance_account_id: String,
@@ -1613,6 +2571,9 @@ impl DemoSummary {
             first_block_hash: demo.first_block_hash.clone(),
             second_block_hash: demo.second_block_hash.clone(),
             state_root: state_root(&demo.state),
+            finalized_height: finalized_height(&demo.state),
+            finalized_hash: finalized_hash(&demo.state),
+            finalized_state_root: finalized_state_root(&demo.state),
             agent_id: "agent:demo:alpha".to_string(),
             agent_registered: demo.state.agent_accounts.contains_key("agent:demo:alpha"),
             local_balance_account_id: "local-balance:demo:agent-alpha".to_string(),
@@ -1659,6 +2620,9 @@ struct SmokeSummary {
     state_root: String,
     block_height: usize,
     latest_block_hash: String,
+    finalized_height: u64,
+    finalized_hash: String,
+    finalized_state_root: String,
     deterministic_replay: bool,
     checks: SmokeChecks,
     handoff_files: Vec<String>,
@@ -1699,6 +2663,9 @@ impl SmokeSummary {
             state_root: state_root(&demo.state),
             block_height: demo.state.blocks.len(),
             latest_block_hash: demo.state.parent_hash.clone(),
+            finalized_height: finalized_height(&demo.state),
+            finalized_hash: finalized_hash(&demo.state),
+            finalized_state_root: finalized_state_root(&demo.state),
             deterministic_replay,
             checks: SmokeChecks {
                 genesis_config_initialized: demo.state.config.no_value,
@@ -1762,6 +2729,9 @@ struct ProductSmokeSummary {
     state_root: String,
     block_height: usize,
     latest_block_hash: String,
+    finalized_height: u64,
+    finalized_hash: String,
+    finalized_state_root: String,
     deterministic_replay: bool,
     checks: ProductSmokeChecks,
     handoff_files: Vec<String>,
@@ -1831,6 +2801,9 @@ impl ProductSmokeSummary {
             state_root: state_root(&demo.state),
             block_height: demo.state.blocks.len(),
             latest_block_hash: demo.state.parent_hash.clone(),
+            finalized_height: finalized_height(&demo.state),
+            finalized_hash: finalized_hash(&demo.state),
+            finalized_state_root: finalized_state_root(&demo.state),
             deterministic_replay,
             checks: ProductSmokeChecks {
                 local_accounts_funded: alice_funded && bob_funded,
@@ -1878,6 +2851,9 @@ fn handoff_files() -> Vec<String> {
         "control-plane-handoff.json".to_string(),
         "genesis-config.json".to_string(),
         "operator-key-references.json".to_string(),
+        "validator-set.json".to_string(),
+        "consensus-state.json".to_string(),
+        "finality-status.json".to_string(),
         "state.json".to_string(),
     ]
 }

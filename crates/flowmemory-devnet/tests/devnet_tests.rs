@@ -1,9 +1,14 @@
 use flowmemory_devnet::model::{
-    DevnetError, FLOWPULSE_TOPIC0, LOCAL_TEST_UNIT_ASSET_ID, Transaction, ZERO_HASH,
-    apply_transaction, build_block, demo_transactions, deterministic_liquidity_id,
-    deterministic_lp_position_id, deterministic_pool_id, deterministic_swap_id,
-    deterministic_token_balance_id, deterministic_token_id, genesis_state,
-    product_demo_transactions, queue_transaction, state_map_roots, state_root,
+    ConsensusValidationError, DevnetError, FLOWPULSE_TOPIC0, LOCAL_PRIVATE_VALIDATOR_ID,
+    LOCAL_TEST_UNIT_ASSET_ID, Transaction, ZERO_HASH, apply_transaction,
+    bridge_replay_key_is_final, build_block, build_block_with_proposer, choose_canonical_fork,
+    demo_transactions, deterministic_liquidity_id, deterministic_lp_position_id,
+    deterministic_pool_id, deterministic_swap_id, deterministic_token_balance_id,
+    deterministic_token_id, envelope_tx, finalized_height, finalized_state_root, genesis_state,
+    product_demo_transactions, propose_block, queue_transaction, record_block_proposal_validation,
+    record_block_validation, record_duplicate_proposal_evidence, record_fork_choice_evidence,
+    state_map_roots, state_root, validate_block_header, validate_bridge_lifecycle_evidence,
+    validate_chain,
 };
 use flowmemory_devnet::{canonical_json, keccak_hex};
 use std::process::Command;
@@ -92,6 +97,353 @@ fn invalid_tx_is_rejected_without_state_mutation() {
     );
     assert_eq!(before, state_root(&state));
     assert!(state.rootfields.is_empty());
+}
+
+#[test]
+fn consensus_valid_block_proposal_is_accepted_and_finalized() {
+    let mut state = genesis_state();
+    queue_transaction(
+        &mut state,
+        register_rootfield_tx("rootfield:consensus:valid"),
+    );
+
+    let block = build_block(&mut state);
+    let report = validate_chain(&state);
+
+    assert_eq!(block.proposer_id, LOCAL_PRIVATE_VALIDATOR_ID);
+    assert_eq!(block.chain_id, state.chain_id);
+    assert_eq!(block.genesis_hash, state.genesis_hash);
+    assert!(block.tx_root.starts_with("0x"));
+    assert!(block.receipt_root.starts_with("0x"));
+    assert!(block.event_root.starts_with("0x"));
+    assert!(report.valid, "{:?}", report.errors);
+    assert_eq!(finalized_height(&state), 1);
+    assert_eq!(state.consensus_state.finalized_hash, block.block_hash);
+    assert_eq!(finalized_state_root(&state), block.state_root);
+    assert_eq!(state.chain_finality_receipts.len(), 1);
+}
+
+#[test]
+fn consensus_rejects_invalid_proposer_without_consuming_pending_txs() {
+    let mut state = genesis_state();
+    queue_transaction(
+        &mut state,
+        register_rootfield_tx("rootfield:consensus:bad-proposer"),
+    );
+
+    let error = build_block_with_proposer(&mut state, "validator:intruder").unwrap_err();
+
+    assert_eq!(
+        error,
+        ConsensusValidationError::InvalidProposer("validator:intruder".to_string())
+    );
+    assert_eq!(state.blocks.len(), 0);
+    assert_eq!(state.pending_txs.len(), 1);
+}
+
+#[test]
+fn consensus_rejects_wrong_parent_and_records_evidence() {
+    let parent = genesis_state();
+    let proposal = propose_block(
+        &parent,
+        vec![envelope_tx(register_rootfield_tx(
+            "rootfield:consensus:parent",
+        ))],
+        LOCAL_PRIVATE_VALIDATOR_ID,
+    )
+    .unwrap();
+    let mut state = parent.clone();
+    let mut forged = proposal.block;
+    forged.parent_hash = keccak_hex(b"wrong-parent");
+
+    let error = record_block_validation(&mut state, &forged).unwrap_err();
+
+    assert!(matches!(
+        error,
+        ConsensusValidationError::InvalidParent { .. }
+    ));
+    assert_eq!(state.fork_evidence.len(), 1);
+    assert_eq!(state.misbehavior_evidence[0].kind, "invalid_parent");
+}
+
+#[test]
+fn consensus_rejects_wrong_state_root_in_block_proposal() {
+    let parent = genesis_state();
+    let mut proposal = propose_block(
+        &parent,
+        vec![envelope_tx(register_rootfield_tx(
+            "rootfield:consensus:root",
+        ))],
+        LOCAL_PRIVATE_VALIDATOR_ID,
+    )
+    .unwrap();
+    proposal.block.state_root = keccak_hex(b"wrong-state-root");
+    let mut state = parent;
+
+    let error = record_block_proposal_validation(&mut state, &proposal).unwrap_err();
+
+    assert!(matches!(
+        error,
+        ConsensusValidationError::RootMismatch { root_name, .. } if root_name == "stateRoot"
+    ));
+    assert_eq!(state.misbehavior_evidence[0].kind, "invalid_state_root");
+}
+
+#[test]
+fn consensus_fork_choice_is_deterministic_and_records_duplicate_proposal() {
+    let parent = genesis_state();
+    let proposal_a = propose_block(
+        &parent,
+        vec![envelope_tx(register_rootfield_tx("rootfield:fork:a"))],
+        LOCAL_PRIVATE_VALIDATOR_ID,
+    )
+    .unwrap();
+    let proposal_b = propose_block(
+        &parent,
+        vec![envelope_tx(register_rootfield_tx("rootfield:fork:b"))],
+        LOCAL_PRIVATE_VALIDATOR_ID,
+    )
+    .unwrap();
+    let outcome = choose_canonical_fork(
+        &parent,
+        &[proposal_a.block.clone(), proposal_b.block.clone()],
+    );
+    let canonical = outcome.canonical_head.as_ref().expect("canonical head");
+    let expected = [&proposal_a.block.block_hash, &proposal_b.block.block_hash]
+        .into_iter()
+        .min()
+        .expect("min hash")
+        .to_string();
+    let mut state = parent;
+
+    record_fork_choice_evidence(&mut state, &outcome);
+    record_duplicate_proposal_evidence(&mut state, &proposal_a.block, &proposal_b.block);
+
+    assert_eq!(canonical.block_hash, expected);
+    assert_eq!(outcome.rejected.len(), 1);
+    assert_eq!(state.fork_evidence.len(), 1);
+    assert_eq!(
+        state.misbehavior_evidence[0].kind,
+        "duplicate_proposal_same_height"
+    );
+}
+
+#[test]
+fn consensus_rejects_wrong_chain_and_wrong_genesis() {
+    let parent = genesis_state();
+    let proposal = propose_block(
+        &parent,
+        vec![envelope_tx(register_rootfield_tx(
+            "rootfield:consensus:identity",
+        ))],
+        LOCAL_PRIVATE_VALIDATOR_ID,
+    )
+    .unwrap();
+
+    let mut wrong_chain_state = parent.clone();
+    let mut wrong_chain = proposal.block.clone();
+    wrong_chain.chain_id = "wrong-chain".to_string();
+    let error = record_block_validation(&mut wrong_chain_state, &wrong_chain).unwrap_err();
+    assert!(matches!(
+        error,
+        ConsensusValidationError::WrongChainId { .. }
+    ));
+    assert_eq!(
+        wrong_chain_state.misbehavior_evidence[0].kind,
+        "wrong_chain_id"
+    );
+
+    let mut wrong_genesis_state = parent;
+    let mut wrong_genesis = proposal.block;
+    wrong_genesis.genesis_hash = keccak_hex(b"wrong-genesis");
+    let error = record_block_validation(&mut wrong_genesis_state, &wrong_genesis).unwrap_err();
+    assert!(matches!(
+        error,
+        ConsensusValidationError::WrongGenesisHash { .. }
+    ));
+    assert_eq!(
+        wrong_genesis_state.misbehavior_evidence[0].kind,
+        "wrong_genesis_hash"
+    );
+}
+
+#[test]
+fn consensus_bridge_replay_rejection_survives_finality_and_restart_shape() {
+    let mut state = genesis_state();
+    let replay_key = "bridge-replay:test:001";
+    queue_transaction(&mut state, bridge_replay_tx(replay_key));
+    let first = build_block(&mut state);
+    queue_transaction(&mut state, bridge_replay_tx(replay_key));
+    let duplicate = build_block(&mut state);
+
+    assert_eq!(state.bridge_replay_keys.len(), 1);
+    assert!(bridge_replay_key_is_final(&state, replay_key));
+    assert_eq!(
+        state.consensus_state.finalized_height,
+        duplicate.block_number
+    );
+    assert_eq!(state.consensus_state.finalized_hash, duplicate.block_hash);
+    assert_eq!(state.chain_finality_receipts.len(), 2);
+    assert!(duplicate.receipts.iter().any(|receipt| {
+        receipt.status == "rejected"
+            && receipt
+                .error
+                .as_ref()
+                .is_some_and(|error| error.contains("bridge replay key already used"))
+    }));
+    assert_eq!(state.blocks[0].block_hash, first.block_hash);
+}
+
+#[test]
+fn consensus_rejects_invalid_validator_key_reference() {
+    let parent = genesis_state();
+    let mut proposal = propose_block(
+        &parent,
+        vec![envelope_tx(register_rootfield_tx(
+            "rootfield:consensus:key-ref",
+        ))],
+        LOCAL_PRIVATE_VALIDATOR_ID,
+    )
+    .unwrap();
+    proposal.block.authority_proof.consensus_key_id = "consensus-key:wrong".to_string();
+
+    let error = validate_block_header(&parent, &proposal.block).unwrap_err();
+
+    assert!(matches!(
+        error,
+        ConsensusValidationError::InvalidAuthorityProof(_)
+    ));
+}
+
+#[test]
+fn consensus_rejects_mutated_block_header_root() {
+    let parent = genesis_state();
+    let mut proposal = propose_block(
+        &parent,
+        vec![envelope_tx(register_rootfield_tx(
+            "rootfield:consensus:mutated-header",
+        ))],
+        LOCAL_PRIVATE_VALIDATOR_ID,
+    )
+    .unwrap();
+    proposal.block.tx_root = keccak_hex(b"mutated-tx-root");
+
+    let error = validate_block_header(&parent, &proposal.block).unwrap_err();
+
+    assert!(matches!(
+        error,
+        ConsensusValidationError::RootMismatch { root_name, .. } if root_name == "txRoot"
+    ));
+}
+
+#[test]
+fn bridge_credit_spend_requires_finalized_credited_state_reference() {
+    let (state, credit_id, transfer_id) = bridge_credit_spend_state();
+
+    let evidence =
+        validate_bridge_lifecycle_evidence(&state, &credit_id, &transfer_id, true).unwrap();
+
+    assert_eq!(evidence.credit_id, credit_id);
+    assert!(evidence.block_hash_includes_credit_tx_and_receipt);
+    assert!(evidence.state_root_changed_after_credit);
+    assert_eq!(evidence.finality.status, "finalized-private-pilot");
+    assert!(evidence.transfer_after_credit.references_credit_id);
+    assert!(
+        evidence
+            .transfer_after_credit
+            .references_finality_receipt_id
+    );
+    assert!(
+        evidence
+            .transfer_after_credit
+            .references_credited_state_root
+    );
+    assert!(evidence.transfer_after_credit.spendable_under_finality_rule);
+}
+
+#[test]
+fn bridge_credit_spend_rejects_missing_finality_receipt_where_required() {
+    let mut state = genesis_state();
+    queue_transaction(
+        &mut state,
+        Transaction::CreateLocalTestUnitBalance {
+            account_id: "local-account:bridge:sink".to_string(),
+            owner: "operator:bridge:sink".to_string(),
+        },
+    );
+    build_block(&mut state);
+
+    let credit_id = keccak_hex(b"bridge-credit:missing-finality");
+    queue_transaction(
+        &mut state,
+        bridge_credit_tx(&credit_id, "bridge-replay:missing-finality"),
+    );
+    let credit_block = build_block(&mut state);
+    let finality_receipt_id = state
+        .consensus_state
+        .latest_finality_receipt_id
+        .clone()
+        .expect("credit finality receipt");
+    state.chain_finality_receipts.remove(&finality_receipt_id);
+
+    queue_transaction(
+        &mut state,
+        bridge_spend_tx(
+            "bridge-spend:missing-finality",
+            &credit_id,
+            &finality_receipt_id,
+            &credit_block.block_hash,
+            &credit_block.state_root,
+        ),
+    );
+    let spend_block = build_block(&mut state);
+
+    assert!(spend_block.receipts.iter().any(|receipt| {
+        receipt.status == "rejected"
+            && receipt
+                .error
+                .as_ref()
+                .is_some_and(|error| error.contains("bridge finality receipt does not exist"))
+    }));
+    let error = validate_bridge_lifecycle_evidence(
+        &state,
+        &credit_id,
+        "bridge-spend:missing-finality",
+        true,
+    )
+    .unwrap_err();
+    assert!(matches!(
+        error,
+        ConsensusValidationError::MissingFinalityReceipt { .. }
+    ));
+}
+
+#[test]
+fn consensus_rejects_duplicate_finality_receipt_for_same_block() {
+    let mut state = genesis_state();
+    queue_transaction(
+        &mut state,
+        register_rootfield_tx("rootfield:consensus:duplicate-finality"),
+    );
+    let block = build_block(&mut state);
+    let receipt = state
+        .chain_finality_receipts
+        .values()
+        .next()
+        .cloned()
+        .expect("finality receipt");
+    let mut duplicate = receipt;
+    duplicate.finality_receipt_id = keccak_hex(b"duplicate-finality-receipt");
+    state
+        .chain_finality_receipts
+        .insert(duplicate.finality_receipt_id.clone(), duplicate);
+
+    let report = validate_chain(&state);
+
+    assert!(!report.valid);
+    assert!(report.errors.iter().any(|error| {
+        error.contains("duplicate finality receipt") && error.contains(&block.block_hash)
+    }));
 }
 
 #[test]
@@ -934,6 +1286,9 @@ fn cli_demo_writes_state_and_handoff_files() {
     assert!(out_dir.join("control-plane-handoff.json").exists());
     assert!(out_dir.join("genesis-config.json").exists());
     assert!(out_dir.join("operator-key-references.json").exists());
+    assert!(out_dir.join("validator-set.json").exists());
+    assert!(out_dir.join("consensus-state.json").exists());
+    assert!(out_dir.join("finality-status.json").exists());
 
     let body = std::fs::read_to_string(&state).expect("state body");
     assert!(body.contains("rootfield:demo:alpha"));
@@ -950,6 +1305,8 @@ fn cli_demo_writes_state_and_handoff_files() {
     assert!(dashboard_body.contains("memoryCells"));
     assert!(dashboard_body.contains("finalityReceipts"));
     assert!(dashboard_body.contains("operatorKeyReferences"));
+    assert!(dashboard_body.contains("validatorSet"));
+    assert!(dashboard_body.contains("chainFinalityReceipts"));
 
     std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
 }
@@ -976,6 +1333,7 @@ fn cli_smoke_runs_full_flow() {
         serde_json::from_slice(&output.stdout).expect("smoke summary json");
     assert_eq!(summary["deterministicReplay"], true);
     assert_eq!(summary["blockHeight"], 10);
+    assert_eq!(summary["finalizedHeight"], 10);
     assert_eq!(summary["checks"]["genesisConfigInitialized"], true);
     assert_eq!(summary["checks"]["operatorKeyReferencePresent"], true);
     assert_eq!(summary["checks"]["localTestUnitBalanceCreated"], true);
@@ -983,6 +1341,7 @@ fn cli_smoke_runs_full_flow() {
     assert_eq!(summary["checks"]["localTestUnitBalanceUnits"], 1000);
     assert_eq!(summary["checks"]["receiptFinalized"], true);
     assert!(out_dir.join("control-plane-handoff.json").exists());
+    assert!(out_dir.join("finality-status.json").exists());
 
     std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
 }
@@ -1008,6 +1367,7 @@ fn cli_product_smoke_exports_token_and_dex_handoff() {
     let summary: serde_json::Value =
         serde_json::from_slice(&output.stdout).expect("product smoke summary json");
     assert_eq!(summary["deterministicReplay"], true);
+    assert_eq!(summary["finalizedHeight"], 2);
     assert_eq!(summary["checks"]["localAccountsFunded"], true);
     assert_eq!(summary["checks"]["tokenLaunched"], true);
     assert_eq!(summary["checks"]["poolCreated"], true);
@@ -1022,6 +1382,161 @@ fn cli_product_smoke_exports_token_and_dex_handoff() {
     assert!(control_plane_body.contains("tokenDefinitions"));
     assert!(control_plane_body.contains("dexPools"));
     assert!(control_plane_body.contains("swapReceipts"));
+    assert!(control_plane_body.contains("finalizedHeight"));
+
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
+fn cli_consensus_commands_write_report_and_finality_proof() {
+    let temp = temp_dir("cli-consensus");
+    let state = temp.join("state.json");
+    let out_dir = temp.join("consensus-smoke");
+    let proof = temp.join("finality-proof.json");
+
+    let smoke = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "consensus-smoke",
+            "--out-dir",
+            out_dir.to_str().expect("out path"),
+        ])
+        .output()
+        .expect("run consensus smoke");
+    assert!(smoke.status.success());
+    let report: serde_json::Value =
+        serde_json::from_slice(&smoke.stdout).expect("consensus report");
+    assert!(report["finalizedHeight"].as_u64().expect("height") >= 3);
+    assert_eq!(report["validation"]["valid"], true);
+    assert!(
+        report["rejectedForks"]
+            .as_array()
+            .expect("rejected forks")
+            .len()
+            >= 1
+    );
+    assert!(out_dir.join("consensus-report.json").exists());
+    assert!(out_dir.join("finality-proof.json").exists());
+    assert!(out_dir.join("fork-choice-proof.json").exists());
+
+    let validate = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "consensus-validate",
+        ])
+        .output()
+        .expect("validate consensus");
+    assert!(validate.status.success());
+    let validation: serde_json::Value =
+        serde_json::from_slice(&validate.stdout).expect("validation json");
+    assert_eq!(validation["valid"], true);
+
+    let validators = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "validator-set",
+        ])
+        .output()
+        .expect("validator set");
+    assert!(validators.status.success());
+    let validator_json: serde_json::Value =
+        serde_json::from_slice(&validators.stdout).expect("validator json");
+    assert!(validator_json["validators"][LOCAL_PRIVATE_VALIDATOR_ID].is_object());
+
+    let finality = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "finality-status",
+        ])
+        .output()
+        .expect("finality status");
+    assert!(finality.status.success());
+    let finality_json: serde_json::Value =
+        serde_json::from_slice(&finality.stdout).expect("finality json");
+    assert_eq!(finality_json["finalizedHeight"], report["finalizedHeight"]);
+
+    let proof_status = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "write-finality-proof",
+            "--out",
+            proof.to_str().expect("proof path"),
+        ])
+        .status()
+        .expect("write finality proof");
+    assert!(proof_status.success());
+    assert!(proof.exists());
+
+    let fork_choice = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "fork-choice-test",
+            "--out",
+            temp.join("fork-choice-proof.json")
+                .to_str()
+                .expect("fork proof"),
+        ])
+        .status()
+        .expect("fork choice proof");
+    assert!(fork_choice.success());
+
+    let live_dir = temp.join("live-l1-consensus");
+    let live_verify = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "live-l1-consensus-verify",
+            "--out-dir",
+            live_dir.to_str().expect("live out"),
+        ])
+        .output()
+        .expect("live l1 consensus verify");
+    assert!(live_verify.status.success());
+    let live_json: serde_json::Value =
+        serde_json::from_slice(&live_verify.stdout).expect("live verify json");
+    assert_eq!(live_json["status"], "passed");
+    assert_eq!(live_json["acceptableForPublicL1"], false);
+    let live_report_body = std::fs::read_to_string(live_dir.join("consensus-finality-report.json"))
+        .expect("live report body");
+    assert!(live_report_body.contains("single-process-private-local-authority-set"));
+    assert!(!live_report_body.contains("privateKey"));
+    assert!(live_dir.join("bridge-lifecycle-evidence.json").exists());
+
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
+fn cli_live_l1_verify_fails_existing_public_l1_claim() {
+    let temp = temp_dir("live-l1-unsafe-report");
+    let state = temp.join("state.json");
+    let live_dir = temp.join("live-l1-consensus");
+    std::fs::create_dir_all(&live_dir).expect("live dir");
+    std::fs::write(
+        live_dir.join("consensus-finality-report.json"),
+        r#"{"schema":"test","readinessClaims":{"acceptableForPublicL1":true}}"#,
+    )
+    .expect("write unsafe report");
+
+    let output = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "live-l1-consensus-verify",
+            "--out-dir",
+            live_dir.to_str().expect("live out"),
+        ])
+        .output()
+        .expect("live l1 consensus verify");
+
+    assert!(!output.status.success());
+    let body = String::from_utf8_lossy(&output.stdout);
+    assert!(body.contains("single-process local/private"));
 
     std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
 }
@@ -1117,6 +1632,9 @@ fn cli_generated_handoff_files_are_deterministic() {
         "control-plane-handoff.json",
         "genesis-config.json",
         "operator-key-references.json",
+        "validator-set.json",
+        "consensus-state.json",
+        "finality-status.json",
         "state.json",
     ] {
         let left = std::fs::read_to_string(out_a.join(file)).expect("left handoff");
@@ -1198,8 +1716,23 @@ fn cli_export_import_state_round_trip_is_deterministic() {
     let original_body = std::fs::read_to_string(&state).expect("original state");
     let imported_body = std::fs::read_to_string(&imported).expect("imported state");
     assert_eq!(original_body, imported_body);
+    let original_json: serde_json::Value =
+        serde_json::from_str(&original_body).expect("original json");
+    let imported_json: serde_json::Value =
+        serde_json::from_str(&imported_body).expect("imported json");
+    assert_eq!(
+        imported_json["consensusState"]["finalizedHeight"],
+        original_json["consensusState"]["finalizedHeight"]
+    );
+    assert_eq!(
+        imported_json["consensusState"]["finalizedStateRoot"],
+        original_json["consensusState"]["finalizedStateRoot"]
+    );
     assert!(temp.join("genesis-config.json").exists());
     assert!(temp.join("operator-key-references.json").exists());
+    assert!(temp.join("validator-set.json").exists());
+    assert!(temp.join("consensus-state.json").exists());
+    assert!(temp.join("finality-status.json").exists());
 
     std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
 }
@@ -1643,4 +2176,86 @@ fn finalize_tx(finality_receipt_id: &str, receipt_id: &str) -> Transaction {
         finalized_by: "operator:test".to_string(),
         finality_status: "finalized".to_string(),
     }
+}
+
+fn bridge_replay_tx(replay_key: &str) -> Transaction {
+    Transaction::RecordBridgeReplayKey {
+        replay_key: replay_key.to_string(),
+        source_chain_id: "base-sepolia-or-mock-local".to_string(),
+        source_tx_hash: keccak_hex(format!("source-tx:{replay_key}").as_bytes()),
+        source_log_index: "0".to_string(),
+        local_object_id: format!("bridge-object:{replay_key}"),
+    }
+}
+
+fn bridge_credit_tx(credit_id: &str, replay_key: &str) -> Transaction {
+    Transaction::ApplyBridgeCredit {
+        credit_id: credit_id.to_string(),
+        replay_key: replay_key.to_string(),
+        source_chain_id: "8453".to_string(),
+        source_tx_hash: keccak_hex(format!("source-tx:{credit_id}").as_bytes()),
+        source_log_index: "0".to_string(),
+        recipient_account_id: "local-account:bridge:receiver".to_string(),
+        amount_units: 25,
+        evidence_hash: keccak_hex(format!("evidence:{credit_id}").as_bytes()),
+    }
+}
+
+fn bridge_spend_tx(
+    transfer_id: &str,
+    credit_id: &str,
+    finality_receipt_id: &str,
+    credited_block_hash: &str,
+    credited_state_root: &str,
+) -> Transaction {
+    Transaction::SpendBridgeCreditLocalTestUnits {
+        transfer_id: transfer_id.to_string(),
+        credit_id: credit_id.to_string(),
+        finality_receipt_id: finality_receipt_id.to_string(),
+        credited_block_hash: credited_block_hash.to_string(),
+        credited_state_root: credited_state_root.to_string(),
+        from_account_id: "local-account:bridge:receiver".to_string(),
+        to_account_id: "local-account:bridge:sink".to_string(),
+        amount_units: 10,
+        memo: format!(
+            "credit={credit_id};finality={finality_receipt_id};stateRoot={credited_state_root}"
+        ),
+    }
+}
+
+fn bridge_credit_spend_state() -> (flowmemory_devnet::model::ChainState, String, String) {
+    let mut state = genesis_state();
+    queue_transaction(
+        &mut state,
+        Transaction::CreateLocalTestUnitBalance {
+            account_id: "local-account:bridge:sink".to_string(),
+            owner: "operator:bridge:sink".to_string(),
+        },
+    );
+    build_block(&mut state);
+
+    let credit_id = keccak_hex(b"bridge-credit:finalized-spend");
+    queue_transaction(
+        &mut state,
+        bridge_credit_tx(&credit_id, "bridge-replay:finalized-spend"),
+    );
+    let credit_block = build_block(&mut state);
+    let finality_receipt_id = state
+        .consensus_state
+        .latest_finality_receipt_id
+        .clone()
+        .expect("credit finality receipt");
+    let transfer_id = "bridge-spend:finalized".to_string();
+    queue_transaction(
+        &mut state,
+        bridge_spend_tx(
+            &transfer_id,
+            &credit_id,
+            &finality_receipt_id,
+            &credit_block.block_hash,
+            &credit_block.state_root,
+        ),
+    );
+    build_block(&mut state);
+    (state, credit_id, transfer_id)
 }

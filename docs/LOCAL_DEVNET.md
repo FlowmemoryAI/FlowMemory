@@ -1,8 +1,8 @@
 # FlowMemory Local Devnet
 
-Status: runnable no-value private/local runtime
+Status: runnable no-value private/local runtime with local authority-set consensus
 
-The local FlowMemory devnet is a Rust CLI that models FlowMemory appchain-style state transitions without production consensus, tokenomics, bridge assets, public validator onboarding, or mainnet claims. It is the current private/local FlowChain runtime surface for second-computer validation.
+The local FlowMemory devnet is a Rust CLI that models FlowMemory appchain-style state transitions with a private/local authority-set consensus profile. It does not implement public permissionless validators, tokenomics, bridge assets, public validator onboarding, or mainnet claims. It is the current private/local FlowChain runtime surface for second-computer validation.
 
 It is local/no-value only. It has local test-unit balance and faucet records for runtime smoke and dashboard/control-plane testing, but those records are not tokens, rewards, staking, gas economics, bridge assets, or production deployment behavior.
 
@@ -15,7 +15,7 @@ Reason:
 - Rust is a better long-term fit for chain/node work than ad hoc scripts.
 - The local model needs deterministic state roots, block hashes, and tests.
 - A full OP Stack/Base Appchain deployment would be premature before schemas and anchors stabilize.
-- Custom consensus is explicitly out of scope.
+- Public permissionless consensus is explicitly out of scope; the current profile is a deterministic private/local authority set for local L1 validation.
 
 Decision record: [2026-05-13-no-value-local-appchain-prototype.md](DECISIONS/2026-05-13-no-value-local-appchain-prototype.md)
 
@@ -114,6 +114,53 @@ cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- smoke
 ```
 
 `smoke` now builds the native object lifecycle, writes state and handoff files, produces 10 deterministic local blocks, and proves deterministic single-node reconciliation by replaying the same flow twice and comparing block hashes, latest parent hash, state root, and map roots. LAN and multi-node networking are not exposed in this crate yet.
+
+Run the consensus smoke:
+
+```powershell
+npm run flowchain:consensus:smoke
+```
+
+Equivalent Rust command:
+
+```powershell
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- consensus-smoke --out-dir devnet/local/consensus-smoke
+```
+
+The consensus smoke writes:
+
+```text
+devnet/local/consensus-smoke/consensus-report.json
+devnet/local/consensus-smoke/finality-proof.json
+devnet/local/consensus-smoke/fork-choice-proof.json
+devnet/local/consensus-smoke/state-snapshot.json
+devnet/local/consensus-smoke/handoff/
+```
+
+Verify live-L1 consensus/finality readiness:
+
+```powershell
+npm run flowchain:consensus:live-l1:verify
+```
+
+The live-L1 verifier writes:
+
+```text
+devnet/local/live-l1-consensus/consensus-finality-report.json
+devnet/local/live-l1-consensus/bridge-lifecycle-evidence.json
+```
+
+The verifier fails if an existing readiness report claims public/live finality or public-L1 acceptability while the runtime is still the private/local single-process authority-set profile. In the current profile, private live pilot scope is acceptable and public L1 readiness is blocked.
+
+Inspect consensus state:
+
+```powershell
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- consensus-validate
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- validator-set
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- finality-status
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- fork-choice-test --out devnet/local/fork-choice-proof.json
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- write-finality-proof --out devnet/local/finality-proof.json
+```
 
 Import a FlowPulse observation fixture:
 
@@ -245,14 +292,34 @@ Supported local transactions:
 Each block has:
 
 - Block number.
+- Chain id.
+- Genesis hash.
+- Authority-set id.
+- Proposer id.
 - Parent hash.
 - Logical time.
 - Transaction ids.
+- Transaction root.
 - Receipts.
+- Receipt root.
+- Event root.
 - State root.
+- Local authority proof.
 - Block hash.
 
-The devnet uses deterministic logical time and canonical JSON with Keccak-256. Tests prove the same inputs produce the same state root and block hash.
+The devnet uses deterministic logical time and canonical JSON with Keccak-256. Tests prove the same inputs produce the same state root and block hash. Blocks are proposed by the configured private/local authority set, validate parent/hash/height/time/proposer/roots, and finalize immediately under the local single-authority profile.
+
+Consensus state includes:
+
+- `validatorSet`
+- `authoritySet`
+- `consensusState`
+- `chainFinalityReceipts`
+- `forkEvidence`
+- `misbehaviorEvidence`
+- `bridgeReplayKeys`
+
+The local finality rule is immediate finality for a validated canonical block signed by the configured private/local authority proof. Static local peer sync adopts only valid chains and uses highest height, then lexicographically lowest canonical block hash as a deterministic tie-breaker. This is not public validator readiness.
 
 `inspect-state --summary`, exported handoff files, and Base anchor placeholders include deterministic roots for the local maps, including operator key references, agent accounts, local test-unit balances, faucet records, model passports, memory cells, challenges, finality receipts, artifact availability proofs, verifier modules, work receipts, and verifier reports.
 
@@ -276,9 +343,12 @@ Generated exports:
 - `fixtures/handoff/generated/control-plane-handoff.json`
 - `fixtures/handoff/generated/genesis-config.json`
 - `fixtures/handoff/generated/operator-key-references.json`
+- `fixtures/handoff/generated/validator-set.json`
+- `fixtures/handoff/generated/consensus-state.json`
+- `fixtures/handoff/generated/finality-status.json`
 - `fixtures/handoff/generated/state.json`
 
-The generated dashboard, indexer, verifier, and state outputs include the expanded local object maps and deterministic map roots. These are local prototype outputs. Review before committing generated copies.
+The generated dashboard, indexer, verifier, control-plane, and state outputs include consensus/finality fields, expanded local object maps, and deterministic map roots. These are local prototype outputs. Review before committing generated copies.
 
 The control-plane handoff contains the current chain id, latest block, blocks, pending transactions, object maps, deterministic map roots, genesis config, and operator key references. It is intended for local services to consume without reading ignored `devnet/local/` files.
 
@@ -291,7 +361,9 @@ Control-plane and dashboard agents should read:
 ## Non-Goals
 
 - No production consensus.
-- No validator set.
+- No public or permissionless validator set.
+- No public validator onboarding.
+- No staking, slashing, rewards, validator economics, or public validator readiness.
 - No tokenomics.
 - No validator rewards.
 - No staking or slashing.

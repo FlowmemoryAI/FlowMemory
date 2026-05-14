@@ -1,6 +1,6 @@
 use crate::hash::{hash_json, keccak_hex};
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use thiserror::Error;
 
 pub const STATE_SCHEMA: &str = "flowmemory.local_devnet.state.v0";
@@ -8,11 +8,25 @@ pub const BLOCK_SCHEMA: &str = "flowmemory.local_devnet.block.v0";
 pub const TX_SCHEMA: &str = "flowmemory.local_devnet.tx.v0";
 pub const CONFIG_SCHEMA: &str = "flowmemory.local_devnet.config.v0";
 pub const OPERATOR_KEY_REFERENCE_SCHEMA: &str = "flowmemory.local_devnet.operator_key_reference.v0";
+pub const VALIDATOR_IDENTITY_SCHEMA: &str = "flowmemory.local_devnet.validator_identity.v0";
+pub const AUTHORITY_SET_SCHEMA: &str = "flowmemory.local_devnet.authority_set.v0";
+pub const CONSENSUS_STATE_SCHEMA: &str = "flowmemory.local_devnet.consensus_state.v0";
+pub const CHAIN_FINALITY_RECEIPT_SCHEMA: &str = "flowmemory.local_devnet.chain_finality_receipt.v0";
+pub const FINALITY_CERTIFICATE_SCHEMA: &str = "flowmemory.local_devnet.finality_certificate.v0";
+pub const MISBEHAVIOR_EVIDENCE_SCHEMA: &str = "flowmemory.local_devnet.misbehavior_evidence.v0";
+pub const FORK_EVIDENCE_SCHEMA: &str = "flowmemory.local_devnet.fork_evidence.v0";
+pub const AUTHORITY_PROOF_SCHEMA: &str = "flowmemory.local_devnet.authority_proof.v0";
+pub const BRIDGE_REPLAY_KEY_SCHEMA: &str = "flowmemory.local_devnet.bridge_replay_key.v0";
+pub const BRIDGE_CREDIT_SCHEMA: &str = "flowmemory.local_devnet.bridge_credit.v0";
+pub const BRIDGE_LIFECYCLE_EVIDENCE_SCHEMA: &str =
+    "flowmemory.local_devnet.bridge_lifecycle_evidence.v0";
 pub const GENESIS_HASH: &str = "0x0f23c892cbd2d00c10839d97ddab833698a83f8df8d6df27ceac03cfdd4b7bc9";
 pub const ZERO_HASH: &str = "0x0000000000000000000000000000000000000000000000000000000000000000";
 pub const FLOWPULSE_TOPIC0: &str =
     "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43";
 pub const LOCAL_TEST_UNIT_ASSET_ID: &str = "asset:flowchain-local-test-unit";
+pub const LOCAL_PRIVATE_VALIDATOR_ID: &str = "validator:local-private:alpha";
+pub const LOCAL_PRIVATE_AUTHORITY_SET_ID: &str = "authority-set:flowmemory-local-private-v0";
 
 #[derive(Debug, Error, PartialEq, Eq)]
 pub enum DevnetError {
@@ -138,6 +152,74 @@ pub enum DevnetError {
     AnchorAlreadyExists(String),
     #[error("invalid event signature: {0}")]
     InvalidEventSignature(String),
+    #[error("duplicate transaction id in block: {0}")]
+    DuplicateTransaction(String),
+    #[error("bridge replay key already used: {0}")]
+    BridgeReplayKeyAlreadyUsed(String),
+    #[error("bridge credit amount must be greater than zero: {0}")]
+    BridgeCreditAmountMustBePositive(String),
+    #[error("bridge credit already exists: {0}")]
+    BridgeCreditAlreadyExists(String),
+    #[error("bridge credit does not exist: {0}")]
+    BridgeCreditMissing(String),
+    #[error("bridge finality receipt does not exist: {0}")]
+    BridgeFinalityReceiptMissing(String),
+    #[error("bridge credit is not final under the supplied receipt: {0}")]
+    BridgeCreditNotFinal(String),
+    #[error("bridge spend reference is invalid: {0}")]
+    BridgeSpendReferenceInvalid(String),
+}
+
+#[derive(Debug, Error, Clone, PartialEq, Eq)]
+pub enum ConsensusValidationError {
+    #[error("wrong chain id: expected {expected}, got {actual}")]
+    WrongChainId { expected: String, actual: String },
+    #[error("wrong genesis hash: expected {expected}, got {actual}")]
+    WrongGenesisHash { expected: String, actual: String },
+    #[error("invalid parent: expected {expected}, got {actual}")]
+    InvalidParent { expected: String, actual: String },
+    #[error("invalid height: expected {expected}, got {actual}")]
+    InvalidHeight { expected: u64, actual: u64 },
+    #[error("timestamp out of bounds: min {min}, max {max}, got {actual}")]
+    TimestampOutOfBounds { min: u64, max: u64, actual: u64 },
+    #[error("invalid proposer: {0}")]
+    InvalidProposer(String),
+    #[error("invalid authority proof: {0}")]
+    InvalidAuthorityProof(String),
+    #[error("transaction ids are not sorted deterministically")]
+    TransactionOrdering,
+    #[error("duplicate transaction id in block: {0}")]
+    DuplicateTransaction(String),
+    #[error("{root_name} mismatch: expected {expected}, got {actual}")]
+    RootMismatch {
+        root_name: String,
+        expected: String,
+        actual: String,
+    },
+    #[error("block hash mismatch: expected {expected}, got {actual}")]
+    BlockHashMismatch { expected: String, actual: String },
+    #[error("unknown parent: {0}")]
+    UnknownParent(String),
+    #[error("stale block height {0}")]
+    StaleBlock(u64),
+    #[error("block conflicts with finalized height {height} hash {finalized_hash}")]
+    FinalizedConflict { height: u64, finalized_hash: String },
+    #[error("missing finality receipt for block {block_height} hash {block_hash}")]
+    MissingFinalityReceipt {
+        block_height: u64,
+        block_hash: String,
+    },
+    #[error("duplicate finality receipt for block {block_height} hash {block_hash}")]
+    DuplicateFinalityReceipt {
+        block_height: u64,
+        block_hash: String,
+    },
+    #[error("finality receipt mismatch: {0}")]
+    FinalityReceiptMismatch(String),
+    #[error("bridge credit does not exist: {0}")]
+    BridgeCreditMissing(String),
+    #[error("bridge spend reference is invalid: {0}")]
+    BridgeSpendReferenceInvalid(String),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -153,6 +235,18 @@ pub struct ChainState {
     pub parent_hash: String,
     #[serde(default = "default_operator_key_references")]
     pub operator_key_references: BTreeMap<String, OperatorKeyReference>,
+    #[serde(default = "default_validator_set")]
+    pub validator_set: BTreeMap<String, ValidatorIdentity>,
+    #[serde(default = "default_authority_set")]
+    pub authority_set: AuthoritySet,
+    #[serde(default = "default_consensus_state")]
+    pub consensus_state: ConsensusState,
+    #[serde(default)]
+    pub chain_finality_receipts: BTreeMap<String, ConsensusFinalityReceipt>,
+    #[serde(default)]
+    pub fork_evidence: Vec<ForkEvidence>,
+    #[serde(default)]
+    pub misbehavior_evidence: Vec<MisbehaviorEvidence>,
     pub rootfields: BTreeMap<String, Rootfield>,
     #[serde(default)]
     pub agent_accounts: BTreeMap<String, AgentAccount>,
@@ -194,6 +288,10 @@ pub struct ChainState {
     pub imported_observations: BTreeMap<String, ImportedFlowPulseObservation>,
     pub imported_verifier_reports: BTreeMap<String, ImportedVerifierReport>,
     pub base_anchors: BTreeMap<String, BaseAnchorPlaceholder>,
+    #[serde(default)]
+    pub bridge_replay_keys: BTreeMap<String, BridgeReplayKeyRecord>,
+    #[serde(default)]
+    pub bridge_credits: BTreeMap<String, BridgeCreditRecord>,
     pub blocks: Vec<Block>,
     pub pending_txs: Vec<TxEnvelope>,
 }
@@ -226,6 +324,126 @@ pub struct OperatorKeyReference {
     pub public_key_hint: String,
     pub secret_material_boundary: String,
     pub crypto_schema_refs: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ValidatorIdentity {
+    pub schema: String,
+    pub validator_id: String,
+    pub account_ref: String,
+    pub consensus_public_key: String,
+    pub consensus_key_id: String,
+    pub roles: Vec<String>,
+    pub weight: u64,
+    pub active: bool,
+    pub key_scope: String,
+    pub bridge_key_separation: String,
+    pub wallet_key_separation: String,
+    pub public_metadata: ValidatorPublicMetadata,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ValidatorPublicMetadata {
+    pub display_name: String,
+    pub operator_ref: String,
+    pub network_profile: String,
+    pub dashboard_safe: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct AuthoritySet {
+    pub schema: String,
+    pub authority_set_id: String,
+    pub chain_id: String,
+    pub genesis_hash: String,
+    pub profile: String,
+    pub validators: Vec<String>,
+    pub proposer_schedule: Vec<String>,
+    pub total_weight: u64,
+    pub quorum_weight: u64,
+    pub public_metadata_export: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ConsensusState {
+    pub schema: String,
+    pub profile: String,
+    pub finality_rule: String,
+    pub canonical_height: u64,
+    pub canonical_head_hash: String,
+    pub canonical_state_root: String,
+    pub finalized_height: u64,
+    pub finalized_hash: String,
+    pub finalized_state_root: String,
+    pub finalized_at_logical_time: u64,
+    pub latest_finality_receipt_id: Option<String>,
+    pub consensus_state_output_path: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct FinalityCertificate {
+    pub schema: String,
+    pub certificate_id: String,
+    pub chain_id: String,
+    pub genesis_hash: String,
+    pub authority_set_id: String,
+    pub block_height: u64,
+    pub block_hash: String,
+    pub state_root: String,
+    pub signer_ids: Vec<String>,
+    pub quorum_weight: u64,
+    pub total_weight: u64,
+    pub profile: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ConsensusFinalityReceipt {
+    pub schema: String,
+    pub finality_receipt_id: String,
+    pub chain_id: String,
+    pub genesis_hash: String,
+    pub authority_set_id: String,
+    pub finalized_height: u64,
+    pub finalized_block_hash: String,
+    pub finalized_state_root: String,
+    pub canonical_head_hash: String,
+    pub canonical_height: u64,
+    pub finality_rule: String,
+    pub certificate: FinalityCertificate,
+    pub produced_at_logical_time: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct MisbehaviorEvidence {
+    pub schema: String,
+    pub evidence_id: String,
+    pub kind: String,
+    pub block_hash: String,
+    pub block_height: u64,
+    pub proposer_id: String,
+    pub detail: String,
+    pub observed_at_logical_time: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ForkEvidence {
+    pub schema: String,
+    pub evidence_id: String,
+    pub kind: String,
+    pub block_hash: String,
+    pub block_height: u64,
+    pub parent_hash: String,
+    pub reason: String,
+    pub canonical_head_hash: String,
+    pub observed_at_logical_time: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -582,6 +800,85 @@ pub struct BaseAnchorPlaceholder {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct BridgeReplayKeyRecord {
+    pub schema: String,
+    pub replay_key: String,
+    pub source_chain_id: String,
+    pub source_tx_hash: String,
+    pub source_log_index: String,
+    pub local_object_id: String,
+    pub status: String,
+    pub first_seen_block: u64,
+    pub finalized_at_height: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct BridgeCreditRecord {
+    pub schema: String,
+    pub credit_id: String,
+    pub replay_key: String,
+    pub source_chain_id: String,
+    pub source_tx_hash: String,
+    pub source_log_index: String,
+    pub recipient_account_id: String,
+    pub amount_units: u64,
+    pub evidence_hash: String,
+    pub credited_at_block: u64,
+    pub status: String,
+    pub finality_required: bool,
+    pub local_only: bool,
+    pub production_ready: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct BridgeLifecycleEvidence {
+    pub schema: String,
+    pub evidence_id: String,
+    pub credit_id: String,
+    pub credit_tx_id: String,
+    pub credit_included_in_block: u64,
+    pub credit_block_hash: String,
+    pub credit_receipt_status: String,
+    pub block_hash_includes_credit_tx_and_receipt: bool,
+    pub state_root_before_credit: String,
+    pub state_root_after_credit: String,
+    pub state_root_changed_after_credit: bool,
+    pub finality: BridgeCreditFinalityEvidence,
+    pub transfer_after_credit: BridgeSpendEvidence,
+    pub result: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct BridgeCreditFinalityEvidence {
+    pub required: bool,
+    pub status: String,
+    pub finality_receipt_id: Option<String>,
+    pub finalized_height: u64,
+    pub finalized_block_hash: String,
+    pub finalized_state_root: String,
+    pub rule: String,
+    pub private_pilot: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct BridgeSpendEvidence {
+    pub transfer_id: String,
+    pub transfer_tx_id: String,
+    pub transfer_block_number: u64,
+    pub transfer_block_hash: String,
+    pub transfer_receipt_status: String,
+    pub references_credit_id: bool,
+    pub references_finality_receipt_id: bool,
+    pub references_credited_state_root: bool,
+    pub spendable_under_finality_rule: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(
     tag = "type",
     rename_all = "PascalCase",
@@ -745,6 +1042,34 @@ pub enum Transaction {
         appchain_chain_id: String,
         finality_status: String,
     },
+    RecordBridgeReplayKey {
+        replay_key: String,
+        source_chain_id: String,
+        source_tx_hash: String,
+        source_log_index: String,
+        local_object_id: String,
+    },
+    ApplyBridgeCredit {
+        credit_id: String,
+        replay_key: String,
+        source_chain_id: String,
+        source_tx_hash: String,
+        source_log_index: String,
+        recipient_account_id: String,
+        amount_units: u64,
+        evidence_hash: String,
+    },
+    SpendBridgeCreditLocalTestUnits {
+        transfer_id: String,
+        credit_id: String,
+        finality_receipt_id: String,
+        credited_block_hash: String,
+        credited_state_root: String,
+        from_account_id: String,
+        to_account_id: String,
+        amount_units: u64,
+        memo: String,
+    },
     ImportFlowPulseObservation(ImportedFlowPulseObservation),
     ImportVerifierReport(ImportedVerifierReport),
 }
@@ -768,14 +1093,41 @@ pub struct LocalAuthorization {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
+pub struct AuthorityProof {
+    pub schema: String,
+    pub proof_type: String,
+    pub validator_id: String,
+    pub consensus_key_id: String,
+    pub digest: String,
+    pub signature: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct Block {
     pub schema: String,
+    #[serde(default = "default_chain_id")]
+    pub chain_id: String,
+    #[serde(default = "default_genesis_hash")]
+    pub genesis_hash: String,
+    #[serde(default = "default_authority_set_id")]
+    pub authority_set_id: String,
+    #[serde(default = "default_validator_id")]
+    pub proposer_id: String,
     pub block_number: u64,
     pub parent_hash: String,
     pub logical_time: u64,
     pub tx_ids: Vec<String>,
+    #[serde(default = "empty_root")]
+    pub tx_root: String,
     pub receipts: Vec<BlockReceipt>,
+    #[serde(default = "empty_root")]
+    pub receipt_root: String,
+    #[serde(default = "empty_root")]
+    pub event_root: String,
     pub state_root: String,
+    #[serde(default = "empty_authority_proof")]
+    pub authority_proof: AuthorityProof,
     pub block_hash: String,
 }
 
@@ -797,6 +1149,8 @@ struct StateCommitmentView<'a> {
     chain_id: &'a str,
     genesis_hash: &'a str,
     operator_key_references: &'a BTreeMap<String, OperatorKeyReference>,
+    validator_set: &'a BTreeMap<String, ValidatorIdentity>,
+    authority_set: &'a AuthoritySet,
     rootfields: &'a BTreeMap<String, Rootfield>,
     agent_accounts: &'a BTreeMap<String, AgentAccount>,
     local_test_unit_balances: &'a BTreeMap<String, LocalTestUnitBalance>,
@@ -821,6 +1175,8 @@ struct StateCommitmentView<'a> {
     imported_observations: &'a BTreeMap<String, ImportedFlowPulseObservation>,
     imported_verifier_reports: &'a BTreeMap<String, ImportedVerifierReport>,
     base_anchors: &'a BTreeMap<String, BaseAnchorPlaceholder>,
+    bridge_replay_keys: &'a BTreeMap<String, BridgeReplayKeyRecord>,
+    bridge_credits: &'a BTreeMap<String, BridgeCreditRecord>,
 }
 
 #[derive(Debug, Serialize)]
@@ -834,6 +1190,8 @@ struct RootMapView<'a, T> {
 #[serde(rename_all = "camelCase")]
 pub struct StateMapRoots {
     pub operator_key_reference_root: String,
+    pub validator_set_root: String,
+    pub authority_set_root: String,
     pub rootfield_state_root: String,
     pub agent_account_root: String,
     pub local_test_unit_balance_root: String,
@@ -858,6 +1216,8 @@ pub struct StateMapRoots {
     pub imported_observation_root: String,
     pub imported_verifier_report_root: String,
     pub base_anchor_root: String,
+    pub bridge_replay_key_root: String,
+    pub bridge_credit_root: String,
 }
 
 pub fn default_config() -> DevnetConfig {
@@ -870,11 +1230,44 @@ pub fn default_config() -> DevnetConfig {
         block_time_seconds: 1,
         operator_key_reference_id: "operator-key:local-devnet:alpha".to_string(),
         no_value: true,
-        consensus: "single-process deterministic local block production".to_string(),
+        consensus:
+            "private/local authority-set consensus with deterministic proposer schedule and immediate local finality"
+                .to_string(),
         crypto_schema_refs: vec![
             "crypto/FLOWMEMORY_CRYPTO_SPEC.md#domain-separation".to_string(),
             "crypto/ATTESTATIONS.md#local-signature-helpers".to_string(),
         ],
+    }
+}
+
+fn default_chain_id() -> String {
+    default_config().chain_id
+}
+
+fn default_genesis_hash() -> String {
+    GENESIS_HASH.to_string()
+}
+
+fn default_authority_set_id() -> String {
+    LOCAL_PRIVATE_AUTHORITY_SET_ID.to_string()
+}
+
+fn default_validator_id() -> String {
+    LOCAL_PRIVATE_VALIDATOR_ID.to_string()
+}
+
+fn empty_root() -> String {
+    ZERO_HASH.to_string()
+}
+
+fn empty_authority_proof() -> AuthorityProof {
+    AuthorityProof {
+        schema: AUTHORITY_PROOF_SCHEMA.to_string(),
+        proof_type: "unset".to_string(),
+        validator_id: String::new(),
+        consensus_key_id: String::new(),
+        digest: ZERO_HASH.to_string(),
+        signature: ZERO_HASH.to_string(),
     }
 }
 
@@ -899,9 +1292,74 @@ pub fn default_operator_key_references() -> BTreeMap<String, OperatorKeyReferenc
     BTreeMap::from([(reference.key_reference_id.clone(), reference)])
 }
 
+pub fn default_validator_set() -> BTreeMap<String, ValidatorIdentity> {
+    let validator = ValidatorIdentity {
+        schema: VALIDATOR_IDENTITY_SCHEMA.to_string(),
+        validator_id: LOCAL_PRIVATE_VALIDATOR_ID.to_string(),
+        account_ref: "operator:local-private:alpha".to_string(),
+        consensus_public_key: keccak_hex(b"flowmemory.local_private.validator.alpha.public"),
+        consensus_key_id: "consensus-key:local-private:alpha".to_string(),
+        roles: vec![
+            "validator".to_string(),
+            "sequencer".to_string(),
+            "proposer".to_string(),
+            "finality-signer".to_string(),
+        ],
+        weight: 1,
+        active: true,
+        key_scope: "consensus-only-local-private-authority".to_string(),
+        bridge_key_separation: "consensus keys do not sign bridge release or custody instructions"
+            .to_string(),
+        wallet_key_separation: "consensus keys are separate from local user wallet and faucet keys"
+            .to_string(),
+        public_metadata: ValidatorPublicMetadata {
+            display_name: "FlowMemory local private authority alpha".to_string(),
+            operator_ref: "operator:local-private:alpha".to_string(),
+            network_profile: "private-local-single-authority".to_string(),
+            dashboard_safe: true,
+        },
+    };
+    BTreeMap::from([(validator.validator_id.clone(), validator)])
+}
+
+pub fn default_authority_set() -> AuthoritySet {
+    AuthoritySet {
+        schema: AUTHORITY_SET_SCHEMA.to_string(),
+        authority_set_id: LOCAL_PRIVATE_AUTHORITY_SET_ID.to_string(),
+        chain_id: default_chain_id(),
+        genesis_hash: GENESIS_HASH.to_string(),
+        profile: "private-local-authority-set".to_string(),
+        validators: vec![LOCAL_PRIVATE_VALIDATOR_ID.to_string()],
+        proposer_schedule: vec![LOCAL_PRIVATE_VALIDATOR_ID.to_string()],
+        total_weight: 1,
+        quorum_weight: 1,
+        public_metadata_export: "dashboard-safe validator metadata only; no secret key material"
+            .to_string(),
+    }
+}
+
+pub fn default_consensus_state() -> ConsensusState {
+    ConsensusState {
+        schema: CONSENSUS_STATE_SCHEMA.to_string(),
+        profile: "private-local-single-authority".to_string(),
+        finality_rule:
+            "single local authority finalizes the canonical block immediately after validation"
+                .to_string(),
+        canonical_height: 0,
+        canonical_head_hash: GENESIS_HASH.to_string(),
+        canonical_state_root: ZERO_HASH.to_string(),
+        finalized_height: 0,
+        finalized_hash: GENESIS_HASH.to_string(),
+        finalized_state_root: ZERO_HASH.to_string(),
+        finalized_at_logical_time: default_config().genesis_logical_time,
+        latest_finality_receipt_id: None,
+        consensus_state_output_path: "devnet/local/consensus-state.json".to_string(),
+    }
+}
+
 pub fn genesis_state() -> ChainState {
     let config = default_config();
-    ChainState {
+    let mut state = ChainState {
         schema: STATE_SCHEMA.to_string(),
         chain_id: config.chain_id.clone(),
         genesis_hash: config.genesis_hash.clone(),
@@ -910,6 +1368,12 @@ pub fn genesis_state() -> ChainState {
         parent_hash: config.genesis_hash.clone(),
         config,
         operator_key_references: default_operator_key_references(),
+        validator_set: default_validator_set(),
+        authority_set: default_authority_set(),
+        consensus_state: default_consensus_state(),
+        chain_finality_receipts: BTreeMap::new(),
+        fork_evidence: Vec::new(),
+        misbehavior_evidence: Vec::new(),
         rootfields: BTreeMap::new(),
         agent_accounts: BTreeMap::new(),
         local_test_unit_balances: BTreeMap::new(),
@@ -934,9 +1398,15 @@ pub fn genesis_state() -> ChainState {
         imported_observations: BTreeMap::new(),
         imported_verifier_reports: BTreeMap::new(),
         base_anchors: BTreeMap::new(),
+        bridge_replay_keys: BTreeMap::new(),
+        bridge_credits: BTreeMap::new(),
         blocks: Vec::new(),
         pending_txs: Vec::new(),
-    }
+    };
+    let genesis_root = state_root(&state);
+    state.consensus_state.canonical_state_root = genesis_root.clone();
+    state.consensus_state.finalized_state_root = genesis_root;
+    state
 }
 
 pub fn envelope_tx(tx: Transaction) -> TxEnvelope {
@@ -1074,6 +1544,8 @@ pub fn state_root(state: &ChainState) -> String {
         chain_id: &state.chain_id,
         genesis_hash: &state.genesis_hash,
         operator_key_references: &state.operator_key_references,
+        validator_set: &state.validator_set,
+        authority_set: &state.authority_set,
         rootfields: &state.rootfields,
         agent_accounts: &state.agent_accounts,
         local_test_unit_balances: &state.local_test_unit_balances,
@@ -1098,6 +1570,8 @@ pub fn state_root(state: &ChainState) -> String {
         imported_observations: &state.imported_observations,
         imported_verifier_reports: &state.imported_verifier_reports,
         base_anchors: &state.base_anchors,
+        bridge_replay_keys: &state.bridge_replay_keys,
+        bridge_credits: &state.bridge_credits,
     };
     hash_json("flowmemory.local_devnet.state_root.v0", &view)
 }
@@ -1114,6 +1588,14 @@ pub fn state_map_roots(state: &ChainState) -> StateMapRoots {
         operator_key_reference_root: map_root(
             "flowmemory.local_devnet.operator_key_references.v0",
             &state.operator_key_references,
+        ),
+        validator_set_root: map_root(
+            "flowmemory.local_devnet.validator_set.v0",
+            &state.validator_set,
+        ),
+        authority_set_root: hash_json(
+            "flowmemory.local_devnet.authority_set_root.v0",
+            &state.authority_set,
         ),
         rootfield_state_root: map_root("flowmemory.local_devnet.rootfields.v0", &state.rootfields),
         agent_account_root: map_root(
@@ -1202,20 +1684,279 @@ pub fn state_map_roots(state: &ChainState) -> StateMapRoots {
             "flowmemory.local_devnet.base_anchors.v0",
             &state.base_anchors,
         ),
+        bridge_replay_key_root: map_root(
+            "flowmemory.local_devnet.bridge_replay_keys.v0",
+            &state.bridge_replay_keys,
+        ),
+        bridge_credit_root: map_root(
+            "flowmemory.local_devnet.bridge_credits.v0",
+            &state.bridge_credits,
+        ),
     }
 }
 
-pub fn build_block(state: &mut ChainState) -> Block {
-    let txs = std::mem::take(&mut state.pending_txs);
-    let mut receipts = Vec::with_capacity(txs.len());
-    let mut tx_ids = Vec::with_capacity(txs.len());
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct BlockProposal {
+    pub block: Block,
+    pub transactions: Vec<TxEnvelope>,
+    pub post_state: ChainState,
+}
 
-    for envelope in txs {
-        tx_ids.push(envelope.tx_id.clone());
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ForkChoiceOutcome {
+    pub schema: String,
+    pub canonical_head: Option<Block>,
+    pub rejected: Vec<ForkEvidence>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ConsensusValidationReport {
+    pub schema: String,
+    pub valid: bool,
+    pub checked_blocks: usize,
+    pub canonical_head_hash: String,
+    pub finalized_height: u64,
+    pub finalized_hash: String,
+    pub finalized_state_root: String,
+    pub consensus_state_root: String,
+    pub errors: Vec<String>,
+}
+
+pub fn tx_root(tx_ids: &[String]) -> String {
+    hash_json(
+        "flowmemory.local_devnet.tx_root.v0",
+        &serde_json::json!({
+            "schema": "flowmemory.local_devnet.tx_root.v0",
+            "txIds": tx_ids
+        }),
+    )
+}
+
+pub fn receipt_root(receipts: &[BlockReceipt]) -> String {
+    hash_json(
+        "flowmemory.local_devnet.receipt_root.v0",
+        &serde_json::json!({
+            "schema": "flowmemory.local_devnet.receipt_root.v0",
+            "receipts": receipts
+        }),
+    )
+}
+
+pub fn event_root(receipts: &[BlockReceipt]) -> String {
+    let events = receipts
+        .iter()
+        .map(|receipt| {
+            serde_json::json!({
+                "schema": "flowmemory.local_devnet.block_event_commitment.v0",
+                "txId": receipt.tx_id,
+                "eventType": if receipt.status == "applied" {
+                    "transaction_applied"
+                } else {
+                    "transaction_rejected"
+                },
+                "status": receipt.status
+            })
+        })
+        .collect::<Vec<_>>();
+    hash_json(
+        "flowmemory.local_devnet.event_root.v0",
+        &serde_json::json!({
+            "schema": "flowmemory.local_devnet.event_root.v0",
+            "events": events
+        }),
+    )
+}
+
+pub fn consensus_state_root(state: &ChainState) -> String {
+    hash_json(
+        "flowmemory.local_devnet.consensus_state_root.v0",
+        &serde_json::json!({
+            "schema": "flowmemory.local_devnet.consensus_state_commitment.v0",
+            "authoritySet": state.authority_set,
+            "validatorSet": state.validator_set,
+            "consensusState": state.consensus_state,
+            "chainFinalityReceipts": state.chain_finality_receipts,
+            "forkEvidence": state.fork_evidence,
+            "misbehaviorEvidence": state.misbehavior_evidence
+        }),
+    )
+}
+
+pub fn expected_proposer_id(state: &ChainState, height: u64) -> Option<String> {
+    if state.authority_set.proposer_schedule.is_empty() || height == 0 {
+        return None;
+    }
+    let index = ((height - 1) as usize) % state.authority_set.proposer_schedule.len();
+    state.authority_set.proposer_schedule.get(index).cloned()
+}
+
+pub fn validator_has_role(state: &ChainState, validator_id: &str, role: &str) -> bool {
+    state
+        .validator_set
+        .get(validator_id)
+        .is_some_and(|validator| {
+            validator.active
+                && validator
+                    .roles
+                    .iter()
+                    .any(|candidate| candidate.eq_ignore_ascii_case(role))
+        })
+}
+
+pub fn calculate_block_hash(block: &Block) -> String {
+    let mut input = block.clone();
+    input.block_hash = ZERO_HASH.to_string();
+    hash_json("flowmemory.local_devnet.block_hash.v0", &input)
+}
+
+fn authority_digest(block: &Block) -> String {
+    let mut input = block.clone();
+    input.block_hash = ZERO_HASH.to_string();
+    input.authority_proof = empty_authority_proof();
+    hash_json("flowmemory.local_devnet.authority_digest.v0", &input)
+}
+
+fn authority_signature(
+    validator_id: &str,
+    consensus_key_id: &str,
+    consensus_public_key: &str,
+    digest: &str,
+) -> String {
+    hash_json(
+        "flowmemory.local_devnet.authority_signature.v0",
+        &serde_json::json!({
+            "validatorId": validator_id,
+            "consensusKeyId": consensus_key_id,
+            "consensusPublicKey": consensus_public_key,
+            "digest": digest
+        }),
+    )
+}
+
+fn authority_proof_for_block(
+    state: &ChainState,
+    block: &Block,
+    proposer_id: &str,
+) -> Result<AuthorityProof, ConsensusValidationError> {
+    let validator = state
+        .validator_set
+        .get(proposer_id)
+        .filter(|validator| validator.active)
+        .ok_or_else(|| ConsensusValidationError::InvalidProposer(proposer_id.to_string()))?;
+    if !validator_has_role(state, proposer_id, "proposer") {
+        return Err(ConsensusValidationError::InvalidProposer(
+            proposer_id.to_string(),
+        ));
+    }
+    let digest = authority_digest(block);
+    Ok(AuthorityProof {
+        schema: AUTHORITY_PROOF_SCHEMA.to_string(),
+        proof_type: "local-private-authority-digest".to_string(),
+        validator_id: proposer_id.to_string(),
+        consensus_key_id: validator.consensus_key_id.clone(),
+        signature: authority_signature(
+            proposer_id,
+            &validator.consensus_key_id,
+            &validator.consensus_public_key,
+            &digest,
+        ),
+        digest,
+    })
+}
+
+fn validate_authority_proof(
+    state: &ChainState,
+    block: &Block,
+) -> Result<(), ConsensusValidationError> {
+    if block.authority_proof.validator_id != block.proposer_id {
+        return Err(ConsensusValidationError::InvalidAuthorityProof(
+            "authority proof validator does not match proposer".to_string(),
+        ));
+    }
+    let validator = state
+        .validator_set
+        .get(&block.proposer_id)
+        .filter(|validator| validator.active)
+        .ok_or_else(|| ConsensusValidationError::InvalidProposer(block.proposer_id.clone()))?;
+    let expected_digest = authority_digest(block);
+    if block.authority_proof.digest != expected_digest {
+        return Err(ConsensusValidationError::InvalidAuthorityProof(
+            "authority proof digest mismatch".to_string(),
+        ));
+    }
+    let expected_signature = authority_signature(
+        &block.proposer_id,
+        &validator.consensus_key_id,
+        &validator.consensus_public_key,
+        &expected_digest,
+    );
+    if block.authority_proof.consensus_key_id != validator.consensus_key_id
+        || block.authority_proof.signature != expected_signature
+    {
+        return Err(ConsensusValidationError::InvalidAuthorityProof(
+            "authority proof signature mismatch".to_string(),
+        ));
+    }
+    Ok(())
+}
+
+fn ensure_unique_tx_ids(tx_ids: &[String]) -> Result<(), ConsensusValidationError> {
+    let mut seen = BTreeSet::new();
+    for tx_id in tx_ids {
+        if !seen.insert(tx_id) {
+            return Err(ConsensusValidationError::DuplicateTransaction(
+                tx_id.clone(),
+            ));
+        }
+    }
+    Ok(())
+}
+
+pub fn propose_block(
+    parent_state: &ChainState,
+    transactions: Vec<TxEnvelope>,
+    proposer_id: &str,
+) -> Result<BlockProposal, ConsensusValidationError> {
+    if !validator_has_role(parent_state, proposer_id, "proposer") {
+        return Err(ConsensusValidationError::InvalidProposer(
+            proposer_id.to_string(),
+        ));
+    }
+    let expected_proposer = expected_proposer_id(parent_state, parent_state.next_block_number)
+        .ok_or_else(|| {
+            ConsensusValidationError::InvalidProposer("empty proposer schedule".to_string())
+        })?;
+    if expected_proposer != proposer_id {
+        return Err(ConsensusValidationError::InvalidProposer(
+            proposer_id.to_string(),
+        ));
+    }
+
+    let mut post_state = parent_state.clone();
+    post_state.pending_txs.clear();
+
+    let mut receipts = Vec::with_capacity(transactions.len());
+    let mut tx_ids = Vec::with_capacity(transactions.len());
+    let mut seen = BTreeSet::new();
+
+    for envelope in &transactions {
         let authorization = envelope.authorization.clone();
-        let result = apply_transaction(state, &envelope.tx);
+        if !seen.insert(envelope.tx_id.clone()) {
+            receipts.push(BlockReceipt {
+                tx_id: envelope.tx_id.clone(),
+                status: "rejected".to_string(),
+                error: Some(DevnetError::DuplicateTransaction(envelope.tx_id.clone()).to_string()),
+                authorization,
+            });
+            continue;
+        }
+        tx_ids.push(envelope.tx_id.clone());
+        let result = apply_transaction(&mut post_state, &envelope.tx);
         receipts.push(BlockReceipt {
-            tx_id: envelope.tx_id,
+            tx_id: envelope.tx_id.clone(),
             status: if result.is_ok() {
                 "applied"
             } else {
@@ -1227,29 +1968,959 @@ pub fn build_block(state: &mut ChainState) -> Block {
         });
     }
 
-    let root = state_root(state);
-    let block_number = state.next_block_number;
-    let logical_time = state.logical_time;
-    let parent_hash = state.parent_hash.clone();
-
     let mut block = Block {
         schema: BLOCK_SCHEMA.to_string(),
-        block_number,
-        parent_hash,
-        logical_time,
+        chain_id: parent_state.chain_id.clone(),
+        genesis_hash: parent_state.genesis_hash.clone(),
+        authority_set_id: parent_state.authority_set.authority_set_id.clone(),
+        proposer_id: proposer_id.to_string(),
+        block_number: parent_state.next_block_number,
+        parent_hash: parent_state.parent_hash.clone(),
+        logical_time: parent_state.logical_time,
+        tx_root: tx_root(&tx_ids),
         tx_ids,
+        receipt_root: receipt_root(&receipts),
+        event_root: event_root(&receipts),
         receipts,
-        state_root: root,
+        state_root: state_root(&post_state),
+        authority_proof: empty_authority_proof(),
         block_hash: ZERO_HASH.to_string(),
     };
-    block.block_hash = hash_json("flowmemory.local_devnet.block_hash.v0", &block);
+    block.authority_proof = authority_proof_for_block(parent_state, &block, proposer_id)?;
+    block.block_hash = calculate_block_hash(&block);
 
-    state.next_block_number += 1;
-    state.logical_time += 1;
-    state.parent_hash = block.block_hash.clone();
-    state.blocks.push(block.clone());
+    let proposal = BlockProposal {
+        block,
+        transactions,
+        post_state,
+    };
+    validate_block_header(parent_state, &proposal.block)?;
+    Ok(proposal)
+}
 
+pub fn validate_block_proposal(
+    parent_state: &ChainState,
+    proposal: &BlockProposal,
+) -> Result<(), ConsensusValidationError> {
+    let expected = propose_block(
+        parent_state,
+        proposal.transactions.clone(),
+        &proposal.block.proposer_id,
+    )?;
+    if expected.block.state_root != proposal.block.state_root {
+        return Err(ConsensusValidationError::RootMismatch {
+            root_name: "stateRoot".to_string(),
+            expected: expected.block.state_root,
+            actual: proposal.block.state_root.clone(),
+        });
+    }
+    if expected.block.tx_root != proposal.block.tx_root {
+        return Err(ConsensusValidationError::RootMismatch {
+            root_name: "txRoot".to_string(),
+            expected: expected.block.tx_root,
+            actual: proposal.block.tx_root.clone(),
+        });
+    }
+    if expected.block.receipt_root != proposal.block.receipt_root {
+        return Err(ConsensusValidationError::RootMismatch {
+            root_name: "receiptRoot".to_string(),
+            expected: expected.block.receipt_root,
+            actual: proposal.block.receipt_root.clone(),
+        });
+    }
+    if expected.block.event_root != proposal.block.event_root {
+        return Err(ConsensusValidationError::RootMismatch {
+            root_name: "eventRoot".to_string(),
+            expected: expected.block.event_root,
+            actual: proposal.block.event_root.clone(),
+        });
+    }
+    if expected.block.block_hash != proposal.block.block_hash {
+        return Err(ConsensusValidationError::BlockHashMismatch {
+            expected: expected.block.block_hash,
+            actual: proposal.block.block_hash.clone(),
+        });
+    }
+    validate_block_header(parent_state, &proposal.block)?;
+    Ok(())
+}
+
+pub fn validate_block_header(
+    parent_state: &ChainState,
+    block: &Block,
+) -> Result<(), ConsensusValidationError> {
+    if block.chain_id != parent_state.chain_id {
+        return Err(ConsensusValidationError::WrongChainId {
+            expected: parent_state.chain_id.clone(),
+            actual: block.chain_id.clone(),
+        });
+    }
+    if block.genesis_hash != parent_state.genesis_hash {
+        return Err(ConsensusValidationError::WrongGenesisHash {
+            expected: parent_state.genesis_hash.clone(),
+            actual: block.genesis_hash.clone(),
+        });
+    }
+    if block.authority_set_id != parent_state.authority_set.authority_set_id {
+        return Err(ConsensusValidationError::InvalidAuthorityProof(
+            "authority set id mismatch".to_string(),
+        ));
+    }
+    if block.parent_hash != parent_state.parent_hash {
+        return Err(ConsensusValidationError::InvalidParent {
+            expected: parent_state.parent_hash.clone(),
+            actual: block.parent_hash.clone(),
+        });
+    }
+    if block.block_number != parent_state.next_block_number {
+        return Err(ConsensusValidationError::InvalidHeight {
+            expected: parent_state.next_block_number,
+            actual: block.block_number,
+        });
+    }
+    let min_time = parent_state.logical_time;
+    let max_time = parent_state
+        .logical_time
+        .saturating_add(parent_state.config.block_time_seconds.max(1) * 2);
+    if block.logical_time < min_time || block.logical_time > max_time {
+        return Err(ConsensusValidationError::TimestampOutOfBounds {
+            min: min_time,
+            max: max_time,
+            actual: block.logical_time,
+        });
+    }
+    let expected_proposer =
+        expected_proposer_id(parent_state, block.block_number).ok_or_else(|| {
+            ConsensusValidationError::InvalidProposer("empty proposer schedule".to_string())
+        })?;
+    if block.proposer_id != expected_proposer
+        || !validator_has_role(parent_state, &block.proposer_id, "proposer")
+    {
+        return Err(ConsensusValidationError::InvalidProposer(
+            block.proposer_id.clone(),
+        ));
+    }
+    if block.block_number <= parent_state.consensus_state.finalized_height {
+        let finalized_hash = parent_state
+            .blocks
+            .iter()
+            .find(|candidate| candidate.block_number == block.block_number)
+            .map(|candidate| candidate.block_hash.clone())
+            .unwrap_or_else(|| parent_state.consensus_state.finalized_hash.clone());
+        if block.block_hash != finalized_hash {
+            return Err(ConsensusValidationError::FinalizedConflict {
+                height: parent_state.consensus_state.finalized_height,
+                finalized_hash,
+            });
+        }
+    }
+    ensure_unique_tx_ids(&block.tx_ids)?;
+    let expected_tx_root = tx_root(&block.tx_ids);
+    if block.tx_root != expected_tx_root {
+        return Err(ConsensusValidationError::RootMismatch {
+            root_name: "txRoot".to_string(),
+            expected: expected_tx_root,
+            actual: block.tx_root.clone(),
+        });
+    }
+    let expected_receipt_root = receipt_root(&block.receipts);
+    if block.receipt_root != expected_receipt_root {
+        return Err(ConsensusValidationError::RootMismatch {
+            root_name: "receiptRoot".to_string(),
+            expected: expected_receipt_root,
+            actual: block.receipt_root.clone(),
+        });
+    }
+    let expected_event_root = event_root(&block.receipts);
+    if block.event_root != expected_event_root {
+        return Err(ConsensusValidationError::RootMismatch {
+            root_name: "eventRoot".to_string(),
+            expected: expected_event_root,
+            actual: block.event_root.clone(),
+        });
+    }
+    validate_authority_proof(parent_state, block)?;
+    let expected_hash = calculate_block_hash(block);
+    if block.block_hash != expected_hash {
+        return Err(ConsensusValidationError::BlockHashMismatch {
+            expected: expected_hash,
+            actual: block.block_hash.clone(),
+        });
+    }
+    Ok(())
+}
+
+pub fn build_block(state: &mut ChainState) -> Block {
+    let proposer = expected_proposer_id(state, state.next_block_number)
+        .unwrap_or_else(|| LOCAL_PRIVATE_VALIDATOR_ID.to_string());
+    build_block_with_proposer(state, &proposer)
+        .expect("default local-private proposer should be valid")
+}
+
+pub fn build_block_with_proposer(
+    state: &mut ChainState,
+    proposer_id: &str,
+) -> Result<Block, ConsensusValidationError> {
+    let proposal = propose_block(state, state.pending_txs.clone(), proposer_id)?;
+    commit_block_proposal(state, proposal)
+}
+
+pub fn commit_block_proposal(
+    state: &mut ChainState,
+    proposal: BlockProposal,
+) -> Result<Block, ConsensusValidationError> {
+    validate_block_proposal(state, &proposal)?;
+    let block = proposal.block;
+    let mut next_state = proposal.post_state;
+    next_state.next_block_number = block.block_number + 1;
+    next_state.logical_time = block.logical_time + 1;
+    next_state.parent_hash = block.block_hash.clone();
+    next_state.blocks.push(block.clone());
+    update_consensus_after_block(&mut next_state, &block);
+    *state = next_state;
+    Ok(block)
+}
+
+fn update_consensus_after_block(state: &mut ChainState, block: &Block) {
+    state.consensus_state.canonical_height = block.block_number;
+    state.consensus_state.canonical_head_hash = block.block_hash.clone();
+    state.consensus_state.canonical_state_root = block.state_root.clone();
+    let receipt = chain_finality_receipt_for_block(state, block);
+    state.consensus_state.finalized_height = receipt.finalized_height;
+    state.consensus_state.finalized_hash = receipt.finalized_block_hash.clone();
+    state.consensus_state.finalized_state_root = receipt.finalized_state_root.clone();
+    state.consensus_state.finalized_at_logical_time = receipt.produced_at_logical_time;
+    state.consensus_state.latest_finality_receipt_id = Some(receipt.finality_receipt_id.clone());
+    state
+        .chain_finality_receipts
+        .insert(receipt.finality_receipt_id.clone(), receipt);
+}
+
+fn chain_finality_receipt_for_block(state: &ChainState, block: &Block) -> ConsensusFinalityReceipt {
+    let signer_ids = vec![block.proposer_id.clone()];
+    let certificate_id = hash_json(
+        "flowmemory.local_devnet.finality_certificate_id.v0",
+        &serde_json::json!({
+            "chainId": block.chain_id,
+            "genesisHash": block.genesis_hash,
+            "authoritySetId": block.authority_set_id,
+            "blockHeight": block.block_number,
+            "blockHash": block.block_hash,
+            "stateRoot": block.state_root,
+            "signerIds": signer_ids
+        }),
+    );
+    let certificate = FinalityCertificate {
+        schema: FINALITY_CERTIFICATE_SCHEMA.to_string(),
+        certificate_id,
+        chain_id: block.chain_id.clone(),
+        genesis_hash: block.genesis_hash.clone(),
+        authority_set_id: block.authority_set_id.clone(),
+        block_height: block.block_number,
+        block_hash: block.block_hash.clone(),
+        state_root: block.state_root.clone(),
+        signer_ids,
+        quorum_weight: state.authority_set.quorum_weight,
+        total_weight: state.authority_set.total_weight,
+        profile: state.consensus_state.profile.clone(),
+    };
+    let finality_receipt_id = hash_json(
+        "flowmemory.local_devnet.chain_finality_receipt_id.v0",
+        &serde_json::json!({
+            "certificateId": certificate.certificate_id,
+            "blockHash": block.block_hash,
+            "blockHeight": block.block_number,
+            "stateRoot": block.state_root
+        }),
+    );
+    ConsensusFinalityReceipt {
+        schema: CHAIN_FINALITY_RECEIPT_SCHEMA.to_string(),
+        finality_receipt_id,
+        chain_id: block.chain_id.clone(),
+        genesis_hash: block.genesis_hash.clone(),
+        authority_set_id: block.authority_set_id.clone(),
+        finalized_height: block.block_number,
+        finalized_block_hash: block.block_hash.clone(),
+        finalized_state_root: block.state_root.clone(),
+        canonical_head_hash: block.block_hash.clone(),
+        canonical_height: block.block_number,
+        finality_rule: state.consensus_state.finality_rule.clone(),
+        certificate,
+        produced_at_logical_time: block.logical_time,
+    }
+}
+
+pub fn finalized_height(state: &ChainState) -> u64 {
+    state.consensus_state.finalized_height
+}
+
+pub fn finalized_state_root(state: &ChainState) -> String {
+    state.consensus_state.finalized_state_root.clone()
+}
+
+pub fn finalized_hash(state: &ChainState) -> String {
+    state.consensus_state.finalized_hash.clone()
+}
+
+pub fn bridge_replay_key_is_final(state: &ChainState, replay_key: &str) -> bool {
+    state
+        .bridge_replay_keys
+        .get(replay_key)
+        .is_some_and(|record| record.first_seen_block <= state.consensus_state.finalized_height)
+}
+
+pub fn bridge_credit_transaction_id(credit: &BridgeCreditRecord) -> String {
+    hash_json(
+        TX_SCHEMA,
+        &Transaction::ApplyBridgeCredit {
+            credit_id: credit.credit_id.clone(),
+            replay_key: credit.replay_key.clone(),
+            source_chain_id: credit.source_chain_id.clone(),
+            source_tx_hash: credit.source_tx_hash.clone(),
+            source_log_index: credit.source_log_index.clone(),
+            recipient_account_id: credit.recipient_account_id.clone(),
+            amount_units: credit.amount_units,
+            evidence_hash: credit.evidence_hash.clone(),
+        },
+    )
+}
+
+fn bridge_spend_transaction_id(
+    transfer: &BalanceTransfer,
+    credit_id: &str,
+    finality_receipt_id: &str,
+    credited_block_hash: &str,
+    credited_state_root: &str,
+) -> String {
+    hash_json(
+        TX_SCHEMA,
+        &Transaction::SpendBridgeCreditLocalTestUnits {
+            transfer_id: transfer.transfer_id.clone(),
+            credit_id: credit_id.to_string(),
+            finality_receipt_id: finality_receipt_id.to_string(),
+            credited_block_hash: credited_block_hash.to_string(),
+            credited_state_root: credited_state_root.to_string(),
+            from_account_id: transfer.from_account_id.clone(),
+            to_account_id: transfer.to_account_id.clone(),
+            amount_units: transfer.amount_units,
+            memo: transfer.memo.clone(),
+        },
+    )
+}
+
+fn block_receipt_status(block: &Block, tx_id: &str) -> Option<String> {
     block
+        .receipts
+        .iter()
+        .find(|receipt| receipt.tx_id == tx_id)
+        .map(|receipt| receipt.status.clone())
+}
+
+pub fn finality_receipt_for_block<'a>(
+    state: &'a ChainState,
+    block: &Block,
+) -> Result<&'a ConsensusFinalityReceipt, ConsensusValidationError> {
+    let receipts = state
+        .chain_finality_receipts
+        .values()
+        .filter(|receipt| {
+            receipt.finalized_height == block.block_number
+                && receipt.finalized_block_hash == block.block_hash
+        })
+        .collect::<Vec<_>>();
+    match receipts.len() {
+        0 => Err(ConsensusValidationError::MissingFinalityReceipt {
+            block_height: block.block_number,
+            block_hash: block.block_hash.clone(),
+        }),
+        1 => {
+            let receipt = receipts[0];
+            if receipt.finalized_state_root != block.state_root {
+                return Err(ConsensusValidationError::FinalityReceiptMismatch(
+                    "finalized state root does not match credited block".to_string(),
+                ));
+            }
+            if receipt.certificate.block_hash != block.block_hash
+                || receipt.certificate.state_root != block.state_root
+                || receipt.certificate.block_height != block.block_number
+            {
+                return Err(ConsensusValidationError::FinalityReceiptMismatch(
+                    "certificate does not cover credited block".to_string(),
+                ));
+            }
+            Ok(receipt)
+        }
+        _ => Err(ConsensusValidationError::DuplicateFinalityReceipt {
+            block_height: block.block_number,
+            block_hash: block.block_hash.clone(),
+        }),
+    }
+}
+
+pub fn validate_bridge_lifecycle_evidence(
+    state: &ChainState,
+    credit_id: &str,
+    transfer_id: &str,
+    require_finality: bool,
+) -> Result<BridgeLifecycleEvidence, ConsensusValidationError> {
+    let credit = state
+        .bridge_credits
+        .get(credit_id)
+        .ok_or_else(|| ConsensusValidationError::BridgeCreditMissing(credit_id.to_string()))?;
+    let credit_block = state
+        .blocks
+        .iter()
+        .find(|block| block.block_number == credit.credited_at_block)
+        .ok_or_else(|| {
+            ConsensusValidationError::BridgeSpendReferenceInvalid(
+                "credited block is missing".to_string(),
+            )
+        })?;
+    let credit_tx_id = bridge_credit_transaction_id(credit);
+    let credit_receipt_status =
+        block_receipt_status(credit_block, &credit_tx_id).ok_or_else(|| {
+            ConsensusValidationError::BridgeSpendReferenceInvalid(
+                "credited block does not include the credit transaction receipt".to_string(),
+            )
+        })?;
+    let block_hash_includes_credit_tx_and_receipt = credit_block.tx_ids.contains(&credit_tx_id)
+        && credit_receipt_status == "applied"
+        && calculate_block_hash(credit_block) == credit_block.block_hash;
+
+    if !block_hash_includes_credit_tx_and_receipt {
+        return Err(ConsensusValidationError::BridgeSpendReferenceInvalid(
+            "credited block hash does not commit to an applied credit receipt".to_string(),
+        ));
+    }
+
+    let state_root_before_credit = state
+        .blocks
+        .iter()
+        .filter(|block| block.block_number < credit_block.block_number)
+        .max_by_key(|block| block.block_number)
+        .map(|block| block.state_root.clone())
+        .unwrap_or_else(|| {
+            let genesis = genesis_state();
+            state_root(&genesis)
+        });
+    let state_root_changed_after_credit = state_root_before_credit != credit_block.state_root;
+    if !state_root_changed_after_credit {
+        return Err(ConsensusValidationError::BridgeSpendReferenceInvalid(
+            "bridge credit did not change the state root".to_string(),
+        ));
+    }
+
+    let finality_receipt = match finality_receipt_for_block(state, credit_block) {
+        Ok(receipt) => Some(receipt),
+        Err(_) if !require_finality => None,
+        Err(error) => return Err(error),
+    };
+
+    let transfer = state.balance_transfers.get(transfer_id).ok_or_else(|| {
+        ConsensusValidationError::BridgeSpendReferenceInvalid(
+            "transfer record is missing".to_string(),
+        )
+    })?;
+    let transfer_block = state
+        .blocks
+        .iter()
+        .find(|block| block.block_number == transfer.transferred_at_block)
+        .ok_or_else(|| {
+            ConsensusValidationError::BridgeSpendReferenceInvalid(
+                "transfer block is missing".to_string(),
+            )
+        })?;
+    if transfer_block.block_number <= credit_block.block_number {
+        return Err(ConsensusValidationError::BridgeSpendReferenceInvalid(
+            "bridge credit spend must occur after the credited block".to_string(),
+        ));
+    }
+    if transfer.from_account_id != credit.recipient_account_id {
+        return Err(ConsensusValidationError::BridgeSpendReferenceInvalid(
+            "transfer source does not match bridge credit recipient".to_string(),
+        ));
+    }
+    let finality_receipt_id = finality_receipt
+        .map(|receipt| receipt.finality_receipt_id.clone())
+        .unwrap_or_default();
+    let transfer_tx_id = bridge_spend_transaction_id(
+        transfer,
+        credit_id,
+        &finality_receipt_id,
+        &credit_block.block_hash,
+        &credit_block.state_root,
+    );
+    let transfer_receipt_status = block_receipt_status(transfer_block, &transfer_tx_id)
+        .ok_or_else(|| {
+            ConsensusValidationError::BridgeSpendReferenceInvalid(
+                "transfer block does not include the bridge spend receipt".to_string(),
+            )
+        })?;
+    let references_credit_id = transfer.memo.contains(credit_id);
+    let references_finality_receipt_id =
+        !finality_receipt_id.is_empty() && transfer.memo.contains(&finality_receipt_id);
+    let references_credited_state_root = transfer.memo.contains(&credit_block.state_root);
+    let spendable_under_finality_rule = finality_receipt.is_some()
+        && transfer_receipt_status == "applied"
+        && references_credit_id
+        && references_finality_receipt_id
+        && references_credited_state_root;
+
+    if require_finality && !spendable_under_finality_rule {
+        return Err(ConsensusValidationError::BridgeSpendReferenceInvalid(
+            "transfer does not reference the credited finalized state".to_string(),
+        ));
+    }
+
+    let finality = match finality_receipt {
+        Some(receipt) => BridgeCreditFinalityEvidence {
+            required: require_finality,
+            status: "finalized-private-pilot".to_string(),
+            finality_receipt_id: Some(receipt.finality_receipt_id.clone()),
+            finalized_height: receipt.finalized_height,
+            finalized_block_hash: receipt.finalized_block_hash.clone(),
+            finalized_state_root: receipt.finalized_state_root.clone(),
+            rule: receipt.finality_rule.clone(),
+            private_pilot: true,
+        },
+        None => BridgeCreditFinalityEvidence {
+            required: require_finality,
+            status: "unfinalized-private-pilot".to_string(),
+            finality_receipt_id: None,
+            finalized_height: 0,
+            finalized_block_hash: ZERO_HASH.to_string(),
+            finalized_state_root: ZERO_HASH.to_string(),
+            rule: state.consensus_state.finality_rule.clone(),
+            private_pilot: true,
+        },
+    };
+
+    let transfer_after_credit = BridgeSpendEvidence {
+        transfer_id: transfer_id.to_string(),
+        transfer_tx_id,
+        transfer_block_number: transfer_block.block_number,
+        transfer_block_hash: transfer_block.block_hash.clone(),
+        transfer_receipt_status,
+        references_credit_id,
+        references_finality_receipt_id,
+        references_credited_state_root,
+        spendable_under_finality_rule,
+    };
+
+    let evidence_id = hash_json(
+        "flowmemory.local_devnet.bridge_lifecycle_evidence_id.v0",
+        &serde_json::json!({
+            "creditId": credit_id,
+            "creditBlockHash": credit_block.block_hash,
+            "transferId": transfer_id,
+            "transferBlockHash": transfer_after_credit.transfer_block_hash,
+            "finalityReceiptId": finality.finality_receipt_id
+        }),
+    );
+
+    Ok(BridgeLifecycleEvidence {
+        schema: BRIDGE_LIFECYCLE_EVIDENCE_SCHEMA.to_string(),
+        evidence_id,
+        credit_id: credit_id.to_string(),
+        credit_tx_id,
+        credit_included_in_block: credit_block.block_number,
+        credit_block_hash: credit_block.block_hash.clone(),
+        credit_receipt_status,
+        block_hash_includes_credit_tx_and_receipt,
+        state_root_before_credit,
+        state_root_after_credit: credit_block.state_root.clone(),
+        state_root_changed_after_credit,
+        finality,
+        transfer_after_credit,
+        result: "accepted-private-pilot-finality".to_string(),
+    })
+}
+
+pub fn validate_chain(state: &ChainState) -> ConsensusValidationReport {
+    let mut errors = Vec::new();
+    let mut cursor = genesis_state();
+    cursor.validator_set = state.validator_set.clone();
+    cursor.authority_set = state.authority_set.clone();
+    cursor.consensus_state.finalized_height = 0;
+    cursor.consensus_state.finalized_hash = GENESIS_HASH.to_string();
+    cursor.consensus_state.finalized_state_root = state_root(&cursor);
+
+    for block in &state.blocks {
+        if let Err(error) = validate_block_header(&cursor, block) {
+            errors.push(error.to_string());
+        }
+        cursor.parent_hash = block.block_hash.clone();
+        cursor.next_block_number = block.block_number + 1;
+        cursor.logical_time = block.logical_time + 1;
+        cursor.blocks.push(block.clone());
+    }
+
+    if let Some(last) = state.blocks.last() {
+        let current_state_root = state_root(state);
+        if last.state_root != current_state_root {
+            errors.push(format!(
+                "latest block state root {} does not match current state root {}",
+                last.state_root, current_state_root
+            ));
+        }
+        if state.consensus_state.canonical_head_hash != last.block_hash {
+            errors.push(format!(
+                "canonical head {} does not match latest block {}",
+                state.consensus_state.canonical_head_hash, last.block_hash
+            ));
+        }
+    }
+    if state.consensus_state.finalized_height > state.consensus_state.canonical_height {
+        errors.push("finalized height exceeds canonical height".to_string());
+    }
+    let mut finality_targets = BTreeSet::new();
+    for receipt in state.chain_finality_receipts.values() {
+        let key = (
+            receipt.finalized_height,
+            receipt.finalized_block_hash.clone(),
+        );
+        if !finality_targets.insert(key) {
+            errors.push(format!(
+                "duplicate finality receipt for block {} hash {}",
+                receipt.finalized_height, receipt.finalized_block_hash
+            ));
+        }
+        match state.blocks.iter().find(|block| {
+            block.block_number == receipt.finalized_height
+                && block.block_hash == receipt.finalized_block_hash
+        }) {
+            Some(block) => {
+                if receipt.finalized_state_root != block.state_root {
+                    errors.push(format!(
+                        "finality receipt {} state root {} does not cover block state root {}",
+                        receipt.finality_receipt_id, receipt.finalized_state_root, block.state_root
+                    ));
+                }
+                if receipt.certificate.block_hash != block.block_hash
+                    || receipt.certificate.state_root != block.state_root
+                    || receipt.certificate.block_height != block.block_number
+                {
+                    errors.push(format!(
+                        "finality certificate {} does not cover block {}",
+                        receipt.certificate.certificate_id, block.block_hash
+                    ));
+                }
+            }
+            None => errors.push(format!(
+                "finality receipt {} points at unknown block {} hash {}",
+                receipt.finality_receipt_id, receipt.finalized_height, receipt.finalized_block_hash
+            )),
+        }
+    }
+    if let Some(latest_id) = &state.consensus_state.latest_finality_receipt_id
+        && !state.chain_finality_receipts.contains_key(latest_id)
+    {
+        errors.push(format!("latest finality receipt is missing: {latest_id}"));
+    }
+    ConsensusValidationReport {
+        schema: "flowmemory.local_devnet.consensus_validation_report.v0".to_string(),
+        valid: errors.is_empty(),
+        checked_blocks: state.blocks.len(),
+        canonical_head_hash: state.consensus_state.canonical_head_hash.clone(),
+        finalized_height: state.consensus_state.finalized_height,
+        finalized_hash: state.consensus_state.finalized_hash.clone(),
+        finalized_state_root: state.consensus_state.finalized_state_root.clone(),
+        consensus_state_root: consensus_state_root(state),
+        errors,
+    }
+}
+
+pub fn choose_canonical_fork(parent_state: &ChainState, candidates: &[Block]) -> ForkChoiceOutcome {
+    let mut valid = Vec::new();
+    let mut rejected = Vec::new();
+    for block in candidates {
+        match validate_block_header(parent_state, block) {
+            Ok(()) => valid.push(block.clone()),
+            Err(error) => rejected.push(fork_evidence(
+                "rejected-invalid-branch",
+                block,
+                &error.to_string(),
+                &parent_state.consensus_state.canonical_head_hash,
+                parent_state.logical_time,
+            )),
+        }
+    }
+    valid.sort_by(|left, right| {
+        right
+            .block_number
+            .cmp(&left.block_number)
+            .then_with(|| left.block_hash.cmp(&right.block_hash))
+    });
+    let canonical_head = valid.first().cloned();
+    if let Some(canonical) = &canonical_head {
+        for block in valid.iter().skip(1) {
+            rejected.push(fork_evidence(
+                "orphaned-valid-branch",
+                block,
+                "lower deterministic fork-choice score",
+                &canonical.block_hash,
+                parent_state.logical_time,
+            ));
+        }
+    }
+    ForkChoiceOutcome {
+        schema: "flowmemory.local_devnet.fork_choice_outcome.v0".to_string(),
+        canonical_head,
+        rejected,
+    }
+}
+
+pub fn record_fork_choice_evidence(state: &mut ChainState, outcome: &ForkChoiceOutcome) {
+    state.fork_evidence.extend(outcome.rejected.clone());
+}
+
+pub fn record_block_validation(
+    state: &mut ChainState,
+    block: &Block,
+) -> Result<(), ConsensusValidationError> {
+    match validate_block_header(state, block) {
+        Ok(()) => Ok(()),
+        Err(error) => {
+            let detail = error.to_string();
+            state.fork_evidence.push(fork_evidence(
+                "rejected-invalid-branch",
+                block,
+                &detail,
+                &state.consensus_state.canonical_head_hash,
+                state.logical_time,
+            ));
+            state.misbehavior_evidence.push(misbehavior_evidence(
+                misbehavior_kind(&error),
+                block,
+                &detail,
+                state.logical_time,
+            ));
+            Err(error)
+        }
+    }
+}
+
+pub fn record_block_proposal_validation(
+    state: &mut ChainState,
+    proposal: &BlockProposal,
+) -> Result<(), ConsensusValidationError> {
+    match validate_block_proposal(state, proposal) {
+        Ok(()) => Ok(()),
+        Err(error) => {
+            let detail = error.to_string();
+            state.fork_evidence.push(fork_evidence(
+                "rejected-invalid-branch",
+                &proposal.block,
+                &detail,
+                &state.consensus_state.canonical_head_hash,
+                state.logical_time,
+            ));
+            state.misbehavior_evidence.push(misbehavior_evidence(
+                misbehavior_kind(&error),
+                &proposal.block,
+                &detail,
+                state.logical_time,
+            ));
+            Err(error)
+        }
+    }
+}
+
+pub fn record_duplicate_proposal_evidence(state: &mut ChainState, first: &Block, second: &Block) {
+    if first.proposer_id == second.proposer_id
+        && first.block_number == second.block_number
+        && first.block_hash != second.block_hash
+    {
+        state.misbehavior_evidence.push(misbehavior_evidence(
+            "duplicate_proposal_same_height",
+            second,
+            &format!(
+                "proposer {} produced competing blocks {} and {} at height {}",
+                second.proposer_id, first.block_hash, second.block_hash, second.block_number
+            ),
+            state.logical_time,
+        ));
+    }
+}
+
+fn fork_evidence(
+    kind: &str,
+    block: &Block,
+    reason: &str,
+    canonical_head_hash: &str,
+    observed_at_logical_time: u64,
+) -> ForkEvidence {
+    let evidence_id = hash_json(
+        "flowmemory.local_devnet.fork_evidence_id.v0",
+        &serde_json::json!({
+            "kind": kind,
+            "blockHash": block.block_hash,
+            "reason": reason,
+            "canonicalHeadHash": canonical_head_hash
+        }),
+    );
+    ForkEvidence {
+        schema: FORK_EVIDENCE_SCHEMA.to_string(),
+        evidence_id,
+        kind: kind.to_string(),
+        block_hash: block.block_hash.clone(),
+        block_height: block.block_number,
+        parent_hash: block.parent_hash.clone(),
+        reason: reason.to_string(),
+        canonical_head_hash: canonical_head_hash.to_string(),
+        observed_at_logical_time,
+    }
+}
+
+fn misbehavior_kind(error: &ConsensusValidationError) -> &'static str {
+    match error {
+        ConsensusValidationError::WrongChainId { .. } => "wrong_chain_id",
+        ConsensusValidationError::WrongGenesisHash { .. } => "wrong_genesis_hash",
+        ConsensusValidationError::InvalidParent { .. } => "invalid_parent",
+        ConsensusValidationError::InvalidProposer(_) => "invalid_proposer",
+        ConsensusValidationError::RootMismatch { root_name, .. } if root_name == "stateRoot" => {
+            "invalid_state_root"
+        }
+        ConsensusValidationError::RootMismatch { .. } => "invalid_root",
+        ConsensusValidationError::DuplicateTransaction(_) => "duplicate_transaction",
+        ConsensusValidationError::FinalizedConflict { .. } => "finalized_conflict",
+        _ => "invalid_block",
+    }
+}
+
+fn misbehavior_evidence(
+    kind: &str,
+    block: &Block,
+    detail: &str,
+    observed_at_logical_time: u64,
+) -> MisbehaviorEvidence {
+    let evidence_id = hash_json(
+        "flowmemory.local_devnet.misbehavior_evidence_id.v0",
+        &serde_json::json!({
+            "kind": kind,
+            "blockHash": block.block_hash,
+            "blockHeight": block.block_number,
+            "proposerId": block.proposer_id,
+            "detail": detail
+        }),
+    );
+    MisbehaviorEvidence {
+        schema: MISBEHAVIOR_EVIDENCE_SCHEMA.to_string(),
+        evidence_id,
+        kind: kind.to_string(),
+        block_hash: block.block_hash.clone(),
+        block_height: block.block_number,
+        proposer_id: block.proposer_id.clone(),
+        detail: detail.to_string(),
+        observed_at_logical_time,
+    }
+}
+
+fn apply_local_test_unit_transfer(
+    state: &mut ChainState,
+    transfer_id: &str,
+    from_account_id: &str,
+    to_account_id: &str,
+    amount_units: u64,
+    memo: &str,
+) -> Result<(), DevnetError> {
+    if state.balance_transfers.contains_key(transfer_id) {
+        return Err(DevnetError::BalanceTransferAlreadyExists(
+            transfer_id.to_string(),
+        ));
+    }
+    if amount_units == 0 {
+        return Err(DevnetError::FaucetAmountMustBePositive(
+            transfer_id.to_string(),
+        ));
+    }
+
+    let from_balance = state
+        .local_test_unit_balances
+        .get(from_account_id)
+        .ok_or_else(|| DevnetError::LocalTestUnitBalanceMissing(from_account_id.to_string()))?;
+    if from_balance.units < amount_units {
+        return Err(DevnetError::LocalTestUnitBalanceInsufficient(
+            from_account_id.to_string(),
+        ));
+    }
+
+    {
+        let from_balance = state
+            .local_test_unit_balances
+            .get_mut(from_account_id)
+            .expect("source local test-unit balance was checked above");
+        from_balance.units -= amount_units;
+        from_balance.updated_at_block = state.next_block_number;
+    }
+
+    let to_balance = state
+        .local_test_unit_balances
+        .get_mut(to_account_id)
+        .ok_or_else(|| DevnetError::LocalTestUnitBalanceMissing(to_account_id.to_string()))?;
+    to_balance.units = to_balance
+        .units
+        .checked_add(amount_units)
+        .ok_or_else(|| DevnetError::LocalTestUnitBalanceOverflow(to_account_id.to_string()))?;
+    to_balance.updated_at_block = state.next_block_number;
+
+    state.balance_transfers.insert(
+        transfer_id.to_string(),
+        BalanceTransfer {
+            transfer_id: transfer_id.to_string(),
+            from_account_id: from_account_id.to_string(),
+            to_account_id: to_account_id.to_string(),
+            amount_units,
+            memo: memo.to_string(),
+            transferred_at_block: state.next_block_number,
+            no_value: true,
+        },
+    );
+    Ok(())
+}
+
+fn ensure_bridge_credit_spendable(
+    state: &ChainState,
+    credit_id: &str,
+    finality_receipt_id: &str,
+    credited_block_hash: &str,
+    credited_state_root: &str,
+    from_account_id: &str,
+    amount_units: u64,
+) -> Result<(), DevnetError> {
+    let credit = state
+        .bridge_credits
+        .get(credit_id)
+        .ok_or_else(|| DevnetError::BridgeCreditMissing(credit_id.to_string()))?;
+    if credit.recipient_account_id != from_account_id {
+        return Err(DevnetError::BridgeSpendReferenceInvalid(
+            "bridge credit recipient does not match spend source".to_string(),
+        ));
+    }
+    if amount_units > credit.amount_units {
+        return Err(DevnetError::BridgeSpendReferenceInvalid(
+            "bridge spend exceeds credited amount".to_string(),
+        ));
+    }
+    let receipt = state
+        .chain_finality_receipts
+        .get(finality_receipt_id)
+        .ok_or_else(|| {
+            DevnetError::BridgeFinalityReceiptMissing(finality_receipt_id.to_string())
+        })?;
+    if receipt.finalized_height < credit.credited_at_block
+        || receipt.finalized_block_hash != credited_block_hash
+        || receipt.finalized_state_root != credited_state_root
+    {
+        return Err(DevnetError::BridgeCreditNotFinal(credit_id.to_string()));
+    }
+    if !matches!(
+        receipt.finality_rule.to_ascii_lowercase().as_str(),
+        rule if rule.contains("finalizes") || rule.contains("finality")
+    ) {
+        return Err(DevnetError::BridgeCreditNotFinal(credit_id.to_string()));
+    }
+    Ok(())
 }
 
 pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(), DevnetError> {
@@ -1373,56 +3044,14 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
             amount_units,
             memo,
         } => {
-            if state.balance_transfers.contains_key(transfer_id) {
-                return Err(DevnetError::BalanceTransferAlreadyExists(
-                    transfer_id.clone(),
-                ));
-            }
-            if *amount_units == 0 {
-                return Err(DevnetError::FaucetAmountMustBePositive(transfer_id.clone()));
-            }
-
-            let from_balance = state
-                .local_test_unit_balances
-                .get(from_account_id)
-                .ok_or_else(|| DevnetError::LocalTestUnitBalanceMissing(from_account_id.clone()))?;
-            if from_balance.units < *amount_units {
-                return Err(DevnetError::LocalTestUnitBalanceInsufficient(
-                    from_account_id.clone(),
-                ));
-            }
-
-            {
-                let from_balance = state
-                    .local_test_unit_balances
-                    .get_mut(from_account_id)
-                    .expect("source local test-unit balance was checked above");
-                from_balance.units -= *amount_units;
-                from_balance.updated_at_block = state.next_block_number;
-            }
-
-            let to_balance = state
-                .local_test_unit_balances
-                .get_mut(to_account_id)
-                .ok_or_else(|| DevnetError::LocalTestUnitBalanceMissing(to_account_id.clone()))?;
-            to_balance.units = to_balance
-                .units
-                .checked_add(*amount_units)
-                .ok_or_else(|| DevnetError::LocalTestUnitBalanceOverflow(to_account_id.clone()))?;
-            to_balance.updated_at_block = state.next_block_number;
-
-            state.balance_transfers.insert(
-                transfer_id.clone(),
-                BalanceTransfer {
-                    transfer_id: transfer_id.clone(),
-                    from_account_id: from_account_id.clone(),
-                    to_account_id: to_account_id.clone(),
-                    amount_units: *amount_units,
-                    memo: memo.clone(),
-                    transferred_at_block: state.next_block_number,
-                    no_value: true,
-                },
-            );
+            apply_local_test_unit_transfer(
+                state,
+                transfer_id,
+                from_account_id,
+                to_account_id,
+                *amount_units,
+                memo,
+            )?;
         }
         Transaction::LaunchToken {
             token_id,
@@ -2280,6 +3909,141 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
                 return Err(DevnetError::AnchorAlreadyExists(anchor.anchor_id));
             }
             state.base_anchors.insert(anchor.anchor_id.clone(), anchor);
+        }
+        Transaction::RecordBridgeReplayKey {
+            replay_key,
+            source_chain_id,
+            source_tx_hash,
+            source_log_index,
+            local_object_id,
+        } => {
+            if state.bridge_replay_keys.contains_key(replay_key) {
+                return Err(DevnetError::BridgeReplayKeyAlreadyUsed(replay_key.clone()));
+            }
+            state.bridge_replay_keys.insert(
+                replay_key.clone(),
+                BridgeReplayKeyRecord {
+                    schema: BRIDGE_REPLAY_KEY_SCHEMA.to_string(),
+                    replay_key: replay_key.clone(),
+                    source_chain_id: source_chain_id.clone(),
+                    source_tx_hash: source_tx_hash.clone(),
+                    source_log_index: source_log_index.clone(),
+                    local_object_id: local_object_id.clone(),
+                    status: "accepted-replay-guard".to_string(),
+                    first_seen_block: state.next_block_number,
+                    finalized_at_height: None,
+                },
+            );
+        }
+        Transaction::ApplyBridgeCredit {
+            credit_id,
+            replay_key,
+            source_chain_id,
+            source_tx_hash,
+            source_log_index,
+            recipient_account_id,
+            amount_units,
+            evidence_hash,
+        } => {
+            if *amount_units == 0 {
+                return Err(DevnetError::BridgeCreditAmountMustBePositive(
+                    credit_id.clone(),
+                ));
+            }
+            if state.bridge_credits.contains_key(credit_id) {
+                return Err(DevnetError::BridgeCreditAlreadyExists(credit_id.clone()));
+            }
+            if state.bridge_replay_keys.contains_key(replay_key) {
+                return Err(DevnetError::BridgeReplayKeyAlreadyUsed(replay_key.clone()));
+            }
+            let credited_at_block = state.next_block_number;
+            let balance = state
+                .local_test_unit_balances
+                .entry(recipient_account_id.clone())
+                .or_insert_with(|| LocalTestUnitBalance {
+                    account_id: recipient_account_id.clone(),
+                    owner: "bridge-credit-recipient".to_string(),
+                    units: 0,
+                    total_faucet_units: 0,
+                    last_faucet_record_id: None,
+                    updated_at_block: credited_at_block,
+                    no_value: true,
+                });
+            balance.units = balance.units.checked_add(*amount_units).ok_or_else(|| {
+                DevnetError::LocalTestUnitBalanceOverflow(recipient_account_id.clone())
+            })?;
+            balance.updated_at_block = credited_at_block;
+            state.bridge_replay_keys.insert(
+                replay_key.clone(),
+                BridgeReplayKeyRecord {
+                    schema: BRIDGE_REPLAY_KEY_SCHEMA.to_string(),
+                    replay_key: replay_key.clone(),
+                    source_chain_id: source_chain_id.clone(),
+                    source_tx_hash: source_tx_hash.clone(),
+                    source_log_index: source_log_index.clone(),
+                    local_object_id: credit_id.clone(),
+                    status: "accepted-in-block-awaits-finality-check".to_string(),
+                    first_seen_block: credited_at_block,
+                    finalized_at_height: None,
+                },
+            );
+            state.bridge_credits.insert(
+                credit_id.clone(),
+                BridgeCreditRecord {
+                    schema: BRIDGE_CREDIT_SCHEMA.to_string(),
+                    credit_id: credit_id.clone(),
+                    replay_key: replay_key.clone(),
+                    source_chain_id: source_chain_id.clone(),
+                    source_tx_hash: source_tx_hash.clone(),
+                    source_log_index: source_log_index.clone(),
+                    recipient_account_id: recipient_account_id.clone(),
+                    amount_units: *amount_units,
+                    evidence_hash: evidence_hash.clone(),
+                    credited_at_block,
+                    status: "accepted-in-block-not-public-final".to_string(),
+                    finality_required: true,
+                    local_only: true,
+                    production_ready: false,
+                },
+            );
+        }
+        Transaction::SpendBridgeCreditLocalTestUnits {
+            transfer_id,
+            credit_id,
+            finality_receipt_id,
+            credited_block_hash,
+            credited_state_root,
+            from_account_id,
+            to_account_id,
+            amount_units,
+            memo,
+        } => {
+            ensure_bridge_credit_spendable(
+                state,
+                credit_id,
+                finality_receipt_id,
+                credited_block_hash,
+                credited_state_root,
+                from_account_id,
+                *amount_units,
+            )?;
+            if !memo.contains(credit_id)
+                || !memo.contains(finality_receipt_id)
+                || !memo.contains(credited_state_root)
+            {
+                return Err(DevnetError::BridgeSpendReferenceInvalid(
+                    "memo must reference credit id, finality receipt id, and credited state root"
+                        .to_string(),
+                ));
+            }
+            apply_local_test_unit_transfer(
+                state,
+                transfer_id,
+                from_account_id,
+                to_account_id,
+                *amount_units,
+                memo,
+            )?;
         }
         Transaction::ImportFlowPulseObservation(observation) => {
             if observation.event_signature.to_lowercase() != FLOWPULSE_TOPIC0 {
