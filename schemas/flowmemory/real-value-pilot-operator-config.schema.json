@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowmemory.local/schemas/flowmemory/real-value-pilot-operator-config.schema.json",
+  "title": "FlowChain Capped Real-Value Pilot Operator Config",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "pilotId",
+    "createdAtUnixMs",
+    "chainId",
+    "contractAddress",
+    "operatorId",
+    "pilotCap",
+    "runtimeInputs",
+    "localPaths",
+    "nextCommands",
+    "productionReady"
+  ],
+  "properties": {
+    "schema": { "const": "flowchain.real_value_pilot.operator_config.v0" },
+    "pilotId": { "$ref": "#/$defs/hex32" },
+    "createdAtUnixMs": { "$ref": "#/$defs/uintString" },
+    "chainId": { "type": "integer", "enum": [31337, 84532, 8453] },
+    "contractAddress": { "$ref": "#/$defs/address" },
+    "operatorId": { "$ref": "#/$defs/hex32" },
+    "pilotCap": { "$ref": "#/$defs/pilotCap" },
+    "runtimeInputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["networkAccess", "signingMaterial", "bridgeRelayer"],
+      "properties": {
+        "networkAccess": { "const": "env-only" },
+        "signingMaterial": { "const": "local-vault-only" },
+        "bridgeRelayer": { "const": "explicit-chain-contract-block-range" }
+      }
+    },
+    "localPaths": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["configPath", "vaultPath", "publicMetadataPath"],
+      "properties": {
+        "configPath": { "type": "string", "minLength": 1 },
+        "vaultPath": { "type": "string", "minLength": 1 },
+        "publicMetadataPath": { "type": "string", "minLength": 1 }
+      }
+    },
+    "nextCommands": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 5
+    },
+    "productionReady": { "const": false }
+  },
+  "$defs": {
+    "address": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "uintString": { "type": "string", "pattern": "^[0-9]+$" },
+    "pilotCap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capId",
+        "assetId",
+        "maxAmount",
+        "usedAmount",
+        "unit",
+        "windowStartsAtUnixMs",
+        "windowEndsAtUnixMs",
+        "realValuePilot",
+        "productionReady"
+      ],
+      "properties": {
+        "capId": { "$ref": "#/$defs/hex32" },
+        "assetId": { "$ref": "#/$defs/hex32" },
+        "maxAmount": { "$ref": "#/$defs/uintString" },
+        "usedAmount": { "$ref": "#/$defs/uintString" },
+        "unit": { "type": "string", "minLength": 1 },
+        "windowStartsAtUnixMs": { "$ref": "#/$defs/uintString" },
+        "windowEndsAtUnixMs": { "$ref": "#/$defs/uintString" },
+        "realValuePilot": { "const": true },
+        "productionReady": { "const": false }
+      }
+    }
+  }
+}
