@@ -24,17 +24,17 @@ Last updated: 2026-05-14.
 
 ## Gate Blocker Rows
 
-- [ ] Contracts: chain ID `8453`, lockbox config, caps, allowlist, pause,
+- [ ] Contracts (#133): chain ID `8453`, lockbox config, caps, allowlist, pause,
   release/recovery, replay protections, dry-run deploy, and source instructions.
-- [ ] Bridge relayer: Base observation, confirmation depth, deterministic credit,
+- [ ] Bridge relayer (#138): Base observation, confirmation depth, deterministic credit,
   duplicate handling, local handoff, withdrawal/release evidence.
-- [ ] Runtime: apply pilot credit exactly once, receipt lookup, restart,
+- [ ] Runtime (#134): apply pilot credit exactly once, receipt lookup, restart,
   export/import, deterministic roots.
-- [ ] Wallet/operator: no-secret config, pilot message signing, negative vectors,
+- [ ] Wallet/operator (#136): no-secret config, pilot message signing, negative vectors,
   public metadata export, next-command UX.
-- [ ] Control plane/dashboard: pilot API, redaction, owner labels, live/degraded
+- [ ] Control plane/dashboard (#137): pilot API, redaction, owner labels, live/degraded
   state, next operator commands, browser no-secret boundary.
-- [ ] Ops/installer: env validation, tiny cap checks, explicit owner ack,
+- [ ] Ops/installer (#135): env validation, tiny cap checks, explicit owner ack,
   emergency stop, evidence export, restart recovery, troubleshooting.
 
 These remain unchecked because they are not merged into `main` as dedicated

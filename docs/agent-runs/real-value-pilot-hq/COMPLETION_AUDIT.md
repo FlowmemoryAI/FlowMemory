@@ -112,13 +112,9 @@ truth until the work lands in reviewed PRs and merges to `main`.
 - GitHub issue #131 is still open. This branch contains a policy fix and local
   product/L1 E2E now passes, but `main` is unchanged until PR #132 merges.
 - `flowchain:real-value-pilot:e2e` does not pass without `-AllowIncomplete`.
-- Dedicated subsystem proof commands do not exist yet:
-  `flowchain:real-value-pilot:contracts`,
-  `flowchain:real-value-pilot:bridge`,
-  `flowchain:real-value-pilot:runtime`,
-  `flowchain:real-value-pilot:wallet`,
-  `flowchain:real-value-pilot:control-dashboard`, and
-  `flowchain:real-value-pilot:ops`.
+- Dedicated subsystem proof commands do not exist yet and are tracked by:
+  contracts issue #133, bridge issue #138, runtime issue #134, wallet issue
+  #136, control-dashboard issue #137, and ops issue #135.
 - `flowchain:l1-e2e` is only a branch alias to `flowchain:full-smoke` in this
   HQ PR; it is not on `main`. It now passes locally after the branch static-
   analysis policy update.
@@ -133,6 +129,7 @@ truth until the work lands in reviewed PRs and merges to `main`.
    contracts-owned fix if the owner chooses to require Slither findings in the
    default gate.
 4. Merge or rebase the richer ops `flowchain:l1-e2e` wrapper when ready.
-5. Have each subsystem agent add its dedicated pilot proof command.
+5. Have each subsystem agent close its dedicated pilot proof issue:
+   #133, #138, #134, #136, #137, and #135.
 6. Rerun `npm run flowchain:real-value-pilot:e2e` without
    `-AllowIncomplete` only after all dedicated proof commands exist.

@@ -140,18 +140,31 @@ in committed files, or if any document presents the pilot as public readiness.
 
 ## Current Blockers
 
-- Dedicated real-value contracts gate does not exist.
-- Dedicated real-value bridge relayer gate does not exist.
-- Dedicated real-value runtime gate does not exist.
-- Dedicated real-value wallet/operator gate does not exist.
-- Dedicated real-value control-plane/dashboard gate does not exist.
-- Dedicated real-value ops/installer gate does not exist.
+- Dedicated real-value contracts gate does not exist; tracked by issue #133.
+- Dedicated real-value bridge relayer gate does not exist; tracked by issue #138.
+- Dedicated real-value runtime gate does not exist; tracked by issue #134.
+- Dedicated real-value wallet/operator gate does not exist; tracked by issue #136.
+- Dedicated real-value control-plane/dashboard gate does not exist; tracked by issue #137.
+- Dedicated real-value ops/installer gate does not exist; tracked by issue #135.
 - GitHub issue #130 must define and be accepted as the release-gate boundary before
   any owner pilot work is treated as more than capped validation.
 - GitHub issue #131 has a branch-local policy fix in this HQ PR: default
   `contracts:hardening` skips optional Slither unless the audit gate is
   explicitly requested. The issue remains open until the fix is reviewed and
   merged.
+
+## Tracking Issues
+
+| Area | Issue | Required command |
+| --- | --- | --- |
+| Contracts | #133 | `npm run flowchain:real-value-pilot:contracts` |
+| Bridge relayer | #138 | `npm run flowchain:real-value-pilot:bridge` |
+| Chain runtime | #134 | `npm run flowchain:real-value-pilot:runtime` |
+| Wallet/operator | #136 | `npm run flowchain:real-value-pilot:wallet` |
+| Control plane/dashboard | #137 | `npm run flowchain:real-value-pilot:control-dashboard` |
+| Ops/installer | #135 | `npm run flowchain:real-value-pilot:ops` |
+| Release-gate boundary | #130 | `npm run flowchain:real-value-pilot:e2e -- -AllowIncomplete` until proofs land |
+| Static-analysis policy | #131 | `npm run contracts:hardening`; `npm run contracts:hardening:slither` |
 
 ## Required PR Evidence
 

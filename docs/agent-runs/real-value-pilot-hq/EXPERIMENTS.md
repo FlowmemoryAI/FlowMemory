@@ -43,6 +43,8 @@ Last updated: 2026-05-14.
 | `npm run flowchain:l1-e2e` | Passed | Current alias to `flowchain-full-smoke.ps1` passed and wrote `devnet/local/full-smoke/flowchain-full-smoke-report.json`. |
 | Post static-analysis docs checks | Passed | `node infra/scripts/check-unsafe-claims.mjs`, `git diff --check`, and `npm run flowchain:real-value-pilot:e2e -- -AllowIncomplete` passed after recording the static-analysis policy evidence. |
 | Post release-boundary docs checks | Passed | `node infra/scripts/check-unsafe-claims.mjs`, `git diff --check`, and `npm run flowchain:real-value-pilot:e2e -- -AllowIncomplete` passed after adding the issue #130 release-gate boundary. |
+| `gh issue create ...` for subsystem proof commands | Passed | Created contracts #133, runtime #134, ops #135, wallet #136, control-dashboard #137, and bridge #138. |
+| Post subsystem-issue mapping checks | Passed | `node infra/scripts/check-unsafe-claims.mjs`, `git diff --check`, and `npm run flowchain:real-value-pilot:e2e -- -AllowIncomplete` passed after mapping #133 through #138 into HQ docs. |
 
 ## Static Analysis Policy Update
 

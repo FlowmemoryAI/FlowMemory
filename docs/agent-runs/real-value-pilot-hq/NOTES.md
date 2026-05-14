@@ -17,6 +17,8 @@ Last updated: 2026-05-14.
   release-gate boundary for observer reads, deposits, release/recovery, local
   credit application, dashboard display, and explicitly out-of-scope public
   readiness claims.
+- Missing subsystem proof commands are now tracked by GitHub issues #133
+  through #138.
 - Issue #131 is the active contracts/static-analysis issue for reconciling
   local Slither findings that block product and L1 E2E evidence.
 - PR #132 now includes an allowed `infra/scripts/` fix for #131: the default
