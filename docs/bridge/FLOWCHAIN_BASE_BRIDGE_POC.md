@@ -1,165 +1,51 @@
 # FlowChain Base Bridge POC
 
-Status: test-only bridge lane for local and Base Sepolia validation.
+Status: capped owner pilot path for mock/local validation and guarded Base chain ID `8453` testing.
 
-This bridge POC is designed so a small canary can be reviewed later without
-claiming production bridge readiness. It is not audited, not trustless, not a
-public bridge, and not approved for broad mainnet use.
+This bridge lane is intentionally small and gated. It is not a public bridge, not a broad mainnet bridge, not audited, and not approved for unrestricted deposits.
 
 ## What Exists
 
-- `contracts/bridge/BaseBridgeLockbox.sol`: non-upgradeable lockbox with owner,
-  explicit test release authority, pause, allowlisted tokens, per-deposit caps,
-  total caps, deposit records, replay guards, deposit events, and release hooks.
-- `contracts/FlowChainSettlementSpine.sol`: compact local/test event spine for
-  bridge and FlowChain object commitments.
-- `tests/bridge/BaseBridgeLockbox.t.sol`: Foundry coverage for token
-  allowlisting, ERC-20 deposits, native deposits, caps, pause behavior,
-  ownership, release, and replay protection.
-- `tests/FlowChainSettlementSpine.t.sol`: Foundry coverage for authorized object
-  commitments and stable settlement event shape.
-- `services/bridge-relayer/`: fixture-first and RPC-range observer that
-  converts explicit bridge deposit records into FlowChain bridge observation,
-  credit, withdrawal-intent, and runtime handoff JSON.
-- `fixtures/bridge/base-sepolia-mock-deposit.json`: deterministic test deposit.
-- `fixtures/bridge/local-runtime-bridge-handoff.json`: deterministic local
-  bridge handoff consumed by the runtime/control-plane until direct intake is
-  enabled.
-- `schemas/flowmemory/bridge-*.schema.json`: bridge deposit, observation,
-  credit, withdrawal-intent, and runtime handoff contracts.
-- `infra/scripts/bridge-base-sepolia-observe.ps1`: env-friendly Base Sepolia
-  observation wrapper that requires no private key.
-- `infra/scripts/bridge-base-sepolia-smoke.ps1`: guarded Base Sepolia smoke.
-- `infra/scripts/bridge-local-anvil-observe.ps1`: local Anvil observation
-  wrapper for chain id `31337`.
-- `infra/scripts/bridge-base-mainnet-canary-read.ps1`: disabled-by-default
-  Base mainnet canary read wrapper.
+- `contracts/bridge/BaseBridgeLockbox.sol`: non-upgradeable owner-controlled lockbox with native ETH and ERC20 custody paths, allowlist, per-deposit cap, cumulative total pilot cap, pause, emergency stop, deposit nonce accounting, release authority, and release replay protection.
+- `tests/bridge/BaseBridgeLockbox.t.sol`: Foundry coverage for deposits, caps, pause, emergency stop, allowlist, wrong authority, release, replay, and zero-value failures.
+- `services/bridge-relayer/src/observe-base-lockbox.ts`: fixture/RPC observer, deterministic evidence builder, local credit applier, withdrawal intent generator, and release evidence writer.
+- `services/bridge-relayer/src/base8453-relay-monitor.ts`: low-latency Base `8453` relay with 12-confirmation eligibility, 5-second default polling, durable checkpoint, bounded recovery window, status/report output, and local FlowChain node intake.
+- `services/bridge-relayer/src/base8453-tx-diagnostic.ts`: transaction hash diagnostic for receipt status, approved lockbox recipient, `lockNative(bytes32,bytes32)` selector `0x1326d1ec`, BridgeDeposit presence, direct ETH sends, reverts, wrong-contract calls, and cap failures.
+- `services/bridge-relayer/src/bridge-pilot-e2e.ts`: no-RPC mock pilot E2E for observe, credit, replay, local usage handoff, withdrawal intent, and release evidence.
+- `services/bridge-relayer/src/bridge-live-readiness-check.ts`: fail-closed live gate self-test.
+- `infra/scripts/bridge-base8453-deploy.ps1`: dry-run and guarded broadcast deployment wrapper.
+- `infra/scripts/bridge-base-mainnet-pilot-observe.ps1`: Base `8453` observation wrapper with chain, cap, confirmation, range, and acknowledgement gates.
+- `infra/scripts/bridge-base8453-control.ps1`: pause, resume, and emergency stop wrapper.
+- `infra/scripts/bridge-evidence-export.ps1`: secret-free bridge evidence bundle export.
+- `fixtures/bridge/base8453-pilot-mock-deposit.json`: deterministic Base `8453` pilot deposit fixture.
+- `schemas/flowmemory/bridge-*.schema.json`: bridge deposit, observation, credit, credit application, pilot evidence, withdrawal intent, withdrawal authorization, release evidence, local usage, and runtime handoff schemas.
+
+## Asset Decision
+
+The lockbox supports both native Base ETH and ERC20 assets. The owner pilot activates one configured asset:
+
+- zero address in `FLOWCHAIN_BASE8453_SUPPORTED_TOKEN` means native ETH
+- nonzero address in `FLOWCHAIN_BASE8453_SUPPORTED_TOKEN` means that ERC20
+
+The relayer refuses tokens not configured by `FLOWCHAIN_BASE8453_SUPPORTED_TOKEN`.
 
 ## Architecture
 
 ```text
-Base Sepolia user/test wallet
-  -> BaseBridgeLockbox.lockERC20 or lockNative
-  -> BridgeDeposit event and DepositRecord state
-  -> bridge-relayer explicit reader/mock observer
+Base 8453 owner wallet
+  -> BaseBridgeLockbox.lockNative or lockERC20
+  -> BridgeDeposit event
+  -> low-latency guarded bridge relay
   -> BridgeObservation with replay key
-  -> BridgeCredit pending/applied local object
-  -> optional FlowChainSettlementSpine.commitObject bridge-deposit commitment
-  -> local runtime/control-plane/workbench handoff
+  -> BridgeCredit
+  -> local exactly-once credit application state
+  -> running FlowChain local node intake for newly applied credits
+  -> local usage handoff and product gate
+  -> withdrawal intent
+  -> release evidence for operator review
 ```
 
-The POC does not mint production assets on FlowChain. Local acceptance is a
-fixture/control-plane event until the private/local runtime explicitly consumes
-bridge deposit objects.
-
-The handoff includes a workbench-ready timeline:
-
-```text
-deposit observed -> credit pending -> credit applied -> withdrawal requested
-```
-
-Until live bridge intake is enabled, `fixtures/bridge/local-runtime-bridge-handoff.json`
-is the exact file for the runtime/control-plane to consume.
-
-## Risk Model
-
-- Base mainnet uses real funds. Mainnet canary reads require
-  `--acknowledge-real-funds` and `--max-usd 25` or lower.
-- The lockbox owner can configure tokens, caps, pause state, and the explicit
-  release authority. Only the release authority can call release hooks. That is
-  a test operator model, not a decentralized bridge model.
-- The relayer reads explicit chains, contracts, and block ranges. It must not
-  broad-scan Base mainnet.
-- No secrets, RPC keys, private keys, or seed phrases should be committed.
-- Bridge observations are advisory local objects until the FlowChain runtime
-  verifies and accepts them.
-
-## Local Mock
-
-```powershell
-npm install
-npm run bridge:mock
-npm run bridge:test
-npm run bridge:local-credit:smoke
-```
-
-Expected output:
-
-```text
-services/bridge-relayer/out/bridge-observation.json
-services/bridge-relayer/out/bridge-credit.json
-services/bridge-relayer/out/bridge-runtime-handoff.json
-fixtures/bridge/local-runtime-bridge-handoff.json
-```
-
-## Base Sepolia Smoke
-
-Deploy the lockbox with Foundry or a deployment script, then run:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base-sepolia-smoke.ps1 `
-  -RpcUrl <base-sepolia-rpc-url> `
-  -LockboxAddress <deployed-lockbox> `
-  -FromBlock <from> `
-  -ToBlock <to>
-```
-
-The script checks Base Sepolia chain id `84532`, requires an explicit lockbox,
-requires an explicit block range, and writes local observation output.
-
-The root package also exposes an env-var smoke path that does not require a
-private key:
-
-```powershell
-$env:BASE_SEPOLIA_RPC_URL="<base-sepolia-rpc-url>"
-$env:BASE_BRIDGE_LOCKBOX_ADDRESS="<deployed-lockbox>"
-$env:BASE_BRIDGE_FROM_BLOCK="<from>"
-$env:BASE_BRIDGE_TO_BLOCK="<to>"
-npm run bridge:sepolia:observe
-```
-
-This command reads only `BridgeDeposit` logs from the explicit lockbox and
-range, then writes observation, credit, and handoff JSON under
-`services/bridge-relayer/out/`.
-
-## Local Anvil Observation
-
-Local Anvil is supported as a mock Base event lane with chain id `31337`.
-Deploy `BaseBridgeLockbox`, emit one or more deposits, then run:
-
-```powershell
-$env:ANVIL_BRIDGE_LOCKBOX_ADDRESS="<deployed-lockbox>"
-$env:ANVIL_BRIDGE_FROM_BLOCK="<from>"
-$env:ANVIL_BRIDGE_TO_BLOCK="<to>"
-npm run bridge:anvil:observe
-```
-
-Use `-RpcUrl` or `ANVIL_RPC_URL` if the Anvil endpoint is not
-`http://127.0.0.1:8545`.
-
-## Foundry Deploy Script
-
-The contract-side bridge spine has a dry-run-by-default Foundry script:
-
-```powershell
-$env:FLOWCHAIN_BRIDGE_OWNER = "0x..."
-$env:FLOWCHAIN_BRIDGE_RELEASE_AUTHORITY = "0x..."
-$env:FLOWCHAIN_SETTLEMENT_SUBMITTER = "0x..."
-$env:FLOWCHAIN_BRIDGE_ALLOW_NATIVE = "true"
-$env:FLOWCHAIN_BRIDGE_NATIVE_PER_DEPOSIT_CAP = "100000000000000000"
-$env:FLOWCHAIN_BRIDGE_NATIVE_TOTAL_CAP = "1000000000000000000"
-$env:FLOWCHAIN_BRIDGE_ALLOW_ERC20 = "false"
-$env:FLOWCHAIN_BRIDGE_ERC20_TOKEN = "0x0000000000000000000000000000000000000000"
-$env:FLOWCHAIN_BRIDGE_ERC20_PER_DEPOSIT_CAP = "0"
-$env:FLOWCHAIN_BRIDGE_ERC20_TOTAL_CAP = "0"
-
-forge script script/DeployBridgeSpine.s.sol:DeployBridgeSpine `
-  --rpc-url http://127.0.0.1:8545
-```
-
-For Base Sepolia dry-run, use `--rpc-url $env:BASE_SEPOLIA_RPC_URL`. Add
-`--broadcast` only after the environment values are explicit and the owner key
-is intentionally supplied to Foundry. Do not commit RPC URLs or private keys.
+Local credit evidence is JSON state and runtime handoff data until the private/local FlowChain runtime consumes bridge objects directly.
 
 ## Contract Event Schema
 
@@ -170,102 +56,113 @@ event BridgeDeposit(
     bytes32 indexed depositId,
     uint256 indexed sourceChainId,
     address indexed sender,
+    address lockbox,
     address token,
     uint256 amount,
     bytes32 flowchainRecipient,
     uint256 nonce,
-    bytes32 metadataHash
+    bytes32 metadataHash,
+    bytes32 pilotModeTag
 );
 ```
 
-`depositId` is:
+`depositId` includes:
 
 ```text
-keccak256(abi.encode(
-  BRIDGE_DEPOSIT_SCHEMA_ID,
-  block.chainid,
-  lockboxAddress,
-  sender,
-  token,
-  amount,
-  flowchainRecipient,
-  nonce,
-  metadataHash
-))
+BRIDGE_DEPOSIT_SCHEMA_ID
+block.chainid
+lockbox address
+sender
+token
+amount
+flowchain recipient
+nonce
+metadata hash
+pilot mode tag
 ```
 
-`BridgeRelease` is a test-only release event:
+Receipt-derived fields such as `txHash`, `logIndex`, block number, block hash, and confirmations are written by the relayer evidence path.
 
-```solidity
-event BridgeRelease(
-    bytes32 indexed releaseId,
-    bytes32 indexed depositId,
-    address indexed recipient,
-    address token,
-    uint256 amount,
-    bytes32 evidenceHash
-);
+## Live Gates
+
+Live observation requires:
+
+- `eth_chainId == 0x2105`
+- explicit operator acknowledgement
+- configured lockbox address
+- configured supported token
+- configured confirmation depth
+- bounded start and end block
+- safe block range width
+- durable checkpoint and bounded recovery window for relay mode
+- per-deposit cap
+- total pilot cap
+- nonzero local recipient
+
+The readiness self-test proves missing env, missing acknowledgement, wrong chain, unapproved lockbox, unsupported token, missing confirmations, and broad block scan fail closed.
+
+## Required Env Names
+
+- `FLOWCHAIN_BASE8453_RPC_URL`
+- `FLOWCHAIN_BASE8453_DEPLOYER_PRIVATE_KEY`
+- `FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS`
+- `FLOWCHAIN_BASE8453_SUPPORTED_TOKEN`
+- `FLOWCHAIN_BASE8453_FROM_BLOCK`
+- `FLOWCHAIN_BASE8453_TO_BLOCK`
+- `FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI`
+- `FLOWCHAIN_PILOT_TOTAL_CAP_WEI`
+- `FLOWCHAIN_PILOT_CONFIRMATIONS`
+- `FLOWCHAIN_PILOT_OPERATOR_ACK`
+
+Required acknowledgement value:
+
+```text
+I_UNDERSTAND_THIS_IS_CAPPED_BASE8453_OWNER_PILOT
 ```
-
-Release hooks require the configured release authority, a recorded deposit,
-matching token, nonzero evidence hash, and available unreleased deposit amount.
-They do not mint anything and do not prove FlowChain finality.
-
-`FlowChainSettlementSpine` can record the local/private runtime's accepted
-object commitments without implementing the runtime in Solidity:
-
-```solidity
-event FlowChainObjectCommitted(
-    bytes32 indexed objectId,
-    bytes32 indexed rootfieldId,
-    bytes32 indexed objectType,
-    address submitter,
-    bytes32 commitment,
-    bytes32 parentObjectId,
-    uint64 sequence,
-    uint64 committedAt,
-    string evidenceURI
-);
-```
-
-Bridge agents should use `BRIDGE_DEPOSIT_OBJECT` as `objectType` when committing
-a FlowChain bridge-deposit object derived from a `BridgeDeposit`. Indexers still
-derive `txHash`, `logIndex`, and block metadata from receipts and logs; those
-fields are not emitted by the contracts.
-
-## Base Mainnet Canary Read
-
-Only after review, and only for a tiny capped canary:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base-mainnet-canary-read.ps1 `
-  -RpcUrl <base-mainnet-rpc-url> `
-  -LockboxAddress <deployed-lockbox> `
-  -FromBlock <from> `
-  -ToBlock <to> `
-  -AcknowledgeRealFunds `
-  -MaxUsd 20
-```
-
-The script checks Base mainnet chain id `8453` and refuses a canary above
-`25` USD. It is read-only and prints the chain, lockbox, block range, max USD
-guardrail, and broadcast status before it reads logs.
 
 ## Commands
 
 ```powershell
-forge test --match-path tests/bridge/BaseBridgeLockbox.t.sol
-forge test --match-path tests/FlowChainSettlementSpine.t.sol
-npm run bridge:test
-npm run bridge:mock
-npm run bridge:sepolia:observe
+forge test
+npm test --prefix services/bridge-relayer
 npm run bridge:local-credit:smoke
-npm run flowchain:full-smoke
+npm run bridge:pilot:mock:e2e
+npm run flowchain:bridge:mock:e2e
+npm run bridge:pilot:live:check
+npm run flowchain:bridge:live:check
+npm run flowchain:real-value-pilot:e2e
+npm run flowchain:no-secret:scan
 git diff --check
 ```
 
-## Not Production
+Pilot command aliases:
 
-This POC is not a production bridge, not a bridge launch, not audited, not a
-tokenomics system, and not a public user deposit system. It exists so the
-private/local FlowChain package can test a Base-origin deposit signal safely.
+```powershell
+npm run bridge:deploy:dry-run
+npm run bridge:deploy:base8453 -- -AcknowledgeBroadcast
+npm run bridge:observe:base8453
+npm run bridge:relay:base8453
+npm run bridge:tx:diagnose -- --tx-hash <base-tx-hash> --acknowledge-pilot
+npm run bridge:credit:local
+npm run bridge:credit:replay-check
+npm run bridge:withdraw:intent
+npm run bridge:release:evidence
+npm run bridge:pause -- -Execute
+npm run bridge:resume -- -Execute
+npm run bridge:emergency-stop -- -Execute
+npm run bridge:evidence:export
+```
+
+## Proof Artifacts
+
+- `docs/agent-runs/production-l1-bridge/CONTRACT_PROOF.md`
+- `docs/agent-runs/production-l1-bridge/RELAYER_PROOF.md`
+- `docs/agent-runs/production-l1-bridge/MOCK_PILOT_E2E_PROOF.md`
+- `docs/agent-runs/production-l1-bridge/REPLAY_PROOF.md`
+- `docs/agent-runs/production-l1-bridge/LIVE_READINESS_PROOF.md`
+- `docs/agent-runs/production-l1-bridge/REAL_FUNDS_PILOT_RUNBOOK.md`
+- `docs/agent-runs/production-l1-bridge/HANDOFF.md`
+
+## Boundary
+
+This path is for a capped owner pilot. It does not remove the need for independent review, conservative caps, operator controls, and owner-provided live credentials.

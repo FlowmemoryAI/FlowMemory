@@ -19,7 +19,7 @@
     "observationId": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
     "replayKey": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
     "observedAt": { "type": "string" },
-    "mode": { "type": "string", "enum": ["mock", "local-anvil", "base-sepolia", "base-mainnet-canary"] },
+    "mode": { "type": "string", "enum": ["mock", "mock-pilot", "local-anvil", "base-sepolia", "base-mainnet-canary", "base-mainnet-pilot"] },
     "productionReady": { "const": false },
     "deposit": { "$ref": "bridge-deposit.schema.json" },
     "guardrails": {
@@ -31,7 +31,27 @@
         "explicitContract": { "type": "boolean" },
         "explicitBlockRange": { "type": "boolean" },
         "noSecrets": { "type": "boolean" },
-        "maxUsd": { "type": "number", "maximum": 25 }
+        "maxUsd": { "type": "number", "maximum": 25 },
+        "maxDepositAmount": { "type": "string", "pattern": "^[0-9]+$" },
+        "totalCapAmount": { "type": "string", "pattern": "^[0-9]+$" },
+        "supportedTokens": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+          "uniqueItems": true
+        },
+        "approvedContract": { "type": "boolean" },
+        "confirmation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["depth", "satisfied"],
+          "properties": {
+            "depth": { "type": "integer", "minimum": 0 },
+            "latestBlockNumber": { "type": "string", "pattern": "^[0-9]+$" },
+            "requiredConfirmedBlockNumber": { "type": "string", "pattern": "^[0-9]+$" },
+            "requestedToBlock": { "type": "string", "pattern": "^[0-9]+$" },
+            "satisfied": { "type": "boolean" }
+          }
+        }
       }
     }
   }

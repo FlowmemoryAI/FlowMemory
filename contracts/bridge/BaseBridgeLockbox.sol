@@ -16,6 +16,7 @@ contract BaseBridgeLockbox {
         uint256 perDepositCap;
         uint256 totalCap;
         uint256 totalLocked;
+        uint256 totalDeposited;
     }
 
     struct DepositRecord {
@@ -32,10 +33,12 @@ contract BaseBridgeLockbox {
     address public constant NATIVE_TOKEN = address(0);
     bytes32 public constant BRIDGE_DEPOSIT_SCHEMA_ID = keccak256("flowmemory.bridge.deposit.v0");
     bytes32 public constant BRIDGE_RELEASE_SCHEMA_ID = keccak256("flowmemory.bridge.release.v0");
+    bytes32 public constant PILOT_MODE_TAG = keccak256("flowchain.base8453.owner-pilot.v0");
 
     address public owner;
     address public releaseAuthority;
     bool public paused;
+    bool public emergencyStopped;
     uint256 public nextNonce = 1;
 
     mapping(address token => TokenConfig config) public tokenConfigs;
@@ -48,6 +51,7 @@ contract BaseBridgeLockbox {
     error NotOwner(address caller);
     error NotReleaseAuthority(address caller);
     error Paused();
+    error EmergencyStopped();
     error ReentrantCall();
     error ZeroOwner();
     error ZeroReleaseAuthority();
@@ -68,16 +72,19 @@ contract BaseBridgeLockbox {
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
     event ReleaseAuthoritySet(address indexed previousAuthority, address indexed newAuthority);
     event PausedSet(bool paused);
+    event EmergencyStopSet(bool stopped);
     event TokenConfigured(address indexed token, bool allowed, uint256 perDepositCap, uint256 totalCap);
     event BridgeDeposit(
         bytes32 indexed depositId,
         uint256 indexed sourceChainId,
         address indexed sender,
+        address lockbox,
         address token,
         uint256 amount,
         bytes32 flowchainRecipient,
         uint256 nonce,
-        bytes32 metadataHash
+        bytes32 metadataHash,
+        bytes32 pilotModeTag
     );
     event BridgeRelease(
         bytes32 indexed releaseId,
@@ -105,6 +112,13 @@ contract BaseBridgeLockbox {
     modifier whenNotPaused() {
         if (paused) {
             revert Paused();
+        }
+        _;
+    }
+
+    modifier whenNotEmergencyStopped() {
+        if (emergencyStopped) {
+            revert EmergencyStopped();
         }
         _;
     }
@@ -158,13 +172,18 @@ contract BaseBridgeLockbox {
         emit PausedSet(value);
     }
 
+    function setEmergencyStopped(bool value) external onlyOwner {
+        emergencyStopped = value;
+        emit EmergencyStopSet(value);
+    }
+
     function configureToken(address token, bool allowed, uint256 perDepositCap, uint256 totalCap) external onlyOwner {
         TokenConfig storage config = tokenConfigs[token];
         if (allowed && perDepositCap == 0) {
             revert ZeroAmount();
         }
-        if (allowed && totalCap != 0 && totalCap < config.totalLocked) {
-            revert TotalCapExceeded(token, config.totalLocked, totalCap);
+        if (allowed && totalCap != 0 && totalCap < config.totalDeposited) {
+            revert TotalCapExceeded(token, config.totalDeposited, totalCap);
         }
 
         config.allowed = allowed;
@@ -177,6 +196,7 @@ contract BaseBridgeLockbox {
         external
         payable
         whenNotPaused
+        whenNotEmergencyStopped
         nonReentrant
         returns (bytes32 depositId)
     {
@@ -186,6 +206,7 @@ contract BaseBridgeLockbox {
     function lockERC20(address token, uint256 amount, bytes32 flowchainRecipient, bytes32 metadataHash)
         external
         whenNotPaused
+        whenNotEmergencyStopped
         nonReentrant
         returns (bytes32 depositId)
     {
@@ -201,6 +222,7 @@ contract BaseBridgeLockbox {
     function releaseNative(bytes32 depositId, address payable recipient, uint256 amount, bytes32 evidenceHash)
         external
         onlyReleaseAuthority
+        whenNotEmergencyStopped
         nonReentrant
         returns (bytes32 releaseId)
     {
@@ -214,6 +236,7 @@ contract BaseBridgeLockbox {
     function releaseERC20(bytes32 depositId, address recipient, address token, uint256 amount, bytes32 evidenceHash)
         external
         onlyReleaseAuthority
+        whenNotEmergencyStopped
         nonReentrant
         returns (bytes32 releaseId)
     {
@@ -257,9 +280,10 @@ contract BaseBridgeLockbox {
             revert PerDepositCapExceeded(token, amount, config.perDepositCap);
         }
 
-        uint256 nextTotal = config.totalLocked + amount;
-        if (config.totalCap != 0 && nextTotal > config.totalCap) {
-            revert TotalCapExceeded(token, nextTotal, config.totalCap);
+        uint256 nextTotalLocked = config.totalLocked + amount;
+        uint256 nextTotalDeposited = config.totalDeposited + amount;
+        if (config.totalCap != 0 && nextTotalDeposited > config.totalCap) {
+            revert TotalCapExceeded(token, nextTotalDeposited, config.totalCap);
         }
 
         uint256 nonce = nextNonce++;
@@ -273,7 +297,8 @@ contract BaseBridgeLockbox {
                 amount,
                 flowchainRecipient,
                 nonce,
-                metadataHash
+                metadataHash,
+                PILOT_MODE_TAG
             )
         );
         if (deposits[depositId]) {
@@ -291,17 +316,20 @@ contract BaseBridgeLockbox {
             metadataHash: metadataHash,
             exists: true
         });
-        config.totalLocked = nextTotal;
+        config.totalLocked = nextTotalLocked;
+        config.totalDeposited = nextTotalDeposited;
 
         emit BridgeDeposit({
             depositId: depositId,
             sourceChainId: block.chainid,
             sender: sender,
+            lockbox: address(this),
             token: token,
             amount: amount,
             flowchainRecipient: flowchainRecipient,
             nonce: nonce,
-            metadataHash: metadataHash
+            metadataHash: metadataHash,
+            pilotModeTag: PILOT_MODE_TAG
         });
     }
 

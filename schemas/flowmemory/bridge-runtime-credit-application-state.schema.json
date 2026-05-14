@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowmemory.local/schemas/flowmemory/bridge-runtime-credit-application-state.schema.json",
+  "title": "FlowChainBridgeRuntimeCreditApplicationState",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "stateId",
+    "updatedAt",
+    "appliedReplayKeys",
+    "applications",
+    "localOnly",
+    "productionReady"
+  ],
+  "properties": {
+    "schema": { "const": "flowmemory.bridge_runtime_credit_application_state.v0" },
+    "stateId": { "$ref": "#/$defs/hex32" },
+    "updatedAt": { "type": "string" },
+    "appliedReplayKeys": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/hex32" },
+      "propertyNames": { "pattern": "^0x[0-9a-fA-F]{64}$" }
+    },
+    "applications": {
+      "type": "array",
+      "items": { "$ref": "bridge-runtime-credit-application.schema.json" }
+    },
+    "localOnly": { "const": true },
+    "productionReady": { "const": false }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" }
+  }
+}

@@ -4,6 +4,10 @@
   "type": "module",
   "scripts": {
     "mock": "node src/observe-base-lockbox.ts --mode mock --fixture ../../fixtures/bridge/base-sepolia-mock-deposit.json --out out/bridge-observation.json --credit-out out/bridge-credit.json --handoff-out out/bridge-runtime-handoff.json",
+    "pilot:e2e": "node src/bridge-pilot-e2e.ts --mode mock-pilot --fixture ../../fixtures/bridge/base8453-pilot-mock-deposit.json --duplicate-fixture ../../fixtures/bridge/base8453-pilot-duplicate-mock-deposits.json --out-dir out/real-value-pilot-e2e",
+    "relay:mock:e2e": "node src/base8453-relay-mock-e2e.ts",
+    "relay:base8453": "node src/base8453-relay-monitor.ts --monitor",
+    "tx:diagnose": "node src/base8453-tx-diagnostic.ts",
     "local-credit:smoke": "node src/observe-base-lockbox.ts --mode mock --fixture ../../fixtures/bridge/base-sepolia-mock-deposit.json --out out/local-credit-observation.json --credit-out out/local-credit.json --handoff-out ../../fixtures/bridge/local-runtime-bridge-handoff.json --withdrawal-out out/local-withdrawal-intent.json --apply-credit --withdrawal-intent",
     "test": "node --test test/*.test.ts"
   }
