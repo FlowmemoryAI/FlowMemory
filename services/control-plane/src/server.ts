@@ -121,7 +121,49 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
       return;
     }
 
-    if (req.method !== "POST" || (req.url !== "/rpc" && req.url !== "/bridge/observations")) {
+    if (req.method === "GET" && requestUrl?.pathname === "/bridge/status") {
+      const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "bridge-status", method: "bridge_status" }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
+    if (req.method === "GET" && requestUrl?.pathname === "/bridge/deposits") {
+      const limit = requestUrl.searchParams.get("limit");
+      const response = dispatchJsonRpc({
+        jsonrpc: "2.0",
+        id: "bridge-deposits",
+        method: "bridge_deposit_list",
+        params: limit === null ? undefined : { limit: Number(limit) },
+      }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
+    if (req.method === "GET" && requestUrl?.pathname === "/bridge/credits") {
+      const limit = requestUrl.searchParams.get("limit");
+      const response = dispatchJsonRpc({
+        jsonrpc: "2.0",
+        id: "bridge-credits",
+        method: "bridge_credit_list",
+        params: limit === null ? undefined : { limit: Number(limit) },
+      }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
+    if (req.method === "GET" && requestUrl?.pathname === "/bridge/credit-status") {
+      const params = Object.fromEntries(requestUrl.searchParams.entries());
+      const response = dispatchJsonRpc({
+        jsonrpc: "2.0",
+        id: "bridge-credit-status",
+        method: "bridge_credit_status",
+        params,
+      }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
+    if (req.method !== "POST" || (req.url !== "/rpc" && req.url !== "/bridge/observations" && req.url !== "/transfer/send")) {
       writeJson(res, 404, { error: "not found" });
       return;
     }
@@ -136,7 +178,9 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
         const payload = JSON.parse(body) as unknown;
         const rpcPayload = req.url === "/bridge/observations"
           ? { jsonrpc: "2.0", id: "bridge-observation-submit", method: "bridge_observation_submit", params: { observation: payload } }
-          : payload;
+          : req.url === "/transfer/send"
+            ? { jsonrpc: "2.0", id: "transfer-send", method: "transfer_send", params: payload }
+            : payload;
         const response = dispatchJsonRpc(rpcPayload, { state });
         if (response === undefined) {
           res.writeHead(204, jsonHeaders);
@@ -152,8 +196,14 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
             code: -32700,
             message: error instanceof Error ? error.message : "parse error",
             data: {
-              schema: "flowmemory.control_plane.error.v0",
+              schema: "flowmemory.control_plane.error.v1",
               reasonCode: "parse.error",
+              errorCode: "MALFORMED_REQUEST",
+              message: "parse error",
+              correlationId: "control-plane-http-parse",
+              recoverable: true,
+              retryable: false,
+              sourceComponent: "control-plane-http",
               localOnly: true,
             },
           },

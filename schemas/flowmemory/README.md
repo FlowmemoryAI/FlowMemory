@@ -29,6 +29,7 @@ These schemas are the canonical local/test V0 shapes for generated Flow Memory a
 - `real-value-pilot-operator-config.schema.json`
 - `real-value-pilot-public-metadata.schema.json`
 - `control-plane-provenance-response.schema.json`
+- `control-plane-production-l1.schema.json`
 
 `memory-signal.schema.json` also embeds the `flowmemory.flowpulse_contract_event.v0`
 shape, which records the `IFlowPulse.FlowPulse` event signature, indexed fields,
@@ -57,6 +58,13 @@ transaction documents that can be wrapped by `local-transaction-envelope`:
 transfer, token launch, pool create, add liquidity, remove liquidity, swap, and
 bridge credit acknowledgement. Bridge withdrawal intent uses
 `bridge-withdrawal-intent.schema.json` and the same local transaction envelope.
+
+`control-plane-production-l1.schema.json` is the JSON-RPC method catalog for
+the existing control-plane API. It publishes request schema names, response
+schema names, result schema names, and the `flowmemory.control_plane.error.v1`
+error envelope used by smoke validation. The catalog includes the bridge wallet
+operator methods `bridge_credit_status` and `transfer_send`, including result
+schemas for live credit lookup labels and local transfer receipts.
 
 The `real-value-pilot-*` schemas describe capped pilot operator messages,
 env-derived non-secret config, and secret-free public metadata export. Pilot

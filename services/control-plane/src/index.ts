@@ -5,4 +5,5 @@ export * from "./methods.ts";
 export * from "./no-secret.ts";
 export * from "./pilot.ts";
 export * from "./runtime-intake.ts";
+export * from "./transaction-envelope.ts";
 export * from "./types.ts";

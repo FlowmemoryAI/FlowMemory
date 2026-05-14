@@ -19,6 +19,13 @@ import {
   buildWorkbenchSnapshot,
   fetchWorkbenchSnapshot,
 } from "../data/workbench";
+import {
+  buildLockNativeDraft,
+  flowchainAccountFromBytes,
+  isUsableFlowchainRecipient,
+  type BridgeLiveSnapshot,
+} from "../data/bridge";
+import { BridgeView } from "../views/BridgeView";
 import { WorkbenchView } from "../views/WorkbenchView";
 
 describe("dashboard fixture", () => {
@@ -306,5 +313,112 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Verifier Modules");
     expect(html).toContain("Hardware Signals");
     expect(html).toContain("Raw JSON");
+  });
+
+  it("requires a non-placeholder FlowChain recipient before lockNative preparation", () => {
+    const placeholder = `0x${"5".repeat(64)}`;
+    const account = flowchainAccountFromBytes(new Uint8Array(32).fill(0xab));
+    const draft = buildLockNativeDraft(account);
+
+    expect(isUsableFlowchainRecipient(account)).toBe(true);
+    expect(isUsableFlowchainRecipient(placeholder)).toBe(false);
+    expect(draft.signature).toBe("lockNative(bytes32 flowchainRecipient, bytes32 metadataHash)");
+    expect(draft.args.flowchainRecipient).toBe(account);
+    expect(draft.noBroadcast).toBe(true);
+    expect(() => buildLockNativeDraft(placeholder)).toThrow(/real 32-byte FlowChain recipient/);
+  });
+
+  it("renders the bridge route with live status labels and transfer surface", () => {
+    const account = `0x${"a".repeat(64)}`;
+    const txHash = `0x${"b".repeat(64)}`;
+    const snapshot: BridgeLiveSnapshot = {
+      baseUrl: DEFAULT_CONTROL_PLANE_URL,
+      fetchedAt: "2026-05-14T12:00:00.000Z",
+      health: {
+        status: "ok",
+        localOnly: true,
+        routes: ["GET /bridge/credit-status", "POST /transfer/send"],
+      },
+      status: {
+        schema: "flowmemory.control_plane.bridge_credit_status.v1",
+        readinessLabel: "LIVE PILOT",
+        exposureLabel: "LOCAL ONLY",
+        livePilot: true,
+        localOnly: true,
+        usingFixtureFallback: false,
+        baseTxHash: txHash,
+        confirmationStatus: "base_observed",
+        lifecycleStatus: {
+          observed: "observed",
+          queued: "queued",
+          applied: "applied",
+          idempotent: "unique_or_idempotent",
+        },
+        creditedAccount: account,
+        tokenId: "flowchain-bridge-credit",
+        amount: "10",
+        spendableBalance: "10",
+        balanceBreakdown: {
+          localAmount: "0",
+          bridgeCreditAmount: "10",
+          pendingAcceptedDelta: "0",
+        },
+        transferActionStatus: "not_run",
+        firstUsableAt: "2026-05-14T12:00:02.000Z",
+        latencyMs: 2000,
+        placeholderRecipient: false,
+        noBaseReleaseBroadcast: true,
+        cappedOwnerTesting: true,
+        credit: {
+          creditId: "bridge-credit:live",
+          accountId: account,
+          baseTxHash: txHash,
+          status: "applied",
+          token: "flowchain-bridge-credit",
+          amount: "10",
+        },
+        deposit: {
+          depositId: "bridge-deposit:live",
+          txHash,
+          flowchainRecipient: account,
+          status: "observed",
+          token: "flowchain-bridge-credit",
+          amount: "10",
+        },
+      },
+      credits: [{
+        creditId: "bridge-credit:live",
+        accountId: account,
+        baseTxHash: txHash,
+        status: "applied",
+        token: "flowchain-bridge-credit",
+        amount: "10",
+      }],
+      deposits: [{
+        depositId: "bridge-deposit:live",
+        txHash,
+        flowchainRecipient: account,
+        status: "observed",
+        token: "flowchain-bridge-credit",
+        amount: "10",
+      }],
+      txLookup: {
+        creditId: "bridge-credit:live",
+        accountId: account,
+        baseTxHash: txHash,
+        status: "applied",
+        token: "flowchain-bridge-credit",
+        amount: "10",
+      },
+    };
+    const html = renderToStaticMarkup(createElement(BridgeView, { controlPlaneUrl: DEFAULT_CONTROL_PLANE_URL, initialSnapshot: snapshot }));
+
+    expect(html).toContain("Live wallet and bridge credit");
+    expect(html).toContain("LIVE PILOT");
+    expect(html).toContain("LOCAL ONLY");
+    expect(html).toContain("lockNative");
+    expect(html).toContain("bridge_credit_get");
+    expect(html).toContain("transfer_send");
+    expect(html).not.toContain(`0x${"5".repeat(64)}`);
   });
 });

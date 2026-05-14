@@ -1,10 +1,30 @@
 # FlowChain Local Control Plane API
 
-Status: local runtime/fixture-backed V0 contract.
+Status: private/local L1-shaped control-plane contract.
 
-This document defines the local JSON-RPC 2.0 API for the FlowChain / FlowMemory control-plane. It gives dashboard, agent, verifier, and devnet tooling one deterministic local surface for FlowMemory objects, local runtime status, local file-backed transaction intake, and bridge-observation intake.
+This document defines the local JSON-RPC 2.0 API for the FlowChain / FlowMemory control-plane. It gives dashboard, wallet, bridge, agent, verifier, and devnet tooling one deterministic local surface for FlowMemory objects, local runtime status, local file-backed signed transaction intake, bridge intake, and L1-style inspection.
 
-It is not a production RPC endpoint, public L1 API, hosted service, wallet API, production bridge API, production token API, or verifier economics surface.
+It is still local/private and no-value unless a later gate explicitly changes that. It is not a hosted public RPC, public validator network, production bridge, custody surface, production tokenomics system, or verifier economics surface.
+
+Every JSON-RPC result includes `responseProvenance`:
+
+```json
+{
+  "schema": "flowmemory.control_plane.response_provenance.v1",
+  "apiVersion": "flowchain-control-plane-production-l1.v1",
+  "method": "chain_status",
+  "runtimeSource": "live|imported|deterministic_fixture|unavailable",
+  "storageSource": "live|imported|deterministic_fixture|unavailable",
+  "indexerSource": "live|imported|deterministic_fixture|unavailable",
+  "bridgeSource": "live|imported|deterministic_fixture|unavailable"
+}
+```
+
+The schema catalog is published at:
+
+```text
+schemas/flowmemory/control-plane-production-l1.schema.json
+```
 
 ## Runtime Boundary
 
@@ -86,11 +106,17 @@ Error:
   "jsonrpc": "2.0",
   "id": "1",
   "error": {
-    "code": -32602,
-    "message": "rootfield_get requires one of: rootfieldId",
+    "code": -32041,
+    "message": "signed envelope signature verification failed",
     "data": {
-      "schema": "flowmemory.control_plane.error.v0",
-      "reasonCode": "params.invalid",
+      "schema": "flowmemory.control_plane.error.v1",
+      "reasonCode": "transaction.bad_signature",
+      "errorCode": "BAD_SIGNATURE",
+      "message": "signed envelope signature verification failed",
+      "correlationId": "control-plane-local",
+      "recoverable": true,
+      "retryable": false,
+      "sourceComponent": "control-plane",
       "localOnly": true
     }
   }
@@ -107,6 +133,18 @@ Error codes:
 | `-32602` | Missing or invalid params. |
 | `-32603` | Internal local control-plane error. |
 | `-32004` | Requested local object was not found. |
+| `-32040` | Secret-shaped request or response material was rejected. |
+| `-32041` | Signed transaction or bridge replay was rejected. |
+| `-32042` | Live runtime is unavailable. |
+| `-32043` | Storage source is unavailable. |
+
+Machine-readable `errorCode` values:
+
+`MALFORMED_REQUEST`, `UNSIGNED_TRANSACTION`, `BAD_SIGNATURE`,
+`WRONG_CHAIN_ID`, `STALE_NONCE`, `DUPLICATE_TX`, `UNKNOWN_BLOCK`,
+`UNKNOWN_TX`, `UNKNOWN_ACCOUNT`, `UNKNOWN_TOKEN`, `UNKNOWN_POOL`,
+`BRIDGE_REPLAY`, `LIVE_RUNTIME_UNAVAILABLE`, `STORAGE_UNAVAILABLE`, and
+`UNSAFE_SECRET_DETECTED`.
 
 ## Methods
 
@@ -128,6 +166,11 @@ Browser-safe summary endpoints are also available:
 GET /explorer/summary
 GET /product-flow/status
 GET /pilot/status
+GET /bridge/status
+GET /bridge/deposits?limit=50
+GET /bridge/credits?limit=50
+GET /bridge/credit-status
+POST /transfer/send
 ```
 
 ### `chain_status`
@@ -177,6 +220,12 @@ Params:
 ```
 
 Returns local/private peer inventory when present. Current single-node mode returns local-only peer rows or an empty local list; it does not imply public validators.
+
+### `sync_status`
+
+Params: none.
+
+Returns current height, target height, finalized height, catch-up state, live runtime availability, and whether fallback state was used.
 
 ### `block_list`
 
@@ -239,9 +288,18 @@ Params:
 ```json
 {
   "signedEnvelope": {
-    "schema": "flowchain.local_transaction_envelope.v0",
-    "tx": {
-      "schema": "flowchain.local_transaction.v0"
+    "schema": "flowchain.signed_transaction_envelope.v1",
+    "chainId": "flowmemory-local-devnet-v0",
+    "signer": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "nonce": "0",
+    "signatureScheme": "flowchain-local-digest-v1",
+    "payload": {
+      "schema": "flowchain.transaction.transfer.v1",
+      "type": "transfer",
+      "from": "account:alice",
+      "to": "account:bob",
+      "tokenId": "local-test-unit",
+      "amount": "7"
     },
     "signature": "0x..."
   },
@@ -249,7 +307,47 @@ Params:
 }
 ```
 
-Accepts signed local test transaction envelopes only. Plain `transaction`, `tx`, or `txs` params are rejected. The method rejects secret-shaped material and appends an intake row to `devnet/local/intake/transactions.ndjson`. It does not broadcast to a public chain.
+Accepts only versioned FlowChain signed transaction envelopes. Plain `transaction`, `tx`, or `txs` params are rejected. The method checks chain id, signer format, nonce, payload schema, duplicate tx id, and local deterministic signature digest. It rejects secret-shaped material and appends an accepted intake row plus local receipt to `devnet/local/intake/transactions.ndjson`. It does not broadcast to a public chain.
+
+Structured rejection codes include `UNSIGNED_TRANSACTION`, `BAD_SIGNATURE`,
+`WRONG_CHAIN_ID`, `STALE_NONCE`, `DUPLICATE_TX`, and
+`UNSAFE_SECRET_DETECTED`.
+
+### `transfer_send`
+
+Params:
+
+```json
+{
+  "from": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "to": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "amount": "2",
+  "tokenId": "flowchain-bridge-credit",
+  "memo": "dashboard-bridge-credit-transfer-test"
+}
+```
+
+Creates a deterministic local signed transfer envelope for an already credited
+FlowChain account, submits it through the same local transaction intake path as
+`transaction_submit`, and returns a machine-readable receipt:
+
+```json
+{
+  "schema": "flowmemory.control_plane.transfer_send_result.v1",
+  "accepted": true,
+  "status": "accepted_local",
+  "receipt": {
+    "schema": "flowmemory.control_plane.transfer_receipt.v1",
+    "status": "accepted_local"
+  },
+  "noBaseReleaseBroadcast": true,
+  "localOnly": true
+}
+```
+
+The method refuses the placeholder `0x5555...5555` FlowChain recipient, checks
+spendable local balance before accepting, and never broadcasts a Base release
+transaction.
 
 ### `mempool_list`
 
@@ -260,6 +358,30 @@ Params:
 ```
 
 Returns pending local transaction/intake rows.
+
+### `event_list`, `event_get`
+
+Event methods expose FlowPulse observations, rejected logs, and local
+transaction-intake events.
+
+List params:
+
+```json
+{
+  "blockNumber": "123457",
+  "blockHash": "0x...",
+  "txId": "0x...",
+  "accountId": "0x...",
+  "eventType": "ROOT_COMMITTED",
+  "limit": 50
+}
+```
+
+Get params:
+
+```json
+{ "eventId": "0x..." }
+```
 
 ### `account_list`
 
@@ -289,7 +411,11 @@ Params:
 { "accountId": "local-balance:demo:agent-alpha" }
 ```
 
-Returns a no-value local test-unit balance record. This is not a token balance, reward, fee account, or bridge asset.
+Returns the local spendable balance for an account. When an applied bridge
+credit exists for the account, the response includes `spendableBalance`,
+`bridgeCreditAmount`, `pendingAcceptedDelta`, and `valueBearingPilot`. Without
+an applied Base 8453 credit, the balance remains a no-value local test-unit
+record.
 
 ### `token_list`
 
@@ -868,6 +994,12 @@ Params:
 
 All params are optional. Returns native finality receipts when present and projected local finality rows for launch-core receipts.
 
+### `finality_status`
+
+Params: none.
+
+Returns chain-level finalized height/hash, finality row counts, and whether finality state is live local runtime state or degraded fallback state.
+
 ### `bridge_observation_list`
 
 Params:
@@ -903,6 +1035,7 @@ Params:
 ```
 
 Rejects secret-shaped material and writes an ignored local intake row to `devnet/local/intake/bridge-observations.ndjson`.
+Duplicate bridge replay keys are rejected with `BRIDGE_REPLAY`.
 
 HTTP bridge observation endpoints are also available:
 
@@ -915,9 +1048,84 @@ POST /bridge/observations
 
 Expose local bridge-deposit test objects. These do not imply a production bridge, withdrawal, lockbox, or asset claim.
 
-### `bridge_credit_list`, `bridge_credit_get`
+### `bridge_credit_list`, `bridge_credit_get`, `bridge_credit_status`
 
-Expose local bridge-credit test objects from runtime/control-plane handoff maps or bridge-deposit projections. These are no-value local accounting objects only.
+`bridge_credit_list` exposes local bridge-credit rows from runtime/control-plane
+handoff maps or bridge-deposit projections.
+
+`bridge_credit_get` accepts `creditId`, `depositId`, `accountId`,
+`flowchainAccount`, `txHash`, or `baseTxHash`. When multiple rows match the same
+Base transaction, the applied runtime credit is preferred over projected
+artifacts.
+
+`bridge_credit_status` accepts the same lookup aliases and returns the live
+wallet/dashboard status panel data:
+
+```json
+{
+  "schema": "flowmemory.control_plane.bridge_credit_status.v1",
+  "readinessLabel": "LIVE PILOT|LOCAL ONLY|NOT READY",
+  "exposureLabel": "LOCAL ONLY",
+  "baseTxHash": "0x...",
+  "confirmationStatus": "base_observed",
+  "lifecycleStatus": {
+    "observed": "observed",
+    "queued": "queued",
+    "applied": "applied",
+    "idempotent": "unique_or_idempotent"
+  },
+  "creditedAccount": "0x...",
+  "spendableBalance": "10",
+  "transferActionStatus": "not_run|accepted_local",
+  "firstUsableAt": "2026-05-14T12:00:02.000Z",
+  "latencyMs": 2000,
+  "noBaseReleaseBroadcast": true,
+  "localOnly": true
+}
+```
+
+`LIVE PILOT` is only returned when the running local node/control-plane state has
+an applied Base chain ID `8453` credit to a non-placeholder FlowChain account.
+Fixture, mock, Base Sepolia, or placeholder-recipient fallback is labeled
+`NOT READY`; an unexposed local control-plane remains `LOCAL ONLY`.
+
+### `bridge_config_get`, `bridge_status`
+
+`bridge_config_get` returns browser-safe bridge mode, cap summary, pause status,
+replay-protection counts, and runtime-intake readiness without exposing env
+values.
+
+`bridge_status` returns bridge readiness, observation/credit/withdrawal/release
+counts, replay status, and `envValuesExposed: false`.
+
+Browser-safe bridge HTTP mirrors are also available:
+
+```text
+GET /bridge/status
+GET /bridge/deposits?limit=50
+GET /bridge/credits?limit=50
+GET /bridge/credit-status?txHash=0x...
+GET /bridge/credit-status?accountId=0x...
+POST /transfer/send
+```
+
+### `withdrawal_intent_list`, `withdrawal_intent_get`
+
+Expose local bridge withdrawal-intent test objects. These are aliases over the
+same source rows as `withdrawal_list` with dashboard-oriented field names.
+
+### `release_evidence_list`, `release_evidence_get`
+
+Expose local release-evidence records from bridge runtime handoffs. If no
+release evidence exists but a withdrawal intent exists, the API returns an
+explicit `pending_operator_release_evidence` projection so the dashboard can
+show the missing step without parsing logs.
+
+### `replay_rejection_list`, `replay_rejection_get`
+
+Expose duplicate replay rejections when present. If there are no duplicates, the
+list returns an explicit `idempotent_no_duplicate` record for dashboard and
+relayer readiness checks.
 
 ### `withdrawal_list`, `withdrawal_get`
 
@@ -980,8 +1188,8 @@ Returns the raw loaded local JSON object for dashboard/workbench debug views. It
 
 Dashboard agents should prefer:
 
-1. `health`, `node_status`, and `chain_status` for source health and global counters.
-2. `block_list`, `transaction_list`, and `mempool_list` for chain/devnet tables.
+1. `health`, `node_status`, `sync_status`, `chain_status`, and `finality_status` for source health and global counters.
+2. `block_list`, `transaction_list`, `event_list`, and `mempool_list` for chain/devnet tables.
 3. `account_list`, `balance_get`, `faucet_event_list`, and `wallet_metadata_list` for local identity and public metadata panels.
 4. `rootfield_list` and `rootfield_get` for Rootfield detail.
 5. `work_receipt_list`, `receipt_list`, `verifier_module_list`, and `verifier_report_list` for lifecycle tables.
@@ -990,7 +1198,8 @@ Dashboard agents should prefer:
 8. `challenge_get`, `challenge_list`, `finality_get`, and `finality_list` for local challenge/finality labels.
 9. `token_list`, `token_balance_list`, `pool_list`, `lp_position_list`, `swap_list`, and `product_flow_status` for product-testnet token/DEX/explorer panels.
 10. `pilot_status`, the four pilot list methods, and the four pilot status methods for capped owner-testing real-value pilot evidence.
-11. `bridge_observation_list`, `bridge_deposit_list`, `bridge_credit_list`, and `withdrawal_list` for local bridge-shaped test panels.
-12. `raw_json_get` for raw JSON inspection.
+11. `bridge_config_get`, `bridge_status`, `bridge_credit_status`, `bridge_observation_list`, `bridge_deposit_list`, `bridge_credit_list`, `withdrawal_intent_list`, `release_evidence_list`, and `replay_rejection_list` for bridge-shaped operator panels.
+12. `bridge_credit_get` by `txHash` or `baseTxHash`, `balance_get`, and `transfer_send` for wallet/dashboard credit lookup and local transfer receipt checks.
+13. `raw_json_get` for raw JSON inspection.
 
 The API is local-only for V0. The submit methods are local file intake, not public chain broadcast. Live indexing, production settlement, production wallet custody, and production bridge methods require separate scoped work.

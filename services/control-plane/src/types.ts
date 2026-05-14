@@ -16,7 +16,9 @@ export type ControlPlaneMethod =
   | "health"
   | "node_status"
   | "peer_list"
+  | "sync_status"
   | "chain_status"
+  | "finality_status"
   | "pilot_status"
   | "pilot_deposit_observation_list"
   | "pilot_credit_list"
@@ -33,6 +35,9 @@ export type ControlPlaneMethod =
   | "transaction_get"
   | "transaction_list"
   | "transaction_submit"
+  | "transfer_send"
+  | "event_get"
+  | "event_list"
   | "account_get"
   | "account_list"
   | "balance_get"
@@ -76,10 +81,19 @@ export type ControlPlaneMethod =
   | "bridge_observation_get"
   | "bridge_observation_list"
   | "bridge_observation_submit"
+  | "bridge_config_get"
+  | "bridge_status"
+  | "bridge_credit_status"
   | "bridge_deposit_get"
   | "bridge_deposit_list"
   | "bridge_credit_get"
   | "bridge_credit_list"
+  | "withdrawal_intent_get"
+  | "withdrawal_intent_list"
+  | "release_evidence_get"
+  | "release_evidence_list"
+  | "replay_rejection_get"
+  | "replay_rejection_list"
   | "withdrawal_get"
   | "withdrawal_list"
   | "provenance_get"
@@ -145,8 +159,14 @@ export interface RpcErrorObject {
   code: number;
   message: string;
   data: {
-    schema: "flowmemory.control_plane.error.v0";
+    schema: "flowmemory.control_plane.error.v1";
     reasonCode: string;
+    errorCode: string;
+    message: string;
+    correlationId: string;
+    recoverable: boolean;
+    retryable: boolean;
+    sourceComponent: string;
     details?: JsonValue;
     localOnly: true;
   };

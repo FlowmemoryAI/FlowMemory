@@ -1,14 +1,17 @@
 import assert from "node:assert/strict";
 import { once } from "node:events";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
 import { canonicalJson } from "../../shared/src/index.ts";
 import {
+  buildLocalSignedTransferEnvelope,
   dispatchJsonRpc,
   loadControlPlaneState,
+  repoRoot,
+  scanJsonForSecrets,
   type JsonObject,
   type RpcErrorResponse,
   type RpcSuccessResponse,
@@ -76,7 +79,7 @@ test("keeps deterministic chain status response snapshots", () => {
   assert.equal(snapshot(first), snapshot(second));
   assert.equal(
     snapshot(first),
-    "{\"capabilities\":[\"health_reads\",\"node_status_reads\",\"peer_reads\",\"local_runtime_status_reads\",\"block_reads\",\"transaction_reads\",\"local_transaction_file_intake\",\"mempool_reads\",\"account_reads\",\"balance_reads\",\"faucet_event_reads\",\"wallet_public_metadata_reads\",\"token_reads\",\"token_balance_reads\",\"dex_pool_reads\",\"lp_position_reads\",\"swap_reads\",\"product_flow_status_reads\",\"receipt_lookup\",\"verifier_report_lookup\",\"memory_lineage_lookup\",\"artifact_fixture_lookup\",\"bridge_observation_file_intake\",\"bridge_deposit_reads\",\"bridge_credit_reads\",\"withdrawal_reads\",\"real_value_pilot_reads\",\"real_value_pilot_operator_steps\",\"devnet_handoff_reads\",\"no_secret_response_checks\",\"raw_json_reads\"],\"chainId\":\"flowmemory-local-devnet-v0\",\"counts\":{\"accounts\":2,\"agents\":2,\"artifactAvailability\":5,\"balances\":2,\"blocks\":11,\"bridgeCredits\":1,\"bridgeDeposits\":1,\"challenges\":1,\"devnetBlocks\":2,\"duplicates\":1,\"faucetEvents\":1,\"finalityRows\":9,\"lpPositions\":0,\"memoryCells\":1,\"memoryReceipts\":8,\"memorySignals\":8,\"mempool\":0,\"models\":2,\"observations\":8,\"pilotStatus\":1,\"pools\":0,\"rejectedLogs\":2,\"rootfields\":2,\"swaps\":0,\"tokenBalances\":1,\"tokens\":1,\"transactions\":25,\"verifierModules\":3,\"verifierReports\":8,\"walletPublicMetadata\":2,\"withdrawals\":1,\"workReceipts\":9},\"schema\":\"flowmemory.control_plane.chain_status.v0\"}",
+    "{\"capabilities\":[\"health_reads\",\"node_status_reads\",\"peer_reads\",\"local_runtime_status_reads\",\"block_reads\",\"transaction_reads\",\"local_transaction_file_intake\",\"local_transfer_send\",\"mempool_reads\",\"account_reads\",\"balance_reads\",\"faucet_event_reads\",\"wallet_public_metadata_reads\",\"token_reads\",\"token_balance_reads\",\"dex_pool_reads\",\"lp_position_reads\",\"swap_reads\",\"product_flow_status_reads\",\"receipt_lookup\",\"verifier_report_lookup\",\"memory_lineage_lookup\",\"artifact_fixture_lookup\",\"bridge_observation_file_intake\",\"bridge_deposit_reads\",\"bridge_credit_reads\",\"bridge_credit_status_reads\",\"withdrawal_reads\",\"real_value_pilot_reads\",\"real_value_pilot_operator_steps\",\"devnet_handoff_reads\",\"no_secret_response_checks\",\"raw_json_reads\"],\"chainId\":\"flowmemory-local-devnet-v0\",\"counts\":{\"accounts\":3,\"agents\":2,\"artifactAvailability\":5,\"balances\":3,\"blocks\":11,\"bridgeCredits\":1,\"bridgeDeposits\":1,\"challenges\":1,\"devnetBlocks\":2,\"duplicates\":1,\"faucetEvents\":1,\"finalityRows\":9,\"lpPositions\":1,\"memoryCells\":1,\"memoryReceipts\":8,\"memorySignals\":8,\"mempool\":0,\"models\":2,\"observations\":8,\"pilotStatus\":1,\"pools\":1,\"rejectedLogs\":2,\"rootfields\":2,\"swaps\":1,\"tokenBalances\":1,\"tokens\":1,\"transactions\":25,\"verifierModules\":3,\"verifierReports\":8,\"walletPublicMetadata\":3,\"withdrawals\":1,\"workReceipts\":9},\"schema\":\"flowmemory.control_plane.chain_status.v0\"}",
   );
   rmSync(dir, { recursive: true, force: true });
 });
@@ -198,20 +201,22 @@ test("submits local transactions to the file-backed runtime intake path", () => 
   const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-intake-"));
   try {
     const state = loadControlPlaneState({ txIntakePath: join(dir, "transactions.ndjson") });
+    const chain = dispatchJsonRpc({ jsonrpc: "2.0", id: "chain", method: "chain_status" }, { state }) as RpcSuccessResponse;
+    const signedEnvelope = buildLocalSignedTransferEnvelope({
+      chainId: chain.result.chainId as string,
+      signer: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      nonce: "0",
+      from: "account:test:alice",
+      to: "account:test:bob",
+      amount: "3",
+    });
     const response = dispatchJsonRpc(
       {
         jsonrpc: "2.0",
         id: 1,
         method: "transaction_submit",
         params: {
-          signedEnvelope: {
-            schema: "flowmemory.test_signed_envelope.v0",
-            tx: {
-              schema: "flowmemory.test_transaction.v0",
-              action: "test",
-            },
-            signature: "0xtest-signature",
-          },
+          signedEnvelope,
         },
       },
       { state },
@@ -221,7 +226,7 @@ test("submits local transactions to the file-backed runtime intake path", () => 
     assert.equal(response.result.accepted, true);
     assert.equal(mempool.result.count, 1);
     assert.equal(mempool.result.transactions[0].source, "local-file-intake");
-    assert.equal(mempool.result.transactions[0].transaction.action, "test");
+    assert.equal(mempool.result.transactions[0].transaction.type, "transfer");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -246,8 +251,9 @@ test("rejects unsigned transaction_submit payloads", () => {
       { state },
     ) as RpcErrorResponse;
 
-    assert.equal(response.error.code, -32602);
-    assert.equal(response.error.data.reasonCode, "params.invalid");
+    assert.equal(response.error.code, -32041);
+    assert.equal(response.error.data.reasonCode, "transaction.unsigned");
+    assert.equal(response.error.data.errorCode, "UNSIGNED_TRANSACTION");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -549,6 +555,126 @@ test("pilot lifecycle can represent a live Base 8453 evidence bundle", () => {
   }
 });
 
+test("looks up live bridge credit by Base tx hash and spends credited balance", () => {
+  const relativeDir = `devnet/local/control-plane-live-credit-test-${process.pid}-${Date.now()}`;
+  const absoluteDir = join(repoRoot(), relativeDir);
+  const liveStatePath = `${relativeDir}/state.json`;
+  const handoffPath = `${relativeDir}/bridge-handoff.json`;
+  const txIntakePath = `${relativeDir}/transactions.ndjson`;
+  const bridgeObservationIntakePath = `${relativeDir}/bridge-observations.ndjson`;
+  const accountId = `0x${"a".repeat(64)}`;
+  const transferTo = `0x${"b".repeat(64)}`;
+  const txHash = `0x${"2".repeat(64)}`;
+  const creditId = `0x${"e".repeat(64)}`;
+  const depositId = `0x${"d".repeat(64)}`;
+  const observationId = `0x${"c".repeat(64)}`;
+
+  try {
+    mkdirSync(absoluteDir, { recursive: true });
+    writeFileSync(join(absoluteDir, "state.json"), JSON.stringify({
+      schema: "flowmemory.local_devnet.state.v0",
+      chainId: "flowmemory-local-devnet-v0",
+      blocks: [],
+    }));
+    writeFileSync(join(absoluteDir, "bridge-handoff.json"), JSON.stringify({
+      schema: "flowmemory.bridge_runtime_handoff.v0",
+      handoffId: `0x${"1".repeat(64)}`,
+      generatedAt: "2026-05-14T00:00:00.000Z",
+      mode: "base-mainnet-canary",
+      productionReady: false,
+      localOnly: true,
+      observations: [{
+        schema: "flowmemory.bridge_deposit_observation.v0",
+        observationId,
+        replayKey: `0x${"9".repeat(64)}`,
+        observedAt: "2026-05-14T00:00:00.000Z",
+        mode: "base-mainnet-canary",
+        deposit: {
+          schema: "flowmemory.bridge_deposit.v0",
+          depositId,
+          sourceChainId: 8453,
+          sourceContract: `0x${"1".repeat(40)}`,
+          txHash,
+          logIndex: 0,
+          token: "local-test-unit",
+          amount: "10",
+          sender: `0x${"4".repeat(40)}`,
+          flowchainRecipient: accountId,
+          nonce: "1",
+          status: "observed",
+        },
+      }],
+      credits: [{
+        schema: "flowmemory.bridge_credit.v0",
+        creditId,
+        observationId,
+        depositId,
+        replayKey: `0x${"9".repeat(64)}`,
+        source: {
+          chainId: 8453,
+          contract: `0x${"1".repeat(40)}`,
+          txHash,
+          logIndex: 0,
+        },
+        token: "local-test-unit",
+        amount: "10",
+        flowchainRecipient: accountId,
+        status: "applied",
+        appliedAt: "2026-05-14T00:00:02.500Z",
+        localOnly: true,
+        productionReady: false,
+      }],
+      withdrawalIntents: [],
+      releaseEvidence: [],
+      replayProtection: {
+        strategy: "source-chain-contract-tx-log-deposit",
+        replayKeys: [`0x${"9".repeat(64)}`],
+        duplicateReplayKeys: [],
+      },
+    }));
+
+    const state = loadControlPlaneState({
+      localDevnetPath: liveStatePath,
+      localDevnetLaunchPath: `${relativeDir}/missing-launch-state.json`,
+      bridgeRuntimeHandoffPath: handoffPath,
+      bridgeObservationPath: `${relativeDir}/missing-observation.json`,
+      txIntakePath,
+      bridgeObservationIntakePath,
+    });
+    const credit = dispatchJsonRpc({ jsonrpc: "2.0", id: 1, method: "bridge_credit_get", params: { txHash } }, { state }) as RpcSuccessResponse;
+    const status = dispatchJsonRpc({ jsonrpc: "2.0", id: 2, method: "bridge_credit_status", params: { txHash } }, { state }) as RpcSuccessResponse;
+    const balance = dispatchJsonRpc({ jsonrpc: "2.0", id: 3, method: "balance_get", params: { accountId, tokenId: "local-test-unit" } }, { state }) as RpcSuccessResponse;
+    const transfer = dispatchJsonRpc({
+      jsonrpc: "2.0",
+      id: 4,
+      method: "transfer_send",
+      params: {
+        from: accountId,
+        to: transferTo,
+        tokenId: "local-test-unit",
+        amount: "4",
+      },
+    }, { state }) as RpcSuccessResponse;
+    const after = dispatchJsonRpc({ jsonrpc: "2.0", id: 5, method: "bridge_credit_status", params: { accountId } }, { state }) as RpcSuccessResponse;
+
+    assert.equal(credit.result.credit.creditId, creditId);
+    assert.equal(status.result.readinessLabel, "LIVE PILOT");
+    assert.equal(status.result.baseTxHash, txHash);
+    assert.equal(status.result.creditedAccount, accountId);
+    assert.equal(status.result.spendableBalance, "10");
+    assert.equal(status.result.firstUsableAt, "2026-05-14T00:00:02.500Z");
+    assert.equal(status.result.latencyMs, "2500");
+    assert.equal(balance.result.amount, "10");
+    assert.equal(balance.result.valueBearingPilot, true);
+    assert.equal(transfer.result.receipt.status, "accepted_local");
+    assert.equal(transfer.result.receipt.balanceAfter, "6");
+    assert.equal(after.result.spendableBalance, "6");
+    assert.equal(after.result.transferActionStatus, "accepted_local");
+  } finally {
+    rmSync(absoluteDir, { recursive: true, force: true });
+  }
+});
+
 test("rejects secret-shaped bridge and pilot-adjacent intake material", () => {
   const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-pilot-secrets-"));
   try {
@@ -596,7 +722,8 @@ test("smoke client queries the complete local lifecycle surface", () => {
 
   assert.equal(smoke.schema, "flowmemory.control_plane.smoke.v0");
   assert.equal(smoke.ok, true);
-  assert.equal(smoke.methodCount, 66);
+  assert.equal(smoke.methodCount, 94);
+  assert.equal(smoke.expectedErrorCount, 4);
   assert.ok((smoke.responseSchemas as string[]).includes("flowmemory.control_plane.real_value_pilot_status.v0"));
   assert.ok((smoke.responseSchemas as string[]).includes("flowmemory.control_plane.raw_json.v0"));
   rmSync(dir, { recursive: true, force: true });
@@ -647,66 +774,80 @@ test("HTTP server exposes browser-safe health and state endpoints", async () => 
     assert.equal(typeof address, "object");
     assert.notEqual(address, null);
     const port = address?.port;
+    const fetchJson = async (path: string, init?: RequestInit): Promise<JsonObject> => {
+      const { headers, ...requestInit } = init ?? {};
+      const response = await fetch(`http://127.0.0.1:${port}${path}`, {
+        ...requestInit,
+        headers: { Origin: "http://127.0.0.1:5173", ...(headers ?? {}) },
+      });
+      assert.equal(response.status, 200);
+      assert.equal(response.headers.get("access-control-allow-origin"), "*");
+      const body = await response.json() as JsonObject;
+      assert.deepEqual(scanJsonForSecrets(body as never), []);
+      return body;
+    };
 
-    const health = await fetch(`http://127.0.0.1:${port}/health`, {
-      headers: { Origin: "http://127.0.0.1:5173" },
-    });
-    assert.equal(health.status, 200);
-    assert.equal(health.headers.get("access-control-allow-origin"), "*");
-    assert.equal((await health.json()).status, "ok");
+    const health = await fetchJson("/health");
+    assert.equal(health.status, "ok");
 
-    const state = await fetch(`http://127.0.0.1:${port}/state`, {
-      headers: { Origin: "http://127.0.0.1:5173" },
-    });
-    assert.equal(state.status, 200);
-    assert.equal(state.headers.get("access-control-allow-origin"), "*");
-    assert.equal((await state.json()).schema, "flowmemory.control_plane.devnet_state.v0");
+    const state = await fetchJson("/state");
+    assert.equal(state.schema, "flowmemory.control_plane.devnet_state.v0");
 
-    const explorer = await fetch(`http://127.0.0.1:${port}/explorer/summary`, {
-      headers: { Origin: "http://127.0.0.1:5173" },
-    });
-    assert.equal(explorer.status, 200);
-    assert.equal(explorer.headers.get("access-control-allow-origin"), "*");
-    assert.equal((await explorer.json()).schema, "flowmemory.control_plane.chain_status.v0");
+    const explorer = await fetchJson("/explorer/summary");
+    assert.equal(explorer.schema, "flowmemory.control_plane.chain_status.v0");
 
-    const productFlow = await fetch(`http://127.0.0.1:${port}/product-flow/status`, {
-      headers: { Origin: "http://127.0.0.1:5173" },
-    });
-    assert.equal(productFlow.status, 200);
-    assert.equal(productFlow.headers.get("access-control-allow-origin"), "*");
-    assert.equal((await productFlow.json()).schema, "flowmemory.control_plane.product_flow_status.v0");
+    const productFlow = await fetchJson("/product-flow/status");
+    assert.equal(productFlow.schema, "flowmemory.control_plane.product_flow_status.v0");
 
-    const rpc = await fetch(`http://127.0.0.1:${port}/rpc`, {
+    const pilotStatus = await fetchJson("/pilot/status");
+    assert.equal(pilotStatus.schema, "flowmemory.control_plane.real_value_pilot_status.v0");
+
+    const pilotCredits = await fetchJson("/pilot/credits?limit=1");
+    assert.equal(pilotCredits.schema, "flowmemory.control_plane.real_value_pilot_credit_list.v0");
+
+    const pilotWithdrawals = await fetchJson("/pilot/withdrawal-intents?limit=1");
+    assert.equal(pilotWithdrawals.schema, "flowmemory.control_plane.real_value_pilot_withdrawal_intent_list.v0");
+
+    const pilotReleaseEvidence = await fetchJson("/pilot/release-evidence?limit=1");
+    assert.equal(pilotReleaseEvidence.schema, "flowmemory.control_plane.real_value_pilot_release_evidence_list.v0");
+
+    const pilotCap = await fetchJson("/pilot/cap-status");
+    assert.equal(pilotCap.schema, "flowmemory.control_plane.real_value_pilot_cap_status.v0");
+
+    const pilotPause = await fetchJson("/pilot/pause-status");
+    assert.equal(pilotPause.schema, "flowmemory.control_plane.real_value_pilot_pause_status.v0");
+
+    const pilotRetry = await fetchJson("/pilot/retry-status");
+    assert.equal(pilotRetry.schema, "flowmemory.control_plane.real_value_pilot_retry_status.v0");
+
+    const pilotEmergency = await fetchJson("/pilot/emergency-status");
+    assert.equal(pilotEmergency.schema, "flowmemory.control_plane.real_value_pilot_emergency_status.v0");
+
+    const rpc = await fetchJson("/rpc", {
       method: "POST",
-      headers: { "content-type": "application/json", Origin: "http://127.0.0.1:5173" },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "node_status" }),
     });
-    assert.equal(rpc.status, 200);
-    assert.equal(rpc.headers.get("access-control-allow-origin"), "*");
-    assert.equal((await rpc.json()).result.schema, "flowmemory.control_plane.node_status.v0");
+    assert.equal((rpc.result as JsonObject).schema, "flowmemory.control_plane.node_status.v0");
 
-    const bridge = await fetch(`http://127.0.0.1:${port}/bridge/observations`, {
-      headers: { Origin: "http://127.0.0.1:5173" },
-    });
-    assert.equal(bridge.status, 200);
-    assert.equal(bridge.headers.get("access-control-allow-origin"), "*");
-    assert.equal((await bridge.json()).schema, "flowmemory.control_plane.bridge_observation_list.v0");
+    const bridge = await fetchJson("/bridge/observations");
+    assert.equal(bridge.schema, "flowmemory.control_plane.bridge_observation_list.v0");
 
-    const pilotDeposits = await fetch(`http://127.0.0.1:${port}/pilot/deposits?limit=1`, {
-      headers: { Origin: "http://127.0.0.1:5173" },
-    });
-    assert.equal(pilotDeposits.status, 200);
-    assert.equal(pilotDeposits.headers.get("access-control-allow-origin"), "*");
-    const pilotDepositBody = await pilotDeposits.json();
+    const bridgeStatus = await fetchJson("/bridge/status");
+    assert.equal(bridgeStatus.schema, "flowmemory.control_plane.bridge_status.v0");
+
+    const bridgeCredits = await fetchJson("/bridge/credits?limit=1");
+    assert.equal(bridgeCredits.schema, "flowmemory.control_plane.bridge_credit_list.v0");
+
+    const bridgeCreditStatus = await fetchJson("/bridge/credit-status");
+    assert.equal(bridgeCreditStatus.schema, "flowmemory.control_plane.bridge_credit_status.v1");
+
+    const pilotDepositBody = await fetchJson("/pilot/deposits?limit=1");
     assert.equal(pilotDepositBody.schema, "flowmemory.control_plane.real_value_pilot_deposit_observation_list.v0");
     assert.equal(pilotDepositBody.count, 1);
 
-    const badPilotDeposits = await fetch(`http://127.0.0.1:${port}/pilot/deposits?limit=0`, {
-      headers: { Origin: "http://127.0.0.1:5173" },
-    });
-    assert.equal(badPilotDeposits.status, 200);
-    const badPilotDepositBody = await badPilotDeposits.json();
-    assert.equal(badPilotDepositBody.error.data.reasonCode, "params.invalid");
+    const badPilotDepositBody = await fetchJson("/pilot/deposits?limit=0");
+    assert.equal(((badPilotDepositBody.error as JsonObject).data as JsonObject).reasonCode, "params.invalid");
   } finally {
     await new Promise<void>((resolve, reject) => {
       server.close((error) => {

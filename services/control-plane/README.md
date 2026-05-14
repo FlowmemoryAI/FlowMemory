@@ -26,7 +26,9 @@ The dispatcher supports:
 - `health`
 - `node_status`
 - `peer_list`
+- `sync_status`
 - `chain_status`
+- `finality_status`
 - `pilot_status`
 - `pilot_deposit_observation_list`
 - `pilot_credit_list`
@@ -43,6 +45,9 @@ The dispatcher supports:
 - `transaction_get`
 - `transaction_list`
 - `transaction_submit`
+- `transfer_send`
+- `event_get`
+- `event_list`
 - `account_get`
 - `account_list`
 - `balance_get`
@@ -86,10 +91,19 @@ The dispatcher supports:
 - `bridge_observation_get`
 - `bridge_observation_list`
 - `bridge_observation_submit`
+- `bridge_config_get`
+- `bridge_status`
 - `bridge_deposit_get`
 - `bridge_deposit_list`
 - `bridge_credit_get`
 - `bridge_credit_list`
+- `bridge_credit_status`
+- `withdrawal_intent_get`
+- `withdrawal_intent_list`
+- `release_evidence_get`
+- `release_evidence_list`
+- `replay_rejection_get`
+- `replay_rejection_list`
 - `withdrawal_get`
 - `withdrawal_list`
 - `provenance_get`
@@ -117,9 +131,11 @@ The loader reads local runtime state first, then committed deterministic outputs
 
 If the launch-core fixture is missing, the loader rebuilds the in-memory view from indexer/verifier outputs or the raw fixture receipts and artifact resolver. It does not fetch from live RPC or write production state.
 
-`transaction_submit` accepts signed local test transaction envelopes only and writes them to `devnet/local/intake/transactions.ndjson` by default. `bridge_observation_submit` writes bridge-agent observations to `devnet/local/intake/bridge-observations.ndjson`. These files are local runtime intake, not committed fixtures.
+`transaction_submit` accepts signed local test transaction envelopes only and writes them to `devnet/local/intake/transactions.ndjson` by default. `transfer_send` builds a deterministic local signed transfer for an already credited FlowChain account, verifies spendable balance, refuses the `0x5555...5555` placeholder recipient, writes through the same local transaction intake path, and returns a machine-readable receipt. `bridge_observation_submit` writes bridge-agent observations to `devnet/local/intake/bridge-observations.ndjson`. These files are local runtime intake, not committed fixtures.
 
-`npm run control-plane:smoke` runs an in-process JSON-RPC client over the complete local lifecycle surface: health, node status, peers, chain status, real-value pilot status/list/status methods, blocks, transactions, mempool, accounts, balances, tokens, token balances, pools, LP positions, swaps, product-flow status, faucet events, wallet public metadata, rootfields, agents, models, work receipts, artifact availability, verifier modules, verifier reports, memory cells, challenges, finality, bridge observations, bridge deposits, bridge credits, withdrawals, provenance, and raw JSON.
+`bridge_credit_status` backs the dashboard wallet panel. It reports Base tx hash, confirmation/lifecycle/idempotent status, credited account, spendable balance, latest transfer action status, first usable timestamp, latency, `LIVE PILOT`/`LOCAL ONLY`/`NOT READY` labels, and `noBaseReleaseBroadcast: true`.
+
+`npm run control-plane:smoke` runs an in-process JSON-RPC client over the complete local lifecycle surface: health, node status, peers, chain status, real-value pilot status/list/status methods, blocks, transactions, local transfer send, mempool, accounts, balances, tokens, token balances, pools, LP positions, swaps, product-flow status, faucet events, wallet public metadata, rootfields, agents, models, work receipts, artifact availability, verifier modules, verifier reports, memory cells, challenges, finality, bridge observations, bridge deposits, bridge credits, bridge credit status, withdrawals, provenance, and raw JSON.
 
 `npm run flowchain:real-value-pilot:control-dashboard` verifies that the API exposes the capped owner-testing pilot lifecycle, rejects secret-shaped material, and that the dashboard source renders the pilot evidence and next operator command without browser secret storage. The root `flowchain:real-value-pilot:e2e` command is the upstream final HQ pilot gate and depends on proof commands from multiple owner branches.
 

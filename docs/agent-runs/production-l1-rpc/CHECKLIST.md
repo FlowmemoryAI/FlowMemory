@@ -1,0 +1,30 @@
+# Private/Local L1-Shaped RPC Checklist
+
+- [x] Read `AGENTS.md`.
+- [x] Read `docs/START_HERE.md`.
+- [x] Read `docs/FLOWMEMORY_HQ_CONTEXT.md`.
+- [x] Read `docs/CURRENT_STATE.md`.
+- [x] Read `docs/FLOWCHAIN_CONTROL_PLANE_API.md`.
+- [x] Read `docs/ROOTFLOW_V0.md`.
+- [x] Read `docs/FLOW_MEMORY_V0.md`.
+- [x] Read `docs/V0_LAUNCH_ACCEPTANCE.md`.
+- [x] Inventory `services/control-plane/`.
+- [x] Inventory `services/shared/`.
+- [x] Inventory `schemas/flowmemory/`.
+- [x] Locate production protocol/runtime/storage/bridge/execution handoffs if present.
+- [x] Draft endpoint matrix.
+- [x] Add schemas for every request and response.
+- [x] Add versioned error envelope.
+- [x] Add provenance fields.
+- [x] Implement signed transaction submit validation.
+- [x] Implement transaction query and receipt query loop.
+- [x] Implement event/account/balance/token/pool/swap/finality/sync queries.
+- [x] Implement bridge query loop and readiness status.
+- [x] Add response schema validation in smoke.
+- [x] Add no-secret scanner coverage for every route.
+- [x] Run `npm test --prefix services/control-plane`.
+- [x] Run `npm run control-plane:smoke`.
+- [x] Run `npm run control-plane:e2e` if added. Not added; standalone smoke and full L1 E2E cover the control-plane route matrix.
+- [x] Run `npm run flowchain:l1-e2e`.
+- [x] Run `git diff --check`.
+- [x] Write proof and handoff artifacts.
