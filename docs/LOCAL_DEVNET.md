@@ -37,6 +37,7 @@ npm run flowchain:start
 npm run flowchain:demo
 npm run flowchain:full-smoke
 npm run flowchain:export
+npm run flowchain:execution:e2e
 npm run flowchain:stop
 ```
 
@@ -115,6 +116,29 @@ cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- smoke
 
 `smoke` now builds the native object lifecycle, writes state and handoff files, produces 10 deterministic local blocks, and proves deterministic single-node reconciliation by replaying the same flow twice and comparing block hashes, latest parent hash, state root, and map roots. LAN and multi-node networking are not exposed in this crate yet.
 
+Run the local product execution flow:
+
+```powershell
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- product-smoke
+```
+
+`product-smoke` starts from deterministic genesis, applies a local bridge credit, transfers local test units between wallets, launches a no-value local test token, transfers that token, creates a local DEX pool, adds liquidity, swaps exact input with a minimum-output guard, removes liquidity, anchors the resulting state, and checks that the product receipts are queryable.
+
+Run the stricter execution E2E:
+
+```powershell
+npm run flowchain:execution:e2e
+```
+
+The execution E2E writes:
+
+```text
+devnet/local/execution-e2e/state.json
+devnet/local/execution-e2e/execution-e2e-report.json
+```
+
+The report includes transaction ids, receipt ids, account balances, token balances, pool reserves, LP positions, swap result, state root, map roots, queryable ids, and failed transaction evidence.
+
 Import a FlowPulse observation fixture:
 
 ```powershell
@@ -185,7 +209,18 @@ The prototype stores:
 - `rootfields`
 - `agentAccounts`
 - `localTestUnitBalances`
+- `accountNonces`
 - `faucetRecords`
+- `balanceTransfers`
+- `bridgeCreditReceipts`
+- `tokenDefinitions`
+- `tokenBalances`
+- `tokenMintReceipts`
+- `tokenTransferReceipts`
+- `dexPools`
+- `lpPositions`
+- `liquidityReceipts`
+- `swapReceipts`
 - `modelPassports`
 - `memoryCells`
 - `challenges`
@@ -198,10 +233,12 @@ The prototype stores:
 - `importedObservations`
 - `importedVerifierReports`
 - `baseAnchors`
+- `executionReceipts`
+- `executionEvents`
 - `blocks`
 - `pendingTxs`
 
-`localTestUnitBalances` and `faucetRecords` are deterministic, no-value local records for runtime testing only. They are not token balances and there is no gas accounting.
+`localTestUnitBalances`, `faucetRecords`, `bridgeCreditReceipts`, token state, DEX state, execution receipts, and execution events are deterministic, no-value local records for runtime testing only. They are not production balances, rewards, staking state, public gas economics, or bridge security claims.
 
 ## Transaction Types
 
@@ -211,6 +248,15 @@ Supported local transactions:
 - `RegisterAgent`
 - `CreateLocalTestUnitBalance`
 - `FaucetLocalTestUnits`
+- `TransferLocalTestUnits`
+- `ApplyBridgeCredit`
+- `LaunchToken`
+- `MintLocalTestToken`
+- `TransferToken`
+- `CreatePool`
+- `AddLiquidity`
+- `RemoveLiquidity`
+- `SwapExactIn`
 - `RegisterModelPassport`
 - `CommitRoot`
 - `SubmitArtifactCommitment`
@@ -229,8 +275,20 @@ Supported local transactions:
 ## Local Lifecycle Rules
 
 - Agent and model records are identity/provenance records only; they do not hold balances.
-- Local test-unit balance records are no-value runtime fixtures only; they do not create a token, monetary claim, fee market, staking role, reward, or bridge asset.
+- Local test-unit balance records are no-value runtime fixtures only; they do not create a token, monetary claim, fee market, staking role, reward, or production bridge asset.
 - Faucet records require an existing local test-unit balance, a unique faucet record id, and a positive amount.
+- Native local transfers require existing source and destination balances, a positive amount, available source units, and the next expected account nonce.
+- Bridge credits are local pilot credit receipts. A credit has a deterministic credit id plus replay key, must be positive, can fund the local test-unit asset, and cannot be applied twice.
+- The pilot bridge-credit spend path uses `asset:flowchain-local-test-unit` as a wrapped local asset. Bridged Base ETH or ERC20 custody is not modeled in this crate.
+- Account nonces are deterministic per account. Reusing the last nonce fails as duplicate; lower or skipped nonces fail as stale.
+- Local execution costs use a deterministic cost table and are recorded in every execution receipt. The default fee behavior is record-only; `charge-native` mode can be enabled in config for tests that debit local test units.
+- Token launch validates deterministic token id, symbol, name, decimals, initial owner balance, duplicate id, duplicate symbol, and positive supply.
+- Local test mint is permitted only as explicit local/test transaction state. It records a mint receipt and updates no-value total supply.
+- Token transfers require positive amount, existing accounts, existing token, available source token balance, and the next expected account nonce.
+- Pool creation requires a deterministic pool id, valid distinct assets, existing creator account, and a unique pool.
+- Liquidity add/remove updates reserves, LP supply, LP position accounting, and liquidity receipts with deterministic floor rounding.
+- Exact-input swaps update reserves and account balances, produce a swap receipt, and fail if the pool is invalid, liquidity is insufficient, the amount is zero, or minimum output is not met.
+- Failed transactions are atomic: the business state is not partially mutated, but a failed execution receipt and `execution_failed` event are recorded.
 - Work receipts must reference an existing artifact commitment in the same rootfield.
 - Verifier reports must reference an existing active verifier module and an existing receipt in the same rootfield.
 - Memory cells can be created or updated only from an existing work receipt with an accepted local verifier report.
@@ -249,12 +307,13 @@ Each block has:
 - Logical time.
 - Transaction ids.
 - Receipts.
+- Execution receipt id, success flag, execution cost units, charged flag, error code, and event ids for each transaction receipt.
 - State root.
 - Block hash.
 
 The devnet uses deterministic logical time and canonical JSON with Keccak-256. Tests prove the same inputs produce the same state root and block hash.
 
-`inspect-state --summary`, exported handoff files, and Base anchor placeholders include deterministic roots for the local maps, including operator key references, agent accounts, local test-unit balances, faucet records, model passports, memory cells, challenges, finality receipts, artifact availability proofs, verifier modules, work receipts, and verifier reports.
+`inspect-state --summary`, exported handoff files, and Base anchor placeholders include deterministic roots for the local maps, including operator key references, agent accounts, local test-unit balances, account nonces, faucet records, balance transfers, bridge credit receipts, token definitions, token balances, token mint receipts, token transfer receipts, DEX pools, LP positions, liquidity receipts, swap receipts, model passports, memory cells, challenges, finality receipts, artifact availability proofs, verifier modules, work receipts, verifier reports, execution receipts, and execution events.
 
 ## Persistence
 
@@ -285,8 +344,10 @@ The control-plane handoff contains the current chain id, latest block, blocks, p
 Control-plane and dashboard agents should read:
 
 - `objects.localTestUnitBalances` and `objects.faucetRecords` from `control-plane-handoff.json`.
+- `objects.accountNonces`, `objects.balanceTransfers`, `objects.bridgeCreditReceipts`, `objects.tokenDefinitions`, `objects.tokenBalances`, `objects.tokenTransferReceipts`, `objects.dexPools`, `objects.lpPositions`, `objects.liquidityReceipts`, `objects.swapReceipts`, `objects.executionReceipts`, and `objects.executionEvents` from `control-plane-handoff.json`.
 - Top-level `localTestUnitBalances` and `faucetRecords` from `dashboard-state.json`.
-- `mapRoots.localTestUnitBalanceRoot` and `mapRoots.faucetRecordRoot` anywhere map-root reconciliation is needed.
+- Top-level token, DEX, receipt, nonce, and execution maps from `dashboard-state.json`.
+- `mapRoots.localTestUnitBalanceRoot`, `mapRoots.accountNonceRoot`, `mapRoots.bridgeCreditReceiptRoot`, `mapRoots.tokenBalanceRoot`, `mapRoots.dexPoolRoot`, `mapRoots.lpPositionRoot`, `mapRoots.executionReceiptRoot`, and `mapRoots.executionEventRoot` anywhere map-root reconciliation is needed.
 
 ## Non-Goals
 

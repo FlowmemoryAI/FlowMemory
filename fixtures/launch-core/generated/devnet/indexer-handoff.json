@@ -1,4 +1,5 @@
 {
+  "accountNonces": {},
   "agentAccounts": {
     "agent:demo:alpha": {
       "active": true,
@@ -24,89 +25,209 @@
   "balanceTransfers": {},
   "blocks": [
     {
-      "blockHash": "0x61e9f90b982f13988e85a382fc39da82c9114ecceea9001ab454c744e0801a9b",
+      "blockHash": "0x842756cdacfd8323d4e5304ac59f818793d3b5155215076a64144cd46fa3b275",
       "blockNumber": 1,
       "logicalTime": 1778688000,
       "parentHash": "0x0f23c892cbd2d00c10839d97ddab833698a83f8df8d6df27ceac03cfdd4b7bc9",
       "receipts": [
         {
           "error": null,
+          "errorCode": null,
+          "eventIds": [
+            "0xf4d2ae64c6843b6c6c2937295e7b269a64574a9645c173efd3f92ef46fbf70d9"
+          ],
+          "executionCostCharged": false,
+          "executionCostUnits": 2,
+          "receiptId": "0x2142f067d405bcd45b804bfc44237a943bdd587721a96be9e0004f03a10429e4",
           "status": "applied",
+          "success": true,
           "txId": "0x2cffda58c783dc026978b06a681587b19d9536ae4e158a69be855da1200f3189"
         },
         {
           "error": null,
+          "errorCode": null,
+          "eventIds": [
+            "0xb218d48446a9addb208938599fd5a2e4b23310305f15b64d7f608ccf6afa9d85"
+          ],
+          "executionCostCharged": false,
+          "executionCostUnits": 2,
+          "receiptId": "0x4c5b73550454a5ce06527b6e9fab2cf104a9f80681dc2cfb891b8e13d5a4bda0",
           "status": "applied",
+          "success": true,
           "txId": "0x75e63a0257621b8ef7412c6455a19d848996905e21f5ba79ccb0870d6e82eb25"
         },
         {
           "error": null,
+          "errorCode": null,
+          "eventIds": [
+            "0x358a02ea4548c4e0ce1da601fdf98966220c16df91351e432a7f072f14e8271f"
+          ],
+          "executionCostCharged": false,
+          "executionCostUnits": 1,
+          "receiptId": "0x1a9d3d926d7af126548d8e1c1f64b1ce9dc9032986ae4806e207c8f7a6aaeb4d",
           "status": "applied",
+          "success": true,
           "txId": "0x6f55c155425b968de01092be7d276f0c24430a2994910881938bc13c72f8892f"
         },
         {
           "error": null,
+          "errorCode": null,
+          "eventIds": [
+            "0xf7dfc91c96e7a21f44dbce4bd7078a3b35a1354f4469141a2b87a00572d87897"
+          ],
+          "executionCostCharged": false,
+          "executionCostUnits": 0,
+          "receiptId": "0x32e833d1b9aa72ba987d58caf30d5df8857a1f6255b07b20e2b75da6f92da424",
           "status": "applied",
+          "success": true,
           "txId": "0xafd3991af8b9e4eadfa3810f82d74701b7518269ae7ba5d0e3e450844445b03b"
         },
         {
           "error": null,
+          "errorCode": null,
+          "eventIds": [
+            "0xe597a31c9e32bcfd11d36ea93864c71a13384c1e0b64032863d109ab25c248a1"
+          ],
+          "executionCostCharged": false,
+          "executionCostUnits": 0,
+          "receiptId": "0x0a1863f382f8a49039ccd7119bb3ec8818ab0a472d5f8a98fc9dd2220c9e2edd",
           "status": "applied",
+          "success": true,
           "txId": "0xec7019403fec03ea2ea4b090bc5ee1c63017ed9834bff5fb87ce2fe5d5794919"
         },
         {
           "error": null,
+          "errorCode": null,
+          "eventIds": [
+            "0x97d803063ba218ebd205922efb36c4ab7e80d7df4dc8ac13120fc66e24301794"
+          ],
+          "executionCostCharged": false,
+          "executionCostUnits": 1,
+          "receiptId": "0xed22a82bb32dfcc2506b38bf5067e64808b01f10b001852bfe958d0b3dfc9b22",
           "status": "applied",
+          "success": true,
           "txId": "0x05abb39c720d8ee1cd9253e32efaa595f5d5b2fcef4a908f61ab4a6bfa315359"
         },
         {
           "error": null,
+          "errorCode": null,
+          "eventIds": [
+            "0x21976b72efed5064f4b21b2e3c55ce61f6bf761441c9d842b2a303f9a1991cd5"
+          ],
+          "executionCostCharged": false,
+          "executionCostUnits": 1,
+          "receiptId": "0xd7f7209dd9709e9bf21dc604742499589ddd76019a833988374077d802b390b2",
           "status": "applied",
+          "success": true,
           "txId": "0xb9f435aceb1bedb86dce821743769b28c02a42002c9cd41f2df1ea0279462ab2"
         },
         {
           "error": null,
+          "errorCode": null,
+          "eventIds": [
+            "0x99710e06c1476c3460f0670e238a1bcfd437ff03c983ea0fda8d2cfdcfae3b4e"
+          ],
+          "executionCostCharged": false,
+          "executionCostUnits": 1,
+          "receiptId": "0xc9d76a50e330a1541cdf2b9eb4ead342fbffc21e1cdb4d0492a4e5eb553e15fb",
           "status": "applied",
+          "success": true,
           "txId": "0x27aeba6c55c764222964764cb2bfbb69fb6fa56cb84714d6e98240ceb6e9d01d"
         },
         {
           "error": null,
+          "errorCode": null,
+          "eventIds": [
+            "0xcf34a90d5d03e23e9c9d8c34833858c680e99af1fb0776fda5ea7ba738219096"
+          ],
+          "executionCostCharged": false,
+          "executionCostUnits": 1,
+          "receiptId": "0x5eb03d645d9763a4d7e0125e7d7508680b7083533b10cb08461491caf33f7443",
           "status": "applied",
+          "success": true,
           "txId": "0xef6df43993478d8f14d609732c7260fa08861ecc17e74137b83beda8d50931d2"
         },
         {
           "error": null,
+          "errorCode": null,
+          "eventIds": [
+            "0x59fb3d5a273f0b958e2a67537da733bb50f1332f85f658e89596d6ac8b2ef0e8"
+          ],
+          "executionCostCharged": false,
+          "executionCostUnits": 2,
+          "receiptId": "0xd4b1bd423c1ea6e3cb5e35f2747b6a32adc8df507a1da92e019f82c09a7ecf30",
           "status": "applied",
+          "success": true,
           "txId": "0x73b81134901c2ce13e575f161d82a404c6f7cd1ef2e8ee17beb6697062175c46"
         },
         {
           "error": null,
+          "errorCode": null,
+          "eventIds": [
+            "0x8cccb30b7750c3484201753c6342d8d2c8e2a4dfa0299c1da6639e68ce78dcb6"
+          ],
+          "executionCostCharged": false,
+          "executionCostUnits": 2,
+          "receiptId": "0xa1ab8856d0d5497d5181bbb501da6394662e0d2bcfec0418e423a86a3ef864be",
           "status": "applied",
+          "success": true,
           "txId": "0x3ac0b196a212a0e77d0a0c4b60e2283d2994b09993971b95427996700f5b92aa"
         },
         {
           "error": null,
+          "errorCode": null,
+          "eventIds": [
+            "0x2df675c4fcc2045ff33b5b9882a2dc47ca4f3a963b2aab777a682c617224a3e1"
+          ],
+          "executionCostCharged": false,
+          "executionCostUnits": 2,
+          "receiptId": "0x7b939d58be6043af7122c2cec2e67c18d2843ff513415cb5a5f3cb633010c5b9",
           "status": "applied",
+          "success": true,
           "txId": "0xda9d2574a0d4bec158e13623499c6efe6dddb76f838c5f06c3e4dc8457b67d3b"
         },
         {
           "error": null,
+          "errorCode": null,
+          "eventIds": [
+            "0xfb7845e078da7450ad7d004079c317851eccddd7b655c2b156619f7236d2ec5e"
+          ],
+          "executionCostCharged": false,
+          "executionCostUnits": 1,
+          "receiptId": "0x34d568b916c5f936aaf58bda2a9fcce1dd7c0efaf0c03e3b12b540967bf198ee",
           "status": "applied",
+          "success": true,
           "txId": "0xa0729982b58cc701aba6af0bc29ca993190db4e8e1489af918dbe293c0c03bad"
         },
         {
           "error": null,
+          "errorCode": null,
+          "eventIds": [
+            "0xc24e920b81b34896a21ca6bde9479d3f4e8a04f287e0e6453cae40e6fa1a7e88"
+          ],
+          "executionCostCharged": false,
+          "executionCostUnits": 1,
+          "receiptId": "0x7c7f30dab08090d339468a6727871b834c71b8659e6b45e240cc8b5c8430322b",
           "status": "applied",
+          "success": true,
           "txId": "0xf32e17d973089ae20766e2c6ec07d1511ddecd3f79803f6146a90df971ca814f"
         },
         {
           "error": null,
+          "errorCode": null,
+          "eventIds": [
+            "0x71ac71abe9bebc6c4214bb7187053d165b1f8cd6d96ef3093df9d107e7ba615d"
+          ],
+          "executionCostCharged": false,
+          "executionCostUnits": 1,
+          "receiptId": "0xf9482b4df67ea49a5180143da2fcc8aaf836aafbb288ccc2130daa9657690376",
           "status": "applied",
+          "success": true,
           "txId": "0x514f9ef68c09de5a4dc80611d661d07a4ea3a4fae6000a43a25864489f354a81"
         }
       ],
       "schema": "flowmemory.local_devnet.block.v0",
-      "stateRoot": "0x8c7c1e7a078b60a809d17a51c44e275059afb8d7535769430c3fc9e9320c7e23",
+      "stateRoot": "0x5c79c20d6d991efea359cd0ed6d5225c8d8255808f90ef58e0068ae73b85e544",
       "txIds": [
         "0x2cffda58c783dc026978b06a681587b19d9536ae4e158a69be855da1200f3189",
         "0x75e63a0257621b8ef7412c6455a19d848996905e21f5ba79ccb0870d6e82eb25",
@@ -126,24 +247,33 @@
       ]
     },
     {
-      "blockHash": "0x7ddb184c69f798f25f27a254f1f530c6cdc31c9656ac19d1b8c114f7a3a650c6",
+      "blockHash": "0xa37d982b6d0fd99ff67504db337644bfeeaf1d2c7bde27d18b213a515f7bfc31",
       "blockNumber": 2,
       "logicalTime": 1778688001,
-      "parentHash": "0x61e9f90b982f13988e85a382fc39da82c9114ecceea9001ab454c744e0801a9b",
+      "parentHash": "0x842756cdacfd8323d4e5304ac59f818793d3b5155215076a64144cd46fa3b275",
       "receipts": [
         {
           "error": null,
+          "errorCode": null,
+          "eventIds": [
+            "0x085da711c107c4b6d62fa286999229290b58829e1a2e7325093c509bf7cb53b4"
+          ],
+          "executionCostCharged": false,
+          "executionCostUnits": 1,
+          "receiptId": "0x210240c9e6967ce25905837b94ac60c8f851a473dd194a04bcdd29f56d904d18",
           "status": "applied",
+          "success": true,
           "txId": "0x8f719c880f17b5d4fb6d9efd54ac276d0dd8050d11c2c7870c36a79b66bc49d7"
         }
       ],
       "schema": "flowmemory.local_devnet.block.v0",
-      "stateRoot": "0x3074ef2e5311d94e8f9a2660a6cc016c7b7f9a08c56ee07f9e841c1489726e68",
+      "stateRoot": "0xc354545e7fa40a6fba67b480c9484abec8b6cd980f21f8646b9840f4d34d72ba",
       "txIds": [
         "0x8f719c880f17b5d4fb6d9efd54ac276d0dd8050d11c2c7870c36a79b66bc49d7"
       ]
     }
   ],
+  "bridgeCreditReceipts": {},
   "challenges": {
     "challenge:demo:001": {
       "challengeId": "challenge:demo:001",
@@ -158,6 +288,474 @@
     }
   },
   "dexPools": {},
+  "executionEvents": {
+    "0x085da711c107c4b6d62fa286999229290b58829e1a2e7325093c509bf7cb53b4": {
+      "accountId": null,
+      "amountUnits": null,
+      "assetId": null,
+      "blockNumber": 2,
+      "eventId": "0x085da711c107c4b6d62fa286999229290b58829e1a2e7325093c509bf7cb53b4",
+      "eventType": "transaction_applied",
+      "objectId": null,
+      "receiptId": "0x210240c9e6967ce25905837b94ac60c8f851a473dd194a04bcdd29f56d904d18",
+      "status": "applied",
+      "txId": "0x8f719c880f17b5d4fb6d9efd54ac276d0dd8050d11c2c7870c36a79b66bc49d7"
+    },
+    "0x21976b72efed5064f4b21b2e3c55ce61f6bf761441c9d842b2a303f9a1991cd5": {
+      "accountId": null,
+      "amountUnits": null,
+      "assetId": null,
+      "blockNumber": 1,
+      "eventId": "0x21976b72efed5064f4b21b2e3c55ce61f6bf761441c9d842b2a303f9a1991cd5",
+      "eventType": "transaction_applied",
+      "objectId": null,
+      "receiptId": "0xd7f7209dd9709e9bf21dc604742499589ddd76019a833988374077d802b390b2",
+      "status": "applied",
+      "txId": "0xb9f435aceb1bedb86dce821743769b28c02a42002c9cd41f2df1ea0279462ab2"
+    },
+    "0x2df675c4fcc2045ff33b5b9882a2dc47ca4f3a963b2aab777a682c617224a3e1": {
+      "accountId": null,
+      "amountUnits": null,
+      "assetId": null,
+      "blockNumber": 1,
+      "eventId": "0x2df675c4fcc2045ff33b5b9882a2dc47ca4f3a963b2aab777a682c617224a3e1",
+      "eventType": "transaction_applied",
+      "objectId": null,
+      "receiptId": "0x7b939d58be6043af7122c2cec2e67c18d2843ff513415cb5a5f3cb633010c5b9",
+      "status": "applied",
+      "txId": "0xda9d2574a0d4bec158e13623499c6efe6dddb76f838c5f06c3e4dc8457b67d3b"
+    },
+    "0x358a02ea4548c4e0ce1da601fdf98966220c16df91351e432a7f072f14e8271f": {
+      "accountId": null,
+      "amountUnits": null,
+      "assetId": null,
+      "blockNumber": 1,
+      "eventId": "0x358a02ea4548c4e0ce1da601fdf98966220c16df91351e432a7f072f14e8271f",
+      "eventType": "transaction_applied",
+      "objectId": null,
+      "receiptId": "0x1a9d3d926d7af126548d8e1c1f64b1ce9dc9032986ae4806e207c8f7a6aaeb4d",
+      "status": "applied",
+      "txId": "0x6f55c155425b968de01092be7d276f0c24430a2994910881938bc13c72f8892f"
+    },
+    "0x59fb3d5a273f0b958e2a67537da733bb50f1332f85f658e89596d6ac8b2ef0e8": {
+      "accountId": null,
+      "amountUnits": null,
+      "assetId": null,
+      "blockNumber": 1,
+      "eventId": "0x59fb3d5a273f0b958e2a67537da733bb50f1332f85f658e89596d6ac8b2ef0e8",
+      "eventType": "transaction_applied",
+      "objectId": null,
+      "receiptId": "0xd4b1bd423c1ea6e3cb5e35f2747b6a32adc8df507a1da92e019f82c09a7ecf30",
+      "status": "applied",
+      "txId": "0x73b81134901c2ce13e575f161d82a404c6f7cd1ef2e8ee17beb6697062175c46"
+    },
+    "0x71ac71abe9bebc6c4214bb7187053d165b1f8cd6d96ef3093df9d107e7ba615d": {
+      "accountId": null,
+      "amountUnits": null,
+      "assetId": null,
+      "blockNumber": 1,
+      "eventId": "0x71ac71abe9bebc6c4214bb7187053d165b1f8cd6d96ef3093df9d107e7ba615d",
+      "eventType": "transaction_applied",
+      "objectId": null,
+      "receiptId": "0xf9482b4df67ea49a5180143da2fcc8aaf836aafbb288ccc2130daa9657690376",
+      "status": "applied",
+      "txId": "0x514f9ef68c09de5a4dc80611d661d07a4ea3a4fae6000a43a25864489f354a81"
+    },
+    "0x8cccb30b7750c3484201753c6342d8d2c8e2a4dfa0299c1da6639e68ce78dcb6": {
+      "accountId": null,
+      "amountUnits": null,
+      "assetId": null,
+      "blockNumber": 1,
+      "eventId": "0x8cccb30b7750c3484201753c6342d8d2c8e2a4dfa0299c1da6639e68ce78dcb6",
+      "eventType": "transaction_applied",
+      "objectId": null,
+      "receiptId": "0xa1ab8856d0d5497d5181bbb501da6394662e0d2bcfec0418e423a86a3ef864be",
+      "status": "applied",
+      "txId": "0x3ac0b196a212a0e77d0a0c4b60e2283d2994b09993971b95427996700f5b92aa"
+    },
+    "0x97d803063ba218ebd205922efb36c4ab7e80d7df4dc8ac13120fc66e24301794": {
+      "accountId": null,
+      "amountUnits": null,
+      "assetId": null,
+      "blockNumber": 1,
+      "eventId": "0x97d803063ba218ebd205922efb36c4ab7e80d7df4dc8ac13120fc66e24301794",
+      "eventType": "transaction_applied",
+      "objectId": null,
+      "receiptId": "0xed22a82bb32dfcc2506b38bf5067e64808b01f10b001852bfe958d0b3dfc9b22",
+      "status": "applied",
+      "txId": "0x05abb39c720d8ee1cd9253e32efaa595f5d5b2fcef4a908f61ab4a6bfa315359"
+    },
+    "0x99710e06c1476c3460f0670e238a1bcfd437ff03c983ea0fda8d2cfdcfae3b4e": {
+      "accountId": null,
+      "amountUnits": null,
+      "assetId": null,
+      "blockNumber": 1,
+      "eventId": "0x99710e06c1476c3460f0670e238a1bcfd437ff03c983ea0fda8d2cfdcfae3b4e",
+      "eventType": "transaction_applied",
+      "objectId": null,
+      "receiptId": "0xc9d76a50e330a1541cdf2b9eb4ead342fbffc21e1cdb4d0492a4e5eb553e15fb",
+      "status": "applied",
+      "txId": "0x27aeba6c55c764222964764cb2bfbb69fb6fa56cb84714d6e98240ceb6e9d01d"
+    },
+    "0xb218d48446a9addb208938599fd5a2e4b23310305f15b64d7f608ccf6afa9d85": {
+      "accountId": null,
+      "amountUnits": null,
+      "assetId": null,
+      "blockNumber": 1,
+      "eventId": "0xb218d48446a9addb208938599fd5a2e4b23310305f15b64d7f608ccf6afa9d85",
+      "eventType": "transaction_applied",
+      "objectId": null,
+      "receiptId": "0x4c5b73550454a5ce06527b6e9fab2cf104a9f80681dc2cfb891b8e13d5a4bda0",
+      "status": "applied",
+      "txId": "0x75e63a0257621b8ef7412c6455a19d848996905e21f5ba79ccb0870d6e82eb25"
+    },
+    "0xc24e920b81b34896a21ca6bde9479d3f4e8a04f287e0e6453cae40e6fa1a7e88": {
+      "accountId": null,
+      "amountUnits": null,
+      "assetId": null,
+      "blockNumber": 1,
+      "eventId": "0xc24e920b81b34896a21ca6bde9479d3f4e8a04f287e0e6453cae40e6fa1a7e88",
+      "eventType": "transaction_applied",
+      "objectId": null,
+      "receiptId": "0x7c7f30dab08090d339468a6727871b834c71b8659e6b45e240cc8b5c8430322b",
+      "status": "applied",
+      "txId": "0xf32e17d973089ae20766e2c6ec07d1511ddecd3f79803f6146a90df971ca814f"
+    },
+    "0xcf34a90d5d03e23e9c9d8c34833858c680e99af1fb0776fda5ea7ba738219096": {
+      "accountId": null,
+      "amountUnits": null,
+      "assetId": null,
+      "blockNumber": 1,
+      "eventId": "0xcf34a90d5d03e23e9c9d8c34833858c680e99af1fb0776fda5ea7ba738219096",
+      "eventType": "transaction_applied",
+      "objectId": null,
+      "receiptId": "0x5eb03d645d9763a4d7e0125e7d7508680b7083533b10cb08461491caf33f7443",
+      "status": "applied",
+      "txId": "0xef6df43993478d8f14d609732c7260fa08861ecc17e74137b83beda8d50931d2"
+    },
+    "0xe597a31c9e32bcfd11d36ea93864c71a13384c1e0b64032863d109ab25c248a1": {
+      "accountId": null,
+      "amountUnits": null,
+      "assetId": null,
+      "blockNumber": 1,
+      "eventId": "0xe597a31c9e32bcfd11d36ea93864c71a13384c1e0b64032863d109ab25c248a1",
+      "eventType": "transaction_applied",
+      "objectId": null,
+      "receiptId": "0x0a1863f382f8a49039ccd7119bb3ec8818ab0a472d5f8a98fc9dd2220c9e2edd",
+      "status": "applied",
+      "txId": "0xec7019403fec03ea2ea4b090bc5ee1c63017ed9834bff5fb87ce2fe5d5794919"
+    },
+    "0xf4d2ae64c6843b6c6c2937295e7b269a64574a9645c173efd3f92ef46fbf70d9": {
+      "accountId": null,
+      "amountUnits": null,
+      "assetId": null,
+      "blockNumber": 1,
+      "eventId": "0xf4d2ae64c6843b6c6c2937295e7b269a64574a9645c173efd3f92ef46fbf70d9",
+      "eventType": "transaction_applied",
+      "objectId": null,
+      "receiptId": "0x2142f067d405bcd45b804bfc44237a943bdd587721a96be9e0004f03a10429e4",
+      "status": "applied",
+      "txId": "0x2cffda58c783dc026978b06a681587b19d9536ae4e158a69be855da1200f3189"
+    },
+    "0xf7dfc91c96e7a21f44dbce4bd7078a3b35a1354f4469141a2b87a00572d87897": {
+      "accountId": null,
+      "amountUnits": null,
+      "assetId": null,
+      "blockNumber": 1,
+      "eventId": "0xf7dfc91c96e7a21f44dbce4bd7078a3b35a1354f4469141a2b87a00572d87897",
+      "eventType": "transaction_applied",
+      "objectId": null,
+      "receiptId": "0x32e833d1b9aa72ba987d58caf30d5df8857a1f6255b07b20e2b75da6f92da424",
+      "status": "applied",
+      "txId": "0xafd3991af8b9e4eadfa3810f82d74701b7518269ae7ba5d0e3e450844445b03b"
+    },
+    "0xfb7845e078da7450ad7d004079c317851eccddd7b655c2b156619f7236d2ec5e": {
+      "accountId": null,
+      "amountUnits": null,
+      "assetId": null,
+      "blockNumber": 1,
+      "eventId": "0xfb7845e078da7450ad7d004079c317851eccddd7b655c2b156619f7236d2ec5e",
+      "eventType": "transaction_applied",
+      "objectId": null,
+      "receiptId": "0x34d568b916c5f936aaf58bda2a9fcce1dd7c0efaf0c03e3b12b540967bf198ee",
+      "status": "applied",
+      "txId": "0xa0729982b58cc701aba6af0bc29ca993190db4e8e1489af918dbe293c0c03bad"
+    }
+  },
+  "executionReceipts": {
+    "0x0a1863f382f8a49039ccd7119bb3ec8818ab0a472d5f8a98fc9dd2220c9e2edd": {
+      "blockNumber": 1,
+      "errorCode": null,
+      "errorMessage": null,
+      "eventIds": [
+        "0xe597a31c9e32bcfd11d36ea93864c71a13384c1e0b64032863d109ab25c248a1"
+      ],
+      "executionCostCharged": false,
+      "executionCostUnits": 0,
+      "noValue": true,
+      "payerAccountId": null,
+      "receiptId": "0x0a1863f382f8a49039ccd7119bb3ec8818ab0a472d5f8a98fc9dd2220c9e2edd",
+      "status": "applied",
+      "success": true,
+      "txId": "0xec7019403fec03ea2ea4b090bc5ee1c63017ed9834bff5fb87ce2fe5d5794919",
+      "txType": "FaucetLocalTestUnits"
+    },
+    "0x1a9d3d926d7af126548d8e1c1f64b1ce9dc9032986ae4806e207c8f7a6aaeb4d": {
+      "blockNumber": 1,
+      "errorCode": null,
+      "errorMessage": null,
+      "eventIds": [
+        "0x358a02ea4548c4e0ce1da601fdf98966220c16df91351e432a7f072f14e8271f"
+      ],
+      "executionCostCharged": false,
+      "executionCostUnits": 1,
+      "noValue": true,
+      "payerAccountId": null,
+      "receiptId": "0x1a9d3d926d7af126548d8e1c1f64b1ce9dc9032986ae4806e207c8f7a6aaeb4d",
+      "status": "applied",
+      "success": true,
+      "txId": "0x6f55c155425b968de01092be7d276f0c24430a2994910881938bc13c72f8892f",
+      "txType": "RegisterAgent"
+    },
+    "0x210240c9e6967ce25905837b94ac60c8f851a473dd194a04bcdd29f56d904d18": {
+      "blockNumber": 2,
+      "errorCode": null,
+      "errorMessage": null,
+      "eventIds": [
+        "0x085da711c107c4b6d62fa286999229290b58829e1a2e7325093c509bf7cb53b4"
+      ],
+      "executionCostCharged": false,
+      "executionCostUnits": 1,
+      "noValue": true,
+      "payerAccountId": null,
+      "receiptId": "0x210240c9e6967ce25905837b94ac60c8f851a473dd194a04bcdd29f56d904d18",
+      "status": "applied",
+      "success": true,
+      "txId": "0x8f719c880f17b5d4fb6d9efd54ac276d0dd8050d11c2c7870c36a79b66bc49d7",
+      "txType": "AnchorBatchToBasePlaceholder"
+    },
+    "0x2142f067d405bcd45b804bfc44237a943bdd587721a96be9e0004f03a10429e4": {
+      "blockNumber": 1,
+      "errorCode": null,
+      "errorMessage": null,
+      "eventIds": [
+        "0xf4d2ae64c6843b6c6c2937295e7b269a64574a9645c173efd3f92ef46fbf70d9"
+      ],
+      "executionCostCharged": false,
+      "executionCostUnits": 2,
+      "noValue": true,
+      "payerAccountId": null,
+      "receiptId": "0x2142f067d405bcd45b804bfc44237a943bdd587721a96be9e0004f03a10429e4",
+      "status": "applied",
+      "success": true,
+      "txId": "0x2cffda58c783dc026978b06a681587b19d9536ae4e158a69be855da1200f3189",
+      "txType": "RegisterRootfield"
+    },
+    "0x32e833d1b9aa72ba987d58caf30d5df8857a1f6255b07b20e2b75da6f92da424": {
+      "blockNumber": 1,
+      "errorCode": null,
+      "errorMessage": null,
+      "eventIds": [
+        "0xf7dfc91c96e7a21f44dbce4bd7078a3b35a1354f4469141a2b87a00572d87897"
+      ],
+      "executionCostCharged": false,
+      "executionCostUnits": 0,
+      "noValue": true,
+      "payerAccountId": null,
+      "receiptId": "0x32e833d1b9aa72ba987d58caf30d5df8857a1f6255b07b20e2b75da6f92da424",
+      "status": "applied",
+      "success": true,
+      "txId": "0xafd3991af8b9e4eadfa3810f82d74701b7518269ae7ba5d0e3e450844445b03b",
+      "txType": "CreateLocalTestUnitBalance"
+    },
+    "0x34d568b916c5f936aaf58bda2a9fcce1dd7c0efaf0c03e3b12b540967bf198ee": {
+      "blockNumber": 1,
+      "errorCode": null,
+      "errorMessage": null,
+      "eventIds": [
+        "0xfb7845e078da7450ad7d004079c317851eccddd7b655c2b156619f7236d2ec5e"
+      ],
+      "executionCostCharged": false,
+      "executionCostUnits": 1,
+      "noValue": true,
+      "payerAccountId": null,
+      "receiptId": "0x34d568b916c5f936aaf58bda2a9fcce1dd7c0efaf0c03e3b12b540967bf198ee",
+      "status": "applied",
+      "success": true,
+      "txId": "0xa0729982b58cc701aba6af0bc29ca993190db4e8e1489af918dbe293c0c03bad",
+      "txType": "OpenChallenge"
+    },
+    "0x4c5b73550454a5ce06527b6e9fab2cf104a9f80681dc2cfb891b8e13d5a4bda0": {
+      "blockNumber": 1,
+      "errorCode": null,
+      "errorMessage": null,
+      "eventIds": [
+        "0xb218d48446a9addb208938599fd5a2e4b23310305f15b64d7f608ccf6afa9d85"
+      ],
+      "executionCostCharged": false,
+      "executionCostUnits": 2,
+      "noValue": true,
+      "payerAccountId": null,
+      "receiptId": "0x4c5b73550454a5ce06527b6e9fab2cf104a9f80681dc2cfb891b8e13d5a4bda0",
+      "status": "applied",
+      "success": true,
+      "txId": "0x75e63a0257621b8ef7412c6455a19d848996905e21f5ba79ccb0870d6e82eb25",
+      "txType": "RegisterModelPassport"
+    },
+    "0x5eb03d645d9763a4d7e0125e7d7508680b7083533b10cb08461491caf33f7443": {
+      "blockNumber": 1,
+      "errorCode": null,
+      "errorMessage": null,
+      "eventIds": [
+        "0xcf34a90d5d03e23e9c9d8c34833858c680e99af1fb0776fda5ea7ba738219096"
+      ],
+      "executionCostCharged": false,
+      "executionCostUnits": 1,
+      "noValue": true,
+      "payerAccountId": null,
+      "receiptId": "0x5eb03d645d9763a4d7e0125e7d7508680b7083533b10cb08461491caf33f7443",
+      "status": "applied",
+      "success": true,
+      "txId": "0xef6df43993478d8f14d609732c7260fa08861ecc17e74137b83beda8d50931d2",
+      "txType": "CommitRoot"
+    },
+    "0x7b939d58be6043af7122c2cec2e67c18d2843ff513415cb5a5f3cb633010c5b9": {
+      "blockNumber": 1,
+      "errorCode": null,
+      "errorMessage": null,
+      "eventIds": [
+        "0x2df675c4fcc2045ff33b5b9882a2dc47ca4f3a963b2aab777a682c617224a3e1"
+      ],
+      "executionCostCharged": false,
+      "executionCostUnits": 2,
+      "noValue": true,
+      "payerAccountId": null,
+      "receiptId": "0x7b939d58be6043af7122c2cec2e67c18d2843ff513415cb5a5f3cb633010c5b9",
+      "status": "applied",
+      "success": true,
+      "txId": "0xda9d2574a0d4bec158e13623499c6efe6dddb76f838c5f06c3e4dc8457b67d3b",
+      "txType": "UpdateMemoryCell"
+    },
+    "0x7c7f30dab08090d339468a6727871b834c71b8659e6b45e240cc8b5c8430322b": {
+      "blockNumber": 1,
+      "errorCode": null,
+      "errorMessage": null,
+      "eventIds": [
+        "0xc24e920b81b34896a21ca6bde9479d3f4e8a04f287e0e6453cae40e6fa1a7e88"
+      ],
+      "executionCostCharged": false,
+      "executionCostUnits": 1,
+      "noValue": true,
+      "payerAccountId": null,
+      "receiptId": "0x7c7f30dab08090d339468a6727871b834c71b8659e6b45e240cc8b5c8430322b",
+      "status": "applied",
+      "success": true,
+      "txId": "0xf32e17d973089ae20766e2c6ec07d1511ddecd3f79803f6146a90df971ca814f",
+      "txType": "ResolveChallenge"
+    },
+    "0xa1ab8856d0d5497d5181bbb501da6394662e0d2bcfec0418e423a86a3ef864be": {
+      "blockNumber": 1,
+      "errorCode": null,
+      "errorMessage": null,
+      "eventIds": [
+        "0x8cccb30b7750c3484201753c6342d8d2c8e2a4dfa0299c1da6639e68ce78dcb6"
+      ],
+      "executionCostCharged": false,
+      "executionCostUnits": 2,
+      "noValue": true,
+      "payerAccountId": null,
+      "receiptId": "0xa1ab8856d0d5497d5181bbb501da6394662e0d2bcfec0418e423a86a3ef864be",
+      "status": "applied",
+      "success": true,
+      "txId": "0x3ac0b196a212a0e77d0a0c4b60e2283d2994b09993971b95427996700f5b92aa",
+      "txType": "SubmitVerifierReport"
+    },
+    "0xc9d76a50e330a1541cdf2b9eb4ead342fbffc21e1cdb4d0492a4e5eb553e15fb": {
+      "blockNumber": 1,
+      "errorCode": null,
+      "errorMessage": null,
+      "eventIds": [
+        "0x99710e06c1476c3460f0670e238a1bcfd437ff03c983ea0fda8d2cfdcfae3b4e"
+      ],
+      "executionCostCharged": false,
+      "executionCostUnits": 1,
+      "noValue": true,
+      "payerAccountId": null,
+      "receiptId": "0xc9d76a50e330a1541cdf2b9eb4ead342fbffc21e1cdb4d0492a4e5eb553e15fb",
+      "status": "applied",
+      "success": true,
+      "txId": "0x27aeba6c55c764222964764cb2bfbb69fb6fa56cb84714d6e98240ceb6e9d01d",
+      "txType": "MarkArtifactAvailability"
+    },
+    "0xd4b1bd423c1ea6e3cb5e35f2747b6a32adc8df507a1da92e019f82c09a7ecf30": {
+      "blockNumber": 1,
+      "errorCode": null,
+      "errorMessage": null,
+      "eventIds": [
+        "0x59fb3d5a273f0b958e2a67537da733bb50f1332f85f658e89596d6ac8b2ef0e8"
+      ],
+      "executionCostCharged": false,
+      "executionCostUnits": 2,
+      "noValue": true,
+      "payerAccountId": null,
+      "receiptId": "0xd4b1bd423c1ea6e3cb5e35f2747b6a32adc8df507a1da92e019f82c09a7ecf30",
+      "status": "applied",
+      "success": true,
+      "txId": "0x73b81134901c2ce13e575f161d82a404c6f7cd1ef2e8ee17beb6697062175c46",
+      "txType": "SubmitWorkReceipt"
+    },
+    "0xd7f7209dd9709e9bf21dc604742499589ddd76019a833988374077d802b390b2": {
+      "blockNumber": 1,
+      "errorCode": null,
+      "errorMessage": null,
+      "eventIds": [
+        "0x21976b72efed5064f4b21b2e3c55ce61f6bf761441c9d842b2a303f9a1991cd5"
+      ],
+      "executionCostCharged": false,
+      "executionCostUnits": 1,
+      "noValue": true,
+      "payerAccountId": null,
+      "receiptId": "0xd7f7209dd9709e9bf21dc604742499589ddd76019a833988374077d802b390b2",
+      "status": "applied",
+      "success": true,
+      "txId": "0xb9f435aceb1bedb86dce821743769b28c02a42002c9cd41f2df1ea0279462ab2",
+      "txType": "SubmitArtifactCommitment"
+    },
+    "0xed22a82bb32dfcc2506b38bf5067e64808b01f10b001852bfe958d0b3dfc9b22": {
+      "blockNumber": 1,
+      "errorCode": null,
+      "errorMessage": null,
+      "eventIds": [
+        "0x97d803063ba218ebd205922efb36c4ab7e80d7df4dc8ac13120fc66e24301794"
+      ],
+      "executionCostCharged": false,
+      "executionCostUnits": 1,
+      "noValue": true,
+      "payerAccountId": null,
+      "receiptId": "0xed22a82bb32dfcc2506b38bf5067e64808b01f10b001852bfe958d0b3dfc9b22",
+      "status": "applied",
+      "success": true,
+      "txId": "0x05abb39c720d8ee1cd9253e32efaa595f5d5b2fcef4a908f61ab4a6bfa315359",
+      "txType": "RegisterVerifierModule"
+    },
+    "0xf9482b4df67ea49a5180143da2fcc8aaf836aafbb288ccc2130daa9657690376": {
+      "blockNumber": 1,
+      "errorCode": null,
+      "errorMessage": null,
+      "eventIds": [
+        "0x71ac71abe9bebc6c4214bb7187053d165b1f8cd6d96ef3093df9d107e7ba615d"
+      ],
+      "executionCostCharged": false,
+      "executionCostUnits": 1,
+      "noValue": true,
+      "payerAccountId": null,
+      "receiptId": "0xf9482b4df67ea49a5180143da2fcc8aaf836aafbb288ccc2130daa9657690376",
+      "status": "applied",
+      "success": true,
+      "txId": "0x514f9ef68c09de5a4dc80611d661d07a4ea3a4fae6000a43a25864489f354a81",
+      "txType": "FinalizeWorkReceipt"
+    }
+  },
   "faucetRecords": {
     "faucet:demo:001": {
       "accountId": "local-balance:demo:agent-alpha",
@@ -178,7 +776,7 @@
       "finalizedBy": "operator:local-demo",
       "receiptId": "receipt:demo:001",
       "rootfieldId": "rootfield:demo:alpha",
-      "stateRoot": "0x4e7ee5e7a8cab9b4ddda183842b9e9c1e1e000afea820b577ecc90fa4d9517e2"
+      "stateRoot": "0x178cdd7a10e4b27879439acefd010ced736cc456f8873abb6ab7fec8d135e92e"
     }
   },
   "genesisConfig": {
@@ -189,6 +787,8 @@
       "crypto/FLOWMEMORY_CRYPTO_SPEC.md#domain-separation",
       "crypto/ATTESTATIONS.md#local-signature-helpers"
     ],
+    "executionCostChargeMode": "record-only",
+    "executionCostsEnabled": true,
     "genesisHash": "0x0f23c892cbd2d00c10839d97ddab833698a83f8df8d6df27ceac03cfdd4b7bc9",
     "genesisLogicalTime": 1778688000,
     "networkId": "flowmemory-private-local",
@@ -201,9 +801,12 @@
   "localTestUnitBalances": {
     "local-balance:demo:agent-alpha": {
       "accountId": "local-balance:demo:agent-alpha",
+      "bridgeCreditedUnits": 0,
+      "lastBridgeCreditId": null,
       "lastFaucetRecordId": "faucet:demo:001",
       "noValue": true,
       "owner": "agent:demo:alpha",
+      "reservedUnits": 0,
       "totalFaucetUnits": 1000,
       "units": 1000,
       "updatedAtBlock": 1
@@ -211,19 +814,23 @@
   },
   "lpPositions": {},
   "mapRoots": {
+    "accountNonceRoot": "0x91a5e27fe38391bb9f93c1a4543693bffa4b4f6fecf2ac9bc630f09f72d1e9bd",
     "agentAccountRoot": "0xcf31230bfff347f79e19a55f4d1ff5fa486b0b1ad4754ce22b93de4b259a3ca7",
     "artifactAvailabilityProofRoot": "0xfb4b693c45014aae0947f35696e9d864e7b26ac6fd39c1df5edb3e0dcf9bd928",
     "artifactCommitmentRoot": "0xb772a9f7273032fd3ba2da8b6476d4715bbbafbd2a7eed21ecd0d558bde3beab",
     "balanceTransferRoot": "0x9b6e249f769a93bc9f34a90156e028d1a830badcd8ccdc5b1487d512cdbf0a6d",
-    "baseAnchorRoot": "0xa10b087464d8e6098696295a2a4b26a4396974c9ed10dd0bba429f22284cd573",
+    "baseAnchorRoot": "0xe1e9eb52e2384ed9190da906cdffde07692401049d384a66ad8f72688ac6276b",
+    "bridgeCreditReceiptRoot": "0x0a86ce98161cb40ca4c7719468c0ed8f122677d12641c13305277094b8f3a509",
     "challengeRoot": "0x16da3d2bf2dcd801bc5deb3987dc01342cb957031ad01408ea77bf5d1583656f",
     "dexPoolRoot": "0x0e5f034494a2deb6a4f20c04f01e678795c587df4869ad3f189f107fcc447dea",
+    "executionEventRoot": "0x6cf55db15d19dddb084512871266d4127dc2b3a0682df89ba1d3a0e3927f0674",
+    "executionReceiptRoot": "0x878dc913e1daae0423b68906a6b6f2411f7866031b9a42830cf591af620d00be",
     "faucetRecordRoot": "0x2277503a52fab3f9e49b40debfb7d641abee75cf268aa56da403fdcf4fad6cee",
-    "finalityReceiptRoot": "0xdf352e20fd1ddfd2855202335e03cfec21d87e99bf8717d161fe8648998e16cf",
+    "finalityReceiptRoot": "0x04a6f56f5df14e6dbfb8c233394c6012c50947f40028e8f95e4e954fec9a29ba",
     "importedObservationRoot": "0x99cb1b939d5a09f800f72e4c5a2b92988571126e1f6f93549f4893b3f7de7880",
     "importedVerifierReportRoot": "0x6070b1015f000dd509c7b276d2ad68d8a9d188ef1a961c2f573346eb75ea5ad7",
     "liquidityReceiptRoot": "0x98bf15cc6859994038744612e125236b1f777895a051c41702c2004134327738",
-    "localTestUnitBalanceRoot": "0x167041ef195b5dde2d2cade6ecb26c9a0a596e9ed21ff7bfb02d33c9d2be8d15",
+    "localTestUnitBalanceRoot": "0xbaae802f4a4792e643944f86fa9baba660e5f796599c0b10936182585a2cd877",
     "lpPositionRoot": "0xe67dd98259afb06ca93620b4a8742b924ec2e8f3e6e72934eef5b8e60829d46f",
     "memoryCellRoot": "0x1b4e91099dd8d867201bd880437197ae6c031e538341aaa3cd2046e5706a2c25",
     "modelPassportRoot": "0x326aa6b0b372d29d24d747fe0879adfd7aaea206373b24ae2ab77d56357e9529",
@@ -233,6 +840,7 @@
     "tokenBalanceRoot": "0xbaf3b150fe41a0f3a2d9fe3dd9a664f9c5934bfef37218d9c3bf1c682be5f8c6",
     "tokenDefinitionRoot": "0xbbbad9681e8756403940e4333111706a4fcee1f30534ba14deea9ba148056be0",
     "tokenMintReceiptRoot": "0xaf86773ae2d2c4cbb8404f895fd9ff4132336f382e4e3f12b59df2ed9ba52806",
+    "tokenTransferReceiptRoot": "0xe6e05832f92dbc9c6a25ed2a39331548748283ed8c2b5bb5c61e0f90fd99edac",
     "verifierModuleRoot": "0xd6ddd8a2d0f5812d64679656c69983a2e0aecd36bd36199d900245658ae4626c",
     "verifierReportRoot": "0x4facd21e55423e182eba87355482a35daa93f53190fbd3a8d2969f9d55bc5373",
     "workReceiptRoot": "0x8b3ef5650c9eea2f608ad9c7cb73df3c289fc0ac72ed04f46e6ae4bce0a1f023"
@@ -269,9 +877,10 @@
     }
   },
   "schema": "flowmemory.indexer_handoff.local_devnet.v0",
-  "stateRoot": "0x3074ef2e5311d94e8f9a2660a6cc016c7b7f9a08c56ee07f9e841c1489726e68",
+  "stateRoot": "0xc354545e7fa40a6fba67b480c9484abec8b6cd980f21f8646b9840f4d34d72ba",
   "swapReceipts": {},
   "tokenBalances": {},
   "tokenDefinitions": {},
-  "tokenMintReceipts": {}
+  "tokenMintReceipts": {},
+  "tokenTransferReceipts": {}
 }

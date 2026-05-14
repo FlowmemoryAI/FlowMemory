@@ -22,7 +22,7 @@ This document marks every major feature as one of:
 | Run devnet tests | Implemented | `cargo test --manifest-path crates/flowmemory-devnet/Cargo.toml`. |
 | Run service tests | Implemented | `npm test` for merged service packages. |
 | Run launch candidate gate | Implemented | `npm run launch:candidate`. |
-| One-command private testnet aliases | Implemented for merged surfaces | `package.json` now exposes `flowchain:prereq`, `flowchain:init`, `flowchain:start`, `flowchain:stop`, `flowchain:demo`, `flowchain:smoke`, `flowchain:full-smoke`, `flowchain:export`, `flowchain:import`, `control-plane:serve`, and `workbench:dev`. |
+| One-command private testnet aliases | Implemented for merged surfaces | `package.json` now exposes `flowchain:prereq`, `flowchain:init`, `flowchain:start`, `flowchain:stop`, `flowchain:demo`, `flowchain:smoke`, `flowchain:full-smoke`, `flowchain:export`, `flowchain:import`, `flowchain:execution:e2e`, `control-plane:serve`, and `workbench:dev`. |
 | Prerequisite check script | Implemented | `infra/scripts/flowchain-check-prereqs.ps1`. |
 | Start/stop scripts | Implemented bounded wrappers | `flowchain:start` prepares launch-core fixtures and state summary; `flowchain:stop` records stopped state and can reset ignored local state. Long-running node behavior remains in flight. |
 | Full smoke script | Implemented for current private/local surfaces | `flowchain:full-smoke` runs the smoke gate, control-plane smoke client, deterministic replay, dashboard build, hardware fixture, unsafe-claim scan, export no-secret scan, and `git diff --check`. |
@@ -43,6 +43,24 @@ This document marks every major feature as one of:
 | State export | Implemented | `export-fixtures` exists and is exercised by the package-level smoke path. |
 | State import/snapshot restore | Implemented local wrapper | `flowchain:import` restores current devnet state from an exported bundle; richer subsystem snapshots remain future work. |
 | Health/status output | Implemented local control-plane path | CLI summary and `control-plane:smoke` exercise local health/status queries. |
+
+## Execution, Balances, Tokens, And DEX
+
+| Feature | Status | Acceptance condition |
+| --- | --- | --- |
+| Native local balances | Implemented private/local | `localTestUnitBalances` records units, bridge credited units, reserved units, available balance behavior, and deterministic roots. |
+| Bridge credit spend flow | Implemented private/local | `ApplyBridgeCredit` credits `asset:flowchain-local-test-unit`, rejects replay, and the product flow spends credited units in transfer and swap paths. |
+| Execution cost table | Implemented private/local | Every execution receipt records deterministic cost units; default mode is record-only, with test coverage for optional native charging failure. |
+| Native transfers | Implemented | Wallet A to wallet B transfer updates balances, nonce, transfer receipt, execution receipt, and event state. |
+| Account nonces | Implemented | Product/account actions require the next nonce; duplicate and stale nonces fail with receipts. |
+| Token launch | Implemented | Local token launch validates id, symbol, name, decimals, supply, duplicate id/symbol, owner account, and records launch/mint state. |
+| Token transfer | Implemented | Token transfers update per-account token balances, record token-transfer receipts, and fail on insufficient balance or invalid token. |
+| Pool creation | Implemented | Pool ids are deterministic over valid distinct asset pairs and creator account nonce. |
+| Add/remove liquidity | Implemented | Liquidity updates reserves, LP supply, LP positions, and liquidity receipts with deterministic rounding. |
+| Exact-input swap | Implemented | Swap updates reserves and balances, enforces minimum output, and records swap receipt. |
+| Failed receipts | Implemented | Failed transactions commit execution receipts and failed events without partial business mutation. |
+| State root coverage | Implemented | Accounts, native balances, bridge credits, token state, pools, LP positions, swaps, execution receipts, and events are included in state roots/map roots. |
+| Execution E2E report | Implemented | `npm run flowchain:execution:e2e` writes `devnet/local/execution-e2e/execution-e2e-report.json`. |
 
 ## Native Objects
 
@@ -162,6 +180,38 @@ Required final evidence for the acceptance PR:
 - Control-plane query sample.
 - Workbench screenshot or test/build evidence.
 - `git diff --check`.
+
+## Execution E2E Evidence
+
+Current execution proof command:
+
+```powershell
+npm run flowchain:execution:e2e
+```
+
+Expected output:
+
+- `devnet/local/execution-e2e/state.json`
+- `devnet/local/execution-e2e/execution-e2e-report.json`
+- local dashboard/indexer/verifier/control-plane handoff files
+
+The report proves bridge credit, native transfer, token launch, token transfer, pool creation, add liquidity, exact-input swap, remove liquidity, queryable receipts, failed receipt evidence, and deterministic state root/map roots.
+
+Direct product runtime proof:
+
+```powershell
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- --state devnet/local/product-execution-smoke/state.json product-smoke --out-dir devnet/local/product-execution-smoke
+```
+
+The root `npm run flowchain:product-e2e` wrapper passes after installing the repository lockfile dependencies. It runs the private/local full smoke prerequisite, executes `product-smoke`, verifies control-plane/dashboard product surfaces, and writes `devnet/local/product-e2e/flowchain-product-e2e-report.json`.
+
+Runtime-owned real-value pilot proof:
+
+```powershell
+npm run flowchain:real-value-pilot:runtime
+```
+
+This command aliases to `flowchain:execution:e2e` and proves the local runtime can apply a bridge credit once, spend credited local units in transfer and DEX flow, reject replay, and preserve state across restart/export/import. The broader real-value pilot coordinator still requires contracts and bridge-relayer proof gates outside this runtime change.
 
 ## Review Gate
 

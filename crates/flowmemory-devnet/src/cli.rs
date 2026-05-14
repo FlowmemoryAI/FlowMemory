@@ -77,6 +77,9 @@ pub enum Command {
     ProductSmoke {
         out_dir: PathBuf,
     },
+    ExecutionE2e {
+        out_dir: PathBuf,
+    },
 }
 
 pub fn run_cli() -> Result<()> {
@@ -196,6 +199,11 @@ fn parse_args(args: Vec<String>) -> Result<Cli> {
                 .map(PathBuf::from)
                 .unwrap_or_else(|_| PathBuf::from("fixtures/handoff/generated-product")),
         },
+        "execution-e2e" => Command::ExecutionE2e {
+            out_dir: option_value(&positional[1..], "--out-dir")
+                .map(PathBuf::from)
+                .unwrap_or_else(|_| PathBuf::from("devnet/local/execution-e2e")),
+        },
         unknown => return Err(anyhow!("unknown command '{unknown}'")),
     };
 
@@ -240,7 +248,7 @@ fn option_u64(args: &[String], name: &str) -> Result<Option<u64>> {
 
 fn print_help() {
     println!(
-        "flowmemory-devnet --state <path> --node-dir <path> <command>\n\nCommands:\n  init\n  reset-local\n  node [--node-id <id>] [--block-ms <ms>] [--max-blocks <n>] [--peer-config <path>]\n  node-stop\n  node-status\n  tick [--node-id <id>] [--peer-config <path>]\n  submit-tx --tx-file <path> [--authorized-by <id>] [--direct]\n  faucet --account <id> --amount <n> [--reason <text>] [--authorized-by <id>] [--direct]\n  start|run [--blocks <n>]\n  run-block\n  submit-fixture --fixture <path>\n  inspect|inspect-state [--summary]\n  export|export-fixtures [--out-dir <path>]\n  export-state [--out <path>]\n  import-state --from <path>\n  demo [--out-dir <path>]\n  smoke [--out-dir <path>]\n  product-demo|product-smoke [--out-dir <path>]\n"
+        "flowmemory-devnet --state <path> --node-dir <path> <command>\n\nCommands:\n  init\n  reset-local\n  node [--node-id <id>] [--block-ms <ms>] [--max-blocks <n>] [--peer-config <path>]\n  node-stop\n  node-status\n  tick [--node-id <id>] [--peer-config <path>]\n  submit-tx --tx-file <path> [--authorized-by <id>] [--direct]\n  faucet --account <id> --amount <n> [--reason <text>] [--authorized-by <id>] [--direct]\n  start|run [--blocks <n>]\n  run-block\n  submit-fixture --fixture <path>\n  inspect|inspect-state [--summary]\n  export|export-fixtures [--out-dir <path>]\n  export-state [--out <path>]\n  import-state --from <path>\n  demo [--out-dir <path>]\n  smoke [--out-dir <path>]\n  product-demo|product-smoke [--out-dir <path>]\n  execution-e2e [--out-dir <path>]\n"
     );
 }
 
@@ -469,6 +477,32 @@ fn run(cli: Cli) -> Result<()> {
                 &first,
                 deterministic_replay,
             ))?;
+        }
+        Command::ExecutionE2e { out_dir } => {
+            let run = build_execution_e2e_state();
+            save_state(&cli.state, &run.state)?;
+            write_runtime_boundary_files(&cli.state, &run.state)?;
+            export_handoff(&run.state, &out_dir)?;
+            let report = ExecutionE2eReport::from_run(&run);
+            let report_path = out_dir.join("execution-e2e-report.json");
+            write_json(report_path.clone(), &report)?;
+            print_json(&ExecutionE2eSummary {
+                schema: "flowmemory.local_devnet.execution_e2e_summary.v0".to_string(),
+                report_path,
+                state_root: state_root(&run.state),
+                success_receipts: run
+                    .state
+                    .execution_receipts
+                    .values()
+                    .filter(|receipt| receipt.success)
+                    .count(),
+                failed_receipts: run
+                    .state
+                    .execution_receipts
+                    .values()
+                    .filter(|receipt| !receipt.success)
+                    .count(),
+            })?;
         }
     }
     Ok(())
@@ -939,6 +973,15 @@ struct DemoRun {
     second_block_hash: String,
 }
 
+struct ExecutionE2eRun {
+    state: crate::model::ChainState,
+    product_block_hash: String,
+    failure_block_hash: String,
+    anchor_block_hash: String,
+    product_tx_ids: Vec<String>,
+    negative_tx_ids: Vec<String>,
+}
+
 fn build_demo_state() -> DemoRun {
     let mut state = genesis_state();
     for tx in demo_transactions() {
@@ -990,6 +1033,174 @@ fn build_product_smoke_state() -> DemoRun {
         state,
         first_block_hash: first.block_hash,
         second_block_hash: second.block_hash,
+    }
+}
+
+fn build_execution_e2e_state() -> ExecutionE2eRun {
+    let mut state = genesis_state();
+    let mut product_tx_ids = Vec::new();
+    for tx in product_demo_transactions() {
+        product_tx_ids.push(queue_transaction(&mut state, tx));
+    }
+    let product_block = build_block(&mut state);
+
+    let token_id = crate::model::deterministic_token_id("FLOWT");
+    let pool_id =
+        crate::model::deterministic_pool_id(crate::model::LOCAL_TEST_UNIT_ASSET_ID, &token_id);
+    let alice = "local-account:product:alice";
+    let bob = "local-account:product:bob";
+    let duplicate_bridge_deposit_id = "bridge-deposit:product:alice:001";
+    let duplicate_bridge_credit_id = crate::model::deterministic_bridge_credit_id(
+        duplicate_bridge_deposit_id,
+        alice,
+        crate::model::LOCAL_TEST_UNIT_ASSET_ID,
+        10_000,
+    );
+    let negative_transactions = vec![
+        Transaction::TransferLocalTestUnits {
+            transfer_id: "transfer:negative:insufficient-native".to_string(),
+            from_account_id: bob.to_string(),
+            to_account_id: alice.to_string(),
+            amount_units: 100_000,
+            account_nonce: 2,
+            memo: "negative-insufficient-native".to_string(),
+        },
+        Transaction::TransferLocalTestUnits {
+            transfer_id: "transfer:negative:duplicate-nonce".to_string(),
+            from_account_id: alice.to_string(),
+            to_account_id: bob.to_string(),
+            amount_units: 1,
+            account_nonce: 7,
+            memo: "negative-duplicate-nonce".to_string(),
+        },
+        Transaction::TransferLocalTestUnits {
+            transfer_id: "transfer:negative:stale-nonce".to_string(),
+            from_account_id: alice.to_string(),
+            to_account_id: bob.to_string(),
+            amount_units: 1,
+            account_nonce: 1,
+            memo: "negative-stale-nonce".to_string(),
+        },
+        Transaction::TransferLocalTestUnits {
+            transfer_id: "transfer:product:alice-to-bob:native:001".to_string(),
+            from_account_id: alice.to_string(),
+            to_account_id: bob.to_string(),
+            amount_units: 1,
+            account_nonce: 8,
+            memo: "negative-duplicate-transfer-id".to_string(),
+        },
+        Transaction::TransferToken {
+            transfer_id: crate::model::deterministic_token_transfer_id(
+                &token_id, bob, alice, 1_000_000, 2,
+            ),
+            token_id: token_id.clone(),
+            from_account_id: bob.to_string(),
+            to_account_id: alice.to_string(),
+            amount_units: 1_000_000,
+            account_nonce: 2,
+        },
+        Transaction::TransferToken {
+            transfer_id: crate::model::deterministic_token_transfer_id(
+                "token:missing",
+                alice,
+                bob,
+                1,
+                8,
+            ),
+            token_id: "token:missing".to_string(),
+            from_account_id: alice.to_string(),
+            to_account_id: bob.to_string(),
+            amount_units: 1,
+            account_nonce: 8,
+        },
+        Transaction::AddLiquidity {
+            liquidity_id: crate::model::deterministic_liquidity_id(&pool_id, alice, "add", "0:1:1"),
+            pool_id: pool_id.clone(),
+            provider_account_id: alice.to_string(),
+            base_amount_units: 0,
+            quote_amount_units: 1,
+            min_lp_units: 1,
+            account_nonce: 8,
+        },
+        Transaction::SwapExactIn {
+            swap_id: crate::model::deterministic_swap_id(
+                "pool:missing",
+                bob,
+                crate::model::LOCAL_TEST_UNIT_ASSET_ID,
+                1,
+                "1",
+            ),
+            pool_id: "pool:missing".to_string(),
+            trader_account_id: bob.to_string(),
+            asset_in_id: crate::model::LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            amount_in_units: 1,
+            min_amount_out_units: 1,
+            account_nonce: 2,
+        },
+        Transaction::SwapExactIn {
+            swap_id: crate::model::deterministic_swap_id(
+                &pool_id,
+                bob,
+                crate::model::LOCAL_TEST_UNIT_ASSET_ID,
+                0,
+                "1",
+            ),
+            pool_id: pool_id.clone(),
+            trader_account_id: bob.to_string(),
+            asset_in_id: crate::model::LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            amount_in_units: 0,
+            min_amount_out_units: 1,
+            account_nonce: 2,
+        },
+        Transaction::SwapExactIn {
+            swap_id: crate::model::deterministic_swap_id(
+                &pool_id,
+                bob,
+                crate::model::LOCAL_TEST_UNIT_ASSET_ID,
+                100,
+                "50000",
+            ),
+            pool_id,
+            trader_account_id: bob.to_string(),
+            asset_in_id: crate::model::LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            amount_in_units: 100,
+            min_amount_out_units: 50_000,
+            account_nonce: 2,
+        },
+        Transaction::ApplyBridgeCredit {
+            credit_id: duplicate_bridge_credit_id,
+            deposit_id: duplicate_bridge_deposit_id.to_string(),
+            replay_key: "bridge-replay:product:alice:001".to_string(),
+            account_id: alice.to_string(),
+            asset_id: crate::model::LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            amount_units: 10_000,
+            acknowledged_at_block_number: 8,
+            account_nonce: 8,
+        },
+    ];
+    let mut negative_tx_ids = Vec::new();
+    for tx in negative_transactions {
+        negative_tx_ids.push(queue_transaction(&mut state, tx));
+    }
+    let failure_block = build_block(&mut state);
+
+    let appchain_chain_id = state.chain_id.clone();
+    queue_transaction(
+        &mut state,
+        Transaction::AnchorBatchToBasePlaceholder {
+            appchain_chain_id,
+            finality_status: "local-execution-e2e-placeholder".to_string(),
+        },
+    );
+    let anchor_block = build_block(&mut state);
+
+    ExecutionE2eRun {
+        state,
+        product_block_hash: product_block.block_hash,
+        failure_block_hash: failure_block.block_hash,
+        anchor_block_hash: anchor_block.block_hash,
+        product_tx_ids,
+        negative_tx_ids,
     }
 }
 
@@ -1109,11 +1320,14 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "rootfields": state.rootfields,
         "agentAccounts": state.agent_accounts,
         "localTestUnitBalances": state.local_test_unit_balances,
+        "accountNonces": state.account_nonces,
         "faucetRecords": state.faucet_records,
         "balanceTransfers": state.balance_transfers,
+        "bridgeCreditReceipts": state.bridge_credit_receipts,
         "tokenDefinitions": state.token_definitions,
         "tokenBalances": state.token_balances,
         "tokenMintReceipts": state.token_mint_receipts,
+        "tokenTransferReceipts": state.token_transfer_receipts,
         "dexPools": state.dex_pools,
         "lpPositions": state.lp_positions,
         "liquidityReceipts": state.liquidity_receipts,
@@ -1128,6 +1342,8 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "workReceipts": state.work_receipts,
         "verifierReports": state.verifier_reports,
         "baseAnchors": state.base_anchors,
+        "executionReceipts": state.execution_receipts,
+        "executionEvents": state.execution_events,
     });
 
     let indexer = serde_json::json!({
@@ -1137,11 +1353,14 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "operatorKeyReferences": state.operator_key_references,
         "agentAccounts": state.agent_accounts,
         "localTestUnitBalances": state.local_test_unit_balances,
+        "accountNonces": state.account_nonces,
         "faucetRecords": state.faucet_records,
         "balanceTransfers": state.balance_transfers,
+        "bridgeCreditReceipts": state.bridge_credit_receipts,
         "tokenDefinitions": state.token_definitions,
         "tokenBalances": state.token_balances,
         "tokenMintReceipts": state.token_mint_receipts,
+        "tokenTransferReceipts": state.token_transfer_receipts,
         "dexPools": state.dex_pools,
         "lpPositions": state.lp_positions,
         "liquidityReceipts": state.liquidity_receipts,
@@ -1151,6 +1370,8 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "finalityReceipts": state.finality_receipts,
         "artifactAvailabilityProofs": state.artifact_availability_proofs,
         "blocks": state.blocks,
+        "executionReceipts": state.execution_receipts,
+        "executionEvents": state.execution_events,
         "mapRoots": state_map_roots(state),
         "stateRoot": state_root(state),
     });
@@ -1160,11 +1381,14 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "genesisConfig": state.config,
         "operatorKeyReferences": state.operator_key_references,
         "localTestUnitBalances": state.local_test_unit_balances,
+        "accountNonces": state.account_nonces,
         "faucetRecords": state.faucet_records,
         "balanceTransfers": state.balance_transfers,
+        "bridgeCreditReceipts": state.bridge_credit_receipts,
         "tokenDefinitions": state.token_definitions,
         "tokenBalances": state.token_balances,
         "tokenMintReceipts": state.token_mint_receipts,
+        "tokenTransferReceipts": state.token_transfer_receipts,
         "dexPools": state.dex_pools,
         "lpPositions": state.lp_positions,
         "liquidityReceipts": state.liquidity_receipts,
@@ -1176,6 +1400,8 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "finalityReceipts": state.finality_receipts,
         "artifactAvailabilityProofs": state.artifact_availability_proofs,
         "importedVerifierReports": state.imported_verifier_reports,
+        "executionReceipts": state.execution_receipts,
+        "executionEvents": state.execution_events,
         "mapRoots": state_map_roots(state),
         "stateRoot": state_root(state),
     });
@@ -1194,11 +1420,14 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
             "rootfields": state.rootfields,
             "agentAccounts": state.agent_accounts,
             "localTestUnitBalances": state.local_test_unit_balances,
+            "accountNonces": state.account_nonces,
             "faucetRecords": state.faucet_records,
             "balanceTransfers": state.balance_transfers,
+            "bridgeCreditReceipts": state.bridge_credit_receipts,
             "tokenDefinitions": state.token_definitions,
             "tokenBalances": state.token_balances,
             "tokenMintReceipts": state.token_mint_receipts,
+            "tokenTransferReceipts": state.token_transfer_receipts,
             "dexPools": state.dex_pools,
             "lpPositions": state.lp_positions,
             "liquidityReceipts": state.liquidity_receipts,
@@ -1212,7 +1441,9 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
             "verifierModules": state.verifier_modules,
             "workReceipts": state.work_receipts,
             "verifierReports": state.verifier_reports,
-            "baseAnchors": state.base_anchors
+            "baseAnchors": state.base_anchors,
+            "executionReceipts": state.execution_receipts,
+            "executionEvents": state.execution_events
         }
     });
 
@@ -1291,15 +1522,20 @@ struct NodeStatus {
     state_root: String,
     pending_txs: usize,
     local_test_unit_balances: usize,
+    account_nonces: usize,
     faucet_records: usize,
     balance_transfers: usize,
+    bridge_credit_receipts: usize,
     token_definitions: usize,
     token_balances: usize,
     token_mint_receipts: usize,
+    token_transfer_receipts: usize,
     dex_pools: usize,
     lp_positions: usize,
     liquidity_receipts: usize,
     swap_receipts: usize,
+    execution_receipts: usize,
+    execution_events: usize,
     static_peer_sync: Option<PeerSyncEvent>,
     last_ingested_txs: usize,
     last_rejected_inbox_files: usize,
@@ -1337,15 +1573,20 @@ impl NodeStatus {
             state_root: state_root(state),
             pending_txs: state.pending_txs.len(),
             local_test_unit_balances: state.local_test_unit_balances.len(),
+            account_nonces: state.account_nonces.len(),
             faucet_records: state.faucet_records.len(),
             balance_transfers: state.balance_transfers.len(),
+            bridge_credit_receipts: state.bridge_credit_receipts.len(),
             token_definitions: state.token_definitions.len(),
             token_balances: state.token_balances.len(),
             token_mint_receipts: state.token_mint_receipts.len(),
+            token_transfer_receipts: state.token_transfer_receipts.len(),
             dex_pools: state.dex_pools.len(),
             lp_positions: state.lp_positions.len(),
             liquidity_receipts: state.liquidity_receipts.len(),
             swap_receipts: state.swap_receipts.len(),
+            execution_receipts: state.execution_receipts.len(),
+            execution_events: state.execution_events.len(),
             static_peer_sync,
             last_ingested_txs,
             last_rejected_inbox_files,
@@ -1428,11 +1669,14 @@ struct StateSummary {
     agent_accounts: usize,
     local_balances: usize,
     local_test_unit_balances: usize,
+    account_nonces: usize,
     faucet_records: usize,
     balance_transfers: usize,
+    bridge_credit_receipts: usize,
     token_definitions: usize,
     token_balances: usize,
     token_mint_receipts: usize,
+    token_transfer_receipts: usize,
     dex_pools: usize,
     lp_positions: usize,
     liquidity_receipts: usize,
@@ -1449,6 +1693,8 @@ struct StateSummary {
     imported_observations: usize,
     imported_verifier_reports: usize,
     base_anchors: usize,
+    execution_receipts: usize,
+    execution_events: usize,
 }
 
 impl StateSummary {
@@ -1468,11 +1714,14 @@ impl StateSummary {
             agent_accounts: state.agent_accounts.len(),
             local_balances: state.local_test_unit_balances.len(),
             local_test_unit_balances: state.local_test_unit_balances.len(),
+            account_nonces: state.account_nonces.len(),
             faucet_records: state.faucet_records.len(),
             balance_transfers: state.balance_transfers.len(),
+            bridge_credit_receipts: state.bridge_credit_receipts.len(),
             token_definitions: state.token_definitions.len(),
             token_balances: state.token_balances.len(),
             token_mint_receipts: state.token_mint_receipts.len(),
+            token_transfer_receipts: state.token_transfer_receipts.len(),
             dex_pools: state.dex_pools.len(),
             lp_positions: state.lp_positions.len(),
             liquidity_receipts: state.liquidity_receipts.len(),
@@ -1489,6 +1738,8 @@ impl StateSummary {
             imported_observations: state.imported_observations.len(),
             imported_verifier_reports: state.imported_verifier_reports.len(),
             base_anchors: state.base_anchors.len(),
+            execution_receipts: state.execution_receipts.len(),
+            execution_events: state.execution_events.len(),
         }
     }
 }
@@ -1771,8 +2022,11 @@ struct ProductSmokeSummary {
 #[serde(rename_all = "camelCase")]
 struct ProductSmokeChecks {
     local_accounts_funded: bool,
+    bridge_credit_applied: bool,
+    native_transfer_executed: bool,
     token_launched: bool,
     initial_supply_assigned: bool,
+    token_transfer_executed: bool,
     pool_created: bool,
     liquidity_added: bool,
     swap_executed: bool,
@@ -1834,12 +2088,15 @@ impl ProductSmokeSummary {
             deterministic_replay,
             checks: ProductSmokeChecks {
                 local_accounts_funded: alice_funded && bob_funded,
+                bridge_credit_applied: !demo.state.bridge_credit_receipts.is_empty(),
+                native_transfer_executed: !demo.state.balance_transfers.is_empty(),
                 token_launched: demo.state.token_definitions.contains_key(&token_id),
                 initial_supply_assigned: demo
                     .state
                     .token_balances
                     .get(&token_balance_id)
                     .is_some_and(|balance| balance.units > 0),
+                token_transfer_executed: !demo.state.token_transfer_receipts.is_empty(),
                 pool_created,
                 liquidity_added,
                 swap_executed: demo
@@ -1853,8 +2110,12 @@ impl ProductSmokeSummary {
                         .get(&bob_token_balance_id)
                         .is_some_and(|balance| balance.units > 0),
                 liquidity_removed,
-                product_receipts_queryable: !demo.state.token_mint_receipts.is_empty()
+                product_receipts_queryable: !demo.state.bridge_credit_receipts.is_empty()
+                    && !demo.state.balance_transfers.is_empty()
+                    && !demo.state.token_mint_receipts.is_empty()
+                    && !demo.state.token_transfer_receipts.is_empty()
                     && !demo.state.liquidity_receipts.is_empty()
+                    && !demo.state.execution_receipts.is_empty()
                     && !demo.state.swap_receipts.is_empty(),
                 no_value_boundary: demo.state.config.no_value
                     && demo
@@ -1866,6 +2127,84 @@ impl ProductSmokeSummary {
                 base_anchor_created: !demo.state.base_anchors.is_empty(),
             },
             handoff_files: handoff_files(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ExecutionE2eSummary {
+    schema: String,
+    report_path: PathBuf,
+    state_root: String,
+    success_receipts: usize,
+    failed_receipts: usize,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ExecutionE2eReport {
+    schema: String,
+    product_block_hash: String,
+    failure_block_hash: String,
+    anchor_block_hash: String,
+    product_tx_ids: Vec<String>,
+    negative_tx_ids: Vec<String>,
+    receipt_ids: Vec<String>,
+    account_balances: Value,
+    account_nonces: Value,
+    token_balances: Value,
+    pool_reserves: Value,
+    lp_positions: Value,
+    bridge_credits: Value,
+    swap_result: Value,
+    state_root: String,
+    map_roots: crate::model::StateMapRoots,
+    failed_transaction_evidence: Value,
+    queryable_ids: Value,
+}
+
+impl ExecutionE2eReport {
+    fn from_run(run: &ExecutionE2eRun) -> Self {
+        let state = &run.state;
+        let receipt_ids = state.execution_receipts.keys().cloned().collect::<Vec<_>>();
+        let failed = state
+            .execution_receipts
+            .values()
+            .filter(|receipt| !receipt.success)
+            .collect::<Vec<_>>();
+        let token_id = crate::model::deterministic_token_id("FLOWT");
+        let pool_id =
+            crate::model::deterministic_pool_id(crate::model::LOCAL_TEST_UNIT_ASSET_ID, &token_id);
+        Self {
+            schema: "flowmemory.local_devnet.execution_e2e_report.v0".to_string(),
+            product_block_hash: run.product_block_hash.clone(),
+            failure_block_hash: run.failure_block_hash.clone(),
+            anchor_block_hash: run.anchor_block_hash.clone(),
+            product_tx_ids: run.product_tx_ids.clone(),
+            negative_tx_ids: run.negative_tx_ids.clone(),
+            receipt_ids,
+            account_balances: serde_json::json!(&state.local_test_unit_balances),
+            account_nonces: serde_json::json!(&state.account_nonces),
+            token_balances: serde_json::json!(&state.token_balances),
+            pool_reserves: serde_json::json!(&state.dex_pools),
+            lp_positions: serde_json::json!(&state.lp_positions),
+            bridge_credits: serde_json::json!(&state.bridge_credit_receipts),
+            swap_result: serde_json::json!(&state.swap_receipts),
+            state_root: state_root(state),
+            map_roots: state_map_roots(state),
+            failed_transaction_evidence: serde_json::json!(failed),
+            queryable_ids: serde_json::json!({
+                "tokenId": token_id,
+                "poolId": pool_id,
+                "bridgeCreditIds": state.bridge_credit_receipts.keys().cloned().collect::<Vec<_>>(),
+                "nativeTransferIds": state.balance_transfers.keys().cloned().collect::<Vec<_>>(),
+                "tokenTransferIds": state.token_transfer_receipts.keys().cloned().collect::<Vec<_>>(),
+                "liquidityReceiptIds": state.liquidity_receipts.keys().cloned().collect::<Vec<_>>(),
+                "swapReceiptIds": state.swap_receipts.keys().cloned().collect::<Vec<_>>(),
+                "executionReceiptIds": state.execution_receipts.keys().cloned().collect::<Vec<_>>(),
+                "executionEventIds": state.execution_events.keys().cloned().collect::<Vec<_>>()
+            }),
         }
     }
 }

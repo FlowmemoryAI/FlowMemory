@@ -1,8 +1,9 @@
 use flowmemory_devnet::model::{
-    DevnetError, FLOWPULSE_TOPIC0, LOCAL_TEST_UNIT_ASSET_ID, Transaction, ZERO_HASH,
-    apply_transaction, build_block, demo_transactions, deterministic_liquidity_id,
-    deterministic_lp_position_id, deterministic_pool_id, deterministic_swap_id,
-    deterministic_token_balance_id, deterministic_token_id, genesis_state,
+    DevnetError, EXECUTION_COST_CHARGE_NATIVE, FLOWPULSE_TOPIC0, LOCAL_TEST_UNIT_ASSET_ID,
+    Transaction, ZERO_HASH, apply_transaction, build_block, demo_transactions,
+    deterministic_bridge_credit_id, deterministic_liquidity_id, deterministic_lp_position_id,
+    deterministic_pool_id, deterministic_swap_id, deterministic_token_balance_id,
+    deterministic_token_id, deterministic_token_transfer_id, genesis_state,
     product_demo_transactions, queue_transaction, state_map_roots, state_root,
 };
 use flowmemory_devnet::{canonical_json, keccak_hex};
@@ -90,8 +91,19 @@ fn invalid_tx_is_rejected_without_state_mutation() {
             .expect("error")
             .contains("rootfield does not exist")
     );
-    assert_eq!(before, state_root(&state));
+    assert_ne!(before, state_root(&state));
     assert!(state.rootfields.is_empty());
+    assert_eq!(state.execution_receipts.len(), 1);
+    let execution_receipt = state
+        .execution_receipts
+        .values()
+        .next()
+        .expect("failed execution receipt");
+    assert!(!execution_receipt.success);
+    assert_eq!(
+        execution_receipt.error_code.as_deref(),
+        Some("execution-error")
+    );
 }
 
 #[test]
@@ -305,6 +317,7 @@ fn local_faucet_and_transfer_update_test_unit_ledger() {
             from_account_id: "local-account:alice".to_string(),
             to_account_id: "local-account:bob".to_string(),
             amount_units: 20,
+            account_nonce: 1,
             memo: "unit-test-transfer".to_string(),
         },
     )
@@ -329,6 +342,7 @@ fn local_faucet_and_transfer_update_test_unit_ledger() {
                 from_account_id: "local-account:bob".to_string(),
                 to_account_id: "local-account:alice".to_string(),
                 amount_units: 30,
+                account_nonce: 1,
                 memo: "too-much".to_string(),
             },
         ),
@@ -372,6 +386,7 @@ fn token_launch_pool_liquidity_swap_and_remove_update_product_state() {
             decimals: 6,
             initial_owner_account_id: alice.to_string(),
             initial_supply_units: 1_000_000,
+            account_nonce: 1,
         },
     )
     .unwrap();
@@ -382,6 +397,7 @@ fn token_launch_pool_liquidity_swap_and_remove_update_product_state() {
             base_asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
             quote_asset_id: token_id.clone(),
             created_by_account_id: alice.to_string(),
+            account_nonce: 2,
         },
     )
     .unwrap();
@@ -394,6 +410,7 @@ fn token_launch_pool_liquidity_swap_and_remove_update_product_state() {
             base_amount_units: 5_000,
             quote_amount_units: 500_000,
             min_lp_units: 1,
+            account_nonce: 3,
         },
     )
     .unwrap();
@@ -406,6 +423,7 @@ fn token_launch_pool_liquidity_swap_and_remove_update_product_state() {
             asset_in_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
             amount_in_units: 100,
             min_amount_out_units: 9_000,
+            account_nonce: 1,
         },
     )
     .unwrap();
@@ -418,6 +436,7 @@ fn token_launch_pool_liquidity_swap_and_remove_update_product_state() {
             lp_units: 100,
             min_base_amount_units: 1,
             min_quote_amount_units: 1,
+            account_nonce: 4,
         },
     )
     .unwrap();
@@ -466,6 +485,7 @@ fn token_and_dex_reject_duplicate_zero_insufficient_and_slippage_failures() {
                 decimals: 6,
                 initial_owner_account_id: "local-account:product:alice".to_string(),
                 initial_supply_units: 1_000,
+                account_nonce: 1,
             },
         ),
         Err(DevnetError::DeterministicIdMismatch {
@@ -484,6 +504,7 @@ fn token_and_dex_reject_duplicate_zero_insufficient_and_slippage_failures() {
             decimals: 6,
             initial_owner_account_id: "local-account:product:alice".to_string(),
             initial_supply_units: 1_000_000,
+            account_nonce: 1,
         },
     )
     .unwrap();
@@ -497,6 +518,7 @@ fn token_and_dex_reject_duplicate_zero_insufficient_and_slippage_failures() {
                 decimals: 6,
                 initial_owner_account_id: "local-account:product:alice".to_string(),
                 initial_supply_units: 1,
+                account_nonce: 2,
             },
         ),
         Err(DevnetError::TokenAlreadyExists(token_id.clone()))
@@ -510,6 +532,7 @@ fn token_and_dex_reject_duplicate_zero_insufficient_and_slippage_failures() {
             base_asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
             quote_asset_id: token_id.clone(),
             created_by_account_id: "local-account:product:alice".to_string(),
+            account_nonce: 2,
         },
     )
     .unwrap();
@@ -521,6 +544,7 @@ fn token_and_dex_reject_duplicate_zero_insufficient_and_slippage_failures() {
                 base_asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
                 quote_asset_id: token_id.clone(),
                 created_by_account_id: "local-account:product:alice".to_string(),
+                account_nonce: 3,
             },
         ),
         Err(DevnetError::PoolAlreadyExists(pool_id.clone()))
@@ -538,6 +562,7 @@ fn token_and_dex_reject_duplicate_zero_insufficient_and_slippage_failures() {
                 base_amount_units: 0,
                 quote_amount_units: 1,
                 min_lp_units: 1,
+                account_nonce: 3,
             },
         ),
         Err(DevnetError::TokenAmountMustBePositive(zero_liquidity_id))
@@ -559,6 +584,7 @@ fn token_and_dex_reject_duplicate_zero_insufficient_and_slippage_failures() {
                 base_amount_units: 2_000,
                 quote_amount_units: 1,
                 min_lp_units: 1,
+                account_nonce: 1,
             },
         ),
         Err(DevnetError::LocalTestUnitBalanceInsufficient(
@@ -581,6 +607,7 @@ fn token_and_dex_reject_duplicate_zero_insufficient_and_slippage_failures() {
             base_amount_units: 5_000,
             quote_amount_units: 500_000,
             min_lp_units: 1,
+            account_nonce: 3,
         },
     )
     .unwrap();
@@ -602,6 +629,7 @@ fn token_and_dex_reject_duplicate_zero_insufficient_and_slippage_failures() {
                 asset_in_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
                 amount_in_units: 100,
                 min_amount_out_units: 50_000,
+                account_nonce: 1,
             },
         ),
         Err(DevnetError::SwapSlippageExceeded(slippage_swap_id))
@@ -624,6 +652,7 @@ fn token_and_dex_reject_duplicate_zero_insufficient_and_slippage_failures() {
                 asset_in_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
                 amount_in_units: 1,
                 min_amount_out_units: 1,
+                account_nonce: 1,
             },
         ),
         Err(DevnetError::PoolMissing("pool:missing".to_string()))
@@ -638,7 +667,7 @@ fn product_demo_transactions_apply_in_one_block_with_receipts() {
     }
 
     let block = build_block(&mut state);
-    assert_eq!(block.receipts.len(), 9);
+    assert_eq!(block.receipts.len(), 10);
     assert!(
         block
             .receipts
@@ -646,9 +675,234 @@ fn product_demo_transactions_apply_in_one_block_with_receipts() {
             .all(|receipt| receipt.status == "applied")
     );
     assert_eq!(state.token_definitions.len(), 1);
+    assert_eq!(state.bridge_credit_receipts.len(), 1);
+    assert_eq!(state.balance_transfers.len(), 1);
+    assert_eq!(state.token_transfer_receipts.len(), 1);
     assert_eq!(state.dex_pools.len(), 1);
     assert_eq!(state.liquidity_receipts.len(), 2);
     assert_eq!(state.swap_receipts.len(), 1);
+}
+
+#[test]
+fn execution_layer_records_failed_receipts_and_preserves_product_invariants() {
+    let mut state = genesis_state();
+    for tx in product_demo_transactions() {
+        queue_transaction(&mut state, tx);
+    }
+    let product_block = build_block(&mut state);
+    assert!(product_block.receipts.iter().all(|receipt| receipt.success));
+
+    let token_id = deterministic_token_id("FLOWT");
+    let pool_id = deterministic_pool_id(LOCAL_TEST_UNIT_ASSET_ID, &token_id);
+    let alice = "local-account:product:alice";
+    let bob = "local-account:product:bob";
+    let pool_before = state.dex_pools.get(&pool_id).expect("pool").clone();
+    let alice_native_before = state.local_test_unit_balances[alice].units;
+    let bob_native_before = state.local_test_unit_balances[bob].units;
+    let bridge_credit_before = state.bridge_credit_receipts.len();
+    let token_supply = state.token_definitions[&token_id].total_supply_units;
+
+    let duplicate_bridge_deposit_id = "bridge-deposit:product:alice:001";
+    let duplicate_bridge_credit_id = deterministic_bridge_credit_id(
+        duplicate_bridge_deposit_id,
+        alice,
+        LOCAL_TEST_UNIT_ASSET_ID,
+        10_000,
+    );
+    let negative_txs = vec![
+        Transaction::TransferLocalTestUnits {
+            transfer_id: "transfer:negative:insufficient-native".to_string(),
+            from_account_id: bob.to_string(),
+            to_account_id: alice.to_string(),
+            amount_units: 100_000,
+            account_nonce: 2,
+            memo: "negative-insufficient-native".to_string(),
+        },
+        Transaction::TransferLocalTestUnits {
+            transfer_id: "transfer:negative:duplicate-nonce".to_string(),
+            from_account_id: alice.to_string(),
+            to_account_id: bob.to_string(),
+            amount_units: 1,
+            account_nonce: 7,
+            memo: "negative-duplicate-nonce".to_string(),
+        },
+        Transaction::TransferLocalTestUnits {
+            transfer_id: "transfer:negative:stale-nonce".to_string(),
+            from_account_id: alice.to_string(),
+            to_account_id: bob.to_string(),
+            amount_units: 1,
+            account_nonce: 1,
+            memo: "negative-stale-nonce".to_string(),
+        },
+        Transaction::TransferToken {
+            transfer_id: deterministic_token_transfer_id(&token_id, bob, alice, 1_000_000, 2),
+            token_id: token_id.clone(),
+            from_account_id: bob.to_string(),
+            to_account_id: alice.to_string(),
+            amount_units: 1_000_000,
+            account_nonce: 2,
+        },
+        Transaction::TransferToken {
+            transfer_id: deterministic_token_transfer_id("token:missing", alice, bob, 1, 8),
+            token_id: "token:missing".to_string(),
+            from_account_id: alice.to_string(),
+            to_account_id: bob.to_string(),
+            amount_units: 1,
+            account_nonce: 8,
+        },
+        Transaction::AddLiquidity {
+            liquidity_id: deterministic_liquidity_id(&pool_id, alice, "add", "0:1:1"),
+            pool_id: pool_id.clone(),
+            provider_account_id: alice.to_string(),
+            base_amount_units: 0,
+            quote_amount_units: 1,
+            min_lp_units: 1,
+            account_nonce: 8,
+        },
+        Transaction::SwapExactIn {
+            swap_id: deterministic_swap_id("pool:missing", bob, LOCAL_TEST_UNIT_ASSET_ID, 1, "1"),
+            pool_id: "pool:missing".to_string(),
+            trader_account_id: bob.to_string(),
+            asset_in_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            amount_in_units: 1,
+            min_amount_out_units: 1,
+            account_nonce: 2,
+        },
+        Transaction::SwapExactIn {
+            swap_id: deterministic_swap_id(&pool_id, bob, LOCAL_TEST_UNIT_ASSET_ID, 0, "1"),
+            pool_id: pool_id.clone(),
+            trader_account_id: bob.to_string(),
+            asset_in_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            amount_in_units: 0,
+            min_amount_out_units: 1,
+            account_nonce: 2,
+        },
+        Transaction::SwapExactIn {
+            swap_id: deterministic_swap_id(&pool_id, bob, LOCAL_TEST_UNIT_ASSET_ID, 100, "50000"),
+            pool_id: pool_id.clone(),
+            trader_account_id: bob.to_string(),
+            asset_in_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            amount_in_units: 100,
+            min_amount_out_units: 50_000,
+            account_nonce: 2,
+        },
+        Transaction::ApplyBridgeCredit {
+            credit_id: duplicate_bridge_credit_id,
+            deposit_id: duplicate_bridge_deposit_id.to_string(),
+            replay_key: "bridge-replay:product:alice:001".to_string(),
+            account_id: alice.to_string(),
+            asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            amount_units: 10_000,
+            acknowledged_at_block_number: 8,
+            account_nonce: 8,
+        },
+    ];
+    for tx in negative_txs {
+        queue_transaction(&mut state, tx);
+    }
+    let failure_block = build_block(&mut state);
+    assert!(
+        failure_block
+            .receipts
+            .iter()
+            .all(|receipt| !receipt.success)
+    );
+    let error_codes = failure_block
+        .receipts
+        .iter()
+        .map(|receipt| receipt.error_code.clone().expect("error code"))
+        .collect::<Vec<_>>();
+    for expected in [
+        "insufficient-native-balance",
+        "duplicate-nonce",
+        "stale-nonce",
+        "insufficient-token-balance",
+        "invalid-token",
+        "invalid-liquidity",
+        "invalid-pool",
+        "invalid-swap-amount",
+        "min-output-not-met",
+        "duplicate-bridge-credit",
+    ] {
+        assert!(
+            error_codes.iter().any(|code| code == expected),
+            "missing error code {expected}: {error_codes:?}"
+        );
+    }
+
+    assert_eq!(state.dex_pools[&pool_id], pool_before);
+    assert_eq!(
+        state.local_test_unit_balances[alice].units,
+        alice_native_before
+    );
+    assert_eq!(state.local_test_unit_balances[bob].units, bob_native_before);
+    assert_eq!(state.bridge_credit_receipts.len(), bridge_credit_before);
+    assert_eq!(state.account_nonces[alice].next_nonce, 8);
+    assert_eq!(state.account_nonces[bob].next_nonce, 2);
+    assert_eq!(total_token_units(&state, &token_id), token_supply);
+    assert_eq!(
+        state.dex_pools[&pool_id].total_lp_units,
+        state
+            .lp_positions
+            .values()
+            .filter(|position| position.pool_id == pool_id)
+            .map(|position| position.lp_units)
+            .sum::<u64>()
+    );
+}
+
+#[test]
+fn execution_cost_charge_mode_rejects_insufficient_execution_balance_atomically() {
+    let mut state = genesis_state();
+    state.config.execution_cost_charge_mode = EXECUTION_COST_CHARGE_NATIVE.to_string();
+    apply_transaction(
+        &mut state,
+        &create_balance_tx("local-account:cost:alice", "operator:cost:alice"),
+    )
+    .unwrap();
+    apply_transaction(
+        &mut state,
+        &create_balance_tx("local-account:cost:bob", "operator:cost:bob"),
+    )
+    .unwrap();
+    apply_transaction(
+        &mut state,
+        &faucet_tx(
+            "faucet:cost:alice",
+            "local-account:cost:alice",
+            "operator:cost:alice",
+            1,
+        ),
+    )
+    .unwrap();
+    queue_transaction(
+        &mut state,
+        Transaction::TransferLocalTestUnits {
+            transfer_id: "transfer:cost:too-expensive".to_string(),
+            from_account_id: "local-account:cost:alice".to_string(),
+            to_account_id: "local-account:cost:bob".to_string(),
+            amount_units: 1,
+            account_nonce: 1,
+            memo: "cost-mode".to_string(),
+        },
+    );
+    let block = build_block(&mut state);
+    assert_eq!(block.receipts.len(), 1);
+    assert!(!block.receipts[0].success);
+    assert_eq!(
+        block.receipts[0].error_code.as_deref(),
+        Some("insufficient-execution-balance")
+    );
+    assert_eq!(
+        state.local_test_unit_balances["local-account:cost:alice"].units,
+        1
+    );
+    assert_eq!(
+        state.local_test_unit_balances["local-account:cost:bob"].units,
+        0
+    );
+    assert!(state.balance_transfers.is_empty());
+    assert!(state.account_nonces.is_empty());
 }
 
 #[test]
@@ -1022,6 +1276,132 @@ fn cli_product_smoke_exports_token_and_dex_handoff() {
     assert!(control_plane_body.contains("tokenDefinitions"));
     assert!(control_plane_body.contains("dexPools"));
     assert!(control_plane_body.contains("swapReceipts"));
+
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
+fn cli_execution_e2e_writes_report_and_round_trips_state() {
+    let temp = temp_dir("cli-execution-e2e");
+    let state = temp.join("state.json");
+    let out_dir = temp.join("execution-e2e");
+    let snapshot = temp.join("snapshot.json");
+    let imported = temp.join("imported-state.json");
+
+    let output = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "execution-e2e",
+            "--out-dir",
+            out_dir.to_str().expect("out path"),
+        ])
+        .output()
+        .expect("run execution e2e");
+    assert!(output.status.success());
+
+    let summary: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("execution e2e summary json");
+    assert_eq!(summary["successReceipts"], 11);
+    assert_eq!(summary["failedReceipts"], 11);
+
+    let report_path = out_dir.join("execution-e2e-report.json");
+    assert!(state.exists());
+    assert!(report_path.exists());
+    assert!(out_dir.join("dashboard-state.json").exists());
+    assert!(out_dir.join("control-plane-handoff.json").exists());
+
+    let report_body = std::fs::read_to_string(&report_path).expect("execution report body");
+    let report: serde_json::Value =
+        serde_json::from_str(&report_body).expect("execution report json");
+    assert_eq!(
+        report["schema"],
+        "flowmemory.local_devnet.execution_e2e_report.v0"
+    );
+    assert_eq!(
+        report["productTxIds"]
+            .as_array()
+            .expect("product txs")
+            .len(),
+        10
+    );
+    assert_eq!(
+        report["negativeTxIds"]
+            .as_array()
+            .expect("negative txs")
+            .len(),
+        11
+    );
+    assert!(
+        report["queryableIds"]["bridgeCreditIds"]
+            .as_array()
+            .is_some_and(|ids| !ids.is_empty())
+    );
+    assert!(
+        report["queryableIds"]["executionReceiptIds"]
+            .as_array()
+            .is_some_and(|ids| ids.len() == 22)
+    );
+    assert!(
+        report["failedTransactionEvidence"]
+            .as_array()
+            .expect("failed evidence")
+            .iter()
+            .any(|receipt| receipt["errorCode"] == "min-output-not-met")
+    );
+    assert!(
+        report["failedTransactionEvidence"]
+            .as_array()
+            .expect("failed evidence")
+            .iter()
+            .any(|receipt| receipt["errorCode"] == "duplicate-transaction")
+    );
+
+    let inspect = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "inspect-state",
+            "--summary",
+        ])
+        .output()
+        .expect("inspect execution e2e state");
+    assert!(inspect.status.success());
+    let inspect_summary: serde_json::Value =
+        serde_json::from_slice(&inspect.stdout).expect("inspect summary json");
+    assert_eq!(inspect_summary["blocks"], 3);
+    assert_eq!(inspect_summary["bridgeCreditReceipts"], 1);
+    assert_eq!(inspect_summary["tokenTransferReceipts"], 1);
+    assert_eq!(inspect_summary["executionReceipts"], 22);
+    assert_eq!(inspect_summary["executionEvents"], 22);
+
+    let export_status = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "export-state",
+            "--out",
+            snapshot.to_str().expect("snapshot path"),
+        ])
+        .status()
+        .expect("export execution e2e state");
+    assert!(export_status.success());
+
+    let import_status = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            imported.to_str().expect("imported path"),
+            "import-state",
+            "--from",
+            snapshot.to_str().expect("snapshot path"),
+        ])
+        .status()
+        .expect("import execution e2e state");
+    assert!(import_status.success());
+
+    let original_body = std::fs::read_to_string(&state).expect("original state");
+    let imported_body = std::fs::read_to_string(&imported).expect("imported state");
+    assert_eq!(original_body, imported_body);
 
     std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
 }
@@ -1486,6 +1866,30 @@ fn setup_product_test_accounts(state: &mut flowmemory_devnet::model::ChainState)
         ),
     )
     .unwrap();
+}
+
+fn total_token_units(state: &flowmemory_devnet::model::ChainState, token_id: &str) -> u64 {
+    let account_units = state
+        .token_balances
+        .values()
+        .filter(|balance| balance.token_id == token_id)
+        .map(|balance| balance.units)
+        .sum::<u64>();
+    let pool_units = state
+        .dex_pools
+        .values()
+        .map(|pool| {
+            let mut total = 0;
+            if pool.base_asset_id == token_id {
+                total += pool.reserve_base_units;
+            }
+            if pool.quote_asset_id == token_id {
+                total += pool.reserve_quote_units;
+            }
+            total
+        })
+        .sum::<u64>();
+    account_units + pool_units
 }
 
 fn register_rootfield_tx(rootfield_id: &str) -> Transaction {

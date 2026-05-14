@@ -13,6 +13,8 @@ pub const ZERO_HASH: &str = "0x0000000000000000000000000000000000000000000000000
 pub const FLOWPULSE_TOPIC0: &str =
     "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43";
 pub const LOCAL_TEST_UNIT_ASSET_ID: &str = "asset:flowchain-local-test-unit";
+pub const EXECUTION_COST_CHARGE_RECORD_ONLY: &str = "record-only";
+pub const EXECUTION_COST_CHARGE_NATIVE: &str = "charge-native";
 
 #[derive(Debug, Error, PartialEq, Eq)]
 pub enum DevnetError {
@@ -36,6 +38,26 @@ pub enum DevnetError {
     FaucetAmountMustBePositive(String),
     #[error("balance transfer already exists: {0}")]
     BalanceTransferAlreadyExists(String),
+    #[error("bridge credit already applied: {0}")]
+    BridgeCreditAlreadyApplied(String),
+    #[error("bridge credit replay key already applied: {0}")]
+    BridgeCreditReplayAlreadyApplied(String),
+    #[error("account nonce is duplicate for {account_id}: {nonce}")]
+    AccountNonceDuplicate { account_id: String, nonce: u64 },
+    #[error("account nonce is stale for {account_id}: expected {expected}, got {actual}")]
+    AccountNonceStale {
+        account_id: String,
+        expected: u64,
+        actual: u64,
+    },
+    #[error(
+        "insufficient execution balance for {account_id}: required {required}, available {available}"
+    )]
+    ExecutionBalanceInsufficient {
+        account_id: String,
+        required: u64,
+        available: u64,
+    },
     #[error("deterministic {kind} id mismatch: expected {expected}, got {actual}")]
     DeterministicIdMismatch {
         kind: String,
@@ -46,6 +68,12 @@ pub enum DevnetError {
     TokenAlreadyExists(String),
     #[error("token symbol already exists: {0}")]
     TokenSymbolAlreadyExists(String),
+    #[error("invalid token symbol: {0}")]
+    TokenInvalidSymbol(String),
+    #[error("invalid token name: {0}")]
+    TokenInvalidName(String),
+    #[error("invalid token decimals: {0}")]
+    TokenInvalidDecimals(u8),
     #[error("token does not exist: {0}")]
     TokenMissing(String),
     #[error("token amount must be greater than zero: {0}")]
@@ -56,6 +84,8 @@ pub enum DevnetError {
     TokenBalanceInsufficient(String),
     #[error("token mint already exists: {0}")]
     TokenMintAlreadyExists(String),
+    #[error("token transfer already exists: {0}")]
+    TokenTransferAlreadyExists(String),
     #[error("pool already exists: {0}")]
     PoolAlreadyExists(String),
     #[error("pool does not exist: {0}")]
@@ -159,15 +189,21 @@ pub struct ChainState {
     #[serde(default)]
     pub local_test_unit_balances: BTreeMap<String, LocalTestUnitBalance>,
     #[serde(default)]
+    pub account_nonces: BTreeMap<String, AccountNonce>,
+    #[serde(default)]
     pub faucet_records: BTreeMap<String, FaucetRecord>,
     #[serde(default)]
     pub balance_transfers: BTreeMap<String, BalanceTransfer>,
+    #[serde(default)]
+    pub bridge_credit_receipts: BTreeMap<String, BridgeCreditReceipt>,
     #[serde(default)]
     pub token_definitions: BTreeMap<String, LocalTestToken>,
     #[serde(default)]
     pub token_balances: BTreeMap<String, LocalTestTokenBalance>,
     #[serde(default)]
     pub token_mint_receipts: BTreeMap<String, LocalTestTokenMintReceipt>,
+    #[serde(default)]
+    pub token_transfer_receipts: BTreeMap<String, LocalTestTokenTransferReceipt>,
     #[serde(default)]
     pub dex_pools: BTreeMap<String, DexPool>,
     #[serde(default)]
@@ -194,6 +230,10 @@ pub struct ChainState {
     pub imported_observations: BTreeMap<String, ImportedFlowPulseObservation>,
     pub imported_verifier_reports: BTreeMap<String, ImportedVerifierReport>,
     pub base_anchors: BTreeMap<String, BaseAnchorPlaceholder>,
+    #[serde(default)]
+    pub execution_receipts: BTreeMap<String, ExecutionReceipt>,
+    #[serde(default)]
+    pub execution_events: BTreeMap<String, ExecutionEvent>,
     pub blocks: Vec<Block>,
     pub pending_txs: Vec<TxEnvelope>,
 }
@@ -211,6 +251,10 @@ pub struct DevnetConfig {
     pub no_value: bool,
     pub consensus: String,
     pub crypto_schema_refs: Vec<String>,
+    #[serde(default = "default_execution_costs_enabled")]
+    pub execution_costs_enabled: bool,
+    #[serde(default = "default_execution_cost_charge_mode")]
+    pub execution_cost_charge_mode: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -259,9 +303,25 @@ pub struct LocalTestUnitBalance {
     pub owner: String,
     pub units: u64,
     pub total_faucet_units: u64,
+    #[serde(default)]
+    pub bridge_credited_units: u64,
+    #[serde(default)]
+    pub reserved_units: u64,
     pub last_faucet_record_id: Option<String>,
+    #[serde(default)]
+    pub last_bridge_credit_id: Option<String>,
     pub updated_at_block: u64,
     pub no_value: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountNonce {
+    pub account_id: String,
+    pub next_nonce: u64,
+    pub last_nonce: u64,
+    pub last_tx_id: Option<String>,
+    pub updated_at_block: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -286,6 +346,21 @@ pub struct BalanceTransfer {
     pub memo: String,
     pub transferred_at_block: u64,
     pub no_value: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct BridgeCreditReceipt {
+    pub credit_id: String,
+    pub deposit_id: String,
+    pub replay_key: String,
+    pub account_id: String,
+    pub asset_id: String,
+    pub amount_units: u64,
+    pub acknowledged_at_block_number: u64,
+    pub applied_at_block: u64,
+    pub local_only: bool,
+    pub production_ready: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -321,6 +396,18 @@ pub struct LocalTestTokenMintReceipt {
     pub amount_units: u64,
     pub reason: String,
     pub minted_at_block: u64,
+    pub no_value: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct LocalTestTokenTransferReceipt {
+    pub transfer_id: String,
+    pub token_id: String,
+    pub from_account_id: String,
+    pub to_account_id: String,
+    pub amount_units: u64,
+    pub transferred_at_block: u64,
     pub no_value: bool,
 }
 
@@ -390,6 +477,39 @@ pub struct SwapReceipt {
     pub reserve_quote_after: u64,
     pub executed_at_block: u64,
     pub no_value: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ExecutionReceipt {
+    pub receipt_id: String,
+    pub tx_id: String,
+    pub tx_type: String,
+    pub status: String,
+    pub success: bool,
+    pub error_code: Option<String>,
+    pub error_message: Option<String>,
+    pub execution_cost_units: u64,
+    pub execution_cost_charged: bool,
+    pub payer_account_id: Option<String>,
+    pub event_ids: Vec<String>,
+    pub block_number: u64,
+    pub no_value: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ExecutionEvent {
+    pub event_id: String,
+    pub receipt_id: String,
+    pub tx_id: String,
+    pub event_type: String,
+    pub object_id: Option<String>,
+    pub account_id: Option<String>,
+    pub asset_id: Option<String>,
+    pub amount_units: Option<u64>,
+    pub block_number: u64,
+    pub status: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -548,15 +668,21 @@ pub struct BaseAnchorPlaceholder {
     #[serde(default)]
     pub local_test_unit_balance_root: String,
     #[serde(default)]
+    pub account_nonce_root: String,
+    #[serde(default)]
     pub faucet_record_root: String,
     #[serde(default)]
     pub balance_transfer_root: String,
+    #[serde(default)]
+    pub bridge_credit_receipt_root: String,
     #[serde(default)]
     pub token_definition_root: String,
     #[serde(default)]
     pub token_balance_root: String,
     #[serde(default)]
     pub token_mint_receipt_root: String,
+    #[serde(default)]
+    pub token_transfer_receipt_root: String,
     #[serde(default)]
     pub dex_pool_root: String,
     #[serde(default)]
@@ -577,6 +703,10 @@ pub struct BaseAnchorPlaceholder {
     pub artifact_availability_proof_root: String,
     #[serde(default)]
     pub verifier_module_root: String,
+    #[serde(default)]
+    pub execution_receipt_root: String,
+    #[serde(default)]
+    pub execution_event_root: String,
     pub previous_anchor_id: String,
     pub finality_status: String,
 }
@@ -616,7 +746,18 @@ pub enum Transaction {
         from_account_id: String,
         to_account_id: String,
         amount_units: u64,
+        account_nonce: u64,
         memo: String,
+    },
+    ApplyBridgeCredit {
+        credit_id: String,
+        deposit_id: String,
+        replay_key: String,
+        account_id: String,
+        asset_id: String,
+        amount_units: u64,
+        acknowledged_at_block_number: u64,
+        account_nonce: u64,
     },
     LaunchToken {
         token_id: String,
@@ -625,19 +766,30 @@ pub enum Transaction {
         decimals: u8,
         initial_owner_account_id: String,
         initial_supply_units: u64,
+        account_nonce: u64,
     },
     MintLocalTestToken {
         mint_id: String,
         token_id: String,
         to_account_id: String,
         amount_units: u64,
+        account_nonce: u64,
         reason: String,
+    },
+    TransferToken {
+        transfer_id: String,
+        token_id: String,
+        from_account_id: String,
+        to_account_id: String,
+        amount_units: u64,
+        account_nonce: u64,
     },
     CreatePool {
         pool_id: String,
         base_asset_id: String,
         quote_asset_id: String,
         created_by_account_id: String,
+        account_nonce: u64,
     },
     AddLiquidity {
         liquidity_id: String,
@@ -646,6 +798,7 @@ pub enum Transaction {
         base_amount_units: u64,
         quote_amount_units: u64,
         min_lp_units: u64,
+        account_nonce: u64,
     },
     RemoveLiquidity {
         liquidity_id: String,
@@ -654,6 +807,7 @@ pub enum Transaction {
         lp_units: u64,
         min_base_amount_units: u64,
         min_quote_amount_units: u64,
+        account_nonce: u64,
     },
     SwapExactIn {
         swap_id: String,
@@ -662,6 +816,7 @@ pub enum Transaction {
         asset_in_id: String,
         amount_in_units: u64,
         min_amount_out_units: u64,
+        account_nonce: u64,
     },
     RegisterModelPassport {
         model_passport_id: String,
@@ -782,9 +937,15 @@ pub struct Block {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct BlockReceipt {
+    pub receipt_id: String,
     pub tx_id: String,
     pub status: String,
+    pub success: bool,
+    pub execution_cost_units: u64,
+    pub execution_cost_charged: bool,
+    pub error_code: Option<String>,
     pub error: Option<String>,
+    pub event_ids: Vec<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub authorization: Option<LocalAuthorization>,
 }
@@ -800,11 +961,14 @@ struct StateCommitmentView<'a> {
     rootfields: &'a BTreeMap<String, Rootfield>,
     agent_accounts: &'a BTreeMap<String, AgentAccount>,
     local_test_unit_balances: &'a BTreeMap<String, LocalTestUnitBalance>,
+    account_nonces: &'a BTreeMap<String, AccountNonce>,
     faucet_records: &'a BTreeMap<String, FaucetRecord>,
     balance_transfers: &'a BTreeMap<String, BalanceTransfer>,
+    bridge_credit_receipts: &'a BTreeMap<String, BridgeCreditReceipt>,
     token_definitions: &'a BTreeMap<String, LocalTestToken>,
     token_balances: &'a BTreeMap<String, LocalTestTokenBalance>,
     token_mint_receipts: &'a BTreeMap<String, LocalTestTokenMintReceipt>,
+    token_transfer_receipts: &'a BTreeMap<String, LocalTestTokenTransferReceipt>,
     dex_pools: &'a BTreeMap<String, DexPool>,
     lp_positions: &'a BTreeMap<String, LpPosition>,
     liquidity_receipts: &'a BTreeMap<String, LiquidityReceipt>,
@@ -821,6 +985,8 @@ struct StateCommitmentView<'a> {
     imported_observations: &'a BTreeMap<String, ImportedFlowPulseObservation>,
     imported_verifier_reports: &'a BTreeMap<String, ImportedVerifierReport>,
     base_anchors: &'a BTreeMap<String, BaseAnchorPlaceholder>,
+    execution_receipts: &'a BTreeMap<String, ExecutionReceipt>,
+    execution_events: &'a BTreeMap<String, ExecutionEvent>,
 }
 
 #[derive(Debug, Serialize)]
@@ -837,11 +1003,14 @@ pub struct StateMapRoots {
     pub rootfield_state_root: String,
     pub agent_account_root: String,
     pub local_test_unit_balance_root: String,
+    pub account_nonce_root: String,
     pub faucet_record_root: String,
     pub balance_transfer_root: String,
+    pub bridge_credit_receipt_root: String,
     pub token_definition_root: String,
     pub token_balance_root: String,
     pub token_mint_receipt_root: String,
+    pub token_transfer_receipt_root: String,
     pub dex_pool_root: String,
     pub lp_position_root: String,
     pub liquidity_receipt_root: String,
@@ -858,6 +1027,16 @@ pub struct StateMapRoots {
     pub imported_observation_root: String,
     pub imported_verifier_report_root: String,
     pub base_anchor_root: String,
+    pub execution_receipt_root: String,
+    pub execution_event_root: String,
+}
+
+fn default_execution_costs_enabled() -> bool {
+    true
+}
+
+fn default_execution_cost_charge_mode() -> String {
+    EXECUTION_COST_CHARGE_RECORD_ONLY.to_string()
 }
 
 pub fn default_config() -> DevnetConfig {
@@ -875,6 +1054,8 @@ pub fn default_config() -> DevnetConfig {
             "crypto/FLOWMEMORY_CRYPTO_SPEC.md#domain-separation".to_string(),
             "crypto/ATTESTATIONS.md#local-signature-helpers".to_string(),
         ],
+        execution_costs_enabled: default_execution_costs_enabled(),
+        execution_cost_charge_mode: default_execution_cost_charge_mode(),
     }
 }
 
@@ -913,11 +1094,14 @@ pub fn genesis_state() -> ChainState {
         rootfields: BTreeMap::new(),
         agent_accounts: BTreeMap::new(),
         local_test_unit_balances: BTreeMap::new(),
+        account_nonces: BTreeMap::new(),
         faucet_records: BTreeMap::new(),
         balance_transfers: BTreeMap::new(),
+        bridge_credit_receipts: BTreeMap::new(),
         token_definitions: BTreeMap::new(),
         token_balances: BTreeMap::new(),
         token_mint_receipts: BTreeMap::new(),
+        token_transfer_receipts: BTreeMap::new(),
         dex_pools: BTreeMap::new(),
         lp_positions: BTreeMap::new(),
         liquidity_receipts: BTreeMap::new(),
@@ -934,6 +1118,8 @@ pub fn genesis_state() -> ChainState {
         imported_observations: BTreeMap::new(),
         imported_verifier_reports: BTreeMap::new(),
         base_anchors: BTreeMap::new(),
+        execution_receipts: BTreeMap::new(),
+        execution_events: BTreeMap::new(),
         blocks: Vec::new(),
         pending_txs: Vec::new(),
     }
@@ -1011,6 +1197,42 @@ pub fn deterministic_token_mint_id(
     )
 }
 
+pub fn deterministic_token_transfer_id(
+    token_id: &str,
+    from_account_id: &str,
+    to_account_id: &str,
+    amount_units: u64,
+    account_nonce: u64,
+) -> String {
+    hash_json(
+        "flowmemory.local_devnet.token_transfer_id.v0",
+        &serde_json::json!({
+            "tokenId": token_id,
+            "fromAccountId": from_account_id,
+            "toAccountId": to_account_id,
+            "amountUnits": amount_units,
+            "accountNonce": account_nonce
+        }),
+    )
+}
+
+pub fn deterministic_bridge_credit_id(
+    deposit_id: &str,
+    account_id: &str,
+    asset_id: &str,
+    amount_units: u64,
+) -> String {
+    hash_json(
+        "flowmemory.local_devnet.bridge_credit_id.v0",
+        &serde_json::json!({
+            "depositId": deposit_id,
+            "accountId": account_id,
+            "assetId": asset_id,
+            "amountUnits": amount_units
+        }),
+    )
+}
+
 pub fn deterministic_pool_id(base_asset_id: &str, quote_asset_id: &str) -> String {
     hash_json(
         "flowmemory.local_devnet.dex_pool_id.v0",
@@ -1077,11 +1299,14 @@ pub fn state_root(state: &ChainState) -> String {
         rootfields: &state.rootfields,
         agent_accounts: &state.agent_accounts,
         local_test_unit_balances: &state.local_test_unit_balances,
+        account_nonces: &state.account_nonces,
         faucet_records: &state.faucet_records,
         balance_transfers: &state.balance_transfers,
+        bridge_credit_receipts: &state.bridge_credit_receipts,
         token_definitions: &state.token_definitions,
         token_balances: &state.token_balances,
         token_mint_receipts: &state.token_mint_receipts,
+        token_transfer_receipts: &state.token_transfer_receipts,
         dex_pools: &state.dex_pools,
         lp_positions: &state.lp_positions,
         liquidity_receipts: &state.liquidity_receipts,
@@ -1098,6 +1323,8 @@ pub fn state_root(state: &ChainState) -> String {
         imported_observations: &state.imported_observations,
         imported_verifier_reports: &state.imported_verifier_reports,
         base_anchors: &state.base_anchors,
+        execution_receipts: &state.execution_receipts,
+        execution_events: &state.execution_events,
     };
     hash_json("flowmemory.local_devnet.state_root.v0", &view)
 }
@@ -1124,6 +1351,10 @@ pub fn state_map_roots(state: &ChainState) -> StateMapRoots {
             "flowmemory.local_devnet.local_test_unit_balances.v0",
             &state.local_test_unit_balances,
         ),
+        account_nonce_root: map_root(
+            "flowmemory.local_devnet.account_nonces.v0",
+            &state.account_nonces,
+        ),
         faucet_record_root: map_root(
             "flowmemory.local_devnet.faucet_records.v0",
             &state.faucet_records,
@@ -1131,6 +1362,10 @@ pub fn state_map_roots(state: &ChainState) -> StateMapRoots {
         balance_transfer_root: map_root(
             "flowmemory.local_devnet.balance_transfers.v0",
             &state.balance_transfers,
+        ),
+        bridge_credit_receipt_root: map_root(
+            "flowmemory.local_devnet.bridge_credit_receipts.v0",
+            &state.bridge_credit_receipts,
         ),
         token_definition_root: map_root(
             "flowmemory.local_devnet.token_definitions.v0",
@@ -1143,6 +1378,10 @@ pub fn state_map_roots(state: &ChainState) -> StateMapRoots {
         token_mint_receipt_root: map_root(
             "flowmemory.local_devnet.token_mint_receipts.v0",
             &state.token_mint_receipts,
+        ),
+        token_transfer_receipt_root: map_root(
+            "flowmemory.local_devnet.token_transfer_receipts.v0",
+            &state.token_transfer_receipts,
         ),
         dex_pool_root: map_root("flowmemory.local_devnet.dex_pools.v0", &state.dex_pools),
         lp_position_root: map_root(
@@ -1202,6 +1441,401 @@ pub fn state_map_roots(state: &ChainState) -> StateMapRoots {
             "flowmemory.local_devnet.base_anchors.v0",
             &state.base_anchors,
         ),
+        execution_receipt_root: map_root(
+            "flowmemory.local_devnet.execution_receipts.v0",
+            &state.execution_receipts,
+        ),
+        execution_event_root: map_root(
+            "flowmemory.local_devnet.execution_events.v0",
+            &state.execution_events,
+        ),
+    }
+}
+
+pub fn deterministic_execution_receipt_id(block_number: u64, tx_id: &str) -> String {
+    hash_json(
+        "flowmemory.local_devnet.execution_receipt_id.v0",
+        &serde_json::json!({
+            "blockNumber": block_number,
+            "txId": tx_id
+        }),
+    )
+}
+
+pub fn deterministic_execution_event_id(receipt_id: &str, tx_id: &str, event_type: &str) -> String {
+    hash_json(
+        "flowmemory.local_devnet.execution_event_id.v0",
+        &serde_json::json!({
+            "receiptId": receipt_id,
+            "txId": tx_id,
+            "eventType": event_type
+        }),
+    )
+}
+
+pub fn transaction_type_name(tx: &Transaction) -> &'static str {
+    match tx {
+        Transaction::RegisterRootfield { .. } => "RegisterRootfield",
+        Transaction::RegisterAgent { .. } => "RegisterAgent",
+        Transaction::CreateLocalTestUnitBalance { .. } => "CreateLocalTestUnitBalance",
+        Transaction::FaucetLocalTestUnits { .. } => "FaucetLocalTestUnits",
+        Transaction::TransferLocalTestUnits { .. } => "TransferLocalTestUnits",
+        Transaction::ApplyBridgeCredit { .. } => "ApplyBridgeCredit",
+        Transaction::LaunchToken { .. } => "LaunchToken",
+        Transaction::MintLocalTestToken { .. } => "MintLocalTestToken",
+        Transaction::TransferToken { .. } => "TransferToken",
+        Transaction::CreatePool { .. } => "CreatePool",
+        Transaction::AddLiquidity { .. } => "AddLiquidity",
+        Transaction::RemoveLiquidity { .. } => "RemoveLiquidity",
+        Transaction::SwapExactIn { .. } => "SwapExactIn",
+        Transaction::RegisterModelPassport { .. } => "RegisterModelPassport",
+        Transaction::CommitRoot { .. } => "CommitRoot",
+        Transaction::SubmitArtifactCommitment { .. } => "SubmitArtifactCommitment",
+        Transaction::MarkArtifactAvailability { .. } => "MarkArtifactAvailability",
+        Transaction::SubmitWorkReceipt { .. } => "SubmitWorkReceipt",
+        Transaction::SubmitVerifierReport { .. } => "SubmitVerifierReport",
+        Transaction::RegisterVerifierModule { .. } => "RegisterVerifierModule",
+        Transaction::UpdateMemoryCell { .. } => "UpdateMemoryCell",
+        Transaction::OpenChallenge { .. } => "OpenChallenge",
+        Transaction::ResolveChallenge { .. } => "ResolveChallenge",
+        Transaction::FinalizeWorkReceipt { .. } => "FinalizeWorkReceipt",
+        Transaction::AnchorBatchToBasePlaceholder { .. } => "AnchorBatchToBasePlaceholder",
+        Transaction::ImportFlowPulseObservation(_) => "ImportFlowPulseObservation",
+        Transaction::ImportVerifierReport(_) => "ImportVerifierReport",
+    }
+}
+
+pub fn execution_cost_units(tx: &Transaction) -> u64 {
+    match tx {
+        Transaction::RegisterRootfield { .. } => 2,
+        Transaction::RegisterAgent { .. } => 1,
+        Transaction::CreateLocalTestUnitBalance { .. } => 0,
+        Transaction::FaucetLocalTestUnits { .. } => 0,
+        Transaction::TransferLocalTestUnits { .. } => 1,
+        Transaction::ApplyBridgeCredit { .. } => 1,
+        Transaction::LaunchToken { .. } => 8,
+        Transaction::MintLocalTestToken { .. } => 3,
+        Transaction::TransferToken { .. } => 2,
+        Transaction::CreatePool { .. } => 10,
+        Transaction::AddLiquidity { .. } => 5,
+        Transaction::RemoveLiquidity { .. } => 5,
+        Transaction::SwapExactIn { .. } => 4,
+        Transaction::RegisterModelPassport { .. } => 2,
+        Transaction::CommitRoot { .. } => 1,
+        Transaction::SubmitArtifactCommitment { .. } => 1,
+        Transaction::MarkArtifactAvailability { .. } => 1,
+        Transaction::SubmitWorkReceipt { .. } => 2,
+        Transaction::SubmitVerifierReport { .. } => 2,
+        Transaction::RegisterVerifierModule { .. } => 1,
+        Transaction::UpdateMemoryCell { .. } => 2,
+        Transaction::OpenChallenge { .. } => 1,
+        Transaction::ResolveChallenge { .. } => 1,
+        Transaction::FinalizeWorkReceipt { .. } => 1,
+        Transaction::AnchorBatchToBasePlaceholder { .. } => 1,
+        Transaction::ImportFlowPulseObservation(_) => 1,
+        Transaction::ImportVerifierReport(_) => 1,
+    }
+}
+
+pub fn execution_error_code(error: &DevnetError) -> String {
+    execution_error_code_for_transaction(
+        &Transaction::AnchorBatchToBasePlaceholder {
+            appchain_chain_id: String::new(),
+            finality_status: String::new(),
+        },
+        error,
+    )
+}
+
+pub fn execution_error_code_for_transaction(tx: &Transaction, error: &DevnetError) -> String {
+    if matches!(
+        tx,
+        Transaction::AddLiquidity { .. } | Transaction::RemoveLiquidity { .. }
+    ) && matches!(error, DevnetError::TokenAmountMustBePositive(_))
+    {
+        return "invalid-liquidity".to_string();
+    }
+    if matches!(tx, Transaction::SwapExactIn { .. })
+        && matches!(error, DevnetError::TokenAmountMustBePositive(_))
+    {
+        return "invalid-swap-amount".to_string();
+    }
+    match error {
+        DevnetError::LocalTestUnitBalanceInsufficient(_) => "insufficient-native-balance",
+        DevnetError::ExecutionBalanceInsufficient { .. } => "insufficient-execution-balance",
+        DevnetError::TokenBalanceInsufficient(_) => "insufficient-token-balance",
+        DevnetError::AccountNonceDuplicate { .. } => "duplicate-nonce",
+        DevnetError::AccountNonceStale { .. } => "stale-nonce",
+        DevnetError::BridgeCreditAlreadyApplied(_)
+        | DevnetError::BridgeCreditReplayAlreadyApplied(_) => "duplicate-bridge-credit",
+        DevnetError::BalanceTransferAlreadyExists(_)
+        | DevnetError::FaucetRecordAlreadyExists(_)
+        | DevnetError::TokenMintAlreadyExists(_)
+        | DevnetError::TokenTransferAlreadyExists(_)
+        | DevnetError::LiquidityReceiptAlreadyExists(_)
+        | DevnetError::SwapReceiptAlreadyExists(_) => "duplicate-transaction",
+        DevnetError::TokenAlreadyExists(_) | DevnetError::TokenSymbolAlreadyExists(_) => {
+            "duplicate-token"
+        }
+        DevnetError::PoolAlreadyExists(_) => "duplicate-pool",
+        DevnetError::TokenInvalidSymbol(_)
+        | DevnetError::TokenInvalidName(_)
+        | DevnetError::TokenInvalidDecimals(_)
+        | DevnetError::TokenMissing(_)
+        | DevnetError::TokenAmountMustBePositive(_) => "invalid-token",
+        DevnetError::PoolMissing(_) => "invalid-pool",
+        DevnetError::PoolInvalidAsset(_) => "invalid-pool-pair",
+        DevnetError::LiquidityBelowMinimum(_)
+        | DevnetError::LpPositionInsufficient(_)
+        | DevnetError::LpPositionMissing(_) => "invalid-liquidity",
+        DevnetError::SwapSlippageExceeded(_) => "min-output-not-met",
+        DevnetError::PoolReserveInsufficient(_) => "insufficient-liquidity",
+        DevnetError::DeterministicIdMismatch { .. } => "deterministic-id-mismatch",
+        _ => "execution-error",
+    }
+    .to_string()
+}
+
+fn execution_payer_account_id(tx: &Transaction) -> Option<&str> {
+    match tx {
+        Transaction::TransferLocalTestUnits {
+            from_account_id, ..
+        } => Some(from_account_id),
+        Transaction::ApplyBridgeCredit { account_id, .. } => Some(account_id),
+        Transaction::LaunchToken {
+            initial_owner_account_id,
+            ..
+        } => Some(initial_owner_account_id),
+        Transaction::MintLocalTestToken { to_account_id, .. } => Some(to_account_id),
+        Transaction::TransferToken {
+            from_account_id, ..
+        } => Some(from_account_id),
+        Transaction::CreatePool {
+            created_by_account_id,
+            ..
+        } => Some(created_by_account_id),
+        Transaction::AddLiquidity {
+            provider_account_id,
+            ..
+        } => Some(provider_account_id),
+        Transaction::RemoveLiquidity {
+            provider_account_id,
+            ..
+        } => Some(provider_account_id),
+        Transaction::SwapExactIn {
+            trader_account_id, ..
+        } => Some(trader_account_id),
+        _ => None,
+    }
+}
+
+fn apply_transaction_atomically(
+    state: &mut ChainState,
+    tx: &Transaction,
+    _tx_id: &str,
+    execution_cost_units: u64,
+) -> Result<bool, DevnetError> {
+    let mut candidate = state.clone();
+    apply_transaction(&mut candidate, tx)?;
+    let execution_cost_charged =
+        charge_execution_cost_if_enabled(&mut candidate, tx, execution_cost_units)?;
+    *state = candidate;
+    Ok(execution_cost_charged)
+}
+
+fn charge_execution_cost_if_enabled(
+    state: &mut ChainState,
+    tx: &Transaction,
+    execution_cost_units: u64,
+) -> Result<bool, DevnetError> {
+    if !state.config.execution_costs_enabled
+        || execution_cost_units == 0
+        || state.config.execution_cost_charge_mode == EXECUTION_COST_CHARGE_RECORD_ONLY
+    {
+        return Ok(false);
+    }
+    if state.config.execution_cost_charge_mode != EXECUTION_COST_CHARGE_NATIVE {
+        return Ok(false);
+    }
+    let Some(account_id) = execution_payer_account_id(tx) else {
+        return Ok(false);
+    };
+    let available = available_local_test_units(state, account_id)?;
+    if available < execution_cost_units {
+        return Err(DevnetError::ExecutionBalanceInsufficient {
+            account_id: account_id.to_string(),
+            required: execution_cost_units,
+            available,
+        });
+    }
+    debit_asset_units(
+        state,
+        account_id,
+        LOCAL_TEST_UNIT_ASSET_ID,
+        execution_cost_units,
+    )?;
+    Ok(true)
+}
+
+fn execution_events_for_transaction(
+    receipt_id: &str,
+    tx_id: &str,
+    tx: &Transaction,
+    success: bool,
+    block_number: u64,
+) -> Vec<ExecutionEvent> {
+    let (event_type, object_id, account_id, asset_id, amount_units) = if success {
+        success_event_descriptor(tx)
+    } else {
+        (
+            "execution_failed".to_string(),
+            Some(tx_id.to_string()),
+            execution_payer_account_id(tx).map(ToOwned::to_owned),
+            None,
+            None,
+        )
+    };
+    let event_id = deterministic_execution_event_id(receipt_id, tx_id, &event_type);
+    vec![ExecutionEvent {
+        event_id,
+        receipt_id: receipt_id.to_string(),
+        tx_id: tx_id.to_string(),
+        event_type,
+        object_id,
+        account_id,
+        asset_id,
+        amount_units,
+        block_number,
+        status: if success { "applied" } else { "failed" }.to_string(),
+    }]
+}
+
+fn success_event_descriptor(
+    tx: &Transaction,
+) -> (
+    String,
+    Option<String>,
+    Option<String>,
+    Option<String>,
+    Option<u64>,
+) {
+    match tx {
+        Transaction::TransferLocalTestUnits {
+            transfer_id,
+            from_account_id,
+            amount_units,
+            ..
+        } => (
+            "native_transfer".to_string(),
+            Some(transfer_id.clone()),
+            Some(from_account_id.clone()),
+            Some(LOCAL_TEST_UNIT_ASSET_ID.to_string()),
+            Some(*amount_units),
+        ),
+        Transaction::ApplyBridgeCredit {
+            credit_id,
+            account_id,
+            asset_id,
+            amount_units,
+            ..
+        } => (
+            "bridge_credit_applied".to_string(),
+            Some(credit_id.clone()),
+            Some(account_id.clone()),
+            Some(asset_id.clone()),
+            Some(*amount_units),
+        ),
+        Transaction::LaunchToken {
+            token_id,
+            initial_owner_account_id,
+            initial_supply_units,
+            ..
+        } => (
+            "token_launched".to_string(),
+            Some(token_id.clone()),
+            Some(initial_owner_account_id.clone()),
+            Some(token_id.clone()),
+            Some(*initial_supply_units),
+        ),
+        Transaction::MintLocalTestToken {
+            mint_id,
+            token_id,
+            to_account_id,
+            amount_units,
+            ..
+        } => (
+            "token_minted".to_string(),
+            Some(mint_id.clone()),
+            Some(to_account_id.clone()),
+            Some(token_id.clone()),
+            Some(*amount_units),
+        ),
+        Transaction::TransferToken {
+            transfer_id,
+            token_id,
+            from_account_id,
+            amount_units,
+            ..
+        } => (
+            "token_transfer".to_string(),
+            Some(transfer_id.clone()),
+            Some(from_account_id.clone()),
+            Some(token_id.clone()),
+            Some(*amount_units),
+        ),
+        Transaction::CreatePool {
+            pool_id,
+            created_by_account_id,
+            ..
+        } => (
+            "pool_created".to_string(),
+            Some(pool_id.clone()),
+            Some(created_by_account_id.clone()),
+            None,
+            None,
+        ),
+        Transaction::AddLiquidity {
+            liquidity_id,
+            provider_account_id,
+            ..
+        } => (
+            "liquidity_added".to_string(),
+            Some(liquidity_id.clone()),
+            Some(provider_account_id.clone()),
+            None,
+            None,
+        ),
+        Transaction::RemoveLiquidity {
+            liquidity_id,
+            provider_account_id,
+            ..
+        } => (
+            "liquidity_removed".to_string(),
+            Some(liquidity_id.clone()),
+            Some(provider_account_id.clone()),
+            None,
+            None,
+        ),
+        Transaction::SwapExactIn {
+            swap_id,
+            trader_account_id,
+            asset_in_id,
+            amount_in_units,
+            ..
+        } => (
+            "swap_executed".to_string(),
+            Some(swap_id.clone()),
+            Some(trader_account_id.clone()),
+            Some(asset_in_id.clone()),
+            Some(*amount_in_units),
+        ),
+        _ => (
+            "transaction_applied".to_string(),
+            None,
+            execution_payer_account_id(tx).map(ToOwned::to_owned),
+            None,
+            None,
+        ),
     }
 }
 
@@ -1209,28 +1843,77 @@ pub fn build_block(state: &mut ChainState) -> Block {
     let txs = std::mem::take(&mut state.pending_txs);
     let mut receipts = Vec::with_capacity(txs.len());
     let mut tx_ids = Vec::with_capacity(txs.len());
+    let block_number = state.next_block_number;
+    let logical_time = state.logical_time;
+    let parent_hash = state.parent_hash.clone();
 
     for envelope in txs {
         tx_ids.push(envelope.tx_id.clone());
         let authorization = envelope.authorization.clone();
-        let result = apply_transaction(state, &envelope.tx);
+        let tx_type = transaction_type_name(&envelope.tx).to_string();
+        let execution_cost_units = execution_cost_units(&envelope.tx);
+        let payer_account_id = execution_payer_account_id(&envelope.tx).map(ToOwned::to_owned);
+        let receipt_id = deterministic_execution_receipt_id(block_number, &envelope.tx_id);
+        let result = apply_transaction_atomically(
+            state,
+            &envelope.tx,
+            &envelope.tx_id,
+            execution_cost_units,
+        );
+        let success = result.is_ok();
+        let execution_cost_charged = result.as_ref().map(|charged| *charged).unwrap_or(false);
+        let error_code = result
+            .as_ref()
+            .err()
+            .map(|error| execution_error_code_for_transaction(&envelope.tx, error));
+        let error_message = result.as_ref().err().map(ToString::to_string);
+        let event_ids = execution_events_for_transaction(
+            &receipt_id,
+            &envelope.tx_id,
+            &envelope.tx,
+            success,
+            block_number,
+        );
+        let event_id_values = event_ids
+            .iter()
+            .map(|event| event.event_id.clone())
+            .collect::<Vec<_>>();
+        for event in event_ids {
+            state.execution_events.insert(event.event_id.clone(), event);
+        }
+        state.execution_receipts.insert(
+            receipt_id.clone(),
+            ExecutionReceipt {
+                receipt_id: receipt_id.clone(),
+                tx_id: envelope.tx_id.clone(),
+                tx_type,
+                status: if success { "applied" } else { "rejected" }.to_string(),
+                success,
+                error_code: error_code.clone(),
+                error_message: error_message.clone(),
+                execution_cost_units,
+                execution_cost_charged,
+                payer_account_id,
+                event_ids: event_id_values.clone(),
+                block_number,
+                no_value: true,
+            },
+        );
         receipts.push(BlockReceipt {
+            receipt_id,
             tx_id: envelope.tx_id,
-            status: if result.is_ok() {
-                "applied"
-            } else {
-                "rejected"
-            }
-            .to_string(),
-            error: result.err().map(|error| error.to_string()),
+            status: if success { "applied" } else { "rejected" }.to_string(),
+            success,
+            execution_cost_units,
+            execution_cost_charged,
+            error_code,
+            error: error_message,
+            event_ids: event_id_values,
             authorization,
         });
     }
 
     let root = state_root(state);
-    let block_number = state.next_block_number;
-    let logical_time = state.logical_time;
-    let parent_hash = state.parent_hash.clone();
 
     let mut block = Block {
         schema: BLOCK_SCHEMA.to_string(),
@@ -1316,7 +1999,10 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
                     owner: owner.clone(),
                     units: 0,
                     total_faucet_units: 0,
+                    bridge_credited_units: 0,
+                    reserved_units: 0,
                     last_faucet_record_id: None,
+                    last_bridge_credit_id: None,
                     updated_at_block: state.next_block_number,
                     no_value: true,
                 },
@@ -1371,8 +2057,10 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
             from_account_id,
             to_account_id,
             amount_units,
+            account_nonce,
             memo,
         } => {
+            ensure_account_nonce_can_apply(state, from_account_id, *account_nonce)?;
             if state.balance_transfers.contains_key(transfer_id) {
                 return Err(DevnetError::BalanceTransferAlreadyExists(
                     transfer_id.clone(),
@@ -1382,13 +2070,14 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
                 return Err(DevnetError::FaucetAmountMustBePositive(transfer_id.clone()));
             }
 
-            let from_balance = state
-                .local_test_unit_balances
-                .get(from_account_id)
-                .ok_or_else(|| DevnetError::LocalTestUnitBalanceMissing(from_account_id.clone()))?;
-            if from_balance.units < *amount_units {
+            if available_local_test_units(state, from_account_id)? < *amount_units {
                 return Err(DevnetError::LocalTestUnitBalanceInsufficient(
                     from_account_id.clone(),
+                ));
+            }
+            if !state.local_test_unit_balances.contains_key(to_account_id) {
+                return Err(DevnetError::LocalTestUnitBalanceMissing(
+                    to_account_id.clone(),
                 ));
             }
 
@@ -1423,6 +2112,87 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
                     no_value: true,
                 },
             );
+            commit_account_nonce(state, from_account_id, *account_nonce, transfer_id);
+        }
+        Transaction::ApplyBridgeCredit {
+            credit_id,
+            deposit_id,
+            replay_key,
+            account_id,
+            asset_id,
+            amount_units,
+            acknowledged_at_block_number,
+            account_nonce,
+        } => {
+            ensure_account_nonce_can_apply(state, account_id, *account_nonce)?;
+            ensure_expected_id(
+                "bridge credit",
+                credit_id,
+                &deterministic_bridge_credit_id(deposit_id, account_id, asset_id, *amount_units),
+            )?;
+            if *amount_units == 0 {
+                return Err(DevnetError::FaucetAmountMustBePositive(credit_id.clone()));
+            }
+            if state.bridge_credit_receipts.contains_key(credit_id) {
+                return Err(DevnetError::BridgeCreditAlreadyApplied(credit_id.clone()));
+            }
+            if state
+                .bridge_credit_receipts
+                .values()
+                .any(|receipt| receipt.replay_key == *replay_key)
+            {
+                return Err(DevnetError::BridgeCreditReplayAlreadyApplied(
+                    replay_key.clone(),
+                ));
+            }
+            if asset_id == LOCAL_TEST_UNIT_ASSET_ID
+                && !state.local_test_unit_balances.contains_key(account_id)
+            {
+                state.local_test_unit_balances.insert(
+                    account_id.clone(),
+                    LocalTestUnitBalance {
+                        account_id: account_id.clone(),
+                        owner: account_id.clone(),
+                        units: 0,
+                        total_faucet_units: 0,
+                        bridge_credited_units: 0,
+                        reserved_units: 0,
+                        last_faucet_record_id: None,
+                        last_bridge_credit_id: None,
+                        updated_at_block: state.next_block_number,
+                        no_value: true,
+                    },
+                );
+            }
+            ensure_asset_exists(state, asset_id)?;
+            credit_asset_units(state, account_id, asset_id, *amount_units)?;
+            if asset_id == LOCAL_TEST_UNIT_ASSET_ID {
+                let balance = state
+                    .local_test_unit_balances
+                    .get_mut(account_id)
+                    .expect("native balance exists after bridge credit");
+                balance.bridge_credited_units = balance
+                    .bridge_credited_units
+                    .checked_add(*amount_units)
+                    .ok_or_else(|| DevnetError::LocalTestUnitBalanceOverflow(account_id.clone()))?;
+                balance.last_bridge_credit_id = Some(credit_id.clone());
+            }
+            state.bridge_credit_receipts.insert(
+                credit_id.clone(),
+                BridgeCreditReceipt {
+                    credit_id: credit_id.clone(),
+                    deposit_id: deposit_id.clone(),
+                    replay_key: replay_key.clone(),
+                    account_id: account_id.clone(),
+                    asset_id: asset_id.clone(),
+                    amount_units: *amount_units,
+                    acknowledged_at_block_number: *acknowledged_at_block_number,
+                    applied_at_block: state.next_block_number,
+                    local_only: true,
+                    production_ready: false,
+                },
+            );
+            commit_account_nonce(state, account_id, *account_nonce, credit_id);
         }
         Transaction::LaunchToken {
             token_id,
@@ -1431,8 +2201,11 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
             decimals,
             initial_owner_account_id,
             initial_supply_units,
+            account_nonce,
         } => {
             let normalized_symbol = normalize_token_symbol(symbol);
+            ensure_account_nonce_can_apply(state, initial_owner_account_id, *account_nonce)?;
+            validate_token_definition(&normalized_symbol, name, *decimals)?;
             ensure_expected_id(
                 "token",
                 token_id,
@@ -1497,14 +2270,17 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
                     no_value: true,
                 },
             );
+            commit_account_nonce(state, initial_owner_account_id, *account_nonce, token_id);
         }
         Transaction::MintLocalTestToken {
             mint_id,
             token_id,
             to_account_id,
             amount_units,
+            account_nonce,
             reason,
         } => {
+            ensure_account_nonce_can_apply(state, to_account_id, *account_nonce)?;
             ensure_expected_id(
                 "token mint",
                 mint_id,
@@ -1546,13 +2322,70 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
                     no_value: true,
                 },
             );
+            commit_account_nonce(state, to_account_id, *account_nonce, mint_id);
+        }
+        Transaction::TransferToken {
+            transfer_id,
+            token_id,
+            from_account_id,
+            to_account_id,
+            amount_units,
+            account_nonce,
+        } => {
+            ensure_account_nonce_can_apply(state, from_account_id, *account_nonce)?;
+            ensure_expected_id(
+                "token transfer",
+                transfer_id,
+                &deterministic_token_transfer_id(
+                    token_id,
+                    from_account_id,
+                    to_account_id,
+                    *amount_units,
+                    *account_nonce,
+                ),
+            )?;
+            if state.token_transfer_receipts.contains_key(transfer_id) {
+                return Err(DevnetError::TokenTransferAlreadyExists(transfer_id.clone()));
+            }
+            if *amount_units == 0 {
+                return Err(DevnetError::TokenAmountMustBePositive(transfer_id.clone()));
+            }
+            ensure_asset_exists(state, token_id)?;
+            if !state.local_test_unit_balances.contains_key(from_account_id) {
+                return Err(DevnetError::LocalTestUnitBalanceMissing(
+                    from_account_id.clone(),
+                ));
+            }
+            if !state.local_test_unit_balances.contains_key(to_account_id) {
+                return Err(DevnetError::LocalTestUnitBalanceMissing(
+                    to_account_id.clone(),
+                ));
+            }
+            ensure_asset_units_available(state, from_account_id, token_id, *amount_units)?;
+            debit_asset_units(state, from_account_id, token_id, *amount_units)?;
+            credit_asset_units(state, to_account_id, token_id, *amount_units)?;
+            state.token_transfer_receipts.insert(
+                transfer_id.clone(),
+                LocalTestTokenTransferReceipt {
+                    transfer_id: transfer_id.clone(),
+                    token_id: token_id.clone(),
+                    from_account_id: from_account_id.clone(),
+                    to_account_id: to_account_id.clone(),
+                    amount_units: *amount_units,
+                    transferred_at_block: state.next_block_number,
+                    no_value: true,
+                },
+            );
+            commit_account_nonce(state, from_account_id, *account_nonce, transfer_id);
         }
         Transaction::CreatePool {
             pool_id,
             base_asset_id,
             quote_asset_id,
             created_by_account_id,
+            account_nonce,
         } => {
+            ensure_account_nonce_can_apply(state, created_by_account_id, *account_nonce)?;
             ensure_expected_id(
                 "pool",
                 pool_id,
@@ -1587,6 +2420,7 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
                     no_value: true,
                 },
             );
+            commit_account_nonce(state, created_by_account_id, *account_nonce, pool_id);
         }
         Transaction::AddLiquidity {
             liquidity_id,
@@ -1595,7 +2429,9 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
             base_amount_units,
             quote_amount_units,
             min_lp_units,
+            account_nonce,
         } => {
+            ensure_account_nonce_can_apply(state, provider_account_id, *account_nonce)?;
             ensure_expected_id(
                 "add liquidity",
                 liquidity_id,
@@ -1716,6 +2552,7 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
                     no_value: true,
                 },
             );
+            commit_account_nonce(state, provider_account_id, *account_nonce, liquidity_id);
         }
         Transaction::RemoveLiquidity {
             liquidity_id,
@@ -1724,7 +2561,9 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
             lp_units,
             min_base_amount_units,
             min_quote_amount_units,
+            account_nonce,
         } => {
+            ensure_account_nonce_can_apply(state, provider_account_id, *account_nonce)?;
             ensure_expected_id(
                 "remove liquidity",
                 liquidity_id,
@@ -1843,6 +2682,7 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
                     no_value: true,
                 },
             );
+            commit_account_nonce(state, provider_account_id, *account_nonce, liquidity_id);
         }
         Transaction::SwapExactIn {
             swap_id,
@@ -1851,7 +2691,9 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
             asset_in_id,
             amount_in_units,
             min_amount_out_units,
+            account_nonce,
         } => {
+            ensure_account_nonce_can_apply(state, trader_account_id, *account_nonce)?;
             ensure_expected_id(
                 "swap",
                 swap_id,
@@ -1934,6 +2776,7 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
                     no_value: true,
                 },
             );
+            commit_account_nonce(state, trader_account_id, *account_nonce, swap_id);
         }
         Transaction::RegisterModelPassport {
             model_passport_id,
@@ -2347,6 +3190,78 @@ fn ensure_asset_exists(state: &ChainState, asset_id: &str) -> Result<(), DevnetE
     Err(DevnetError::TokenMissing(asset_id.to_string()))
 }
 
+fn validate_token_definition(symbol: &str, name: &str, decimals: u8) -> Result<(), DevnetError> {
+    if symbol.len() < 2
+        || symbol.len() > 12
+        || !symbol
+            .chars()
+            .all(|character| character.is_ascii_uppercase() || character.is_ascii_digit())
+    {
+        return Err(DevnetError::TokenInvalidSymbol(symbol.to_string()));
+    }
+    if name.trim().is_empty() || name.trim().len() > 64 {
+        return Err(DevnetError::TokenInvalidName(name.to_string()));
+    }
+    if decimals > 18 {
+        return Err(DevnetError::TokenInvalidDecimals(decimals));
+    }
+    Ok(())
+}
+
+fn ensure_account_nonce_can_apply(
+    state: &ChainState,
+    account_id: &str,
+    account_nonce: u64,
+) -> Result<(), DevnetError> {
+    let expected = state
+        .account_nonces
+        .get(account_id)
+        .map(|nonce| nonce.next_nonce)
+        .unwrap_or(1);
+    if account_nonce == expected {
+        return Ok(());
+    }
+    if state
+        .account_nonces
+        .get(account_id)
+        .is_some_and(|nonce| nonce.last_nonce == account_nonce)
+    {
+        return Err(DevnetError::AccountNonceDuplicate {
+            account_id: account_id.to_string(),
+            nonce: account_nonce,
+        });
+    }
+    Err(DevnetError::AccountNonceStale {
+        account_id: account_id.to_string(),
+        expected,
+        actual: account_nonce,
+    })
+}
+
+fn commit_account_nonce(state: &mut ChainState, account_id: &str, account_nonce: u64, tx_id: &str) {
+    state.account_nonces.insert(
+        account_id.to_string(),
+        AccountNonce {
+            account_id: account_id.to_string(),
+            next_nonce: account_nonce + 1,
+            last_nonce: account_nonce,
+            last_tx_id: Some(tx_id.to_string()),
+            updated_at_block: state.next_block_number,
+        },
+    );
+}
+
+fn available_local_test_units(state: &ChainState, account_id: &str) -> Result<u64, DevnetError> {
+    let balance = state
+        .local_test_unit_balances
+        .get(account_id)
+        .ok_or_else(|| DevnetError::LocalTestUnitBalanceMissing(account_id.to_string()))?;
+    balance
+        .units
+        .checked_sub(balance.reserved_units)
+        .ok_or_else(|| DevnetError::LocalTestUnitBalanceInsufficient(account_id.to_string()))
+}
+
 fn ensure_asset_units_available(
     state: &ChainState,
     account_id: &str,
@@ -2369,11 +3284,7 @@ fn ensure_asset_units_available(
 
 fn asset_units(state: &ChainState, account_id: &str, asset_id: &str) -> Result<u64, DevnetError> {
     if asset_id == LOCAL_TEST_UNIT_ASSET_ID {
-        return state
-            .local_test_unit_balances
-            .get(account_id)
-            .map(|balance| balance.units)
-            .ok_or_else(|| DevnetError::LocalTestUnitBalanceMissing(account_id.to_string()));
+        return available_local_test_units(state, account_id);
     }
     ensure_asset_exists(state, asset_id)?;
     let balance_id = deterministic_token_balance_id(asset_id, account_id);
@@ -2575,11 +3486,14 @@ pub fn anchor_from_state(
         operator_key_reference_root: &'a str,
         agent_account_root: &'a str,
         local_test_unit_balance_root: &'a str,
+        account_nonce_root: &'a str,
         faucet_record_root: &'a str,
         balance_transfer_root: &'a str,
+        bridge_credit_receipt_root: &'a str,
         token_definition_root: &'a str,
         token_balance_root: &'a str,
         token_mint_receipt_root: &'a str,
+        token_transfer_receipt_root: &'a str,
         dex_pool_root: &'a str,
         lp_position_root: &'a str,
         liquidity_receipt_root: &'a str,
@@ -2590,6 +3504,8 @@ pub fn anchor_from_state(
         finality_receipt_root: &'a str,
         artifact_availability_proof_root: &'a str,
         verifier_module_root: &'a str,
+        execution_receipt_root: &'a str,
+        execution_event_root: &'a str,
         previous_anchor_id: &'a str,
         finality_status: &'a str,
     }
@@ -2609,11 +3525,14 @@ pub fn anchor_from_state(
             operator_key_reference_root: &roots.operator_key_reference_root,
             agent_account_root: &roots.agent_account_root,
             local_test_unit_balance_root: &roots.local_test_unit_balance_root,
+            account_nonce_root: &roots.account_nonce_root,
             faucet_record_root: &roots.faucet_record_root,
             balance_transfer_root: &roots.balance_transfer_root,
+            bridge_credit_receipt_root: &roots.bridge_credit_receipt_root,
             token_definition_root: &roots.token_definition_root,
             token_balance_root: &roots.token_balance_root,
             token_mint_receipt_root: &roots.token_mint_receipt_root,
+            token_transfer_receipt_root: &roots.token_transfer_receipt_root,
             dex_pool_root: &roots.dex_pool_root,
             lp_position_root: &roots.lp_position_root,
             liquidity_receipt_root: &roots.liquidity_receipt_root,
@@ -2624,6 +3543,8 @@ pub fn anchor_from_state(
             finality_receipt_root: &roots.finality_receipt_root,
             artifact_availability_proof_root: &roots.artifact_availability_proof_root,
             verifier_module_root: &roots.verifier_module_root,
+            execution_receipt_root: &roots.execution_receipt_root,
+            execution_event_root: &roots.execution_event_root,
             previous_anchor_id: &previous_anchor_id,
             finality_status,
         },
@@ -2642,11 +3563,14 @@ pub fn anchor_from_state(
         operator_key_reference_root: roots.operator_key_reference_root,
         agent_account_root: roots.agent_account_root,
         local_test_unit_balance_root: roots.local_test_unit_balance_root,
+        account_nonce_root: roots.account_nonce_root,
         faucet_record_root: roots.faucet_record_root,
         balance_transfer_root: roots.balance_transfer_root,
+        bridge_credit_receipt_root: roots.bridge_credit_receipt_root,
         token_definition_root: roots.token_definition_root,
         token_balance_root: roots.token_balance_root,
         token_mint_receipt_root: roots.token_mint_receipt_root,
+        token_transfer_receipt_root: roots.token_transfer_receipt_root,
         dex_pool_root: roots.dex_pool_root,
         lp_position_root: roots.lp_position_root,
         liquidity_receipt_root: roots.liquidity_receipt_root,
@@ -2657,6 +3581,8 @@ pub fn anchor_from_state(
         finality_receipt_root: roots.finality_receipt_root,
         artifact_availability_proof_root: roots.artifact_availability_proof_root,
         verifier_module_root: roots.verifier_module_root,
+        execution_receipt_root: roots.execution_receipt_root,
+        execution_event_root: roots.execution_event_root,
         previous_anchor_id,
         finality_status: finality_status.to_string(),
     }
@@ -2785,6 +3711,14 @@ pub fn product_demo_transactions() -> Vec<Transaction> {
     let bob = "local-account:product:bob".to_string();
     let token_id = deterministic_token_id("FLOWT");
     let pool_id = deterministic_pool_id(LOCAL_TEST_UNIT_ASSET_ID, &token_id);
+    let bridge_deposit_id = "bridge-deposit:product:alice:001".to_string();
+    let bridge_credit_id = deterministic_bridge_credit_id(
+        &bridge_deposit_id,
+        &alice,
+        LOCAL_TEST_UNIT_ASSET_ID,
+        10_000,
+    );
+    let token_transfer_id = deterministic_token_transfer_id(&token_id, &alice, &bob, 10_000, 4);
     let add_liquidity_id = deterministic_liquidity_id(
         &pool_id,
         &alice,
@@ -2814,19 +3748,23 @@ pub fn product_demo_transactions() -> Vec<Transaction> {
             account_id: bob.clone(),
             owner: "operator:product:bob".to_string(),
         },
-        Transaction::FaucetLocalTestUnits {
-            faucet_record_id: "faucet:product:alice".to_string(),
+        Transaction::ApplyBridgeCredit {
+            credit_id: bridge_credit_id,
+            deposit_id: bridge_deposit_id,
+            replay_key: "bridge-replay:product:alice:001".to_string(),
             account_id: alice.clone(),
-            recipient: "operator:product:alice".to_string(),
+            asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
             amount_units: 10_000,
-            reason: "product-smoke-no-value-test-units".to_string(),
+            acknowledged_at_block_number: 8,
+            account_nonce: 1,
         },
-        Transaction::FaucetLocalTestUnits {
-            faucet_record_id: "faucet:product:bob".to_string(),
-            account_id: bob.clone(),
-            recipient: "operator:product:bob".to_string(),
+        Transaction::TransferLocalTestUnits {
+            transfer_id: "transfer:product:alice-to-bob:native:001".to_string(),
+            from_account_id: alice.clone(),
+            to_account_id: bob.clone(),
             amount_units: 1_000,
-            reason: "product-smoke-no-value-test-units".to_string(),
+            account_nonce: 2,
+            memo: "bridge-credit-spend-transfer".to_string(),
         },
         Transaction::LaunchToken {
             token_id: token_id.clone(),
@@ -2835,12 +3773,22 @@ pub fn product_demo_transactions() -> Vec<Transaction> {
             decimals: 6,
             initial_owner_account_id: alice.clone(),
             initial_supply_units: 1_000_000,
+            account_nonce: 3,
+        },
+        Transaction::TransferToken {
+            transfer_id: token_transfer_id,
+            token_id: token_id.clone(),
+            from_account_id: alice.clone(),
+            to_account_id: bob.clone(),
+            amount_units: 10_000,
+            account_nonce: 4,
         },
         Transaction::CreatePool {
             pool_id: pool_id.clone(),
             base_asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
             quote_asset_id: token_id.clone(),
             created_by_account_id: alice.clone(),
+            account_nonce: 5,
         },
         Transaction::AddLiquidity {
             liquidity_id: add_liquidity_id,
@@ -2849,6 +3797,7 @@ pub fn product_demo_transactions() -> Vec<Transaction> {
             base_amount_units: 5_000,
             quote_amount_units: 500_000,
             min_lp_units: 1,
+            account_nonce: 6,
         },
         Transaction::SwapExactIn {
             swap_id,
@@ -2857,6 +3806,7 @@ pub fn product_demo_transactions() -> Vec<Transaction> {
             asset_in_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
             amount_in_units: 100,
             min_amount_out_units: 9_000,
+            account_nonce: 1,
         },
         Transaction::RemoveLiquidity {
             liquidity_id: remove_liquidity_id,
@@ -2865,6 +3815,7 @@ pub fn product_demo_transactions() -> Vec<Transaction> {
             lp_units: 100,
             min_base_amount_units: 1,
             min_quote_amount_units: 1,
+            account_nonce: 7,
         },
     ]
 }
