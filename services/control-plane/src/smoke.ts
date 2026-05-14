@@ -5,8 +5,18 @@ import { loadControlPlaneState } from "./fixture-state.ts";
 import type { ControlPlanePaths, JsonObject, RpcErrorResponse, RpcSuccessResponse } from "./types.ts";
 
 function firstDevnetBlock(state: ReturnType<typeof loadControlPlaneState>): JsonObject {
-  const blocks = Array.isArray(state.devnet?.blocks) ? state.devnet.blocks : [];
-  const block = blocks[0];
+  const blocksResponse = dispatchJsonRpc(
+    { jsonrpc: "2.0", id: "blocks-prefetch", method: "block_list", params: { limit: 10 } },
+    { state },
+  ) as RpcSuccessResponse;
+  const blocks = (blocksResponse.result as JsonObject).blocks;
+  const blockRows = Array.isArray(blocks) ? blocks : [];
+  const block = blockRows.find((entry) => {
+    if (entry === null || typeof entry !== "object" || Array.isArray(entry)) {
+      return false;
+    }
+    return Array.isArray((entry as JsonObject).txIds) && ((entry as JsonObject).txIds as unknown[]).length > 0;
+  }) ?? blockRows[0];
   if (block === null || typeof block !== "object" || Array.isArray(block)) {
     throw new Error("control-plane smoke requires at least one local devnet block");
   }

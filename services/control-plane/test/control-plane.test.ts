@@ -420,6 +420,35 @@ test("smoke client queries the complete local lifecycle surface", () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
+test("smoke client ignores stale local devnet blocks without transactions", () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-stale-devnet-"));
+  try {
+    const staleDevnetPath = join(dir, "state.json");
+    writeFileSync(staleDevnetPath, JSON.stringify({
+      schema: "flowmemory.local_devnet.state.v0",
+      blocks: [{
+        schema: "flowmemory.local_devnet.block.v0",
+        blockNumber: "1",
+        blockHash: "0x1909a47bfaaabbfe51d371173d550fcdaff1abaedeea1045bfb77a496bdb8695",
+        txIds: [],
+        receipts: [],
+      }],
+    }));
+
+    const smoke = runControlPlaneSmoke({
+      localDevnetPath: staleDevnetPath,
+      txIntakePath: join(dir, "transactions.ndjson"),
+      bridgeObservationIntakePath: join(dir, "bridge-observations.ndjson"),
+    });
+
+    assert.equal(smoke.schema, "flowmemory.control_plane.smoke.v0");
+    assert.equal(smoke.ok, true);
+    assert.equal(typeof (smoke.queried as Record<string, unknown>).txId, "string");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("HTTP server exposes browser-safe health and state endpoints", async () => {
   const server = startControlPlaneServer({ host: "127.0.0.1", port: 0 });
 
