@@ -9,6 +9,7 @@ Set-StrictMode -Version Latest
 . "$PSScriptRoot\flowchain-common.ps1"
 
 $repoRoot = Set-FlowChainRepoRoot
+Set-FlowChainCargoTargetDir -RepoRoot $repoRoot -Purpose "product-e2e" | Out-Null
 $productRoot = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/product-e2e")
 
 if (Test-Path -LiteralPath $productRoot) {
