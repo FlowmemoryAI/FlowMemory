@@ -1004,6 +1004,30 @@ fn transactions_from_fixture(path: &Path) -> Result<Vec<Transaction>> {
             .with_context(|| format!("failed to parse txs in {}", path.display()));
     }
 
+    if value.get("transactions").is_some() {
+        let transactions = value
+            .get("transactions")
+            .and_then(Value::as_array)
+            .ok_or_else(|| anyhow!("transactions must be an array in {}", path.display()))?;
+        return Ok(transactions
+            .iter()
+            .cloned()
+            .map(|envelope| Transaction::ApplyProductionL1Transaction { envelope })
+            .collect());
+    }
+
+    if value.get("bridgeEvidence").is_some() {
+        let evidence = value
+            .get("bridgeEvidence")
+            .and_then(Value::as_array)
+            .ok_or_else(|| anyhow!("bridgeEvidence must be an array in {}", path.display()))?;
+        return Ok(evidence
+            .iter()
+            .cloned()
+            .map(|evidence| Transaction::ApplyProtocolBridgeEvidence { evidence })
+            .collect());
+    }
+
     if value.get("tx").is_some() {
         let tx = serde_json::from_value(value["tx"].clone())
             .with_context(|| format!("failed to parse tx in {}", path.display()))?;
@@ -1128,6 +1152,19 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "workReceipts": state.work_receipts,
         "verifierReports": state.verifier_reports,
         "baseAnchors": state.base_anchors,
+        "protocolAccounts": state.protocol_accounts,
+        "protocolBalances": state.protocol_balances,
+        "protocolValidatorAuthorities": state.protocol_validator_authorities,
+        "protocolBridgeEvidence": state.protocol_bridge_evidence,
+        "protocolBridgeCredits": state.protocol_bridge_credits,
+        "protocolBridgeReplayIndex": state.protocol_bridge_replay_index,
+        "protocolReceipts": state.protocol_receipts,
+        "protocolEvents": state.protocol_events,
+        "protocolEventReceiptIndex": state.protocol_event_receipt_index,
+        "protocolWithdrawals": state.protocol_withdrawals,
+        "protocolObjectStore": state.protocol_object_store,
+        "protocolFinalityVotes": state.protocol_finality_votes,
+        "protocolFinalityCertificates": state.protocol_finality_certificates,
     });
 
     let indexer = serde_json::json!({
@@ -1151,6 +1188,12 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "finalityReceipts": state.finality_receipts,
         "artifactAvailabilityProofs": state.artifact_availability_proofs,
         "blocks": state.blocks,
+        "protocolBridgeEvidence": state.protocol_bridge_evidence,
+        "protocolBridgeCredits": state.protocol_bridge_credits,
+        "protocolReceipts": state.protocol_receipts,
+        "protocolEvents": state.protocol_events,
+        "protocolEventReceiptIndex": state.protocol_event_receipt_index,
+        "protocolFinalityCertificates": state.protocol_finality_certificates,
         "mapRoots": state_map_roots(state),
         "stateRoot": state_root(state),
     });
@@ -1176,6 +1219,12 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "finalityReceipts": state.finality_receipts,
         "artifactAvailabilityProofs": state.artifact_availability_proofs,
         "importedVerifierReports": state.imported_verifier_reports,
+        "protocolReceipts": state.protocol_receipts,
+        "protocolEvents": state.protocol_events,
+        "protocolBridgeEvidence": state.protocol_bridge_evidence,
+        "protocolBridgeReplayIndex": state.protocol_bridge_replay_index,
+        "protocolFinalityVotes": state.protocol_finality_votes,
+        "protocolFinalityCertificates": state.protocol_finality_certificates,
         "mapRoots": state_map_roots(state),
         "stateRoot": state_root(state),
     });
@@ -1212,7 +1261,20 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
             "verifierModules": state.verifier_modules,
             "workReceipts": state.work_receipts,
             "verifierReports": state.verifier_reports,
-            "baseAnchors": state.base_anchors
+            "baseAnchors": state.base_anchors,
+            "protocolAccounts": state.protocol_accounts,
+            "protocolBalances": state.protocol_balances,
+            "protocolValidatorAuthorities": state.protocol_validator_authorities,
+            "protocolBridgeEvidence": state.protocol_bridge_evidence,
+            "protocolBridgeCredits": state.protocol_bridge_credits,
+            "protocolBridgeReplayIndex": state.protocol_bridge_replay_index,
+            "protocolReceipts": state.protocol_receipts,
+            "protocolEvents": state.protocol_events,
+            "protocolEventReceiptIndex": state.protocol_event_receipt_index,
+            "protocolWithdrawals": state.protocol_withdrawals,
+            "protocolObjectStore": state.protocol_object_store,
+            "protocolFinalityVotes": state.protocol_finality_votes,
+            "protocolFinalityCertificates": state.protocol_finality_certificates
         }
     });
 
@@ -1449,6 +1511,19 @@ struct StateSummary {
     imported_observations: usize,
     imported_verifier_reports: usize,
     base_anchors: usize,
+    protocol_accounts: usize,
+    protocol_balances: usize,
+    protocol_validator_authorities: usize,
+    protocol_bridge_evidence: usize,
+    protocol_bridge_credits: usize,
+    protocol_bridge_replay_index: usize,
+    protocol_receipts: usize,
+    protocol_events: usize,
+    protocol_event_receipt_index: usize,
+    protocol_withdrawals: usize,
+    protocol_object_store: usize,
+    protocol_finality_votes: usize,
+    protocol_finality_certificates: usize,
 }
 
 impl StateSummary {
@@ -1489,6 +1564,19 @@ impl StateSummary {
             imported_observations: state.imported_observations.len(),
             imported_verifier_reports: state.imported_verifier_reports.len(),
             base_anchors: state.base_anchors.len(),
+            protocol_accounts: state.protocol_accounts.len(),
+            protocol_balances: state.protocol_balances.len(),
+            protocol_validator_authorities: state.protocol_validator_authorities.len(),
+            protocol_bridge_evidence: state.protocol_bridge_evidence.len(),
+            protocol_bridge_credits: state.protocol_bridge_credits.len(),
+            protocol_bridge_replay_index: state.protocol_bridge_replay_index.len(),
+            protocol_receipts: state.protocol_receipts.len(),
+            protocol_events: state.protocol_events.len(),
+            protocol_event_receipt_index: state.protocol_event_receipt_index.len(),
+            protocol_withdrawals: state.protocol_withdrawals.len(),
+            protocol_object_store: state.protocol_object_store.len(),
+            protocol_finality_votes: state.protocol_finality_votes.len(),
+            protocol_finality_certificates: state.protocol_finality_certificates.len(),
         }
     }
 }

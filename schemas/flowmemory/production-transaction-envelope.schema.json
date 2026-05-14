@@ -1,0 +1,326 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowmemory.local/schemas/flowmemory/production-transaction-envelope.schema.json",
+  "title": "FlowChain Transaction Envelope V0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "txId",
+    "protocolVersion",
+    "chainId",
+    "networkProfile",
+    "genesisHash",
+    "nonce",
+    "nonceDomain",
+    "signer",
+    "payloadType",
+    "payloadHash",
+    "payload",
+    "fee",
+    "expiration",
+    "signature"
+  ],
+  "properties": {
+    "schema": {
+      "const": "flowchain.production_l1.transaction_envelope.v0",
+      "x-owner": "crypto"
+    },
+    "txId": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$",
+      "x-owner": "crypto"
+    },
+    "protocolVersion": {
+      "const": "flowchain.private_local_l1.protocol.v0",
+      "x-owner": "protocol"
+    },
+    "chainId": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "x-owner": "runtime"
+    },
+    "networkProfile": {
+      "type": "string",
+      "enum": [
+        "flowchain-local-private",
+        "flowchain-local-multinode",
+        "flowchain-base8453-pilot"
+      ],
+      "x-owner": "runtime"
+    },
+    "genesisHash": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$",
+      "x-owner": "crypto"
+    },
+    "nonce": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "x-owner": "runtime"
+    },
+    "nonceDomain": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$",
+      "x-owner": "runtime"
+    },
+    "signer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "accountId",
+        "publicKey",
+        "address",
+        "role"
+      ],
+      "properties": {
+        "accountId": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$",
+          "x-owner": "wallet"
+        },
+        "publicKey": {
+          "type": "string",
+          "pattern": "^0x(02|03)[0-9a-fA-F]{64}$",
+          "x-owner": "wallet"
+        },
+        "address": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "x-owner": "wallet"
+        },
+        "role": {
+          "enum": [
+            "user",
+            "validator",
+            "bridge_operator",
+            "deployer",
+            "relayer",
+            "emergency_operator"
+          ],
+          "x-owner": "wallet"
+        }
+      },
+      "x-owner": "wallet"
+    },
+    "payloadType": {
+      "type": "string",
+      "enum": [
+        "native_transfer",
+        "faucet_funding",
+        "bridge_credit",
+        "token_launch",
+        "token_mint",
+        "token_transfer",
+        "pool_create",
+        "add_liquidity",
+        "remove_liquidity",
+        "swap",
+        "withdrawal_intent",
+        "validator_authority_config",
+        "finality_vote",
+        "finality_certificate",
+        "agent_account_update",
+        "model_passport_update",
+        "work_receipt_update",
+        "artifact_availability_proof_update",
+        "verifier_module_update",
+        "verifier_report_update",
+        "memory_cell_update",
+        "challenge_update",
+        "finality_receipt_update"
+      ],
+      "x-owner": "runtime"
+    },
+    "payloadHash": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$",
+      "x-owner": "crypto"
+    },
+    "payload": {
+      "$ref": "https://flowmemory.local/schemas/flowmemory/production-transaction-payload.schema.json",
+      "x-owner": "runtime"
+    },
+    "fee": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "gasLimit",
+        "maxFeePerGas",
+        "localExecutionCostLimit"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "no_fee_local",
+            "local_gas_units"
+          ],
+          "x-owner": "runtime"
+        },
+        "gasLimit": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "x-owner": "runtime"
+        },
+        "maxFeePerGas": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "x-owner": "runtime"
+        },
+        "localExecutionCostLimit": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "x-owner": "runtime"
+        }
+      },
+      "x-owner": "runtime"
+    },
+    "expiration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validAfterBlock",
+        "validUntilBlock",
+        "expiresAtUnixMs"
+      ],
+      "properties": {
+        "validAfterBlock": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "x-owner": "runtime"
+        },
+        "validUntilBlock": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "x-owner": "runtime"
+        },
+        "expiresAtUnixMs": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "x-owner": "runtime"
+        }
+      },
+      "x-owner": "runtime"
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scheme",
+        "signingDigest",
+        "value"
+      ],
+      "properties": {
+        "scheme": {
+          "const": "fixture-secp256k1-digest-only",
+          "x-owner": "crypto"
+        },
+        "signingDigest": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$",
+          "x-owner": "crypto"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{128}$",
+          "x-owner": "crypto"
+        }
+      },
+      "x-owner": "crypto"
+    }
+  },
+  "$defs": {
+    "hex32": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$"
+    },
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "publicKey": {
+      "type": "string",
+      "pattern": "^0x(02|03)[0-9a-fA-F]{64}$"
+    },
+    "uintString": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "isoTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "networkProfile": {
+      "type": "string",
+      "enum": [
+        "flowchain-local-private",
+        "flowchain-local-multinode",
+        "flowchain-base8453-pilot"
+      ]
+    },
+    "payloadType": {
+      "type": "string",
+      "enum": [
+        "native_transfer",
+        "faucet_funding",
+        "bridge_credit",
+        "token_launch",
+        "token_mint",
+        "token_transfer",
+        "pool_create",
+        "add_liquidity",
+        "remove_liquidity",
+        "swap",
+        "withdrawal_intent",
+        "validator_authority_config",
+        "finality_vote",
+        "finality_certificate",
+        "agent_account_update",
+        "model_passport_update",
+        "work_receipt_update",
+        "artifact_availability_proof_update",
+        "verifier_module_update",
+        "verifier_report_update",
+        "memory_cell_update",
+        "challenge_update",
+        "finality_receipt_update"
+      ]
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "NativeTransferRecorded",
+        "FaucetFundingRecorded",
+        "BridgeCreditApplied",
+        "TokenLaunched",
+        "TokenMinted",
+        "TokenTransferred",
+        "PoolCreated",
+        "LiquidityAdded",
+        "LiquidityRemoved",
+        "SwapExecuted",
+        "WithdrawalIntentRecorded",
+        "ValidatorAuthorityConfigured",
+        "FinalityVoteRecorded",
+        "FinalityCertificateRecorded",
+        "ObjectLifecycleUpdated"
+      ]
+    },
+    "stateComponent": {
+      "type": "string",
+      "enum": [
+        "accounts",
+        "balances",
+        "tokens",
+        "pools",
+        "lp_positions",
+        "bridge_credits",
+        "withdrawals",
+        "object_store",
+        "finality",
+        "validator_state"
+      ]
+    }
+  }
+}

@@ -6,6 +6,7 @@ use flowmemory_devnet::model::{
     product_demo_transactions, queue_transaction, state_map_roots, state_root,
 };
 use flowmemory_devnet::{canonical_json, keccak_hex};
+use serde_json::Value;
 use std::process::Command;
 
 #[test]
@@ -266,6 +267,164 @@ fn every_core_transaction_type_can_be_applied() {
     assert_eq!(state.imported_observations.len(), 1);
     assert_eq!(state.imported_verifier_reports.len(), 1);
     assert_eq!(state.base_anchors.len(), 1);
+}
+
+#[test]
+fn production_l1_bridge_credit_updates_live_state_roots_receipts_and_replay_index() {
+    let mut state = genesis_state();
+    let initial_root = state_root(&state);
+
+    for evidence in production_bridge_evidence_fixture() {
+        queue_transaction(
+            &mut state,
+            Transaction::ApplyProtocolBridgeEvidence { evidence },
+        );
+    }
+    let evidence_block = build_block(&mut state);
+    assert!(
+        evidence_block
+            .receipts
+            .iter()
+            .all(|receipt| receipt.status == "applied")
+    );
+
+    for envelope in production_transaction_fixture() {
+        queue_transaction(
+            &mut state,
+            Transaction::ApplyProductionL1Transaction { envelope },
+        );
+    }
+    let tx_block = build_block(&mut state);
+    assert!(
+        tx_block
+            .receipts
+            .iter()
+            .all(|receipt| receipt.status == "applied"),
+        "{:?}",
+        tx_block.receipts
+    );
+
+    assert_ne!(initial_root, state_root(&state));
+    assert_eq!(tx_block.state_root, state_root(&state));
+    assert_eq!(state.protocol_bridge_evidence.len(), 2);
+    assert_eq!(state.protocol_bridge_credits.len(), 1);
+    assert_eq!(state.protocol_bridge_replay_index.len(), 1);
+    assert_eq!(state.protocol_receipts.len(), 23);
+    assert_eq!(state.protocol_events.len(), 23);
+    assert_eq!(state.protocol_event_receipt_index.len(), 23);
+    assert_eq!(state.protocol_withdrawals.len(), 1);
+    assert_eq!(state.protocol_finality_votes.len(), 1);
+    assert_eq!(state.protocol_finality_certificates.len(), 1);
+    assert_eq!(state.protocol_object_store.len(), 9);
+
+    let credit = state
+        .protocol_bridge_credits
+        .values()
+        .next()
+        .expect("bridge credit");
+    assert_eq!(credit.status, "applied");
+    assert!(
+        state
+            .protocol_receipts
+            .get(&credit.receipt_id)
+            .expect("credit receipt")
+            .bridge_evidence_refs
+            .contains(&credit.evidence_id)
+    );
+    assert!(
+        state
+            .protocol_events
+            .get(&credit.event_id)
+            .expect("credit event")
+            .event_type
+            == "BridgeCreditApplied"
+    );
+
+    let roots = state_map_roots(&state);
+    assert!(roots.protocol_bridge_credit_root.starts_with("0x"));
+    assert!(roots.protocol_bridge_replay_index_root.starts_with("0x"));
+    assert!(roots.protocol_event_receipt_index_root.starts_with("0x"));
+}
+
+#[test]
+fn production_l1_bridge_evidence_rejects_duplicate_invalid_and_mutated_cases() {
+    let valid = production_bridge_evidence_fixture()
+        .into_iter()
+        .next()
+        .expect("deposit evidence");
+
+    let mut state = genesis_state();
+    apply_transaction(
+        &mut state,
+        &Transaction::ApplyProtocolBridgeEvidence {
+            evidence: valid.clone(),
+        },
+    )
+    .unwrap();
+    assert!(matches!(
+        apply_transaction(
+            &mut state,
+            &Transaction::ApplyProtocolBridgeEvidence {
+                evidence: valid.clone()
+            },
+        ),
+        Err(DevnetError::ProtocolDuplicateBridgeEvent(_))
+    ));
+
+    let mut invalid_chain = valid.clone();
+    invalid_chain["sourceChainId"] = Value::from(1);
+    assert!(matches!(
+        apply_transaction(
+            &mut genesis_state(),
+            &Transaction::ApplyProtocolBridgeEvidence {
+                evidence: invalid_chain
+            },
+        ),
+        Err(DevnetError::ProtocolInvalidBridgeSourceChain(_))
+    ));
+
+    let mut wrong_lockbox = valid.clone();
+    wrong_lockbox["lockboxAddress"] =
+        Value::from("0x1111111111111111111111111111111111111111");
+    assert!(matches!(
+        apply_transaction(
+            &mut genesis_state(),
+            &Transaction::ApplyProtocolBridgeEvidence {
+                evidence: wrong_lockbox
+            },
+        ),
+        Err(DevnetError::ProtocolWrongLockbox(_))
+    ));
+
+    let mut over_cap = valid.clone();
+    over_cap["amount"] = Value::from("5000001");
+    assert!(matches!(
+        apply_transaction(
+            &mut genesis_state(),
+            &Transaction::ApplyProtocolBridgeEvidence { evidence: over_cap },
+        ),
+        Err(DevnetError::ProtocolBridgeAmountOverCap(_))
+    ));
+
+    let mut pending = valid.clone();
+    pending["finalityStatus"] = Value::from("source_pending");
+    assert!(matches!(
+        apply_transaction(
+            &mut genesis_state(),
+            &Transaction::ApplyProtocolBridgeEvidence { evidence: pending },
+        ),
+        Err(DevnetError::ProtocolBridgeConfirmationUnsatisfied(_))
+    ));
+
+    let mut mutated = valid;
+    mutated["depositorAddress"] = Value::from("0x2222222222222222222222222222222222222222");
+    assert!(matches!(
+        apply_transaction(
+            &mut genesis_state(),
+            &Transaction::ApplyProtocolBridgeEvidence { evidence: mutated },
+        ),
+        Err(DevnetError::ProtocolMutatedBridgeEvidence(_))
+    ));
 }
 
 #[test]
@@ -1205,6 +1364,98 @@ fn cli_export_import_state_round_trip_is_deterministic() {
 }
 
 #[test]
+fn cli_export_import_preserves_live_l1_bridge_protocol_objects() {
+    let temp = temp_dir("production-l1-export-import");
+    let state = temp.join("state.json");
+    let imported = temp.join("imported-state.json");
+    let snapshot = temp.join("snapshot.json");
+    let evidence = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("..")
+        .join("..")
+        .join("fixtures")
+        .join("production-l1")
+        .join("bridge-evidence.valid.json");
+    let transactions = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("..")
+        .join("..")
+        .join("fixtures")
+        .join("production-l1")
+        .join("transactions.valid.json");
+
+    let init = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args(["--state", state.to_str().expect("state path"), "init"])
+        .status()
+        .expect("init production state");
+    assert!(init.success());
+    for fixture in [&evidence, &transactions] {
+        let submit = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+            .args([
+                "--state",
+                state.to_str().expect("state path"),
+                "submit-fixture",
+                "--fixture",
+                fixture.to_str().expect("fixture path"),
+            ])
+            .status()
+            .expect("submit production fixture");
+        assert!(submit.success());
+        let block = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+            .args([
+                "--state",
+                state.to_str().expect("state path"),
+                "start",
+                "--blocks",
+                "1",
+            ])
+            .status()
+            .expect("build production fixture block");
+        assert!(block.success());
+    }
+
+    let export_status = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "export-state",
+            "--out",
+            snapshot.to_str().expect("snapshot path"),
+        ])
+        .status()
+        .expect("export production state");
+    assert!(export_status.success());
+
+    let import_status = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            imported.to_str().expect("imported path"),
+            "import-state",
+            "--from",
+            snapshot.to_str().expect("snapshot path"),
+        ])
+        .status()
+        .expect("import production state");
+    assert!(import_status.success());
+
+    let original_body = std::fs::read_to_string(&state).expect("original state");
+    let imported_body = std::fs::read_to_string(&imported).expect("imported state");
+    assert_eq!(original_body, imported_body);
+    let imported_json: Value = serde_json::from_str(&imported_body).expect("imported json");
+    assert_eq!(imported_json["protocolBridgeCredits"].as_object().unwrap().len(), 1);
+    assert_eq!(imported_json["protocolBridgeReplayIndex"].as_object().unwrap().len(), 1);
+    assert_eq!(imported_json["protocolReceipts"].as_object().unwrap().len(), 23);
+    assert_eq!(
+        imported_json["protocolEventReceiptIndex"]
+            .as_object()
+            .unwrap()
+            .len(),
+        23
+    );
+    assert_eq!(imported_json["protocolFinalityCertificates"].as_object().unwrap().len(), 1);
+
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
 fn cli_node_runs_ten_blocks_and_includes_authorized_inbox_tx() {
     let temp = temp_dir("cli-node");
     let state = temp.join("state.json");
@@ -1394,6 +1645,36 @@ fn temp_dir(name: &str) -> std::path::PathBuf {
     }
     std::fs::create_dir_all(&temp).expect("create temp dir");
     temp
+}
+
+fn production_bridge_evidence_fixture() -> Vec<Value> {
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("..")
+        .join("..")
+        .join("fixtures")
+        .join("production-l1")
+        .join("bridge-evidence.valid.json");
+    let body = std::fs::read_to_string(path).expect("bridge evidence fixture");
+    let value: Value = serde_json::from_str(&body).expect("bridge evidence json");
+    value["bridgeEvidence"]
+        .as_array()
+        .expect("bridgeEvidence array")
+        .clone()
+}
+
+fn production_transaction_fixture() -> Vec<Value> {
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("..")
+        .join("..")
+        .join("fixtures")
+        .join("production-l1")
+        .join("transactions.valid.json");
+    let body = std::fs::read_to_string(path).expect("production transaction fixture");
+    let value: Value = serde_json::from_str(&body).expect("production transaction json");
+    value["transactions"]
+        .as_array()
+        .expect("transactions array")
+        .clone()
 }
 
 fn run_demo_chain() -> (
