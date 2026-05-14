@@ -2,7 +2,10 @@ import { appendFileSync, mkdirSync, readFileSync, existsSync } from "node:fs";
 import { dirname } from "node:path";
 
 import { canonicalJson, findSecret, keccak256Hex } from "../../shared/src/index.ts";
-import { invalidParams, methodNotFound, objectNotFound, secretRejected } from "./errors.ts";
+import { bridgeSourceEventReplayKey, flowchainBridgeObservationId } from "../../../crypto/src/production-l1.js";
+import { localTransactionReplayKey } from "../../../crypto/src/transactions.js";
+import { verifyFlowchainEnvelope } from "../../../crypto/src/runtime-validation.js";
+import { cryptoRejected, invalidParams, methodNotFound, objectNotFound, secretRejected } from "./errors.ts";
 import { loadControlPlaneState, resolveControlPlanePath } from "./fixture-state.ts";
 import {
   pilotCapStatus,
@@ -24,6 +27,8 @@ import type {
 } from "./types.ts";
 
 const ZERO_ROOT = "0x0000000000000000000000000000000000000000000000000000000000000000";
+const FLOWCHAIN_LIVE_L1_CHAIN_ID = "31337";
+const FLOWCHAIN_LIVE_L1_NETWORK_PROFILE = "local-chain";
 
 type MethodHandler = (params: JsonValue | undefined, context: ControlPlaneContext) => JsonValue;
 
@@ -441,7 +446,8 @@ function mempoolRows(state: LoadedControlPlaneState): JsonObject[] {
     schema: "flowmemory.control_plane.mempool_transaction.v0",
     transactionId: stringValue(entry.txId) ?? stringValue(entry.intakeId) ?? stableId("flowmemory.control_plane.mempool.intake.v0", entry),
     status: stringValue(entry.status) ?? "accepted_local",
-    transaction: asJsonObject(asJsonObject(entry.signedEnvelope)?.tx)
+    transaction: asJsonObject(asJsonObject(entry.signedEnvelope)?.document)
+      ?? asJsonObject(asJsonObject(entry.signedEnvelope)?.tx)
       ?? asJsonObject(asJsonObject(entry.signedEnvelope)?.transaction)
       ?? asJsonObject(asJsonObject(entry.signedEnvelope)?.payload)
       ?? asJsonObject(entry.transaction)
@@ -1539,46 +1545,118 @@ function parseSignedEnvelope(value: JsonValue | undefined, label: string): JsonO
   return object;
 }
 
-function signedEnvelopeForSubmit(params: JsonObject): JsonObject {
+function signedEnvelopeForSubmit(params: JsonObject): { document: JsonObject; envelope: JsonObject } {
   if (params.transaction !== undefined || params.tx !== undefined || params.txs !== undefined) {
-    throw invalidParams("transaction_submit accepts signed envelopes only; use signedTransaction or signedEnvelope");
+    throw invalidParams("transaction_submit accepts cryptographic envelopes only; use signedTransaction or signedEnvelope");
   }
-  const envelope = parseSignedEnvelope(params.signedEnvelope, "signedEnvelope")
+  const signedEnvelope = parseSignedEnvelope(params.signedEnvelope, "signedEnvelope")
     ?? parseSignedEnvelope(params.signedTransaction, "signedTransaction");
-  if (envelope === null) {
+  if (signedEnvelope === null) {
     throw invalidParams("transaction_submit requires signedTransaction or signedEnvelope");
   }
 
-  const transaction = asJsonObject(envelope.tx) ?? asJsonObject(envelope.transaction) ?? asJsonObject(envelope.payload);
-  const signature = envelope.signature ?? envelope.signatures ?? envelope.proof ?? envelope.authorization;
-  const hasSignature = typeof signature === "string"
-    || Array.isArray(signature)
-    || asJsonObject(signature) !== null;
-  if (transaction === null || !hasSignature) {
-    throw invalidParams("signed envelope must include tx/transaction/payload and signature/signatures/proof/authorization");
+  const document = asJsonObject(signedEnvelope.document)
+    ?? asJsonObject(signedEnvelope.tx)
+    ?? asJsonObject(signedEnvelope.transaction)
+    ?? asJsonObject(signedEnvelope.payload);
+  const envelope = asJsonObject(signedEnvelope.envelope)
+    ?? (signedEnvelope.schema === "flowchain.local_transaction_envelope.v0" ? signedEnvelope : null);
+
+  if (document === null || envelope === null) {
+    throw invalidParams("signed envelope must include document and envelope");
   }
-  return envelope;
+  if (envelope.schema !== "flowchain.local_transaction_envelope.v0") {
+    throw invalidParams("signed envelope must use flowchain.local_transaction_envelope.v0");
+  }
+  return { document, envelope };
+}
+
+function seenTransactionReplayKeys(state: LoadedControlPlaneState): Set<string> {
+  const seen = new Set<string>();
+  for (const row of txIntakeRows(state)) {
+    const signedEnvelope = asJsonObject(row.signedEnvelope);
+    const envelope = asJsonObject(signedEnvelope?.envelope)
+      ?? (signedEnvelope?.schema === "flowchain.local_transaction_envelope.v0" ? signedEnvelope : null);
+    if (envelope !== null) {
+      try {
+        seen.add(localTransactionReplayKey(envelope));
+      } catch {
+        continue;
+      }
+    }
+    const storedReplayKey = stringValue(row.cryptoReplayKey);
+    if (storedReplayKey !== undefined) {
+      seen.add(storedReplayKey);
+    }
+  }
+  return seen;
+}
+
+function seenTransactionIds(state: LoadedControlPlaneState): Set<string> {
+  const seen = new Set<string>();
+  for (const row of txIntakeRows(state)) {
+    const txId = stringValue(row.txId) ?? stringValue(row.transactionId);
+    if (txId !== undefined) {
+      seen.add(txId);
+    }
+    const signedEnvelope = asJsonObject(row.signedEnvelope);
+    const envelope = asJsonObject(signedEnvelope?.envelope)
+      ?? (signedEnvelope?.schema === "flowchain.local_transaction_envelope.v0" ? signedEnvelope : null);
+    const envelopeTxId = stringValue(envelope?.transactionId);
+    if (envelopeTxId !== undefined) {
+      seen.add(envelopeTxId);
+    }
+  }
+  return seen;
 }
 
 function transactionSubmit(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
   const state = stateFor(context);
   const objectParams = asObjectParams(params, "transaction_submit");
+  const paramsFinding = findSecret(objectParams);
+  if (paramsFinding !== null) {
+    throw secretRejected("transaction intake contained secret-shaped material", paramsFinding);
+  }
   const signedEnvelope = signedEnvelopeForSubmit(objectParams);
+  const submittedBy = optionalString(objectParams, "submittedBy") ?? "local-control-plane";
+  const preflightPayload: JsonObject = { signedEnvelope, submittedBy };
+  const preflightFinding = findSecret(preflightPayload);
+  if (preflightFinding !== null) {
+    throw secretRejected("transaction intake contained secret-shaped material", preflightFinding);
+  }
+  const verification = verifyFlowchainEnvelope({
+    document: signedEnvelope.document,
+    envelope: signedEnvelope.envelope,
+    context: {
+      chainId: FLOWCHAIN_LIVE_L1_CHAIN_ID,
+      networkProfile: FLOWCHAIN_LIVE_L1_NETWORK_PROFILE,
+      expectedNonce: optionalString(objectParams, "expectedNonce") ?? signedEnvelope.envelope.nonce,
+      requireCanonical: true,
+      seenNonces: seenTransactionReplayKeys(state),
+      seenTransactionIds: seenTransactionIds(state),
+    },
+  });
+  if (verification.ok !== true) {
+    throw cryptoRejected("transaction_submit rejected by FlowChain crypto runtime verification", {
+      failureCodes: verification.failureCodes,
+      transactionId: verification.transactionId,
+      envelopeId: verification.envelopeId,
+    } as JsonObject);
+  }
+  const cryptoReplayKey = localTransactionReplayKey(signedEnvelope.envelope);
   const intakePayload: JsonObject = {
     signedEnvelope,
-    submittedBy: optionalString(objectParams, "submittedBy") ?? "local-control-plane",
+    cryptoVerification: verification as JsonObject,
+    cryptoReplayKey,
+    submittedBy,
   };
-  const finding = findSecret(intakePayload);
-  if (finding !== null) {
-    throw secretRejected("transaction intake contained secret-shaped material", finding);
-  }
   const intakeId = stableId("flowmemory.control_plane.transaction_intake.v0", intakePayload);
   const row: JsonObject = {
     schema: "flowmemory.control_plane.transaction_intake.v0",
     intakeId,
-    txId: stableId("flowmemory.control_plane.transaction.local_tx_id.v0", intakePayload),
+    txId: stringValue(verification.transactionId) ?? stableId("flowmemory.control_plane.transaction.local_tx_id.v0", intakePayload),
     receivedAt: "2026-05-13T00:00:00.000Z",
-    status: "accepted_local",
+    status: "accepted_crypto_verified",
     intakeMode: "local-file",
     runtimeIntakePath: state.paths.txIntakePath,
     ...intakePayload,
@@ -1591,6 +1669,13 @@ function transactionSubmit(params: JsonValue | undefined, context: ControlPlaneC
     intakeId,
     txId: row.txId,
     status: row.status,
+    crypto: {
+      ok: true,
+      failureCodes: [],
+      transactionId: verification.transactionId,
+      envelopeId: verification.envelopeId,
+      replayKey: cryptoReplayKey,
+    },
     forwardedTo: "local-file-intake",
     runtimeIntakePath: state.paths.txIntakePath,
     localOnly: true,
@@ -2570,6 +2655,104 @@ function bridgeObservationGet(params: JsonValue | undefined, context: ControlPla
   };
 }
 
+function bridgeDepositCryptoInput(deposit: JsonObject): JsonObject {
+  return {
+    sourceChainId: stringValue(deposit.sourceChainId),
+    lockbox: stringValue(deposit.sourceContract),
+    token: stringValue(deposit.token),
+    depositor: stringValue(deposit.sender),
+    recipient: stringValue(deposit.flowchainRecipient),
+    amount: stringValue(deposit.amount),
+    txHash: stringValue(deposit.txHash),
+    logIndex: stringValue(deposit.logIndex),
+    blockNumber: stringValue(deposit.sourceBlockNumber) ?? "0",
+    eventNonce: stringValue(deposit.nonce) ?? "0",
+  };
+}
+
+function bridgeSourceEventInput(deposit: JsonObject): JsonObject {
+  return {
+    sourceChainId: stringValue(deposit.sourceChainId),
+    lockbox: stringValue(deposit.sourceContract),
+    txHash: stringValue(deposit.txHash),
+    logIndex: stringValue(deposit.logIndex),
+  };
+}
+
+function seenBridgeReplayKeys(state: LoadedControlPlaneState): Set<string> {
+  const seen = new Set<string>();
+  for (const row of bridgeObservationRows(state)) {
+    const replayKey = stringValue(row.replayKey);
+    if (replayKey !== null) {
+      seen.add(replayKey);
+    }
+  }
+  return seen;
+}
+
+function verifyBridgeObservationForRuntime(observation: JsonObject, state: LoadedControlPlaneState): JsonObject {
+  const failureCodes = new Set<string>();
+  const deposit = asJsonObject(observation.deposit);
+  let expectedReplayKey: string | undefined;
+  let expectedObservationId: string | undefined;
+
+  if (deposit === null) {
+    failureCodes.add("missing-bridge-deposit");
+  } else {
+    try {
+      expectedReplayKey = bridgeSourceEventReplayKey(bridgeSourceEventInput(deposit));
+      expectedObservationId = flowchainBridgeObservationId(bridgeDepositCryptoInput(deposit));
+      if (stringValue(observation.replayKey) !== expectedReplayKey) {
+        failureCodes.add("wrong-bridge-replay-key");
+      }
+      if (stringValue(observation.observationId) !== expectedObservationId) {
+        failureCodes.add("wrong-bridge-observation-id");
+      }
+      if (seenBridgeReplayKeys(state).has(expectedReplayKey)) {
+        failureCodes.add("duplicate-bridge-replay-key");
+        failureCodes.add("duplicate-bridge-source-event");
+      }
+    } catch {
+      failureCodes.add("malformed-bridge-evidence");
+    }
+
+    const mode = stringValue(observation.mode);
+    const sourceChainId = stringValue(deposit.sourceChainId);
+    const guardrails = asJsonObject(observation.guardrails);
+    if (mode === "base-mainnet-pilot" && sourceChainId !== "8453") {
+      failureCodes.add("wrong-chain-id");
+    }
+    if (mode === "base-mainnet-pilot") {
+      for (const [field, code] of [
+        ["explicitChainId", "missing-chain-guardrail"],
+        ["explicitContract", "missing-contract-guardrail"],
+        ["explicitBlockRange", "missing-range-guardrail"],
+        ["noSecrets", "missing-no-secret-guardrail"],
+        ["approvedContract", "unapproved-bridge-lockbox"],
+      ] as const) {
+        if (guardrails?.[field] !== true) {
+          failureCodes.add(code);
+        }
+      }
+    }
+  }
+
+  if (failureCodes.size > 0) {
+    throw cryptoRejected("bridge_observation_submit rejected by FlowChain bridge crypto verification", {
+      failureCodes: [...failureCodes],
+      observationId: stringValue(observation.observationId),
+      replayKey: stringValue(observation.replayKey),
+    } as JsonObject);
+  }
+
+  return {
+    schema: "flowchain.bridge_observation_runtime_crypto.v0",
+    ok: true,
+    observationId: expectedObservationId,
+    replayKey: expectedReplayKey,
+  };
+}
+
 function bridgeObservationSubmit(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
   const state = stateFor(context);
   const objectParams = asObjectParams(params, "bridge_observation_submit");
@@ -2578,6 +2761,7 @@ function bridgeObservationSubmit(params: JsonValue | undefined, context: Control
   if (finding !== null) {
     throw secretRejected("bridge observation intake contained secret-shaped material", finding);
   }
+  const cryptoVerification = verifyBridgeObservationForRuntime(observation, state);
   const observationId = stringValue(observation.observationId)
     ?? stableId("flowmemory.control_plane.bridge_observation_intake.v0", observation);
   const row: JsonObject = {
@@ -2587,6 +2771,7 @@ function bridgeObservationSubmit(params: JsonValue | undefined, context: Control
     mode: stringValue(observation.mode) ?? "mock",
     productionReady: false,
     ...observation,
+    cryptoVerification,
     intakeStatus: "accepted_local",
     localOnly: true,
   };
@@ -2595,6 +2780,7 @@ function bridgeObservationSubmit(params: JsonValue | undefined, context: Control
     schema: "flowmemory.control_plane.bridge_observation_submit_result.v0",
     accepted: true,
     observationId,
+    crypto: cryptoVerification,
     forwardedTo: "local-file-intake",
     runtimeIntakePath: state.paths.bridgeObservationIntakePath,
     localOnly: true,

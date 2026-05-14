@@ -1,0 +1,22 @@
+# Production L1 Crypto Checklist
+
+- [x] Read required repository context.
+- [x] Inventory existing crypto exports, wallet-only exports, runtime-safe exports, fixtures, and schemas.
+- [x] Preserve one crypto package, one wallet format, one transaction envelope, and one hashing system.
+- [x] Add canonical public identity helpers and vectors.
+- [x] Add complete canonical transaction envelope and schema.
+- [x] Add domain-separated hash helpers.
+- [x] Add nonce, replay, bridge event, withdrawal, and finality replay rules.
+- [x] Export runtime-safe validation with no wallet/vault imports.
+- [x] Add positive vectors for wallet transfer, faucet, token launch, token transfer, pool create, add/remove liquidity, swap, bridge credit, withdrawal intent, and validator/finality object.
+- [x] Add negative vectors for chain/profile/domain/signer/role/nonce/duplicate/expiration/payload/public-key/signature/root/bridge duplicate failures.
+- [x] Add or update CLI command surface.
+- [x] Update `crypto/README.md`.
+- [x] Add proof docs.
+- [x] Write final `HANDOFF.md`.
+- [x] Run `npm test --prefix crypto`.
+- [x] Run `npm run validate:vectors --prefix crypto`.
+- [x] Run `npm run validate:production-l1-crypto --prefix crypto`.
+- [x] Run `npm run wallet:e2e --prefix crypto`.
+- [x] Run `git diff --check`.
+- [x] Run no-secret scan over generated examples.

@@ -41,7 +41,7 @@
         "accountId": { "$ref": "#/$defs/hex32" },
         "signerId": { "$ref": "#/$defs/hex32" },
         "signerKeyId": { "$ref": "#/$defs/hex32" },
-        "signerRole": { "enum": ["operator", "agent", "verifier", "hardware"] },
+        "signerRole": { "$ref": "#/$defs/signerRole" },
         "signerRoleCode": { "type": "integer", "minimum": 1, "maximum": 255 },
         "publicKey": { "type": "string", "pattern": "^0x([0-9a-fA-F]{66}|[0-9a-fA-F]{130})$" },
         "label": { "type": "string", "minLength": 1 },
@@ -71,7 +71,7 @@
         "accountId": { "$ref": "#/$defs/hex32" },
         "signerId": { "$ref": "#/$defs/hex32" },
         "signerKeyId": { "$ref": "#/$defs/hex32" },
-        "signerRole": { "enum": ["operator", "agent", "verifier", "hardware"] },
+        "signerRole": { "$ref": "#/$defs/signerRole" },
         "signerRoleCode": { "type": "integer", "minimum": 1, "maximum": 255 },
         "publicKey": { "type": "string", "pattern": "^0x([0-9a-fA-F]{66}|[0-9a-fA-F]{130})$" },
         "label": { "type": "string", "minLength": 1 },
@@ -81,6 +81,19 @@
         "importedFromVaultId": { "$ref": "#/$defs/hex32" },
         "importedAtUnixMs": { "$ref": "#/$defs/uintString" }
       }
+    },
+    "signerRole": {
+      "enum": [
+        "operator",
+        "agent",
+        "verifier",
+        "hardware",
+        "user",
+        "validator",
+        "bridgeRelayer",
+        "bridgeReleaseAuthority",
+        "emergencyOperator"
+      ]
     }
   }
 }

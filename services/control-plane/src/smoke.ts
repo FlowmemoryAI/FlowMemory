@@ -1,4 +1,5 @@
 import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
 
 import { dispatchJsonRpc } from "./json-rpc.ts";
 import { loadControlPlaneState } from "./fixture-state.ts";
@@ -28,6 +29,20 @@ function stringField(value: unknown, name: string): string {
     throw new Error(`control-plane smoke missing ${name}`);
   }
   return String(value);
+}
+
+function smokeSignedEnvelope(): JsonObject {
+  const vectors = JSON.parse(
+    readFileSync(new URL("../../../crypto/fixtures/production-l1-vectors.json", import.meta.url), "utf8"),
+  ) as JsonObject;
+  const walletTransfer = (vectors.positive as JsonObject[]).find((entry) => entry.name === "wallet-transfer");
+  if (walletTransfer === undefined) {
+    throw new Error("control-plane smoke missing production-L1 wallet-transfer vector");
+  }
+  return {
+    document: walletTransfer.document,
+    envelope: walletTransfer.envelope,
+  };
 }
 
 export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> = {}): JsonObject {
@@ -86,15 +101,7 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
       id: "transactionSubmit",
       method: "transaction_submit",
       params: {
-        signedEnvelope: {
-          schema: "flowmemory.control_plane.smoke_signed_envelope.v0",
-          tx: {
-            schema: "flowmemory.control_plane.smoke_transaction.v0",
-            action: "local-smoke",
-            nonce: "0",
-          },
-          signature: "0xlocal-smoke-signature",
-        },
+        signedEnvelope: smokeSignedEnvelope(),
         submittedBy: "control-plane-smoke",
       },
     },

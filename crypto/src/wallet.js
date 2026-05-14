@@ -7,7 +7,15 @@ import {
   buildUnsignedLocalTransactionEnvelope,
   validateLocalTransactionEnvelope
 } from "./transactions.js";
+import { flowchainTransactionId } from "./production-l1.js";
 import { LOCAL_ALPHA_SIGNER_ROLES } from "./constants.js";
+import {
+  flowchainAccountId,
+  flowchainAddressFromPublicKey,
+  flowchainPublicAccountMetadata,
+  flowchainSignerKeyId,
+  isFlowchainRole
+} from "./identity.js";
 
 const VAULT_SCHEMA = "flowmemory.crypto.local-test-vault.v0";
 const VAULT_SECRETS_SCHEMA = "flowmemory.crypto.local-test-vault-secrets.v0";
@@ -127,7 +135,10 @@ export async function signLocalTransactionWithVault({
   document,
   chainId,
   nonce,
-  issuedAtUnixMs = Date.now().toString()
+  issuedAtUnixMs = Date.now().toString(),
+  expiresAtUnixMs,
+  networkProfile,
+  payloadType
 }) {
   const session = unlockEncryptedTestVault({ vault, password });
   const account = session.accounts.find(
@@ -145,12 +156,20 @@ export async function signLocalTransactionWithVault({
     signerKeyId: account.signerKeyId,
     signerRole: account.signerRole,
     publicKey: account.publicKey,
-    issuedAtUnixMs
+    issuedAtUnixMs,
+    expiresAtUnixMs,
+    networkProfile,
+    payloadType
   });
   const signature = await signDigest({ digest: unsigned.signingDigest, privateKey: account.privateKey });
-  return {
+  const signed = {
     ...unsigned,
+    signerAddress: account.address,
     signature
+  };
+  return {
+    ...signed,
+    transactionId: flowchainTransactionId(signed)
   };
 }
 
@@ -234,15 +253,26 @@ function createVaultAccount({
     throw new Error(`unsupported signer role: ${signerRole}`);
   }
   const publicKey = publicKeyFromPrivateKey(privateKey);
-  const publicKeyHash = keccakUtf8(publicKey);
+  const productionRole = isFlowchainRole(signerRole) ? signerRole : "user";
+  const publicMetadata = flowchainPublicAccountMetadata({
+    publicKey,
+    role: productionRole,
+    label,
+    createdAtUnixMs
+  });
   const account = {
     label,
     signerRole,
     signerRoleCode: LOCAL_ALPHA_SIGNER_ROLES[signerRole],
-    signerId: signerId ?? keccakUtf8(`flowchain.local-alpha.signer:${publicKey}`),
-    signerKeyId: keccakUtf8(`flowchain.local-alpha.signer-key:${publicKey}`),
-    publicKey,
-    publicKeyHash,
+    signerId: signerId ?? (isFlowchainRole(signerRole) ? flowchainAccountId({ publicKey, role: signerRole }) : keccakUtf8(`flowchain.local-alpha.signer:${publicKey}`)),
+    signerKeyId: isFlowchainRole(signerRole) ? flowchainSignerKeyId({ publicKey }) : keccakUtf8(`flowchain.local-alpha.signer-key:${publicKey}`),
+    publicKey: publicMetadata.publicKey,
+    publicKeyHash: publicMetadata.publicKeyHash,
+    publicKeyEncoding: publicMetadata.publicKeyEncoding,
+    address: flowchainAddressFromPublicKey(publicKey),
+    accountId: publicMetadata.accountId,
+    accountRole: publicMetadata.role,
+    accountRoleCode: publicMetadata.roleCode,
     createdAtUnixMs,
     active: true,
     privateKey

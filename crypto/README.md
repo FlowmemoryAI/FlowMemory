@@ -33,6 +33,14 @@ Validate all package-level vector fixtures:
 npm run validate:vectors
 ```
 
+Validate the production-L1-shaped crypto foundation, including canonical
+identity metadata, completed transaction envelopes, runtime-safe verification,
+hash helpers, positive vectors, and exact negative rejection vectors:
+
+```powershell
+npm run validate:production-l1-crypto
+```
+
 Validate the Local Alpha object and signature-envelope fixtures against the
 canonical JSON Schemas:
 
@@ -56,11 +64,19 @@ npm run wallet:add-account -- --vault .\tmp-local-vault.json --role agent --labe
 npm run wallet:list -- --vault .\tmp-local-vault.json
 npm run wallet:sign -- --vault .\tmp-local-vault.json --document .\fixtures\some-object.json --chain-id 31337 --nonce 1 --out .\tmp-envelope.json
 npm run wallet:verify -- --document .\fixtures\some-object.json --envelope .\tmp-envelope.json --chain-id 31337
+npm run wallet:e2e
 ```
 
 The wallet commands are for local/private testnet smoke use only. Public exports
 contain signer metadata and public keys; private keys, mnemonics, seed material,
 and ciphertext are not exported as public metadata.
+
+`wallet:sign` now writes the completed canonical local transaction envelope
+shape with `schemaVersion`, `networkProfile`, `payloadType`, expiration,
+local execution cost, fee policy, signature algorithm, signature, and
+`transactionId`. Legacy local-alpha envelopes without those production-L1
+fields remain accepted as compatibility fixtures, but
+`validate:production-l1-crypto` requires the completed field set.
 
 Run the capped real-value pilot wallet/operator E2E:
 
@@ -93,7 +109,7 @@ encrypted vault creation, unlock, or signing helpers.
 6. `FLOWCHAIN_LOCAL_ALPHA_OBJECTS.md`
 7. `TEST_VECTORS.md`
 
-Runnable fixtures live in `fixtures/`. `fixtures/vectors.json` contains the current 46 package-level vectors. `fixtures/local-alpha-objects.json` contains positive and negative Local Alpha object, signed-envelope, and transaction-envelope fixtures. `fixtures/product-testnet-transactions.json` contains Product Testnet V1 wallet transaction documents, signed envelopes, and negative vectors for wrong chain, replay, wrong nonce/domain, payload mutation, malformed signer, missing signer, wrong object type, and invalid amounts. Supporting cross-language vectors live in `test-vectors/`.
+Runnable fixtures live in `fixtures/`. `fixtures/vectors.json` contains the current 46 package-level vectors. `fixtures/local-alpha-objects.json` contains positive and negative Local Alpha object, signed-envelope, and transaction-envelope fixtures. `fixtures/product-testnet-transactions.json` contains Product Testnet V1 wallet transaction documents, signed envelopes, and negative vectors for wrong chain, replay, wrong nonce/domain, payload mutation, malformed signer, missing signer, wrong object type, and invalid amounts. `fixtures/production-l1-vectors.json` contains the production-L1-shaped identity, hash-helper, positive transaction-family, and exact negative validation vectors. Supporting cross-language vectors live in `test-vectors/`.
 
 Validate the current vector set with:
 
@@ -114,11 +130,27 @@ The Python validator is a cross-check for the FlowPulse aggregate vector. The pr
 - Local Alpha object IDs: canonical IDs for `AgentAccount`, `ModelPassport`, `WorkReceipt`, `ArtifactAvailabilityProof`, `VerifierModule`, `VerifierReport`, `MemoryCell`, `Challenge`, `FinalityReceipt`, `BridgeDeposit`, `BridgeCredit`, `BridgeWithdrawal`, local balance records, hardware signal envelopes, and control-plane provenance responses.
 - Local Alpha signature envelopes: local operator, agent, verifier, and hardware secp256k1 test signatures over typed object IDs. These are no-value local/test keys and are not wallet custody or production key-management claims.
 - Local transaction envelopes: chain-bound signed envelopes over canonical JSON payload hashes, object IDs, signer IDs, signer key IDs, signer roles, nonces, and domain separators.
+- Production-L1 local transaction envelopes: the same canonical envelope extended with schema version, network profile, payload type, expiration, local execution cost, fee policy, signature algorithm, transaction ID, role metadata, and runtime-safe verification result fields.
 - Product Testnet V1 transaction documents: canonical transfer, token launch, DEX pool create, add liquidity, remove liquidity, swap, bridge credit acknowledgement, and bridge withdrawal intent documents that reuse the local transaction envelope and local test vault.
 
 ## Implemented Helpers
 
 The package exports Keccak helpers, canonical JSON hashing, typed hash utilities, FlowPulse observation ids, cursor ids, report digests, receipt hashes, artifact/root commitments, work receipt ids, Local Alpha object ids, bridge/balance object ids, Product Testnet V1 transaction ids, hardware signal envelope ids, Local Alpha signature and transaction envelope payloads, envelope validators, Merkle roots, encrypted local test-vault helpers, worker/verifier signature payloads, verifier attestation envelope hashes, and local secp256k1 sign/verify helpers for tests.
+
+Runtime/API-safe import path:
+
+```js
+import { verifyFlowchainEnvelope } from "@flowmemory/crypto/runtime-validation";
+```
+
+This subpath imports validation, identity, hashing, and signature verification
+helpers only. It does not import encrypted vault creation, unlock, rotation, or
+wallet signing code.
+
+Wallet/vault-only exports remain in the root compatibility export and wallet
+CLI paths: `createEncryptedTestVault`, `unlockEncryptedTestVault`,
+`addEncryptedTestVaultAccount`, `rotateEncryptedTestVaultAccount`, and
+`signLocalTransactionWithVault`.
 
 The implementation is ESM JavaScript with `src/index.d.ts` declarations for TypeScript consumers.
 

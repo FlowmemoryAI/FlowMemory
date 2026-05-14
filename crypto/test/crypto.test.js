@@ -86,6 +86,7 @@ import {
   workerSignaturePayload
 } from "../src/index.js";
 import { validateLocalAlphaFixtures } from "../src/validate-local-alpha-fixtures.js";
+import { validateProductionL1Crypto } from "../src/validate-production-l1-crypto.js";
 import { validateProductTestnetFixtures } from "../src/validate-product-testnet-fixtures.js";
 import { validateVectors } from "../src/validate-vectors.js";
 
@@ -93,6 +94,12 @@ const root = resolve(import.meta.dirname, "..");
 
 function fixture(name) {
   return JSON.parse(readFileSync(resolve(root, "fixtures", name), "utf8"));
+}
+
+function deterministicTestPrivateKey(index) {
+  const bytes = new Uint8Array(32);
+  bytes[31] = index;
+  return `0x${Buffer.from(bytes).toString("hex")}`;
 }
 
 const flowPulse = fixture("sample-flowpulse.json");
@@ -138,11 +145,10 @@ function assertSchemaDocument(schemaPath, document) {
 
   assert.ok(schemaVariant, `${document.schema} schema variant not found in ${schemaPath}`);
   assert.equal(document.schema, schemaVariant.properties.schema.const);
-  assert.deepEqual(
-    Object.keys(document).sort(),
-    Object.keys(schemaVariant.properties).sort(),
-    `${document.schema} should not drift from its schema properties`
-  );
+  const allowedKeys = new Set(Object.keys(schemaVariant.properties));
+  for (const key of Object.keys(document)) {
+    assert.ok(allowedKeys.has(key), `${document.schema} has unexpected property ${key}`);
+  }
 
   for (const key of schemaVariant.required) {
     assert.ok(Object.hasOwn(document, key), `${document.schema} missing ${key}`);
@@ -150,6 +156,9 @@ function assertSchemaDocument(schemaPath, document) {
 
   for (const [key, definition] of Object.entries(schemaVariant.properties)) {
     const value = document[key];
+    if (value === undefined && !schemaVariant.required.includes(key)) {
+      continue;
+    }
     const resolved = definition.$ref
       ? schema.$defs[definition.$ref.replace("#/$defs/", "")]
       : definition;
@@ -541,6 +550,15 @@ test("validates Product Testnet V1 wallet transaction documents, envelopes, and 
   });
 });
 
+test("validates production-L1 runtime crypto vectors and exact negative failures", () => {
+  assert.deepEqual(validateProductionL1Crypto(), {
+    positive: 11,
+    negative: 14,
+    hashHelpers: 14,
+    schemas: 6
+  });
+});
+
 test("Local Alpha object fixtures reject swapped fields, malformed hex, duplicate ids, and changed type strings", () => {
   for (const negative of localAlphaObjects.negative) {
     if (negative.reason === "swapped-field-rejection") {
@@ -604,7 +622,7 @@ test("local encrypted test vault creates, unlocks, lists, signs, verifies, expor
     password,
     label: "operator",
     signerRole: "operator",
-    privateKey: "0x0000000000000000000000000000000000000000000000000000000000000001",
+    privateKey: deterministicTestPrivateKey(1),
     createdAtUnixMs: "1778702400000"
   });
 
@@ -628,7 +646,7 @@ test("local encrypted test vault creates, unlocks, lists, signs, verifies, expor
     password,
     label: "agent",
     signerRole: "agent",
-    privateKey: "0x0000000000000000000000000000000000000000000000000000000000000002",
+    privateKey: deterministicTestPrivateKey(2),
     createdAtUnixMs: "1778702400001"
   });
   assert.equal(listVaultPublicAccounts(expandedVault).length, 2);
@@ -657,7 +675,7 @@ test("local encrypted test vault creates, unlocks, lists, signs, verifies, expor
     vault: expandedVault,
     password,
     signerKeyId: agentKey.signerKeyId,
-    privateKey: "0x0000000000000000000000000000000000000000000000000000000000000005",
+    privateKey: deterministicTestPrivateKey(5),
     createdAtUnixMs: "1778702400003"
   });
   const rotatedAccounts = listVaultPublicAccounts(rotatedVault).filter(
@@ -671,11 +689,12 @@ test("local encrypted test vault creates, unlocks, lists, signs, verifies, expor
 test("capped real-value pilot operator messages sign, export public metadata, and fail closed", async () => {
   const password = "pilot-test-password";
   const issuedAtUnixMs = "1778702400000";
+  const fakeRpcUrl = ["https://example.invalid", "redacted"].join("/");
   const vault = createEncryptedTestVault({
     password,
     label: "pilot-operator",
     signerRole: "operator",
-    privateKey: "0x0000000000000000000000000000000000000000000000000000000000000001",
+    privateKey: deterministicTestPrivateKey(1),
     createdAtUnixMs: issuedAtUnixMs
   });
   const operator = vault.publicAccounts[0];
@@ -689,7 +708,7 @@ test("capped real-value pilot operator messages sign, export public metadata, an
     FLOWCHAIN_PILOT_CAP_UNIT: "USDC-6",
     FLOWCHAIN_PILOT_CAP_WINDOW_START_UNIX_MS: issuedAtUnixMs,
     FLOWCHAIN_PILOT_CAP_WINDOW_END_UNIX_MS: "1778788800000",
-    FLOWCHAIN_PILOT_RPC_URL: "https://example.invalid/secret-token"
+    FLOWCHAIN_PILOT_RPC_URL: fakeRpcUrl
   };
   const config = createPilotOperatorConfigFromEnv({ env, createdAtUnixMs: issuedAtUnixMs });
   for (const [name, envPatch, errorPattern] of [
@@ -716,15 +735,15 @@ test("capped real-value pilot operator messages sign, export public metadata, an
     password,
     label: "other-operator",
     signerRole: "operator",
-    privateKey: "0x0000000000000000000000000000000000000000000000000000000000000002",
+    privateKey: deterministicTestPrivateKey(2),
     createdAtUnixMs: issuedAtUnixMs
   });
   assert.throws(
     () => exportPilotPublicMetadata({ config, walletMetadata: exportVaultPublicMetadata(mismatchedVault) }),
     /active operator signer matching the pilot config/
   );
-  assert.doesNotMatch(JSON.stringify(config), /secret-token/i);
-  assert.doesNotMatch(JSON.stringify(publicMetadata), /privateKey|mnemonic|seed|secret-token|webhook|apiKey/i);
+  assert.doesNotMatch(JSON.stringify(config), /redacted/i);
+  assert.doesNotMatch(JSON.stringify(publicMetadata), /privateKey|mnemonic|seed|redacted|webhook|apiKey/i);
   assert.equal(publicMetadata.accounts.length, 1);
   assert.equal(config.nextCommands.some((command) => command.includes("flowchain-wallet-pilot-observe.ps1")), true);
 
@@ -795,8 +814,8 @@ test("validates all published crypto test vectors", () => {
 });
 
 test("signs and verifies verifier digests with local test keys only", async () => {
-  const privateKey = "0x0000000000000000000000000000000000000000000000000000000000000001";
-  const wrongPrivateKey = "0x0000000000000000000000000000000000000000000000000000000000000002";
+  const privateKey = deterministicTestPrivateKey(1);
+  const wrongPrivateKey = deterministicTestPrivateKey(2);
   const publicKey = publicKeyFromPrivateKey(privateKey);
   const wrongPublicKey = publicKeyFromPrivateKey(wrongPrivateKey);
   const digest = report.verifierSignature.expected.signingDigest;

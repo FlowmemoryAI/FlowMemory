@@ -14,12 +14,17 @@
     "./pilot-envelope-validation": {
       "types": "./src/pilot-envelope-validation.d.ts",
       "default": "./src/pilot-envelope-validation.js"
+    },
+    "./runtime-validation": {
+      "types": "./src/runtime-validation.d.ts",
+      "default": "./src/runtime-validation.js"
     }
   },
   "scripts": {
     "test": "node --test",
     "vectors": "node src/cli.js",
     "validate:vectors": "node src/validate-vectors.js",
+    "validate:production-l1-crypto": "node src/validate-production-l1-crypto.js",
     "validate:local-alpha": "node src/validate-local-alpha-fixtures.js",
     "validate:product-transactions": "node src/validate-product-testnet-fixtures.js",
     "wallet:product-smoke": "node src/validate-product-testnet-fixtures.js",
@@ -31,6 +36,10 @@
     "wallet:rotate": "node src/wallet-cli.js rotate",
     "wallet:sign": "node src/wallet-cli.js sign",
     "wallet:verify": "node src/wallet-cli.js verify",
+    "wallet:e2e": "node src/wallet-e2e.js",
+    "wallet:derive-metadata": "node src/wallet-cli.js derive-metadata",
+    "scan:no-secrets": "node src/no-secret-scan.js",
+    "production-l1:vectors": "node src/production-l1-vector-cli.js",
     "wallet:pilot-config": "node src/pilot-wallet-cli.js config-from-env",
     "wallet:pilot-metadata": "node src/pilot-wallet-cli.js metadata",
     "wallet:pilot-sign": "node src/pilot-wallet-cli.js sign",

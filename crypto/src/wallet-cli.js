@@ -8,7 +8,9 @@ import {
   rotateEncryptedTestVaultAccount,
   signLocalTransactionWithVault,
   unlockEncryptedTestVault,
-  validateLocalTransactionEnvelope
+  validateLocalTransactionEnvelope,
+  verifyFlowchainEnvelope,
+  flowchainPublicAccountMetadata
 } from "./index.js";
 
 const command = process.argv[2];
@@ -73,7 +75,10 @@ try {
       document,
       chainId: required("chain-id"),
       nonce: required("nonce"),
-      issuedAtUnixMs: args["issued-at-unix-ms"]
+      issuedAtUnixMs: args["issued-at-unix-ms"],
+      expiresAtUnixMs: args["expires-at-unix-ms"],
+      networkProfile: args["network-profile"] ?? "local-chain",
+      payloadType: args["payload-type"]
     });
     writeOutput(args.out, envelope);
     console.log(JSON.stringify(envelope, null, 2));
@@ -90,13 +95,25 @@ try {
     if (args["expected-signer-id"]) {
       context.expectedSignerId = args["expected-signer-id"];
     }
-    const result = validateLocalTransactionEnvelope({
-      document,
-      envelope,
-      context
-    });
+    if (args["network-profile"]) {
+      context.networkProfile = args["network-profile"];
+    }
+    if (args["now-unix-ms"]) {
+      context.nowUnixMs = args["now-unix-ms"];
+    }
+    const result = args["runtime"] || args["require-canonical"]
+      ? verifyFlowchainEnvelope({ document, envelope, context: { ...context, requireCanonical: true } })
+      : validateLocalTransactionEnvelope({ document, envelope, context });
     console.log(JSON.stringify(result, null, 2));
-    process.exitCode = result.valid ? 0 : 1;
+    process.exitCode = (result.valid ?? result.ok) ? 0 : 1;
+  } else if (command === "derive-metadata") {
+    const metadata = flowchainPublicAccountMetadata({
+      publicKey: required("public-key"),
+      role: args.role ?? "user",
+      label: args.label,
+      createdAtUnixMs: args["created-at-unix-ms"]
+    });
+    console.log(JSON.stringify(metadata, null, 2));
   } else {
     usage();
     process.exitCode = 1;
@@ -158,6 +175,7 @@ function usage() {
   node src/wallet-cli.js metadata --vault <path>
   node src/wallet-cli.js add-account --vault <path> [--password <local-test-password>] [--label <label>] [--role agent]
   node src/wallet-cli.js rotate --vault <path> --signer-key-id <id> [--password <local-test-password>] [--label <label>]
-  node src/wallet-cli.js sign --vault <path> --document <path> --chain-id <id> --nonce <n> [--signer-key-id <id>] [--issued-at-unix-ms <ms>] [--out <path>]
-  node src/wallet-cli.js verify --document <path> --envelope <path> [--chain-id <id>] [--expected-nonce <n>] [--expected-signer-id <id>]`);
+  node src/wallet-cli.js sign --vault <path> --document <path> --chain-id <id> --nonce <n> [--network-profile local-chain] [--payload-type <type>] [--signer-key-id <id>] [--issued-at-unix-ms <ms>] [--expires-at-unix-ms <ms>] [--out <path>]
+  node src/wallet-cli.js verify --document <path> --envelope <path> [--chain-id <id>] [--network-profile <profile>] [--expected-nonce <n>] [--expected-signer-id <id>] [--require-canonical] [--runtime]
+  node src/wallet-cli.js derive-metadata --public-key <compressed-or-uncompressed-public-key> [--role user] [--label <label>]`);
 }
