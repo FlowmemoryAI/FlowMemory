@@ -48,7 +48,8 @@ const NAV_ITEMS = [
 export function AppShell({ data, canaryData, workbench, children }: AppShellProps) {
   const location = useLocation();
   const isBridgeRoute = location.pathname.startsWith("/bridge");
-  if (isBridgeRoute) {
+  const isWalletRoute = location.pathname.startsWith("/wallet");
+  if (isBridgeRoute || isWalletRoute) {
     return <>{children}</>;
   }
 
