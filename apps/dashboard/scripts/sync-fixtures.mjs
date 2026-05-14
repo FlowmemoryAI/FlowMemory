@@ -31,6 +31,11 @@ const fixtureCopies = [
     source: resolve(repoRoot, "fixtures/bridge/base-sepolia-mock-deposit.json"),
     destination: resolve(destinationDir, "flowchain-bridge-test-deposit.json"),
   },
+  {
+    label: "FlowChain L1 explorer fallback",
+    source: resolve(repoRoot, "fixtures/dashboard/flowchain-l1-explorer-fallback.json"),
+    destination: resolve(destinationDir, "flowchain-l1-explorer-fallback.json"),
+  },
 ];
 
 mkdirSync(destinationDir, { recursive: true });

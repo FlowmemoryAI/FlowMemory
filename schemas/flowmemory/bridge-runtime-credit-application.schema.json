@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowmemory.local/schemas/flowmemory/bridge-runtime-credit-application.schema.json",
+  "title": "FlowChainBridgeRuntimeCreditApplication",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "applicationId",
+    "creditId",
+    "depositId",
+    "replayKey",
+    "flowchainRecipient",
+    "amount",
+    "status",
+    "applyCount",
+    "localOnly",
+    "productionReady"
+  ],
+  "properties": {
+    "schema": { "const": "flowmemory.bridge_runtime_credit_application.v0" },
+    "applicationId": { "$ref": "#/$defs/hex32" },
+    "creditId": { "$ref": "#/$defs/hex32" },
+    "depositId": { "$ref": "#/$defs/hex32" },
+    "replayKey": { "$ref": "#/$defs/hex32" },
+    "flowchainRecipient": { "$ref": "#/$defs/hex32" },
+    "amount": { "$ref": "#/$defs/uintString" },
+    "status": { "type": "string", "enum": ["applied", "idempotent_replay", "rejected"] },
+    "appliedAt": { "type": "string" },
+    "previousApplicationId": { "$ref": "#/$defs/hex32" },
+    "rejectionReason": { "type": "string" },
+    "applyCount": { "type": "integer", "minimum": 0, "maximum": 1 },
+    "localOnly": { "const": true },
+    "productionReady": { "const": false }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "uintString": { "type": "string", "pattern": "^[0-9]+$" }
+  }
+}

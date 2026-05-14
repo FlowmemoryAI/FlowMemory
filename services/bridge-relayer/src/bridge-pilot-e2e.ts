@@ -1,0 +1,404 @@
+import assert from "node:assert/strict";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, relative, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { assertNoSecrets } from "../../shared/src/index.ts";
+import {
+  BASE_MAINNET_CHAIN_ID,
+  BASE_MAINNET_CHAIN_ID_HEX,
+  parseBridgeArgs,
+  runBridgePipeline,
+  type BridgeMode,
+  type BridgePipelineResult,
+} from "./observe-base-lockbox.ts";
+
+type PilotE2EMode = Extract<BridgeMode, "mock-pilot" | "base-mainnet-pilot">;
+
+interface PilotE2EOptions {
+  mode: PilotE2EMode;
+  fixturePath: string;
+  duplicateFixturePath: string;
+  outDir: string;
+  approvedLockbox: string;
+  rpcEndpoint?: string;
+  lockboxAddress?: string;
+  fromBlock?: string;
+  toBlock?: string;
+  confirmations: string;
+  maxUsd: string;
+  maxDepositAmount: string;
+  totalCapAmount: string;
+}
+
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
+const DEFAULT_FIXTURE = resolve(REPO_ROOT, "fixtures/bridge/base8453-pilot-mock-deposit.json");
+const DEFAULT_DUPLICATE_FIXTURE = resolve(REPO_ROOT, "fixtures/bridge/base8453-pilot-duplicate-mock-deposits.json");
+const DEFAULT_OUT_DIR = resolve(REPO_ROOT, "services/bridge-relayer/out/real-value-pilot-e2e");
+const DEFAULT_APPROVED_LOCKBOX = "0x1111111111111111111111111111111111111111";
+const WRONG_APPROVED_LOCKBOX = "0x9999999999999999999999999999999999999999";
+
+function argValue(args: string[], index: number, name: string): string {
+  const value = args[index + 1];
+  if (!value || value.startsWith("--")) {
+    throw new Error(`${name} requires a value`);
+  }
+  return value;
+}
+
+function parsePilotE2EArgs(args: string[]): PilotE2EOptions {
+  let mode: PilotE2EMode = "mock-pilot";
+  let fixturePath = DEFAULT_FIXTURE;
+  let duplicateFixturePath = DEFAULT_DUPLICATE_FIXTURE;
+  let outDir = DEFAULT_OUT_DIR;
+  let approvedLockbox = DEFAULT_APPROVED_LOCKBOX;
+  let rpcEndpoint: string | undefined;
+  let lockboxAddress: string | undefined;
+  let fromBlock: string | undefined;
+  let toBlock: string | undefined;
+  let confirmations = "2";
+  let maxUsd = "1";
+  let maxDepositAmount = "20000000";
+  let totalCapAmount = "20000000";
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === "--mode") {
+      const value = argValue(args, index, arg);
+      if (value !== "mock-pilot" && value !== "base-mainnet-pilot") {
+        throw new Error("--mode must be mock-pilot or base-mainnet-pilot");
+      }
+      mode = value;
+      index += 1;
+    } else if (arg === "--fixture") {
+      fixturePath = resolve(argValue(args, index, arg));
+      index += 1;
+    } else if (arg === "--duplicate-fixture") {
+      duplicateFixturePath = resolve(argValue(args, index, arg));
+      index += 1;
+    } else if (arg === "--out-dir") {
+      outDir = resolve(argValue(args, index, arg));
+      index += 1;
+    } else if (arg === "--approved-lockbox") {
+      approvedLockbox = argValue(args, index, arg);
+      index += 1;
+    } else if (arg === "--rpc-endpoint") {
+      rpcEndpoint = argValue(args, index, arg);
+      index += 1;
+    } else if (arg === "--lockbox-address") {
+      lockboxAddress = argValue(args, index, arg);
+      index += 1;
+    } else if (arg === "--from-block") {
+      fromBlock = argValue(args, index, arg);
+      index += 1;
+    } else if (arg === "--to-block") {
+      toBlock = argValue(args, index, arg);
+      index += 1;
+    } else if (arg === "--confirmations") {
+      confirmations = argValue(args, index, arg);
+      index += 1;
+    } else if (arg === "--max-usd") {
+      maxUsd = argValue(args, index, arg);
+      index += 1;
+    } else if (arg === "--max-deposit-amount") {
+      maxDepositAmount = argValue(args, index, arg);
+      index += 1;
+    } else if (arg === "--total-cap-amount") {
+      totalCapAmount = argValue(args, index, arg);
+      index += 1;
+    } else {
+      throw new Error(`unknown argument: ${arg}`);
+    }
+  }
+
+  if (mode === "base-mainnet-pilot") {
+    const missing = [
+      ["--rpc-endpoint", rpcEndpoint],
+      ["--lockbox-address", lockboxAddress],
+      ["--from-block", fromBlock],
+      ["--to-block", toBlock],
+    ].filter(([, value]) => value === undefined).map(([name]) => name);
+    if (missing.length > 0) {
+      throw new Error(`base-mainnet-pilot E2E requires ${missing.join(", ")}`);
+    }
+  }
+
+  return {
+    mode,
+    fixturePath,
+    duplicateFixturePath,
+    outDir,
+    approvedLockbox,
+    rpcEndpoint,
+    lockboxAddress,
+    fromBlock,
+    toBlock,
+    confirmations,
+    maxUsd,
+    maxDepositAmount,
+    totalCapAmount,
+  };
+}
+
+function pipelineArgs(options: PilotE2EOptions, statePath: string, fixturePath = options.fixturePath): string[] {
+  const common = [
+    "--approved-lockbox",
+    options.approvedLockbox,
+    "--confirmations",
+    options.confirmations,
+    "--acknowledge-pilot",
+    "--max-usd",
+    options.maxUsd,
+    "--max-deposit-amount",
+    options.maxDepositAmount,
+    "--total-cap-amount",
+    options.totalCapAmount,
+    "--apply-credit",
+    "--withdrawal-intent",
+    "--runtime-state",
+    statePath,
+  ];
+
+  if (options.mode === "mock-pilot") {
+    return [
+      "--mode",
+      "mock-pilot",
+      "--fixture",
+      fixturePath,
+      ...common,
+    ];
+  }
+
+  return [
+    "--mode",
+    "base-mainnet-pilot",
+    "--rpc-url",
+    options.rpcEndpoint ?? "",
+    "--lockbox-address",
+    options.lockboxAddress ?? "",
+    "--from-block",
+    options.fromBlock ?? "",
+    "--to-block",
+    options.toBlock ?? "",
+    "--acknowledge-real-funds",
+    ...common,
+  ];
+}
+
+function writeJson(path: string, value: unknown): void {
+  mkdirSync(dirname(path), { recursive: true });
+  assertNoSecrets(value);
+  writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function relativeToRepo(path: string): string {
+  return relative(REPO_ROOT, path).replace(/\\/g, "/");
+}
+
+function first<T>(values: T[], name: string): T {
+  const value = values[0];
+  assert.ok(value !== undefined, `${name} must contain at least one entry`);
+  return value;
+}
+
+async function runFirstAndReplay(options: PilotE2EOptions, statePath: string): Promise<{
+  firstRun: BridgePipelineResult;
+  replayRun: BridgePipelineResult;
+}> {
+  const firstRun = await runBridgePipeline(parseBridgeArgs(pipelineArgs(options, statePath)));
+  const firstCredit = first(firstRun.credits, "first credits");
+  const firstApplication = first(firstRun.runtimeApplications, "first runtime applications");
+  const firstWithdrawal = first(firstRun.withdrawalIntents, "first withdrawal intents");
+  const firstEvidence = first(firstRun.pilotEvidence, "first pilot evidence");
+  const firstReleaseEvidence = first(firstRun.releaseEvidences, "first release evidence");
+
+  assert.equal(firstCredit.status, "applied");
+  assert.equal(firstApplication.status, "applied");
+  assert.equal(firstApplication.applyCount, 1);
+  assert.equal(firstEvidence.creditApplication.appliedExactlyOnce, true);
+  assert.equal(firstWithdrawal.broadcast, false);
+  assert.equal(firstReleaseEvidence.releaseCall.broadcast, false);
+
+  const replayRun = await runBridgePipeline(parseBridgeArgs(pipelineArgs(options, statePath)));
+  const replayCredit = first(replayRun.credits, "replay credits");
+  const replayApplication = first(replayRun.runtimeApplications, "replay runtime applications");
+  const replayEvidence = first(replayRun.pilotEvidence, "replay pilot evidence");
+
+  assert.equal(replayCredit.status, "rejected");
+  assert.equal(replayCredit.rejectionReason, "already_applied_replay_key");
+  assert.equal(replayApplication.status, "idempotent_replay");
+  assert.equal(replayApplication.applyCount, 0);
+  assert.equal(replayEvidence.replay.decision, "already_applied_idempotent");
+  assert.equal(replayRun.withdrawalIntents.length, 0);
+
+  return { firstRun, replayRun };
+}
+
+async function runDuplicateReplay(options: PilotE2EOptions, statePath: string): Promise<BridgePipelineResult> {
+  const duplicateRun = await runBridgePipeline(parseBridgeArgs(pipelineArgs(options, statePath, options.duplicateFixturePath)));
+  const applied = duplicateRun.credits.filter((credit) => credit.status === "applied");
+  const rejected = duplicateRun.credits.filter((credit) => credit.status === "rejected");
+
+  assert.equal(duplicateRun.observations.length, 2);
+  assert.equal(applied.length, 1);
+  assert.equal(rejected.length, 1);
+  assert.equal(rejected[0]?.rejectionReason, "duplicate_replay_key");
+  assert.equal(duplicateRun.handoff.replayProtection.duplicateReplayKeys.length, 1);
+  assert.equal(duplicateRun.withdrawalIntents.length, 1);
+  return duplicateRun;
+}
+
+async function assertNegativeCoverage(options: PilotE2EOptions): Promise<{
+  wrongChainRejected: boolean;
+  unapprovedContractRejected: boolean;
+}> {
+  await assert.rejects(
+    () => runBridgePipeline(parseBridgeArgs(pipelineArgs({
+      ...options,
+      fixturePath: resolve(REPO_ROOT, "fixtures/bridge/base-sepolia-mock-deposit.json"),
+    }, resolve(options.outDir, "wrong-chain-state.json")))),
+    /pilot deposit must be from Base chain 8453/,
+  );
+
+  await assert.rejects(
+    () => runBridgePipeline(parseBridgeArgs(pipelineArgs({
+      ...options,
+      approvedLockbox: WRONG_APPROVED_LOCKBOX,
+    }, resolve(options.outDir, "unapproved-state.json")))),
+    /unapproved bridge lockbox address/,
+  );
+
+  return {
+    wrongChainRejected: true,
+    unapprovedContractRejected: true,
+  };
+}
+
+async function main(): Promise<void> {
+  const options = parsePilotE2EArgs(process.argv.slice(2));
+  rmSync(options.outDir, { recursive: true, force: true });
+  mkdirSync(options.outDir, { recursive: true });
+
+  console.log(`Step 1 complete: resolved bridge pilot E2E mode ${options.mode}.`);
+  console.log("Next operator command: node services/bridge-relayer/src/bridge-pilot-e2e.ts --mode mock-pilot");
+
+  const statePath = resolve(options.outDir, "bridge-credit-application-state.json");
+  const duplicateStatePath = resolve(options.outDir, "bridge-duplicate-credit-application-state.json");
+  const { firstRun, replayRun } = await runFirstAndReplay(options, statePath);
+  console.log("Step 2 complete: first local credit application and same-event replay were checked.");
+  console.log("Next operator command: Get-Content services/bridge-relayer/out/real-value-pilot-e2e/bridge-pilot-evidence.json");
+
+  const duplicateRun = await runDuplicateReplay(options, duplicateStatePath);
+  console.log("Step 3 complete: duplicate deposit fixture replay was rejected with evidence.");
+  console.log("Next operator command: Get-Content services/bridge-relayer/out/real-value-pilot-e2e/bridge-replay-handoff.json");
+
+  const negativeCoverage = await assertNegativeCoverage(options);
+  console.log("Step 4 complete: wrong-chain and unapproved-contract negative checks passed.");
+  console.log("Next operator command: npm test --prefix services/bridge-relayer");
+
+  const observation = first(firstRun.observations, "observations");
+  const credit = first(firstRun.credits, "credits");
+  const evidence = first(firstRun.pilotEvidence, "pilot evidence");
+  const withdrawal = first(firstRun.withdrawalIntents, "withdrawal intents");
+  const releaseEvidence = first(firstRun.releaseEvidences, "release evidence");
+
+  const observationPath = resolve(options.outDir, "bridge-observation.json");
+  const creditPath = resolve(options.outDir, "bridge-credit.json");
+  const evidencePath = resolve(options.outDir, "bridge-pilot-evidence.json");
+  const releaseEvidencePath = resolve(options.outDir, "bridge-release-evidence.json");
+  const withdrawalPath = resolve(options.outDir, "bridge-withdrawal-intent.json");
+  const handoffPath = resolve(options.outDir, "bridge-runtime-handoff.json");
+  const replayHandoffPath = resolve(options.outDir, "bridge-replay-handoff.json");
+
+  writeJson(observationPath, observation);
+  writeJson(creditPath, credit);
+  writeJson(evidencePath, evidence);
+  writeJson(releaseEvidencePath, releaseEvidence);
+  writeJson(withdrawalPath, withdrawal);
+  writeJson(handoffPath, firstRun.handoff);
+  writeJson(replayHandoffPath, duplicateRun.handoff);
+
+  [
+    observation,
+    credit,
+    evidence,
+    releaseEvidence,
+    withdrawal,
+    firstRun.handoff,
+    replayRun.handoff,
+    duplicateRun.handoff,
+  ].forEach((artifact) => assertNoSecrets(artifact));
+
+  const report = {
+    schema: "flowmemory.bridge_real_value_pilot_e2e_report.v0",
+    generatedAt: new Date().toISOString(),
+    mode: options.mode,
+    sourceChain: {
+      chainId: BASE_MAINNET_CHAIN_ID,
+      chainIdHex: BASE_MAINNET_CHAIN_ID_HEX,
+    },
+    productionReady: false,
+    broadcast: false,
+    artifacts: {
+      observationPath: relativeToRepo(observationPath),
+      creditPath: relativeToRepo(creditPath),
+      pilotEvidencePath: relativeToRepo(evidencePath),
+      releaseEvidencePath: relativeToRepo(releaseEvidencePath),
+      withdrawalIntentPath: relativeToRepo(withdrawalPath),
+      runtimeHandoffPath: relativeToRepo(handoffPath),
+      replayHandoffPath: relativeToRepo(replayHandoffPath),
+      applicationStatePath: relativeToRepo(statePath),
+    },
+    deterministicIds: {
+      observationId: observation.observationId,
+      replayKey: observation.replayKey,
+      creditId: credit.creditId,
+      evidenceId: evidence.evidenceId,
+      releaseEvidenceId: releaseEvidence.releaseEvidenceId,
+      withdrawalIntentId: withdrawal.withdrawalIntentId,
+    },
+    exactlyOnce: {
+      firstApplicationStatus: first(firstRun.runtimeApplications, "first applications").status,
+      replayApplicationStatus: first(replayRun.runtimeApplications, "replay applications").status,
+      replayCreditStatus: first(replayRun.credits, "replay credits").status,
+      appliedOnce: true,
+    },
+    replayProtection: {
+      duplicateReplayKeys: duplicateRun.handoff.replayProtection.duplicateReplayKeys,
+      rejectedCreditIds: duplicateRun.credits
+        .filter((replayCredit) => replayCredit.status === "rejected")
+        .map((replayCredit) => replayCredit.creditId),
+      decision: "duplicate_replay_key_rejected",
+    },
+    withdrawalReleaseEvidence: {
+      withdrawalIntentId: withdrawal.withdrawalIntentId,
+      releaseEvidenceId: releaseEvidence.releaseEvidenceId,
+      broadcast: releaseEvidence.releaseCall.broadcast,
+      method: releaseEvidence.releaseCall.method,
+    },
+    negativeCoverage,
+    requiredEnvironmentVariables: [
+      "FLOWCHAIN_BASE8453_RPC_URL",
+      "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+      "FLOWCHAIN_BASE8453_FROM_BLOCK",
+      "FLOWCHAIN_BASE8453_TO_BLOCK",
+      "FLOWCHAIN_BASE8453_CONFIRMATIONS",
+      "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+      "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+      "FLOWCHAIN_PILOT_MAX_USD",
+      "FLOWCHAIN_PILOT_OPERATOR_ACK",
+    ],
+    liveObserverCommand: "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base-mainnet-pilot-observe.ps1 -OperatorAck -ApplyCredit -WithdrawalIntent",
+    noSecrets: true,
+  };
+  assertNoSecrets(report);
+
+  const reportPath = resolve(options.outDir, "bridge-real-value-pilot-e2e-report.json");
+  writeJson(reportPath, report);
+
+  console.log("Step 5 complete: bridge pilot E2E artifacts were written.");
+  console.log(`Next operator command: Get-Content ${relativeToRepo(reportPath)}`);
+  console.log(`Bridge pilot E2E report: ${relativeToRepo(reportPath)}`);
+}
+
+await main();

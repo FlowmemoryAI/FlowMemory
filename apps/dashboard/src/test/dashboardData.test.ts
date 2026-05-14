@@ -3,6 +3,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import canaryFixture from "../../../../fixtures/dashboard/flowmemory-dashboard-base-canary-v0.json";
 import fixture from "../../../../fixtures/dashboard/flowmemory-dashboard-v0.json";
+import explorerFallback from "../../../../fixtures/dashboard/flowchain-l1-explorer-fallback.json";
 import devnetDashboardState from "../../../../fixtures/launch-core/generated/devnet/dashboard-state.json";
 import devnetState from "../../../../fixtures/launch-core/generated/devnet/state.json";
 import bridgeTestDeposit from "../../public/data/flowchain-bridge-test-deposit.json";
@@ -15,6 +16,7 @@ import {
   WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH,
   WORKBENCH_DEVNET_DASHBOARD_STATE_PATH,
   WORKBENCH_DEVNET_STATE_PATH,
+  WORKBENCH_EXPLORER_FALLBACK_PATH,
   WORKBENCH_SECTIONS,
   buildWorkbenchSnapshot,
   fetchWorkbenchSnapshot,
@@ -112,6 +114,7 @@ describe("dashboard fixture", () => {
       devnetState,
       devnetDashboardState,
       bridgeTestDeposit,
+      explorerFallback,
     });
 
     expect(workbench.source).toBe("fixture-fallback");
@@ -136,16 +139,20 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.models.length).toBeGreaterThan(0);
     expect(workbench.sections.challenges.length).toBeGreaterThan(0);
     expect(workbench.sections.balances.length).toBeGreaterThan(0);
-    expect(workbench.sections.tokenLaunches).toHaveLength(0);
-    expect(workbench.sections.tokenBalances).toHaveLength(0);
-    expect(workbench.sections.dexPools).toHaveLength(0);
-    expect(workbench.sections.liquidityPositions).toHaveLength(0);
-    expect(workbench.sections.swaps).toHaveLength(0);
+    expect(workbench.sections.tokenLaunches).toHaveLength(1);
+    expect(workbench.sections.tokenBalances).toHaveLength(1);
+    expect(workbench.sections.tokenTransfers).toHaveLength(1);
+    expect(workbench.sections.dexPools).toHaveLength(1);
+    expect(workbench.sections.liquidityPositions.length).toBeGreaterThanOrEqual(2);
+    expect(workbench.sections.swaps).toHaveLength(1);
     expect(workbench.sections.bridgeDeposits.length).toBeGreaterThan(0);
-    expect(workbench.sections.bridgeCredits).toHaveLength(0);
-    expect(workbench.sections.bridgeWithdrawals).toHaveLength(0);
+    expect(workbench.sections.bridgeCredits).toHaveLength(2);
+    expect(workbench.sections.bridgeWithdrawals.length).toBeGreaterThanOrEqual(1);
+    expect(workbench.sections.bridgeReleases).toHaveLength(1);
+    expect(workbench.sections.errorsRecovery.length).toBeGreaterThanOrEqual(6);
     expect(workbench.sections.realValuePilot.length).toBeGreaterThan(0);
-    expect(workbench.sections.realValuePilot[0].facts.find((fact) => fact.label === "scope")?.value).toBe("capped owner testing");
+    expect(workbench.sections.realValuePilot.some((record) => record.facts.some((fact) => fact.label === "scope" && fact.value === "capped owner testing"))).toBe(true);
+    expect(workbench.sections.realValuePilot.some((record) => record.facts.some((fact) => fact.label === "source chain ID" && fact.value === "8453"))).toBe(true);
     expect(workbench.sections.explorerRecords.length).toBeGreaterThan(0);
     expect(workbench.node.status).toBe("offline");
     expect(workbench.actions).toEqual([]);
@@ -259,6 +266,9 @@ describe("dashboard fixture", () => {
       if (url === WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH) {
         return Response.json(bridgeTestDeposit);
       }
+      if (url === WORKBENCH_EXPLORER_FALLBACK_PATH) {
+        return Response.json(explorerFallback);
+      }
 
       return new Response("not found", { status: 404 });
     });
@@ -272,11 +282,13 @@ describe("dashboard fixture", () => {
     expect(workbench.raw.controlPlanePilotStatus).toMatchObject({ state: "degraded" });
     expect(workbench.raw.devnetState).toEqual(devnetState);
     expect(workbench.raw.bridgeTestDeposit).toEqual(bridgeTestDeposit);
+    expect(workbench.raw.explorerFallback).toEqual(explorerFallback);
     expect(workbench.loadIssues).toEqual([]);
     expect(fetchMock).toHaveBeenCalledWith("http://127.0.0.1:8787/health", expect.any(Object));
     expect(fetchMock).toHaveBeenCalledWith("http://127.0.0.1:8787/pilot/status", expect.any(Object));
     expect(fetchMock).toHaveBeenCalledWith(WORKBENCH_DEVNET_STATE_PATH, expect.any(Object));
     expect(fetchMock).toHaveBeenCalledWith(WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH, expect.any(Object));
+    expect(fetchMock).toHaveBeenCalledWith(WORKBENCH_EXPLORER_FALLBACK_PATH, expect.any(Object));
   });
 
   it("renders the critical workbench view labels from fixture fallback", () => {
@@ -284,6 +296,7 @@ describe("dashboard fixture", () => {
       devnetState,
       devnetDashboardState,
       bridgeTestDeposit,
+      explorerFallback,
     });
     const html = renderToStaticMarkup(createElement(WorkbenchView, { data, workbench }));
 
@@ -296,11 +309,15 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Wallet Metadata");
     expect(html).toContain("Token Launch");
     expect(html).toContain("Token Balances");
+    expect(html).toContain("Token Transfers");
     expect(html).toContain("DEX Pools");
     expect(html).toContain("Liquidity");
     expect(html).toContain("Swaps");
+    expect(html).toContain("Receipts / Events");
     expect(html).toContain("Explorer Records");
     expect(html).toContain("Bridge Deposits");
+    expect(html).toContain("Bridge Releases");
+    expect(html).toContain("Errors / Recovery");
     expect(html).toContain("private keys in browser localStorage");
     expect(html).toContain("Rootfields");
     expect(html).toContain("Verifier Modules");

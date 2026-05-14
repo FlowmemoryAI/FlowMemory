@@ -129,6 +129,55 @@ cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- submit-fixture 
 cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- run-block
 ```
 
+Queue a pilot bridge handoff into the local runtime:
+
+```powershell
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- bridge-handoff --handoff fixtures/bridge/local-runtime-bridge-handoff.json --direct
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- run-block
+```
+
+`bridge-handoff` consumes `flowmemory.bridge_runtime_handoff.v0` objects from the relayer handoff. For each non-rejected credit it queues deterministic setup and credit transactions:
+
+- `MapBridgeAsset`
+- `MapBridgeAccount`
+- `CreateLocalTestUnitBalance`
+- `CreditBridgeFromBaseEvent`
+
+The current pilot maps the source token to `local-test-unit` so bridge credits remain local runtime accounting records. The command output is `flowmemory.local_devnet.bridge_handoff_queue.v0` with queued transaction ids and expected bridge receipt ids.
+
+Look up a bridge receipt by receipt id:
+
+```powershell
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- bridge-receipt --receipt-id 0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6
+```
+
+Look up the same receipt by Base event reference:
+
+```powershell
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- bridge-receipt --source-chain-id 84532 --source-contract 0x1111111111111111111111111111111111111111 --tx-hash 0x2222222222222222222222222222222222222222222222222222222222222222 --log-index 0
+```
+
+Run the pilot runtime E2E wrapper:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-real-value-pilot-runtime.ps1
+```
+
+When the bridge proof has already run, the wrapper consumes
+`services/bridge-relayer/out/real-value-pilot-e2e/bridge-runtime-handoff.json`
+so the final pilot gate covers the Base `8453` bridge-to-runtime handoff. When
+that file is absent, it falls back to
+`fixtures/bridge/local-runtime-bridge-handoff.json` for standalone runtime
+development.
+
+The broader product E2E wrapper also inspects the pilot runtime surface:
+
+```powershell
+npm run flowchain:product-e2e -- -SkipFullSmoke -AllowIncomplete
+```
+
+In incomplete coordination mode it writes `devnet/local/product-e2e/flowchain-product-e2e-report.json`, verifies the runtime exposes `bridge-handoff` and `bridge-receipt`, validates the direct runtime proof report when present, and records whether the root `flowchain:real-value-pilot:runtime` and `flowchain:real-value-pilot:e2e` package scripts exist. The exact `npm run flowchain:product-e2e` gate remains strict and fails when required dependencies are missing.
+
 Export handoff fixtures:
 
 ```powershell
@@ -197,11 +246,19 @@ The prototype stores:
 - `verifierReports`
 - `importedObservations`
 - `importedVerifierReports`
+- `bridgeAssetMappings`
+- `bridgeAccountMappings`
+- `bridgeCredits`
+- `bridgeCreditReceipts`
+- `bridgeReplayIndex`
+- `bridgeEventReceiptIndex`
 - `baseAnchors`
 - `blocks`
 - `pendingTxs`
 
 `localTestUnitBalances` and `faucetRecords` are deterministic, no-value local records for runtime testing only. They are not token balances and there is no gas accounting.
+
+Bridge pilot records are deterministic local credit records. They reference relayer-provided Base event identifiers after the event has been observed and do not make any custody, withdrawal, or settlement claim.
 
 ## Transaction Types
 
@@ -225,6 +282,9 @@ Supported local transactions:
 - `AnchorBatchToBasePlaceholder`
 - `ImportFlowPulseObservation`
 - `ImportVerifierReport`
+- `MapBridgeAsset`
+- `MapBridgeAccount`
+- `CreditBridgeFromBaseEvent`
 
 ## Local Lifecycle Rules
 
@@ -239,6 +299,10 @@ Supported local transactions:
 - Finality receipts can be created only for accepted receipts with no unresolved challenge.
 - Artifact availability is a local proof/status record over an existing artifact commitment; it does not store raw artifact data.
 - Verifier modules are local identity records for verifier provenance; they do not introduce staking, rewards, or verifier economics.
+- Bridge asset mappings bind a source chain/token pair to an existing local asset id and reject duplicate mappings.
+- Bridge account mappings bind a FlowChain recipient reference to a deterministic local bridge account id and reject duplicate mappings.
+- Bridge credits require existing asset/account mappings, an existing local bridge balance record, a positive amount, a unique credit id, a unique receipt id, a unique replay key, and a unique Base event reference.
+- Bridge replay attempts are rejected with receipt evidence and do not mutate the bridge credit, receipt, replay, or local balance state.
 
 ## Blocks And Roots
 
@@ -254,7 +318,7 @@ Each block has:
 
 The devnet uses deterministic logical time and canonical JSON with Keccak-256. Tests prove the same inputs produce the same state root and block hash.
 
-`inspect-state --summary`, exported handoff files, and Base anchor placeholders include deterministic roots for the local maps, including operator key references, agent accounts, local test-unit balances, faucet records, model passports, memory cells, challenges, finality receipts, artifact availability proofs, verifier modules, work receipts, and verifier reports.
+`inspect-state --summary`, exported handoff files, and Base anchor placeholders include deterministic roots for the local maps, including operator key references, agent accounts, local test-unit balances, faucet records, model passports, memory cells, challenges, finality receipts, artifact availability proofs, verifier modules, work receipts, verifier reports, bridge asset mappings, bridge account mappings, bridge credits, bridge credit receipts, bridge replay indexes, and bridge event receipt indexes.
 
 ## Persistence
 
@@ -285,8 +349,12 @@ The control-plane handoff contains the current chain id, latest block, blocks, p
 Control-plane and dashboard agents should read:
 
 - `objects.localTestUnitBalances` and `objects.faucetRecords` from `control-plane-handoff.json`.
+- `objects.bridgeAssetMappings`, `objects.bridgeAccountMappings`, `objects.bridgeCredits`, `objects.bridgeCreditReceipts`, `objects.bridgeReplayIndex`, and `objects.bridgeEventReceiptIndex` from `control-plane-handoff.json`.
 - Top-level `localTestUnitBalances` and `faucetRecords` from `dashboard-state.json`.
-- `mapRoots.localTestUnitBalanceRoot` and `mapRoots.faucetRecordRoot` anywhere map-root reconciliation is needed.
+- Top-level `bridgeAssetMappings`, `bridgeAccountMappings`, `bridgeCredits`, `bridgeCreditReceipts`, `bridgeReplayIndex`, and `bridgeEventReceiptIndex` from `dashboard-state.json`.
+
+Relayer-indexer and verifier consumers should read the same top-level bridge maps from `indexer-handoff.json` and `verifier-handoff.json`. The dedicated runtime proof checks those files for the pilot credit, bridge receipt, event receipt index, replay evidence, and bridge roots.
+- `mapRoots.localTestUnitBalanceRoot`, `mapRoots.faucetRecordRoot`, `mapRoots.bridgeAssetMappingRoot`, `mapRoots.bridgeAccountMappingRoot`, `mapRoots.bridgeCreditRoot`, `mapRoots.bridgeCreditReceiptRoot`, `mapRoots.bridgeReplayIndexRoot`, and `mapRoots.bridgeEventReceiptIndexRoot` anywhere map-root reconciliation is needed.
 
 ## Non-Goals
 

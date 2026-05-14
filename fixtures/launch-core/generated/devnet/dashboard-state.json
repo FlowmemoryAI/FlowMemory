@@ -31,19 +31,25 @@
   },
   "balanceTransfers": {},
   "baseAnchors": {
-    "0xf57ab7d2c1459c03cf01bfddd56b046be685d8eaa4597e6bb54b5015aeaf003f": {
+    "0x6908eac7dbf828ab8d295d2ae86f0b0db9295a27b1fe4999c26a3ed97244ef8d": {
       "agentAccountRoot": "0xcf31230bfff347f79e19a55f4d1ff5fa486b0b1ad4754ce22b93de4b259a3ca7",
-      "anchorId": "0xf57ab7d2c1459c03cf01bfddd56b046be685d8eaa4597e6bb54b5015aeaf003f",
+      "anchorId": "0x6908eac7dbf828ab8d295d2ae86f0b0db9295a27b1fe4999c26a3ed97244ef8d",
       "appchainChainId": "flowmemory-local-devnet-v0",
       "artifactAvailabilityProofRoot": "0xfb4b693c45014aae0947f35696e9d864e7b26ac6fd39c1df5edb3e0dcf9bd928",
       "artifactCommitmentRoot": "0xb772a9f7273032fd3ba2da8b6476d4715bbbafbd2a7eed21ecd0d558bde3beab",
       "balanceTransferRoot": "0x9b6e249f769a93bc9f34a90156e028d1a830badcd8ccdc5b1487d512cdbf0a6d",
       "blockRangeEnd": 1,
       "blockRangeStart": 1,
+      "bridgeAccountMappingRoot": "0x46285ec5782d3e6cc1e557fd5dd779e979d679e5cc723832cb189d27a5c552c8",
+      "bridgeAssetMappingRoot": "0xbd283f6190cba76038f7364e207557dd20f7883d78e5f89a96579af5455a89aa",
+      "bridgeCreditReceiptRoot": "0x0a86ce98161cb40ca4c7719468c0ed8f122677d12641c13305277094b8f3a509",
+      "bridgeCreditRoot": "0x613ab06f110cc7a5eb06a0f44b7a0f04b0b3cfb0556d30d42842f33563596248",
+      "bridgeEventReceiptIndexRoot": "0xcaad305c45f57c516d0fdfdef15c5d88b399b976df173f005e9d7dc30fbdbdb2",
+      "bridgeReplayIndexRoot": "0x9344f8651651d2d5042d2853205154a5777cd57aa9e892e2ac41b9b9fe04c00f",
       "challengeRoot": "0x16da3d2bf2dcd801bc5deb3987dc01342cb957031ad01408ea77bf5d1583656f",
       "dexPoolRoot": "0x0e5f034494a2deb6a4f20c04f01e678795c587df4869ad3f189f107fcc447dea",
       "faucetRecordRoot": "0x2277503a52fab3f9e49b40debfb7d641abee75cf268aa56da403fdcf4fad6cee",
-      "finalityReceiptRoot": "0xdf352e20fd1ddfd2855202335e03cfec21d87e99bf8717d161fe8648998e16cf",
+      "finalityReceiptRoot": "0x1c8536e507c5ba2242a5875c9537043645828825286ca256cc1171f1eb960c3f",
       "finalityStatus": "local-placeholder",
       "liquidityReceiptRoot": "0x98bf15cc6859994038744612e125236b1f777895a051c41702c2004134327738",
       "localTestUnitBalanceRoot": "0x167041ef195b5dde2d2cade6ecb26c9a0a596e9ed21ff7bfb02d33c9d2be8d15",
@@ -53,7 +59,7 @@
       "operatorKeyReferenceRoot": "0x8457aa3ed0f4238834a8f3925f25ccca805828d8427c3ef67590a45659b22a40",
       "previousAnchorId": "0x0000000000000000000000000000000000000000000000000000000000000000",
       "rootfieldStateRoot": "0xb72a851dca1103410484e3272945bae5e87fc39b8f32f77d2991959b60d3bfbf",
-      "stateRoot": "0x8c7c1e7a078b60a809d17a51c44e275059afb8d7535769430c3fc9e9320c7e23",
+      "stateRoot": "0x7e50021bc0dd2537f9ecfd7973f9799b6ffdffcfd427e3bb059f4dfd1253b947",
       "swapReceiptRoot": "0xc9f3ee93962f36ed10421ec9ad736079a3b13ef6504336495af243b718cefee1",
       "tokenBalanceRoot": "0xbaf3b150fe41a0f3a2d9fe3dd9a664f9c5934bfef37218d9c3bf1c682be5f8c6",
       "tokenDefinitionRoot": "0xbbbad9681e8756403940e4333111706a4fcee1f30534ba14deea9ba148056be0",
@@ -64,6 +70,12 @@
     }
   },
   "blockHeight": 2,
+  "bridgeAccountMappings": {},
+  "bridgeAssetMappings": {},
+  "bridgeCreditReceipts": {},
+  "bridgeCredits": {},
+  "bridgeEventReceiptIndex": {},
+  "bridgeReplayIndex": {},
   "challenges": {
     "challenge:demo:001": {
       "challengeId": "challenge:demo:001",
@@ -98,7 +110,7 @@
       "finalizedBy": "operator:local-demo",
       "receiptId": "receipt:demo:001",
       "rootfieldId": "rootfield:demo:alpha",
-      "stateRoot": "0x4e7ee5e7a8cab9b4ddda183842b9e9c1e1e000afea820b577ecc90fa4d9517e2"
+      "stateRoot": "0xf47b94f6d4be36bc5ade63085c9c3c6174d5b25eb5bfaae9a57e3946f5637352"
     }
   },
   "genesisConfig": {
@@ -134,11 +146,17 @@
     "artifactAvailabilityProofRoot": "0xfb4b693c45014aae0947f35696e9d864e7b26ac6fd39c1df5edb3e0dcf9bd928",
     "artifactCommitmentRoot": "0xb772a9f7273032fd3ba2da8b6476d4715bbbafbd2a7eed21ecd0d558bde3beab",
     "balanceTransferRoot": "0x9b6e249f769a93bc9f34a90156e028d1a830badcd8ccdc5b1487d512cdbf0a6d",
-    "baseAnchorRoot": "0xa10b087464d8e6098696295a2a4b26a4396974c9ed10dd0bba429f22284cd573",
+    "baseAnchorRoot": "0x8b7c3423523f44b9a470a1281b088c72537a42e26f88fc8cd4c3e8360324c7ca",
+    "bridgeAccountMappingRoot": "0x46285ec5782d3e6cc1e557fd5dd779e979d679e5cc723832cb189d27a5c552c8",
+    "bridgeAssetMappingRoot": "0xbd283f6190cba76038f7364e207557dd20f7883d78e5f89a96579af5455a89aa",
+    "bridgeCreditReceiptRoot": "0x0a86ce98161cb40ca4c7719468c0ed8f122677d12641c13305277094b8f3a509",
+    "bridgeCreditRoot": "0x613ab06f110cc7a5eb06a0f44b7a0f04b0b3cfb0556d30d42842f33563596248",
+    "bridgeEventReceiptIndexRoot": "0xcaad305c45f57c516d0fdfdef15c5d88b399b976df173f005e9d7dc30fbdbdb2",
+    "bridgeReplayIndexRoot": "0x9344f8651651d2d5042d2853205154a5777cd57aa9e892e2ac41b9b9fe04c00f",
     "challengeRoot": "0x16da3d2bf2dcd801bc5deb3987dc01342cb957031ad01408ea77bf5d1583656f",
     "dexPoolRoot": "0x0e5f034494a2deb6a4f20c04f01e678795c587df4869ad3f189f107fcc447dea",
     "faucetRecordRoot": "0x2277503a52fab3f9e49b40debfb7d641abee75cf268aa56da403fdcf4fad6cee",
-    "finalityReceiptRoot": "0xdf352e20fd1ddfd2855202335e03cfec21d87e99bf8717d161fe8648998e16cf",
+    "finalityReceiptRoot": "0x1c8536e507c5ba2242a5875c9537043645828825286ca256cc1171f1eb960c3f",
     "importedObservationRoot": "0x99cb1b939d5a09f800f72e4c5a2b92988571126e1f6f93549f4893b3f7de7880",
     "importedVerifierReportRoot": "0x6070b1015f000dd509c7b276d2ad68d8a9d188ef1a961c2f573346eb75ea5ad7",
     "liquidityReceiptRoot": "0x98bf15cc6859994038744612e125236b1f777895a051c41702c2004134327738",
@@ -210,7 +228,7 @@
     }
   },
   "schema": "flowmemory.dashboard_state.local_devnet.v0",
-  "stateRoot": "0x3074ef2e5311d94e8f9a2660a6cc016c7b7f9a08c56ee07f9e841c1489726e68",
+  "stateRoot": "0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c",
   "swapReceipts": {},
   "tokenBalances": {},
   "tokenDefinitions": {},
