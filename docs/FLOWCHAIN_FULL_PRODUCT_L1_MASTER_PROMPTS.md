@@ -335,7 +335,7 @@ Forbidden folders:
 
 - `apps/dashboard/` except read-only coordination
 - `services/bridge-relayer/`
-- production deployment scripts
+- forbidden production deployment scripts
 
 Prompt:
 
@@ -401,7 +401,7 @@ Forbidden folders:
 
 - runtime internals except documented handoff files
 - wallet private key handling
-- production mainnet deployment
+- forbidden production mainnet deployment
 
 Prompt:
 

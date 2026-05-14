@@ -66,7 +66,7 @@ Indexer/verifier local package:
 - The control-plane API prefers live local runtime state from `devnet/local/`, falls back to deterministic fixtures, and exposes a 49-method local smoke client for node status, blocks, transactions, accounts, balances, wallets, Rootfields, receipts, verifier reports, memory cells, challenges, finality, bridge observations, bridge deposits, bridge credits, withdrawals, provenance, and raw JSON.
 - Control-plane transaction and bridge-observation intake writes local ignored files under `devnet/local/intake/` and rejects private-key, mnemonic, seed phrase, RPC credential, API key, and webhook-shaped material.
 - `npm run index:base-sepolia -- --rpc-url <url> --address <contract> --from-block <n> --to-block <n>` provides a constrained Base Sepolia reader path.
-- The Base Sepolia reader requires an explicit RPC URL, rejects non-Base-Sepolia chain ids, and persists both canonical state and a durable checkpoint without storing RPC URLs or keys.
+- The Base Sepolia reader requires an explicit RPC URL, rejects non-Base-Sepolia chain ids, rejects broad scans by default, validates resolved HTTP(S) RPC URLs, persists canonical state and a durable checkpoint atomically, and records resume fields without storing RPC URLs or keys.
 - `npm run index:base-canary -- --acknowledge-mainnet-canary --rpc-url <url> --address <contract> --from-block <n> --to-block <n>` provides a guarded Base mainnet canary reader path for the documented V0 canary deployment only.
 - The Base canary reader requires explicit acknowledgement, RPC URL, addresses, and block range; rejects non-Base-mainnet chain ids; refuses scans wider than 5,000 blocks; persists canonical state plus a durable canary checkpoint; and marks the checkpoint as not production-ready.
 - A live canary read over blocks `45955500` to `45955540` observed 4 FlowPulse logs from the documented `RootfieldRegistry` and `FlowMemoryHookAdapter` canary addresses with 0 rejected logs and 0 duplicates.
@@ -74,7 +74,8 @@ Indexer/verifier local package:
 - The dashboard has a separate Base canary mode at `/canary` that shows live-read canary FlowPulse observations, Rootflow transitions, canary boundaries, and raw canary JSON without replacing local fixture mode.
 - `npm run verify:base-canary:sources` produces a dry-run source verification plan for all canary contracts and writes `fixtures/deployments/base-canary-source-verification-plan.json`; `npm run verify:base-canary:sources:submit` submits after `BASESCAN_API_KEY` is configured.
 - All 10 deployed Base canary contracts are verified on BaseScan. `FlowMemoryHookAdapter` was verified against deployment-source commit `11d562c` because `main` now contains the newer v4-shaped callback path.
-- `npm run deploy:base-sepolia` and `npm run deploy:base-sepolia:broadcast` provide Foundry deploy commands for the current V0 Base Sepolia testnet contract set. They require local env values and do not commit credentials.
+- `npm run deploy:base-sepolia:plan` writes a non-secret Base Sepolia rehearsal plan artifact. `npm run deploy:base-sepolia` and `npm run deploy:base-sepolia:broadcast` provide Foundry dry-run/broadcast commands for the current V0 Base Sepolia testnet contract set. They require local env values and do not commit credentials.
+- `docs/DEPLOYMENTS/BASE_SEPOLIA_REHEARSAL.md` defines the dry-run, optional broadcast, write smoke, readback, source-verification, and rollback rehearsal path.
 - A Base mainnet V0 canary deployment exists for testing only; deployed addresses and smoke transactions are recorded in `docs/DEPLOYMENTS/2026-05-13-base-canary-v0.md`.
 
 Dashboard V0:
@@ -122,8 +123,10 @@ Launch-core specifications:
 - `docs/FLOWCHAIN_TESTNET_ACCEPTANCE.md` marks private/local testnet features as implemented, in flight, missing, or later gated.
 - `docs/FLOWCHAIN_AGENT_INTEGRATION_MAP.md` maps the next-wave worktree ownership and cross-agent handoffs.
 - `docs/FLOWCHAIN_TROUBLESHOOTING.md` and `docs/FLOWCHAIN_OPERATOR_CHECKLIST.md` provide the Windows-first second-computer troubleshooting and operator checklist layer.
+- `docs/LAUNCH_DEMO_RUNBOOK.md` provides the beginner-safe browser click script, operator talk track, recovery steps, and launch-day demo checklist.
 - `docs/DECISIONS/rootflow-v0.md` records the V0 decision and non-goal boundaries.
 - `docs/reviews/ROOTFLOW_FLOW_MEMORY_V0_ACCEPTANCE_AUDIT.md` tracks evidence and missing work for the active launch-core goal.
+- `docs/reviews/LAUNCH_CANDIDATE_SECURITY_BOUNDARY_REVIEW.md` records the current security boundary review for local/test V0 demos and guarded canary review.
 - `docs/reviews/OPEN_PR_MERGE_READINESS.md` is now historical merge-readiness evidence for PRs that have merged.
 - `docs/LAUNCH_CORE_AGENT_GOALS.md` provides copy-ready goals for the contracts, crypto, indexer/verifier, dashboard, and review worktrees.
 
@@ -137,9 +140,8 @@ FlowChain private/local testnet snapshot:
   simulator, Base Sepolia reader/deploy commands, guarded canary reader, and
   Windows-first root wrapper commands for prerequisite checks, init, bounded
   start/stop, demo, smoke, full smoke, export/import, and workbench dev mode.
-- In flight: private-testnet object IDs and envelopes for newest local balance
-  and bridge-shaped surfaces, workbench polish, optional hardware operator
-  signal fixtures, Base Sepolia hook deployment runbook, and advanced L1
+- In flight: optional hardware operator signal fixtures, Base Sepolia live
+  rehearsal execution against a funded testnet deployer, and advanced L1
   research gates.
 - Missing: long-running multi-process node behavior, LAN peer mode, encrypted
   local operator vault, and second-computer smoke evidence for the latest

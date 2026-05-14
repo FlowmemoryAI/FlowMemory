@@ -16,11 +16,15 @@ Run from the repository root:
 npm test
 npm run index:fixtures
 npm run index:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --from-block <n> --to-block <n>
+npm run index:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --resume-from-checkpoint --to-block <n>
 npm run verify:fixtures
 npm run e2e
 ```
 
-The fixture commands require no secrets and no live RPC. The Base Sepolia command requires an explicit RPC URL, refuses non-Base-Sepolia chain ids, and does not store the RPC URL in output artifacts.
+The fixture commands require no secrets and no live RPC. The Base Sepolia
+command requires an explicit resolved HTTP(S) RPC URL, refuses non-Base-Sepolia
+chain ids, refuses broad scans by default, and does not store the RPC URL in
+output artifacts.
 
 ## FlowPulse Input
 
@@ -90,7 +94,8 @@ It requires:
 
 - `--rpc-url`
 - one or more `--address` values
-- `--from-block`
+- `--from-block`, or `--resume-from-checkpoint` when a checkpoint already
+  exists
 - `--to-block`
 
 It enforces:
@@ -98,6 +103,9 @@ It enforces:
 - `eth_chainId` must be Base Sepolia (`84532`)
 - block values must be explicit decimal or `0x` quantities
 - emitting addresses must be explicit EVM addresses
+- RPC URLs must be resolved HTTP(S) URLs without embedded username/password
+  credentials or obvious secret-shaped material
+- scan spans must stay within the configured maximum block span
 - output files must not contain RPC URLs or private keys
 
 It writes:
@@ -108,6 +116,10 @@ services/indexer/out/base-sepolia-indexer-checkpoint.json
 ```
 
 This is a testnet reader boundary, not a production mainnet indexer.
+
+Checkpoint output includes `lastIndexedBlock`, `highestObservedBlock`,
+`nextFromBlock`, and `emptyRange` so an operator can resume after empty or
+non-empty reads without silently repeating the same window.
 
 ## Identity Model
 
@@ -235,7 +247,9 @@ Verifier report schema:
 flowmemory.verifier.report.v0
 ```
 
-The JSON writer uses canonical key ordering, no wall-clock timestamps, no secrets, and stable fixture ordering.
+The JSON writer uses canonical key ordering, no wall-clock timestamps in fixture
+paths, no secrets, stable fixture ordering, and atomic temp-file replacement for
+live reader state/checkpoint files.
 
 ## Off-Chain Boundary
 
@@ -296,7 +310,8 @@ The control-plane exposes methods for health, chain status, node status, peers, 
 What changed:
 
 - Added a runnable fixture-first indexer/verifier package with CLIs, persistence, schemas, and tests.
-- Added a constrained Base Sepolia reader with durable local state and checkpoint output.
+- Added a constrained Base Sepolia reader with durable local state, atomic
+  checkpoint output, resume support, and dashboard feed summaries.
 - Defined contract `pulseId`, indexer `observationId`, indexer `cursorId`, and verifier `reportId`.
 - Defined V0 lifecycle states, duplicate behavior, resolver policy boundaries, and report statuses.
 
@@ -309,6 +324,7 @@ Checks:
 - `npm test`
 - `npm run index:fixtures`
 - `npm run index:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --from-block <n> --to-block <n>`
+- `npm run index:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --resume-from-checkpoint --to-block <n>`
 - `npm run verify:fixtures`
 - `npm run e2e`
 

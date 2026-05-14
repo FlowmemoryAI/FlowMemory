@@ -74,6 +74,86 @@ npm run flowchain:init
 npm run flowchain:demo
 ```
 
+## Workbench And Local Service Recovery
+
+The launch demo uses the dashboard as a local workbench. It can run with either
+the local control-plane API or deterministic fixture fallback.
+
+### Workbench Loads With Fixture Fallback
+
+This is not automatically a failure. It means the browser did not detect the
+local control-plane API at `http://127.0.0.1:8787`.
+
+To switch to local API mode, run in a separate PowerShell window:
+
+```powershell
+cd E:\FlowMemory\flowmemory-main
+npm run control-plane:serve
+```
+
+Refresh the workbench. The banner should change from **Fixture fallback
+active.** to **Local API detected.**
+
+### Control Plane Does Not Start
+
+Run the smallest local recovery path:
+
+```powershell
+cd E:\FlowMemory\flowmemory-main
+npm install
+npm run launch:v0
+npm test --prefix services/control-plane
+npm run control-plane:serve
+```
+
+If port `8787` is already in use, inspect it:
+
+```powershell
+Get-NetTCPConnection -LocalPort 8787 -ErrorAction SilentlyContinue
+```
+
+Close the old PowerShell window that owns the service, or stop the process if
+you intentionally started it and no longer need it.
+
+### Workbench Dev Server Does Not Open
+
+Install dashboard dependencies and rerun the wrapper:
+
+```powershell
+npm install --prefix apps/dashboard
+npm run workbench:dev
+```
+
+Use the URL printed by Vite. It is usually `http://127.0.0.1:5173/`, but Vite
+may choose another port if `5173` is busy.
+
+### Browser Shows Stale Or Missing Dashboard Data
+
+Refresh generated fixtures and sync the dashboard public copy:
+
+```powershell
+npm run launch:v0
+npm run flowmemory:canary-dashboard
+npm run sync:fixtures --prefix apps/dashboard
+npm run workbench:dev
+```
+
+Do not refresh live canary data during a demo unless the operator explicitly
+approves the RPC endpoint, canary addresses, and small block range.
+
+### Local State Looks Corrupt Or Confusing
+
+Reset ignored local state only:
+
+```powershell
+npm run flowchain:stop -- -ResetLocalState
+npm run flowchain:init
+npm run flowchain:start
+npm run flowchain:demo
+```
+
+This does not edit committed fixtures.
+
 ## Smoke Evidence
 
 After a successful smoke run, check:

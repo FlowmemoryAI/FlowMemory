@@ -161,6 +161,31 @@ operator separation, multisig or comparable account-control decisions,
 key-rotation/recovery, verifier signing policy, PoolManager hook wiring, and a
 recorded go/no-go decision are required before any production claim.
 
+### Launch-Candidate Boundary Review
+
+The 2026-05-13 launch-candidate security boundary review lives in
+`docs/reviews/LAUNCH_CANDIDATE_SECURITY_BOUNDARY_REVIEW.md`.
+
+Current security conclusion:
+
+- Local/test V0 demos and guarded Base canary review are acceptable with
+  explicit canary-only framing.
+- No production or mainnet-launch claim is approved.
+- Direct single-account ownership, owner allowlists, self-registration, and open
+  submission are V0 coordination surfaces only.
+- `BASE_SEPOLIA_DEPLOYER_KEY_HEX` is read from the local environment for the
+  Base Sepolia deploy wrapper, but the wrapper passes it to Foundry as a
+  command-line private key. That is a local/test caveat and a blocker for any
+  future production signing path.
+- The local encrypted test vault is no-value private/local tooling, not
+  production custody or audited key management.
+- The guarded Base mainnet canary reader is for documented canary addresses and
+  bounded block ranges only. It is not a broad production indexer.
+- `FlowMemoryAfterSwapHook` is a production-shaped hook candidate, not a
+  production Uniswap v4 hook deployment. Any future hook broadcast requires a
+  recorded salt/address, permission-bit review, PoolManager integration review,
+  source-verification plan, post-deploy read range, and go/no-go decision.
+
 ## PR Security Checklist
 
 - Does this change introduce or require secrets?

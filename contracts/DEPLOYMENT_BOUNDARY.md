@@ -121,16 +121,24 @@ Private keys must not be committed to the repo, copied into docs, or stored in g
 ## Current Commands
 
 ```powershell
+npm run deploy:base-sepolia:plan -- --json
 npm run deploy:base-sepolia
 npm run deploy:base-sepolia:broadcast
 npm run read:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --from-block <n> --to-block <n>
+npm run read:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --resume-from-checkpoint --to-block <n>
 npm run verify:base-canary:sources -- --json
 ```
+
+`deploy:base-sepolia:plan` requires no private key and writes a non-secret
+rehearsal plan to `fixtures/deployments/base-sepolia-rehearsal-plan.json`.
 
 `deploy:base-sepolia` requires `BASE_SEPOLIA_RPC_URL` and
 `BASE_SEPOLIA_DEPLOYER_KEY_HEX` from the local shell or an untracked `.env`
 loader. The example file is `.env.example`; real key material must stay
 outside Git.
+
+The detailed public testnet rehearsal runbook is
+`docs/DEPLOYMENTS/BASE_SEPOLIA_REHEARSAL.md`.
 
 `verify:base-canary:sources` reads `fixtures/deployments/base-canary-v0.json`
 and prints a dry-run verification plan by default. It also writes the same

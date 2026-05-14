@@ -113,7 +113,9 @@ Observed canary smoke read for the range above:
 - Observation count: `4`.
 - Rejected log count: `0`.
 - Duplicate count: `0`.
-- Last indexed block: `45955535`.
+- Highest observed block: `45955535`.
+- Last indexed block scanned: `45955540`.
+- Next checkpoint resume block: `45955541`.
 - Output state: `services/indexer/out/base-canary-indexer-state.json` by default.
 - Output checkpoint: `services/indexer/out/base-canary-indexer-checkpoint.json` by default.
 

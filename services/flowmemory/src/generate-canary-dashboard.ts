@@ -78,6 +78,9 @@ interface CanaryCheckpoint {
   rejectedLogCount: number;
   duplicateCount: number;
   lastIndexedBlock: string;
+  highestObservedBlock: string | null;
+  nextFromBlock: string;
+  emptyRange: boolean;
   generatedAt: string;
   safety: {
     productionReady: false;
