@@ -556,6 +556,19 @@ export interface LocalAlphaEnvelopeValidationResult {
   errors: string[];
 }
 
+export interface WalletEnvelopeVerificationResult {
+  schema: "flowchain.wallet_envelope_verification.v0";
+  valid: boolean;
+  signatureValid: boolean;
+  chainIdMatch: boolean;
+  signerDerivedAddress: Bytes32 | null;
+  payloadHash: Bytes32 | null;
+  transactionId: Bytes32 | null;
+  replayKey: string | null;
+  rejectionReason: string | null;
+  errors: string[];
+}
+
 export const ZERO_BYTES32: Bytes32;
 export const FLOWPULSE_SCHEMA_ID_PREIMAGE: string;
 export const FLOWPULSE_EVENT_SIGNATURE: string;
@@ -570,6 +583,12 @@ export const LOCAL_ALPHA_FINALITY_STATES: Readonly<Record<string, number>>;
 export const LOCAL_ALPHA_HARDWARE_TRANSPORTS: Readonly<Record<string, number>>;
 export const LOCAL_ALPHA_SIGNER_ROLES: Readonly<Record<string, number>>;
 export const LOCAL_ALPHA_BRIDGE_STATUSES: Readonly<Record<string, number>>;
+export const LOCAL_WALLET_PUBLIC_METADATA_SCHEMA: string;
+export const LOCAL_WALLET_KEY_SCHEME: string;
+export const DEFAULT_LOCAL_WALLET_CHAIN_ID: string;
+export const LOCAL_TEST_UNIT_ASSET_ID: Bytes32;
+export const WALLET_SIGNED_ENVELOPE_SCHEMA: string;
+export const WALLET_ENVELOPE_VERIFICATION_SCHEMA: string;
 
 export function strip0x(value: string): string;
 export function bytesToHex(bytes: Uint8Array): Hex;
@@ -721,6 +740,8 @@ export function createEncryptedTestVault(input?: {
   signerRole?: string;
   createdAtUnixMs?: number | bigint | string;
   privateKey?: Hex;
+  chainId?: number | bigint | string;
+  lastKnownNonce?: number | bigint | string;
 }): Record<string, unknown>;
 export function unlockEncryptedTestVault(input: {
   vault: Record<string, unknown>;
@@ -728,6 +749,21 @@ export function unlockEncryptedTestVault(input: {
 }): Record<string, unknown>;
 export function listVaultPublicAccounts(vaultOrSession: Record<string, unknown>): Array<Record<string, unknown>>;
 export function exportVaultPublicMetadata(vaultOrSession: Record<string, unknown>): Record<string, unknown>;
+export function exportLocalWalletPublicMetadata(
+  vaultOrSession: Record<string, unknown>,
+  input?: { updatedAtUnixMs?: number | bigint | string }
+): Record<string, unknown>;
+export function validateLocalWalletPublicMetadata(
+  metadata: Record<string, unknown>,
+  context?: { expectedChainId?: number | bigint | string }
+): {
+  schema: string;
+  valid: boolean;
+  secretFree: boolean;
+  chainIdMatch: boolean;
+  accountCount: number;
+  errors: string[];
+};
 export function addEncryptedTestVaultAccount(input: {
   vault: Record<string, unknown>;
   password: string;
@@ -736,6 +772,8 @@ export function addEncryptedTestVaultAccount(input: {
   createdAtUnixMs?: number | bigint | string;
   privateKey?: Hex;
   signerId?: Bytes32;
+  chainId?: number | bigint | string;
+  lastKnownNonce?: number | bigint | string;
 }): Record<string, unknown>;
 export function rotateEncryptedTestVaultAccount(input: {
   vault: Record<string, unknown>;
@@ -744,6 +782,7 @@ export function rotateEncryptedTestVaultAccount(input: {
   label?: string;
   createdAtUnixMs?: number | bigint | string;
   privateKey?: Hex;
+  chainId?: number | bigint | string;
 }): Record<string, unknown>;
 export function signLocalTransactionWithVault(input: {
   vault: Record<string, unknown>;
@@ -759,6 +798,38 @@ export function verifyLocalTransactionSignature(input: {
   envelope: Record<string, unknown>;
   context?: Record<string, unknown>;
 }): LocalAlphaEnvelopeValidationResult;
+
+export function buildProductTransferDocument(input: Record<string, unknown>): Record<string, unknown>;
+export function buildProductTokenLaunchDocument(input: Record<string, unknown>): Record<string, unknown>;
+export function buildProductPoolCreateDocument(input: Record<string, unknown>): Record<string, unknown>;
+export function buildProductAddLiquidityDocument(input: Record<string, unknown>): Record<string, unknown>;
+export function buildProductRemoveLiquidityDocument(input: Record<string, unknown>): Record<string, unknown>;
+export function buildProductSwapDocument(input: Record<string, unknown>): Record<string, unknown>;
+export function buildBridgeWithdrawalIntentDocument(input: Record<string, unknown>): Record<string, unknown>;
+export function buildFinalityActionDocument(input: Record<string, unknown>): Record<string, unknown>;
+export function signWalletDocumentWithVault(input: {
+  vault: Record<string, unknown>;
+  password: string;
+  signerKeyId: Bytes32;
+  document: Record<string, unknown>;
+  chainId: number | bigint | string;
+  nonce: number | bigint | string;
+  issuedAtUnixMs?: number | bigint | string;
+  fee?: Record<string, unknown> | null;
+  expiresAtUnixMs?: number | bigint | string | null;
+}): Promise<Record<string, unknown>>;
+export function verifyWalletSignedEnvelope(input: {
+  envelope: Record<string, unknown>;
+  context?: {
+    document?: Record<string, unknown>;
+    chainId?: number | bigint | string;
+    expectedNonce?: number | bigint | string;
+    expectedSignerId?: Bytes32;
+    expectedSignerAddress?: Bytes32;
+    expectedPayloadType?: string;
+    seenNonces?: Set<string>;
+  };
+}): WalletEnvelopeVerificationResult;
 
 export const PILOT_MESSAGE_SCHEMAS: readonly string[];
 export function validatePilotOperatorEnvelope(input: {

@@ -24,6 +24,8 @@ These schemas are the canonical local/test V0 shapes for generated Flow Memory a
 - `hardware-signal-envelope.schema.json`
 - `local-signature-envelope.schema.json`
 - `local-transaction-envelope.schema.json`
+- `local-wallet-public-metadata.schema.json`
+- `wallet-signed-envelope.schema.json`
 - `product-transaction.schema.json`
 - `real-value-pilot-message.schema.json`
 - `real-value-pilot-operator-config.schema.json`
@@ -51,6 +53,17 @@ should validate both JSON shape and recomputed cryptographic fields.
 `local-transaction-envelope.schema.json` describes the chain-bound local/private
 transaction envelope consumed by the private L1 package. It binds the chain id,
 domain separator, nonce, signer, payload hash, object ID, and signature.
+
+`wallet-signed-envelope.schema.json` describes the human-facing wallet output
+that wraps the local transaction envelope with the payload body, tx id, public
+signer metadata, fee/validity support flags, and verification result. The
+existing control-plane `transaction_submit` path accepts this wrapper through
+its `tx` and `signature` fields.
+
+`local-wallet-public-metadata.schema.json` describes the dashboard/operator-safe
+wallet export: labels, addresses, public keys, key scheme, chain binding, and
+nonce hints only. Vault ciphertext and private material stay in ignored local
+paths.
 
 `product-transaction.schema.json` describes the Product Testnet V1 wallet
 transaction documents that can be wrapped by `local-transaction-envelope`:
