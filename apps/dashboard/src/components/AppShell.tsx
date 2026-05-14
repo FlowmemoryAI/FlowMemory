@@ -15,6 +15,7 @@ import {
   Network,
   RadioTower,
   ShieldCheck,
+  Wallet,
 } from "lucide-react";
 import type { DashboardData } from "../data/types";
 import type { WorkbenchSnapshot } from "../data/workbench";
@@ -29,6 +30,7 @@ interface AppShellProps {
 
 const NAV_ITEMS = [
   { to: "/", label: "Workbench", icon: Monitor },
+  { to: "/wallet", label: "Wallet", icon: Wallet },
   { to: "/bridge", label: "Bridge pilot", icon: ArrowRightLeft },
   { to: "/overview", label: "Overview", icon: LayoutDashboard },
   { to: "/canary", label: "Base canary", icon: RadioReceiver },

@@ -1,8 +1,12 @@
-import { createServer, type ServerResponse } from "node:http";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { createEncryptedTestVault, exportLocalWalletPublicMetadata } from "../../../crypto/src/wallet.js";
 import { dispatchJsonRpc } from "./json-rpc.ts";
-import { loadControlPlaneState } from "./fixture-state.ts";
+import { loadControlPlaneState, resolveControlPlanePath } from "./fixture-state.ts";
+import type { JsonObject } from "./types.ts";
 
 interface ServerOptions {
   host: string;
@@ -23,6 +27,105 @@ function jsonResult(response: ReturnType<typeof dispatchJsonRpc>): unknown {
 function writeJson(res: ServerResponse, statusCode: number, body: unknown): void {
   res.writeHead(statusCode, jsonHeaders);
   res.end(`${JSON.stringify(body)}\n`);
+}
+
+function readRequestBody(req: IncomingMessage): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let body = "";
+    req.setEncoding("utf8");
+    req.on("data", (chunk) => {
+      body += chunk;
+    });
+    req.on("error", reject);
+    req.on("end", () => resolve(body));
+  });
+}
+
+function publicWalletResult(state: ReturnType<typeof loadControlPlaneState>): JsonObject {
+  const metadata = state.walletPublicMetadata;
+  const accounts = Array.isArray(metadata?.accounts) ? metadata.accounts : [];
+  const primaryAccount = accounts.find((entry): entry is JsonObject =>
+    entry !== null && typeof entry === "object" && !Array.isArray(entry),
+  ) ?? null;
+  return {
+    schema: "flowmemory.control_plane.local_wallet_public_status.v0",
+    exists: metadata !== null,
+    metadataPath: resolveControlPlanePath(state.paths.walletPublicMetadataPath),
+    account: primaryAccount,
+    accounts: accounts as JsonObject[],
+    secretMaterialReturned: false,
+    localOnly: true,
+  };
+}
+
+function labelSlug(value: unknown): string {
+  const label = typeof value === "string" && value.trim().length > 0 ? value.trim() : "flowchain-operator";
+  const slug = label.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "");
+  return slug.length > 0 ? slug.slice(0, 64) : "flowchain-operator";
+}
+
+function parseWalletCreatePayload(payload: unknown): { label: string; password: string; chainId: string; replace: boolean } {
+  if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
+    throw new Error("wallet creation payload must be an object");
+  }
+  const record = payload as Record<string, unknown>;
+  const password = typeof record.password === "string" ? record.password : "";
+  if (password.length < 8) {
+    throw new Error("wallet vault passphrase must be at least 8 characters");
+  }
+  const chainId = typeof record.chainId === "string" && /^\d+$/.test(record.chainId) ? record.chainId : "31337";
+  return {
+    label: labelSlug(record.label),
+    password,
+    chainId,
+    replace: record.replace === true,
+  };
+}
+
+function createLocalWallet(state: ReturnType<typeof loadControlPlaneState>, payload: unknown): JsonObject {
+  const request = parseWalletCreatePayload(payload);
+  const metadataPath = resolveControlPlanePath(state.paths.walletPublicMetadataPath);
+  const walletDir = dirname(metadataPath);
+  const metadataBase = basename(metadataPath).replace(/-public-metadata\.json$/i, "").replace(/\.json$/i, "");
+  const vaultPath = join(walletDir, `${metadataBase}-vault.local.json`);
+  mkdirSync(walletDir, { recursive: true });
+
+  if (!request.replace && existsSync(vaultPath) && existsSync(metadataPath)) {
+    return {
+      ...publicWalletResult(state),
+      schema: "flowmemory.control_plane.local_wallet_create_result.v0",
+      created: false,
+      alreadyExists: true,
+      vaultPath,
+      note: "Existing encrypted local wallet vault was left unchanged. Set replace=true to rotate to a new wallet.",
+    };
+  }
+
+  const vault = createEncryptedTestVault({
+    password: request.password,
+    label: request.label,
+    signerRole: "operator",
+    chainId: request.chainId,
+  });
+  const metadata = exportLocalWalletPublicMetadata(vault);
+  writeFileSync(vaultPath, `${JSON.stringify(vault, null, 2)}\n`);
+  writeFileSync(metadataPath, `${JSON.stringify(metadata, null, 2)}\n`);
+
+  const account = Array.isArray(metadata.accounts) ? metadata.accounts[0] as JsonObject : null;
+  return {
+    schema: "flowmemory.control_plane.local_wallet_create_result.v0",
+    created: true,
+    alreadyExists: false,
+    account,
+    accounts: metadata.accounts as JsonObject[],
+    vaultPath,
+    metadataPath,
+    chainId: request.chainId,
+    keyScheme: account?.keyScheme ?? "secp256k1",
+    secretMaterialReturned: false,
+    credentialStored: false,
+    localOnly: true,
+  };
 }
 
 function listParamsFromUrl(requestUrl: URL | null): Record<string, string | number> | undefined {
@@ -199,6 +302,28 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
       return;
     }
 
+    if (req.method === "GET" && requestUrl?.pathname === "/wallets/operator") {
+      writeJson(res, 200, publicWalletResult(state));
+      return;
+    }
+
+    if (req.method === "POST" && requestUrl?.pathname === "/wallets/create") {
+      readRequestBody(req)
+        .then((body) => {
+          const payload = body.length > 0 ? JSON.parse(body) as unknown : {};
+          writeJson(res, 200, createLocalWallet(state, payload));
+        })
+        .catch((error) => {
+          writeJson(res, 400, {
+            schema: "flowmemory.control_plane.local_wallet_create_error.v0",
+            message: error instanceof Error ? error.message : "wallet creation failed",
+            secretMaterialReturned: false,
+            localOnly: true,
+          });
+        });
+      return;
+    }
+
     if (req.method === "GET" && req.url === "/bridge/observations") {
       const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "bridge-observations", method: "bridge_observation_list" }, { state });
       writeJson(res, 200, jsonResult(response));
@@ -210,12 +335,7 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
       return;
     }
 
-    let body = "";
-    req.setEncoding("utf8");
-    req.on("data", (chunk) => {
-      body += chunk;
-    });
-    req.on("end", () => {
+    readRequestBody(req).then((body) => {
       try {
         const payload = JSON.parse(body) as unknown;
         const rpcPayload = req.url === "/bridge/observations"
@@ -243,6 +363,20 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
           },
         });
       }
+    }).catch((error) => {
+      writeJson(res, 400, {
+        jsonrpc: "2.0",
+        id: null,
+        error: {
+          code: -32700,
+          message: error instanceof Error ? error.message : "request read error",
+          data: {
+            schema: "flowmemory.control_plane.error.v0",
+            reasonCode: "request.read_error",
+            localOnly: true,
+          },
+        },
+      });
     });
   });
 

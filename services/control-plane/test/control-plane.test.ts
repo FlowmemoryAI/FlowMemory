@@ -1146,3 +1146,63 @@ test("HTTP server exposes browser-safe health and state endpoints", async () => 
     });
   }
 });
+
+test("HTTP server creates local encrypted wallet metadata without returning secret material", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-wallet-http-"));
+  const previousMetadataPath = process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH;
+  process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH = join(dir, "flowchain-operator-public-metadata.json");
+  const server = startControlPlaneServer({ host: "127.0.0.1", port: 0 });
+
+  try {
+    await once(server, "listening");
+    const address = server.address();
+    assert.equal(typeof address, "object");
+    assert.notEqual(address, null);
+    const port = address?.port;
+
+    const create = await fetch(`http://127.0.0.1:${port}/wallets/create`, {
+      method: "POST",
+      headers: { "content-type": "application/json", Origin: "http://127.0.0.1:5173" },
+      body: JSON.stringify({
+        label: "operator-test-wallet",
+        password: "local-test-wallet-passphrase",
+        chainId: "31337",
+        replace: true,
+      }),
+    });
+    assert.equal(create.status, 200);
+    assert.equal(create.headers.get("access-control-allow-origin"), "*");
+    const created = await create.json() as JsonObject;
+    assert.equal(created.schema, "flowmemory.control_plane.local_wallet_create_result.v0");
+    assert.equal(created.created, true);
+    assert.equal(created.secretMaterialReturned, false);
+    assert.equal((created.account as JsonObject).keyScheme, "secp256k1");
+    assert.equal(JSON.stringify(created).includes("privateKey"), false);
+    assert.equal(JSON.stringify(created).includes("ciphertext"), false);
+    assert.equal(JSON.stringify(created).includes("local-test-wallet-passphrase"), false);
+
+    const status = await fetch(`http://127.0.0.1:${port}/wallets/operator`, {
+      headers: { Origin: "http://127.0.0.1:5173" },
+    });
+    assert.equal(status.status, 200);
+    const body = await status.json() as JsonObject;
+    assert.equal(body.exists, true);
+    assert.equal((body.account as JsonObject).accountId, (created.account as JsonObject).accountId);
+  } finally {
+    await new Promise<void>((resolve, reject) => {
+      server.close((error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve();
+      });
+    });
+    if (previousMetadataPath === undefined) {
+      delete process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH;
+    } else {
+      process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH = previousMetadataPath;
+    }
+    rmSync(dir, { recursive: true, force: true });
+  }
+});

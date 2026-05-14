@@ -16,6 +16,7 @@ import { OverviewView } from "./views/OverviewView";
 import { RawJsonInspectorView } from "./views/RawJsonInspectorView";
 import { RootfieldsView } from "./views/RootfieldsView";
 import { VerifierReportsView } from "./views/VerifierReportsView";
+import { WalletView } from "./views/WalletView";
 import { WorkbenchView } from "./views/WorkbenchView";
 import { WorkReceiptsView } from "./views/WorkReceiptsView";
 
@@ -117,6 +118,7 @@ export default function App() {
     <AppShell data={data} canaryData={canaryData} workbench={workbench}>
       <Routes>
         <Route path="/" element={<WorkbenchView data={data} workbench={workbench} onRefresh={() => setVersion((current) => current + 1)} />} />
+        <Route path="/wallet" element={<WalletView workbench={workbench} />} />
         <Route path="/bridge" element={<BridgePilotView workbench={workbench} />} />
         <Route path="/overview" element={<OverviewView data={data} />} />
         <Route path="/canary" element={<CanaryDeploymentView data={canaryData} />} />
