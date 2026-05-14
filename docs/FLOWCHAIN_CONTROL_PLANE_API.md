@@ -53,6 +53,11 @@ devnet/local/intake/transactions.ndjson
 devnet/local/intake/bridge-observations.ndjson
 ```
 
+`transaction_submit` can also be asked to forward a valid local devnet transaction
+into the active Rust runtime state with `runtimeSubmit: true` or
+`runtimeSubmitMode: "direct"`. That mode is still local-only, but it proves the
+RPC can drive the same state file that block production reads.
+
 All JSON-RPC responses and local intake payloads are scanned for private-key, mnemonic, seed phrase, RPC credential, API key, and webhook-shaped material.
 
 ## JSON-RPC Envelope
@@ -289,11 +294,16 @@ Params:
     },
     "signature": "0x..."
   },
-  "submittedBy": "local-operator"
+  "submittedBy": "local-operator",
+  "runtimeSubmit": true
 }
 ```
 
-Accepts signed local test transaction envelopes only. Plain `transaction`, `tx`, or `txs` params are rejected. The method rejects secret-shaped material and appends an intake row to `devnet/local/intake/transactions.ndjson`. It does not broadcast to a public chain.
+Accepts signed local test transaction envelopes only. Plain `transaction`, `tx`,
+or `txs` params are rejected. The method rejects secret-shaped material and
+appends an intake row to `devnet/local/intake/transactions.ndjson`. With
+`runtimeSubmit` enabled, the contained devnet `tx` is also submitted directly to
+the active local Rust runtime state. It does not broadcast to a public chain.
 
 ### `mempool_list`
 

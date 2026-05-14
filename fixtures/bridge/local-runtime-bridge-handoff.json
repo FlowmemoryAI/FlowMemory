@@ -1,6 +1,6 @@
 {
   "schema": "flowmemory.bridge_runtime_handoff.v0",
-  "handoffId": "0x29cf06d9ffbfff9538a38f5055122f0c8801df516b70d2d2a2bd0937cd1dea9f",
+  "handoffId": "0x78dd7a25f55ab00e62fad047f9f7b5e39233b47163e85b3a57b5b1867c735829",
   "generatedAt": "2026-05-13T00:00:00.000Z",
   "mode": "mock",
   "productionReady": false,
@@ -74,7 +74,7 @@
   "withdrawalIntents": [
     {
       "schema": "flowmemory.bridge_withdrawal_intent.v0",
-      "withdrawalIntentId": "0x6ae5f8a744eb711ef791e5c5b9b6e01b94a84e3fa668ce67484040e8fe564ffa",
+      "withdrawalIntentId": "0x7183c023e4fdec83362cfcf1d195bc97fad6ad3f3abc4a1af320c3354315b3aa",
       "creditId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
       "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
       "sourceChainId": 84532,
@@ -123,9 +123,9 @@
   "releaseEvidences": [
     {
       "schema": "flowmemory.bridge_release_evidence.v0",
-      "releaseEvidenceId": "0x486e8abfce6246093c96114e1af34cb3c8c1afd9646766a584b2dee8296c2d97",
+      "releaseEvidenceId": "0xf0f06391f74c94c8331b684073967e28946adca4e3ecd7a7f2b27eece495fe23",
       "generatedAt": "2026-05-13T00:00:00.000Z",
-      "withdrawalIntentId": "0x6ae5f8a744eb711ef791e5c5b9b6e01b94a84e3fa668ce67484040e8fe564ffa",
+      "withdrawalIntentId": "0x7183c023e4fdec83362cfcf1d195bc97fad6ad3f3abc4a1af320c3354315b3aa",
       "creditId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
       "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
       "sourceChainId": 84532,
@@ -142,7 +142,7 @@
         "recipient": "0x4444444444444444444444444444444444444444",
         "token": "0x3333333333333333333333333333333333333333",
         "amount": "20000000",
-        "evidenceHash": "0x871d7552d22b7e2d0d1dfef570a8bcecccd11afef217a71dca1a37aae02ccb3a",
+        "evidenceHash": "0x7009968cfb7edf56372f45f0f5659238c124551b4a8773b2b86f0acf7643ae3e",
         "broadcast": false
       },
       "operatorNote": "Pilot release evidence only. Review before any separate release-authority transaction; this relayer does not broadcast.",
@@ -188,7 +188,7 @@
     {
       "phase": "withdrawal_requested",
       "status": "requested",
-      "objectId": "0x6ae5f8a744eb711ef791e5c5b9b6e01b94a84e3fa668ce67484040e8fe564ffa",
+      "objectId": "0x7183c023e4fdec83362cfcf1d195bc97fad6ad3f3abc4a1af320c3354315b3aa",
       "title": "Withdrawal requested",
       "summary": "Test-mode local-to-Base withdrawal intent recorded with no broadcast or real release."
     }
@@ -250,9 +250,9 @@
     },
     {
       "sectionKey": "transactions",
-      "id": "0x6ae5f8a744eb711ef791e5c5b9b6e01b94a84e3fa668ce67484040e8fe564ffa",
+      "id": "0x7183c023e4fdec83362cfcf1d195bc97fad6ad3f3abc4a1af320c3354315b3aa",
       "kind": "Bridge withdrawal intent",
-      "title": "0x6ae5f8a744eb711ef791e5c5b9b6e01b94a84e3fa668ce67484040e8fe564ffa",
+      "title": "0x7183c023e4fdec83362cfcf1d195bc97fad6ad3f3abc4a1af320c3354315b3aa",
       "summary": "Test-mode withdrawal intent recorded; no mainnet or real-funds release is broadcast.",
       "status": "pending",
       "facts": [
@@ -273,7 +273,7 @@
           "value": "test_record_only"
         }
       ],
-      "rawRef": "0x6ae5f8a744eb711ef791e5c5b9b6e01b94a84e3fa668ce67484040e8fe564ffa"
+      "rawRef": "0x7183c023e4fdec83362cfcf1d195bc97fad6ad3f3abc4a1af320c3354315b3aa"
     }
   ],
   "limitations": [

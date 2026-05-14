@@ -1,4 +1,4 @@
-# FlowChain Production L1 Live-Chain Goal Pack
+# FlowChain Guardrailed Live-Chain Build Goal Pack
 
 Status: copy-ready `/goal` prompts for agents building FlowChain from the
 current local/private runtime and capped owner pilot into a complete runnable
@@ -62,4 +62,3 @@ Launcher:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\infra\scripts\launch-production-l1-live-chain-goals.ps1 -DryRun
 ```
-

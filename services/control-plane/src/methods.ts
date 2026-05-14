@@ -1,9 +1,10 @@
-import { appendFileSync, mkdirSync, readFileSync, existsSync } from "node:fs";
-import { dirname } from "node:path";
+import { spawnSync } from "node:child_process";
+import { appendFileSync, mkdirSync, readFileSync, existsSync, writeFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 
 import { canonicalJson, findSecret, keccak256Hex } from "../../shared/src/index.ts";
 import { invalidParams, methodNotFound, objectNotFound, secretRejected } from "./errors.ts";
-import { loadControlPlaneState, resolveControlPlanePath } from "./fixture-state.ts";
+import { loadControlPlaneState, repoRoot, resolveControlPlanePath } from "./fixture-state.ts";
 import {
   bridgeLiveReadiness,
   pilotCapStatus,
@@ -354,6 +355,12 @@ function appendNdjson(path: string, row: JsonObject): void {
   appendFileSync(resolved, `${JSON.stringify(row)}\n`);
 }
 
+function writeJson(path: string, value: JsonObject): void {
+  const resolved = resolveControlPlanePath(path);
+  mkdirSync(dirname(resolved), { recursive: true });
+  writeFileSync(resolved, `${JSON.stringify(value, null, 2)}\n`);
+}
+
 function txIntakeRows(state: LoadedControlPlaneState): JsonObject[] {
   const rows = readNdjson(state.paths.txIntakePath);
   return rows.length > 0 ? rows : state.txIntake;
@@ -459,6 +466,24 @@ function nodeAccountRows(state: LoadedControlPlaneState): JsonObject[] {
       metadata: walletAccount,
       source: "wallet-public-metadata",
       publicOnly: true,
+      localOnly: true,
+    });
+  }
+  for (const [balanceId, value] of Object.entries(devnetLocalTestUnitBalances(state))) {
+    const balance = asJsonObject(value) ?? {};
+    const accountId = stringValue(balance.accountId) ?? balanceId;
+    if (rows.some((row) => row.accountId === accountId || row.keyReferenceId === accountId)) {
+      continue;
+    }
+    rows.push({
+      schema: "flowmemory.control_plane.account.v0",
+      accountId,
+      accountType: "local_test_unit_balance",
+      owner: stringValue(balance.owner) ?? null,
+      balance: stringValue(balance.units) ?? stringValue(balance.amountUnits) ?? "0",
+      noValue: true,
+      metadata: balance,
+      source: "local-devnet:localTestUnitBalances",
       localOnly: true,
     });
   }
@@ -765,7 +790,8 @@ function tokenBalanceRows(state: LoadedControlPlaneState): JsonObject[] {
     return {
       schema: "flowmemory.control_plane.token_balance.v0",
       balanceId,
-      accountId: stringValue(balance.owner) ?? stringValue(balance.accountId) ?? balanceId,
+      accountId: stringValue(balance.accountId) ?? balanceId,
+      owner: stringValue(balance.owner) ?? null,
       tokenId: "local-test-unit",
       amount: stringValue(balance.units) ?? stringValue(balance.amountUnits) ?? "0",
       status: "projected_local_unit",
@@ -1873,13 +1899,114 @@ function signedEnvelopeForSubmit(params: JsonObject): JsonObject {
   return envelope;
 }
 
+function transactionFromSignedEnvelope(envelope: JsonObject): JsonObject {
+  const transaction = asJsonObject(envelope.tx) ?? asJsonObject(envelope.transaction) ?? asJsonObject(envelope.payload);
+  if (transaction === null) {
+    throw invalidParams("signed envelope must include tx/transaction/payload");
+  }
+  return transaction;
+}
+
+function runtimeSubmitMode(params: JsonObject): "off" | "direct" {
+  const mode = optionalString(params, "runtimeSubmitMode");
+  if (mode !== undefined && mode !== "direct" && mode !== "off") {
+    throw invalidParams("runtimeSubmitMode must be direct or off", {
+      allowed: ["direct", "off"],
+    });
+  }
+  if (mode === "direct") {
+    return "direct";
+  }
+  if (mode === "off") {
+    return "off";
+  }
+  return optionalBoolean(params, "runtimeSubmit") || optionalBoolean(params, "forwardToRuntime")
+    ? "direct"
+    : "off";
+}
+
+function safeFileId(value: string): string {
+  return value.replace(/[^A-Za-z0-9._-]/g, "_").slice(0, 120);
+}
+
+function submitEnvelopeToRuntime(
+  state: LoadedControlPlaneState,
+  signedEnvelope: JsonObject,
+  intakeId: string,
+  submittedBy: string,
+): JsonObject {
+  const tx = transactionFromSignedEnvelope(signedEnvelope);
+  const runtimeDir = resolve(dirname(resolveControlPlanePath(state.paths.txIntakePath)), "runtime-submit");
+  const fixturePath = resolve(runtimeDir, `${safeFileId(intakeId)}.json`);
+  writeJson(fixturePath, {
+    schema: "flowmemory.control_plane.runtime_submit_fixture.v0",
+    tx,
+  });
+
+  const statePath = resolveControlPlanePath(state.paths.localDevnetPath);
+  const nodeDir = resolve(dirname(statePath), "node");
+  const args = [
+    "run",
+    "--manifest-path",
+    "crates/flowmemory-devnet/Cargo.toml",
+    "--",
+    "--state",
+    statePath,
+    "--node-dir",
+    nodeDir,
+    "submit-tx",
+    "--tx-file",
+    fixturePath,
+    "--authorized-by",
+    submittedBy,
+    "--direct",
+  ];
+  const result = spawnSync("cargo", args, {
+    cwd: repoRoot(),
+    encoding: "utf8",
+    windowsHide: true,
+  });
+
+  if (result.error !== undefined) {
+    throw invalidParams("runtime submit failed before cargo started", {
+      error: result.error.message,
+    });
+  }
+  if (result.status !== 0) {
+    throw invalidParams("runtime submit rejected the signed transaction payload", {
+      status: result.status,
+      stderr: result.stderr.trim().slice(0, 1200),
+    });
+  }
+
+  let queued: JsonValue = [];
+  try {
+    const parsed = JSON.parse(result.stdout) as JsonObject;
+    queued = asJsonArray(parsed.queued);
+  } catch {
+    queued = [];
+  }
+
+  return {
+    schema: "flowmemory.control_plane.runtime_submit_result.v0",
+    mode: "direct",
+    queued,
+    statePath,
+    nodeDir,
+    fixturePath,
+    status: "queued_in_runtime_state",
+    localOnly: true,
+  };
+}
+
 function transactionSubmit(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
   const state = stateFor(context);
   const objectParams = asObjectParams(params, "transaction_submit");
   const signedEnvelope = signedEnvelopeForSubmit(objectParams);
+  const submittedBy = optionalString(objectParams, "submittedBy") ?? "local-control-plane";
   const intakePayload: JsonObject = {
     signedEnvelope,
-    submittedBy: optionalString(objectParams, "submittedBy") ?? "local-control-plane",
+    submittedBy,
   };
   const finding = findSecret(intakePayload);
   if (finding !== null) {
@@ -1898,14 +2025,19 @@ function transactionSubmit(params: JsonValue | undefined, context: ControlPlaneC
     localOnly: true,
   };
   appendNdjson(state.paths.txIntakePath, row);
+  const runtimeMode = runtimeSubmitMode(objectParams);
+  const runtimeSubmission = runtimeMode === "direct"
+    ? submitEnvelopeToRuntime(state, signedEnvelope, intakeId, submittedBy)
+    : null;
   return {
     schema: "flowmemory.control_plane.transaction_submit_result.v0",
     accepted: true,
     intakeId,
     txId: row.txId,
     status: row.status,
-    forwardedTo: "local-file-intake",
+    forwardedTo: runtimeSubmission === null ? "local-file-intake" : "local-runtime-state",
     runtimeIntakePath: state.paths.txIntakePath,
+    runtimeSubmission,
     localOnly: true,
   };
 }
@@ -1957,7 +2089,7 @@ function balanceGet(params: JsonValue | undefined, context: ControlPlaneContext)
   return {
     schema: "flowmemory.control_plane.balance.v0",
     accountId: account.accountId,
-    amount: "0",
+    amount: stringValue(account.balance) ?? "0",
     unit: "no-value-local-credit",
     noValue: true,
     localOnly: true,
