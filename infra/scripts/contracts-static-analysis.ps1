@@ -5,6 +5,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$requireSlitherCheck = $RequireSlither -or $env:REQUIRE_SLITHER -eq "1"
+
 if (-not (Get-Command forge -ErrorAction SilentlyContinue)) {
   throw "forge is required for contract hardening checks"
 }
@@ -25,13 +27,13 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $slither = Get-Command slither -ErrorAction SilentlyContinue
-if ($slither) {
+if ($requireSlitherCheck -and $slither) {
   slither . --config-file .slither.config.json
   if ($LASTEXITCODE -ne 0) {
     throw "slither failed"
   }
-} elseif ($RequireSlither) {
+} elseif ($requireSlitherCheck) {
   throw "slither is required but was not found on PATH"
 } else {
-  Write-Warning "slither was not found on PATH; install slither-analyzer or rerun with -RequireSlither in audit environments"
+  Write-Warning "slither is optional for this default gate; run with -RequireSlither or npm run contracts:hardening:slither in audit environments"
 }

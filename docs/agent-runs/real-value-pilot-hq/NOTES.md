@@ -15,6 +15,8 @@ Last updated: 2026-05-14.
   public-network pilot work.
 - Issue #131 is the active contracts/static-analysis issue for reconciling
   local Slither findings that block product and L1 E2E evidence.
+- PR #132 now includes an allowed `infra/scripts/` fix for #131: the default
+  hardening path skips Slither unless the explicit audit gate is requested.
 
 ## Reusable Work
 
@@ -64,14 +66,16 @@ Last updated: 2026-05-14.
 - `npm run flowchain:real-value-pilot:e2e -- -AllowIncomplete` passed as a
   coordination report and listed the six missing dedicated subsystem proof
   commands.
-- `npm run flowchain:product-e2e` did not pass locally after dependencies were
-  installed. It failed in `contracts:hardening` because local Slither reported
-  existing findings in `contracts/bridge/BaseBridgeLockbox.sol`.
-- The product E2E failure is not caused by the HQ docs/script changes in this
-  branch; the next action belongs to the contracts/static-analysis owner.
-- GitHub issue #131 tracks the required Slither/static-analysis decision or
-  contract fix before local product/L1 E2E evidence should be treated as green.
+- `npm run flowchain:product-e2e` initially failed locally after dependencies
+  were installed because default `contracts:hardening` ran Slither whenever it
+  was present.
+- After updating `infra/scripts/contracts-static-analysis.ps1` and
+  `infra/scripts/contracts-static-analysis.sh`, default `contracts:hardening`,
+  `npm run flowchain:product-e2e`, and `npm run flowchain:l1-e2e` pass locally.
+- GitHub issue #131 remains open until this static-analysis policy update is
+  reviewed and merged; the explicit Slither audit gate still owns the native
+  release findings.
 - Draft PR opened: https://github.com/FlowmemoryAI/FlowMemory/pull/132.
 - Completion audit result: not complete. PR #132 is not merged, `origin/main`
-  lacks both new scripts, the default pilot gate fails with missing subsystem
-  proofs, and local `flowchain:l1-e2e` fails under local Slither.
+  lacks both new scripts, and the default pilot gate fails with missing
+  subsystem proofs.

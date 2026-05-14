@@ -128,9 +128,10 @@ in committed files, or if any document presents the pilot as public readiness.
 - Dedicated real-value ops/installer gate does not exist.
 - GitHub issue #130 must define and be accepted as the release-gate boundary before
   any owner pilot work is treated as more than capped validation.
-- GitHub issue #131 must resolve the Slither/static-analysis policy or contract
-  findings before local `flowchain:product-e2e` and `flowchain:l1-e2e`
-  evidence is coherent in Slither-equipped environments.
+- GitHub issue #131 has a branch-local policy fix in this HQ PR: default
+  `contracts:hardening` skips optional Slither unless the audit gate is
+  explicitly requested. The issue remains open until the fix is reviewed and
+  merged.
 
 ## Required PR Evidence
 

@@ -55,15 +55,17 @@ and `NOTES.md`.
 
 ## Baseline Check Result
 
-`npm run flowchain:product-e2e` was run after dependency installation. It failed
-inside `npm run contracts:hardening` because local Slither reported existing
-findings in `contracts/bridge/BaseBridgeLockbox.sol`.
+`npm run flowchain:product-e2e` initially failed inside
+`npm run contracts:hardening` because local Slither reported existing findings
+in `contracts/bridge/BaseBridgeLockbox.sol`.
 
-Owner: contracts / static-analysis policy.
+This branch now updates the allowed `infra/scripts/` static-analysis wrappers
+so default `contracts:hardening` matches the documented policy: Slither is
+optional by default and required only through `contracts:hardening:slither`,
+`-RequireSlither`, or `REQUIRE_SLITHER=1`.
 
-Next action: contracts owner should either address the Slither findings or
-update the accepted static-analysis policy in a contracts-scoped PR. This HQ
-branch does not edit `contracts/`.
+Current branch result: `npm run contracts:hardening`,
+`npm run flowchain:product-e2e`, and `npm run flowchain:l1-e2e` pass locally.
 
 GitHub blocker: https://github.com/FlowmemoryAI/FlowMemory/issues/131
 
@@ -74,5 +76,5 @@ Draft PR: https://github.com/FlowmemoryAI/FlowMemory/pull/132
 Audit file: `docs/agent-runs/real-value-pilot-hq/COMPLETION_AUDIT.md`.
 
 Result: not complete. `origin/main` lacks both new scripts, the default pilot
-gate fails with the intended missing-proof report, and local `flowchain:l1-e2e`
-currently fails in `contracts:hardening` under local Slither.
+gate fails with the intended missing-proof report, and local branch-only
+`flowchain:l1-e2e` evidence is not on `main`.
