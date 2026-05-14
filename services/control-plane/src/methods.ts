@@ -197,11 +197,17 @@ function firstDevnetMap(state: LoadedControlPlaneState, keys: string[]): Record<
 }
 
 function devnetBlocksArray(state: LoadedControlPlaneState): JsonObject[] {
-  const candidate = asJsonArray(state.devnet?.blocks).length > 0
-    ? asJsonArray(state.devnet?.blocks)
-    : asJsonArray(state.devnetControlPlaneHandoff?.blocks).length > 0
-      ? asJsonArray(state.devnetControlPlaneHandoff?.blocks)
-      : asJsonArray(state.devnetIndexerHandoff?.blocks);
+  const sources = [
+    asJsonArray(state.devnet?.blocks),
+    asJsonArray(state.devnetControlPlaneHandoff?.blocks),
+    asJsonArray(state.devnetIndexerHandoff?.blocks),
+  ];
+  const candidate = sources.find((blocks) =>
+    blocks.some((entry) => {
+      const block = asJsonObject(entry);
+      return block !== null && stringList(block.txIds).length > 0;
+    }),
+  ) ?? sources.find((blocks) => blocks.length > 0) ?? [];
   return candidate
     .map((entry) => asJsonObject(entry))
     .filter((entry): entry is JsonObject => entry !== null);
