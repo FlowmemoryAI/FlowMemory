@@ -13,6 +13,8 @@ Last updated: 2026-05-14.
   useful context, not merged source of truth.
 - Issue #130 is the active gate issue for defining release boundaries before
   public-network pilot work.
+- Issue #131 is the active contracts/static-analysis issue for reconciling
+  local Slither findings that block product and L1 E2E evidence.
 
 ## Reusable Work
 
@@ -67,6 +69,8 @@ Last updated: 2026-05-14.
   existing findings in `contracts/bridge/BaseBridgeLockbox.sol`.
 - The product E2E failure is not caused by the HQ docs/script changes in this
   branch; the next action belongs to the contracts/static-analysis owner.
+- GitHub issue #131 tracks the required Slither/static-analysis decision or
+  contract fix before local product/L1 E2E evidence should be treated as green.
 - Draft PR opened: https://github.com/FlowmemoryAI/FlowMemory/pull/132.
 - Completion audit result: not complete. PR #132 is not merged, `origin/main`
   lacks both new scripts, the default pilot gate fails with missing subsystem

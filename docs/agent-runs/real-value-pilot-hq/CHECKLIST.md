@@ -65,6 +65,8 @@ Next action: contracts owner should either address the Slither findings or
 update the accepted static-analysis policy in a contracts-scoped PR. This HQ
 branch does not edit `contracts/`.
 
+GitHub blocker: https://github.com/FlowmemoryAI/FlowMemory/issues/131
+
 Draft PR: https://github.com/FlowmemoryAI/FlowMemory/pull/132
 
 ## Completion Audit

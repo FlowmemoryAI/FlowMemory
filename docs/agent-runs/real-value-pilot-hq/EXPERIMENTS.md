@@ -31,6 +31,10 @@ Last updated: 2026-05-14.
 | `npm run flowchain:l1-e2e` | Failed locally | Alias invoked full smoke and stopped in `contracts:hardening` because local Slither reported the same `BaseBridgeLockbox.releaseNative` findings. |
 | Live pilot worktree inspection | Passed | Inspected `flowmemory-live-contracts`, `flowmemory-live-bridge`, `flowmemory-live-chain`, `flowmemory-live-wallet`, `flowmemory-live-control-dashboard`, and `flowmemory-live-ops` statuses, package scripts, and run notes. |
 | Requested original worktree inspection refresh | Passed | Rechecked `flowmemory-chain`, `flowmemory-bridge-full`, `flowmemory-contracts`, `flowmemory-crypto`, `flowmemory-indexer`, `flowmemory-dashboard`, `flowmemory-review`, and `flowmemory-hq-review-loop` statuses and relevant package scripts. |
+| `gh issue view 130 --repo FlowmemoryAI/FlowMemory --json ...` | Passed | Confirmed release-gate issue #130 remains open and is the accepted-boundary blocker. |
+| `gh issue view 131 --repo FlowmemoryAI/FlowMemory --json ...` | Passed | Confirmed Slither/static-analysis issue #131 remains open and blocks coherent local product/L1 E2E evidence. |
+| `powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/status-report.ps1` | Passed | Confirmed PR #132 is the only open real-value pilot implementation PR, many sibling worktrees are dirty, and issues #130/#131 are open. |
+| Post blocker-link docs checks | Passed | `node infra/scripts/check-unsafe-claims.mjs`, `git diff --check`, and `npm run flowchain:real-value-pilot:e2e -- -AllowIncomplete` passed after linking issues #130/#131. |
 
 ## Product E2E Failure Assignment
 
@@ -39,6 +43,8 @@ Owner: contracts / static-analysis policy.
 Next action: contracts owner should address the Slither findings or update the
 accepted static-analysis policy in a contracts-scoped PR. This HQ branch is not
 allowed to edit `contracts/`.
+
+GitHub blocker: https://github.com/FlowmemoryAI/FlowMemory/issues/131
 
 Observed Slither findings:
 

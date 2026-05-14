@@ -39,9 +39,10 @@ are true on `main`:
 | Keep public-readiness claims out of docs. | `node infra/scripts/check-unsafe-claims.mjs` passed. | Complete for touched docs. |
 | `git diff --check` passes. | Ran after edits and after follow-up updates; only Windows line-ending warnings appeared. | Complete. |
 | New pilot gate in incomplete mode. | `npm run flowchain:real-value-pilot:e2e -- -AllowIncomplete` passed and wrote `devnet/local/real-value-pilot/flowchain-real-value-pilot-e2e-report.json`. | Complete. |
-| Existing `npm run flowchain:product-e2e` remains passing, or failure is documented with owner and next action. | Ran twice. First failed due missing dependencies. After `npm ci`, `npm ci --prefix apps/dashboard`, and `npm ci --prefix crypto`, it failed in `contracts:hardening` because local Slither reported `BaseBridgeLockbox.releaseNative` findings. Owner and next action recorded in `CHECKLIST.md` and PR #132. | Failure documented; not passing locally. |
+| Existing `npm run flowchain:product-e2e` remains passing, or failure is documented with owner and next action. | Ran twice. First failed due missing dependencies. After `npm ci`, `npm ci --prefix apps/dashboard`, and `npm ci --prefix crypto`, it failed in `contracts:hardening` because local Slither reported `BaseBridgeLockbox.releaseNative` findings. Owner and next action recorded in `CHECKLIST.md`, PR #132, and issue #131. | Failure documented; not passing locally. |
 | Open a PR with exact commands run and current blockers. | Draft PR #132 opened: https://github.com/FlowmemoryAI/FlowMemory/pull/132. | Complete. |
 | PR CI state. | `gh pr view 132` showed all CI checks successful and merge state `CLEAN` after push. | Complete for current PR. |
+| GitHub blocker state. | `gh issue view 130`, `gh issue view 131`, and `infra/scripts/status-report.ps1` show issues #130 and #131 open. | Not complete; blockers remain open. |
 | Final success: `flowchain:real-value-pilot:e2e` passes on `main`. | `origin/main` lacks the script; branch gate fails by design because dedicated subsystem proof commands are missing. | Not complete. |
 | Final success: `flowchain:l1-e2e` passes on `main`. | `origin/main` lacks the script; branch alias currently fails locally through `flowchain-full-smoke` because `contracts:hardening` fails under local Slither. | Not complete. |
 
@@ -76,6 +77,14 @@ Result: failed locally inside `npm run contracts:hardening`; Slither reported
 `missing-zero-check` and `low-level-calls` findings for
 `contracts/bridge/BaseBridgeLockbox.sol`.
 
+```powershell
+gh issue view 131 --repo FlowmemoryAI/FlowMemory --json number,title,state,url
+```
+
+Result: issue #131 is open and tracks the required contracts/static-analysis
+decision before local product/L1 E2E evidence is treated as coherent in this
+Slither-equipped environment.
+
 ## In-Flight Worktree Evidence
 
 The following evidence was inspected after PR #132 opened. It is not source of
@@ -93,6 +102,10 @@ truth until the work lands in reviewed PRs and merges to `main`.
 ## Uncovered Or Incomplete Requirements
 
 - The new gates are not on `main`; PR #132 is still draft and unmerged.
+- GitHub issue #130 is still open, so the accepted release-gate boundary is not
+  complete.
+- GitHub issue #131 is still open, so local product/L1 E2E evidence remains
+  blocked in Slither-equipped environments.
 - `flowchain:real-value-pilot:e2e` does not pass without `-AllowIncomplete`.
 - Dedicated subsystem proof commands do not exist yet:
   `flowchain:real-value-pilot:contracts`,
@@ -108,9 +121,11 @@ truth until the work lands in reviewed PRs and merges to `main`.
 ## Next Concrete Actions
 
 1. Keep PR #132 open as the HQ gate/documentation branch until reviewed.
-2. Have contracts/static-analysis owner resolve or explicitly accept the local
-   Slither findings before relying on local `flowchain:l1-e2e` evidence.
-3. Merge or rebase the richer ops `flowchain:l1-e2e` wrapper when ready.
-4. Have each subsystem agent add its dedicated pilot proof command.
-5. Rerun `npm run flowchain:real-value-pilot:e2e` without
+2. Close issue #130 by accepting the capped owner-pilot release boundary.
+3. Close issue #131 by having the contracts/static-analysis owner resolve or
+   explicitly accept the local Slither findings before relying on local
+   `flowchain:l1-e2e` evidence.
+4. Merge or rebase the richer ops `flowchain:l1-e2e` wrapper when ready.
+5. Have each subsystem agent add its dedicated pilot proof command.
+6. Rerun `npm run flowchain:real-value-pilot:e2e` without
    `-AllowIncomplete` only after all dedicated proof commands exist.
