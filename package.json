@@ -59,6 +59,7 @@
     "flowchain:real-value-pilot:runtime": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-real-value-pilot-runtime.ps1",
     "flowchain:real-value-pilot:control-dashboard": "npm run real-value-pilot:e2e --prefix services/control-plane",
     "flowchain:real-value-pilot:wallet": "npm run wallet:pilot-e2e --prefix crypto",
+    "flowchain:no-secret:scan": "node infra/scripts/flowchain-no-secret-scan.mjs",
     "flowchain:export": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-export.ps1",
     "flowchain:import": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-import.ps1",
     "workbench:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-workbench.ps1",

@@ -14,6 +14,7 @@ import {
   Network,
   RadioTower,
   ShieldCheck,
+  Wallet,
 } from "lucide-react";
 import type { DashboardData } from "../data/types";
 import type { WorkbenchSnapshot } from "../data/workbench";
@@ -30,6 +31,7 @@ const NAV_ITEMS = [
   { to: "/", label: "Workbench", icon: Monitor },
   { to: "/overview", label: "Overview", icon: LayoutDashboard },
   { to: "/canary", label: "Base canary", icon: RadioReceiver },
+  { to: "/bridge", label: "Bridge wallet", icon: Wallet },
   { to: "/flowmemory", label: "Flow Memory", icon: BrainCircuit },
   { to: "/flowpulse", label: "FlowPulse", icon: Activity },
   { to: "/rootfields", label: "Rootfields", icon: Boxes },

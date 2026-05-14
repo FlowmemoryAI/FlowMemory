@@ -7,6 +7,7 @@ import type { DashboardData } from "./data/types";
 import { DEFAULT_CONTROL_PLANE_URL, buildWorkbenchSnapshot, fetchWorkbenchSnapshot, type WorkbenchSnapshot } from "./data/workbench";
 import { AlertsView } from "./views/AlertsView";
 import { CanaryDeploymentView } from "./views/CanaryDeploymentView";
+import { BridgeView } from "./views/BridgeView";
 import { DevnetBlocksView } from "./views/DevnetBlocksView";
 import { FlowMemoryView } from "./views/FlowMemoryView";
 import { FlowPulseStreamView } from "./views/FlowPulseStreamView";
@@ -118,6 +119,7 @@ export default function App() {
         <Route path="/" element={<WorkbenchView data={data} workbench={workbench} onRefresh={() => setVersion((current) => current + 1)} />} />
         <Route path="/overview" element={<OverviewView data={data} />} />
         <Route path="/canary" element={<CanaryDeploymentView data={canaryData} />} />
+        <Route path="/bridge" element={<BridgeView />} />
         <Route path="/flowmemory" element={<FlowMemoryView data={data} />} />
         <Route path="/flowpulse" element={<FlowPulseStreamView data={data} />} />
         <Route path="/rootfields" element={<RootfieldsView data={data} />} />

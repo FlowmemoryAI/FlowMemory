@@ -1113,6 +1113,200 @@ code {
   gap: 5px;
 }
 
+.bridge-readiness-strip {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.bridge-readiness-strip article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 7px 10px;
+  align-items: start;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8f9f4;
+}
+
+.bridge-readiness-strip strong,
+.bridge-readiness-strip span {
+  overflow-wrap: anywhere;
+}
+
+.bridge-readiness-strip span:not(.status-badge) {
+  grid-column: 2;
+  color: #4c554c;
+  font-size: 0.82rem;
+  line-height: 1.42;
+}
+
+.bridge-status-grid,
+.bridge-action-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.bridge-live-panel,
+.bridge-recipient-panel,
+.bridge-lookup-panel,
+.bridge-transfer-panel {
+  display: grid;
+  gap: 13px;
+}
+
+.bridge-fact-grid,
+.bridge-transfer-source {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin: 0;
+}
+
+.bridge-fact-grid div,
+.bridge-transfer-source div {
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #f7f8f4;
+}
+
+.bridge-fact-grid dt,
+.bridge-transfer-source dt {
+  margin-bottom: 5px;
+  color: #586258;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.bridge-fact-grid dd,
+.bridge-transfer-source dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #202720;
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.8rem;
+}
+
+.bridge-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.bridge-mode-grid button {
+  min-height: 36px;
+  padding: 0 9px;
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+.bridge-mode-grid button.active,
+.bridge-mode-grid button:hover {
+  border-color: #93aa9d;
+  background: #e7eee8;
+}
+
+.bridge-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.bridge-field span,
+.bridge-generated-account span,
+.bridge-recipient-display strong {
+  color: #586258;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.bridge-field input,
+.bridge-field select {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+  background: var(--surface);
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.8rem;
+}
+
+.bridge-amount-field {
+  max-width: 220px;
+}
+
+.bridge-generated-account,
+.bridge-recipient-display {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #f7f8f4;
+}
+
+.bridge-generated-account code,
+.bridge-recipient-display span {
+  width: auto;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.bridge-recipient-display.valid {
+  border-color: #a8ceb7;
+  background: #eef6f0;
+}
+
+.bridge-recipient-display small {
+  color: var(--danger);
+}
+
+.bridge-confirm-line {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 9px;
+  align-items: start;
+  color: #374238;
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.bridge-confirm-line input {
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+}
+
+.bridge-error {
+  margin: 0;
+  color: #963b3b;
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+.bridge-receipt {
+  max-height: 320px;
+  margin: 0;
+  padding: 12px;
+  overflow: auto;
+  border: 1px solid #d8dfd4;
+  border-radius: 7px;
+  background: #202720;
+  color: #edf4ec;
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.76rem;
+  line-height: 1.48;
+}
+
 .rootfield-grid,
 .hardware-grid {
   display: grid;
@@ -1422,7 +1616,10 @@ code {
   .pilot-status-body,
   .local-action-grid,
   .workbench-command-center,
-  .workbench-record-grid {
+  .workbench-record-grid,
+  .bridge-readiness-strip,
+  .bridge-status-grid,
+  .bridge-action-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1496,7 +1693,9 @@ code {
     border-top: 1px solid var(--line);
   }
 
-  .workbench-fact-grid {
+  .workbench-fact-grid,
+  .bridge-fact-grid,
+  .bridge-transfer-source {
     grid-template-columns: 1fr;
   }
 }
@@ -1508,7 +1707,8 @@ code {
   .definition-grid,
   .lane-stats,
   .record-facts,
-  .workbench-switcher {
+  .workbench-switcher,
+  .bridge-mode-grid {
     grid-template-columns: 1fr;
   }
 
