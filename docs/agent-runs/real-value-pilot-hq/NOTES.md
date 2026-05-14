@@ -46,3 +46,6 @@ Last updated: 2026-05-14.
 - The product E2E failure is not caused by the HQ docs/script changes in this
   branch; the next action belongs to the contracts/static-analysis owner.
 - Draft PR opened: https://github.com/FlowmemoryAI/FlowMemory/pull/132.
+- Completion audit result: not complete. PR #132 is not merged, `origin/main`
+  lacks both new scripts, the default pilot gate fails with missing subsystem
+  proofs, and local `flowchain:l1-e2e` fails under local Slither.

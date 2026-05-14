@@ -25,6 +25,10 @@ Last updated: 2026-05-14.
 | `npm ci --prefix crypto` | Passed | Installed crypto dependencies from lockfile. |
 | `npm run flowchain:product-e2e` | Failed after dependency install | Reached `npm run contracts:hardening`; local Slither reported existing `BaseBridgeLockbox.releaseNative` findings in `contracts/bridge/BaseBridgeLockbox.sol`, so product E2E stopped. |
 | Draft PR creation through GitHub connector | Passed | Opened https://github.com/FlowmemoryAI/FlowMemory/pull/132. |
+| `git show origin/main:package.json \| rg -n "flowchain:l1-e2e\|flowchain:real-value-pilot:e2e" -S` | No matches | Confirmed `origin/main` lacks both new scripts. |
+| `gh pr view 132 --repo FlowmemoryAI/FlowMemory --json ...` | Passed | PR #132 is open draft, merge state `CLEAN`, CI checks successful, not merged. |
+| `npm run flowchain:real-value-pilot:e2e` | Failed as expected | Default gate failed clearly with six missing dedicated proof commands and wrote the report. |
+| `npm run flowchain:l1-e2e` | Failed locally | Alias invoked full smoke and stopped in `contracts:hardening` because local Slither reported the same `BaseBridgeLockbox.releaseNative` findings. |
 
 ## Product E2E Failure Assignment
 

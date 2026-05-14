@@ -62,3 +62,11 @@ update the accepted static-analysis policy in a contracts-scoped PR. This HQ
 branch does not edit `contracts/`.
 
 Draft PR: https://github.com/FlowmemoryAI/FlowMemory/pull/132
+
+## Completion Audit
+
+Audit file: `docs/agent-runs/real-value-pilot-hq/COMPLETION_AUDIT.md`.
+
+Result: not complete. `origin/main` lacks both new scripts, the default pilot
+gate fails with the intended missing-proof report, and local `flowchain:l1-e2e`
+currently fails in `contracts:hardening` under local Slither.
