@@ -9,25 +9,32 @@ interface BridgeSpineVm {
     function stopBroadcast() external;
     function envAddress(string calldata key) external returns (address value);
     function envBool(string calldata key) external returns (bool value);
+    function envOr(string calldata key, bool defaultValue) external returns (bool value);
     function envUint(string calldata key) external returns (uint256 value);
 }
 
 /// @title DeployBridgeSpine
-/// @notice Foundry script for local Anvil and Base Sepolia bridge-spine testing.
+/// @notice Foundry script for local Anvil, Base Sepolia, and capped Base 8453 pilot bridge-spine deployment.
 /// @dev Dry-run with `forge script` by default. Add `--broadcast` only after
-/// setting explicit test environment variables.
+/// setting explicit environment variables and the Base 8453 pilot ack when applicable.
 contract DeployBridgeSpine {
     BridgeSpineVm private constant VM = BridgeSpineVm(address(uint160(uint256(keccak256("hevm cheat code")))));
+    address private constant NATIVE_TOKEN = address(0);
+    uint256 internal constant LOCAL_ANVIL_CHAIN_ID = 31_337;
+    uint256 internal constant BASE_SEPOLIA_CHAIN_ID = 84_532;
+    uint256 internal constant BASE_MAINNET_CHAIN_ID = 8_453;
 
     struct Deployment {
         address lockbox;
         address settlementSpine;
+        uint256 chainId;
         address owner;
         address releaseAuthority;
         address settlementSubmitter;
         address erc20Token;
         bool allowNative;
         bool allowErc20;
+        bool base8453PilotAck;
     }
 
     struct Config {
@@ -41,27 +48,32 @@ contract DeployBridgeSpine {
         uint256 nativeTotalCap;
         uint256 erc20PerDepositCap;
         uint256 erc20TotalCap;
+        bool base8453PilotAck;
     }
 
     error Erc20TokenRequired();
+    error NoBridgeAssetAllowed();
+    error UnsupportedBridgeSpineDeploymentChain(uint256 chainId);
+    error Base8453PilotAckRequired();
+    error PilotTotalCapRequired(address token);
 
     event FlowChainBridgeSpineDeployed(
         address indexed lockbox,
         address indexed settlementSpine,
-        address indexed owner,
+        uint256 indexed chainId,
+        address owner,
         address releaseAuthority,
         address settlementSubmitter,
         address erc20Token,
         bool allowNative,
-        bool allowErc20
+        bool allowErc20,
+        bool base8453PilotAck
     );
 
     function run() external returns (Deployment memory deployment) {
         Config memory config = _readConfig();
-
-        if (config.allowErc20 && config.erc20Token == address(0)) {
-            revert Erc20TokenRequired();
-        }
+        uint256 chainId = _enforceDeploymentGate(config);
+        _validateConfig(config, chainId);
 
         VM.startBroadcast(config.owner);
 
@@ -69,7 +81,7 @@ contract DeployBridgeSpine {
         FlowChainSettlementSpine settlementSpine = new FlowChainSettlementSpine(config.owner);
 
         if (config.allowNative) {
-            lockbox.configureToken(address(0), true, config.nativePerDepositCap, config.nativeTotalCap);
+            lockbox.configureToken(NATIVE_TOKEN, true, config.nativePerDepositCap, config.nativeTotalCap);
         }
         if (config.allowErc20) {
             lockbox.configureToken(config.erc20Token, true, config.erc20PerDepositCap, config.erc20TotalCap);
@@ -81,23 +93,27 @@ contract DeployBridgeSpine {
         deployment = Deployment({
             lockbox: address(lockbox),
             settlementSpine: address(settlementSpine),
+            chainId: chainId,
             owner: config.owner,
             releaseAuthority: config.releaseAuthority,
             settlementSubmitter: config.settlementSubmitter,
             erc20Token: config.erc20Token,
             allowNative: config.allowNative,
-            allowErc20: config.allowErc20
+            allowErc20: config.allowErc20,
+            base8453PilotAck: config.base8453PilotAck
         });
 
         emit FlowChainBridgeSpineDeployed(
             address(lockbox),
             address(settlementSpine),
+            chainId,
             config.owner,
             config.releaseAuthority,
             config.settlementSubmitter,
             config.erc20Token,
             config.allowNative,
-            config.allowErc20
+            config.allowErc20,
+            config.base8453PilotAck
         );
 
         VM.stopBroadcast();
@@ -114,7 +130,35 @@ contract DeployBridgeSpine {
             nativePerDepositCap: VM.envUint("FLOWCHAIN_BRIDGE_NATIVE_PER_DEPOSIT_CAP"),
             nativeTotalCap: VM.envUint("FLOWCHAIN_BRIDGE_NATIVE_TOTAL_CAP"),
             erc20PerDepositCap: VM.envUint("FLOWCHAIN_BRIDGE_ERC20_PER_DEPOSIT_CAP"),
-            erc20TotalCap: VM.envUint("FLOWCHAIN_BRIDGE_ERC20_TOTAL_CAP")
+            erc20TotalCap: VM.envUint("FLOWCHAIN_BRIDGE_ERC20_TOTAL_CAP"),
+            base8453PilotAck: VM.envOr("FLOWCHAIN_BASE8453_PILOT_ACK", false)
         });
+    }
+
+    function _enforceDeploymentGate(Config memory config) private view returns (uint256 chainId) {
+        chainId = block.chainid;
+        if (chainId != LOCAL_ANVIL_CHAIN_ID && chainId != BASE_SEPOLIA_CHAIN_ID && chainId != BASE_MAINNET_CHAIN_ID) {
+            revert UnsupportedBridgeSpineDeploymentChain(chainId);
+        }
+        if (chainId == BASE_MAINNET_CHAIN_ID && !config.base8453PilotAck) {
+            revert Base8453PilotAckRequired();
+        }
+    }
+
+    function _validateConfig(Config memory config, uint256 chainId) private pure {
+        if (!config.allowNative && !config.allowErc20) {
+            revert NoBridgeAssetAllowed();
+        }
+        if (config.allowErc20 && config.erc20Token == address(0)) {
+            revert Erc20TokenRequired();
+        }
+        if (chainId == BASE_MAINNET_CHAIN_ID) {
+            if (config.allowNative && config.nativeTotalCap == 0) {
+                revert PilotTotalCapRequired(NATIVE_TOKEN);
+            }
+            if (config.allowErc20 && config.erc20TotalCap == 0) {
+                revert PilotTotalCapRequired(config.erc20Token);
+            }
+        }
     }
 }

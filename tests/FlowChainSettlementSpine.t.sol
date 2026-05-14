@@ -97,8 +97,57 @@ contract FlowChainSettlementSpineTest {
         _assertTrue(record.exists);
 
         _assertObjectCommittedLog(
-            logs[logs.length - 1], objectId, rootfieldId, objectType, commitment, parentObjectId, sequence
+            logs[logs.length - 1],
+            objectId,
+            rootfieldId,
+            objectType,
+            address(this),
+            commitment,
+            parentObjectId,
+            sequence,
+            "bridge://evidence/1"
         );
+    }
+
+    function testCommitBridgeAndControlPlaneObjectVocabularyWithStableEventShape() public {
+        bytes32 rootfieldId = keccak256("rootfield.flowchain.objects");
+
+        _commitKnownObjectType({
+            objectType: spine.BRIDGE_CREDIT_OBJECT(),
+            objectId: keccak256("bridge.credit.1"),
+            rootfieldId: rootfieldId,
+            commitment: keccak256("bridge.credit.commitment"),
+            parentObjectId: keccak256("bridge.deposit.1"),
+            evidenceURI: "bridge://credit/1",
+            expectedSequence: 1
+        });
+        _commitKnownObjectType({
+            objectType: spine.BRIDGE_WITHDRAWAL_INTENT_OBJECT(),
+            objectId: keccak256("bridge.withdrawal.intent.1"),
+            rootfieldId: rootfieldId,
+            commitment: keccak256("bridge.withdrawal.intent.commitment"),
+            parentObjectId: keccak256("bridge.credit.1"),
+            evidenceURI: "bridge://withdrawal-intent/1",
+            expectedSequence: 2
+        });
+        _commitKnownObjectType({
+            objectType: spine.MEMORY_OBJECT(),
+            objectId: keccak256("memory.cell.1"),
+            rootfieldId: rootfieldId,
+            commitment: keccak256("memory.cell.commitment"),
+            parentObjectId: bytes32(0),
+            evidenceURI: "memory://cell/1",
+            expectedSequence: 3
+        });
+        _commitKnownObjectType({
+            objectType: spine.FINALITY_OBJECT(),
+            objectId: keccak256("finality.receipt.1"),
+            rootfieldId: rootfieldId,
+            commitment: keccak256("finality.receipt.commitment"),
+            parentObjectId: keccak256("memory.cell.1"),
+            evidenceURI: "finality://receipt/1",
+            expectedSequence: 4
+        });
     }
 
     function testAuthorizedSubmitterCanCommitAndRevocationBlocksFutureCommits() public {
@@ -222,9 +271,11 @@ contract FlowChainSettlementSpineTest {
         bytes32 objectId,
         bytes32 rootfieldId,
         bytes32 objectType,
+        address expectedSubmitter,
         bytes32 commitment,
         bytes32 parentObjectId,
-        uint64 sequence
+        uint64 sequence,
+        string memory expectedEvidenceURI
     ) private view {
         _assertTrue(log.emitter == address(spine));
         _assertTrue(log.topics[0] == OBJECT_COMMITTED_SIGNATURE);
@@ -241,12 +292,52 @@ contract FlowChainSettlementSpineTest {
             string memory evidenceURI
         ) = abi.decode(log.data, (address, bytes32, bytes32, uint64, uint64, string));
 
-        _assertTrue(decodedSubmitter == address(this));
+        _assertTrue(decodedSubmitter == expectedSubmitter);
         _assertTrue(decodedCommitment == commitment);
         _assertTrue(decodedParentObjectId == parentObjectId);
         _assertTrue(decodedSequence == sequence);
         _assertTrue(committedAt > 0);
-        _assertTrue(keccak256(bytes(evidenceURI)) == keccak256("bridge://evidence/1"));
+        _assertTrue(keccak256(bytes(evidenceURI)) == keccak256(bytes(expectedEvidenceURI)));
+    }
+
+    function _commitKnownObjectType(
+        bytes32 objectType,
+        bytes32 objectId,
+        bytes32 rootfieldId,
+        bytes32 commitment,
+        bytes32 parentObjectId,
+        string memory evidenceURI,
+        uint64 expectedSequence
+    ) private {
+        vm.recordLogs();
+        uint64 sequence = spine.commitObject(objectType, objectId, rootfieldId, commitment, parentObjectId, evidenceURI);
+        SettlementVm.Log[] memory logs = vm.getRecordedLogs();
+
+        _assertTrue(sequence == expectedSequence);
+        _assertTrue(spine.nextSequence() == expectedSequence + 1);
+        _assertTrue(spine.isObjectCommitted(objectId));
+
+        FlowChainSettlementSpine.ObjectCommitment memory record = spine.getObjectCommitment(objectId);
+        _assertTrue(record.submitter == address(this));
+        _assertTrue(record.objectType == objectType);
+        _assertTrue(record.rootfieldId == rootfieldId);
+        _assertTrue(record.commitment == commitment);
+        _assertTrue(record.parentObjectId == parentObjectId);
+        _assertTrue(record.sequence == expectedSequence);
+        _assertTrue(record.committedAt > 0);
+        _assertTrue(record.exists);
+
+        _assertObjectCommittedLog(
+            logs[logs.length - 1],
+            objectId,
+            rootfieldId,
+            objectType,
+            address(this),
+            commitment,
+            parentObjectId,
+            sequence,
+            evidenceURI
+        );
     }
 
     function _assertTrue(bool value) private pure {
