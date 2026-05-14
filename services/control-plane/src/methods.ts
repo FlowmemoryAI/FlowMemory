@@ -178,12 +178,17 @@ function devnetRootfields(state: LoadedControlPlaneState): Record<string, JsonVa
 
 function devnetMap(state: LoadedControlPlaneState, key: string): Record<string, JsonValue> {
   const controlPlaneObjects = asJsonObject(state.devnetControlPlaneHandoff?.objects);
-  const value = state.devnet?.[key]
-    ?? controlPlaneObjects?.[key]
-    ?? state.devnetControlPlaneHandoff?.[key]
-    ?? state.devnetVerifierHandoff?.[key]
-    ?? state.devnetIndexerHandoff?.[key];
-  return value !== null && typeof value === "object" && !Array.isArray(value) ? value as Record<string, JsonValue> : {};
+  const candidates = [
+    state.devnet?.[key],
+    controlPlaneObjects?.[key],
+    state.devnetControlPlaneHandoff?.[key],
+    state.devnetVerifierHandoff?.[key],
+    state.devnetIndexerHandoff?.[key],
+  ];
+  const maps = candidates
+    .map((value) => asJsonObject(value))
+    .filter((value): value is Record<string, JsonValue> => value !== null);
+  return maps.find((value) => Object.keys(value).length > 0) ?? maps[0] ?? {};
 }
 
 function firstDevnetMap(state: LoadedControlPlaneState, keys: string[]): Record<string, JsonValue> {
