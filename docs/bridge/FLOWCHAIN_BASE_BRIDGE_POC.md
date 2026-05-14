@@ -1,10 +1,11 @@
 # FlowChain Base Bridge POC
 
-Status: test-only bridge lane for local and Base Sepolia validation.
+Status: test and capped Base `8453` pilot bridge lane.
 
-This bridge POC is designed so a small canary can be reviewed later without
-claiming production bridge readiness. It is not audited, not trustless, not a
-public bridge, and not approved for broad mainnet use.
+This bridge POC is designed so local, Base Sepolia, and tiny capped Base `8453`
+pilot activity can be reviewed without claiming broad bridge readiness. It is
+not audited, not trustless, not a public bridge, and not approved for broad
+mainnet use.
 
 ## What Exists
 
@@ -12,7 +13,9 @@ public bridge, and not approved for broad mainnet use.
   explicit test release authority, pause, allowlisted tokens, per-deposit caps,
   total caps, deposit records, replay guards, deposit events, and release hooks.
 - `contracts/FlowChainSettlementSpine.sol`: compact local/test event spine for
-  bridge and FlowChain object commitments.
+  bridge and FlowChain object commitments, including stable object constants for
+  bridge deposits, bridge credits, withdrawal intents, memory objects, and
+  finality objects.
 - `tests/bridge/BaseBridgeLockbox.t.sol`: Foundry coverage for token
   allowlisting, ERC-20 deposits, native deposits, caps, pause behavior,
   ownership, release, and replay protection.
@@ -73,6 +76,34 @@ is the exact file for the runtime/control-plane to consume.
 - No secrets, RPC keys, private keys, or seed phrases should be committed.
 - Bridge observations are advisory local objects until the FlowChain runtime
   verifies and accepts them.
+
+## Authority And Emergency Assumptions
+
+- Owner: configures token allowlist entries, per-deposit caps, total caps, pause
+  state, and the release authority. Owner control is a pilot operator model, not
+  production governance.
+- Release authority: can call `releaseNative` and `releaseERC20` for recorded
+  deposits. It is expected to be a pilot operator or local relayer identity, not
+  an unaudited public bridge validator set.
+- Pause: blocks new deposits only. Releases remain available while paused so an
+  operator can unwind or recover deposits according to explicit evidence.
+- Caps: each allowed asset has a nonzero per-deposit cap. Base `8453`
+  deployment configuration additionally requires a nonzero per-asset total cap.
+  Total locked accounting is reduced as releases are recorded.
+- Replay protection: deposits include a monotonically increasing lockbox nonce;
+  releases are keyed by deposit, recipient, token, amount, and evidence hash.
+  Reusing the same release evidence for the same release details reverts.
+- Emergency boundary: a compromised owner or release authority can misuse this
+  POC. The intended emergency tools are pause, cap reduction above current
+  locked amount, allowlist disablement, authority rotation, and explicit
+  release/recovery calls. This is why the lockbox is only suitable for a tiny
+  capped pilot.
+- Native release boundary: `releaseNative` uses Solidity `transfer`; use simple
+  EOA or plain `receive` recipients for pilot recovery unless a smart-contract
+  recipient has been separately reviewed.
+- Token boundary: use plain ERC-20s for rehearsal and only explicitly approved
+  assets for the Base `8453` pilot. Fee-on-transfer, rebasing, callback-heavy,
+  or otherwise nonstandard assets are outside the pilot safety claim.
 
 ## Local Mock
 
@@ -157,7 +188,8 @@ Use `-RpcUrl` or `ANVIL_RPC_URL` if the Anvil endpoint is not
 
 ## Foundry Deploy Script
 
-The contract-side bridge spine has a dry-run-by-default Foundry script:
+The contract-side bridge spine has one dry-run-by-default Foundry script for
+the existing lockbox and settlement spine:
 
 ```powershell
 $env:FLOWCHAIN_BRIDGE_OWNER = "0x..."
@@ -175,9 +207,87 @@ forge script script/DeployBridgeSpine.s.sol:DeployBridgeSpine `
   --rpc-url http://127.0.0.1:8545
 ```
 
-For Base Sepolia dry-run, use `--rpc-url $env:BASE_SEPOLIA_RPC_URL`. Add
-`--broadcast` only after the environment values are explicit and the owner key
-is intentionally supplied to Foundry. Do not commit RPC URLs or private keys.
+For Base Sepolia dry-run, use `--rpc-url $env:BASE_SEPOLIA_RPC_URL`.
+
+For the capped Base `8453` pilot dry run, set explicit local env values and a
+nonzero total cap for every configured asset:
+
+```powershell
+$env:FLOWCHAIN_BASE8453_RPC_URL = "<base-8453-rpc-url>"
+$env:FLOWCHAIN_BRIDGE_OWNER = "<pilot-owner-address>"
+$env:FLOWCHAIN_BRIDGE_RELEASE_AUTHORITY = "<pilot-release-authority-address>"
+$env:FLOWCHAIN_SETTLEMENT_SUBMITTER = "<pilot-settlement-submitter-address>"
+$env:FLOWCHAIN_BRIDGE_ALLOW_NATIVE = "true"
+$env:FLOWCHAIN_BRIDGE_NATIVE_PER_DEPOSIT_CAP = "1000000000000000"
+$env:FLOWCHAIN_BRIDGE_NATIVE_TOTAL_CAP = "5000000000000000"
+$env:FLOWCHAIN_BRIDGE_ALLOW_ERC20 = "false"
+$env:FLOWCHAIN_BRIDGE_ERC20_TOKEN = "0x0000000000000000000000000000000000000000"
+$env:FLOWCHAIN_BRIDGE_ERC20_PER_DEPOSIT_CAP = "0"
+$env:FLOWCHAIN_BRIDGE_ERC20_TOTAL_CAP = "0"
+$env:FLOWCHAIN_BASE8453_PILOT_ACK = "true"
+
+forge script script/DeployBridgeSpine.s.sol:DeployBridgeSpine `
+  --rpc-url $env:FLOWCHAIN_BASE8453_RPC_URL
+```
+
+The `8453` path reverts unless `FLOWCHAIN_BASE8453_PILOT_ACK=true`. Broadcast is
+the same script with `--broadcast`, but the deployer key must come from a local
+ignored env var or secure shell secret and must never be committed:
+
+```powershell
+forge script script/DeployBridgeSpine.s.sol:DeployBridgeSpine `
+  --rpc-url $env:FLOWCHAIN_BASE8453_RPC_URL `
+  --broadcast `
+  --private-key $env:FLOWCHAIN_BASE8453_DEPLOYER_PRIVATE_KEY
+```
+
+The script rejects chains other than local Anvil `31337`, Base Sepolia `84532`,
+and Base `8453`. It also rejects Base `8453` configured assets with zero total
+cap. Do not commit RPC URLs or private keys.
+
+## Deployed Address Handling
+
+Deployment addresses are local operator state until a reviewed pilot record is
+intentionally published. Store addresses in an ignored local env file or shell
+variables, for example:
+
+```powershell
+$env:FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS = "0x..."
+$env:FLOWCHAIN_BASE8453_SETTLEMENT_SPINE_ADDRESS = "0x..."
+```
+
+Public docs should name how the relayer loads `FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS`
+and the deployment block range; they should not hardcode a lockbox address as a
+blanket endorsement. Foundry `broadcast/` artifacts are ignored by Git and may
+be used as local evidence for the PR summary.
+
+## Source Verification
+
+After a reviewed pilot broadcast, verify the two deployed sources with the
+constructor arguments used locally:
+
+```powershell
+$env:BASESCAN_API_KEY = "<basescan-api-key>"
+
+forge verify-contract `
+  --chain-id 8453 `
+  <lockbox-address> `
+  contracts/bridge/BaseBridgeLockbox.sol:BaseBridgeLockbox `
+  --constructor-args $(cast abi-encode "constructor(address,address)" <owner> <release-authority>) `
+  --etherscan-api-key $env:BASESCAN_API_KEY `
+  --watch
+
+forge verify-contract `
+  --chain-id 8453 `
+  <settlement-spine-address> `
+  contracts/FlowChainSettlementSpine.sol:FlowChainSettlementSpine `
+  --constructor-args $(cast abi-encode "constructor(address)" <owner>) `
+  --etherscan-api-key $env:BASESCAN_API_KEY `
+  --watch
+```
+
+For dry-run planning, run the same commands with placeholder addresses in the
+PR notes and do not submit without the reviewed deployment addresses.
 
 ## Contract Event Schema
 
@@ -247,9 +357,12 @@ event FlowChainObjectCommitted(
 ```
 
 Bridge agents should use `BRIDGE_DEPOSIT_OBJECT` as `objectType` when committing
-a FlowChain bridge-deposit object derived from a `BridgeDeposit`. Indexers still
-derive `txHash`, `logIndex`, and block metadata from receipts and logs; those
-fields are not emitted by the contracts.
+a FlowChain bridge-deposit object derived from a `BridgeDeposit`.
+`BRIDGE_CREDIT_OBJECT` and `BRIDGE_WITHDRAWAL_INTENT_OBJECT` are the matching
+object types for credit and withdrawal-intent commitments. `MEMORY_OBJECT` and
+`FINALITY_OBJECT` remain available for control-plane object commitments.
+Indexers still derive `txHash`, `logIndex`, and block metadata from receipts and
+logs; those fields are not emitted by the contracts.
 
 ## Base Mainnet Canary Read
 
@@ -350,6 +463,7 @@ Failure, retry, and replay behavior:
 ```powershell
 forge test --match-path tests/bridge/BaseBridgeLockbox.t.sol
 forge test --match-path tests/FlowChainSettlementSpine.t.sol
+npm run flowchain:real-value-pilot:contracts
 npm run bridge:test
 npm run bridge:mock
 npm run bridge:sepolia:observe

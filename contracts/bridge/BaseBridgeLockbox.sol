@@ -204,11 +204,11 @@ contract BaseBridgeLockbox {
         nonReentrant
         returns (bytes32 releaseId)
     {
-        releaseId = _recordRelease(depositId, recipient, NATIVE_TOKEN, amount, evidenceHash);
-        (bool ok,) = recipient.call{value: amount}("");
-        if (!ok) {
-            revert TransferFailed();
+        if (recipient == address(0)) {
+            revert ZeroRecipient();
         }
+        releaseId = _recordRelease(depositId, recipient, NATIVE_TOKEN, amount, evidenceHash);
+        recipient.transfer(amount);
     }
 
     function releaseERC20(bytes32 depositId, address recipient, address token, uint256 amount, bytes32 evidenceHash)
