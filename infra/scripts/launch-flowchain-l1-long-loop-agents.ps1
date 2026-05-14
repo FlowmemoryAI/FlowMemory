@@ -57,6 +57,13 @@ $agents = @(
         Prompt = "installer-ops.md"
     },
     @{
+        Name = "hq-review"
+        Worktree = "E:\FlowMemory\flowmemory-hq-review-loop"
+        Branch = "agent/l1-loop-hq-review"
+        Prompt = "hq-review.md"
+        CreateWorktree = $true
+    },
+    @{
         Name = "hardware-signals"
         Worktree = "E:\FlowMemory\flowmemory-hardware"
         Branch = "agent/l1-loop-hardware-signals"
@@ -108,7 +115,18 @@ foreach ($agent in $agents) {
     }
 
     if (-not (Test-Path -LiteralPath $worktree)) {
-        throw "Missing worktree: $worktree"
+        if ($agent.CreateWorktree) {
+            Write-Host "Creating worktree $worktree on $branch"
+            if (-not $DryRun) {
+                & git -C $repoRoot worktree add -B $branch $worktree origin/main
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Failed to create worktree $worktree"
+                }
+            }
+        }
+        else {
+            throw "Missing worktree: $worktree"
+        }
     }
 
     if (-not $NoBranchPrepare) {
