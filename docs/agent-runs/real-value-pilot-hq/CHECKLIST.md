@@ -20,7 +20,9 @@ Last updated: 2026-05-14.
 - [x] Run `git diff --check`.
 - [x] Run the new pilot gate in incomplete mode.
 - [x] Run `npm run flowchain:product-e2e`, or document why it was not practical.
-- [x] Open a draft PR with exact commands run and current blockers.
+- [x] Open a PR with exact commands run and current blockers.
+- [x] Merge the HQ gate PR to `main`.
+- [x] Post HQ refresh comments on subsystem issues #133 through #138.
 
 ## Gate Blocker Rows
 
@@ -55,9 +57,9 @@ and `NOTES.md`.
 
 ## Release-Gate Boundary
 
-- [x] Branch documents issue #130 capped owner-pilot boundary in
+- [x] `main` documents issue #130 capped owner-pilot boundary in
   `docs/FLOWCHAIN_REAL_VALUE_PILOT.md`.
-- [ ] Issue #130 boundary is reviewed and accepted on GitHub.
+- [x] Issue #130 boundary is reviewed and accepted on GitHub.
 
 ## Baseline Check Result
 
@@ -65,22 +67,23 @@ and `NOTES.md`.
 `npm run contracts:hardening` because local Slither reported existing findings
 in `contracts/bridge/BaseBridgeLockbox.sol`.
 
-This branch now updates the allowed `infra/scripts/` static-analysis wrappers
+PR #132 updated the allowed `infra/scripts/` static-analysis wrappers
 so default `contracts:hardening` matches the documented policy: Slither is
 optional by default and required only through `contracts:hardening:slither`,
 `-RequireSlither`, or `REQUIRE_SLITHER=1`.
 
-Current branch result: `npm run contracts:hardening`,
+Post-merge main-equivalent result: `npm run contracts:hardening`,
 `npm run flowchain:product-e2e`, and `npm run flowchain:l1-e2e` pass locally.
 
-GitHub blocker: https://github.com/FlowmemoryAI/FlowMemory/issues/131
+Closed GitHub blocker: https://github.com/FlowmemoryAI/FlowMemory/issues/131
 
-Draft PR: https://github.com/FlowmemoryAI/FlowMemory/pull/132
+Merged PR: https://github.com/FlowmemoryAI/FlowMemory/pull/132
 
 ## Completion Audit
 
 Audit file: `docs/agent-runs/real-value-pilot-hq/COMPLETION_AUDIT.md`.
 
-Result: not complete. `origin/main` lacks both new scripts, the default pilot
-gate fails with the intended missing-proof report, and local branch-only
-`flowchain:l1-e2e` evidence is not on `main`.
+Result: not complete. `origin/main` contains the HQ scripts and
+`flowchain:l1-e2e` passes locally, but the default pilot gate still fails with
+the intended missing-proof report until the six dedicated subsystem proof
+commands land on `main`.
