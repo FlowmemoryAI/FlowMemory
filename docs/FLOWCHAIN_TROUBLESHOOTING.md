@@ -61,6 +61,7 @@ or workbench commands.
 | Smoke fails during hardware fixture check | Python is missing or not on PATH. | Install Python 3 or run `npm run flowchain:smoke -- -SkipHardware` for a scoped local smoke. |
 | `flowchain:full-smoke` fails with missing command coverage | The full local/private L1 package is not complete yet. | Read `devnet/local/smoke/flowchain-full-smoke-report.json` and the owning issues #99-#108. Use `npm run flowchain:full-smoke -- -SkipMergedSmoke -AllowIncomplete` only to validate the temporary report wrapper. |
 | Cargo output looks like a different worktree | A shared `CARGO_TARGET_DIR` is reusing stale binaries. | Use the root wrapper scripts; they pin cargo output to `crates/flowmemory-devnet/target` for this checkout. |
+| Cargo cannot overwrite a Windows `.exe` under `target` | A running node, old test process, or stale shell is locking Cargo build output. | Run `npm run flowchain:node:stop`, close old PowerShell windows, and retry. If the lock remains, reboot before deleting ignored local build output. |
 | Existing state blocks init | `devnet/local/state.json` already exists. | Run `npm run flowchain:demo`, or force reset with `powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-init.ps1 -Force`. |
 | Import refuses to overwrite state | Import protects existing local state by default. | Run `npm run flowchain:import -- --BundlePath <zip> -Force`. |
 
@@ -115,6 +116,19 @@ Get-NetTCPConnection -LocalPort 8787 -ErrorAction SilentlyContinue
 Close the old PowerShell window that owns the service, or stop the process if
 you intentionally started it and no longer need it.
 
+### Port Conflicts
+
+The control plane normally uses `http://127.0.0.1:8787/`, and the workbench
+usually uses `http://127.0.0.1:5173/`. If either port is busy:
+
+```powershell
+Get-NetTCPConnection -LocalPort 8787 -ErrorAction SilentlyContinue
+Get-NetTCPConnection -LocalPort 5173 -ErrorAction SilentlyContinue
+```
+
+Close the stale terminal that owns the port. Vite may choose another workbench
+port automatically; use the URL printed by `npm run workbench:dev`.
+
 ### Workbench Dev Server Does Not Open
 
 Install dashboard dependencies and rerun the wrapper:
@@ -153,6 +167,24 @@ npm run flowchain:demo
 ```
 
 This does not edit committed fixtures.
+
+## Capped Owner Pilot Troubleshooting
+
+Start with the dry-run:
+
+```powershell
+npm run flowchain:real-value-pilot:ops
+```
+
+| Symptom | Likely cause | Fix |
+| --- | --- | --- |
+| Live pilot says `FLOWCHAIN_PILOT_OPERATOR_ACK` is required | Missing explicit owner acknowledgement. | Set `$env:FLOWCHAIN_PILOT_OPERATOR_ACK="I_UNDERSTAND_THIS_IS_CAPPED_BASE8453_OWNER_PILOT"` in the local shell only. |
+| Live pilot reports wrong chain | `FLOWCHAIN_BASE8453_RPC_URL` points to a non-Base endpoint or stale provider route. | Verify the endpoint with the provider, then rerun. The script must see chain id `8453` before live deploy or observer actions. |
+| Live observer says the lockbox address is invalid | `FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS` is missing, malformed, or from a different deployment. | Use the exact deployed lockbox address for this pilot. The script accepts only a 20-byte hex address. |
+| Live observer finds no events | Block range is wrong, the contract is wrong, or the deposit has not been indexed by the RPC provider yet. | Set `FLOWCHAIN_BASE8453_FROM_BLOCK` and `FLOWCHAIN_BASE8453_TO_BLOCK` around the known transaction block, keep the range at `5000` blocks or less, and rerun observe. |
+| Replay or duplicate credit evidence appears | The same Base event was observed more than once. | Keep the generated `replayKey` evidence and do not manually credit twice. Rerun `npm run flowchain:real-value-pilot -- --Mode Live --Action Observe` to regenerate deterministic evidence. |
+| Pause or resume cannot broadcast | `cast` is missing, the owner key is missing, or the key is not the lockbox owner. | Install Foundry, verify `$env:FLOWCHAIN_BASE8453_DEPLOYER_PRIVATE_KEY` in the local shell, and rerun the action. |
+| Evidence export refuses a file | The evidence directory contains an env file, local vault, private-key file, build output, or secret-named path. | Move that file outside the evidence directory and rerun `npm run flowchain:real-value-pilot:export`. |
 
 ## Smoke Evidence
 

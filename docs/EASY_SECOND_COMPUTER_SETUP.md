@@ -55,6 +55,15 @@ npm run flowchain:product-e2e
 That gate must pass before the setup should be treated as ready for a local
 second-computer test.
 
+Before any capped Base `8453` owner pilot action, run the ops dry-run proof:
+
+```powershell
+npm run flowchain:real-value-pilot:ops
+```
+
+Then follow `docs/FLOWCHAIN_REAL_VALUE_PILOT.md` for owner go/no-go criteria,
+emergency stop, evidence export, and restart recovery commands.
+
 ## Already Cloned Setup
 
 If the repo is already cloned:

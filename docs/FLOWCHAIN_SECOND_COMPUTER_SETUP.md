@@ -120,6 +120,15 @@ npm run flowchain:full-smoke
 npm run flowchain:product-e2e
 ```
 
+Run the capped owner pilot ops dry-run before any Base `8453` pilot action:
+
+```powershell
+npm run flowchain:real-value-pilot:ops
+```
+
+The full owner pilot coordination checklist is
+`docs/FLOWCHAIN_REAL_VALUE_PILOT.md`.
+
 Run the local workbench in a separate PowerShell window:
 
 ```powershell
@@ -156,6 +165,8 @@ Expected current result:
   local account funding, token launch, pool creation, liquidity, swap receipts,
   bridge-test credit visibility, control-plane query surfaces, workbench
   product surfaces, and no-secret response boundaries.
+- `npm run flowchain:real-value-pilot:ops` is the dry-run ops proof for the
+  capped owner pilot. It uses no live RPC URL or private key.
 - `npm run workbench:dev` opens the existing dashboard as the local workbench.
 
 Current stop point: if a second computer needs production custody, production
@@ -180,6 +191,7 @@ npm run flowchain:start
 npm run control-plane:serve
 npm run workbench:dev
 npm run flowchain:product-e2e
+npm run flowchain:real-value-pilot:ops
 npm run flowchain:export
 ```
 
@@ -206,6 +218,9 @@ npm run flowchain:demo
 npm run flowchain:smoke
 npm run flowchain:full-smoke
 npm run flowchain:product-e2e
+npm run flowchain:real-value-pilot:ops
+npm run flowchain:real-value-pilot:emergency-stop
+npm run flowchain:real-value-pilot:export
 npm run flowchain:export
 npm run workbench:dev
 ```
@@ -222,6 +237,9 @@ Current status:
 | `npm run flowchain:smoke` | Implemented for current private/local surfaces | Runs service tests, crypto validation, launch candidate, devnet tests, control-plane smoke, deterministic replay, dashboard build, hardware fixture, unsafe-claim scan, and no-secret export scan. |
 | `npm run flowchain:full-smoke` | Implemented acceptance gate | Wraps smoke, wallet CLI sign/verify, full-smoke report, no-secret scan, and `git diff --check`. |
 | `npm run flowchain:product-e2e` | Implemented product testnet gate | Wraps the full smoke and proves local account funding, token launch, DEX pool/liquidity/swap receipts, bridge-test records, control-plane product queries, workbench product surfaces, and no-secret API boundaries. |
+| `npm run flowchain:real-value-pilot:ops` | Branch-local dry-run pilot ops proof | Parser-checks pilot scripts, proves dry-run needs no RPC or keys, verifies missing live env refusal, checks emergency-stop dry-run, and writes sanitized evidence export. |
+| `npm run flowchain:real-value-pilot:emergency-stop` | Branch-local guarded pause wrapper | Routes to the live `Pause` action after explicit acknowledgement, Base `8453` chain check, cap check, lockbox address check, and owner key check. |
+| `npm run flowchain:real-value-pilot:export` | Branch-local pilot evidence exporter | Writes a sanitized ignored bundle excluding Git metadata, dependency folders, build targets, local vaults, private-key files, and env files. |
 | `npm run flowchain:export` | Implemented | Writes ignored export directory and zip bundle. |
 | `npm run flowchain:import -- --BundlePath <zip> -Force` | Implemented script path | Restores local state from an exported bundle. |
 | `npm run workbench:dev` | Implemented | Wraps `npm run dev --prefix apps/dashboard`. |
