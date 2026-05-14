@@ -1,0 +1,22 @@
+# Production L1 Storage Checklist
+
+- [x] Read required repository context.
+- [x] Inventory current runtime state, transactions, receipts, events, and query needs.
+- [x] Create agent-run tracking files.
+- [x] Add durable storage contract and proof docs.
+- [x] Add manifest and schema validation.
+- [x] Add bridge observation, credit, withdrawal, release evidence, and replay-key persistence.
+- [x] Add deterministic event records.
+- [x] Add atomic block/state/manifest writes.
+- [x] Add durable indexes for tx, account, receipt, event, token, pool, and bridge queries.
+- [x] Add deterministic export with manifest, state root, height/hash/finality, state maps, indexes, and included-files manifest.
+- [x] Add clean import with schema/root/chain/genesis validation and malformed-root rejection.
+- [x] Add restart and crash recovery coverage.
+- [x] Add corruption/index-health coverage.
+- [x] Add storage E2E alias and wrapper.
+- [x] Run `cargo test --manifest-path crates/flowmemory-devnet/Cargo.toml`.
+- [x] Run `npm run flowchain:export`.
+- [x] Run `npm run flowchain:import`.
+- [x] Run `npm run flowchain:storage:e2e`.
+- [x] Run `git diff --check`.
+- [x] Write final handoff.

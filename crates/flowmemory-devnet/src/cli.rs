@@ -1,11 +1,14 @@
 use crate::hash::{hash_json, normalize_value};
 use crate::model::{
     FLOWPULSE_TOPIC0, ImportedFlowPulseObservation, ImportedVerifierReport, LocalAuthorization,
-    Transaction, build_block, demo_transactions, envelope_tx, genesis_state,
-    product_demo_transactions, queue_authorized_transaction, queue_transaction, state_map_roots,
-    state_root,
+    Transaction, build_block, demo_transactions, envelope_tx, genesis_state, latest_hash,
+    latest_height, product_demo_transactions, queue_authorized_transaction, queue_transaction,
+    state_map_roots, state_root,
 };
-use crate::storage::{default_state_path, load_or_genesis, load_state, reset_state, save_state};
+use crate::storage::{
+    default_state_path, export_state as export_durable_state, import_state as import_durable_state,
+    index_health, load_or_genesis, load_state, reset_state, save_state, storage_data_dir_for_state,
+};
 use anyhow::{Context, Result, anyhow};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -67,6 +70,10 @@ pub enum Command {
     },
     ImportState {
         from: PathBuf,
+    },
+    StorageStatus,
+    StorageE2e {
+        out_dir: PathBuf,
     },
     Demo {
         out_dir: PathBuf,
@@ -181,6 +188,12 @@ fn parse_args(args: Vec<String>) -> Result<Cli> {
         "import-state" => Command::ImportState {
             from: PathBuf::from(option_value(&positional[1..], "--from")?),
         },
+        "storage-status" => Command::StorageStatus,
+        "storage-e2e" => Command::StorageE2e {
+            out_dir: option_value(&positional[1..], "--out-dir")
+                .map(PathBuf::from)
+                .unwrap_or_else(|_| PathBuf::from("devnet/local/storage-e2e")),
+        },
         "demo" => Command::Demo {
             out_dir: option_value(&positional[1..], "--out-dir")
                 .map(PathBuf::from)
@@ -240,7 +253,7 @@ fn option_u64(args: &[String], name: &str) -> Result<Option<u64>> {
 
 fn print_help() {
     println!(
-        "flowmemory-devnet --state <path> --node-dir <path> <command>\n\nCommands:\n  init\n  reset-local\n  node [--node-id <id>] [--block-ms <ms>] [--max-blocks <n>] [--peer-config <path>]\n  node-stop\n  node-status\n  tick [--node-id <id>] [--peer-config <path>]\n  submit-tx --tx-file <path> [--authorized-by <id>] [--direct]\n  faucet --account <id> --amount <n> [--reason <text>] [--authorized-by <id>] [--direct]\n  start|run [--blocks <n>]\n  run-block\n  submit-fixture --fixture <path>\n  inspect|inspect-state [--summary]\n  export|export-fixtures [--out-dir <path>]\n  export-state [--out <path>]\n  import-state --from <path>\n  demo [--out-dir <path>]\n  smoke [--out-dir <path>]\n  product-demo|product-smoke [--out-dir <path>]\n"
+        "flowmemory-devnet --state <path> --node-dir <path> <command>\n\nCommands:\n  init\n  reset-local\n  node [--node-id <id>] [--block-ms <ms>] [--max-blocks <n>] [--peer-config <path>]\n  node-stop\n  node-status\n  tick [--node-id <id>] [--peer-config <path>]\n  submit-tx --tx-file <path> [--authorized-by <id>] [--direct]\n  faucet --account <id> --amount <n> [--reason <text>] [--authorized-by <id>] [--direct]\n  start|run [--blocks <n>]\n  run-block\n  submit-fixture --fixture <path>\n  inspect|inspect-state [--summary]\n  export|export-fixtures [--out-dir <path>]\n  export-state [--out <path>]\n  import-state --from <path>\n  storage-status\n  storage-e2e [--out-dir <path>]\n  demo [--out-dir <path>]\n  smoke [--out-dir <path>]\n  product-demo|product-smoke [--out-dir <path>]\n"
     );
 }
 
@@ -250,12 +263,12 @@ fn run(cli: Cli) -> Result<()> {
             let state = genesis_state();
             save_state(&cli.state, &state)?;
             write_runtime_boundary_files(&cli.state, &state)?;
-            print_json(&StateSummary::from_state(&state))?;
+            print_json(&StateSummary::from_state_at(&cli.state, &state))?;
         }
         Command::ResetLocal => {
             let state = reset_state(&cli.state)?;
             write_runtime_boundary_files(&cli.state, &state)?;
-            print_json(&StateSummary::from_state(&state))?;
+            print_json(&StateSummary::from_state_at(&cli.state, &state))?;
         }
         Command::Node {
             node_id,
@@ -405,7 +418,7 @@ fn run(cli: Cli) -> Result<()> {
         Command::InspectState { summary } => {
             let state = load_or_genesis(&cli.state)?;
             if summary {
-                print_json(&StateSummary::from_state(&state))?;
+                print_json(&StateSummary::from_state_at(&cli.state, &state))?;
             } else {
                 print_json(&state)?;
             }
@@ -416,15 +429,23 @@ fn run(cli: Cli) -> Result<()> {
             print_json(&ExportSummary::from_state(&state, out_dir))?;
         }
         Command::ExportState { out } => {
-            let state = load_or_genesis(&cli.state)?;
-            write_json(out.clone(), &state)?;
-            print_json(&ExportStateSummary::from_state(&state, out))?;
+            let export = export_durable_state(&cli.state, &out)?;
+            print_json(&ExportStateSummary::from_export(&export, out))?;
         }
         Command::ImportState { from } => {
-            let state = load_state(&from)?;
-            save_state(&cli.state, &state)?;
+            let state = import_durable_state(&cli.state, &from)?;
             write_runtime_boundary_files(&cli.state, &state)?;
             print_json(&ImportStateSummary::from_state(&state, from, cli.state))?;
+        }
+        Command::StorageStatus => {
+            let state = load_or_genesis(&cli.state)?;
+            save_state(&cli.state, &state)?;
+            let health = index_health(&cli.state)?;
+            print_json(&health)?;
+        }
+        Command::StorageE2e { out_dir } => {
+            let summary = run_storage_e2e(&cli.state, &out_dir)?;
+            print_json(&summary)?;
         }
         Command::Demo { out_dir } => {
             let demo = build_demo_state();
@@ -993,6 +1014,155 @@ fn build_product_smoke_state() -> DemoRun {
     }
 }
 
+fn build_storage_e2e_state() -> DemoRun {
+    let mut state = genesis_state();
+    for tx in product_demo_transactions() {
+        queue_transaction(&mut state, tx);
+    }
+    let first = build_block(&mut state);
+
+    let bridge_observation_id = "bridge-observation:e2e:001".to_string();
+    let bridge_credit_id = "bridge-credit:e2e:001".to_string();
+    let withdrawal_intent_id = "withdrawal-intent:e2e:001".to_string();
+    queue_transaction(
+        &mut state,
+        Transaction::RecordBridgeObservation {
+            observation_id: bridge_observation_id.clone(),
+            source_event_key: "base-sepolia:lockbox:tx-e2e:0".to_string(),
+            source_chain_id: "84532".to_string(),
+            source_contract: "0x1111111111111111111111111111111111111111".to_string(),
+            source_tx_hash: crate::hash::keccak_hex(b"bridge:e2e:source-tx"),
+            source_log_index: "0".to_string(),
+            depositor: "0x2222222222222222222222222222222222222222".to_string(),
+            recipient_account_id: "local-account:product:bob".to_string(),
+            asset_id: crate::model::LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            amount_units: 7,
+            evidence_ref: "fixture://bridge/e2e/deposit".to_string(),
+            replay_key: "replay:bridge:e2e:001".to_string(),
+        },
+    );
+    queue_transaction(
+        &mut state,
+        Transaction::ApplyBridgeCredit {
+            credit_id: bridge_credit_id,
+            observation_id: bridge_observation_id,
+            account_id: "local-account:product:bob".to_string(),
+            asset_id: crate::model::LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            amount_units: 7,
+        },
+    );
+    queue_transaction(
+        &mut state,
+        Transaction::CreateWithdrawalIntent {
+            withdrawal_intent_id: withdrawal_intent_id.clone(),
+            account_id: "local-account:product:bob".to_string(),
+            asset_id: crate::model::LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            amount_units: 3,
+            destination_chain_id: "84532".to_string(),
+            destination_address: "0x3333333333333333333333333333333333333333".to_string(),
+            local_burn_or_lock_id: "local-lock:e2e:001".to_string(),
+            release_policy: "test_record_only".to_string(),
+            evidence_ref: "fixture://bridge/e2e/withdrawal-intent".to_string(),
+        },
+    );
+    queue_transaction(
+        &mut state,
+        Transaction::RecordReleaseEvidence {
+            release_evidence_id: "release-evidence:e2e:001".to_string(),
+            withdrawal_intent_id,
+            source_chain_id: "84532".to_string(),
+            release_tx_hash: crate::hash::keccak_hex(b"bridge:e2e:release-tx"),
+            release_log_index: "0".to_string(),
+            evidence_ref: "fixture://bridge/e2e/release-evidence".to_string(),
+            status: "recorded".to_string(),
+        },
+    );
+    let second = build_block(&mut state);
+    let appchain_chain_id = state.chain_id.clone();
+    queue_transaction(
+        &mut state,
+        Transaction::AnchorBatchToBasePlaceholder {
+            appchain_chain_id,
+            finality_status: "local-storage-e2e-placeholder".to_string(),
+        },
+    );
+    build_block(&mut state);
+
+    DemoRun {
+        state,
+        first_block_hash: first.block_hash,
+        second_block_hash: second.block_hash,
+    }
+}
+
+fn run_storage_e2e(_state_path: &Path, out_dir: &Path) -> Result<StorageE2eSummary> {
+    let source_dir = out_dir.join("source");
+    let imported_dir = out_dir.join("imported");
+    if source_dir.exists() {
+        fs::remove_dir_all(&source_dir)
+            .with_context(|| format!("failed to remove {}", source_dir.display()))?;
+    }
+    if imported_dir.exists() {
+        fs::remove_dir_all(&imported_dir)
+            .with_context(|| format!("failed to remove {}", imported_dir.display()))?;
+    }
+    fs::create_dir_all(out_dir)
+        .with_context(|| format!("failed to create storage e2e dir {}", out_dir.display()))?;
+
+    let source_state_path = source_dir.join("state.json");
+    let imported_state_path = imported_dir.join("state.json");
+    let export_path = out_dir.join("flowchain-storage-e2e-export.json");
+    let demo = build_storage_e2e_state();
+    save_state(&source_state_path, &demo.state)?;
+    let before_health = index_health(&source_state_path)?;
+    let export = export_durable_state(&source_state_path, &export_path)?;
+    let imported = import_durable_state(&imported_state_path, &export_path)?;
+    let after_health = index_health(&imported_state_path)?;
+
+    let root_preserved = state_root(&demo.state) == state_root(&imported);
+    let bridge_credit_preserved = imported
+        .bridge_credits
+        .contains_key("bridge-credit:e2e:001");
+    let replay_key_preserved = imported
+        .consumed_replay_keys
+        .contains_key("replay:bridge:e2e:001");
+    let event_index_preserved =
+        after_health.event_index_entries >= before_health.event_index_entries;
+    if !root_preserved
+        || !bridge_credit_preserved
+        || !replay_key_preserved
+        || !event_index_preserved
+    {
+        return Err(anyhow!(
+            "storage e2e failed to preserve root, bridge credit, replay key, or event index"
+        ));
+    }
+
+    Ok(StorageE2eSummary {
+        schema: "flowmemory.local_devnet.storage_e2e_summary.v1".to_string(),
+        source_state_path,
+        imported_state_path,
+        export_path,
+        before_state_root: state_root(&demo.state),
+        after_state_root: state_root(&imported),
+        latest_height: latest_height(&imported),
+        latest_hash: latest_hash(&imported).to_string(),
+        finalized_height: crate::model::finalized_height(&imported),
+        finalized_hash: crate::model::finalized_hash(&imported).to_string(),
+        tx_index_entries: after_health.tx_index_entries,
+        receipt_index_entries: after_health.receipt_index_entries,
+        event_index_entries: after_health.event_index_entries,
+        bridge_observation_entries: after_health.bridge_observation_entries,
+        bridge_credit_entries: after_health.bridge_credit_entries,
+        replay_key_entries: after_health.replay_key_entries,
+        root_preserved,
+        bridge_credit_preserved,
+        replay_key_preserved,
+        event_index_preserved,
+        included_files: export.included_files,
+    })
+}
+
 fn transactions_from_fixture(path: &Path) -> Result<Vec<Transaction>> {
     let body = fs::read_to_string(path)
         .with_context(|| format!("failed to read fixture {}", path.display()))?;
@@ -1127,6 +1297,11 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "verifierModules": state.verifier_modules,
         "workReceipts": state.work_receipts,
         "verifierReports": state.verifier_reports,
+        "bridgeObservations": state.bridge_observations,
+        "bridgeCredits": state.bridge_credits,
+        "withdrawalIntents": state.withdrawal_intents,
+        "releaseEvidence": state.release_evidence,
+        "consumedReplayKeys": state.consumed_replay_keys,
         "baseAnchors": state.base_anchors,
     });
 
@@ -1150,6 +1325,11 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "challenges": state.challenges,
         "finalityReceipts": state.finality_receipts,
         "artifactAvailabilityProofs": state.artifact_availability_proofs,
+        "bridgeObservations": state.bridge_observations,
+        "bridgeCredits": state.bridge_credits,
+        "withdrawalIntents": state.withdrawal_intents,
+        "releaseEvidence": state.release_evidence,
+        "consumedReplayKeys": state.consumed_replay_keys,
         "blocks": state.blocks,
         "mapRoots": state_map_roots(state),
         "stateRoot": state_root(state),
@@ -1176,6 +1356,11 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "finalityReceipts": state.finality_receipts,
         "artifactAvailabilityProofs": state.artifact_availability_proofs,
         "importedVerifierReports": state.imported_verifier_reports,
+        "bridgeObservations": state.bridge_observations,
+        "bridgeCredits": state.bridge_credits,
+        "withdrawalIntents": state.withdrawal_intents,
+        "releaseEvidence": state.release_evidence,
+        "consumedReplayKeys": state.consumed_replay_keys,
         "mapRoots": state_map_roots(state),
         "stateRoot": state_root(state),
     });
@@ -1212,6 +1397,11 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
             "verifierModules": state.verifier_modules,
             "workReceipts": state.work_receipts,
             "verifierReports": state.verifier_reports,
+            "bridgeObservations": state.bridge_observations,
+            "bridgeCredits": state.bridge_credits,
+            "withdrawalIntents": state.withdrawal_intents,
+            "releaseEvidence": state.release_evidence,
+            "consumedReplayKeys": state.consumed_replay_keys,
             "baseAnchors": state.base_anchors
         }
     });
@@ -1240,9 +1430,26 @@ fn write_runtime_boundary_files(state_path: &Path, state: &crate::model::ChainSt
 }
 
 fn write_json<T: Serialize>(path: PathBuf, value: &T) -> Result<()> {
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)
+            .with_context(|| format!("failed to create directory {}", parent.display()))?;
+    }
     let body = serde_json::to_string_pretty(value)?;
-    fs::write(&path, format!("{body}\n"))
-        .with_context(|| format!("failed to write {}", path.display()))
+    let tmp = path.with_file_name(format!(
+        ".{}.{}.tmp",
+        path.file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or("record"),
+        std::process::id()
+    ));
+    fs::write(&tmp, format!("{body}\n"))
+        .with_context(|| format!("failed to write temporary file {}", tmp.display()))?;
+    if path.exists() {
+        fs::remove_file(&path)
+            .with_context(|| format!("failed to replace existing {}", path.display()))?;
+    }
+    fs::rename(&tmp, &path)
+        .with_context(|| format!("failed to move {} to {}", tmp.display(), path.display()))
 }
 
 fn print_json<T: Serialize>(value: &T) -> Result<()> {
@@ -1300,6 +1507,11 @@ struct NodeStatus {
     lp_positions: usize,
     liquidity_receipts: usize,
     swap_receipts: usize,
+    bridge_observations: usize,
+    bridge_credits: usize,
+    withdrawal_intents: usize,
+    release_evidence: usize,
+    consumed_replay_keys: usize,
     static_peer_sync: Option<PeerSyncEvent>,
     last_ingested_txs: usize,
     last_rejected_inbox_files: usize,
@@ -1346,6 +1558,11 @@ impl NodeStatus {
             lp_positions: state.lp_positions.len(),
             liquidity_receipts: state.liquidity_receipts.len(),
             swap_receipts: state.swap_receipts.len(),
+            bridge_observations: state.bridge_observations.len(),
+            bridge_credits: state.bridge_credits.len(),
+            withdrawal_intents: state.withdrawal_intents.len(),
+            release_evidence: state.release_evidence.len(),
+            consumed_replay_keys: state.consumed_replay_keys.len(),
             static_peer_sync,
             last_ingested_txs,
             last_rejected_inbox_files,
@@ -1375,10 +1592,10 @@ impl NodeStatusSummary {
         let stop_requested = stop_file(&node_dir).exists();
         Self {
             schema: "flowmemory.local_devnet.node_status_summary.v0".to_string(),
-            state_path,
+            state_path: state_path.clone(),
             node_dir,
             stop_requested,
-            state: StateSummary::from_state(state),
+            state: StateSummary::from_state_at(&state_path, state),
             persisted_status,
         }
     }
@@ -1419,8 +1636,13 @@ struct StateSummary {
     next_block_number: u64,
     logical_time: u64,
     parent_hash: String,
+    latest_height: u64,
+    latest_hash: String,
+    finalized_height: u64,
+    finalized_hash: String,
     state_root: String,
     map_roots: crate::model::StateMapRoots,
+    data_directory: PathBuf,
     operator_key_references: usize,
     pending_txs: usize,
     blocks: usize,
@@ -1448,10 +1670,21 @@ struct StateSummary {
     verifier_reports: usize,
     imported_observations: usize,
     imported_verifier_reports: usize,
+    bridge_observations: usize,
+    bridge_credits: usize,
+    withdrawal_intents: usize,
+    release_evidence: usize,
+    consumed_replay_keys: usize,
     base_anchors: usize,
 }
 
 impl StateSummary {
+    fn from_state_at(state_path: &Path, state: &crate::model::ChainState) -> Self {
+        let mut summary = Self::from_state(state);
+        summary.data_directory = storage_data_dir_for_state(state_path);
+        summary
+    }
+
     fn from_state(state: &crate::model::ChainState) -> Self {
         Self {
             schema: "flowmemory.local_devnet.summary.v0".to_string(),
@@ -1459,8 +1692,13 @@ impl StateSummary {
             next_block_number: state.next_block_number,
             logical_time: state.logical_time,
             parent_hash: state.parent_hash.clone(),
+            latest_height: latest_height(state),
+            latest_hash: latest_hash(state).to_string(),
+            finalized_height: crate::model::finalized_height(state),
+            finalized_hash: crate::model::finalized_hash(state).to_string(),
             state_root: state_root(state),
             map_roots: state_map_roots(state),
+            data_directory: storage_data_dir_for_state(&default_state_path()),
             operator_key_references: state.operator_key_references.len(),
             pending_txs: state.pending_txs.len(),
             blocks: state.blocks.len(),
@@ -1488,6 +1726,11 @@ impl StateSummary {
             verifier_reports: state.verifier_reports.len(),
             imported_observations: state.imported_observations.len(),
             imported_verifier_reports: state.imported_verifier_reports.len(),
+            bridge_observations: state.bridge_observations.len(),
+            bridge_credits: state.bridge_credits.len(),
+            withdrawal_intents: state.withdrawal_intents.len(),
+            release_evidence: state.release_evidence.len(),
+            consumed_replay_keys: state.consumed_replay_keys.len(),
             base_anchors: state.base_anchors.len(),
         }
     }
@@ -1546,11 +1789,11 @@ struct ExportStateSummary {
 }
 
 impl ExportStateSummary {
-    fn from_state(state: &crate::model::ChainState, out: PathBuf) -> Self {
+    fn from_export(export: &crate::storage::StorageExport, out: PathBuf) -> Self {
         Self {
             schema: "flowmemory.local_devnet.export_state_summary.v0".to_string(),
             out,
-            state_root: state_root(state),
+            state_root: export.state_root.clone(),
         }
     }
 }
@@ -1575,6 +1818,32 @@ impl ImportStateSummary {
             map_roots: state_map_roots(state),
         }
     }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct StorageE2eSummary {
+    schema: String,
+    source_state_path: PathBuf,
+    imported_state_path: PathBuf,
+    export_path: PathBuf,
+    before_state_root: String,
+    after_state_root: String,
+    latest_height: u64,
+    latest_hash: String,
+    finalized_height: u64,
+    finalized_hash: String,
+    tx_index_entries: usize,
+    receipt_index_entries: usize,
+    event_index_entries: usize,
+    bridge_observation_entries: usize,
+    bridge_credit_entries: usize,
+    replay_key_entries: usize,
+    root_preserved: bool,
+    bridge_credit_preserved: bool,
+    replay_key_preserved: bool,
+    event_index_preserved: bool,
+    included_files: Vec<String>,
 }
 
 #[derive(Debug, Serialize)]

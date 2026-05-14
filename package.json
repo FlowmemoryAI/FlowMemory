@@ -58,6 +58,7 @@
     "flowchain:real-value-pilot:wallet": "npm run wallet:pilot-e2e --prefix crypto",
     "flowchain:export": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-export.ps1",
     "flowchain:import": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-import.ps1",
+    "flowchain:storage:e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-storage-e2e.ps1",
     "workbench:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-workbench.ps1",
     "e2e": "npm run index:fixtures && npm run verify:fixtures && npm run flowmemory:generate",
     "demo:indexer": "npm run demo --prefix services/indexer",

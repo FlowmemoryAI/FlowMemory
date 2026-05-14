@@ -1,6 +1,7 @@
 param(
     [string] $StatePath = "devnet/local/state.json",
     [string] $OutDir = "devnet/local/export/latest",
+    [string] $ExportPath = "devnet/local/export/latest/flowchain-state-export.json",
     [string] $BundlePath = "devnet/local/export/flowchain-local-state.zip",
     [switch] $NoZip
 )
@@ -14,10 +15,21 @@ $repoRoot = Set-FlowChainRepoRoot
 Set-FlowChainCargoTargetDir -RepoRoot $repoRoot | Out-Null
 $stateFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $StatePath)
 $outFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $OutDir)
+$exportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ExportPath)
 $bundleFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $BundlePath)
 
 if (-not (Test-Path -LiteralPath $stateFullPath)) {
-    throw "State file does not exist. Run npm run flowchain:init or npm run flowchain:demo first."
+    Invoke-FlowChainCommand -Label "Create deterministic devnet state for export" -FilePath "cargo" -ArgumentList @(
+        "run",
+        "--manifest-path",
+        "crates/flowmemory-devnet/Cargo.toml",
+        "--",
+        "--state",
+        $stateFullPath,
+        "demo",
+        "--out-dir",
+        $outFullPath
+    )
 }
 
 Invoke-FlowChainCommand -Label "Export devnet handoff fixtures" -FilePath "cargo" -ArgumentList @(
@@ -32,22 +44,67 @@ Invoke-FlowChainCommand -Label "Export devnet handoff fixtures" -FilePath "cargo
     $outFullPath
 )
 
+Invoke-FlowChainCommand -Label "Export durable FlowChain state" -FilePath "cargo" -ArgumentList @(
+    "run",
+    "--manifest-path",
+    "crates/flowmemory-devnet/Cargo.toml",
+    "--",
+    "--state",
+    $stateFullPath,
+    "export-state",
+    "--out",
+    $exportFullPath
+)
+
+$storageStatusRaw = & cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- --state $stateFullPath storage-status
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to inspect durable storage status."
+}
+$storageStatus = $storageStatusRaw | ConvertFrom-Json
+$exportJson = Get-Content -Raw -LiteralPath $exportFullPath | ConvertFrom-Json
+
 $manifestPath = Join-Path $outFullPath "export-manifest.json"
 $manifest = [ordered]@{
     schema = "flowchain.private_testnet.export_manifest.v0"
-    exportedAt = (Get-Date).ToUniversalTime().ToString("o")
+    storageExportSchema = $exportJson.schema
     sourceStatePath = $stateFullPath
     outDir = $outFullPath
-    includesPrivateOperatorKey = $false
+    exportPath = $exportFullPath
+    dataDirectory = $storageStatus.dataDirectory
+    latestHeight = $storageStatus.latestHeight
+    latestHash = $storageStatus.latestHash
+    finalizedHeight = $storageStatus.finalizedHeight
+    finalizedHash = $storageStatus.finalizedHash
+    stateRoot = $storageStatus.stateRoot
+    indexHealth = [ordered]@{
+        tx = $storageStatus.txIndexEntries
+        receipts = $storageStatus.receiptIndexEntries
+        events = $storageStatus.eventIndexEntries
+        accounts = $storageStatus.accountIndexEntries
+        tokens = $storageStatus.tokenIndexEntries
+        pools = $storageStatus.poolIndexEntries
+        bridgeObservations = $storageStatus.bridgeObservationEntries
+        bridgeCredits = $storageStatus.bridgeCreditEntries
+        withdrawalIntents = $storageStatus.withdrawalIntentEntries
+        releaseEvidence = $storageStatus.releaseEvidenceEntries
+        replayKeys = $storageStatus.replayKeyEntries
+    }
+    operatorSigningSecretsIncluded = $false
     files = @(
+        "flowchain-state-export.json",
         "dashboard-state.json",
         "indexer-handoff.json",
         "verifier-handoff.json",
-        "state.json"
+        "control-plane-handoff.json",
+        "genesis-config.json",
+        "operator-key-references.json",
+        "state.json",
+        "export-manifest.json"
     )
 }
 Write-FlowChainJson -Path $manifestPath -Value $manifest
 Assert-FlowChainNoSecretFiles -Path $outFullPath
+Assert-FlowChainNoSecretFiles -Path $exportFullPath
 
 if (-not $NoZip) {
     $bundleParent = Split-Path -Parent $bundleFullPath
@@ -62,3 +119,10 @@ if (-not $NoZip) {
 Write-Host ""
 Write-Host "FlowChain local state export complete."
 Write-Host "Export directory: $outFullPath"
+Write-Host "Data directory: $($storageStatus.dataDirectory)"
+Write-Host "Current height: $($storageStatus.latestHeight)"
+Write-Host "Latest hash: $($storageStatus.latestHash)"
+Write-Host "Finalized height: $($storageStatus.finalizedHeight)"
+Write-Host "State root: $($storageStatus.stateRoot)"
+Write-Host "Export path: $exportFullPath"
+Write-Host "Index health: tx=$($storageStatus.txIndexEntries) receipts=$($storageStatus.receiptIndexEntries) events=$($storageStatus.eventIndexEntries) bridgeCredits=$($storageStatus.bridgeCreditEntries)"

@@ -37,6 +37,8 @@ npm run flowchain:start
 npm run flowchain:demo
 npm run flowchain:full-smoke
 npm run flowchain:export
+npm run flowchain:import
+npm run flowchain:storage:e2e
 npm run flowchain:stop
 ```
 
@@ -137,11 +139,30 @@ cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- export-fixtures
 
 `export` is an alias for `export-fixtures`.
 
-Export and import a full state snapshot:
+Export and import a durable full state snapshot:
 
 ```powershell
 cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- export-state --out fixtures/handoff/generated/state-snapshot.json
 cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- --state devnet/local/imported-state.json import-state --from fixtures/handoff/generated/state-snapshot.json
+```
+
+The snapshot is a self-describing storage export with schema version, chain id,
+genesis hash, latest height/hash, finalized height/hash, deterministic state
+root, map roots, an included-files manifest, evidence-safety flags, state, and
+indexes. Import validates schema, chain id, genesis hash, root shape, root
+contents, canonical tip/finality, and indexes. Import refuses to write into an
+existing state/data directory unless the operator chooses a clean target.
+
+Check durable storage health:
+
+```powershell
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- storage-status
+```
+
+Run the restart/export/import/index bridge persistence E2E:
+
+```powershell
+npm run flowchain:storage:e2e
 ```
 
 Use a custom state path:
@@ -197,6 +218,11 @@ The prototype stores:
 - `verifierReports`
 - `importedObservations`
 - `importedVerifierReports`
+- `bridgeObservations`
+- `bridgeCredits`
+- `withdrawalIntents`
+- `releaseEvidence`
+- `consumedReplayKeys`
 - `baseAnchors`
 - `blocks`
 - `pendingTxs`
@@ -225,6 +251,10 @@ Supported local transactions:
 - `AnchorBatchToBasePlaceholder`
 - `ImportFlowPulseObservation`
 - `ImportVerifierReport`
+- `RecordBridgeObservation`
+- `ApplyBridgeCredit`
+- `CreateWithdrawalIntent`
+- `RecordReleaseEvidence`
 
 ## Local Lifecycle Rules
 
@@ -239,6 +269,9 @@ Supported local transactions:
 - Finality receipts can be created only for accepted receipts with no unresolved challenge.
 - Artifact availability is a local proof/status record over an existing artifact commitment; it does not store raw artifact data.
 - Verifier modules are local identity records for verifier provenance; they do not introduce staking, rewards, or verifier economics.
+- Bridge observations persist public source evidence references and replay keys.
+- Bridge credits consume replay keys exactly once and credit local test-unit balances only in this no-value runtime.
+- Withdrawal intents persist local lock/burn references and public release evidence references. They do not broadcast funds from this crate.
 
 ## Blocks And Roots
 
@@ -264,6 +297,51 @@ Default local state:
 devnet/local/state.json
 ```
 
+Durable storage for the default state lives alongside it:
+
+```text
+devnet/local/storage/
+  manifest.json
+  blocks/{height}.json
+  headers/{height}.json
+  transactions/{tx_id}.json
+  receipts/{tx_id}.json
+  events/{event_id}.json
+  objects/*.json
+  indexes/storage-indexes.json
+  snapshots/{height}.json
+  snapshots/latest.json
+  backups/
+  tmp/
+```
+
+For a custom state path, the storage directory is a sibling named
+`<state-file>.storage/`, except `state.json` uses `storage/`.
+
+Writes use temporary files and rename to final paths for blocks, headers,
+transactions, receipts, events, object maps, indexes, snapshots, manifests,
+compatibility state snapshots, and exports. Startup validates the manifest and
+snapshot, removes leftover `*.tmp` files, and rebuilds derived records/indexes
+from the durable snapshot if a previous write was interrupted before indexes or
+derived records were complete.
+
+The manifest contains storage version, chain id, genesis hash, data directory,
+latest height/hash, finalized height/hash, deterministic state root, map roots,
+storage policy, tool version, and compatibility state path. Startup rejects
+wrong chain id, wrong genesis hash, malformed roots, future storage versions,
+old durable storage versions that require explicit migration, bad finality, and
+canonical pointer mismatches.
+
+The current storage policy is archival. No pruning is performed in this pass, so
+old block, transaction, receipt, event, object, and snapshot records remain
+available for local queries. The persisted index file supports lookup by
+transaction id, receipt transaction id, event id, account id, token id, pool id,
+rootfield id, bridge source event/replay key, bridge observation id, bridge
+credit id, withdrawal intent id, release evidence id, and consumed replay key.
+
+Legacy raw `state.json` files are migrated on load by backing up the old file
+under `storage/backups/` and committing the durable layout.
+
 `devnet/local/` is ignored by git.
 
 ## Handoff Files
@@ -287,6 +365,8 @@ Control-plane and dashboard agents should read:
 - `objects.localTestUnitBalances` and `objects.faucetRecords` from `control-plane-handoff.json`.
 - Top-level `localTestUnitBalances` and `faucetRecords` from `dashboard-state.json`.
 - `mapRoots.localTestUnitBalanceRoot` and `mapRoots.faucetRecordRoot` anywhere map-root reconciliation is needed.
+- Bridge provenance from `bridgeObservations`, `bridgeCredits`, `withdrawalIntents`, `releaseEvidence`, and `consumedReplayKeys` in exported state or control-plane handoff files.
+- Query indexes from `devnet/local/storage/indexes/storage-indexes.json` when an RPC or explorer needs transaction, receipt, event, account, token, pool, rootfield, or bridge lookup without scanning every block file.
 
 ## Non-Goals
 

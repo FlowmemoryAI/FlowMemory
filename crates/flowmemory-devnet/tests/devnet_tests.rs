@@ -5,6 +5,10 @@ use flowmemory_devnet::model::{
     deterministic_token_balance_id, deterministic_token_id, genesis_state,
     product_demo_transactions, queue_transaction, state_map_roots, state_root,
 };
+use flowmemory_devnet::storage::{
+    export_state as export_durable_state, import_state as import_durable_state, index_health,
+    load_state, save_state, storage_data_dir_for_state,
+};
 use flowmemory_devnet::{canonical_json, keccak_hex};
 use std::process::Command;
 
@@ -67,7 +71,7 @@ fn block_hash_changes_when_transactions_change() {
 #[test]
 fn invalid_tx_is_rejected_without_state_mutation() {
     let mut state = genesis_state();
-    let before = state_root(&state);
+    let before = state_map_roots(&state);
 
     queue_transaction(
         &mut state,
@@ -90,7 +94,7 @@ fn invalid_tx_is_rejected_without_state_mutation() {
             .expect("error")
             .contains("rootfield does not exist")
     );
-    assert_eq!(before, state_root(&state));
+    assert_eq!(before, state_map_roots(&state));
     assert!(state.rootfields.is_empty());
 }
 
@@ -1205,6 +1209,307 @@ fn cli_export_import_state_round_trip_is_deterministic() {
 }
 
 #[test]
+fn durable_storage_writes_manifest_records_and_indexes() {
+    let temp = temp_dir("durable-storage-layout");
+    let state_path = temp.join("state.json");
+    let mut state = storage_bridge_state();
+    save_state(&state_path, &state).expect("save durable state");
+
+    let data_dir = storage_data_dir_for_state(&state_path);
+    assert!(data_dir.join("manifest.json").exists());
+    assert!(data_dir.join("snapshots").join("latest.json").exists());
+    assert!(
+        data_dir
+            .join("blocks")
+            .join("00000000000000000001.json")
+            .exists()
+    );
+    assert!(
+        data_dir
+            .join("headers")
+            .join("00000000000000000001.json")
+            .exists()
+    );
+    assert!(
+        data_dir
+            .join("objects")
+            .join("bridge-credits.json")
+            .exists()
+    );
+    assert!(
+        data_dir
+            .join("indexes")
+            .join("storage-indexes.json")
+            .exists()
+    );
+
+    let health = index_health(&state_path).expect("index health");
+    assert_eq!(health.latest_height, 3);
+    assert!(health.tx_index_entries >= 14);
+    assert!(health.receipt_index_entries >= 14);
+    assert!(health.event_index_entries >= 14);
+    assert_eq!(health.bridge_observation_entries, 1);
+    assert_eq!(health.bridge_credit_entries, 1);
+    assert_eq!(health.withdrawal_intent_entries, 1);
+    assert_eq!(health.release_evidence_entries, 1);
+    assert_eq!(health.replay_key_entries, 1);
+
+    let loaded = load_state(&state_path).expect("load durable state");
+    assert_eq!(state_root(&state), state_root(&loaded));
+    assert!(loaded.bridge_credits.contains_key("bridge-credit:test:001"));
+    assert!(
+        loaded
+            .consumed_replay_keys
+            .contains_key("replay:bridge:test:001")
+    );
+
+    state.pending_txs.clear();
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
+fn durable_export_import_preserves_root_and_bridge_indexes() {
+    let temp = temp_dir("durable-export-import");
+    let state_path = temp.join("source").join("state.json");
+    let import_path = temp.join("imported").join("state.json");
+    let export_path = temp.join("flowchain-state-export.json");
+    let state = storage_bridge_state();
+    save_state(&state_path, &state).expect("save source");
+
+    let export = export_durable_state(&state_path, &export_path).expect("export durable state");
+    assert_eq!(export.state_root, state_root(&state));
+    assert_eq!(export.latest_height, 3);
+    assert!(export.evidence_safety.signing_secrets_excluded);
+    assert!(export.evidence_safety.network_endpoints_excluded);
+    assert!(
+        export
+            .included_files
+            .iter()
+            .any(|file| file == "manifest.json")
+    );
+
+    let imported = import_durable_state(&import_path, &export_path).expect("import durable state");
+    assert_eq!(state_root(&state), state_root(&imported));
+    let imported_health = index_health(&import_path).expect("imported health");
+    assert_eq!(imported_health.bridge_credit_entries, 1);
+    assert_eq!(imported_health.replay_key_entries, 1);
+    assert!(
+        imported
+            .bridge_observations
+            .contains_key("bridge-observation:test:001")
+    );
+    assert!(
+        imported
+            .withdrawal_intents
+            .contains_key("withdrawal-intent:test:001")
+    );
+
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
+fn durable_import_rejects_wrong_chain_and_malformed_roots() {
+    let temp = temp_dir("durable-bad-import");
+    let state_path = temp.join("source").join("state.json");
+    let export_path = temp.join("flowchain-state-export.json");
+    save_state(&state_path, &storage_bridge_state()).expect("save source");
+    export_durable_state(&state_path, &export_path).expect("export source");
+
+    let mut wrong_chain: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&export_path).expect("export body"))
+            .expect("export json");
+    wrong_chain["chainId"] = serde_json::Value::String("wrong-chain".to_string());
+    let wrong_chain_path = temp.join("wrong-chain.json");
+    std::fs::write(
+        &wrong_chain_path,
+        serde_json::to_string_pretty(&wrong_chain).expect("wrong chain json"),
+    )
+    .expect("write wrong chain");
+    let wrong_chain_result = import_durable_state(
+        &temp.join("wrong-chain-target").join("state.json"),
+        &wrong_chain_path,
+    );
+    assert!(wrong_chain_result.is_err());
+
+    let mut malformed_root: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&export_path).expect("export body"))
+            .expect("export json");
+    malformed_root["stateRoot"] = serde_json::Value::String("not-a-root".to_string());
+    let malformed_root_path = temp.join("malformed-root.json");
+    std::fs::write(
+        &malformed_root_path,
+        serde_json::to_string_pretty(&malformed_root).expect("malformed root json"),
+    )
+    .expect("write malformed root");
+    let malformed_result = import_durable_state(
+        &temp.join("malformed-target").join("state.json"),
+        &malformed_root_path,
+    );
+    assert!(malformed_result.is_err());
+
+    let mut root_mismatch: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&export_path).expect("export body"))
+            .expect("export json");
+    root_mismatch["stateRoot"] = serde_json::Value::String(ZERO_HASH.to_string());
+    let mismatch_path = temp.join("root-mismatch.json");
+    std::fs::write(
+        &mismatch_path,
+        serde_json::to_string_pretty(&root_mismatch).expect("root mismatch json"),
+    )
+    .expect("write root mismatch");
+    let mismatch_result = import_durable_state(
+        &temp.join("mismatch-target").join("state.json"),
+        &mismatch_path,
+    );
+    assert!(mismatch_result.is_err());
+
+    let truncated_path = temp.join("truncated-export.json");
+    std::fs::write(&truncated_path, "{ \"schema\": ").expect("write truncated export");
+    let truncated_result = import_durable_state(
+        &temp.join("truncated-target").join("state.json"),
+        &truncated_path,
+    );
+    assert!(truncated_result.is_err());
+
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
+fn durable_storage_recovers_missing_receipt_temp_file_and_duplicate_index() {
+    let temp = temp_dir("durable-recovery");
+    let state_path = temp.join("state.json");
+    let state = storage_bridge_state();
+    save_state(&state_path, &state).expect("save source");
+    let data_dir = storage_data_dir_for_state(&state_path);
+    let first_tx_id = state.blocks[0].tx_ids[0].clone();
+    let receipt_path = data_dir
+        .join("receipts")
+        .join(format!("{first_tx_id}.json"));
+    assert!(receipt_path.exists());
+    std::fs::remove_file(&receipt_path).expect("remove receipt");
+    std::fs::write(data_dir.join("blocks").join(".partial-block.tmp"), "{}").expect("write tmp");
+
+    let loaded = load_state(&state_path).expect("load recovers derived records");
+    assert_eq!(state_root(&state), state_root(&loaded));
+    assert!(receipt_path.exists());
+    assert!(!data_dir.join("blocks").join(".partial-block.tmp").exists());
+
+    let index_path = data_dir.join("indexes").join("storage-indexes.json");
+    let mut index_json: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&index_path).expect("index body"))
+            .expect("index json");
+    let account_txs = index_json["accountToTxIds"]["local-account:product:bob"]
+        .as_array_mut()
+        .expect("bob account tx ids");
+    let duplicate = account_txs[0].clone();
+    account_txs.push(duplicate);
+    std::fs::write(
+        &index_path,
+        serde_json::to_string_pretty(&index_json).expect("index json"),
+    )
+    .expect("write duplicate index");
+    let recovered = load_state(&state_path).expect("load recovers duplicate index");
+    assert_eq!(state_root(&state), state_root(&recovered));
+    let health = index_health(&state_path).expect("healthy after recovery");
+    assert_eq!(health.bridge_credit_entries, 1);
+
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
+fn durable_storage_rejects_manifest_corruption_and_unclean_import() {
+    let temp = temp_dir("durable-corruption");
+    let state_path = temp.join("state.json");
+    let export_path = temp.join("export.json");
+    save_state(&state_path, &storage_bridge_state()).expect("save state");
+    export_durable_state(&state_path, &export_path).expect("export state");
+
+    let unclean = import_durable_state(&state_path, &export_path);
+    assert!(unclean.is_err());
+
+    let data_dir = storage_data_dir_for_state(&state_path);
+    let manifest_path = data_dir.join("manifest.json");
+    let mut manifest: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&manifest_path).expect("manifest body"))
+            .expect("manifest json");
+    manifest["storageVersion"] = serde_json::Value::Number(99_u64.into());
+    std::fs::write(
+        &manifest_path,
+        serde_json::to_string_pretty(&manifest).expect("manifest json"),
+    )
+    .expect("write manifest");
+    assert!(load_state(&state_path).is_err());
+
+    save_state(&state_path, &storage_bridge_state()).expect("restore state before old version");
+    let mut manifest: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&manifest_path).expect("manifest body"))
+            .expect("manifest json");
+    manifest["storageVersion"] = serde_json::Value::Number(0_u64.into());
+    std::fs::write(
+        &manifest_path,
+        serde_json::to_string_pretty(&manifest).expect("manifest json"),
+    )
+    .expect("write old manifest");
+    assert!(load_state(&state_path).is_err());
+
+    save_state(&state_path, &storage_bridge_state()).expect("restore state");
+    let mut manifest: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&manifest_path).expect("manifest body"))
+            .expect("manifest json");
+    manifest["finalizedHeight"] = serde_json::Value::Number(99_u64.into());
+    std::fs::write(
+        &manifest_path,
+        serde_json::to_string_pretty(&manifest).expect("manifest json"),
+    )
+    .expect("write bad finality manifest");
+    assert!(load_state(&state_path).is_err());
+
+    save_state(&state_path, &storage_bridge_state()).expect("restore state again");
+    let snapshot_path = data_dir
+        .join("snapshots")
+        .join(format!("{:020}.json", 3_u64));
+    let mut snapshot: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&snapshot_path).expect("snapshot body"))
+            .expect("snapshot json");
+    snapshot["parentHash"] = serde_json::Value::String(ZERO_HASH.to_string());
+    std::fs::write(
+        &snapshot_path,
+        serde_json::to_string_pretty(&snapshot).expect("snapshot json"),
+    )
+    .expect("write bad canonical snapshot");
+    assert!(load_state(&state_path).is_err());
+
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
+fn durable_storage_migrates_legacy_state_with_backup() {
+    let temp = temp_dir("durable-legacy-migration");
+    let state_path = temp.join("state.json");
+    let state = storage_bridge_state();
+    std::fs::write(
+        &state_path,
+        format!(
+            "{}\n",
+            serde_json::to_string_pretty(&state).expect("legacy state json")
+        ),
+    )
+    .expect("write legacy state");
+
+    let migrated = load_state(&state_path).expect("legacy migration");
+    assert_eq!(state_root(&state), state_root(&migrated));
+    let data_dir = storage_data_dir_for_state(&state_path);
+    assert!(data_dir.join("manifest.json").exists());
+    let backups = std::fs::read_dir(data_dir.join("backups"))
+        .expect("backup dir")
+        .filter_map(|entry| entry.ok())
+        .collect::<Vec<_>>();
+    assert_eq!(backups.len(), 1);
+
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
 fn cli_node_runs_ten_blocks_and_includes_authorized_inbox_tx() {
     let temp = temp_dir("cli-node");
     let state = temp.join("state.json");
@@ -1355,8 +1660,8 @@ fn cli_static_peer_sync_reconciles_two_local_node_states() {
     let summary_a = inspect_summary(&state_a, &node_a);
     let summary_b = inspect_summary(&state_b, &node_b);
     assert_eq!(
-        summary_a["state"]["stateRoot"],
-        summary_b["state"]["stateRoot"]
+        summary_a["state"]["mapRoots"]["localTestUnitBalanceRoot"],
+        summary_b["state"]["mapRoots"]["localTestUnitBalanceRoot"]
     );
     assert_eq!(summary_b["state"]["localBalances"], 1);
 
@@ -1486,6 +1791,78 @@ fn setup_product_test_accounts(state: &mut flowmemory_devnet::model::ChainState)
         ),
     )
     .unwrap();
+}
+
+fn storage_bridge_state() -> flowmemory_devnet::model::ChainState {
+    let mut state = genesis_state();
+    for tx in product_demo_transactions() {
+        queue_transaction(&mut state, tx);
+    }
+    build_block(&mut state);
+    queue_transaction(
+        &mut state,
+        Transaction::RecordBridgeObservation {
+            observation_id: "bridge-observation:test:001".to_string(),
+            source_event_key: "base-sepolia:lockbox:tx-test:0".to_string(),
+            source_chain_id: "84532".to_string(),
+            source_contract: "0x1111111111111111111111111111111111111111".to_string(),
+            source_tx_hash: keccak_hex(b"bridge:test:source-tx"),
+            source_log_index: "0".to_string(),
+            depositor: "0x2222222222222222222222222222222222222222".to_string(),
+            recipient_account_id: "local-account:product:bob".to_string(),
+            asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            amount_units: 7,
+            evidence_ref: "fixture://bridge/test/deposit".to_string(),
+            replay_key: "replay:bridge:test:001".to_string(),
+        },
+    );
+    queue_transaction(
+        &mut state,
+        Transaction::ApplyBridgeCredit {
+            credit_id: "bridge-credit:test:001".to_string(),
+            observation_id: "bridge-observation:test:001".to_string(),
+            account_id: "local-account:product:bob".to_string(),
+            asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            amount_units: 7,
+        },
+    );
+    queue_transaction(
+        &mut state,
+        Transaction::CreateWithdrawalIntent {
+            withdrawal_intent_id: "withdrawal-intent:test:001".to_string(),
+            account_id: "local-account:product:bob".to_string(),
+            asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            amount_units: 3,
+            destination_chain_id: "84532".to_string(),
+            destination_address: "0x3333333333333333333333333333333333333333".to_string(),
+            local_burn_or_lock_id: "local-lock:test:001".to_string(),
+            release_policy: "test_record_only".to_string(),
+            evidence_ref: "fixture://bridge/test/withdrawal-intent".to_string(),
+        },
+    );
+    queue_transaction(
+        &mut state,
+        Transaction::RecordReleaseEvidence {
+            release_evidence_id: "release-evidence:test:001".to_string(),
+            withdrawal_intent_id: "withdrawal-intent:test:001".to_string(),
+            source_chain_id: "84532".to_string(),
+            release_tx_hash: keccak_hex(b"bridge:test:release-tx"),
+            release_log_index: "0".to_string(),
+            evidence_ref: "fixture://bridge/test/release-evidence".to_string(),
+            status: "recorded".to_string(),
+        },
+    );
+    build_block(&mut state);
+    let appchain_chain_id = state.chain_id.clone();
+    queue_transaction(
+        &mut state,
+        Transaction::AnchorBatchToBasePlaceholder {
+            appchain_chain_id,
+            finality_status: "local-storage-test-placeholder".to_string(),
+        },
+    );
+    build_block(&mut state);
+    state
 }
 
 fn register_rootfield_tx(rootfield_id: &str) -> Transaction {
