@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Activity,
   AlertTriangle,
@@ -475,10 +476,10 @@ export function WalletView({ workbench }: WalletViewProps) {
   return (
     <div className="wallet-app-shell">
       <aside className="wallet-app-sidebar" aria-label="Wallet navigation">
-        <a className="wallet-brand" href="/wallet" aria-label="Flowchain wallet home">
+        <Link className="wallet-brand" to="/wallet" aria-label="Flowchain wallet home">
           <FlowMark />
           <strong>Flowchain</strong>
-        </a>
+        </Link>
 
         <nav className="wallet-side-nav">
           <button className={activePanel === "home" ? "active" : ""} type="button" onClick={() => setActivePanel("home")}>
@@ -493,10 +494,10 @@ export function WalletView({ workbench }: WalletViewProps) {
             <Activity size={19} aria-hidden="true" />
             Activity
           </button>
-          <a href="/bridge">
+          <Link to="/bridge">
             <Network size={19} aria-hidden="true" />
             Bridge
-          </a>
+          </Link>
           <button className={activePanel === "swap" ? "active" : ""} type="button" onClick={() => setActivePanel("swap")}>
             <ArrowRightLeft size={19} aria-hidden="true" />
             Swap
@@ -614,11 +615,11 @@ export function WalletView({ workbench }: WalletViewProps) {
             <strong>Swap</strong>
             <small>Swap assets</small>
           </button>
-          <a href="/bridge">
+          <Link to="/bridge">
             <span><Network size={22} aria-hidden="true" /></span>
             <strong>Bridge</strong>
             <small>Bridge to Flowchain</small>
-          </a>
+          </Link>
         </section>
 
         <section className="wallet-assets-section">
@@ -740,10 +741,10 @@ export function WalletView({ workbench }: WalletViewProps) {
             <h2>Bridge to Flowchain</h2>
             <p>Move assets between chains</p>
           </div>
-          <a href="/bridge">
+          <Link to="/bridge">
             Open bridge
             <ArrowRight size={17} aria-hidden="true" />
-          </a>
+          </Link>
         </section>
 
         <section className="wallet-side-card wallet-watchlist-card">
