@@ -452,6 +452,162 @@ export function bridgeWithdrawalIntentId({
   ]);
 }
 
+export function pilotCapHash({
+  capId,
+  assetId,
+  maxAmount,
+  usedAmount,
+  unit,
+  windowStartsAtUnixMs,
+  windowEndsAtUnixMs,
+  realValuePilot,
+  productionReady
+}) {
+  return typedHash(TYPE_STRINGS.pilotCapV0, [
+    ["bytes32", capId],
+    ["bytes32", assetId],
+    ["uint256", maxAmount],
+    ["uint256", usedAmount],
+    ["bytes32", keccakUtf8(unit)],
+    ["uint64", windowStartsAtUnixMs],
+    ["uint64", windowEndsAtUnixMs],
+    ["uint8", booleanCode(realValuePilot)],
+    ["uint8", booleanCode(productionReady)]
+  ]);
+}
+
+export function pilotBridgeCreditAckId({
+  chainId,
+  contractAddress,
+  operatorId,
+  creditId,
+  depositId,
+  accountId,
+  assetId,
+  amount,
+  acknowledgedAtBlockNumber,
+  accountNonce,
+  issuedAtUnixMs,
+  expiresAtUnixMs,
+  pilotCap
+}) {
+  return typedHash(TYPE_STRINGS.pilotBridgeCreditAckV0, [
+    ["uint256", chainId],
+    ["address", contractAddress],
+    ["bytes32", operatorId],
+    ["bytes32", creditId],
+    ["bytes32", depositId],
+    ["bytes32", accountId],
+    ["bytes32", assetId],
+    ["uint256", amount],
+    ["uint64", acknowledgedAtBlockNumber],
+    ["uint64", accountNonce],
+    ["uint64", issuedAtUnixMs],
+    ["uint64", expiresAtUnixMs],
+    ["bytes32", pilotCapHash(pilotCap)]
+  ]);
+}
+
+export function pilotWithdrawalIntentId({
+  sourceChainId,
+  destinationChainId,
+  contractAddress,
+  operatorId,
+  creditId,
+  depositId,
+  token,
+  amount,
+  flowchainAccount,
+  baseRecipient,
+  status,
+  requestedAt,
+  accountNonce,
+  issuedAtUnixMs,
+  expiresAtUnixMs,
+  pilotCap
+}) {
+  return typedHash(TYPE_STRINGS.pilotWithdrawalIntentV0, [
+    ["uint256", sourceChainId],
+    ["uint256", destinationChainId],
+    ["address", contractAddress],
+    ["bytes32", operatorId],
+    ["bytes32", creditId],
+    ["bytes32", depositId],
+    ["address", token],
+    ["uint256", amount],
+    ["bytes32", flowchainAccount],
+    ["address", baseRecipient],
+    ["bytes32", keccakUtf8(status)],
+    ["bytes32", keccakUtf8(requestedAt)],
+    ["uint64", accountNonce],
+    ["uint64", issuedAtUnixMs],
+    ["uint64", expiresAtUnixMs],
+    ["bytes32", pilotCapHash(pilotCap)]
+  ]);
+}
+
+export function pilotReleaseEvidenceId({
+  chainId,
+  contractAddress,
+  operatorId,
+  withdrawalIntentId,
+  releaseTxHash,
+  releaseLogIndex,
+  token,
+  amount,
+  recipient,
+  releasedAtBlockNumber,
+  releasedAtUnixMs,
+  evidenceHash,
+  issuedAtUnixMs,
+  expiresAtUnixMs,
+  pilotCap
+}) {
+  return typedHash(TYPE_STRINGS.pilotReleaseEvidenceV0, [
+    ["uint256", chainId],
+    ["address", contractAddress],
+    ["bytes32", operatorId],
+    ["bytes32", withdrawalIntentId],
+    ["bytes32", releaseTxHash],
+    ["uint32", releaseLogIndex],
+    ["address", token],
+    ["uint256", amount],
+    ["address", recipient],
+    ["uint64", releasedAtBlockNumber],
+    ["uint64", releasedAtUnixMs],
+    ["bytes32", evidenceHash],
+    ["uint64", issuedAtUnixMs],
+    ["uint64", expiresAtUnixMs],
+    ["bytes32", pilotCapHash(pilotCap)]
+  ]);
+}
+
+export function pilotEmergencyControlId({
+  chainId,
+  contractAddress,
+  operatorId,
+  action,
+  targetSignerId,
+  reasonHash,
+  issuedAtUnixMs,
+  expiresAtUnixMs,
+  nonce,
+  pilotCap
+}) {
+  return typedHash(TYPE_STRINGS.pilotEmergencyControlV0, [
+    ["uint256", chainId],
+    ["address", contractAddress],
+    ["bytes32", operatorId],
+    ["bytes32", keccakUtf8(action)],
+    ["bytes32", targetSignerId],
+    ["bytes32", reasonHash],
+    ["uint64", issuedAtUnixMs],
+    ["uint64", expiresAtUnixMs],
+    ["bytes32", nonce],
+    ["bytes32", pilotCapHash(pilotCap)]
+  ]);
+}
+
 export function hardwareSignalEnvelopeId({
   deviceId,
   signalRoot,
@@ -1062,6 +1218,158 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       );
     }
   },
+  "flowchain.pilot_bridge_credit_ack.v0": {
+    objectType: "pilot_bridge_credit_ack",
+    idField: "pilotBridgeCreditAckId",
+    domainName: "pilotBridgeCreditAckId",
+    signerRoles: ["operator"],
+    nonzeroFields: [
+      "pilotBridgeCreditAckId",
+      "operatorId",
+      "creditId",
+      "depositId",
+      "accountId",
+      "assetId"
+    ],
+    input: (document) => ({
+      chainId: document.chainId,
+      contractAddress: document.contractAddress,
+      operatorId: document.operatorId,
+      creditId: document.creditId,
+      depositId: document.depositId,
+      accountId: document.accountId,
+      assetId: document.assetId,
+      amount: document.amount,
+      acknowledgedAtBlockNumber: document.acknowledgedAtBlockNumber,
+      accountNonce: document.accountNonce,
+      issuedAtUnixMs: document.issuedAtUnixMs,
+      expiresAtUnixMs: document.expiresAtUnixMs,
+      pilotCap: document.pilotCap
+    }),
+    id: pilotBridgeCreditAckId,
+    parentRootCheck(document) {
+      return (
+        [31337, 8453, 84532].includes(document.chainId) &&
+        BigInt(document.amount) > 0n &&
+        hasPilotCap(document.pilotCap)
+      );
+    }
+  },
+  "flowchain.pilot_withdrawal_intent.v0": {
+    objectType: "pilot_withdrawal_intent",
+    idField: "pilotWithdrawalIntentId",
+    domainName: "pilotWithdrawalIntentId",
+    signerRoles: ["operator"],
+    nonzeroFields: [
+      "pilotWithdrawalIntentId",
+      "operatorId",
+      "creditId",
+      "depositId",
+      "flowchainAccount"
+    ],
+    input: (document) => ({
+      sourceChainId: document.sourceChainId,
+      destinationChainId: document.destinationChainId,
+      contractAddress: document.contractAddress,
+      operatorId: document.operatorId,
+      creditId: document.creditId,
+      depositId: document.depositId,
+      token: document.token,
+      amount: document.amount,
+      flowchainAccount: document.flowchainAccount,
+      baseRecipient: document.baseRecipient,
+      status: document.status,
+      requestedAt: document.requestedAt,
+      accountNonce: document.accountNonce,
+      issuedAtUnixMs: document.issuedAtUnixMs,
+      expiresAtUnixMs: document.expiresAtUnixMs,
+      pilotCap: document.pilotCap
+    }),
+    id: pilotWithdrawalIntentId,
+    parentRootCheck(document) {
+      return (
+        [31337, 8453, 84532].includes(document.sourceChainId) &&
+        [31337, 8453, 84532].includes(document.destinationChainId) &&
+        BigInt(document.amount) > 0n &&
+        document.status === "requested" &&
+        hasPilotCap(document.pilotCap)
+      );
+    }
+  },
+  "flowchain.pilot_release_evidence.v0": {
+    objectType: "pilot_release_evidence",
+    idField: "pilotReleaseEvidenceId",
+    domainName: "pilotReleaseEvidenceId",
+    signerRoles: ["operator"],
+    nonzeroFields: [
+      "pilotReleaseEvidenceId",
+      "operatorId",
+      "withdrawalIntentId",
+      "releaseTxHash",
+      "evidenceHash"
+    ],
+    input: (document) => ({
+      chainId: document.chainId,
+      contractAddress: document.contractAddress,
+      operatorId: document.operatorId,
+      withdrawalIntentId: document.withdrawalIntentId,
+      releaseTxHash: document.releaseTxHash,
+      releaseLogIndex: document.releaseLogIndex,
+      token: document.token,
+      amount: document.amount,
+      recipient: document.recipient,
+      releasedAtBlockNumber: document.releasedAtBlockNumber,
+      releasedAtUnixMs: document.releasedAtUnixMs,
+      evidenceHash: document.evidenceHash,
+      issuedAtUnixMs: document.issuedAtUnixMs,
+      expiresAtUnixMs: document.expiresAtUnixMs,
+      pilotCap: document.pilotCap
+    }),
+    id: pilotReleaseEvidenceId,
+    parentRootCheck(document) {
+      return (
+        [31337, 8453, 84532].includes(document.chainId) &&
+        BigInt(document.amount) > 0n &&
+        Number.isInteger(document.releaseLogIndex) &&
+        document.releaseLogIndex >= 0 &&
+        hasPilotCap(document.pilotCap)
+      );
+    }
+  },
+  "flowchain.pilot_emergency_control.v0": {
+    objectType: "pilot_emergency_control",
+    idField: "pilotEmergencyControlId",
+    domainName: "pilotEmergencyControlId",
+    signerRoles: ["operator"],
+    nonzeroFields: [
+      "pilotEmergencyControlId",
+      "operatorId",
+      "targetSignerId",
+      "reasonHash",
+      "nonce"
+    ],
+    input: (document) => ({
+      chainId: document.chainId,
+      contractAddress: document.contractAddress,
+      operatorId: document.operatorId,
+      action: document.action,
+      targetSignerId: document.targetSignerId,
+      reasonHash: document.reasonHash,
+      issuedAtUnixMs: document.issuedAtUnixMs,
+      expiresAtUnixMs: document.expiresAtUnixMs,
+      nonce: document.nonce,
+      pilotCap: document.pilotCap
+    }),
+    id: pilotEmergencyControlId,
+    parentRootCheck(document) {
+      return (
+        [31337, 8453, 84532].includes(document.chainId) &&
+        ["pause", "revoke"].includes(document.action) &&
+        BigInt(document.expiresAtUnixMs) >= BigInt(document.issuedAtUnixMs) &&
+        hasPilotCap(document.pilotCap)
+      );
+    }
+  },
   "flowchain.hardware_signal_envelope.v0": {
     objectType: "hardware_signal_envelope",
     idField: "hardwareSignalEnvelopeId",
@@ -1290,6 +1598,27 @@ function classifyObjectError(error) {
     return "malformed-id";
   }
   return "invalid-object";
+}
+
+function hasPilotCap(cap) {
+  if (!cap || typeof cap !== "object") {
+    return false;
+  }
+  return (
+    isHex32(cap.capId) &&
+    isHex32(cap.assetId) &&
+    typeof cap.maxAmount === "string" &&
+    typeof cap.usedAmount === "string" &&
+    typeof cap.unit === "string" &&
+    typeof cap.windowStartsAtUnixMs === "string" &&
+    typeof cap.windowEndsAtUnixMs === "string" &&
+    cap.realValuePilot === true &&
+    cap.productionReady === false &&
+    BigInt(cap.maxAmount) > 0n &&
+    BigInt(cap.usedAmount) >= 0n &&
+    BigInt(cap.usedAmount) <= BigInt(cap.maxAmount) &&
+    BigInt(cap.windowEndsAtUnixMs) > BigInt(cap.windowStartsAtUnixMs)
+  );
 }
 
 function booleanCode(value) {

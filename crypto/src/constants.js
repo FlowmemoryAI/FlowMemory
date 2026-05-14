@@ -79,6 +79,16 @@ export const TYPE_STRINGS = Object.freeze({
     "FlowChainProductBridgeCreditAckV0(bytes32 creditId,bytes32 depositId,bytes32 accountId,bytes32 assetId,uint256 amount,uint64 acknowledgedAtBlockNumber,uint64 accountNonce)",
   bridgeWithdrawalIntentV0:
     "FlowChainBridgeWithdrawalIntentV0(bytes32 creditId,bytes32 depositId,uint256 sourceChainId,uint256 destinationChainId,address token,uint256 amount,bytes32 flowchainAccount,address baseRecipient,bytes32 statusHash,bytes32 requestedAtHash,uint8 testMode,uint8 broadcast,bytes32 releasePolicyHash,uint8 productionReady)",
+  pilotCapV0:
+    "FlowChainPilotCapV0(bytes32 capId,bytes32 assetId,uint256 maxAmount,uint256 usedAmount,bytes32 unitHash,uint64 windowStartsAtUnixMs,uint64 windowEndsAtUnixMs,uint8 realValuePilot,uint8 productionReady)",
+  pilotBridgeCreditAckV0:
+    "FlowChainPilotBridgeCreditAckV0(uint256 chainId,address contractAddress,bytes32 operatorId,bytes32 creditId,bytes32 depositId,bytes32 accountId,bytes32 assetId,uint256 amount,uint64 acknowledgedAtBlockNumber,uint64 accountNonce,uint64 issuedAtUnixMs,uint64 expiresAtUnixMs,bytes32 capHash)",
+  pilotWithdrawalIntentV0:
+    "FlowChainPilotWithdrawalIntentV0(uint256 sourceChainId,uint256 destinationChainId,address contractAddress,bytes32 operatorId,bytes32 creditId,bytes32 depositId,address token,uint256 amount,bytes32 flowchainAccount,address baseRecipient,bytes32 statusHash,bytes32 requestedAtHash,uint64 accountNonce,uint64 issuedAtUnixMs,uint64 expiresAtUnixMs,bytes32 capHash)",
+  pilotReleaseEvidenceV0:
+    "FlowChainPilotReleaseEvidenceV0(uint256 chainId,address contractAddress,bytes32 operatorId,bytes32 withdrawalIntentId,bytes32 releaseTxHash,uint32 releaseLogIndex,address token,uint256 amount,address recipient,uint64 releasedAtBlockNumber,uint64 releasedAtUnixMs,bytes32 evidenceHash,uint64 issuedAtUnixMs,uint64 expiresAtUnixMs,bytes32 capHash)",
+  pilotEmergencyControlV0:
+    "FlowChainPilotEmergencyControlV0(uint256 chainId,address contractAddress,bytes32 operatorId,bytes32 actionHash,bytes32 targetSignerId,bytes32 reasonHash,uint64 issuedAtUnixMs,uint64 expiresAtUnixMs,bytes32 nonce,bytes32 capHash)",
   hardwareSignalEnvelopeV0:
     "FlowChainHardwareSignalEnvelopeV0(bytes32 deviceId,bytes32 signalRoot,bytes32 previousSignalEnvelopeId,bytes32 channelRoot,uint64 sequence,uint64 observedAtUnixMs,uint8 transport,bytes32 nonce)",
   controlPlaneProvenanceResponseV0:
@@ -124,6 +134,11 @@ export const DOMAIN_STRINGS = Object.freeze({
   productSwapId: "flowchain.product-testnet.v1.swap.id",
   productBridgeCreditAckId: "flowchain.product-testnet.v1.bridge-credit-ack.id",
   bridgeWithdrawalIntentId: "flowchain.product-testnet.v1.bridge-withdrawal-intent.id",
+  pilotCapId: "flowchain.real-value-pilot.v0.cap.id",
+  pilotBridgeCreditAckId: "flowchain.real-value-pilot.v0.bridge-credit-ack.id",
+  pilotWithdrawalIntentId: "flowchain.real-value-pilot.v0.withdrawal-intent.id",
+  pilotReleaseEvidenceId: "flowchain.real-value-pilot.v0.release-evidence.id",
+  pilotEmergencyControlId: "flowchain.real-value-pilot.v0.emergency-control.id",
   hardwareSignalEnvelopeId: "flowchain.local-alpha.v0.hardware-signal-envelope.id",
   controlPlaneProvenanceResponseId: "flowchain.local-alpha.v0.control-plane-provenance-response.id",
   localSignatureEnvelope: "flowchain.local-alpha.v0.local-signature-envelope",

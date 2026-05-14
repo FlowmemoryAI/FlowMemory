@@ -13,6 +13,8 @@ import {
   bridgeDepositId,
   bridgeWithdrawalId,
   bridgeWithdrawalIntentId,
+  buildPilotBridgeCreditAckDocument,
+  createPilotOperatorConfigFromEnv,
   challengeId,
   canonicalJsonHash,
   canonicalJson,
@@ -31,6 +33,7 @@ import {
   flowPulseSchemaId,
   createEncryptedTestVault,
   exportVaultPublicMetadata,
+  exportPilotPublicMetadata,
   hardwareSignalEnvelopeId,
   indexerCursorId,
   listVaultPublicAccounts,
@@ -51,6 +54,8 @@ import {
   modelPassportId,
   productAddLiquidityId,
   productBridgeCreditAckId,
+  pilotEnvelopeReplayKey,
+  pilotBridgeCreditAckId,
   productPoolCreateId,
   productRemoveLiquidityId,
   productSwapId,
@@ -70,6 +75,7 @@ import {
   unlockEncryptedTestVault,
   validateLocalAlphaEnvelope,
   validateLocalTransactionEnvelope,
+  validatePilotOperatorEnvelope,
   verifierModuleId,
   verifierIdentity,
   verifierReportHash,
@@ -109,6 +115,7 @@ const localAlphaValidators = Object.freeze({
   localBalanceRecordId,
   localSignatureEnvelopeHash,
   localTransactionEnvelopeHash,
+  pilotBridgeCreditAckId,
   productAddLiquidityId,
   productBridgeCreditAckId,
   productPoolCreateId,
@@ -661,6 +668,128 @@ test("local encrypted test vault creates, unlocks, lists, signs, verifies, expor
   assert.equal(rotatedAccounts.some((account) => account.rotatedFromSignerKeyId === agentKey.signerKeyId), true);
 });
 
+test("capped real-value pilot operator messages sign, export public metadata, and fail closed", async () => {
+  const password = "pilot-test-password";
+  const issuedAtUnixMs = "1778702400000";
+  const vault = createEncryptedTestVault({
+    password,
+    label: "pilot-operator",
+    signerRole: "operator",
+    privateKey: "0x0000000000000000000000000000000000000000000000000000000000000001",
+    createdAtUnixMs: issuedAtUnixMs
+  });
+  const operator = vault.publicAccounts[0];
+  const env = {
+    FLOWCHAIN_PILOT_CHAIN_ID: "84532",
+    FLOWCHAIN_PILOT_CONTRACT_ADDRESS: "0x1111111111111111111111111111111111111111",
+    FLOWCHAIN_PILOT_OPERATOR_ID: operator.signerId,
+    FLOWCHAIN_PILOT_CAP_ID: keccakUtf8("pilot-cap:test"),
+    FLOWCHAIN_PILOT_CAP_ASSET_ID: keccakUtf8("asset:usdc"),
+    FLOWCHAIN_PILOT_CAP_MAX_AMOUNT: "25000000",
+    FLOWCHAIN_PILOT_CAP_UNIT: "USDC-6",
+    FLOWCHAIN_PILOT_CAP_WINDOW_START_UNIX_MS: issuedAtUnixMs,
+    FLOWCHAIN_PILOT_CAP_WINDOW_END_UNIX_MS: "1778788800000",
+    FLOWCHAIN_PILOT_RPC_URL: "https://example.invalid/secret-token"
+  };
+  const config = createPilotOperatorConfigFromEnv({ env, createdAtUnixMs: issuedAtUnixMs });
+  for (const [name, envPatch, errorPattern] of [
+    ["unsupported chain id", { FLOWCHAIN_PILOT_CHAIN_ID: "1" }, /unsupported pilot chain id/],
+    ["malformed cap id", { FLOWCHAIN_PILOT_CAP_ID: "not-a-cap-id" }, /invalid pilot cap id/],
+    ["zero max cap", { FLOWCHAIN_PILOT_CAP_MAX_AMOUNT: "0" }, /maxAmount must be positive/],
+    ["used cap above max", { FLOWCHAIN_PILOT_CAP_USED_AMOUNT: "25000001" }, /usedAmount/],
+    ["closed cap window", { FLOWCHAIN_PILOT_CAP_WINDOW_END_UNIX_MS: issuedAtUnixMs }, /window/],
+    ["secret-shaped config path", { FLOWCHAIN_PILOT_CONFIG_PATH: "devnet/local/pilot-wallet/rpc_url.json" }, /secret material/],
+    ["base mainnet non-usdc cap", { FLOWCHAIN_PILOT_CHAIN_ID: "8453", FLOWCHAIN_PILOT_CAP_UNIT: "ETH-18" }, /USDC-6/],
+    ["base mainnet cap above guardrail", { FLOWCHAIN_PILOT_CHAIN_ID: "8453", FLOWCHAIN_PILOT_CAP_MAX_AMOUNT: "25000001" }, /25 USD/]
+  ]) {
+    assert.throws(
+      () => createPilotOperatorConfigFromEnv({ env: { ...env, ...envPatch }, createdAtUnixMs: issuedAtUnixMs }),
+      errorPattern,
+      name
+    );
+  }
+  const publicMetadata = exportPilotPublicMetadata({
+    config,
+    walletMetadata: exportVaultPublicMetadata(vault)
+  });
+  const mismatchedVault = createEncryptedTestVault({
+    password,
+    label: "other-operator",
+    signerRole: "operator",
+    privateKey: "0x0000000000000000000000000000000000000000000000000000000000000002",
+    createdAtUnixMs: issuedAtUnixMs
+  });
+  assert.throws(
+    () => exportPilotPublicMetadata({ config, walletMetadata: exportVaultPublicMetadata(mismatchedVault) }),
+    /active operator signer matching the pilot config/
+  );
+  assert.doesNotMatch(JSON.stringify(config), /secret-token/i);
+  assert.doesNotMatch(JSON.stringify(publicMetadata), /privateKey|mnemonic|seed|secret-token|webhook|apiKey/i);
+  assert.equal(publicMetadata.accounts.length, 1);
+  assert.equal(config.nextCommands.some((command) => command.includes("flowchain-wallet-pilot-observe.ps1")), true);
+
+  const document = buildPilotBridgeCreditAckDocument({
+    chainId: config.chainId,
+    contractAddress: config.contractAddress,
+    operatorId: config.operatorId,
+    creditId: keccakUtf8("pilot-credit"),
+    depositId: keccakUtf8("pilot-deposit"),
+    accountId: operator.signerId,
+    assetId: config.pilotCap.assetId,
+    amount: "5000000",
+    acknowledgedAtBlockNumber: "10",
+    accountNonce: "1",
+    issuedAtUnixMs,
+    expiresAtUnixMs: "1778706000000",
+    pilotCap: config.pilotCap
+  });
+  assert.equal(pilotBridgeCreditAckId(document), document.pilotBridgeCreditAckId);
+
+  const envelope = await signLocalTransactionWithVault({
+    vault,
+    password,
+    signerKeyId: operator.signerKeyId,
+    document,
+    chainId: config.chainId,
+    nonce: "1",
+    issuedAtUnixMs
+  });
+  assert.deepEqual(validatePilotOperatorEnvelope({
+    document,
+    envelope,
+    context: {
+      expectedChainId: config.chainId,
+      expectedContractAddress: config.contractAddress,
+      expectedOperatorId: config.operatorId,
+      expectedNonce: "1",
+      nowUnixMs: issuedAtUnixMs
+    }
+  }), { valid: true, errors: [] });
+
+  for (const [name, mutation, expectedError] of [
+    ["wrong-chain", { context: { expectedChainId: "8453" } }, "wrong-chain-id"],
+    ["wrong-contract", { context: { expectedContractAddress: "0x2222222222222222222222222222222222222222" } }, "wrong-contract-address"],
+    ["wrong-operator", { context: { expectedOperatorId: keccakUtf8("wrong") } }, "wrong-operator"],
+    ["mutated-payload", { document: { ...document, amount: "1" } }, "bad-payload-hash"],
+    ["replay", { context: { seenNonces: new Set([pilotEnvelopeReplayKey(envelope)]) } }, "replay"],
+    ["expired", { context: { nowUnixMs: "1778709600000" } }, "expired-message"],
+    ["missing-cap", { document: withoutField(document, "pilotCap") }, "missing-cap-fields"]
+  ]) {
+    const result = validatePilotOperatorEnvelope({
+      document: mutation.document ?? document,
+      envelope,
+      context: {
+        expectedChainId: config.chainId,
+        expectedContractAddress: config.contractAddress,
+        expectedOperatorId: config.operatorId,
+        ...mutation.context
+      }
+    });
+    assert.equal(result.valid, false, name);
+    assert.ok(result.errors.includes(expectedError), `${name}: ${result.errors.join(", ")}`);
+  }
+});
+
 test("validates all published crypto test vectors", () => {
   assert.equal(validateVectors(), 46);
 });
@@ -737,4 +866,10 @@ function mutatedTransactionVector(vector, documentsByName, transactionsByName) {
   }
 
   return { document, envelope, context };
+}
+
+function withoutField(document, field) {
+  const copy = structuredClone(document);
+  delete copy[field];
+  return copy;
 }

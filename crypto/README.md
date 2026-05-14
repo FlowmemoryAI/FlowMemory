@@ -62,6 +62,27 @@ The wallet commands are for local/private testnet smoke use only. Public exports
 contain signer metadata and public keys; private keys, mnemonics, seed material,
 and ciphertext are not exported as public metadata.
 
+Run the capped real-value pilot wallet/operator E2E:
+
+```powershell
+npm run wallet:pilot-e2e
+```
+
+Pilot helper commands:
+
+```powershell
+npm run wallet:pilot-config -- --out ..\devnet\local\pilot-wallet\operator-config.local.json
+npm run wallet:pilot-metadata -- --config ..\devnet\local\pilot-wallet\operator-config.local.json --vault ..\devnet\local\pilot-wallet\operator-vault.json
+npm run wallet:pilot-sign -- --config ..\devnet\local\pilot-wallet\operator-config.local.json --vault ..\devnet\local\pilot-wallet\operator-vault.json --document .\fixtures\pilot-release-evidence.json --nonce 1
+npm run wallet:pilot-verify -- --config ..\devnet\local\pilot-wallet\operator-config.local.json --document .\fixtures\pilot-release-evidence.json --envelope .\out\pilot-release-envelope.json
+npm run wallet:pilot-next -- --config ..\devnet\local\pilot-wallet\operator-config.local.json
+```
+
+The pilot commands stay command-line only. Runtime and control-plane consumers
+that only need public verification can import
+`@flowmemory/crypto/pilot-envelope-validation`; that subpath does not import
+encrypted vault creation, unlock, or signing helpers.
+
 ## Read Order
 
 1. `FLOWMEMORY_CRYPTO_SPEC.md`

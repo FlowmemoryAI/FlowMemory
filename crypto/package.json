@@ -10,6 +10,10 @@
     ".": {
       "types": "./src/index.d.ts",
       "default": "./src/index.js"
+    },
+    "./pilot-envelope-validation": {
+      "types": "./src/pilot-envelope-validation.d.ts",
+      "default": "./src/pilot-envelope-validation.js"
     }
   },
   "scripts": {
@@ -26,7 +30,13 @@
     "wallet:add-account": "node src/wallet-cli.js add-account",
     "wallet:rotate": "node src/wallet-cli.js rotate",
     "wallet:sign": "node src/wallet-cli.js sign",
-    "wallet:verify": "node src/wallet-cli.js verify"
+    "wallet:verify": "node src/wallet-cli.js verify",
+    "wallet:pilot-config": "node src/pilot-wallet-cli.js config-from-env",
+    "wallet:pilot-metadata": "node src/pilot-wallet-cli.js metadata",
+    "wallet:pilot-sign": "node src/pilot-wallet-cli.js sign",
+    "wallet:pilot-verify": "node src/pilot-wallet-cli.js verify",
+    "wallet:pilot-next": "node src/pilot-wallet-cli.js next-commands",
+    "wallet:pilot-e2e": "node src/pilot-wallet-e2e.js"
   },
   "dependencies": {
     "@noble/hashes": "2.2.0",

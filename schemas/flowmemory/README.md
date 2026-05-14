@@ -25,6 +25,9 @@ These schemas are the canonical local/test V0 shapes for generated Flow Memory a
 - `local-signature-envelope.schema.json`
 - `local-transaction-envelope.schema.json`
 - `product-transaction.schema.json`
+- `real-value-pilot-message.schema.json`
+- `real-value-pilot-operator-config.schema.json`
+- `real-value-pilot-public-metadata.schema.json`
 - `control-plane-provenance-response.schema.json`
 
 `memory-signal.schema.json` also embeds the `flowmemory.flowpulse_contract_event.v0`
@@ -54,6 +57,11 @@ transaction documents that can be wrapped by `local-transaction-envelope`:
 transfer, token launch, pool create, add liquidity, remove liquidity, swap, and
 bridge credit acknowledgement. Bridge withdrawal intent uses
 `bridge-withdrawal-intent.schema.json` and the same local transaction envelope.
+
+The `real-value-pilot-*` schemas describe capped pilot operator messages,
+env-derived non-secret config, and secret-free public metadata export. Pilot
+messages include cap fields and are verified through the crypto package without
+loading vault signing helpers.
 
 Run the canonical Local Alpha schema/fixture check from the crypto package:
 

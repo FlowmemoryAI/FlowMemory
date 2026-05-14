@@ -405,6 +405,84 @@ export interface BridgeWithdrawalIntentInput {
   productionReady: boolean;
 }
 
+export interface PilotCapInput {
+  capId: Bytes32;
+  assetId: Bytes32;
+  maxAmount: number | bigint | string;
+  usedAmount: number | bigint | string;
+  unit: string;
+  windowStartsAtUnixMs: number | bigint | string;
+  windowEndsAtUnixMs: number | bigint | string;
+  realValuePilot: boolean;
+  productionReady: boolean;
+}
+
+export interface PilotBridgeCreditAckInput {
+  chainId: number | bigint | string;
+  contractAddress: Address;
+  operatorId: Bytes32;
+  creditId: Bytes32;
+  depositId: Bytes32;
+  accountId: Bytes32;
+  assetId: Bytes32;
+  amount: number | bigint | string;
+  acknowledgedAtBlockNumber: number | bigint | string;
+  accountNonce: number | bigint | string;
+  issuedAtUnixMs: number | bigint | string;
+  expiresAtUnixMs: number | bigint | string;
+  pilotCap: PilotCapInput;
+}
+
+export interface PilotWithdrawalIntentInput {
+  sourceChainId: number | bigint | string;
+  destinationChainId: number | bigint | string;
+  contractAddress: Address;
+  operatorId: Bytes32;
+  creditId: Bytes32;
+  depositId: Bytes32;
+  token: Address;
+  amount: number | bigint | string;
+  flowchainAccount: Bytes32;
+  baseRecipient: Address;
+  status: string;
+  requestedAt: string;
+  accountNonce: number | bigint | string;
+  issuedAtUnixMs: number | bigint | string;
+  expiresAtUnixMs: number | bigint | string;
+  pilotCap: PilotCapInput;
+}
+
+export interface PilotReleaseEvidenceInput {
+  chainId: number | bigint | string;
+  contractAddress: Address;
+  operatorId: Bytes32;
+  withdrawalIntentId: Bytes32;
+  releaseTxHash: Bytes32;
+  releaseLogIndex: number | bigint | string;
+  token: Address;
+  amount: number | bigint | string;
+  recipient: Address;
+  releasedAtBlockNumber: number | bigint | string;
+  releasedAtUnixMs: number | bigint | string;
+  evidenceHash: Bytes32;
+  issuedAtUnixMs: number | bigint | string;
+  expiresAtUnixMs: number | bigint | string;
+  pilotCap: PilotCapInput;
+}
+
+export interface PilotEmergencyControlInput {
+  chainId: number | bigint | string;
+  contractAddress: Address;
+  operatorId: Bytes32;
+  action: string;
+  targetSignerId: Bytes32;
+  reasonHash: Bytes32;
+  issuedAtUnixMs: number | bigint | string;
+  expiresAtUnixMs: number | bigint | string;
+  nonce: Bytes32;
+  pilotCap: PilotCapInput;
+}
+
 export interface ControlPlaneProvenanceResponseInput {
   requestId: Bytes32;
   subjectId: Bytes32;
@@ -588,6 +666,11 @@ export function productRemoveLiquidityId(input: ProductRemoveLiquidityInput): By
 export function productSwapId(input: ProductSwapInput): Bytes32;
 export function productBridgeCreditAckId(input: ProductBridgeCreditAckInput): Bytes32;
 export function bridgeWithdrawalIntentId(input: BridgeWithdrawalIntentInput): Bytes32;
+export function pilotCapHash(input: PilotCapInput): Bytes32;
+export function pilotBridgeCreditAckId(input: PilotBridgeCreditAckInput): Bytes32;
+export function pilotWithdrawalIntentId(input: PilotWithdrawalIntentInput): Bytes32;
+export function pilotReleaseEvidenceId(input: PilotReleaseEvidenceInput): Bytes32;
+export function pilotEmergencyControlId(input: PilotEmergencyControlInput): Bytes32;
 export function hardwareSignalEnvelopeId(input: HardwareSignalEnvelopeInput): Bytes32;
 export function controlPlaneProvenanceResponseId(input: ControlPlaneProvenanceResponseInput): Bytes32;
 export function localSignatureEnvelopeHash(input: LocalSignatureEnvelopeInput): Bytes32;
@@ -676,3 +759,35 @@ export function verifyLocalTransactionSignature(input: {
   envelope: Record<string, unknown>;
   context?: Record<string, unknown>;
 }): LocalAlphaEnvelopeValidationResult;
+
+export const PILOT_MESSAGE_SCHEMAS: readonly string[];
+export function validatePilotOperatorEnvelope(input: {
+  document: Record<string, unknown>;
+  envelope: Record<string, unknown>;
+  context?: {
+    chainId?: number | bigint | string;
+    expectedChainId?: number | bigint | string;
+    expectedDestinationChainId?: number | bigint | string;
+    expectedContractAddress?: string;
+    expectedOperatorId?: Bytes32;
+    expectedNonce?: number | bigint | string;
+    expectedSignerId?: Bytes32;
+    seenNonces?: Set<string>;
+    nowUnixMs?: number | bigint | string;
+  };
+}): LocalAlphaEnvelopeValidationResult;
+export function pilotEnvelopeReplayKey(envelope: Record<string, unknown>): string;
+export function assertPublicPilotMetadataContainsNoSecrets(value: unknown): void;
+export function createPilotOperatorConfigFromEnv(input?: {
+  env?: Record<string, string | undefined>;
+  createdAtUnixMs?: number | bigint | string;
+}): Record<string, unknown>;
+export function buildPilotNextCommands(config: Record<string, unknown>): string[];
+export function exportPilotPublicMetadata(input: {
+  config: Record<string, unknown>;
+  walletMetadata: Record<string, unknown>;
+}): Record<string, unknown>;
+export function buildPilotBridgeCreditAckDocument(input: PilotBridgeCreditAckInput): Record<string, unknown>;
+export function buildPilotWithdrawalIntentDocument(input: PilotWithdrawalIntentInput): Record<string, unknown>;
+export function buildPilotReleaseEvidenceDocument(input: PilotReleaseEvidenceInput): Record<string, unknown>;
+export function buildPilotEmergencyControlDocument(input: PilotEmergencyControlInput): Record<string, unknown>;
