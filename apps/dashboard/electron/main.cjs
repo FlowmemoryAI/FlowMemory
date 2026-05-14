@@ -1,7 +1,8 @@
-const { app, BrowserWindow, Menu, shell } = require("electron");
+const { app, BrowserWindow, Menu, ipcMain, shell } = require("electron");
 const fs = require("node:fs/promises");
 const http = require("node:http");
 const path = require("node:path");
+const { createLocalDesktopWallet, publicDesktopWalletStatus } = require("./wallet-store.cjs");
 
 const isDev = Boolean(process.env.FLOWCHAIN_WALLET_DESKTOP_DEV_URL);
 let staticServer;
@@ -120,6 +121,9 @@ async function createWalletWindow() {
 app.setName("Flowchain Wallet");
 
 app.whenReady().then(() => {
+  ipcMain.handle("flowchain-wallet:get-local-wallet", () => publicDesktopWalletStatus(app.getPath("userData")));
+  ipcMain.handle("flowchain-wallet:create-local-wallet", (_event, payload) => createLocalDesktopWallet(app.getPath("userData"), payload));
+
   Menu.setApplicationMenu(Menu.buildFromTemplate([
     {
       label: "Flowchain Wallet",

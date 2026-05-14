@@ -56,6 +56,7 @@ type WalletCreateResult = WalletStatus & {
   vaultPath?: string;
   note?: string;
   message?: string;
+  desktopLocal?: boolean;
 };
 
 type WalletBalance = {
@@ -141,6 +142,20 @@ type LocalActivity = {
 
 interface WalletViewProps {
   workbench: WorkbenchSnapshot;
+}
+
+type FlowchainDesktopBridge = {
+  app?: string;
+  platform?: string;
+  packaged?: boolean;
+  getLocalWallet?: () => Promise<WalletStatus>;
+  createLocalWallet?: (payload: { label: string; password: string; chainId: string; replace: boolean }) => Promise<WalletCreateResult>;
+};
+
+declare global {
+  interface Window {
+    flowchainDesktop?: FlowchainDesktopBridge;
+  }
 }
 
 class WalletApiError extends Error {
@@ -301,6 +316,7 @@ export function WalletView({ workbench }: WalletViewProps) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [localActivity, setLocalActivity] = useState<LocalActivity[]>([]);
+  const desktopWalletAvailable = typeof window !== "undefined" && Boolean(window.flowchainDesktop?.createLocalWallet);
 
   const activeAccount = result?.account ?? status?.account ?? null;
   const activeAccountId = accountId(activeAccount);
@@ -330,6 +346,29 @@ export function WalletView({ workbench }: WalletViewProps) {
     setMessage(nextMessage);
   }
 
+  async function loadDesktopWalletFallback(apiMessage: string): Promise<boolean> {
+    const desktop = typeof window !== "undefined" ? window.flowchainDesktop : undefined;
+    if (!desktop?.getLocalWallet) {
+      return false;
+    }
+    try {
+      const desktopStatus = await desktop.getLocalWallet();
+      setStatus(desktopStatus);
+      setBalances([]);
+      setTransfers([]);
+      setCredits([]);
+      setBridgeStatus(null);
+      setMessage(
+        desktopStatus.exists
+          ? "Wallet loaded locally. Flowchain API is unavailable, so balances and activity cannot sync yet."
+          : `${apiMessage}. Create encrypted wallet will still work locally in this desktop app.`,
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async function loadStatus() {
     try {
       const [walletResult, balanceResult, transferResult, creditResult, bridgeResult] = await Promise.all([
@@ -347,7 +386,11 @@ export function WalletView({ workbench }: WalletViewProps) {
       setBridgeStatus(bridgeResult.payload);
       setMessage(null);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "wallet data unavailable");
+      const apiMessage = error instanceof Error ? error.message : "wallet data unavailable";
+      const loadedLocalWallet = await loadDesktopWalletFallback(apiMessage);
+      if (!loadedLocalWallet) {
+        setMessage(apiMessage);
+      }
     }
   }
 
@@ -382,15 +425,31 @@ export function WalletView({ workbench }: WalletViewProps) {
     setLoading(true);
     setMessage(null);
     try {
+      const walletRequest = {
+        label,
+        password: passphrase,
+        chainId: "31337",
+        replace,
+      };
+      const desktop = typeof window !== "undefined" ? window.flowchainDesktop : undefined;
+      if (desktop?.createLocalWallet) {
+        const payload = await desktop.createLocalWallet(walletRequest);
+        setResult(payload);
+        setStatus(payload);
+        setBalances([]);
+        setTransfers([]);
+        setCredits([]);
+        setBridgeStatus(null);
+        setPassphrase("");
+        setActivePanel("receive");
+        setMessage(payload.alreadyExists ? safeText(payload.note, "Existing wallet loaded.") : "Wallet created locally on this device.");
+        return;
+      }
+
       const { payload, url } = await fetchWalletApi<WalletCreateResult>(apiCandidates, "/wallets/create", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          label,
-          password: passphrase,
-          chainId: "31337",
-          replace,
-        }),
+        body: JSON.stringify(walletRequest),
       });
       setWalletApiUrl(url);
       setResult(payload);
@@ -924,11 +983,11 @@ export function WalletView({ workbench }: WalletViewProps) {
               </label>
               <label className="wallet-inline-check">
                 <input checked={replace} onChange={(event) => setReplace(event.target.checked)} type="checkbox" />
-                Replace existing local operator wallet
+                Replace existing local wallet with a new address
               </label>
               <button type="button" disabled={!canCreate} onClick={() => void createWallet()}>
                 <KeyRound size={17} aria-hidden="true" />
-                {loading ? "Creating" : "Create encrypted wallet"}
+                {loading ? "Creating" : desktopWalletAvailable ? "Create encrypted desktop wallet" : "Create encrypted wallet"}
               </button>
               <button type="button" onClick={() => void loadStatus()}>
                 <RefreshCw size={17} aria-hidden="true" />
