@@ -1,4 +1,5 @@
 import type { DashboardData, DashboardStatus, Provenance, SourceSubsystem } from "./types";
+import { publicAssetPath } from "./loadDashboardData";
 
 export const DEFAULT_CONTROL_PLANE_URL = "http://127.0.0.1:8787";
 export const WORKBENCH_DEVNET_STATE_PATH = "/data/flowchain-local-devnet-state.json";
@@ -701,7 +702,7 @@ async function fetchJsonWithTimeout(url: string, timeoutMs: number): Promise<unk
 
 async function fetchOptionalJson(path: string): Promise<{ value: unknown | null; error?: string }> {
   try {
-    return { value: await fetchJsonWithTimeout(path, CONTROL_PLANE_TIMEOUT_MS) };
+    return { value: await fetchJsonWithTimeout(publicAssetPath(path), CONTROL_PLANE_TIMEOUT_MS) };
   } catch (error) {
     return {
       value: null,
