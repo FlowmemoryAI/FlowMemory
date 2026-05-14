@@ -76,6 +76,20 @@ Result: failed locally inside `npm run contracts:hardening`; Slither reported
 `missing-zero-check` and `low-level-calls` findings for
 `contracts/bridge/BaseBridgeLockbox.sol`.
 
+## In-Flight Worktree Evidence
+
+The following evidence was inspected after PR #132 opened. It is not source of
+truth until the work lands in reviewed PRs and merges to `main`.
+
+| Area | Live branch evidence | Completion impact |
+| --- | --- | --- |
+| Contracts | `agent/real-value-pilot-contracts` reports `forge test`, `npm run contracts:hardening`, deploy dry-run, and `npm run flowchain:product-e2e` passing after local dependency install. | Candidate proof exists branch-locally, but no dedicated root pilot proof command is merged. |
+| Bridge relayer | `agent/real-value-pilot-bridge` has Base `8453` observer and mock pilot E2E files, but the checklist still records observer, replay, local-credit, and product E2E proof rows as pending. | Still incomplete. |
+| Chain runtime | `agent/real-value-pilot-chain` has bridge-credit runtime changes in progress; baseline cargo test passed before edits and current experiments remain pending. | Still incomplete. |
+| Wallet/operator | `agent/real-value-pilot-wallet` has pilot signing, schemas, and docs in progress; all verification commands are still pending in its checklist. | Still incomplete. |
+| Control plane/dashboard | `agent/real-value-pilot-control-dashboard` has pilot API/dashboard files and a service-local E2E, but its checklist still marks implementation and test rows incomplete. | Still incomplete. |
+| Ops/installer | `agent/real-value-pilot-ops` has root pilot wrappers, emergency stop, sanitized export, and a passing checklist, including product E2E after an ops-side static-analysis wrapper change. | Candidate proof exists branch-locally, but not merged; it must reconcile with contracts hardening policy. |
+
 ## Uncovered Or Incomplete Requirements
 
 - The new gates are not on `main`; PR #132 is still draft and unmerged.

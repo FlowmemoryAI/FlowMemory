@@ -79,6 +79,22 @@ pilot go. Until then, missing proof rows are blockers, not warnings.
 | Ops path verifies required env, tiny caps, explicit owner ack, emergency stop, export evidence, restart recovery, and no-secret scans. | Ops/installer | `npm run flowchain:real-value-pilot:ops` | Missing dedicated pilot command. |
 | Final pilot gate runs baseline commands plus every available dedicated proof command. | HQ/Ops | `npm run flowchain:real-value-pilot:e2e` | Added here; expected incomplete until subsystem commands land. |
 
+## In-Flight Implementation Status
+
+This HQ branch has inspected the active pilot worktrees and found branch-local
+work that can feed future merges. None of the rows below is enough to mark the
+owner pilot `go`, because the final proof commands still need to exist and pass
+from `main`.
+
+| Area | In-flight branch state | Required next step |
+| --- | --- | --- |
+| Contracts | `agent/real-value-pilot-contracts` reports passing contract tests, hardening, deploy dry-run, and product E2E after dependency install. | Merge reviewed contract work and expose a dedicated root pilot contracts proof command. |
+| Bridge relayer | `agent/real-value-pilot-bridge` contains Base `8453` observer and mock pilot E2E work, with verification rows still pending. | Finish bridge verification, then expose a dedicated root bridge proof command. |
+| Chain runtime | `agent/real-value-pilot-chain` contains bridge-credit runtime work in progress, with current pilot experiments still pending. | Finish runtime apply/replay/restart/export proof, then expose a dedicated root runtime proof command. |
+| Wallet/operator | `agent/real-value-pilot-wallet` contains pilot signing, validation, schema, and operator-doc work with test rows still pending. | Finish wallet negative vectors and public metadata checks, then expose a dedicated root wallet proof command. |
+| Control plane/dashboard | `agent/real-value-pilot-control-dashboard` contains pilot API/dashboard work and a service-local E2E, with checklist rows still incomplete. | Finish API/dashboard verification, then expose a dedicated root control-dashboard proof command. |
+| Ops/installer | `agent/real-value-pilot-ops` contains root pilot wrappers, emergency stop, sanitized export, and a passing local checklist after an ops-side static-analysis wrapper change. | Reconcile product E2E hardening policy and merge a reviewed ops proof command. |
+
 ## Owner Go/No-Go Checklist
 
 The owner should mark the pilot `go` only when all rows are true:

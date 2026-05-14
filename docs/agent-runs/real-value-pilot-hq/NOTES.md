@@ -26,6 +26,28 @@ Last updated: 2026-05-14.
 - The real-value goal pack in PR #129 names the same owner proof areas used in
   `docs/FLOWCHAIN_REAL_VALUE_PILOT.md`.
 
+## Live Pilot Branch Notes
+
+- Contracts branch `agent/real-value-pilot-contracts` reports passing contract
+  tests, hardening, deploy dry-run, and product E2E. It remains unmerged and has
+  no dedicated root pilot proof command on `main`.
+- Bridge branch `agent/real-value-pilot-bridge` contains Base `8453` observer
+  and mock pilot E2E work, but its run checklist still records the key proof
+  commands as pending.
+- Chain branch `agent/real-value-pilot-chain` has runtime bridge-credit work in
+  progress. Baseline cargo test passed before edits; current pilot experiments
+  are not recorded as complete.
+- Wallet branch `agent/real-value-pilot-wallet` contains pilot signing,
+  validation, schemas, and operator-doc work, with test rows still pending in
+  its checklist.
+- Control-dashboard branch `agent/real-value-pilot-control-dashboard` contains
+  pilot API and dashboard work plus a service-local E2E, but its checklist still
+  marks implementation and verification rows incomplete.
+- Ops branch `agent/real-value-pilot-ops` contains the most complete root
+  wrapper/runbook path, including emergency stop and sanitized export. Its
+  product E2E result depends on an ops-side static-analysis wrapper change that
+  is not present in this HQ PR.
+
 ## Boundaries
 
 - This branch does not touch `crates/`, `contracts/`, `services/`, `crypto/`,

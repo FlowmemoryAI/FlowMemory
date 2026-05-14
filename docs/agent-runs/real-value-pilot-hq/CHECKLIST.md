@@ -37,6 +37,10 @@ Last updated: 2026-05-14.
 - [ ] Ops/installer: env validation, tiny cap checks, explicit owner ack,
   emergency stop, evidence export, restart recovery, troubleshooting.
 
+These remain unchecked because they are not merged into `main` as dedicated
+root proof commands. Current live worktree evidence is recorded in `PLAN.md`
+and `NOTES.md`.
+
 ## Owner Go/No-Go
 
 - [ ] `npm run flowchain:product-e2e` passes on `main`.

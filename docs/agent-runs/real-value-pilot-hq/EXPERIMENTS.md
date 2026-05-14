@@ -29,6 +29,8 @@ Last updated: 2026-05-14.
 | `gh pr view 132 --repo FlowmemoryAI/FlowMemory --json ...` | Passed | PR #132 is open draft, merge state `CLEAN`, CI checks successful, not merged. |
 | `npm run flowchain:real-value-pilot:e2e` | Failed as expected | Default gate failed clearly with six missing dedicated proof commands and wrote the report. |
 | `npm run flowchain:l1-e2e` | Failed locally | Alias invoked full smoke and stopped in `contracts:hardening` because local Slither reported the same `BaseBridgeLockbox.releaseNative` findings. |
+| Live pilot worktree inspection | Passed | Inspected `flowmemory-live-contracts`, `flowmemory-live-bridge`, `flowmemory-live-chain`, `flowmemory-live-wallet`, `flowmemory-live-control-dashboard`, and `flowmemory-live-ops` statuses, package scripts, and run notes. |
+| Requested original worktree inspection refresh | Passed | Rechecked `flowmemory-chain`, `flowmemory-bridge-full`, `flowmemory-contracts`, `flowmemory-crypto`, `flowmemory-indexer`, `flowmemory-dashboard`, `flowmemory-review`, and `flowmemory-hq-review-loop` statuses and relevant package scripts. |
 
 ## Product E2E Failure Assignment
 

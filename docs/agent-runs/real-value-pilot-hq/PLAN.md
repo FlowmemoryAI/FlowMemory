@@ -85,6 +85,21 @@ GitHub source-of-truth state checked before edits:
 | `E:\FlowMemory\flowmemory-hq-review-loop` | `agent/l1-loop-hq-review` | HQ review docs and `flowchain:l1-e2e` alias to full-smoke. | Reuse the baseline alias idea while documenting that a dedicated wrapper can replace it. |
 | `E:\FlowMemory\flowchain-release` | `hq/real-value-pilot-goals` | Draft PR #129 goal prompts and launcher. | Treat as prompt source only; source of truth remains GitHub PR #129 until merged. |
 
+## Live Pilot Worktree Snapshot
+
+These branches contain the current real-value pilot implementation attempts.
+They are useful coordination evidence only. The final gate still requires merged
+root commands on `main`.
+
+| Worktree | Branch | Current evidence | HQ state |
+| --- | --- | --- | --- |
+| `E:\FlowMemory\flowmemory-live-contracts` | `agent/real-value-pilot-contracts` | Checklist reports `forge test`, `npm run contracts:hardening`, deploy dry-run, and `npm run flowchain:product-e2e` passing after dependency install. Work is in `contracts/`, `script/`, and tests. | Useful contracts proof candidate; no dedicated root `flowchain:real-value-pilot:contracts` command exists on HQ/main yet. |
+| `E:\FlowMemory\flowmemory-live-bridge` | `agent/real-value-pilot-bridge` | Adds bridge relayer pilot observer files, Base `8453` script, mock E2E code, and a branch-local `flowchain:real-value-pilot:e2e` script. Checklist still has implementation and verification rows unchecked. | Bridge proof remains in progress and unmerged. |
+| `E:\FlowMemory\flowmemory-live-chain` | `agent/real-value-pilot-chain` | Runtime model/CLI/tests show pilot bridge-credit work in progress. Baseline cargo test passed before edits; current experiments are still pending. | Runtime proof remains in progress and unmerged. |
+| `E:\FlowMemory\flowmemory-live-wallet` | `agent/real-value-pilot-wallet` | Adds pilot schemas, wallet/operator docs, and signing/validation code. Checklist still has implementation and test rows unchecked. | Wallet proof remains in progress and unmerged. |
+| `E:\FlowMemory\flowmemory-live-control-dashboard` | `agent/real-value-pilot-control-dashboard` | Adds pilot control-plane API/dashboard files and a service-local `real-value-pilot:e2e` script. Checklist still shows API/dashboard/test rows unchecked. | Control-dashboard proof remains in progress and unmerged. |
+| `E:\FlowMemory\flowmemory-live-ops` | `agent/real-value-pilot-ops` | Adds pilot ops/runbook scripts, emergency stop, sanitized export, and branch-local root `flowchain:real-value-pilot:e2e`; checklist reports unsafe-claims, diff check, and product E2E passing after an ops-side static-analysis wrapper change. | Ops proof candidate exists branch-locally, but it is not merged into HQ/main. |
+
 ## Implementation Plan
 
 1. Create `docs/FLOWCHAIN_REAL_VALUE_PILOT.md` with the capped owner-pilot
