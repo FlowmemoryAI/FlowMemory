@@ -12,10 +12,7 @@ Set-StrictMode -Version Latest
 $repoRoot = Set-FlowChainRepoRoot
 $fullSmokeRoot = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/full-smoke")
 
-if (Test-Path -LiteralPath $fullSmokeRoot) {
-    Remove-Item -LiteralPath $fullSmokeRoot -Recurse -Force
-}
-New-Item -ItemType Directory -Force -Path $fullSmokeRoot | Out-Null
+$fullSmokeRoot = Reset-FlowChainDirectory -Path $fullSmokeRoot
 
 $smokeArgs = @(
     "-NoProfile",

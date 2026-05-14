@@ -1,6 +1,6 @@
 {
   "schema": "flowmemory.bridge_runtime_handoff.v0",
-  "handoffId": "0x36fcd03ec701406d4af9a5c8702ecaa4fcb9ead45b72e3a7e11cf33649b36c93",
+  "handoffId": "0x29cf06d9ffbfff9538a38f5055122f0c8801df516b70d2d2a2bd0937cd1dea9f",
   "generatedAt": "2026-05-13T00:00:00.000Z",
   "mode": "mock",
   "productionReady": false,
@@ -13,6 +13,12 @@
       "observedAt": "2026-05-13T00:00:00.000Z",
       "mode": "mock",
       "productionReady": false,
+      "asset": {
+        "sourceChainId": 84532,
+        "sourceToken": "0x3333333333333333333333333333333333333333",
+        "destinationAssetId": "0xa822b6df476163d54b3dbe6ddc4d72177772bf0ecdfc9282998420387b0cb40d",
+        "decimals": 18
+      },
       "deposit": {
         "schema": "flowmemory.bridge_deposit.v0",
         "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
@@ -23,16 +29,17 @@
         "token": "0x3333333333333333333333333333333333333333",
         "amount": "20000000",
         "sender": "0x4444444444444444444444444444444444444444",
-        "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "flowchainRecipient": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
         "nonce": "1",
-        "metadataHash": "0x6666666666666666666666666666666666666666666666666666666666666666",
+        "metadataHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
         "status": "observed"
       },
       "guardrails": {
         "explicitChainId": true,
         "explicitContract": true,
         "explicitBlockRange": false,
-        "noSecrets": true
+        "noSecrets": true,
+        "assetDecimals": 18
       }
     }
   ],
@@ -50,8 +57,14 @@
         "logIndex": 0
       },
       "token": "0x3333333333333333333333333333333333333333",
+      "asset": {
+        "sourceChainId": 84532,
+        "sourceToken": "0x3333333333333333333333333333333333333333",
+        "destinationAssetId": "0xa822b6df476163d54b3dbe6ddc4d72177772bf0ecdfc9282998420387b0cb40d",
+        "decimals": 18
+      },
       "amount": "20000000",
-      "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+      "flowchainRecipient": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
       "status": "applied",
       "appliedAt": "2026-05-13T00:00:00.000Z",
       "localOnly": true,
@@ -61,14 +74,20 @@
   "withdrawalIntents": [
     {
       "schema": "flowmemory.bridge_withdrawal_intent.v0",
-      "withdrawalIntentId": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
+      "withdrawalIntentId": "0x6ae5f8a744eb711ef791e5c5b9b6e01b94a84e3fa668ce67484040e8fe564ffa",
       "creditId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
       "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
       "sourceChainId": 84532,
       "destinationChainId": 84532,
       "token": "0x3333333333333333333333333333333333333333",
+      "asset": {
+        "sourceChainId": 84532,
+        "sourceToken": "0x3333333333333333333333333333333333333333",
+        "destinationAssetId": "0xa822b6df476163d54b3dbe6ddc4d72177772bf0ecdfc9282998420387b0cb40d",
+        "decimals": 18
+      },
       "amount": "20000000",
-      "flowchainAccount": "0x5555555555555555555555555555555555555555555555555555555555555555",
+      "flowchainAccount": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
       "baseRecipient": "0x4444444444444444444444444444444444444444",
       "status": "requested",
       "requestedAt": "2026-05-13T00:00:00.000Z",
@@ -85,7 +104,13 @@
       "creditId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
       "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
       "replayKey": "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09",
-      "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+      "flowchainRecipient": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      "asset": {
+        "sourceChainId": 84532,
+        "sourceToken": "0x3333333333333333333333333333333333333333",
+        "destinationAssetId": "0xa822b6df476163d54b3dbe6ddc4d72177772bf0ecdfc9282998420387b0cb40d",
+        "decimals": 18
+      },
       "amount": "20000000",
       "status": "applied",
       "appliedAt": "2026-05-13T00:00:00.000Z",
@@ -98,20 +123,26 @@
   "releaseEvidences": [
     {
       "schema": "flowmemory.bridge_release_evidence.v0",
-      "releaseEvidenceId": "0x0ae60c9a0b75a071172ee7cf80959d9b35c6ea331af5ccca7bc94eda23b8b000",
+      "releaseEvidenceId": "0x486e8abfce6246093c96114e1af34cb3c8c1afd9646766a584b2dee8296c2d97",
       "generatedAt": "2026-05-13T00:00:00.000Z",
-      "withdrawalIntentId": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
+      "withdrawalIntentId": "0x6ae5f8a744eb711ef791e5c5b9b6e01b94a84e3fa668ce67484040e8fe564ffa",
       "creditId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
       "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
       "sourceChainId": 84532,
       "destinationChainId": 84532,
       "lockbox": "0x1111111111111111111111111111111111111111",
+      "asset": {
+        "sourceChainId": 84532,
+        "sourceToken": "0x3333333333333333333333333333333333333333",
+        "destinationAssetId": "0xa822b6df476163d54b3dbe6ddc4d72177772bf0ecdfc9282998420387b0cb40d",
+        "decimals": 18
+      },
       "releaseCall": {
         "method": "releaseERC20",
         "recipient": "0x4444444444444444444444444444444444444444",
         "token": "0x3333333333333333333333333333333333333333",
         "amount": "20000000",
-        "evidenceHash": "0x697d114347dc96921b6b6df9bd9b7b3dd436e4ebe51d6d9e5c1c06c682ae5b58",
+        "evidenceHash": "0x871d7552d22b7e2d0d1dfef570a8bcecccd11afef217a71dca1a37aae02ccb3a",
         "broadcast": false
       },
       "operatorNote": "Pilot release evidence only. Review before any separate release-authority transaction; this relayer does not broadcast.",
@@ -145,7 +176,7 @@
       "status": "pending",
       "objectId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
       "title": "Credit pending",
-      "summary": "20000000 test units queued for 0x5555555555555555555555555555555555555555555555555555555555555555."
+      "summary": "20000000 test units queued for 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef."
     },
     {
       "phase": "credit_applied",
@@ -157,7 +188,7 @@
     {
       "phase": "withdrawal_requested",
       "status": "requested",
-      "objectId": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
+      "objectId": "0x6ae5f8a744eb711ef791e5c5b9b6e01b94a84e3fa668ce67484040e8fe564ffa",
       "title": "Withdrawal requested",
       "summary": "Test-mode local-to-Base withdrawal intent recorded with no broadcast or real release."
     }
@@ -200,7 +231,7 @@
       "facts": [
         {
           "label": "recipient",
-          "value": "0x5555555555555555555555555555555555555555555555555555555555555555"
+          "value": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
         },
         {
           "label": "amount",
@@ -219,9 +250,9 @@
     },
     {
       "sectionKey": "transactions",
-      "id": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
+      "id": "0x6ae5f8a744eb711ef791e5c5b9b6e01b94a84e3fa668ce67484040e8fe564ffa",
       "kind": "Bridge withdrawal intent",
-      "title": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
+      "title": "0x6ae5f8a744eb711ef791e5c5b9b6e01b94a84e3fa668ce67484040e8fe564ffa",
       "summary": "Test-mode withdrawal intent recorded; no mainnet or real-funds release is broadcast.",
       "status": "pending",
       "facts": [
@@ -242,7 +273,7 @@
           "value": "test_record_only"
         }
       ],
-      "rawRef": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751"
+      "rawRef": "0x6ae5f8a744eb711ef791e5c5b9b6e01b94a84e3fa668ce67484040e8fe564ffa"
     }
   ],
   "limitations": [

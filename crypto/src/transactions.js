@@ -3,34 +3,57 @@ import { verifyDigest } from "./attestations.js";
 import { eip712Digest } from "./flowpulse.js";
 import { canonicalJsonHash, domainSeparator, keccakUtf8, typedHash } from "./hashes.js";
 import {
+  FLOWCHAIN_NETWORK_PROFILES,
+  flowchainNetworkProfileHash,
+  flowchainProductionDomain,
+  flowchainProductionDomainSeparator,
+  flowchainTransactionId
+} from "./production-l1.js";
+import {
+  flowchainAccountId,
+  flowchainAddressFromPublicKey,
+  isFlowchainRole,
+  normalizeFlowchainPublicKey
+} from "./identity.js";
+import {
   localAlphaObjectDescriptor,
   localAlphaObjectId,
   localAlphaObjectTypeHash
 } from "./objects.js";
 
-export function localTransactionEnvelopeHash({
-  chainId,
-  domainSeparator,
-  signerId,
-  signerKeyId,
-  signerRole,
-  nonce,
-  payloadHash,
-  objectId,
-  objectTypeHash,
-  issuedAtUnixMs
-}) {
+export function localTransactionEnvelopeHash(input) {
+  if (isProductionL1EnvelopeInput(input)) {
+    return typedHash(TYPE_STRINGS.localTransactionEnvelopeProductionL1V0, [
+      ["uint16", input.schemaVersion],
+      ["uint256", input.chainId],
+      ["bytes32", input.networkProfileHash ?? flowchainNetworkProfileHash(input.networkProfile)],
+      ["bytes32", input.domainSeparator],
+      ["bytes32", input.signerId],
+      ["bytes32", input.signerKeyId],
+      ["uint8", input.signerRole],
+      ["uint64", input.nonce],
+      ["bytes32", input.payloadTypeHash ?? keccakUtf8(input.payloadType)],
+      ["bytes32", input.payloadHash],
+      ["bytes32", input.objectId],
+      ["bytes32", input.objectTypeHash],
+      ["uint64", input.issuedAtUnixMs],
+      ["uint64", input.expiresAtUnixMs],
+      ["bytes32", input.localExecutionCostHash ?? canonicalJsonHash(input.localExecutionCost ?? defaultLocalExecutionCost())],
+      ["bytes32", input.feeHash ?? canonicalJsonHash(input.fee ?? defaultFee())],
+      ["bytes32", input.signatureAlgorithmHash ?? keccakUtf8(input.signatureAlgorithm)]
+    ]);
+  }
   return typedHash(TYPE_STRINGS.localTransactionEnvelopeV0, [
-    ["uint256", chainId],
-    ["bytes32", domainSeparator],
-    ["bytes32", signerId],
-    ["bytes32", signerKeyId],
-    ["uint8", signerRole],
-    ["uint64", nonce],
-    ["bytes32", payloadHash],
-    ["bytes32", objectId],
-    ["bytes32", objectTypeHash],
-    ["uint64", issuedAtUnixMs]
+    ["uint256", input.chainId],
+    ["bytes32", input.domainSeparator],
+    ["bytes32", input.signerId],
+    ["bytes32", input.signerKeyId],
+    ["uint8", input.signerRole],
+    ["uint64", input.nonce],
+    ["bytes32", input.payloadHash],
+    ["bytes32", input.objectId],
+    ["bytes32", input.objectTypeHash],
+    ["uint64", input.issuedAtUnixMs]
   ]);
 }
 
@@ -45,7 +68,7 @@ export function localTransactionEnvelopePayload(input) {
 }
 
 export function localTransactionEnvelopeInput(envelope) {
-  return {
+  const input = {
     chainId: envelope.chainId,
     domainSeparator: envelope.domainSeparator,
     signerId: envelope.signerId,
@@ -57,17 +80,51 @@ export function localTransactionEnvelopeInput(envelope) {
     objectTypeHash: envelope.objectTypeHash,
     issuedAtUnixMs: envelope.issuedAtUnixMs
   };
+  if (isProductionL1EnvelopeInput(envelope)) {
+    return {
+      schemaVersion: envelope.schemaVersion,
+      chainId: envelope.chainId,
+      networkProfile: envelope.networkProfile,
+      networkProfileHash: envelope.networkProfileHash,
+      domainSeparator: envelope.domainSeparator,
+      signerId: envelope.signerId,
+      signerKeyId: envelope.signerKeyId,
+      signerRole: envelope.signerRoleCode,
+      nonce: envelope.nonce,
+      payloadType: envelope.payloadType,
+      payloadTypeHash: envelope.payloadTypeHash,
+      payloadHash: envelope.payloadHash,
+      objectId: envelope.objectId,
+      objectTypeHash: envelope.objectTypeHash,
+      issuedAtUnixMs: envelope.issuedAtUnixMs,
+      expiresAtUnixMs: envelope.expiresAtUnixMs,
+      localExecutionCostHash: envelope.localExecutionCostHash,
+      feeHash: envelope.feeHash,
+      signatureAlgorithm: envelope.signatureAlgorithm,
+      signatureAlgorithmHash: envelope.signatureAlgorithmHash
+    };
+  }
+  return input;
 }
 
 export function localTransactionReplayKey(envelope) {
+  if (envelope?.networkProfile) {
+    return `${envelope.chainId}:${envelope.networkProfile}:${envelope.signerId}:${envelope.signerRole}:${envelope.nonce}`;
+  }
   return `${envelope.chainId}:${envelope.domain}:${envelope.signerId}:${envelope.nonce}`;
 }
 
-export function localTransactionDomain(chainId) {
+export function localTransactionDomain(chainId, networkProfile) {
+  if (networkProfile) {
+    return flowchainProductionDomain({ chainId, networkProfile });
+  }
   return `${DOMAIN_STRINGS.localTransactionEnvelope}:chain:${chainId}`;
 }
 
-export function localTransactionDomainSeparator(chainId) {
+export function localTransactionDomainSeparator(chainId, networkProfile) {
+  if (networkProfile) {
+    return flowchainProductionDomainSeparator({ chainId, networkProfile });
+  }
   return keccakUtf8(localTransactionDomain(chainId));
 }
 
@@ -79,7 +136,14 @@ export function buildUnsignedLocalTransactionEnvelope({
   signerKeyId,
   signerRole,
   publicKey,
-  issuedAtUnixMs
+  issuedAtUnixMs,
+  expiresAtUnixMs,
+  networkProfile = FLOWCHAIN_NETWORK_PROFILES.localChain,
+  payloadType,
+  localExecutionCost = defaultLocalExecutionCost(),
+  fee = defaultFee(),
+  signatureAlgorithm = "secp256k1-keccak256-eip712-local-v0",
+  canonical = true
 }) {
   const descriptor = localAlphaObjectDescriptor(document?.schema);
   if (!descriptor) {
@@ -92,10 +156,24 @@ export function buildUnsignedLocalTransactionEnvelope({
 
   const objectId = localAlphaObjectId(document);
   const objectTypeHash = localAlphaObjectTypeHash(document.schema);
-  const domain = localTransactionDomain(chainId);
+  const domain = localTransactionDomain(chainId, canonical ? networkProfile : undefined);
   const envelopeInput = {
+    ...(canonical
+      ? {
+          schemaVersion: 1,
+          networkProfile,
+          networkProfileHash: flowchainNetworkProfileHash(networkProfile),
+          payloadType: payloadType ?? descriptor.objectType,
+          payloadTypeHash: keccakUtf8(payloadType ?? descriptor.objectType),
+          expiresAtUnixMs: expiresAtUnixMs ?? defaultExpiresAtUnixMs(issuedAtUnixMs),
+          localExecutionCostHash: canonicalJsonHash(localExecutionCost),
+          feeHash: canonicalJsonHash(fee),
+          signatureAlgorithm,
+          signatureAlgorithmHash: keccakUtf8(signatureAlgorithm)
+        }
+      : {}),
     chainId,
-    domainSeparator: localTransactionDomainSeparator(chainId),
+    domainSeparator: localTransactionDomainSeparator(chainId, canonical ? networkProfile : undefined),
     signerId,
     signerKeyId,
     signerRole: signerRoleCode,
@@ -109,6 +187,13 @@ export function buildUnsignedLocalTransactionEnvelope({
 
   return {
     schema: "flowchain.local_transaction_envelope.v0",
+    ...(canonical
+      ? {
+          schemaVersion: envelopeInput.schemaVersion,
+          networkProfile,
+          networkProfileHash: envelopeInput.networkProfileHash
+        }
+      : {}),
     envelopeId: payload.structHash,
     domain,
     domainSeparator: envelopeInput.domainSeparator,
@@ -118,13 +203,36 @@ export function buildUnsignedLocalTransactionEnvelope({
     signerKeyId,
     signerRole,
     signerRoleCode,
-    publicKey,
+    publicKey: canonical ? normalizeFlowchainPublicKey(publicKey) : publicKey,
+    ...(canonical
+      ? {
+          publicKeyEncoding: "secp256k1-compressed-hex",
+          signerAddress: flowchainAddressFromPublicKey(publicKey)
+        }
+      : {}),
     objectSchema: document.schema,
     objectType: descriptor.objectType,
+    ...(canonical
+      ? {
+          payloadType: envelopeInput.payloadType,
+          payloadTypeHash: envelopeInput.payloadTypeHash
+        }
+      : {}),
     objectTypeHash,
     objectId,
     payloadHash: envelopeInput.payloadHash,
     issuedAtUnixMs,
+    ...(canonical
+      ? {
+          expiresAtUnixMs: envelopeInput.expiresAtUnixMs,
+          localExecutionCost,
+          localExecutionCostHash: envelopeInput.localExecutionCostHash,
+          fee,
+          feeHash: envelopeInput.feeHash,
+          signatureAlgorithm,
+          signatureAlgorithmHash: envelopeInput.signatureAlgorithmHash
+        }
+      : {}),
     signingDigest: payload.signingDigest
   };
 }
@@ -143,12 +251,19 @@ export function validateLocalTransactionEnvelope({
     return { valid: false, errors: ["missing-signer"] };
   }
 
-  const expectedDomain = localTransactionDomain(envelope.chainId);
-  const expectedDomainSeparator = localTransactionDomainSeparator(envelope.chainId);
+  const canonicalEnvelope = isProductionL1EnvelopeInput(envelope);
+  const expectedDomain = localTransactionDomain(envelope.chainId, canonicalEnvelope ? envelope.networkProfile : undefined);
+  const expectedDomainSeparator = localTransactionDomainSeparator(
+    envelope.chainId,
+    canonicalEnvelope ? envelope.networkProfile : undefined
+  );
   const expectedRoleCode = LOCAL_ALPHA_SIGNER_ROLES[envelope.signerRole];
 
   if (context.chainId !== undefined && String(envelope.chainId) !== String(context.chainId)) {
     errors.push("wrong-chain-id");
+  }
+  if (context.networkProfile !== undefined && envelope.networkProfile !== context.networkProfile) {
+    errors.push("wrong-network-profile");
   }
   if (context.expectedNonce !== undefined && String(envelope.nonce) !== String(context.expectedNonce)) {
     errors.push("wrong-nonce");
@@ -183,6 +298,16 @@ export function validateLocalTransactionEnvelope({
   }
   if (context.seenNonces?.has?.(localTransactionReplayKey(envelope))) {
     errors.push("replay");
+    errors.push("duplicate-nonce");
+  }
+  if (context.minimumNonce !== undefined && BigInt(envelope.nonce) < BigInt(context.minimumNonce)) {
+    errors.push("stale-nonce");
+  }
+  if (context.expectedPayloadType !== undefined && envelope.payloadType !== context.expectedPayloadType) {
+    errors.push("wrong-payload-type");
+  }
+  if (context.requireCanonical && !canonicalEnvelope) {
+    errors.push("missing-canonical-field");
   }
 
   try {
@@ -210,6 +335,9 @@ export function validateLocalTransactionEnvelope({
     if (envelope.payloadHash !== expectedPayloadHash) {
       errors.push("bad-payload-hash");
     }
+    if (canonicalEnvelope) {
+      validateProductionL1EnvelopeExtension(envelope, errors, context);
+    }
 
     const input = localTransactionEnvelopeInput(envelope);
     const expectedEnvelopeId = localTransactionEnvelopeHash(input);
@@ -232,7 +360,7 @@ export function validateLocalTransactionEnvelope({
       errors.push("bad-signature");
     }
   } catch (error) {
-    errors.push(/hex|bytes/i.test(String(error?.message)) ? "malformed-id" : "invalid-transaction");
+    errors.push(classifyTransactionError(error));
   }
 
   return {
@@ -243,4 +371,113 @@ export function validateLocalTransactionEnvelope({
 
 function isHex32(value) {
   return typeof value === "string" && /^0x[0-9a-fA-F]{64}$/.test(value);
+}
+
+function isProductionL1EnvelopeInput(input) {
+  return Boolean(input?.schemaVersion || input?.networkProfile || input?.payloadType || input?.expiresAtUnixMs);
+}
+
+function defaultLocalExecutionCost() {
+  return {
+    unit: "local-compute",
+    amount: "0",
+    metering: "not-metered-local-private-testnet"
+  };
+}
+
+function defaultFee() {
+  return {
+    assetId: ZERO_BYTES32,
+    amount: "0",
+    policy: "no-value-local-private-testnet"
+  };
+}
+
+function defaultExpiresAtUnixMs(issuedAtUnixMs) {
+  return (BigInt(issuedAtUnixMs) + 3_600_000n).toString();
+}
+
+function validateProductionL1EnvelopeExtension(envelope, errors, context) {
+  const required = [
+    "schemaVersion",
+    "networkProfile",
+    "networkProfileHash",
+    "payloadType",
+    "payloadTypeHash",
+    "expiresAtUnixMs",
+    "localExecutionCost",
+    "localExecutionCostHash",
+    "fee",
+    "feeHash",
+    "signatureAlgorithm",
+    "signatureAlgorithmHash"
+  ];
+  for (const field of required) {
+    if (envelope[field] === undefined || envelope[field] === null || envelope[field] === "") {
+      errors.push("missing-canonical-field");
+    }
+  }
+  if (envelope.schemaVersion !== 1) {
+    errors.push("wrong-schema-version");
+  }
+  if (envelope.networkProfileHash !== flowchainNetworkProfileHash(envelope.networkProfile)) {
+    errors.push("wrong-network-profile");
+  }
+  if (envelope.payloadTypeHash !== keccakUtf8(envelope.payloadType)) {
+    errors.push("wrong-payload-type");
+  }
+  if (envelope.localExecutionCostHash !== canonicalJsonHash(envelope.localExecutionCost)) {
+    errors.push("bad-local-execution-cost");
+  }
+  if (envelope.feeHash !== canonicalJsonHash(envelope.fee)) {
+    errors.push("bad-fee");
+  }
+  if (envelope.signatureAlgorithmHash !== keccakUtf8(envelope.signatureAlgorithm)) {
+    errors.push("bad-signature-algorithm");
+  }
+  if (BigInt(envelope.expiresAtUnixMs) < BigInt(envelope.issuedAtUnixMs)) {
+    errors.push("expired-tx");
+  }
+  if (context.nowUnixMs !== undefined && BigInt(envelope.expiresAtUnixMs) < BigInt(context.nowUnixMs)) {
+    errors.push("expired-tx");
+  }
+  try {
+    normalizeFlowchainPublicKey(envelope.publicKey);
+  } catch {
+    errors.push("malformed-public-key");
+  }
+  if (isFlowchainRole(envelope.signerRole)) {
+    const derivedSignerId = flowchainAccountId({ publicKey: envelope.publicKey, role: envelope.signerRole });
+    if (envelope.signerId !== derivedSignerId) {
+      errors.push("wrong-signer");
+    }
+    if (envelope.signerAddress && envelope.signerAddress !== flowchainAddressFromPublicKey(envelope.publicKey)) {
+      errors.push("wrong-signer");
+    }
+  }
+  if (envelope.signature && !/^0x[0-9a-fA-F]{128}$/.test(envelope.signature)) {
+    errors.push("malformed-signature");
+  }
+  if (envelope.signature) {
+    const expectedTransactionId = flowchainTransactionId(envelope);
+    if (envelope.transactionId && envelope.transactionId !== expectedTransactionId) {
+      errors.push("bad-transaction-id");
+    }
+    if (context.seenTransactionIds?.has?.(envelope.transactionId ?? expectedTransactionId)) {
+      errors.push("duplicate-tx-id");
+    }
+  }
+}
+
+function classifyTransactionError(error) {
+  if (/public key/i.test(String(error?.message))) {
+    return "malformed-public-key";
+  }
+  if (/signature/i.test(String(error?.message))) {
+    return "malformed-signature";
+  }
+  if (/hex|bytes/i.test(String(error?.message))) {
+    return "malformed-id";
+  }
+  return "invalid-transaction";
 }

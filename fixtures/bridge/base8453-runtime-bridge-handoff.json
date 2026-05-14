@@ -1,0 +1,189 @@
+{
+  "schema": "flowmemory.bridge_runtime_handoff.v0",
+  "handoffId": "0x8d57f147f4e289f128c4aa2e11e07ba9216d06ae1cfcb29ce9846a38958a42bb",
+  "generatedAt": "2026-05-13T00:00:00.000Z",
+  "mode": "base-mainnet-pilot",
+  "productionReady": true,
+  "localOnly": false,
+  "observations": [
+    {
+      "schema": "flowmemory.bridge_deposit_observation.v0",
+      "observationId": "0xf65deb7e284bacecf312fef9937ce1c05cade61ba3edbddecbe18c356d6a3719",
+      "replayKey": "0xea93b7d168d2f1f6c4be4f95ba4d85aa2d07fc4298a720d180000a19d98481f0",
+      "observedAt": "2026-05-13T00:00:00.000Z",
+      "mode": "base-mainnet-pilot",
+      "productionReady": true,
+      "localOnly": false,
+      "asset": {
+        "sourceChainId": 8453,
+        "sourceToken": "0x3333333333333333333333333333333333333333",
+        "destinationAssetId": "0x17a994c882c8cbafa5f5e1d85c21dcfedcd4b8f9387952bf76af8792a39a70fa",
+        "decimals": 18
+      },
+      "deposit": {
+        "schema": "flowmemory.bridge_deposit.v0",
+        "depositId": "0x8453000000000000000000000000000000000000000000000000000000000001",
+        "sourceChainId": 8453,
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "txHash": "0x8453000000000000000000000000000000000000000000000000000000000002",
+        "logIndex": 0,
+        "sourceBlockNumber": "100",
+        "sourceBlockHash": "0x8453000000000000000000000000000000000000000000000000000000000003",
+        "transactionIndex": 1,
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "20000000",
+        "sender": "0x4444444444444444444444444444444444444444",
+        "flowchainRecipient": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+        "nonce": "1",
+        "metadataHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "observed"
+      },
+      "guardrails": {
+        "explicitChainId": true,
+        "explicitContract": true,
+        "explicitBlockRange": true,
+        "noSecrets": true,
+        "maxUsd": "1",
+        "maxDepositAmount": "20000000",
+        "totalCapAmount": "20000000",
+        "supportedTokens": [
+          "0x3333333333333333333333333333333333333333"
+        ],
+        "assetDecimals": 18,
+        "approvedContract": true,
+        "confirmation": {
+          "depth": 5,
+          "latestBlockNumber": "112",
+          "requiredConfirmedBlockNumber": "107",
+          "requestedToBlock": "100",
+          "satisfied": true
+        }
+      }
+    }
+  ],
+  "credits": [
+    {
+      "schema": "flowmemory.bridge_credit.v0",
+      "creditId": "0xc4f46eb30b6b1e47b682bbe2c892f40c4eb83149d662b22df6b8f72efad71468",
+      "observationId": "0xf65deb7e284bacecf312fef9937ce1c05cade61ba3edbddecbe18c356d6a3719",
+      "depositId": "0x8453000000000000000000000000000000000000000000000000000000000001",
+      "replayKey": "0xea93b7d168d2f1f6c4be4f95ba4d85aa2d07fc4298a720d180000a19d98481f0",
+      "source": {
+        "chainId": 8453,
+        "contract": "0x1111111111111111111111111111111111111111",
+        "txHash": "0x8453000000000000000000000000000000000000000000000000000000000002",
+        "logIndex": 0
+      },
+      "token": "0x3333333333333333333333333333333333333333",
+      "asset": {
+        "sourceChainId": 8453,
+        "sourceToken": "0x3333333333333333333333333333333333333333",
+        "destinationAssetId": "0x17a994c882c8cbafa5f5e1d85c21dcfedcd4b8f9387952bf76af8792a39a70fa",
+        "decimals": 18
+      },
+      "amount": "20000000",
+      "flowchainRecipient": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      "status": "applied",
+      "appliedAt": "2026-05-13T00:00:00.000Z",
+      "localOnly": false,
+      "productionReady": true
+    }
+  ],
+  "withdrawalIntents": [],
+  "runtimeApplications": [],
+  "pilotEvidence": [
+    {
+      "schema": "flowmemory.bridge_pilot_evidence.v0",
+      "evidenceId": "0x2c682a9601d143f86f90a21728e8ac875c92dc5a299bf5d8b32a73d5b960e5ee",
+      "generatedAt": "2026-05-13T00:00:00.000Z",
+      "mode": "base-mainnet-pilot",
+      "productionReady": true,
+      "localOnly": false,
+      "observationId": "0xf65deb7e284bacecf312fef9937ce1c05cade61ba3edbddecbe18c356d6a3719",
+      "creditId": "0xc4f46eb30b6b1e47b682bbe2c892f40c4eb83149d662b22df6b8f72efad71468",
+      "depositId": "0x8453000000000000000000000000000000000000000000000000000000000001",
+      "replayKey": "0xea93b7d168d2f1f6c4be4f95ba4d85aa2d07fc4298a720d180000a19d98481f0",
+      "source": {
+        "chainId": 8453,
+        "chainIdHex": "0x2105",
+        "contract": "0x1111111111111111111111111111111111111111",
+        "txHash": "0x8453000000000000000000000000000000000000000000000000000000000002",
+        "logIndex": 0,
+        "blockNumber": "100"
+      },
+      "asset": {
+        "sourceChainId": 8453,
+        "sourceToken": "0x3333333333333333333333333333333333333333",
+        "destinationAssetId": "0x17a994c882c8cbafa5f5e1d85c21dcfedcd4b8f9387952bf76af8792a39a70fa",
+        "decimals": 18
+      },
+      "guardrails": {
+        "approvedContract": true,
+        "confirmation": {
+          "depth": 5,
+          "latestBlockNumber": "112",
+          "requiredConfirmedBlockNumber": "107",
+          "requestedToBlock": "100",
+          "satisfied": true
+        },
+        "maxUsd": "1",
+        "maxDepositAmount": "20000000",
+        "totalCapAmount": "20000000",
+        "pilotModeTag": "0x8edc10ba20d09d2f920c2135ea53baaa72ec90df339d57248f096ca150771a6e",
+        "supportedTokens": [
+          "0x3333333333333333333333333333333333333333"
+        ],
+        "assetDecimals": 18,
+        "operatorAcknowledged": true,
+        "noSecrets": true
+      },
+      "creditApplication": {
+        "status": "applied",
+        "appliedExactlyOnce": true
+      },
+      "replay": {
+        "decision": "accepted_once",
+        "duplicateReplayKeys": []
+      },
+      "nextOperatorCommands": [
+        "npm run flowchain:real-value-pilot:runtime",
+        "npm run flowchain:bridge:live:check"
+      ]
+    }
+  ],
+  "releaseEvidences": [],
+  "replayProtection": {
+    "strategy": "source-chain-contract-tx-log-deposit",
+    "replayKeys": [
+      "0xea93b7d168d2f1f6c4be4f95ba4d85aa2d07fc4298a720d180000a19d98481f0"
+    ],
+    "duplicateReplayKeys": []
+  },
+  "runtimeIntake": {
+    "status": "handoff_file",
+    "consumer": "flowchain-runtime-agent",
+    "expectedPath": "fixtures/bridge/base8453-runtime-bridge-handoff.json",
+    "note": "Runtime live pilot handoff fixture for exact-value credit application tests."
+  },
+  "workbenchTimeline": [
+    {
+      "phase": "deposit_observed",
+      "status": "observed",
+      "objectId": "0xf65deb7e284bacecf312fef9937ce1c05cade61ba3edbddecbe18c356d6a3719",
+      "title": "Deposit observed",
+      "summary": "Observed lockbox deposit 0x8453000000000000000000000000000000000000000000000000000000000001 on Base chain 8453."
+    },
+    {
+      "phase": "credit_applied",
+      "status": "applied",
+      "objectId": "0xc4f46eb30b6b1e47b682bbe2c892f40c4eb83149d662b22df6b8f72efad71468",
+      "title": "Credit applied",
+      "summary": "20000000 smallest units applied to the FlowChain destination wallet."
+    }
+  ],
+  "workbenchRecords": [],
+  "limitations": [
+    "This fixture is deterministic runtime proof input and contains no RPC URLs, private keys, seed phrases, or webhooks.",
+    "It does not broadcast withdrawals or releases."
+  ]
+}

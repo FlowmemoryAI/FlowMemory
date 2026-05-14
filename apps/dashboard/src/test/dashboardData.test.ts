@@ -250,6 +250,96 @@ describe("dashboard fixture", () => {
           lifecycle: [],
         });
       }
+      if (url.endsWith("/bridge/live-readiness")) {
+        return Response.json({
+          schema: "flowmemory.control_plane.bridge_live_readiness.v0",
+          baseChainId: 8453,
+          baseChainName: "Base",
+          failClosedStatus: "BLOCKED",
+          readyForOperatorLivePilot: false,
+          lockbox: { configured: false, envName: "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", ownerVerified: false },
+          node: { running: true, chainId: "flowmemory-local-devnet-v0" },
+          confirmationDepth: { configured: false, envName: "FLOWCHAIN_BASE8453_CONFIRMATION_DEPTH" },
+          missingEnvNames: ["FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS"],
+          currentArtifacts: { base8453DepositCount: 0, localOrMockDepositCount: 1, mockPresentedAsLive: false },
+          issues: [{
+            reasonCode: "missing_env",
+            status: "blocked",
+            title: "Missing live pilot env",
+            summary: "Live readiness is blocked until all required env names are present.",
+            envNames: ["FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS"],
+          }],
+          envValuesPrinted: false,
+          localOnly: true,
+          productionReady: false,
+        });
+      }
+      if (url.endsWith("/pilot/lifecycle")) {
+        return Response.json({
+          schema: "flowmemory.control_plane.bridge_lifecycle_record_list.v0",
+          count: 1,
+          lifecycleRecords: [{
+            lifecycleRecordId: "lifecycle:1",
+            baseTxHash: `0x${"1".repeat(64)}`,
+            logIndex: 0,
+            depositId: "deposit:1",
+            replayKey: "replay:1",
+            replayStatus: "accepted",
+            creditId: "credit:1",
+            recipientWallet: "wallet:credited",
+            withdrawalIntentId: "withdrawal:1",
+            withdrawalStatus: "requested",
+            releaseEvidenceId: "release:1",
+            releaseStatus: "recorded",
+            asset: "local-test-unit",
+            amountSmallestUnits: "100",
+            status: "credited",
+            artifactClass: "local-or-mock",
+            liveArtifact: false,
+            evidenceFilePath: "fixtures/bridge/local-runtime-bridge-handoff.json",
+            equality: {
+              depositAmount: "100",
+              observedAmount: "100",
+              creditedAmount: "100",
+              walletDelta: "100",
+              transferableAmount: "100",
+              withdrawalAmount: "100",
+              releaseAmount: "100",
+              allEqual: true,
+              equalities: { walletDelta: true },
+            },
+          }],
+        });
+      }
+      if (url.endsWith("/wallets/balances")) {
+        return Response.json({
+          schema: "flowmemory.control_plane.wallet_balance_list.v0",
+          count: 1,
+          balances: [{
+            balanceId: "balance:credited",
+            walletAddress: "wallet:credited",
+            asset: "local-test-unit",
+            amount: "100",
+            status: "credited",
+            creditId: "credit:1",
+          }],
+        });
+      }
+      if (url.endsWith("/wallets/transfers")) {
+        return Response.json({
+          schema: "flowmemory.control_plane.wallet_transfer_history.v0",
+          count: 1,
+          transfers: [{
+            transferId: "transfer:1",
+            txId: "tx:transfer:1",
+            fromAccountId: "wallet:credited",
+            toAccountId: "wallet:recipient",
+            assetId: "local-test-unit",
+            amount: "100",
+            status: "applied",
+          }],
+        });
+      }
       if (url === WORKBENCH_DEVNET_STATE_PATH) {
         return Response.json(devnetState);
       }
@@ -270,13 +360,85 @@ describe("dashboard fixture", () => {
     expect(workbench.raw.controlPlaneHealth).toEqual({ status: "ok" });
     expect(workbench.raw.controlPlaneState).toEqual({ state: devnetState });
     expect(workbench.raw.controlPlanePilotStatus).toMatchObject({ state: "degraded" });
+    expect(workbench.raw.controlPlaneBridgeReadiness).toMatchObject({ failClosedStatus: "BLOCKED" });
+    expect(workbench.raw.controlPlanePilotLifecycle).toMatchObject({ count: 1 });
+    expect(workbench.sections.realValuePilot.some((record) => record.kind === "Bridge live readiness")).toBe(true);
+    expect(workbench.sections.realValuePilot.some((record) => record.kind === "Bridge exact lifecycle")).toBe(true);
+    expect(workbench.sections.realValuePilot.some((record) => record.kind === "Wallet transfer history")).toBe(true);
+    const lifecycleRecord = workbench.sections.realValuePilot.find((record) => record.kind === "Bridge exact lifecycle");
+    expect(lifecycleRecord?.facts.find((fact) => fact.label === "replay key")?.value).toBe("replay:1");
+    expect(lifecycleRecord?.facts.find((fact) => fact.label === "withdrawal intent")?.value).toBe("withdrawal:1");
+    expect(lifecycleRecord?.facts.find((fact) => fact.label === "release evidence")?.value).toBe("release:1");
+    expect(lifecycleRecord?.facts.find((fact) => fact.label === "withdrawal amount")?.value).toBe("100");
+    expect(lifecycleRecord?.facts.find((fact) => fact.label === "release amount")?.value).toBe("100");
     expect(workbench.raw.devnetState).toEqual(devnetState);
     expect(workbench.raw.bridgeTestDeposit).toEqual(bridgeTestDeposit);
     expect(workbench.loadIssues).toEqual([]);
     expect(fetchMock).toHaveBeenCalledWith("http://127.0.0.1:8787/health", expect.any(Object));
     expect(fetchMock).toHaveBeenCalledWith("http://127.0.0.1:8787/pilot/status", expect.any(Object));
+    expect(fetchMock).toHaveBeenCalledWith("http://127.0.0.1:8787/bridge/live-readiness", expect.any(Object));
+    expect(fetchMock).toHaveBeenCalledWith("http://127.0.0.1:8787/pilot/lifecycle", expect.any(Object));
     expect(fetchMock).toHaveBeenCalledWith(WORKBENCH_DEVNET_STATE_PATH, expect.any(Object));
     expect(fetchMock).toHaveBeenCalledWith(WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH, expect.any(Object));
+  });
+
+  it("renders bridge readiness live-blocked without env values", () => {
+    const configuredButHidden = "https://example.invalid/rpc-redacted";
+    const workbench = buildWorkbenchSnapshot(data, {
+      controlPlane: {
+        url: "http://127.0.0.1:8787",
+        status: "available",
+        checkedAt: "2026-05-14T15:00:00.000Z",
+        endpoints: ["GET /health", "GET /state", "GET /bridge/live-readiness", "GET /pilot/lifecycle"],
+        health: { status: "ok" },
+        state: devnetState,
+        pilotStatus: {
+          schema: "flowmemory.control_plane.real_value_pilot_status.v0",
+          state: "degraded",
+          stateReason: "Waiting for Base 8453 deposit.",
+          baseChainId: 8453,
+          cappedOwnerTesting: true,
+          broadPublicReadiness: false,
+          productionReady: false,
+          browserStoresSecrets: false,
+          nextOperatorStep: { command: "npm run control-plane:serve" },
+          lifecycle: [],
+        },
+        bridgeLiveReadiness: {
+          schema: "flowmemory.control_plane.bridge_live_readiness.v0",
+          baseChainId: 8453,
+          baseChainName: "Base",
+          failClosedStatus: "BLOCKED",
+          readyForOperatorLivePilot: false,
+          lockbox: { configured: false, envName: "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", ownerVerified: false },
+          node: { running: true, chainId: "flowmemory-local-devnet-v0" },
+          confirmationDepth: { configured: false, envName: "FLOWCHAIN_BASE8453_CONFIRMATION_DEPTH" },
+          missingEnvNames: ["FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS"],
+          currentArtifacts: { base8453DepositCount: 0, localOrMockDepositCount: 1, mockPresentedAsLive: false },
+          issues: [{
+            reasonCode: "missing_env",
+            status: "blocked",
+            title: "Missing live pilot env",
+            summary: "Live readiness is blocked until all required env names are present.",
+            envNames: ["FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS"],
+          }],
+          envValuesPrinted: false,
+          localOnly: true,
+          productionReady: false,
+        },
+      },
+      devnetState,
+      devnetDashboardState,
+    });
+    const html = renderToStaticMarkup(createElement(WorkbenchView, { data, workbench }));
+
+    expect(html).toContain("Bridge live readiness");
+    expect(html).toContain("BLOCKED");
+    expect(html).toContain("FLOWCHAIN_BASE8453_RPC_URL");
+    expect(html).toContain("FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS");
+    expect(html).toContain("env values printed");
+    expect(html).toContain("false");
+    expect(html).not.toContain(configuredButHidden);
   });
 
   it("renders the critical workbench view labels from fixture fallback", () => {
@@ -291,6 +453,7 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Node and API status");
     expect(html).toContain("Control-plane offline");
     expect(html).toContain("Real-value pilot");
+    expect(html).toContain("Bridge live readiness");
     expect(html).toContain("capped owner testing");
     expect(html).toContain("public readiness");
     expect(html).toContain("Wallet Metadata");

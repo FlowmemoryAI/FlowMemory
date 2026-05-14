@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowmemory.local/schemas/flowmemory/bridge-local-usage-proof.schema.json",
+  "title": "FlowMemory Bridge Local Usage Proof",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generatedAt",
+    "creditId",
+    "sourceRecipient",
+    "secondRecipient",
+    "transfer",
+    "balances",
+    "productOrDexFlow",
+    "localOnly",
+    "noSecrets"
+  ],
+  "properties": {
+    "schema": {
+      "const": "flowmemory.bridge_local_usage_proof.v0"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "creditId": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$"
+    },
+    "sourceRecipient": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$"
+    },
+    "secondRecipient": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$"
+    },
+    "transfer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "transferId",
+        "amount",
+        "status",
+        "broadcast"
+      ],
+      "properties": {
+        "transferId": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$"
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "status": {
+          "const": "prepared"
+        },
+        "broadcast": {
+          "const": false
+        }
+      }
+    },
+    "balances": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "creditedWalletAfterCredit",
+        "creditedWalletAfterTransfer",
+        "secondWalletAfterTransfer"
+      ],
+      "properties": {
+        "creditedWalletAfterCredit": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "creditedWalletAfterTransfer": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "secondWalletAfterTransfer": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        }
+      }
+    },
+    "productOrDexFlow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "supportedByCommand",
+        "bridgeRelayerExecutesProductTrade",
+        "status"
+      ],
+      "properties": {
+        "supportedByCommand": {
+          "const": "npm run flowchain:product-e2e"
+        },
+        "bridgeRelayerExecutesProductTrade": {
+          "const": false
+        },
+        "status": {
+          "const": "covered_by_existing_local_gate"
+        }
+      }
+    },
+    "localOnly": {
+      "const": true
+    },
+    "noSecrets": {
+      "const": true
+    }
+  }
+}

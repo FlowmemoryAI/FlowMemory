@@ -9,7 +9,7 @@ The MVP covers local inspection of:
 - Local control-plane health and state from `http://127.0.0.1:8787/health`, `/state`, and `/rpc`
 - Node status, peers, mempool, accounts, local balances, faucet events, public wallet references, and setup status
 - Product Testnet V1 wallet/account public state, local/test token launch records, token balances, DEX pools, liquidity positions, swaps, and unified explorer rollups
-- Real-value pilot status for capped owner testing: Base deposit observation, local credit, replay/retry, withdrawal intent, release evidence, caps, pause, emergency state, and exact next operator command
+- Real-value pilot status for capped owner testing: Base 8453 live readiness, missing env names without values, Base deposit observation, exact local credit, wallet transferability, withdrawal/release evidence, caps, pause, emergency state, and exact next operator command
 - FlowPulse observations from indexer-style receipt/log data
 - Rootfield registry state
 - Work lanes and work receipts
@@ -72,6 +72,10 @@ When `npm run control-plane:serve` is running, the workbench probes:
 GET http://127.0.0.1:8787/health
 GET http://127.0.0.1:8787/state
 GET http://127.0.0.1:8787/pilot/status
+GET http://127.0.0.1:8787/bridge/live-readiness
+GET http://127.0.0.1:8787/pilot/lifecycle
+GET http://127.0.0.1:8787/wallets/balances
+GET http://127.0.0.1:8787/wallets/transfers
 POST http://127.0.0.1:8787/rpc
 ```
 
@@ -92,6 +96,20 @@ false and whether the browser stores secrets. The browser must not write private
 keys, mnemonics, seed phrases, RPC credentials, API keys, or webhooks to
 localStorage/sessionStorage; it only consumes browser-safe control-plane
 responses and fixture data.
+
+The first screen also includes a `Bridge live readiness` panel. It shows
+`BLOCKED`, `FAILED`, or `READY_FOR_OPERATOR_LIVE_PILOT`, Base chain ID `8453`,
+whether the local node is running, whether the lockbox is configured, whether
+confirmation depth is configured, and missing env names. It never renders env
+values. Mock/local artifacts remain labeled as local or mock; the live panel
+must not present mock data as real.
+
+The `Real-Value Pilot` workbench table includes lifecycle records from
+`/pilot/lifecycle`, exact value equality for deposit, observed, credited, wallet
+delta, transferable, withdrawal, and release amounts, wallet balances from
+`/wallets/balances`, and transfer history from `/wallets/transfers`. The global
+search field can filter visible records by Base tx hash, credit id, wallet
+address, and status.
 
 ## Non-Goals
 

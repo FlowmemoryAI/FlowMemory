@@ -245,6 +245,12 @@
           "sourceChainId": 31337,
           "destinationChainId": 84532,
           "token": "0x3333333333333333333333333333333333333333",
+          "asset": {
+            "sourceChainId": 31337,
+            "sourceToken": "0x3333333333333333333333333333333333333333",
+            "destinationAssetId": "0xfb24ae62df7271f2218d0ac5cc0df832209752d4a03483fc5c9b25b548998a07",
+            "decimals": 18
+          },
           "amount": "5000000",
           "flowchainAccount": "0x43df29be6dcbf171c042f86227b45acf58938e981c539759335d76798778fde3",
           "baseRecipient": "0x4444444444444444444444444444444444444444",
@@ -264,6 +270,12 @@
           "sourceChainId": 31337,
           "destinationChainId": 84532,
           "token": "0x3333333333333333333333333333333333333333",
+          "asset": {
+            "sourceChainId": 31337,
+            "sourceToken": "0x3333333333333333333333333333333333333333",
+            "destinationAssetId": "0xfb24ae62df7271f2218d0ac5cc0df832209752d4a03483fc5c9b25b548998a07",
+            "decimals": 18
+          },
           "amount": "5000000",
           "flowchainAccount": "0x43df29be6dcbf171c042f86227b45acf58938e981c539759335d76798778fde3",
           "baseRecipient": "0x4444444444444444444444444444444444444444",
@@ -593,9 +605,9 @@
         "schemaPath": "../../schemas/flowmemory/local-transaction-envelope.schema.json",
         "function": "localTransactionEnvelopeHash",
         "expected": {
-          "envelopeId": "0x6ba95e7e98808cdeef4cd7aeae9cd88410ae66087d5dd4c5997e440923760871",
-          "signingDigest": "0x549a8d18f1531138ac49e4a4afb869b041222ce8c1c2a611fa3b4ad0ce48589c",
-          "payloadHash": "0xd24bfc9c616f340a8cc26e665043537bbf57dbcf5b2d5e65c885a8de517f0af4"
+          "envelopeId": "0x64dcf916c58ffc75d052410acd64955cd79eeed81575cdcfc858926b1cedad45",
+          "signingDigest": "0xa5e7b46843ef07f50446155fa57c7b6275a7e03d022c23778923919e48885134",
+          "payloadHash": "0xadf2f55a0f5d7221f7e0bcff127e031a6552dce5be88ec562dc868bce8bd355d"
         },
         "input": {
           "chainId": "31337",
@@ -604,14 +616,14 @@
           "signerKeyId": "0x8ebb83dff68eac8dd9a13ad4ef6e771b696d492ee7489c20ec8ea183fd66c208",
           "signerRole": 2,
           "nonce": "8",
-          "payloadHash": "0xd24bfc9c616f340a8cc26e665043537bbf57dbcf5b2d5e65c885a8de517f0af4",
+          "payloadHash": "0xadf2f55a0f5d7221f7e0bcff127e031a6552dce5be88ec562dc868bce8bd355d",
           "objectId": "0x7be29323cef21fc50c828a7e18d125056c82e5735cb7e1d47f9efc40e2b77c9a",
           "objectTypeHash": "0xf54d0a70abd4a36a0d64f6b0704100bc0e86970d2d72d79613d7a033d083a66a",
           "issuedAtUnixMs": "1778702400000"
         },
         "envelope": {
           "schema": "flowchain.local_transaction_envelope.v0",
-          "envelopeId": "0x6ba95e7e98808cdeef4cd7aeae9cd88410ae66087d5dd4c5997e440923760871",
+          "envelopeId": "0x64dcf916c58ffc75d052410acd64955cd79eeed81575cdcfc858926b1cedad45",
           "domain": "flowchain.local-alpha.v0.local-transaction-envelope:chain:31337",
           "domainSeparator": "0xff516fcab184623fe60f12b4d1e0430a57e6d18685d1356887ada50f5f20b36c",
           "chainId": "31337",
@@ -625,10 +637,10 @@
           "objectType": "bridge_withdrawal_intent",
           "objectTypeHash": "0xf54d0a70abd4a36a0d64f6b0704100bc0e86970d2d72d79613d7a033d083a66a",
           "objectId": "0x7be29323cef21fc50c828a7e18d125056c82e5735cb7e1d47f9efc40e2b77c9a",
-          "payloadHash": "0xd24bfc9c616f340a8cc26e665043537bbf57dbcf5b2d5e65c885a8de517f0af4",
+          "payloadHash": "0xadf2f55a0f5d7221f7e0bcff127e031a6552dce5be88ec562dc868bce8bd355d",
           "issuedAtUnixMs": "1778702400000",
-          "signingDigest": "0x549a8d18f1531138ac49e4a4afb869b041222ce8c1c2a611fa3b4ad0ce48589c",
-          "signature": "0xd7fb65246dae96d3676db6b13eef6ec4fa4ae823e47d91c51f1b788e1afdf3ac0496321ff302de87ca52c2ca49cffb81543261b89e31f23b4200790d844c0174"
+          "signingDigest": "0xa5e7b46843ef07f50446155fa57c7b6275a7e03d022c23778923919e48885134",
+          "signature": "0xb68abd0a2c97bd04aeb112ef8619135a800e15f54b69a4329d27b72a3f2cdbc003b9e5df69c674eecfe8c21ec420fb4b93c833fb7e7ba47cfb89921c0a102a7d"
         }
       }
     ],

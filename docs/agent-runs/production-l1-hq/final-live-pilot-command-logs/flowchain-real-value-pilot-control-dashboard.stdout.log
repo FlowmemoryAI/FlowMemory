@@ -1,0 +1,36 @@
+
+> flowchain:real-value-pilot:control-dashboard
+> npm run real-value-pilot:e2e --prefix services/control-plane
+
+
+> real-value-pilot:e2e
+> node src/real-value-pilot-e2e.ts
+
+{
+  "schema": "flowmemory.control_plane.real_value_pilot_e2e.v0",
+  "ok": true,
+  "pilotState": "degraded",
+  "nextOperatorCommand": "npm run bridge:observe -- --mode base-mainnet-canary --rpc-url <FLOWCHAIN_BASE8453_RPC_URL> --lockbox-address <FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS> --from-block <n> --to-block <n> --acknowledge-real-funds --max-usd 25",
+  "apiMethods": [
+    "pilot_status",
+    "pilot_deposit_observation_list",
+    "pilot_credit_list",
+    "pilot_withdrawal_intent_list",
+    "pilot_release_evidence_list",
+    "pilot_cap_status",
+    "pilot_pause_status",
+    "pilot_retry_status",
+    "pilot_emergency_status",
+    "bridge_live_readiness",
+    "pilot_lifecycle_record_list",
+    "wallet_balance_list",
+    "wallet_transfer_history"
+  ],
+  "dashboardEvidence": [
+    "apps/dashboard/src/data/workbench.ts realValuePilot section",
+    "apps/dashboard/src/data/workbench.ts /pilot/status probe",
+    "apps/dashboard/src/views/WorkbenchView.tsx Real-value pilot panel"
+  ],
+  "localOnly": true,
+  "productionReady": false
+}

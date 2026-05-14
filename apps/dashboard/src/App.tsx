@@ -6,6 +6,7 @@ import { DEFAULT_CANARY_DASHBOARD_DATA_PATH, fetchDashboardData } from "./data/l
 import type { DashboardData } from "./data/types";
 import { DEFAULT_CONTROL_PLANE_URL, buildWorkbenchSnapshot, fetchWorkbenchSnapshot, type WorkbenchSnapshot } from "./data/workbench";
 import { AlertsView } from "./views/AlertsView";
+import { BridgePilotView } from "./views/BridgePilotView";
 import { CanaryDeploymentView } from "./views/CanaryDeploymentView";
 import { DevnetBlocksView } from "./views/DevnetBlocksView";
 import { FlowMemoryView } from "./views/FlowMemoryView";
@@ -116,6 +117,7 @@ export default function App() {
     <AppShell data={data} canaryData={canaryData} workbench={workbench}>
       <Routes>
         <Route path="/" element={<WorkbenchView data={data} workbench={workbench} onRefresh={() => setVersion((current) => current + 1)} />} />
+        <Route path="/bridge" element={<BridgePilotView workbench={workbench} />} />
         <Route path="/overview" element={<OverviewView data={data} />} />
         <Route path="/canary" element={<CanaryDeploymentView data={canaryData} />} />
         <Route path="/flowmemory" element={<FlowMemoryView data={data} />} />

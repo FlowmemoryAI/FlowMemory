@@ -14,6 +14,10 @@
     "./pilot-envelope-validation": {
       "types": "./src/pilot-envelope-validation.d.ts",
       "default": "./src/pilot-envelope-validation.js"
+    },
+    "./runtime-validation": {
+      "types": "./src/runtime-validation.d.ts",
+      "default": "./src/runtime-validation.js"
     }
   },
   "scripts": {
@@ -22,21 +26,44 @@
     "validate:vectors": "node src/validate-vectors.js",
     "validate:local-alpha": "node src/validate-local-alpha-fixtures.js",
     "validate:product-transactions": "node src/validate-product-testnet-fixtures.js",
+    "validate:production-l1-crypto": "node src/validate-production-l1-crypto.js",
     "wallet:product-smoke": "node src/validate-product-testnet-fixtures.js",
     "wallet:create": "node src/wallet-cli.js create",
+    "wallet:import": "node src/wallet-cli.js import",
+    "wallet:unlock": "node src/wallet-cli.js unlock",
+    "wallet:lock": "node src/wallet-cli.js lock",
     "wallet:check": "node src/wallet-cli.js check",
     "wallet:list": "node src/wallet-cli.js list",
     "wallet:metadata": "node src/wallet-cli.js metadata",
+    "wallet:export-metadata": "node src/wallet-cli.js export-metadata",
+    "wallet:verify-metadata": "node src/wallet-cli.js verify-metadata",
     "wallet:add-account": "node src/wallet-cli.js add-account",
     "wallet:rotate": "node src/wallet-cli.js rotate",
     "wallet:sign": "node src/wallet-cli.js sign",
     "wallet:verify": "node src/wallet-cli.js verify",
+    "wallet:derive-metadata": "node src/wallet-cli.js derive-metadata",
+    "wallet:sign-transfer": "node src/wallet-cli.js sign-transfer",
+    "wallet:sign-token-launch": "node src/wallet-cli.js sign-token-launch",
+    "wallet:sign-token-transfer": "node src/wallet-cli.js sign-token-transfer",
+    "wallet:sign-pool-create": "node src/wallet-cli.js sign-pool-create",
+    "wallet:sign-add-liquidity": "node src/wallet-cli.js sign-add-liquidity",
+    "wallet:sign-remove-liquidity": "node src/wallet-cli.js sign-remove-liquidity",
+    "wallet:sign-swap": "node src/wallet-cli.js sign-swap",
+    "wallet:sign-withdrawal-intent": "node src/wallet-cli.js sign-withdrawal-intent",
+    "wallet:sign-finality": "node src/wallet-cli.js sign-finality",
+    "wallet:submit": "node src/wallet-cli.js submit",
+    "wallet:query": "node src/wallet-cli.js query",
+    "wallet:e2e": "node src/wallet-e2e.js",
+    "wallet:transfer:e2e": "node src/wallet-e2e.js --transfer-only",
+    "wallet:operator-bridge": "node src/operator-bridge-cli.js",
     "wallet:pilot-config": "node src/pilot-wallet-cli.js config-from-env",
     "wallet:pilot-metadata": "node src/pilot-wallet-cli.js metadata",
     "wallet:pilot-sign": "node src/pilot-wallet-cli.js sign",
     "wallet:pilot-verify": "node src/pilot-wallet-cli.js verify",
     "wallet:pilot-next": "node src/pilot-wallet-cli.js next-commands",
-    "wallet:pilot-e2e": "node src/pilot-wallet-e2e.js"
+    "wallet:pilot-e2e": "node src/pilot-wallet-e2e.js",
+    "scan:no-secrets": "node src/no-secret-scan.js",
+    "production-l1:vectors": "node src/production-l1-vector-cli.js"
   },
   "dependencies": {
     "@noble/hashes": "2.2.0",

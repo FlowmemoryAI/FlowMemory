@@ -12,15 +12,15 @@ Local mock:
 npm run bridge:mock
 ```
 
-Mock real-value pilot E2E, with no external RPC:
+Deterministic fixture real-value pilot E2E, with no external RPC:
 
 ```powershell
 npm run flowchain:real-value-pilot:bridge
 ```
 
-The mock pilot E2E writes deterministic observation, credit, pilot evidence,
+The fixture pilot E2E writes deterministic observation, credit, pilot evidence,
 withdrawal intent, release evidence, runtime handoff, replay handoff, and
-exactly-once application-state files under
+exact-value/application-state files under
 `services/bridge-relayer/out/real-value-pilot-e2e/`.
 
 Base public-network pilot observation:
@@ -29,21 +29,31 @@ Base public-network pilot observation:
 $env:FLOWCHAIN_BASE8453_RPC_URL="<base-8453-rpc-url>"
 $env:FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS="<approved-lockbox>"
 $env:FLOWCHAIN_BASE8453_APPROVED_LOCKBOX_ADDRESS="<approved-lockbox>"
+$env:FLOWCHAIN_BASE8453_SUPPORTED_TOKEN="<zero-address-for-native-or-erc20-address>"
+$env:FLOWCHAIN_BASE8453_ASSET_DECIMALS="<asset-decimals>"
 $env:FLOWCHAIN_BASE8453_FROM_BLOCK="<from>"
 $env:FLOWCHAIN_BASE8453_TO_BLOCK="<to>"
-$env:FLOWCHAIN_BASE8453_CONFIRMATIONS="2"
-$env:FLOWCHAIN_PILOT_MAX_USD="1"
+$env:FLOWCHAIN_PILOT_CONFIRMATIONS="2"
 $env:FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI="<tiny-cap>"
 $env:FLOWCHAIN_PILOT_TOTAL_CAP_WEI="<tiny-total-cap>"
-$env:FLOWCHAIN_PILOT_OPERATOR_ACK="I_UNDERSTAND_THIS_IS_A_TINY_CAPPED_BASE8453_PILOT"
-npm run bridge:base8453:pilot:observe -- -OperatorAck -ApplyCredit -WithdrawalIntent
+$env:FLOWCHAIN_PILOT_OPERATOR_ACK="I_UNDERSTAND_THIS_IS_CAPPED_BASE8453_OWNER_PILOT"
+npm run flowchain:bridge:observe:base8453
+npm run flowchain:bridge:withdraw:intent
+npm run flowchain:bridge:release:evidence
+```
+
+Optional guardrail:
+
+```powershell
+$env:FLOWCHAIN_PILOT_MAX_USD="1"
 ```
 
 The observer verifies `eth_chainId == 0x2105`, rejects unapproved lockboxes,
 enforces confirmation depth before `eth_getLogs`, and never prints or writes the
-RPC URL. Re-running the same observed event is idempotent: the existing local
-application is cited and the replay credit is rejected with evidence instead of
-applying a second local credit.
+RPC URL. Amounts remain uint256 decimal strings across observation, credit,
+runtime application, withdrawal intent, and release evidence. Re-running the
+same observed event is idempotent: the existing application is cited and the
+replay credit is rejected with evidence instead of applying a second credit.
 
 The control plane can read `services/bridge-relayer/out/bridge-observation.json`
 and can intake additional local bridge-agent observations through JSON-RPC

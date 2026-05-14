@@ -8,6 +8,7 @@ import {
   BrainCircuit,
   Boxes,
   ClipboardCheck,
+  ArrowRightLeft,
   RadioReceiver,
   LayoutDashboard,
   Monitor,
@@ -28,6 +29,7 @@ interface AppShellProps {
 
 const NAV_ITEMS = [
   { to: "/", label: "Workbench", icon: Monitor },
+  { to: "/bridge", label: "Bridge pilot", icon: ArrowRightLeft },
   { to: "/overview", label: "Overview", icon: LayoutDashboard },
   { to: "/canary", label: "Base canary", icon: RadioReceiver },
   { to: "/flowmemory", label: "Flow Memory", icon: BrainCircuit },
@@ -43,6 +45,11 @@ const NAV_ITEMS = [
 
 export function AppShell({ data, canaryData, workbench, children }: AppShellProps) {
   const location = useLocation();
+  const isBridgeRoute = location.pathname.startsWith("/bridge");
+  if (isBridgeRoute) {
+    return <>{children}</>;
+  }
+
   const isCanaryRoute = location.pathname.startsWith("/canary");
   const activeData = isCanaryRoute && canaryData ? canaryData : data;
   const bannerMode = isCanaryRoute

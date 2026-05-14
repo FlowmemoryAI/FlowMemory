@@ -443,6 +443,79 @@ Returns:
 
 The result includes lifecycle rows for Base deposit observation, local credit application, replay/retry checks, withdrawal intent, release evidence, caps, pause, and emergency state.
 
+`bridge_live_readiness`
+
+Params: none.
+
+Returns a fail-closed machine-readable readiness object for operator live-pilot
+inspection. It always identifies Base as chain ID `8453`, reports whether the
+lockbox, Base reader endpoint, block range, confirmation depth, cap env, and
+operator acknowledgement are configured, and lists missing env names only. It
+must not return env values.
+
+Important fields:
+
+```json
+{
+  "schema": "flowmemory.control_plane.bridge_live_readiness.v0",
+  "baseChainId": 8453,
+  "failClosedStatus": "BLOCKED",
+  "readyForOperatorLivePilot": false,
+  "missingEnvNames": ["FLOWCHAIN_BASE8453_RPC_URL"],
+  "envValuesPrinted": false,
+  "issues": [
+    { "reasonCode": "missing_env", "status": "blocked" }
+  ]
+}
+```
+
+`failClosedStatus` is one of `BLOCKED`, `FAILED`, or
+`READY_FOR_OPERATOR_LIVE_PILOT`. The dashboard must not present live mode as
+ready until this field is `READY_FOR_OPERATOR_LIVE_PILOT` and the lockbox
+address has been owner-verified outside the browser.
+
+`pilot_lifecycle_record_list`
+
+Returns deposit/credit lifecycle records keyed by Base tx hash, log index,
+credit id, recipient wallet, asset, amount in smallest units, status, and
+evidence path/id.
+
+List params:
+
+```json
+{
+  "baseTxHash": "0x...",
+  "creditId": "0x...",
+  "walletAddress": "0x...",
+  "status": "release_evidence_recorded",
+  "query": "optional free text",
+  "limit": 50
+}
+```
+
+Each record includes exact value equality fields:
+
+```json
+{
+  "depositAmount": "1000000",
+  "observedAmount": "1000000",
+  "creditedAmount": "1000000",
+  "walletDelta": "1000000",
+  "transferableAmount": "1000000",
+  "withdrawalAmount": "1000000",
+  "releaseAmount": "1000000",
+  "allEqual": true
+}
+```
+
+`wallet_balance_list` and `wallet_transfer_history`
+
+These methods expose wallet balances and transfer history needed to prove that
+a credited FlowChain wallet can transfer the credited amount and that recipient
+balances update exactly. They accept the same list filters for
+`walletAddress`, `status`, `query`, and `limit`, and they return
+`localOnly: true`, `productionReady: false`.
+
 List methods:
 
 - `pilot_deposit_observation_list`
@@ -465,6 +538,8 @@ Browser-safe HTTP mirrors are also available:
 
 ```text
 GET /pilot/status
+GET /bridge/live-readiness
+GET /pilot/lifecycle?txHash=0x...&creditId=0x...&walletAddress=0x...&status=...
 GET /pilot/deposits?limit=50
 GET /pilot/credits?limit=50
 GET /pilot/withdrawal-intents?limit=50
@@ -473,9 +548,11 @@ GET /pilot/cap-status
 GET /pilot/pause-status
 GET /pilot/retry-status
 GET /pilot/emergency-status
+GET /wallets/balances?walletAddress=0x...&status=credited
+GET /wallets/transfers?walletAddress=0x...&status=applied
 ```
 
-The four HTTP list endpoints accept the same `limit` bound as the JSON-RPC list methods. Invalid limits return the standard JSON-RPC invalid params error envelope as JSON.
+The HTTP list endpoints accept the same `limit` bound and filters as the JSON-RPC list methods. Invalid limits return the standard JSON-RPC invalid params error envelope as JSON.
 
 ### `faucet_event_list`
 

@@ -11,10 +11,7 @@ $repoRoot = Set-FlowChainRepoRoot
 Set-FlowChainCargoTargetDir -RepoRoot $repoRoot | Out-Null
 $smokeFullDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $SmokeDir)
 
-if (Test-Path -LiteralPath $smokeFullDir) {
-    Remove-Item -LiteralPath $smokeFullDir -Recurse -Force
-}
-New-Item -ItemType Directory -Force -Path $smokeFullDir | Out-Null
+$smokeFullDir = Reset-FlowChainDirectory -Path $smokeFullDir
 
 $statePath = Join-Path $smokeFullDir "state.json"
 $nodeDir = Join-Path $smokeFullDir "node"

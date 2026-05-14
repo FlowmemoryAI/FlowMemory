@@ -11,6 +11,7 @@
     "observedAt",
     "mode",
     "productionReady",
+    "asset",
     "deposit",
     "guardrails"
   ],
@@ -20,7 +21,9 @@
     "replayKey": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
     "observedAt": { "type": "string" },
     "mode": { "type": "string", "enum": ["mock", "mock-pilot", "local-anvil", "base-sepolia", "base-mainnet-canary", "base-mainnet-pilot"] },
-    "productionReady": { "const": false },
+    "productionReady": { "type": "boolean" },
+    "localOnly": { "type": "boolean" },
+    "asset": { "$ref": "#/$defs/assetIdentity" },
     "deposit": { "$ref": "bridge-deposit.schema.json" },
     "guardrails": {
       "type": "object",
@@ -31,9 +34,15 @@
         "explicitContract": { "type": "boolean" },
         "explicitBlockRange": { "type": "boolean" },
         "noSecrets": { "type": "boolean" },
-        "maxUsd": { "type": "number", "maximum": 25 },
+        "maxUsd": { "type": "string", "pattern": "^[0-9]+$" },
         "maxDepositAmount": { "type": "string", "pattern": "^[0-9]+$" },
         "totalCapAmount": { "type": "string", "pattern": "^[0-9]+$" },
+        "supportedTokens": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+          "uniqueItems": true
+        },
+        "assetDecimals": { "type": "integer", "minimum": 0, "maximum": 255 },
         "approvedContract": { "type": "boolean" },
         "confirmation": {
           "type": "object",
@@ -47,6 +56,19 @@
             "satisfied": { "type": "boolean" }
           }
         }
+      }
+    }
+  },
+  "$defs": {
+    "assetIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceChainId", "sourceToken", "destinationAssetId", "decimals"],
+      "properties": {
+        "sourceChainId": { "type": "integer", "enum": [31337, 84532, 8453] },
+        "sourceToken": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+        "destinationAssetId": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+        "decimals": { "type": "integer", "minimum": 0, "maximum": 255 }
       }
     }
   }

@@ -1,0 +1,2651 @@
+
+> flowchain:real-value-pilot:e2e
+> powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-real-value-pilot-e2e.ps1
+
+
+== Run flowchain:product-e2e (hq/ops) ==
+
+> flowchain:product-e2e
+> powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-product-e2e.ps1
+
+
+== Run private/local prerequisite full smoke ==
+
+> flowchain:full-smoke
+> powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-full-smoke.ps1
+
+
+== Run FlowChain private/local smoke gate ==
+
+== FlowChain Prerequisites ==
+
+Name                 Required Status Version                                                                           
+----                 -------- ------ -------                                                                           
+Git                      True ok     git version 2.51.2.windows.1                                                      
+Node.js                  True ok     v24.15.0                                                                          
+npm                      True ok     11.12.1                                                                           
+Rust cargo               True ok     cargo 1.95.0 (f2d3ce0bd 2026-03-21)                                               
+Rust compiler            True ok     rustc 1.95.0 (59807616e 2026-04-14)                                               
+MSVC C++ build tools     True ok     Visual C++ tools at C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools
+Foundry forge            True ok     forge Version: 1.6.0-v1.6.0-rc1                                                   
+Python                   True ok     Python 3.11.5                                                                     
+
+
+
+== Dependency Install State ==
+
+Area                Path                        Status    InstallCommand                     
+----                ----                        ------    --------------                     
+root npm workspaces node_modules                installed npm install                        
+dashboard workbench apps/dashboard/node_modules installed npm install --prefix apps/dashboard
+crypto package      crypto/node_modules         installed npm install --prefix crypto        
+
+
+
+Next command on a clean second computer:
+npm run flowchain:init
+
+== Run service tests ==
+
+> test
+> npm test --prefix services/shared && npm test --prefix services/indexer && npm test --prefix services/verifier && npm test --prefix services/flowmemory && npm test --prefix services/control-plane && npm test --prefix services/bridge-relayer
+
+
+> test
+> node --test test/*.test.ts
+
+✔ computes EVM Keccak-256 test vectors (1.8176ms)
+✔ derives canonical FlowPulse observation id from receipt/log metadata (2.2718ms)
+✔ parses a fixture-only FlowPulse log without live RPC (3.1075ms)
+✔ rejects non-FlowPulse fixture logs (0.4974ms)
+✔ normalizes EVM addresses and rejects malformed addresses (0.1749ms)
+✔ exposes the v0 verifier status vocabulary (0.7257ms)
+✔ canonical JSON sorts object keys while preserving array order (0.2098ms)
+✔ derives deterministic verifier report id from canonical report core (2.5503ms)
+✔ detects secret-shaped response material without rejecting ordinary hashes (1.1385ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 134.2122
+
+> test
+> node --test test/*.test.ts
+
+✔ indexes FlowPulse fixture logs into canonical observations (6.7986ms)
+✔ detects exact duplicate observations (13.8463ms)
+✔ ingests receipt fixtures and rejects reverted or malformed logs cleanly (16.9206ms)
+✔ models finality threshold without claiming production reorg handling (3.0765ms)
+✔ marks block hash mismatches as reorged in fixture state (1.8604ms)
+✔ persists deterministic indexer state JSON (13.0625ms)
+✔ ships an indexer persistence JSON schema fixture (0.3575ms)
+✔ maps mocked local RPC logs into raw FlowPulse fixtures without secrets (32.058ms)
+✔ rejects non Base Sepolia RPC endpoints for live reads (1.6797ms)
+✔ rejects non Base mainnet RPC endpoints for canary reads (0.8827ms)
+✔ runs Base Sepolia reader and persists durable state plus checkpoint (19.3246ms)
+✔ Base Sepolia reader records RPC and ABI malformed logs in the dashboard feed (11.4695ms)
+✔ runs Base mainnet canary reader and persists empty scans safely (4.6534ms)
+✔ Base mainnet canary reader surfaces malformed logs without dropping checkpoints (4.9192ms)
+✔ Base mainnet canary reader preserves exact duplicates and reorg replacements (19.0631ms)
+✔ parses Base Sepolia reader CLI args without defaulting to a public RPC (0.8157ms)
+✔ Base Sepolia reader supports safe checkpoint resume after empty ranges (4.1342ms)
+✔ parses guarded Base mainnet canary reader CLI args (0.5536ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 303.6166
+
+> test
+> node --test test/*.test.ts
+
+✔ generates valid deterministic reports from fixture observations (10.0971ms)
+✔ marks missing artifacts unresolved (5.4171ms)
+✔ marks commitment mismatch as invalid (4.8859ms)
+✔ marks unknown pulse types unsupported (4.4081ms)
+✔ marks artifacts over fixture policy size unresolved (4.2854ms)
+✔ generates all verifier statuses from receipt fixtures (31.7838ms)
+✔ validates swap-derived memory signal commitments (12.3662ms)
+✔ persists deterministic verifier report JSON (25.2745ms)
+✔ ships a verifier report JSON schema fixture (0.3861ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 238.8364
+
+> test
+> node --test test/*.test.ts
+
+✔ maps verifier statuses to Flow Memory launch vocabulary (0.9449ms)
+✔ published schemas exist for every launch-core object (1.8724ms)
+✔ generates concrete Rootflow and Flow Memory V0 outputs (42.7254ms)
+✔ generates Base canary dashboard output from committed deployment artifacts (10.1809ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 189.9207
+
+> test
+> node --test test/*.test.ts
+
+{
+  "service": "flowmemory-control-plane-v0",
+  "url": "http://127.0.0.1:54289/rpc",
+  "localOnly": true
+}
+✔ dispatches JSON-RPC methods against local fixture state (70.0516ms)
+✔ returns stable invalid params errors for missing required params (30.4051ms)
+✔ returns standard unknown method errors (0.1933ms)
+✔ validates malformed requests and bad params with stable codes (57.58ms)
+✔ keeps deterministic chain status response snapshots (16.3039ms)
+✔ recovers when generated launch/indexer/verifier fixtures are missing (72.7108ms)
+✔ looks up receipt, report, and memory provenance (33.5566ms)
+✔ supports receipt and report object lookup by provenance-linked ids (30.0578ms)
+✔ exposes artifact, devnet, challenge, and finality read methods (25.1122ms)
+✔ prefers devnet/local runtime state over committed devnet fixtures (5.3591ms)
+✔ degrades instead of crashing when active local devnet JSON is malformed (7.4974ms)
+✔ submits local transactions to the file-backed runtime intake path (26.1319ms)
+✔ rejects unsigned transaction_submit payloads (25.1698ms)
+✔ exposes account, wallet, bridge deposit, credit, and withdrawal reads (26.9812ms)
+✔ exposes product token, DEX, bridge credit, and product-flow reads from handoff maps (9.2246ms)
+✔ rejects secret-shaped intake and responses before returning them (37.72ms)
+✔ exposes real-value pilot lifecycle reads and operator next steps (33.8375ms)
+✔ pilot lifecycle can represent a live Base 8453 evidence bundle (45.2232ms)
+✔ bridge live readiness fails closed for missing env and returns env names only (25.4142ms)
+✔ exact-value fixture reports equality across bridge lifecycle and wallet transfer history (65.4405ms)
+✔ rejects secret-shaped bridge and pilot-adjacent intake material (28.5012ms)
+✔ smoke client queries the complete local lifecycle surface (85.6308ms)
+✔ smoke client ignores stale local devnet blocks without transactions (36.0713ms)
+✔ HTTP server exposes browser-safe health and state endpoints (102.4987ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1128.604
+
+> test
+> node --test test/*.test.ts
+
+✔ validates the committed mock bridge deposit fixture (49.8562ms)
+✔ builds a non-production bridge observation (38.1599ms)
+✔ builds deterministic bridge credit, withdrawal intent, and runtime handoff objects (107.4926ms)
+✔ local credit smoke pipeline applies a mock credit and records test withdrawal intent (57.5587ms)
+✔ mock pilot E2E path applies a Base 8453 credit exactly once across replay (66.5333ms)
+✔ mock pilot duplicate deposits reject replay with explicit evidence (7.8879ms)
+✔ mock pilot preserves exact tiny, small, u64 boundary, and above-u64 amounts as decimal strings (30.3577ms)
+✔ mock pilot rejects per-deposit and total pilot cap excess before credit application (3.7223ms)
+✔ release evidence amount mismatches are rejected explicitly (5.0875ms)
+✔ bridge pipeline reports and artifacts do not contain secrets (5.6683ms)
+✔ mock pilot rejects wrong source chains and unapproved contracts (0.8233ms)
+✔ mock pilot rejects unsupported tokens (0.593ms)
+✔ decodes BaseBridgeLockbox BridgeDeposit logs from RPC log payloads (1.038ms)
+✔ observes Base Sepolia deposit logs through read-only RPC calls (26.9071ms)
+✔ observes Base public-network pilot only after eth_chainId 0x2105 and confirmation depth (7.4187ms)
+✔ Base public-network pilot rejects wrong chain IDs before log reads (0.5539ms)
+✔ Base public-network pilot rejects unapproved lockbox and insufficient confirmations (0.7132ms)
+✔ requires explicit Base mainnet real-funds guardrails (0.1827ms)
+✔ rejects broad Base block ranges (0.1506ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 647.4942
+
+== Run crypto tests ==
+
+> @flowmemory/crypto@0.0.0 test
+> node --test
+
+✔ canonicalJson sorts object keys recursively (1.0456ms)
+✔ canonicalJson normalizes hex case before hashing (1.1179ms)
+✔ exports named domain separators and cursor/root identity helpers (3.0963ms)
+✔ computes FlowPulse schema id, event signature, pulse id, and event args hash (0.3949ms)
+✔ computes FlowPulse observation id and receipt hash (0.5295ms)
+✔ computes artifact commitment, Merkle root, and storage receipt commitment (0.9168ms)
+✔ computes deterministic verifier report hash (0.2288ms)
+✔ computes EIP-712 worker and verifier signature payloads (1.2658ms)
+✔ computes generic attestation envelope hash (0.2985ms)
+✔ observation id changes when reorg-sensitive block hash changes (0.3616ms)
+✔ receipt-adjacent fields fail closed when changed (1.1778ms)
+✔ computes FlowChain Local Alpha object ids and validates schema documents (6.7768ms)
+✔ validates FlowChain Local Alpha signed object envelopes (74.8402ms)
+✔ AJV validates all Local Alpha object and envelope fixtures against canonical schemas (101.0314ms)
+✔ Local Alpha signed envelope vectors reject replay, wrong domains, missing signer, malformed roots, malformed bridge deposits, and wrong types (51.9194ms)
+✔ validates canonical local transaction envelopes and negative vectors (8.1355ms)
+✔ validates Product Testnet V1 wallet transaction documents, envelopes, and negative vectors (150.9329ms)
+✔ Local Alpha object fixtures reject swapped fields, malformed hex, duplicate ids, and changed type strings (0.6154ms)
+✔ control-plane provenance response uses stable canonical JSON body hashing (0.2613ms)
+✔ local encrypted test vault creates, unlocks, lists, signs, verifies, exports public metadata, and rotates accounts (291.1956ms)
+✔ capped real-value pilot operator messages sign, export public metadata, and fail closed (122ms)
+✔ validates all published crypto test vectors (2.751ms)
+✔ signs and verifies verifier digests with local test keys only (5.7404ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1040.3176
+
+== Validate crypto vectors ==
+
+> @flowmemory/crypto@0.0.0 validate:vectors
+> node src/validate-vectors.js
+
+FLOWMEMORY_CRYPTO_VECTORS_OK 46
+
+== Validate local alpha crypto objects ==
+
+> @flowmemory/crypto@0.0.0 validate:local-alpha
+> node src/validate-local-alpha-fixtures.js
+
+FLOWCHAIN_LOCAL_ALPHA_FIXTURES_OK documents=15 envelopes=15 transactions=1 schemas=17
+
+== Run launch candidate gate ==
+
+> launch:candidate
+> npm run contracts:hardening && npm run launch:v0 && npm run validate:launch && npm run fixtures:check && node infra/scripts/check-unsafe-claims.mjs
+
+
+> contracts:hardening
+> node infra/scripts/run-contract-hardening.mjs
+
+No files changed, compilation skipped
+No files changed, compilation skipped
+
+Ran 23 tests for tests/RootfieldRegistry.t.sol:RootfieldRegistryTest
+[PASS] testCannotDeactivateInactiveRootfield() (gas: 119766)
+[PASS] testCannotDeactivateUnregisteredRootfield() (gas: 11530)
+[PASS] testCannotRegisterDuplicateRootfieldId() (gas: 108629)
+[PASS] testCannotRegisterZeroRootfieldId() (gas: 8955)
+[PASS] testCannotRegisterZeroSchemaHash() (gas: 8893)
+[PASS] testCannotSubmitUnregisteredRootfield() (gas: 11631)
+[PASS] testCannotSubmitZeroArtifactCommitment() (gas: 108457)
+[PASS] testCannotSubmitZeroRoot() (gas: 108529)
+[PASS] testCannotTransferInactiveRootfieldOwnership() (gas: 314948)
+[PASS] testCannotTransferRootfieldToZeroOwner() (gas: 108048)
+[PASS] testCannotTransferUnregisteredRootfieldOwnership() (gas: 206731)
+[PASS] testDeactivateRootfieldEmitsStatusPulseAndBlocksRoots() (gas: 130338)
+[PASS] testFlowPulseSignatureExcludesReceiptMetadata() (gas: 306)
+[PASS] testOnlyRootfieldOwnerCanDeactivateRootfield() (gas: 304505)
+[PASS] testOnlyRootfieldOwnerCanSubmitRoot() (gas: 304647)
+[PASS] testOnlyRootfieldOwnerCanTransferRootfieldOwnership() (gas: 499716)
+[PASS] testRegisterRootfieldEmitsFlowPulseSchema() (gas: 112889)
+[PASS] testRegisterRootfieldStoresCommitmentMetadata() (gas: 108252)
+[PASS] testRegistrationUriIsArbitraryAdvisoryLogData() (gas: 112689)
+[PASS] testSubmitRootEmitsFlowPulseSchemaWithoutReceiptMetadata() (gas: 141333)
+[PASS] testSubmitRootStoresLatestRootAndIncrementsCounts() (gas: 135158)
+[PASS] testTransferRootfieldOwnershipAllowsNewOwnerOnly() (gas: 350260)
+[PASS] testTransferRootfieldOwnershipEmitsStatusPulseAndOwnershipEvent() (gas: 322163)
+Suite result: ok. 23 passed; 0 failed; 0 skipped; finished in 8.58ms (46.83ms CPU time)
+
+Ran 8 tests for tests/FlowChainSettlementSpine.t.sol:FlowChainSettlementSpineTest
+[PASS] testAuthorizedSubmitterCanCommitAndRevocationBlocksFutureCommits() (gas: 151186)
+[PASS] testCommitBridgeAndControlPlaneObjectVocabularyWithStableEventShape() (gas: 607684)
+[PASS] testCommitBridgeDepositObjectEmitsStableEventAndStoresRecord() (gas: 166921)
+[PASS] testCommitRejectsUnauthorizedZeroFieldsAndDuplicates() (gas: 171729)
+[PASS] testConstructorRequiresOwnerAndAuthorizesOwner() (gas: 69123)
+[PASS] testMissingObjectLookupReverts() (gas: 24518)
+[PASS] testNonOwnerCannotAuthorizeSubmitter() (gas: 16712)
+[PASS] testOwnerCanAuthorizeSubmitterAndTransferOwnership() (gas: 41602)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 9.47ms (20.20ms CPU time)
+
+Ran 32 tests for tests/LiveV0Package.t.sol:LiveV0PackageTest
+[PASS] testArtifactRegistryDeprecatesOnlyByOwner() (gas: 781675)
+[PASS] testArtifactRegistryRejectsDuplicateAndInvalidCommitments() (gas: 673777)
+[PASS] testArtifactRegistryStoresCommitmentAndEmitsAdvisoryUri() (gas: 670621)
+[PASS] testCursorRegistryRegistersAndAdvancesCommitments() (gas: 541574)
+[PASS] testCursorRegistryRejectsDuplicateAndNonOwnerAdvance() (gas: 647821)
+[PASS] testCursorRegistryRejectsZeroIdsAndCommitments() (gas: 521058)
+[PASS] testFlowMemoryHookAdapterEmitsObservationAndReturnsSelector() (gas: 682700)
+[PASS] testFlowMemoryHookAdapterExposesUniswapV4AfterSwapShape() (gas: 690269)
+[PASS] testFlowMemoryHookAdapterRejectsEmptyUniswapV4HookData() (gas: 643542)
+[PASS] testFlowMemoryHookAdapterRejectsInvalidUniswapV4HookInputs() (gas: 667008)
+[PASS] testFlowMemoryHookAdapterRejectsZeroCommitment() (gas: 642755)
+[PASS] testFlowMemoryHookAdapterRejectsZeroSwapInputs() (gas: 648272)
+[PASS] testFlowMemoryHookAdapterUsesDefaultUriForEmptyUniswapV4HookUri() (gas: 688250)
+[PASS] testReceiptVerifierRejectsDuplicateReport() (gas: 456174)
+[PASS] testReceiptVerifierRejectsInvalidZeroFields() (gas: 323603)
+[PASS] testReceiptVerifierStoresReportCommitmentWithoutReceiptMetadataClaims() (gas: 454442)
+[PASS] testVerifierReportRegistryAcceptsAllV0StatusesAsAdvisoryReports() (gas: 1300659)
+[PASS] testVerifierReportRegistryAuthorizesVerifierAndStoresReport() (gas: 638580)
+[PASS] testVerifierReportRegistryBlocksRevokedVerifier() (gas: 463941)
+[PASS] testVerifierReportRegistryRejectsNonOwnerVerifierAuthorization() (gas: 618963)
+[PASS] testVerifierReportRegistryRejectsUnauthorizedInvalidStatusAndDuplicates() (gas: 659430)
+[PASS] testWorkDebtSchedulerRejectsNonParticipantCompletion() (gas: 716019)
+[PASS] testWorkDebtSchedulerRejectsZeroFieldsDuplicateAndCompletedTransition() (gas: 627984)
+[PASS] testWorkDebtSchedulerSchedulesAndCompletesWithoutTokenMechanics() (gas: 611880)
+[PASS] testWorkReceiptRegistryAuthorizesWorkerAndStoresLaneReceipt() (gas: 720288)
+[PASS] testWorkReceiptRegistryBlocksRevokedWorker() (gas: 512773)
+[PASS] testWorkReceiptRegistryRejectsDuplicateReceipt() (gas: 714311)
+[PASS] testWorkReceiptRegistryRejectsNonOwnerWorkerAuthorization() (gas: 675718)
+[PASS] testWorkReceiptRegistryRejectsUnauthorizedInvalidLaneAndZeroRoots() (gas: 546563)
+[PASS] testWorkerAndVerifierRegistriesDeactivateAndRejectUnregisteredUpdates() (gas: 1462957)
+[PASS] testWorkerAndVerifierRegistriesRejectDuplicateAndZeroFields() (gas: 1245882)
+[PASS] testWorkerAndVerifierRegistriesStoreSelfRegisteredMetadata() (gas: 1239894)
+Suite result: ok. 32 passed; 0 failed; 0 skipped; finished in 9.20ms (85.15ms CPU time)
+
+Ran 18 tests for tests/bridge/BaseBridgeLockbox.t.sol:BaseBridgeLockboxTest
+[PASS] testConstructorRequiresExplicitOwnerAndReleaseAuthority() (gas: 115820)
+[PASS] testEmergencyStopBlocksDepositsAndReleasesUntilOwnerResumes() (gas: 383806)
+[PASS] testLockERC20EmitsStableDeterministicDepositEventAndRecord() (gas: 314498)
+[PASS] testLockNativeWorksWhenExplicitlyAllowlisted() (gas: 253223)
+[PASS] testNonOwnerCannotConfigurePauseOrSetReleaseAuthority() (gas: 41448)
+[PASS] testOwnerCanConfigureAllowlistedTokenAndReleaseAuthority() (gas: 31875)
+[PASS] testPauseBlocksDepositsButNotAuthorizedRelease() (gas: 380927)
+[PASS] testRejectsPerDepositAndTotalCapExceeded() (gas: 983467)
+[PASS] testRejectsUnallowlistedDisabledAndZeroTokenDeposits() (gas: 421402)
+[PASS] testRejectsZeroAmountRecipientAndDirectNativeTransfers() (gas: 113722)
+[PASS] testReleaseBlocksTokenMismatchOverReleaseAndZeroEvidence() (gas: 370988)
+[PASS] testReleaseERC20CanReleaseInPartsWithDistinctEvidenceUntilExhausted() (gas: 389444)
+[PASS] testReleaseERC20EmitsStableSchemaAndBlocksReplay() (gas: 377780)
+[PASS] testReleaseERC20RequiresExplicitAuthorityAndKnownDeposit() (gas: 390973)
+[PASS] testReleaseNativeWorksThroughExplicitAuthorityWhilePaused() (gas: 320593)
+[PASS] testReleaseRejectsZeroRecipientAndZeroAmount() (gas: 342401)
+[PASS] testRepeatedDepositsUseNonceReplayProtection() (gas: 490286)
+[PASS] testTotalCapIsCumulativeAndCannotBeLoweredBelowHistoricalDeposits() (gas: 325940)
+Suite result: ok. 18 passed; 0 failed; 0 skipped; finished in 9.51ms (43.07ms CPU time)
+
+Ran 7 tests for tests/FlowMemoryAfterSwapHook.t.sol:FlowMemoryAfterSwapHookTest
+[PASS] testAfterSwapHookEmitsFlowPulseAndReturnsZeroHookDelta() (gas: 666179)
+[PASS] testAfterSwapHookIsPoolManagerGated() (gas: 843285)
+[PASS] testAfterSwapHookRejectsInvalidHookDataWithoutCustodyOrFeeState() (gas: 639185)
+[PASS] testHookEventSchemasExcludeTxHashAndLogIndexAssumptions() (gas: 299)
+[PASS] testPlannerDefinesAfterSwapOnlyPermissionTarget() (gas: 438073)
+[PASS] testPlannerMinesBaseSepoliaCreate2AddressWithTargetFlags() (gas: 8955316)
+[PASS] testPlannerRejectsCustomAccountingAndExtraHookFlags() (gas: 438661)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 30.33ms (36.85ms CPU time)
+
+Ran 5 test suites in 32.39ms (67.08ms CPU time): 88 tests passed, 0 failed, 0 skipped (88 total tests)
+WARNING: slither is optional for this default gate; run with -RequireSlither or npm run contracts:hardening:slither in 
+audit environments
+
+> launch:v0
+> npm run launch:v0 --prefix services/flowmemory
+
+
+> launch:v0
+> node src/launch-v0.ts
+
+
+[launch:v0] observe FlowPulse fixtures with indexer
+
+> index:fixtures
+> node src/index-fixtures.ts
+
+{
+  "service": "flowmemory-indexer-v0",
+  "outputPath": "E:\\FlowMemory\\flowmemory-prod-hq\\services\\indexer\\out\\indexer-state.json",
+  "observations": 8,
+  "cursors": 7,
+  "rejectedLogs": 2,
+  "duplicates": 1
+}
+
+[launch:v0] create verifier reports from indexed observations
+
+> verify:fixtures
+> node src/verify-fixtures.ts
+
+{
+  "service": "flowmemory-verifier-v0",
+  "inputPath": "E:\\FlowMemory\\flowmemory-prod-hq\\services\\indexer\\out\\indexer-state.json",
+  "outputPath": "E:\\FlowMemory\\flowmemory-prod-hq\\services\\verifier\\out\\reports.json",
+  "reports": 8,
+  "statuses": {
+    "valid": 4,
+    "reorged": 1,
+    "invalid": 1,
+    "unresolved": 1,
+    "unsupported": 1
+  }
+}
+
+[launch:v0] run no-value local devnet handoff
+{
+  "schema": "flowmemory.local_devnet.demo_summary.v0",
+  "statePath": "devnet/local/launch-v0-state.json",
+  "firstBlockHash": "0xd890758bdeaa4ab7a658d7813b2b9bdd0850824aaef830b9f2f4ff455aaf3811",
+  "secondBlockHash": "0x64e3d605fb1bba40b7de6a6a9813f77619282c07b9a33c7b41df1f6e3d71958b",
+  "stateRoot": "0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c",
+  "agentId": "agent:demo:alpha",
+  "agentRegistered": true,
+  "localBalanceAccountId": "local-balance:demo:agent-alpha",
+  "localBalanceUnits": 1000,
+  "faucetRecordId": "faucet:demo:001",
+  "faucetRecordCreated": true,
+  "workReceiptId": "receipt:demo:001",
+  "workReceiptSubmitted": true,
+  "verifierReportId": "report:demo:001",
+  "verifierReportSubmitted": true,
+  "memoryCellId": "memory:demo:agent-alpha:core",
+  "memoryCellUpdated": true,
+  "challengeId": "challenge:demo:001",
+  "challengeResolved": true,
+  "finalityReceiptId": "finality:demo:001",
+  "receiptFinalized": true,
+  "outDir": "fixtures/launch-core/generated/devnet",
+  "handoffFiles": [
+    "dashboard-state.json",
+    "indexer-handoff.json",
+    "verifier-handoff.json",
+    "control-plane-handoff.json",
+    "genesis-config.json",
+    "operator-key-references.json",
+    "state.json"
+  ]
+}
+
+[launch:v0] validate FlowRouter hardware POC fixture
+valid: hardware\fixtures\flowrouter_sample_seed42.json
+
+[launch:v0] generate Rootflow and Flow Memory V0 state
+{
+  "service": "flowmemory-launch-v0",
+  "loadedFlowPulses": 8,
+  "indexedObservations": 8,
+  "verifierReports": 8,
+  "rootflowTransitions": 7,
+  "memorySignals": 8,
+  "memoryReceipts": 8,
+  "rootfieldBundles": 1,
+  "agentMemoryViews": 1,
+  "dashboardFixture": "fixtures/dashboard/flowmemory-dashboard-v0.json",
+  "dashboardRuntimeData": "apps/dashboard/public/data/flowmemory-dashboard-v0.json",
+  "localOnly": true
+}
+
+> validate:launch
+> npm run validate --prefix services/flowmemory
+
+
+> validate
+> node src/validate-launch-core.ts
+
+{
+  "service": "flowmemory-launch-core-validator",
+  "path": "fixtures/launch-core/flowmemory-launch-v0.json",
+  "memorySignals": 8,
+  "memoryReceipts": 8,
+  "rootflowTransitions": 7,
+  "rootfieldBundles": 1,
+  "agentMemoryViews": 1,
+  "swapMemorySignals": 1
+}
+
+> fixtures:check
+> npm run fixtures:check --prefix services/flowmemory
+
+
+> fixtures:check
+> node src/check-fixture-drift.ts
+
+{
+  "service": "flowmemory-fixture-drift-check",
+  "checked": [
+    "fixtures/launch-core/flowmemory-launch-v0.json",
+    "fixtures/launch-core/rootflow-transitions.json",
+    "fixtures/dashboard/flowmemory-dashboard-v0.json",
+    "apps/dashboard/public/data/flowmemory-dashboard-v0.json"
+  ],
+  "status": "clean"
+}
+Checked launch claims in README.md, docs, contracts.
+
+== Run devnet tests ==
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 36 tests
+test canonical_json_sorts_object_keys ... ok
+test challenge_rejects_missing_receipt ... ok
+test local_test_unit_faucet_updates_balance_without_value_claims ... ok
+test local_faucet_and_transfer_update_test_unit_ledger ... ok
+test invalid_dependencies_are_rejected ... ok
+test finalization_rejects_unresolved_challenge ... ok
+test finalization_rejects_invalid_finality_status ... ok
+test zero_hash_constant_is_hex_32_bytes ... ok
+test memory_update_rejects_missing_or_failed_source_receipt ... ok
+test live_bridge_credit_u64_max_boundary_is_explicit ... ok
+test token_and_dex_reject_duplicate_zero_insufficient_and_slippage_failures ... ok
+test same_base_tx_with_different_log_index_gets_distinct_live_credits ... ok
+test duplicate_ids_are_rejected_for_new_objects ... ok
+test invalid_tx_is_rejected_without_state_mutation ... ok
+test block_hash_changes_when_transactions_change ... ok
+test product_demo_transactions_apply_in_one_block_with_receipts ... ok
+test token_launch_pool_liquidity_swap_and_remove_update_product_state ... ok
+test live_bridge_credit_rejects_unsatisfied_confirmation_and_pilot_cap_excess ... ok
+test live_bridge_credit_survives_export_import_restart_and_remains_transferable ... ok
+test live_bridge_credit_rejects_wrong_chain_unsupported_asset_zero_and_bad_identity ... ok
+test live_bridge_credit_applies_exact_amount_and_rejects_replay ... ok
+test every_core_transaction_type_can_be_applied ... ok
+test pilot_bridge_credit_maps_asset_account_and_rejects_replay ... ok
+test state_root_is_deterministic_for_same_inputs ... ok
+{
+  "queued": [
+    "0x20253125a8c22265ed5c267fd504f39e75d9704d0a3a54c19888d7f42afdc2f4",
+    "0xef932dd015421efddcc8c66e2a14e86f832bb741769c7e3839aa40c1b373f799"
+  ]
+}
+test cli_rejects_malformed_fixture ... ok
+{
+  "queued": [
+    "0xa3d0ed7805d73161cd62c13adfd89b7994b1cecbe984492f1a32b03caea7df55",
+    "0xa07a31ff460c01f48f9e7842bf1b34caea9f4cd09d44e0f745dcfcaabf82cb44"
+  ]
+}
+test live_bridge_credit_amount_above_u64_is_rejected_before_state_file_mutation ... ok
+test deterministic_replay_covers_new_maps_and_anchor ... ok
+{"blockHash":"0x5b6b5d47985bf48fe151fe9b83e75bd9b85409648fca6c63b1ba54d904537eed","blockNumber":1,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":2}
+{"blockHash":"0x129486fb4b14f5b28cfd84668d13be89f254f952ed90c464f2f384a68e312f56","blockNumber":1,"event":"blockProduced","nodeId":"node:test:a","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0xe47d401cfc50529a67f73858f3d638e9ebeec303feb70ecb12682acfa9104af9","txs":2}
+{"blockHash":"0xa016ab182e6c067d5190b9ee2bf3e143e31b1c86101e46bb031c4945ddf234d7","blockNumber":2,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+{"blockHash":"0xb3c4b34022dcb570f66c4d9bfdaf99446dea4d7e046655786d0d6b0c0ce25706","blockNumber":2,"event":"blockProduced","nodeId":"node:test:a","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0xe47d401cfc50529a67f73858f3d638e9ebeec303feb70ecb12682acfa9104af9","txs":0}
+{
+  "schema": "flowmemory.local_devnet.demo_summary.v0",
+  "statePath": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-export-import\\state.json",
+  "firstBlockHash": "0xd890758bdeaa4ab7a658d7813b2b9bdd0850824aaef830b9f2f4ff455aaf3811",
+  "secondBlockHash": "0x64e3d605fb1bba40b7de6a6a9813f77619282c07b9a33c7b41df1f6e3d71958b",
+  "stateRoot": "0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c",
+  "agentId": "agent:demo:alpha",
+  "agentRegistered": true,
+  "localBalanceAccountId": "local-balance:demo:agent-alpha",
+  "localBalanceUnits": 1000,
+  "faucetRecordId": "faucet:demo:001",
+  "faucetRecordCreated": true,
+  "workReceiptId": "receipt:demo:001",
+  "workReceiptSubmitted": true,
+  "verifierReportId": "report:demo:001",
+  "verifierReportSubmitted": true,
+  "memoryCellId": "memory:demo:agent-alpha:core",
+  "memoryCellUpdated": true,
+  "challengeId": "challenge:demo:001",
+  "challengeResolved": true,
+  "finalityReceiptId": "finality:demo:001",
+  "receiptFinalized": true,
+  "outDir": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-export-import\\handoff",
+  "handoffFiles": [
+    "dashboard-state.json",
+    "indexer-handoff.json",
+    "verifier-handoff.json",
+    "control-plane-handoff.json",
+    "genesis-config.json",
+    "operator-key-references.json",
+    "state.json"
+  ]
+}
+{"schema":"flowmemory.local_devnet.node_status.v0","status":"stopped","note":"max blocks reached","nodeId":"node:test:a","pid":23504,"statePath":"C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-cli-peer-sync\\state-a.json","nodeDir":"C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-cli-peer-sync\\node-a","blockHeight":2,"nextBlockNumber":3,"latestBlockHash":"0xb3c4b34022dcb570f66c4d9bfdaf99446dea4d7e046655786d0d6b0c0ce25706","stateRoot":"0xe47d401cfc50529a67f73858f3d638e9ebeec303feb70ecb12682acfa9104af9","pendingTxs":0,"localTestUnitBalances":1,"faucetRecords":0,"balanceTransfers":0,"tokenDefinitions":0,"tokenBalances":0,"tokenMintReceipts":0,"dexPools":0,"lpPositions":0,"liquidityReceipts":0,"swapReceipts":0,"bridgeAssetMappings":0,"bridgeAccountMappings":0,"bridgeCredits":0,"bridgeCreditReceipts":0,"bridgeReplayKeys":0,"staticPeerSync":null,"lastIngestedTxs":0,"lastRejectedInboxFiles":0,"lanMode":"not exposed; static local-file peers only"}
+test cli_start_runs_10_blocks_and_state_survives_restart ... ok
+{"blockHash":"0x1fe23c769ad41c9768e0758c06dbc4eea1b1b65bb5e707a486888de7e035e2b3","blockNumber":3,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+{
+  "schema": "flowmemory.local_devnet.demo_summary.v0",
+  "statePath": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-cli-demo\\state.json",
+  "firstBlockHash": "0xd890758bdeaa4ab7a658d7813b2b9bdd0850824aaef830b9f2f4ff455aaf3811",
+  "secondBlockHash": "0x64e3d605fb1bba40b7de6a6a9813f77619282c07b9a33c7b41df1f6e3d71958b",
+  "stateRoot": "0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c",
+  "agentId": "agent:demo:alpha",
+  "agentRegistered": true,
+  "localBalanceAccountId": "local-balance:demo:agent-alpha",
+  "localBalanceUnits": 1000,
+  "faucetRecordId": "faucet:demo:001",
+  "faucetRecordCreated": true,
+  "workReceiptId": "receipt:demo:001",
+  "workReceiptSubmitted": true,
+  "verifierReportId": "report:demo:001",
+  "verifierReportSubmitted": true,
+  "memoryCellId": "memory:demo:agent-alpha:core",
+  "memoryCellUpdated": true,
+  "challengeId": "challenge:demo:001",
+  "challengeResolved": true,
+  "finalityReceiptId": "finality:demo:001",
+  "receiptFinalized": true,
+  "outDir": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-cli-demo\\handoff",
+  "handoffFiles": [
+    "dashboard-state.json",
+    "indexer-handoff.json",
+    "verifier-handoff.json",
+    "control-plane-handoff.json",
+    "genesis-config.json",
+    "operator-key-references.json",
+    "state.json"
+  ]
+}
+{
+  "schema": "flowmemory.local_devnet.export_state_summary.v0",
+  "out": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-export-import\\snapshot.json",
+  "stateRoot": "0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c"
+}
+{"blockHash":"0xb89fd0de9c39a73e3c7ad5b2fc8738874dae0639071f8121a712ecc905c49d31","blockNumber":4,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+test cli_demo_writes_state_and_handoff_files ... ok
+{"blockHash":"0x2907c13f62f39ce2cb1bf52b2272e50423b68d218243f15bf651b247dd9ca6fa","blockNumber":5,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+{"blockHash":"0xbaa733064a0ada65aa3f403ddb881c1cabe6d7150a91a043d2f31f609c02a6fa","blockNumber":3,"event":"blockProduced","nodeId":"node:test:b","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0xe47d401cfc50529a67f73858f3d638e9ebeec303feb70ecb12682acfa9104af9","txs":0}
+{"schema":"flowmemory.local_devnet.node_status.v0","status":"stopped","note":"max blocks reached","nodeId":"node:test:b","pid":35736,"statePath":"C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-cli-peer-sync\\state-b.json","nodeDir":"C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-cli-peer-sync\\node-b","blockHeight":3,"nextBlockNumber":4,"latestBlockHash":"0xbaa733064a0ada65aa3f403ddb881c1cabe6d7150a91a043d2f31f609c02a6fa","stateRoot":"0xe47d401cfc50529a67f73858f3d638e9ebeec303feb70ecb12682acfa9104af9","pendingTxs":0,"localTestUnitBalances":1,"faucetRecords":0,"balanceTransfers":0,"tokenDefinitions":0,"tokenBalances":0,"tokenMintReceipts":0,"dexPools":0,"lpPositions":0,"liquidityReceipts":0,"swapReceipts":0,"bridgeAssetMappings":0,"bridgeAccountMappings":0,"bridgeCredits":0,"bridgeCreditReceipts":0,"bridgeReplayKeys":0,"staticPeerSync":null,"lastIngestedTxs":0,"lastRejectedInboxFiles":0,"lanMode":"not exposed; static local-file peers only"}
+{
+  "schema": "flowmemory.local_devnet.import_state_summary.v0",
+  "from": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-export-import\\snapshot.json",
+  "statePath": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-export-import\\imported-state.json",
+  "stateRoot": "0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c",
+  "mapRoots": {
+    "operatorKeyReferenceRoot": "0x8457aa3ed0f4238834a8f3925f25ccca805828d8427c3ef67590a45659b22a40",
+    "rootfieldStateRoot": "0xb72a851dca1103410484e3272945bae5e87fc39b8f32f77d2991959b60d3bfbf",
+    "agentAccountRoot": "0xcf31230bfff347f79e19a55f4d1ff5fa486b0b1ad4754ce22b93de4b259a3ca7",
+    "localTestUnitBalanceRoot": "0x167041ef195b5dde2d2cade6ecb26c9a0a596e9ed21ff7bfb02d33c9d2be8d15",
+    "faucetRecordRoot": "0x2277503a52fab3f9e49b40debfb7d641abee75cf268aa56da403fdcf4fad6cee",
+    "balanceTransferRoot": "0x9b6e249f769a93bc9f34a90156e028d1a830badcd8ccdc5b1487d512cdbf0a6d",
+    "tokenDefinitionRoot": "0xbbbad9681e8756403940e4333111706a4fcee1f30534ba14deea9ba148056be0",
+    "tokenBalanceRoot": "0xbaf3b150fe41a0f3a2d9fe3dd9a664f9c5934bfef37218d9c3bf1c682be5f8c6",
+    "tokenMintReceiptRoot": "0xaf86773ae2d2c4cbb8404f895fd9ff4132336f382e4e3f12b59df2ed9ba52806",
+    "dexPoolRoot": "0x0e5f034494a2deb6a4f20c04f01e678795c587df4869ad3f189f107fcc447dea",
+    "lpPositionRoot": "0xe67dd98259afb06ca93620b4a8742b924ec2e8f3e6e72934eef5b8e60829d46f",
+    "liquidityReceiptRoot": "0x98bf15cc6859994038744612e125236b1f777895a051c41702c2004134327738",
+    "swapReceiptRoot": "0xc9f3ee93962f36ed10421ec9ad736079a3b13ef6504336495af243b718cefee1",
+    "bridgeAssetMappingRoot": "0xbd283f6190cba76038f7364e207557dd20f7883d78e5f89a96579af5455a89aa",
+    "bridgeAccountMappingRoot": "0x46285ec5782d3e6cc1e557fd5dd779e979d679e5cc723832cb189d27a5c552c8",
+    "bridgeCreditRoot": "0x613ab06f110cc7a5eb06a0f44b7a0f04b0b3cfb0556d30d42842f33563596248",
+    "bridgeCreditReceiptRoot": "0x0a86ce98161cb40ca4c7719468c0ed8f122677d12641c13305277094b8f3a509",
+    "bridgeReplayIndexRoot": "0x9344f8651651d2d5042d2853205154a5777cd57aa9e892e2ac41b9b9fe04c00f",
+    "bridgeEventReceiptIndexRoot": "0xcaad305c45f57c516d0fdfdef15c5d88b399b976df173f005e9d7dc30fbdbdb2",
+    "modelPassportRoot": "0x326aa6b0b372d29d24d747fe0879adfd7aaea206373b24ae2ab77d56357e9529",
+    "memoryCellRoot": "0x1b4e91099dd8d867201bd880437197ae6c031e538341aaa3cd2046e5706a2c25",
+    "challengeRoot": "0x16da3d2bf2dcd801bc5deb3987dc01342cb957031ad01408ea77bf5d1583656f",
+    "finalityReceiptRoot": "0x1c8536e507c5ba2242a5875c9537043645828825286ca256cc1171f1eb960c3f",
+    "artifactCommitmentRoot": "0xb772a9f7273032fd3ba2da8b6476d4715bbbafbd2a7eed21ecd0d558bde3beab",
+    "artifactAvailabilityProofRoot": "0xfb4b693c45014aae0947f35696e9d864e7b26ac6fd39c1df5edb3e0dcf9bd928",
+    "verifierModuleRoot": "0xd6ddd8a2d0f5812d64679656c69983a2e0aecd36bd36199d900245658ae4626c",
+    "workReceiptRoot": "0x8b3ef5650c9eea2f608ad9c7cb73df3c289fc0ac72ed04f46e6ae4bce0a1f023",
+    "verifierReportRoot": "0x4facd21e55423e182eba87355482a35daa93f53190fbd3a8d2969f9d55bc5373",
+    "importedObservationRoot": "0x99cb1b939d5a09f800f72e4c5a2b92988571126e1f6f93549f4893b3f7de7880",
+    "importedVerifierReportRoot": "0x6070b1015f000dd509c7b276d2ad68d8a9d188ef1a961c2f573346eb75ea5ad7",
+    "baseAnchorRoot": "0x8b7c3423523f44b9a470a1281b088c72537a42e26f88fc8cd4c3e8360324c7ca"
+  }
+}
+{"blockHash":"0x1710ed9b55a58a1e2145e6f81a1dfe9899fe71d95e4851060a6916ba4e07f226","blockNumber":6,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+test cli_export_import_state_round_trip_is_deterministic ... ok
+{"blockHash":"0x441743f38e3077215ca4e3ca8feb02dabe97e5c8602778d1dfc60981470f838a","blockNumber":7,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+test cli_product_smoke_exports_token_and_dex_handoff ... ok
+{
+  "schema": "flowmemory.local_devnet.product_smoke_summary.v0",
+  "statePath": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-pilot-bridge-restart-export\\state.json",
+  "outDir": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-pilot-bridge-restart-export\\product-handoff",
+  "stateRoot": "0x7e4bc64638016dde9b2e487762021d2e2ab3d1a5f97084b41bbd0cf21ea7163b",
+  "blockHeight": 2,
+  "latestBlockHash": "0x8a08ac342f5784241dbae8409b4141975d56e672264c9d43c99fe201e3fe7889",
+  "deterministicReplay": true,
+  "checks": {
+    "localAccountsFunded": true,
+    "tokenLaunched": true,
+    "initialSupplyAssigned": true,
+    "poolCreated": true,
+    "liquidityAdded": true,
+    "swapExecuted": true,
+    "liquidityRemoved": true,
+    "productReceiptsQueryable": true,
+    "noValueBoundary": true,
+    "baseAnchorCreated": true
+  },
+  "handoffFiles": [
+    "dashboard-state.json",
+    "indexer-handoff.json",
+    "verifier-handoff.json",
+    "control-plane-handoff.json",
+    "genesis-config.json",
+    "operator-key-references.json",
+    "state.json"
+  ]
+}
+{"blockHash":"0x4ea7da696371e1e523525ee2ae92620efa84d02a6177018ffe3d565ae6735e23","blockNumber":8,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+test cli_static_peer_sync_reconciles_two_local_node_states ... ok
+{"blockHash":"0x3984328f552a75c3a0e4d83684f04c9444ebad61e6e51d000193ccda17d199e4","blockNumber":9,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+{
+  "schema": "flowmemory.local_devnet.bridge_handoff_queue.v0",
+  "handoff": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures/bridge/local-runtime-bridge-handoff.json",
+  "queued": [
+    "0x1525ed5fb2a23f06c5bedecf73f43a3671ad92face4bcd172db8ec00a819515a",
+    "0x197fd59fc726e1fa3da2d4590a67fc21c2a565aeccd241f861401bf888d03de0",
+    "0x535533a6e723b0ac7301ecc28298b77760afefedea07d0a486187d9ed186a8ff",
+    "0xf9fd1db5d7a82db5aa5595f47d4a37b2334551291fae67985a5a8f3f25da27b3"
+  ],
+  "expectedReceipts": [
+    "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6"
+  ]
+}
+{"blockHash":"0x288c4c4510ae10cd307051629da37e7a499a27e684d75704b566ad22fc1b95e0","blockNumber":10,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+{"schema":"flowmemory.local_devnet.node_status.v0","status":"stopped","note":"max blocks reached","nodeId":"node:test:cli","pid":25676,"statePath":"C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-cli-node\\state.json","nodeDir":"C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-cli-node\\node","blockHeight":10,"nextBlockNumber":11,"latestBlockHash":"0x288c4c4510ae10cd307051629da37e7a499a27e684d75704b566ad22fc1b95e0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","pendingTxs":0,"localTestUnitBalances":1,"faucetRecords":1,"balanceTransfers":0,"tokenDefinitions":0,"tokenBalances":0,"tokenMintReceipts":0,"dexPools":0,"lpPositions":0,"liquidityReceipts":0,"swapReceipts":0,"bridgeAssetMappings":0,"bridgeAccountMappings":0,"bridgeCredits":0,"bridgeCreditReceipts":0,"bridgeReplayKeys":0,"staticPeerSync":null,"lastIngestedTxs":0,"lastRejectedInboxFiles":0,"lanMode":"not exposed; static local-file peers only"}
+test cli_smoke_runs_full_flow ... ok
+{
+  "schema": "flowmemory.local_devnet.run_summary.v0",
+  "blocksProduced": 1,
+  "blockHashes": [
+    "0x137476bc4047dbee4140de21fd129904f2f66f0807ca4af2c3ddf7867702dad8"
+  ],
+  "nextBlockNumber": 4,
+  "stateRoot": "0xec8139b9195ee9d870c39c0a70c071b34bd56a8ec853c697b4ee8991482df70a"
+}
+test cli_node_runs_ten_blocks_and_includes_authorized_inbox_tx ... ok
+test cli_generated_handoff_files_are_deterministic ... ok
+{
+  "schema": "flowmemory.local_devnet.run_summary.v0",
+  "blocksProduced": 1,
+  "blockHashes": [
+    "0xa4d0196a621398e4a6066946b9f908698e1ded06efeef235143ab61563187f65"
+  ],
+  "nextBlockNumber": 5,
+  "stateRoot": "0xec8139b9195ee9d870c39c0a70c071b34bd56a8ec853c697b4ee8991482df70a"
+}
+{
+  "schema": "flowmemory.local_devnet.export_summary.v0",
+  "outDir": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-pilot-bridge-restart-export\\pilot-handoff",
+  "stateRoot": "0xec8139b9195ee9d870c39c0a70c071b34bd56a8ec853c697b4ee8991482df70a",
+  "mapRoots": {
+    "operatorKeyReferenceRoot": "0x8457aa3ed0f4238834a8f3925f25ccca805828d8427c3ef67590a45659b22a40",
+    "rootfieldStateRoot": "0x1abd7bb52f85dace493c1edf34129b8774300bfb5595070d27ae27bc28898412",
+    "agentAccountRoot": "0x6689d400a2886143ae7ab9eb3907d06f534a61f1d3ed0dd2f5b044cd2affeebf",
+    "localTestUnitBalanceRoot": "0x26226b3f480ad398b4da52f90131296e006a6225b7bed820cc8b6127cc931586",
+    "faucetRecordRoot": "0x8b954e8889b03353ee37d2d288701a50fb293bc0e698ffc472f549acb86c9752",
+    "balanceTransferRoot": "0x9b6e249f769a93bc9f34a90156e028d1a830badcd8ccdc5b1487d512cdbf0a6d",
+    "tokenDefinitionRoot": "0x6aa33e40dbdad763c1b23c28cf20a094df1724a2b50614c21a412d4ccd22c408",
+    "tokenBalanceRoot": "0xd39e4114323d0bcdc756dcb1b8de262f3d6bd846e02ae71c522f19f889664bb2",
+    "tokenMintReceiptRoot": "0x677627b65d8fe010ea621017dede8381a24115d11ac23db347df400cba129530",
+    "dexPoolRoot": "0x460bce145817ea878f6cd7d0a7cdd354561fab54a987feef302d278e7c922424",
+    "lpPositionRoot": "0xc46449afb2332208d26ec0819815dacd6b23edb4dafa3c459fd50390e0bd7c7e",
+    "liquidityReceiptRoot": "0xf54c1dae4aad11a835c9344bd048af5a2e443d0593233001abf85025ebf5cfc0",
+    "swapReceiptRoot": "0xe05b98f512292da925fd0bf20b862f27a4562232d12fecb8e085ffbabddd16fd",
+    "bridgeAssetMappingRoot": "0xb260d1122fa42dcb292f6fe5e56a4e030e5e615a4a9312daf8ffc910dcecdab3",
+    "bridgeAccountMappingRoot": "0xc55bb4ed64f4c7c3c59a753dec55f4c73438b89f87a54c870459c306130e7ecc",
+    "bridgeCreditRoot": "0xd6b4ca2049afff2b25283dd79cf52c6f9b1f7d98462d2aaca3278dcd3dfb5b7e",
+    "bridgeCreditReceiptRoot": "0x4cfba14b266bc913c27220a3404a19918377b626b9f136a497082ac35e9e5da4",
+    "bridgeReplayIndexRoot": "0xc6229f17f7833d669560641c27540e99a0717d3d46acc2618f174940960430a0",
+    "bridgeEventReceiptIndexRoot": "0x44d361136e1cd4050231cda8ea66079808366cdf5fa9263e954d03401786c67a",
+    "modelPassportRoot": "0xb77afe1eb29ea6a75692d8139d6885103c0fa4a8ed9057387195f688f143ca1d",
+    "memoryCellRoot": "0xe229374c3cb1db0204bf14c286e027fc621c759087ca60e3f722d6091b477415",
+    "challengeRoot": "0x0074c2d1f2a2758629b782810b0ab688fc99231b1c08b40d93124a299c91d19e",
+    "finalityReceiptRoot": "0x16d842cb146334f981d5e77b85ebd0f9c644449fabead3c56753b54cdfad3697",
+    "artifactCommitmentRoot": "0xefd221299a2ae93032e6cbf0e470e4653e5632875c4c1c2fcddcf520f220a0bb",
+    "artifactAvailabilityProofRoot": "0x065b1e1c4f8a2f618a74f50d3f42a19c485d3991947028e41ab400a49821d399",
+    "verifierModuleRoot": "0x0ad280f68622da721712d716d967149bf2efee225507a9bd5b9a7ad9bf48a24d",
+    "workReceiptRoot": "0x3d2b1f869ac3c4094e9624ea65c98914267e73a8b9279faa3344a0f652ab1fbd",
+    "verifierReportRoot": "0x52c0b486cbe5a2b20f9b02c8b508178033a6f9e664eb0f104e9ab078523e2256",
+    "importedObservationRoot": "0x99cb1b939d5a09f800f72e4c5a2b92988571126e1f6f93549f4893b3f7de7880",
+    "importedVerifierReportRoot": "0x6070b1015f000dd509c7b276d2ad68d8a9d188ef1a961c2f573346eb75ea5ad7",
+    "baseAnchorRoot": "0xe728a90cd84ff3d0ba83433f7dcd2e24c76c379a64ebf5b03a8997a00dc1a5cc"
+  },
+  "files": [
+    "dashboard-state.json",
+    "indexer-handoff.json",
+    "verifier-handoff.json",
+    "control-plane-handoff.json",
+    "genesis-config.json",
+    "operator-key-references.json",
+    "state.json"
+  ]
+}
+{
+  "schema": "flowmemory.local_devnet.export_state_summary.v0",
+  "out": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-pilot-bridge-restart-export\\snapshot.json",
+  "stateRoot": "0xec8139b9195ee9d870c39c0a70c071b34bd56a8ec853c697b4ee8991482df70a"
+}
+{
+  "schema": "flowmemory.local_devnet.import_state_summary.v0",
+  "from": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-pilot-bridge-restart-export\\snapshot.json",
+  "statePath": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-36348-pilot-bridge-restart-export\\imported-state.json",
+  "stateRoot": "0xec8139b9195ee9d870c39c0a70c071b34bd56a8ec853c697b4ee8991482df70a",
+  "mapRoots": {
+    "operatorKeyReferenceRoot": "0x8457aa3ed0f4238834a8f3925f25ccca805828d8427c3ef67590a45659b22a40",
+    "rootfieldStateRoot": "0x1abd7bb52f85dace493c1edf34129b8774300bfb5595070d27ae27bc28898412",
+    "agentAccountRoot": "0x6689d400a2886143ae7ab9eb3907d06f534a61f1d3ed0dd2f5b044cd2affeebf",
+    "localTestUnitBalanceRoot": "0x26226b3f480ad398b4da52f90131296e006a6225b7bed820cc8b6127cc931586",
+    "faucetRecordRoot": "0x8b954e8889b03353ee37d2d288701a50fb293bc0e698ffc472f549acb86c9752",
+    "balanceTransferRoot": "0x9b6e249f769a93bc9f34a90156e028d1a830badcd8ccdc5b1487d512cdbf0a6d",
+    "tokenDefinitionRoot": "0x6aa33e40dbdad763c1b23c28cf20a094df1724a2b50614c21a412d4ccd22c408",
+    "tokenBalanceRoot": "0xd39e4114323d0bcdc756dcb1b8de262f3d6bd846e02ae71c522f19f889664bb2",
+    "tokenMintReceiptRoot": "0x677627b65d8fe010ea621017dede8381a24115d11ac23db347df400cba129530",
+    "dexPoolRoot": "0x460bce145817ea878f6cd7d0a7cdd354561fab54a987feef302d278e7c922424",
+    "lpPositionRoot": "0xc46449afb2332208d26ec0819815dacd6b23edb4dafa3c459fd50390e0bd7c7e",
+    "liquidityReceiptRoot": "0xf54c1dae4aad11a835c9344bd048af5a2e443d0593233001abf85025ebf5cfc0",
+    "swapReceiptRoot": "0xe05b98f512292da925fd0bf20b862f27a4562232d12fecb8e085ffbabddd16fd",
+    "bridgeAssetMappingRoot": "0xb260d1122fa42dcb292f6fe5e56a4e030e5e615a4a9312daf8ffc910dcecdab3",
+    "bridgeAccountMappingRoot": "0xc55bb4ed64f4c7c3c59a753dec55f4c73438b89f87a54c870459c306130e7ecc",
+    "bridgeCreditRoot": "0xd6b4ca2049afff2b25283dd79cf52c6f9b1f7d98462d2aaca3278dcd3dfb5b7e",
+    "bridgeCreditReceiptRoot": "0x4cfba14b266bc913c27220a3404a19918377b626b9f136a497082ac35e9e5da4",
+    "bridgeReplayIndexRoot": "0xc6229f17f7833d669560641c27540e99a0717d3d46acc2618f174940960430a0",
+    "bridgeEventReceiptIndexRoot": "0x44d361136e1cd4050231cda8ea66079808366cdf5fa9263e954d03401786c67a",
+    "modelPassportRoot": "0xb77afe1eb29ea6a75692d8139d6885103c0fa4a8ed9057387195f688f143ca1d",
+    "memoryCellRoot": "0xe229374c3cb1db0204bf14c286e027fc621c759087ca60e3f722d6091b477415",
+    "challengeRoot": "0x0074c2d1f2a2758629b782810b0ab688fc99231b1c08b40d93124a299c91d19e",
+    "finalityReceiptRoot": "0x16d842cb146334f981d5e77b85ebd0f9c644449fabead3c56753b54cdfad3697",
+    "artifactCommitmentRoot": "0xefd221299a2ae93032e6cbf0e470e4653e5632875c4c1c2fcddcf520f220a0bb",
+    "artifactAvailabilityProofRoot": "0x065b1e1c4f8a2f618a74f50d3f42a19c485d3991947028e41ab400a49821d399",
+    "verifierModuleRoot": "0x0ad280f68622da721712d716d967149bf2efee225507a9bd5b9a7ad9bf48a24d",
+    "workReceiptRoot": "0x3d2b1f869ac3c4094e9624ea65c98914267e73a8b9279faa3344a0f652ab1fbd",
+    "verifierReportRoot": "0x52c0b486cbe5a2b20f9b02c8b508178033a6f9e664eb0f104e9ab078523e2256",
+    "importedObservationRoot": "0x99cb1b939d5a09f800f72e4c5a2b92988571126e1f6f93549f4893b3f7de7880",
+    "importedVerifierReportRoot": "0x6070b1015f000dd509c7b276d2ad68d8a9d188ef1a961c2f573346eb75ea5ad7",
+    "baseAnchorRoot": "0xe728a90cd84ff3d0ba83433f7dcd2e24c76c379a64ebf5b03a8997a00dc1a5cc"
+  }
+}
+test cli_pilot_bridge_handoff_receipts_survive_restart_and_export_import ... ok
+
+test result: ok. 36 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.45s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+== Run control-plane full smoke client ==
+
+> control-plane:smoke
+> npm run smoke --prefix services/control-plane
+
+
+> smoke
+> node src/smoke.ts
+
+{
+  "schema": "flowmemory.control_plane.smoke.v0",
+  "ok": true,
+  "methodCount": 70,
+  "responseSchemas": [
+    "flowmemory.control_plane.health.v0",
+    "flowmemory.control_plane.node_status.v0",
+    "flowmemory.control_plane.peer_list.v0",
+    "flowmemory.control_plane.chain_status.v0",
+    "flowmemory.control_plane.real_value_pilot_status.v0",
+    "flowmemory.control_plane.real_value_pilot_deposit_observation_list.v0",
+    "flowmemory.control_plane.real_value_pilot_credit_list.v0",
+    "flowmemory.control_plane.real_value_pilot_withdrawal_intent_list.v0",
+    "flowmemory.control_plane.real_value_pilot_release_evidence_list.v0",
+    "flowmemory.control_plane.real_value_pilot_cap_status.v0",
+    "flowmemory.control_plane.real_value_pilot_pause_status.v0",
+    "flowmemory.control_plane.real_value_pilot_retry_status.v0",
+    "flowmemory.control_plane.real_value_pilot_emergency_status.v0",
+    "flowmemory.control_plane.bridge_live_readiness.v0",
+    "flowmemory.control_plane.bridge_lifecycle_record_list.v0",
+    "flowmemory.control_plane.devnet_state.v0",
+    "flowmemory.control_plane.block_list.v0",
+    "flowmemory.control_plane.block_detail.v0",
+    "flowmemory.control_plane.transaction_list.v0",
+    "flowmemory.control_plane.transaction_detail.v0",
+    "flowmemory.control_plane.transaction_submit_result.v0",
+    "flowmemory.control_plane.mempool_list.v0",
+    "flowmemory.control_plane.account_list.v0",
+    "flowmemory.control_plane.account_detail.v0",
+    "flowmemory.control_plane.balance.v0",
+    "flowmemory.control_plane.token_list.v0",
+    "flowmemory.control_plane.token_detail.v0",
+    "flowmemory.control_plane.token_balance_list.v0",
+    "flowmemory.control_plane.token_balance_detail.v0",
+    "flowmemory.control_plane.pool_list.v0",
+    "flowmemory.control_plane.lp_position_list.v0",
+    "flowmemory.control_plane.swap_list.v0",
+    "flowmemory.control_plane.product_flow_status.v0",
+    "flowmemory.control_plane.faucet_event_list.v0",
+    "flowmemory.control_plane.wallet_public_metadata_list.v0",
+    "flowmemory.control_plane.wallet_public_metadata_detail.v0",
+    "flowmemory.control_plane.wallet_balance_list.v0",
+    "flowmemory.control_plane.wallet_transfer_history.v0",
+    "flowmemory.control_plane.rootfield_list.v0",
+    "flowmemory.control_plane.rootfield.v0",
+    "flowmemory.control_plane.agent_list.v0",
+    "flowmemory.control_plane.agent.v0",
+    "flowmemory.control_plane.model_list.v0",
+    "flowmemory.control_plane.model_detail.v0",
+    "flowmemory.control_plane.work_receipt_list.v0",
+    "flowmemory.control_plane.work_receipt.v0",
+    "flowmemory.control_plane.artifact_availability_list.v0",
+    "flowmemory.control_plane.artifact_availability_detail.v0",
+    "flowmemory.control_plane.verifier_module_list.v0",
+    "flowmemory.control_plane.verifier_module_detail.v0",
+    "flowmemory.control_plane.verifier_report_list.v0",
+    "flowmemory.control_plane.verifier_report.v0",
+    "flowmemory.control_plane.receipt_list.v0",
+    "flowmemory.control_plane.receipt.v0",
+    "flowmemory.control_plane.memory_cell_list.v0",
+    "flowmemory.control_plane.memory_cell.v0",
+    "flowmemory.control_plane.challenge_list.v0",
+    "flowmemory.control_plane.challenge.v0",
+    "flowmemory.control_plane.finality_list.v0",
+    "flowmemory.control_plane.finality.v0",
+    "flowmemory.control_plane.bridge_observation_list.v0",
+    "flowmemory.control_plane.bridge_observation.v0",
+    "flowmemory.control_plane.bridge_deposit_list.v0",
+    "flowmemory.control_plane.bridge_deposit_detail.v0",
+    "flowmemory.control_plane.bridge_credit_list.v0",
+    "flowmemory.control_plane.bridge_credit_detail.v0",
+    "flowmemory.control_plane.withdrawal_list.v0",
+    "flowmemory.control_plane.withdrawal_detail.v0",
+    "flowmemory.control_plane.provenance.v0",
+    "flowmemory.control_plane.raw_json.v0"
+  ],
+  "queried": {
+    "rootfieldId": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "receiptId": "0x48066ab6febdedb523cfcae2f313752db7e80467641d80914ebfe2e079d8c49d",
+    "reportId": "0x03af9720a87f7d72ce2ce95c1d04d50134649da51ace802d88818ad67fb2ebb3",
+    "artifactUri": "ipfs://bafy-flowmemory-example",
+    "blockNumber": "1",
+    "txId": "0x2cffda58c783dc026978b06a681587b19d9536ae4e158a69be855da1200f3189",
+    "accountId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+    "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
+    "tokenId": "local-test-unit"
+  },
+  "localOnly": true
+}
+
+== Run deterministic demo A ==
+{
+  "schema": "flowmemory.local_devnet.demo_summary.v0",
+  "statePath": "E:\\FlowMemory\\flowmemory-prod-hq\\devnet\\local\\smoke\\run-a\\state.json",
+  "firstBlockHash": "0xd890758bdeaa4ab7a658d7813b2b9bdd0850824aaef830b9f2f4ff455aaf3811",
+  "secondBlockHash": "0x64e3d605fb1bba40b7de6a6a9813f77619282c07b9a33c7b41df1f6e3d71958b",
+  "stateRoot": "0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c",
+  "agentId": "agent:demo:alpha",
+  "agentRegistered": true,
+  "localBalanceAccountId": "local-balance:demo:agent-alpha",
+  "localBalanceUnits": 1000,
+  "faucetRecordId": "faucet:demo:001",
+  "faucetRecordCreated": true,
+  "workReceiptId": "receipt:demo:001",
+  "workReceiptSubmitted": true,
+  "verifierReportId": "report:demo:001",
+  "verifierReportSubmitted": true,
+  "memoryCellId": "memory:demo:agent-alpha:core",
+  "memoryCellUpdated": true,
+  "challengeId": "challenge:demo:001",
+  "challengeResolved": true,
+  "finalityReceiptId": "finality:demo:001",
+  "receiptFinalized": true,
+  "outDir": "E:\\FlowMemory\\flowmemory-prod-hq\\devnet\\local\\smoke\\run-a\\export",
+  "handoffFiles": [
+    "dashboard-state.json",
+    "indexer-handoff.json",
+    "verifier-handoff.json",
+    "control-plane-handoff.json",
+    "genesis-config.json",
+    "operator-key-references.json",
+    "state.json"
+  ]
+}
+
+== Run deterministic demo B ==
+{
+  "schema": "flowmemory.local_devnet.demo_summary.v0",
+  "statePath": "E:\\FlowMemory\\flowmemory-prod-hq\\devnet\\local\\smoke\\run-b\\state.json",
+  "firstBlockHash": "0xd890758bdeaa4ab7a658d7813b2b9bdd0850824aaef830b9f2f4ff455aaf3811",
+  "secondBlockHash": "0x64e3d605fb1bba40b7de6a6a9813f77619282c07b9a33c7b41df1f6e3d71958b",
+  "stateRoot": "0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c",
+  "agentId": "agent:demo:alpha",
+  "agentRegistered": true,
+  "localBalanceAccountId": "local-balance:demo:agent-alpha",
+  "localBalanceUnits": 1000,
+  "faucetRecordId": "faucet:demo:001",
+  "faucetRecordCreated": true,
+  "workReceiptId": "receipt:demo:001",
+  "workReceiptSubmitted": true,
+  "verifierReportId": "report:demo:001",
+  "verifierReportSubmitted": true,
+  "memoryCellId": "memory:demo:agent-alpha:core",
+  "memoryCellUpdated": true,
+  "challengeId": "challenge:demo:001",
+  "challengeResolved": true,
+  "finalityReceiptId": "finality:demo:001",
+  "receiptFinalized": true,
+  "outDir": "E:\\FlowMemory\\flowmemory-prod-hq\\devnet\\local\\smoke\\run-b\\export",
+  "handoffFiles": [
+    "dashboard-state.json",
+    "indexer-handoff.json",
+    "verifier-handoff.json",
+    "control-plane-handoff.json",
+    "genesis-config.json",
+    "operator-key-references.json",
+    "state.json"
+  ]
+}
+
+== Build FlowChain workbench ==
+
+> @flowmemory/dashboard@0.0.0 build
+> npm run sync:fixtures && tsc -b && vite build
+
+
+> @flowmemory/dashboard@0.0.0 sync:fixtures
+> node scripts/sync-fixtures.mjs
+
+Synced dashboard fixture: E:\FlowMemory\flowmemory-prod-hq\apps\dashboard\public\data\flowmemory-dashboard-v0.json
+Synced Base canary dashboard fixture: E:\FlowMemory\flowmemory-prod-hq\apps\dashboard\public\data\flowmemory-dashboard-base-canary-v0.json
+Synced FlowChain local devnet state: E:\FlowMemory\flowmemory-prod-hq\apps\dashboard\public\data\flowchain-local-devnet-state.json
+Synced FlowChain local devnet dashboard state: E:\FlowMemory\flowmemory-prod-hq\apps\dashboard\public\data\flowchain-local-devnet-dashboard-state.json
+Synced FlowChain bridge test deposit: E:\FlowMemory\flowmemory-prod-hq\apps\dashboard\public\data\flowchain-bridge-test-deposit.json
+[36mvite v8.0.12 [32mbuilding client environment for production...[36m[39m
+[2Ktransforming...✓ 1591 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.55 kB │ gzip:  0.34 kB
+dist/assets/index-CAQNAAti.css   20.23 kB │ gzip:  4.71 kB
+dist/assets/index-GR9YuIn4.js   293.83 kB │ gzip: 83.64 kB
+
+[32m✓ built in 252ms[39m
+Workbench build complete.
+
+== Validate FlowRouter simulator fixture ==
+valid: hardware\fixtures\flowrouter_sample_seed42.json
+
+== Check unsafe launch claims ==
+Checked launch claims in README.md, docs, contracts.
+
+FlowChain private/local smoke passed for merged private/local surfaces.
+Deterministic state root: 0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c
+Smoke report: E:\FlowMemory\flowmemory-prod-hq\devnet\local\smoke\flowchain-smoke-report.json
+Production-gated non-goals remain recorded in docs/FLOWCHAIN_TESTNET_ACCEPTANCE.md.
+
+== Create encrypted local test wallet vault ==
+
+> @flowmemory/crypto@0.0.0 wallet:create
+> node src/wallet-cli.js create --vault E:\FlowMemory\flowmemory-prod-hq\devnet\local\full-smoke\wallet-vault.local.json --label full-smoke-operator --role operator
+
+{
+  "schema": "flowchain.wallet.account_created.v0",
+  "address": "0x6fb9c1154704428b3536fcfd7a8e4c98a2bf35ec12c51ef4a873110bd68c15b8",
+  "publicKey": "0x033a26b6e9edb863dba31b146b7cde584fdb6840df0ccf60b36ab692dbe05ca474"
+}
+
+== Sign local transaction envelope ==
+
+> @flowmemory/crypto@0.0.0 wallet:sign
+> node src/wallet-cli.js sign --vault E:\FlowMemory\flowmemory-prod-hq\devnet\local\full-smoke\wallet-vault.local.json --document E:\FlowMemory\flowmemory-prod-hq\devnet\local\full-smoke\wallet-document.json --chain-id 31337 --nonce 1 --out E:\FlowMemory\flowmemory-prod-hq\devnet\local\full-smoke\wallet-envelope.json
+
+{
+  "schema": "flowchain.wallet.sign_result.v0",
+  "txId": "0xe7749b2009605d03821a0d24011e083ea87760d72661aedad25b5a44db73d233",
+  "chainId": "31337",
+  "payloadType": "flowchain.agent_account.v0",
+  "signerAddress": "0x6fb9c1154704428b3536fcfd7a8e4c98a2bf35ec12c51ef4a873110bd68c15b8",
+  "nonce": "1",
+  "envelopePath": "E:\\FlowMemory\\flowmemory-prod-hq\\devnet\\local\\full-smoke\\wallet-envelope.json",
+  "verification": {
+    "schema": "flowchain.wallet_envelope_verification.v0",
+    "valid": true,
+    "signatureValid": true,
+    "chainIdMatch": true,
+    "signerDerivedAddress": "0x6fb9c1154704428b3536fcfd7a8e4c98a2bf35ec12c51ef4a873110bd68c15b8",
+    "payloadHash": "0x704d52815b622028de031b7dd1febbf3a327c046f91ae5fffadf13418c605c63",
+    "transactionId": "0xe7749b2009605d03821a0d24011e083ea87760d72661aedad25b5a44db73d233",
+    "replayKey": "31337:local-chain:0x6fb9c1154704428b3536fcfd7a8e4c98a2bf35ec12c51ef4a873110bd68c15b8:operator:1",
+    "rejectionReason": null,
+    "errors": []
+  }
+}
+
+== Verify local transaction envelope ==
+
+> @flowmemory/crypto@0.0.0 wallet:verify
+> node src/wallet-cli.js verify --document E:\FlowMemory\flowmemory-prod-hq\devnet\local\full-smoke\wallet-document.json --envelope E:\FlowMemory\flowmemory-prod-hq\devnet\local\full-smoke\wallet-envelope.json --chain-id 31337
+
+{
+  "schema": "flowchain.wallet_envelope_verification.v0",
+  "valid": true,
+  "signatureValid": true,
+  "chainIdMatch": true,
+  "signerDerivedAddress": "0x6fb9c1154704428b3536fcfd7a8e4c98a2bf35ec12c51ef4a873110bd68c15b8",
+  "payloadHash": "0x704d52815b622028de031b7dd1febbf3a327c046f91ae5fffadf13418c605c63",
+  "transactionId": "0xe7749b2009605d03821a0d24011e083ea87760d72661aedad25b5a44db73d233",
+  "replayKey": "31337:local-chain:0x6fb9c1154704428b3536fcfd7a8e4c98a2bf35ec12c51ef4a873110bd68c15b8:operator:1",
+  "rejectionReason": null,
+  "errors": []
+}
+
+== Run bridge local-credit handoff smoke ==
+
+> bridge:local-credit:smoke
+> npm run local-credit:smoke --prefix services/bridge-relayer
+
+
+> local-credit:smoke
+> node src/observe-base-lockbox.ts --mode mock --fixture ../../fixtures/bridge/base-sepolia-mock-deposit.json --out out/local-credit-observation.json --credit-out out/local-credit.json --handoff-out ../../fixtures/bridge/local-runtime-bridge-handoff.json --withdrawal-out out/local-withdrawal-intent.json --apply-credit --withdrawal-intent
+
+Bridge mode: mock fixture; no chain RPC or private key is used.
+Wrote E:\FlowMemory\flowmemory-prod-hq\services\bridge-relayer\out\local-credit-observation.json
+Wrote E:\FlowMemory\flowmemory-prod-hq\services\bridge-relayer\out\local-credit.json
+Wrote E:\FlowMemory\flowmemory-prod-hq\fixtures\bridge\local-runtime-bridge-handoff.json
+Wrote E:\FlowMemory\flowmemory-prod-hq\services\bridge-relayer\out\local-withdrawal-intent.json
+Bridge run complete: observed=1, credits=1, applications=1, withdrawals=1, evidence=0
+Next operator command: npm run flowchain:bridge:local-credit:smoke
+Next operator command: npm run flowchain:product-e2e
+
+== Run FlowRouter operator-signal smoke ==
+
+> flowchain:hardware:smoke
+> powershell -NoProfile -ExecutionPolicy Bypass -File hardware/simulator/flowrouter-smoke.ps1
+
+smoke passed: raw packets, operator signals, control-plane handoff, fixture drift check, and 8 negative cases
+
+== Check working tree patch whitespace ==
+
+FlowChain full private/local smoke passed.
+Deterministic state root: 0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c
+Full smoke report: E:\FlowMemory\flowmemory-prod-hq\devnet\local\full-smoke\flowchain-full-smoke-report.json
+
+== Run wallet product smoke ==
+
+> @flowmemory/crypto@0.0.0 wallet:product-smoke
+> node src/validate-product-testnet-fixtures.js
+
+FLOWCHAIN_PRODUCT_TESTNET_TRANSACTIONS_OK documents=8 transactions=8 negativeTransactions=9 schemas=3
+
+FlowChain Product Testnet V1 E2E report: E:\FlowMemory\flowmemory-prod-hq\devnet\local\product-e2e\flowchain-product-e2e-report.json
+FlowChain Product Testnet V1 E2E passed.
+
+== Run flowchain:l1-e2e (hq/ops) ==
+
+> flowchain:l1-e2e
+> powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-full-smoke.ps1
+
+
+== Run FlowChain private/local smoke gate ==
+
+== FlowChain Prerequisites ==
+
+Name                 Required Status Version                                                                           
+----                 -------- ------ -------                                                                           
+Git                      True ok     git version 2.51.2.windows.1                                                      
+Node.js                  True ok     v24.15.0                                                                          
+npm                      True ok     11.12.1                                                                           
+Rust cargo               True ok     cargo 1.95.0 (f2d3ce0bd 2026-03-21)                                               
+Rust compiler            True ok     rustc 1.95.0 (59807616e 2026-04-14)                                               
+MSVC C++ build tools     True ok     Visual C++ tools at C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools
+Foundry forge            True ok     forge Version: 1.6.0-v1.6.0-rc1                                                   
+Python                   True ok     Python 3.11.5                                                                     
+
+
+
+== Dependency Install State ==
+
+Area                Path                        Status    InstallCommand                     
+----                ----                        ------    --------------                     
+root npm workspaces node_modules                installed npm install                        
+dashboard workbench apps/dashboard/node_modules installed npm install --prefix apps/dashboard
+crypto package      crypto/node_modules         installed npm install --prefix crypto        
+
+
+
+Next command on a clean second computer:
+npm run flowchain:init
+
+== Run service tests ==
+
+> test
+> npm test --prefix services/shared && npm test --prefix services/indexer && npm test --prefix services/verifier && npm test --prefix services/flowmemory && npm test --prefix services/control-plane && npm test --prefix services/bridge-relayer
+
+
+> test
+> node --test test/*.test.ts
+
+✔ computes EVM Keccak-256 test vectors (2.1728ms)
+✔ derives canonical FlowPulse observation id from receipt/log metadata (2.6826ms)
+✔ parses a fixture-only FlowPulse log without live RPC (3.4324ms)
+✔ rejects non-FlowPulse fixture logs (0.5073ms)
+✔ normalizes EVM addresses and rejects malformed addresses (0.1821ms)
+✔ exposes the v0 verifier status vocabulary (0.7147ms)
+✔ canonical JSON sorts object keys while preserving array order (0.2206ms)
+✔ derives deterministic verifier report id from canonical report core (2.4606ms)
+✔ detects secret-shaped response material without rejecting ordinary hashes (1.1408ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 145.9422
+
+> test
+> node --test test/*.test.ts
+
+✔ indexes FlowPulse fixture logs into canonical observations (6.8492ms)
+✔ detects exact duplicate observations (13.5618ms)
+✔ ingests receipt fixtures and rejects reverted or malformed logs cleanly (16.8978ms)
+✔ models finality threshold without claiming production reorg handling (3.5605ms)
+✔ marks block hash mismatches as reorged in fixture state (2.0142ms)
+✔ persists deterministic indexer state JSON (13.5438ms)
+✔ ships an indexer persistence JSON schema fixture (0.3766ms)
+✔ maps mocked local RPC logs into raw FlowPulse fixtures without secrets (24.8136ms)
+✔ rejects non Base Sepolia RPC endpoints for live reads (1.6163ms)
+✔ rejects non Base mainnet RPC endpoints for canary reads (0.8403ms)
+✔ runs Base Sepolia reader and persists durable state plus checkpoint (18.9884ms)
+✔ Base Sepolia reader records RPC and ABI malformed logs in the dashboard feed (12.0647ms)
+✔ runs Base mainnet canary reader and persists empty scans safely (4.6929ms)
+✔ Base mainnet canary reader surfaces malformed logs without dropping checkpoints (4.9011ms)
+✔ Base mainnet canary reader preserves exact duplicates and reorg replacements (20.5652ms)
+✔ parses Base Sepolia reader CLI args without defaulting to a public RPC (1.1589ms)
+✔ Base Sepolia reader supports safe checkpoint resume after empty ranges (5.0684ms)
+✔ parses guarded Base mainnet canary reader CLI args (0.7736ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 309.2118
+
+> test
+> node --test test/*.test.ts
+
+✔ generates valid deterministic reports from fixture observations (10.2039ms)
+✔ marks missing artifacts unresolved (5.5427ms)
+✔ marks commitment mismatch as invalid (5.1435ms)
+✔ marks unknown pulse types unsupported (5.2817ms)
+✔ marks artifacts over fixture policy size unresolved (4.4077ms)
+✔ generates all verifier statuses from receipt fixtures (33.9804ms)
+✔ validates swap-derived memory signal commitments (13.2932ms)
+✔ persists deterministic verifier report JSON (25.3744ms)
+✔ ships a verifier report JSON schema fixture (0.4363ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 246.0824
+
+> test
+> node --test test/*.test.ts
+
+✔ maps verifier statuses to Flow Memory launch vocabulary (0.9997ms)
+✔ published schemas exist for every launch-core object (1.1557ms)
+✔ generates concrete Rootflow and Flow Memory V0 outputs (46.2755ms)
+✔ generates Base canary dashboard output from committed deployment artifacts (11.3259ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 206.2118
+
+> test
+> node --test test/*.test.ts
+
+{
+  "service": "flowmemory-control-plane-v0",
+  "url": "http://127.0.0.1:54435/rpc",
+  "localOnly": true
+}
+✔ dispatches JSON-RPC methods against local fixture state (68.7323ms)
+✔ returns stable invalid params errors for missing required params (29.8997ms)
+✔ returns standard unknown method errors (0.2058ms)
+✔ validates malformed requests and bad params with stable codes (62.3527ms)
+✔ keeps deterministic chain status response snapshots (18.8918ms)
+✔ recovers when generated launch/indexer/verifier fixtures are missing (75.6147ms)
+✔ looks up receipt, report, and memory provenance (39.3401ms)
+✔ supports receipt and report object lookup by provenance-linked ids (31.8227ms)
+✔ exposes artifact, devnet, challenge, and finality read methods (27.1532ms)
+✔ prefers devnet/local runtime state over committed devnet fixtures (5.6223ms)
+✔ degrades instead of crashing when active local devnet JSON is malformed (7.8453ms)
+✔ submits local transactions to the file-backed runtime intake path (29.5172ms)
+✔ rejects unsigned transaction_submit payloads (25.8583ms)
+✔ exposes account, wallet, bridge deposit, credit, and withdrawal reads (28.4633ms)
+✔ exposes product token, DEX, bridge credit, and product-flow reads from handoff maps (8.6297ms)
+✔ rejects secret-shaped intake and responses before returning them (26.93ms)
+✔ exposes real-value pilot lifecycle reads and operator next steps (34.2492ms)
+✔ pilot lifecycle can represent a live Base 8453 evidence bundle (42.9035ms)
+✔ bridge live readiness fails closed for missing env and returns env names only (26.9585ms)
+✔ exact-value fixture reports equality across bridge lifecycle and wallet transfer history (62.2935ms)
+✔ rejects secret-shaped bridge and pilot-adjacent intake material (26.49ms)
+✔ smoke client queries the complete local lifecycle surface (73.3778ms)
+✔ smoke client ignores stale local devnet blocks without transactions (36.6238ms)
+✔ HTTP server exposes browser-safe health and state endpoints (102.2834ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1141.6049
+
+> test
+> node --test test/*.test.ts
+
+✔ validates the committed mock bridge deposit fixture (46.8514ms)
+✔ builds a non-production bridge observation (35.3649ms)
+✔ builds deterministic bridge credit, withdrawal intent, and runtime handoff objects (100.3876ms)
+✔ local credit smoke pipeline applies a mock credit and records test withdrawal intent (58.9407ms)
+✔ mock pilot E2E path applies a Base 8453 credit exactly once across replay (67.0851ms)
+✔ mock pilot duplicate deposits reject replay with explicit evidence (9.3422ms)
+✔ mock pilot preserves exact tiny, small, u64 boundary, and above-u64 amounts as decimal strings (31.6972ms)
+✔ mock pilot rejects per-deposit and total pilot cap excess before credit application (3.5631ms)
+✔ release evidence amount mismatches are rejected explicitly (5.5295ms)
+✔ bridge pipeline reports and artifacts do not contain secrets (5.7584ms)
+✔ mock pilot rejects wrong source chains and unapproved contracts (0.7189ms)
+✔ mock pilot rejects unsupported tokens (0.3961ms)
+✔ decodes BaseBridgeLockbox BridgeDeposit logs from RPC log payloads (0.82ms)
+✔ observes Base Sepolia deposit logs through read-only RPC calls (24.436ms)
+✔ observes Base public-network pilot only after eth_chainId 0x2105 and confirmation depth (7.9572ms)
+✔ Base public-network pilot rejects wrong chain IDs before log reads (0.5369ms)
+✔ Base public-network pilot rejects unapproved lockbox and insufficient confirmations (0.7857ms)
+✔ requires explicit Base mainnet real-funds guardrails (0.1859ms)
+✔ rejects broad Base block ranges (0.1489ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 611.4544
+
+== Run crypto tests ==
+
+> @flowmemory/crypto@0.0.0 test
+> node --test
+
+✔ canonicalJson sorts object keys recursively (1.0132ms)
+✔ canonicalJson normalizes hex case before hashing (1.1885ms)
+✔ exports named domain separators and cursor/root identity helpers (3.5342ms)
+✔ computes FlowPulse schema id, event signature, pulse id, and event args hash (0.43ms)
+✔ computes FlowPulse observation id and receipt hash (0.4878ms)
+✔ computes artifact commitment, Merkle root, and storage receipt commitment (0.9261ms)
+✔ computes deterministic verifier report hash (0.2362ms)
+✔ computes EIP-712 worker and verifier signature payloads (1.3386ms)
+✔ computes generic attestation envelope hash (0.2898ms)
+✔ observation id changes when reorg-sensitive block hash changes (0.3854ms)
+✔ receipt-adjacent fields fail closed when changed (1.1147ms)
+✔ computes FlowChain Local Alpha object ids and validates schema documents (6.8514ms)
+✔ validates FlowChain Local Alpha signed object envelopes (77.2319ms)
+✔ AJV validates all Local Alpha object and envelope fixtures against canonical schemas (99.1507ms)
+✔ Local Alpha signed envelope vectors reject replay, wrong domains, missing signer, malformed roots, malformed bridge deposits, and wrong types (52.0278ms)
+✔ validates canonical local transaction envelopes and negative vectors (8.1829ms)
+✔ validates Product Testnet V1 wallet transaction documents, envelopes, and negative vectors (154.0329ms)
+✔ Local Alpha object fixtures reject swapped fields, malformed hex, duplicate ids, and changed type strings (0.622ms)
+✔ control-plane provenance response uses stable canonical JSON body hashing (0.2815ms)
+✔ local encrypted test vault creates, unlocks, lists, signs, verifies, exports public metadata, and rotates accounts (294.4087ms)
+✔ capped real-value pilot operator messages sign, export public metadata, and fail closed (119.4191ms)
+✔ validates all published crypto test vectors (2.754ms)
+✔ signs and verifies verifier digests with local test keys only (5.4596ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1047.634
+
+== Validate crypto vectors ==
+
+> @flowmemory/crypto@0.0.0 validate:vectors
+> node src/validate-vectors.js
+
+FLOWMEMORY_CRYPTO_VECTORS_OK 46
+
+== Validate local alpha crypto objects ==
+
+> @flowmemory/crypto@0.0.0 validate:local-alpha
+> node src/validate-local-alpha-fixtures.js
+
+FLOWCHAIN_LOCAL_ALPHA_FIXTURES_OK documents=15 envelopes=15 transactions=1 schemas=17
+
+== Run launch candidate gate ==
+
+> launch:candidate
+> npm run contracts:hardening && npm run launch:v0 && npm run validate:launch && npm run fixtures:check && node infra/scripts/check-unsafe-claims.mjs
+
+
+> contracts:hardening
+> node infra/scripts/run-contract-hardening.mjs
+
+No files changed, compilation skipped
+No files changed, compilation skipped
+
+Ran 23 tests for tests/RootfieldRegistry.t.sol:RootfieldRegistryTest
+[PASS] testCannotDeactivateInactiveRootfield() (gas: 119766)
+[PASS] testCannotDeactivateUnregisteredRootfield() (gas: 11530)
+[PASS] testCannotRegisterDuplicateRootfieldId() (gas: 108629)
+[PASS] testCannotRegisterZeroRootfieldId() (gas: 8955)
+[PASS] testCannotRegisterZeroSchemaHash() (gas: 8893)
+[PASS] testCannotSubmitUnregisteredRootfield() (gas: 11631)
+[PASS] testCannotSubmitZeroArtifactCommitment() (gas: 108457)
+[PASS] testCannotSubmitZeroRoot() (gas: 108529)
+[PASS] testCannotTransferInactiveRootfieldOwnership() (gas: 314948)
+[PASS] testCannotTransferRootfieldToZeroOwner() (gas: 108048)
+[PASS] testCannotTransferUnregisteredRootfieldOwnership() (gas: 206731)
+[PASS] testDeactivateRootfieldEmitsStatusPulseAndBlocksRoots() (gas: 130338)
+[PASS] testFlowPulseSignatureExcludesReceiptMetadata() (gas: 306)
+[PASS] testOnlyRootfieldOwnerCanDeactivateRootfield() (gas: 304505)
+[PASS] testOnlyRootfieldOwnerCanSubmitRoot() (gas: 304647)
+[PASS] testOnlyRootfieldOwnerCanTransferRootfieldOwnership() (gas: 499716)
+[PASS] testRegisterRootfieldEmitsFlowPulseSchema() (gas: 112889)
+[PASS] testRegisterRootfieldStoresCommitmentMetadata() (gas: 108252)
+[PASS] testRegistrationUriIsArbitraryAdvisoryLogData() (gas: 112689)
+[PASS] testSubmitRootEmitsFlowPulseSchemaWithoutReceiptMetadata() (gas: 141333)
+[PASS] testSubmitRootStoresLatestRootAndIncrementsCounts() (gas: 135158)
+[PASS] testTransferRootfieldOwnershipAllowsNewOwnerOnly() (gas: 350260)
+[PASS] testTransferRootfieldOwnershipEmitsStatusPulseAndOwnershipEvent() (gas: 322163)
+Suite result: ok. 23 passed; 0 failed; 0 skipped; finished in 6.56ms (51.56ms CPU time)
+
+Ran 8 tests for tests/FlowChainSettlementSpine.t.sol:FlowChainSettlementSpineTest
+[PASS] testAuthorizedSubmitterCanCommitAndRevocationBlocksFutureCommits() (gas: 151186)
+[PASS] testCommitBridgeAndControlPlaneObjectVocabularyWithStableEventShape() (gas: 607684)
+[PASS] testCommitBridgeDepositObjectEmitsStableEventAndStoresRecord() (gas: 166921)
+[PASS] testCommitRejectsUnauthorizedZeroFieldsAndDuplicates() (gas: 171729)
+[PASS] testConstructorRequiresOwnerAndAuthorizesOwner() (gas: 69123)
+[PASS] testMissingObjectLookupReverts() (gas: 24518)
+[PASS] testNonOwnerCannotAuthorizeSubmitter() (gas: 16712)
+[PASS] testOwnerCanAuthorizeSubmitterAndTransferOwnership() (gas: 41602)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 6.81ms (15.25ms CPU time)
+
+Ran 18 tests for tests/bridge/BaseBridgeLockbox.t.sol:BaseBridgeLockboxTest
+[PASS] testConstructorRequiresExplicitOwnerAndReleaseAuthority() (gas: 115820)
+[PASS] testEmergencyStopBlocksDepositsAndReleasesUntilOwnerResumes() (gas: 383806)
+[PASS] testLockERC20EmitsStableDeterministicDepositEventAndRecord() (gas: 314498)
+[PASS] testLockNativeWorksWhenExplicitlyAllowlisted() (gas: 253223)
+[PASS] testNonOwnerCannotConfigurePauseOrSetReleaseAuthority() (gas: 41448)
+[PASS] testOwnerCanConfigureAllowlistedTokenAndReleaseAuthority() (gas: 31875)
+[PASS] testPauseBlocksDepositsButNotAuthorizedRelease() (gas: 380927)
+[PASS] testRejectsPerDepositAndTotalCapExceeded() (gas: 983467)
+[PASS] testRejectsUnallowlistedDisabledAndZeroTokenDeposits() (gas: 421402)
+[PASS] testRejectsZeroAmountRecipientAndDirectNativeTransfers() (gas: 113722)
+[PASS] testReleaseBlocksTokenMismatchOverReleaseAndZeroEvidence() (gas: 370988)
+[PASS] testReleaseERC20CanReleaseInPartsWithDistinctEvidenceUntilExhausted() (gas: 389444)
+[PASS] testReleaseERC20EmitsStableSchemaAndBlocksReplay() (gas: 377780)
+[PASS] testReleaseERC20RequiresExplicitAuthorityAndKnownDeposit() (gas: 390973)
+[PASS] testReleaseNativeWorksThroughExplicitAuthorityWhilePaused() (gas: 320593)
+[PASS] testReleaseRejectsZeroRecipientAndZeroAmount() (gas: 342401)
+[PASS] testRepeatedDepositsUseNonceReplayProtection() (gas: 490286)
+[PASS] testTotalCapIsCumulativeAndCannotBeLoweredBelowHistoricalDeposits() (gas: 325940)
+Suite result: ok. 18 passed; 0 failed; 0 skipped; finished in 6.93ms (21.72ms CPU time)
+
+Ran 32 tests for tests/LiveV0Package.t.sol:LiveV0PackageTest
+[PASS] testArtifactRegistryDeprecatesOnlyByOwner() (gas: 781675)
+[PASS] testArtifactRegistryRejectsDuplicateAndInvalidCommitments() (gas: 673777)
+[PASS] testArtifactRegistryStoresCommitmentAndEmitsAdvisoryUri() (gas: 670621)
+[PASS] testCursorRegistryRegistersAndAdvancesCommitments() (gas: 541574)
+[PASS] testCursorRegistryRejectsDuplicateAndNonOwnerAdvance() (gas: 647821)
+[PASS] testCursorRegistryRejectsZeroIdsAndCommitments() (gas: 521058)
+[PASS] testFlowMemoryHookAdapterEmitsObservationAndReturnsSelector() (gas: 682700)
+[PASS] testFlowMemoryHookAdapterExposesUniswapV4AfterSwapShape() (gas: 690269)
+[PASS] testFlowMemoryHookAdapterRejectsEmptyUniswapV4HookData() (gas: 643542)
+[PASS] testFlowMemoryHookAdapterRejectsInvalidUniswapV4HookInputs() (gas: 667008)
+[PASS] testFlowMemoryHookAdapterRejectsZeroCommitment() (gas: 642755)
+[PASS] testFlowMemoryHookAdapterRejectsZeroSwapInputs() (gas: 648272)
+[PASS] testFlowMemoryHookAdapterUsesDefaultUriForEmptyUniswapV4HookUri() (gas: 688250)
+[PASS] testReceiptVerifierRejectsDuplicateReport() (gas: 456174)
+[PASS] testReceiptVerifierRejectsInvalidZeroFields() (gas: 323603)
+[PASS] testReceiptVerifierStoresReportCommitmentWithoutReceiptMetadataClaims() (gas: 454442)
+[PASS] testVerifierReportRegistryAcceptsAllV0StatusesAsAdvisoryReports() (gas: 1300659)
+[PASS] testVerifierReportRegistryAuthorizesVerifierAndStoresReport() (gas: 638580)
+[PASS] testVerifierReportRegistryBlocksRevokedVerifier() (gas: 463941)
+[PASS] testVerifierReportRegistryRejectsNonOwnerVerifierAuthorization() (gas: 618963)
+[PASS] testVerifierReportRegistryRejectsUnauthorizedInvalidStatusAndDuplicates() (gas: 659430)
+[PASS] testWorkDebtSchedulerRejectsNonParticipantCompletion() (gas: 716019)
+[PASS] testWorkDebtSchedulerRejectsZeroFieldsDuplicateAndCompletedTransition() (gas: 627984)
+[PASS] testWorkDebtSchedulerSchedulesAndCompletesWithoutTokenMechanics() (gas: 611880)
+[PASS] testWorkReceiptRegistryAuthorizesWorkerAndStoresLaneReceipt() (gas: 720288)
+[PASS] testWorkReceiptRegistryBlocksRevokedWorker() (gas: 512773)
+[PASS] testWorkReceiptRegistryRejectsDuplicateReceipt() (gas: 714311)
+[PASS] testWorkReceiptRegistryRejectsNonOwnerWorkerAuthorization() (gas: 675718)
+[PASS] testWorkReceiptRegistryRejectsUnauthorizedInvalidLaneAndZeroRoots() (gas: 546563)
+[PASS] testWorkerAndVerifierRegistriesDeactivateAndRejectUnregisteredUpdates() (gas: 1462957)
+[PASS] testWorkerAndVerifierRegistriesRejectDuplicateAndZeroFields() (gas: 1245882)
+[PASS] testWorkerAndVerifierRegistriesStoreSelfRegisteredMetadata() (gas: 1239894)
+Suite result: ok. 32 passed; 0 failed; 0 skipped; finished in 7.12ms (45.59ms CPU time)
+
+Ran 7 tests for tests/FlowMemoryAfterSwapHook.t.sol:FlowMemoryAfterSwapHookTest
+[PASS] testAfterSwapHookEmitsFlowPulseAndReturnsZeroHookDelta() (gas: 666179)
+[PASS] testAfterSwapHookIsPoolManagerGated() (gas: 843285)
+[PASS] testAfterSwapHookRejectsInvalidHookDataWithoutCustodyOrFeeState() (gas: 639185)
+[PASS] testHookEventSchemasExcludeTxHashAndLogIndexAssumptions() (gas: 299)
+[PASS] testPlannerDefinesAfterSwapOnlyPermissionTarget() (gas: 438073)
+[PASS] testPlannerMinesBaseSepoliaCreate2AddressWithTargetFlags() (gas: 8955316)
+[PASS] testPlannerRejectsCustomAccountingAndExtraHookFlags() (gas: 438661)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 28.27ms (34.80ms CPU time)
+
+Ran 5 test suites in 30.64ms (55.69ms CPU time): 88 tests passed, 0 failed, 0 skipped (88 total tests)
+WARNING: slither is optional for this default gate; run with -RequireSlither or npm run contracts:hardening:slither in 
+audit environments
+
+> launch:v0
+> npm run launch:v0 --prefix services/flowmemory
+
+
+> launch:v0
+> node src/launch-v0.ts
+
+
+[launch:v0] observe FlowPulse fixtures with indexer
+
+> index:fixtures
+> node src/index-fixtures.ts
+
+{
+  "service": "flowmemory-indexer-v0",
+  "outputPath": "E:\\FlowMemory\\flowmemory-prod-hq\\services\\indexer\\out\\indexer-state.json",
+  "observations": 8,
+  "cursors": 7,
+  "rejectedLogs": 2,
+  "duplicates": 1
+}
+
+[launch:v0] create verifier reports from indexed observations
+
+> verify:fixtures
+> node src/verify-fixtures.ts
+
+{
+  "service": "flowmemory-verifier-v0",
+  "inputPath": "E:\\FlowMemory\\flowmemory-prod-hq\\services\\indexer\\out\\indexer-state.json",
+  "outputPath": "E:\\FlowMemory\\flowmemory-prod-hq\\services\\verifier\\out\\reports.json",
+  "reports": 8,
+  "statuses": {
+    "valid": 4,
+    "reorged": 1,
+    "invalid": 1,
+    "unresolved": 1,
+    "unsupported": 1
+  }
+}
+
+[launch:v0] run no-value local devnet handoff
+{
+  "schema": "flowmemory.local_devnet.demo_summary.v0",
+  "statePath": "devnet/local/launch-v0-state.json",
+  "firstBlockHash": "0xd890758bdeaa4ab7a658d7813b2b9bdd0850824aaef830b9f2f4ff455aaf3811",
+  "secondBlockHash": "0x64e3d605fb1bba40b7de6a6a9813f77619282c07b9a33c7b41df1f6e3d71958b",
+  "stateRoot": "0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c",
+  "agentId": "agent:demo:alpha",
+  "agentRegistered": true,
+  "localBalanceAccountId": "local-balance:demo:agent-alpha",
+  "localBalanceUnits": 1000,
+  "faucetRecordId": "faucet:demo:001",
+  "faucetRecordCreated": true,
+  "workReceiptId": "receipt:demo:001",
+  "workReceiptSubmitted": true,
+  "verifierReportId": "report:demo:001",
+  "verifierReportSubmitted": true,
+  "memoryCellId": "memory:demo:agent-alpha:core",
+  "memoryCellUpdated": true,
+  "challengeId": "challenge:demo:001",
+  "challengeResolved": true,
+  "finalityReceiptId": "finality:demo:001",
+  "receiptFinalized": true,
+  "outDir": "fixtures/launch-core/generated/devnet",
+  "handoffFiles": [
+    "dashboard-state.json",
+    "indexer-handoff.json",
+    "verifier-handoff.json",
+    "control-plane-handoff.json",
+    "genesis-config.json",
+    "operator-key-references.json",
+    "state.json"
+  ]
+}
+
+[launch:v0] validate FlowRouter hardware POC fixture
+valid: hardware\fixtures\flowrouter_sample_seed42.json
+
+[launch:v0] generate Rootflow and Flow Memory V0 state
+{
+  "service": "flowmemory-launch-v0",
+  "loadedFlowPulses": 8,
+  "indexedObservations": 8,
+  "verifierReports": 8,
+  "rootflowTransitions": 7,
+  "memorySignals": 8,
+  "memoryReceipts": 8,
+  "rootfieldBundles": 1,
+  "agentMemoryViews": 1,
+  "dashboardFixture": "fixtures/dashboard/flowmemory-dashboard-v0.json",
+  "dashboardRuntimeData": "apps/dashboard/public/data/flowmemory-dashboard-v0.json",
+  "localOnly": true
+}
+
+> validate:launch
+> npm run validate --prefix services/flowmemory
+
+
+> validate
+> node src/validate-launch-core.ts
+
+{
+  "service": "flowmemory-launch-core-validator",
+  "path": "fixtures/launch-core/flowmemory-launch-v0.json",
+  "memorySignals": 8,
+  "memoryReceipts": 8,
+  "rootflowTransitions": 7,
+  "rootfieldBundles": 1,
+  "agentMemoryViews": 1,
+  "swapMemorySignals": 1
+}
+
+> fixtures:check
+> npm run fixtures:check --prefix services/flowmemory
+
+
+> fixtures:check
+> node src/check-fixture-drift.ts
+
+{
+  "service": "flowmemory-fixture-drift-check",
+  "checked": [
+    "fixtures/launch-core/flowmemory-launch-v0.json",
+    "fixtures/launch-core/rootflow-transitions.json",
+    "fixtures/dashboard/flowmemory-dashboard-v0.json",
+    "apps/dashboard/public/data/flowmemory-dashboard-v0.json"
+  ],
+  "status": "clean"
+}
+Checked launch claims in README.md, docs, contracts.
+
+== Run devnet tests ==
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 36 tests
+test canonical_json_sorts_object_keys ... ok
+test challenge_rejects_missing_receipt ... ok
+test local_test_unit_faucet_updates_balance_without_value_claims ... ok
+test local_faucet_and_transfer_update_test_unit_ledger ... ok
+test finalization_rejects_invalid_finality_status ... ok
+test finalization_rejects_unresolved_challenge ... ok
+test invalid_dependencies_are_rejected ... ok
+test zero_hash_constant_is_hex_32_bytes ... ok
+test memory_update_rejects_missing_or_failed_source_receipt ... ok
+test live_bridge_credit_u64_max_boundary_is_explicit ... ok
+test duplicate_ids_are_rejected_for_new_objects ... ok
+test same_base_tx_with_different_log_index_gets_distinct_live_credits ... ok
+test invalid_tx_is_rejected_without_state_mutation ... ok
+test token_and_dex_reject_duplicate_zero_insufficient_and_slippage_failures ... ok
+test block_hash_changes_when_transactions_change ... ok
+test token_launch_pool_liquidity_swap_and_remove_update_product_state ... ok
+test product_demo_transactions_apply_in_one_block_with_receipts ... ok
+test live_bridge_credit_rejects_unsatisfied_confirmation_and_pilot_cap_excess ... ok
+test live_bridge_credit_survives_export_import_restart_and_remains_transferable ... ok
+test live_bridge_credit_applies_exact_amount_and_rejects_replay ... ok
+test live_bridge_credit_rejects_wrong_chain_unsupported_asset_zero_and_bad_identity ... ok
+test pilot_bridge_credit_maps_asset_account_and_rejects_replay ... ok
+test every_core_transaction_type_can_be_applied ... ok
+{
+  "queued": [
+    "0xa3d0ed7805d73161cd62c13adfd89b7994b1cecbe984492f1a32b03caea7df55",
+    "0xa07a31ff460c01f48f9e7842bf1b34caea9f4cd09d44e0f745dcfcaabf82cb44"
+  ]
+}
+test state_root_is_deterministic_for_same_inputs ... ok
+{
+  "queued": [
+    "0x20253125a8c22265ed5c267fd504f39e75d9704d0a3a54c19888d7f42afdc2f4",
+    "0xef932dd015421efddcc8c66e2a14e86f832bb741769c7e3839aa40c1b373f799"
+  ]
+}
+test cli_rejects_malformed_fixture ... ok
+test live_bridge_credit_amount_above_u64_is_rejected_before_state_file_mutation ... ok
+test deterministic_replay_covers_new_maps_and_anchor ... ok
+{"blockHash":"0x129486fb4b14f5b28cfd84668d13be89f254f952ed90c464f2f384a68e312f56","blockNumber":1,"event":"blockProduced","nodeId":"node:test:a","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0xe47d401cfc50529a67f73858f3d638e9ebeec303feb70ecb12682acfa9104af9","txs":2}
+{"blockHash":"0x5b6b5d47985bf48fe151fe9b83e75bd9b85409648fca6c63b1ba54d904537eed","blockNumber":1,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":2}
+test cli_start_runs_10_blocks_and_state_survives_restart ... ok
+{"blockHash":"0xb3c4b34022dcb570f66c4d9bfdaf99446dea4d7e046655786d0d6b0c0ce25706","blockNumber":2,"event":"blockProduced","nodeId":"node:test:a","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0xe47d401cfc50529a67f73858f3d638e9ebeec303feb70ecb12682acfa9104af9","txs":0}
+{"schema":"flowmemory.local_devnet.node_status.v0","status":"stopped","note":"max blocks reached","nodeId":"node:test:a","pid":16632,"statePath":"C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-cli-peer-sync\\state-a.json","nodeDir":"C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-cli-peer-sync\\node-a","blockHeight":2,"nextBlockNumber":3,"latestBlockHash":"0xb3c4b34022dcb570f66c4d9bfdaf99446dea4d7e046655786d0d6b0c0ce25706","stateRoot":"0xe47d401cfc50529a67f73858f3d638e9ebeec303feb70ecb12682acfa9104af9","pendingTxs":0,"localTestUnitBalances":1,"faucetRecords":0,"balanceTransfers":0,"tokenDefinitions":0,"tokenBalances":0,"tokenMintReceipts":0,"dexPools":0,"lpPositions":0,"liquidityReceipts":0,"swapReceipts":0,"bridgeAssetMappings":0,"bridgeAccountMappings":0,"bridgeCredits":0,"bridgeCreditReceipts":0,"bridgeReplayKeys":0,"staticPeerSync":null,"lastIngestedTxs":0,"lastRejectedInboxFiles":0,"lanMode":"not exposed; static local-file peers only"}
+{"blockHash":"0xa016ab182e6c067d5190b9ee2bf3e143e31b1c86101e46bb031c4945ddf234d7","blockNumber":2,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+{
+  "schema": "flowmemory.local_devnet.demo_summary.v0",
+  "statePath": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-cli-demo\\state.json",
+  "firstBlockHash": "0xd890758bdeaa4ab7a658d7813b2b9bdd0850824aaef830b9f2f4ff455aaf3811",
+  "secondBlockHash": "0x64e3d605fb1bba40b7de6a6a9813f77619282c07b9a33c7b41df1f6e3d71958b",
+  "stateRoot": "0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c",
+  "agentId": "agent:demo:alpha",
+  "agentRegistered": true,
+  "localBalanceAccountId": "local-balance:demo:agent-alpha",
+  "localBalanceUnits": 1000,
+  "faucetRecordId": "faucet:demo:001",
+  "faucetRecordCreated": true,
+  "workReceiptId": "receipt:demo:001",
+  "workReceiptSubmitted": true,
+  "verifierReportId": "report:demo:001",
+  "verifierReportSubmitted": true,
+  "memoryCellId": "memory:demo:agent-alpha:core",
+  "memoryCellUpdated": true,
+  "challengeId": "challenge:demo:001",
+  "challengeResolved": true,
+  "finalityReceiptId": "finality:demo:001",
+  "receiptFinalized": true,
+  "outDir": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-cli-demo\\handoff",
+  "handoffFiles": [
+    "dashboard-state.json",
+    "indexer-handoff.json",
+    "verifier-handoff.json",
+    "control-plane-handoff.json",
+    "genesis-config.json",
+    "operator-key-references.json",
+    "state.json"
+  ]
+}
+{"blockHash":"0x1fe23c769ad41c9768e0758c06dbc4eea1b1b65bb5e707a486888de7e035e2b3","blockNumber":3,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+test cli_demo_writes_state_and_handoff_files ... ok
+{"blockHash":"0xb89fd0de9c39a73e3c7ad5b2fc8738874dae0639071f8121a712ecc905c49d31","blockNumber":4,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+{
+  "schema": "flowmemory.local_devnet.demo_summary.v0",
+  "statePath": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-export-import\\state.json",
+  "firstBlockHash": "0xd890758bdeaa4ab7a658d7813b2b9bdd0850824aaef830b9f2f4ff455aaf3811",
+  "secondBlockHash": "0x64e3d605fb1bba40b7de6a6a9813f77619282c07b9a33c7b41df1f6e3d71958b",
+  "stateRoot": "0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c",
+  "agentId": "agent:demo:alpha",
+  "agentRegistered": true,
+  "localBalanceAccountId": "local-balance:demo:agent-alpha",
+  "localBalanceUnits": 1000,
+  "faucetRecordId": "faucet:demo:001",
+  "faucetRecordCreated": true,
+  "workReceiptId": "receipt:demo:001",
+  "workReceiptSubmitted": true,
+  "verifierReportId": "report:demo:001",
+  "verifierReportSubmitted": true,
+  "memoryCellId": "memory:demo:agent-alpha:core",
+  "memoryCellUpdated": true,
+  "challengeId": "challenge:demo:001",
+  "challengeResolved": true,
+  "finalityReceiptId": "finality:demo:001",
+  "receiptFinalized": true,
+  "outDir": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-export-import\\handoff",
+  "handoffFiles": [
+    "dashboard-state.json",
+    "indexer-handoff.json",
+    "verifier-handoff.json",
+    "control-plane-handoff.json",
+    "genesis-config.json",
+    "operator-key-references.json",
+    "state.json"
+  ]
+}
+{"blockHash":"0xbaa733064a0ada65aa3f403ddb881c1cabe6d7150a91a043d2f31f609c02a6fa","blockNumber":3,"event":"blockProduced","nodeId":"node:test:b","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0xe47d401cfc50529a67f73858f3d638e9ebeec303feb70ecb12682acfa9104af9","txs":0}
+{"schema":"flowmemory.local_devnet.node_status.v0","status":"stopped","note":"max blocks reached","nodeId":"node:test:b","pid":41876,"statePath":"C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-cli-peer-sync\\state-b.json","nodeDir":"C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-cli-peer-sync\\node-b","blockHeight":3,"nextBlockNumber":4,"latestBlockHash":"0xbaa733064a0ada65aa3f403ddb881c1cabe6d7150a91a043d2f31f609c02a6fa","stateRoot":"0xe47d401cfc50529a67f73858f3d638e9ebeec303feb70ecb12682acfa9104af9","pendingTxs":0,"localTestUnitBalances":1,"faucetRecords":0,"balanceTransfers":0,"tokenDefinitions":0,"tokenBalances":0,"tokenMintReceipts":0,"dexPools":0,"lpPositions":0,"liquidityReceipts":0,"swapReceipts":0,"bridgeAssetMappings":0,"bridgeAccountMappings":0,"bridgeCredits":0,"bridgeCreditReceipts":0,"bridgeReplayKeys":0,"staticPeerSync":null,"lastIngestedTxs":0,"lastRejectedInboxFiles":0,"lanMode":"not exposed; static local-file peers only"}
+{"blockHash":"0x2907c13f62f39ce2cb1bf52b2272e50423b68d218243f15bf651b247dd9ca6fa","blockNumber":5,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+{
+  "schema": "flowmemory.local_devnet.export_state_summary.v0",
+  "out": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-export-import\\snapshot.json",
+  "stateRoot": "0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c"
+}
+{"blockHash":"0x1710ed9b55a58a1e2145e6f81a1dfe9899fe71d95e4851060a6916ba4e07f226","blockNumber":6,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+{
+  "schema": "flowmemory.local_devnet.product_smoke_summary.v0",
+  "statePath": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-pilot-bridge-restart-export\\state.json",
+  "outDir": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-pilot-bridge-restart-export\\product-handoff",
+  "stateRoot": "0x7e4bc64638016dde9b2e487762021d2e2ab3d1a5f97084b41bbd0cf21ea7163b",
+  "blockHeight": 2,
+  "latestBlockHash": "0x8a08ac342f5784241dbae8409b4141975d56e672264c9d43c99fe201e3fe7889",
+  "deterministicReplay": true,
+  "checks": {
+    "localAccountsFunded": true,
+    "tokenLaunched": true,
+    "initialSupplyAssigned": true,
+    "poolCreated": true,
+    "liquidityAdded": true,
+    "swapExecuted": true,
+    "liquidityRemoved": true,
+    "productReceiptsQueryable": true,
+    "noValueBoundary": true,
+    "baseAnchorCreated": true
+  },
+  "handoffFiles": [
+    "dashboard-state.json",
+    "indexer-handoff.json",
+    "verifier-handoff.json",
+    "control-plane-handoff.json",
+    "genesis-config.json",
+    "operator-key-references.json",
+    "state.json"
+  ]
+}
+{"blockHash":"0x441743f38e3077215ca4e3ca8feb02dabe97e5c8602778d1dfc60981470f838a","blockNumber":7,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+test cli_static_peer_sync_reconciles_two_local_node_states ... ok
+{
+  "schema": "flowmemory.local_devnet.import_state_summary.v0",
+  "from": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-export-import\\snapshot.json",
+  "statePath": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-export-import\\imported-state.json",
+  "stateRoot": "0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c",
+  "mapRoots": {
+    "operatorKeyReferenceRoot": "0x8457aa3ed0f4238834a8f3925f25ccca805828d8427c3ef67590a45659b22a40",
+    "rootfieldStateRoot": "0xb72a851dca1103410484e3272945bae5e87fc39b8f32f77d2991959b60d3bfbf",
+    "agentAccountRoot": "0xcf31230bfff347f79e19a55f4d1ff5fa486b0b1ad4754ce22b93de4b259a3ca7",
+    "localTestUnitBalanceRoot": "0x167041ef195b5dde2d2cade6ecb26c9a0a596e9ed21ff7bfb02d33c9d2be8d15",
+    "faucetRecordRoot": "0x2277503a52fab3f9e49b40debfb7d641abee75cf268aa56da403fdcf4fad6cee",
+    "balanceTransferRoot": "0x9b6e249f769a93bc9f34a90156e028d1a830badcd8ccdc5b1487d512cdbf0a6d",
+    "tokenDefinitionRoot": "0xbbbad9681e8756403940e4333111706a4fcee1f30534ba14deea9ba148056be0",
+    "tokenBalanceRoot": "0xbaf3b150fe41a0f3a2d9fe3dd9a664f9c5934bfef37218d9c3bf1c682be5f8c6",
+    "tokenMintReceiptRoot": "0xaf86773ae2d2c4cbb8404f895fd9ff4132336f382e4e3f12b59df2ed9ba52806",
+    "dexPoolRoot": "0x0e5f034494a2deb6a4f20c04f01e678795c587df4869ad3f189f107fcc447dea",
+    "lpPositionRoot": "0xe67dd98259afb06ca93620b4a8742b924ec2e8f3e6e72934eef5b8e60829d46f",
+    "liquidityReceiptRoot": "0x98bf15cc6859994038744612e125236b1f777895a051c41702c2004134327738",
+    "swapReceiptRoot": "0xc9f3ee93962f36ed10421ec9ad736079a3b13ef6504336495af243b718cefee1",
+    "bridgeAssetMappingRoot": "0xbd283f6190cba76038f7364e207557dd20f7883d78e5f89a96579af5455a89aa",
+    "bridgeAccountMappingRoot": "0x46285ec5782d3e6cc1e557fd5dd779e979d679e5cc723832cb189d27a5c552c8",
+    "bridgeCreditRoot": "0x613ab06f110cc7a5eb06a0f44b7a0f04b0b3cfb0556d30d42842f33563596248",
+    "bridgeCreditReceiptRoot": "0x0a86ce98161cb40ca4c7719468c0ed8f122677d12641c13305277094b8f3a509",
+    "bridgeReplayIndexRoot": "0x9344f8651651d2d5042d2853205154a5777cd57aa9e892e2ac41b9b9fe04c00f",
+    "bridgeEventReceiptIndexRoot": "0xcaad305c45f57c516d0fdfdef15c5d88b399b976df173f005e9d7dc30fbdbdb2",
+    "modelPassportRoot": "0x326aa6b0b372d29d24d747fe0879adfd7aaea206373b24ae2ab77d56357e9529",
+    "memoryCellRoot": "0x1b4e91099dd8d867201bd880437197ae6c031e538341aaa3cd2046e5706a2c25",
+    "challengeRoot": "0x16da3d2bf2dcd801bc5deb3987dc01342cb957031ad01408ea77bf5d1583656f",
+    "finalityReceiptRoot": "0x1c8536e507c5ba2242a5875c9537043645828825286ca256cc1171f1eb960c3f",
+    "artifactCommitmentRoot": "0xb772a9f7273032fd3ba2da8b6476d4715bbbafbd2a7eed21ecd0d558bde3beab",
+    "artifactAvailabilityProofRoot": "0xfb4b693c45014aae0947f35696e9d864e7b26ac6fd39c1df5edb3e0dcf9bd928",
+    "verifierModuleRoot": "0xd6ddd8a2d0f5812d64679656c69983a2e0aecd36bd36199d900245658ae4626c",
+    "workReceiptRoot": "0x8b3ef5650c9eea2f608ad9c7cb73df3c289fc0ac72ed04f46e6ae4bce0a1f023",
+    "verifierReportRoot": "0x4facd21e55423e182eba87355482a35daa93f53190fbd3a8d2969f9d55bc5373",
+    "importedObservationRoot": "0x99cb1b939d5a09f800f72e4c5a2b92988571126e1f6f93549f4893b3f7de7880",
+    "importedVerifierReportRoot": "0x6070b1015f000dd509c7b276d2ad68d8a9d188ef1a961c2f573346eb75ea5ad7",
+    "baseAnchorRoot": "0x8b7c3423523f44b9a470a1281b088c72537a42e26f88fc8cd4c3e8360324c7ca"
+  }
+}
+test cli_product_smoke_exports_token_and_dex_handoff ... ok
+test cli_export_import_state_round_trip_is_deterministic ... ok
+{
+  "schema": "flowmemory.local_devnet.bridge_handoff_queue.v0",
+  "handoff": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures/bridge/local-runtime-bridge-handoff.json",
+  "queued": [
+    "0x1525ed5fb2a23f06c5bedecf73f43a3671ad92face4bcd172db8ec00a819515a",
+    "0x197fd59fc726e1fa3da2d4590a67fc21c2a565aeccd241f861401bf888d03de0",
+    "0x535533a6e723b0ac7301ecc28298b77760afefedea07d0a486187d9ed186a8ff",
+    "0xf9fd1db5d7a82db5aa5595f47d4a37b2334551291fae67985a5a8f3f25da27b3"
+  ],
+  "expectedReceipts": [
+    "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6"
+  ]
+}
+{"blockHash":"0x4ea7da696371e1e523525ee2ae92620efa84d02a6177018ffe3d565ae6735e23","blockNumber":8,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+{"blockHash":"0x3984328f552a75c3a0e4d83684f04c9444ebad61e6e51d000193ccda17d199e4","blockNumber":9,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+{
+  "schema": "flowmemory.local_devnet.run_summary.v0",
+  "blocksProduced": 1,
+  "blockHashes": [
+    "0x137476bc4047dbee4140de21fd129904f2f66f0807ca4af2c3ddf7867702dad8"
+  ],
+  "nextBlockNumber": 4,
+  "stateRoot": "0xec8139b9195ee9d870c39c0a70c071b34bd56a8ec853c697b4ee8991482df70a"
+}
+{"blockHash":"0x288c4c4510ae10cd307051629da37e7a499a27e684d75704b566ad22fc1b95e0","blockNumber":10,"event":"blockProduced","nodeId":"node:test:cli","schema":"flowmemory.local_devnet.node_log.v0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","txs":0}
+{"schema":"flowmemory.local_devnet.node_status.v0","status":"stopped","note":"max blocks reached","nodeId":"node:test:cli","pid":20880,"statePath":"C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-cli-node\\state.json","nodeDir":"C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-cli-node\\node","blockHeight":10,"nextBlockNumber":11,"latestBlockHash":"0x288c4c4510ae10cd307051629da37e7a499a27e684d75704b566ad22fc1b95e0","stateRoot":"0x7fc76d6954a226320e83e44c792c2bf8a048b81fab0ba0b8cac60b221cbbcdee","pendingTxs":0,"localTestUnitBalances":1,"faucetRecords":1,"balanceTransfers":0,"tokenDefinitions":0,"tokenBalances":0,"tokenMintReceipts":0,"dexPools":0,"lpPositions":0,"liquidityReceipts":0,"swapReceipts":0,"bridgeAssetMappings":0,"bridgeAccountMappings":0,"bridgeCredits":0,"bridgeCreditReceipts":0,"bridgeReplayKeys":0,"staticPeerSync":null,"lastIngestedTxs":0,"lastRejectedInboxFiles":0,"lanMode":"not exposed; static local-file peers only"}
+test cli_generated_handoff_files_are_deterministic ... ok
+test cli_smoke_runs_full_flow ... ok
+test cli_node_runs_ten_blocks_and_includes_authorized_inbox_tx ... ok
+{
+  "schema": "flowmemory.local_devnet.run_summary.v0",
+  "blocksProduced": 1,
+  "blockHashes": [
+    "0xa4d0196a621398e4a6066946b9f908698e1ded06efeef235143ab61563187f65"
+  ],
+  "nextBlockNumber": 5,
+  "stateRoot": "0xec8139b9195ee9d870c39c0a70c071b34bd56a8ec853c697b4ee8991482df70a"
+}
+{
+  "schema": "flowmemory.local_devnet.export_summary.v0",
+  "outDir": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-pilot-bridge-restart-export\\pilot-handoff",
+  "stateRoot": "0xec8139b9195ee9d870c39c0a70c071b34bd56a8ec853c697b4ee8991482df70a",
+  "mapRoots": {
+    "operatorKeyReferenceRoot": "0x8457aa3ed0f4238834a8f3925f25ccca805828d8427c3ef67590a45659b22a40",
+    "rootfieldStateRoot": "0x1abd7bb52f85dace493c1edf34129b8774300bfb5595070d27ae27bc28898412",
+    "agentAccountRoot": "0x6689d400a2886143ae7ab9eb3907d06f534a61f1d3ed0dd2f5b044cd2affeebf",
+    "localTestUnitBalanceRoot": "0x26226b3f480ad398b4da52f90131296e006a6225b7bed820cc8b6127cc931586",
+    "faucetRecordRoot": "0x8b954e8889b03353ee37d2d288701a50fb293bc0e698ffc472f549acb86c9752",
+    "balanceTransferRoot": "0x9b6e249f769a93bc9f34a90156e028d1a830badcd8ccdc5b1487d512cdbf0a6d",
+    "tokenDefinitionRoot": "0x6aa33e40dbdad763c1b23c28cf20a094df1724a2b50614c21a412d4ccd22c408",
+    "tokenBalanceRoot": "0xd39e4114323d0bcdc756dcb1b8de262f3d6bd846e02ae71c522f19f889664bb2",
+    "tokenMintReceiptRoot": "0x677627b65d8fe010ea621017dede8381a24115d11ac23db347df400cba129530",
+    "dexPoolRoot": "0x460bce145817ea878f6cd7d0a7cdd354561fab54a987feef302d278e7c922424",
+    "lpPositionRoot": "0xc46449afb2332208d26ec0819815dacd6b23edb4dafa3c459fd50390e0bd7c7e",
+    "liquidityReceiptRoot": "0xf54c1dae4aad11a835c9344bd048af5a2e443d0593233001abf85025ebf5cfc0",
+    "swapReceiptRoot": "0xe05b98f512292da925fd0bf20b862f27a4562232d12fecb8e085ffbabddd16fd",
+    "bridgeAssetMappingRoot": "0xb260d1122fa42dcb292f6fe5e56a4e030e5e615a4a9312daf8ffc910dcecdab3",
+    "bridgeAccountMappingRoot": "0xc55bb4ed64f4c7c3c59a753dec55f4c73438b89f87a54c870459c306130e7ecc",
+    "bridgeCreditRoot": "0xd6b4ca2049afff2b25283dd79cf52c6f9b1f7d98462d2aaca3278dcd3dfb5b7e",
+    "bridgeCreditReceiptRoot": "0x4cfba14b266bc913c27220a3404a19918377b626b9f136a497082ac35e9e5da4",
+    "bridgeReplayIndexRoot": "0xc6229f17f7833d669560641c27540e99a0717d3d46acc2618f174940960430a0",
+    "bridgeEventReceiptIndexRoot": "0x44d361136e1cd4050231cda8ea66079808366cdf5fa9263e954d03401786c67a",
+    "modelPassportRoot": "0xb77afe1eb29ea6a75692d8139d6885103c0fa4a8ed9057387195f688f143ca1d",
+    "memoryCellRoot": "0xe229374c3cb1db0204bf14c286e027fc621c759087ca60e3f722d6091b477415",
+    "challengeRoot": "0x0074c2d1f2a2758629b782810b0ab688fc99231b1c08b40d93124a299c91d19e",
+    "finalityReceiptRoot": "0x16d842cb146334f981d5e77b85ebd0f9c644449fabead3c56753b54cdfad3697",
+    "artifactCommitmentRoot": "0xefd221299a2ae93032e6cbf0e470e4653e5632875c4c1c2fcddcf520f220a0bb",
+    "artifactAvailabilityProofRoot": "0x065b1e1c4f8a2f618a74f50d3f42a19c485d3991947028e41ab400a49821d399",
+    "verifierModuleRoot": "0x0ad280f68622da721712d716d967149bf2efee225507a9bd5b9a7ad9bf48a24d",
+    "workReceiptRoot": "0x3d2b1f869ac3c4094e9624ea65c98914267e73a8b9279faa3344a0f652ab1fbd",
+    "verifierReportRoot": "0x52c0b486cbe5a2b20f9b02c8b508178033a6f9e664eb0f104e9ab078523e2256",
+    "importedObservationRoot": "0x99cb1b939d5a09f800f72e4c5a2b92988571126e1f6f93549f4893b3f7de7880",
+    "importedVerifierReportRoot": "0x6070b1015f000dd509c7b276d2ad68d8a9d188ef1a961c2f573346eb75ea5ad7",
+    "baseAnchorRoot": "0xe728a90cd84ff3d0ba83433f7dcd2e24c76c379a64ebf5b03a8997a00dc1a5cc"
+  },
+  "files": [
+    "dashboard-state.json",
+    "indexer-handoff.json",
+    "verifier-handoff.json",
+    "control-plane-handoff.json",
+    "genesis-config.json",
+    "operator-key-references.json",
+    "state.json"
+  ]
+}
+{
+  "schema": "flowmemory.local_devnet.export_state_summary.v0",
+  "out": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-pilot-bridge-restart-export\\snapshot.json",
+  "stateRoot": "0xec8139b9195ee9d870c39c0a70c071b34bd56a8ec853c697b4ee8991482df70a"
+}
+{
+  "schema": "flowmemory.local_devnet.import_state_summary.v0",
+  "from": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-pilot-bridge-restart-export\\snapshot.json",
+  "statePath": "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowmemory-devnet-test-32268-pilot-bridge-restart-export\\imported-state.json",
+  "stateRoot": "0xec8139b9195ee9d870c39c0a70c071b34bd56a8ec853c697b4ee8991482df70a",
+  "mapRoots": {
+    "operatorKeyReferenceRoot": "0x8457aa3ed0f4238834a8f3925f25ccca805828d8427c3ef67590a45659b22a40",
+    "rootfieldStateRoot": "0x1abd7bb52f85dace493c1edf34129b8774300bfb5595070d27ae27bc28898412",
+    "agentAccountRoot": "0x6689d400a2886143ae7ab9eb3907d06f534a61f1d3ed0dd2f5b044cd2affeebf",
+    "localTestUnitBalanceRoot": "0x26226b3f480ad398b4da52f90131296e006a6225b7bed820cc8b6127cc931586",
+    "faucetRecordRoot": "0x8b954e8889b03353ee37d2d288701a50fb293bc0e698ffc472f549acb86c9752",
+    "balanceTransferRoot": "0x9b6e249f769a93bc9f34a90156e028d1a830badcd8ccdc5b1487d512cdbf0a6d",
+    "tokenDefinitionRoot": "0x6aa33e40dbdad763c1b23c28cf20a094df1724a2b50614c21a412d4ccd22c408",
+    "tokenBalanceRoot": "0xd39e4114323d0bcdc756dcb1b8de262f3d6bd846e02ae71c522f19f889664bb2",
+    "tokenMintReceiptRoot": "0x677627b65d8fe010ea621017dede8381a24115d11ac23db347df400cba129530",
+    "dexPoolRoot": "0x460bce145817ea878f6cd7d0a7cdd354561fab54a987feef302d278e7c922424",
+    "lpPositionRoot": "0xc46449afb2332208d26ec0819815dacd6b23edb4dafa3c459fd50390e0bd7c7e",
+    "liquidityReceiptRoot": "0xf54c1dae4aad11a835c9344bd048af5a2e443d0593233001abf85025ebf5cfc0",
+    "swapReceiptRoot": "0xe05b98f512292da925fd0bf20b862f27a4562232d12fecb8e085ffbabddd16fd",
+    "bridgeAssetMappingRoot": "0xb260d1122fa42dcb292f6fe5e56a4e030e5e615a4a9312daf8ffc910dcecdab3",
+    "bridgeAccountMappingRoot": "0xc55bb4ed64f4c7c3c59a753dec55f4c73438b89f87a54c870459c306130e7ecc",
+    "bridgeCreditRoot": "0xd6b4ca2049afff2b25283dd79cf52c6f9b1f7d98462d2aaca3278dcd3dfb5b7e",
+    "bridgeCreditReceiptRoot": "0x4cfba14b266bc913c27220a3404a19918377b626b9f136a497082ac35e9e5da4",
+    "bridgeReplayIndexRoot": "0xc6229f17f7833d669560641c27540e99a0717d3d46acc2618f174940960430a0",
+    "bridgeEventReceiptIndexRoot": "0x44d361136e1cd4050231cda8ea66079808366cdf5fa9263e954d03401786c67a",
+    "modelPassportRoot": "0xb77afe1eb29ea6a75692d8139d6885103c0fa4a8ed9057387195f688f143ca1d",
+    "memoryCellRoot": "0xe229374c3cb1db0204bf14c286e027fc621c759087ca60e3f722d6091b477415",
+    "challengeRoot": "0x0074c2d1f2a2758629b782810b0ab688fc99231b1c08b40d93124a299c91d19e",
+    "finalityReceiptRoot": "0x16d842cb146334f981d5e77b85ebd0f9c644449fabead3c56753b54cdfad3697",
+    "artifactCommitmentRoot": "0xefd221299a2ae93032e6cbf0e470e4653e5632875c4c1c2fcddcf520f220a0bb",
+    "artifactAvailabilityProofRoot": "0x065b1e1c4f8a2f618a74f50d3f42a19c485d3991947028e41ab400a49821d399",
+    "verifierModuleRoot": "0x0ad280f68622da721712d716d967149bf2efee225507a9bd5b9a7ad9bf48a24d",
+    "workReceiptRoot": "0x3d2b1f869ac3c4094e9624ea65c98914267e73a8b9279faa3344a0f652ab1fbd",
+    "verifierReportRoot": "0x52c0b486cbe5a2b20f9b02c8b508178033a6f9e664eb0f104e9ab078523e2256",
+    "importedObservationRoot": "0x99cb1b939d5a09f800f72e4c5a2b92988571126e1f6f93549f4893b3f7de7880",
+    "importedVerifierReportRoot": "0x6070b1015f000dd509c7b276d2ad68d8a9d188ef1a961c2f573346eb75ea5ad7",
+    "baseAnchorRoot": "0xe728a90cd84ff3d0ba83433f7dcd2e24c76c379a64ebf5b03a8997a00dc1a5cc"
+  }
+}
+test cli_pilot_bridge_handoff_receipts_survive_restart_and_export_import ... ok
+
+test result: ok. 36 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+== Run control-plane full smoke client ==
+
+> control-plane:smoke
+> npm run smoke --prefix services/control-plane
+
+
+> smoke
+> node src/smoke.ts
+
+{
+  "schema": "flowmemory.control_plane.smoke.v0",
+  "ok": true,
+  "methodCount": 70,
+  "responseSchemas": [
+    "flowmemory.control_plane.health.v0",
+    "flowmemory.control_plane.node_status.v0",
+    "flowmemory.control_plane.peer_list.v0",
+    "flowmemory.control_plane.chain_status.v0",
+    "flowmemory.control_plane.real_value_pilot_status.v0",
+    "flowmemory.control_plane.real_value_pilot_deposit_observation_list.v0",
+    "flowmemory.control_plane.real_value_pilot_credit_list.v0",
+    "flowmemory.control_plane.real_value_pilot_withdrawal_intent_list.v0",
+    "flowmemory.control_plane.real_value_pilot_release_evidence_list.v0",
+    "flowmemory.control_plane.real_value_pilot_cap_status.v0",
+    "flowmemory.control_plane.real_value_pilot_pause_status.v0",
+    "flowmemory.control_plane.real_value_pilot_retry_status.v0",
+    "flowmemory.control_plane.real_value_pilot_emergency_status.v0",
+    "flowmemory.control_plane.bridge_live_readiness.v0",
+    "flowmemory.control_plane.bridge_lifecycle_record_list.v0",
+    "flowmemory.control_plane.devnet_state.v0",
+    "flowmemory.control_plane.block_list.v0",
+    "flowmemory.control_plane.block_detail.v0",
+    "flowmemory.control_plane.transaction_list.v0",
+    "flowmemory.control_plane.transaction_detail.v0",
+    "flowmemory.control_plane.transaction_submit_result.v0",
+    "flowmemory.control_plane.mempool_list.v0",
+    "flowmemory.control_plane.account_list.v0",
+    "flowmemory.control_plane.account_detail.v0",
+    "flowmemory.control_plane.balance.v0",
+    "flowmemory.control_plane.token_list.v0",
+    "flowmemory.control_plane.token_detail.v0",
+    "flowmemory.control_plane.token_balance_list.v0",
+    "flowmemory.control_plane.token_balance_detail.v0",
+    "flowmemory.control_plane.pool_list.v0",
+    "flowmemory.control_plane.lp_position_list.v0",
+    "flowmemory.control_plane.swap_list.v0",
+    "flowmemory.control_plane.product_flow_status.v0",
+    "flowmemory.control_plane.faucet_event_list.v0",
+    "flowmemory.control_plane.wallet_public_metadata_list.v0",
+    "flowmemory.control_plane.wallet_public_metadata_detail.v0",
+    "flowmemory.control_plane.wallet_balance_list.v0",
+    "flowmemory.control_plane.wallet_transfer_history.v0",
+    "flowmemory.control_plane.rootfield_list.v0",
+    "flowmemory.control_plane.rootfield.v0",
+    "flowmemory.control_plane.agent_list.v0",
+    "flowmemory.control_plane.agent.v0",
+    "flowmemory.control_plane.model_list.v0",
+    "flowmemory.control_plane.model_detail.v0",
+    "flowmemory.control_plane.work_receipt_list.v0",
+    "flowmemory.control_plane.work_receipt.v0",
+    "flowmemory.control_plane.artifact_availability_list.v0",
+    "flowmemory.control_plane.artifact_availability_detail.v0",
+    "flowmemory.control_plane.verifier_module_list.v0",
+    "flowmemory.control_plane.verifier_module_detail.v0",
+    "flowmemory.control_plane.verifier_report_list.v0",
+    "flowmemory.control_plane.verifier_report.v0",
+    "flowmemory.control_plane.receipt_list.v0",
+    "flowmemory.control_plane.receipt.v0",
+    "flowmemory.control_plane.memory_cell_list.v0",
+    "flowmemory.control_plane.memory_cell.v0",
+    "flowmemory.control_plane.challenge_list.v0",
+    "flowmemory.control_plane.challenge.v0",
+    "flowmemory.control_plane.finality_list.v0",
+    "flowmemory.control_plane.finality.v0",
+    "flowmemory.control_plane.bridge_observation_list.v0",
+    "flowmemory.control_plane.bridge_observation.v0",
+    "flowmemory.control_plane.bridge_deposit_list.v0",
+    "flowmemory.control_plane.bridge_deposit_detail.v0",
+    "flowmemory.control_plane.bridge_credit_list.v0",
+    "flowmemory.control_plane.bridge_credit_detail.v0",
+    "flowmemory.control_plane.withdrawal_list.v0",
+    "flowmemory.control_plane.withdrawal_detail.v0",
+    "flowmemory.control_plane.provenance.v0",
+    "flowmemory.control_plane.raw_json.v0"
+  ],
+  "queried": {
+    "rootfieldId": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "receiptId": "0x48066ab6febdedb523cfcae2f313752db7e80467641d80914ebfe2e079d8c49d",
+    "reportId": "0x03af9720a87f7d72ce2ce95c1d04d50134649da51ace802d88818ad67fb2ebb3",
+    "artifactUri": "ipfs://bafy-flowmemory-example",
+    "blockNumber": "1",
+    "txId": "0x2cffda58c783dc026978b06a681587b19d9536ae4e158a69be855da1200f3189",
+    "accountId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
+    "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
+    "tokenId": "local-test-unit"
+  },
+  "localOnly": true
+}
+
+== Run deterministic demo A ==
+{
+  "schema": "flowmemory.local_devnet.demo_summary.v0",
+  "statePath": "E:\\FlowMemory\\flowmemory-prod-hq\\devnet\\local\\smoke\\run-a\\state.json",
+  "firstBlockHash": "0xd890758bdeaa4ab7a658d7813b2b9bdd0850824aaef830b9f2f4ff455aaf3811",
+  "secondBlockHash": "0x64e3d605fb1bba40b7de6a6a9813f77619282c07b9a33c7b41df1f6e3d71958b",
+  "stateRoot": "0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c",
+  "agentId": "agent:demo:alpha",
+  "agentRegistered": true,
+  "localBalanceAccountId": "local-balance:demo:agent-alpha",
+  "localBalanceUnits": 1000,
+  "faucetRecordId": "faucet:demo:001",
+  "faucetRecordCreated": true,
+  "workReceiptId": "receipt:demo:001",
+  "workReceiptSubmitted": true,
+  "verifierReportId": "report:demo:001",
+  "verifierReportSubmitted": true,
+  "memoryCellId": "memory:demo:agent-alpha:core",
+  "memoryCellUpdated": true,
+  "challengeId": "challenge:demo:001",
+  "challengeResolved": true,
+  "finalityReceiptId": "finality:demo:001",
+  "receiptFinalized": true,
+  "outDir": "E:\\FlowMemory\\flowmemory-prod-hq\\devnet\\local\\smoke\\run-a\\export",
+  "handoffFiles": [
+    "dashboard-state.json",
+    "indexer-handoff.json",
+    "verifier-handoff.json",
+    "control-plane-handoff.json",
+    "genesis-config.json",
+    "operator-key-references.json",
+    "state.json"
+  ]
+}
+
+== Run deterministic demo B ==
+{
+  "schema": "flowmemory.local_devnet.demo_summary.v0",
+  "statePath": "E:\\FlowMemory\\flowmemory-prod-hq\\devnet\\local\\smoke\\run-b\\state.json",
+  "firstBlockHash": "0xd890758bdeaa4ab7a658d7813b2b9bdd0850824aaef830b9f2f4ff455aaf3811",
+  "secondBlockHash": "0x64e3d605fb1bba40b7de6a6a9813f77619282c07b9a33c7b41df1f6e3d71958b",
+  "stateRoot": "0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c",
+  "agentId": "agent:demo:alpha",
+  "agentRegistered": true,
+  "localBalanceAccountId": "local-balance:demo:agent-alpha",
+  "localBalanceUnits": 1000,
+  "faucetRecordId": "faucet:demo:001",
+  "faucetRecordCreated": true,
+  "workReceiptId": "receipt:demo:001",
+  "workReceiptSubmitted": true,
+  "verifierReportId": "report:demo:001",
+  "verifierReportSubmitted": true,
+  "memoryCellId": "memory:demo:agent-alpha:core",
+  "memoryCellUpdated": true,
+  "challengeId": "challenge:demo:001",
+  "challengeResolved": true,
+  "finalityReceiptId": "finality:demo:001",
+  "receiptFinalized": true,
+  "outDir": "E:\\FlowMemory\\flowmemory-prod-hq\\devnet\\local\\smoke\\run-b\\export",
+  "handoffFiles": [
+    "dashboard-state.json",
+    "indexer-handoff.json",
+    "verifier-handoff.json",
+    "control-plane-handoff.json",
+    "genesis-config.json",
+    "operator-key-references.json",
+    "state.json"
+  ]
+}
+
+== Build FlowChain workbench ==
+
+> @flowmemory/dashboard@0.0.0 build
+> npm run sync:fixtures && tsc -b && vite build
+
+
+> @flowmemory/dashboard@0.0.0 sync:fixtures
+> node scripts/sync-fixtures.mjs
+
+Synced dashboard fixture: E:\FlowMemory\flowmemory-prod-hq\apps\dashboard\public\data\flowmemory-dashboard-v0.json
+Synced Base canary dashboard fixture: E:\FlowMemory\flowmemory-prod-hq\apps\dashboard\public\data\flowmemory-dashboard-base-canary-v0.json
+Synced FlowChain local devnet state: E:\FlowMemory\flowmemory-prod-hq\apps\dashboard\public\data\flowchain-local-devnet-state.json
+Synced FlowChain local devnet dashboard state: E:\FlowMemory\flowmemory-prod-hq\apps\dashboard\public\data\flowchain-local-devnet-dashboard-state.json
+Synced FlowChain bridge test deposit: E:\FlowMemory\flowmemory-prod-hq\apps\dashboard\public\data\flowchain-bridge-test-deposit.json
+[36mvite v8.0.12 [32mbuilding client environment for production...[36m[39m
+[2Ktransforming...✓ 1591 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.55 kB │ gzip:  0.34 kB
+dist/assets/index-CAQNAAti.css   20.23 kB │ gzip:  4.71 kB
+dist/assets/index-GR9YuIn4.js   293.83 kB │ gzip: 83.64 kB
+
+[32m✓ built in 259ms[39m
+Workbench build complete.
+
+== Validate FlowRouter simulator fixture ==
+valid: hardware\fixtures\flowrouter_sample_seed42.json
+
+== Check unsafe launch claims ==
+Checked launch claims in README.md, docs, contracts.
+
+FlowChain private/local smoke passed for merged private/local surfaces.
+Deterministic state root: 0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c
+Smoke report: E:\FlowMemory\flowmemory-prod-hq\devnet\local\smoke\flowchain-smoke-report.json
+Production-gated non-goals remain recorded in docs/FLOWCHAIN_TESTNET_ACCEPTANCE.md.
+
+== Create encrypted local test wallet vault ==
+
+> @flowmemory/crypto@0.0.0 wallet:create
+> node src/wallet-cli.js create --vault E:\FlowMemory\flowmemory-prod-hq\devnet\local\full-smoke\wallet-vault.local.json --label full-smoke-operator --role operator
+
+{
+  "schema": "flowchain.wallet.account_created.v0",
+  "address": "0x3018d60bc45618d554c5771802506a3459e60865b18dbc12e1cae21656a4bb18",
+  "publicKey": "0x03bb35632b8d1c724090a0de5748019c1db1962753f42fce60d86392d6512b65b8"
+}
+
+== Sign local transaction envelope ==
+
+> @flowmemory/crypto@0.0.0 wallet:sign
+> node src/wallet-cli.js sign --vault E:\FlowMemory\flowmemory-prod-hq\devnet\local\full-smoke\wallet-vault.local.json --document E:\FlowMemory\flowmemory-prod-hq\devnet\local\full-smoke\wallet-document.json --chain-id 31337 --nonce 1 --out E:\FlowMemory\flowmemory-prod-hq\devnet\local\full-smoke\wallet-envelope.json
+
+{
+  "schema": "flowchain.wallet.sign_result.v0",
+  "txId": "0x17c807cb28fb6428ed686487714152fe78c0a41fd8af968fd0c67333fb009979",
+  "chainId": "31337",
+  "payloadType": "flowchain.agent_account.v0",
+  "signerAddress": "0x3018d60bc45618d554c5771802506a3459e60865b18dbc12e1cae21656a4bb18",
+  "nonce": "1",
+  "envelopePath": "E:\\FlowMemory\\flowmemory-prod-hq\\devnet\\local\\full-smoke\\wallet-envelope.json",
+  "verification": {
+    "schema": "flowchain.wallet_envelope_verification.v0",
+    "valid": true,
+    "signatureValid": true,
+    "chainIdMatch": true,
+    "signerDerivedAddress": "0x3018d60bc45618d554c5771802506a3459e60865b18dbc12e1cae21656a4bb18",
+    "payloadHash": "0x704d52815b622028de031b7dd1febbf3a327c046f91ae5fffadf13418c605c63",
+    "transactionId": "0x17c807cb28fb6428ed686487714152fe78c0a41fd8af968fd0c67333fb009979",
+    "replayKey": "31337:local-chain:0x3018d60bc45618d554c5771802506a3459e60865b18dbc12e1cae21656a4bb18:operator:1",
+    "rejectionReason": null,
+    "errors": []
+  }
+}
+
+== Verify local transaction envelope ==
+
+> @flowmemory/crypto@0.0.0 wallet:verify
+> node src/wallet-cli.js verify --document E:\FlowMemory\flowmemory-prod-hq\devnet\local\full-smoke\wallet-document.json --envelope E:\FlowMemory\flowmemory-prod-hq\devnet\local\full-smoke\wallet-envelope.json --chain-id 31337
+
+{
+  "schema": "flowchain.wallet_envelope_verification.v0",
+  "valid": true,
+  "signatureValid": true,
+  "chainIdMatch": true,
+  "signerDerivedAddress": "0x3018d60bc45618d554c5771802506a3459e60865b18dbc12e1cae21656a4bb18",
+  "payloadHash": "0x704d52815b622028de031b7dd1febbf3a327c046f91ae5fffadf13418c605c63",
+  "transactionId": "0x17c807cb28fb6428ed686487714152fe78c0a41fd8af968fd0c67333fb009979",
+  "replayKey": "31337:local-chain:0x3018d60bc45618d554c5771802506a3459e60865b18dbc12e1cae21656a4bb18:operator:1",
+  "rejectionReason": null,
+  "errors": []
+}
+
+== Run bridge local-credit handoff smoke ==
+
+> bridge:local-credit:smoke
+> npm run local-credit:smoke --prefix services/bridge-relayer
+
+
+> local-credit:smoke
+> node src/observe-base-lockbox.ts --mode mock --fixture ../../fixtures/bridge/base-sepolia-mock-deposit.json --out out/local-credit-observation.json --credit-out out/local-credit.json --handoff-out ../../fixtures/bridge/local-runtime-bridge-handoff.json --withdrawal-out out/local-withdrawal-intent.json --apply-credit --withdrawal-intent
+
+Bridge mode: mock fixture; no chain RPC or private key is used.
+Wrote E:\FlowMemory\flowmemory-prod-hq\services\bridge-relayer\out\local-credit-observation.json
+Wrote E:\FlowMemory\flowmemory-prod-hq\services\bridge-relayer\out\local-credit.json
+Wrote E:\FlowMemory\flowmemory-prod-hq\fixtures\bridge\local-runtime-bridge-handoff.json
+Wrote E:\FlowMemory\flowmemory-prod-hq\services\bridge-relayer\out\local-withdrawal-intent.json
+Bridge run complete: observed=1, credits=1, applications=1, withdrawals=1, evidence=0
+Next operator command: npm run flowchain:bridge:local-credit:smoke
+Next operator command: npm run flowchain:product-e2e
+
+== Run FlowRouter operator-signal smoke ==
+
+> flowchain:hardware:smoke
+> powershell -NoProfile -ExecutionPolicy Bypass -File hardware/simulator/flowrouter-smoke.ps1
+
+smoke passed: raw packets, operator signals, control-plane handoff, fixture drift check, and 8 negative cases
+
+== Check working tree patch whitespace ==
+
+FlowChain full private/local smoke passed.
+Deterministic state root: 0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c
+Full smoke report: E:\FlowMemory\flowmemory-prod-hq\devnet\local\full-smoke\flowchain-full-smoke-report.json
+
+== Run flowchain:real-value-pilot:contracts (contracts) ==
+
+> flowchain:real-value-pilot:contracts
+> powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-real-value-pilot-contracts-e2e.ps1
+
+
+== Bridge lockbox focused tests ==
+No files changed, compilation skipped
+
+Ran 18 tests for tests/bridge/BaseBridgeLockbox.t.sol:BaseBridgeLockboxTest
+[PASS] testConstructorRequiresExplicitOwnerAndReleaseAuthority() (gas: 115820)
+[PASS] testEmergencyStopBlocksDepositsAndReleasesUntilOwnerResumes() (gas: 383806)
+[PASS] testLockERC20EmitsStableDeterministicDepositEventAndRecord() (gas: 314498)
+[PASS] testLockNativeWorksWhenExplicitlyAllowlisted() (gas: 253223)
+[PASS] testNonOwnerCannotConfigurePauseOrSetReleaseAuthority() (gas: 41448)
+[PASS] testOwnerCanConfigureAllowlistedTokenAndReleaseAuthority() (gas: 31875)
+[PASS] testPauseBlocksDepositsButNotAuthorizedRelease() (gas: 380927)
+[PASS] testRejectsPerDepositAndTotalCapExceeded() (gas: 983467)
+[PASS] testRejectsUnallowlistedDisabledAndZeroTokenDeposits() (gas: 421402)
+[PASS] testRejectsZeroAmountRecipientAndDirectNativeTransfers() (gas: 113722)
+[PASS] testReleaseBlocksTokenMismatchOverReleaseAndZeroEvidence() (gas: 370988)
+[PASS] testReleaseERC20CanReleaseInPartsWithDistinctEvidenceUntilExhausted() (gas: 389444)
+[PASS] testReleaseERC20EmitsStableSchemaAndBlocksReplay() (gas: 377780)
+[PASS] testReleaseERC20RequiresExplicitAuthorityAndKnownDeposit() (gas: 390973)
+[PASS] testReleaseNativeWorksThroughExplicitAuthorityWhilePaused() (gas: 320593)
+[PASS] testReleaseRejectsZeroRecipientAndZeroAmount() (gas: 342401)
+[PASS] testRepeatedDepositsUseNonceReplayProtection() (gas: 490286)
+[PASS] testTotalCapIsCumulativeAndCannotBeLoweredBelowHistoricalDeposits() (gas: 325940)
+Suite result: ok. 18 passed; 0 failed; 0 skipped; finished in 3.37ms (33.40ms CPU time)
+
+Ran 1 test suite in 8.71ms (3.37ms CPU time): 18 tests passed, 0 failed, 0 skipped (18 total tests)
+
+== Settlement spine focused tests ==
+No files changed, compilation skipped
+
+Ran 8 tests for tests/FlowChainSettlementSpine.t.sol:FlowChainSettlementSpineTest
+[PASS] testAuthorizedSubmitterCanCommitAndRevocationBlocksFutureCommits() (gas: 151186)
+[PASS] testCommitBridgeAndControlPlaneObjectVocabularyWithStableEventShape() (gas: 607684)
+[PASS] testCommitBridgeDepositObjectEmitsStableEventAndStoresRecord() (gas: 166921)
+[PASS] testCommitRejectsUnauthorizedZeroFieldsAndDuplicates() (gas: 171729)
+[PASS] testConstructorRequiresOwnerAndAuthorizesOwner() (gas: 69123)
+[PASS] testMissingObjectLookupReverts() (gas: 24518)
+[PASS] testNonOwnerCannotAuthorizeSubmitter() (gas: 16712)
+[PASS] testOwnerCanAuthorizeSubmitterAndTransferOwnership() (gas: 41602)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 1.59ms (6.28ms CPU time)
+
+Ran 1 test suite in 7.46ms (1.59ms CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)
+
+== Contract hardening gate ==
+
+> contracts:hardening
+> node infra/scripts/run-contract-hardening.mjs
+
+No files changed, compilation skipped
+No files changed, compilation skipped
+
+Ran 8 tests for tests/FlowChainSettlementSpine.t.sol:FlowChainSettlementSpineTest
+[PASS] testAuthorizedSubmitterCanCommitAndRevocationBlocksFutureCommits() (gas: 151186)
+[PASS] testCommitBridgeAndControlPlaneObjectVocabularyWithStableEventShape() (gas: 607684)
+[PASS] testCommitBridgeDepositObjectEmitsStableEventAndStoresRecord() (gas: 166921)
+[PASS] testCommitRejectsUnauthorizedZeroFieldsAndDuplicates() (gas: 171729)
+[PASS] testConstructorRequiresOwnerAndAuthorizesOwner() (gas: 69123)
+[PASS] testMissingObjectLookupReverts() (gas: 24518)
+[PASS] testNonOwnerCannotAuthorizeSubmitter() (gas: 16712)
+[PASS] testOwnerCanAuthorizeSubmitterAndTransferOwnership() (gas: 41602)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 6.20ms (12.21ms CPU time)
+
+Ran 23 tests for tests/RootfieldRegistry.t.sol:RootfieldRegistryTest
+[PASS] testCannotDeactivateInactiveRootfield() (gas: 119766)
+[PASS] testCannotDeactivateUnregisteredRootfield() (gas: 11530)
+[PASS] testCannotRegisterDuplicateRootfieldId() (gas: 108629)
+[PASS] testCannotRegisterZeroRootfieldId() (gas: 8955)
+[PASS] testCannotRegisterZeroSchemaHash() (gas: 8893)
+[PASS] testCannotSubmitUnregisteredRootfield() (gas: 11631)
+[PASS] testCannotSubmitZeroArtifactCommitment() (gas: 108457)
+[PASS] testCannotSubmitZeroRoot() (gas: 108529)
+[PASS] testCannotTransferInactiveRootfieldOwnership() (gas: 314948)
+[PASS] testCannotTransferRootfieldToZeroOwner() (gas: 108048)
+[PASS] testCannotTransferUnregisteredRootfieldOwnership() (gas: 206731)
+[PASS] testDeactivateRootfieldEmitsStatusPulseAndBlocksRoots() (gas: 130338)
+[PASS] testFlowPulseSignatureExcludesReceiptMetadata() (gas: 306)
+[PASS] testOnlyRootfieldOwnerCanDeactivateRootfield() (gas: 304505)
+[PASS] testOnlyRootfieldOwnerCanSubmitRoot() (gas: 304647)
+[PASS] testOnlyRootfieldOwnerCanTransferRootfieldOwnership() (gas: 499716)
+[PASS] testRegisterRootfieldEmitsFlowPulseSchema() (gas: 112889)
+[PASS] testRegisterRootfieldStoresCommitmentMetadata() (gas: 108252)
+[PASS] testRegistrationUriIsArbitraryAdvisoryLogData() (gas: 112689)
+[PASS] testSubmitRootEmitsFlowPulseSchemaWithoutReceiptMetadata() (gas: 141333)
+[PASS] testSubmitRootStoresLatestRootAndIncrementsCounts() (gas: 135158)
+[PASS] testTransferRootfieldOwnershipAllowsNewOwnerOnly() (gas: 350260)
+[PASS] testTransferRootfieldOwnershipEmitsStatusPulseAndOwnershipEvent() (gas: 322163)
+Suite result: ok. 23 passed; 0 failed; 0 skipped; finished in 5.70ms (24.10ms CPU time)
+
+Ran 18 tests for tests/bridge/BaseBridgeLockbox.t.sol:BaseBridgeLockboxTest
+[PASS] testConstructorRequiresExplicitOwnerAndReleaseAuthority() (gas: 115820)
+[PASS] testEmergencyStopBlocksDepositsAndReleasesUntilOwnerResumes() (gas: 383806)
+[PASS] testLockERC20EmitsStableDeterministicDepositEventAndRecord() (gas: 314498)
+[PASS] testLockNativeWorksWhenExplicitlyAllowlisted() (gas: 253223)
+[PASS] testNonOwnerCannotConfigurePauseOrSetReleaseAuthority() (gas: 41448)
+[PASS] testOwnerCanConfigureAllowlistedTokenAndReleaseAuthority() (gas: 31875)
+[PASS] testPauseBlocksDepositsButNotAuthorizedRelease() (gas: 380927)
+[PASS] testRejectsPerDepositAndTotalCapExceeded() (gas: 983467)
+[PASS] testRejectsUnallowlistedDisabledAndZeroTokenDeposits() (gas: 421402)
+[PASS] testRejectsZeroAmountRecipientAndDirectNativeTransfers() (gas: 113722)
+[PASS] testReleaseBlocksTokenMismatchOverReleaseAndZeroEvidence() (gas: 370988)
+[PASS] testReleaseERC20CanReleaseInPartsWithDistinctEvidenceUntilExhausted() (gas: 389444)
+[PASS] testReleaseERC20EmitsStableSchemaAndBlocksReplay() (gas: 377780)
+[PASS] testReleaseERC20RequiresExplicitAuthorityAndKnownDeposit() (gas: 390973)
+[PASS] testReleaseNativeWorksThroughExplicitAuthorityWhilePaused() (gas: 320593)
+[PASS] testReleaseRejectsZeroRecipientAndZeroAmount() (gas: 342401)
+[PASS] testRepeatedDepositsUseNonceReplayProtection() (gas: 490286)
+[PASS] testTotalCapIsCumulativeAndCannotBeLoweredBelowHistoricalDeposits() (gas: 325940)
+Suite result: ok. 18 passed; 0 failed; 0 skipped; finished in 5.75ms (19.43ms CPU time)
+
+Ran 32 tests for tests/LiveV0Package.t.sol:LiveV0PackageTest
+[PASS] testArtifactRegistryDeprecatesOnlyByOwner() (gas: 781675)
+[PASS] testArtifactRegistryRejectsDuplicateAndInvalidCommitments() (gas: 673777)
+[PASS] testArtifactRegistryStoresCommitmentAndEmitsAdvisoryUri() (gas: 670621)
+[PASS] testCursorRegistryRegistersAndAdvancesCommitments() (gas: 541574)
+[PASS] testCursorRegistryRejectsDuplicateAndNonOwnerAdvance() (gas: 647821)
+[PASS] testCursorRegistryRejectsZeroIdsAndCommitments() (gas: 521058)
+[PASS] testFlowMemoryHookAdapterEmitsObservationAndReturnsSelector() (gas: 682700)
+[PASS] testFlowMemoryHookAdapterExposesUniswapV4AfterSwapShape() (gas: 690269)
+[PASS] testFlowMemoryHookAdapterRejectsEmptyUniswapV4HookData() (gas: 643542)
+[PASS] testFlowMemoryHookAdapterRejectsInvalidUniswapV4HookInputs() (gas: 667008)
+[PASS] testFlowMemoryHookAdapterRejectsZeroCommitment() (gas: 642755)
+[PASS] testFlowMemoryHookAdapterRejectsZeroSwapInputs() (gas: 648272)
+[PASS] testFlowMemoryHookAdapterUsesDefaultUriForEmptyUniswapV4HookUri() (gas: 688250)
+[PASS] testReceiptVerifierRejectsDuplicateReport() (gas: 456174)
+[PASS] testReceiptVerifierRejectsInvalidZeroFields() (gas: 323603)
+[PASS] testReceiptVerifierStoresReportCommitmentWithoutReceiptMetadataClaims() (gas: 454442)
+[PASS] testVerifierReportRegistryAcceptsAllV0StatusesAsAdvisoryReports() (gas: 1300659)
+[PASS] testVerifierReportRegistryAuthorizesVerifierAndStoresReport() (gas: 638580)
+[PASS] testVerifierReportRegistryBlocksRevokedVerifier() (gas: 463941)
+[PASS] testVerifierReportRegistryRejectsNonOwnerVerifierAuthorization() (gas: 618963)
+[PASS] testVerifierReportRegistryRejectsUnauthorizedInvalidStatusAndDuplicates() (gas: 659430)
+[PASS] testWorkDebtSchedulerRejectsNonParticipantCompletion() (gas: 716019)
+[PASS] testWorkDebtSchedulerRejectsZeroFieldsDuplicateAndCompletedTransition() (gas: 627984)
+[PASS] testWorkDebtSchedulerSchedulesAndCompletesWithoutTokenMechanics() (gas: 611880)
+[PASS] testWorkReceiptRegistryAuthorizesWorkerAndStoresLaneReceipt() (gas: 720288)
+[PASS] testWorkReceiptRegistryBlocksRevokedWorker() (gas: 512773)
+[PASS] testWorkReceiptRegistryRejectsDuplicateReceipt() (gas: 714311)
+[PASS] testWorkReceiptRegistryRejectsNonOwnerWorkerAuthorization() (gas: 675718)
+[PASS] testWorkReceiptRegistryRejectsUnauthorizedInvalidLaneAndZeroRoots() (gas: 546563)
+[PASS] testWorkerAndVerifierRegistriesDeactivateAndRejectUnregisteredUpdates() (gas: 1462957)
+[PASS] testWorkerAndVerifierRegistriesRejectDuplicateAndZeroFields() (gas: 1245882)
+[PASS] testWorkerAndVerifierRegistriesStoreSelfRegisteredMetadata() (gas: 1239894)
+Suite result: ok. 32 passed; 0 failed; 0 skipped; finished in 5.80ms (47.19ms CPU time)
+
+Ran 7 tests for tests/FlowMemoryAfterSwapHook.t.sol:FlowMemoryAfterSwapHookTest
+[PASS] testAfterSwapHookEmitsFlowPulseAndReturnsZeroHookDelta() (gas: 666179)
+[PASS] testAfterSwapHookIsPoolManagerGated() (gas: 843285)
+[PASS] testAfterSwapHookRejectsInvalidHookDataWithoutCustodyOrFeeState() (gas: 639185)
+[PASS] testHookEventSchemasExcludeTxHashAndLogIndexAssumptions() (gas: 299)
+[PASS] testPlannerDefinesAfterSwapOnlyPermissionTarget() (gas: 438073)
+[PASS] testPlannerMinesBaseSepoliaCreate2AddressWithTargetFlags() (gas: 8955316)
+[PASS] testPlannerRejectsCustomAccountingAndExtraHookFlags() (gas: 438661)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 27.17ms (36.11ms CPU time)
+
+Ran 5 test suites in 29.40ms (50.61ms CPU time): 88 tests passed, 0 failed, 0 skipped (88 total tests)
+WARNING: slither is optional for this default gate; run with -RequireSlither or npm run contracts:hardening:slither in 
+audit environments
+
+== Local Anvil bridge-spine dry run ==
+No files changed, compilation skipped
+Script ran successfully.
+Gas used: 2073009
+
+== Return ==
+deployment: struct DeployBridgeSpine.Deployment Deployment({ lockbox: 0x8F7a45eBDe059392E46A46DCc14AB24681A961Ea, settlementSpine: 0x15452EC016c4dc8c549E7fe6Ff4b26324Ea8b7A4, chainId: 31337 [3.133e4], owner: 0x1111111111111111111111111111111111111111, releaseAuthority: 0x2222222222222222222222222222222222222222, settlementSubmitter: 0x3333333333333333333333333333333333333333, erc20Token: 0x0000000000000000000000000000000000000000, allowNative: true, allowErc20: false, base8453PilotAck: false })
+
+If you wish to simulate on-chain transactions pass a RPC URL.
+
+== Base 8453 dry run rejects missing pilot ack ==
+No files changed, compilation skipped
+Error: Failed to decode return value: 0xc5c72aa2
+Traces:
+  [2718951] → new DeployBridgeSpine@0x9f7cF1d1F558E57ef88a59ac3D47214eF25B6A06
+    └─ ← [Return] 13580 bytes of code
+
+  [8308] DeployBridgeSpine::run()
+    ├─ [0] VM::envAddress("FLOWCHAIN_BRIDGE_OWNER")
+    │   └─ ← [Return] <env var value>
+    ├─ [0] VM::envAddress("FLOWCHAIN_BRIDGE_RELEASE_AUTHORITY")
+    │   └─ ← [Return] <env var value>
+    ├─ [0] VM::envAddress("FLOWCHAIN_SETTLEMENT_SUBMITTER")
+    │   └─ ← [Return] <env var value>
+    ├─ [0] VM::envAddress("FLOWCHAIN_BRIDGE_ERC20_TOKEN")
+    │   └─ ← [Return] <env var value>
+    ├─ [0] VM::envBool("FLOWCHAIN_BRIDGE_ALLOW_NATIVE")
+    │   └─ ← [Return] <env var value>
+    ├─ [0] VM::envBool("FLOWCHAIN_BRIDGE_ALLOW_ERC20")
+    │   └─ ← [Return] <env var value>
+    ├─ [0] VM::envUint("FLOWCHAIN_BRIDGE_NATIVE_PER_DEPOSIT_CAP")
+    │   └─ ← [Return] <env var value>
+    ├─ [0] VM::envUint("FLOWCHAIN_BRIDGE_NATIVE_TOTAL_CAP")
+    │   └─ ← [Return] <env var value>
+    ├─ [0] VM::envUint("FLOWCHAIN_BRIDGE_ERC20_PER_DEPOSIT_CAP")
+    │   └─ ← [Return] <env var value>
+    ├─ [0] VM::envUint("FLOWCHAIN_BRIDGE_ERC20_TOTAL_CAP")
+    │   └─ ← [Return] <env var value>
+    ├─ [0] VM::envOr("FLOWCHAIN_BASE8453_PILOT_ACK", false)
+    │   └─ ← [Return] <env var value>
+    └─ ← [Revert] Base8453PilotAckRequired()
+
+
+Gas used: 29372
+Error: script failed: Base8453PilotAckRequired()
+
+== Base 8453 bridge-spine dry run with pilot ack ==
+No files changed, compilation skipped
+Script ran successfully.
+Gas used: 2073168
+
+== Return ==
+deployment: struct DeployBridgeSpine.Deployment Deployment({ lockbox: 0x8F7a45eBDe059392E46A46DCc14AB24681A961Ea, settlementSpine: 0x15452EC016c4dc8c549E7fe6Ff4b26324Ea8b7A4, chainId: 8453, owner: 0x1111111111111111111111111111111111111111, releaseAuthority: 0x2222222222222222222222222222222222222222, settlementSubmitter: 0x3333333333333333333333333333333333333333, erc20Token: 0x0000000000000000000000000000000000000000, allowNative: true, allowErc20: false, base8453PilotAck: true })
+
+If you wish to simulate on-chain transactions pass a RPC URL.
+
+FlowChain real-value pilot contracts E2E passed.
+Report: E:\FlowMemory\flowmemory-prod-hq\devnet\local\real-value-pilot\contracts-e2e\flowchain-real-value-pilot-contracts-e2e-report.json
+
+== Run flowchain:real-value-pilot:bridge (bridge-relayer) ==
+
+> flowchain:real-value-pilot:bridge
+> npm run pilot:e2e --prefix services/bridge-relayer
+
+
+> pilot:e2e
+> node src/bridge-pilot-e2e.ts --mode mock-pilot --fixture ../../fixtures/bridge/base8453-pilot-mock-deposit.json --duplicate-fixture ../../fixtures/bridge/base8453-pilot-duplicate-mock-deposits.json --out-dir out/real-value-pilot-e2e
+
+Step 1 complete: resolved bridge pilot E2E mode mock-pilot.
+Next operator command: npm run flowchain:real-value-pilot:bridge
+Step 2 complete: first local credit application and same-event replay were checked.
+Next operator command: Get-Content services/bridge-relayer/out/real-value-pilot-e2e/bridge-pilot-evidence.json
+Step 3 complete: duplicate deposit fixture replay was rejected with evidence.
+Next operator command: Get-Content services/bridge-relayer/out/real-value-pilot-e2e/bridge-replay-handoff.json
+Step 4 complete: wrong-chain and unapproved-contract negative checks passed.
+Next operator command: npm test --prefix services/bridge-relayer
+Step 5 complete: bridge pilot E2E artifacts were written.
+Next operator command: Get-Content services/bridge-relayer/out/real-value-pilot-e2e/bridge-real-value-pilot-e2e-report.json
+Bridge pilot E2E report: services/bridge-relayer/out/real-value-pilot-e2e/bridge-real-value-pilot-e2e-report.json
+
+== Run flowchain:real-value-pilot:runtime (chain-runtime) ==
+
+> flowchain:real-value-pilot:runtime
+> powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-real-value-pilot-runtime.ps1
+
+
+== Initialize runtime state ==
+
+== Queue live bridge handoff ==
+
+== Include live bridge credit in block ==
+
+== Inspect post-credit state ==
+
+== Queue duplicate live bridge handoff ==
+
+== Reject duplicate live bridge credit ==
+
+== Queue transfer from credited wallet ==
+
+== Apply transfer from credited wallet ==
+
+== Inspect post-transfer state ==
+
+== Restart runtime for one block ==
+
+== Inspect restarted runtime ==
+
+== Export handoff fixtures ==
+
+== Export runtime state ==
+
+== Import runtime state ==
+
+== Inspect imported runtime ==
+
+FlowChain runtime credit proof: E:\FlowMemory\flowmemory-prod-hq\devnet\local\production-l1-real-funds-readiness\runtime-credit-proof.json
+Classification: READY
+
+== Run flowchain:real-value-pilot:wallet (wallet-operator) ==
+
+> flowchain:real-value-pilot:wallet
+> npm run wallet:pilot-e2e --prefix crypto
+
+
+> @flowmemory/crypto@0.0.0 wallet:pilot-e2e
+> node src/pilot-wallet-e2e.js
+
+FLOWCHAIN_PILOT_WALLET_E2E_OK documents=5 envelopes=5 negativeCases=7
+
+== Run flowchain:real-value-pilot:control-dashboard (control-plane/dashboard) ==
+
+> flowchain:real-value-pilot:control-dashboard
+> npm run real-value-pilot:e2e --prefix services/control-plane
+
+
+> real-value-pilot:e2e
+> node src/real-value-pilot-e2e.ts
+
+{
+  "schema": "flowmemory.control_plane.real_value_pilot_e2e.v0",
+  "ok": true,
+  "pilotState": "degraded",
+  "nextOperatorCommand": "npm run bridge:observe -- --mode base-mainnet-canary --rpc-url <FLOWCHAIN_BASE8453_RPC_URL> --lockbox-address <FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS> --from-block <n> --to-block <n> --acknowledge-real-funds --max-usd 25",
+  "apiMethods": [
+    "pilot_status",
+    "pilot_deposit_observation_list",
+    "pilot_credit_list",
+    "pilot_withdrawal_intent_list",
+    "pilot_release_evidence_list",
+    "pilot_cap_status",
+    "pilot_pause_status",
+    "pilot_retry_status",
+    "pilot_emergency_status",
+    "bridge_live_readiness",
+    "pilot_lifecycle_record_list",
+    "wallet_balance_list",
+    "wallet_transfer_history"
+  ],
+  "dashboardEvidence": [
+    "apps/dashboard/src/data/workbench.ts realValuePilot section",
+    "apps/dashboard/src/data/workbench.ts /pilot/status probe",
+    "apps/dashboard/src/views/WorkbenchView.tsx Real-value pilot panel"
+  ],
+  "localOnly": true,
+  "productionReady": false
+}
+
+== Run flowchain:real-value-pilot:ops (ops-installer) ==
+
+> flowchain:real-value-pilot:ops
+> powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-real-value-pilot-ops-e2e.ps1
+
+
+FlowChain real-value pilot ops dry-run E2E passed.
+Report: E:\FlowMemory\flowmemory-prod-hq\devnet\local\real-value-pilot\ops-e2e\flowchain-real-value-pilot-ops-e2e-report.json
+
+FlowChain real-value pilot E2E passed.
+Report: E:\FlowMemory\flowmemory-prod-hq\devnet\local\real-value-pilot\flowchain-real-value-pilot-e2e-report.json

@@ -1,0 +1,20 @@
+
+> flowchain:bridge:mock:e2e
+> npm run bridge:local-credit:smoke
+
+
+> bridge:local-credit:smoke
+> npm run local-credit:smoke --prefix services/bridge-relayer
+
+
+> local-credit:smoke
+> node src/observe-base-lockbox.ts --mode mock --fixture ../../fixtures/bridge/base-sepolia-mock-deposit.json --out out/local-credit-observation.json --credit-out out/local-credit.json --handoff-out ../../fixtures/bridge/local-runtime-bridge-handoff.json --withdrawal-out out/local-withdrawal-intent.json --apply-credit --withdrawal-intent
+
+Bridge mode: mock fixture; no chain RPC or private key is used.
+Wrote E:\FlowMemory\flowmemory-prod-hq\services\bridge-relayer\out\local-credit-observation.json
+Wrote E:\FlowMemory\flowmemory-prod-hq\services\bridge-relayer\out\local-credit.json
+Wrote E:\FlowMemory\flowmemory-prod-hq\fixtures\bridge\local-runtime-bridge-handoff.json
+Wrote E:\FlowMemory\flowmemory-prod-hq\services\bridge-relayer\out\local-withdrawal-intent.json
+Bridge run complete: observed=1, credits=1, applications=1, withdrawals=1, evidence=0
+Next operator command: npm run flowchain:bridge:local-credit:smoke
+Next operator command: npm run flowchain:product-e2e

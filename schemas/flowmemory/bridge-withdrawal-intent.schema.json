@@ -12,6 +12,7 @@
     "sourceChainId",
     "destinationChainId",
     "token",
+    "asset",
     "amount",
     "flowchainAccount",
     "baseRecipient",
@@ -30,6 +31,17 @@
     "sourceChainId": { "type": "integer", "enum": [31337, 84532, 8453] },
     "destinationChainId": { "type": "integer", "enum": [31337, 84532, 8453] },
     "token": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceChainId", "sourceToken", "destinationAssetId", "decimals"],
+      "properties": {
+        "sourceChainId": { "type": "integer", "enum": [31337, 84532, 8453] },
+        "sourceToken": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+        "destinationAssetId": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+        "decimals": { "type": "integer", "minimum": 0, "maximum": 255 }
+      }
+    },
     "amount": { "type": "string", "pattern": "^[0-9]+$" },
     "flowchainAccount": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
     "baseRecipient": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },

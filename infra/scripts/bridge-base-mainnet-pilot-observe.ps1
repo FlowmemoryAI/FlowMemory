@@ -9,9 +9,13 @@ param(
 
     [string]$ToBlock = $env:FLOWCHAIN_BASE8453_TO_BLOCK,
 
-    [string]$Confirmations = $(if ($env:FLOWCHAIN_BASE8453_CONFIRMATIONS) { $env:FLOWCHAIN_BASE8453_CONFIRMATIONS } else { "2" }),
+    [string]$Confirmations = $(if ($env:FLOWCHAIN_PILOT_CONFIRMATIONS) { $env:FLOWCHAIN_PILOT_CONFIRMATIONS } elseif ($env:FLOWCHAIN_BASE8453_CONFIRMATION_DEPTH) { $env:FLOWCHAIN_BASE8453_CONFIRMATION_DEPTH } else { $env:FLOWCHAIN_BASE8453_CONFIRMATIONS }),
 
-    [string]$MaxUsd = $env:FLOWCHAIN_PILOT_MAX_USD,
+    [string]$SupportedToken = $env:FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,
+
+    [string]$AssetDecimals = $env:FLOWCHAIN_BASE8453_ASSET_DECIMALS,
+
+    [string]$MaxUsd = $(if ($env:FLOWCHAIN_PILOT_MAX_USD) { $env:FLOWCHAIN_PILOT_MAX_USD } else { "25" }),
 
     [string]$MaxDepositAmount = $env:FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,
 
@@ -35,7 +39,9 @@ param(
 
     [string]$WithdrawalOut = "services/bridge-relayer/out/base8453-pilot-withdrawal-intent.json",
 
-    [string]$ReleaseEvidenceOut = "services/bridge-relayer/out/base8453-pilot-release-evidence.json"
+    [string]$ReleaseEvidenceOut = "services/bridge-relayer/out/base8453-pilot-release-evidence.json",
+
+    [string]$ReportPath = "devnet/local/bridge-live-readiness/bridge-observe-base8453-report.json"
 )
 
 $ErrorActionPreference = "Stop"
@@ -43,6 +49,22 @@ Set-StrictMode -Version Latest
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location -LiteralPath $repoRoot
+$requiredAck = "I_UNDERSTAND_THIS_IS_CAPPED_BASE8453_OWNER_PILOT"
+
+function Write-JsonReport {
+    param(
+        [Parameter(Mandatory = $true)]
+        [object]$Value
+    )
+    $fullRoot = [System.IO.Path]::GetFullPath($repoRoot).TrimEnd('\')
+    $fullPath = [System.IO.Path]::GetFullPath((Join-Path $repoRoot $ReportPath))
+    if (-not $fullPath.StartsWith($fullRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "ReportPath must stay inside the repository."
+    }
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $fullPath) | Out-Null
+    $Value | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $fullPath -Encoding UTF8
+    Write-Host "Report: $fullPath"
+}
 
 function Write-NextCommand {
     param(
@@ -57,42 +79,71 @@ function Write-NextCommand {
     Write-Host "Next operator command: $Command" -ForegroundColor Cyan
 }
 
-$ackFromEnv = $env:FLOWCHAIN_PILOT_OPERATOR_ACK -eq "I_UNDERSTAND_THIS_IS_A_TINY_CAPPED_BASE8453_PILOT"
-$acknowledged = [bool]$OperatorAck -or $ackFromEnv
+function Protect-ObserverOutputLine {
+    param([Parameter(Mandatory = $true)][string]$Line)
+
+    foreach ($pair in @(
+            @{ value = $RpcUrl; label = "<FLOWCHAIN_BASE8453_RPC_URL>" },
+            @{ value = $LockboxAddress; label = "<FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS>" },
+            @{ value = $ApprovedLockboxAddress; label = "<FLOWCHAIN_BASE8453_APPROVED_LOCKBOX_ADDRESS>" },
+            @{ value = $FromBlock; label = "<FLOWCHAIN_BASE8453_FROM_BLOCK>" },
+            @{ value = $ToBlock; label = "<FLOWCHAIN_BASE8453_TO_BLOCK>" },
+            @{ value = $SupportedToken; label = "<FLOWCHAIN_BASE8453_SUPPORTED_TOKEN>" },
+            @{ value = $MaxDepositAmount; label = "<FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI>" },
+            @{ value = $TotalCapAmount; label = "<FLOWCHAIN_PILOT_TOTAL_CAP_WEI>" }
+        )) {
+        $value = [string]$pair.value
+        if (-not [string]::IsNullOrWhiteSpace($value) -and $value.Length -ge 6) {
+            $Line = $Line -replace [regex]::Escape($value), [string]$pair.label
+        }
+    }
+
+    if ($Line -match '^(Lockbox|Block range|Confirmation depth|Base pilot acknowledged|Supported tokens|Pilot max USD):') {
+        return $null
+    }
+    return $Line
+}
+
+$ackFromEnv = $env:FLOWCHAIN_PILOT_OPERATOR_ACK -eq $requiredAck
+$acknowledged = $ackFromEnv
 
 $missing = @()
-if ([string]::IsNullOrWhiteSpace($RpcUrl)) { $missing += "FLOWCHAIN_BASE8453_RPC_URL or -RpcUrl" }
-if ([string]::IsNullOrWhiteSpace($LockboxAddress)) { $missing += "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS or -LockboxAddress" }
-if ([string]::IsNullOrWhiteSpace($ApprovedLockboxAddress)) { $missing += "FLOWCHAIN_BASE8453_APPROVED_LOCKBOX_ADDRESS or -ApprovedLockboxAddress" }
-if ([string]::IsNullOrWhiteSpace($FromBlock)) { $missing += "FLOWCHAIN_BASE8453_FROM_BLOCK or -FromBlock" }
-if ([string]::IsNullOrWhiteSpace($ToBlock)) { $missing += "FLOWCHAIN_BASE8453_TO_BLOCK or -ToBlock" }
-if ([string]::IsNullOrWhiteSpace($Confirmations)) { $missing += "FLOWCHAIN_BASE8453_CONFIRMATIONS or -Confirmations" }
-if ([string]::IsNullOrWhiteSpace($MaxUsd)) { $missing += "FLOWCHAIN_PILOT_MAX_USD or -MaxUsd" }
-if ([string]::IsNullOrWhiteSpace($MaxDepositAmount)) { $missing += "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI or -MaxDepositAmount" }
-if ([string]::IsNullOrWhiteSpace($TotalCapAmount)) { $missing += "FLOWCHAIN_PILOT_TOTAL_CAP_WEI or -TotalCapAmount" }
-if (-not $acknowledged) { $missing += "FLOWCHAIN_PILOT_OPERATOR_ACK=I_UNDERSTAND_THIS_IS_A_TINY_CAPPED_BASE8453_PILOT or -OperatorAck" }
+if ([string]::IsNullOrWhiteSpace($RpcUrl)) { $missing += "FLOWCHAIN_BASE8453_RPC_URL" }
+if ([string]::IsNullOrWhiteSpace($LockboxAddress)) { $missing += "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS" }
+if ([string]::IsNullOrWhiteSpace($ApprovedLockboxAddress)) { $missing += "FLOWCHAIN_BASE8453_APPROVED_LOCKBOX_ADDRESS or FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS" }
+if ([string]::IsNullOrWhiteSpace($FromBlock)) { $missing += "FLOWCHAIN_BASE8453_FROM_BLOCK" }
+if ([string]::IsNullOrWhiteSpace($ToBlock)) { $missing += "FLOWCHAIN_BASE8453_TO_BLOCK" }
+if ([string]::IsNullOrWhiteSpace($Confirmations)) { $missing += "FLOWCHAIN_PILOT_CONFIRMATIONS" }
+if ([string]::IsNullOrWhiteSpace($SupportedToken)) { $missing += "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN" }
+if ([string]::IsNullOrWhiteSpace($AssetDecimals)) { $missing += "FLOWCHAIN_BASE8453_ASSET_DECIMALS" }
+if ([string]::IsNullOrWhiteSpace($MaxDepositAmount)) { $missing += "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI" }
+if ([string]::IsNullOrWhiteSpace($TotalCapAmount)) { $missing += "FLOWCHAIN_PILOT_TOTAL_CAP_WEI" }
+if (-not $acknowledged) { $missing += "FLOWCHAIN_PILOT_OPERATOR_ACK" }
 
 if ($missing.Count -gt 0) {
-    throw "Base 8453 pilot observation needs: $($missing -join ', '). No private key is required by this relayer."
+    Write-JsonReport -Value ([ordered]@{
+        schema = "flowchain.bridge_observe_base8453_report.v0"
+        status = "blocked"
+        command = "npm run flowchain:bridge:observe:base8453"
+        missingEnvNames = $missing
+        broadcasts = $false
+        noSecrets = $true
+    })
+    throw "Base 8453 pilot observation blocked by missing env names: $($missing -join ', ')."
 }
 
 Write-Host "Preparing Base 8453 bridge pilot observation." -ForegroundColor Yellow
-Write-Host "Chain: Base public network (8453 / 0x2105)"
-Write-Host "Lockbox: $LockboxAddress"
-Write-Host "Approved lockbox: $ApprovedLockboxAddress"
-Write-Host "Block range: $FromBlock-$ToBlock"
-Write-Host "Confirmation depth: $Confirmations"
-Write-Host "Max USD guardrail: $MaxUsd"
-Write-Host "Max deposit amount: $MaxDepositAmount"
-Write-Host "Total cap amount: $TotalCapAmount"
+Write-Host "Required env names present: FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_BASE8453_TO_BLOCK, FLOWCHAIN_PILOT_CONFIRMATIONS, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_OPERATOR_ACK"
+Write-Host "Optional guardrail env names: FLOWCHAIN_PILOT_MAX_USD"
 Write-Host "Broadcast: false; this relayer never sends release transactions."
 
 Write-NextCommand `
     -Step "Step 1" `
-    -Command "npm run bridge:observe -- --mode base-mainnet-pilot --rpc-url `$env:FLOWCHAIN_BASE8453_RPC_URL --lockbox-address `$env:FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS --approved-lockbox `$env:FLOWCHAIN_BASE8453_APPROVED_LOCKBOX_ADDRESS --from-block `$env:FLOWCHAIN_BASE8453_FROM_BLOCK --to-block `$env:FLOWCHAIN_BASE8453_TO_BLOCK --confirmations `$env:FLOWCHAIN_BASE8453_CONFIRMATIONS --acknowledge-pilot --acknowledge-real-funds --max-usd `$env:FLOWCHAIN_PILOT_MAX_USD --max-deposit-amount `$env:FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI --total-cap-amount `$env:FLOWCHAIN_PILOT_TOTAL_CAP_WEI"
+    -Command "npm run flowchain:bridge:observe:base8453"
 
+$observerScript = Join-Path $repoRoot "services/bridge-relayer/src/observe-base-lockbox.ts"
 $arguments = @(
-    "run", "bridge:observe", "--",
+    $observerScript,
     "--mode", "base-mainnet-pilot",
     "--rpc-url", $RpcUrl,
     "--lockbox-address", $LockboxAddress,
@@ -105,6 +156,8 @@ $arguments = @(
     "--max-usd", $MaxUsd,
     "--max-deposit-amount", $MaxDepositAmount,
     "--total-cap-amount", $TotalCapAmount,
+    "--supported-token", $SupportedToken,
+    "--asset-decimals", $AssetDecimals,
     "--runtime-state", $RuntimeState,
     "--out", $Out,
     "--credit-out", $CreditOut,
@@ -119,10 +172,28 @@ if ($WithdrawalIntent) {
     $arguments += @("--withdrawal-intent", "--withdrawal-out", $WithdrawalOut, "--release-evidence-out", $ReleaseEvidenceOut)
 }
 
-npm @arguments
-if ($LASTEXITCODE -ne 0) {
-    throw "Base 8453 pilot bridge observer failed with exit code $LASTEXITCODE."
+$observerOutput = (& node @arguments 2>&1) | ForEach-Object { "$_" }
+$observerExitCode = $LASTEXITCODE
+foreach ($line in $observerOutput) {
+    $safeLine = Protect-ObserverOutputLine -Line $line
+    if ($null -ne $safeLine -and -not [string]::IsNullOrWhiteSpace($safeLine)) {
+        Write-Host $safeLine
+    }
 }
+if ($observerExitCode -ne 0) {
+    throw "Base 8453 pilot bridge observer failed with exit code $observerExitCode."
+}
+
+Write-JsonReport -Value ([ordered]@{
+    schema = "flowchain.bridge_observe_base8453_report.v0"
+    status = "completed"
+    command = "npm run flowchain:bridge:observe:base8453"
+    outputEnvNames = @("Out", "CreditOut", "HandoffOut", "EvidenceOut", "WithdrawalOut", "ReleaseEvidenceOut")
+    broadcasts = $false
+    printsEnvValues = $false
+    envValuesPrinted = $false
+    noSecrets = $true
+})
 
 Write-NextCommand -Step "Step 2" -Command "Get-Content $EvidenceOut"
 
@@ -130,7 +201,7 @@ if ($WithdrawalIntent) {
     Write-NextCommand -Step "Step 3" -Command "Get-Content $ReleaseEvidenceOut"
 }
 else {
-    Write-NextCommand -Step "Step 3" -Command "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base-mainnet-pilot-observe.ps1 -OperatorAck -ApplyCredit -WithdrawalIntent"
+    Write-NextCommand -Step "Step 3" -Command "npm run flowchain:bridge:withdraw:intent"
 }
 
 Write-NextCommand -Step "Step 4" -Command "npm run flowchain:product-e2e"

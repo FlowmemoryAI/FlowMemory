@@ -59,9 +59,12 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
   const bridgeRecordCount =
     workbench.sections.bridgeDeposits.length + workbench.sections.bridgeCredits.length + workbench.sections.bridgeWithdrawals.length;
   const pilotRecords = workbench.sections.realValuePilot;
-  const pilotOverview = pilotRecords[0];
+  const pilotOverview = pilotRecords.find((record) => record.kind === "Pilot status") ?? pilotRecords[0];
+  const bridgeReadiness = pilotRecords.find((record) => record.kind === "Bridge live readiness");
   const pilotState = pilotOverview?.facts.find((fact) => fact.label === "state")?.value ?? "degraded";
   const pilotNextCommand = pilotOverview?.facts.find((fact) => fact.label === "next command")?.value ?? "npm run control-plane:serve";
+  const bridgeReadinessStatus = bridgeReadiness?.facts.find((fact) => fact.label === "fail-closed status")?.value ?? "BLOCKED";
+  const bridgeReadinessMissingEnv = bridgeReadiness?.facts.find((fact) => fact.label === "missing env names")?.value ?? "endpoint unavailable";
   const productSurfaces: Array<{
     key: WorkbenchSectionKey;
     label: string;
@@ -262,6 +265,43 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
               <div>
                 <dt>evidence rows</dt>
                 <dd>{pilotRecords.length}</dd>
+              </div>
+            </dl>
+          </div>
+        </article>
+        <article>
+          <div className="panel-heading">
+            <div>
+              <ShieldAlert size={18} aria-hidden="true" />
+              <h2>Bridge live readiness</h2>
+            </div>
+            <StatusBadge status={bridgeReadiness?.status ?? "pending"} compact />
+          </div>
+          <div className="pilot-status-body">
+            <div>
+              <span className="eyebrow">base 8453 fail-closed check</span>
+              <h3>{bridgeReadinessStatus}</h3>
+              <p>
+                {bridgeReadiness?.summary ??
+                  "Live readiness is blocked until the local control-plane exposes bridge readiness details."}
+              </p>
+            </div>
+            <dl className="workbench-fact-grid">
+              <div>
+                <dt>base chain</dt>
+                <dd>{displayValue(bridgeReadiness?.facts.find((fact) => fact.label === "base chain")?.value ?? "8453")}</dd>
+              </div>
+              <div>
+                <dt>lockbox configured</dt>
+                <dd>{displayValue(bridgeReadiness?.facts.find((fact) => fact.label === "lockbox configured")?.value ?? "false")}</dd>
+              </div>
+              <div>
+                <dt>missing env names</dt>
+                <dd>{displayValue(bridgeReadinessMissingEnv)}</dd>
+              </div>
+              <div>
+                <dt>env values printed</dt>
+                <dd>{displayValue(bridgeReadiness?.facts.find((fact) => fact.label === "env values printed")?.value ?? "false")}</dd>
               </div>
             </dl>
           </div>

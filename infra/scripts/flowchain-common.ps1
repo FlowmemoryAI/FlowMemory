@@ -78,6 +78,46 @@ function Invoke-FlowChainCommand {
     }
 }
 
+function Reset-FlowChainDirectory {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $Path
+    )
+
+    $fullPath = [System.IO.Path]::GetFullPath($Path)
+    if (Test-Path -LiteralPath $fullPath) {
+        $lastRemoveError = $null
+        for ($attempt = 1; $attempt -le 5; $attempt++) {
+            try {
+                Remove-Item -LiteralPath $fullPath -Recurse -Force -ErrorAction Stop
+                break
+            }
+            catch {
+                $lastRemoveError = $_
+                Start-Sleep -Milliseconds (200 * $attempt)
+            }
+        }
+
+        if (Test-Path -LiteralPath $fullPath) {
+            $parent = Split-Path -Parent $fullPath
+            $leaf = Split-Path -Leaf $fullPath
+            $stamp = (Get-Date).ToUniversalTime().ToString("yyyyMMddTHHmmssfffZ")
+            $stalePath = Join-Path $parent "$leaf.stale-$PID-$stamp"
+            try {
+                Move-Item -LiteralPath $fullPath -Destination $stalePath -ErrorAction Stop
+                Write-Host "Moved locked stale directory to: $stalePath"
+            }
+            catch {
+                $removeMessage = if ($null -ne $lastRemoveError) { $lastRemoveError.Exception.Message } else { "not attempted" }
+                throw "Unable to reset directory $fullPath. Last remove error: $removeMessage. Move error: $($_.Exception.Message)"
+            }
+        }
+    }
+
+    New-Item -ItemType Directory -Force -Path $fullPath | Out-Null
+    return $fullPath
+}
+
 function Join-FlowChainProcessArguments {
     param(
         [string[]] $ArgumentList = @()
@@ -132,7 +172,18 @@ function Write-FlowChainJson {
 
     $body = ($Value | ConvertTo-Json -Depth $Depth) + [Environment]::NewLine
     $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-    [System.IO.File]::WriteAllText($Path, $body, $utf8NoBom)
+    $lastWriteError = $null
+    for ($attempt = 1; $attempt -le 5; $attempt++) {
+        try {
+            [System.IO.File]::WriteAllText($Path, $body, $utf8NoBom)
+            return
+        }
+        catch {
+            $lastWriteError = $_
+            Start-Sleep -Milliseconds (100 * $attempt)
+        }
+    }
+    throw "Unable to write JSON file $Path. Last write error: $($lastWriteError.Exception.Message)"
 }
 
 function Assert-FlowChainNoSecretText {

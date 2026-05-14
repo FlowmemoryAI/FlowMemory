@@ -25,6 +25,27 @@ function writeJson(res: ServerResponse, statusCode: number, body: unknown): void
   res.end(`${JSON.stringify(body)}\n`);
 }
 
+function listParamsFromUrl(requestUrl: URL | null): Record<string, string | number> | undefined {
+  if (requestUrl === null) {
+    return undefined;
+  }
+
+  const params: Record<string, string | number> = {};
+  const limit = requestUrl.searchParams.get("limit");
+  if (limit !== null) {
+    params.limit = Number(limit);
+  }
+
+  for (const name of ["baseTxHash", "txHash", "creditId", "walletAddress", "wallet", "accountId", "recipientWallet", "status", "query"]) {
+    const value = requestUrl.searchParams.get(name);
+    if (value !== null && value.length > 0) {
+      params[name] = value;
+    }
+  }
+
+  return Object.keys(params).length > 0 ? params : undefined;
+}
+
 function parseArgs(args: string[]): ServerOptions {
   const options: ServerOptions = {
     host: "127.0.0.1",
@@ -58,8 +79,9 @@ function parseArgs(args: string[]): ServerOptions {
 }
 
 export function startControlPlaneServer(options: ServerOptions): ReturnType<typeof createServer> {
-  const state = loadControlPlaneState();
   const server = createServer((req, res) => {
+    const state = loadControlPlaneState();
+
     if (req.method === "OPTIONS") {
       res.writeHead(204, jsonHeaders);
       res.end();
@@ -84,6 +106,12 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
       return;
     }
 
+    if (req.method === "GET" && req.url === "/chain/status") {
+      const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "chain-status", method: "chain_status" }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
     if (req.method === "GET" && req.url === "/product-flow/status") {
       const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "product-flow-status", method: "product_flow_status" }, { state });
       writeJson(res, 200, jsonResult(response));
@@ -93,6 +121,7 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
     const requestUrl = req.url === undefined ? null : new URL(req.url, "http://127.0.0.1");
     const pilotRoutes: Record<string, { method: string; list: boolean }> = {
       "/pilot/status": { method: "pilot_status", list: false },
+      "/pilot/lifecycle": { method: "pilot_lifecycle_record_list", list: true },
       "/pilot/deposits": { method: "pilot_deposit_observation_list", list: true },
       "/pilot/credits": { method: "pilot_credit_list", list: true },
       "/pilot/withdrawal-intents": { method: "pilot_withdrawal_intent_list", list: true },
@@ -104,12 +133,67 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
     };
     const pilotRoute = requestUrl === null ? undefined : pilotRoutes[requestUrl.pathname];
     if (req.method === "GET" && pilotRoute !== undefined) {
-      const limit = requestUrl?.searchParams.get("limit");
       const response = dispatchJsonRpc({
         jsonrpc: "2.0",
         id: `pilot:${requestUrl?.pathname}`,
         method: pilotRoute.method,
-        params: pilotRoute.list && limit !== null ? { limit: Number(limit) } : undefined,
+        params: pilotRoute.list ? listParamsFromUrl(requestUrl) : undefined,
+      }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
+    if (req.method === "GET" && requestUrl?.pathname === "/bridge/live-readiness") {
+      const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "bridge-live-readiness", method: "bridge_live_readiness" }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
+    if (req.method === "GET" && requestUrl?.pathname === "/bridge/status") {
+      const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "bridge-status", method: "bridge_status" }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
+    if (req.method === "GET" && requestUrl?.pathname === "/bridge/credits") {
+      const response = dispatchJsonRpc({
+        jsonrpc: "2.0",
+        id: "bridge-credits",
+        method: "bridge_credit_list",
+        params: listParamsFromUrl(requestUrl),
+      }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
+    if (req.method === "GET" && requestUrl?.pathname === "/bridge/credit-status") {
+      const response = dispatchJsonRpc({
+        jsonrpc: "2.0",
+        id: "bridge-credit-status",
+        method: "bridge_credit_status",
+        params: listParamsFromUrl(requestUrl),
+      }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
+    if (req.method === "GET" && requestUrl?.pathname === "/wallets/balances") {
+      const response = dispatchJsonRpc({
+        jsonrpc: "2.0",
+        id: "wallet-balances",
+        method: "wallet_balance_list",
+        params: listParamsFromUrl(requestUrl),
+      }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
+    if (req.method === "GET" && requestUrl?.pathname === "/wallets/transfers") {
+      const response = dispatchJsonRpc({
+        jsonrpc: "2.0",
+        id: "wallet-transfers",
+        method: "wallet_transfer_history",
+        params: listParamsFromUrl(requestUrl),
       }, { state });
       writeJson(res, 200, jsonResult(response));
       return;

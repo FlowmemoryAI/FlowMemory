@@ -77,6 +77,10 @@ export interface ControlPlaneProbe {
   health?: unknown;
   state?: unknown;
   pilotStatus?: unknown;
+  bridgeLiveReadiness?: unknown;
+  pilotLifecycle?: unknown;
+  walletBalances?: unknown;
+  walletTransfers?: unknown;
 }
 
 export interface WorkbenchNodeStatus {
@@ -115,6 +119,10 @@ export interface WorkbenchSnapshot {
     devnetDashboardState: unknown | null;
     bridgeTestDeposit: unknown | null;
     controlPlanePilotStatus: unknown | null;
+    controlPlaneBridgeReadiness: unknown | null;
+    controlPlanePilotLifecycle: unknown | null;
+    controlPlaneWalletBalances: unknown | null;
+    controlPlaneWalletTransfers: unknown | null;
     controlPlaneHealth: unknown | null;
     controlPlaneState: unknown | null;
   };
@@ -246,8 +254,8 @@ export const WORKBENCH_SECTIONS: WorkbenchSectionDefinition[] = [
   {
     key: "realValuePilot",
     label: "Real-Value Pilot",
-    detail: "Capped owner-testing lifecycle for Base deposit observation, local credit, replay/retry status, withdrawal intent, release evidence, caps, pause, and emergency state.",
-    expectedEndpoint: "GET /pilot/status + POST /rpc pilot_status",
+    detail: "Capped owner-testing lifecycle for Base deposit observation, exact local credit, wallet transferability, withdrawal/release evidence, readiness blockers, caps, pause, and emergency state.",
+    expectedEndpoint: "GET /bridge/live-readiness + GET /pilot/lifecycle + GET /pilot/status",
     missingCommand: "npm run control-plane:serve",
     missingService: "FlowChain real-value pilot control-plane /pilot/status",
   },
@@ -494,16 +502,23 @@ function stringArray(value: unknown): string[] {
 
 function statusFrom(value: unknown, fallback: DashboardStatus = "observed"): DashboardStatus {
   const normalized = text(value, fallback).toLowerCase();
-  if (normalized === "applied" || normalized === "success" || normalized === "active" || normalized === "live") {
+  if (
+    normalized === "applied" ||
+    normalized === "success" ||
+    normalized === "active" ||
+    normalized === "live" ||
+    normalized === "ready_for_operator_live_pilot" ||
+    normalized === "ready"
+  ) {
     return "verified";
   }
   if (normalized === "finalized") {
     return "finalized";
   }
-  if (normalized === "failed" || normalized === "invalid" || normalized === "reverted") {
+  if (normalized === "failed" || normalized === "invalid" || normalized === "reverted" || normalized === "failure") {
     return "failed";
   }
-  if (normalized === "pending" || normalized === "local-placeholder" || normalized === "degraded") {
+  if (normalized === "pending" || normalized === "local-placeholder" || normalized === "degraded" || normalized === "blocked") {
     return "pending";
   }
   if (normalized === "error") {
@@ -698,17 +713,53 @@ async function fetchOptionalJson(path: string): Promise<{ value: unknown | null;
 async function probeControlPlane(): Promise<ControlPlaneProbe> {
   const url = getControlPlaneUrl();
   const checkedAt = new Date().toISOString();
-  const defaultEndpoints = ["GET /health", "GET /state", "GET /pilot/status"];
+  const defaultEndpoints = [
+    "GET /health",
+    "GET /state",
+    "GET /pilot/status",
+    "GET /bridge/live-readiness",
+    "GET /pilot/lifecycle",
+    "GET /wallets/balances",
+    "GET /wallets/transfers",
+  ];
 
   try {
     const health = await fetchJsonWithTimeout(`${url}/health`, CONTROL_PLANE_TIMEOUT_MS);
     let state: unknown | undefined;
     let pilotStatus: unknown | undefined;
+    let bridgeLiveReadiness: unknown | undefined;
+    let pilotLifecycle: unknown | undefined;
+    let walletBalances: unknown | undefined;
+    let walletTransfers: unknown | undefined;
 
     try {
       pilotStatus = await fetchJsonWithTimeout(`${url}/pilot/status`, CONTROL_PLANE_TIMEOUT_MS);
     } catch {
       pilotStatus = undefined;
+    }
+
+    try {
+      bridgeLiveReadiness = await fetchJsonWithTimeout(`${url}/bridge/live-readiness`, CONTROL_PLANE_TIMEOUT_MS);
+    } catch {
+      bridgeLiveReadiness = undefined;
+    }
+
+    try {
+      pilotLifecycle = await fetchJsonWithTimeout(`${url}/pilot/lifecycle`, CONTROL_PLANE_TIMEOUT_MS);
+    } catch {
+      pilotLifecycle = undefined;
+    }
+
+    try {
+      walletBalances = await fetchJsonWithTimeout(`${url}/wallets/balances`, CONTROL_PLANE_TIMEOUT_MS);
+    } catch {
+      walletBalances = undefined;
+    }
+
+    try {
+      walletTransfers = await fetchJsonWithTimeout(`${url}/wallets/transfers`, CONTROL_PLANE_TIMEOUT_MS);
+    } catch {
+      walletTransfers = undefined;
     }
 
     try {
@@ -721,6 +772,10 @@ async function probeControlPlane(): Promise<ControlPlaneProbe> {
         endpoints: uniqueEndpoints(defaultEndpoints, collectEndpointHints(health)),
         health,
         pilotStatus,
+        bridgeLiveReadiness,
+        pilotLifecycle,
+        walletBalances,
+        walletTransfers,
         error: `Health endpoint responded, but state endpoint was not loaded: ${
           error instanceof Error ? error.message : "unknown state error"
         }`,
@@ -735,6 +790,10 @@ async function probeControlPlane(): Promise<ControlPlaneProbe> {
       health,
       state,
       pilotStatus,
+      bridgeLiveReadiness,
+      pilotLifecycle,
+      walletBalances,
+      walletTransfers,
     };
   } catch (error) {
     return {
@@ -1106,8 +1165,232 @@ function commandFromStep(step: unknown): string {
   return isRecord(step) ? text(step.command, "npm run flowchain:real-value-pilot:e2e") : "npm run flowchain:real-value-pilot:e2e";
 }
 
+function readinessStatus(value: unknown): DashboardStatus {
+  const normalized = text(value, "BLOCKED").toUpperCase();
+  if (normalized === "READY_FOR_OPERATOR_LIVE_PILOT") {
+    return "verified";
+  }
+  if (normalized === "FAILED") {
+    return "failed";
+  }
+  return "pending";
+}
+
+function readinessPayload(controlPlane: ControlPlaneProbe, pilot: UnknownRecord | null): UnknownRecord | null {
+  if (isRecord(controlPlane.bridgeLiveReadiness)) {
+    return controlPlane.bridgeLiveReadiness;
+  }
+  if (isRecord(pilot?.bridgeLiveReadiness)) {
+    return pilot.bridgeLiveReadiness as UnknownRecord;
+  }
+  return null;
+}
+
+function bridgeReadinessRecord(controlPlane: ControlPlaneProbe, readiness: UnknownRecord | null): WorkbenchRecord {
+  if (!readiness) {
+    return makeLocalRecord(
+      "devnet",
+      controlPlane.url,
+      {
+        id: "bridge-live-readiness",
+        kind: "Bridge live readiness",
+        title: "Bridge live readiness BLOCKED",
+        summary: "The live readiness endpoint is unavailable; operator live pilot remains fail-closed until the control-plane returns readiness details.",
+        status: controlPlane.status === "available" ? "pending" : "offline",
+        facts: [
+          { label: "fail-closed status", value: "BLOCKED" },
+          { label: "base chain", value: "8453" },
+          { label: "missing env names", value: "endpoint unavailable" },
+          { label: "env values printed", value: "false" },
+          { label: "mock presented as live", value: "false" },
+          { label: "owner verified lockbox", value: "false" },
+        ],
+        raw: { endpoint: "/bridge/live-readiness", status: "unavailable" },
+      },
+      controlPlane.checkedAt,
+    );
+  }
+
+  const node = isRecord(readiness.node) ? readiness.node : {};
+  const lockbox = isRecord(readiness.lockbox) ? readiness.lockbox : {};
+  const confirmationDepth = isRecord(readiness.confirmationDepth) ? readiness.confirmationDepth : {};
+  const artifacts = isRecord(readiness.currentArtifacts) ? readiness.currentArtifacts : {};
+  const missingEnvNames = stringArray(readiness.missingEnvNames);
+  const failClosedStatus = text(readiness.failClosedStatus, "BLOCKED");
+
+  return makeLocalRecord(
+    "devnet",
+    controlPlane.url,
+    {
+      id: "bridge-live-readiness",
+      kind: "Bridge live readiness",
+      title: `Bridge live readiness ${failClosedStatus}`,
+      summary:
+        missingEnvNames.length > 0
+          ? `Fail-closed with missing env names: ${missingEnvNames.join(", ")}.`
+          : text(readiness.machineStatus, "Live readiness is available from the control-plane."),
+      status: readinessStatus(failClosedStatus),
+      facts: [
+        { label: "fail-closed status", value: failClosedStatus },
+        { label: "base chain", value: `${text(readiness.baseChainName, "Base")} ${text(readiness.baseChainId, "8453")}` },
+        { label: "node running", value: text(node.running, "false") },
+        { label: "lockbox configured", value: text(lockbox.configured, "false") },
+        { label: "confirmation configured", value: text(confirmationDepth.configured, "false") },
+        { label: "missing env names", value: missingEnvNames.join(", ") || "none" },
+        { label: "env values printed", value: text(readiness.envValuesPrinted, "false") },
+        { label: "mock presented as live", value: text(artifacts.mockPresentedAsLive, "false") },
+      ],
+      raw: readiness,
+    },
+    controlPlane.checkedAt,
+  );
+}
+
+function bridgeReadinessIssueRecords(controlPlane: ControlPlaneProbe, readiness: UnknownRecord | null): WorkbenchRecord[] {
+  if (!readiness) {
+    return [];
+  }
+
+  return collectionFrom(readiness, ["issues"]).map((issue, index) =>
+    makeLocalRecord(
+      "devnet",
+      controlPlane.url,
+      {
+        id: `bridge-readiness-issue:${text(issue.reasonCode, String(index + 1))}`,
+        kind: "Operational empty/error state",
+        title: text(issue.title, "Bridge readiness issue"),
+        summary: text(issue.summary, "A live-pilot readiness issue is visible in the control-plane response."),
+        status: statusFrom(issue.status, "pending"),
+        facts: [
+          { label: "reason code", value: text(issue.reasonCode) },
+          { label: "status", value: text(issue.status, "blocked") },
+          { label: "env names", value: stringArray(issue.envNames).join(", ") || "none" },
+          { label: "machine readable", value: "true" },
+        ],
+        raw: issue,
+      },
+      controlPlane.checkedAt,
+    ),
+  );
+}
+
+function lifecycleRows(controlPlane: ControlPlaneProbe, pilot: UnknownRecord | null): UnknownRecord[] {
+  if (isRecord(controlPlane.pilotLifecycle)) {
+    return collectionFrom(controlPlane.pilotLifecycle, ["lifecycleRecords"]);
+  }
+  if (pilot) {
+    return collectionFrom(pilot, ["lifecycleRecords"]);
+  }
+  return [];
+}
+
+function bridgeLifecycleRecord(controlPlane: ControlPlaneProbe, row: UnknownRecord, index: number): WorkbenchRecord {
+  const equality = isRecord(row.equality) ? row.equality : {};
+  const equalities = isRecord(equality.equalities) ? equality.equalities : {};
+  const depositObservation = isRecord(row.depositObservation) ? row.depositObservation : {};
+  const withdrawalIntent = isRecord(row.withdrawalIntent) ? row.withdrawalIntent : {};
+  const releaseEvidence = isRecord(row.releaseEvidence) ? row.releaseEvidence : {};
+  const liveArtifact = row.liveArtifact === true;
+  const artifactClass = text(row.artifactClass, liveArtifact ? "live-base8453" : "local-or-mock");
+  const baseTxHash = text(row.baseTxHash ?? row.txHash, `lifecycle:${index + 1}`);
+  const creditId = text(row.creditId, "credit pending");
+  const amount = text(row.amountSmallestUnits ?? equality.depositAmount, "0");
+  const replayKey = text(row.replayKey ?? depositObservation.replayKey);
+  const withdrawalIntentId = text(row.withdrawalIntentId ?? withdrawalIntent.withdrawalIntentId);
+  const releaseEvidenceId = text(row.releaseEvidenceId ?? releaseEvidence.releaseEvidenceId);
+
+  return makeLocalRecord(
+    "devnet",
+    controlPlane.url,
+    {
+      id: text(row.lifecycleRecordId, `${baseTxHash}:${text(row.logIndex, String(index))}`),
+      kind: "Bridge exact lifecycle",
+      title: `${baseTxHash} / ${creditId}`,
+      summary: `${artifactClass} record with deposit, observed, credited, wallet delta, transferable, withdrawal, and release amount equality ${text(equality.allEqual, "false")}.`,
+      status: statusFrom(row.status, "pending"),
+      facts: [
+        { label: "base tx hash", value: baseTxHash },
+        { label: "log index", value: text(row.logIndex) },
+        { label: "deposit id", value: text(row.depositId ?? depositObservation.depositId) },
+        { label: "replay key", value: replayKey },
+        { label: "replay status", value: text(row.replayStatus ?? depositObservation.replayStatus) },
+        { label: "credit id", value: creditId },
+        { label: "recipient wallet", value: text(row.recipientWallet) },
+        { label: "withdrawal intent", value: withdrawalIntentId },
+        { label: "withdrawal status", value: text(row.withdrawalStatus ?? withdrawalIntent.status) },
+        { label: "release evidence", value: releaseEvidenceId },
+        { label: "release status", value: text(row.releaseStatus ?? releaseEvidence.status) },
+        { label: "asset", value: text(row.asset) },
+        { label: "amount smallest units", value: amount },
+        { label: "deposit amount", value: text(equality.depositAmount) },
+        { label: "credited amount", value: text(equality.creditedAmount) },
+        { label: "withdrawal amount", value: text(equality.withdrawalAmount) },
+        { label: "release amount", value: text(equality.releaseAmount) },
+        { label: "all values equal", value: text(equality.allEqual, "false") },
+        { label: "wallet delta equal", value: text(equalities.walletDelta, "false") },
+        { label: "evidence path", value: text(row.evidenceFilePath) },
+      ],
+      raw: row,
+    },
+    controlPlane.checkedAt,
+  );
+}
+
+function buildControlPlaneWalletBalanceRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
+  return collectionFrom(controlPlane.walletBalances, ["balances"]).map((balance, index) =>
+    makeLocalRecord(
+      "devnet",
+      controlPlane.url,
+      {
+        id: text(balance.balanceId, `wallet-balance:${index + 1}`),
+        kind: "Wallet balance",
+        title: text(balance.walletAddress, `wallet:${index + 1}`),
+        summary: `Wallet balance ${text(balance.status, "observed")} for ${text(balance.asset, "asset")} is ${text(balance.amount, "0")} smallest units.`,
+        status: statusFrom(balance.status, "observed"),
+        facts: [
+          { label: "wallet", value: text(balance.walletAddress) },
+          { label: "asset", value: text(balance.asset) },
+          { label: "amount", value: text(balance.amount, "0") },
+          { label: "previous amount", value: text(balance.previousAmount) },
+          { label: "credit id", value: text(balance.creditId) },
+          { label: "transfer id", value: text(balance.transferId) },
+        ],
+        raw: balance,
+      },
+      controlPlane.checkedAt,
+    ),
+  );
+}
+
+function buildControlPlaneWalletTransferRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
+  return collectionFrom(controlPlane.walletTransfers, ["transfers"]).map((transfer, index) =>
+    makeLocalRecord(
+      "devnet",
+      controlPlane.url,
+      {
+        id: text(transfer.transferId ?? transfer.txId, `wallet-transfer:${index + 1}`),
+        kind: "Wallet transfer history",
+        title: text(transfer.txId ?? transfer.transferId, `transfer:${index + 1}`),
+        summary: `${text(transfer.amount, "0")} ${text(transfer.assetId, "asset")} transferred from ${text(transfer.fromAccountId)} to ${text(transfer.toAccountId)}.`,
+        status: statusFrom(transfer.status, "observed"),
+        facts: [
+          { label: "from wallet", value: text(transfer.fromAccountId) },
+          { label: "to wallet", value: text(transfer.toAccountId) },
+          { label: "asset", value: text(transfer.assetId) },
+          { label: "amount", value: text(transfer.amount, "0") },
+          { label: "status", value: text(transfer.status) },
+          { label: "evidence path", value: text(transfer.evidenceFilePath) },
+        ],
+        raw: transfer,
+      },
+      controlPlane.checkedAt,
+    ),
+  );
+}
+
 function buildPilotRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
   const pilot = isRecord(controlPlane.pilotStatus) ? controlPlane.pilotStatus : null;
+  const readiness = readinessPayload(controlPlane, pilot);
   const records: WorkbenchRecord[] = [];
 
   if (!pilot) {
@@ -1132,6 +1415,10 @@ function buildPilotRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
         controlPlane.checkedAt,
       ),
     );
+    records.push(bridgeReadinessRecord(controlPlane, readiness));
+    records.push(...bridgeReadinessIssueRecords(controlPlane, readiness));
+    records.push(...buildControlPlaneWalletBalanceRecords(controlPlane));
+    records.push(...buildControlPlaneWalletTransferRecords(controlPlane));
     return records;
   }
 
@@ -1166,6 +1453,14 @@ function buildPilotRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
       controlPlane.checkedAt,
     ),
   );
+
+  records.push(bridgeReadinessRecord(controlPlane, readiness));
+  records.push(...bridgeReadinessIssueRecords(controlPlane, readiness));
+  lifecycleRows(controlPlane, pilot).forEach((row, index) => {
+    records.push(bridgeLifecycleRecord(controlPlane, row, index));
+  });
+  records.push(...buildControlPlaneWalletBalanceRecords(controlPlane));
+  records.push(...buildControlPlaneWalletTransferRecords(controlPlane));
 
   lifecycle.forEach((step, index) => {
     records.push(
@@ -1902,6 +2197,10 @@ function buildRawJsonRecords(
         raw: {
           health: controlPlane.health ?? null,
           state: controlPlane.state ?? null,
+          bridgeLiveReadiness: controlPlane.bridgeLiveReadiness ?? null,
+          pilotLifecycle: controlPlane.pilotLifecycle ?? null,
+          walletBalances: controlPlane.walletBalances ?? null,
+          walletTransfers: controlPlane.walletTransfers ?? null,
           error: controlPlane.error ?? null,
         },
       },
@@ -2093,7 +2392,7 @@ export function buildWorkbenchSnapshot(
     transactions: buildTransactionRecords(data, activeDevnetState),
     mempool: buildMempoolRecords(activeDevnetState),
     accounts: buildAccountRecords(activeDevnetState),
-    balances: buildBalanceRecords(activeDevnetState),
+    balances: [...buildBalanceRecords(activeDevnetState), ...buildControlPlaneWalletBalanceRecords(controlPlane)],
     faucetEvents: buildFaucetEventRecords(activeDevnetState),
     walletMetadata: buildWalletMetadataRecords(activeDevnetState),
     tokenLaunches: buildTokenLaunchRecords(activeDevnetState),
@@ -2152,6 +2451,10 @@ export function buildWorkbenchSnapshot(
       devnetDashboardState: options.devnetDashboardState ?? null,
       bridgeTestDeposit,
       controlPlanePilotStatus: controlPlane.pilotStatus ?? null,
+      controlPlaneBridgeReadiness: controlPlane.bridgeLiveReadiness ?? null,
+      controlPlanePilotLifecycle: controlPlane.pilotLifecycle ?? null,
+      controlPlaneWalletBalances: controlPlane.walletBalances ?? null,
+      controlPlaneWalletTransfers: controlPlane.walletTransfers ?? null,
       controlPlaneHealth: controlPlane.health ?? null,
       controlPlaneState: controlPlane.state ?? null,
     },
