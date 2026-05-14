@@ -56,6 +56,7 @@
     "flowchain:real-value-pilot:emergency-stop": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-real-value-pilot-emergency-stop.ps1",
     "flowchain:real-value-pilot:export": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-real-value-pilot-export.ps1",
     "flowchain:real-value-pilot:bridge": "npm run pilot:e2e --prefix services/bridge-relayer",
+    "flowchain:real-value-pilot:runtime": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-real-value-pilot-runtime.ps1",
     "flowchain:real-value-pilot:control-dashboard": "npm run real-value-pilot:e2e --prefix services/control-plane",
     "flowchain:real-value-pilot:wallet": "npm run wallet:pilot-e2e --prefix crypto",
     "flowchain:export": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-export.ps1",
