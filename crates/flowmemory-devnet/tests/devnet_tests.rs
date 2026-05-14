@@ -1,5 +1,5 @@
 use flowmemory_devnet::model::{
-    DevnetError, FLOWPULSE_TOPIC0, LOCAL_TEST_UNIT_ASSET_ID, Transaction, ZERO_HASH,
+    DevnetError, FLOWPULSE_TOPIC0, GENESIS_HASH, LOCAL_TEST_UNIT_ASSET_ID, Transaction, ZERO_HASH,
     apply_transaction, build_block, demo_transactions, deterministic_liquidity_id,
     deterministic_lp_position_id, deterministic_pool_id, deterministic_swap_id,
     deterministic_token_balance_id, deterministic_token_id, genesis_state,
@@ -23,6 +23,24 @@ fn state_root_is_deterministic_for_same_inputs() {
 
     assert_eq!(state_root(&first), state_root(&second));
     assert_eq!(first_block.block_hash, second_block.block_hash);
+}
+
+#[test]
+fn duplicate_pending_transaction_is_included_once() {
+    let mut state = genesis_state();
+    let tx = Transaction::CreateLocalTestUnitBalance {
+        account_id: "local-account:duplicate".to_string(),
+        owner: "operator:duplicate".to_string(),
+    };
+
+    let tx_id = queue_transaction(&mut state, tx.clone());
+    let duplicate_tx_id = queue_transaction(&mut state, tx);
+    let block = build_block(&mut state);
+
+    assert_eq!(tx_id, duplicate_tx_id);
+    assert_eq!(block.tx_ids, vec![tx_id]);
+    assert_eq!(block.receipts.len(), 1);
+    assert_eq!(state.local_test_unit_balances.len(), 1);
 }
 
 #[test]
@@ -1270,8 +1288,189 @@ fn cli_node_runs_ten_blocks_and_includes_authorized_inbox_tx() {
         state_json["blocks"][0]["receipts"][0]["authorization"]["signer"],
         "local-test-operator"
     );
+    assert_eq!(state_json["blocks"][0]["receipts"][0]["status"], "applied");
+    assert_eq!(state_json["blocks"][0]["receipts"][1]["status"], "applied");
     assert!(node_dir.join("node-identity.json").exists());
     assert!(node_dir.join("status.json").exists());
+
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
+fn cli_sync_reports_incompatible_and_invalid_static_peers() {
+    let temp = temp_dir("cli-peer-negative-status");
+    let local_state = temp.join("local-state.json");
+    let local_node = temp.join("local-node");
+    let stale_state = temp.join("stale-state.json");
+    let wrong_chain_state = temp.join("wrong-chain-state.json");
+    let wrong_genesis_state = temp.join("wrong-genesis-state.json");
+    let unsupported_state = temp.join("unsupported-state.json");
+    let invalid_parent_state = temp.join("invalid-parent-state.json");
+    let peer_config = temp.join("local-peers.json");
+
+    for state in [
+        &local_state,
+        &stale_state,
+        &wrong_chain_state,
+        &wrong_genesis_state,
+        &unsupported_state,
+    ] {
+        let init = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+            .args(["--state", state.to_str().expect("state path"), "init"])
+            .status()
+            .expect("init state");
+        assert!(init.success());
+    }
+
+    let start = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            local_state.to_str().expect("local state"),
+            "start",
+            "--blocks",
+            "2",
+        ])
+        .status()
+        .expect("advance local state");
+    assert!(start.success());
+
+    let mut wrong_chain: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&wrong_chain_state).expect("wrong chain"))
+            .expect("wrong chain json");
+    wrong_chain["chainId"] = serde_json::Value::String("flowmemory-wrong-chain-v0".to_string());
+    wrong_chain["config"]["chainId"] =
+        serde_json::Value::String("flowmemory-wrong-chain-v0".to_string());
+    std::fs::write(
+        &wrong_chain_state,
+        serde_json::to_string_pretty(&wrong_chain).expect("wrong chain json body"),
+    )
+    .expect("write wrong chain");
+
+    let wrong_genesis_hash = format!("0x{}", "1".repeat(64));
+    let mut wrong_genesis: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(&wrong_genesis_state).expect("wrong genesis"),
+    )
+    .expect("wrong genesis json");
+    wrong_genesis["genesisHash"] = serde_json::Value::String(wrong_genesis_hash.clone());
+    wrong_genesis["config"]["genesisHash"] = serde_json::Value::String(wrong_genesis_hash.clone());
+    wrong_genesis["parentHash"] = serde_json::Value::String(wrong_genesis_hash.clone());
+    std::fs::write(
+        &wrong_genesis_state,
+        serde_json::to_string_pretty(&wrong_genesis).expect("wrong genesis json body"),
+    )
+    .expect("write wrong genesis");
+
+    let mut invalid_parent: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&local_state).expect("local state"))
+            .expect("local json");
+    invalid_parent["blocks"][0]["parentHash"] =
+        serde_json::Value::String(format!("0x{}", "2".repeat(64)));
+    std::fs::write(
+        &invalid_parent_state,
+        serde_json::to_string_pretty(&invalid_parent).expect("invalid parent json body"),
+    )
+    .expect("write invalid parent");
+
+    let config = serde_json::json!({
+        "schema": "flowmemory.local_devnet.peer_config.v1",
+        "nodeId": "node:test:local",
+        "networkProfile": "local-file-private-testnet",
+        "chainId": "flowmemory-local-devnet-v0",
+        "genesisHash": GENESIS_HASH,
+        "protocolVersion": "flowchain-local-network/0.1.0",
+        "role": "block-producer",
+        "listenAddress": "flowchain-local://node-test-local",
+        "bindAddress": "local-file://node-test-local",
+        "statePath": local_state.to_string_lossy().to_string(),
+        "dataDir": local_node.to_string_lossy().to_string(),
+        "staticPeers": [
+            {
+                "nodeId": "node:test:stale",
+                "role": "full-node",
+                "statePath": stale_state.to_string_lossy().to_string(),
+                "chainId": "flowmemory-local-devnet-v0",
+                "genesisHash": GENESIS_HASH,
+                "protocolVersion": "flowchain-local-network/0.1.0"
+            },
+            {
+                "nodeId": "node:test:wrong-chain",
+                "role": "full-node",
+                "statePath": wrong_chain_state.to_string_lossy().to_string(),
+                "chainId": "flowmemory-wrong-chain-v0",
+                "genesisHash": GENESIS_HASH,
+                "protocolVersion": "flowchain-local-network/0.1.0"
+            },
+            {
+                "nodeId": "node:test:wrong-genesis",
+                "role": "full-node",
+                "statePath": wrong_genesis_state.to_string_lossy().to_string(),
+                "chainId": "flowmemory-local-devnet-v0",
+                "genesisHash": wrong_genesis_hash,
+                "protocolVersion": "flowchain-local-network/0.1.0"
+            },
+            {
+                "nodeId": "node:test:unsupported",
+                "role": "full-node",
+                "statePath": unsupported_state.to_string_lossy().to_string(),
+                "chainId": "flowmemory-local-devnet-v0",
+                "genesisHash": GENESIS_HASH,
+                "protocolVersion": "flowchain-local-network/9.9.9"
+            },
+            {
+                "nodeId": "node:test:invalid-parent",
+                "role": "full-node",
+                "statePath": invalid_parent_state.to_string_lossy().to_string(),
+                "chainId": "flowmemory-local-devnet-v0",
+                "genesisHash": GENESIS_HASH,
+                "protocolVersion": "flowchain-local-network/0.1.0"
+            }
+        ]
+    });
+    std::fs::write(
+        &peer_config,
+        serde_json::to_string_pretty(&config).expect("peer config"),
+    )
+    .expect("write peer config");
+
+    let output = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            local_state.to_str().expect("local state"),
+            "--node-dir",
+            local_node.to_str().expect("local node"),
+            "sync",
+            "--node-id",
+            "node:test:local",
+            "--peer-config",
+            peer_config.to_str().expect("peer config"),
+        ])
+        .output()
+        .expect("run sync");
+    assert!(output.status.success());
+
+    let sync: serde_json::Value = serde_json::from_slice(&output.stdout).expect("sync json");
+    let peers = sync["status"]["peers"].as_array().expect("peers");
+    let find_peer = |peer_id: &str| {
+        peers
+            .iter()
+            .find(|peer| peer["peerId"] == peer_id)
+            .unwrap_or_else(|| panic!("missing peer {peer_id}"))
+    };
+
+    assert_eq!(find_peer("node:test:stale")["syncStatus"], "stalePeer");
+    assert_eq!(find_peer("node:test:wrong-chain")["status"], "wrongChain");
+    assert_eq!(
+        find_peer("node:test:wrong-genesis")["status"],
+        "wrongGenesis"
+    );
+    assert_eq!(
+        find_peer("node:test:unsupported")["status"],
+        "unsupportedProtocol"
+    );
+    assert_eq!(
+        find_peer("node:test:invalid-parent")["rejectedBlock"]["reason"],
+        "invalidParentBlock"
+    );
 
     std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
 }

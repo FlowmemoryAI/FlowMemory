@@ -1,9 +1,9 @@
 use crate::hash::{hash_json, normalize_value};
 use crate::model::{
-    FLOWPULSE_TOPIC0, ImportedFlowPulseObservation, ImportedVerifierReport, LocalAuthorization,
-    Transaction, build_block, demo_transactions, envelope_tx, genesis_state,
-    product_demo_transactions, queue_authorized_transaction, queue_transaction, state_map_roots,
-    state_root,
+    Block, FLOWPULSE_TOPIC0, ImportedFlowPulseObservation, ImportedVerifierReport,
+    LocalAuthorization, Transaction, TxEnvelope, ZERO_HASH, build_block, demo_transactions,
+    envelope_tx, genesis_state, product_demo_transactions, queue_authorized_transaction,
+    queue_transaction, state_map_roots, state_root,
 };
 use crate::storage::{default_state_path, load_or_genesis, load_state, reset_state, save_state};
 use anyhow::{Context, Result, anyhow};
@@ -38,6 +38,10 @@ pub enum Command {
     NodeStop,
     NodeStatus,
     Tick {
+        node_id: String,
+        peer_config: Option<PathBuf>,
+    },
+    Sync {
         node_id: String,
         peer_config: Option<PathBuf>,
     },
@@ -142,6 +146,12 @@ fn parse_args(args: Vec<String>) -> Result<Cli> {
             peer_config: option_value_optional(&positional[1..], "--peer-config")
                 .map(PathBuf::from),
         },
+        "sync" | "sync-once" => Command::Sync {
+            node_id: option_value_optional(&positional[1..], "--node-id")
+                .unwrap_or_else(|| "node:local:alpha".to_string()),
+            peer_config: option_value_optional(&positional[1..], "--peer-config")
+                .map(PathBuf::from),
+        },
         "submit-tx" => {
             let tx_file = option_value(&positional[1..], "--tx-file")?;
             Command::SubmitTx {
@@ -240,7 +250,7 @@ fn option_u64(args: &[String], name: &str) -> Result<Option<u64>> {
 
 fn print_help() {
     println!(
-        "flowmemory-devnet --state <path> --node-dir <path> <command>\n\nCommands:\n  init\n  reset-local\n  node [--node-id <id>] [--block-ms <ms>] [--max-blocks <n>] [--peer-config <path>]\n  node-stop\n  node-status\n  tick [--node-id <id>] [--peer-config <path>]\n  submit-tx --tx-file <path> [--authorized-by <id>] [--direct]\n  faucet --account <id> --amount <n> [--reason <text>] [--authorized-by <id>] [--direct]\n  start|run [--blocks <n>]\n  run-block\n  submit-fixture --fixture <path>\n  inspect|inspect-state [--summary]\n  export|export-fixtures [--out-dir <path>]\n  export-state [--out <path>]\n  import-state --from <path>\n  demo [--out-dir <path>]\n  smoke [--out-dir <path>]\n  product-demo|product-smoke [--out-dir <path>]\n"
+        "flowmemory-devnet --state <path> --node-dir <path> <command>\n\nCommands:\n  init\n  reset-local\n  node [--node-id <id>] [--block-ms <ms>] [--max-blocks <n>] [--peer-config <path>]\n  node-stop\n  node-status\n  tick [--node-id <id>] [--peer-config <path>]\n  sync|sync-once [--node-id <id>] [--peer-config <path>]\n  submit-tx --tx-file <path> [--authorized-by <id>] [--direct]\n  faucet --account <id> --amount <n> [--reason <text>] [--authorized-by <id>] [--direct]\n  start|run [--blocks <n>]\n  run-block\n  submit-fixture --fixture <path>\n  inspect|inspect-state [--summary]\n  export|export-fixtures [--out-dir <path>]\n  export-state [--out <path>]\n  import-state --from <path>\n  demo [--out-dir <path>]\n  smoke [--out-dir <path>]\n  product-demo|product-smoke [--out-dir <path>]\n"
     );
 }
 
@@ -288,6 +298,8 @@ fn run(cli: Cli) -> Result<()> {
                     &state,
                     0,
                     0,
+                    0,
+                    None,
                     None,
                 ),
             )?;
@@ -313,9 +325,16 @@ fn run(cli: Cli) -> Result<()> {
             peer_config,
         } => {
             let mut state = load_or_genesis(&cli.state)?;
-            let peers = load_peer_config(peer_config.as_deref())?;
-            let sync_event = sync_from_peers(&mut state, &peers)?;
+            let peer_config = load_peer_config(
+                peer_config.as_deref(),
+                &node_id,
+                &cli.state,
+                &cli.node_dir,
+                &state,
+            )?;
+            let sync_outcome = sync_from_peers(&mut state, &peer_config)?;
             let ingested = drain_inbox(&mut state, &cli.node_dir)?;
+            let relayed = relay_txs_to_peers(&cli.node_dir, &peer_config, &ingested.accepted)?;
             let produced = build_block(&mut state);
             save_state(&cli.state, &state)?;
             write_runtime_boundary_files(&cli.state, &state)?;
@@ -329,11 +348,46 @@ fn run(cli: Cli) -> Result<()> {
                 &state,
                 ingested.queued,
                 ingested.rejected,
-                sync_event,
+                relayed,
+                Some(sync_outcome),
+                Some(&peer_config),
             );
-            write_node_identity(&cli.node_dir, &node_id, &cli.state, peer_config.as_deref())?;
+            write_node_identity(&cli.node_dir, &node_id, &cli.state, Some(&peer_config))?;
             write_node_status(&cli.node_dir, &status)?;
             print_json(&NodeTickSummary::from_block(status, produced.block_hash))?;
+        }
+        Command::Sync {
+            node_id,
+            peer_config,
+        } => {
+            let mut state = load_or_genesis(&cli.state)?;
+            let peer_config = load_peer_config(
+                peer_config.as_deref(),
+                &node_id,
+                &cli.state,
+                &cli.node_dir,
+                &state,
+            )?;
+            let sync_outcome = sync_from_peers(&mut state, &peer_config)?;
+            save_state(&cli.state, &state)?;
+            write_runtime_boundary_files(&cli.state, &state)?;
+            let status = NodeStatus::from_state(
+                "synced",
+                "manual peer sync completed",
+                &node_id,
+                std::process::id(),
+                &cli.state,
+                &cli.node_dir,
+                &state,
+                0,
+                0,
+                0,
+                Some(sync_outcome),
+                Some(&peer_config),
+            );
+            write_node_identity(&cli.node_dir, &node_id, &cli.state, Some(&peer_config))?;
+            write_node_status(&cli.node_dir, &status)?;
+            print_json(&NodeSyncSummary::from_status(status))?;
         }
         Command::SubmitTx {
             tx_file,
@@ -504,9 +558,27 @@ struct PeerConfig {
     #[serde(default = "peer_config_schema")]
     schema: String,
     #[serde(default)]
-    node_id: Option<String>,
+    node_id: String,
+    #[serde(default = "default_network_profile")]
+    network_profile: String,
     #[serde(default)]
-    peers: Vec<StaticPeer>,
+    chain_id: String,
+    #[serde(default)]
+    genesis_hash: String,
+    #[serde(default = "default_protocol_version")]
+    protocol_version: String,
+    #[serde(default = "default_node_role")]
+    role: String,
+    #[serde(default)]
+    listen_address: String,
+    #[serde(default)]
+    bind_address: String,
+    #[serde(default)]
+    data_dir: PathBuf,
+    #[serde(default)]
+    state_path: PathBuf,
+    #[serde(default, alias = "peers")]
+    static_peers: Vec<StaticPeer>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -514,6 +586,26 @@ struct PeerConfig {
 struct StaticPeer {
     node_id: String,
     state_path: PathBuf,
+    #[serde(default)]
+    role: String,
+    #[serde(default)]
+    address: String,
+    #[serde(default)]
+    peer_address: String,
+    #[serde(default)]
+    listen_address: String,
+    #[serde(default)]
+    bind_address: String,
+    #[serde(default)]
+    node_dir: Option<PathBuf>,
+    #[serde(default)]
+    data_dir: Option<PathBuf>,
+    #[serde(default)]
+    chain_id: String,
+    #[serde(default)]
+    genesis_hash: String,
+    #[serde(default = "default_protocol_version")]
+    protocol_version: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -521,18 +613,215 @@ struct StaticPeer {
 struct PeerSyncEvent {
     peer_id: String,
     peer_state_path: PathBuf,
+    previous_local_height: usize,
     adopted_block_height: usize,
+    adopted_latest_hash: String,
     adopted_state_root: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct PeerSyncOutcome {
+    peers: Vec<PeerStatus>,
+    adopted: Option<PeerSyncEvent>,
+    rejected_blocks: Vec<BlockRejectEvidence>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct PeerStatus {
+    peer_id: String,
+    role: String,
+    address: String,
+    listen_address: String,
+    bind_address: String,
+    state_path: PathBuf,
+    node_dir: Option<PathBuf>,
+    protocol_version: String,
+    chain_id: String,
+    genesis_hash: String,
+    connection_status: String,
+    status: String,
+    sync_status: String,
+    reason: Option<String>,
+    latest_height: Option<usize>,
+    latest_hash: Option<String>,
+    last_seen_height: Option<usize>,
+    last_seen_hash: Option<String>,
+    remote_state_root: Option<String>,
+    adopted: bool,
+    reconnect_attempts: u64,
+    rejected_block: Option<BlockRejectEvidence>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct BlockRejectEvidence {
+    peer_id: String,
+    block_height: Option<u64>,
+    block_hash: Option<String>,
+    reason: String,
+    expected: Option<String>,
+    actual: Option<String>,
 }
 
 #[derive(Debug, Default)]
 struct InboxIngestSummary {
     queued: usize,
     rejected: usize,
+    accepted: Vec<TxEnvelope>,
 }
 
+const NETWORK_PROTOCOL_VERSION: &str = "flowchain-local-network/0.1.0";
+const NETWORK_PROFILE: &str = "local-file-private-testnet";
+const DEFAULT_LISTEN_ADDRESS_PREFIX: &str = "flowchain-local";
+
 fn peer_config_schema() -> String {
-    "flowmemory.local_devnet.static_peers.v0".to_string()
+    "flowmemory.local_devnet.peer_config.v1".to_string()
+}
+
+fn default_network_profile() -> String {
+    NETWORK_PROFILE.to_string()
+}
+
+fn default_protocol_version() -> String {
+    NETWORK_PROTOCOL_VERSION.to_string()
+}
+
+fn default_node_role() -> String {
+    "block-producer".to_string()
+}
+
+impl PeerStatus {
+    fn from_static_peer(peer: &StaticPeer) -> Self {
+        Self {
+            peer_id: peer.node_id.clone(),
+            role: peer.role.clone(),
+            address: peer.address.clone(),
+            listen_address: peer.listen_address.clone(),
+            bind_address: peer.bind_address.clone(),
+            state_path: peer.state_path.clone(),
+            node_dir: peer.node_dir.clone(),
+            protocol_version: peer.protocol_version.clone(),
+            chain_id: peer.chain_id.clone(),
+            genesis_hash: peer.genesis_hash.clone(),
+            connection_status: "unknown".to_string(),
+            status: "unknown".to_string(),
+            sync_status: "unknown".to_string(),
+            reason: None,
+            latest_height: None,
+            latest_hash: None,
+            last_seen_height: None,
+            last_seen_hash: None,
+            remote_state_root: None,
+            adopted: false,
+            reconnect_attempts: 1,
+            rejected_block: None,
+        }
+    }
+
+    fn reject(&mut self, status: &str, sync_status: &str, reason: String) {
+        self.connection_status = "rejected".to_string();
+        self.status = status.to_string();
+        self.sync_status = sync_status.to_string();
+        self.reason = Some(reason);
+    }
+}
+
+fn default_listen_address(node_id: &str, path: &Path) -> String {
+    format!(
+        "{DEFAULT_LISTEN_ADDRESS_PREFIX}://{}@{}",
+        file_safe_id(node_id),
+        path.display()
+    )
+}
+
+fn default_bind_address(node_id: &str, path: &Path) -> String {
+    format!("local-file://{}#{}", path.display(), file_safe_id(node_id))
+}
+
+fn latest_block_hash(state: &crate::model::ChainState) -> String {
+    state
+        .blocks
+        .last()
+        .map(|block| block.block_hash.clone())
+        .unwrap_or_else(|| state.parent_hash.clone())
+}
+
+fn validate_peer_chain(
+    peer_id: &str,
+    state: &crate::model::ChainState,
+) -> std::result::Result<(), BlockRejectEvidence> {
+    let mut expected_parent = state.genesis_hash.clone();
+    let mut expected_number = 1_u64;
+
+    for block in &state.blocks {
+        if block.block_number != expected_number {
+            return Err(BlockRejectEvidence {
+                peer_id: peer_id.to_string(),
+                block_height: Some(block.block_number),
+                block_hash: Some(block.block_hash.clone()),
+                reason: "invalidBlockNumber".to_string(),
+                expected: Some(expected_number.to_string()),
+                actual: Some(block.block_number.to_string()),
+            });
+        }
+        if block.parent_hash != expected_parent {
+            return Err(BlockRejectEvidence {
+                peer_id: peer_id.to_string(),
+                block_height: Some(block.block_number),
+                block_hash: Some(block.block_hash.clone()),
+                reason: "invalidParentBlock".to_string(),
+                expected: Some(expected_parent),
+                actual: Some(block.parent_hash.clone()),
+            });
+        }
+
+        let expected_hash = block_hash_for_validation(block);
+        if block.block_hash != expected_hash {
+            return Err(BlockRejectEvidence {
+                peer_id: peer_id.to_string(),
+                block_height: Some(block.block_number),
+                block_hash: Some(block.block_hash.clone()),
+                reason: "invalidBlockHash".to_string(),
+                expected: Some(expected_hash),
+                actual: Some(block.block_hash.clone()),
+            });
+        }
+
+        expected_parent = block.block_hash.clone();
+        expected_number += 1;
+    }
+
+    if state.parent_hash != expected_parent {
+        return Err(BlockRejectEvidence {
+            peer_id: peer_id.to_string(),
+            block_height: state.blocks.last().map(|block| block.block_number),
+            block_hash: state.blocks.last().map(|block| block.block_hash.clone()),
+            reason: "invalidCanonicalHead".to_string(),
+            expected: Some(expected_parent),
+            actual: Some(state.parent_hash.clone()),
+        });
+    }
+
+    if state.next_block_number != expected_number {
+        return Err(BlockRejectEvidence {
+            peer_id: peer_id.to_string(),
+            block_height: state.blocks.last().map(|block| block.block_number),
+            block_hash: state.blocks.last().map(|block| block.block_hash.clone()),
+            reason: "invalidNextBlockNumber".to_string(),
+            expected: Some(expected_number.to_string()),
+            actual: Some(state.next_block_number.to_string()),
+        });
+    }
+
+    Ok(())
+}
+
+fn block_hash_for_validation(block: &Block) -> String {
+    let mut candidate = block.clone();
+    candidate.block_hash = ZERO_HASH.to_string();
+    hash_json("flowmemory.local_devnet.block_hash.v0", &candidate)
 }
 
 fn run_node(options: NodeRunOptions) -> Result<()> {
@@ -549,19 +838,28 @@ fn run_node(options: NodeRunOptions) -> Result<()> {
             .with_context(|| format!("failed to remove stale stop file {}", stop_path.display()))?;
     }
 
-    let peers = load_peer_config(options.peer_config.as_deref())?;
+    let mut state = load_or_genesis(&options.state_path)?;
+    save_state(&options.state_path, &state)?;
+    write_runtime_boundary_files(&options.state_path, &state)?;
+    let peer_config = load_peer_config(
+        options.peer_config.as_deref(),
+        &options.node_id,
+        &options.state_path,
+        &options.node_dir,
+        &state,
+    )?;
     write_node_identity(
         &options.node_dir,
         &options.node_id,
         &options.state_path,
-        options.peer_config.as_deref(),
+        Some(&peer_config),
     )?;
 
-    let mut state = load_or_genesis(&options.state_path)?;
-    save_state(&options.state_path, &state)?;
-    write_runtime_boundary_files(&options.state_path, &state)?;
-
     let mut produced = 0_u64;
+    let mut last_sync_outcome: Option<PeerSyncOutcome> = None;
+    let mut last_ingested_txs = 0_usize;
+    let mut last_rejected_inbox_files = 0_usize;
+    let mut last_relayed_txs = 0_usize;
     loop {
         if stop_path.exists() {
             let status = NodeStatus::from_state(
@@ -572,17 +870,24 @@ fn run_node(options: NodeRunOptions) -> Result<()> {
                 &options.state_path,
                 &options.node_dir,
                 &state,
-                0,
-                0,
-                None,
+                last_ingested_txs,
+                last_rejected_inbox_files,
+                last_relayed_txs,
+                last_sync_outcome.clone(),
+                Some(&peer_config),
             );
             write_node_status(&options.node_dir, &status)?;
             println!("{}", serde_json::to_string(&status)?);
             break;
         }
 
-        let sync_event = sync_from_peers(&mut state, &peers)?;
+        let sync_outcome = sync_from_peers(&mut state, &peer_config)?;
         let ingested = drain_inbox(&mut state, &options.node_dir)?;
+        let relayed = relay_txs_to_peers(&options.node_dir, &peer_config, &ingested.accepted)?;
+        last_sync_outcome = Some(sync_outcome.clone());
+        last_ingested_txs = ingested.queued;
+        last_rejected_inbox_files = ingested.rejected;
+        last_relayed_txs = relayed;
         let block = build_block(&mut state);
         produced += 1;
         save_state(&options.state_path, &state)?;
@@ -598,7 +903,9 @@ fn run_node(options: NodeRunOptions) -> Result<()> {
             &state,
             ingested.queued,
             ingested.rejected,
-            sync_event,
+            relayed,
+            Some(sync_outcome),
+            Some(&peer_config),
         );
         write_node_status(&options.node_dir, &status)?;
 
@@ -606,12 +913,14 @@ fn run_node(options: NodeRunOptions) -> Result<()> {
             "{}",
             serde_json::to_string(&serde_json::json!({
                 "schema": "flowmemory.local_devnet.node_log.v0",
-                "nodeId": options.node_id,
+                "nodeId": &options.node_id,
                 "event": "blockProduced",
                 "blockNumber": block.block_number,
                 "blockHash": block.block_hash,
                 "txs": block.tx_ids.len(),
-                "stateRoot": block.state_root
+                "stateRoot": block.state_root,
+                "syncStatus": status.sync_status,
+                "peers": status.peers
             }))?
         );
 
@@ -627,9 +936,11 @@ fn run_node(options: NodeRunOptions) -> Result<()> {
                 &options.state_path,
                 &options.node_dir,
                 &state,
-                0,
-                0,
-                None,
+                last_ingested_txs,
+                last_rejected_inbox_files,
+                last_relayed_txs,
+                last_sync_outcome.clone(),
+                Some(&peer_config),
             );
             write_node_status(&options.node_dir, &status)?;
             println!("{}", serde_json::to_string(&status)?);
@@ -676,21 +987,47 @@ fn write_txs_to_inbox(
     fs::create_dir_all(&inbox)
         .with_context(|| format!("failed to create inbox directory {}", inbox.display()))?;
 
-    let mut queued = Vec::new();
-    for tx in txs {
-        let envelope = local_authorized_envelope(tx, authorized_by.clone());
-        let tx_id = envelope.tx_id.clone();
-        let path = inbox.join(format!("{}.json", file_safe_id(&tx_id)));
+    let envelopes = txs
+        .into_iter()
+        .map(|tx| local_authorized_envelope(tx, authorized_by.clone()))
+        .collect::<Vec<_>>();
+    let queued = envelopes
+        .iter()
+        .map(|envelope| envelope.tx_id.clone())
+        .collect::<Vec<_>>();
+
+    if let Some(envelope) = envelopes.first()
+        && envelopes.len() == 1
+    {
+        let path = inbox.join(format!("{}.json", file_safe_id(&envelope.tx_id)));
         write_json(
             path,
             &serde_json::json!({
                 "schema": "flowmemory.local_devnet.inbox_tx.v0",
-                "tx": envelope.tx,
-                "authorization": envelope.authorization
+                "tx": &envelope.tx,
+                "authorization": &envelope.authorization
             }),
         )?;
-        queued.push(tx_id);
+        return Ok(queued);
     }
+
+    let batch_id = hash_json("flowmemory.local_devnet.inbox_batch.v0", &queued);
+    let txs = envelopes
+        .iter()
+        .map(|envelope| envelope.tx.clone())
+        .collect::<Vec<_>>();
+    let authorization = envelopes
+        .first()
+        .and_then(|envelope| envelope.authorization.clone());
+    let path = inbox.join(format!("batch-{}.json", file_safe_id(&batch_id)));
+    write_json(
+        path,
+        &serde_json::json!({
+            "schema": "flowmemory.local_devnet.inbox_tx_batch.v0",
+            "txs": txs,
+            "authorization": authorization
+        }),
+    )?;
     Ok(queued)
 }
 
@@ -723,7 +1060,8 @@ fn drain_inbox(
                 for (tx, authorization) in txs {
                     let mut envelope = envelope_tx(tx);
                     envelope.authorization = authorization;
-                    state.pending_txs.push(envelope);
+                    state.pending_txs.push(envelope.clone());
+                    summary.accepted.push(envelope);
                     summary.queued += 1;
                 }
                 move_inbox_file(&path, &processed_dir(node_dir))?;
@@ -780,77 +1118,440 @@ fn local_authorized_envelope(
     envelope
 }
 
-fn load_peer_config(path: Option<&Path>) -> Result<Vec<StaticPeer>> {
-    let Some(path) = path else {
-        return Ok(Vec::new());
+fn relay_txs_to_peers(
+    node_dir: &Path,
+    config: &PeerConfig,
+    envelopes: &[TxEnvelope],
+) -> Result<usize> {
+    if envelopes.is_empty() || config.static_peers.is_empty() {
+        return Ok(0);
+    }
+
+    let mut relayed = 0_usize;
+    for peer in &config.static_peers {
+        if peer.protocol_version != NETWORK_PROTOCOL_VERSION
+            || peer.chain_id != config.chain_id
+            || peer.genesis_hash != config.genesis_hash
+        {
+            continue;
+        }
+        let Some(peer_node_dir) = &peer.node_dir else {
+            continue;
+        };
+        let peer_inbox = inbox_dir(peer_node_dir);
+        fs::create_dir_all(&peer_inbox)
+            .with_context(|| format!("failed to create peer inbox {}", peer_inbox.display()))?;
+
+        let peer_marker_dir = relayed_dir(node_dir).join(file_safe_id(&peer.node_id));
+        fs::create_dir_all(&peer_marker_dir).with_context(|| {
+            format!(
+                "failed to create relay marker directory {}",
+                peer_marker_dir.display()
+            )
+        })?;
+
+        for envelope in envelopes {
+            let marker = peer_marker_dir.join(format!("{}.json", file_safe_id(&envelope.tx_id)));
+            if marker.exists() {
+                continue;
+            }
+            let target = peer_inbox.join(format!("relay-{}.json", file_safe_id(&envelope.tx_id)));
+            write_json(
+                target.clone(),
+                &serde_json::json!({
+                    "schema": "flowmemory.local_devnet.relayed_tx.v0",
+                    "fromNodeId": &config.node_id,
+                    "toNodeId": &peer.node_id,
+                    "seenByNodeIds": [config.node_id.clone()],
+                    "tx": &envelope.tx,
+                    "authorization": &envelope.authorization
+                }),
+            )?;
+            write_json(
+                marker,
+                &serde_json::json!({
+                    "schema": "flowmemory.local_devnet.relay_marker.v0",
+                    "fromNodeId": &config.node_id,
+                    "toNodeId": &peer.node_id,
+                    "txId": &envelope.tx_id,
+                    "targetInboxFile": target
+                }),
+            )?;
+            relayed += 1;
+        }
+    }
+
+    Ok(relayed)
+}
+
+fn load_peer_config(
+    path: Option<&Path>,
+    node_id: &str,
+    state_path: &Path,
+    node_dir: &Path,
+    state: &crate::model::ChainState,
+) -> Result<PeerConfig> {
+    let mut config = if let Some(path) = path {
+        let body = fs::read_to_string(path)
+            .with_context(|| format!("failed to read peer config {}", path.display()))?;
+        serde_json::from_str::<PeerConfig>(body.trim_start_matches('\u{feff}'))
+            .with_context(|| format!("failed to parse peer config {}", path.display()))?
+    } else {
+        PeerConfig {
+            schema: peer_config_schema(),
+            node_id: String::new(),
+            network_profile: default_network_profile(),
+            chain_id: String::new(),
+            genesis_hash: String::new(),
+            protocol_version: default_protocol_version(),
+            role: default_node_role(),
+            listen_address: String::new(),
+            bind_address: String::new(),
+            data_dir: PathBuf::new(),
+            state_path: PathBuf::new(),
+            static_peers: Vec::new(),
+        }
     };
-    let body = fs::read_to_string(path)
-        .with_context(|| format!("failed to read peer config {}", path.display()))?;
-    let config: PeerConfig = serde_json::from_str(body.trim_start_matches('\u{feff}'))
-        .with_context(|| format!("failed to parse peer config {}", path.display()))?;
-    Ok(config.peers)
+
+    if config.node_id.is_empty() {
+        config.node_id = node_id.to_string();
+    }
+    if config.network_profile.is_empty() {
+        config.network_profile = default_network_profile();
+    }
+    if config.chain_id.is_empty() {
+        config.chain_id = state.chain_id.clone();
+    }
+    if config.genesis_hash.is_empty() {
+        config.genesis_hash = state.genesis_hash.clone();
+    }
+    if config.protocol_version.is_empty() {
+        config.protocol_version = default_protocol_version();
+    }
+    if config.role.is_empty() {
+        config.role = default_node_role();
+    }
+    if config.listen_address.is_empty() {
+        config.listen_address = default_listen_address(&config.node_id, node_dir);
+    }
+    if config.bind_address.is_empty() {
+        config.bind_address = default_bind_address(&config.node_id, node_dir);
+    }
+    if config.data_dir.as_os_str().is_empty() {
+        config.data_dir = node_dir.to_path_buf();
+    }
+    if config.state_path.as_os_str().is_empty() {
+        config.state_path = state_path.to_path_buf();
+    }
+
+    if config.node_id != node_id {
+        return Err(anyhow!(
+            "peer config nodeId {} does not match runtime node id {}",
+            config.node_id,
+            node_id
+        ));
+    }
+    if config.chain_id != state.chain_id {
+        return Err(anyhow!(
+            "peer config chainId {} does not match local state chainId {}",
+            config.chain_id,
+            state.chain_id
+        ));
+    }
+    if config.genesis_hash != state.genesis_hash {
+        return Err(anyhow!(
+            "peer config genesisHash {} does not match local state genesisHash {}",
+            config.genesis_hash,
+            state.genesis_hash
+        ));
+    }
+    if config.protocol_version != NETWORK_PROTOCOL_VERSION {
+        return Err(anyhow!(
+            "unsupported local node protocolVersion {}; supported {}",
+            config.protocol_version,
+            NETWORK_PROTOCOL_VERSION
+        ));
+    }
+
+    for peer in &mut config.static_peers {
+        if peer.role.is_empty() {
+            peer.role = "full-node".to_string();
+        }
+        if peer.protocol_version.is_empty() {
+            peer.protocol_version = default_protocol_version();
+        }
+        if peer.chain_id.is_empty() {
+            peer.chain_id = config.chain_id.clone();
+        }
+        if peer.genesis_hash.is_empty() {
+            peer.genesis_hash = config.genesis_hash.clone();
+        }
+        if peer.listen_address.is_empty() {
+            peer.listen_address = if !peer.address.is_empty() {
+                peer.address.clone()
+            } else if !peer.peer_address.is_empty() {
+                peer.peer_address.clone()
+            } else if let Some(peer_node_dir) = &peer.node_dir {
+                default_listen_address(&peer.node_id, peer_node_dir)
+            } else {
+                default_listen_address(&peer.node_id, &peer.state_path)
+            };
+        }
+        if peer.peer_address.is_empty() {
+            peer.peer_address = peer.listen_address.clone();
+        }
+        if peer.address.is_empty() {
+            peer.address = peer.listen_address.clone();
+        }
+        if peer.bind_address.is_empty() {
+            peer.bind_address = if let Some(peer_node_dir) = &peer.node_dir {
+                default_bind_address(&peer.node_id, peer_node_dir)
+            } else {
+                format!("local-file://{}", peer.state_path.display())
+            };
+        }
+    }
+
+    Ok(config)
 }
 
 fn sync_from_peers(
     state: &mut crate::model::ChainState,
-    peers: &[StaticPeer],
-) -> Result<Option<PeerSyncEvent>> {
-    let mut adopted = None;
-    for peer in peers {
+    config: &PeerConfig,
+) -> Result<PeerSyncOutcome> {
+    let mut outcome = PeerSyncOutcome {
+        peers: Vec::new(),
+        adopted: None,
+        rejected_blocks: Vec::new(),
+    };
+
+    for peer in &config.static_peers {
+        let mut status = PeerStatus::from_static_peer(peer);
+
+        if peer.protocol_version != NETWORK_PROTOCOL_VERSION {
+            status.reject(
+                "unsupportedProtocol",
+                "blocked",
+                format!(
+                    "unsupported protocolVersion {}; supported {}",
+                    peer.protocol_version, NETWORK_PROTOCOL_VERSION
+                ),
+            );
+            outcome.peers.push(status);
+            continue;
+        }
+
+        if peer.chain_id != state.chain_id {
+            status.reject(
+                "wrongChain",
+                "blocked",
+                format!(
+                    "peer chainId {} does not match local chainId {}",
+                    peer.chain_id, state.chain_id
+                ),
+            );
+            outcome.peers.push(status);
+            continue;
+        }
+
+        if peer.genesis_hash != state.genesis_hash {
+            status.reject(
+                "wrongGenesis",
+                "blocked",
+                format!(
+                    "peer genesisHash {} does not match local genesisHash {}",
+                    peer.genesis_hash, state.genesis_hash
+                ),
+            );
+            outcome.peers.push(status);
+            continue;
+        }
+
         if !peer.state_path.exists() {
+            status.connection_status = "disconnected".to_string();
+            status.status = "disconnected".to_string();
+            status.sync_status = "disconnected".to_string();
+            status.reason = Some("peer state path is not reachable".to_string());
+            outcome.peers.push(status);
             continue;
         }
+
         let peer_state = load_state(&peer.state_path)?;
+        status.chain_id = peer_state.chain_id.clone();
+        status.genesis_hash = peer_state.genesis_hash.clone();
+        status.latest_height = Some(peer_state.blocks.len());
+        status.latest_hash = Some(latest_block_hash(&peer_state));
+        status.last_seen_height = status.latest_height;
+        status.last_seen_hash = status.latest_hash.clone();
+        status.remote_state_root = Some(state_root(&peer_state));
+        status.connection_status = "connected".to_string();
+
         if peer_state.chain_id != state.chain_id {
+            status.reject(
+                "wrongChain",
+                "blocked",
+                format!(
+                    "peer state chainId {} does not match local chainId {}",
+                    peer_state.chain_id, state.chain_id
+                ),
+            );
+            outcome.peers.push(status);
             continue;
         }
-        if should_adopt_peer_state(state, &peer_state) {
+
+        if peer_state.genesis_hash != state.genesis_hash {
+            status.reject(
+                "wrongGenesis",
+                "blocked",
+                format!(
+                    "peer state genesisHash {} does not match local genesisHash {}",
+                    peer_state.genesis_hash, state.genesis_hash
+                ),
+            );
+            outcome.peers.push(status);
+            continue;
+        }
+
+        if let Err(rejected) = validate_peer_chain(&peer.node_id, &peer_state) {
+            status.status = "connected".to_string();
+            status.sync_status = "syncBlocked".to_string();
+            status.reason = Some(rejected.reason.clone());
+            status.rejected_block = Some(rejected.clone());
+            outcome.rejected_blocks.push(rejected);
+            outcome.peers.push(status);
+            continue;
+        }
+
+        let local_height = state.blocks.len();
+        let peer_height = peer_state.blocks.len();
+        if peer_height > local_height {
+            let previous_local_height = local_height;
+            let adopted_latest_hash = latest_block_hash(&peer_state);
             let adopted_state_root = state_root(&peer_state);
-            let adopted_block_height = peer_state.blocks.len();
             *state = peer_state;
-            adopted = Some(PeerSyncEvent {
+            status.status = "connected".to_string();
+            status.sync_status = "syncing".to_string();
+            status.adopted = true;
+            outcome.adopted = Some(PeerSyncEvent {
                 peer_id: peer.node_id.clone(),
                 peer_state_path: peer.state_path.clone(),
-                adopted_block_height,
+                previous_local_height,
+                adopted_block_height: peer_height,
+                adopted_latest_hash,
                 adopted_state_root,
             });
+        } else if peer_height < local_height {
+            let rejected = BlockRejectEvidence {
+                peer_id: peer.node_id.clone(),
+                block_height: peer_state.blocks.last().map(|block| block.block_number),
+                block_hash: peer_state
+                    .blocks
+                    .last()
+                    .map(|block| block.block_hash.clone()),
+                reason: "stalePeerHead".to_string(),
+                expected: Some(format!("height >= {local_height}")),
+                actual: Some(format!("height {peer_height}")),
+            };
+            status.status = "connected".to_string();
+            status.sync_status = "stalePeer".to_string();
+            status.reason = Some("peer head is behind local head; not adopted".to_string());
+            status.rejected_block = Some(rejected.clone());
+            outcome.rejected_blocks.push(rejected);
+        } else if latest_block_hash(&peer_state) == latest_block_hash(state) {
+            status.status = "caughtUp".to_string();
+            status.sync_status = "caughtUp".to_string();
+        } else {
+            let rejected = BlockRejectEvidence {
+                peer_id: peer.node_id.clone(),
+                block_height: peer_state.blocks.last().map(|block| block.block_number),
+                block_hash: peer_state
+                    .blocks
+                    .last()
+                    .map(|block| block.block_hash.clone()),
+                reason: "conflictingPeerHead".to_string(),
+                expected: Some(latest_block_hash(state)),
+                actual: Some(latest_block_hash(&peer_state)),
+            };
+            status.status = "connected".to_string();
+            status.sync_status = "syncBlocked".to_string();
+            status.reason = Some("peer head conflicts at the same height".to_string());
+            status.rejected_block = Some(rejected.clone());
+            outcome.rejected_blocks.push(rejected);
         }
-    }
-    Ok(adopted)
-}
 
-fn should_adopt_peer_state(
-    local: &crate::model::ChainState,
-    peer: &crate::model::ChainState,
-) -> bool {
-    let local_height = local.blocks.len();
-    let peer_height = peer.blocks.len();
-    if peer_height > local_height {
-        return true;
+        outcome.peers.push(status);
     }
-    if peer_height == local_height && peer_height > 0 {
-        return state_root(peer) < state_root(local);
-    }
-    false
+
+    Ok(outcome)
 }
 
 fn write_node_identity(
     node_dir: &Path,
     node_id: &str,
     state_path: &Path,
-    peer_config: Option<&Path>,
+    peer_config: Option<&PeerConfig>,
 ) -> Result<()> {
     fs::create_dir_all(node_dir)?;
+    let (
+        network_profile,
+        chain_id,
+        genesis_hash,
+        protocol_version,
+        role,
+        listen_address,
+        bind_address,
+        data_dir,
+        peers,
+    ) = match peer_config {
+        Some(config) => (
+            config.network_profile.clone(),
+            config.chain_id.clone(),
+            config.genesis_hash.clone(),
+            config.protocol_version.clone(),
+            config.role.clone(),
+            config.listen_address.clone(),
+            config.bind_address.clone(),
+            config.data_dir.clone(),
+            config.static_peers.clone(),
+        ),
+        None => (
+            default_network_profile(),
+            String::new(),
+            String::new(),
+            default_protocol_version(),
+            default_node_role(),
+            default_listen_address(node_id, node_dir),
+            default_bind_address(node_id, node_dir),
+            node_dir.to_path_buf(),
+            Vec::new(),
+        ),
+    };
     write_json(
         node_dir.join("node-identity.json"),
         &serde_json::json!({
             "schema": "flowmemory.local_devnet.node_identity.v0",
             "nodeId": node_id,
-            "mode": "local-file-private-testnet",
+            "networkProfile": &network_profile,
+            "chainId": &chain_id,
+            "genesisHash": &genesis_hash,
+            "protocolVersion": &protocol_version,
+            "role": &role,
+            "listenAddress": &listen_address,
+            "bindAddress": &bind_address,
+            "dataDir": &data_dir,
             "statePath": state_path,
-            "peerConfig": peer_config,
+            "staticPeers": &peers,
+            "safeApiMetadata": {
+                "nodeId": node_id,
+                "networkProfile": &network_profile,
+                "chainId": &chain_id,
+                "genesisHash": &genesis_hash,
+                "protocolVersion": &protocol_version,
+                "role": &role,
+                "listenAddress": &listen_address
+            },
             "localOnly": true,
-            "lanMode": "not exposed; static local-file peers only"
+            "lanMode": "not exposed; static local-file peers and deterministic file relay only"
         }),
     )
 }
@@ -882,6 +1583,10 @@ fn processed_dir(node_dir: &Path) -> PathBuf {
 
 fn rejected_dir(node_dir: &Path) -> PathBuf {
     node_dir.join("rejected")
+}
+
+fn relayed_dir(node_dir: &Path) -> PathBuf {
+    node_dir.join("relayed")
 }
 
 fn stop_file(node_dir: &Path) -> PathBuf {
@@ -1283,12 +1988,23 @@ struct NodeStatus {
     note: String,
     node_id: String,
     pid: u32,
+    network_profile: String,
+    chain_id: String,
+    genesis_hash: String,
+    protocol_version: String,
+    role: String,
+    listen_address: String,
+    bind_address: String,
     state_path: PathBuf,
     node_dir: PathBuf,
     block_height: usize,
+    finalized_height: usize,
     next_block_number: u64,
     latest_block_hash: String,
     state_root: String,
+    sync_status: String,
+    peers: Vec<PeerStatus>,
+    rejected_blocks: Vec<BlockRejectEvidence>,
     pending_txs: usize,
     local_test_unit_balances: usize,
     faucet_records: usize,
@@ -1303,6 +2019,7 @@ struct NodeStatus {
     static_peer_sync: Option<PeerSyncEvent>,
     last_ingested_txs: usize,
     last_rejected_inbox_files: usize,
+    last_relayed_txs: usize,
     lan_mode: String,
 }
 
@@ -1317,17 +2034,52 @@ impl NodeStatus {
         state: &crate::model::ChainState,
         last_ingested_txs: usize,
         last_rejected_inbox_files: usize,
-        static_peer_sync: Option<PeerSyncEvent>,
+        last_relayed_txs: usize,
+        sync_outcome: Option<PeerSyncOutcome>,
+        peer_config: Option<&PeerConfig>,
     ) -> Self {
+        let peers = sync_outcome
+            .as_ref()
+            .map(|outcome| outcome.peers.clone())
+            .unwrap_or_default();
+        let rejected_blocks = sync_outcome
+            .as_ref()
+            .map(|outcome| outcome.rejected_blocks.clone())
+            .unwrap_or_default();
+        let static_peer_sync = sync_outcome.and_then(|outcome| outcome.adopted);
+        let sync_status = node_sync_status(&peers, static_peer_sync.as_ref());
+        let network_profile = peer_config
+            .map(|config| config.network_profile.clone())
+            .unwrap_or_else(default_network_profile);
+        let protocol_version = peer_config
+            .map(|config| config.protocol_version.clone())
+            .unwrap_or_else(default_protocol_version);
+        let role = peer_config
+            .map(|config| config.role.clone())
+            .unwrap_or_else(default_node_role);
+        let listen_address = peer_config
+            .map(|config| config.listen_address.clone())
+            .unwrap_or_else(|| default_listen_address(node_id, node_dir));
+        let bind_address = peer_config
+            .map(|config| config.bind_address.clone())
+            .unwrap_or_else(|| default_bind_address(node_id, node_dir));
         Self {
             schema: "flowmemory.local_devnet.node_status.v0".to_string(),
             status: status.to_string(),
             note: note.to_string(),
             node_id: node_id.to_string(),
             pid,
+            network_profile,
+            chain_id: state.chain_id.clone(),
+            genesis_hash: state.genesis_hash.clone(),
+            protocol_version,
+            role,
+            listen_address,
+            bind_address,
             state_path: state_path.to_path_buf(),
             node_dir: node_dir.to_path_buf(),
             block_height: state.blocks.len(),
+            finalized_height: state.blocks.len(),
             next_block_number: state.next_block_number,
             latest_block_hash: state
                 .blocks
@@ -1335,6 +2087,9 @@ impl NodeStatus {
                 .map(|block| block.block_hash.clone())
                 .unwrap_or_else(|| state.parent_hash.clone()),
             state_root: state_root(state),
+            sync_status,
+            peers,
+            rejected_blocks,
             pending_txs: state.pending_txs.len(),
             local_test_unit_balances: state.local_test_unit_balances.len(),
             faucet_records: state.faucet_records.len(),
@@ -1349,9 +2104,38 @@ impl NodeStatus {
             static_peer_sync,
             last_ingested_txs,
             last_rejected_inbox_files,
-            lan_mode: "not exposed; static local-file peers only".to_string(),
+            last_relayed_txs,
+            lan_mode: "not exposed; static local-file peers and deterministic file relay only"
+                .to_string(),
         }
     }
+}
+
+fn node_sync_status(peers: &[PeerStatus], adopted: Option<&PeerSyncEvent>) -> String {
+    if adopted.is_some() {
+        return "syncing".to_string();
+    }
+    if peers.is_empty() {
+        return "singleNode".to_string();
+    }
+    if peers
+        .iter()
+        .any(|peer| matches!(peer.sync_status.as_str(), "blocked" | "syncBlocked"))
+    {
+        return "blocked".to_string();
+    }
+    if peers.iter().any(|peer| peer.sync_status == "disconnected") {
+        return "degraded".to_string();
+    }
+    if peers.iter().all(|peer| {
+        matches!(
+            peer.sync_status.as_str(),
+            "caughtUp" | "stalePeer" | "localAhead"
+        )
+    }) {
+        return "caughtUp".to_string();
+    }
+    "connected".to_string()
 }
 
 #[derive(Debug, Serialize)]
@@ -1406,6 +2190,22 @@ impl NodeTickSummary {
         Self {
             schema: "flowmemory.local_devnet.node_tick.v0".to_string(),
             block_hash,
+            status,
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct NodeSyncSummary {
+    schema: String,
+    status: NodeStatus,
+}
+
+impl NodeSyncSummary {
+    fn from_status(status: NodeStatus) -> Self {
+        Self {
+            schema: "flowmemory.local_devnet.node_sync.v0".to_string(),
             status,
         }
     }

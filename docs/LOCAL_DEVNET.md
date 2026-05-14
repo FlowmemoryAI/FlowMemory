@@ -41,8 +41,10 @@ npm run flowchain:stop
 ```
 
 The wrappers call the Rust CLI below and write ignored operator/status/handoff/
-export files under `devnet/local/`. The current runtime is still a
-deterministic local CLI, not a long-running node.
+export files under `devnet/local/`. The runtime is still local/private and
+deterministic. It now includes a bounded local node mode plus deterministic
+file-relay peer sync for multi-node smoke testing; it is not LAN socket gossip,
+public validator networking, or production consensus.
 
 Initialize state:
 
@@ -113,7 +115,93 @@ Run the full smoke flow:
 cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- smoke
 ```
 
-`smoke` now builds the native object lifecycle, writes state and handoff files, produces 10 deterministic local blocks, and proves deterministic single-node reconciliation by replaying the same flow twice and comparing block hashes, latest parent hash, state root, and map roots. LAN and multi-node networking are not exposed in this crate yet.
+`smoke` now builds the native object lifecycle, writes state and handoff files, produces 10 deterministic local blocks, and proves deterministic single-node reconciliation by replaying the same flow twice and comparing block hashes, latest parent hash, state root, and map roots.
+
+## Private Local Networking
+
+The local/private networking layer uses deterministic local files as the
+transport boundary. Each node has an explicit identity, state file, node
+directory, listen-address string, bind-address string, and static peer config.
+Nodes exchange status by reading peer state and relaying locally authorized
+transactions into peer inboxes. Blocks are reconciled by validating the peer
+chain summary and adopting the higher valid canonical state.
+
+Run the strict two-node network E2E:
+
+```powershell
+npm run flowchain:network:e2e
+```
+
+Run the required multi-node smoke alias:
+
+```powershell
+npm run flowchain:multi-node:smoke
+```
+
+Reports are written under ignored local paths:
+
+```text
+devnet/local/network-e2e/network-e2e-report.json
+devnet/local/multi-node-smoke/multi-node-smoke-report.json
+```
+
+The E2E starts node A and node B, submits a locally authorized transaction to
+node A, proves node B can query the resulting local balance/faucet state after
+sync, stops node B, advances node A, restarts node B, and proves both nodes end
+at the same height and state root. It also records negative peer evidence for
+wrong chain ID, wrong genesis hash, unsupported protocol version, stale peer
+head, invalid parent block, and duplicate transaction IDs.
+
+Peer config shape:
+
+```json
+{
+  "schema": "flowmemory.local_devnet.peer_config.v1",
+  "nodeId": "node:network:a",
+  "networkProfile": "local-file-private-testnet",
+  "chainId": "flowmemory-local-devnet-v0",
+  "genesisHash": "0x0f23c892cbd2d00c10839d97ddab833698a83f8df8d6df27ceac03cfdd4b7bc9",
+  "protocolVersion": "flowchain-local-network/0.1.0",
+  "role": "block-producer",
+  "listenAddress": "flowchain-local://node-network-a@devnet/local/network-e2e/node-a",
+  "bindAddress": "local-file://devnet/local/network-e2e/node-a#node-network-a",
+  "dataDir": "devnet/local/network-e2e/node-a",
+  "statePath": "devnet/local/network-e2e/node-a-state.json",
+  "staticPeers": [
+    {
+      "nodeId": "node:network:b",
+      "role": "full-node",
+      "peerAddress": "flowchain-local://node-network-b@devnet/local/network-e2e/node-b",
+      "listenAddress": "flowchain-local://node-network-b@devnet/local/network-e2e/node-b",
+      "bindAddress": "local-file://devnet/local/network-e2e/node-b#node-network-b",
+      "nodeDir": "devnet/local/network-e2e/node-b",
+      "statePath": "devnet/local/network-e2e/node-b-state.json",
+      "chainId": "flowmemory-local-devnet-v0",
+      "genesisHash": "0x0f23c892cbd2d00c10839d97ddab833698a83f8df8d6df27ceac03cfdd4b7bc9",
+      "protocolVersion": "flowchain-local-network/0.1.0"
+    }
+  ]
+}
+```
+
+`node-status` exposes dashboard-safe network metadata without reading internal
+logs:
+
+- `networkProfile`, `chainId`, `genesisHash`, `protocolVersion`, `role`
+- `listenAddress`, `bindAddress`, `statePath`, `nodeDir`
+- `blockHeight`, `finalizedHeight`, `latestBlockHash`, `stateRoot`
+- `syncStatus`, `staticPeerSync`, `peers[]`, `rejectedBlocks[]`
+- per-peer `connectionStatus`, `status`, `syncStatus`, `latestHeight`,
+  `latestHash`, `lastSeenHeight`, `lastSeenHash`, `remoteStateRoot`,
+  `reconnectAttempts`, and `rejectedBlock`
+
+Manual node commands:
+
+```powershell
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- --state devnet/local/network-e2e/node-a-state.json --node-dir devnet/local/network-e2e/node-a node --node-id node:network:a --peer-config devnet/local/network-e2e/node-a-peers.json --max-blocks 3
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- --state devnet/local/network-e2e/node-b-state.json --node-dir devnet/local/network-e2e/node-b sync --node-id node:network:b --peer-config devnet/local/network-e2e/node-b-peers.json
+cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- --state devnet/local/network-e2e/node-b-state.json --node-dir devnet/local/network-e2e/node-b node-status
+```
 
 Import a FlowPulse observation fixture:
 

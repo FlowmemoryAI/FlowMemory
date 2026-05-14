@@ -1,6 +1,6 @@
 use crate::hash::{hash_json, keccak_hex};
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use thiserror::Error;
 
 pub const STATE_SCHEMA: &str = "flowmemory.local_devnet.state.v0";
@@ -1209,11 +1209,28 @@ pub fn build_block(state: &mut ChainState) -> Block {
     let txs = std::mem::take(&mut state.pending_txs);
     let mut receipts = Vec::with_capacity(txs.len());
     let mut tx_ids = Vec::with_capacity(txs.len());
+    let mut included_tx_ids = state
+        .blocks
+        .iter()
+        .flat_map(|block| {
+            block
+                .receipts
+                .iter()
+                .filter(|receipt| receipt.status == "applied")
+                .map(|receipt| receipt.tx_id.clone())
+        })
+        .collect::<BTreeSet<_>>();
 
     for envelope in txs {
+        if included_tx_ids.contains(&envelope.tx_id) {
+            continue;
+        }
         tx_ids.push(envelope.tx_id.clone());
         let authorization = envelope.authorization.clone();
         let result = apply_transaction(state, &envelope.tx);
+        if result.is_ok() {
+            included_tx_ids.insert(envelope.tx_id.clone());
+        }
         receipts.push(BlockReceipt {
             tx_id: envelope.tx_id,
             status: if result.is_ok() {
