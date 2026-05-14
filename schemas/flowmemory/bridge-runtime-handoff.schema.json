@@ -24,7 +24,7 @@
     "schema": { "const": "flowmemory.bridge_runtime_handoff.v0" },
     "handoffId": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
     "generatedAt": { "type": "string" },
-    "mode": { "type": "string", "enum": ["mock", "local-anvil", "base-sepolia", "base-mainnet-canary"] },
+    "mode": { "type": "string", "enum": ["mock", "mock-pilot", "local-anvil", "base-sepolia", "base-mainnet-canary", "base-mainnet-pilot"] },
     "productionReady": { "const": false },
     "localOnly": { "const": true },
     "observations": {
@@ -38,6 +38,18 @@
     "withdrawalIntents": {
       "type": "array",
       "items": { "$ref": "bridge-withdrawal-intent.schema.json" }
+    },
+    "runtimeApplications": {
+      "type": "array",
+      "items": { "$ref": "bridge-runtime-credit-application.schema.json" }
+    },
+    "pilotEvidence": {
+      "type": "array",
+      "items": { "$ref": "bridge-pilot-evidence.schema.json" }
+    },
+    "releaseEvidences": {
+      "type": "array",
+      "items": { "$ref": "bridge-release-evidence.schema.json" }
     },
     "replayProtection": {
       "type": "object",

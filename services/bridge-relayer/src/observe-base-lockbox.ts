@@ -1,9 +1,10 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
   canonicalJson,
+  assertNoSecrets,
   decodeAddressTopic,
   decodeBytes32Word,
   decodeUint256Word,
@@ -14,10 +15,13 @@ import {
 } from "../../shared/src/index.ts";
 
 export const BASE_MAINNET_CHAIN_ID = 8453;
+export const BASE_MAINNET_CHAIN_ID_HEX = "0x2105";
 export const BASE_SEPOLIA_CHAIN_ID = 84532;
 export const LOCAL_ANVIL_CHAIN_ID = 31337;
 export const MAX_CANARY_USD = 25;
+export const MAX_PILOT_USD = 25;
 export const MAX_BLOCK_RANGE = 5_000n;
+export const DEFAULT_PILOT_CONFIRMATIONS = 2;
 export const BRIDGE_DEPOSIT_EVENT_SIGNATURE_TEXT =
   "BridgeDeposit(bytes32,uint256,address,address,uint256,bytes32,uint256,bytes32)";
 export const BRIDGE_DEPOSIT_TOPIC0 = keccak256Utf8(BRIDGE_DEPOSIT_EVENT_SIGNATURE_TEXT);
@@ -30,7 +34,21 @@ export type BridgeSourceChainId =
   | typeof BASE_SEPOLIA_CHAIN_ID
   | typeof BASE_MAINNET_CHAIN_ID;
 
-export type BridgeMode = "mock" | "local-anvil" | "base-sepolia" | "base-mainnet-canary";
+export type BridgeMode =
+  | "mock"
+  | "mock-pilot"
+  | "local-anvil"
+  | "base-sepolia"
+  | "base-mainnet-canary"
+  | "base-mainnet-pilot";
+
+export interface BridgeConfirmationEvidence {
+  depth: number;
+  latestBlockNumber?: string;
+  requiredConfirmedBlockNumber?: string;
+  requestedToBlock?: string;
+  satisfied: boolean;
+}
 
 export interface BridgeDeposit {
   schema: "flowmemory.bridge_deposit.v0";
@@ -65,6 +83,10 @@ export interface BridgeObservation {
     explicitBlockRange: boolean;
     noSecrets: boolean;
     maxUsd?: number;
+    maxDepositAmount?: string;
+    totalCapAmount?: string;
+    confirmation?: BridgeConfirmationEvidence;
+    approvedContract?: boolean;
   };
 }
 
@@ -138,6 +160,87 @@ export interface BridgeWithdrawalIntentSet {
   productionReady: false;
 }
 
+export interface BridgeRuntimeCreditApplication {
+  schema: "flowmemory.bridge_runtime_credit_application.v0";
+  applicationId: `0x${string}`;
+  creditId: `0x${string}`;
+  depositId: `0x${string}`;
+  replayKey: `0x${string}`;
+  flowchainRecipient: `0x${string}`;
+  amount: string;
+  status: "applied" | "idempotent_replay" | "rejected";
+  appliedAt?: string;
+  previousApplicationId?: `0x${string}`;
+  rejectionReason?: string;
+  applyCount: 0 | 1;
+  localOnly: true;
+  productionReady: false;
+}
+
+export interface BridgePilotEvidence {
+  schema: "flowmemory.bridge_pilot_evidence.v0";
+  evidenceId: `0x${string}`;
+  generatedAt: string;
+  mode: BridgeMode;
+  productionReady: false;
+  localOnly: true;
+  observationId: `0x${string}`;
+  creditId: `0x${string}`;
+  depositId: `0x${string}`;
+  replayKey: `0x${string}`;
+  source: {
+    chainId: BridgeSourceChainId;
+    chainIdHex: `0x${string}`;
+    contract: `0x${string}`;
+    txHash: `0x${string}`;
+    logIndex: number;
+    blockNumber?: string;
+  };
+  guardrails: {
+    approvedContract: boolean;
+    confirmation: BridgeConfirmationEvidence;
+    maxUsd?: number;
+    maxDepositAmount?: string;
+    totalCapAmount?: string;
+    operatorAcknowledged: boolean;
+    noSecrets: true;
+  };
+  creditApplication: {
+    applicationId?: `0x${string}`;
+    status: BridgeRuntimeCreditApplication["status"] | BridgeCredit["status"];
+    appliedExactlyOnce: boolean;
+    rejectionReason?: string;
+  };
+  replay: {
+    decision: "accepted_once" | "duplicate_replay_key_rejected" | "already_applied_idempotent";
+    duplicateReplayKeys: `0x${string}`[];
+  };
+  nextOperatorCommands: string[];
+}
+
+export interface BridgeReleaseEvidence {
+  schema: "flowmemory.bridge_release_evidence.v0";
+  releaseEvidenceId: `0x${string}`;
+  generatedAt: string;
+  withdrawalIntentId: `0x${string}`;
+  creditId: `0x${string}`;
+  depositId: `0x${string}`;
+  sourceChainId: BridgeSourceChainId;
+  destinationChainId: BridgeSourceChainId;
+  lockbox: `0x${string}`;
+  releaseCall: {
+    method: "releaseERC20" | "releaseNative";
+    recipient: `0x${string}`;
+    token: `0x${string}`;
+    amount: string;
+    evidenceHash: `0x${string}`;
+    broadcast: false;
+  };
+  operatorNote: string;
+  productionReady: false;
+  localOnly: true;
+}
+
 export interface BridgeRuntimeHandoff {
   schema: "flowmemory.bridge_runtime_handoff.v0";
   handoffId: `0x${string}`;
@@ -148,6 +251,9 @@ export interface BridgeRuntimeHandoff {
   observations: BridgeObservation[];
   credits: BridgeCredit[];
   withdrawalIntents: BridgeWithdrawalIntent[];
+  runtimeApplications: BridgeRuntimeCreditApplication[];
+  pilotEvidence: BridgePilotEvidence[];
+  releaseEvidences: BridgeReleaseEvidence[];
   replayProtection: {
     strategy: "source-chain-contract-tx-log-deposit";
     replayKeys: `0x${string}`[];
@@ -191,17 +297,28 @@ interface CliOptions {
   fromBlock?: string;
   toBlock?: string;
   expectedChainId?: BridgeSourceChainId;
+  approvedLockboxAddresses: `0x${string}`[];
+  confirmationDepth: number;
   acknowledgeRealFunds: boolean;
+  acknowledgePilot: boolean;
   maxUsd?: number;
+  maxDepositAmount?: string;
+  totalCapAmount?: string;
   applyCredit: boolean;
   withdrawalIntent: boolean;
   withdrawalBaseRecipient?: `0x${string}`;
+  runtimeStatePath?: string;
+  evidenceOutPath?: string;
+  releaseEvidenceOutPath?: string;
 }
 
 export interface BridgePipelineResult {
   observations: BridgeObservation[];
   credits: BridgeCredit[];
   withdrawalIntents: BridgeWithdrawalIntent[];
+  runtimeApplications: BridgeRuntimeCreditApplication[];
+  pilotEvidence: BridgePilotEvidence[];
+  releaseEvidences: BridgeReleaseEvidence[];
   handoff: BridgeRuntimeHandoff;
 }
 
@@ -253,6 +370,14 @@ function asDecimalString(value: unknown, name: string): string {
   return text;
 }
 
+function asPositiveDecimalString(value: unknown, name: string): string {
+  const text = asDecimalString(value, name);
+  if (BigInt(text) <= 0n) {
+    throw new Error(`${name} must be greater than zero`);
+  }
+  return text;
+}
+
 function asNonNegativeInteger(value: unknown, name: string): number {
   const number = Number(value);
   if (!Number.isInteger(number) || number < 0) {
@@ -280,6 +405,26 @@ function asSourceChainId(value: unknown, name: string): BridgeSourceChainId {
   return chainId as BridgeSourceChainId;
 }
 
+function isMockMode(mode: BridgeMode): boolean {
+  return mode === "mock" || mode === "mock-pilot";
+}
+
+function isPilotMode(mode: BridgeMode): boolean {
+  return mode === "mock-pilot" || mode === "base-mainnet-pilot";
+}
+
+function chainIdHex(chainId: BridgeSourceChainId): `0x${string}` {
+  return `0x${chainId.toString(16)}`;
+}
+
+function parseApprovedLockboxes(value: string, name: string): `0x${string}`[] {
+  return value
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0)
+    .map((entry) => asAddress(entry, name));
+}
+
 function expectedChainIdForMode(mode: BridgeMode, explicit?: BridgeSourceChainId): BridgeSourceChainId {
   if (explicit !== undefined) {
     return explicit;
@@ -288,6 +433,9 @@ function expectedChainIdForMode(mode: BridgeMode, explicit?: BridgeSourceChainId
     return LOCAL_ANVIL_CHAIN_ID;
   }
   if (mode === "base-sepolia") {
+    return BASE_SEPOLIA_CHAIN_ID;
+  }
+  if (mode === "mock") {
     return BASE_SEPOLIA_CHAIN_ID;
   }
   return BASE_MAINNET_CHAIN_ID;
@@ -305,11 +453,19 @@ export function parseBridgeArgs(args: string[]): CliOptions {
   let fromBlock: string | undefined;
   let toBlock: string | undefined;
   let expectedChainId: BridgeSourceChainId | undefined;
+  let approvedLockboxAddresses: `0x${string}`[] = [];
+  let confirmationDepth: number | undefined;
   let acknowledgeRealFunds = false;
+  let acknowledgePilot = false;
   let maxUsd: number | undefined;
+  let maxDepositAmount: string | undefined;
+  let totalCapAmount: string | undefined;
   let applyCredit = false;
   let withdrawalIntent = false;
   let withdrawalBaseRecipient: `0x${string}` | undefined;
+  let runtimeStatePath: string | undefined;
+  let evidenceOutPath: string | undefined;
+  let releaseEvidenceOutPath: string | undefined;
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
@@ -317,11 +473,13 @@ export function parseBridgeArgs(args: string[]): CliOptions {
       const value = argValue(args, index, arg);
       if (
         value !== "mock"
+        && value !== "mock-pilot"
         && value !== "local-anvil"
         && value !== "base-sepolia"
         && value !== "base-mainnet-canary"
+        && value !== "base-mainnet-pilot"
       ) {
-        throw new Error("--mode must be mock, local-anvil, base-sepolia, or base-mainnet-canary");
+        throw new Error("--mode must be mock, mock-pilot, local-anvil, base-sepolia, base-mainnet-canary, or base-mainnet-pilot");
       }
       mode = value;
       index += 1;
@@ -355,10 +513,30 @@ export function parseBridgeArgs(args: string[]): CliOptions {
     } else if (arg === "--expected-chain-id") {
       expectedChainId = asSourceChainId(argValue(args, index, arg), arg);
       index += 1;
+    } else if (arg === "--approved-lockbox" || arg === "--approved-lockbox-address") {
+      approvedLockboxAddresses.push(asAddress(argValue(args, index, arg), arg));
+      index += 1;
+    } else if (arg === "--approved-lockboxes" || arg === "--approved-lockbox-addresses") {
+      approvedLockboxAddresses = [
+        ...approvedLockboxAddresses,
+        ...parseApprovedLockboxes(argValue(args, index, arg), arg),
+      ];
+      index += 1;
+    } else if (arg === "--confirmations" || arg === "--confirmation-depth") {
+      confirmationDepth = asNonNegativeInteger(argValue(args, index, arg), arg);
+      index += 1;
     } else if (arg === "--acknowledge-real-funds") {
       acknowledgeRealFunds = true;
+    } else if (arg === "--acknowledge-pilot") {
+      acknowledgePilot = true;
     } else if (arg === "--max-usd") {
       maxUsd = Number(argValue(args, index, arg));
+      index += 1;
+    } else if (arg === "--max-deposit-amount") {
+      maxDepositAmount = asPositiveDecimalString(argValue(args, index, arg), arg);
+      index += 1;
+    } else if (arg === "--total-cap-amount") {
+      totalCapAmount = asPositiveDecimalString(argValue(args, index, arg), arg);
       index += 1;
     } else if (arg === "--apply-credit") {
       applyCredit = true;
@@ -367,16 +545,25 @@ export function parseBridgeArgs(args: string[]): CliOptions {
     } else if (arg === "--withdrawal-base-recipient") {
       withdrawalBaseRecipient = asAddress(argValue(args, index, arg), arg);
       index += 1;
+    } else if (arg === "--runtime-state") {
+      runtimeStatePath = argValue(args, index, arg);
+      index += 1;
+    } else if (arg === "--evidence-out") {
+      evidenceOutPath = argValue(args, index, arg);
+      index += 1;
+    } else if (arg === "--release-evidence-out") {
+      releaseEvidenceOutPath = argValue(args, index, arg);
+      index += 1;
     } else {
       throw new Error(`unknown argument: ${arg}`);
     }
   }
 
-  if (mode === "mock" && !fixturePath) {
-    throw new Error("--fixture is required in mock mode");
+  if (isMockMode(mode) && !fixturePath) {
+    throw new Error("--fixture is required in mock modes");
   }
 
-  if (mode !== "mock") {
+  if (!isMockMode(mode)) {
     if (!rpcUrl || !lockboxAddress || !fromBlock || !toBlock) {
       throw new Error("--rpc-url, --lockbox-address, --from-block, and --to-block are required for RPC reads");
     }
@@ -397,7 +584,39 @@ export function parseBridgeArgs(args: string[]): CliOptions {
     if (maxUsd === undefined || !Number.isFinite(maxUsd) || maxUsd <= 0 || maxUsd > MAX_CANARY_USD) {
       throw new Error(`Base mainnet canary requires --max-usd <= ${MAX_CANARY_USD}`);
     }
+    if (applyCredit) {
+      throw new Error("Base mainnet canary is read-only; --apply-credit requires the explicit pilot mode");
+    }
+    if (withdrawalIntent) {
+      throw new Error("Base mainnet canary is read-only; withdrawal intents require the explicit pilot mode");
+    }
   }
+
+  if (isPilotMode(mode)) {
+    if (!acknowledgePilot) {
+      throw new Error("Base pilot modes require --acknowledge-pilot");
+    }
+    if (mode === "base-mainnet-pilot" && !acknowledgeRealFunds) {
+      throw new Error("Base mainnet pilot requires --acknowledge-real-funds");
+    }
+    if (maxUsd === undefined || !Number.isFinite(maxUsd) || maxUsd <= 0 || maxUsd > MAX_PILOT_USD) {
+      throw new Error(`Base pilot modes require --max-usd <= ${MAX_PILOT_USD}`);
+    }
+    if (maxDepositAmount === undefined) {
+      throw new Error("Base pilot modes require --max-deposit-amount");
+    }
+    if (totalCapAmount === undefined) {
+      throw new Error("Base pilot modes require --total-cap-amount");
+    }
+    if (BigInt(totalCapAmount) < BigInt(maxDepositAmount)) {
+      throw new Error("--total-cap-amount must be greater than or equal to --max-deposit-amount");
+    }
+    if (approvedLockboxAddresses.length === 0) {
+      throw new Error("Base pilot modes require at least one --approved-lockbox");
+    }
+  }
+
+  const resolvedConfirmationDepth = confirmationDepth ?? (isPilotMode(mode) ? DEFAULT_PILOT_CONFIRMATIONS : 0);
 
   return {
     mode,
@@ -411,11 +630,19 @@ export function parseBridgeArgs(args: string[]): CliOptions {
     fromBlock,
     toBlock,
     expectedChainId,
+    approvedLockboxAddresses: [...new Set(approvedLockboxAddresses)].sort() as `0x${string}`[],
+    confirmationDepth: resolvedConfirmationDepth,
     acknowledgeRealFunds,
+    acknowledgePilot,
     maxUsd,
+    maxDepositAmount,
+    totalCapAmount,
     applyCredit,
     withdrawalIntent,
     withdrawalBaseRecipient,
+    runtimeStatePath,
+    evidenceOutPath,
+    releaseEvidenceOutPath,
   };
 }
 
@@ -478,11 +705,27 @@ export function bridgeReplayKey(deposit: BridgeDeposit): `0x${string}` {
   });
 }
 
+interface BridgeGuardrailOptions {
+  maxUsd?: number;
+  maxDepositAmount?: string;
+  totalCapAmount?: string;
+  confirmation?: BridgeConfirmationEvidence;
+  approvedContract?: boolean;
+}
+
+function normalizeGuardrailOptions(value?: number | BridgeGuardrailOptions): BridgeGuardrailOptions {
+  if (typeof value === "number") {
+    return { maxUsd: value };
+  }
+  return value ?? {};
+}
+
 export function makeObservation(
   deposit: BridgeDeposit,
   mode: BridgeObservation["mode"],
-  maxUsd?: number,
+  guardrailOptions?: number | BridgeGuardrailOptions,
 ): BridgeObservation {
+  const guardrails = normalizeGuardrailOptions(guardrailOptions);
   const replayKey = bridgeReplayKey(deposit);
   return {
     schema: "flowmemory.bridge_deposit_observation.v0",
@@ -499,9 +742,13 @@ export function makeObservation(
     guardrails: {
       explicitChainId: true,
       explicitContract: true,
-      explicitBlockRange: mode !== "mock",
+      explicitBlockRange: !isMockMode(mode),
       noSecrets: true,
-      ...(maxUsd === undefined ? {} : { maxUsd }),
+      ...(guardrails.maxUsd === undefined ? {} : { maxUsd: guardrails.maxUsd }),
+      ...(guardrails.maxDepositAmount === undefined ? {} : { maxDepositAmount: guardrails.maxDepositAmount }),
+      ...(guardrails.totalCapAmount === undefined ? {} : { totalCapAmount: guardrails.totalCapAmount }),
+      ...(guardrails.confirmation === undefined ? {} : { confirmation: guardrails.confirmation }),
+      ...(guardrails.approvedContract === undefined ? {} : { approvedContract: guardrails.approvedContract }),
     },
   };
 }
@@ -579,6 +826,9 @@ function makeCredits(observations: BridgeObservation[], applyCredit: boolean): B
       return makeBridgeCredit(observation, "rejected", "duplicate_replay_key");
     }
     seen.add(observation.replayKey);
+    if (observation.mode === "base-mainnet-canary") {
+      return makeBridgeCredit(observation, "rejected", "base_mainnet_canary_read_only");
+    }
     return makeBridgeCredit(observation, applyCredit ? "applied" : "pending");
   });
 }
@@ -642,11 +892,145 @@ function duplicateReplayKeys(observations: BridgeObservation[]): `0x${string}`[]
   return [...duplicates].sort();
 }
 
+interface BridgeRuntimeCreditApplicationState {
+  schema: "flowmemory.bridge_runtime_credit_application_state.v0";
+  stateId: `0x${string}`;
+  updatedAt: string;
+  appliedReplayKeys: Record<string, `0x${string}`>;
+  applications: BridgeRuntimeCreditApplication[];
+  localOnly: true;
+  productionReady: false;
+}
+
+function emptyApplicationState(): BridgeRuntimeCreditApplicationState {
+  return {
+    schema: "flowmemory.bridge_runtime_credit_application_state.v0",
+    stateId: stableId("flowmemory.bridge_runtime_credit_application_state.v0", { applications: [] }),
+    updatedAt: FIXED_TEST_OBSERVED_AT,
+    appliedReplayKeys: {},
+    applications: [],
+    localOnly: true,
+    productionReady: false,
+  };
+}
+
+function loadApplicationState(path?: string): BridgeRuntimeCreditApplicationState {
+  if (path === undefined || !existsSync(resolve(path))) {
+    return emptyApplicationState();
+  }
+  const parsed = JSON.parse(readFileSync(resolve(path), "utf8")) as Partial<BridgeRuntimeCreditApplicationState>;
+  if (parsed.schema !== "flowmemory.bridge_runtime_credit_application_state.v0") {
+    throw new Error("unsupported bridge runtime credit application state schema");
+  }
+  return {
+    schema: "flowmemory.bridge_runtime_credit_application_state.v0",
+    stateId: asHash(String(parsed.stateId), "stateId"),
+    updatedAt: String(parsed.updatedAt ?? FIXED_TEST_OBSERVED_AT),
+    appliedReplayKeys: Object.fromEntries(
+      Object.entries(parsed.appliedReplayKeys ?? {}).map(([key, value]) => [
+        asHash(key, "appliedReplayKeys key"),
+        asHash(String(value), "appliedReplayKeys value"),
+      ]),
+    ),
+    applications: Array.isArray(parsed.applications) ? parsed.applications as BridgeRuntimeCreditApplication[] : [],
+    localOnly: true,
+    productionReady: false,
+  };
+}
+
+function makeRuntimeApplication(
+  credit: BridgeCredit,
+  status: BridgeRuntimeCreditApplication["status"],
+  previousApplicationId?: `0x${string}`,
+  rejectionReason?: string,
+): BridgeRuntimeCreditApplication {
+  const applyCount = status === "applied" ? 1 : 0;
+  return {
+    schema: "flowmemory.bridge_runtime_credit_application.v0",
+    applicationId: stableId("flowmemory.bridge_runtime_credit_application.v0", {
+      creditId: credit.creditId,
+      replayKey: credit.replayKey,
+      status,
+      previousApplicationId: previousApplicationId ?? null,
+    }),
+    creditId: credit.creditId,
+    depositId: credit.depositId,
+    replayKey: credit.replayKey,
+    flowchainRecipient: credit.flowchainRecipient,
+    amount: credit.amount,
+    status,
+    appliedAt: status === "applied" ? FIXED_TEST_OBSERVED_AT : undefined,
+    previousApplicationId,
+    rejectionReason,
+    applyCount,
+    localOnly: true,
+    productionReady: false,
+  };
+}
+
+function saveApplicationState(path: string, state: BridgeRuntimeCreditApplicationState): void {
+  const stateId = stableId("flowmemory.bridge_runtime_credit_application_state.v0", {
+    applications: state.applications.map((application) => application.applicationId),
+    appliedReplayKeys: state.appliedReplayKeys,
+  });
+  const normalized: BridgeRuntimeCreditApplicationState = {
+    ...state,
+    stateId,
+    updatedAt: FIXED_TEST_OBSERVED_AT,
+  };
+  const outPath = resolve(path);
+  mkdirSync(dirname(outPath), { recursive: true });
+  assertNoSecrets(normalized);
+  writeFileSync(outPath, `${JSON.stringify(normalized, null, 2)}\n`);
+}
+
+function applyCreditsExactlyOnce(
+  credits: BridgeCredit[],
+  runtimeStatePath?: string,
+): BridgeRuntimeCreditApplication[] {
+  const state = loadApplicationState(runtimeStatePath);
+  const applications: BridgeRuntimeCreditApplication[] = [];
+  let changed = false;
+
+  for (const credit of credits) {
+    if (credit.status !== "applied") {
+      if (credit.status === "rejected") {
+        applications.push(makeRuntimeApplication(credit, "rejected", undefined, credit.rejectionReason));
+      }
+      continue;
+    }
+
+    const previousApplicationId = state.appliedReplayKeys[credit.replayKey];
+    if (previousApplicationId !== undefined) {
+      credit.status = "rejected";
+      credit.appliedAt = undefined;
+      credit.rejectionReason = "already_applied_replay_key";
+      applications.push(makeRuntimeApplication(credit, "idempotent_replay", previousApplicationId, credit.rejectionReason));
+      continue;
+    }
+
+    const application = makeRuntimeApplication(credit, "applied");
+    state.appliedReplayKeys[credit.replayKey] = application.applicationId;
+    state.applications.push(application);
+    applications.push(application);
+    changed = true;
+  }
+
+  if (runtimeStatePath !== undefined && changed) {
+    saveApplicationState(runtimeStatePath, state);
+  }
+
+  return applications;
+}
+
 export function makeRuntimeHandoff(
   mode: BridgeMode,
   observations: BridgeObservation[],
   credits: BridgeCredit[],
   withdrawalIntents: BridgeWithdrawalIntent[],
+  runtimeApplications: BridgeRuntimeCreditApplication[] = [],
+  pilotEvidence: BridgePilotEvidence[] = [],
+  releaseEvidences: BridgeReleaseEvidence[] = [],
   expectedPath = "fixtures/bridge/local-runtime-bridge-handoff.json",
 ): BridgeRuntimeHandoff {
   const normalizedExpectedPath = normalizeHandoffExpectedPath(expectedPath);
@@ -749,6 +1133,9 @@ export function makeRuntimeHandoff(
       observationIds: observations.map((observation) => observation.observationId),
       creditIds: credits.map((credit) => credit.creditId),
       withdrawalIntentIds: withdrawalIntents.map((intent) => intent.withdrawalIntentId),
+      runtimeApplicationIds: runtimeApplications.map((application) => application.applicationId),
+      pilotEvidenceIds: pilotEvidence.map((evidence) => evidence.evidenceId),
+      releaseEvidenceIds: releaseEvidences.map((evidence) => evidence.releaseEvidenceId),
     }),
     generatedAt: FIXED_TEST_OBSERVED_AT,
     mode,
@@ -757,6 +1144,9 @@ export function makeRuntimeHandoff(
     observations,
     credits,
     withdrawalIntents,
+    runtimeApplications,
+    pilotEvidence,
+    releaseEvidences,
     replayProtection: {
       strategy: "source-chain-contract-tx-log-deposit",
       replayKeys,
@@ -811,8 +1201,174 @@ function hexQuantityToNumber(value: string | undefined, name: string): number | 
   return parsed;
 }
 
+function confirmationForEvidence(options: CliOptions, confirmation?: BridgeConfirmationEvidence): BridgeConfirmationEvidence {
+  return confirmation ?? {
+    depth: options.confirmationDepth,
+    satisfied: true,
+  };
+}
+
+function nextOperatorCommands(options: CliOptions): string[] {
+  if (isPilotMode(options.mode)) {
+    return [
+      "Get-Content services/bridge-relayer/out/base8453-pilot-evidence.json",
+      "Get-Content services/bridge-relayer/out/base8453-pilot-release-evidence.json",
+      "npm run flowchain:product-e2e",
+    ];
+  }
+  return [
+    "npm run bridge:local-credit:smoke",
+    "npm run flowchain:product-e2e",
+  ];
+}
+
+function replayDecision(
+  credit: BridgeCredit,
+  duplicateReplayKeys: `0x${string}`[],
+  application?: BridgeRuntimeCreditApplication,
+): BridgePilotEvidence["replay"]["decision"] {
+  if (application?.status === "idempotent_replay") {
+    return "already_applied_idempotent";
+  }
+  if (credit.status === "rejected" && duplicateReplayKeys.includes(credit.replayKey)) {
+    return "duplicate_replay_key_rejected";
+  }
+  return "accepted_once";
+}
+
+function makePilotEvidence(
+  options: CliOptions,
+  observation: BridgeObservation,
+  credit: BridgeCredit,
+  duplicateKeys: `0x${string}`[],
+  application: BridgeRuntimeCreditApplication | undefined,
+  confirmation?: BridgeConfirmationEvidence,
+): BridgePilotEvidence {
+  const confirmationEvidence = confirmationForEvidence(options, confirmation ?? observation.guardrails.confirmation);
+  const appliedExactlyOnce = application?.status === "applied" && application.applyCount === 1;
+  const approvedContract = observation.guardrails.approvedContract ?? true;
+  return {
+    schema: "flowmemory.bridge_pilot_evidence.v0",
+    evidenceId: stableId("flowmemory.bridge_pilot_evidence.v0", {
+      observationId: observation.observationId,
+      creditId: credit.creditId,
+      applicationId: application?.applicationId ?? null,
+      replayDecision: replayDecision(credit, duplicateKeys, application),
+    }),
+    generatedAt: FIXED_TEST_OBSERVED_AT,
+    mode: options.mode,
+    productionReady: false,
+    localOnly: true,
+    observationId: observation.observationId,
+    creditId: credit.creditId,
+    depositId: observation.deposit.depositId,
+    replayKey: observation.replayKey,
+    source: {
+      chainId: observation.deposit.sourceChainId,
+      chainIdHex: chainIdHex(observation.deposit.sourceChainId),
+      contract: observation.deposit.sourceContract,
+      txHash: observation.deposit.txHash,
+      logIndex: observation.deposit.logIndex,
+      blockNumber: observation.deposit.sourceBlockNumber,
+    },
+    guardrails: {
+      approvedContract,
+      confirmation: confirmationEvidence,
+      maxUsd: options.maxUsd,
+      maxDepositAmount: options.maxDepositAmount,
+      totalCapAmount: options.totalCapAmount,
+      operatorAcknowledged: options.acknowledgePilot,
+      noSecrets: true,
+    },
+    creditApplication: {
+      applicationId: application?.applicationId,
+      status: application?.status ?? credit.status,
+      appliedExactlyOnce,
+      rejectionReason: application?.rejectionReason ?? credit.rejectionReason,
+    },
+    replay: {
+      decision: replayDecision(credit, duplicateKeys, application),
+      duplicateReplayKeys: duplicateKeys,
+    },
+    nextOperatorCommands: nextOperatorCommands(options),
+  };
+}
+
+function makeReleaseEvidence(intent: BridgeWithdrawalIntent, deposit: BridgeDeposit): BridgeReleaseEvidence {
+  const evidenceHash = stableId("flowmemory.bridge_release_evidence_hash.v0", {
+    withdrawalIntentId: intent.withdrawalIntentId,
+    creditId: intent.creditId,
+    depositId: intent.depositId,
+    amount: intent.amount,
+    baseRecipient: intent.baseRecipient,
+  });
+  return {
+    schema: "flowmemory.bridge_release_evidence.v0",
+    releaseEvidenceId: stableId("flowmemory.bridge_release_evidence.v0", {
+      withdrawalIntentId: intent.withdrawalIntentId,
+      evidenceHash,
+    }),
+    generatedAt: FIXED_TEST_OBSERVED_AT,
+    withdrawalIntentId: intent.withdrawalIntentId,
+    creditId: intent.creditId,
+    depositId: intent.depositId,
+    sourceChainId: intent.sourceChainId,
+    destinationChainId: intent.destinationChainId,
+    lockbox: deposit.sourceContract,
+    releaseCall: {
+      method: deposit.token === "0x0000000000000000000000000000000000000000" ? "releaseNative" : "releaseERC20",
+      recipient: intent.baseRecipient,
+      token: intent.token,
+      amount: intent.amount,
+      evidenceHash,
+      broadcast: false,
+    },
+    operatorNote: "Pilot release evidence only. Review before any separate release-authority transaction; this relayer does not broadcast.",
+    productionReady: false,
+    localOnly: true,
+  };
+}
+
 function addressFromAbiWord(word: `0x${string}`, name: string): `0x${string}` {
   return asAddress(`0x${word.slice(-40)}`, name);
+}
+
+function assertApprovedLockbox(address: `0x${string}`, options: CliOptions): void {
+  if (options.approvedLockboxAddresses.length === 0) {
+    return;
+  }
+  const approved = new Set(options.approvedLockboxAddresses.map((entry) => entry.toLowerCase()));
+  if (!approved.has(address.toLowerCase())) {
+    throw new Error(`unapproved bridge lockbox address: ${address}`);
+  }
+}
+
+function enforcePilotDepositGuardrails(deposits: BridgeDeposit[], options: CliOptions): void {
+  if (!isPilotMode(options.mode)) {
+    return;
+  }
+  const maxDeposit = BigInt(options.maxDepositAmount ?? "0");
+  const totalCap = BigInt(options.totalCapAmount ?? "0");
+  let total = 0n;
+  const countedReplayKeys = new Set<`0x${string}`>();
+  for (const deposit of deposits) {
+    if (deposit.sourceChainId !== BASE_MAINNET_CHAIN_ID) {
+      throw new Error(`pilot deposit must be from Base chain ${BASE_MAINNET_CHAIN_ID} (${BASE_MAINNET_CHAIN_ID_HEX})`);
+    }
+    assertApprovedLockbox(deposit.sourceContract, options);
+    const amount = BigInt(deposit.amount);
+    if (amount > maxDeposit) {
+      throw new Error(`pilot deposit amount exceeds --max-deposit-amount: ${deposit.amount}`);
+    }
+    const replayKey = bridgeReplayKey(deposit);
+    if (!countedReplayKeys.has(replayKey)) {
+      countedReplayKeys.add(replayKey);
+      total += amount;
+    }
+  }
+  if (total > totalCap) {
+    throw new Error(`pilot deposit batch exceeds --total-cap-amount: ${total.toString()}`);
+  }
 }
 
 export function parseBridgeDepositLog(log: RpcLog, expectedChainId: BridgeSourceChainId): BridgeDeposit {
@@ -874,11 +1430,43 @@ async function readChainId(rpcUrl: string): Promise<number> {
   return Number(BigInt(result));
 }
 
-async function readBridgeDepositLogs(options: CliOptions): Promise<BridgeDeposit[]> {
+async function readLatestBlockNumber(rpcUrl: string): Promise<bigint> {
+  const result = await rpcCall<string>(rpcUrl, "eth_blockNumber", []);
+  return hexQuantityToBigInt(result, "eth_blockNumber");
+}
+
+interface BridgeLogReadResult {
+  deposits: BridgeDeposit[];
+  confirmation?: BridgeConfirmationEvidence;
+}
+
+async function readBridgeDepositLogs(options: CliOptions): Promise<BridgeLogReadResult> {
   const expectedChainId = expectedChainIdForMode(options.mode, options.expectedChainId);
+  if (options.lockboxAddress !== undefined) {
+    assertApprovedLockbox(options.lockboxAddress, options);
+  }
   const actualChainId = await readChainId(options.rpcUrl ?? "");
   if (actualChainId !== expectedChainId) {
-    throw new Error(`wrong chain id: expected ${expectedChainId}, got ${actualChainId}`);
+    throw new Error(`wrong chain id: expected ${expectedChainId} (${chainIdHex(expectedChainId)}), got ${actualChainId} (${chainIdHex(actualChainId as BridgeSourceChainId)})`);
+  }
+
+  let confirmation: BridgeConfirmationEvidence | undefined;
+  if (options.confirmationDepth > 0) {
+    const latestBlock = await readLatestBlockNumber(options.rpcUrl ?? "");
+    const requestedToBlock = asBlock(options.toBlock ?? "0", "--to-block");
+    const depth = BigInt(options.confirmationDepth);
+    const requiredConfirmedBlock = latestBlock >= depth ? latestBlock - depth : -1n;
+    const satisfied = requiredConfirmedBlock >= requestedToBlock;
+    confirmation = {
+      depth: options.confirmationDepth,
+      latestBlockNumber: latestBlock.toString(),
+      requiredConfirmedBlockNumber: requiredConfirmedBlock < 0n ? "0" : requiredConfirmedBlock.toString(),
+      requestedToBlock: requestedToBlock.toString(),
+      satisfied,
+    };
+    if (!satisfied) {
+      throw new Error(`insufficient confirmations: toBlock ${requestedToBlock.toString()} requires depth ${options.confirmationDepth}, latest block ${latestBlock.toString()}`);
+    }
   }
 
   const logs = await rpcCall<RpcLog[]>(options.rpcUrl ?? "", "eth_getLogs", [{
@@ -888,18 +1476,41 @@ async function readBridgeDepositLogs(options: CliOptions): Promise<BridgeDeposit
     topics: [BRIDGE_DEPOSIT_TOPIC0],
   }]);
 
-  return logs
+  const deposits = logs
     .filter((log) => !log.removed)
     .map((log) => parseBridgeDepositLog(log, expectedChainId));
+  for (const deposit of deposits) {
+    assertApprovedLockbox(deposit.sourceContract, options);
+  }
+  return { deposits, confirmation };
 }
 
 export async function runBridgePipeline(options: CliOptions): Promise<BridgePipelineResult> {
-  const deposits = options.mode === "mock"
-    ? fixtureDeposits(JSON.parse(readFileSync(resolve(options.fixturePath ?? ""), "utf8")) as unknown)
+  const readResult = isMockMode(options.mode)
+    ? {
+      deposits: fixtureDeposits(JSON.parse(readFileSync(resolve(options.fixturePath ?? ""), "utf8")) as unknown),
+      confirmation: undefined,
+    }
     : await readBridgeDepositLogs(options);
+  const deposits = readResult.deposits;
+  enforcePilotDepositGuardrails(deposits, options);
+  if (options.mode === "base-mainnet-canary" && (options.applyCredit || options.withdrawalIntent)) {
+    throw new Error("Base mainnet canary is read-only; use base-mainnet-pilot only after explicit pilot approval");
+  }
 
-  const observations = deposits.map((deposit) => makeObservation(deposit, options.mode, options.maxUsd));
+  const confirmation = confirmationForEvidence(options, readResult.confirmation);
+  const approvedContracts = new Set(options.approvedLockboxAddresses.map((address) => address.toLowerCase()));
+  const observations = deposits.map((deposit) => makeObservation(deposit, options.mode, {
+    maxUsd: options.maxUsd,
+    maxDepositAmount: options.maxDepositAmount,
+    totalCapAmount: options.totalCapAmount,
+    confirmation: isPilotMode(options.mode) || options.confirmationDepth > 0 ? confirmation : undefined,
+    approvedContract: options.approvedLockboxAddresses.length === 0
+      ? undefined
+      : approvedContracts.has(deposit.sourceContract.toLowerCase()),
+  }));
   const credits = makeCredits(observations, options.applyCredit);
+  const runtimeApplications = applyCreditsExactlyOnce(credits, options.runtimeStatePath);
   const withdrawalIntents = options.withdrawalIntent
     ? credits
       .filter((credit) => credit.status === "applied")
@@ -911,12 +1522,42 @@ export async function runBridgePipeline(options: CliOptions): Promise<BridgePipe
         return makeWithdrawalIntent(credit, deposit, options.withdrawalBaseRecipient);
       })
     : [];
-  const handoff = makeRuntimeHandoff(options.mode, observations, credits, withdrawalIntents, options.handoffOutPath);
+  const releaseEvidences = withdrawalIntents.map((intent) => {
+    const deposit = observations.find((observation) => observation.deposit.depositId === intent.depositId)?.deposit;
+    if (deposit === undefined) {
+      throw new Error(`missing deposit for withdrawal intent ${intent.withdrawalIntentId}`);
+    }
+    return makeReleaseEvidence(intent, deposit);
+  });
+  const duplicateKeys = duplicateReplayKeys(observations);
+  const pilotEvidence = isPilotMode(options.mode)
+    ? observations.map((observation, index) => {
+      const credit = credits[index];
+      if (credit === undefined) {
+        throw new Error(`missing credit for observation ${observation.observationId}`);
+      }
+      const application = runtimeApplications[index] ?? runtimeApplications.find((candidate) => candidate.creditId === credit.creditId);
+      return makePilotEvidence(options, observation, credit, duplicateKeys, application, confirmation);
+    })
+    : [];
+  const handoff = makeRuntimeHandoff(
+    options.mode,
+    observations,
+    credits,
+    withdrawalIntents,
+    runtimeApplications,
+    pilotEvidence,
+    releaseEvidences,
+    options.handoffOutPath,
+  );
 
   return {
     observations,
     credits,
     withdrawalIntents,
+    runtimeApplications,
+    pilotEvidence,
+    releaseEvidences,
     handoff,
   };
 }
@@ -933,6 +1574,7 @@ export async function runBridgeObserver(options: CliOptions): Promise<BridgeObse
 function writeJson(path: string, value: unknown): void {
   const outPath = resolve(path);
   mkdirSync(dirname(outPath), { recursive: true });
+  assertNoSecrets(value);
   writeFileSync(outPath, `${JSON.stringify(value, null, 2)}\n`);
   console.log(`Wrote ${outPath}`);
 }
@@ -942,22 +1584,32 @@ function artifactForSingleOrSet<TSingle, TSet>(values: TSingle[], setValue: TSet
 }
 
 function printRunBoundary(options: CliOptions): void {
-  if (options.mode === "mock") {
+  if (isMockMode(options.mode)) {
     console.log("Bridge mode: mock fixture; no chain RPC or private key is used.");
+    if (options.mode === "mock-pilot") {
+      console.log(`Pilot source chain: Base mainnet ${BASE_MAINNET_CHAIN_ID} (${BASE_MAINNET_CHAIN_ID_HEX}).`);
+      console.log(`Approved lockboxes: ${options.approvedLockboxAddresses.join(", ")}`);
+      console.log(`Pilot max USD: ${options.maxUsd}; max deposit amount: ${options.maxDepositAmount}; total cap amount: ${options.totalCapAmount}.`);
+    }
     return;
   }
 
   const expectedChainId = expectedChainIdForMode(options.mode, options.expectedChainId);
   console.log(`Bridge mode: ${options.mode}`);
-  console.log(`Chain id: ${expectedChainId}`);
+  console.log(`Chain id: ${expectedChainId} (${chainIdHex(expectedChainId)})`);
   console.log(`Lockbox: ${options.lockboxAddress}`);
   console.log(`Block range: ${options.fromBlock}-${options.toBlock}`);
+  console.log(`Confirmation depth: ${options.confirmationDepth}`);
   console.log("Broadcast: false; this observer never sends transactions.");
   if (options.mode === "base-sepolia") {
     console.log("Asset boundary: Base Sepolia test assets only.");
   }
   if (options.mode === "base-mainnet-canary") {
     console.log(`Real-funds guardrail acknowledged for read-only canary. Max USD: ${options.maxUsd}`);
+  }
+  if (options.mode === "base-mainnet-pilot") {
+    console.log(`Base pilot acknowledged. Approved lockboxes: ${options.approvedLockboxAddresses.join(", ")}`);
+    console.log(`Pilot max USD: ${options.maxUsd}; max deposit amount: ${options.maxDepositAmount}; total cap amount: ${options.totalCapAmount}.`);
   }
 }
 
@@ -979,14 +1631,41 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1
   if (options.handoffOutPath !== undefined) {
     writeJson(options.handoffOutPath, result.handoff);
   }
+  if (options.evidenceOutPath !== undefined) {
+    writeJson(
+      options.evidenceOutPath,
+      artifactForSingleOrSet(result.pilotEvidence, {
+        schema: "flowmemory.bridge_pilot_evidence_set.v0",
+        generatedAt: FIXED_TEST_OBSERVED_AT,
+        count: result.pilotEvidence.length,
+        evidence: result.pilotEvidence,
+        productionReady: false,
+      }),
+    );
+  }
   if (options.withdrawalOutPath !== undefined) {
     writeJson(
       options.withdrawalOutPath,
       artifactForSingleOrSet(result.withdrawalIntents, makeWithdrawalIntentSet(result.withdrawalIntents)),
     );
   }
+  if (options.releaseEvidenceOutPath !== undefined) {
+    writeJson(
+      options.releaseEvidenceOutPath,
+      artifactForSingleOrSet(result.releaseEvidences, {
+        schema: "flowmemory.bridge_release_evidence_set.v0",
+        generatedAt: FIXED_TEST_OBSERVED_AT,
+        count: result.releaseEvidences.length,
+        releaseEvidences: result.releaseEvidences,
+        productionReady: false,
+      }),
+    );
+  }
 
   console.log(
-    `Bridge run complete: observed=${result.observations.length}, credits=${result.credits.length}, withdrawals=${result.withdrawalIntents.length}`,
+    `Bridge run complete: observed=${result.observations.length}, credits=${result.credits.length}, applications=${result.runtimeApplications.length}, withdrawals=${result.withdrawalIntents.length}, evidence=${result.pilotEvidence.length}`,
   );
+  for (const command of nextOperatorCommands(options)) {
+    console.log(`Next operator command: ${command}`);
+  }
 }

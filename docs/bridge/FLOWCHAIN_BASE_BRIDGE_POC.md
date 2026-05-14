@@ -81,6 +81,7 @@ npm install
 npm run bridge:mock
 npm run bridge:test
 npm run bridge:local-credit:smoke
+npm run flowchain:real-value-pilot:bridge
 ```
 
 Expected output:
@@ -91,6 +92,23 @@ services/bridge-relayer/out/bridge-credit.json
 services/bridge-relayer/out/bridge-runtime-handoff.json
 fixtures/bridge/local-runtime-bridge-handoff.json
 ```
+
+The real-value pilot mock E2E uses Base chain ID `8453` fixture data without
+external RPC and writes:
+
+```text
+services/bridge-relayer/out/real-value-pilot-e2e/bridge-observation.json
+services/bridge-relayer/out/real-value-pilot-e2e/bridge-credit.json
+services/bridge-relayer/out/real-value-pilot-e2e/bridge-pilot-evidence.json
+services/bridge-relayer/out/real-value-pilot-e2e/bridge-release-evidence.json
+services/bridge-relayer/out/real-value-pilot-e2e/bridge-runtime-handoff.json
+services/bridge-relayer/out/real-value-pilot-e2e/bridge-replay-handoff.json
+services/bridge-relayer/out/real-value-pilot-e2e/bridge-credit-application-state.json
+```
+
+It proves deterministic IDs, wrong-chain rejection, unapproved-lockbox rejection,
+duplicate replay evidence, exactly-once local credit application, and
+test-record-only withdrawal/release evidence.
 
 ## Base Sepolia Smoke
 
@@ -251,6 +269,82 @@ The script checks Base mainnet chain id `8453` and refuses a canary above
 `25` USD. It is read-only and prints the chain, lockbox, block range, max USD
 guardrail, and broadcast status before it reads logs.
 
+## Base 8453 Pilot Observer
+
+The pilot observer is distinct from the read-only canary path. It is for a tiny
+capped owner-operated pilot only and still does not broadcast releases.
+
+Required environment variables:
+
+```text
+FLOWCHAIN_BASE8453_RPC_URL
+FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS
+FLOWCHAIN_BASE8453_APPROVED_LOCKBOX_ADDRESS
+FLOWCHAIN_BASE8453_FROM_BLOCK
+FLOWCHAIN_BASE8453_TO_BLOCK
+FLOWCHAIN_BASE8453_CONFIRMATIONS
+FLOWCHAIN_PILOT_MAX_USD
+FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI
+FLOWCHAIN_PILOT_TOTAL_CAP_WEI
+FLOWCHAIN_PILOT_OPERATOR_ACK=I_UNDERSTAND_THIS_IS_A_TINY_CAPPED_BASE8453_PILOT
+```
+
+Mock mode, no external RPC:
+
+```powershell
+npm run flowchain:real-value-pilot:bridge
+```
+
+Live observer mode:
+
+```powershell
+npm run bridge:base8453:pilot:observe -- -OperatorAck -ApplyCredit -WithdrawalIntent
+```
+
+Equivalent direct command:
+
+```powershell
+npm run bridge:observe -- `
+  --mode base-mainnet-pilot `
+  --rpc-url $env:FLOWCHAIN_BASE8453_RPC_URL `
+  --lockbox-address $env:FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS `
+  --approved-lockbox $env:FLOWCHAIN_BASE8453_APPROVED_LOCKBOX_ADDRESS `
+  --from-block $env:FLOWCHAIN_BASE8453_FROM_BLOCK `
+  --to-block $env:FLOWCHAIN_BASE8453_TO_BLOCK `
+  --confirmations $env:FLOWCHAIN_BASE8453_CONFIRMATIONS `
+  --acknowledge-pilot `
+  --acknowledge-real-funds `
+  --max-usd $env:FLOWCHAIN_PILOT_MAX_USD `
+  --max-deposit-amount $env:FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI `
+  --total-cap-amount $env:FLOWCHAIN_PILOT_TOTAL_CAP_WEI `
+  --apply-credit `
+  --withdrawal-intent `
+  --runtime-state services/bridge-relayer/out/base8453-pilot-credit-application-state.json `
+  --out services/bridge-relayer/out/base8453-pilot-bridge-observation.json `
+  --credit-out services/bridge-relayer/out/base8453-pilot-bridge-credit.json `
+  --handoff-out services/bridge-relayer/out/base8453-pilot-bridge-handoff.json `
+  --evidence-out services/bridge-relayer/out/base8453-pilot-evidence.json `
+  --withdrawal-out services/bridge-relayer/out/base8453-pilot-withdrawal-intent.json `
+  --release-evidence-out services/bridge-relayer/out/base8453-pilot-release-evidence.json
+```
+
+Failure, retry, and replay behavior:
+
+- Wrong `eth_chainId` fails before `eth_getLogs`; Base must return `0x2105`.
+- Unapproved lockbox addresses fail before log reads.
+- If `toBlock` is newer than `latestBlock - confirmations`, the observer fails
+  with an insufficient-confirmations error; retry after more blocks or lower the
+  explicitly configured confirmation depth.
+- Duplicate logs in one batch produce one applied credit and one rejected credit
+  with `duplicate_replay_key` evidence.
+- Re-running the same deposit with the same runtime application state is
+  idempotent: the credit is rejected with `already_applied_replay_key` and no
+  second local application is recorded.
+- Withdrawal/release evidence is written as a local operator record only. The
+  relayer does not sign or broadcast `releaseERC20` or `releaseNative`.
+- RPC URLs, keys, seed phrases, mnemonics, API keys, and webhooks must stay in
+  local environment/config only and are not written to artifacts.
+
 ## Commands
 
 ```powershell
@@ -260,6 +354,7 @@ npm run bridge:test
 npm run bridge:mock
 npm run bridge:sepolia:observe
 npm run bridge:local-credit:smoke
+npm run flowchain:real-value-pilot:bridge
 npm run flowchain:full-smoke
 git diff --check
 ```
