@@ -105,15 +105,16 @@ npm run flowchain:demo
 npm run flowchain:export
 ```
 
-Run the private/local acceptance smoke path when Foundry, Python, Visual Studio
-Build Tools C++ workload, dashboard dependencies, and crypto dependencies are
-installed:
+Run the private/local product testnet acceptance path when Foundry, Python,
+Visual Studio Build Tools C++ workload, dashboard dependencies, and crypto
+dependencies are installed:
 
 ```powershell
 npm install --prefix apps/dashboard
 npm install --prefix crypto
 npm run flowchain:smoke
 npm run flowchain:full-smoke
+npm run flowchain:product-e2e
 ```
 
 Run the existing dashboard as the local workbench:
@@ -141,8 +142,8 @@ npm run read:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpul
 - Do not claim FlowMemory has production contracts or a mainnet deployment.
 - Do not claim FlowMemory is production-ready or mainnet-ready.
 - Do not claim the current hook adapter is a production Uniswap v4 hook.
-- Do not claim explorer, hardware console, production FlowRouter hardware, or Meshtastic integration exists yet.
-- Do not claim cryptographic proof systems, tokenomics, or appchain/L1 implementation exists yet.
+- Do not claim production explorer, production hardware console, production FlowRouter hardware, or Meshtastic integration exists yet.
+- Do not claim production cryptographic proof systems, tokenomics, public mainnet, or audited value-bearing L1 deployment exists yet.
 - Do not claim URI fields enforce off-chain storage. Current URI values are caller-supplied log data.
 
 ## Repository Map

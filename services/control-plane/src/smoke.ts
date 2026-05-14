@@ -41,6 +41,12 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
   const withdrawals = dispatchJsonRpc({ jsonrpc: "2.0", id: "withdrawals-prefetch", method: "withdrawal_list" }, { state }) as RpcSuccessResponse;
   const withdrawal = ((withdrawals.result as JsonObject).withdrawals as JsonObject[])[0];
   const withdrawalId = stringField(withdrawal.withdrawalId, "withdrawalId");
+  const tokens = dispatchJsonRpc({ jsonrpc: "2.0", id: "tokens-prefetch", method: "token_list" }, { state }) as RpcSuccessResponse;
+  const token = ((tokens.result as JsonObject).tokens as JsonObject[])[0];
+  const tokenId = stringField(token.tokenId, "tokenId");
+  const tokenBalances = dispatchJsonRpc({ jsonrpc: "2.0", id: "token-balances-prefetch", method: "token_balance_list" }, { state }) as RpcSuccessResponse;
+  const tokenBalance = ((tokenBalances.result as JsonObject).balances as JsonObject[])[0];
+  const tokenBalanceId = stringField(tokenBalance.balanceId, "tokenBalanceId");
 
   if (rootfieldId === undefined || receipt === undefined || reportId === undefined || artifactUri === undefined) {
     throw new Error("control-plane smoke requires launch-core rootfield, receipt, report, and artifact fixture data");
@@ -61,10 +67,14 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
       id: "transactionSubmit",
       method: "transaction_submit",
       params: {
-        transaction: {
-          schema: "flowmemory.control_plane.smoke_transaction.v0",
-          action: "local-smoke",
-          nonce: "0",
+        signedEnvelope: {
+          schema: "flowmemory.control_plane.smoke_signed_envelope.v0",
+          tx: {
+            schema: "flowmemory.control_plane.smoke_transaction.v0",
+            action: "local-smoke",
+            nonce: "0",
+          },
+          signature: "0xlocal-smoke-signature",
         },
         submittedBy: "control-plane-smoke",
       },
@@ -73,6 +83,14 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
     { jsonrpc: "2.0", id: "accounts", method: "account_list", params: { limit: 10 } },
     { jsonrpc: "2.0", id: "account", method: "account_get", params: { accountId } },
     { jsonrpc: "2.0", id: "balance", method: "balance_get", params: { accountId } },
+    { jsonrpc: "2.0", id: "tokens", method: "token_list", params: { limit: 10 } },
+    { jsonrpc: "2.0", id: "token", method: "token_get", params: { tokenId } },
+    { jsonrpc: "2.0", id: "tokenBalances", method: "token_balance_list", params: { limit: 10 } },
+    { jsonrpc: "2.0", id: "tokenBalance", method: "token_balance_get", params: { balanceId: tokenBalanceId } },
+    { jsonrpc: "2.0", id: "pools", method: "pool_list", params: { limit: 10 } },
+    { jsonrpc: "2.0", id: "lpPositions", method: "lp_position_list", params: { limit: 10 } },
+    { jsonrpc: "2.0", id: "swaps", method: "swap_list", params: { limit: 10 } },
+    { jsonrpc: "2.0", id: "productFlowStatus", method: "product_flow_status" },
     { jsonrpc: "2.0", id: "faucet", method: "faucet_event_list", params: { limit: 10 } },
     { jsonrpc: "2.0", id: "wallets", method: "wallet_metadata_list", params: { limit: 10 } },
     { jsonrpc: "2.0", id: "wallet", method: "wallet_metadata_get", params: { walletId: accountId } },
@@ -135,6 +153,7 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
       txId,
       accountId,
       depositId,
+      tokenId,
     },
     localOnly: true,
   };

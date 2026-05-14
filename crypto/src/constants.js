@@ -63,6 +63,22 @@ export const TYPE_STRINGS = Object.freeze({
     "FlowChainBridgeWithdrawalV0(bytes32 accountId,uint256 destinationChainId,address destinationContract,address token,uint256 amount,address recipient,uint64 requestedAtBlockNumber,uint64 requestedAtUnixMs,uint8 status,bytes32 nonce,bytes32 metadataHash)",
   localBalanceRecordV0:
     "FlowChainLocalBalanceRecordV0(bytes32 accountId,bytes32 assetId,uint256 availableAmount,uint256 lockedAmount,bytes32 lastCreditId,bytes32 lastWithdrawalId,bytes32 stateRoot,uint64 updatedAtBlockNumber,bytes32 nonce)",
+  productTransferV0:
+    "FlowChainProductTransferV0(bytes32 fromAccountId,bytes32 toAccountId,bytes32 assetId,uint256 amount,uint64 accountNonce,uint64 deadlineBlock,bytes32 memoHash)",
+  productTokenLaunchV0:
+    "FlowChainProductTokenLaunchV0(bytes32 issuerAccountId,bytes32 tokenId,bytes32 symbolHash,bytes32 nameHash,bytes32 metadataHash,uint8 decimals,uint256 initialSupply,bytes32 recipientAccountId,uint64 accountNonce,bytes32 launchPolicyHash)",
+  productPoolCreateV0:
+    "FlowChainProductPoolCreateV0(bytes32 creatorAccountId,bytes32 poolId,bytes32 baseAssetId,bytes32 quoteAssetId,uint32 feeBps,uint32 tickSpacing,bytes32 metadataHash,uint64 accountNonce)",
+  productAddLiquidityV0:
+    "FlowChainProductAddLiquidityV0(bytes32 providerAccountId,bytes32 poolId,uint256 baseAmount,uint256 quoteAmount,uint256 minLiquidityTokens,uint64 deadlineBlock,uint64 accountNonce)",
+  productRemoveLiquidityV0:
+    "FlowChainProductRemoveLiquidityV0(bytes32 providerAccountId,bytes32 poolId,uint256 liquidityTokens,uint256 minBaseAmount,uint256 minQuoteAmount,uint64 deadlineBlock,uint64 accountNonce)",
+  productSwapV0:
+    "FlowChainProductSwapV0(bytes32 traderAccountId,bytes32 poolId,bytes32 assetInId,bytes32 assetOutId,uint256 amountIn,uint256 minAmountOut,uint64 deadlineBlock,uint64 accountNonce)",
+  productBridgeCreditAckV0:
+    "FlowChainProductBridgeCreditAckV0(bytes32 creditId,bytes32 depositId,bytes32 accountId,bytes32 assetId,uint256 amount,uint64 acknowledgedAtBlockNumber,uint64 accountNonce)",
+  bridgeWithdrawalIntentV0:
+    "FlowChainBridgeWithdrawalIntentV0(bytes32 creditId,bytes32 depositId,uint256 sourceChainId,uint256 destinationChainId,address token,uint256 amount,bytes32 flowchainAccount,address baseRecipient,bytes32 statusHash,bytes32 requestedAtHash,uint8 testMode,uint8 broadcast,bytes32 releasePolicyHash,uint8 productionReady)",
   hardwareSignalEnvelopeV0:
     "FlowChainHardwareSignalEnvelopeV0(bytes32 deviceId,bytes32 signalRoot,bytes32 previousSignalEnvelopeId,bytes32 channelRoot,uint64 sequence,uint64 observedAtUnixMs,uint8 transport,bytes32 nonce)",
   controlPlaneProvenanceResponseV0:
@@ -100,6 +116,14 @@ export const DOMAIN_STRINGS = Object.freeze({
   bridgeCreditId: "flowchain.local-alpha.v0.bridge-credit.id",
   bridgeWithdrawalId: "flowchain.local-alpha.v0.bridge-withdrawal.id",
   localBalanceRecordId: "flowchain.local-alpha.v0.local-balance-record.id",
+  productTransferId: "flowchain.product-testnet.v1.transfer.id",
+  productTokenLaunchId: "flowchain.product-testnet.v1.token-launch.id",
+  productPoolCreateId: "flowchain.product-testnet.v1.pool-create.id",
+  productAddLiquidityId: "flowchain.product-testnet.v1.add-liquidity.id",
+  productRemoveLiquidityId: "flowchain.product-testnet.v1.remove-liquidity.id",
+  productSwapId: "flowchain.product-testnet.v1.swap.id",
+  productBridgeCreditAckId: "flowchain.product-testnet.v1.bridge-credit-ack.id",
+  bridgeWithdrawalIntentId: "flowchain.product-testnet.v1.bridge-withdrawal-intent.id",
   hardwareSignalEnvelopeId: "flowchain.local-alpha.v0.hardware-signal-envelope.id",
   controlPlaneProvenanceResponseId: "flowchain.local-alpha.v0.control-plane-provenance-response.id",
   localSignatureEnvelope: "flowchain.local-alpha.v0.local-signature-envelope",

@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowmemory.local/schemas/flowmemory/product-transaction.schema.json",
+  "title": "FlowChain Product Testnet V1 Transaction Documents",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "transferId", "fromAccountId", "toAccountId", "assetId", "amount", "accountNonce", "deadlineBlock", "memoHash"],
+      "properties": {
+        "schema": { "const": "flowchain.product_transfer.v0" },
+        "transferId": { "$ref": "#/$defs/hex32" },
+        "fromAccountId": { "$ref": "#/$defs/hex32" },
+        "toAccountId": { "$ref": "#/$defs/hex32" },
+        "assetId": { "$ref": "#/$defs/hex32" },
+        "amount": { "$ref": "#/$defs/uintString" },
+        "accountNonce": { "$ref": "#/$defs/uintString" },
+        "deadlineBlock": { "$ref": "#/$defs/uintString" },
+        "memoHash": { "$ref": "#/$defs/hex32" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "tokenLaunchId", "issuerAccountId", "tokenId", "symbolHash", "nameHash", "metadataHash", "decimals", "initialSupply", "recipientAccountId", "accountNonce", "launchPolicyHash"],
+      "properties": {
+        "schema": { "const": "flowchain.product_token_launch.v0" },
+        "tokenLaunchId": { "$ref": "#/$defs/hex32" },
+        "issuerAccountId": { "$ref": "#/$defs/hex32" },
+        "tokenId": { "$ref": "#/$defs/hex32" },
+        "symbolHash": { "$ref": "#/$defs/hex32" },
+        "nameHash": { "$ref": "#/$defs/hex32" },
+        "metadataHash": { "$ref": "#/$defs/hex32" },
+        "decimals": { "type": "integer", "minimum": 0, "maximum": 18 },
+        "initialSupply": { "$ref": "#/$defs/uintString" },
+        "recipientAccountId": { "$ref": "#/$defs/hex32" },
+        "accountNonce": { "$ref": "#/$defs/uintString" },
+        "launchPolicyHash": { "$ref": "#/$defs/hex32" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "poolCreateId", "creatorAccountId", "poolId", "baseAssetId", "quoteAssetId", "feeBps", "tickSpacing", "metadataHash", "accountNonce"],
+      "properties": {
+        "schema": { "const": "flowchain.product_pool_create.v0" },
+        "poolCreateId": { "$ref": "#/$defs/hex32" },
+        "creatorAccountId": { "$ref": "#/$defs/hex32" },
+        "poolId": { "$ref": "#/$defs/hex32" },
+        "baseAssetId": { "$ref": "#/$defs/hex32" },
+        "quoteAssetId": { "$ref": "#/$defs/hex32" },
+        "feeBps": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "tickSpacing": { "type": "integer", "minimum": 1 },
+        "metadataHash": { "$ref": "#/$defs/hex32" },
+        "accountNonce": { "$ref": "#/$defs/uintString" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "addLiquidityId", "providerAccountId", "poolId", "baseAmount", "quoteAmount", "minLiquidityTokens", "deadlineBlock", "accountNonce"],
+      "properties": {
+        "schema": { "const": "flowchain.product_add_liquidity.v0" },
+        "addLiquidityId": { "$ref": "#/$defs/hex32" },
+        "providerAccountId": { "$ref": "#/$defs/hex32" },
+        "poolId": { "$ref": "#/$defs/hex32" },
+        "baseAmount": { "$ref": "#/$defs/uintString" },
+        "quoteAmount": { "$ref": "#/$defs/uintString" },
+        "minLiquidityTokens": { "$ref": "#/$defs/uintString" },
+        "deadlineBlock": { "$ref": "#/$defs/uintString" },
+        "accountNonce": { "$ref": "#/$defs/uintString" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "removeLiquidityId", "providerAccountId", "poolId", "liquidityTokens", "minBaseAmount", "minQuoteAmount", "deadlineBlock", "accountNonce"],
+      "properties": {
+        "schema": { "const": "flowchain.product_remove_liquidity.v0" },
+        "removeLiquidityId": { "$ref": "#/$defs/hex32" },
+        "providerAccountId": { "$ref": "#/$defs/hex32" },
+        "poolId": { "$ref": "#/$defs/hex32" },
+        "liquidityTokens": { "$ref": "#/$defs/uintString" },
+        "minBaseAmount": { "$ref": "#/$defs/uintString" },
+        "minQuoteAmount": { "$ref": "#/$defs/uintString" },
+        "deadlineBlock": { "$ref": "#/$defs/uintString" },
+        "accountNonce": { "$ref": "#/$defs/uintString" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "swapId", "traderAccountId", "poolId", "assetInId", "assetOutId", "amountIn", "minAmountOut", "deadlineBlock", "accountNonce"],
+      "properties": {
+        "schema": { "const": "flowchain.product_swap.v0" },
+        "swapId": { "$ref": "#/$defs/hex32" },
+        "traderAccountId": { "$ref": "#/$defs/hex32" },
+        "poolId": { "$ref": "#/$defs/hex32" },
+        "assetInId": { "$ref": "#/$defs/hex32" },
+        "assetOutId": { "$ref": "#/$defs/hex32" },
+        "amountIn": { "$ref": "#/$defs/uintString" },
+        "minAmountOut": { "$ref": "#/$defs/uintString" },
+        "deadlineBlock": { "$ref": "#/$defs/uintString" },
+        "accountNonce": { "$ref": "#/$defs/uintString" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "bridgeCreditAckId", "creditId", "depositId", "accountId", "assetId", "amount", "acknowledgedAtBlockNumber", "accountNonce"],
+      "properties": {
+        "schema": { "const": "flowchain.product_bridge_credit_ack.v0" },
+        "bridgeCreditAckId": { "$ref": "#/$defs/hex32" },
+        "creditId": { "$ref": "#/$defs/hex32" },
+        "depositId": { "$ref": "#/$defs/hex32" },
+        "accountId": { "$ref": "#/$defs/hex32" },
+        "assetId": { "$ref": "#/$defs/hex32" },
+        "amount": { "$ref": "#/$defs/uintString" },
+        "acknowledgedAtBlockNumber": { "$ref": "#/$defs/uintString" },
+        "accountNonce": { "$ref": "#/$defs/uintString" }
+      }
+    }
+  ],
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "uintString": { "type": "string", "pattern": "^[0-9]+$" }
+  }
+}

@@ -34,7 +34,7 @@ Run-Step "Start bounded local stack" { npm run flowchain:start }
 Run-Step "Run deterministic demo" { npm run flowchain:demo }
 
 if (-not $SkipSmoke) {
-    Run-Step "Run full local smoke" { npm run flowchain:smoke }
+    Run-Step "Run FlowChain product testnet E2E gate" { npm run flowchain:product-e2e }
 }
 
 Run-Step "Export local bundle" { npm run flowchain:export }

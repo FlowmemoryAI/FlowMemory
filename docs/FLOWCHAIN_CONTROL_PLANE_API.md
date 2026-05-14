@@ -4,7 +4,7 @@ Status: local runtime/fixture-backed V0 contract.
 
 This document defines the local JSON-RPC 2.0 API for the FlowChain / FlowMemory control-plane. It gives dashboard, agent, verifier, and devnet tooling one deterministic local surface for FlowMemory objects, local runtime status, local file-backed transaction intake, and bridge-observation intake.
 
-It is not a production RPC endpoint, public L1 API, hosted service, wallet API, bridge API, token API, or verifier economics surface.
+It is not a production RPC endpoint, public L1 API, hosted service, wallet API, production bridge API, production token API, or verifier economics surface.
 
 ## Runtime Boundary
 
@@ -121,6 +121,13 @@ HTTP health is also available:
 GET /health
 ```
 
+Browser-safe summary endpoints are also available:
+
+```text
+GET /explorer/summary
+GET /product-flow/status
+```
+
 ### `chain_status`
 
 Params: none.
@@ -229,15 +236,18 @@ Params:
 
 ```json
 {
-  "signedTransaction": "{...}",
-  "transaction": {
-    "schema": "flowchain.local_transaction_envelope.v0"
+  "signedEnvelope": {
+    "schema": "flowchain.local_transaction_envelope.v0",
+    "tx": {
+      "schema": "flowchain.local_transaction.v0"
+    },
+    "signature": "0x..."
   },
   "submittedBy": "local-operator"
 }
 ```
 
-Accepts a production-shaped local test transaction envelope or plain local test object, rejects secret-shaped material, and appends an intake row to `devnet/local/intake/transactions.ndjson`. It does not broadcast to a public chain.
+Accepts signed local test transaction envelopes only. Plain `transaction`, `tx`, or `txs` params are rejected. The method rejects secret-shaped material and appends an intake row to `devnet/local/intake/transactions.ndjson`. It does not broadcast to a public chain.
 
 ### `mempool_list`
 
@@ -278,6 +288,129 @@ Params:
 ```
 
 Returns a no-value local test-unit balance record. This is not a token balance, reward, fee account, or bridge asset.
+
+### `token_list`
+
+Params:
+
+```json
+{
+  "status": "launched",
+  "limit": 50
+}
+```
+
+All params are optional. Returns product-testnet token rows from devnet/control-plane handoff maps such as `tokens`, `tokenDefinitions`, `tokenLaunches`, `localTokens`, or `launchedTokens`. If no native token map exists but local test-unit balances exist, the API projects a no-value `local-test-unit` row so explorer panels can still render local funding state.
+
+### `token_get`
+
+Params: one of:
+
+```json
+{ "tokenId": "token:demo" }
+```
+
+```json
+{ "symbol": "DEMO" }
+```
+
+### `token_balance_list`
+
+Params:
+
+```json
+{
+  "accountId": "account:alice",
+  "tokenId": "token:demo",
+  "limit": 50
+}
+```
+
+All params are optional. Returns product-testnet token balance rows from handoff maps such as `tokenBalances`, `localTokenBalances`, or `accountTokenBalances`. Local test-unit balances are projected as `local-test-unit` token balances when native token-balance maps are not present.
+
+### `token_balance_get`
+
+Params: one of:
+
+```json
+{ "balanceId": "token-balance:demo:alice" }
+```
+
+```json
+{
+  "accountId": "account:alice",
+  "tokenId": "token:demo"
+}
+```
+
+### `pool_list`, `pool_get`
+
+Pool methods expose DEX pool rows from `pools`, `dexPools`, `liquidityPools`, or `ammPools` handoff maps.
+
+List params:
+
+```json
+{
+  "tokenId": "token:demo",
+  "limit": 50
+}
+```
+
+Get params:
+
+```json
+{ "poolId": "pool:demo-ltu" }
+```
+
+### `lp_position_list`, `lp_position_get`
+
+LP position methods expose liquidity position rows from `lpPositions`, `liquidityPositions`, or `poolPositions` handoff maps.
+
+List params:
+
+```json
+{
+  "accountId": "account:alice",
+  "poolId": "pool:demo-ltu",
+  "limit": 50
+}
+```
+
+Get params:
+
+```json
+{ "positionId": "lp:alice:demo-ltu" }
+```
+
+### `swap_list`, `swap_get`
+
+Swap methods expose DEX swap rows from `swaps`, `swapReceipts`, or `dexSwaps` handoff maps.
+
+List params:
+
+```json
+{
+  "accountId": "account:alice",
+  "poolId": "pool:demo-ltu",
+  "limit": 50
+}
+```
+
+Get params:
+
+```json
+{ "swapId": "swap:001" }
+```
+
+```json
+{ "txId": "0x..." }
+```
+
+### `product_flow_status`
+
+Params: none.
+
+Returns product-testnet readiness counters and stage labels for wallet, funding, transfer, token launch, DEX pool, liquidity, swap, bridge credit, and explorer visibility. This is a local acceptance/readiness view only; it does not claim production L1 or real-funds bridge readiness.
 
 ### `faucet_event_list`
 
@@ -719,7 +852,7 @@ Expose local bridge-deposit test objects. These do not imply a production bridge
 
 ### `bridge_credit_list`, `bridge_credit_get`
 
-Expose local bridge-credit test objects. These are no-value local accounting objects only.
+Expose local bridge-credit test objects from runtime/control-plane handoff maps or bridge-deposit projections. These are no-value local accounting objects only.
 
 ### `withdrawal_list`, `withdrawal_get`
 
@@ -772,6 +905,8 @@ Allowed `source` values:
 - `devnetVerifierHandoff`
 - `devnetControlPlaneHandoff`
 - `txFixtures`
+- `txIntake`
+- `bridgeObservations`
 
 Returns the raw loaded local JSON object for dashboard/workbench debug views. It does not accept arbitrary filesystem paths.
 
@@ -787,7 +922,8 @@ Dashboard agents should prefer:
 6. `receipt_get`, `work_receipt_get`, `verifier_report_get`, and `provenance_get` for detail drawers.
 7. `artifact_availability_list`, `memory_cell_list`, `agent_list`, and `model_list` for dashboard/workbench panels.
 8. `challenge_get`, `challenge_list`, `finality_get`, and `finality_list` for local challenge/finality labels.
-9. `bridge_observation_list`, `bridge_deposit_list`, `bridge_credit_list`, and `withdrawal_list` for local bridge-shaped test panels.
-10. `raw_json_get` for raw JSON inspection.
+9. `token_list`, `token_balance_list`, `pool_list`, `lp_position_list`, `swap_list`, and `product_flow_status` for product-testnet token/DEX/explorer panels.
+10. `bridge_observation_list`, `bridge_deposit_list`, `bridge_credit_list`, and `withdrawal_list` for local bridge-shaped test panels.
+11. `raw_json_get` for raw JSON inspection.
 
 The API is local-only for V0. The submit methods are local file intake, not public chain broadcast. Live indexing, production settlement, production wallet custody, and production bridge methods require separate scoped work.

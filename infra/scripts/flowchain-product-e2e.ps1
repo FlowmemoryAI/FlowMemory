@@ -92,8 +92,44 @@ $requiredRuntimeCommands = [ordered]@{
 }
 
 foreach ($commandName in $requiredRuntimeCommands.Keys) {
-    $exists = $runtimeHelp -match "(^|\s)$([regex]::Escape($commandName))(\s|$)"
+    $exists = $runtimeHelp.Contains($commandName)
     Add-ProductCheck -Name "runtime-command:$commandName" -Passed $exists -Owner $requiredRuntimeCommands[$commandName] -Evidence $(if ($exists) { "flowmemory-devnet exposes $commandName" } else { "flowmemory-devnet must expose $commandName" })
+}
+
+if ($runtimeHelp.Contains("product-smoke")) {
+    $productStatePath = Join-Path $productRoot "product-state.json"
+    $productExportDir = Join-Path $productRoot "export"
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $productSmokeOutput = (& cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- --state $productStatePath product-smoke --out-dir $productExportDir 2>&1) -join [Environment]::NewLine
+        if ($LASTEXITCODE -ne 0) {
+            throw "Runtime product-smoke command failed."
+        }
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+    $jsonStart = $productSmokeOutput.IndexOf("{")
+    $jsonEnd = $productSmokeOutput.LastIndexOf("}")
+    if ($jsonStart -lt 0 -or $jsonEnd -lt $jsonStart) {
+        throw "Runtime product-smoke did not emit JSON output."
+    }
+    $productSmoke = $productSmokeOutput.Substring($jsonStart, $jsonEnd - $jsonStart + 1) | ConvertFrom-Json
+    foreach ($check in @(
+            "localAccountsFunded",
+            "tokenLaunched",
+            "initialSupplyAssigned",
+            "poolCreated",
+            "liquidityAdded",
+            "swapExecuted",
+            "liquidityRemoved",
+            "productReceiptsQueryable",
+            "noValueBoundary"
+        )) {
+        $passed = [bool] $productSmoke.checks.$check
+        Add-ProductCheck -Name "runtime-product-smoke:$check" -Passed $passed -Owner "runtime/token-dex" -Evidence $(if ($passed) { "product-smoke check passed" } else { "product-smoke check failed" })
+    }
 }
 
 $controlPlaneMethodsPath = Join-Path $repoRoot "services/control-plane/src/types.ts"
@@ -102,9 +138,9 @@ $requiredControlPlaneMethods = [ordered]@{
     "token_list" = "control-plane"
     "token_get" = "control-plane"
     "token_balance_list" = "control-plane"
-    "dex_pool_list" = "control-plane"
-    "dex_pool_get" = "control-plane"
-    "liquidity_position_list" = "control-plane"
+    "pool_list" = "control-plane"
+    "pool_get" = "control-plane"
+    "lp_position_list" = "control-plane"
     "swap_list" = "control-plane"
     "product_flow_status" = "control-plane"
 }
@@ -116,18 +152,25 @@ foreach ($methodName in $requiredControlPlaneMethods.Keys) {
 
 $dashboardSource = Get-ChildItem -LiteralPath (Join-Path $repoRoot "apps/dashboard/src") -Recurse -File -Include *.tsx,*.ts,*.css |
     ForEach-Object { Get-Content -Raw -LiteralPath $_.FullName }
-$dashboardText = $dashboardSource -join [Environment]::NewLine
+$dashboardText = (($dashboardSource -join [Environment]::NewLine).ToLowerInvariant())
 $requiredDashboardSignals = [ordered]@{
-    "Launch Token" = "dashboard"
-    "Create Pool" = "dashboard"
-    "Add Liquidity" = "dashboard"
-    "Swap" = "dashboard"
-    "Bridge Credit" = "dashboard"
+    "launch test token" = "dashboard"
+    "create test pool" = "dashboard"
+    "add test liquidity" = "dashboard"
+    "swap" = "dashboard"
+    "bridge credit" = "dashboard"
 }
 
 foreach ($signalName in $requiredDashboardSignals.Keys) {
     $exists = $dashboardText.Contains($signalName)
     Add-ProductCheck -Name "dashboard-surface:$signalName" -Passed $exists -Owner $requiredDashboardSignals[$signalName] -Evidence $(if ($exists) { "surface text exists" } else { "workbench must expose $signalName user flow" })
+}
+
+$walletProductSmokeExists = (Get-Content -Raw -LiteralPath (Join-Path $repoRoot "crypto/package.json") | ConvertFrom-Json).scripts.PSObject.Properties.Name -contains "wallet:product-smoke"
+Add-ProductCheck -Name "wallet-product-smoke-command" -Passed $walletProductSmokeExists -Owner "wallet/crypto" -Evidence $(if ($walletProductSmokeExists) { "crypto wallet product smoke command exists" } else { "crypto package must expose wallet:product-smoke" })
+if ($walletProductSmokeExists) {
+    Invoke-FlowChainCommand -Label "Run wallet product smoke" -FilePath "npm" -ArgumentList @("run", "wallet:product-smoke", "--prefix", "crypto")
+    Add-ProductCheck -Name "wallet-product-smoke" -Passed $true -Owner "wallet/crypto" -Evidence "npm run wallet:product-smoke --prefix crypto passed"
 }
 
 $reportPath = Join-Path $productRoot "flowchain-product-e2e-report.json"

@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 import { readFileSync, writeFileSync } from "node:fs";
 import {
+  addEncryptedTestVaultAccount,
   createEncryptedTestVault,
   exportVaultPublicMetadata,
+  listVaultPublicAccounts,
+  rotateEncryptedTestVaultAccount,
   signLocalTransactionWithVault,
+  unlockEncryptedTestVault,
   validateLocalTransactionEnvelope
 } from "./index.js";
 
@@ -19,6 +23,45 @@ try {
     });
     writeOutput(args.vault, vault);
     console.log(JSON.stringify(exportVaultPublicMetadata(vault), null, 2));
+  } else if (command === "check") {
+    const vault = readJson(required("vault"));
+    const session = unlockEncryptedTestVault({ vault, password: password() });
+    console.log(JSON.stringify({
+      schema: "flowmemory.crypto.local-test-vault-check.v0",
+      vaultId: session.vaultId,
+      accountCount: session.accounts.length,
+      publicAccountCount: session.publicAccounts.length,
+      unlocked: true
+    }, null, 2));
+  } else if (command === "list") {
+    const vault = readJson(required("vault"));
+    unlockEncryptedTestVault({ vault, password: password() });
+    console.log(JSON.stringify(listVaultPublicAccounts(vault), null, 2));
+  } else if (command === "metadata") {
+    const vault = readJson(required("vault"));
+    console.log(JSON.stringify(exportVaultPublicMetadata(vault), null, 2));
+  } else if (command === "add-account") {
+    const vaultPath = required("vault");
+    const vault = readJson(vaultPath);
+    const updatedVault = addEncryptedTestVaultAccount({
+      vault,
+      password: password(),
+      label: args.label ?? "local-account",
+      signerRole: args.role ?? "agent"
+    });
+    writeOutput(vaultPath, updatedVault);
+    console.log(JSON.stringify(exportVaultPublicMetadata(updatedVault), null, 2));
+  } else if (command === "rotate") {
+    const vaultPath = required("vault");
+    const vault = readJson(vaultPath);
+    const updatedVault = rotateEncryptedTestVaultAccount({
+      vault,
+      password: password(),
+      signerKeyId: required("signer-key-id"),
+      label: args.label
+    });
+    writeOutput(vaultPath, updatedVault);
+    console.log(JSON.stringify(exportVaultPublicMetadata(updatedVault), null, 2));
   } else if (command === "sign") {
     const vault = readJson(required("vault"));
     const document = readJson(required("document"));
@@ -29,17 +72,28 @@ try {
       signerKeyId,
       document,
       chainId: required("chain-id"),
-      nonce: required("nonce")
+      nonce: required("nonce"),
+      issuedAtUnixMs: args["issued-at-unix-ms"]
     });
     writeOutput(args.out, envelope);
     console.log(JSON.stringify(envelope, null, 2));
   } else if (command === "verify") {
     const document = readJson(required("document"));
     const envelope = readJson(required("envelope"));
+    const context = {};
+    if (args["chain-id"]) {
+      context.chainId = args["chain-id"];
+    }
+    if (args["expected-nonce"]) {
+      context.expectedNonce = args["expected-nonce"];
+    }
+    if (args["expected-signer-id"]) {
+      context.expectedSignerId = args["expected-signer-id"];
+    }
     const result = validateLocalTransactionEnvelope({
       document,
       envelope,
-      context: args["chain-id"] ? { chainId: args["chain-id"] } : {}
+      context
     });
     console.log(JSON.stringify(result, null, 2));
     process.exitCode = result.valid ? 0 : 1;
@@ -99,6 +153,11 @@ function writeOutput(path, value) {
 function usage() {
   console.error(`Usage:
   node src/wallet-cli.js create --vault <path> [--password <local-test-password>] [--label <label>] [--role operator]
-  node src/wallet-cli.js sign --vault <path> --document <path> --chain-id <id> --nonce <n> [--signer-key-id <id>] [--out <path>]
-  node src/wallet-cli.js verify --document <path> --envelope <path> [--chain-id <id>]`);
+  node src/wallet-cli.js check --vault <path> [--password <local-test-password>]
+  node src/wallet-cli.js list --vault <path> [--password <local-test-password>]
+  node src/wallet-cli.js metadata --vault <path>
+  node src/wallet-cli.js add-account --vault <path> [--password <local-test-password>] [--label <label>] [--role agent]
+  node src/wallet-cli.js rotate --vault <path> --signer-key-id <id> [--password <local-test-password>] [--label <label>]
+  node src/wallet-cli.js sign --vault <path> --document <path> --chain-id <id> --nonce <n> [--signer-key-id <id>] [--issued-at-unix-ms <ms>] [--out <path>]
+  node src/wallet-cli.js verify --document <path> --envelope <path> [--chain-id <id>] [--expected-nonce <n>] [--expected-signer-id <id>]`);
 }

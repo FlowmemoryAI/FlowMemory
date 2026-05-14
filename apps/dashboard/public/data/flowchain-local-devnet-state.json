@@ -19,7 +19,7 @@
   "genesisHash": "0x0f23c892cbd2d00c10839d97ddab833698a83f8df8d6df27ceac03cfdd4b7bc9",
   "nextBlockNumber": 3,
   "logicalTime": 1778688002,
-  "parentHash": "0x6fc3297759b76c4c907d7590525390ae77af11a1db76c6383fb016a289e2600b",
+  "parentHash": "0x7ddb184c69f798f25f27a254f1f530c6cdc31c9656ac19d1b8c114f7a3a650c6",
   "operatorKeyReferences": {
     "operator-key:local-devnet:alpha": {
       "schema": "flowmemory.local_devnet.operator_key_reference.v0",
@@ -82,6 +82,13 @@
     }
   },
   "balanceTransfers": {},
+  "tokenDefinitions": {},
+  "tokenBalances": {},
+  "tokenMintReceipts": {},
+  "dexPools": {},
+  "lpPositions": {},
+  "liquidityReceipts": {},
+  "swapReceipts": {},
   "modelPassports": {
     "model:demo:local-alpha": {
       "modelPassportId": "model:demo:local-alpha",
@@ -128,7 +135,7 @@
       "finalityStatus": "finalized",
       "challengeCount": 1,
       "finalizedAtBlock": 1,
-      "stateRoot": "0x9a04c063ceb652a89bcdeba147cc36ceeecce9e8a0c6161a5d13b6363a9b5af2"
+      "stateRoot": "0x4e7ee5e7a8cab9b4ddda183842b9e9c1e1e000afea820b577ecc90fa4d9517e2"
     }
   },
   "artifactCommitments": {
@@ -186,12 +193,12 @@
   "importedObservations": {},
   "importedVerifierReports": {},
   "baseAnchors": {
-    "0x7dd81dfdeac346efaef81a3d62e064ab7b5ec4f00f2e2c0fd19745d876ae438d": {
-      "anchorId": "0x7dd81dfdeac346efaef81a3d62e064ab7b5ec4f00f2e2c0fd19745d876ae438d",
+    "0xf57ab7d2c1459c03cf01bfddd56b046be685d8eaa4597e6bb54b5015aeaf003f": {
+      "anchorId": "0xf57ab7d2c1459c03cf01bfddd56b046be685d8eaa4597e6bb54b5015aeaf003f",
       "appchainChainId": "flowmemory-local-devnet-v0",
       "blockRangeStart": 1,
       "blockRangeEnd": 1,
-      "stateRoot": "0x01313a55fdb9736570aa707b5ebf030fc1bf4212df721f7bb17612ad5de2502a",
+      "stateRoot": "0x8c7c1e7a078b60a809d17a51c44e275059afb8d7535769430c3fc9e9320c7e23",
       "workReceiptRoot": "0x8b3ef5650c9eea2f608ad9c7cb73df3c289fc0ac72ed04f46e6ae4bce0a1f023",
       "verifierReportRoot": "0x4facd21e55423e182eba87355482a35daa93f53190fbd3a8d2969f9d55bc5373",
       "rootfieldStateRoot": "0xb72a851dca1103410484e3272945bae5e87fc39b8f32f77d2991959b60d3bfbf",
@@ -201,10 +208,17 @@
       "localTestUnitBalanceRoot": "0x167041ef195b5dde2d2cade6ecb26c9a0a596e9ed21ff7bfb02d33c9d2be8d15",
       "faucetRecordRoot": "0x2277503a52fab3f9e49b40debfb7d641abee75cf268aa56da403fdcf4fad6cee",
       "balanceTransferRoot": "0x9b6e249f769a93bc9f34a90156e028d1a830badcd8ccdc5b1487d512cdbf0a6d",
+      "tokenDefinitionRoot": "0xbbbad9681e8756403940e4333111706a4fcee1f30534ba14deea9ba148056be0",
+      "tokenBalanceRoot": "0xbaf3b150fe41a0f3a2d9fe3dd9a664f9c5934bfef37218d9c3bf1c682be5f8c6",
+      "tokenMintReceiptRoot": "0xaf86773ae2d2c4cbb8404f895fd9ff4132336f382e4e3f12b59df2ed9ba52806",
+      "dexPoolRoot": "0x0e5f034494a2deb6a4f20c04f01e678795c587df4869ad3f189f107fcc447dea",
+      "lpPositionRoot": "0xe67dd98259afb06ca93620b4a8742b924ec2e8f3e6e72934eef5b8e60829d46f",
+      "liquidityReceiptRoot": "0x98bf15cc6859994038744612e125236b1f777895a051c41702c2004134327738",
+      "swapReceiptRoot": "0xc9f3ee93962f36ed10421ec9ad736079a3b13ef6504336495af243b718cefee1",
       "modelPassportRoot": "0x326aa6b0b372d29d24d747fe0879adfd7aaea206373b24ae2ab77d56357e9529",
       "memoryCellRoot": "0x1b4e91099dd8d867201bd880437197ae6c031e538341aaa3cd2046e5706a2c25",
       "challengeRoot": "0x16da3d2bf2dcd801bc5deb3987dc01342cb957031ad01408ea77bf5d1583656f",
-      "finalityReceiptRoot": "0xb2d8234d12f255669267722c21a3841257ca49f304863a7145e7e708a47b3132",
+      "finalityReceiptRoot": "0xdf352e20fd1ddfd2855202335e03cfec21d87e99bf8717d161fe8648998e16cf",
       "artifactAvailabilityProofRoot": "0xfb4b693c45014aae0947f35696e9d864e7b26ac6fd39c1df5edb3e0dcf9bd928",
       "verifierModuleRoot": "0xd6ddd8a2d0f5812d64679656c69983a2e0aecd36bd36199d900245658ae4626c",
       "previousAnchorId": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -311,13 +325,13 @@
           "error": null
         }
       ],
-      "stateRoot": "0x01313a55fdb9736570aa707b5ebf030fc1bf4212df721f7bb17612ad5de2502a",
-      "blockHash": "0xb2251f1db0005e7e665f849a1f0bc2de35f65b263cb4d7aaa870f73f9551eb5c"
+      "stateRoot": "0x8c7c1e7a078b60a809d17a51c44e275059afb8d7535769430c3fc9e9320c7e23",
+      "blockHash": "0x61e9f90b982f13988e85a382fc39da82c9114ecceea9001ab454c744e0801a9b"
     },
     {
       "schema": "flowmemory.local_devnet.block.v0",
       "blockNumber": 2,
-      "parentHash": "0xb2251f1db0005e7e665f849a1f0bc2de35f65b263cb4d7aaa870f73f9551eb5c",
+      "parentHash": "0x61e9f90b982f13988e85a382fc39da82c9114ecceea9001ab454c744e0801a9b",
       "logicalTime": 1778688001,
       "txIds": [
         "0x8f719c880f17b5d4fb6d9efd54ac276d0dd8050d11c2c7870c36a79b66bc49d7"
@@ -329,8 +343,8 @@
           "error": null
         }
       ],
-      "stateRoot": "0x00ab998a4d1f28200177680699c941b06ee536c0b70a1b35e20849de241740c0",
-      "blockHash": "0x6fc3297759b76c4c907d7590525390ae77af11a1db76c6383fb016a289e2600b"
+      "stateRoot": "0x3074ef2e5311d94e8f9a2660a6cc016c7b7f9a08c56ee07f9e841c1489726e68",
+      "blockHash": "0x7ddb184c69f798f25f27a254f1f530c6cdc31c9656ac19d1b8c114f7a3a650c6"
     }
   ],
   "pendingTxs": []

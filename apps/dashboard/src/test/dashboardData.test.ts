@@ -5,12 +5,14 @@ import canaryFixture from "../../../../fixtures/dashboard/flowmemory-dashboard-b
 import fixture from "../../../../fixtures/dashboard/flowmemory-dashboard-v0.json";
 import devnetDashboardState from "../../../../fixtures/launch-core/generated/devnet/dashboard-state.json";
 import devnetState from "../../../../fixtures/launch-core/generated/devnet/state.json";
+import bridgeTestDeposit from "../../public/data/flowchain-bridge-test-deposit.json";
 import { validateDashboardData } from "../data/loadDashboardData";
 import { DASHBOARD_STATUSES } from "../data/status";
 import { computeOverviewMetrics, searchRecords } from "../data/selectors";
 import type { DashboardData, ProvenancedRecord } from "../data/types";
 import {
   DEFAULT_CONTROL_PLANE_URL,
+  WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH,
   WORKBENCH_DEVNET_DASHBOARD_STATE_PATH,
   WORKBENCH_DEVNET_STATE_PATH,
   WORKBENCH_SECTIONS,
@@ -109,6 +111,7 @@ describe("dashboard fixture", () => {
     const workbench = buildWorkbenchSnapshot(data, {
       devnetState,
       devnetDashboardState,
+      bridgeTestDeposit,
     });
 
     expect(workbench.source).toBe("fixture-fallback");
@@ -132,9 +135,16 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.rawJson.map((record) => record.id)).toContain("raw-dashboard-fixture");
     expect(workbench.sections.models.length).toBeGreaterThan(0);
     expect(workbench.sections.challenges.length).toBeGreaterThan(0);
-    expect(workbench.sections.bridgeDeposits).toHaveLength(0);
+    expect(workbench.sections.balances.length).toBeGreaterThan(0);
+    expect(workbench.sections.tokenLaunches).toHaveLength(0);
+    expect(workbench.sections.tokenBalances).toHaveLength(0);
+    expect(workbench.sections.dexPools).toHaveLength(0);
+    expect(workbench.sections.liquidityPositions).toHaveLength(0);
+    expect(workbench.sections.swaps).toHaveLength(0);
+    expect(workbench.sections.bridgeDeposits.length).toBeGreaterThan(0);
     expect(workbench.sections.bridgeCredits).toHaveLength(0);
     expect(workbench.sections.bridgeWithdrawals).toHaveLength(0);
+    expect(workbench.sections.explorerRecords.length).toBeGreaterThan(0);
     expect(workbench.node.status).toBe("offline");
     expect(workbench.actions).toEqual([]);
 
@@ -197,6 +207,9 @@ describe("dashboard fixture", () => {
       if (url === WORKBENCH_DEVNET_DASHBOARD_STATE_PATH) {
         return Response.json(devnetDashboardState);
       }
+      if (url === WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH) {
+        return Response.json(bridgeTestDeposit);
+      }
 
       return new Response("not found", { status: 404 });
     });
@@ -208,15 +221,18 @@ describe("dashboard fixture", () => {
     expect(workbench.raw.controlPlaneHealth).toEqual({ status: "ok" });
     expect(workbench.raw.controlPlaneState).toEqual({ state: devnetState });
     expect(workbench.raw.devnetState).toEqual(devnetState);
+    expect(workbench.raw.bridgeTestDeposit).toEqual(bridgeTestDeposit);
     expect(workbench.loadIssues).toEqual([]);
     expect(fetchMock).toHaveBeenCalledWith("http://127.0.0.1:8787/health", expect.any(Object));
     expect(fetchMock).toHaveBeenCalledWith(WORKBENCH_DEVNET_STATE_PATH, expect.any(Object));
+    expect(fetchMock).toHaveBeenCalledWith(WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH, expect.any(Object));
   });
 
   it("renders the critical workbench view labels from fixture fallback", () => {
     const workbench = buildWorkbenchSnapshot(data, {
       devnetState,
       devnetDashboardState,
+      bridgeTestDeposit,
     });
     const html = renderToStaticMarkup(createElement(WorkbenchView, { data, workbench }));
 
@@ -224,7 +240,14 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Node and API status");
     expect(html).toContain("Control-plane offline");
     expect(html).toContain("Wallet Metadata");
+    expect(html).toContain("Token Launch");
+    expect(html).toContain("Token Balances");
+    expect(html).toContain("DEX Pools");
+    expect(html).toContain("Liquidity");
+    expect(html).toContain("Swaps");
+    expect(html).toContain("Explorer Records");
     expect(html).toContain("Bridge Deposits");
+    expect(html).toContain("private keys in browser localStorage");
     expect(html).toContain("Rootfields");
     expect(html).toContain("Verifier Modules");
     expect(html).toContain("Hardware Signals");
