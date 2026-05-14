@@ -1,8 +1,8 @@
 use flowmemory_devnet::model::{
     DevnetError, FLOWPULSE_TOPIC0, LOCAL_TEST_UNIT_ASSET_ID, Transaction, ZERO_HASH,
-    apply_transaction, build_block, demo_transactions, deterministic_liquidity_id,
-    deterministic_lp_position_id, deterministic_pool_id, deterministic_swap_id,
-    deterministic_token_balance_id, deterministic_token_id, genesis_state,
+    apply_transaction, bridge_source_replay_key, build_block, demo_transactions,
+    deterministic_liquidity_id, deterministic_lp_position_id, deterministic_pool_id,
+    deterministic_swap_id, deterministic_token_balance_id, deterministic_token_id, genesis_state,
     product_demo_transactions, queue_transaction, state_map_roots, state_root,
 };
 use flowmemory_devnet::{canonical_json, keccak_hex};
@@ -1364,6 +1364,187 @@ fn cli_static_peer_sync_reconciles_two_local_node_states() {
 }
 
 #[test]
+fn cli_live_bridge_ingest_rejects_duplicate_source_event_and_survives_export_import() {
+    let temp = temp_dir("live-bridge-ingest");
+    let state = temp.join("state.json");
+    let node_dir = temp.join("node");
+    let handoff = temp.join("live-handoff.json");
+    let duplicate_handoff = temp.join("live-handoff-duplicate.json");
+    let transfer = temp.join("transfer.json");
+    let snapshot = temp.join("snapshot.json");
+    let imported = temp.join("imported-state.json");
+    let source_contract = "0x1111111111111111111111111111111111111111";
+    let source_tx_hash = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    let replay_key = bridge_source_replay_key(8453, source_contract, source_tx_hash, 0);
+    write_live_handoff(
+        &handoff,
+        &replay_key,
+        "0x01",
+        "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    );
+
+    let ingest = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "--node-dir",
+            node_dir.to_str().expect("node dir"),
+            "bridge-ingest",
+            "--handoff",
+            handoff.to_str().expect("handoff path"),
+            "--direct",
+            "--require-live",
+            "--authorized-by",
+            "operator:bridge:test",
+        ])
+        .output()
+        .expect("live bridge ingest");
+    assert!(
+        ingest.status.success(),
+        "{}",
+        String::from_utf8_lossy(&ingest.stderr)
+    );
+
+    let include = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args(["--state", state.to_str().expect("state path"), "run-block"])
+        .status()
+        .expect("include bridge credit");
+    assert!(include.success());
+
+    let state_json = read_json(&state);
+    assert_eq!(state_json["bridgeCredits"].as_object().unwrap().len(), 1);
+    assert_eq!(
+        state_json["bridgeCreditReceipts"]
+            .as_object()
+            .unwrap()
+            .len(),
+        1
+    );
+    assert_eq!(state_json["bridgeReplayKeys"].as_object().unwrap().len(), 1);
+    let credit = &state_json["bridgeCredits"]["0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"];
+    let account_id = credit["recipientAccountId"].as_str().unwrap();
+    assert_eq!(credit["productionReady"], true);
+    assert_eq!(credit["localOnly"], false);
+    assert_eq!(state_json["localTestUnitBalances"][account_id]["units"], 50);
+
+    write_live_handoff(
+        &duplicate_handoff,
+        "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "0x02",
+        "0xbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbc",
+    );
+    let duplicate = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "--node-dir",
+            node_dir.to_str().expect("node dir"),
+            "bridge-ingest",
+            "--handoff",
+            duplicate_handoff.to_str().expect("duplicate handoff path"),
+            "--direct",
+            "--require-live",
+            "--authorized-by",
+            "operator:bridge:test",
+        ])
+        .output()
+        .expect("duplicate live bridge ingest");
+    assert!(duplicate.status.success());
+    let duplicate_json: serde_json::Value =
+        serde_json::from_slice(&duplicate.stdout).expect("duplicate ingest json");
+    assert!(
+        duplicate_json["queued"]["rejected"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|entry| entry["reason"]
+                .as_str()
+                .unwrap_or_default()
+                .contains("bridge source event already consumed"))
+    );
+
+    std::fs::write(
+        &transfer,
+        format!(
+            r#"{{
+  "schema": "flowmemory.local_devnet.runtime_batch.v0",
+  "txs": [
+    {{ "type": "CreateLocalTestUnitBalance", "accountId": "local-account:bridge:test-receiver", "owner": "operator:bridge:test" }},
+    {{ "type": "TransferLocalTestUnits", "transferId": "transfer:bridge:live-test:001", "fromAccountId": "{account_id}", "toAccountId": "local-account:bridge:test-receiver", "amountUnits": 7, "memo": "live-bridge-transferability-test" }}
+  ]
+}}"#
+        ),
+    )
+    .expect("write transfer tx");
+    let transfer_submit = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "submit-tx",
+            "--tx-file",
+            transfer.to_str().expect("transfer path"),
+            "--direct",
+            "--authorized-by",
+            "operator:bridge:test",
+        ])
+        .status()
+        .expect("submit transfer");
+    assert!(transfer_submit.success());
+    let transfer_include = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args(["--state", state.to_str().expect("state path"), "run-block"])
+        .status()
+        .expect("include transfer");
+    assert!(transfer_include.success());
+    let after_transfer = read_json(&state);
+    assert_eq!(
+        after_transfer["localTestUnitBalances"]["local-account:bridge:test-receiver"]["units"],
+        7
+    );
+
+    let export = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "export-state",
+            "--out",
+            snapshot.to_str().expect("snapshot path"),
+        ])
+        .status()
+        .expect("export state");
+    assert!(export.success());
+    let import = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            imported.to_str().expect("imported state"),
+            "import-state",
+            "--from",
+            snapshot.to_str().expect("snapshot path"),
+        ])
+        .status()
+        .expect("import state");
+    assert!(import.success());
+    let imported_json = read_json(&imported);
+    assert_eq!(
+        after_transfer["bridgeCredits"],
+        imported_json["bridgeCredits"]
+    );
+    assert_eq!(
+        after_transfer["bridgeCreditReceipts"],
+        imported_json["bridgeCreditReceipts"]
+    );
+    assert_eq!(
+        after_transfer["bridgeReplayKeys"],
+        imported_json["bridgeReplayKeys"]
+    );
+    assert_eq!(
+        after_transfer["localTestUnitBalances"][account_id],
+        imported_json["localTestUnitBalances"][account_id]
+    );
+
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
 fn zero_hash_constant_is_hex_32_bytes() {
     assert_eq!(ZERO_HASH.len(), 66);
     assert!(ZERO_HASH.starts_with("0x"));
@@ -1382,6 +1563,94 @@ fn inspect_summary(state: &std::path::Path, node_dir: &std::path::Path) -> serde
         .expect("inspect node status");
     assert!(output.status.success());
     serde_json::from_slice(&output.stdout).expect("status json")
+}
+
+fn read_json(path: &std::path::Path) -> serde_json::Value {
+    serde_json::from_str(&std::fs::read_to_string(path).expect("read json")).expect("parse json")
+}
+
+fn write_live_handoff(path: &std::path::Path, replay_key: &str, nonce: &str, credit_id: &str) {
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .expect("system clock")
+        .as_secs()
+        .to_string();
+    std::fs::write(
+        path,
+        format!(
+            r#"{{
+  "schema": "flowmemory.bridge_runtime_handoff.v0",
+  "handoffId": "0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "generatedAt": "{now}",
+  "handoffWrittenAt": "{now}",
+  "mode": "base-mainnet-pilot",
+  "productionReady": true,
+  "localOnly": false,
+  "observations": [
+    {{
+      "schema": "flowmemory.bridge_deposit_observation.v0",
+      "observationId": "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "replayKey": "{replay_key}",
+      "observedAt": "{now}",
+      "mode": "base-mainnet-pilot",
+      "productionReady": true,
+      "deposit": {{
+        "schema": "flowmemory.bridge_deposit.v0",
+        "depositId": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sourceChainId": 8453,
+        "sourceContract": "0x1111111111111111111111111111111111111111",
+        "txHash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "logIndex": 0,
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "50",
+        "sender": "0x4444444444444444444444444444444444444444",
+        "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "nonce": "{nonce}",
+        "status": "observed"
+      }},
+      "guardrails": {{
+        "explicitChainId": true,
+        "explicitContract": true,
+        "explicitBlockRange": true,
+        "noSecrets": true,
+        "confirmation": {{
+          "depth": 12,
+          "satisfied": true
+        }}
+      }}
+    }}
+  ],
+  "credits": [
+    {{
+      "schema": "flowmemory.bridge_credit.v0",
+      "creditId": "{credit_id}",
+      "observationId": "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "depositId": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "replayKey": "{replay_key}",
+      "source": {{
+        "chainId": 8453,
+        "contract": "0x1111111111111111111111111111111111111111",
+        "txHash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "logIndex": 0
+      }},
+      "token": "0x3333333333333333333333333333333333333333",
+      "amount": "50",
+      "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+      "status": "applied",
+      "localOnly": false,
+      "productionReady": true
+    }}
+  ],
+  "withdrawalIntents": [],
+  "replayProtection": {{
+    "strategy": "source-chain-contract-tx-log-deposit",
+    "replayKeys": ["{replay_key}"],
+    "duplicateReplayKeys": []
+  }}
+}}"#
+        ),
+    )
+    .expect("write live handoff");
 }
 
 fn temp_dir(name: &str) -> std::path::PathBuf {

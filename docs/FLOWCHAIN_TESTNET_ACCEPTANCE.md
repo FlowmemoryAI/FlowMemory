@@ -1,9 +1,9 @@
 # FlowChain Testnet Acceptance
 
 Status: acceptance matrix for the private/local testnet package. The HQ/Ops
-command wrapper layer and full-smoke gate are implemented for current
-private/local surfaces. Workbench polish and longer-running runtime behavior
-remain active, but the local object/control-plane path is no longer blocked.
+command wrapper layer, full-smoke gate, and production-style local node runtime
+are implemented for current private/local surfaces. Workbench polish remains
+active, but the local object/control-plane/runtime path is no longer blocked.
 
 This document marks every major feature as one of:
 
@@ -22,9 +22,9 @@ This document marks every major feature as one of:
 | Run devnet tests | Implemented | `cargo test --manifest-path crates/flowmemory-devnet/Cargo.toml`. |
 | Run service tests | Implemented | `npm test` for merged service packages. |
 | Run launch candidate gate | Implemented | `npm run launch:candidate`. |
-| One-command private testnet aliases | Implemented for merged surfaces | `package.json` now exposes `flowchain:prereq`, `flowchain:init`, `flowchain:start`, `flowchain:stop`, `flowchain:demo`, `flowchain:smoke`, `flowchain:full-smoke`, `flowchain:export`, `flowchain:import`, `control-plane:serve`, and `workbench:dev`. |
+| One-command private testnet aliases | Implemented for merged surfaces | `package.json` now exposes `flowchain:prereq`, `flowchain:init`, `flowchain:start`, `flowchain:stop`, `flowchain:node:start`, `flowchain:node`, `flowchain:node:stop`, `flowchain:node:status`, `flowchain:node:restart`, `flowchain:bridge:ingest`, `flowchain:wallet:transfer:e2e`, `flowchain:restart:verify`, `flowchain:live-bridge:status`, `flowchain:no-secret:scan`, `flowchain:tx`, `flowchain:node:smoke`, `flowchain:demo`, `flowchain:smoke`, `flowchain:full-smoke`, `flowchain:export`, `flowchain:import`, `control-plane:serve`, and `workbench:dev`. |
 | Prerequisite check script | Implemented | `infra/scripts/flowchain-check-prereqs.ps1`. |
-| Start/stop scripts | Implemented bounded wrappers | `flowchain:start` prepares launch-core fixtures and state summary; `flowchain:stop` records stopped state and can reset ignored local state. Long-running node behavior remains in flight. |
+| Start/stop scripts | Implemented | `flowchain:start` prepares launch-core fixtures and state summary; `flowchain:node`, `flowchain:node:stop`, `flowchain:node:status`, and `flowchain:node:restart` operate the persistent private/local node. |
 | Full smoke script | Implemented for current private/local surfaces | `flowchain:full-smoke` runs the smoke gate, control-plane smoke client, deterministic replay, dashboard build, hardware fixture, unsafe-claim scan, export no-secret scan, and `git diff --check`. |
 | Export/import state bundles | Implemented local wrapper | `flowchain:export` writes ignored export files and zip bundle; `flowchain:import` restores local state from a bundle. |
 | Troubleshooting guide | Implemented | `docs/FLOWCHAIN_TROUBLESHOOTING.md` plus script error messages. |
@@ -35,14 +35,17 @@ This document marks every major feature as one of:
 | --- | --- | --- |
 | No-value deterministic devnet | Implemented | Existing Rust devnet remains the single runtime surface. |
 | Private/local genesis/config | Implemented local boundary | `flowchain:init` and devnet exports write deterministic local genesis/config references. |
-| Single-node local runtime | Implemented bounded local runtime | Current CLI can init/demo/run blocks and `flowchain:start` gives an obvious bounded start path; long-running node behavior remains future polish. |
+| Single-node local runtime | Implemented persistent local runtime | Current CLI can start a persistent node, stop it, restart it, submit transactions, produce bounded or interval blocks, persist receipts/events, and expose status. |
 | Multi-node or LAN notes | Missing | Must be optional and safe, or marked later gated. |
 | Deterministic block production | Implemented | Current devnet models deterministic blocks and state roots. |
 | Deterministic replay | Implemented | `flowchain:smoke` reruns the native object demo twice and compares block hashes, latest parent hash, state root, and map roots. |
-| Transaction ingestion | Implemented local fixture path | Current devnet supports fixture submission plus deterministic demo transactions for the local object lifecycle. |
+| Transaction ingestion | Implemented local runtime path | Current devnet supports signed transaction envelopes, local authorized tx files, file inbox ingestion, duplicate/replay rejection, nonce checks, and deterministic block inclusion. |
 | State export | Implemented | `export-fixtures` exists and is exercised by the package-level smoke path. |
-| State import/snapshot restore | Implemented local wrapper | `flowchain:import` restores current devnet state from an exported bundle; richer subsystem snapshots remain future work. |
-| Health/status output | Implemented local control-plane path | CLI summary and `control-plane:smoke` exercise local health/status queries. |
+| State import/snapshot restore | Implemented local wrapper and runtime CLI | `flowchain:import` restores current devnet state from an exported bundle; `export-state` and `import-state` preserve deterministic runtime roots. |
+| Health/status output | Implemented local control-plane and node path | CLI summary, `node-status`, status JSON, and `control-plane:smoke` exercise local health/status queries. |
+| Runtime receipts and events | Implemented | Block production writes queryable transaction, receipt, and event indexes that survive restart. |
+| Bridge credit local spendability | Implemented local/private path | `ApplyBridgeCredit` requires Base source chain id `8453`, stores a replay key, stores a bridge credit receipt, rejects duplicate source chain/contract/tx/log applications, credits local balance once, and smoke/tests prove local spendability plus withdrawal intent recording. |
+| Live pilot handoff intake | Implemented code path, externally gated for real handoff evidence | `flowchain:bridge:ingest` consumes an explicit `flowmemory.bridge_runtime_handoff.v0` handoff into the main `devnet/local/state.json` when it is `productionReady: true`, `localOnly: false`, Base `8453`, and 12-confirmation eligible. Real live pass still requires an external Base handoff file. |
 
 ## Native Objects
 
@@ -149,10 +152,15 @@ The package is accepted only when one documented command can:
 Current wrapper status:
 
 - `npm run flowchain:full-smoke` is the documented acceptance command.
+- `npm run flowchain:node:smoke` is the documented production-node runtime proof.
 - It proves the merged launch-core, crypto helpers/vectors, local devnet,
   export, dashboard build, hardware fixture, deterministic replay,
   control-plane query coverage, native local object lifecycle, and
   claim/no-secret guardrails.
+- The node smoke proves signed submit, block inclusion, receipt query, balance
+  update, restart, replay rejection, bridge credit spendability, and
+  export/import root preservation. The evidence file is
+  `devnet/local/node-smoke/production-node-smoke-report.json`.
 
 Required final evidence for the acceptance PR:
 

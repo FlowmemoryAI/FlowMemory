@@ -13,6 +13,11 @@ pub fn hash_json<T: Serialize>(domain: &str, value: &T) -> String {
     keccak_hex(format!("{domain}:{canonical}").as_bytes())
 }
 
+pub fn canonical_json_hash<T: Serialize>(value: &T) -> String {
+    let canonical = canonical_json(value);
+    keccak_hex(canonical.as_bytes())
+}
+
 pub fn canonical_json<T: Serialize>(value: &T) -> String {
     let value = serde_json::to_value(value).expect("serializable value");
     let normalized = normalize_value(value);

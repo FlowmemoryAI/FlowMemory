@@ -1,19 +1,22 @@
-use crate::hash::{hash_json, normalize_value};
+use crate::hash::{canonical_json_hash, hash_json, keccak_hex, normalize_value};
 use crate::model::{
-    FLOWPULSE_TOPIC0, ImportedFlowPulseObservation, ImportedVerifierReport, LocalAuthorization,
-    Transaction, build_block, demo_transactions, envelope_tx, genesis_state,
-    product_demo_transactions, queue_authorized_transaction, queue_transaction, state_map_roots,
+    FLOWPULSE_TOPIC0, ImportedFlowPulseObservation, ImportedVerifierReport,
+    LOCAL_TEST_UNIT_ASSET_ID, LocalAuthorization, Transaction, build_block, demo_transactions,
+    deterministic_token_id, envelope_tx, genesis_state, product_demo_transactions,
+    queue_authorized_transaction, queue_transaction, record_pending_transaction, state_map_roots,
     state_root,
 };
 use crate::storage::{default_state_path, load_or_genesis, load_state, reset_state, save_state};
 use anyhow::{Context, Result, anyhow};
+use k256::ecdsa::{Signature, VerifyingKey, signature::hazmat::PrehashVerifier};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::collections::BTreeSet;
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 #[derive(Debug)]
 pub struct Cli {
@@ -37,6 +40,12 @@ pub enum Command {
     },
     NodeStop,
     NodeStatus,
+    NodeRestart {
+        node_id: String,
+        block_ms: u64,
+        max_blocks: Option<u64>,
+        peer_config: Option<PathBuf>,
+    },
     Tick {
         node_id: String,
         peer_config: Option<PathBuf>,
@@ -45,6 +54,12 @@ pub enum Command {
         tx_file: PathBuf,
         authorized_by: Option<String>,
         direct: bool,
+    },
+    BridgeIngest {
+        handoff: PathBuf,
+        authorized_by: Option<String>,
+        direct: bool,
+        require_live: bool,
     },
     Faucet {
         account_id: String,
@@ -58,6 +73,11 @@ pub enum Command {
     },
     InspectState {
         summary: bool,
+    },
+    ListMempool,
+    Query {
+        kind: QueryKind,
+        id: String,
     },
     ExportFixtures {
         out_dir: PathBuf,
@@ -77,6 +97,21 @@ pub enum Command {
     ProductSmoke {
         out_dir: PathBuf,
     },
+    NodeSmoke {
+        out_dir: PathBuf,
+    },
+}
+
+#[derive(Debug, Clone)]
+pub enum QueryKind {
+    Block,
+    Transaction,
+    Receipt,
+    Account,
+    Token,
+    Pool,
+    BridgeCredit,
+    FinalityReceipt,
 }
 
 pub fn run_cli() -> Result<()> {
@@ -136,6 +171,14 @@ fn parse_args(args: Vec<String>) -> Result<Cli> {
         },
         "node-stop" => Command::NodeStop,
         "node-status" => Command::NodeStatus,
+        "node-restart" => Command::NodeRestart {
+            node_id: option_value_optional(&positional[1..], "--node-id")
+                .unwrap_or_else(|| "node:local:alpha".to_string()),
+            block_ms: option_u64(&positional[1..], "--block-ms")?.unwrap_or(1_000),
+            max_blocks: option_u64(&positional[1..], "--max-blocks")?.or(Some(1)),
+            peer_config: option_value_optional(&positional[1..], "--peer-config")
+                .map(PathBuf::from),
+        },
         "tick" => Command::Tick {
             node_id: option_value_optional(&positional[1..], "--node-id")
                 .unwrap_or_else(|| "node:local:alpha".to_string()),
@@ -150,6 +193,12 @@ fn parse_args(args: Vec<String>) -> Result<Cli> {
                 direct: positional.iter().any(|arg| arg == "--direct"),
             }
         }
+        "bridge-ingest" | "bridge-handoff" => Command::BridgeIngest {
+            handoff: PathBuf::from(option_value(&positional[1..], "--handoff")?),
+            authorized_by: option_value_optional(&positional[1..], "--authorized-by"),
+            direct: positional.iter().any(|arg| arg == "--direct"),
+            require_live: positional.iter().any(|arg| arg == "--require-live"),
+        },
         "faucet" => Command::Faucet {
             account_id: option_value(&positional[1..], "--account")?,
             amount: option_u64(&positional[1..], "--amount")?
@@ -167,6 +216,43 @@ fn parse_args(args: Vec<String>) -> Result<Cli> {
         }
         "inspect" | "inspect-state" => Command::InspectState {
             summary: positional.iter().any(|arg| arg == "--summary"),
+        },
+        "list-mempool" | "mempool" => Command::ListMempool,
+        "query" => Command::Query {
+            kind: query_kind(&option_value(&positional[1..], "--kind")?)?,
+            id: option_value(&positional[1..], "--id")?,
+        },
+        "query-block" => Command::Query {
+            kind: QueryKind::Block,
+            id: option_value(&positional[1..], "--id")?,
+        },
+        "query-tx" | "query-transaction" => Command::Query {
+            kind: QueryKind::Transaction,
+            id: option_value(&positional[1..], "--id")?,
+        },
+        "query-receipt" => Command::Query {
+            kind: QueryKind::Receipt,
+            id: option_value(&positional[1..], "--id")?,
+        },
+        "query-account" => Command::Query {
+            kind: QueryKind::Account,
+            id: option_value(&positional[1..], "--id")?,
+        },
+        "query-token" => Command::Query {
+            kind: QueryKind::Token,
+            id: option_value(&positional[1..], "--id")?,
+        },
+        "query-pool" => Command::Query {
+            kind: QueryKind::Pool,
+            id: option_value(&positional[1..], "--id")?,
+        },
+        "query-bridge-credit" => Command::Query {
+            kind: QueryKind::BridgeCredit,
+            id: option_value(&positional[1..], "--id")?,
+        },
+        "query-finality" | "query-finality-receipt" => Command::Query {
+            kind: QueryKind::FinalityReceipt,
+            id: option_value(&positional[1..], "--id")?,
         },
         "export" | "export-fixtures" => Command::ExportFixtures {
             out_dir: option_value(&positional[1..], "--out-dir")
@@ -195,6 +281,11 @@ fn parse_args(args: Vec<String>) -> Result<Cli> {
             out_dir: option_value(&positional[1..], "--out-dir")
                 .map(PathBuf::from)
                 .unwrap_or_else(|_| PathBuf::from("fixtures/handoff/generated-product")),
+        },
+        "node-smoke" => Command::NodeSmoke {
+            out_dir: option_value(&positional[1..], "--out-dir")
+                .map(PathBuf::from)
+                .unwrap_or_else(|_| PathBuf::from("devnet/local/node-smoke")),
         },
         unknown => return Err(anyhow!("unknown command '{unknown}'")),
     };
@@ -238,9 +329,23 @@ fn option_u64(args: &[String], name: &str) -> Result<Option<u64>> {
         .with_context(|| format!("{name} must be a positive integer"))
 }
 
+fn query_kind(value: &str) -> Result<QueryKind> {
+    match value {
+        "block" => Ok(QueryKind::Block),
+        "tx" | "transaction" => Ok(QueryKind::Transaction),
+        "receipt" => Ok(QueryKind::Receipt),
+        "account" => Ok(QueryKind::Account),
+        "token" => Ok(QueryKind::Token),
+        "pool" => Ok(QueryKind::Pool),
+        "bridge-credit" | "bridgeCredit" => Ok(QueryKind::BridgeCredit),
+        "finality" | "finality-receipt" | "finalityReceipt" => Ok(QueryKind::FinalityReceipt),
+        other => Err(anyhow!("unsupported query kind '{other}'")),
+    }
+}
+
 fn print_help() {
     println!(
-        "flowmemory-devnet --state <path> --node-dir <path> <command>\n\nCommands:\n  init\n  reset-local\n  node [--node-id <id>] [--block-ms <ms>] [--max-blocks <n>] [--peer-config <path>]\n  node-stop\n  node-status\n  tick [--node-id <id>] [--peer-config <path>]\n  submit-tx --tx-file <path> [--authorized-by <id>] [--direct]\n  faucet --account <id> --amount <n> [--reason <text>] [--authorized-by <id>] [--direct]\n  start|run [--blocks <n>]\n  run-block\n  submit-fixture --fixture <path>\n  inspect|inspect-state [--summary]\n  export|export-fixtures [--out-dir <path>]\n  export-state [--out <path>]\n  import-state --from <path>\n  demo [--out-dir <path>]\n  smoke [--out-dir <path>]\n  product-demo|product-smoke [--out-dir <path>]\n"
+        "flowmemory-devnet --state <path> --node-dir <path> <command>\n\nCommands:\n  init\n  reset-local\n  node [--node-id <id>] [--block-ms <ms>] [--max-blocks <n>] [--peer-config <path>]\n  node-stop\n  node-status\n  node-restart [--node-id <id>] [--block-ms <ms>] [--max-blocks <n>] [--peer-config <path>]\n  tick [--node-id <id>] [--peer-config <path>]\n  submit-tx --tx-file <path> [--authorized-by <id>] [--direct]\n  bridge-ingest --handoff <path> [--authorized-by <id>] [--direct] [--require-live]\n  faucet --account <id> --amount <n> [--reason <text>] [--authorized-by <id>] [--direct]\n  list-mempool\n  query --kind <block|transaction|receipt|account|token|pool|bridge-credit|finality-receipt> --id <id>\n  query-block|query-tx|query-receipt|query-account|query-token|query-pool|query-bridge-credit|query-finality --id <id>\n  start|run [--blocks <n>]\n  run-block\n  submit-fixture --fixture <path>\n  inspect|inspect-state [--summary]\n  export|export-fixtures [--out-dir <path>]\n  export-state [--out <path>]\n  import-state --from <path>\n  demo [--out-dir <path>]\n  smoke [--out-dir <path>]\n  product-demo|product-smoke [--out-dir <path>]\n  node-smoke [--out-dir <path>]\n"
     );
 }
 
@@ -308,6 +413,25 @@ fn run(cli: Cli) -> Result<()> {
                 persisted_status,
             ))?;
         }
+        Command::NodeRestart {
+            node_id,
+            block_ms,
+            max_blocks,
+            peer_config,
+        } => {
+            request_node_stop(&cli.node_dir)?;
+            if stop_file(&cli.node_dir).exists() {
+                fs::remove_file(stop_file(&cli.node_dir))?;
+            }
+            run_node(NodeRunOptions {
+                state_path: cli.state,
+                node_dir: cli.node_dir,
+                node_id,
+                block_ms,
+                max_blocks,
+                peer_config,
+            })?;
+        }
         Command::Tick {
             node_id,
             peer_config,
@@ -333,6 +457,17 @@ fn run(cli: Cli) -> Result<()> {
             );
             write_node_identity(&cli.node_dir, &node_id, &cli.state, peer_config.as_deref())?;
             write_node_status(&cli.node_dir, &status)?;
+            append_node_log(
+                &cli.node_dir,
+                &serde_json::json!({
+                    "schema": "flowmemory.local_devnet.node_log.v0",
+                    "nodeId": node_id,
+                    "event": "manualTick",
+                    "blockHash": produced.block_hash,
+                    "txs": produced.tx_ids.len(),
+                    "stateRoot": produced.state_root
+                }),
+            )?;
             print_json(&NodeTickSummary::from_block(status, produced.block_hash))?;
         }
         Command::SubmitTx {
@@ -340,13 +475,41 @@ fn run(cli: Cli) -> Result<()> {
             authorized_by,
             direct,
         } => {
-            let txs = transactions_from_fixture(&tx_file)?;
             let queued = if direct {
-                queue_txs_direct(&cli.state, txs, authorized_by)?
+                queue_tx_file_direct(&cli.state, &tx_file, authorized_by)?
             } else {
-                write_txs_to_inbox(&cli.node_dir, txs, authorized_by)?
+                write_tx_file_to_inbox(&cli.node_dir, &tx_file, authorized_by)?
             };
-            print_json(&QueuedTransactions { queued })?;
+            print_json(&queued)?;
+        }
+        Command::BridgeIngest {
+            handoff,
+            authorized_by,
+            direct,
+            require_live,
+        } => {
+            let txs = bridge_handoff_transactions_from_path(&handoff, require_live)?;
+            let credit_ids = txs
+                .iter()
+                .filter_map(bridge_credit_id_from_tx)
+                .collect::<Vec<_>>();
+            let queued = if direct {
+                queue_txs_direct_result(&cli.state, txs, authorized_by)?
+            } else {
+                QueuedTransactions::accepted_only(write_txs_to_inbox(
+                    &cli.node_dir,
+                    txs,
+                    authorized_by,
+                )?)
+            };
+            print_json(&BridgeIngestSummary {
+                schema: "flowmemory.local_devnet.bridge_ingest.v0".to_string(),
+                handoff,
+                direct,
+                require_live,
+                credit_ids,
+                queued,
+            })?;
         }
         Command::Faucet {
             account_id,
@@ -384,7 +547,7 @@ fn run(cli: Cli) -> Result<()> {
             } else {
                 write_txs_to_inbox(&cli.node_dir, txs, authorized_by)?
             };
-            print_json(&QueuedTransactions { queued })?;
+            print_json(&QueuedTransactions::accepted_only(queued))?;
         }
         Command::Start { blocks } => {
             let mut state = load_or_genesis(&cli.state)?;
@@ -400,7 +563,7 @@ fn run(cli: Cli) -> Result<()> {
                 queued.push(queue_transaction(&mut state, tx));
             }
             save_state(&cli.state, &state)?;
-            print_json(&QueuedTransactions { queued })?;
+            print_json(&QueuedTransactions::accepted_only(queued))?;
         }
         Command::InspectState { summary } => {
             let state = load_or_genesis(&cli.state)?;
@@ -409,6 +572,14 @@ fn run(cli: Cli) -> Result<()> {
             } else {
                 print_json(&state)?;
             }
+        }
+        Command::ListMempool => {
+            let state = load_or_genesis(&cli.state)?;
+            print_json(&MempoolSummary::from_state(&state))?;
+        }
+        Command::Query { kind, id } => {
+            let state = load_or_genesis(&cli.state)?;
+            print_json(&query_state(&state, kind, &id)?)?;
         }
         Command::ExportFixtures { out_dir } => {
             let state = load_or_genesis(&cli.state)?;
@@ -470,6 +641,10 @@ fn run(cli: Cli) -> Result<()> {
                 deterministic_replay,
             ))?;
         }
+        Command::NodeSmoke { out_dir } => {
+            let report = run_node_smoke(&cli.state, &cli.node_dir, &out_dir)?;
+            print_json(&report)?;
+        }
     }
     Ok(())
 }
@@ -529,6 +704,25 @@ struct PeerSyncEvent {
 struct InboxIngestSummary {
     queued: usize,
     rejected: usize,
+}
+
+const MAX_MEMPOOL_TXS: usize = 1_024;
+const LOCAL_TRANSACTION_TYPE: &str = "FlowChainLocalTransactionEnvelopeV0(uint256 chainId,bytes32 domainSeparator,bytes32 signerId,bytes32 signerKeyId,uint8 signerRole,uint64 nonce,bytes32 payloadHash,bytes32 objectId,bytes32 objectTypeHash,uint64 issuedAtUnixMs)";
+
+#[derive(Debug)]
+struct ParsedEnvelope {
+    envelope: crate::model::TxEnvelope,
+    signer: Option<String>,
+    nonce: Option<u64>,
+    replay_key: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct RejectedTx {
+    tx_id: Option<String>,
+    reason: String,
+    source: Option<PathBuf>,
 }
 
 fn peer_config_schema() -> String {
@@ -602,9 +796,7 @@ fn run_node(options: NodeRunOptions) -> Result<()> {
         );
         write_node_status(&options.node_dir, &status)?;
 
-        println!(
-            "{}",
-            serde_json::to_string(&serde_json::json!({
+        let log_line = serde_json::json!({
                 "schema": "flowmemory.local_devnet.node_log.v0",
                 "nodeId": options.node_id,
                 "event": "blockProduced",
@@ -612,8 +804,9 @@ fn run_node(options: NodeRunOptions) -> Result<()> {
                 "blockHash": block.block_hash,
                 "txs": block.tx_ids.len(),
                 "stateRoot": block.state_root
-            }))?
-        );
+        });
+        append_node_log(&options.node_dir, &log_line)?;
+        println!("{}", serde_json::to_string(&log_line)?);
 
         if options
             .max_blocks
@@ -657,14 +850,79 @@ fn queue_txs_direct(
     let mut state = load_or_genesis(state_path)?;
     let mut queued = Vec::new();
     for tx in txs {
-        let tx_id = match authorized_by.clone() {
-            Some(signer) => queue_authorized_transaction(&mut state, tx, signer),
-            None => queue_transaction(&mut state, tx),
-        };
-        queued.push(tx_id);
+        let envelope = local_authorized_envelope(tx, authorized_by.clone());
+        let parsed = parsed_local_envelope(envelope);
+        queued.push(try_queue_envelope(&mut state, parsed)?);
     }
     save_state(state_path, &state)?;
     Ok(queued)
+}
+
+fn queue_txs_direct_result(
+    state_path: &Path,
+    txs: Vec<Transaction>,
+    authorized_by: Option<String>,
+) -> Result<QueuedTransactions> {
+    let mut state = load_or_genesis(state_path)?;
+    let mut result = QueuedTransactions::default();
+    let mut simulation = preflight_state_with_pending(&state);
+    for tx in txs {
+        let envelope = local_authorized_envelope(tx, authorized_by.clone());
+        let parsed = parsed_local_envelope(envelope);
+        match validate_and_queue_envelope(&mut state, &mut simulation, parsed, None) {
+            Ok(tx_id) => result.queued.push(tx_id),
+            Err(rejected) => result.rejected.push(rejected),
+        }
+    }
+    save_state(state_path, &state)?;
+    Ok(result)
+}
+
+fn queue_tx_file_direct(
+    state_path: &Path,
+    tx_file: &Path,
+    authorized_by: Option<String>,
+) -> Result<QueuedTransactions> {
+    let mut state = load_or_genesis(state_path)?;
+    let mut result = QueuedTransactions::default();
+    let parsed = parsed_envelopes_from_file(tx_file, authorized_by)?;
+    let mut simulation = preflight_state_with_pending(&state);
+    for parsed in parsed {
+        match validate_and_queue_envelope(&mut state, &mut simulation, parsed, None) {
+            Ok(tx_id) => result.queued.push(tx_id),
+            Err(rejected) => result.rejected.push(rejected),
+        }
+    }
+    save_state(state_path, &state)?;
+    Ok(result)
+}
+
+fn write_tx_file_to_inbox(
+    node_dir: &Path,
+    tx_file: &Path,
+    authorized_by: Option<String>,
+) -> Result<QueuedTransactions> {
+    let inbox = inbox_dir(node_dir);
+    fs::create_dir_all(&inbox)
+        .with_context(|| format!("failed to create inbox directory {}", inbox.display()))?;
+    let body = fs::read_to_string(tx_file)
+        .with_context(|| format!("failed to read transaction file {}", tx_file.display()))?;
+    let value: Value = serde_json::from_str(body.trim_start_matches('\u{feff}'))
+        .with_context(|| format!("failed to parse transaction file {}", tx_file.display()))?;
+    let tx_ids = tx_ids_from_value(&value, authorized_by.clone())?;
+    let suffix = file_safe_id(&hash_json(
+        "flowmemory.local_devnet.inbox_file.v0",
+        &serde_json::json!({
+            "path": tx_file,
+            "txIds": tx_ids
+        }),
+    ));
+    let path = inbox.join(format!("{suffix}.json"));
+    write_json(path, &value)?;
+    Ok(QueuedTransactions {
+        queued: tx_ids,
+        rejected: Vec::new(),
+    })
 }
 
 fn write_txs_to_inbox(
@@ -717,16 +975,44 @@ fn drain_inbox(
     files.sort();
 
     let mut summary = InboxIngestSummary::default();
+    let mut simulation = preflight_state_with_pending(state);
     for path in files {
-        match transactions_from_inbox_file(&path) {
-            Ok(txs) => {
-                for (tx, authorization) in txs {
-                    let mut envelope = envelope_tx(tx);
-                    envelope.authorization = authorization;
-                    state.pending_txs.push(envelope);
-                    summary.queued += 1;
+        match parsed_envelopes_from_inbox_file(&path) {
+            Ok(envelopes) => {
+                let mut file_rejections = Vec::new();
+                for envelope in envelopes {
+                    match validate_and_queue_envelope(
+                        state,
+                        &mut simulation,
+                        envelope,
+                        Some(path.clone()),
+                    ) {
+                        Ok(_) => summary.queued += 1,
+                        Err(rejected) => {
+                            summary.rejected += 1;
+                            file_rejections.push(rejected);
+                        }
+                    }
                 }
-                move_inbox_file(&path, &processed_dir(node_dir))?;
+                if file_rejections.is_empty() {
+                    move_inbox_file(&path, &processed_dir(node_dir))?;
+                } else {
+                    let error_path = rejected_dir(node_dir).join(format!(
+                        "{}.error.json",
+                        path.file_stem()
+                            .and_then(|stem| stem.to_str())
+                            .unwrap_or("rejected")
+                    ));
+                    write_json(
+                        error_path,
+                        &serde_json::json!({
+                            "schema": "flowmemory.local_devnet.rejected_inbox_tx.v0",
+                            "source": path,
+                            "rejections": file_rejections
+                        }),
+                    )?;
+                    move_inbox_file(&path, &rejected_dir(node_dir))?;
+                }
             }
             Err(error) => {
                 let error_path = rejected_dir(node_dir).join(format!(
@@ -775,6 +1061,13 @@ fn local_authorized_envelope(
             mode: "local-authorized".to_string(),
             signer,
             digest: envelope.tx_id.clone(),
+            chain_id: None,
+            nonce: None,
+            signer_role: None,
+            signer_key_id: None,
+            public_key: None,
+            signature: None,
+            replay_key: None,
         });
     }
     envelope
@@ -860,6 +1153,21 @@ fn write_node_status(node_dir: &Path, status: &NodeStatus) -> Result<()> {
     write_json(node_dir.join("status.json"), status)
 }
 
+fn append_node_log(node_dir: &Path, value: &Value) -> Result<()> {
+    fs::create_dir_all(node_dir)?;
+    let path = node_dir.join("node.log.jsonl");
+    let mut line = serde_json::to_string(value)?;
+    line.push('\n');
+    use std::io::Write;
+    let mut file = fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&path)
+        .with_context(|| format!("failed to open node log {}", path.display()))?;
+    file.write_all(line.as_bytes())
+        .with_context(|| format!("failed to append node log {}", path.display()))
+}
+
 fn read_node_status(node_dir: &Path) -> Result<Option<Value>> {
     let path = node_dir.join("status.json");
     if !path.exists() {
@@ -897,31 +1205,120 @@ fn file_safe_id(id: &str) -> String {
         .collect()
 }
 
-fn transactions_from_inbox_file(
-    path: &Path,
-) -> Result<Vec<(Transaction, Option<LocalAuthorization>)>> {
+fn parsed_envelopes_from_inbox_file(path: &Path) -> Result<Vec<ParsedEnvelope>> {
     let body = fs::read_to_string(path)
         .with_context(|| format!("failed to read inbox transaction {}", path.display()))?;
     let value: Value = serde_json::from_str(body.trim_start_matches('\u{feff}'))
         .with_context(|| format!("failed to parse inbox transaction {}", path.display()))?;
-    let authorization = authorization_from_value(value.get("authorization"))?;
+    parsed_envelopes_from_value(&value, None)
+}
 
+fn parsed_envelopes_from_file(
+    path: &Path,
+    authorized_by: Option<String>,
+) -> Result<Vec<ParsedEnvelope>> {
+    let body = fs::read_to_string(path)
+        .with_context(|| format!("failed to read transaction file {}", path.display()))?;
+    let value: Value = serde_json::from_str(body.trim_start_matches('\u{feff}'))
+        .with_context(|| format!("failed to parse transaction file {}", path.display()))?;
+    parsed_envelopes_from_value(&value, authorized_by)
+}
+
+fn parsed_envelopes_from_value(
+    value: &Value,
+    authorized_by: Option<String>,
+) -> Result<Vec<ParsedEnvelope>> {
+    if value.get("envelope").is_some() {
+        return Ok(vec![signed_envelope_from_value(value)?]);
+    }
+
+    if value.get("schema").and_then(Value::as_str)
+        == Some("flowchain.local_transaction_envelope.v0")
+    {
+        return Ok(vec![signed_envelope_from_value(&serde_json::json!({
+            "envelope": value,
+            "document": value.get("payload")
+        }))?]);
+    }
+
+    let authorization = authorization_from_value(value.get("authorization"))?;
     if value.get("txs").is_some() {
-        let txs: Vec<Transaction> = serde_json::from_value(value["txs"].clone())
-            .with_context(|| format!("failed to parse txs in {}", path.display()))?;
+        let txs: Vec<Transaction> =
+            serde_json::from_value(value["txs"].clone()).context("failed to parse txs")?;
         return Ok(txs
             .into_iter()
-            .map(|tx| (tx, authorization.clone()))
+            .map(|tx| {
+                let mut envelope = local_authorized_envelope(
+                    tx,
+                    authorization
+                        .as_ref()
+                        .map(|authorization| authorization.signer.clone())
+                        .or_else(|| authorized_by.clone()),
+                );
+                if authorization.is_some() {
+                    envelope.authorization = authorization.clone();
+                }
+                parsed_local_envelope(envelope)
+            })
             .collect());
     }
 
     if value.get("tx").is_some() {
-        let tx = serde_json::from_value(value["tx"].clone())
-            .with_context(|| format!("failed to parse tx in {}", path.display()))?;
-        return Ok(vec![(tx, authorization)]);
+        let tx = serde_json::from_value(value["tx"].clone()).context("failed to parse tx")?;
+        let mut envelope = local_authorized_envelope(
+            tx,
+            authorization
+                .as_ref()
+                .map(|authorization| authorization.signer.clone())
+                .or(authorized_by),
+        );
+        if authorization.is_some() {
+            envelope.authorization = authorization;
+        }
+        return Ok(vec![parsed_local_envelope(envelope)]);
     }
 
-    transactions_from_fixture(path).map(|txs| txs.into_iter().map(|tx| (tx, None)).collect())
+    Err(anyhow!(
+        "unsupported transaction file shape: expected envelope, tx, or txs"
+    ))
+}
+
+fn parsed_local_envelope(envelope: crate::model::TxEnvelope) -> ParsedEnvelope {
+    let signer = envelope
+        .authorization
+        .as_ref()
+        .map(|authorization| authorization.signer.clone());
+    let nonce = envelope
+        .authorization
+        .as_ref()
+        .and_then(|authorization| authorization.nonce);
+    let replay_key = envelope
+        .authorization
+        .as_ref()
+        .and_then(|authorization| authorization.replay_key.clone())
+        .or_else(|| {
+            let authorization = envelope.authorization.as_ref()?;
+            Some(format!(
+                "{}:local-authorized:{}:{}",
+                authorization.chain_id.clone()?,
+                authorization.signer,
+                authorization.nonce?
+            ))
+        });
+    ParsedEnvelope {
+        envelope,
+        signer,
+        nonce,
+        replay_key,
+    }
+}
+
+fn tx_ids_from_value(value: &Value, authorized_by: Option<String>) -> Result<Vec<String>> {
+    let mut ids = Vec::new();
+    for parsed in parsed_envelopes_from_value(value, authorized_by)? {
+        ids.push(parsed.envelope.tx_id);
+    }
+    Ok(ids)
 }
 
 fn authorization_from_value(value: Option<&Value>) -> Result<Option<LocalAuthorization>> {
@@ -931,6 +1328,361 @@ fn authorization_from_value(value: Option<&Value>) -> Result<Option<LocalAuthori
             .map(Some)
             .context("failed to parse local authorization"),
     }
+}
+
+fn signed_envelope_from_value(value: &Value) -> Result<ParsedEnvelope> {
+    let envelope_value = value.get("envelope").unwrap_or(value);
+    let payload = envelope_value
+        .get("payload")
+        .or_else(|| value.get("payload"))
+        .or_else(|| value.get("document"))
+        .ok_or_else(|| anyhow!("signed transaction envelope must include payload or document"))?;
+    let tx_value = payload
+        .get("tx")
+        .or_else(|| value.get("tx"))
+        .ok_or_else(|| anyhow!("signed transaction envelope payload must include tx"))?;
+    let tx: Transaction = serde_json::from_value(tx_value.clone())
+        .context("failed to parse signed transaction payload tx")?;
+
+    let schema = required_str(envelope_value, "schema")?;
+    if schema != "flowchain.local_transaction_envelope.v0" {
+        return Err(anyhow!("unsupported signed envelope schema: {schema}"));
+    }
+    let envelope_id = required_str(envelope_value, "envelopeId")?;
+    let chain_id = required_str(envelope_value, "chainId")?;
+    let nonce = required_u64(envelope_value, "nonce")?;
+    let signer_id = envelope_signer_str(envelope_value, "signerId")?;
+    let signer_key_id = envelope_signer_str(envelope_value, "signerKeyId")?;
+    let signer_role = envelope_signer_str(envelope_value, "signerRole")?;
+    let signer_role_code = envelope_signer_u64(envelope_value, "signerRoleCode")?;
+    let public_key = envelope_signer_str(envelope_value, "publicKey")?;
+    let domain = required_str(envelope_value, "domain")?;
+    let domain_separator = required_str(envelope_value, "domainSeparator")?;
+    let payload_hash = required_str(envelope_value, "payloadHash")?;
+    let object_id = envelope_value.get("objectId").and_then(Value::as_str);
+    let object_type_hash = envelope_value.get("objectTypeHash").and_then(Value::as_str);
+    let issued_at_unix_ms = required_u64(envelope_value, "issuedAtUnixMs")?;
+    let signing_digest = required_str(envelope_value, "signingDigest")?;
+    let signature = required_str(envelope_value, "signature")?;
+
+    let expected_payload_hash = canonical_json_hash(payload);
+    if payload_hash != expected_payload_hash {
+        return Err(anyhow!("bad-payload-hash"));
+    }
+    let expected_domain =
+        format!("flowchain.local-alpha.v0.local-transaction-envelope:chain:{chain_id}");
+    let legacy_domain = "flowchain.local.v0.transaction-envelope".to_string();
+    if domain != expected_domain && domain != legacy_domain {
+        return Err(anyhow!("wrong-domain"));
+    }
+    if domain_separator != keccak_hex(domain.as_bytes()) {
+        return Err(anyhow!("wrong-domain"));
+    }
+    let expected_role_code = match signer_role {
+        "operator" => 1,
+        "agent" => 2,
+        "verifier" => 3,
+        "hardware" => 4,
+        _ => return Err(anyhow!("wrong-signer")),
+    };
+    if signer_role_code != expected_role_code {
+        return Err(anyhow!("wrong-signer"));
+    }
+
+    if let (Some(object_id), Some(object_type_hash)) = (object_id, object_type_hash) {
+        let expected_envelope_id =
+            local_transaction_envelope_hash(LocalTransactionEnvelopeInput {
+                chain_id,
+                domain_separator,
+                signer_id,
+                signer_key_id,
+                signer_role: signer_role_code,
+                nonce,
+                payload_hash,
+                object_id,
+                object_type_hash,
+                issued_at_unix_ms,
+            })?;
+        if envelope_id != expected_envelope_id {
+            return Err(anyhow!("bad-envelope-id"));
+        }
+        let expected_digest = eip712_digest(domain_separator, &expected_envelope_id)?;
+        if signing_digest != expected_digest {
+            return Err(anyhow!("bad-envelope-digest"));
+        }
+    }
+    if !verify_signature(signing_digest, signature, public_key)? {
+        return Err(anyhow!("bad-signature"));
+    }
+
+    let replay_key = format!("{chain_id}:{domain}:{signer_id}:{nonce}");
+    let authorization = LocalAuthorization {
+        mode: "signed-local-transaction-envelope".to_string(),
+        signer: signer_id.to_string(),
+        digest: signing_digest.to_string(),
+        chain_id: Some(chain_id.to_string()),
+        nonce: Some(nonce),
+        signer_role: Some(signer_role.to_string()),
+        signer_key_id: Some(signer_key_id.to_string()),
+        public_key: Some(public_key.to_string()),
+        signature: Some(signature.to_string()),
+        replay_key: Some(replay_key.clone()),
+    };
+    Ok(ParsedEnvelope {
+        envelope: crate::model::TxEnvelope {
+            tx_id: envelope_id.to_string(),
+            tx,
+            authorization: Some(authorization),
+            submitted_at_block: 0,
+        },
+        signer: Some(signer_id.to_string()),
+        nonce: Some(nonce),
+        replay_key: Some(replay_key),
+    })
+}
+
+struct LocalTransactionEnvelopeInput<'a> {
+    chain_id: &'a str,
+    domain_separator: &'a str,
+    signer_id: &'a str,
+    signer_key_id: &'a str,
+    signer_role: u64,
+    nonce: u64,
+    payload_hash: &'a str,
+    object_id: &'a str,
+    object_type_hash: &'a str,
+    issued_at_unix_ms: u64,
+}
+
+fn local_transaction_envelope_hash(input: LocalTransactionEnvelopeInput<'_>) -> Result<String> {
+    let mut encoded = Vec::with_capacity(320);
+    encoded.extend(hex_32(&keccak_hex(LOCAL_TRANSACTION_TYPE.as_bytes()))?);
+    encoded.extend(uint_word(parse_u128(input.chain_id, "chainId")?));
+    encoded.extend(hex_32(input.domain_separator)?);
+    encoded.extend(hex_32(input.signer_id)?);
+    encoded.extend(hex_32(input.signer_key_id)?);
+    encoded.extend(uint_word(input.signer_role as u128));
+    encoded.extend(uint_word(input.nonce as u128));
+    encoded.extend(hex_32(input.payload_hash)?);
+    encoded.extend(hex_32(input.object_id)?);
+    encoded.extend(hex_32(input.object_type_hash)?);
+    encoded.extend(uint_word(input.issued_at_unix_ms as u128));
+    Ok(keccak_hex(&encoded))
+}
+
+fn eip712_digest(domain_separator: &str, struct_hash: &str) -> Result<String> {
+    let mut encoded = Vec::with_capacity(66);
+    encoded.extend([0x19, 0x01]);
+    encoded.extend(hex_32(domain_separator)?);
+    encoded.extend(hex_32(struct_hash)?);
+    Ok(keccak_hex(&encoded))
+}
+
+fn verify_signature(digest: &str, signature: &str, public_key: &str) -> Result<bool> {
+    let digest_bytes = hex_32(digest)?;
+    let signature_bytes = hex_bytes(signature, 64)?;
+    let public_key_bytes = hex_bytes(public_key, 0)?;
+    let verifying_key =
+        VerifyingKey::from_sec1_bytes(&public_key_bytes).map_err(|_| anyhow!("bad-public-key"))?;
+    let signature =
+        Signature::from_slice(&signature_bytes).map_err(|_| anyhow!("bad-signature"))?;
+    Ok(verifying_key
+        .verify_prehash(&digest_bytes, &signature)
+        .is_ok())
+}
+
+fn hex_32(value: &str) -> Result<Vec<u8>> {
+    hex_bytes(value, 32)
+}
+
+fn hex_bytes(value: &str, expected_len: usize) -> Result<Vec<u8>> {
+    let stripped = value
+        .strip_prefix("0x")
+        .ok_or_else(|| anyhow!("hex value must start with 0x"))?;
+    let bytes = hex::decode(stripped).map_err(|_| anyhow!("malformed hex"))?;
+    if expected_len > 0 && bytes.len() != expected_len {
+        return Err(anyhow!("hex value has wrong length"));
+    }
+    Ok(bytes)
+}
+
+fn uint_word(value: u128) -> Vec<u8> {
+    let mut word = vec![0_u8; 32];
+    word[16..].copy_from_slice(&value.to_be_bytes());
+    word
+}
+
+fn parse_u128(value: &str, field: &str) -> Result<u128> {
+    value
+        .parse::<u128>()
+        .with_context(|| format!("{field} must be an unsigned integer string"))
+}
+
+fn required_str<'a>(value: &'a Value, key: &str) -> Result<&'a str> {
+    value
+        .get(key)
+        .and_then(Value::as_str)
+        .ok_or_else(|| anyhow!("missing string field {key}"))
+}
+
+fn required_u64(value: &Value, key: &str) -> Result<u64> {
+    let raw = value
+        .get(key)
+        .and_then(|value| value.as_str().or_else(|| value.as_u64().map(|_| "")))
+        .ok_or_else(|| anyhow!("missing integer field {key}"))?;
+    if raw.is_empty() {
+        return value
+            .get(key)
+            .and_then(Value::as_u64)
+            .ok_or_else(|| anyhow!("missing integer field {key}"));
+    }
+    raw.parse::<u64>()
+        .with_context(|| format!("{key} must be an unsigned integer string"))
+}
+
+fn envelope_signer_str<'a>(value: &'a Value, key: &str) -> Result<&'a str> {
+    value
+        .get(key)
+        .and_then(Value::as_str)
+        .or_else(|| {
+            value
+                .get("signer")
+                .and_then(|signer| signer.get(key))
+                .and_then(Value::as_str)
+        })
+        .ok_or_else(|| anyhow!("missing string field {key}"))
+}
+
+fn envelope_signer_u64(value: &Value, key: &str) -> Result<u64> {
+    if value.get(key).is_some() {
+        return required_u64(value, key);
+    }
+    let signer = value
+        .get("signer")
+        .ok_or_else(|| anyhow!("missing signer object"))?;
+    required_u64(signer, key)
+}
+
+fn preflight_state_with_pending(state: &crate::model::ChainState) -> crate::model::ChainState {
+    let mut simulation = state.clone();
+    let pending = simulation.pending_txs.clone();
+    simulation.pending_txs.clear();
+    for envelope in pending {
+        let _ = crate::model::apply_transaction(&mut simulation, &envelope.tx);
+    }
+    simulation
+}
+
+fn validate_and_queue_envelope(
+    state: &mut crate::model::ChainState,
+    simulation: &mut crate::model::ChainState,
+    mut parsed: ParsedEnvelope,
+    source: Option<PathBuf>,
+) -> std::result::Result<String, RejectedTx> {
+    parsed.envelope.submitted_at_block = state.next_block_number;
+    validate_envelope_for_mempool(state, simulation, &parsed).map_err(|reason| RejectedTx {
+        tx_id: Some(parsed.envelope.tx_id.clone()),
+        reason,
+        source: source.clone(),
+    })?;
+    let tx_id = parsed.envelope.tx_id.clone();
+    if let Some(signer) = parsed.signer.clone()
+        && let Some(nonce) = parsed.nonce
+    {
+        state.account_nonces.insert(
+            signer.clone(),
+            crate::model::AccountNonce {
+                signer,
+                next_nonce: nonce + 1,
+                last_tx_id: Some(tx_id.clone()),
+                updated_at_block: state.next_block_number,
+            },
+        );
+    }
+    if let Some(replay_key) = parsed.replay_key.clone()
+        && let Some(signer) = parsed.signer.clone()
+        && let Some(nonce) = parsed.nonce
+    {
+        state.replay_keys.insert(
+            replay_key.clone(),
+            crate::model::ReplayKeyRecord {
+                replay_key,
+                tx_id: tx_id.clone(),
+                signer,
+                nonce,
+                accepted_at_block: state.next_block_number,
+            },
+        );
+    }
+    crate::model::apply_transaction(simulation, &parsed.envelope.tx).map_err(|error| {
+        RejectedTx {
+            tx_id: Some(tx_id.clone()),
+            reason: error.to_string(),
+            source,
+        }
+    })?;
+    record_pending_transaction(state, &parsed.envelope);
+    state.pending_txs.push(parsed.envelope);
+    Ok(tx_id)
+}
+
+fn try_queue_envelope(
+    state: &mut crate::model::ChainState,
+    parsed: ParsedEnvelope,
+) -> Result<String> {
+    let mut simulation = preflight_state_with_pending(state);
+    validate_and_queue_envelope(state, &mut simulation, parsed, None)
+        .map_err(|rejected| anyhow!(rejected.reason))
+}
+
+fn validate_envelope_for_mempool(
+    state: &crate::model::ChainState,
+    simulation: &crate::model::ChainState,
+    parsed: &ParsedEnvelope,
+) -> std::result::Result<(), String> {
+    if state.pending_txs.len() >= MAX_MEMPOOL_TXS {
+        return Err("mempool-full".to_string());
+    }
+    if parsed.envelope.tx_id.trim().is_empty() {
+        return Err("missing-tx-id".to_string());
+    }
+    if state
+        .pending_txs
+        .iter()
+        .any(|pending| pending.tx_id == parsed.envelope.tx_id)
+        || state.consumed_tx_ids.contains_key(&parsed.envelope.tx_id)
+    {
+        return Err("duplicate-tx-id".to_string());
+    }
+    if let Some(authorization) = &parsed.envelope.authorization
+        && let Some(chain_id) = &authorization.chain_id
+        && chain_id != &state.chain_id
+    {
+        return Err("wrong-chain-id".to_string());
+    }
+    if let Some(replay_key) = &parsed.replay_key
+        && state.replay_keys.contains_key(replay_key)
+    {
+        return Err("replay".to_string());
+    }
+    if let Some(signer) = &parsed.signer
+        && let Some(nonce) = parsed.nonce
+    {
+        let expected = state
+            .account_nonces
+            .get(signer)
+            .map(|record| record.next_nonce)
+            .unwrap_or(1);
+        if nonce < expected {
+            return Err("stale-nonce".to_string());
+        }
+        if nonce > expected {
+            return Err("future-nonce".to_string());
+        }
+    }
+    crate::model::apply_transaction(&mut simulation.clone(), &parsed.envelope.tx)
+        .map_err(|error| error.to_string())?;
+    Ok(())
 }
 
 struct DemoRun {
@@ -993,6 +1745,139 @@ fn build_product_smoke_state() -> DemoRun {
     }
 }
 
+fn run_node_smoke(
+    state_path: &Path,
+    _node_dir: &Path,
+    out_dir: &Path,
+) -> Result<NodeRuntimeSmokeReport> {
+    fs::create_dir_all(out_dir)?;
+    let mut state = genesis_state();
+    let txs = production_runtime_smoke_transactions();
+    let mut tx_ids = Vec::with_capacity(txs.len());
+    for tx in txs {
+        tx_ids.push(queue_authorized_transaction(
+            &mut state,
+            tx,
+            "local-node-smoke-operator".to_string(),
+        ));
+    }
+    let mut block_hashes = Vec::new();
+    while state.blocks.len() < 10 {
+        block_hashes.push(build_block(&mut state).block_hash);
+    }
+    save_state(state_path, &state)?;
+    write_runtime_boundary_files(state_path, &state)?;
+    let restart_state = load_state(state_path)?;
+    let snapshot_path = out_dir.join("state-snapshot.json");
+    write_json(snapshot_path.clone(), &restart_state)?;
+    let imported_state: crate::model::ChainState =
+        serde_json::from_str(&fs::read_to_string(&snapshot_path)?)?;
+    let report = NodeRuntimeSmokeReport {
+        schema: "flowchain.private_testnet.production_node_smoke.v0".to_string(),
+        commands_run: vec!["flowmemory-devnet node-smoke".to_string()],
+        block_count: restart_state.blocks.len(),
+        tx_ids,
+        receipt_ids: restart_state.receipts.keys().cloned().collect(),
+        state_root: state_root(&restart_state),
+        latest_hash: restart_state.latest_hash.clone(),
+        restart_proof: RestartProof {
+            before_state_root: state_root(&state),
+            after_state_root: state_root(&restart_state),
+            before_latest_hash: state.latest_hash.clone(),
+            after_latest_hash: restart_state.latest_hash.clone(),
+            preserved: state_root(&state) == state_root(&restart_state)
+                && state.latest_hash == restart_state.latest_hash,
+        },
+        export_import_proof: ExportImportProof {
+            imported_state_root: state_root(&imported_state),
+            preserved: state_root(&restart_state) == state_root(&imported_state),
+        },
+        failure_details: Vec::new(),
+        block_hashes,
+    };
+    write_json(out_dir.join("production-node-smoke-report.json"), &report)?;
+    Ok(report)
+}
+
+fn production_runtime_smoke_transactions() -> Vec<Transaction> {
+    let mut txs = Vec::new();
+    txs.extend(demo_transactions());
+    txs.extend(product_demo_transactions());
+
+    let token_id = deterministic_token_id("FLOWT");
+    let token_transfer_id = hash_json(
+        "flowmemory.local_devnet.token_transfer_id.v0",
+        &serde_json::json!({
+            "tokenId": token_id,
+            "from": "local-account:product:alice",
+            "to": "local-account:product:bob",
+            "amount": 100_u64,
+            "memo": "node-smoke-token-transfer"
+        }),
+    );
+    txs.push(Transaction::TransferLocalTestToken {
+        transfer_id: token_transfer_id,
+        token_id,
+        from_account_id: "local-account:product:alice".to_string(),
+        to_account_id: "local-account:product:bob".to_string(),
+        amount_units: 100,
+        memo: "node-smoke-token-transfer".to_string(),
+    });
+
+    txs.push(Transaction::CreateLocalTestUnitBalance {
+        account_id: "local-account:bridge:bob".to_string(),
+        owner: "operator:bridge:bob".to_string(),
+    });
+    let replay_key = keccak_hex(b"flowchain.node-smoke.bridge.replay-key");
+    let credit_id = hash_json(
+        "flowmemory.local_devnet.bridge_credit_id.v0",
+        &serde_json::json!({
+            "replayKey": replay_key,
+            "recipient": "local-account:bridge:alice",
+            "amount": 75_u64
+        }),
+    );
+    txs.push(Transaction::ApplyBridgeCredit {
+        credit_id: credit_id.clone(),
+        observation_id: keccak_hex(b"flowchain.node-smoke.bridge.observation"),
+        deposit_id: keccak_hex(b"flowchain.node-smoke.bridge.deposit"),
+        replay_key: replay_key.clone(),
+        source_chain_id: 8453,
+        source_contract: "0x1111111111111111111111111111111111111111".to_string(),
+        source_tx_hash: keccak_hex(b"flowchain.node-smoke.bridge.source-tx"),
+        source_log_index: 0,
+        token: "0x3333333333333333333333333333333333333333".to_string(),
+        asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+        recipient_account_id: "local-account:bridge:alice".to_string(),
+        amount_units: 75,
+        verifier: "bridge-verifier:local-smoke".to_string(),
+        evidence_hash: keccak_hex(b"flowchain.node-smoke.bridge.evidence"),
+        local_only: true,
+        production_ready: false,
+        base_observed_at: "2026-05-13T00:00:00.000Z".to_string(),
+        handoff_written_at: "2026-05-13T00:00:01.000Z".to_string(),
+        node_ingested_at: "2026-05-13T00:00:02.000Z".to_string(),
+    });
+    txs.push(Transaction::TransferLocalTestUnits {
+        transfer_id: "transfer:bridge:alice-to-bob".to_string(),
+        from_account_id: "local-account:bridge:alice".to_string(),
+        to_account_id: "local-account:bridge:bob".to_string(),
+        amount_units: 25,
+        memo: "bridge-credit-spend-proof".to_string(),
+    });
+    txs.push(Transaction::RequestWithdrawal {
+        withdrawal_intent_id: keccak_hex(b"flowchain.node-smoke.withdrawal.intent"),
+        credit_id,
+        account_id: "local-account:bridge:alice".to_string(),
+        asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+        amount_units: 10,
+        destination_chain_id: 8453,
+        base_recipient: "0x4444444444444444444444444444444444444444".to_string(),
+        memo: "test-mode-withdrawal-intent".to_string(),
+    });
+    txs
+}
+
 fn transactions_from_fixture(path: &Path) -> Result<Vec<Transaction>> {
     let body = fs::read_to_string(path)
         .with_context(|| format!("failed to read fixture {}", path.display()))?;
@@ -1010,6 +1895,15 @@ fn transactions_from_fixture(path: &Path) -> Result<Vec<Transaction>> {
         return Ok(vec![tx]);
     }
 
+    if value
+        .get("schema")
+        .and_then(Value::as_str)
+        .is_some_and(|schema| schema == "flowmemory.bridge_runtime_handoff.v0")
+    {
+        return bridge_handoff_transactions(&value, false)
+            .with_context(|| format!("failed to parse bridge handoff {}", path.display()));
+    }
+
     if value.get("rawLog").is_some() && value.get("expected").is_some() {
         return Ok(vec![Transaction::ImportFlowPulseObservation(
             observation_from_flowpulse_fixture(&value)?,
@@ -1023,9 +1917,262 @@ fn transactions_from_fixture(path: &Path) -> Result<Vec<Transaction>> {
     }
 
     Err(anyhow!(
-        "unsupported fixture shape in {}: expected tx, txs, FlowPulse observation, or verifier report fixture",
+        "unsupported fixture shape in {}: expected tx, txs, bridge handoff, FlowPulse observation, or verifier report fixture",
         path.display()
     ))
+}
+
+fn bridge_handoff_transactions_from_path(
+    path: &Path,
+    require_live: bool,
+) -> Result<Vec<Transaction>> {
+    let body = fs::read_to_string(path)
+        .with_context(|| format!("failed to read bridge handoff {}", path.display()))?;
+    let value: Value = serde_json::from_str(body.trim_start_matches('\u{feff}'))
+        .with_context(|| format!("failed to parse bridge handoff {}", path.display()))?;
+    bridge_handoff_transactions(&value, require_live)
+}
+
+fn bridge_handoff_transactions(value: &Value, require_live: bool) -> Result<Vec<Transaction>> {
+    let schema = value
+        .get("schema")
+        .and_then(Value::as_str)
+        .ok_or_else(|| anyhow!("bridge handoff missing schema"))?;
+    if schema != "flowmemory.bridge_runtime_handoff.v0" {
+        return Err(anyhow!("unsupported bridge handoff schema: {schema}"));
+    }
+    if require_live {
+        require_bool(value, "productionReady", true)?;
+        require_bool(value, "localOnly", false)?;
+    }
+
+    let credits = value
+        .get("credits")
+        .and_then(Value::as_array)
+        .ok_or_else(|| anyhow!("bridge handoff missing credits array"))?;
+    let observations = value
+        .get("observations")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    let handoff_written_at = string_value_optional(value, "handoffWrittenAt")
+        .or_else(|| string_value_optional(value, "generatedAt"))
+        .unwrap_or_else(current_rfc3339);
+    let mut txs = Vec::new();
+    let mut local_accounts = BTreeSet::new();
+
+    for credit in credits {
+        let status = credit
+            .get("status")
+            .and_then(Value::as_str)
+            .unwrap_or("pending");
+        if status == "rejected" {
+            continue;
+        }
+        if require_live {
+            require_bool(credit, "productionReady", true)?;
+            require_bool(credit, "localOnly", false)?;
+        }
+
+        let source = credit
+            .get("source")
+            .and_then(Value::as_object)
+            .ok_or_else(|| anyhow!("bridge credit missing source object"))?;
+        let source_chain_id = value_to_u64(
+            source
+                .get("chainId")
+                .ok_or_else(|| anyhow!("bridge credit source missing chainId"))?,
+            "source.chainId",
+        )?;
+        if require_live && source_chain_id != 8453 {
+            return Err(anyhow!(
+                "live bridge handoff source chain must be Base 8453, got {source_chain_id}"
+            ));
+        }
+        let observation_id = string_value(credit, "observationId")?;
+        if require_live {
+            require_confirmation_eligible(&observations, &observation_id)?;
+        }
+        let flowchain_recipient = string_value(credit, "flowchainRecipient")?;
+        let recipient_account_id = string_value_optional(credit, "recipientAccountId")
+            .unwrap_or_else(|| deterministic_bridge_account_id(&flowchain_recipient));
+        if local_accounts.insert(recipient_account_id.clone()) {
+            txs.push(Transaction::CreateLocalTestUnitBalance {
+                account_id: recipient_account_id.clone(),
+                owner: "operator:bridge:pilot".to_string(),
+            });
+        }
+
+        let node_ingested_at = current_rfc3339();
+        let base_observed_at = string_value_optional(credit, "baseObservedAt")
+            .or_else(|| observation_timestamp(&observations, &observation_id))
+            .or_else(|| string_value_optional(value, "baseObservedAt"))
+            .unwrap_or_else(|| handoff_written_at.clone());
+        let source_contract = string_field(source, "contract")?;
+        let source_tx_hash = string_field(source, "txHash")?;
+        let source_log_index = value_to_u64(
+            source
+                .get("logIndex")
+                .ok_or_else(|| anyhow!("bridge credit source missing logIndex"))?,
+            "source.logIndex",
+        )?;
+        let credit_id = string_value(credit, "creditId")?;
+        txs.push(Transaction::ApplyBridgeCredit {
+            credit_id: credit_id.clone(),
+            observation_id,
+            deposit_id: string_value(credit, "depositId")?,
+            replay_key: string_value(credit, "replayKey").unwrap_or_else(|_| {
+                crate::model::bridge_source_replay_key(
+                    source_chain_id,
+                    &source_contract,
+                    &source_tx_hash,
+                    source_log_index,
+                )
+            }),
+            source_chain_id,
+            source_contract,
+            source_tx_hash,
+            source_log_index,
+            token: string_value(credit, "token")?,
+            asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            recipient_account_id,
+            amount_units: value_to_u64(
+                credit
+                    .get("amount")
+                    .ok_or_else(|| anyhow!("bridge credit missing amount"))?,
+                "amount",
+            )?,
+            verifier: "bridge-verifier:base8453-live-handoff".to_string(),
+            evidence_hash: string_value_optional(credit, "evidenceHash").unwrap_or_else(|| {
+                hash_json(
+                    "flowmemory.local_devnet.bridge_credit_evidence.v0",
+                    &normalize_value(credit.clone()),
+                )
+            }),
+            local_only: bool_field_default(credit, "localOnly", true),
+            production_ready: bool_field_default(credit, "productionReady", false),
+            base_observed_at,
+            handoff_written_at: string_value_optional(credit, "handoffWrittenAt")
+                .unwrap_or_else(|| handoff_written_at.clone()),
+            node_ingested_at,
+        });
+    }
+
+    Ok(txs)
+}
+
+fn deterministic_bridge_account_id(flowchain_recipient: &str) -> String {
+    format!(
+        "local-account:bridge:{}",
+        hash_json(
+            "flowmemory.local_devnet.bridge_account_id.v0",
+            &serde_json::json!({ "flowchainRecipient": flowchain_recipient })
+        )
+        .trim_start_matches("0x")
+    )
+}
+
+fn bridge_credit_id_from_tx(tx: &Transaction) -> Option<String> {
+    match tx {
+        Transaction::ApplyBridgeCredit { credit_id, .. } => Some(credit_id.clone()),
+        _ => None,
+    }
+}
+
+fn current_rfc3339() -> String {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_secs().to_string())
+        .unwrap_or_else(|_| "0".to_string())
+}
+
+fn string_value(value: &Value, key: &str) -> Result<String> {
+    value
+        .get(key)
+        .and_then(Value::as_str)
+        .map(ToOwned::to_owned)
+        .ok_or_else(|| anyhow!("missing string field {key}"))
+}
+
+fn string_value_optional(value: &Value, key: &str) -> Option<String> {
+    value
+        .get(key)
+        .and_then(Value::as_str)
+        .map(ToOwned::to_owned)
+}
+
+fn value_to_u64(value: &Value, label: &str) -> Result<u64> {
+    match value {
+        Value::String(value) => value
+            .parse::<u64>()
+            .with_context(|| format!("{label} must be an unsigned integer string")),
+        Value::Number(value) => value
+            .as_u64()
+            .ok_or_else(|| anyhow!("{label} must be a non-negative integer")),
+        _ => Err(anyhow!("{label} must be a string or number")),
+    }
+}
+
+fn bool_field_default(value: &Value, key: &str, default: bool) -> bool {
+    value.get(key).and_then(Value::as_bool).unwrap_or(default)
+}
+
+fn require_bool(value: &Value, key: &str, expected: bool) -> Result<()> {
+    let actual = value
+        .get(key)
+        .and_then(Value::as_bool)
+        .ok_or_else(|| anyhow!("live bridge handoff missing boolean field {key}"))?;
+    if actual != expected {
+        return Err(anyhow!(
+            "live bridge handoff field {key} must be {expected}, got {actual}"
+        ));
+    }
+    Ok(())
+}
+
+fn observation_timestamp(observations: &[Value], observation_id: &str) -> Option<String> {
+    observations
+        .iter()
+        .find(|observation| {
+            observation
+                .get("observationId")
+                .and_then(Value::as_str)
+                .is_some_and(|id| id == observation_id)
+        })
+        .and_then(|observation| observation.get("observedAt"))
+        .and_then(Value::as_str)
+        .map(ToOwned::to_owned)
+}
+
+fn require_confirmation_eligible(observations: &[Value], observation_id: &str) -> Result<()> {
+    let Some(observation) = observations.iter().find(|observation| {
+        observation
+            .get("observationId")
+            .and_then(Value::as_str)
+            .is_some_and(|id| id == observation_id)
+    }) else {
+        return Err(anyhow!(
+            "live bridge handoff missing observation {observation_id}"
+        ));
+    };
+    let confirmation = observation
+        .get("guardrails")
+        .and_then(|guardrails| guardrails.get("confirmation"))
+        .ok_or_else(|| anyhow!("live bridge handoff missing confirmation evidence"))?;
+    let depth = confirmation
+        .get("depth")
+        .and_then(Value::as_u64)
+        .ok_or_else(|| anyhow!("live bridge handoff confirmation depth is missing"))?;
+    let satisfied = confirmation
+        .get("satisfied")
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    if depth < 12 || !satisfied {
+        return Err(anyhow!(
+            "live bridge handoff is not 12-confirmation eligible: depth={depth}, satisfied={satisfied}"
+        ));
+    }
+    Ok(())
 }
 
 fn observation_from_flowpulse_fixture(value: &Value) -> Result<ImportedFlowPulseObservation> {
@@ -1106,7 +2253,10 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "stateRoot": state_root(state),
         "mapRoots": map_roots,
         "blockHeight": state.blocks.len(),
+        "latestHash": state.latest_hash,
+        "finalizedHeight": state.finalized_height,
         "rootfields": state.rootfields,
+        "accountNonces": state.account_nonces,
         "agentAccounts": state.agent_accounts,
         "localTestUnitBalances": state.local_test_unit_balances,
         "faucetRecords": state.faucet_records,
@@ -1114,6 +2264,7 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "tokenDefinitions": state.token_definitions,
         "tokenBalances": state.token_balances,
         "tokenMintReceipts": state.token_mint_receipts,
+        "tokenTransferReceipts": state.token_transfer_receipts,
         "dexPools": state.dex_pools,
         "lpPositions": state.lp_positions,
         "liquidityReceipts": state.liquidity_receipts,
@@ -1127,6 +2278,14 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "verifierModules": state.verifier_modules,
         "workReceipts": state.work_receipts,
         "verifierReports": state.verifier_reports,
+        "bridgeObservations": state.bridge_observations,
+        "bridgeCredits": state.bridge_credits,
+        "bridgeCreditReceipts": state.bridge_credit_receipts,
+        "bridgeReplayKeys": state.bridge_replay_keys,
+        "withdrawalIntents": state.withdrawal_intents,
+        "transactions": state.transactions,
+        "receipts": state.receipts,
+        "events": state.events,
         "baseAnchors": state.base_anchors,
     });
 
@@ -1135,6 +2294,7 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "genesisConfig": state.config,
         "importedObservations": state.imported_observations,
         "operatorKeyReferences": state.operator_key_references,
+        "accountNonces": state.account_nonces,
         "agentAccounts": state.agent_accounts,
         "localTestUnitBalances": state.local_test_unit_balances,
         "faucetRecords": state.faucet_records,
@@ -1142,6 +2302,7 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "tokenDefinitions": state.token_definitions,
         "tokenBalances": state.token_balances,
         "tokenMintReceipts": state.token_mint_receipts,
+        "tokenTransferReceipts": state.token_transfer_receipts,
         "dexPools": state.dex_pools,
         "lpPositions": state.lp_positions,
         "liquidityReceipts": state.liquidity_receipts,
@@ -1150,6 +2311,14 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "challenges": state.challenges,
         "finalityReceipts": state.finality_receipts,
         "artifactAvailabilityProofs": state.artifact_availability_proofs,
+        "bridgeObservations": state.bridge_observations,
+        "bridgeCredits": state.bridge_credits,
+        "bridgeCreditReceipts": state.bridge_credit_receipts,
+        "bridgeReplayKeys": state.bridge_replay_keys,
+        "withdrawalIntents": state.withdrawal_intents,
+        "transactions": state.transactions,
+        "receipts": state.receipts,
+        "events": state.events,
         "blocks": state.blocks,
         "mapRoots": state_map_roots(state),
         "stateRoot": state_root(state),
@@ -1159,12 +2328,14 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "schema": "flowmemory.verifier_handoff.local_devnet.v0",
         "genesisConfig": state.config,
         "operatorKeyReferences": state.operator_key_references,
+        "accountNonces": state.account_nonces,
         "localTestUnitBalances": state.local_test_unit_balances,
         "faucetRecords": state.faucet_records,
         "balanceTransfers": state.balance_transfers,
         "tokenDefinitions": state.token_definitions,
         "tokenBalances": state.token_balances,
         "tokenMintReceipts": state.token_mint_receipts,
+        "tokenTransferReceipts": state.token_transfer_receipts,
         "dexPools": state.dex_pools,
         "lpPositions": state.lp_positions,
         "liquidityReceipts": state.liquidity_receipts,
@@ -1176,6 +2347,14 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "finalityReceipts": state.finality_receipts,
         "artifactAvailabilityProofs": state.artifact_availability_proofs,
         "importedVerifierReports": state.imported_verifier_reports,
+        "bridgeObservations": state.bridge_observations,
+        "bridgeCredits": state.bridge_credits,
+        "bridgeCreditReceipts": state.bridge_credit_receipts,
+        "bridgeReplayKeys": state.bridge_replay_keys,
+        "withdrawalIntents": state.withdrawal_intents,
+        "transactions": state.transactions,
+        "receipts": state.receipts,
+        "events": state.events,
         "mapRoots": state_map_roots(state),
         "stateRoot": state_root(state),
     });
@@ -1187,11 +2366,18 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
         "chainId": state.chain_id,
         "stateRoot": state_root(state),
         "mapRoots": state_map_roots(state),
+        "latestHeight": state.latest_height,
+        "latestHash": state.latest_hash,
+        "finalizedHeight": state.finalized_height,
         "latestBlock": state.blocks.last(),
         "blocks": state.blocks,
         "pendingTxs": state.pending_txs,
+        "transactions": state.transactions,
+        "receipts": state.receipts,
+        "events": state.events,
         "objects": {
             "rootfields": state.rootfields,
+            "accountNonces": state.account_nonces,
             "agentAccounts": state.agent_accounts,
             "localTestUnitBalances": state.local_test_unit_balances,
             "faucetRecords": state.faucet_records,
@@ -1199,6 +2385,7 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
             "tokenDefinitions": state.token_definitions,
             "tokenBalances": state.token_balances,
             "tokenMintReceipts": state.token_mint_receipts,
+            "tokenTransferReceipts": state.token_transfer_receipts,
             "dexPools": state.dex_pools,
             "lpPositions": state.lp_positions,
             "liquidityReceipts": state.liquidity_receipts,
@@ -1212,6 +2399,11 @@ fn export_handoff(state: &crate::model::ChainState, out_dir: &Path) -> Result<()
             "verifierModules": state.verifier_modules,
             "workReceipts": state.work_receipts,
             "verifierReports": state.verifier_reports,
+            "bridgeObservations": state.bridge_observations,
+            "bridgeCredits": state.bridge_credits,
+            "bridgeCreditReceipts": state.bridge_credit_receipts,
+            "bridgeReplayKeys": state.bridge_replay_keys,
+            "withdrawalIntents": state.withdrawal_intents,
             "baseAnchors": state.base_anchors
         }
     });
@@ -1236,6 +2428,32 @@ fn write_runtime_boundary_files(state_path: &Path, state: &crate::model::ChainSt
         out_dir.join("operator-key-references.json"),
         &state.operator_key_references,
     )?;
+    write_json(
+        out_dir.join("runtime-handoff.json"),
+        &serde_json::json!({
+            "schema": "flowmemory.local_devnet.runtime_handoff.v0",
+            "chainId": state.chain_id,
+            "latestHeight": state.latest_height,
+            "latestHash": state.latest_hash,
+            "finalizedHeight": state.finalized_height,
+            "stateRoot": state_root(state),
+            "mapRoots": state_map_roots(state),
+            "mempool": {
+                "pending": state.pending_txs.len(),
+                "maxSize": MAX_MEMPOOL_TXS,
+                "pendingTxs": state.pending_txs
+            },
+            "transactions": state.transactions,
+            "receipts": state.receipts,
+            "events": state.events,
+            "bridgeCredits": state.bridge_credits,
+            "bridgeCreditReceipts": state.bridge_credit_receipts,
+            "withdrawalIntents": state.withdrawal_intents,
+            "controlPlanePreferredHandoff": out_dir.join("handoff").join("control-plane-handoff.json"),
+            "dashboardPreferredHandoff": out_dir.join("handoff").join("dashboard-state.json")
+        }),
+    )?;
+    export_handoff(state, &out_dir.join("handoff"))?;
     Ok(())
 }
 
@@ -1269,10 +2487,124 @@ fn string_at(values: &[Value], index: usize, label: &str) -> Result<String> {
         .ok_or_else(|| anyhow!("missing string value {label}"))
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Default, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct QueuedTransactions {
     queued: Vec<String>,
+    rejected: Vec<RejectedTx>,
+}
+
+impl QueuedTransactions {
+    fn accepted_only(queued: Vec<String>) -> Self {
+        Self {
+            queued,
+            rejected: Vec::new(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct BridgeIngestSummary {
+    schema: String,
+    handoff: PathBuf,
+    direct: bool,
+    require_live: bool,
+    credit_ids: Vec<String>,
+    queued: QueuedTransactions,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct MempoolSummary {
+    schema: String,
+    max_size: usize,
+    pending: usize,
+    pending_txs: Vec<crate::model::TxEnvelope>,
+}
+
+impl MempoolSummary {
+    fn from_state(state: &crate::model::ChainState) -> Self {
+        Self {
+            schema: "flowmemory.local_devnet.mempool.v0".to_string(),
+            max_size: MAX_MEMPOOL_TXS,
+            pending: state.pending_txs.len(),
+            pending_txs: state.pending_txs.clone(),
+        }
+    }
+}
+
+fn query_state(state: &crate::model::ChainState, kind: QueryKind, id: &str) -> Result<Value> {
+    let value = match kind {
+        QueryKind::Block => {
+            let block = if let Ok(height) = id.parse::<u64>() {
+                state
+                    .blocks
+                    .iter()
+                    .find(|block| block.block_number == height)
+            } else {
+                state.blocks.iter().find(|block| block.block_hash == id)
+            };
+            serde_json::json!({
+                "schema": "flowmemory.local_devnet.query.block.v0",
+                "id": id,
+                "block": block
+            })
+        }
+        QueryKind::Transaction => serde_json::json!({
+            "schema": "flowmemory.local_devnet.query.transaction.v0",
+            "id": id,
+            "transaction": state.transactions.get(id),
+            "pending": state.pending_txs.iter().find(|tx| tx.tx_id == id)
+        }),
+        QueryKind::Receipt => serde_json::json!({
+            "schema": "flowmemory.local_devnet.query.receipt.v0",
+            "id": id,
+            "receipt": state.receipts.get(id)
+        }),
+        QueryKind::Account => {
+            let token_balances = state
+                .token_balances
+                .values()
+                .filter(|balance| balance.account_id == id)
+                .collect::<Vec<_>>();
+            serde_json::json!({
+                "schema": "flowmemory.local_devnet.query.account.v0",
+                "id": id,
+                "localTestUnitBalance": state.local_test_unit_balances.get(id),
+                "agentAccount": state.agent_accounts.get(id),
+                "tokenBalances": token_balances,
+                "nonce": state.account_nonces.get(id)
+            })
+        }
+        QueryKind::Token => serde_json::json!({
+            "schema": "flowmemory.local_devnet.query.token.v0",
+            "id": id,
+            "token": state.token_definitions.get(id),
+            "balances": state.token_balances.values().filter(|balance| balance.token_id == id).collect::<Vec<_>>()
+        }),
+        QueryKind::Pool => serde_json::json!({
+            "schema": "flowmemory.local_devnet.query.pool.v0",
+            "id": id,
+            "pool": state.dex_pools.get(id),
+            "lpPositions": state.lp_positions.values().filter(|position| position.pool_id == id).collect::<Vec<_>>(),
+            "liquidityReceipts": state.liquidity_receipts.values().filter(|receipt| receipt.pool_id == id).collect::<Vec<_>>(),
+            "swapReceipts": state.swap_receipts.values().filter(|receipt| receipt.pool_id == id).collect::<Vec<_>>()
+        }),
+        QueryKind::BridgeCredit => serde_json::json!({
+            "schema": "flowmemory.local_devnet.query.bridge_credit.v0",
+            "id": id,
+            "credit": state.bridge_credits.get(id),
+            "receipt": state.bridge_credit_receipts.get(id),
+            "replayKey": state.bridge_credits.get(id).and_then(|credit| state.bridge_replay_keys.get(&credit.replay_key))
+        }),
+        QueryKind::FinalityReceipt => serde_json::json!({
+            "schema": "flowmemory.local_devnet.query.finality_receipt.v0",
+            "id": id,
+            "finalityReceipt": state.finality_receipts.get(id)
+        }),
+    };
+    Ok(value)
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -1286,20 +2618,37 @@ struct NodeStatus {
     state_path: PathBuf,
     node_dir: PathBuf,
     block_height: usize,
+    latest_height: u64,
     next_block_number: u64,
     latest_block_hash: String,
+    finalized_height: u64,
     state_root: String,
+    receipt_root: String,
+    event_root: String,
     pending_txs: usize,
+    max_mempool_txs: usize,
+    account_nonces: usize,
+    consumed_txs: usize,
     local_test_unit_balances: usize,
     faucet_records: usize,
     balance_transfers: usize,
     token_definitions: usize,
     token_balances: usize,
     token_mint_receipts: usize,
+    token_transfer_receipts: usize,
     dex_pools: usize,
     lp_positions: usize,
     liquidity_receipts: usize,
     swap_receipts: usize,
+    bridge_observations: usize,
+    bridge_credits: usize,
+    bridge_credit_receipts: usize,
+    bridge_replay_keys: usize,
+    withdrawal_intents: usize,
+    receipts: usize,
+    events: usize,
+    log_path: PathBuf,
+    last_error: Option<String>,
     static_peer_sync: Option<PeerSyncEvent>,
     last_ingested_txs: usize,
     last_rejected_inbox_files: usize,
@@ -1328,24 +2677,41 @@ impl NodeStatus {
             state_path: state_path.to_path_buf(),
             node_dir: node_dir.to_path_buf(),
             block_height: state.blocks.len(),
+            latest_height: state.latest_height,
             next_block_number: state.next_block_number,
             latest_block_hash: state
                 .blocks
                 .last()
                 .map(|block| block.block_hash.clone())
                 .unwrap_or_else(|| state.parent_hash.clone()),
+            finalized_height: state.finalized_height,
             state_root: state_root(state),
+            receipt_root: state_map_roots(state).receipt_root,
+            event_root: state_map_roots(state).event_root,
             pending_txs: state.pending_txs.len(),
+            max_mempool_txs: MAX_MEMPOOL_TXS,
+            account_nonces: state.account_nonces.len(),
+            consumed_txs: state.consumed_tx_ids.len(),
             local_test_unit_balances: state.local_test_unit_balances.len(),
             faucet_records: state.faucet_records.len(),
             balance_transfers: state.balance_transfers.len(),
             token_definitions: state.token_definitions.len(),
             token_balances: state.token_balances.len(),
             token_mint_receipts: state.token_mint_receipts.len(),
+            token_transfer_receipts: state.token_transfer_receipts.len(),
             dex_pools: state.dex_pools.len(),
             lp_positions: state.lp_positions.len(),
             liquidity_receipts: state.liquidity_receipts.len(),
             swap_receipts: state.swap_receipts.len(),
+            bridge_observations: state.bridge_observations.len(),
+            bridge_credits: state.bridge_credits.len(),
+            bridge_credit_receipts: state.bridge_credit_receipts.len(),
+            bridge_replay_keys: state.bridge_replay_keys.len(),
+            withdrawal_intents: state.withdrawal_intents.len(),
+            receipts: state.receipts.len(),
+            events: state.events.len(),
+            log_path: node_dir.join("node.log.jsonl"),
+            last_error: None,
             static_peer_sync,
             last_ingested_txs,
             last_rejected_inbox_files,
@@ -1416,12 +2782,18 @@ impl NodeTickSummary {
 struct StateSummary {
     schema: String,
     chain_id: String,
+    latest_height: u64,
     next_block_number: u64,
     logical_time: u64,
     parent_hash: String,
+    latest_hash: String,
+    finalized_height: u64,
     state_root: String,
     map_roots: crate::model::StateMapRoots,
     operator_key_references: usize,
+    account_nonces: usize,
+    consumed_txs: usize,
+    replay_keys: usize,
     pending_txs: usize,
     blocks: usize,
     rootfields: usize,
@@ -1433,6 +2805,7 @@ struct StateSummary {
     token_definitions: usize,
     token_balances: usize,
     token_mint_receipts: usize,
+    token_transfer_receipts: usize,
     dex_pools: usize,
     lp_positions: usize,
     liquidity_receipts: usize,
@@ -1448,7 +2821,15 @@ struct StateSummary {
     verifier_reports: usize,
     imported_observations: usize,
     imported_verifier_reports: usize,
+    bridge_observations: usize,
+    bridge_credits: usize,
+    bridge_credit_receipts: usize,
+    bridge_replay_keys: usize,
+    withdrawal_intents: usize,
     base_anchors: usize,
+    transactions: usize,
+    receipts: usize,
+    events: usize,
 }
 
 impl StateSummary {
@@ -1456,12 +2837,18 @@ impl StateSummary {
         Self {
             schema: "flowmemory.local_devnet.summary.v0".to_string(),
             chain_id: state.chain_id.clone(),
+            latest_height: state.latest_height,
             next_block_number: state.next_block_number,
             logical_time: state.logical_time,
             parent_hash: state.parent_hash.clone(),
+            latest_hash: state.latest_hash.clone(),
+            finalized_height: state.finalized_height,
             state_root: state_root(state),
             map_roots: state_map_roots(state),
             operator_key_references: state.operator_key_references.len(),
+            account_nonces: state.account_nonces.len(),
+            consumed_txs: state.consumed_tx_ids.len(),
+            replay_keys: state.replay_keys.len(),
             pending_txs: state.pending_txs.len(),
             blocks: state.blocks.len(),
             rootfields: state.rootfields.len(),
@@ -1473,6 +2860,7 @@ impl StateSummary {
             token_definitions: state.token_definitions.len(),
             token_balances: state.token_balances.len(),
             token_mint_receipts: state.token_mint_receipts.len(),
+            token_transfer_receipts: state.token_transfer_receipts.len(),
             dex_pools: state.dex_pools.len(),
             lp_positions: state.lp_positions.len(),
             liquidity_receipts: state.liquidity_receipts.len(),
@@ -1488,7 +2876,15 @@ impl StateSummary {
             verifier_reports: state.verifier_reports.len(),
             imported_observations: state.imported_observations.len(),
             imported_verifier_reports: state.imported_verifier_reports.len(),
+            bridge_observations: state.bridge_observations.len(),
+            bridge_credits: state.bridge_credits.len(),
+            bridge_credit_receipts: state.bridge_credit_receipts.len(),
+            bridge_replay_keys: state.bridge_replay_keys.len(),
+            withdrawal_intents: state.withdrawal_intents.len(),
             base_anchors: state.base_anchors.len(),
+            transactions: state.transactions.len(),
+            receipts: state.receipts.len(),
+            events: state.events.len(),
         }
     }
 }
@@ -1780,6 +3176,39 @@ struct ProductSmokeChecks {
     product_receipts_queryable: bool,
     no_value_boundary: bool,
     base_anchor_created: bool,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct NodeRuntimeSmokeReport {
+    schema: String,
+    commands_run: Vec<String>,
+    block_count: usize,
+    tx_ids: Vec<String>,
+    receipt_ids: Vec<String>,
+    state_root: String,
+    latest_hash: String,
+    restart_proof: RestartProof,
+    export_import_proof: ExportImportProof,
+    failure_details: Vec<String>,
+    block_hashes: Vec<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct RestartProof {
+    before_state_root: String,
+    after_state_root: String,
+    before_latest_hash: String,
+    after_latest_hash: String,
+    preserved: bool,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ExportImportProof {
+    imported_state_root: String,
+    preserved: bool,
 }
 
 impl ProductSmokeSummary {
