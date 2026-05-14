@@ -4,7 +4,12 @@ import { BrowserRouter, HashRouter } from "react-router-dom";
 import App from "./App";
 import "./styles.css";
 
-const Router = window.location.protocol === "file:" ? HashRouter : BrowserRouter;
+const isNativeShell = window.location.protocol === "file:" || "Capacitor" in window;
+const Router = isNativeShell ? HashRouter : BrowserRouter;
+
+if (isNativeShell && window.location.hash.length === 0) {
+  window.location.hash = "/wallet";
+}
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

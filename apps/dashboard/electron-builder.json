@@ -10,7 +10,34 @@
     "package.json"
   ],
   "asar": true,
+  "mac": {
+    "category": "public.app-category.finance",
+    "target": [
+      "dmg",
+      "zip"
+    ],
+    "identity": null
+  },
   "win": {
-    "signAndEditExecutable": false
+    "signAndEditExecutable": false,
+    "target": [
+      "nsis",
+      "zip"
+    ]
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Flowchain Wallet"
+  },
+  "linux": {
+    "category": "Finance",
+    "target": [
+      "AppImage",
+      "zip"
+    ]
   }
 }
