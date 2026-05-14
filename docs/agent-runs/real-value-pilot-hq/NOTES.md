@@ -11,18 +11,15 @@ Last updated: 2026-05-14.
   assumptions.
 - Draft PR #129 is prompt/launcher-only for real-value pilot agents. It is
   useful context, not merged source of truth.
-- Issue #130 is the active gate issue for defining release boundaries before
-  public-network pilot work.
-- PR #132 now expands `docs/FLOWCHAIN_REAL_VALUE_PILOT.md` with the issue #130
-  release-gate boundary for observer reads, deposits, release/recovery, local
-  credit application, dashboard display, and explicitly out-of-scope public
-  readiness claims.
+- Issue #130 is closed. PR #132 merged the release-gate boundary for observer
+  reads, deposits, release/recovery, local credit application, dashboard
+  display, and explicitly out-of-scope public-readiness claims.
 - Missing subsystem proof commands are now tracked by GitHub issues #133
   through #138.
-- Issue #131 is the active contracts/static-analysis issue for reconciling
-  local Slither findings that block product and L1 E2E evidence.
-- PR #132 now includes an allowed `infra/scripts/` fix for #131: the default
-  hardening path skips Slither unless the explicit audit gate is requested.
+- Issue #131 is closed. PR #132 merged the allowed `infra/scripts/` policy fix:
+  default hardening skips Slither unless the explicit audit gate is requested.
+- HQ refresh comments are posted on issues #133 through #138 with each local
+  worktree's current proof evidence and next integration action.
 
 ## Reusable Work
 
@@ -41,22 +38,27 @@ Last updated: 2026-05-14.
 - Contracts branch `agent/real-value-pilot-contracts` reports passing contract
   tests, hardening, deploy dry-run, and product E2E. It remains unmerged and has
   no dedicated root pilot proof command on `main`.
-- Bridge branch `agent/real-value-pilot-bridge` contains Base `8453` observer
-  and mock pilot E2E work, but its run checklist still records the key proof
-  commands as pending.
-- Chain branch `agent/real-value-pilot-chain` has runtime bridge-credit work in
-  progress. Baseline cargo test passed before edits; current pilot experiments
-  are not recorded as complete.
-- Wallet branch `agent/real-value-pilot-wallet` contains pilot signing,
-  validation, schemas, and operator-doc work, with test rows still pending in
-  its checklist.
-- Control-dashboard branch `agent/real-value-pilot-control-dashboard` contains
-  pilot API and dashboard work plus a service-local E2E, but its checklist still
-  marks implementation and verification rows incomplete.
+- Bridge branch `agent/real-value-pilot-bridge` checklist now reports the
+  observer, replay, local-credit, withdrawal/release, negative, smoke, and
+  product E2E proof rows complete. It remains unmerged and lacks the dedicated
+  root `flowchain:real-value-pilot:bridge` command on `main`.
+- Chain branch `agent/real-value-pilot-chain` checklist reports the direct
+  runtime wrapper proof complete for credit-once, replay, receipt lookup,
+  restart, and export/import roots. It still needs the root
+  `flowchain:real-value-pilot:runtime` package script and a clean product E2E
+  rerun after dependency setup.
+- Wallet branch `agent/real-value-pilot-wallet` checklist reports pilot
+  schemas, validation, signing, negative cases, scans, and product evidence
+  complete. It remains unmerged and lacks the dedicated root
+  `flowchain:real-value-pilot:wallet` command on `main`.
+- Control-dashboard branch `agent/real-value-pilot-control-dashboard` checklist
+  reports API/dashboard tests, build, smoke, and branch-local
+  `flowchain:real-value-pilot:control-dashboard` complete. It remains unmerged.
 - Ops branch `agent/real-value-pilot-ops` contains the most complete root
   wrapper/runbook path, including emergency stop and sanitized export. Its
-  product E2E result depends on an ops-side static-analysis wrapper change that
-  is not present in this HQ PR.
+  checklist reports product E2E complete, but the dedicated root
+  `flowchain:real-value-pilot:ops` alias expected by the HQ gate is still
+  missing on `main`.
 
 ## Boundaries
 
@@ -78,10 +80,10 @@ Last updated: 2026-05-14.
 - After updating `infra/scripts/contracts-static-analysis.ps1` and
   `infra/scripts/contracts-static-analysis.sh`, default `contracts:hardening`,
   `npm run flowchain:product-e2e`, and `npm run flowchain:l1-e2e` pass locally.
-- GitHub issue #131 remains open until this static-analysis policy update is
-  reviewed and merged; the explicit Slither audit gate still owns the native
-  release findings.
-- Draft PR opened: https://github.com/FlowmemoryAI/FlowMemory/pull/132.
-- Completion audit result: not complete. PR #132 is not merged, `origin/main`
-  lacks both new scripts, and the default pilot gate fails with missing
-  subsystem proofs.
+- The explicit Slither audit gate still owns the native release findings.
+- PR #132 merged: https://github.com/FlowmemoryAI/FlowMemory/pull/132.
+- Post-merge local main-equivalent verification passed
+  `npm run flowchain:product-e2e`, `npm run flowchain:l1-e2e`,
+  `git diff --check`, and `node infra/scripts/check-unsafe-claims.mjs`.
+- Completion audit result: not complete. The default pilot gate exists on
+  `main`, but still fails with missing dedicated subsystem proof commands.

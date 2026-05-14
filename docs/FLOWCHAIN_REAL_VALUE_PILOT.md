@@ -19,20 +19,24 @@ approval.
 
 ## Current Baseline
 
-Current `main` at the start of this HQ pass:
+Current `main` after PR #132 merged at
+`14f378b7f2dee9bfd29aec691ebda41e2b6fa101`:
 
 - `npm run flowchain:product-e2e` exists as the local product testnet gate.
 - `npm run flowchain:full-smoke` exists as the private/local L1 baseline gate.
-- `npm run flowchain:l1-e2e` is added here as the current L1 baseline alias to
+- `npm run flowchain:l1-e2e` exists as the current L1 baseline alias to
   `flowchain:full-smoke`; it can be tightened by the ops branch when the
   dedicated L1 wrapper is merged.
-- `npm run flowchain:real-value-pilot:e2e` is added here as the final pilot
+- `npm run flowchain:real-value-pilot:e2e` exists as the final pilot
   gate. It fails by default while required subsystem proof commands are missing.
 
 GitHub source-of-truth state checked for this pass:
 
 - Draft PR #129 adds the copy-ready real-value pilot goal pack.
-- Issue #130 defines the required gate work before public-network pilot work.
+- Issue #130 is closed; PR #132 merged the capped owner-pilot release-gate
+  boundary.
+- Issue #131 is closed; PR #132 merged the optional-Slither default hardening
+  policy while keeping `contracts:hardening:slither` as the explicit audit gate.
 - Open PRs #110, #112 through #117, #71, and #73 remain useful context only
   until merged.
 
@@ -84,7 +88,7 @@ the proof is branch-local or verified from `main`.
 | Required proof | Owning agent | Required command | Current state |
 | --- | --- | --- | --- |
 | Existing product testnet gate remains green. | HQ/Ops | `npm run flowchain:product-e2e` | Existing command; run before PR when practical. |
-| L1 baseline gate remains green. | HQ/Ops | `npm run flowchain:l1-e2e` | Added as current alias to `flowchain:full-smoke`. |
+| L1 baseline gate remains green. | HQ/Ops | `npm run flowchain:l1-e2e` | Exists on `main` as current alias to `flowchain:full-smoke`; latest local main-equivalent run passed. |
 | Base chain ID `8453` is verified before any live observer or deployment action. | Contracts + Bridge + Ops | `npm run flowchain:real-value-pilot:contracts`; `npm run flowchain:real-value-pilot:bridge`; `npm run flowchain:real-value-pilot:ops` | Missing dedicated pilot commands. |
 | Lockbox address is loaded from ignored local config or env, not hardcoded as a blanket endorsement. | Contracts + Ops | `npm run flowchain:real-value-pilot:contracts`; `npm run flowchain:real-value-pilot:ops` | Missing dedicated pilot commands. |
 | Per-deposit cap, total pilot cap, supported-asset allowlist, pause, release, recovery, and replay protection are covered by tests and dry-run deployment evidence. | Contracts | `npm run flowchain:real-value-pilot:contracts` | Missing dedicated pilot command. |
@@ -97,7 +101,7 @@ the proof is branch-local or verified from `main`.
 | Dashboard labels the flow as capped owner testing and shows live/degraded/error state plus exact next operator commands. | Control plane/dashboard | `npm run flowchain:real-value-pilot:control-dashboard` | Missing dedicated pilot command. |
 | Browser stores no private keys or RPC credentials. | Control plane/dashboard + Wallet/operator | `npm run flowchain:real-value-pilot:control-dashboard`; `npm run flowchain:real-value-pilot:wallet` | Missing dedicated pilot commands. |
 | Ops path verifies required env, tiny caps, explicit owner ack, emergency stop, export evidence, restart recovery, and no-secret scans. | Ops/installer | `npm run flowchain:real-value-pilot:ops` | Missing dedicated pilot command. |
-| Final pilot gate runs baseline commands plus every available dedicated proof command. | HQ/Ops | `npm run flowchain:real-value-pilot:e2e` | Added here; expected incomplete until subsystem commands land. |
+| Final pilot gate runs baseline commands plus every available dedicated proof command. | HQ/Ops | `npm run flowchain:real-value-pilot:e2e` | Exists on `main`; strict mode still fails until subsystem commands land. |
 
 ## In-Flight Implementation Status
 
@@ -108,12 +112,12 @@ from `main`.
 
 | Area | In-flight branch state | Required next step |
 | --- | --- | --- |
-| Contracts | `agent/real-value-pilot-contracts` reports passing contract tests, hardening, deploy dry-run, and product E2E after dependency install. | Merge reviewed contract work and expose a dedicated root pilot contracts proof command. |
-| Bridge relayer | `agent/real-value-pilot-bridge` contains Base `8453` observer and mock pilot E2E work, with verification rows still pending. | Finish bridge verification, then expose a dedicated root bridge proof command. |
-| Chain runtime | `agent/real-value-pilot-chain` contains bridge-credit runtime work in progress, with current pilot experiments still pending. | Finish runtime apply/replay/restart/export proof, then expose a dedicated root runtime proof command. |
-| Wallet/operator | `agent/real-value-pilot-wallet` contains pilot signing, validation, schema, and operator-doc work with test rows still pending. | Finish wallet negative vectors and public metadata checks, then expose a dedicated root wallet proof command. |
-| Control plane/dashboard | `agent/real-value-pilot-control-dashboard` contains pilot API/dashboard work and a service-local E2E, with checklist rows still incomplete. | Finish API/dashboard verification, then expose a dedicated root control-dashboard proof command. |
-| Ops/installer | `agent/real-value-pilot-ops` contains root pilot wrappers, emergency stop, sanitized export, and a passing local checklist after an ops-side static-analysis wrapper change. | Reconcile product E2E hardening policy and merge a reviewed ops proof command. |
+| Contracts | `agent/real-value-pilot-contracts` checklist reports the contracts proof complete, including hardening, deploy dry-run, and product E2E. | Rebase onto `14f378b`, expose `flowchain:real-value-pilot:contracts`, rerun evidence, and open a PR. |
+| Bridge relayer | `agent/real-value-pilot-bridge` checklist reports the bridge proof complete; service-local `pilot:e2e` exists. | Rebase onto `14f378b`, expose `flowchain:real-value-pilot:bridge`, rerun evidence, and open a PR. |
+| Chain runtime | `agent/real-value-pilot-chain` checklist reports runtime credit/replay/restart/export proof complete through the direct wrapper; root package command is missing. | Rebase onto `14f378b`, expose `flowchain:real-value-pilot:runtime`, rerun evidence, and open a PR. |
+| Wallet/operator | `agent/real-value-pilot-wallet` checklist reports wallet/operator schemas, signing, validation, negative cases, scans, and product evidence complete. | Rebase onto `14f378b`, expose `flowchain:real-value-pilot:wallet`, rerun evidence, and open a PR. |
+| Control plane/dashboard | `agent/real-value-pilot-control-dashboard` checklist reports API/dashboard proof complete and has branch-local `flowchain:real-value-pilot:control-dashboard`. | Rebase onto `14f378b`, rerun evidence, and open a PR. |
+| Ops/installer | `agent/real-value-pilot-ops` checklist reports ops proof complete; root lifecycle commands exist branch-locally, but `flowchain:real-value-pilot:ops` is missing. | Rebase onto `14f378b`, expose `flowchain:real-value-pilot:ops`, rerun evidence, and open a PR. |
 
 ## Owner Go/No-Go Checklist
 
@@ -146,12 +150,11 @@ in committed files, or if any document presents the pilot as public readiness.
 - Dedicated real-value wallet/operator gate does not exist; tracked by issue #136.
 - Dedicated real-value control-plane/dashboard gate does not exist; tracked by issue #137.
 - Dedicated real-value ops/installer gate does not exist; tracked by issue #135.
-- GitHub issue #130 must define and be accepted as the release-gate boundary before
-  any owner pilot work is treated as more than capped validation.
-- GitHub issue #131 has a branch-local policy fix in this HQ PR: default
-  `contracts:hardening` skips optional Slither unless the audit gate is
-  explicitly requested. The issue remains open until the fix is reviewed and
-  merged.
+- Issue #130 is closed by PR #132; the release-gate boundary is now on `main`.
+- Issue #131 is closed by PR #132; default `contracts:hardening` skips optional
+  Slither unless the audit gate is explicitly requested.
+- HQ posted refresh comments on issues #133 through #138 with the latest local
+  worktree evidence and next integration actions.
 
 ## Tracking Issues
 
@@ -163,8 +166,8 @@ in committed files, or if any document presents the pilot as public readiness.
 | Wallet/operator | #136 | `npm run flowchain:real-value-pilot:wallet` |
 | Control plane/dashboard | #137 | `npm run flowchain:real-value-pilot:control-dashboard` |
 | Ops/installer | #135 | `npm run flowchain:real-value-pilot:ops` |
-| Release-gate boundary | #130 | `npm run flowchain:real-value-pilot:e2e -- -AllowIncomplete` until proofs land |
-| Static-analysis policy | #131 | `npm run contracts:hardening`; `npm run contracts:hardening:slither` |
+| Release-gate boundary | #130, closed by PR #132 | `npm run flowchain:real-value-pilot:e2e -- -AllowIncomplete` until proofs land |
+| Static-analysis policy | #131, closed by PR #132 | `npm run contracts:hardening`; `npm run contracts:hardening:slither` |
 
 ## Required PR Evidence
 
