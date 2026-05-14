@@ -70,6 +70,27 @@ type WalletBalance = {
   source?: string;
 };
 
+type WalletSendResult = {
+  schema?: string;
+  accepted?: boolean;
+  applied?: boolean;
+  transferId?: string;
+  txIds?: string[];
+  amountUnits?: string;
+  status?: string;
+  from?: {
+    requestedAccountId?: string;
+    runtimeAccountId?: string;
+    resolution?: string;
+  };
+  to?: {
+    requestedAccountId?: string;
+    runtimeAccountId?: string;
+    resolution?: string;
+  };
+  message?: string;
+};
+
 type WalletTransfer = {
   transferId?: string;
   txId?: string;
@@ -385,26 +406,46 @@ export function WalletView({ workbench }: WalletViewProps) {
     }
   }
 
-  function submitSendDraft() {
+  async function submitSend() {
     if (!sendTo.trim() || !sendAmount.trim()) {
       setMessage("Enter a recipient and amount first.");
       return;
     }
-    setLocalActivity((current) => [
-      {
-        id: `send:${Date.now()}`,
-        type: "Send prepared",
-        asset: "ETH",
-        route: `${shortId(primaryWalletAddress)} to ${shortId(sendTo)}`,
-        amount: `-${sendAmount} ETH`,
-        status: "Prepared",
-      },
-      ...current,
-    ]);
-    setSendTo("");
-    setSendAmount("");
-    setActivePanel("activity");
-    setMessage("Send draft prepared. Live signing/broadcast is not connected to this wallet screen yet.");
+    setLoading(true);
+    setMessage(null);
+    try {
+      const { payload, url } = await fetchWalletApi<WalletSendResult>(apiCandidates, "/wallets/send", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          fromAccountId: primaryWalletAddress,
+          toAccountId: sendTo.trim(),
+          amountEth: sendAmount.trim(),
+          memo: "flowchain-wallet-ui-send",
+        }),
+      });
+      setWalletApiUrl(url);
+      setLocalActivity((current) => [
+        {
+          id: payload.transferId ?? `send:${Date.now()}`,
+          type: payload.applied ? "Send applied" : "Send queued",
+          asset: "ETH",
+          route: `${shortId(payload.from?.runtimeAccountId ?? primaryWalletAddress)} to ${shortId(payload.to?.runtimeAccountId ?? sendTo)}`,
+          amount: `-${sendAmount} ETH`,
+          status: statusLabel(payload.status),
+        },
+        ...current,
+      ]);
+      setSendTo("");
+      setSendAmount("");
+      setActivePanel("activity");
+      setMessage(payload.applied ? "Send applied on Flowchain runtime." : "Send queued for Flowchain runtime.");
+      await loadStatus();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "wallet send failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function submitSwapDraft() {
@@ -797,9 +838,9 @@ export function WalletView({ workbench }: WalletViewProps) {
                 <span>Amount</span>
                 <input value={sendAmount} onChange={(event) => setSendAmount(event.target.value)} inputMode="decimal" placeholder="0.000001" />
               </label>
-              <button type="button" onClick={submitSendDraft}>
+              <button type="button" disabled={loading} onClick={() => void submitSend()}>
                 <Send size={17} aria-hidden="true" />
-                Prepare send
+                {loading ? "Sending" : "Send"}
               </button>
             </div>
           ) : null}

@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { createEncryptedTestVault, exportLocalWalletPublicMetadata } from "../../../crypto/src/wallet.js";
 import { dispatchJsonRpc } from "./json-rpc.ts";
 import { loadControlPlaneState, resolveControlPlanePath } from "./fixture-state.ts";
+import { executeWalletSend } from "./wallet-runtime.ts";
 import type { JsonObject } from "./types.ts";
 
 interface ServerOptions {
@@ -319,6 +320,24 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
             message: error instanceof Error ? error.message : "wallet creation failed",
             secretMaterialReturned: false,
             localOnly: true,
+          });
+        });
+      return;
+    }
+
+    if (req.method === "POST" && requestUrl?.pathname === "/wallets/send") {
+      readRequestBody(req)
+        .then((body) => {
+          const payload = body.length > 0 ? JSON.parse(body) as unknown : {};
+          writeJson(res, 200, executeWalletSend(state, payload));
+        })
+        .catch((error) => {
+          writeJson(res, 400, {
+            schema: "flowmemory.control_plane.wallet_send_error.v0",
+            accepted: false,
+            message: error instanceof Error ? error.message : "wallet send failed",
+            localOnly: true,
+            productionReady: false,
           });
         });
       return;

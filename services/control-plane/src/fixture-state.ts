@@ -339,6 +339,10 @@ function loadBridgeObservations(paths: ControlPlanePaths, sources: Record<string
 export function controlPlanePaths(overrides: Partial<ControlPlanePaths> = {}): ControlPlanePaths {
   return {
     ...DEFAULT_CONTROL_PLANE_PATHS,
+    localDevnetPath: process.env.FLOWCHAIN_CONTROL_PLANE_LOCAL_DEVNET_PATH
+      ?? DEFAULT_CONTROL_PLANE_PATHS.localDevnetPath,
+    localDevnetLaunchPath: process.env.FLOWCHAIN_CONTROL_PLANE_LOCAL_DEVNET_LAUNCH_PATH
+      ?? DEFAULT_CONTROL_PLANE_PATHS.localDevnetLaunchPath,
     bridgeRuntimeHandoffPath: process.env.FLOWCHAIN_CONTROL_PLANE_BRIDGE_RUNTIME_HANDOFF_PATH
       ?? DEFAULT_CONTROL_PLANE_PATHS.bridgeRuntimeHandoffPath,
     bridgeObservationPath: process.env.FLOWCHAIN_CONTROL_PLANE_BRIDGE_OBSERVATION_PATH

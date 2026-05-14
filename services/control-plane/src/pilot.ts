@@ -650,6 +650,26 @@ function walletTransferRows(state: LoadedControlPlaneState): JsonObject[] {
 
 function walletBalanceRows(state: LoadedControlPlaneState): JsonObject[] {
   const rows: JsonObject[] = [];
+  for (const balance of devnetObjectRows(state, ["localTestUnitBalances", "localBalances"])) {
+    const accountId = stringValue(balance.accountId) ?? stringValue(balance.owner);
+    if (accountId === null) {
+      continue;
+    }
+    rows.push({
+      schema: "flowmemory.control_plane.wallet_balance.v0",
+      balanceId: stableId("flowmemory.control_plane.wallet_balance.local_runtime.v0", balance),
+      walletAddress: accountId,
+      asset: "local-test-unit",
+      amount: stringValue(balance.units) ?? stringValue(balance.amountUnits) ?? "0",
+      creditedAmount: stringValue(balance.units) ?? stringValue(balance.amountUnits) ?? "0",
+      status: balance.noValue === false ? "runtime_value_credit" : "local_runtime",
+      source: "local-runtime-balance",
+      balance,
+      localOnly: true,
+      productionReady: false,
+    });
+  }
+
   for (const credit of pilotCreditRows(state).filter((row) => statusIsApplied(row.status))) {
     rows.push({
       schema: "flowmemory.control_plane.wallet_balance.v0",
