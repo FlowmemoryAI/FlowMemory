@@ -117,6 +117,15 @@ npm run flowchain:full-smoke
 npm run flowchain:product-e2e
 ```
 
+Run the capped owner pilot dry-run before any Base `8453` pilot action:
+
+```powershell
+npm run flowchain:real-value-pilot:ops
+```
+
+Owner pilot coordination and go/no-go criteria live in
+`docs/FLOWCHAIN_REAL_VALUE_PILOT.md`.
+
 Run the existing dashboard as the local workbench:
 
 ```powershell

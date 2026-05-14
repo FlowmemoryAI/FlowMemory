@@ -44,6 +44,16 @@ npm run flowchain:export
 Run `npm run flowchain:full-smoke` when the machine has the full prerequisite set,
 including Foundry, Python, dashboard dependencies, and crypto dependencies.
 
+Capped owner pilot preflight:
+
+```powershell
+npm run flowchain:real-value-pilot:ops
+```
+
+Do not run live pilot actions until the owner has reviewed
+`docs/FLOWCHAIN_REAL_VALUE_PILOT.md` and supplied the required env vars in a
+local shell only.
+
 ## Launch Demo Day
 
 Primary script: `docs/LAUNCH_DEMO_RUNBOOK.md`.
