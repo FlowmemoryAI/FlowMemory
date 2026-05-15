@@ -27,7 +27,8 @@ $agents = @(
     @{ Name = "ops-installer"; Worktree = "E:\FlowMemory\flowmemory-live-ops"; Branch = "agent/live-product-ops-installer"; Prompt = "11-ops-installer-monitoring.md" },
     @{ Name = "storage-recovery"; Worktree = "E:\FlowMemory\flowmemory-live-storage"; Branch = "agent/live-product-state-storage-recovery"; Prompt = "12-state-storage-recovery.md" },
     @{ Name = "verification"; Worktree = "E:\FlowMemory\flowmemory-live-verification"; Branch = "agent/live-product-verification"; Prompt = "13-live-product-verification.md" },
-    @{ Name = "sdk-docs"; Worktree = "E:\FlowMemory\flowmemory-live-sdk-docs"; Branch = "agent/live-product-sdk-docs"; Prompt = "14-sdk-docs-developer-tooling.md" }
+    @{ Name = "sdk-docs"; Worktree = "E:\FlowMemory\flowmemory-live-sdk-docs"; Branch = "agent/live-product-sdk-docs"; Prompt = "14-sdk-docs-developer-tooling.md" },
+    @{ Name = "infra-rpc"; Worktree = "E:\FlowMemory\flowmemory-live-infra-rpc"; Branch = "agent/live-product-infra-rpc"; Prompt = "15-live-infrastructure-public-rpc.md" }
 )
 
 function Invoke-Git {

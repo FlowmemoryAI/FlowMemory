@@ -21,7 +21,10 @@ submission and local production-shaped E2E. The public/live path is still
 blocked by missing public RPC deployment inputs and Base 8453 bridge inputs. A
 new uncovered goal prompt was added for SDK, docs, examples, and developer
 tooling because the original goal pack did not assign that requirement to a
-dedicated agent.
+dedicated agent. A second uncovered prompt was added for live infrastructure,
+public RPC hosting/readiness, service persistence, backup readiness, and Base
+8453 deployment coordination because the original ops prompt focused on local
+Windows installation.
 
 ## Prompt-To-Artifact Checklist
 
@@ -42,8 +45,9 @@ dedicated agent.
 | Storage/export/import/restart | production E2E `exportImportStatus` and `restartRecoveryStatus` are `passed` | Local/private proven |
 | Cryptography/signing safety | wallet E2E and no-secret scan passed; dedicated wallet/keys and consensus agents still own deeper production hardening | Partially proven |
 | Docs and dev kits | No dedicated prompt existed in the goal pack; added `14-sdk-docs-developer-tooling.md` and launcher entry | Newly assigned, not built |
+| Public infrastructure owner | Original ops prompt was local-run focused; added `15-live-infrastructure-public-rpc.md` and launcher entry for public RPC, service persistence, backups, and Base 8453 deployment readiness | Newly assigned, not built |
 | Final live product verifier | `13-live-product-verification.md` exists and requires `npm run flowchain:live-product:e2e`, but that final command is not yet evidenced as passing | Not complete |
-| GitHub state | branch was pushed previously; current work adds uncommitted docs/launcher changes and must be committed/pushed | Pending |
+| GitHub state | SDK/docs prompt commit `4b8afe4` was pushed; current infra prompt additions must be committed/pushed | Pending |
 
 ## Actual Command Evidence
 
@@ -71,7 +75,11 @@ dedicated agent.
    verification from the wallet-apps and release-gate prompts.
 5. SDK/docs/devkit work was uncovered by the original 13-prompt pack; it now has
    a dedicated prompt and launcher entry but no completed artifacts yet.
-6. `npm run flowchain:live-product:e2e` is required by the goal pack but has not
+6. Public RPC hosting, service persistence, state backup readiness, and live
+   bridge deployment coordination were not deeply owned by the local ops prompt;
+   they now have a dedicated prompt and launcher entry but no completed
+   artifacts yet.
+7. `npm run flowchain:live-product:e2e` is required by the goal pack but has not
    been proven passing from a clean checkout with configured live dependencies.
 
 ## Next Prompt Action
@@ -79,11 +87,15 @@ dedicated agent.
 Added:
 
 - `docs/agent-goals/production-l1-live-chain/14-sdk-docs-developer-tooling.md`
+- `docs/agent-goals/production-l1-live-chain/15-live-infrastructure-public-rpc.md`
 - launcher entry for `sdk-docs`
+- launcher entry for `infra-rpc`
 
 This new prompt must keep looping until FlowChain has runnable SDK/devkit/docs
 artifacts and `npm run flowchain:sdk:e2e` passes locally while keeping live
-paths fail-closed.
+paths fail-closed. The infra prompt must keep looping until
+`npm run flowchain:live-infra:check` exists and proves public RPC/service/backup
+and Base 8453 deployment readiness or fails closed with exact owner inputs.
 
 ## Completion Decision
 
