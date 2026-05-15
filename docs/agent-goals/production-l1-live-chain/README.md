@@ -56,6 +56,7 @@ exact missing variable or deployment artifact.
 - `11-ops-installer-monitoring.md`
 - `12-state-storage-recovery.md`
 - `13-live-product-verification.md`
+- `14-sdk-docs-developer-tooling.md`
 
 Launcher:
 
