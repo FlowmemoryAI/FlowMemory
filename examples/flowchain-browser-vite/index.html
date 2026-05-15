@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FlowChain Browser SDK Example</title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>FlowChain Local RPC</h1>
+        <button id="refresh" type="button">Refresh</button>
+      </header>
+      <section>
+        <h2>Readiness</h2>
+        <pre id="readiness">Loading...</pre>
+      </section>
+      <section>
+        <h2>Balance Widget</h2>
+        <label>
+          Account
+          <input id="account" value="local-account:node-example:destination" />
+        </label>
+        <pre id="balance">Loading...</pre>
+      </section>
+      <section>
+        <h2>Bridge Panel</h2>
+        <pre id="bridge">Loading...</pre>
+      </section>
+      <section>
+        <h2>Activity</h2>
+        <pre id="activity">Loading...</pre>
+      </section>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

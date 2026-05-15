@@ -1,0 +1,102 @@
+{
+  "schema": "flowchain.sdk_e2e_report.v0",
+  "status": "passed",
+  "generatedAt": "2026-05-15T04:21:43.241Z",
+  "endpointHost": "127.0.0.1",
+  "runtimeStatePath": "E:\\FlowMemory\\flowmemory-live-sdk-docs\\devnet\\local\\sdk-e2e\\runtime\\state.json",
+  "discovery": {
+    "methodCount": 79,
+    "evmJsonRpcCompatible": false,
+    "flowchainJsonRpcCompatible": true
+  },
+  "readiness": {
+    "status": "BLOCKED",
+    "publicRpcReady": false,
+    "missingProductionEnvNames": [
+      "FLOWCHAIN_RPC_PUBLIC_URL",
+      "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+      "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+      "FLOWCHAIN_RPC_TLS_TERMINATED",
+      "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+    ],
+    "envValuesPrinted": false
+  },
+  "bridgeReadiness": {
+    "failClosedStatus": "BLOCKED",
+    "readyForOperatorLivePilot": false,
+    "missingEnvNames": [
+      "FLOWCHAIN_BASE8453_FROM_BLOCK",
+      "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+      "FLOWCHAIN_BASE8453_RPC_URL",
+      "FLOWCHAIN_BASE8453_TO_BLOCK",
+      "FLOWCHAIN_PILOT_CONFIRMATIONS",
+      "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+      "FLOWCHAIN_PILOT_OPERATOR_ACK",
+      "FLOWCHAIN_PILOT_TOTAL_CAP_WEI"
+    ],
+    "envValuesPrinted": false
+  },
+  "transaction": {
+    "txId": "0x61f9f250cf98dbcfe3bfc7571c345acb8b72f12b6df2c9c5f1d38db255b7d918",
+    "status": "applied",
+    "destinationBalance": "7",
+    "blockHash": "0xfff3cbac3dd2a8a4c2e867be29df75e1e8740af6a2a2c4f33cd6ea5040a9c9f7",
+    "blockNumber": "1"
+  },
+  "checks": {
+    "sdkUnitTests": "run separately by npm test --prefix packages/flowchain-sdk",
+    "rpcReferenceMatched": true,
+    "mempoolVisibleBeforeBlock": true,
+    "blockRead": true,
+    "transactionRead": true,
+    "accountRead": true,
+    "balanceRead": true,
+    "finalityRead": true,
+    "provenanceRead": true,
+    "cliJson": true,
+    "exampleCommand": true,
+    "docsSnippetsChecked": true,
+    "noSecrets": true
+  },
+  "commands": [
+    {
+      "label": "runtime init",
+      "status": 0,
+      "stdoutLength": 4145,
+      "stderrLength": 228
+    },
+    {
+      "label": "rpc reference check",
+      "status": 0,
+      "stdoutLength": 278,
+      "stderrLength": 0
+    },
+    {
+      "label": "produce block",
+      "status": 0,
+      "stdoutLength": 285,
+      "stderrLength": 238
+    },
+    {
+      "label": "devkit discover --json",
+      "status": 0,
+      "stdoutLength": 19608,
+      "stderrLength": 0
+    },
+    {
+      "label": "bridge readiness example",
+      "status": 0,
+      "stdoutLength": 840,
+      "stderrLength": 0
+    },
+    {
+      "label": "node local example",
+      "status": 0,
+      "stdoutLength": 958,
+      "stderrLength": 0
+    }
+  ],
+  "reportPath": "E:\\FlowMemory\\flowmemory-live-sdk-docs\\docs\\agent-runs\\live-product-sdk-docs\\flowchain-sdk-e2e-report.json",
+  "localOnly": true,
+  "productionReady": false
+}

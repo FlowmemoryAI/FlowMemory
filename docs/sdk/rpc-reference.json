@@ -1,0 +1,650 @@
+{
+  "schema": "flowchain.sdk.rpc_reference.v0",
+  "generatedFrom": "rpc_discover",
+  "service": "flowmemory-control-plane-v0",
+  "protocol": "JSON-RPC 2.0",
+  "rpcPath": "/rpc",
+  "chainId": "flowmemory-local-devnet-v0",
+  "methodCount": 79,
+  "compatibility": {
+    "evmJsonRpcCompatible": false,
+    "solanaJsonRpcCompatible": false,
+    "flowchainJsonRpcCompatible": true
+  },
+  "methods": [
+    {
+      "method": "account_get",
+      "category": "wallet",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "account_list",
+      "category": "wallet",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "agent_get",
+      "category": "general",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "agent_list",
+      "category": "general",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "artifact_availability_get",
+      "category": "storage",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "artifact_availability_list",
+      "category": "storage",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "artifact_get",
+      "category": "storage",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "balance_get",
+      "category": "wallet",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "block_get",
+      "category": "ledger",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "block_list",
+      "category": "ledger",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "bridge_credit_get",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "bridge_credit_list",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "bridge_credit_status",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "bridge_deposit_get",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "bridge_deposit_list",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "bridge_live_readiness",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "bridge_observation_get",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "bridge_observation_list",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "bridge_observation_submit",
+      "category": "bridge",
+      "mode": "local-file-intake",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "bridge_status",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "chain_status",
+      "category": "node",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "challenge_get",
+      "category": "verification",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "challenge_list",
+      "category": "verification",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "devnet_state",
+      "category": "general",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "faucet_event_list",
+      "category": "general",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "finality_get",
+      "category": "verification",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "finality_list",
+      "category": "verification",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "health",
+      "category": "general",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "lp_position_get",
+      "category": "assets-dex",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "lp_position_list",
+      "category": "assets-dex",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "memory_cell_get",
+      "category": "flowmemory",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "memory_cell_list",
+      "category": "flowmemory",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "mempool_list",
+      "category": "ledger",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "model_get",
+      "category": "general",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "model_list",
+      "category": "general",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "node_status",
+      "category": "node",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "peer_list",
+      "category": "node",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "pilot_cap_status",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "pilot_credit_list",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "pilot_deposit_observation_list",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "pilot_emergency_status",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "pilot_lifecycle_record_list",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "pilot_pause_status",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "pilot_release_evidence_list",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "pilot_retry_status",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "pilot_status",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "pilot_withdrawal_intent_list",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "pool_get",
+      "category": "assets-dex",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "pool_list",
+      "category": "assets-dex",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "product_flow_status",
+      "category": "general",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "provenance_get",
+      "category": "general",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "raw_json_get",
+      "category": "general",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "receipt_get",
+      "category": "flowmemory",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "receipt_list",
+      "category": "flowmemory",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "rootfield_get",
+      "category": "flowmemory",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "rootfield_list",
+      "category": "flowmemory",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "rpc_discover",
+      "category": "rpc",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "rpc_readiness",
+      "category": "rpc",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "swap_get",
+      "category": "assets-dex",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "swap_list",
+      "category": "assets-dex",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "token_balance_get",
+      "category": "assets-dex",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "token_balance_list",
+      "category": "assets-dex",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "token_get",
+      "category": "assets-dex",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "token_list",
+      "category": "assets-dex",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "transaction_get",
+      "category": "ledger",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "transaction_list",
+      "category": "ledger",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "transaction_submit",
+      "category": "ledger",
+      "mode": "local-file-intake",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "verifier_module_get",
+      "category": "verification",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "verifier_module_list",
+      "category": "verification",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "verifier_report_get",
+      "category": "verification",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "verifier_report_list",
+      "category": "verification",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "wallet_balance_list",
+      "category": "wallet",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "wallet_metadata_get",
+      "category": "wallet",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "wallet_metadata_list",
+      "category": "wallet",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "wallet_transfer_history",
+      "category": "wallet",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "withdrawal_get",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "withdrawal_list",
+      "category": "bridge",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "work_receipt_get",
+      "category": "flowmemory",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "method": "work_receipt_list",
+      "category": "flowmemory",
+      "mode": "read",
+      "stable": true,
+      "localOnly": true,
+      "productionReady": false
+    }
+  ],
+  "localOnly": true,
+  "productionReady": false
+}
