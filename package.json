@@ -63,6 +63,7 @@
     "flowchain:l1-e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-full-smoke.ps1",
     "flowchain:l1:e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-full-smoke.ps1",
     "flowchain:production-l1:e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-production-l1-e2e.ps1",
+    "flowchain:live-product:e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-live-product-e2e.ps1",
     "flowchain:live-l1-bridge:e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-live-l1-bridge-e2e.ps1",
     "flowchain:real-value-pilot:e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-real-value-pilot-e2e.ps1",
     "flowchain:real-value-pilot": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-real-value-pilot.ps1",

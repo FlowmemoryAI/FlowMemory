@@ -1,6 +1,7 @@
 param(
     [string[]] $Paths = @(
         "apps/dashboard/public/data",
+        "devnet/local/live-product-e2e",
         "devnet/local/production-l1-e2e",
         "devnet/local/live-l1-bridge-e2e",
         "devnet/local/full-smoke",

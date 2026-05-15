@@ -46,8 +46,8 @@ Windows installation.
 | Cryptography/signing safety | wallet E2E and no-secret scan passed; dedicated wallet/keys and consensus agents still own deeper production hardening | Partially proven |
 | Docs and dev kits | No dedicated prompt existed in the goal pack; added `14-sdk-docs-developer-tooling.md` and launcher entry | Newly assigned, not built |
 | Public infrastructure owner | Original ops prompt was local-run focused; added `15-live-infrastructure-public-rpc.md` and launcher entry for public RPC, service persistence, backups, and Base 8453 deployment readiness | Newly assigned, not built |
-| Final live product verifier | `13-live-product-verification.md` exists and requires `npm run flowchain:live-product:e2e`, but that final command is not yet evidenced as passing | Not complete |
-| GitHub state | SDK/docs prompt commit `4b8afe4` was pushed; current infra prompt additions must be committed/pushed | Pending |
+| Final live product verifier | `13-live-product-verification.md` exists and requires `npm run flowchain:live-product:e2e`; the root command now exists and must fail closed until live blockers clear | Implemented, not passing live |
+| GitHub state | SDK/docs prompt commit `4b8afe4` and infra prompt commit `2cc0ae0` were pushed; current final-gate script additions must be committed/pushed | Pending |
 
 ## Actual Command Evidence
 
@@ -79,8 +79,9 @@ Windows installation.
    bridge deployment coordination were not deeply owned by the local ops prompt;
    they now have a dedicated prompt and launcher entry but no completed
    artifacts yet.
-7. `npm run flowchain:live-product:e2e` is required by the goal pack but has not
-   been proven passing from a clean checkout with configured live dependencies.
+7. `npm run flowchain:live-product:e2e` now exists, but it is expected to report
+   `BLOCKED` until public RPC, live infra, SDK/devkit, and Base bridge gates are
+   implemented/configured and verified.
 
 ## Next Prompt Action
 
