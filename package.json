@@ -8,7 +8,8 @@
     "services/verifier",
     "services/flowmemory",
     "services/control-plane",
-    "services/bridge-relayer"
+    "services/bridge-relayer",
+    "packages/flowchain-sdk"
   ],
   "scripts": {
     "test": "npm test --prefix services/shared && npm test --prefix services/indexer && npm test --prefix services/verifier && npm test --prefix services/flowmemory && npm test --prefix services/control-plane && npm test --prefix services/bridge-relayer",
@@ -91,6 +92,11 @@
     "flowchain:bridge:emergency-stop": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base8453-control.ps1 -Action EmergencyStop",
     "flowchain:control-plane:smoke": "npm run control-plane:smoke",
     "flowchain:rpc:e2e": "npm run rpc:e2e --prefix services/control-plane",
+    "flowchain:sdk:test": "npm test --prefix packages/flowchain-sdk",
+    "flowchain:sdk:e2e": "npm run flowchain:sdk:test && node tools/flowchain-sdk-e2e.mjs",
+    "flowchain:devkit": "node tools/flowchain-devkit.mjs",
+    "flowchain:rpc-reference:write": "node tools/flowchain-rpc-reference.mjs --write",
+    "flowchain:rpc-reference:check": "node tools/flowchain-rpc-reference.mjs --check",
     "flowchain:dashboard:build": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-workbench.ps1 -BuildOnly",
     "flowchain:dashboard:verify": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-workbench.ps1 -BuildOnly",
     "flowchain:export": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-export.ps1",
