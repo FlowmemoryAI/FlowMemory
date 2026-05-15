@@ -14,9 +14,25 @@ function Get-FlowChainRepoRoot {
     return $root
 }
 
+function Set-FlowChainNpmCache {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $RepoRoot
+    )
+
+    if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable("npm_config_cache", "Process"))) {
+        $cacheDir = Join-Path $RepoRoot "devnet/local/npm-cache"
+        New-Item -ItemType Directory -Force -Path $cacheDir | Out-Null
+        $env:npm_config_cache = $cacheDir
+    }
+
+    return $env:npm_config_cache
+}
+
 function Set-FlowChainRepoRoot {
     $root = Get-FlowChainRepoRoot
     Set-Location -LiteralPath $root
+    Set-FlowChainNpmCache -RepoRoot $root | Out-Null
     return $root
 }
 

@@ -93,9 +93,11 @@ foreach ($agent in $agents) {
         }
     }
 
-    $command = @"
+$command = @"
 `$prompt = Get-Content -Raw -LiteralPath "$promptPath"
 Set-Location -LiteralPath "$worktree"
+`$env:npm_config_cache = Join-Path "$worktree" "devnet\local\npm-cache"
+New-Item -ItemType Directory -Force -Path `$env:npm_config_cache | Out-Null
 codex --cd "$worktree" -s danger-full-access -a never `$prompt
 "@
 
