@@ -179,6 +179,14 @@ $definitions = @(
         ownerInputGate = $true
     },
     [ordered]@{
+        id = "incident-drill"
+        requirement = "Incident drills prove operational failures become critical incidents while owner-input blockers remain non-critical."
+        path = "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json"
+        command = "npm run flowchain:ops:incident-drill"
+        productionGate = $true
+        ownerInputGate = $false
+    },
+    [ordered]@{
         id = "public-deployment-contract"
         requirement = "Public deployment contract is ready before endpoint exposure or tester packet sharing."
         path = "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"

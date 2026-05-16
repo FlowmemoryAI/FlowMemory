@@ -1,6 +1,6 @@
 ﻿# FlowChain Public Deployment Contract
 
-Generated: 2026-05-16T09:00:00.1100943Z
+Generated: 2026-05-16T09:51:19.0614853Z
 Status: blocked
 Deployment ready: False
 Packet shareable: False
@@ -17,7 +17,7 @@ This file records deployment gates, commands, and env names only. It must not co
 | Owner signup checklist maps every public RPC, backup, and Base 8453 bridge value to the exact thing the owner must get without requesting secrets in chat. | passed | signupStatus=passed, itemCount=8, externalSignupCount=3, missingCoverage=0, repoOwned=True, localEnvFileSupported=True |
 | Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added. | passed | templateStatus=passed, pathIsGitIgnored=True, requiredEnvNameCount=15, includesAllRequired=True |
 | Public RPC exposure has a no-values owner edge template and deployment bundle for HTTPS reverse proxying, rate limiting, verification, and rollback. | passed | edgeTemplateStatus=passed, bundleStatus=passed, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True |
-| The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable. | passed | serviceStatus=passed, privateBind=True, latestHeight=33750, finalizedHeight=33750 |
+| The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable. | passed | serviceStatus=passed, privateBind=True, latestHeight=34458, finalizedHeight=34458 |
 | The deployment has recent service-monitor evidence that block height advances over multiple samples. | passed | monitorStatus=passed, samples=2, heightAdvanced=True |
 | Owner deployment has a no-secret ops snapshot that separates critical incidents from expected owner-input blockers and lists incident commands. | passed | opsSnapshot=blocked, criticalCount=0, blockedCount=5 |
 | The owner deployment contract validates the required public RPC, backup, and Base 8453 input names without values. | blocked | ownerInputsStatus=blocked, ownerInputReady=False |

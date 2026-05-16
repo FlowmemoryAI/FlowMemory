@@ -4,6 +4,7 @@ param(
     [int] $MonitorDurationSeconds = 20,
     [int] $MonitorPollSeconds = 5,
     [int] $MonitorMaxStateAgeSeconds = 90,
+    [string] $InputReportDir = "",
     [switch] $AllowBlocked,
     [switch] $NoRefresh
 )
@@ -17,17 +18,34 @@ Set-StrictMode -Version Latest
 $repoRoot = Set-FlowChainRepoRoot
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
 $markdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $MarkdownPath)
+$inputReportFullDir = ""
+if (-not [string]::IsNullOrWhiteSpace($InputReportDir)) {
+    if (-not $NoRefresh.IsPresent) {
+        throw "InputReportDir is only supported with -NoRefresh so synthetic incident drills cannot overwrite live evidence."
+    }
+    $inputReportFullDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $InputReportDir)
+}
+
+function Resolve-OpsInputReportPath {
+    param([Parameter(Mandatory = $true)][string] $Path)
+
+    if (-not [string]::IsNullOrWhiteSpace($inputReportFullDir)) {
+        return Join-Path $inputReportFullDir (Split-Path -Leaf $Path)
+    }
+
+    return Resolve-FlowChainPath -RepoRoot $repoRoot -Path $Path
+}
 
 $paths = [ordered]@{
-    serviceStatus = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
-    serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
-    publicRpc = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
-    backup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
-    bridgeLive = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
-    bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
-    externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
-    publicDeployment = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
-    noSecret = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
+    serviceStatus = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
+    serviceMonitor = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
+    publicRpc = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
+    backup = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
+    bridgeLive = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
+    bridgeInfra = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
+    externalTester = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
+    publicDeployment = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
+    noSecret = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
 }
 
 function Get-OpsProp {
@@ -192,6 +210,10 @@ $incidentCommands = [ordered]@{
         "npm run flowchain:public-rpc:abuse-test",
         "npm run flowchain:external-tester:packet"
     )
+    drills = @(
+        "npm run flowchain:ops:incident-drill",
+        "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh"
+    )
     emergency = @(
         "npm run flowchain:emergency:stop-local",
         "npm run flowchain:bridge:emergency-stop",
@@ -206,6 +228,7 @@ $report = [ordered]@{
     refresh = [ordered]@{
         performed = -not $NoRefresh
         steps = @($refreshSteps)
+        inputReportDir = $inputReportFullDir
     }
     chain = [ordered]@{
         latestHeight = $latestHeight

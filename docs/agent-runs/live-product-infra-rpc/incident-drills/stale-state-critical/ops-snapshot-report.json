@@ -1,0 +1,133 @@
+{
+    "schema":  "flowchain.ops_snapshot_report.v1",
+    "generatedAt":  "2026-05-16T09:50:34.5187402Z",
+    "status":  "failed",
+    "refresh":  {
+                    "performed":  false,
+                    "steps":  [
+
+                              ],
+                    "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input"
+                },
+    "chain":  {
+                  "latestHeight":  "34458",
+                  "finalizedHeight":  "34458",
+                  "stateFileLastWriteAgeSeconds":  999999,
+                  "monitorStatus":  "passed",
+                  "monitorSamples":  2,
+                  "monitorHeightAdvanced":  true
+              },
+    "reportStatuses":  {
+                           "serviceStatus":  "passed",
+                           "serviceMonitor":  "passed",
+                           "publicRpc":  "blocked",
+                           "backup":  "blocked",
+                           "bridgeLive":  "blocked",
+                           "bridgeInfra":  "blocked",
+                           "externalTester":  "blocked",
+                           "publicDeployment":  "blocked",
+                           "noSecret":  "passed"
+                       },
+    "findings":  [
+                     {
+                         "severity":  "critical",
+                         "code":  "state-stale",
+                         "message":  "State file is stale relative to the monitor threshold.",
+                         "commands":  [
+                                          "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
+                         "code":  "public-rpc-not-ready",
+                         "message":  "Public RPC is not ready to share.",
+                         "commands":  [
+                                          "npm run flowchain:public-rpc:check",
+                                          "npm run flowchain:public-rpc:validate",
+                                          "npm run flowchain:public-rpc:abuse-test"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
+                         "code":  "backup-not-ready",
+                         "message":  "State backup is not ready for public operation.",
+                         "commands":  [
+                                          "npm run flowchain:backup:restore:validate",
+                                          "npm run flowchain:backup:check"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
+                         "code":  "bridge-not-ready",
+                         "message":  "Base 8453 bridge readiness is not ready for external funded testing.",
+                         "commands":  [
+                                          "npm run flowchain:bridge:live:check",
+                                          "npm run flowchain:bridge:infra:check",
+                                          "npm run flowchain:bridge:emergency-stop"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
+                         "code":  "external-tester-not-shareable",
+                         "message":  "External tester packet must remain not-shareable.",
+                         "commands":  [
+                                          "npm run flowchain:tester:readiness",
+                                          "npm run flowchain:external-tester:packet"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
+                         "code":  "deployment-contract-not-ready",
+                         "message":  "Public deployment contract is not ready.",
+                         "commands":  [
+                                          "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+                                      ]
+                     }
+                 ],
+    "criticalCount":  1,
+    "blockedCount":  5,
+    "incidentCommands":  {
+                             "status":  [
+                                            "npm run flowchain:ops:snapshot",
+                                            "npm run flowchain:service:status",
+                                            "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30"
+                                        ],
+                             "restart":  [
+                                             "npm run flowchain:service:restart -- -LiveProfile",
+                                             "npm run flowchain:service:status"
+                                         ],
+                             "backupRecovery":  [
+                                                    "npm run flowchain:backup:restore:validate",
+                                                    "npm run flowchain:backup:create",
+                                                    "npm run flowchain:backup:restore:verify"
+                                                ],
+                             "publicExposure":  [
+                                                    "npm run flowchain:public-rpc:check",
+                                                    "npm run flowchain:public-rpc:abuse-test",
+                                                    "npm run flowchain:external-tester:packet"
+                                                ],
+                             "drills":  [
+                                            "npm run flowchain:ops:incident-drill",
+                                            "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh"
+                                        ],
+                             "emergency":  [
+                                               "npm run flowchain:emergency:stop-local",
+                                               "npm run flowchain:bridge:emergency-stop",
+                                               "npm run flowchain:emergency:export-evidence"
+                                           ]
+                         },
+    "reportPaths":  {
+                        "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\service-status-report.json",
+                        "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\service-monitor-report.json",
+                        "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\public-rpc-readiness-report.json",
+                        "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\backup-readiness-report.json",
+                        "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\bridge-live-readiness-report.json",
+                        "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\bridge-infra-readiness-report.json",
+                        "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\external-tester-readiness-report.json",
+                        "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\public-deployment-contract-report.json",
+                        "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\no-secret-scan-report.json"
+                    },
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

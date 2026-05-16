@@ -1,16 +1,17 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-16T08:59:58.4612227Z",
+    "generatedAt":  "2026-05-16T09:51:17.2859860Z",
     "status":  "blocked",
     "refresh":  {
                     "performed":  false,
                     "steps":  [
 
-                              ]
+                              ],
+                    "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "33750",
-                  "finalizedHeight":  "33750",
+                  "latestHeight":  "34458",
+                  "finalizedHeight":  "34458",
                   "stateFileLastWriteAgeSeconds":  1,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
@@ -97,6 +98,10 @@
                                                     "npm run flowchain:public-rpc:abuse-test",
                                                     "npm run flowchain:external-tester:packet"
                                                 ],
+                             "drills":  [
+                                            "npm run flowchain:ops:incident-drill",
+                                            "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh"
+                                        ],
                              "emergency":  [
                                                "npm run flowchain:emergency:stop-local",
                                                "npm run flowchain:bridge:emergency-stop",

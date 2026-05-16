@@ -1,0 +1,328 @@
+{
+    "schema":  "flowchain.incident_drill_report.v0",
+    "generatedAt":  "2026-05-16T09:51:15.9324509Z",
+    "status":  "passed",
+    "incidentDrillReady":  true,
+    "validationScope":  "synthetic-ops-snapshot-incidents-plus-live-postcheck",
+    "ownerValuesRequired":  false,
+    "mutatesLiveState":  false,
+    "syntheticIncidentInputs":  true,
+    "caseCounts":  {
+                       "passed":  8,
+                       "failed":  0,
+                       "total":  8
+                   },
+    "requiredScenarios":  [
+                              "baseline-owner-blockers-only",
+                              "node-down-critical",
+                              "control-plane-down-critical",
+                              "stale-state-critical",
+                              "height-not-advancing-critical",
+                              "no-secret-scan-critical",
+                              "recovery-command-print",
+                              "post-drill-live-status"
+                          ],
+    "cases":  [
+                  {
+                      "id":  "baseline-owner-blockers-only",
+                      "requirement":  "Expected owner-input blockers remain blocked without being classified as critical incidents.",
+                      "status":  "passed",
+                      "evidence":  "expectedStatus=blocked, actualStatus=blocked, exitCode=0, missingCodes=0, commandsPresent=True, safeFlags=True",
+                      "expectedCodes":  [
+                                            "public-rpc-not-ready",
+                                            "backup-not-ready",
+                                            "bridge-not-ready",
+                                            "external-tester-not-shareable",
+                                            "deployment-contract-not-ready"
+                                        ],
+                      "child":  {
+                                    "name":  "baseline-owner-blockers-only",
+                                    "exitCode":  0,
+                                    "outputTail":  [
+                                                       "FlowChain ops snapshot status: blocked",
+                                                       "Latest height: 34458",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\ops-snapshot-report.json",
+                                                       "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\OPS_SNAPSHOT.md",
+                                                       "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, external-tester-not-shareable, deployment-contract-not-ready"
+                                                   ]
+                                },
+                      "reportStatus":  "blocked",
+                      "criticalCount":  0,
+                      "blockedCount":  5,
+                      "findingCodes":  [
+                                           "public-rpc-not-ready",
+                                           "backup-not-ready",
+                                           "bridge-not-ready",
+                                           "external-tester-not-shareable",
+                                           "deployment-contract-not-ready"
+                                       ]
+                  },
+                  {
+                      "id":  "node-down-critical",
+                      "requirement":  "A stopped block-producing node is classified as a critical incident with restart commands.",
+                      "status":  "passed",
+                      "evidence":  "expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True",
+                      "expectedCodes":  [
+                                            "service-status-not-passed",
+                                            "node-not-running"
+                                        ],
+                      "child":  {
+                                    "name":  "node-down-critical",
+                                    "exitCode":  1,
+                                    "outputTail":  [
+                                                       "FlowChain ops snapshot status: failed",
+                                                       "Latest height: 34458",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\node-down-critical\\ops-snapshot-report.json",
+                                                       "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\node-down-critical\\OPS_SNAPSHOT.md",
+                                                       "Critical findings: service-status-not-passed, node-not-running",
+                                                       "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, external-tester-not-shareable, deployment-contract-not-ready"
+                                                   ]
+                                },
+                      "reportStatus":  "failed",
+                      "criticalCount":  2,
+                      "blockedCount":  5,
+                      "findingCodes":  [
+                                           "service-status-not-passed",
+                                           "node-not-running",
+                                           "public-rpc-not-ready",
+                                           "backup-not-ready",
+                                           "bridge-not-ready",
+                                           "external-tester-not-shareable",
+                                           "deployment-contract-not-ready"
+                                       ]
+                  },
+                  {
+                      "id":  "control-plane-down-critical",
+                      "requirement":  "A stopped control-plane RPC service is classified as a critical incident.",
+                      "status":  "passed",
+                      "evidence":  "expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True",
+                      "expectedCodes":  [
+                                            "service-status-not-passed",
+                                            "control-plane-not-running"
+                                        ],
+                      "child":  {
+                                    "name":  "control-plane-down-critical",
+                                    "exitCode":  1,
+                                    "outputTail":  [
+                                                       "FlowChain ops snapshot status: failed",
+                                                       "Latest height: 34458",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\ops-snapshot-report.json",
+                                                       "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\OPS_SNAPSHOT.md",
+                                                       "Critical findings: service-status-not-passed, control-plane-not-running",
+                                                       "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, external-tester-not-shareable, deployment-contract-not-ready"
+                                                   ]
+                                },
+                      "reportStatus":  "failed",
+                      "criticalCount":  2,
+                      "blockedCount":  5,
+                      "findingCodes":  [
+                                           "service-status-not-passed",
+                                           "control-plane-not-running",
+                                           "public-rpc-not-ready",
+                                           "backup-not-ready",
+                                           "bridge-not-ready",
+                                           "external-tester-not-shareable",
+                                           "deployment-contract-not-ready"
+                                       ]
+                  },
+                  {
+                      "id":  "stale-state-critical",
+                      "requirement":  "A stale state file is classified as a critical incident even when service reports are otherwise readable.",
+                      "status":  "passed",
+                      "evidence":  "expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True",
+                      "expectedCodes":  [
+                                            "state-stale"
+                                        ],
+                      "child":  {
+                                    "name":  "stale-state-critical",
+                                    "exitCode":  1,
+                                    "outputTail":  [
+                                                       "FlowChain ops snapshot status: failed",
+                                                       "Latest height: 34458",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\ops-snapshot-report.json",
+                                                       "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\OPS_SNAPSHOT.md",
+                                                       "Critical findings: state-stale",
+                                                       "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, external-tester-not-shareable, deployment-contract-not-ready"
+                                                   ]
+                                },
+                      "reportStatus":  "failed",
+                      "criticalCount":  1,
+                      "blockedCount":  5,
+                      "findingCodes":  [
+                                           "state-stale",
+                                           "public-rpc-not-ready",
+                                           "backup-not-ready",
+                                           "bridge-not-ready",
+                                           "external-tester-not-shareable",
+                                           "deployment-contract-not-ready"
+                                       ]
+                  },
+                  {
+                      "id":  "height-not-advancing-critical",
+                      "requirement":  "A monitor window with stagnant block height is classified as a critical incident.",
+                      "status":  "passed",
+                      "evidence":  "expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True",
+                      "expectedCodes":  [
+                                            "height-not-advancing"
+                                        ],
+                      "child":  {
+                                    "name":  "height-not-advancing-critical",
+                                    "exitCode":  1,
+                                    "outputTail":  [
+                                                       "FlowChain ops snapshot status: failed",
+                                                       "Latest height: 34458",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\height-not-advancing-critical\\ops-snapshot-report.json",
+                                                       "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\height-not-advancing-critical\\OPS_SNAPSHOT.md",
+                                                       "Critical findings: height-not-advancing",
+                                                       "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, external-tester-not-shareable, deployment-contract-not-ready"
+                                                   ]
+                                },
+                      "reportStatus":  "failed",
+                      "criticalCount":  1,
+                      "blockedCount":  5,
+                      "findingCodes":  [
+                                           "height-not-advancing",
+                                           "public-rpc-not-ready",
+                                           "backup-not-ready",
+                                           "bridge-not-ready",
+                                           "external-tester-not-shareable",
+                                           "deployment-contract-not-ready"
+                                       ]
+                  },
+                  {
+                      "id":  "no-secret-scan-critical",
+                      "requirement":  "A failed no-secret scan is classified as a critical incident before sharing any public artifacts.",
+                      "status":  "passed",
+                      "evidence":  "expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True",
+                      "expectedCodes":  [
+                                            "no-secret-scan-not-passed"
+                                        ],
+                      "child":  {
+                                    "name":  "no-secret-scan-critical",
+                                    "exitCode":  1,
+                                    "outputTail":  [
+                                                       "FlowChain ops snapshot status: failed",
+                                                       "Latest height: 34458",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\ops-snapshot-report.json",
+                                                       "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\OPS_SNAPSHOT.md",
+                                                       "Critical findings: no-secret-scan-not-passed",
+                                                       "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, external-tester-not-shareable, deployment-contract-not-ready"
+                                                   ]
+                                },
+                      "reportStatus":  "failed",
+                      "criticalCount":  1,
+                      "blockedCount":  5,
+                      "findingCodes":  [
+                                           "public-rpc-not-ready",
+                                           "backup-not-ready",
+                                           "bridge-not-ready",
+                                           "external-tester-not-shareable",
+                                           "deployment-contract-not-ready",
+                                           "no-secret-scan-not-passed"
+                                       ]
+                  },
+                  {
+                      "id":  "recovery-command-print",
+                      "requirement":  "Emergency recovery commands are printable to a no-values report without stopping live services.",
+                      "status":  "passed",
+                      "evidence":  "exitCode=0, recoverySteps=8, emergencyCommands=4",
+                      "expectedCodes":  [
+
+                                        ],
+                      "child":  {
+                                    "name":  "recovery-command-print",
+                                    "exitCode":  0,
+                                    "outputTail":  [
+                                                       "FlowChain recovery steps:",
+                                                       "- npm run flowchain:emergency:export-evidence",
+                                                       "- npm run flowchain:doctor",
+                                                       "- npm run flowchain:init",
+                                                       "- npm run flowchain:node:start",
+                                                       "- npm run flowchain:node:status",
+                                                       "- npm run control-plane:serve",
+                                                       "- npm run workbench:dev",
+                                                       "- npm run flowchain:bridge:live:check",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\recovery-commands-report.json"
+                                                   ]
+                                },
+                      "reportStatus":  "printed",
+                      "criticalCount":  null,
+                      "blockedCount":  null,
+                      "findingCodes":  {
+
+                                       }
+                  },
+                  {
+                      "id":  "post-drill-live-status",
+                      "requirement":  "Incident drills leave the live local chain services running and readable.",
+                      "status":  "passed",
+                      "evidence":  "exitCode=0, status=passed, node=running, controlPlane=running",
+                      "expectedCodes":  [
+
+                                        ],
+                      "child":  {
+                                    "name":  "post-drill-live-status",
+                                    "exitCode":  0,
+                                    "outputTail":  [
+                                                       "FlowChain service status: passed",
+                                                       "Node: running PID=19572",
+                                                       "Control plane: running PID=44416 bind=127.0.0.1:8787",
+                                                       "Public readiness: blocked",
+                                                       "Latest height: 34481",
+                                                       "Finalized height: 34481",
+                                                       "Backup path: not-configured",
+                                                       "Bridge readiness: live=blocked, infra=blocked",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\post-drill-service-status-report.json"
+                                                   ]
+                                },
+                      "reportStatus":  "passed",
+                      "criticalCount":  null,
+                      "blockedCount":  null,
+                      "findingCodes":  {
+
+                                       }
+                  }
+              ],
+    "liveStateBefore":  {
+                            "readable":  true,
+                            "statePathConfigured":  true,
+                            "chainId":  "flowmemory-local-devnet-v0",
+                            "latestHeight":  "34472",
+                            "latestHash":  "0x73b621529240816483ed994cfbd5d8cea486cbe985594fe3fdb2dc653e7e342f",
+                            "latestRoot":  "0x31db1fe747c4dbb697c17ab1b24f5031ec2c977476b0d95d7f5120184c47f2d7",
+                            "latestBlockTimestamp":  "1778722471",
+                            "latestBlockAgeSeconds":  0,
+                            "stateFileLastWriteAgeSeconds":  0,
+                            "finalizedHeight":  "34472",
+                            "finalizedHash":  "0x73b621529240816483ed994cfbd5d8cea486cbe985594fe3fdb2dc653e7e342f",
+                            "mempoolDepth":  0,
+                            "peerCount":  null,
+                            "blockCount":  34472
+                        },
+    "liveStateAfter":  {
+                           "readable":  true,
+                           "statePathConfigured":  true,
+                           "chainId":  "flowmemory-local-devnet-v0",
+                           "latestHeight":  "34486",
+                           "latestHash":  "0x47a15f3e1029f6afe643156a765072ac43498fc939a9661c657869257ee77f3f",
+                           "latestRoot":  "0x31db1fe747c4dbb697c17ab1b24f5031ec2c977476b0d95d7f5120184c47f2d7",
+                           "latestBlockTimestamp":  "1778722485",
+                           "latestBlockAgeSeconds":  3,
+                           "stateFileLastWriteAgeSeconds":  3,
+                           "finalizedHeight":  "34486",
+                           "finalizedHash":  "0x47a15f3e1029f6afe643156a765072ac43498fc939a9661c657869257ee77f3f",
+                           "mempoolDepth":  0,
+                           "peerCount":  null,
+                           "blockCount":  34486
+                       },
+    "reportPaths":  {
+                        "report":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drill-report.json",
+                        "markdown":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\INCIDENT_DRILL.md",
+                        "runDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills",
+                        "recovery":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\recovery-commands-report.json",
+                        "postDrillServiceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\post-drill-service-status-report.json"
+                    },
+    "noLiveBroadcast":  true,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

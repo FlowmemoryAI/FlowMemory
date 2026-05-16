@@ -37,6 +37,7 @@ $paths = [ordered]@{
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
+    incidentDrill = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json"
     publicDeploymentContract = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     architectureAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"
     backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
@@ -287,6 +288,9 @@ $liveInfraExitCode = $liveInfraResult.exitCode
 $externalTesterPacketResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-packet.ps1"), "-AllowBlocked")
 $externalTesterPacketOutput = @($externalTesterPacketResult.output)
 $externalTesterPacketExitCode = $externalTesterPacketResult.exitCode
+$incidentDrillResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-incident-drill.ps1"))
+$incidentDrillOutput = @($incidentDrillResult.output)
+$incidentDrillExitCode = $incidentDrillResult.exitCode
 $opsSnapshotResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-snapshot.ps1"), "-AllowBlocked", "-NoRefresh")
 $opsSnapshotOutput = @($opsSnapshotResult.output)
 $opsSnapshotExitCode = $opsSnapshotResult.exitCode
@@ -562,6 +566,21 @@ $opsSnapshotPassed = $opsSnapshotExitCode -eq 0 `
     -and $opsSnapshotCriticalCount -eq 0 `
     -and (-not [string]::IsNullOrWhiteSpace($opsSnapshotLatestHeight)) `
     -and (-not [string]::IsNullOrWhiteSpace($opsSnapshotFinalizedHeight))
+$incidentDrill = $reports.incidentDrill
+$incidentDrillStatus = Get-ReportStatus -Report $incidentDrill
+$incidentDrillReady = Get-AuditProp -Object $incidentDrill -Name "incidentDrillReady" -Default $false
+$incidentCaseCounts = Get-AuditProp -Object $incidentDrill -Name "caseCounts"
+$incidentFailedCases = [int](Get-AuditProp -Object $incidentCaseCounts -Name "failed" -Default 999999)
+$incidentTotalCases = [int](Get-AuditProp -Object $incidentCaseCounts -Name "total" -Default 0)
+$incidentDrillPassed = $incidentDrillExitCode -eq 0 `
+    -and $incidentDrillStatus -eq "passed" `
+    -and $incidentDrillReady -eq $true `
+    -and $incidentFailedCases -eq 0 `
+    -and $incidentTotalCases -ge 8 `
+    -and ((Get-AuditProp -Object $incidentDrill -Name "mutatesLiveState" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $incidentDrill -Name "noLiveBroadcast" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $incidentDrill -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $incidentDrill -Name "noSecrets" -Default $false) -eq $true)
 $productionLocalAggregateStatus = [string](Get-AuditProp -Object $liveProduct -Name "productionLocalAggregateStatus")
 $liveProductLiveInfraStatus = [string](Get-AuditProp -Object $liveProduct -Name "liveInfraStatus")
 $liveProductNoLiveBroadcast = Get-AuditProp -Object $liveProduct -Name "noLiveBroadcast"
@@ -778,6 +797,12 @@ Add-AuditItem -Items $items -Id "ops-snapshot" `
     -Evidence "opsStatus=$opsSnapshotStatus, criticalCount=$opsSnapshotCriticalCount, blockedCount=$opsSnapshotBlockedCount, latestHeight=$opsSnapshotLatestHeight, finalizedHeight=$opsSnapshotFinalizedHeight, report=$($paths.opsSnapshot)" `
     -Commands @("npm run flowchain:ops:snapshot -- -AllowBlocked")
 
+Add-AuditItem -Items $items -Id "incident-drill" `
+    -Requirement "Incident drills prove node-down, control-plane-down, stale-state, stalled-height, and no-secret failures classify as critical while owner-input blockers stay non-critical." `
+    -Status $(if ($incidentDrillPassed) { "passed" } else { "failed" }) `
+    -Evidence "incidentStatus=$incidentDrillStatus, ready=$incidentDrillReady, cases=$incidentTotalCases, failedCases=$incidentFailedCases, report=$($paths.incidentDrill)" `
+    -Commands @("npm run flowchain:ops:incident-drill")
+
 Add-AuditItem -Items $items -Id "public-rpc-external-sharing" `
     -Requirement "External/public RPC is configured behind owner TLS, CORS, rate limit, endpoint checks, and response hygiene." `
     -Status $(if ((Get-ReportStatus -Report $reports.publicRpc) -eq "passed") { "passed" } else { "blocked" }) `
@@ -890,6 +915,8 @@ $report = [ordered]@{
     liveInfraOutputRedacted = @($liveInfraOutput | ForEach-Object { "$_" })
     externalTesterPacketExitCode = $externalTesterPacketExitCode
     externalTesterPacketOutputRedacted = @($externalTesterPacketOutput | ForEach-Object { "$_" })
+    incidentDrillExitCode = $incidentDrillExitCode
+    incidentDrillOutputRedacted = @($incidentDrillOutput | ForEach-Object { "$_" })
     opsSnapshotExitCode = $opsSnapshotExitCode
     opsSnapshotOutputRedacted = @($opsSnapshotOutput | ForEach-Object { "$_" })
     publicDeploymentContractExitCode = $publicDeploymentContractExitCode
@@ -926,6 +953,7 @@ $report = [ordered]@{
         "npm run flowchain:backup:check",
         "npm run flowchain:service:monitor",
         "npm run flowchain:ops:snapshot",
+        "npm run flowchain:ops:incident-drill",
         "npm run flowchain:live-infra:check",
         "npm run flowchain:bridge:diagnose:tx",
         "npm run flowchain:tester:readiness",
