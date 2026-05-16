@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { once } from "node:events";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -13,6 +13,7 @@ import {
   type RpcErrorResponse,
   type RpcSuccessResponse,
 } from "../src/index.ts";
+import { spawnCargoSync } from "../src/cargo.ts";
 import { startControlPlaneServer } from "../src/server.ts";
 import { runControlPlaneSmoke } from "../src/smoke.ts";
 
@@ -121,6 +122,65 @@ test("keeps deterministic chain status response snapshots", () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
+test("reports the active local runtime block before fixture/indexer blocks", () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-runtime-block-"));
+  try {
+    const localDevnetPath = join(dir, "state.json");
+    writeFileSync(localDevnetPath, JSON.stringify({
+      schema: "flowmemory.local_devnet.state.v0",
+      chainId: "flowmemory-local-devnet-v0",
+      blocks: [
+        {
+          schema: "flowmemory.local_devnet.block.v0",
+          blockNumber: 1,
+          blockHash: `0x${"1".repeat(64)}`,
+          stateRoot: `0x${"a".repeat(64)}`,
+          txIds: [],
+          receipts: [],
+        },
+        {
+          schema: "flowmemory.local_devnet.block.v0",
+          blockNumber: 42,
+          blockHash: `0x${"2".repeat(64)}`,
+          stateRoot: `0x${"b".repeat(64)}`,
+          txIds: [],
+          receipts: [],
+        },
+      ],
+      pendingTxs: [],
+    }));
+    const state = loadControlPlaneState({
+      localDevnetPath,
+      localDevnetLaunchPath: join(dir, "missing-launch-state.json"),
+      txIntakePath: join(dir, "transactions.ndjson"),
+      bridgeObservationIntakePath: join(dir, "bridge-observations.ndjson"),
+    });
+    const chain = dispatchJsonRpc({ jsonrpc: "2.0", id: 1, method: "chain_status" }, { state }) as RpcSuccessResponse;
+    const node = dispatchJsonRpc({ jsonrpc: "2.0", id: 2, method: "node_status" }, { state }) as RpcSuccessResponse;
+    const block = dispatchJsonRpc(
+      { jsonrpc: "2.0", id: 3, method: "block_get", params: { blockNumber: "42" } },
+      { state },
+    ) as RpcSuccessResponse;
+    const blocks = dispatchJsonRpc(
+      { jsonrpc: "2.0", id: 4, method: "block_list", params: { source: "active-local-runtime" } },
+      { state },
+    ) as RpcSuccessResponse;
+
+    assert.equal(chain.result.currentBlock, "42");
+    assert.equal(chain.result.blockHeight, "42");
+    assert.equal(chain.result.currentBlockHash, `0x${"2".repeat(64)}`);
+    assert.equal(chain.result.latestStateRoot, `0x${"b".repeat(64)}`);
+    assert.equal(chain.result.finalizedBlock, "42");
+    assert.equal(((chain.result.counts as JsonObject).runtimeBlocks), 2);
+    assert.equal(node.result.latestBlockNumber, "42");
+    assert.equal((block.result.block as JsonObject).source, "active-local-runtime");
+    assert.equal((((block.result.provenance as JsonObject).sources as JsonObject[])[0]).path, localDevnetPath);
+    assert.equal(blocks.result.count, 2);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("exposes RPC discovery and readiness without leaking env values", () => {
   const envNames = [
     "FLOWCHAIN_RPC_PUBLIC_URL",
@@ -151,6 +211,21 @@ test("exposes RPC discovery and readiness without leaking env values", () => {
     assert.equal(readiness.result.noSecrets, true);
     assert.equal(readiness.result.productionReady, false);
     assert.ok((readiness.result.missingProductionEnvNames as string[]).includes("FLOWCHAIN_RPC_PUBLIC_URL"));
+
+    process.env.FLOWCHAIN_RPC_PUBLIC_URL = "http://rpc.example.test";
+    process.env.FLOWCHAIN_RPC_ALLOWED_ORIGINS = "*";
+    process.env.FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE = "0";
+    process.env.FLOWCHAIN_RPC_TLS_TERMINATED = "false";
+    process.env.FLOWCHAIN_RPC_STATE_BACKUP_PATH = "configured-but-not-printed";
+    const invalidReadiness = dispatchJsonRpc({ jsonrpc: "2.0", id: 3, method: "rpc_readiness" }) as RpcSuccessResponse;
+    assert.equal(invalidReadiness.result.status, "FAILED");
+    assert.ok((invalidReadiness.result.invalidProductionEnvNames as string[]).includes("FLOWCHAIN_RPC_PUBLIC_URL"));
+    assert.ok((invalidReadiness.result.invalidProductionEnvNames as string[]).includes("FLOWCHAIN_RPC_ALLOWED_ORIGINS"));
+    assert.ok((invalidReadiness.result.invalidProductionEnvNames as string[]).includes("FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE"));
+    assert.ok((invalidReadiness.result.invalidProductionEnvNames as string[]).includes("FLOWCHAIN_RPC_TLS_TERMINATED"));
+    assert.equal((invalidReadiness.result.publicRpcControls as JsonObject).envValuesPrinted, false);
+    assert.equal(JSON.stringify(invalidReadiness.result).includes("rpc.example.test"), false);
+    assert.equal(JSON.stringify(invalidReadiness.result).includes("configured-but-not-printed"), false);
   } finally {
     for (const [name, value] of originalEnv) {
       if (value === undefined) {
@@ -331,6 +406,47 @@ test("submits local transactions to the file-backed runtime intake path", () => 
     assert.equal(mempool.result.count, 1);
     assert.equal(mempool.result.transactions[0].source, "local-file-intake");
     assert.equal(mempool.result.transactions[0].transaction.action, "test");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("can forward runtime submissions to the live node inbox", () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-node-inbox-"));
+  try {
+    const state = loadControlPlaneState({
+      localDevnetPath: join(dir, "state.json"),
+      txIntakePath: join(dir, "transactions.ndjson"),
+    });
+    const response = dispatchJsonRpc(
+      {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "transaction_submit",
+        params: {
+          signedEnvelope: {
+            schema: "flowmemory.test_signed_envelope.v0",
+            tx: {
+              type: "CreateLocalTestUnitBalance",
+              accountId: "local-account:test:node-inbox",
+              owner: "operator:test",
+            },
+            signature: "0xtest-signature",
+          },
+          submittedBy: "operator:test",
+          runtimeSubmitMode: "node-inbox",
+        },
+      },
+      { state },
+    ) as RpcSuccessResponse;
+
+    const runtimeSubmission = response.result.runtimeSubmission as JsonObject;
+    assert.equal(response.result.forwardedTo, "local-runtime-inbox");
+    assert.equal(runtimeSubmission.mode, "node-inbox");
+    assert.equal(runtimeSubmission.status, "queued_in_node_inbox");
+    assert.ok(Array.isArray(runtimeSubmission.queued));
+    assert.equal(runtimeSubmission.queued.length, 1);
+    assert.equal(readdirSync(join(dir, "node", "inbox")).length, 1);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -1206,6 +1322,109 @@ test("HTTP server exposes browser-safe health and state endpoints", async () => 
   }
 });
 
+test("HTTP server honors configured CORS origins", async () => {
+  const previousOrigins = process.env.FLOWCHAIN_RPC_ALLOWED_ORIGINS;
+  process.env.FLOWCHAIN_RPC_ALLOWED_ORIGINS = "http://allowed.example";
+  const server = startControlPlaneServer({ host: "127.0.0.1", port: 0 });
+
+  try {
+    await once(server, "listening");
+    const address = server.address();
+    assert.equal(typeof address, "object");
+    assert.notEqual(address, null);
+    const port = address?.port;
+
+    const allowed = await fetch(`http://127.0.0.1:${port}/health`, {
+      headers: { Origin: "http://allowed.example" },
+    });
+    assert.equal(allowed.status, 200);
+    assert.equal(allowed.headers.get("access-control-allow-origin"), "http://allowed.example");
+
+    const rejected = await fetch(`http://127.0.0.1:${port}/health`, {
+      headers: { Origin: "http://blocked.example" },
+    });
+    assert.equal(rejected.status, 403);
+    assert.equal(rejected.headers.get("access-control-allow-origin"), null);
+    assert.equal((await rejected.json()).schema, "flowmemory.control_plane.cors_rejected.v0");
+  } finally {
+    await new Promise<void>((resolve, reject) => {
+      server.close((error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve();
+      });
+    });
+    if (previousOrigins === undefined) {
+      delete process.env.FLOWCHAIN_RPC_ALLOWED_ORIGINS;
+    } else {
+      process.env.FLOWCHAIN_RPC_ALLOWED_ORIGINS = previousOrigins;
+    }
+  }
+});
+
+test("HTTP server enforces configured per-client rate limits without trusting spoofed forwarded clients", async () => {
+  const previousRateLimit = process.env.FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE;
+  process.env.FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE = "1";
+  const server = startControlPlaneServer({ host: "127.0.0.1", port: 0 });
+
+  try {
+    await once(server, "listening");
+    const address = server.address();
+    assert.equal(typeof address, "object");
+    assert.notEqual(address, null);
+    const port = address?.port;
+    const edgeConfirmedClient = `198.51.100.${Math.floor(Math.random() * 100) + 1}`;
+    const firstRequestHeaders = { "x-forwarded-for": `203.0.113.10, ${edgeConfirmedClient}` };
+    const secondRequestHeaders = { "x-forwarded-for": `203.0.113.11, ${edgeConfirmedClient}` };
+
+    const first = await fetch(`http://127.0.0.1:${port}/health`, { headers: firstRequestHeaders });
+    assert.equal(first.status, 200);
+
+    const second = await fetch(`http://127.0.0.1:${port}/health`, { headers: secondRequestHeaders });
+    assert.equal(second.status, 429);
+    assert.equal(second.headers.get("retry-after") !== null, true);
+    const body = await second.json() as JsonObject;
+    assert.equal(body.schema, "flowmemory.control_plane.rate_limited.v0");
+    assert.equal(body.envValuesPrinted, false);
+    assert.equal(JSON.stringify(body).includes("FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE"), false);
+  } finally {
+    await new Promise<void>((resolve, reject) => {
+      server.close((error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve();
+      });
+    });
+    if (previousRateLimit === undefined) {
+      delete process.env.FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE;
+    } else {
+      process.env.FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE = previousRateLimit;
+    }
+  }
+});
+
+test("control-plane cargo target override must stay inside the repository", () => {
+  const previousTarget = process.env.FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR;
+  process.env.FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR = tmpdir();
+
+  try {
+    assert.throws(
+      () => spawnCargoSync(["--version"], { cwd: process.cwd(), encoding: "utf8", windowsHide: true }),
+      /FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR must stay inside the repository/,
+    );
+  } finally {
+    if (previousTarget === undefined) {
+      delete process.env.FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR;
+    } else {
+      process.env.FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR = previousTarget;
+    }
+  }
+});
+
 test("HTTP server creates local encrypted wallet metadata without returning secret material", async () => {
   const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-wallet-http-"));
   const previousMetadataPath = process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH;
@@ -1247,6 +1466,42 @@ test("HTTP server creates local encrypted wallet metadata without returning secr
     const body = await status.json() as JsonObject;
     assert.equal(body.exists, true);
     assert.equal((body.account as JsonObject).accountId, (created.account as JsonObject).accountId);
+
+    const testerA = await fetch(`http://127.0.0.1:${port}/wallets/create`, {
+      method: "POST",
+      headers: { "content-type": "application/json", Origin: "http://127.0.0.1:5173" },
+      body: JSON.stringify({
+        label: "tester-a",
+        password: "local-test-wallet-passphrase-a",
+        chainId: "31337",
+        replace: true,
+        isolated: true,
+      }),
+    });
+    const testerB = await fetch(`http://127.0.0.1:${port}/wallets/create`, {
+      method: "POST",
+      headers: { "content-type": "application/json", Origin: "http://127.0.0.1:5173" },
+      body: JSON.stringify({
+        label: "tester-b",
+        password: "local-test-wallet-passphrase-b",
+        chainId: "31337",
+        replace: true,
+        isolated: true,
+      }),
+    });
+    assert.equal(testerA.status, 200);
+    assert.equal(testerB.status, 200);
+    const testerABody = await testerA.json() as JsonObject;
+    const testerBBody = await testerB.json() as JsonObject;
+    assert.equal(testerABody.schema, "flowmemory.control_plane.local_wallet_create_result.v0");
+    assert.equal(testerBBody.schema, "flowmemory.control_plane.local_wallet_create_result.v0");
+    assert.equal(testerABody.isolated, true);
+    assert.equal(testerBBody.isolated, true);
+    assert.notEqual((testerABody.account as JsonObject).accountId, (testerBBody.account as JsonObject).accountId);
+    assert.equal(JSON.stringify(testerABody).includes("privateKey"), false);
+    assert.equal(JSON.stringify(testerBBody).includes("ciphertext"), false);
+    assert.equal(JSON.stringify(testerABody).includes("local-test-wallet-passphrase-a"), false);
+    assert.equal(JSON.stringify(testerBBody).includes("local-test-wallet-passphrase-b"), false);
   } finally {
     await new Promise<void>((resolve, reject) => {
       server.close((error) => {

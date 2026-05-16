@@ -1,6 +1,84 @@
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
+function Add-FlowChainRustToolchainToPathIfNeeded {
+    $cargo = Get-Command cargo -ErrorAction SilentlyContinue
+    $rustc = Get-Command rustc -ErrorAction SilentlyContinue
+    if ($cargo -and $rustc) {
+        try {
+            & cargo --version *> $null
+            $cargoExitCode = $LASTEXITCODE
+            & rustc --version *> $null
+            $rustcExitCode = $LASTEXITCODE
+            if ($cargoExitCode -eq 0 -and $rustcExitCode -eq 0) {
+                return
+            }
+        }
+        catch {
+        }
+    }
+
+    $defaultCargoHome = Join-Path $env:USERPROFILE ".cargo"
+    $configuredCargoHome = [Environment]::GetEnvironmentVariable("CARGO_HOME", "Process")
+    if ([string]::IsNullOrWhiteSpace($configuredCargoHome) -or -not (Test-Path -LiteralPath (Join-Path $configuredCargoHome "bin\rustup.exe"))) {
+        $env:CARGO_HOME = $defaultCargoHome
+    }
+    if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable("RUSTUP_HOME", "Process"))) {
+        $env:RUSTUP_HOME = Join-Path $env:USERPROFILE ".rustup"
+    }
+
+    $rustupPath = Join-Path $env:USERPROFILE ".cargo\bin\rustup.exe"
+    if (-not (Test-Path -LiteralPath $rustupPath)) {
+        return
+    }
+
+    $toolchainCandidates = @()
+    if (-not [string]::IsNullOrWhiteSpace($env:FLOWCHAIN_RUSTUP_TOOLCHAIN)) {
+        $toolchainCandidates += $env:FLOWCHAIN_RUSTUP_TOOLCHAIN
+    }
+    $toolchainCandidates += @(
+        "1.95.0-x86_64-pc-windows-gnu",
+        "stable-x86_64-pc-windows-gnu",
+        "stable-x86_64-pc-windows-msvc",
+        ""
+    )
+
+    foreach ($toolchain in $toolchainCandidates) {
+        try {
+            if ([string]::IsNullOrWhiteSpace($toolchain)) {
+                $cargoPath = (& $rustupPath which cargo 2>$null).Trim()
+                $rustcPath = (& $rustupPath which rustc 2>$null).Trim()
+            }
+            else {
+                $cargoPath = (& $rustupPath which cargo --toolchain $toolchain 2>$null).Trim()
+                $rustcPath = (& $rustupPath which rustc --toolchain $toolchain 2>$null).Trim()
+            }
+        }
+        catch {
+            continue
+        }
+
+        if ([string]::IsNullOrWhiteSpace($cargoPath) -or [string]::IsNullOrWhiteSpace($rustcPath)) {
+            continue
+        }
+        if (-not (Test-Path -LiteralPath $cargoPath) -or -not (Test-Path -LiteralPath $rustcPath)) {
+            continue
+        }
+
+        $toolchainBin = Split-Path -Parent $cargoPath
+        $pathParts = @($env:PATH -split ';' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+        if ($toolchainBin -notin $pathParts) {
+            $env:PATH = "$toolchainBin;$env:PATH"
+        }
+        if (-not [string]::IsNullOrWhiteSpace($toolchain)) {
+            $env:FLOWCHAIN_RUSTUP_TOOLCHAIN = $toolchain
+        }
+        return
+    }
+}
+
+Add-FlowChainRustToolchainToPathIfNeeded
+
 function Get-FlowChainRepoRoot {
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
         throw "git was not found on PATH."
@@ -149,8 +227,12 @@ function Set-FlowChainCargoTargetDir {
     # Keep Cargo outputs away from the default crate target so a running local
     # node cannot lock flowmemory-devnet.exe and break setup on Windows.
     $targetDir = Join-Path $RepoRoot "devnet/local/cargo-target/$safePurpose-$PID"
+    $tempDir = Join-Path $RepoRoot "devnet/local/tmp/$safePurpose-$PID"
     $env:CARGO_TARGET_DIR = $targetDir
     New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
+    New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
+    $env:TEMP = $tempDir
+    $env:TMP = $tempDir
     return $targetDir
 }
 

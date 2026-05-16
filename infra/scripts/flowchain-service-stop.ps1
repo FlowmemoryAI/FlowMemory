@@ -14,21 +14,28 @@ Set-StrictMode -Version Latest
 $repoRoot = Set-FlowChainRepoRoot
 $servicesFullDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ServicesDir)
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
+$controlPlaneScriptPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "services/control-plane/src/server.ts")
 $controlPlanePidPath = Join-Path $servicesFullDir "control-plane.pid"
 $relayerPidPath = Join-Path $servicesFullDir "bridge-relayer-loop.pid"
 
 function Stop-FlowChainPidFile {
-    param([Parameter(Mandatory = $true)][string] $PidPath)
-    $status = Test-FlowChainPid -PidPath $PidPath
+    param(
+        [Parameter(Mandatory = $true)][string] $PidPath,
+        [string[]] $CommandLineIncludes = @()
+    )
+    $status = Test-FlowChainPid -PidPath $PidPath -CommandLineIncludes $CommandLineIncludes
     if ($status.running -and $null -ne $status.pid) {
+        if (-not $status.commandLineMatched) {
+            return "pid-mismatch-not-stopped"
+        }
         Stop-Process -Id $status.pid -Force -ErrorAction SilentlyContinue
         return "stopped"
     }
     return "not-running"
 }
 
-$relayerStop = Stop-FlowChainPidFile -PidPath $relayerPidPath
-$controlStop = Stop-FlowChainPidFile -PidPath $controlPlanePidPath
+$relayerStop = Stop-FlowChainPidFile -PidPath $relayerPidPath -CommandLineIncludes @("bridge-base-mainnet-pilot-observe.ps1")
+$controlStop = Stop-FlowChainPidFile -PidPath $controlPlanePidPath -CommandLineIncludes @($controlPlaneScriptPath)
 $nodeStop = "not-run"
 try {
     & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "flowchain-node-stop.ps1") -StatePath $StatePath -NodeDir $NodeDir
@@ -41,7 +48,7 @@ catch {
 $report = [ordered]@{
     schema = "flowchain.service_stop_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = if ($nodeStop -eq "failed") { "degraded" } else { "stopped" }
+    status = if ($nodeStop -eq "failed" -or $controlStop -eq "pid-mismatch-not-stopped" -or $relayerStop -eq "pid-mismatch-not-stopped") { "degraded" } else { "stopped" }
     node = $nodeStop
     controlPlane = $controlStop
     bridgeRelayerLoop = $relayerStop

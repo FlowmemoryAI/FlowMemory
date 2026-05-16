@@ -1,8 +1,126 @@
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
+$script:FlowChainOwnerEnvFileImported = $false
+$script:FlowChainOwnerEnvFileState = [ordered]@{
+    configured = $false
+    imported = $false
+    importedEnvNames = @()
+    ignoredEnvNames = @()
+    problem = ""
+}
+
+function Import-FlowChainOwnerEnvFileIfConfigured {
+    if ($script:FlowChainOwnerEnvFileImported) {
+        return
+    }
+
+    $script:FlowChainOwnerEnvFileImported = $true
+    $envFilePath = [Environment]::GetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_FILE", "Process")
+    if ([string]::IsNullOrWhiteSpace($envFilePath)) {
+        return
+    }
+
+    $allowedNames = @(
+        "FLOWCHAIN_RPC_PUBLIC_URL",
+        "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+        "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+        "FLOWCHAIN_RPC_TLS_TERMINATED",
+        "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+        "FLOWCHAIN_PILOT_OPERATOR_ACK",
+        "FLOWCHAIN_BASE8453_RPC_URL",
+        "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+        "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+        "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+        "FLOWCHAIN_BASE8453_FROM_BLOCK",
+        "FLOWCHAIN_BASE8453_TO_BLOCK",
+        "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+        "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+        "FLOWCHAIN_PILOT_CONFIRMATIONS",
+        "FLOWCHAIN_BASE8453_TX_HASH",
+        "FLOWCHAIN_BASE8453_OPERATOR_TX_HASH",
+        "FLOWCHAIN_BRIDGE_TARGET_SETTLEMENT_SECONDS",
+        "FLOWCHAIN_BASE8453_ESTIMATED_BLOCK_SECONDS",
+        "FLOWCHAIN_BRIDGE_POLL_SECONDS"
+    )
+
+    try {
+        $fullPath = [System.IO.Path]::GetFullPath($envFilePath)
+    }
+    catch {
+        $script:FlowChainOwnerEnvFileState = [ordered]@{
+            configured = $true
+            imported = $false
+            importedEnvNames = @()
+            ignoredEnvNames = @()
+            problem = "FLOWCHAIN_OWNER_ENV_FILE is not a valid path."
+        }
+        throw "FLOWCHAIN_OWNER_ENV_FILE is not a valid path."
+    }
+
+    if (-not (Test-Path -LiteralPath $fullPath)) {
+        $script:FlowChainOwnerEnvFileState = [ordered]@{
+            configured = $true
+            imported = $false
+            importedEnvNames = @()
+            ignoredEnvNames = @()
+            problem = "FLOWCHAIN_OWNER_ENV_FILE points to a missing file."
+        }
+        throw "FLOWCHAIN_OWNER_ENV_FILE points to a missing file."
+    }
+
+    $importedNames = New-Object System.Collections.ArrayList
+    $ignoredNames = New-Object System.Collections.ArrayList
+    $lineNumber = 0
+    foreach ($line in @(Get-Content -LiteralPath $fullPath)) {
+        $lineNumber += 1
+        $trimmed = "$line".Trim()
+        if ($trimmed.Length -eq 0 -or $trimmed.StartsWith("#")) {
+            continue
+        }
+        if ($trimmed.StartsWith("export ")) {
+            $trimmed = $trimmed.Substring(7).Trim()
+        }
+        if ($trimmed -notmatch '^([A-Z][A-Z0-9_]*)=(.*)$') {
+            throw "FLOWCHAIN_OWNER_ENV_FILE line $lineNumber must be NAME=value."
+        }
+
+        $name = $Matches[1]
+        $value = $Matches[2].Trim()
+        if ($value.Length -ge 2 -and (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'")))) {
+            $value = $value.Substring(1, $value.Length - 2)
+        }
+
+        if ($name -notin $allowedNames) {
+            if (-not $ignoredNames.Contains($name)) {
+                [void] $ignoredNames.Add($name)
+            }
+            continue
+        }
+
+        [Environment]::SetEnvironmentVariable($name, $value, "Process")
+        if (-not $importedNames.Contains($name)) {
+            [void] $importedNames.Add($name)
+        }
+    }
+
+    $script:FlowChainOwnerEnvFileState = [ordered]@{
+        configured = $true
+        imported = $true
+        importedEnvNames = @($importedNames)
+        ignoredEnvNames = @($ignoredNames)
+        problem = ""
+    }
+}
+
+function Get-FlowChainOwnerEnvFileState {
+    Import-FlowChainOwnerEnvFileIfConfigured
+    return $script:FlowChainOwnerEnvFileState
+}
+
 function Get-FlowChainEnvValue {
     param([Parameter(Mandatory = $true)][string] $Name)
+    Import-FlowChainOwnerEnvFileIfConfigured
     $value = [Environment]::GetEnvironmentVariable($Name, "Process")
     if ([string]::IsNullOrWhiteSpace($value)) {
         return $null
@@ -252,6 +370,47 @@ function Get-FlowChainStateFacts {
     }
     if ($state.PSObject.Properties.Name -contains "peers" -and $null -ne $state.peers) {
         $facts.peerCount = @($state.peers).Count
+    }
+
+    return $facts
+}
+
+function Get-FlowChainBlockFacts {
+    param(
+        [Parameter(Mandatory = $true)][string] $StatePath,
+        [AllowNull()][string] $BlockNumber
+    )
+
+    $facts = [ordered]@{
+        found = $false
+        blockNumber = $BlockNumber
+        blockHash = $null
+        stateRoot = $null
+    }
+
+    if ([string]::IsNullOrWhiteSpace($BlockNumber) -or -not (Test-Path -LiteralPath $StatePath)) {
+        return $facts
+    }
+
+    try {
+        $state = Get-Content -Raw -LiteralPath $StatePath | ConvertFrom-Json
+    }
+    catch {
+        return $facts
+    }
+
+    if (-not ($state.PSObject.Properties.Name -contains "blocks") -or $null -eq $state.blocks) {
+        return $facts
+    }
+
+    foreach ($block in @($state.blocks)) {
+        $height = Get-FlowChainJsonString -Object $block -Names @("blockNumber", "height", "number")
+        if ($height -eq $BlockNumber) {
+            $facts.found = $true
+            $facts.blockHash = Get-FlowChainJsonString -Object $block -Names @("blockHash", "hash")
+            $facts.stateRoot = Get-FlowChainJsonString -Object $block -Names @("stateRoot", "root")
+            return $facts
+        }
     }
 
     return $facts

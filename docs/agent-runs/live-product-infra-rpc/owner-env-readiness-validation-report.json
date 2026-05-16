@@ -1,0 +1,59 @@
+{
+    "schema":  "flowchain.owner_env_readiness_validation_report.v0",
+    "generatedAt":  "2026-05-16T00:36:13.6676274Z",
+    "status":  "passed",
+    "scenarioCount":  2,
+    "scenarios":  [
+                      {
+                          "name":  "missing-owner-env-file",
+                          "expectedStatus":  "failed",
+                          "actualStatus":  "failed",
+                          "exitCode":  1,
+                          "expectedExitCode":  1,
+                          "passed":  true,
+                          "expectedProblem":  "missing",
+                          "problemMatched":  true,
+                          "stepCount":  0,
+                          "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-validation\\missing-owner-env-file-report.json",
+                          "markdownPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-validation\\missing-owner-env-file.md",
+                          "outputRedactedTail":  [
+                                                     "",
+                                                     "FlowChain owner env readiness status: failed",
+                                                     "Owner env file: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-validation\\missing-owner-env.local",
+                                                     "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-validation\\missing-owner-env-file-report.json",
+                                                     "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-validation\\missing-owner-env-file.md",
+                                                     "Missing env names: FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_BASE8453_TO_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                                     "Owner env file problems: owner env file is missing; owner env file is inside the repo but is not git-ignored"
+                                                 ]
+                      },
+                      {
+                          "name":  "unignored-owner-env-file",
+                          "expectedStatus":  "failed",
+                          "actualStatus":  "failed",
+                          "exitCode":  1,
+                          "expectedExitCode":  1,
+                          "passed":  true,
+                          "expectedProblem":  "not git-ignored",
+                          "problemMatched":  true,
+                          "stepCount":  0,
+                          "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-validation\\unignored-owner-env-file-report.json",
+                          "markdownPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-validation\\unignored-owner-env-file.md",
+                          "outputRedactedTail":  [
+                                                     "",
+                                                     "FlowChain owner env readiness status: failed",
+                                                     "Owner env file: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-validation\\unignored-owner-env.local",
+                                                     "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-validation\\unignored-owner-env-file-report.json",
+                                                     "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-validation\\unignored-owner-env-file.md",
+                                                     "Missing env names: FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_BASE8453_TO_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                                     "Owner env file problems: owner env file is inside the repo but is not git-ignored"
+                                                 ]
+                      }
+                  ],
+    "checks":  {
+                   "missingOwnerEnvFileFailsBeforeChildGates":  true,
+                   "unignoredOwnerEnvFileFailsBeforeChildGates":  true
+               },
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

@@ -4,9 +4,8 @@ use crate::model::{
     BridgePilotCapProof, FLOWPULSE_TOPIC0, ImportedFlowPulseObservation, ImportedVerifierReport,
     LOCAL_TEST_UNIT_ASSET_ID, LocalAuthorization, Transaction, bridge_event_reference_key,
     build_block, demo_transactions, deterministic_bridge_account_mapping_id,
-    deterministic_bridge_asset_mapping_id, envelope_tx,
-    genesis_state, product_demo_transactions, queue_authorized_transaction, queue_transaction,
-    state_map_roots, state_root,
+    deterministic_bridge_asset_mapping_id, envelope_tx, genesis_state, product_demo_transactions,
+    queue_authorized_transaction, queue_transaction, state_map_roots, state_root,
 };
 use crate::storage::{
     default_state_path, load_or_genesis, load_state, reset_state, save_state, write_json_pretty,
@@ -748,11 +747,21 @@ fn write_txs_to_inbox(
     fs::create_dir_all(&inbox)
         .with_context(|| format!("failed to create inbox directory {}", inbox.display()))?;
 
-    let mut queued = Vec::new();
-    for tx in txs {
-        let envelope = local_authorized_envelope(tx, authorized_by.clone());
-        let tx_id = envelope.tx_id.clone();
-        let path = inbox.join(format!("{}.json", file_safe_id(&tx_id)));
+    let envelopes = txs
+        .into_iter()
+        .map(|tx| local_authorized_envelope(tx, authorized_by.clone()))
+        .collect::<Vec<_>>();
+    let queued = envelopes
+        .iter()
+        .map(|envelope| envelope.tx_id.clone())
+        .collect::<Vec<_>>();
+
+    if envelopes.len() == 1 {
+        let envelope = envelopes
+            .into_iter()
+            .next()
+            .expect("single inbox envelope should exist");
+        let path = inbox.join(format!("{}.json", file_safe_id(&envelope.tx_id)));
         write_json(
             path,
             &serde_json::json!({
@@ -761,8 +770,33 @@ fn write_txs_to_inbox(
                 "authorization": envelope.authorization
             }),
         )?;
-        queued.push(tx_id);
+        return Ok(queued);
     }
+
+    if envelopes.is_empty() {
+        return Ok(queued);
+    }
+
+    let batch_id = hash_json(
+        "flowmemory.local_devnet.inbox_tx_batch.v0",
+        &serde_json::json!({ "queued": queued }),
+    );
+    let tx_values = envelopes
+        .iter()
+        .map(|envelope| serde_json::to_value(&envelope.tx))
+        .collect::<Result<Vec<_>, _>>()?;
+    let authorization = envelopes
+        .first()
+        .and_then(|envelope| envelope.authorization.clone());
+    let path = inbox.join(format!("{}.json", file_safe_id(&batch_id)));
+    write_json(
+        path,
+        &serde_json::json!({
+            "schema": "flowmemory.local_devnet.inbox_tx_batch.v0",
+            "txs": tx_values,
+            "authorization": authorization
+        }),
+    )?;
     Ok(queued)
 }
 

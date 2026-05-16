@@ -1,0 +1,41 @@
+{
+    "schema":  "flowchain.external_tester_packet_report.v0",
+    "generatedAt":  "2026-05-16T00:43:22.9236008Z",
+    "status":  "blocked",
+    "packetShareable":  false,
+    "packetPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\EXTERNAL_TESTER_PACKET.md",
+    "latestHeight":  "25272",
+    "readinessStatus":  "blocked",
+    "ownerInputsStatus":  "blocked",
+    "completionAuditStatus":  "failed",
+    "localTesterRehearsalReady":  true,
+    "externalSharingReady":  false,
+    "missingEnvNames":  [
+                            "FLOWCHAIN_RPC_PUBLIC_URL",
+                            "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                            "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                            "FLOWCHAIN_RPC_TLS_TERMINATED",
+                            "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                            "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                            "FLOWCHAIN_BASE8453_RPC_URL",
+                            "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                            "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                            "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                            "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                            "FLOWCHAIN_BASE8453_TO_BLOCK",
+                            "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                            "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                            "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                        ],
+    "reportPaths":  {
+                        "readiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
+                        "ownerInputs":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-report.json",
+                        "completionAudit":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-completion-audit-report.json",
+                        "packet":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\EXTERNAL_TESTER_PACKET.md"
+                    },
+    "readinessCommandExitCode":  0,
+    "ownerInputsCommandExitCode":  0,
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

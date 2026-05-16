@@ -87,9 +87,13 @@ pub fn reset_state(path: &Path) -> Result<ChainState> {
 #[cfg(windows)]
 fn replace_file(from: &Path, to: &Path) -> Result<()> {
     use std::os::windows::ffi::OsStrExt;
+    use std::thread;
+    use std::time::Duration;
 
     const MOVEFILE_REPLACE_EXISTING: u32 = 0x1;
     const MOVEFILE_WRITE_THROUGH: u32 = 0x8;
+    const REPLACE_RETRY_ATTEMPTS: usize = 80;
+    const REPLACE_RETRY_SLEEP_MS: u64 = 25;
 
     unsafe extern "system" {
         fn MoveFileExW(
@@ -109,18 +113,32 @@ fn replace_file(from: &Path, to: &Path) -> Result<()> {
         .encode_wide()
         .chain(std::iter::once(0))
         .collect::<Vec<_>>();
-    let moved = unsafe {
-        MoveFileExW(
-            from_wide.as_ptr(),
-            to_wide.as_ptr(),
-            MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH,
-        )
-    };
-    if moved == 0 {
-        return Err(std::io::Error::last_os_error())
-            .with_context(|| format!("failed to atomically replace {}", to.display()));
+    for attempt in 0..REPLACE_RETRY_ATTEMPTS {
+        let moved = unsafe {
+            MoveFileExW(
+                from_wide.as_ptr(),
+                to_wide.as_ptr(),
+                MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH,
+            )
+        };
+        if moved != 0 {
+            return Ok(());
+        }
+
+        let error = std::io::Error::last_os_error();
+        if !is_transient_windows_replace_error(&error) || attempt + 1 == REPLACE_RETRY_ATTEMPTS {
+            return Err(error)
+                .with_context(|| format!("failed to atomically replace {}", to.display()));
+        }
+        thread::sleep(Duration::from_millis(REPLACE_RETRY_SLEEP_MS));
     }
-    Ok(())
+
+    unreachable!("replace retry loop returns on success or final failure")
+}
+
+#[cfg(windows)]
+fn is_transient_windows_replace_error(error: &std::io::Error) -> bool {
+    matches!(error.raw_os_error(), Some(5 | 32 | 33))
 }
 
 #[cfg(not(windows))]

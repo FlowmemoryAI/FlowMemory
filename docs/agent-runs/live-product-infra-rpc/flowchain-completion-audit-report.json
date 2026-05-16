@@ -1,0 +1,756 @@
+{
+    "schema":  "flowchain.completion_audit_report.v0",
+    "generatedAt":  "2026-05-16T00:43:28.0428635Z",
+    "status":  "blocked",
+    "completionReady":  false,
+    "objective":  "FlowChain live infrastructure/public RPC/deployment readiness with wallets, RPC connectivity, bridge readiness, block production, fail-closed owner inputs, no secrets, and no live broadcasts.",
+    "latestHeight":  "25272",
+    "liveProductExitCode":  0,
+    "liveProductOutputRedacted":  [
+                                      "FlowChain live-product:e2e aggregate starting.",
+                                      "FlowChain live-product:e2e status: blocked",
+                                      "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-product-e2e-report.json",
+                                      "Missing env names: FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_BASE8453_TO_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS, FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                  ],
+    "serviceStatusExitCode":  0,
+    "serviceStatusOutputRedacted":  [
+                                        "FlowChain service status: passed",
+                                        "Node: running PID=48108",
+                                        "Control plane: running PID=55704 bind=127.0.0.1:8787",
+                                        "Public readiness: blocked",
+                                        "Latest height: 25037",
+                                        "Finalized height: 25037",
+                                        "Backup path: not-configured",
+                                        "Bridge readiness: live=blocked, infra=blocked",
+                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json"
+                                    ],
+    "serviceMonitorExitCode":  0,
+    "serviceMonitorOutputRedacted":  [
+                                         "FlowChain service monitor status: passed",
+                                         "Samples: 2",
+                                         "Height: 25043 -\u003e 25050",
+                                         "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json"
+                                     ],
+    "liveWalletExitCode":  0,
+    "liveWalletOutputRedacted":  [
+                                     "   Compiling proc-macro2 v1.0.106",
+                                     "   Compiling quote v1.0.45",
+                                     "   Compiling version_check v0.9.5",
+                                     "   Compiling unicode-ident v1.0.24",
+                                     "   Compiling typenum v1.20.0",
+                                     "   Compiling serde_core v1.0.228",
+                                     "   Compiling zmij v1.0.21",
+                                     "   Compiling thiserror v2.0.18",
+                                     "   Compiling serde_json v1.0.149",
+                                     "   Compiling serde v1.0.228",
+                                     "   Compiling anyhow v1.0.102",
+                                     "   Compiling memchr v2.8.0",
+                                     "   Compiling keccak v0.1.6",
+                                     "   Compiling itoa v1.0.18",
+                                     "   Compiling hex v0.4.3",
+                                     "   Compiling generic-array v0.14.7",
+                                     "   Compiling syn v2.0.117",
+                                     "   Compiling block-buffer v0.10.4",
+                                     "   Compiling crypto-common v0.1.7",
+                                     "   Compiling digest v0.10.7",
+                                     "   Compiling sha3 v0.10.9",
+                                     "   Compiling thiserror-impl v2.0.18",
+                                     "   Compiling serde_derive v1.0.228",
+                                     "   Compiling flowmemory-devnet v0.1.0 (E:\\FlowMemory\\flowmemory-live-infra-rpc\\crates\\flowmemory-devnet)",
+                                     "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 51.01s",
+                                     "     Running `devnet\\local\\cargo-target\\live-service-wallet-e2e-4120\\debug\\flowmemory-devnet.exe --state E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\state.json --node-dir E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\node faucet --account local-account:live-service-wallet:20260516003226625-4120:sender --amount 100 --reason live-service-wallet-e2e --authorized-by operator:live-service-wallet-e2e`",
+                                     "FlowChain live service wallet E2E passed.",
+                                     "Sender after: 75",
+                                     "Recipient after: 25",
+                                     "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-wallet-e2e-report.json"
+                                 ],
+    "testerNetworkExitCode":  0,
+    "testerNetworkOutputRedacted":  [
+                                        "   Compiling proc-macro2 v1.0.106",
+                                        "   Compiling unicode-ident v1.0.24",
+                                        "   Compiling version_check v0.9.5",
+                                        "   Compiling quote v1.0.45",
+                                        "   Compiling typenum v1.20.0",
+                                        "   Compiling serde_core v1.0.228",
+                                        "   Compiling zmij v1.0.21",
+                                        "   Compiling thiserror v2.0.18",
+                                        "   Compiling serde v1.0.228",
+                                        "   Compiling anyhow v1.0.102",
+                                        "   Compiling serde_json v1.0.149",
+                                        "   Compiling memchr v2.8.0",
+                                        "   Compiling keccak v0.1.6",
+                                        "   Compiling itoa v1.0.18",
+                                        "   Compiling hex v0.4.3",
+                                        "   Compiling generic-array v0.14.7",
+                                        "   Compiling block-buffer v0.10.4",
+                                        "   Compiling crypto-common v0.1.7",
+                                        "   Compiling syn v2.0.117",
+                                        "   Compiling digest v0.10.7",
+                                        "   Compiling sha3 v0.10.9",
+                                        "   Compiling thiserror-impl v2.0.18",
+                                        "   Compiling serde_derive v1.0.228",
+                                        "   Compiling flowmemory-devnet v0.1.0 (E:\\FlowMemory\\flowmemory-live-infra-rpc\\crates\\flowmemory-devnet)",
+                                        "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 47.56s",
+                                        "     Running `devnet\\local\\cargo-target\\live-service-tester-network-e2e-6896\\debug\\flowmemory-devnet.exe --state E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\state.json --node-dir E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\node faucet --account 0x7d62576fb9a0ea497ee0915db0e872a471f29dba4384dbabb264570d0391fbb3 --amount 100 --reason live-service-tester-network-e2e --authorized-by operator:live-service-tester-network-e2e`",
+                                        "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.21s",
+                                        "     Running `devnet\\local\\cargo-target\\live-service-tester-network-e2e-6896\\debug\\flowmemory-devnet.exe --state E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\state.json --node-dir E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\node faucet --account 0x4c83a6cf8d43f40f72e89c5ca3f55062d6b5d03b26c3466441fa07b91bb1d2ea --amount 100 --reason live-service-tester-network-e2e --authorized-by operator:live-service-tester-network-e2e`",
+                                        "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.22s",
+                                        "     Running `devnet\\local\\cargo-target\\live-service-tester-network-e2e-6896\\debug\\flowmemory-devnet.exe --state E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\state.json --node-dir E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\node faucet --account 0xe40bf26693e00775a7db55a1145c740f4b8f7b301f773d808ca555ae31c8a867 --amount 100 --reason live-service-tester-network-e2e --authorized-by operator:live-service-tester-network-e2e`",
+                                        "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.21s",
+                                        "     Running `devnet\\local\\cargo-target\\live-service-tester-network-e2e-6896\\debug\\flowmemory-devnet.exe --state E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\state.json --node-dir E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\node faucet --account 0x99205a0b11ac0e5ee32c74fb2f125b3b2c683306fc0c36c950a6710c2987de88 --amount 100 --reason live-service-tester-network-e2e --authorized-by operator:live-service-tester-network-e2e`",
+                                        "FlowChain live service tester network E2E passed.",
+                                        "Tester accounts: 4",
+                                        "Chain blocks: 25088 -\u003e 25111",
+                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json"
+                                    ],
+    "bridgePilotLocalExitCode":  0,
+    "bridgePilotLocalOutputRedacted":  [
+                                           "",
+                                           "\u003e flowchain:real-value-pilot:bridge",
+                                           "\u003e npm run pilot:e2e --prefix services/bridge-relayer",
+                                           "",
+                                           "",
+                                           "\u003e pilot:e2e",
+                                           "\u003e node src/bridge-pilot-e2e.ts --mode mock-pilot --fixture ../../fixtures/bridge/base8453-pilot-mock-deposit.json --duplicate-fixture ../../fixtures/bridge/base8453-pilot-duplicate-mock-deposits.json --out-dir out/real-value-pilot-e2e",
+                                           "",
+                                           "Step 1 complete: resolved bridge pilot E2E mode mock-pilot.",
+                                           "Next operator command: npm run flowchain:real-value-pilot:bridge",
+                                           "Step 2 complete: first local credit application and same-event replay were checked.",
+                                           "Next operator command: Get-Content services/bridge-relayer/out/real-value-pilot-e2e/bridge-pilot-evidence.json",
+                                           "Step 3 complete: duplicate deposit fixture replay was rejected with evidence.",
+                                           "Next operator command: Get-Content services/bridge-relayer/out/real-value-pilot-e2e/bridge-replay-handoff.json",
+                                           "Step 4 complete: wrong-chain and unapproved-contract negative checks passed.",
+                                           "Next operator command: npm test --prefix services/bridge-relayer",
+                                           "Step 5 complete: bridge pilot E2E artifacts were written.",
+                                           "Next operator command: Get-Content services/bridge-relayer/out/real-value-pilot-e2e/bridge-real-value-pilot-e2e-report.json",
+                                           "Bridge pilot E2E report: services/bridge-relayer/out/real-value-pilot-e2e/bridge-real-value-pilot-e2e-report.json"
+                                       ],
+    "baseTxDiagnosticExitCode":  1,
+    "baseTxDiagnosticOutputRedacted":  [
+                                           "",
+                                           "\u003e flowchain:bridge:diagnose:tx",
+                                           "\u003e node services/bridge-relayer/src/diagnose-base8453-tx.ts",
+                                           "",
+                                           "FlowChain bridge tx diagnostic status: blocked (missing-env)",
+                                           "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\live-l1-bridge-e2e\\base-tx-diagnostic.json"
+                                       ],
+    "ownerInputsValidationExitCode":  0,
+    "ownerInputsValidationOutputRedacted":  [
+                                                "FlowChain owner inputs validation status: passed",
+                                                "Scenarios: 6",
+                                                "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-validation-report.json"
+                                            ],
+    "publicRpcValidationExitCode":  0,
+    "publicRpcValidationOutputRedacted":  [
+                                              "FlowChain public RPC validation status: passed",
+                                              "Readiness status: blocked",
+                                              "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation-report.json"
+                                          ],
+    "ownerInputsExitCode":  0,
+    "ownerInputsOutputRedacted":  [
+                                      "FlowChain owner inputs status: blocked",
+                                      "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-report.json",
+                                      "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\OWNER_INPUTS.md",
+                                      "Missing env names: FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_BASE8453_TO_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                  ],
+    "ownerOnboardingExitCode":  0,
+    "ownerOnboardingOutputRedacted":  [
+                                          "FlowChain owner onboarding status: passed",
+                                          "FlowChain RPC is repo-owned; public RPC needs an owner HTTPS edge, not a third-party FlowChain RPC provider.",
+                                          "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-onboarding-report.json",
+                                          "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\OWNER_ONBOARDING.md"
+                                      ],
+    "ownerSignupChecklistExitCode":  0,
+    "ownerSignupChecklistOutputRedacted":  [
+                                               "FlowChain owner signup checklist status: passed",
+                                               "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-signup-checklist-report.json",
+                                               "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\OWNER_SIGNUP_CHECKLIST.md"
+                                           ],
+    "ownerEnvTemplateExitCode":  0,
+    "ownerEnvTemplateOutputRedacted":  [
+                                           "FlowChain owner env template status: passed",
+                                           "Template path: E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\owner-inputs\\flowchain-owner.local.env",
+                                           "Git ignored: True",
+                                           "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-template-report.json",
+                                           "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\OWNER_ENV_TEMPLATE.md"
+                                       ],
+    "ownerEnvReadinessValidationExitCode":  0,
+    "ownerEnvReadinessValidationOutputRedacted":  [
+                                                      "FlowChain owner env readiness validation status: passed",
+                                                      "Scenarios: 2",
+                                                      "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-validation-report.json"
+                                                  ],
+    "ownerEnvReadinessExitCode":  0,
+    "ownerEnvReadinessOutputRedacted":  [
+                                            "",
+                                            "== Owner input contract from local env file ==",
+                                            "npm run flowchain:owner-inputs -- -AllowBlocked",
+                                            "BLOCKED: Owner input contract from local env file",
+                                            "",
+                                            "== Live infrastructure with local env file ==",
+                                            "npm run flowchain:live-infra:check -- -AllowBlocked",
+                                            "BLOCKED: Live infrastructure with local env file",
+                                            "",
+                                            "== Public deployment contract with local env file ==",
+                                            "npm run flowchain:public-deployment:contract -- -AllowBlocked",
+                                            "BLOCKED: Public deployment contract with local env file",
+                                            "",
+                                            "FlowChain owner env readiness status: blocked",
+                                            "Owner env file: E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\owner-inputs\\flowchain-owner.local.env",
+                                            "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-report.json",
+                                            "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\OWNER_ENV_READINESS.md",
+                                            "Missing env names: FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_BASE8453_TO_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                        ],
+    "publicRpcEdgeTemplateExitCode":  0,
+    "publicRpcEdgeTemplateOutputRedacted":  [
+                                                "FlowChain public RPC edge template status: passed",
+                                                "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-edge-template-report.json",
+                                                "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\PUBLIC_RPC_EDGE_TEMPLATE.md"
+                                            ],
+    "liveInfraExitCode":  0,
+    "liveInfraOutputRedacted":  [
+                                    "",
+                                    "== Owner input contract ==",
+                                    "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-inputs.ps1 -AllowBlocked",
+                                    "BLOCKED: Owner input contract",
+                                    "",
+                                    "== Public RPC readiness ==",
+                                    "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-readiness.ps1 -AllowBlocked",
+                                    "BLOCKED: Public RPC readiness",
+                                    "",
+                                    "== Service process status ==",
+                                    "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-status.ps1 -AllowBlocked",
+                                    "PASSED: Service process status",
+                                    "",
+                                    "== Backup readiness ==",
+                                    "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-backup-readiness.ps1 -AllowBlocked",
+                                    "BLOCKED: Backup readiness",
+                                    "",
+                                    "== Bridge live readiness ==",
+                                    "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-live-check.ps1 -AllowBlocked",
+                                    "BLOCKED: Bridge live readiness",
+                                    "",
+                                    "== Bridge infra readiness ==",
+                                    "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-live-env-bridge-readiness.ps1 -AllowBlocked",
+                                    "BLOCKED: Bridge infra readiness",
+                                    "",
+                                    "== No-secret scan live infra reports ==",
+                                    "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-no-secret-scan.ps1 -Paths docs/agent-runs/live-product-infra-rpc devnet/local/bridge-live-readiness devnet/local/services",
+                                    "PASSED: No-secret scan live infra reports",
+                                    "",
+                                    "FlowChain live infra status: blocked",
+                                    "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-infra-check-report.json",
+                                    "Missing env names: FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_BASE8453_TO_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                ],
+    "externalTesterPacketExitCode":  0,
+    "externalTesterPacketOutputRedacted":  [
+                                               "FlowChain external tester packet status: blocked",
+                                               "Shareable externally: False",
+                                               "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-packet-report.json",
+                                               "Packet: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\EXTERNAL_TESTER_PACKET.md",
+                                               "Missing or invalid env names: FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_BASE8453_TO_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                           ],
+    "publicDeploymentContractExitCode":  0,
+    "publicDeploymentContractOutputRedacted":  [
+                                                   "FlowChain public deployment contract status: blocked",
+                                                   "Deployment ready: False",
+                                                   "Packet shareable: False",
+                                                   "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
+                                                   "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\PUBLIC_DEPLOYMENT_CONTRACT.md",
+                                                   "Missing env names: FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_BASE8453_TO_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                               ],
+    "architectureAuditExitCode":  0,
+    "architectureAuditOutputRedacted":  [
+                                            "FlowChain architecture audit status: blocked",
+                                            "Blocked only on known external owner inputs: True",
+                                            "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-architecture-audit-report.json",
+                                            "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ARCHITECTURE_AUDIT.md",
+                                            "Missing env names: FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_BASE8453_TO_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS, FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                        ],
+    "itemCounts":  {
+                       "passed":  20,
+                       "blocked":  7,
+                       "failed":  0,
+                       "total":  27
+                   },
+    "items":  [
+                  {
+                      "id":  "service-live-profile",
+                      "requirement":  "Chain service is running in live profile and command lines match this worktree.",
+                      "status":  "passed",
+                      "evidence":  "service-status status=passed, node=running, controlPlane=running, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
+                      "commands":  [
+                                       "npm run flowchain:service:status"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "block-production",
+                      "requirement":  "Chain is producing/finalizing blocks and state is fresh.",
+                      "status":  "passed",
+                      "evidence":  "latestHeight=25272, stateFileLastWriteAgeSeconds=3, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
+                      "commands":  [
+                                       "npm run flowchain:service:status"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "sustained-block-production",
+                      "requirement":  "Live service monitor observes running services and advancing block height over a sampling window.",
+                      "status":  "passed",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, heights=25167-\u003e25174, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json",
+                      "commands":  [
+                                       "npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "wallet-create",
+                      "requirement":  "People can create wallets through the RPC service without receiving secret material.",
+                      "status":  "passed",
+                      "evidence":  "testerWalletCreates=4, secretMaterialReturned=false, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json",
+                      "commands":  [
+                                       "npm run flowchain:wallet:live-tester:e2e"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "wallet-transfer",
+                      "requirement":  "Wallet-to-wallet transfers sent through the running service settle on produced blocks.",
+                      "status":  "passed",
+                      "evidence":  "single-transfer blocks 25061-\u003e25081, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-wallet-e2e-report.json",
+                      "commands":  [
+                                       "npm run flowchain:wallet:live-service:e2e"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "tester-network-transfer",
+                      "requirement":  "A small tester group can create wallets, receive funds, and send funds to each other through the running service.",
+                      "status":  "passed",
+                      "evidence":  "testerCount=4, transfers=4, blocks=25088-\u003e25111, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json",
+                      "commands":  [
+                                       "npm run flowchain:wallet:live-tester:e2e"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "rpc-connect-local",
+                      "requirement":  "Clients can connect to the private RPC service for health, discovery, readiness, chain, and wallet methods.",
+                      "status":  "passed",
+                      "evidence":  "localTesterRehearsalReady=True, latestHeight=25272, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
+                      "commands":  [
+                                       "npm run flowchain:tester:readiness -- -AllowBlocked"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "system-architecture-audit",
+                      "requirement":  "System architecture for runtime, RPC, wallets, bridge, backup, operations, verification, and fail-closed owner boundaries is explicit and evidence-backed.",
+                      "status":  "passed",
+                      "evidence":  "architectureStatus=blocked, blockedOnlyOnKnownExternalOwnerInputs=True, blockedItems=5, failedItems=0, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-architecture-audit-report.json",
+                      "commands":  [
+                                       "npm run flowchain:architecture:audit -- -AllowBlocked"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "public-deployment-contract",
+                      "requirement":  "Owner-operated public deployment contract is machine-checkable, has rollback commands, and fails closed until public RPC, backup, bridge, and tester sharing gates pass.",
+                      "status":  "passed",
+                      "evidence":  "deploymentStatus=blocked, deploymentReady=False, packetShareable=False, blockedOnlyKnown=True, blockedItems=5, failedItems=0, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
+                      "commands":  [
+                                       "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "owner-input-validator-self-test",
+                      "requirement":  "Owner input validator blocks missing env, fails invalid env, passes structurally valid dummy owner inputs from direct env and the local owner env-file loader, and writes failed reports for missing or malformed owner env files without printing values.",
+                      "status":  "passed",
+                      "evidence":  "validationStatus=passed, missingBlocks=True, invalidFails=True, validPasses=True, ownerEnvFilePasses=True, missingOwnerEnvFileFails=True, malformedOwnerEnvFileFails=True, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-validation-report.json",
+                      "commands":  [
+                                       "npm run flowchain:owner-inputs:validate"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "owner-input-contract",
+                      "requirement":  "Owner public RPC, backup, and Base 8453 bridge inputs are validated without printing values.",
+                      "status":  "blocked",
+                      "evidence":  "ownerInputsStatus=blocked, ownerInputReady=False, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-report.json",
+                      "commands":  [
+                                       "npm run flowchain:owner-inputs"
+                                   ],
+                      "blockers":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                   ]
+                  },
+                  {
+                      "id":  "owner-onboarding-packet",
+                      "requirement":  "Owner onboarding distinguishes repo-owned FlowChain RPC from the external Base 8453 RPC dependency and gives no-values setup commands.",
+                      "status":  "passed",
+                      "evidence":  "onboardingStatus=passed, flowChainRpcIsOurs=True, thirdPartyFlowChainRpcProviderNeeded=False, publicRpcRequiresOwnerPublicEdge=True, base8453RpcIsExternalChainDependency=True, localEnvFileSupported=True, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-onboarding-report.json",
+                      "commands":  [
+                                       "npm run flowchain:owner:onboarding"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "owner-signup-checklist",
+                      "requirement":  "Owner signup checklist maps public RPC edge, always-on host, backup storage, Base 8453 RPC, bridge details, and local env-file setup to exact owner actions without requesting secrets.",
+                      "status":  "passed",
+                      "evidence":  "signupStatus=passed, itemCount=8, externalSignupCount=3, missingCoverage=0, repoOwned=True, localEnvFileSupported=True, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-signup-checklist-report.json",
+                      "commands":  [
+                                       "npm run flowchain:owner:signup-checklist"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "owner-env-template",
+                      "requirement":  "Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added.",
+                      "status":  "passed",
+                      "evidence":  "templateStatus=passed, pathIsGitIgnored=True, requiredEnvNameCount=15, includesAllRequired=True, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-template-report.json",
+                      "commands":  [
+                                       "npm run flowchain:owner-env:template"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "owner-env-readiness-validator-self-test",
+                      "requirement":  "Owner env readiness validator fails closed before child gates for missing owner env files and repo-local env files that are not git-ignored.",
+                      "status":  "passed",
+                      "evidence":  "validationStatus=passed, missingFails=True, unignoredFails=True, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-validation-report.json",
+                      "commands":  [
+                                       "npm run flowchain:owner-env:readiness:validate"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "owner-env-readiness",
+                      "requirement":  "The ignored owner env file can drive owner-input, live-infra, and public deployment gates through one redacted command.",
+                      "status":  "blocked",
+                      "evidence":  "readinessStatus=blocked, pathGitIgnored=True, ownerInputsReady=False, liveInfraReady=False, publicDeploymentContractReady=False, blockedOnlyKnown=True, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-report.json",
+                      "commands":  [
+                                       "npm run flowchain:owner-env:readiness -- -AllowBlocked"
+                                   ],
+                      "blockers":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                   ]
+                  },
+                  {
+                      "id":  "public-rpc-edge-template",
+                      "requirement":  "Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding.",
+                      "status":  "passed",
+                      "evidence":  "edgeTemplateStatus=passed, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-edge-template-report.json",
+                      "commands":  [
+                                       "npm run flowchain:public-rpc:edge-template"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "public-rpc-readiness-validator-self-test",
+                      "requirement":  "Public RPC readiness validator proves endpoint checks, CORS allowed-origin acceptance, disallowed-origin rejection, bounded rate-limit rejection, retry-after evidence, and response hygiene against a temporary local control plane.",
+                      "status":  "passed",
+                      "evidence":  "validationStatus=passed, allowedOriginAccepted=True, disallowedProbe=True, disallowedRejected=True, endpointChecks=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation-report.json",
+                      "commands":  [
+                                       "npm run flowchain:public-rpc:validate"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "external-tester-packet",
+                      "requirement":  "External tester handoff packet is generated and fails closed until sharing gates pass.",
+                      "status":  "passed",
+                      "evidence":  "packetStatus=blocked, shareable=False, packet=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\EXTERNAL_TESTER_PACKET.md",
+                      "commands":  [
+                                       "npm run flowchain:external-tester:packet"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "public-rpc-external-sharing",
+                      "requirement":  "External/public RPC is configured behind owner TLS, CORS, rate limit, endpoint checks, and response hygiene.",
+                      "status":  "blocked",
+                      "evidence":  "publicRpcStatus=blocked, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
+                      "commands":  [
+                                       "npm run flowchain:public-rpc:check"
+                                   ],
+                      "blockers":  [
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED"
+                                   ]
+                  },
+                  {
+                      "id":  "state-backup",
+                      "requirement":  "State backup path is configured, writable, and readable for live RPC operations.",
+                      "status":  "blocked",
+                      "evidence":  "backupStatus=blocked, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
+                      "commands":  [
+                                       "npm run flowchain:backup:check"
+                                   ],
+                      "blockers":  [
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                   ]
+                  },
+                  {
+                      "id":  "bridge-funds",
+                      "requirement":  "Bridge readiness for owner-operated Base 8453 funds is verified fail-closed without live broadcasts.",
+                      "status":  "blocked",
+                      "evidence":  "bridgeLive=blocked, bridgeInfra=blocked, reports=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json, E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
+                      "commands":  [
+                                       "npm run flowchain:bridge:live:check",
+                                       "npm run flowchain:bridge:infra:check"
+                                   ],
+                      "blockers":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                   ]
+                  },
+                  {
+                      "id":  "bridge-local-pilot-proof",
+                      "requirement":  "Local/mock bridge pilot proof preserves exact value, rejects replay/wrong-chain/unapproved-lockbox cases, and performs no broadcast.",
+                      "status":  "passed",
+                      "evidence":  "broadcast=False, allAmountsEqual=True, wrongChainRejected=True, unapprovedContractRejected=True, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\services\\bridge-relayer\\out\\real-value-pilot-e2e\\bridge-real-value-pilot-e2e-report.json",
+                      "commands":  [
+                                       "npm run flowchain:real-value-pilot:bridge"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "base-tx-diagnostic-fail-closed",
+                      "requirement":  "Owner-supplied Base 8453 transaction diagnostic is read-only, no-secret, and fails closed when tx/env inputs are absent.",
+                      "status":  "passed",
+                      "evidence":  "diagnosticStatus=blocked, safeReason=missing-env, broadcasts=False, printsEnvValues=False, noSecrets=True, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\live-l1-bridge-e2e\\base-tx-diagnostic.json",
+                      "commands":  [
+                                       "npm run flowchain:bridge:diagnose:tx"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "live-infra-aggregate-refresh",
+                      "requirement":  "Completion audit refreshes the live-infra aggregate gate before deciding readiness.",
+                      "status":  "blocked",
+                      "evidence":  "liveInfraStatus=blocked, ownerInputsReady=False, publicRpcReady=False, servicesReady=True, backupReady=False, bridgeReady=False, noSecretReady=True, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-infra-check-report.json",
+                      "commands":  [
+                                       "npm run flowchain:live-infra:check -- -AllowBlocked"
+                                   ],
+                      "blockers":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                   ]
+                  },
+                  {
+                      "id":  "aggregate-gate",
+                      "requirement":  "Full product gate runs production local L1 aggregate, restores live service, proves wallet flows, and runs live infra readiness.",
+                      "status":  "blocked",
+                      "evidence":  "liveProductExitCode=0, liveProductStatus=blocked, productionLocalAggregate=passed-with-live-blockers, liveInfra=blocked, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-product-e2e-report.json",
+                      "commands":  [
+                                       "npm run flowchain:live-product:e2e -- -AllowBlocked"
+                                   ],
+                      "blockers":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                   ]
+                  },
+                  {
+                      "id":  "no-secrets-no-broadcasts",
+                      "requirement":  "Reports and gates do not print secrets/env values and no live Base broadcast occurred.",
+                      "status":  "passed",
+                      "evidence":  "noSecretStatus=passed, liveProductNoLiveBroadcast=True, baseTxDiagnosticBroadcasts=False, baseTxDiagnosticNoSecrets=True, reports=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json, E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\live-l1-bridge-e2e\\base-tx-diagnostic.json",
+                      "commands":  [
+                                       "npm run flowchain:no-secret:scan"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  }
+              ],
+    "missingEnvNames":  [
+                            "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                            "FLOWCHAIN_BASE8453_RPC_URL",
+                            "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                            "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                            "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                            "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                            "FLOWCHAIN_BASE8453_TO_BLOCK",
+                            "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                            "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                            "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                            "FLOWCHAIN_RPC_PUBLIC_URL",
+                            "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                            "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                            "FLOWCHAIN_RPC_TLS_TERMINATED",
+                            "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                        ],
+    "exactExternalOwnerInputsRemaining":  [
+                                              "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                              "FLOWCHAIN_BASE8453_RPC_URL",
+                                              "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                              "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                              "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                              "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                              "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                              "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                              "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                              "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                              "FLOWCHAIN_RPC_PUBLIC_URL",
+                                              "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                              "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                              "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                              "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                          ],
+    "reportPaths":  {
+                        "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
+                        "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json",
+                        "liveProduct":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-product-e2e-report.json",
+                        "liveInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-infra-check-report.json",
+                        "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
+                        "ownerInputs":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-report.json",
+                        "ownerOnboarding":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-onboarding-report.json",
+                        "ownerSignupChecklist":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-signup-checklist-report.json",
+                        "ownerEnvTemplate":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-template-report.json",
+                        "ownerEnvReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-report.json",
+                        "ownerEnvReadinessValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-validation-report.json",
+                        "ownerInputsValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-validation-report.json",
+                        "publicRpcEdgeTemplate":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-edge-template-report.json",
+                        "publicRpcValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation-report.json",
+                        "externalTesterPacket":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-packet-report.json",
+                        "publicDeploymentContract":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
+                        "architectureAudit":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-architecture-audit-report.json",
+                        "liveWallet":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-wallet-e2e-report.json",
+                        "testerNetwork":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json",
+                        "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
+                        "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
+                        "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
+                        "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
+                        "bridgePilotLocal":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\services\\bridge-relayer\\out\\real-value-pilot-e2e\\bridge-real-value-pilot-e2e-report.json",
+                        "baseTxDiagnostic":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\live-l1-bridge-e2e\\base-tx-diagnostic.json",
+                        "productionL1":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\production-l1-e2e\\flowchain-production-l1-e2e-report.json",
+                        "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json"
+                    },
+    "nextCommandsAfterOwnerInputs":  [
+                                         "npm run flowchain:owner-inputs:validate",
+                                         "npm run flowchain:owner:onboarding",
+                                         "npm run flowchain:owner:signup-checklist",
+                                         "npm run flowchain:owner-env:template",
+                                         "npm run flowchain:owner-env:readiness:validate",
+                                         "npm run flowchain:owner-env:readiness -- -AllowBlocked",
+                                         "npm run flowchain:owner-inputs",
+                                         "npm run flowchain:public-rpc:edge-template",
+                                         "npm run flowchain:public-rpc:validate",
+                                         "npm run flowchain:service:monitor",
+                                         "npm run flowchain:live-infra:check",
+                                         "npm run flowchain:bridge:diagnose:tx",
+                                         "npm run flowchain:tester:readiness",
+                                         "npm run flowchain:external-tester:packet",
+                                         "npm run flowchain:public-deployment:contract",
+                                         "npm run flowchain:architecture:audit",
+                                         "npm run flowchain:live-product:e2e"
+                                     ],
+    "noLiveBroadcast":  true,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

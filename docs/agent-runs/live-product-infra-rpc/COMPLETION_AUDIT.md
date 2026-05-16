@@ -1,0 +1,60 @@
+﻿# FlowChain Completion Audit
+
+Generated: 2026-05-16T00:43:28.0428635Z
+Status: blocked
+Completion ready: False
+Latest observed height: 25272
+
+## Prompt-To-Artifact Checklist
+
+| Requirement | Status | Evidence | Commands |
+| --- | --- | --- | --- |
+| Chain service is running in live profile and command lines match this worktree. | passed | service-status status=passed, node=running, controlPlane=running, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
+| Chain is producing/finalizing blocks and state is fresh. | passed | latestHeight=25272, stateFileLastWriteAgeSeconds=3, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
+| Live service monitor observes running services and advancing block height over a sampling window. | passed | monitorStatus=passed, samples=2, heightAdvanced=True, heights=25167->25174, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-monitor-report.json | npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90 |
+| People can create wallets through the RPC service without receiving secret material. | passed | testerWalletCreates=4, secretMaterialReturned=false, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\live-service-tester-network-e2e-report.json | npm run flowchain:wallet:live-tester:e2e |
+| Wallet-to-wallet transfers sent through the running service settle on produced blocks. | passed | single-transfer blocks 25061->25081, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\live-service-wallet-e2e-report.json | npm run flowchain:wallet:live-service:e2e |
+| A small tester group can create wallets, receive funds, and send funds to each other through the running service. | passed | testerCount=4, transfers=4, blocks=25088->25111, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\live-service-tester-network-e2e-report.json | npm run flowchain:wallet:live-tester:e2e |
+| Clients can connect to the private RPC service for health, discovery, readiness, chain, and wallet methods. | passed | localTesterRehearsalReady=True, latestHeight=25272, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\external-tester-readiness-report.json | npm run flowchain:tester:readiness -- -AllowBlocked |
+| System architecture for runtime, RPC, wallets, bridge, backup, operations, verification, and fail-closed owner boundaries is explicit and evidence-backed. | passed | architectureStatus=blocked, blockedOnlyOnKnownExternalOwnerInputs=True, blockedItems=5, failedItems=0, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\flowchain-architecture-audit-report.json | npm run flowchain:architecture:audit -- -AllowBlocked |
+| Owner-operated public deployment contract is machine-checkable, has rollback commands, and fails closed until public RPC, backup, bridge, and tester sharing gates pass. | passed | deploymentStatus=blocked, deploymentReady=False, packetShareable=False, blockedOnlyKnown=True, blockedItems=5, failedItems=0, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\public-deployment-contract-report.json | npm run flowchain:public-deployment:contract -- -AllowBlocked |
+| Owner input validator blocks missing env, fails invalid env, passes structurally valid dummy owner inputs from direct env and the local owner env-file loader, and writes failed reports for missing or malformed owner env files without printing values. | passed | validationStatus=passed, missingBlocks=True, invalidFails=True, validPasses=True, ownerEnvFilePasses=True, missingOwnerEnvFileFails=True, malformedOwnerEnvFileFails=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\owner-inputs-validation-report.json | npm run flowchain:owner-inputs:validate |
+| Owner public RPC, backup, and Base 8453 bridge inputs are validated without printing values. | blocked | ownerInputsStatus=blocked, ownerInputReady=False, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\owner-inputs-report.json | npm run flowchain:owner-inputs |
+| Owner onboarding distinguishes repo-owned FlowChain RPC from the external Base 8453 RPC dependency and gives no-values setup commands. | passed | onboardingStatus=passed, flowChainRpcIsOurs=True, thirdPartyFlowChainRpcProviderNeeded=False, publicRpcRequiresOwnerPublicEdge=True, base8453RpcIsExternalChainDependency=True, localEnvFileSupported=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\owner-onboarding-report.json | npm run flowchain:owner:onboarding |
+| Owner signup checklist maps public RPC edge, always-on host, backup storage, Base 8453 RPC, bridge details, and local env-file setup to exact owner actions without requesting secrets. | passed | signupStatus=passed, itemCount=8, externalSignupCount=3, missingCoverage=0, repoOwned=True, localEnvFileSupported=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\owner-signup-checklist-report.json | npm run flowchain:owner:signup-checklist |
+| Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added. | passed | templateStatus=passed, pathIsGitIgnored=True, requiredEnvNameCount=15, includesAllRequired=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\owner-env-template-report.json | npm run flowchain:owner-env:template |
+| Owner env readiness validator fails closed before child gates for missing owner env files and repo-local env files that are not git-ignored. | passed | validationStatus=passed, missingFails=True, unignoredFails=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\owner-env-readiness-validation-report.json | npm run flowchain:owner-env:readiness:validate |
+| The ignored owner env file can drive owner-input, live-infra, and public deployment gates through one redacted command. | blocked | readinessStatus=blocked, pathGitIgnored=True, ownerInputsReady=False, liveInfraReady=False, publicDeploymentContractReady=False, blockedOnlyKnown=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\owner-env-readiness-report.json | npm run flowchain:owner-env:readiness -- -AllowBlocked |
+| Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding. | passed | edgeTemplateStatus=passed, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\public-rpc-edge-template-report.json | npm run flowchain:public-rpc:edge-template |
+| Public RPC readiness validator proves endpoint checks, CORS allowed-origin acceptance, disallowed-origin rejection, bounded rate-limit rejection, retry-after evidence, and response hygiene against a temporary local control plane. | passed | validationStatus=passed, allowedOriginAccepted=True, disallowedProbe=True, disallowedRejected=True, endpointChecks=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\public-rpc-validation-report.json | npm run flowchain:public-rpc:validate |
+| External tester handoff packet is generated and fails closed until sharing gates pass. | passed | packetStatus=blocked, shareable=False, packet=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\EXTERNAL_TESTER_PACKET.md | npm run flowchain:external-tester:packet |
+| External/public RPC is configured behind owner TLS, CORS, rate limit, endpoint checks, and response hygiene. | blocked | publicRpcStatus=blocked, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\public-rpc-readiness-report.json | npm run flowchain:public-rpc:check |
+| State backup path is configured, writable, and readable for live RPC operations. | blocked | backupStatus=blocked, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\backup-readiness-report.json | npm run flowchain:backup:check |
+| Bridge readiness for owner-operated Base 8453 funds is verified fail-closed without live broadcasts. | blocked | bridgeLive=blocked, bridgeInfra=blocked, reports=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\bridge-live-readiness-report.json, E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\bridge-infra-readiness-report.json | npm run flowchain:bridge:live:check; npm run flowchain:bridge:infra:check |
+| Local/mock bridge pilot proof preserves exact value, rejects replay/wrong-chain/unapproved-lockbox cases, and performs no broadcast. | passed | broadcast=False, allAmountsEqual=True, wrongChainRejected=True, unapprovedContractRejected=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\services\bridge-relayer\out\real-value-pilot-e2e\bridge-real-value-pilot-e2e-report.json | npm run flowchain:real-value-pilot:bridge |
+| Owner-supplied Base 8453 transaction diagnostic is read-only, no-secret, and fails closed when tx/env inputs are absent. | passed | diagnosticStatus=blocked, safeReason=missing-env, broadcasts=False, printsEnvValues=False, noSecrets=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\devnet\local\live-l1-bridge-e2e\base-tx-diagnostic.json | npm run flowchain:bridge:diagnose:tx |
+| Completion audit refreshes the live-infra aggregate gate before deciding readiness. | blocked | liveInfraStatus=blocked, ownerInputsReady=False, publicRpcReady=False, servicesReady=True, backupReady=False, bridgeReady=False, noSecretReady=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\flowchain-live-infra-check-report.json | npm run flowchain:live-infra:check -- -AllowBlocked |
+| Full product gate runs production local L1 aggregate, restores live service, proves wallet flows, and runs live infra readiness. | blocked | liveProductExitCode=0, liveProductStatus=blocked, productionLocalAggregate=passed-with-live-blockers, liveInfra=blocked, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\flowchain-live-product-e2e-report.json | npm run flowchain:live-product:e2e -- -AllowBlocked |
+| Reports and gates do not print secrets/env values and no live Base broadcast occurred. | passed | noSecretStatus=passed, liveProductNoLiveBroadcast=True, baseTxDiagnosticBroadcasts=False, baseTxDiagnosticNoSecrets=True, reports=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\no-secret-scan-report.json, E:\FlowMemory\flowmemory-live-infra-rpc\devnet\local\live-l1-bridge-e2e\base-tx-diagnostic.json | npm run flowchain:no-secret:scan |
+
+## Remaining External Owner Inputs
+
+- FLOWCHAIN_PILOT_OPERATOR_ACK
+- FLOWCHAIN_BASE8453_RPC_URL
+- FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS
+- FLOWCHAIN_BASE8453_SUPPORTED_TOKEN
+- FLOWCHAIN_BASE8453_ASSET_DECIMALS
+- FLOWCHAIN_BASE8453_FROM_BLOCK
+- FLOWCHAIN_BASE8453_TO_BLOCK
+- FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI
+- FLOWCHAIN_PILOT_TOTAL_CAP_WEI
+- FLOWCHAIN_PILOT_CONFIRMATIONS
+- FLOWCHAIN_RPC_PUBLIC_URL
+- FLOWCHAIN_RPC_ALLOWED_ORIGINS
+- FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE
+- FLOWCHAIN_RPC_TLS_TERMINATED
+- FLOWCHAIN_RPC_STATE_BACKUP_PATH
+
+## Completion Decision
+
+Do not mark the goal complete. The local L1 and private tester rehearsal are working, but public RPC, backup, and Base 8453 bridge readiness remain blocked on exact owner inputs.

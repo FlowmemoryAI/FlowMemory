@@ -1,8 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { spawnSync } from "node:child_process";
 
 import { canonicalJson, findSecret, keccak256Hex } from "../../shared/src/index.ts";
+import { spawnCargoSync } from "./cargo.ts";
 import { repoRoot, resolveControlPlanePath } from "./fixture-state.ts";
 import type { JsonObject, JsonValue, LoadedControlPlaneState } from "./types.ts";
 
@@ -184,7 +184,7 @@ function writeTransferFixture(path: string, txs: JsonObject[], amountUnits: stri
 }
 
 function runCargoJson(args: string[]): JsonObject {
-  const result = spawnSync("cargo", args, {
+  const result = spawnCargoSync(args, {
     cwd: repoRoot(),
     encoding: "utf8",
     windowsHide: true,
@@ -245,10 +245,12 @@ export function executeWalletSend(state: LoadedControlPlaneState, payload: unkno
   const intakeDir = resolve(repoRoot(), "devnet", "local", "wallet-runtime-intake");
   const fixturePath = resolve(intakeDir, `${Date.now()}-${process.pid}-${transferId.slice(2, 12)}.json`);
   const statePath = resolveControlPlanePath(state.paths.localDevnetPath);
-  const nodeDir = resolve(dirname(statePath), "wallet-runtime-node");
+  const nodeDir = request.applyBlock
+    ? resolve(dirname(statePath), "wallet-runtime-node")
+    : resolve(dirname(statePath), "node");
   writeTransferFixture(fixturePath, txs, request.amountUnits);
 
-  const submit = runCargoJson([
+  const submitArgs = [
     "run",
     "--manifest-path",
     "crates/flowmemory-devnet/Cargo.toml",
@@ -262,8 +264,11 @@ export function executeWalletSend(state: LoadedControlPlaneState, payload: unkno
     fixturePath,
     "--authorized-by",
     `wallet:${from.runtimeAccountId}`,
-    "--direct",
-  ]);
+  ];
+  if (request.applyBlock) {
+    submitArgs.push("--direct");
+  }
+  const submit = runCargoJson(submitArgs);
   const block = request.applyBlock
     ? runCargoJson([
         "run",

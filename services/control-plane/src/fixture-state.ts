@@ -43,7 +43,7 @@ export const DEFAULT_CONTROL_PLANE_PATHS: ControlPlanePaths = {
   bridgeObservationPath: "services/bridge-relayer/out/bridge-observation.json",
   bridgeRuntimeHandoffPath: "fixtures/bridge/local-runtime-bridge-handoff.json",
   bridgeObservationIntakePath: "devnet/local/intake/bridge-observations.ndjson",
-  walletTransferProofPath: "devnet/local/production-l1-wallet/transfer-e2e/wallet-e2e-proof.json",
+  walletTransferProofPath: "devnet/local/production-l1-wallet/wallet-e2e/wallet-e2e-proof.json",
   walletPublicMetadataPath: "devnet/local/wallet/flowchain-operator/flowchain-operator-public-metadata.json",
 };
 

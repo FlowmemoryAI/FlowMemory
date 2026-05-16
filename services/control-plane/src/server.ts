@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -17,9 +17,10 @@ interface ServerOptions {
 const jsonHeaders = {
   "access-control-allow-headers": "content-type",
   "access-control-allow-methods": "GET,POST,OPTIONS",
-  "access-control-allow-origin": "*",
   "content-type": "application/json",
 };
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const rateLimitBuckets = new Map<string, { windowStartedAtMs: number; count: number }>();
 
 function jsonResult(response: ReturnType<typeof dispatchJsonRpc>): unknown {
   return Array.isArray(response) ? response : response?.result ?? response;
@@ -28,6 +29,76 @@ function jsonResult(response: ReturnType<typeof dispatchJsonRpc>): unknown {
 function writeJson(res: ServerResponse, statusCode: number, body: unknown): void {
   res.writeHead(statusCode, jsonHeaders);
   res.end(`${JSON.stringify(body)}\n`);
+}
+
+function configuredAllowedOrigins(): string[] {
+  return (process.env.FLOWCHAIN_RPC_ALLOWED_ORIGINS ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+}
+
+function applyCorsHeaders(req: IncomingMessage, res: ServerResponse): boolean {
+  const allowedOrigins = configuredAllowedOrigins();
+  const requestOrigin = req.headers.origin;
+  if (allowedOrigins.length === 0 || allowedOrigins.includes("*")) {
+    res.setHeader("access-control-allow-origin", "*");
+    return true;
+  }
+  if (typeof requestOrigin === "string" && allowedOrigins.includes(requestOrigin)) {
+    res.setHeader("access-control-allow-origin", requestOrigin);
+    res.setHeader("vary", "Origin");
+    return true;
+  }
+  return requestOrigin === undefined;
+}
+
+function configuredRateLimitPerMinute(): number | null {
+  const raw = process.env.FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE;
+  if (raw === undefined || raw.trim().length === 0 || !/^[1-9][0-9]*$/.test(raw.trim())) {
+    return null;
+  }
+  return Number(raw.trim());
+}
+
+function rateLimitClientKey(req: IncomingMessage): string {
+  const forwardedFor = req.headers["x-forwarded-for"];
+  const forwarded = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor;
+  const forwardedChain = typeof forwarded === "string"
+    ? forwarded.split(",").map((entry) => entry.trim()).filter((entry) => entry.length > 0)
+    : [];
+  const candidate = forwardedChain.length > 0
+    ? forwardedChain[forwardedChain.length - 1]
+    : req.socket.remoteAddress;
+  return candidate && candidate.length > 0 ? candidate : "unknown";
+}
+
+function applyRateLimit(req: IncomingMessage, res: ServerResponse): boolean {
+  const limit = configuredRateLimitPerMinute();
+  if (limit === null) {
+    return true;
+  }
+  const now = Date.now();
+  const key = rateLimitClientKey(req);
+  const bucket = rateLimitBuckets.get(key);
+  if (bucket === undefined || now - bucket.windowStartedAtMs >= RATE_LIMIT_WINDOW_MS) {
+    rateLimitBuckets.set(key, { windowStartedAtMs: now, count: 1 });
+    return true;
+  }
+  if (bucket.count >= limit) {
+    const retryAfterSeconds = Math.max(1, Math.ceil((RATE_LIMIT_WINDOW_MS - (now - bucket.windowStartedAtMs)) / 1000));
+    res.setHeader("retry-after", String(retryAfterSeconds));
+    writeJson(res, 429, {
+      schema: "flowmemory.control_plane.rate_limited.v0",
+      message: "rate limit exceeded",
+      retryAfterSeconds,
+      envValuesPrinted: false,
+      noSecrets: true,
+    });
+    return false;
+  }
+  bucket.count += 1;
+  return true;
 }
 
 function readRequestBody(req: IncomingMessage): Promise<string> {
@@ -65,7 +136,7 @@ function labelSlug(value: unknown): string {
   return slug.length > 0 ? slug.slice(0, 64) : "flowchain-operator";
 }
 
-function parseWalletCreatePayload(payload: unknown): { label: string; password: string; chainId: string; replace: boolean } {
+function parseWalletCreatePayload(payload: unknown): { label: string; password: string; chainId: string; replace: boolean; isolated: boolean } {
   if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
     throw new Error("wallet creation payload must be an object");
   }
@@ -80,24 +151,49 @@ function parseWalletCreatePayload(payload: unknown): { label: string; password: 
     password,
     chainId,
     replace: record.replace === true,
+    isolated: record.isolated === true || record.localTester === true,
   };
 }
 
 function createLocalWallet(state: ReturnType<typeof loadControlPlaneState>, payload: unknown): JsonObject {
   const request = parseWalletCreatePayload(payload);
-  const metadataPath = resolveControlPlanePath(state.paths.walletPublicMetadataPath);
-  const walletDir = dirname(metadataPath);
-  const metadataBase = basename(metadataPath).replace(/-public-metadata\.json$/i, "").replace(/\.json$/i, "");
-  const vaultPath = join(walletDir, `${metadataBase}-vault.local.json`);
-  mkdirSync(walletDir, { recursive: true });
+  const operatorMetadataPath = resolveControlPlanePath(state.paths.walletPublicMetadataPath);
+  const walletDir = dirname(operatorMetadataPath);
+  const metadataBase = request.isolated
+    ? request.label
+    : basename(operatorMetadataPath).replace(/-public-metadata\.json$/i, "").replace(/\.json$/i, "");
+  const walletTargetDir = request.isolated ? join(walletDir, "local-testers") : walletDir;
+  const metadataPath = request.isolated
+    ? join(walletTargetDir, `${metadataBase}-public-metadata.json`)
+    : operatorMetadataPath;
+  const vaultPath = join(walletTargetDir, `${metadataBase}-vault.local.json`);
+  mkdirSync(walletTargetDir, { recursive: true });
 
   if (!request.replace && existsSync(vaultPath) && existsSync(metadataPath)) {
+    const existingMetadata = request.isolated
+      ? JSON.parse(readFileSync(metadataPath, "utf8")) as JsonObject
+      : null;
+    const existingAccounts = Array.isArray(existingMetadata?.accounts) ? existingMetadata.accounts as JsonObject[] : [];
+    const existingResult = request.isolated
+      ? {
+          schema: "flowmemory.control_plane.local_wallet_public_status.v0",
+          exists: true,
+          metadataPath,
+          account: existingAccounts[0] ?? null,
+          accounts: existingAccounts,
+          secretMaterialReturned: false,
+          localOnly: true,
+        }
+      : publicWalletResult(state);
     return {
-      ...publicWalletResult(state),
+      ...existingResult,
       schema: "flowmemory.control_plane.local_wallet_create_result.v0",
       created: false,
       alreadyExists: true,
       vaultPath,
+      metadataPath,
+      walletLabel: request.label,
+      isolated: request.isolated,
       note: "Existing encrypted local wallet vault was left unchanged. Set replace=true to rotate to a new wallet.",
     };
   }
@@ -117,6 +213,8 @@ function createLocalWallet(state: ReturnType<typeof loadControlPlaneState>, payl
     schema: "flowmemory.control_plane.local_wallet_create_result.v0",
     created: true,
     alreadyExists: false,
+    walletLabel: request.label,
+    isolated: request.isolated,
     account,
     accounts: metadata.accounts as JsonObject[],
     vaultPath,
@@ -185,6 +283,18 @@ function parseArgs(args: string[]): ServerOptions {
 export function startControlPlaneServer(options: ServerOptions): ReturnType<typeof createServer> {
   const server = createServer((req, res) => {
     const state = loadControlPlaneState();
+    const corsAllowed = applyCorsHeaders(req, res);
+    if (!corsAllowed) {
+      writeJson(res, 403, {
+        schema: "flowmemory.control_plane.cors_rejected.v0",
+        message: "origin is not allowed",
+        localOnly: true,
+      });
+      return;
+    }
+    if (!applyRateLimit(req, res)) {
+      return;
+    }
 
     if (req.method === "OPTIONS") {
       res.writeHead(204, jsonHeaders);

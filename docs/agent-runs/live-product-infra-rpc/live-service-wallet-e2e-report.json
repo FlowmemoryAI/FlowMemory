@@ -1,0 +1,33 @@
+{
+    "schema":  "flowchain.live_service_wallet_e2e_report.v0",
+    "generatedAt":  "2026-05-16T00:33:24.5259958Z",
+    "status":  "passed",
+    "rpcEndpoint":  "local-private-127.0.0.1",
+    "runId":  "20260516003226625-4120",
+    "serviceHealthSchema":  "flowmemory.control_plane.health.v0",
+    "chainBeforeBlock":  "25061",
+    "chainAfterBlock":  "25081",
+    "senderAccountId":  "local-account:live-service-wallet:20260516003226625-4120:sender",
+    "recipientAccountId":  "local-account:live-service-wallet:20260516003226625-4120:recipient",
+    "fundSenderTxIds":  [
+                            "0x11ed83b8845abbc4b7cdccea81ac4409f8ba4cfa8737383477e5a6d74d44419b",
+                            "0x2ef2b9ea96aed6c19f7deabb63a49d19cef532e96ca39c6119f16b36b1cd5018"
+                        ],
+    "sendTxIds":  [
+                      "0x6abecdaf26ddd16e88f7360f8cd3a3250fd6445776ae8f6fc1713ca5be580f0b",
+                      "0x37b998867986a43e2f0afdcc3a2358b66d4852ed8e88b21e279cab345d4cd02a"
+                  ],
+    "sendStatus":  "queued_local_runtime",
+    "transferId":  "0x02e279ebe4feb84c735357aa7651cbd077cf3dcbfca994d4479e521a3582459d",
+    "balances":  {
+                     "senderFunded":  "100",
+                     "senderAfter":  "75",
+                     "recipientAfter":  "25"
+                 },
+    "transferHistoryCount":  1,
+    "localOnly":  true,
+    "productionReady":  false,
+    "noLiveBroadcast":  true,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

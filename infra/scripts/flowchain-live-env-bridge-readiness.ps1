@@ -188,13 +188,23 @@ $emergencyCommands = @(
     "flowchain:bridge:emergency-stop",
     "flowchain:emergency:stop-local"
 )
+$diagnosticCommands = @(
+    "flowchain:bridge:diagnose:tx"
+)
 $missingEmergencyCommands = @($emergencyCommands | Where-Object { $scripts -notcontains $_ })
 if ($missingEmergencyCommands.Count -gt 0) {
     foreach ($command in $missingEmergencyCommands) {
         Add-FlowChainReadinessProblem -Problems $problems -Name $command -Reason "emergency command is not discoverable in package.json" -Kind "failed" -Category "artifact"
     }
 }
+$missingDiagnosticCommands = @($diagnosticCommands | Where-Object { $scripts -notcontains $_ })
+if ($missingDiagnosticCommands.Count -gt 0) {
+    foreach ($command in $missingDiagnosticCommands) {
+        Add-FlowChainReadinessProblem -Problems $problems -Name $command -Reason "Base transaction diagnostic command is not discoverable in package.json" -Kind "failed" -Category "artifact"
+    }
+}
 $checks.emergencyCommandsDiscoverable = $missingEmergencyCommands.Count -eq 0
+$checks.diagnosticCommandsDiscoverable = $missingDiagnosticCommands.Count -eq 0
 
 $failed = @($problems | Where-Object { $_.kind -eq "failed" })
 $status = if ($failed.Count -gt 0) { "failed" } elseif ($problems.Count -gt 0) { "blocked" } else { "passed" }
@@ -228,6 +238,13 @@ $report = [ordered]@{
         "npm run flowchain:bridge:resume",
         "npm run flowchain:bridge:emergency-stop",
         "npm run flowchain:emergency:stop-local"
+    )
+    diagnosticCommands = @(
+        "npm run flowchain:bridge:diagnose:tx -- --tx-hash <owner-supplied-base-tx-hash>"
+    )
+    diagnosticEnvNames = @(
+        "FLOWCHAIN_BASE8453_TX_HASH",
+        "FLOWCHAIN_BASE8453_OPERATOR_TX_HASH"
     )
     problems = @($problems)
     broadcasts = $false

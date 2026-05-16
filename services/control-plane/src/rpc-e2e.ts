@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { findSecret } from "../../shared/src/index.ts";
+import { spawnCargoSync } from "./cargo.ts";
 import { dispatchJsonRpc } from "./json-rpc.ts";
 import { runControlPlaneSmoke } from "./smoke.ts";
 import type { JsonObject, JsonValue, RpcSuccessResponse } from "./types.ts";
@@ -28,7 +28,7 @@ const runtimePaths = {
 };
 
 function runCargoJson(args: string[], label: string): JsonObject {
-  const result = spawnSync("cargo", args, {
+  const result = spawnCargoSync(args, {
     cwd: repoRoot,
     encoding: "utf8",
     windowsHide: true,

@@ -1796,6 +1796,37 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
             }
             let transfer_no_value = from_balance.no_value;
 
+            if from_account_id == to_account_id {
+                let balance = state
+                    .local_test_unit_balances
+                    .get_mut(from_account_id)
+                    .expect("source local test-unit balance was checked above");
+                balance.updated_at_block = state.next_block_number;
+                state.balance_transfers.insert(
+                    transfer_id.clone(),
+                    BalanceTransfer {
+                        transfer_id: transfer_id.clone(),
+                        from_account_id: from_account_id.clone(),
+                        to_account_id: to_account_id.clone(),
+                        amount_units: *amount_units,
+                        memo: memo.clone(),
+                        transferred_at_block: state.next_block_number,
+                        no_value: transfer_no_value,
+                    },
+                );
+                return Ok(());
+            }
+
+            let to_balance = state
+                .local_test_unit_balances
+                .get(to_account_id)
+                .ok_or_else(|| DevnetError::LocalTestUnitBalanceMissing(to_account_id.clone()))?;
+            let credited_to_units = to_balance
+                .units
+                .checked_add(*amount_units)
+                .ok_or_else(|| DevnetError::LocalTestUnitBalanceOverflow(to_account_id.clone()))?;
+            let credited_to_no_value = to_balance.no_value && transfer_no_value;
+
             {
                 let from_balance = state
                     .local_test_unit_balances
@@ -1808,12 +1839,9 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
             let to_balance = state
                 .local_test_unit_balances
                 .get_mut(to_account_id)
-                .ok_or_else(|| DevnetError::LocalTestUnitBalanceMissing(to_account_id.clone()))?;
-            to_balance.units = to_balance
-                .units
-                .checked_add(*amount_units)
-                .ok_or_else(|| DevnetError::LocalTestUnitBalanceOverflow(to_account_id.clone()))?;
-            to_balance.no_value = to_balance.no_value && transfer_no_value;
+                .expect("destination local test-unit balance was checked above");
+            to_balance.units = credited_to_units;
+            to_balance.no_value = credited_to_no_value;
             to_balance.updated_at_block = state.next_block_number;
 
             state.balance_transfers.insert(

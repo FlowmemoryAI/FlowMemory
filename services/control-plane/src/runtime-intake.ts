@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { spawnSync } from "node:child_process";
 
+import { cargoDisplayCommand, spawnCargoSync } from "./cargo.ts";
 import { repoRoot } from "./fixture-state.ts";
 import type { ControlPlanePaths, JsonObject, JsonValue } from "./types.ts";
 
@@ -83,7 +83,7 @@ export function submitTransactionsToRuntime(paths: ControlPlanePaths, txs: JsonO
     "--fixture",
     intakePath,
   ];
-  const result = spawnSync("cargo", args, {
+  const result = spawnCargoSync(args, {
     cwd: repoRoot(),
     encoding: "utf8",
   });
@@ -104,7 +104,7 @@ export function submitTransactionsToRuntime(paths: ControlPlanePaths, txs: JsonO
     runtimeStatePath,
     queued,
     runtime: {
-      command: `cargo ${args.join(" ")}`,
+      command: cargoDisplayCommand(args),
       status: result.status,
       stderr: result.stderr,
     },

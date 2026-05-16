@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.bridge_infra_readiness_report.v0",
-    "generatedAt":  "2026-05-15T04:35:57.6308067Z",
+    "generatedAt":  "2026-05-16T00:43:18.6554378Z",
     "status":  "blocked",
     "requiredEnvNames":  [
                              "FLOWCHAIN_PILOT_OPERATOR_ACK",
@@ -34,7 +34,8 @@
     "assetMode":  "unknown",
     "checks":  {
                    "operatorAcknowledgement":  false,
-                   "emergencyCommandsDiscoverable":  true
+                   "emergencyCommandsDiscoverable":  true,
+                   "diagnosticCommandsDiscoverable":  true
                },
     "blockRangePolicy":  {
                              "maxRange":  "5000",
@@ -56,6 +57,13 @@
                               "npm run flowchain:bridge:emergency-stop",
                               "npm run flowchain:emergency:stop-local"
                           ],
+    "diagnosticCommands":  [
+                               "npm run flowchain:bridge:diagnose:tx -- --tx-hash \u003cowner-supplied-base-tx-hash\u003e"
+                           ],
+    "diagnosticEnvNames":  [
+                               "FLOWCHAIN_BASE8453_TX_HASH",
+                               "FLOWCHAIN_BASE8453_OPERATOR_TX_HASH"
+                           ],
     "problems":  [
                      {
                          "name":  "FLOWCHAIN_PILOT_OPERATOR_ACK",

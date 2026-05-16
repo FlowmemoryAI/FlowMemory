@@ -343,6 +343,60 @@ fn local_faucet_and_transfer_update_test_unit_ledger() {
 }
 
 #[test]
+fn rejected_local_transfer_does_not_debit_sender_when_recipient_is_missing() {
+    let mut state = genesis_state();
+    apply_transaction(
+        &mut state,
+        &Transaction::CreateLocalTestUnitBalance {
+            account_id: "local-account:alice".to_string(),
+            owner: "operator:alice".to_string(),
+        },
+    )
+    .unwrap();
+    apply_transaction(
+        &mut state,
+        &Transaction::FaucetLocalTestUnits {
+            faucet_record_id: "faucet:unit:atomic".to_string(),
+            account_id: "local-account:alice".to_string(),
+            recipient: "operator:alice".to_string(),
+            amount_units: 50,
+            reason: "atomic-rejection-test".to_string(),
+        },
+    )
+    .unwrap();
+
+    assert_eq!(
+        apply_transaction(
+            &mut state,
+            &Transaction::TransferLocalTestUnits {
+                transfer_id: "transfer:unit:missing-recipient".to_string(),
+                from_account_id: "local-account:alice".to_string(),
+                to_account_id: "local-account:missing".to_string(),
+                amount_units: 20,
+                memo: "recipient-missing".to_string(),
+            },
+        ),
+        Err(DevnetError::LocalTestUnitBalanceMissing(
+            "local-account:missing".to_string()
+        ))
+    );
+    assert_eq!(
+        state.local_test_unit_balances["local-account:alice"].units,
+        50
+    );
+    assert!(
+        !state
+            .local_test_unit_balances
+            .contains_key("local-account:missing")
+    );
+    assert!(
+        !state
+            .balance_transfers
+            .contains_key("transfer:unit:missing-recipient")
+    );
+}
+
+#[test]
 fn pilot_bridge_credit_maps_asset_account_and_rejects_replay() {
     let mut state = genesis_state();
     let txs = pilot_bridge_setup_and_credit_txs();
@@ -2062,6 +2116,127 @@ fn cli_node_runs_ten_blocks_and_includes_authorized_inbox_tx() {
     );
     assert!(node_dir.join("node-identity.json").exists());
     assert!(node_dir.join("status.json").exists());
+
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
+fn cli_submit_tx_batches_multiple_txs_and_preserves_order() {
+    let temp = temp_dir("cli-submit-batch-order");
+    let state = temp.join("state.json");
+    let node_dir = temp.join("node");
+    let fixture = temp.join("ordered-wallet-send.json");
+    let sender = "local-account:cli-submit-batch:sender";
+    let recipient = "local-account:cli-submit-batch:recipient";
+
+    let faucet = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "--node-dir",
+            node_dir.to_str().expect("node dir"),
+            "faucet",
+            "--account",
+            sender,
+            "--amount",
+            "9",
+            "--reason",
+            "cli-submit-batch-order",
+            "--authorized-by",
+            "local-test-operator",
+            "--direct",
+        ])
+        .status()
+        .expect("fund sender");
+    assert!(faucet.success());
+
+    let fixture_json = serde_json::json!({
+        "schema": "flowmemory.local_devnet.ordered_submit_tx_fixture.v0",
+        "txs": [
+            {
+                "type": "CreateLocalTestUnitBalance",
+                "accountId": recipient,
+                "owner": "operator:recipient"
+            },
+            {
+                "type": "TransferLocalTestUnits",
+                "transferId": "transfer:cli-submit-batch-order",
+                "fromAccountId": sender,
+                "toAccountId": recipient,
+                "amountUnits": 4,
+                "memo": "ordered multi-tx submit"
+            }
+        ]
+    });
+    std::fs::write(
+        &fixture,
+        format!(
+            "{}\n",
+            serde_json::to_string_pretty(&fixture_json).expect("fixture json")
+        ),
+    )
+    .expect("write fixture");
+
+    let submit = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "--node-dir",
+            node_dir.to_str().expect("node dir"),
+            "submit-tx",
+            "--tx-file",
+            fixture.to_str().expect("fixture path"),
+            "--authorized-by",
+            "local-test-operator",
+        ])
+        .output()
+        .expect("submit ordered txs");
+    assert!(submit.status.success());
+    let submitted: serde_json::Value =
+        serde_json::from_slice(&submit.stdout).expect("submit summary json");
+    assert_eq!(
+        submitted["queued"].as_array().expect("queued tx ids").len(),
+        2
+    );
+
+    let tick = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "--node-dir",
+            node_dir.to_str().expect("node dir"),
+            "tick",
+            "--node-id",
+            "node:test:ordered-submit",
+        ])
+        .status()
+        .expect("tick ordered txs");
+    assert!(tick.success());
+
+    let processed_count = std::fs::read_dir(node_dir.join("processed"))
+        .expect("processed dir")
+        .filter_map(Result::ok)
+        .filter(|entry| entry.path().extension().and_then(|ext| ext.to_str()) == Some("json"))
+        .count();
+    assert_eq!(processed_count, 1);
+
+    let state_body = std::fs::read_to_string(&state).expect("state body");
+    let state_json: serde_json::Value = serde_json::from_str(&state_body).expect("state json");
+    assert_eq!(state_json["localTestUnitBalances"][sender]["units"], 5);
+    assert_eq!(state_json["localTestUnitBalances"][recipient]["units"], 4);
+    assert_eq!(
+        state_json["balanceTransfers"]["transfer:cli-submit-batch-order"]["amountUnits"],
+        4
+    );
+    let blocks = state_json["blocks"].as_array().expect("blocks");
+    let last_block = blocks.last().expect("ordered submit block");
+    assert!(
+        last_block["receipts"]
+            .as_array()
+            .expect("receipts")
+            .iter()
+            .all(|receipt| receipt["status"] == "applied")
+    );
 
     std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
 }

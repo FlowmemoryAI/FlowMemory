@@ -328,27 +328,37 @@ function buildExactValueReport(firstRun: BridgePipelineResult): Record<string, u
 
 async function assertNegativeCoverage(options: PilotE2EOptions): Promise<{
   wrongChainRejected: boolean;
+  wrongChainRejectionReason: string;
   unapprovedContractRejected: boolean;
+  unapprovedContractRejectionReason: string;
 }> {
-  await assert.rejects(
-    () => runBridgePipeline(parseBridgeArgs(pipelineArgs({
+  const wrongChainRun = await runBridgePipeline(parseBridgeArgs(pipelineArgs({
       ...options,
       fixturePath: resolve(REPO_ROOT, "fixtures/bridge/base-sepolia-mock-deposit.json"),
-    }, resolve(options.outDir, "wrong-chain-state.json")))),
-    /pilot deposit must be from Base chain 8453/,
-  );
+    }, resolve(options.outDir, "wrong-chain-state.json"))));
+  const wrongChainCredit = first(wrongChainRun.credits, "wrong-chain credits");
+  assert.equal(wrongChainCredit.status, "rejected");
+  assert.equal(wrongChainCredit.rejectionReason, "wrong_source_chain");
+  assert.equal(wrongChainRun.runtimeApplications.filter((application) => application.status === "applied").length, 0);
+  assert.equal(wrongChainRun.withdrawalIntents.length, 0);
+  assert.equal(wrongChainRun.releaseEvidences.length, 0);
 
-  await assert.rejects(
-    () => runBridgePipeline(parseBridgeArgs(pipelineArgs({
+  const unapprovedRun = await runBridgePipeline(parseBridgeArgs(pipelineArgs({
       ...options,
       approvedLockbox: WRONG_APPROVED_LOCKBOX,
-    }, resolve(options.outDir, "unapproved-state.json")))),
-    /unapproved bridge lockbox address/,
-  );
+    }, resolve(options.outDir, "unapproved-state.json"))));
+  const unapprovedCredit = first(unapprovedRun.credits, "unapproved credits");
+  assert.equal(unapprovedCredit.status, "rejected");
+  assert.equal(unapprovedCredit.rejectionReason, "unapproved_lockbox");
+  assert.equal(unapprovedRun.runtimeApplications.filter((application) => application.status === "applied").length, 0);
+  assert.equal(unapprovedRun.withdrawalIntents.length, 0);
+  assert.equal(unapprovedRun.releaseEvidences.length, 0);
 
   return {
     wrongChainRejected: true,
+    wrongChainRejectionReason: wrongChainCredit.rejectionReason,
     unapprovedContractRejected: true,
+    unapprovedContractRejectionReason: unapprovedCredit.rejectionReason,
   };
 }
 

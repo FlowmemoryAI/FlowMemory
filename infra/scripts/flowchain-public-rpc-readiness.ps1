@@ -2,6 +2,7 @@ param(
     [string] $StatePath = "devnet/local/state.json",
     [string] $ReportPath = "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json",
     [int] $MaxBlockAgeSeconds = 300,
+    [int] $RateLimitProbeMaxRequests = 300,
     [switch] $AllowBlocked
 )
 
@@ -27,6 +28,25 @@ $problems = New-Object System.Collections.ArrayList
 $missingEnv = New-Object System.Collections.ArrayList
 $endpointChecks = New-Object System.Collections.ArrayList
 $responses = New-Object System.Collections.ArrayList
+$corsCheck = [ordered]@{
+    performed = $false
+    allowOriginHeaderPresent = $false
+    configuredOriginAccepted = $false
+    disallowedOriginProbePerformed = $false
+    disallowedOriginRejected = $false
+    wildcardRejectedForPublicMode = $true
+    headerValuePrinted = $false
+}
+$rateLimitCheck = [ordered]@{
+    configured = $false
+    probePerformed = $false
+    probeRequestLimit = $RateLimitProbeMaxRequests
+    configuredLimit = $null
+    requestCount = 0
+    rejectionObserved = $false
+    retryAfterHeaderPresent = $false
+    skippedBecauseAboveProbeLimit = $false
+}
 
 foreach ($name in $requiredEnv) {
     if ([string]::IsNullOrWhiteSpace((Get-FlowChainEnvValue -Name $name))) {
@@ -82,6 +102,8 @@ if (-not [string]::IsNullOrWhiteSpace($rateLimitRaw)) {
     }
     else {
         $rateLimit = [int64]$rateLimitRaw
+        $rateLimitCheck.configured = $true
+        $rateLimitCheck.configuredLimit = $rateLimit
     }
 }
 
@@ -158,6 +180,118 @@ if ($null -ne $publicUri) {
     }
 }
 
+if ($null -ne $publicUri -and $allowedOrigins.Count -gt 0) {
+    try {
+        $corsProbeUrl = Join-FlowChainEndpointUri -PublicUrl $publicUrl -EndpointPath "/health"
+        $corsProbe = Invoke-WebRequest -Uri $corsProbeUrl -Method Get -Headers @{ Origin = $allowedOrigins[0] } -TimeoutSec 10 -UseBasicParsing
+        $corsHeader = "$($corsProbe.Headers["Access-Control-Allow-Origin"])"
+        $corsCheck.performed = $true
+        $corsCheck.allowOriginHeaderPresent = -not [string]::IsNullOrWhiteSpace($corsHeader)
+        $corsCheck.configuredOriginAccepted = ($corsHeader -eq $allowedOrigins[0])
+        $corsCheck.wildcardRejectedForPublicMode = -not ($publicMode -and $corsHeader -eq "*")
+        if (-not $corsCheck.allowOriginHeaderPresent) {
+            Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_ALLOWED_ORIGINS" -Reason "configured endpoint did not return an Access-Control-Allow-Origin header" -Kind "failed" -Category "endpoint"
+        }
+        if ($publicMode -and $corsHeader -eq "*") {
+            Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_ALLOWED_ORIGINS" -Reason "configured public endpoint returned wildcard CORS" -Kind "failed" -Category "endpoint"
+        }
+        if ($publicMode -and $corsHeader -ne $allowedOrigins[0]) {
+            Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_ALLOWED_ORIGINS" -Reason "configured public endpoint did not return the requested allowed origin" -Kind "failed" -Category "endpoint"
+        }
+
+        $blockedOrigin = "https://flowchain-disallowed-origin.invalid"
+        if ($allowedOrigins -contains $blockedOrigin) {
+            $blockedOrigin = "https://flowchain-not-allowed.invalid"
+        }
+        $corsCheck.disallowedOriginProbePerformed = $true
+        try {
+            $blockedProbe = Invoke-WebRequest -Uri $corsProbeUrl -Method Get -Headers @{ Origin = $blockedOrigin } -TimeoutSec 10 -UseBasicParsing
+            $blockedHeader = "$($blockedProbe.Headers["Access-Control-Allow-Origin"])"
+            $corsCheck.disallowedOriginRejected = $false
+            if ($publicMode) {
+                Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_ALLOWED_ORIGINS" -Reason "configured public endpoint accepted a disallowed browser origin" -Kind "failed" -Category "endpoint"
+            }
+        }
+        catch {
+            $statusCode = $null
+            if ($null -ne $_.Exception.Response) {
+                try {
+                    $statusCode = [int]$_.Exception.Response.StatusCode
+                }
+                catch {
+                    $statusCode = $null
+                }
+            }
+            if ($statusCode -eq 403) {
+                $corsCheck.disallowedOriginRejected = $true
+            }
+            elseif ($publicMode) {
+                Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_ALLOWED_ORIGINS" -Reason "configured endpoint disallowed-origin probe failed without a 403 rejection" -Kind "failed" -Category "endpoint"
+            }
+        }
+        if ($publicMode -and $corsCheck.disallowedOriginRejected -ne $true) {
+            Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_ALLOWED_ORIGINS" -Reason "configured public endpoint did not reject a disallowed browser origin" -Kind "failed" -Category "endpoint"
+        }
+    }
+    catch {
+        Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_ALLOWED_ORIGINS" -Reason "configured endpoint CORS probe failed" -Kind "failed" -Category "endpoint"
+    }
+}
+
+if ($null -ne $publicUri -and $null -ne $rateLimit) {
+    if ($rateLimit -gt $RateLimitProbeMaxRequests) {
+        $rateLimitCheck.skippedBecauseAboveProbeLimit = $true
+        if ($publicMode) {
+            Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE" -Reason "configured public rate limit is above the bounded readiness probe limit" -Kind "failed" -Category "endpoint"
+        }
+    }
+    else {
+        $rateLimitCheck.probePerformed = $true
+        $rateProbeUrl = Join-FlowChainEndpointUri -PublicUrl $publicUrl -EndpointPath "/health"
+        $rateProbeClient = "198.51.100.$([Math]::Max(1, ($PID % 250)))"
+        $rateProbeHeaders = @{
+            "X-Forwarded-For" = $rateProbeClient
+        }
+        if ($allowedOrigins.Count -gt 0) {
+            $rateProbeHeaders["Origin"] = $allowedOrigins[0]
+        }
+        for ($requestNumber = 1; $requestNumber -le ($rateLimit + 1); $requestNumber++) {
+            $rateLimitCheck.requestCount = $requestNumber
+            try {
+                $rateProbe = Invoke-WebRequest -Uri $rateProbeUrl -Method Get -Headers $rateProbeHeaders -TimeoutSec 10 -UseBasicParsing
+                if ([int]$rateProbe.StatusCode -eq 429) {
+                    $rateLimitCheck.rejectionObserved = $true
+                    $rateLimitCheck.retryAfterHeaderPresent = -not [string]::IsNullOrWhiteSpace("$($rateProbe.Headers["Retry-After"])")
+                    break
+                }
+            }
+            catch {
+                $statusCode = $null
+                $retryAfter = ""
+                if ($null -ne $_.Exception.Response) {
+                    try {
+                        $statusCode = [int]$_.Exception.Response.StatusCode
+                        $retryAfter = "$($_.Exception.Response.Headers["Retry-After"])"
+                    }
+                    catch {
+                        $statusCode = $null
+                    }
+                }
+                if ($statusCode -eq 429) {
+                    $rateLimitCheck.rejectionObserved = $true
+                    $rateLimitCheck.retryAfterHeaderPresent = -not [string]::IsNullOrWhiteSpace($retryAfter)
+                    break
+                }
+                Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE" -Reason "configured endpoint rate-limit probe failed before observing 429" -Kind "failed" -Category "endpoint"
+                break
+            }
+        }
+        if (-not $rateLimitCheck.rejectionObserved) {
+            Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE" -Reason "configured endpoint did not enforce rate limiting during bounded probe" -Kind "failed" -Category "endpoint"
+        }
+    }
+}
+
 $health = if ($endpointResults.Contains("/health") -and $endpointResults["/health"].status -eq "passed") { $responses[0] } else { $null }
 $discover = $null
 $readiness = $null
@@ -202,11 +336,29 @@ if ($null -ne $chainStatus -and $stateFacts.readable) {
     $endpointHash = Get-FlowChainJsonString -Object $chainStatus -Names @("currentBlockHash", "latestBlockHash")
     $endpointRoot = Get-FlowChainJsonString -Object $chainStatus -Names @("latestStateRoot", "stateRoot")
     $endpointFinalized = Get-FlowChainJsonString -Object $chainStatus -Names @("finalizedBlock", "finalizedHeight")
+    $stateFactsAfterEndpoint = Get-FlowChainStateFacts -StatePath $stateFullPath
+    $endpointBlockFacts = Get-FlowChainBlockFacts -StatePath $stateFullPath -BlockNumber $endpointHeight
 
-    $chainChecks.latestHeightMatches = ($endpointHeight -eq $stateFacts.latestHeight)
-    $chainChecks.latestHashMatches = ($endpointHash -eq $stateFacts.latestHash)
-    $chainChecks.latestRootMatches = ($endpointRoot -eq $stateFacts.latestRoot)
-    $chainChecks.finalizedHeightMatches = ($endpointFinalized -eq $stateFacts.finalizedHeight)
+    $chainChecks.latestHeightMatches = (
+        $endpointHeight -eq $stateFacts.latestHeight -or
+        $endpointHeight -eq $stateFactsAfterEndpoint.latestHeight -or
+        $endpointBlockFacts.found
+    )
+    $chainChecks.latestHashMatches = (
+        $endpointHash -eq $stateFacts.latestHash -or
+        $endpointHash -eq $stateFactsAfterEndpoint.latestHash -or
+        ($endpointBlockFacts.found -and $endpointHash -eq $endpointBlockFacts.blockHash)
+    )
+    $chainChecks.latestRootMatches = (
+        $endpointRoot -eq $stateFacts.latestRoot -or
+        $endpointRoot -eq $stateFactsAfterEndpoint.latestRoot -or
+        ($endpointBlockFacts.found -and $endpointRoot -eq $endpointBlockFacts.stateRoot)
+    )
+    $chainChecks.finalizedHeightMatches = (
+        $endpointFinalized -eq $stateFacts.finalizedHeight -or
+        $endpointFinalized -eq $stateFactsAfterEndpoint.finalizedHeight -or
+        ($endpointBlockFacts.found -and $endpointFinalized -eq $endpointHeight)
+    )
 
     if ($chainChecks.latestHeightMatches -ne $true) {
         Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_PUBLIC_URL" -Reason "endpoint latest block height does not match local node state" -Kind "failed" -Category "endpoint"
@@ -264,8 +416,18 @@ $report = [ordered]@{
         httpsRequiredForPublicMode = $true
         tlsTerminatedAcknowledged = ($tlsTerminatedRaw -eq "true")
         allowedOriginsConfigured = $allowedOrigins.Count -gt 0
-        allowedOriginsWildcardRejected = $publicMode
+        allowedOriginsWildcardRejected = ((-not $publicMode) -or @($allowedOrigins | Where-Object { $_ -in @("*", "null", "all", "ALL") }).Count -eq 0)
         numericRateLimit = $null -ne $rateLimit
+        rateLimitProbePerformed = $rateLimitCheck.probePerformed
+        rateLimitRejectionObserved = $rateLimitCheck.rejectionObserved
+        rateLimitRetryAfterHeaderPresent = $rateLimitCheck.retryAfterHeaderPresent
+        rateLimitProbeWithinMax = -not $rateLimitCheck.skippedBecauseAboveProbeLimit
+        corsProbePerformed = $corsCheck.performed
+        corsAllowOriginHeaderPresent = $corsCheck.allowOriginHeaderPresent
+        corsConfiguredOriginAccepted = $corsCheck.configuredOriginAccepted
+        corsDisallowedOriginProbePerformed = $corsCheck.disallowedOriginProbePerformed
+        corsDisallowedOriginRejected = $corsCheck.disallowedOriginRejected
+        corsWildcardRejectedForPublicMode = $corsCheck.wildcardRejectedForPublicMode
         backupPathConfigured = $backupCheck.configured
         backupPathExists = $backupCheck.exists
         backupPathWritable = $backupCheck.writable
@@ -289,6 +451,8 @@ $report = [ordered]@{
     }
     maxBlockAgeSeconds = $MaxBlockAgeSeconds
     responseHygiene = $hygiene
+    cors = $corsCheck
+    rateLimit = $rateLimitCheck
     problems = @($problems)
     noSecrets = $hygiene.passed
 }

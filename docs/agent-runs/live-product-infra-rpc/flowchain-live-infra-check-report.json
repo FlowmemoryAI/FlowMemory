@@ -1,22 +1,24 @@
 {
     "schema":  "flowchain.live_infra_check_report.v0",
-    "generatedAt":  "2026-05-15T04:35:58.7833569Z",
+    "generatedAt":  "2026-05-16T00:43:20.3578326Z",
     "status":  "blocked",
     "repoPath":  "E:/FlowMemory/flowmemory-live-infra-rpc",
     "git":  {
                 "branch":  "agent/live-product-infra-rpc",
-                "commit":  "2cc0ae017b3cbd7dbf216e798a861ab444ceccf4"
+                "commit":  "3e36ddc795e2c8f414711aba1c23be944d2af46d"
             },
     "readiness":  {
+                      "ownerInputsReady":  false,
                       "publicRpcReady":  false,
-                      "servicesReady":  false,
+                      "servicesReady":  true,
                       "backupReady":  false,
                       "bridgeReady":  false,
                       "noSecretReady":  true
                   },
     "reportStatuses":  {
+                           "ownerInputs":  "blocked",
                            "publicRpc":  "blocked",
-                           "services":  "blocked",
+                           "services":  "passed",
                            "backup":  "blocked",
                            "bridgeLive":  "blocked",
                            "bridgeInfra":  "blocked",
@@ -39,6 +41,9 @@
                             "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                             "FLOWCHAIN_PILOT_CONFIRMATIONS"
                         ],
+    "invalidEnvNames":  [
+
+                        ],
     "missingArtifactNames":  [
 
                              ],
@@ -46,14 +51,13 @@
 
                              ],
     "missingProcessNames":  [
-                                "devnet/local/node/flowchain-node.pid",
-                                "devnet/local/services/control-plane.pid"
+
                             ],
     "blockedProcessNames":  [
-                                "devnet/local/node/flowchain-node.pid",
-                                "devnet/local/services/control-plane.pid"
+
                             ],
     "commandList":  [
+                        "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-inputs.ps1 -AllowBlocked",
                         "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-readiness.ps1 -AllowBlocked",
                         "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-status.ps1 -AllowBlocked",
                         "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-backup-readiness.ps1 -AllowBlocked",
@@ -62,6 +66,15 @@
                         "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-no-secret-scan.ps1 -Paths docs/agent-runs/live-product-infra-rpc devnet/local/bridge-live-readiness devnet/local/services"
                     ],
     "steps":  [
+                  {
+                      "name":  "Owner input contract",
+                      "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-inputs.ps1 -AllowBlocked",
+                      "status":  "blocked",
+                      "exitCode":  0,
+                      "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Owner-input-contract.log",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-report.json",
+                      "reason":  ""
+                  },
                   {
                       "name":  "Public RPC readiness",
                       "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-readiness.ps1 -AllowBlocked",
@@ -74,7 +87,7 @@
                   {
                       "name":  "Service process status",
                       "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-status.ps1 -AllowBlocked",
-                      "status":  "blocked",
+                      "status":  "passed",
                       "exitCode":  0,
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Service-process-status.log",
                       "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
@@ -118,6 +131,7 @@
                   }
               ],
     "reportPaths":  {
+                        "ownerInputs":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-report.json",
                         "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
                         "services":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
@@ -127,6 +141,7 @@
                         "logs":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs"
                     },
     "blockedUntil":  {
+                         "ownerInputs":  "Provide structurally valid owner public RPC, backup, and Base 8453 bridge env names without committing values.",
                          "publicRpc":  "Configure FLOWCHAIN_RPC_* env names and run the control-plane behind TLS/rate-limit/CORS enforcement.",
                          "services":  "Run npm run flowchain:service:start -- -LiveProfile after local state exists.",
                          "backup":  "Provide FLOWCHAIN_RPC_STATE_BACKUP_PATH as an existing writable directory.",

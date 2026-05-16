@@ -1,0 +1,103 @@
+{
+    "schema":  "flowchain.external_tester_readiness_report.v0",
+    "generatedAt":  "2026-05-16T00:43:21.0996378Z",
+    "status":  "blocked",
+    "localTesterRehearsalReady":  true,
+    "externalSharingReady":  false,
+    "checks":  {
+                   "serviceReady":  true,
+                   "chainProducing":  true,
+                   "testerWalletNetworkReady":  true,
+                   "testerWalletNetworkFresh":  true,
+                   "liveInfraReady":  false
+               },
+    "latestHeight":  "25272",
+    "stateFileLastWriteAgeSeconds":  3,
+    "testerNetwork":  {
+                          "status":  "passed",
+                          "generatedAt":  "2026-05-16T00:34:50.8670505Z",
+                          "testerCount":  4,
+                          "chainBeforeBlock":  "25088",
+                          "chainAfterBlock":  "25111",
+                          "walletCreateCount":  4,
+                          "transferCount":  4,
+                          "secretMaterialReturned":  false
+                      },
+    "missingEnvNames":  [
+                            "FLOWCHAIN_RPC_PUBLIC_URL",
+                            "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                            "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                            "FLOWCHAIN_RPC_TLS_TERMINATED",
+                            "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                            "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                            "FLOWCHAIN_BASE8453_RPC_URL",
+                            "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                            "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                            "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                            "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                            "FLOWCHAIN_BASE8453_TO_BLOCK",
+                            "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                            "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                            "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                        ],
+    "reportPaths":  {
+                        "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
+                        "liveInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-infra-check-report.json",
+                        "liveProduct":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-product-e2e-report.json",
+                        "testerNetwork":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json",
+                        "externalTesterReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json"
+                    },
+    "refresh":  {
+                    "serviceStatusExitCode":  0,
+                    "liveInfraExitCode":  0,
+                    "liveInfraOutputRedactedTail":  [
+                                                        "",
+                                                        "== Owner input contract ==",
+                                                        "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-inputs.ps1 -AllowBlocked",
+                                                        "BLOCKED: Owner input contract",
+                                                        "",
+                                                        "== Public RPC readiness ==",
+                                                        "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-readiness.ps1 -AllowBlocked",
+                                                        "BLOCKED: Public RPC readiness",
+                                                        "",
+                                                        "== Service process status ==",
+                                                        "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-status.ps1 -AllowBlocked",
+                                                        "PASSED: Service process status",
+                                                        "",
+                                                        "== Backup readiness ==",
+                                                        "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-backup-readiness.ps1 -AllowBlocked",
+                                                        "BLOCKED: Backup readiness",
+                                                        "",
+                                                        "== Bridge live readiness ==",
+                                                        "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-live-check.ps1 -AllowBlocked",
+                                                        "BLOCKED: Bridge live readiness",
+                                                        "",
+                                                        "== Bridge infra readiness ==",
+                                                        "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-live-env-bridge-readiness.ps1 -AllowBlocked",
+                                                        "BLOCKED: Bridge infra readiness",
+                                                        "",
+                                                        "== No-secret scan live infra reports ==",
+                                                        "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-no-secret-scan.ps1 -Paths docs/agent-runs/live-product-infra-rpc devnet/local/bridge-live-readiness devnet/local/services",
+                                                        "PASSED: No-secret scan live infra reports",
+                                                        "",
+                                                        "FlowChain live infra status: blocked",
+                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-infra-check-report.json",
+                                                        "Missing env names: FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_BASE8453_TO_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                                    ],
+                    "testerNetworkRefreshPerformed":  false,
+                    "testerNetworkFreshBeforeRefresh":  true,
+                    "testerNetworkFreshAfterRefresh":  true,
+                    "testerNetworkRefreshExitCode":  null,
+                    "testerNetworkRefreshOutputRedactedTail":  [
+
+                                                               ]
+                },
+    "ownerNextActions":  [
+                             "Configure the FLOWCHAIN_RPC_* public RPC and backup env names in the service environment.",
+                             "Configure the FLOWCHAIN_BASE8453_* and FLOWCHAIN_PILOT_* bridge env names after owner verification.",
+                             "Rerun npm run flowchain:live-infra:check and npm run flowchain:tester:readiness before sharing the network externally."
+                         ],
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

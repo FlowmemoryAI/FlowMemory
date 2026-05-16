@@ -1,8 +1,8 @@
-import { spawnSync } from "node:child_process";
 import { appendFileSync, mkdirSync, readFileSync, existsSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
 import { canonicalJson, findSecret, keccak256Hex } from "../../shared/src/index.ts";
+import { spawnCargoSync } from "./cargo.ts";
 import { invalidParams, methodNotFound, objectNotFound, secretRejected } from "./errors.ts";
 import { loadControlPlaneState, repoRoot, resolveControlPlanePath } from "./fixture-state.ts";
 import {
@@ -119,7 +119,31 @@ function stableId(schema: string, value: JsonValue): string {
   return keccak256Hex(new TextEncoder().encode(canonicalJson({ schema, value })));
 }
 
+function latestRuntimeBlock(state: LoadedControlPlaneState): { blockNumber: string; blockHash: string; stateRoot: string | null; logicalTime: JsonValue | null } | null {
+  const latest = activeRuntimeBlocksArray(state).sort((left, right) =>
+    compareStringNumbers(stringValue(right.blockNumber) ?? "0", stringValue(left.blockNumber) ?? "0")
+  )[0];
+  if (latest === undefined) {
+    return null;
+  }
+
+  return {
+    blockNumber: stringValue(latest.blockNumber) ?? "0",
+    blockHash: stringValue(latest.blockHash) ?? ZERO_ROOT,
+    stateRoot: stringValue(latest.stateRoot),
+    logicalTime: latest.logicalTime ?? null,
+  };
+}
+
 function latestBlock(state: LoadedControlPlaneState): { blockNumber: string; blockHash: string } {
+  const runtimeLatest = latestRuntimeBlock(state);
+  if (runtimeLatest !== null) {
+    return {
+      blockNumber: runtimeLatest.blockNumber,
+      blockHash: runtimeLatest.blockHash,
+    };
+  }
+
   const latest = [...state.indexer.state.observations].sort((left, right) => {
     const block = BigInt(right.blockNumber) - BigInt(left.blockNumber);
     if (block !== 0n) {
@@ -139,6 +163,11 @@ function latestBlock(state: LoadedControlPlaneState): { blockNumber: string; blo
 }
 
 function finalizedBlock(state: LoadedControlPlaneState): string {
+  const runtimeLatest = latestRuntimeBlock(state);
+  if (runtimeLatest !== null) {
+    return runtimeLatest.blockNumber;
+  }
+
   const finalized = state.indexer.state.observations
     .filter((observation) => observation.lifecycleState === "finalized")
     .map((observation) => BigInt(observation.blockNumber));
@@ -218,8 +247,11 @@ function firstDevnetMap(state: LoadedControlPlaneState, keys: string[]): Record<
 }
 
 function devnetBlocksArray(state: LoadedControlPlaneState): JsonObject[] {
+  const localRuntimeBlocks = asJsonArray(state.devnet?.blocks)
+    .map((entry) => asJsonObject(entry))
+    .filter((entry): entry is JsonObject => entry !== null);
   const sources = [
-    asJsonArray(state.devnet?.blocks),
+    localRuntimeBlocks,
     asJsonArray(state.devnetControlPlaneHandoff?.blocks),
     asJsonArray(state.devnetIndexerHandoff?.blocks),
   ];
@@ -230,6 +262,17 @@ function devnetBlocksArray(state: LoadedControlPlaneState): JsonObject[] {
     }),
   ) ?? sources.find((blocks) => blocks.length > 0) ?? [];
   return candidate
+    .map((entry) => asJsonObject(entry))
+    .filter((entry): entry is JsonObject => entry !== null);
+}
+
+function activeRuntimeBlocksArray(state: LoadedControlPlaneState): JsonObject[] {
+  const activeRuntimePath = state.sources.devnet?.path === state.paths.localDevnetPath
+    || state.sources.devnet?.path === state.paths.localDevnetLaunchPath;
+  if (!activeRuntimePath) {
+    return [];
+  }
+  return asJsonArray(state.devnet?.blocks)
     .map((entry) => asJsonObject(entry))
     .filter((entry): entry is JsonObject => entry !== null);
 }
@@ -403,6 +446,29 @@ function walletPublicMetadataAccounts(state: LoadedControlPlaneState): JsonObjec
   return accountId === null ? [] : [metadata];
 }
 
+function accountRowRank(row: JsonObject): number {
+  const source = stringValue(row.source);
+  const accountType = stringValue(row.accountType);
+  if (source === "wallet-public-metadata" || accountType === "wallet") {
+    return 0;
+  }
+  if (accountType === "agent" || accountType === "operator") {
+    return 1;
+  }
+  if (accountType === "local_test_unit_balance") {
+    return 3;
+  }
+  return 2;
+}
+
+function compareAccountRows(left: JsonObject, right: JsonObject): number {
+  const rankDifference = accountRowRank(left) - accountRowRank(right);
+  if (rankDifference !== 0) {
+    return rankDifference;
+  }
+  return String(left.accountId ?? "").localeCompare(String(right.accountId ?? ""));
+}
+
 function nodeAccountRows(state: LoadedControlPlaneState): JsonObject[] {
   const rows: JsonObject[] = [];
   for (const [agentId, value] of Object.entries(devnetAgentAccounts(state))) {
@@ -498,7 +564,7 @@ function nodeAccountRows(state: LoadedControlPlaneState): JsonObject[] {
       localOnly: true,
     });
   }
-  return rows.sort((left, right) => String(left.accountId).localeCompare(String(right.accountId)));
+  return rows.sort(compareAccountRows);
 }
 
 function walletMetadataRows(state: LoadedControlPlaneState): JsonObject[] {
@@ -993,6 +1059,30 @@ function blockRows(state: LoadedControlPlaneState, includeTransactions = false):
       localOnly: true,
     };
   });
+  const existingRuntimeKeys = new Set(rows.map((block) => `${block.blockNumber}:${block.blockHash}`));
+  for (const block of activeRuntimeBlocksArray(state)) {
+    const blockNumber = stringValue(block.blockNumber) ?? "0";
+    const blockHash = stringValue(block.blockHash) ?? ZERO_ROOT;
+    const key = `${blockNumber}:${blockHash}`;
+    if (existingRuntimeKeys.has(key)) {
+      continue;
+    }
+    rows.push({
+      schema: "flowmemory.control_plane.block.v0",
+      blockNumber,
+      blockHash,
+      parentHash: stringValue(block.parentHash) ?? null,
+      logicalTime: block.logicalTime ?? null,
+      stateRoot: stringValue(block.stateRoot) ?? null,
+      txIds: stringList(block.txIds),
+      receiptCount: asJsonArray(block.receipts).length,
+      receipts: asJsonArray(block.receipts),
+      transactions: includeTransactions ? [] : undefined,
+      source: "active-local-runtime",
+      runtimeStateSource: runtimeSourcePath(state),
+      localOnly: true,
+    });
+  }
 
   const indexerBlocks = new Map<string, JsonObject>();
   for (const observation of state.indexer.state.observations) {
@@ -1044,7 +1134,14 @@ function blockRows(state: LoadedControlPlaneState, includeTransactions = false):
       : undefined,
   })));
 
-  return rows.sort((left, right) => compareStringNumbers(stringValue(left.blockNumber) ?? "0", stringValue(right.blockNumber) ?? "0"));
+  return rows.sort((left, right) => {
+    const leftHasTx = stringList(left.txIds).length > 0 ? 0 : 1;
+    const rightHasTx = stringList(right.txIds).length > 0 ? 0 : 1;
+    if (leftHasTx !== rightHasTx) {
+      return leftHasTx - rightHasTx;
+    }
+    return compareStringNumbers(stringValue(left.blockNumber) ?? "0", stringValue(right.blockNumber) ?? "0");
+  });
 }
 
 function rootfieldRows(state: LoadedControlPlaneState): JsonObject[] {
@@ -1331,8 +1428,7 @@ function finalityRows(state: LoadedControlPlaneState): JsonObject[] {
 
 function nodeStatus(_params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
   const state = stateFor(context);
-  const blocks = devnetBlocksArray(state);
-  const latest = blocks[blocks.length - 1] ?? null;
+  const latest = latestRuntimeBlock(state);
   return {
     schema: "flowmemory.control_plane.node_status.v0",
     nodeId: "flowmemory-local-control-plane",
@@ -1400,6 +1496,7 @@ function health(_params: JsonValue | undefined, context: ControlPlaneContext): J
       verifierReports: state.verifier.reports.length,
       rootfields: rootfieldRows(state).length,
       blocks: blockRows(state).length,
+      runtimeBlocks: activeRuntimeBlocksArray(state).length,
       transactions: transactionRows(state).length,
       mempool: mempoolRows(state).length,
       bridgeDeposits: bridgeDepositRows(state).length,
@@ -1494,6 +1591,42 @@ function rpcReadiness(params: JsonValue | undefined, context: ControlPlaneContex
     "FLOWCHAIN_RPC_TLS_TERMINATED",
     "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
   ].filter((name) => typeof process.env[name] !== "string" || process.env[name]?.trim().length === 0);
+  const publicUrlRaw = process.env.FLOWCHAIN_RPC_PUBLIC_URL?.trim() ?? "";
+  const allowedOriginsRaw = process.env.FLOWCHAIN_RPC_ALLOWED_ORIGINS?.trim() ?? "";
+  const rateLimitRaw = process.env.FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE?.trim() ?? "";
+  const tlsTerminatedRaw = process.env.FLOWCHAIN_RPC_TLS_TERMINATED?.trim() ?? "";
+  const invalidProductionEnvNames = new Set<string>();
+  let publicMode = false;
+  if (publicUrlRaw.length > 0) {
+    try {
+      const publicUrl = new URL(publicUrlRaw);
+      const host = publicUrl.hostname.toLowerCase();
+      publicMode = !["127.0.0.1", "localhost", "::1"].includes(host);
+      if (!["http:", "https:"].includes(publicUrl.protocol)) {
+        invalidProductionEnvNames.add("FLOWCHAIN_RPC_PUBLIC_URL");
+      }
+      if (publicMode && publicUrl.protocol !== "https:") {
+        invalidProductionEnvNames.add("FLOWCHAIN_RPC_PUBLIC_URL");
+      }
+    } catch {
+      invalidProductionEnvNames.add("FLOWCHAIN_RPC_PUBLIC_URL");
+    }
+  }
+  const allowedOrigins = allowedOriginsRaw.length > 0
+    ? allowedOriginsRaw.split(",").map((entry) => entry.trim()).filter((entry) => entry.length > 0)
+    : [];
+  if (allowedOriginsRaw.length > 0 && allowedOrigins.length === 0) {
+    invalidProductionEnvNames.add("FLOWCHAIN_RPC_ALLOWED_ORIGINS");
+  }
+  if (publicMode && allowedOrigins.some((entry) => ["*", "null", "all", "ALL"].includes(entry))) {
+    invalidProductionEnvNames.add("FLOWCHAIN_RPC_ALLOWED_ORIGINS");
+  }
+  if (rateLimitRaw.length > 0 && !/^[1-9][0-9]*$/.test(rateLimitRaw)) {
+    invalidProductionEnvNames.add("FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE");
+  }
+  if (tlsTerminatedRaw.length > 0 && tlsTerminatedRaw.toLowerCase() !== "true") {
+    invalidProductionEnvNames.add("FLOWCHAIN_RPC_TLS_TERMINATED");
+  }
   const issues: JsonObject[] = [];
   if (!runtimeLoaded) {
     issues.push({
@@ -1516,6 +1649,13 @@ function rpcReadiness(params: JsonValue | undefined, context: ControlPlaneContex
       missingEnvNames: missingProductionEnvNames,
     });
   }
+  if (invalidProductionEnvNames.size > 0) {
+    issues.push({
+      reasonCode: "invalid_public_rpc_deployment_env",
+      status: "failed",
+      invalidEnvNames: [...invalidProductionEnvNames].sort(),
+    });
+  }
   if (liveBridgeReadiness.failClosedStatus !== "READY_FOR_OPERATOR_LIVE_PILOT") {
     issues.push({
       reasonCode: "bridge_live_readiness_not_ready",
@@ -1528,7 +1668,9 @@ function rpcReadiness(params: JsonValue | undefined, context: ControlPlaneContex
     schema: "flowchain.rpc.readiness.v0",
     service: "flowmemory-control-plane-v0",
     rpcPath: "/rpc",
-    status: issues.length === 0 ? "READY_FOR_CONFIGURED_OWNER_RPC_DEPLOYMENT" : "BLOCKED",
+    status: issues.length === 0
+      ? "READY_FOR_CONFIGURED_OWNER_RPC_DEPLOYMENT"
+      : issues.some((issue) => issue.status === "failed") ? "FAILED" : "BLOCKED",
     localRuntimeReadable: runtimeLoaded,
     publicRpcReady: issues.length === 0,
     walletUsableAgainstRpc: runtimeLoaded,
@@ -1539,6 +1681,15 @@ function rpcReadiness(params: JsonValue | undefined, context: ControlPlaneContex
     missingOptionalSources: missing,
     degradedSources: degraded,
     missingProductionEnvNames,
+    invalidProductionEnvNames: [...invalidProductionEnvNames].sort(),
+    publicRpcControls: {
+      publicMode,
+      allowedOriginsConfigured: allowedOrigins.length > 0,
+      allowedOriginsWildcardRejectedForPublicMode: !publicMode || !allowedOrigins.some((entry) => ["*", "null", "all", "ALL"].includes(entry)),
+      rateLimitConfigured: /^[1-9][0-9]*$/.test(rateLimitRaw),
+      tlsTerminatedAcknowledged: tlsTerminatedRaw.toLowerCase() === "true",
+      envValuesPrinted: false,
+    },
     bridgeLiveReadiness: {
       failClosedStatus: liveBridgeReadiness.failClosedStatus,
       readyForOperatorLivePilot: liveBridgeReadiness.readyForOperatorLivePilot,
@@ -1557,7 +1708,8 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
   const state = stateFor(context);
   const latest = latestBlock(state);
   const devnetBlocks = devnetBlocksArray(state);
-  const latestDevnetBlock = devnetBlocks[devnetBlocks.length - 1] ?? null;
+  const latestDevnetBlock = latestRuntimeBlock(state);
+  const activeRuntimeBlocks = activeRuntimeBlocksArray(state);
   const nodeRunning = state.devnet !== null && state.sources.devnet?.status !== "missing";
   const peerRows = devnetPeers(state);
 
@@ -1571,10 +1723,10 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
     nodeRunning,
     currentBlock: latest.blockNumber,
     currentBlockHash: latest.blockHash,
-    blockHeight: stringValue(latestDevnetBlock?.blockNumber) ?? latest.blockNumber,
-    latestStateRoot: stringValue(latestDevnetBlock?.stateRoot) ?? stringValue(state.devnet?.stateRoot) ?? latest.blockHash,
+    blockHeight: latestDevnetBlock?.blockNumber ?? latest.blockNumber,
+    latestStateRoot: latestDevnetBlock?.stateRoot ?? stringValue(state.devnet?.stateRoot) ?? latest.blockHash,
     finalizedBlock: finalizedBlock(state),
-    generatedAt: state.launchCore.generatedAt,
+    generatedAt: new Date().toISOString(),
     peerStatus: {
       available: peerRows.length > 0,
       peerCount: peerRows.length,
@@ -1612,6 +1764,7 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
       challenges: challengeRows(state).length,
       finalityRows: finalityRows(state).length,
       blocks: blockRows(state).length,
+      runtimeBlocks: activeRuntimeBlocks.length,
       transactions: transactionRows(state).length,
       mempool: mempoolRows(state).length,
       accounts: nodeAccountRows(state).length,
@@ -1627,7 +1780,7 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
       bridgeCredits: bridgeCreditRows(state).length,
       withdrawals: withdrawalRows(state).length,
       pilotStatus: 1,
-      devnetBlocks: devnetBlocksArray(state).length,
+      devnetBlocks: activeRuntimeBlocks.length > 0 ? activeRuntimeBlocks.length : devnetBlocks.length,
     },
     capabilities: [
       "health_reads",
@@ -1682,19 +1835,21 @@ function devnetState(params: JsonValue | undefined, context: ControlPlaneContext
   const objectParams = asObjectParams(params, "devnet_state");
   const includeBlocks = optionalBoolean(objectParams, "includeBlocks");
   const blocks = devnetBlocksArray(state);
+  const runtimeBlocks = activeRuntimeBlocksArray(state);
+  const latest = latestRuntimeBlock(state);
 
   return {
     schema: "flowmemory.control_plane.devnet_state.v0",
     available: state.devnet !== null,
     chainId: typeof state.devnet?.chainId === "string" ? state.devnet.chainId : "flowmemory-local-devnet-v0",
     genesisHash: typeof state.devnet?.genesisHash === "string" ? state.devnet.genesisHash : null,
-    latestBlockNumber: blocks.length > 0 ? blocks[blocks.length - 1]?.blockNumber ?? null : null,
-    latestBlockHash: blocks.length > 0 ? blocks[blocks.length - 1]?.blockHash ?? null : null,
-    stateRoot: typeof state.devnetControlPlaneHandoff?.stateRoot === "string"
+    latestBlockNumber: latest?.blockNumber ?? (blocks.length > 0 ? blocks[blocks.length - 1]?.blockNumber ?? null : null),
+    latestBlockHash: latest?.blockHash ?? (blocks.length > 0 ? blocks[blocks.length - 1]?.blockHash ?? null : null),
+    stateRoot: latest?.stateRoot ?? (typeof state.devnetControlPlaneHandoff?.stateRoot === "string"
       ? state.devnetControlPlaneHandoff.stateRoot
       : typeof state.devnetIndexerHandoff?.stateRoot === "string"
         ? state.devnetIndexerHandoff.stateRoot
-        : state.devnet?.parentHash ?? null,
+        : state.devnet?.parentHash ?? null),
     rootfieldCount: Object.keys(devnetRootfields(state)).length,
     workReceiptCount: Object.keys(devnetWorkReceipts(state)).length,
     verifierReportCount: Object.keys(devnetReports(state)).length,
@@ -1725,6 +1880,7 @@ function devnetState(params: JsonValue | undefined, context: ControlPlaneContext
     baseAnchorCount: state.devnet?.baseAnchors && typeof state.devnet.baseAnchors === "object" && !Array.isArray(state.devnet.baseAnchors)
       ? Object.keys(state.devnet.baseAnchors).length
       : 0,
+    runtimeBlockCount: runtimeBlocks.length,
     blocks: includeBlocks ? blocks : undefined,
     source: state.sources.devnet,
     indexerHandoff: state.devnetIndexerHandoff === null ? null : {
@@ -1782,8 +1938,8 @@ function blockGet(params: JsonValue | undefined, context: ControlPlaneContext): 
     block,
     provenance: {
       sources: [
-        block.source === "local-devnet"
-          ? provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.block.v0")
+        block.source === "local-devnet" || block.source === "active-local-runtime"
+          ? provenanceSource("devnet", block.source === "active-local-runtime" ? runtimeSourcePath(state) : "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.block.v0")
           : provenanceSource("indexer", "services/indexer/out/indexer-state.json", "flowmemory.indexer.persistence.v0"),
       ],
     },
@@ -1907,15 +2063,20 @@ function transactionFromSignedEnvelope(envelope: JsonObject): JsonObject {
   return transaction;
 }
 
-function runtimeSubmitMode(params: JsonObject): "off" | "direct" {
+type RuntimeSubmitMode = "off" | "direct" | "node-inbox";
+
+function runtimeSubmitMode(params: JsonObject): RuntimeSubmitMode {
   const mode = optionalString(params, "runtimeSubmitMode");
-  if (mode !== undefined && mode !== "direct" && mode !== "off") {
-    throw invalidParams("runtimeSubmitMode must be direct or off", {
-      allowed: ["direct", "off"],
+  if (mode !== undefined && mode !== "direct" && mode !== "off" && mode !== "node-inbox") {
+    throw invalidParams("runtimeSubmitMode must be direct, node-inbox, or off", {
+      allowed: ["direct", "node-inbox", "off"],
     });
   }
   if (mode === "direct") {
     return "direct";
+  }
+  if (mode === "node-inbox") {
+    return "node-inbox";
   }
   if (mode === "off") {
     return "off";
@@ -1934,6 +2095,7 @@ function submitEnvelopeToRuntime(
   signedEnvelope: JsonObject,
   intakeId: string,
   submittedBy: string,
+  mode: Exclude<RuntimeSubmitMode, "off">,
 ): JsonObject {
   const tx = transactionFromSignedEnvelope(signedEnvelope);
   const runtimeDir = resolve(dirname(resolveControlPlanePath(state.paths.txIntakePath)), "runtime-submit");
@@ -1959,9 +2121,11 @@ function submitEnvelopeToRuntime(
     fixturePath,
     "--authorized-by",
     submittedBy,
-    "--direct",
   ];
-  const result = spawnSync("cargo", args, {
+  if (mode === "direct") {
+    args.push("--direct");
+  }
+  const result = spawnCargoSync(args, {
     cwd: repoRoot(),
     encoding: "utf8",
     windowsHide: true,
@@ -1989,12 +2153,12 @@ function submitEnvelopeToRuntime(
 
   return {
     schema: "flowmemory.control_plane.runtime_submit_result.v0",
-    mode: "direct",
+    mode,
     queued,
     statePath,
     nodeDir,
     fixturePath,
-    status: "queued_in_runtime_state",
+    status: mode === "direct" ? "queued_in_runtime_state" : "queued_in_node_inbox",
     localOnly: true,
   };
 }
@@ -2026,8 +2190,8 @@ function transactionSubmit(params: JsonValue | undefined, context: ControlPlaneC
   };
   appendNdjson(state.paths.txIntakePath, row);
   const runtimeMode = runtimeSubmitMode(objectParams);
-  const runtimeSubmission = runtimeMode === "direct"
-    ? submitEnvelopeToRuntime(state, signedEnvelope, intakeId, submittedBy)
+  const runtimeSubmission = runtimeMode !== "off"
+    ? submitEnvelopeToRuntime(state, signedEnvelope, intakeId, submittedBy, runtimeMode)
     : null;
   return {
     schema: "flowmemory.control_plane.transaction_submit_result.v0",
@@ -2035,7 +2199,11 @@ function transactionSubmit(params: JsonValue | undefined, context: ControlPlaneC
     intakeId,
     txId: row.txId,
     status: row.status,
-    forwardedTo: runtimeSubmission === null ? "local-file-intake" : "local-runtime-state",
+    forwardedTo: runtimeSubmission === null
+      ? "local-file-intake"
+      : runtimeMode === "direct"
+        ? "local-runtime-state"
+        : "local-runtime-inbox",
     runtimeIntakePath: state.paths.txIntakePath,
     runtimeSubmission,
     localOnly: true,
@@ -3333,8 +3501,8 @@ function provenanceForObject(state: LoadedControlPlaneState, key: string): JsonO
   }
   if (block !== undefined || transaction !== undefined) {
     const source = block?.source ?? transaction?.source;
-    sources.push(source === "local-devnet"
-      ? provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.state.v0")
+    sources.push(source === "local-devnet" || source === "active-local-runtime"
+      ? provenanceSource("devnet", source === "active-local-runtime" ? runtimeSourcePath(state) : "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.state.v0")
       : provenanceSource("indexer", "services/indexer/out/indexer-state.json", "flowmemory.indexer.persistence.v0"));
   }
   if (model !== undefined) {

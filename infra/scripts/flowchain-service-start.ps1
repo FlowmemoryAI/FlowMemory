@@ -19,15 +19,28 @@ Set-StrictMode -Version Latest
 
 $repoRoot = Set-FlowChainRepoRoot
 $servicesFullDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ServicesDir)
+$controlPlaneScriptPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "services/control-plane/src/server.ts")
 $logsDir = Join-Path $servicesFullDir "logs"
 $controlPlanePidPath = Join-Path $servicesFullDir "control-plane.pid"
 $relayerPidPath = Join-Path $servicesFullDir "bridge-relayer-loop.pid"
 $reportPath = Join-Path $servicesFullDir "flowchain-service-start-report.json"
+$configuredControlPlaneCargoTargetDir = [Environment]::GetEnvironmentVariable("FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR", "Process")
+$controlPlaneCargoTargetDir = if ([string]::IsNullOrWhiteSpace($configuredControlPlaneCargoTargetDir)) {
+    Join-Path $repoRoot "devnet/local/cargo-target/control-plane-runtime"
+}
+else {
+    [System.IO.Path]::GetFullPath($configuredControlPlaneCargoTargetDir)
+}
+$controlPlaneCargoTargetDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path $controlPlaneCargoTargetDir
+$controlPlaneCargoTempDir = Join-Path $repoRoot "devnet/local/tmp/control-plane-runtime"
 New-Item -ItemType Directory -Force -Path $logsDir | Out-Null
+New-Item -ItemType Directory -Force -Path $controlPlaneCargoTargetDir | Out-Null
+New-Item -ItemType Directory -Force -Path $controlPlaneCargoTempDir | Out-Null
 
 function Get-ControlPlanePortProcess {
     param(
-        [Parameter(Mandatory = $true)][int] $Port
+        [Parameter(Mandatory = $true)][int] $Port,
+        [Parameter(Mandatory = $true)][string] $ExpectedScriptPath
     )
 
     $connections = @(Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue | Select-Object -First 1)
@@ -44,7 +57,7 @@ function Get-ControlPlanePortProcess {
     return [ordered]@{
         pid = $pidValue
         commandLine = "$commandLine"
-        isControlPlane = ("$commandLine" -like "*src/server.ts*" -or "$commandLine" -like "*services/control-plane/src/server.ts*")
+        isCurrentRepoControlPlane = ("$commandLine" -like "*$ExpectedScriptPath*")
     }
 }
 
@@ -76,22 +89,52 @@ if ($LASTEXITCODE -ne 0) {
     throw "FlowChain node start failed."
 }
 
-$controlStatus = Test-FlowChainPid -PidPath $controlPlanePidPath -CommandLineIncludes @("services/control-plane/src/server.ts")
-if (-not $controlStatus.running) {
-    $portProcess = Get-ControlPlanePortProcess -Port $ControlPlanePort
+$controlStatus = Test-FlowChainPid -PidPath $controlPlanePidPath -CommandLineIncludes @($controlPlaneScriptPath)
+if ($controlStatus.running -and -not $controlStatus.commandLineMatched) {
+    Remove-Item -LiteralPath $controlPlanePidPath -Force -ErrorAction SilentlyContinue
+    $controlStatus = Test-FlowChainPid -PidPath $controlPlanePidPath -CommandLineIncludes @($controlPlaneScriptPath)
+}
+if (-not ($controlStatus.running -and $controlStatus.commandLineMatched)) {
+    $portProcess = Get-ControlPlanePortProcess -Port $ControlPlanePort -ExpectedScriptPath $controlPlaneScriptPath
     if ($null -ne $portProcess) {
-        if (-not $portProcess.isControlPlane) {
-            throw "Control-plane port $ControlPlanePort is already in use by a non-control-plane process."
+        if (-not $portProcess.isCurrentRepoControlPlane) {
+            throw "Control-plane port $ControlPlanePort is already in use by a process that was not launched from this repository. Stop that process or choose another port."
         }
         Set-Content -LiteralPath $controlPlanePidPath -Value "$($portProcess.pid)"
-        $controlStatus = Test-FlowChainPid -PidPath $controlPlanePidPath -CommandLineIncludes @("src/server.ts")
+        $controlStatus = Test-FlowChainPid -PidPath $controlPlanePidPath -CommandLineIncludes @($controlPlaneScriptPath)
     }
 }
-if (-not $controlStatus.running) {
+if (-not ($controlStatus.running -and $controlStatus.commandLineMatched)) {
+    $previousFlowChainControlPlaneCargoTarget = [Environment]::GetEnvironmentVariable("FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR", "Process")
+    $previousCargoTarget = [Environment]::GetEnvironmentVariable("CARGO_TARGET_DIR", "Process")
+    $previousTemp = [Environment]::GetEnvironmentVariable("TEMP", "Process")
+    $previousTmp = [Environment]::GetEnvironmentVariable("TMP", "Process")
+    try {
+        $env:FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR = $controlPlaneCargoTargetDir
+        $env:CARGO_TARGET_DIR = $controlPlaneCargoTargetDir
+        $env:TEMP = $controlPlaneCargoTempDir
+        $env:TMP = $controlPlaneCargoTempDir
+        & cargo build --manifest-path "crates/flowmemory-devnet/Cargo.toml"
+        if ($LASTEXITCODE -ne 0) {
+            throw "Control-plane runtime cargo warmup failed."
+        }
+    }
+    finally {
+        [Environment]::SetEnvironmentVariable("CARGO_TARGET_DIR", $previousCargoTarget, "Process")
+        [Environment]::SetEnvironmentVariable("TEMP", $previousTemp, "Process")
+        [Environment]::SetEnvironmentVariable("TMP", $previousTmp, "Process")
+        if ([string]::IsNullOrWhiteSpace($previousFlowChainControlPlaneCargoTarget)) {
+            $env:FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR = $controlPlaneCargoTargetDir
+        }
+        else {
+            [Environment]::SetEnvironmentVariable("FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR", $previousFlowChainControlPlaneCargoTarget, "Process")
+        }
+    }
+
     $stdoutPath = Join-Path $logsDir "control-plane.stdout.log"
     $stderrPath = Join-Path $logsDir "control-plane.stderr.log"
     $cpArgs = @(
-        "services/control-plane/src/server.ts",
+        $controlPlaneScriptPath,
         "--host",
         $ControlPlaneHost,
         "--port",
@@ -105,7 +148,7 @@ if (-not $controlStatus.running) {
         -RedirectStandardOutput $stdoutPath `
         -RedirectStandardError $stderrPath
     Set-Content -LiteralPath $controlPlanePidPath -Value "$($process.Id)"
-    $controlStatus = Test-FlowChainPid -PidPath $controlPlanePidPath -CommandLineIncludes @("services/control-plane/src/server.ts")
+    $controlStatus = Test-FlowChainPid -PidPath $controlPlanePidPath -CommandLineIncludes @($controlPlaneScriptPath)
 }
 
 $relayerStarted = $false
@@ -142,13 +185,13 @@ while (`$true) {
 
 $nodePidPath = Join-Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $NodeDir) "flowchain-node.pid"
 $nodeStatus = Test-FlowChainPid -PidPath $nodePidPath -CommandLineIncludes @("flowmemory-devnet")
-$controlStatus = Test-FlowChainPid -PidPath $controlPlanePidPath -CommandLineIncludes @("services/control-plane/src/server.ts")
+$controlStatus = Test-FlowChainPid -PidPath $controlPlanePidPath -CommandLineIncludes @($controlPlaneScriptPath)
 $relayerStatusFinal = Test-FlowChainPid -PidPath $relayerPidPath -CommandLineIncludes @("bridge-base-mainnet-pilot-observe.ps1")
 
 $report = [ordered]@{
     schema = "flowchain.service_start_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = if ($nodeStatus.running -and $controlStatus.running) { "started" } else { "failed" }
+    status = if ($nodeStatus.running -and $nodeStatus.commandLineMatched -and $controlStatus.running -and $controlStatus.commandLineMatched) { "started" } else { "failed" }
     liveProfile = [bool]$LiveProfile
     statePath = $StatePath
     nodeDir = $NodeDir
@@ -167,6 +210,7 @@ $report = [ordered]@{
     controlPlane = [ordered]@{
         running = $controlStatus.running
         pid = $controlStatus.pid
+        commandLineMatched = $controlStatus.commandLineMatched
     }
     bridgeRelayerLoop = [ordered]@{
         requested = [bool]$StartBridgeRelayerLoop
@@ -174,6 +218,10 @@ $report = [ordered]@{
         running = $relayerStatusFinal.running
         pid = $relayerStatusFinal.pid
         pollSeconds = $BridgePollSeconds
+    }
+    controlPlaneCargoWarmup = [ordered]@{
+        targetDir = $controlPlaneCargoTargetDir
+        tempDir = $controlPlaneCargoTempDir
     }
     statusCommand = "npm run flowchain:service:status"
     stopCommand = "npm run flowchain:service:stop"

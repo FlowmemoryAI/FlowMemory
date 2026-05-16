@@ -55,7 +55,7 @@ function Invoke-LiveInfraStep {
     }
     $output | Set-Content -LiteralPath $logPath -Encoding UTF8
     $status = if ($exitCode -eq 0) { "passed" } elseif ($AllowFailure) { "blocked" } else { "failed" }
-    if ($exitCode -eq 0 -and -not [string]::IsNullOrWhiteSpace($ExpectedReportPath) -and (Test-Path -LiteralPath $ExpectedReportPath)) {
+    if (-not [string]::IsNullOrWhiteSpace($ExpectedReportPath) -and (Test-Path -LiteralPath $ExpectedReportPath)) {
         $childReport = Read-FlowChainJsonIfExists -Path $ExpectedReportPath
         if ($null -ne $childReport -and $childReport.PSObject.Properties.Name -contains "status") {
             $childStatus = "$($childReport.status)"
@@ -111,11 +111,20 @@ function Add-MissingNamesFromReport {
 }
 
 $publicReportPath = Join-Path $reportFullDir "public-rpc-readiness-report.json"
+$ownerInputsReportPath = Join-Path $reportFullDir "owner-inputs-report.json"
 $serviceReportPath = Join-Path $reportFullDir "service-status-report.json"
 $backupReportPath = Join-Path $reportFullDir "backup-readiness-report.json"
 $bridgeLiveReportPath = Join-Path $reportFullDir "bridge-live-readiness-report.json"
 $bridgeInfraReportPath = Join-Path $reportFullDir "bridge-infra-readiness-report.json"
 $noSecretReportPath = Join-Path $reportFullDir "no-secret-scan-report.json"
+
+Invoke-LiveInfraStep `
+    -Name "Owner input contract" `
+    -Command "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-inputs.ps1 -AllowBlocked" `
+    -FilePath "powershell" `
+    -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-inputs.ps1"), "-ReportPath", $ownerInputsReportPath, "-AllowBlocked") `
+    -ExpectedReportPath $ownerInputsReportPath `
+    -AllowFailure
 
 Invoke-LiveInfraStep `
     -Name "Public RPC readiness" `
@@ -166,6 +175,7 @@ Invoke-LiveInfraStep `
     -AllowFailure
 
 $publicReport = Read-FlowChainJsonIfExists -Path $publicReportPath
+$ownerInputsReport = Read-FlowChainJsonIfExists -Path $ownerInputsReportPath
 $serviceReport = Read-FlowChainJsonIfExists -Path $serviceReportPath
 $backupReport = Read-FlowChainJsonIfExists -Path $backupReportPath
 $bridgeLiveReport = Read-FlowChainJsonIfExists -Path $bridgeLiveReportPath
@@ -173,8 +183,16 @@ $bridgeInfraReport = Read-FlowChainJsonIfExists -Path $bridgeInfraReportPath
 $noSecretReport = Read-FlowChainJsonIfExists -Path $noSecretReportPath
 
 $missingEnvNames = New-Object System.Collections.ArrayList
-foreach ($report in @($publicReport, $backupReport, $bridgeLiveReport, $bridgeInfraReport)) {
+foreach ($report in @($ownerInputsReport, $publicReport, $backupReport, $bridgeLiveReport, $bridgeInfraReport)) {
     Add-MissingNamesFromReport -Target $missingEnvNames -Report $report -Category "env"
+}
+$invalidEnvNames = New-Object System.Collections.ArrayList
+if ($null -ne $ownerInputsReport -and $ownerInputsReport.PSObject.Properties.Name -contains "invalidEnvNames") {
+    foreach ($name in @($ownerInputsReport.invalidEnvNames)) {
+        if (-not [string]::IsNullOrWhiteSpace("$name")) {
+            [void] $invalidEnvNames.Add("$name")
+        }
+    }
 }
 $missingArtifactNames = New-Object System.Collections.ArrayList
 foreach ($report in @($publicReport, $serviceReport, $backupReport, $bridgeInfraReport)) {
@@ -184,6 +202,7 @@ $missingProcessNames = New-Object System.Collections.ArrayList
 Add-MissingNamesFromReport -Target $missingProcessNames -Report $serviceReport -Category "process"
 
 $reportStatuses = [ordered]@{
+    ownerInputs = Get-ReportStatus -Report $ownerInputsReport
     publicRpc = Get-ReportStatus -Report $publicReport
     services = Get-ReportStatus -Report $serviceReport
     backup = Get-ReportStatus -Report $backupReport
@@ -192,6 +211,7 @@ $reportStatuses = [ordered]@{
     noSecretScan = Get-ReportStatus -Report $noSecretReport
 }
 
+$ownerInputsReady = ($ownerInputsReport -and $ownerInputsReport.PSObject.Properties.Name -contains "ownerInputReady" -and $ownerInputsReport.ownerInputReady -eq $true)
 $publicReady = ($publicReport -and $publicReport.PSObject.Properties.Name -contains "publicRpcReady" -and $publicReport.publicRpcReady -eq $true)
 $servicesReady = $reportStatuses.services -eq "passed"
 $backupReady = $reportStatuses.backup -eq "passed"
@@ -202,7 +222,7 @@ $failedStatuses = @($reportStatuses.GetEnumerator() | Where-Object { $_.Value -e
 $overallStatus = if ($failedStatuses.Count -gt 0) {
     "failed"
 }
-elseif ($publicReady -and $servicesReady -and $backupReady -and $bridgeReady -and $noSecretReady) {
+elseif ($ownerInputsReady -and $publicReady -and $servicesReady -and $backupReady -and $bridgeReady -and $noSecretReady) {
     "passed"
 }
 else {
@@ -219,6 +239,7 @@ $finalReport = [ordered]@{
         commit = (& git rev-parse HEAD).Trim()
     }
     readiness = [ordered]@{
+        ownerInputsReady = $ownerInputsReady
         publicRpcReady = $publicReady
         servicesReady = $servicesReady
         backupReady = $backupReady
@@ -227,6 +248,7 @@ $finalReport = [ordered]@{
     }
     reportStatuses = $reportStatuses
     missingEnvNames = @($missingEnvNames | Select-Object -Unique)
+    invalidEnvNames = @($invalidEnvNames | Select-Object -Unique)
     missingArtifactNames = @($missingArtifactNames | Select-Object -Unique)
     blockedArtifactNames = @($missingArtifactNames | Select-Object -Unique)
     missingProcessNames = @($missingProcessNames | Select-Object -Unique)
@@ -234,6 +256,7 @@ $finalReport = [ordered]@{
     commandList = @($commandsRun)
     steps = @($steps)
     reportPaths = [ordered]@{
+        ownerInputs = $ownerInputsReportPath
         publicRpc = $publicReportPath
         services = $serviceReportPath
         backup = $backupReportPath
@@ -243,6 +266,7 @@ $finalReport = [ordered]@{
         logs = $logsDir
     }
     blockedUntil = [ordered]@{
+        ownerInputs = "Provide structurally valid owner public RPC, backup, and Base 8453 bridge env names without committing values."
         publicRpc = "Configure FLOWCHAIN_RPC_* env names and run the control-plane behind TLS/rate-limit/CORS enforcement."
         services = "Run npm run flowchain:service:start -- -LiveProfile after local state exists."
         backup = "Provide FLOWCHAIN_RPC_STATE_BACKUP_PATH as an existing writable directory."
@@ -259,6 +283,9 @@ Write-Host "FlowChain live infra status: $overallStatus"
 Write-Host "Report: $reportPath"
 if ($finalReport.missingEnvNames.Count -gt 0) {
     Write-Host "Missing env names: $($finalReport.missingEnvNames -join ', ')"
+}
+if ($finalReport.invalidEnvNames.Count -gt 0) {
+    Write-Host "Invalid env names: $($finalReport.invalidEnvNames -join ', ')"
 }
 if ($finalReport.blockedArtifactNames.Count -gt 0) {
     Write-Host "Blocked artifact names: $($finalReport.blockedArtifactNames -join ', ')"

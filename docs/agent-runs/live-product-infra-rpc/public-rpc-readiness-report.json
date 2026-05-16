@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_readiness_report.v0",
-    "generatedAt":  "2026-05-15T04:35:51.5585011Z",
+    "generatedAt":  "2026-05-16T00:42:42.8706593Z",
     "status":  "blocked",
     "publicRpcReady":  false,
     "publicMode":  false,
@@ -26,8 +26,18 @@
                    "httpsRequiredForPublicMode":  true,
                    "tlsTerminatedAcknowledged":  false,
                    "allowedOriginsConfigured":  false,
-                   "allowedOriginsWildcardRejected":  false,
+                   "allowedOriginsWildcardRejected":  true,
                    "numericRateLimit":  false,
+                   "rateLimitProbePerformed":  false,
+                   "rateLimitRejectionObserved":  false,
+                   "rateLimitRetryAfterHeaderPresent":  false,
+                   "rateLimitProbeWithinMax":  true,
+                   "corsProbePerformed":  false,
+                   "corsAllowOriginHeaderPresent":  false,
+                   "corsConfiguredOriginAccepted":  false,
+                   "corsDisallowedOriginProbePerformed":  false,
+                   "corsDisallowedOriginRejected":  false,
+                   "corsWildcardRejectedForPublicMode":  true,
                    "backupPathConfigured":  false,
                    "backupPathExists":  false,
                    "backupPathWritable":  false,
@@ -48,13 +58,13 @@
     "localState":  {
                        "statePath":  "devnet/local/state.json",
                        "chainId":  "flowmemory-local-devnet-v0",
-                       "latestHeight":  "232",
-                       "latestHash":  "0xa81de80ec355086968e527ab380377b0af0c4f3157ca8d97b106a74bf2ba7c0a",
-                       "latestRoot":  "0x149b8017ed2be0fb192c295383d2a198798a24e8509978c678fe78205ca8ee58",
-                       "latestBlockAgeSeconds":  66,
-                       "stateFileLastWriteAgeSeconds":  66,
-                       "finalizedHeight":  "232",
-                       "finalizedHash":  "0xa81de80ec355086968e527ab380377b0af0c4f3157ca8d97b106a74bf2ba7c0a",
+                       "latestHeight":  "25267",
+                       "latestHash":  "0x265d36ae122be6fef51eb592c0189d20ab8f8ace0abd875e65befb2cc1a4ddb8",
+                       "latestRoot":  "0x0b3d0d8a58a2a945f3044056b5790809ba21040aa608e4823164e2fadc70d077",
+                       "latestBlockAgeSeconds":  0,
+                       "stateFileLastWriteAgeSeconds":  0,
+                       "finalizedHeight":  "25267",
+                       "finalizedHash":  "0x265d36ae122be6fef51eb592c0189d20ab8f8ace0abd875e65befb2cc1a4ddb8",
                        "mempoolDepth":  0,
                        "peerCount":  null
                    },
@@ -65,6 +75,25 @@
 
                                          ]
                         },
+    "cors":  {
+                 "performed":  false,
+                 "allowOriginHeaderPresent":  false,
+                 "configuredOriginAccepted":  false,
+                 "disallowedOriginProbePerformed":  false,
+                 "disallowedOriginRejected":  false,
+                 "wildcardRejectedForPublicMode":  true,
+                 "headerValuePrinted":  false
+             },
+    "rateLimit":  {
+                      "configured":  false,
+                      "probePerformed":  false,
+                      "probeRequestLimit":  300,
+                      "configuredLimit":  null,
+                      "requestCount":  0,
+                      "rejectionObserved":  false,
+                      "retryAfterHeaderPresent":  false,
+                      "skippedBecauseAboveProbeLimit":  false
+                  },
     "problems":  [
                      {
                          "name":  "FLOWCHAIN_RPC_PUBLIC_URL",

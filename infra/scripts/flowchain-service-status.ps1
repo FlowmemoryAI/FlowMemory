@@ -19,6 +19,7 @@ $stateFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resol
 $nodeFullDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $NodeDir)
 $servicesFullDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ServicesDir)
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
+$controlPlaneScriptPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "services/control-plane/src/server.ts")
 
 $nodePidPath = Join-Path $nodeFullDir "flowchain-node.pid"
 $controlPlanePidPath = Join-Path $servicesFullDir "control-plane.pid"
@@ -26,9 +27,11 @@ $relayerPidPath = Join-Path $servicesFullDir "bridge-relayer-loop.pid"
 $serviceStartReportPath = Join-Path $servicesFullDir "flowchain-service-start-report.json"
 
 $nodeStatus = Test-FlowChainPid -PidPath $nodePidPath -CommandLineIncludes @("flowmemory-devnet")
-$controlPlaneStatus = Test-FlowChainPid -PidPath $controlPlanePidPath -CommandLineIncludes @("services/control-plane/src/server.ts")
+$controlPlaneStatus = Test-FlowChainPid -PidPath $controlPlanePidPath -CommandLineIncludes @($controlPlaneScriptPath)
 $relayerStatus = Test-FlowChainPid -PidPath $relayerPidPath -CommandLineIncludes @("bridge-base-mainnet-pilot-observe.ps1")
-if (-not $controlPlaneStatus.running) {
+$controlPlaneReady = $controlPlaneStatus.running -and $controlPlaneStatus.commandLineMatched
+$controlPlanePortProcess = $null
+if (-not $controlPlaneReady) {
     $connections = @(Get-NetTCPConnection -LocalPort $ControlPlanePort -ErrorAction SilentlyContinue | Select-Object -First 1)
     if ($connections.Count -gt 0) {
         $portPid = [int]$connections[0].OwningProcess
@@ -38,10 +41,17 @@ if (-not $controlPlaneStatus.running) {
         catch {
             $commandLine = ""
         }
-        if ("$commandLine" -like "*src/server.ts*" -or "$commandLine" -like "*services/control-plane/src/server.ts*") {
+        if ("$commandLine" -like "*$controlPlaneScriptPath*") {
             $controlPlaneStatus["running"] = $true
             $controlPlaneStatus["pid"] = $portPid
             $controlPlaneStatus["commandLineMatched"] = $true
+            $controlPlaneReady = $true
+        }
+        else {
+            $controlPlanePortProcess = [ordered]@{
+                pid = $portPid
+                currentRepoControlPlane = $false
+            }
         }
     }
 }
@@ -57,8 +67,11 @@ $problems = New-Object System.Collections.ArrayList
 if (-not $nodeStatus.running) {
     Add-FlowChainReadinessProblem -Problems $problems -Name "devnet/local/node/flowchain-node.pid" -Reason "FlowChain node process is not running" -Category "process"
 }
-if (-not $controlPlaneStatus.running) {
-    Add-FlowChainReadinessProblem -Problems $problems -Name "devnet/local/services/control-plane.pid" -Reason "control-plane process is not running" -Category "process"
+if (-not $controlPlaneReady) {
+    Add-FlowChainReadinessProblem -Problems $problems -Name "devnet/local/services/control-plane.pid" -Reason "control-plane process is not running from this repository" -Category "process"
+}
+if ($null -ne $controlPlanePortProcess -and -not $controlPlaneReady) {
+    Add-FlowChainReadinessProblem -Problems $problems -Name "127.0.0.1:$ControlPlanePort" -Reason "control-plane port is occupied by a process that was not launched from this repository" -Kind "failed" -Category "process"
 }
 if (-not $stateFacts.readable) {
     Add-FlowChainReadinessProblem -Problems $problems -Name "devnet/local/state.json" -Reason "state file is missing or unreadable" -Category "artifact"
@@ -97,11 +110,12 @@ $report = [ordered]@{
         commandLineMatched = $nodeStatus.commandLineMatched
     }
     controlPlane = [ordered]@{
-        status = if ($controlPlaneStatus.running) { "running" } else { "stopped" }
+        status = if ($controlPlaneReady) { "running" } elseif ($null -ne $controlPlanePortProcess) { "port-occupied" } elseif ($controlPlaneStatus.running) { "pid-mismatch" } else { "stopped" }
         pid = $controlPlaneStatus.pid
         pidPath = "devnet/local/services/control-plane.pid"
-        commandLineMatched = $controlPlaneStatus.commandLineMatched
+        commandLineMatched = $controlPlaneReady
     }
+    controlPlanePortProcess = $controlPlanePortProcess
     bridgeRelayerLoop = [ordered]@{
         status = if ($relayerStatus.running) { "running" } else { "stopped" }
         pid = $relayerStatus.pid
