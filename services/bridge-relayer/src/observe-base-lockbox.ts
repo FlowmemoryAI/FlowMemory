@@ -335,8 +335,25 @@ interface CliOptions {
   withdrawalIntent: boolean;
   withdrawalBaseRecipient?: `0x${string}`;
   runtimeStatePath?: string;
+  cursorStatePath?: string;
   evidenceOutPath?: string;
   releaseEvidenceOutPath?: string;
+}
+
+interface BridgeLockboxCursorState {
+  schema: "flowmemory.bridge_lockbox_cursor_state.v0";
+  stateId: `0x${string}`;
+  updatedAt: string;
+  mode: BridgeMode;
+  sourceChainId: BridgeSourceChainId;
+  lockboxAddress: `0x${string}`;
+  lastScannedBlock: string;
+  lastConfirmedHead: string;
+  lastFromBlock: string;
+  lastToBlock: string;
+  lastLogCount: number;
+  localOnly: boolean;
+  productionReady: boolean;
 }
 
 export interface BridgePipelineResult {
@@ -513,6 +530,7 @@ export function parseBridgeArgs(args: string[]): CliOptions {
   let withdrawalIntent = false;
   let withdrawalBaseRecipient: `0x${string}` | undefined;
   let runtimeStatePath: string | undefined;
+  let cursorStatePath: string | undefined;
   let evidenceOutPath: string | undefined;
   let releaseEvidenceOutPath: string | undefined;
 
@@ -609,6 +627,9 @@ export function parseBridgeArgs(args: string[]): CliOptions {
     } else if (arg === "--runtime-state") {
       runtimeStatePath = argValue(args, index, arg);
       index += 1;
+    } else if (arg === "--cursor-state") {
+      cursorStatePath = argValue(args, index, arg);
+      index += 1;
     } else if (arg === "--evidence-out") {
       evidenceOutPath = argValue(args, index, arg);
       index += 1;
@@ -624,17 +645,24 @@ export function parseBridgeArgs(args: string[]): CliOptions {
     throw new Error("--fixture is required in mock modes");
   }
 
+  if (cursorStatePath !== undefined && mode !== "base-mainnet-pilot") {
+    throw new Error("--cursor-state is only supported for base-mainnet-pilot");
+  }
+
   if (!isMockMode(mode)) {
-    if (!rpcUrl || !lockboxAddress || !fromBlock || !toBlock) {
-      throw new Error("--rpc-url, --lockbox-address, --from-block, and --to-block are required for RPC reads");
+    const cursorEnabled = cursorStatePath !== undefined;
+    if (!rpcUrl || !lockboxAddress || !fromBlock || (!toBlock && !cursorEnabled)) {
+      throw new Error("--rpc-url, --lockbox-address, --from-block, and --to-block are required for RPC reads unless base-mainnet-pilot uses --cursor-state");
     }
     const from = asBlock(fromBlock, "--from-block");
-    const to = asBlock(toBlock, "--to-block");
-    if (to < from) {
-      throw new Error("--to-block must be greater than or equal to --from-block");
-    }
-    if ((to - from) > MAX_BLOCK_RANGE) {
-      throw new Error(`block range is too wide; max is ${MAX_BLOCK_RANGE.toString()} blocks`);
+    if (toBlock !== undefined) {
+      const to = asBlock(toBlock, "--to-block");
+      if (to < from) {
+        throw new Error("--to-block must be greater than or equal to --from-block");
+      }
+      if (!cursorEnabled && (to - from) > MAX_BLOCK_RANGE) {
+        throw new Error(`block range is too wide; max is ${MAX_BLOCK_RANGE.toString()} blocks`);
+      }
     }
   }
 
@@ -713,6 +741,7 @@ export function parseBridgeArgs(args: string[]): CliOptions {
     withdrawalIntent,
     withdrawalBaseRecipient,
     runtimeStatePath,
+    cursorStatePath,
     evidenceOutPath,
     releaseEvidenceOutPath,
   };
@@ -1176,6 +1205,102 @@ function saveApplicationState(path: string, state: BridgeRuntimeCreditApplicatio
   const tmpPath = `${outPath}.${process.pid}.${Date.now()}.tmp`;
   try {
     writeFileSync(tmpPath, `${JSON.stringify(normalized, null, 2)}\n`, { flag: "wx" });
+    renameSync(tmpPath, outPath);
+  } catch (error) {
+    rmSync(tmpPath, { force: true });
+    throw error;
+  }
+}
+
+async function withBridgeStateFileLock<T>(statePath: string, operation: () => Promise<T>): Promise<T> {
+  const lock = acquireApplicationStateLock(statePath);
+  try {
+    return await operation();
+  } finally {
+    releaseApplicationStateLock(lock);
+  }
+}
+
+function loadBridgeCursorState(path: string, options: CliOptions, expectedChainId: BridgeSourceChainId): BridgeLockboxCursorState | undefined {
+  const resolvedPath = resolve(path);
+  if (!existsSync(resolvedPath)) {
+    return undefined;
+  }
+  const parsed = JSON.parse(readFileSync(resolvedPath, "utf8")) as Partial<BridgeLockboxCursorState>;
+  if (parsed.schema !== "flowmemory.bridge_lockbox_cursor_state.v0") {
+    throw new Error("unsupported bridge lockbox cursor state schema");
+  }
+  if (parsed.mode !== options.mode) {
+    throw new Error(`bridge cursor mode mismatch: expected ${options.mode}, got ${String(parsed.mode)}`);
+  }
+  if (parsed.sourceChainId !== expectedChainId) {
+    throw new Error(`bridge cursor chain mismatch: expected ${expectedChainId}, got ${String(parsed.sourceChainId)}`);
+  }
+  const lockboxAddress = asAddress(String(parsed.lockboxAddress ?? ""), "cursor.lockboxAddress");
+  if (options.lockboxAddress !== undefined && lockboxAddress.toLowerCase() !== options.lockboxAddress.toLowerCase()) {
+    throw new Error("bridge cursor lockbox mismatch");
+  }
+  const lastScannedBlock = asBlock(String(parsed.lastScannedBlock ?? ""), "cursor.lastScannedBlock");
+  const lastConfirmedHead = asBlock(String(parsed.lastConfirmedHead ?? "0"), "cursor.lastConfirmedHead");
+  const lastFromBlock = asBlock(String(parsed.lastFromBlock ?? "0"), "cursor.lastFromBlock");
+  const lastToBlock = asBlock(String(parsed.lastToBlock ?? "0"), "cursor.lastToBlock");
+  return {
+    schema: "flowmemory.bridge_lockbox_cursor_state.v0",
+    stateId: asHash(String(parsed.stateId), "cursor.stateId"),
+    updatedAt: String(parsed.updatedAt ?? FIXED_TEST_OBSERVED_AT),
+    mode: parsed.mode,
+    sourceChainId: parsed.sourceChainId,
+    lockboxAddress,
+    lastScannedBlock: lastScannedBlock.toString(),
+    lastConfirmedHead: lastConfirmedHead.toString(),
+    lastFromBlock: lastFromBlock.toString(),
+    lastToBlock: lastToBlock.toString(),
+    lastLogCount: Number(parsed.lastLogCount ?? 0),
+    localOnly: false,
+    productionReady: true,
+  };
+}
+
+function saveBridgeCursorState(
+  path: string,
+  options: CliOptions,
+  expectedChainId: BridgeSourceChainId,
+  fromBlock: bigint,
+  toBlock: bigint,
+  confirmedHead: bigint,
+  logCount: number,
+): void {
+  if (options.lockboxAddress === undefined) {
+    throw new Error("bridge cursor save requires lockbox address");
+  }
+  const stateId = stableId("flowmemory.bridge_lockbox_cursor_state.v0", {
+    mode: options.mode,
+    sourceChainId: expectedChainId,
+    lockboxAddress: options.lockboxAddress.toLowerCase(),
+    lastScannedBlock: toBlock.toString(),
+    lastConfirmedHead: confirmedHead < 0n ? "0" : confirmedHead.toString(),
+  });
+  const state: BridgeLockboxCursorState = {
+    schema: "flowmemory.bridge_lockbox_cursor_state.v0",
+    stateId,
+    updatedAt: FIXED_TEST_OBSERVED_AT,
+    mode: options.mode,
+    sourceChainId: expectedChainId,
+    lockboxAddress: options.lockboxAddress,
+    lastScannedBlock: toBlock.toString(),
+    lastConfirmedHead: confirmedHead < 0n ? "0" : confirmedHead.toString(),
+    lastFromBlock: fromBlock.toString(),
+    lastToBlock: toBlock.toString(),
+    lastLogCount: logCount,
+    localOnly: false,
+    productionReady: true,
+  };
+  const outPath = resolve(path);
+  mkdirSync(dirname(outPath), { recursive: true });
+  assertNoSecrets(state);
+  const tmpPath = `${outPath}.${process.pid}.${Date.now()}.tmp`;
+  try {
+    writeFileSync(tmpPath, `${JSON.stringify(state, null, 2)}\n`, { flag: "wx" });
     renameSync(tmpPath, outPath);
   } catch (error) {
     rmSync(tmpPath, { force: true });
@@ -1732,8 +1857,8 @@ async function rpcCall<T>(rpcUrl: string, method: string, params: JsonValue[]): 
   return payload.result;
 }
 
-function blockTag(value: string): string {
-  return `0x${BigInt(value).toString(16)}`;
+function blockTagFromBigInt(value: bigint): string {
+  return `0x${value.toString(16)}`;
 }
 
 async function readChainId(rpcUrl: string): Promise<number> {
@@ -1752,6 +1877,13 @@ interface BridgeLogReadResult {
 }
 
 async function readBridgeDepositLogs(options: CliOptions): Promise<BridgeLogReadResult> {
+  if (options.cursorStatePath !== undefined) {
+    return withBridgeStateFileLock(options.cursorStatePath, () => readBridgeDepositLogsLocked(options));
+  }
+  return readBridgeDepositLogsLocked(options);
+}
+
+async function readBridgeDepositLogsLocked(options: CliOptions): Promise<BridgeLogReadResult> {
   const expectedChainId = expectedChainIdForMode(options.mode, options.expectedChainId);
   if (options.lockboxAddress !== undefined) {
     assertApprovedLockbox(options.lockboxAddress, options);
@@ -1762,9 +1894,37 @@ async function readBridgeDepositLogs(options: CliOptions): Promise<BridgeLogRead
   }
 
   let confirmation: BridgeConfirmationEvidence | undefined;
-  if (options.confirmationDepth > 0) {
+  let effectiveFromBlock = asBlock(options.fromBlock ?? "0", "--from-block");
+  let effectiveToBlock = asBlock(options.toBlock ?? "0", "--to-block");
+  let latestBlock: bigint | undefined;
+  let requiredConfirmedBlock: bigint | undefined;
+
+  if (options.cursorStatePath !== undefined) {
+    const cursor = loadBridgeCursorState(options.cursorStatePath, options, expectedChainId);
+    if (cursor !== undefined) {
+      effectiveFromBlock = asBlock(cursor.lastScannedBlock, "cursor.lastScannedBlock") + 1n;
+    }
+    latestBlock = await readLatestBlockNumber(options.rpcUrl ?? "");
+    const depth = BigInt(options.confirmationDepth);
+    requiredConfirmedBlock = latestBlock >= depth ? latestBlock - depth : -1n;
+    const upperBound = options.toBlock === undefined ? undefined : asBlock(options.toBlock, "--to-block");
+    const windowUpperBound = effectiveFromBlock + MAX_BLOCK_RANGE;
+    effectiveToBlock = [requiredConfirmedBlock, windowUpperBound, upperBound]
+      .filter((value): value is bigint => value !== undefined)
+      .reduce((lowest, value) => value < lowest ? value : lowest);
+    confirmation = {
+      depth: options.confirmationDepth,
+      latestBlockNumber: latestBlock.toString(),
+      requiredConfirmedBlockNumber: requiredConfirmedBlock < 0n ? "0" : requiredConfirmedBlock.toString(),
+      requestedToBlock: effectiveToBlock < effectiveFromBlock ? effectiveFromBlock.toString() : effectiveToBlock.toString(),
+      satisfied: effectiveToBlock >= effectiveFromBlock,
+    };
+    if (effectiveToBlock < effectiveFromBlock) {
+      return { deposits: [], confirmation };
+    }
+  } else if (options.confirmationDepth > 0) {
     const latestBlock = await readLatestBlockNumber(options.rpcUrl ?? "");
-    const requestedToBlock = asBlock(options.toBlock ?? "0", "--to-block");
+    const requestedToBlock = effectiveToBlock;
     const depth = BigInt(options.confirmationDepth);
     const requiredConfirmedBlock = latestBlock >= depth ? latestBlock - depth : -1n;
     const satisfied = requiredConfirmedBlock >= requestedToBlock;
@@ -1782,8 +1942,8 @@ async function readBridgeDepositLogs(options: CliOptions): Promise<BridgeLogRead
 
   const logs = await rpcCall<RpcLog[]>(options.rpcUrl ?? "", "eth_getLogs", [{
     address: options.lockboxAddress,
-    fromBlock: blockTag(options.fromBlock ?? "0"),
-    toBlock: blockTag(options.toBlock ?? "0"),
+    fromBlock: blockTagFromBigInt(effectiveFromBlock),
+    toBlock: blockTagFromBigInt(effectiveToBlock),
     topics: [[BRIDGE_DEPOSIT_TOPIC0, BRIDGE_DEPOSIT_LEGACY_TOPIC0]],
   }]);
 
@@ -1793,6 +1953,17 @@ async function readBridgeDepositLogs(options: CliOptions): Promise<BridgeLogRead
   for (const deposit of deposits) {
     assertApprovedLockbox(deposit.sourceContract, options);
     assertSupportedToken(deposit.token, options);
+  }
+  if (options.cursorStatePath !== undefined) {
+    saveBridgeCursorState(
+      options.cursorStatePath,
+      options,
+      expectedChainId,
+      effectiveFromBlock,
+      effectiveToBlock,
+      requiredConfirmedBlock ?? effectiveToBlock,
+      deposits.length,
+    );
   }
   return { deposits, confirmation };
 }
@@ -1915,7 +2086,10 @@ function printRunBoundary(options: CliOptions): void {
   console.log(`Bridge mode: ${options.mode}`);
   console.log(`Chain id: ${expectedChainId} (${chainIdHex(expectedChainId)})`);
   console.log(`Lockbox: ${options.lockboxAddress}`);
-  console.log(`Block range: ${options.fromBlock}-${options.toBlock}`);
+  console.log(`Block range: ${options.fromBlock}-${options.toBlock ?? "cursor-confirmed-head"}`);
+  if (options.cursorStatePath !== undefined) {
+    console.log(`Cursor state: ${resolve(options.cursorStatePath)}`);
+  }
   console.log(`Confirmation depth: ${options.confirmationDepth}`);
   console.log("Broadcast: false; this observer never sends transactions.");
   if (options.mode === "base-sepolia") {

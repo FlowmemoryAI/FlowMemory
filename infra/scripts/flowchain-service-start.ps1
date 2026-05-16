@@ -193,10 +193,11 @@ if ($StartBridgeRelayerLoop) {
         $relayerStdout = Join-Path $logsDir "bridge-relayer-loop.stdout.log"
         $relayerStderr = Join-Path $logsDir "bridge-relayer-loop.stderr.log"
         $observeScript = Join-Path $PSScriptRoot "bridge-base-mainnet-pilot-observe.ps1"
+        $bridgeCursorState = "services/bridge-relayer/out/base8453-pilot-cursor-state.json"
         $loopCommand = @"
 while (`$true) {
   try {
-    & "$observeScript" -ReportPath "devnet/local/bridge-live-readiness/bridge-relayer-loop-report.json"
+    & "$observeScript" -CursorState "$bridgeCursorState" -ReportPath "devnet/local/bridge-live-readiness/bridge-relayer-loop-report.json"
   } catch {
     Write-Error `$_.Exception.Message
   }
@@ -250,6 +251,7 @@ $report = [ordered]@{
         running = $relayerStatusFinal.running
         pid = $relayerStatusFinal.pid
         pollSeconds = $BridgePollSeconds
+        cursorState = "services/bridge-relayer/out/base8453-pilot-cursor-state.json"
     }
     controlPlaneCargoWarmup = [ordered]@{
         targetDir = $controlPlaneCargoTargetDir

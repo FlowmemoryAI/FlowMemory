@@ -29,6 +29,8 @@ param(
 
     [string]$RuntimeState = "services/bridge-relayer/out/base8453-pilot-credit-application-state.json",
 
+    [string]$CursorState = "services/bridge-relayer/out/base8453-pilot-cursor-state.json",
+
     [string]$Out = "services/bridge-relayer/out/base8453-pilot-bridge-observation.json",
 
     [string]$CreditOut = "services/bridge-relayer/out/base8453-pilot-bridge-credit.json",
@@ -88,6 +90,7 @@ function Protect-ObserverOutputLine {
             @{ value = $ApprovedLockboxAddress; label = "<FLOWCHAIN_BASE8453_APPROVED_LOCKBOX_ADDRESS>" },
             @{ value = $FromBlock; label = "<FLOWCHAIN_BASE8453_FROM_BLOCK>" },
             @{ value = $ToBlock; label = "<FLOWCHAIN_BASE8453_TO_BLOCK>" },
+            @{ value = $CursorState; label = "<FLOWCHAIN_BASE8453_CURSOR_STATE>" },
             @{ value = $SupportedToken; label = "<FLOWCHAIN_BASE8453_SUPPORTED_TOKEN>" },
             @{ value = $MaxDepositAmount; label = "<FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI>" },
             @{ value = $TotalCapAmount; label = "<FLOWCHAIN_PILOT_TOTAL_CAP_WEI>" }
@@ -112,7 +115,7 @@ if ([string]::IsNullOrWhiteSpace($RpcUrl)) { $missing += "FLOWCHAIN_BASE8453_RPC
 if ([string]::IsNullOrWhiteSpace($LockboxAddress)) { $missing += "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS" }
 if ([string]::IsNullOrWhiteSpace($ApprovedLockboxAddress)) { $missing += "FLOWCHAIN_BASE8453_APPROVED_LOCKBOX_ADDRESS or FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS" }
 if ([string]::IsNullOrWhiteSpace($FromBlock)) { $missing += "FLOWCHAIN_BASE8453_FROM_BLOCK" }
-if ([string]::IsNullOrWhiteSpace($ToBlock)) { $missing += "FLOWCHAIN_BASE8453_TO_BLOCK" }
+if ([string]::IsNullOrWhiteSpace($ToBlock) -and [string]::IsNullOrWhiteSpace($CursorState)) { $missing += "FLOWCHAIN_BASE8453_TO_BLOCK or CursorState" }
 if ([string]::IsNullOrWhiteSpace($Confirmations)) { $missing += "FLOWCHAIN_PILOT_CONFIRMATIONS" }
 if ([string]::IsNullOrWhiteSpace($SupportedToken)) { $missing += "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN" }
 if ([string]::IsNullOrWhiteSpace($AssetDecimals)) { $missing += "FLOWCHAIN_BASE8453_ASSET_DECIMALS" }
@@ -133,8 +136,9 @@ if ($missing.Count -gt 0) {
 }
 
 Write-Host "Preparing Base 8453 bridge pilot observation." -ForegroundColor Yellow
-Write-Host "Required env names present: FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_BASE8453_TO_BLOCK, FLOWCHAIN_PILOT_CONFIRMATIONS, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_OPERATOR_ACK"
+Write-Host "Required env names present: FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_CONFIRMATIONS, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_OPERATOR_ACK"
 Write-Host "Optional guardrail env names: FLOWCHAIN_PILOT_MAX_USD"
+Write-Host "Optional scan upper bound env name: FLOWCHAIN_BASE8453_TO_BLOCK"
 Write-Host "Broadcast: false; this relayer never sends release transactions."
 
 Write-NextCommand `
@@ -149,7 +153,6 @@ $arguments = @(
     "--lockbox-address", $LockboxAddress,
     "--approved-lockbox", $ApprovedLockboxAddress,
     "--from-block", $FromBlock,
-    "--to-block", $ToBlock,
     "--confirmations", $Confirmations,
     "--acknowledge-pilot",
     "--acknowledge-real-funds",
@@ -159,12 +162,16 @@ $arguments = @(
     "--supported-token", $SupportedToken,
     "--asset-decimals", $AssetDecimals,
     "--runtime-state", $RuntimeState,
+    "--cursor-state", $CursorState,
     "--out", $Out,
     "--credit-out", $CreditOut,
     "--handoff-out", $HandoffOut,
     "--evidence-out", $EvidenceOut
 )
 
+if (-not [string]::IsNullOrWhiteSpace($ToBlock)) {
+    $arguments += @("--to-block", $ToBlock)
+}
 if ($ApplyCredit) {
     $arguments += "--apply-credit"
 }
@@ -188,7 +195,8 @@ Write-JsonReport -Value ([ordered]@{
     schema = "flowchain.bridge_observe_base8453_report.v0"
     status = "completed"
     command = "npm run flowchain:bridge:observe:base8453"
-    outputEnvNames = @("Out", "CreditOut", "HandoffOut", "EvidenceOut", "WithdrawalOut", "ReleaseEvidenceOut")
+    outputEnvNames = @("Out", "CreditOut", "HandoffOut", "EvidenceOut", "WithdrawalOut", "ReleaseEvidenceOut", "CursorState")
+    cursorStatePath = $CursorState
     broadcasts = $false
     printsEnvValues = $false
     envValuesPrinted = $false

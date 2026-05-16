@@ -154,6 +154,36 @@ function pilotArgs(fixturePath: string, extra: string[] = []): string[] {
   ];
 }
 
+function baseMainnetPilotRpcArgs(extra: string[] = []): string[] {
+  return [
+    "--mode",
+    "base-mainnet-pilot",
+    "--rpc-url",
+    "https://example.invalid/base-mainnet",
+    "--lockbox-address",
+    "0x1111111111111111111111111111111111111111",
+    "--approved-lockbox",
+    "0x1111111111111111111111111111111111111111",
+    "--from-block",
+    "100",
+    "--confirmations",
+    "5",
+    "--acknowledge-pilot",
+    "--acknowledge-real-funds",
+    "--max-usd",
+    "1",
+    "--max-deposit-amount",
+    "20000000",
+    "--total-cap-amount",
+    "20000000",
+    "--supported-token",
+    "0x3333333333333333333333333333333333333333",
+    "--asset-decimals",
+    "6",
+    ...extra,
+  ];
+}
+
 function runBridgeCli(args: string[], env: Record<string, string> = {}): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolveRun, rejectRun) => {
     const child = spawn(process.execPath, ["src/observe-base-lockbox.ts", ...args], {
@@ -684,6 +714,125 @@ test("observes Base public-network pilot only after eth_chainId 0x2105 and confi
     assert.equal(result.observations[0]?.guardrails.confirmation?.satisfied, true);
     assert.equal(result.credits[0]?.status, "applied");
     assert.equal(result.pilotEvidence[0]?.source.chainIdHex, "0x2105");
+  } finally {
+    globalThis.fetch = originalFetch;
+    rmSync(stateDir, { recursive: true, force: true });
+  }
+});
+
+test("Base public-network pilot cursor advances over confirmed ranges", async () => {
+  const stateDir = mkdtempSync(join(tmpdir(), "flowmemory-bridge-cursor-rpc-"));
+  const cursorPath = join(stateDir, "cursor-state.json");
+  const ranges: { fromBlock?: string; toBlock?: string }[] = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (_input, init) => {
+    const body = JSON.parse(String(init?.body ?? "{}")) as { method: string; params: Record<string, unknown>[] };
+    if (body.method === "eth_chainId") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x2105" }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_blockNumber") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: ranges.length === 0 ? "0x70" : "0x72" }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_getLogs") {
+      const range = body.params[0] ?? {};
+      ranges.push({
+        fromBlock: String(range.fromBlock),
+        toBlock: String(range.toBlock),
+      });
+      return new Response(JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        result: ranges.length === 1 ? [sampleBridgeDepositLog(BASE_MAINNET_CHAIN_ID)] : [],
+      }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, error: { message: "unexpected method" } }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  };
+
+  try {
+    const firstRun = await runBridgePipeline(parseBridgeArgs(baseMainnetPilotRpcArgs([
+      "--cursor-state",
+      cursorPath,
+    ])));
+    const firstCursor = JSON.parse(readFileSync(cursorPath, "utf8")) as { lastScannedBlock: string; lastConfirmedHead: string; lastLogCount: number };
+    const secondRun = await runBridgePipeline(parseBridgeArgs(baseMainnetPilotRpcArgs([
+      "--cursor-state",
+      cursorPath,
+    ])));
+    const secondCursor = JSON.parse(readFileSync(cursorPath, "utf8")) as { lastScannedBlock: string; lastConfirmedHead: string; lastLogCount: number };
+
+    assert.equal(firstRun.observations.length, 1);
+    assert.deepEqual(ranges[0], { fromBlock: "0x64", toBlock: "0x6b" });
+    assert.equal(firstCursor.lastScannedBlock, "107");
+    assert.equal(firstCursor.lastConfirmedHead, "107");
+    assert.equal(firstCursor.lastLogCount, 1);
+    assert.equal(secondRun.observations.length, 0);
+    assert.deepEqual(ranges[1], { fromBlock: "0x6c", toBlock: "0x6d" });
+    assert.equal(secondCursor.lastScannedBlock, "109");
+    assert.equal(secondCursor.lastConfirmedHead, "109");
+    assert.equal(secondCursor.lastLogCount, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+    rmSync(stateDir, { recursive: true, force: true });
+  }
+});
+
+test("Base public-network pilot cursor does not advance when no confirmed block is available", async () => {
+  const stateDir = mkdtempSync(join(tmpdir(), "flowmemory-bridge-cursor-wait-"));
+  const cursorPath = join(stateDir, "cursor-state.json");
+  writeFileSync(cursorPath, `${JSON.stringify({
+    schema: "flowmemory.bridge_lockbox_cursor_state.v0",
+    stateId: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    updatedAt: FIXED_TEST_OBSERVED_AT,
+    mode: "base-mainnet-pilot",
+    sourceChainId: BASE_MAINNET_CHAIN_ID,
+    lockboxAddress: "0x1111111111111111111111111111111111111111",
+    lastScannedBlock: "107",
+    lastConfirmedHead: "107",
+    lastFromBlock: "100",
+    lastToBlock: "107",
+    lastLogCount: 1,
+    localOnly: false,
+    productionReady: true,
+  }, null, 2)}\n`);
+  const calls: string[] = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (_input, init) => {
+    const body = JSON.parse(String(init?.body ?? "{}")) as { method: string };
+    calls.push(body.method);
+    if (body.method === "eth_chainId") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x2105" }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_blockNumber") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x70" }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, error: { message: "unexpected method" } }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  };
+
+  try {
+    const result = await runBridgePipeline(parseBridgeArgs(baseMainnetPilotRpcArgs([
+      "--cursor-state",
+      cursorPath,
+    ])));
+    const cursor = JSON.parse(readFileSync(cursorPath, "utf8")) as { lastScannedBlock: string };
+    assert.equal(result.observations.length, 0);
+    assert.deepEqual(calls, ["eth_chainId", "eth_blockNumber"]);
+    assert.equal(cursor.lastScannedBlock, "107");
   } finally {
     globalThis.fetch = originalFetch;
     rmSync(stateDir, { recursive: true, force: true });
