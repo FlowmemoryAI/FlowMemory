@@ -1,6 +1,6 @@
 ﻿# FlowChain Architecture Audit
 
-Generated: 2026-05-16T00:43:26.8898375Z
+Generated: 2026-05-16T04:55:11.3580976Z
 Status: blocked
 Blocked only on known external owner inputs: True
 
@@ -21,7 +21,7 @@ Blocked only on known external owner inputs: True
 
 | Layer | Requirement | Status | Evidence |
 | --- | --- | --- | --- |
-| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=25272, finalizedHeight=25272 |
+| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=25361, finalizedHeight=25361 |
 | Operations | Operations has explicit status, monitor, and emergency-stop controls that do not depend on public deployment being live. | passed | monitorStatus=passed, samples=2, heightAdvanced=True |
 | RPC/API | The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation before it can be exposed publicly. | passed | validationStatus=passed, corsAllowed=True, corsRejected=True, endpointChecks=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True |
 | Public edge | External RPC exposure is a distinct owner-operated edge with TLS, allowed origins, rate limits, endpoint checks, and response hygiene. | blocked | publicRpcStatus=blocked, publicRpcReady=False |
@@ -29,7 +29,7 @@ Blocked only on known external owner inputs: True
 | Wallets | Wallet creation and wallet-to-wallet transfer are routed through the RPC/control-plane boundary into runtime blocks without returning secret material. | passed | walletStatus=passed, testerStatus=passed, testerWalletCreates=4, testerSecretLeak=False |
 | Bridge | The bridge architecture has a deterministic local proof for exact value, replay protection, wrong-chain rejection, unapproved-lockbox rejection, and no broadcast. | passed | broadcast=False, allAmountsEqual=True, wrongChainRejected=True, unapprovedContractRejected=True |
 | Bridge | Live Base 8453 bridge observation is isolated behind owner guardrails, read-only diagnostics, confirmation/cap settings, and no-broadcast checks. | blocked | bridgeLive=blocked, bridgeInfra=blocked, baseTxDiagnostic=blocked, baseTxSafe=True |
-| Storage/recovery | Live state backup is a separate configured storage boundary that must prove writable/readable before public operation. | blocked | backupStatus=blocked |
+| Storage/recovery | Live state backup and restore are separate configured storage boundaries with manifest hash proof, restore rehearsal, and corruption detection before public operation. | blocked | backupStatus=blocked, validationStatus=passed, snapshotProof=not-run, restoreProof=not-run, corruptionDetected=True |
 | Deployment | The owner-operated public deployment contract is machine-checkable, includes rollback commands, and blocks sharing until public RPC, backup, bridge, and tester gates pass. | blocked | deploymentStatus=blocked, deploymentReady=False, blockedOnlyKnown=True, blockedItems=5, failedItems=0 |
 | Governance/safety | Live-only inputs are externally owned, listed by name only, self-tested for missing/invalid/valid direct env plus local owner env-file loading, and fail closed on missing or malformed owner env files without printing values. | passed | ownerInputsStatus=blocked, validationStatus=passed, ownerEnvFilePasses=True, missingOwnerEnvFileFails=True, malformedOwnerEnvFileFails=True, knownMissingInputs=15, unknownInputs=0 |
 | Governance/safety | The ignored owner env file is a first-class setup boundary that can drive owner-input, live-infra, and public deployment gates through one redacted command. | blocked | readinessStatus=blocked, validationStatus=passed, missingFails=True, unignoredFails=True, gitIgnored=True, blockedOnlyKnown=True |

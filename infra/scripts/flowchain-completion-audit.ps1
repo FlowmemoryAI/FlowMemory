@@ -35,6 +35,7 @@ $paths = [ordered]@{
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     publicDeploymentContract = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     architectureAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"
+    backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
     liveWallet = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json"
     testerNetwork = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
     publicRpc = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
@@ -165,6 +166,9 @@ $ownerInputsValidationExitCode = $ownerInputsValidationResult.exitCode
 $publicRpcValidationResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-validation.ps1"))
 $publicRpcValidationOutput = @($publicRpcValidationResult.output)
 $publicRpcValidationExitCode = $publicRpcValidationResult.exitCode
+$backupRestoreValidationResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-restore-validation.ps1"))
+$backupRestoreValidationOutput = @($backupRestoreValidationResult.output)
+$backupRestoreValidationExitCode = $backupRestoreValidationResult.exitCode
 $ownerInputsResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-inputs.ps1"), "-AllowBlocked")
 $ownerInputsOutput = @($ownerInputsResult.output)
 $ownerInputsExitCode = $ownerInputsResult.exitCode
@@ -386,6 +390,21 @@ $publicRpcValidationPassed = $publicRpcValidationExitCode -eq 0 `
     -and $publicRpcValidationRateLimitRejected -eq $true `
     -and $publicRpcValidationRateLimitRetryAfter -eq $true `
     -and $publicRpcValidationHygiene -eq $true
+$backupRestoreValidation = $reports.backupRestoreValidation
+$backupRestoreValidationStatus = Get-ReportStatus -Report $backupRestoreValidation
+$backupRestoreValidationChecks = Get-AuditProp -Object $backupRestoreValidation -Name "checks"
+$backupRestoreValidationBackupPassed = Get-AuditProp -Object $backupRestoreValidationChecks -Name "backupCommandPassed" -Default $false
+$backupRestoreValidationRestorePassed = Get-AuditProp -Object $backupRestoreValidationChecks -Name "restoreCommandPassed" -Default $false
+$backupRestoreValidationHashRoundTrip = Get-AuditProp -Object $backupRestoreValidationChecks -Name "backupRestoreHashRoundTrip" -Default $false
+$backupRestoreValidationCorruptionDetected = Get-AuditProp -Object $backupRestoreValidationChecks -Name "corruptedSnapshotDetected" -Default $false
+$backupRestoreValidationPassed = $backupRestoreValidationExitCode -eq 0 `
+    -and $backupRestoreValidationStatus -eq "passed" `
+    -and $backupRestoreValidationBackupPassed -eq $true `
+    -and $backupRestoreValidationRestorePassed -eq $true `
+    -and $backupRestoreValidationHashRoundTrip -eq $true `
+    -and $backupRestoreValidationCorruptionDetected -eq $true `
+    -and ((Get-AuditProp -Object $backupRestoreValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $backupRestoreValidation -Name "noSecrets" -Default $false) -eq $true)
 $externalTesterPacketStatus = Get-ReportStatus -Report $externalTesterPacket
 $externalTesterPacketShareable = Get-AuditProp -Object $externalTesterPacket -Name "packetShareable" -Default $false
 $externalTesterPacketPath = [string](Get-AuditProp -Object $externalTesterPacket -Name "packetPath" -Default $paths.externalTesterPacket)
@@ -575,6 +594,12 @@ Add-AuditItem -Items $items -Id "public-rpc-readiness-validator-self-test" `
     -Evidence "validationStatus=$publicRpcValidationStatus, allowedOriginAccepted=$publicRpcValidationAllowed, disallowedProbe=$publicRpcValidationDisallowedProbe, disallowedRejected=$publicRpcValidationDisallowedRejected, endpointChecks=$publicRpcValidationEndpointChecks, rateLimitProbe=$publicRpcValidationRateLimitProbe, rateLimitRejected=$publicRpcValidationRateLimitRejected, rateLimitRetryAfter=$publicRpcValidationRateLimitRetryAfter, responseHygiene=$publicRpcValidationHygiene, report=$($paths.publicRpcValidation)" `
     -Commands @("npm run flowchain:public-rpc:validate")
 
+Add-AuditItem -Items $items -Id "backup-restore-validator-self-test" `
+    -Requirement "Backup tooling creates a manifest-backed live-state snapshot, verifies a restore rehearsal without mutating live state, and rejects corrupted snapshots." `
+    -Status $(if ($backupRestoreValidationPassed) { "passed" } else { "failed" }) `
+    -Evidence "validationStatus=$backupRestoreValidationStatus, backupPassed=$backupRestoreValidationBackupPassed, restorePassed=$backupRestoreValidationRestorePassed, hashRoundTrip=$backupRestoreValidationHashRoundTrip, corruptionDetected=$backupRestoreValidationCorruptionDetected, report=$($paths.backupRestoreValidation)" `
+    -Commands @("npm run flowchain:backup:restore:validate")
+
 Add-AuditItem -Items $items -Id "external-tester-packet" `
     -Requirement "External tester handoff packet is generated and fails closed until sharing gates pass." `
     -Status $(if (($externalTesterPacketStatus -eq "passed" -and $externalTesterPacketShareable -eq $true) -or ($externalTesterPacketStatus -eq "blocked" -and $externalTesterPacketShareable -eq $false)) { "passed" } else { "failed" }) `
@@ -588,11 +613,16 @@ Add-AuditItem -Items $items -Id "public-rpc-external-sharing" `
     -Commands @("npm run flowchain:public-rpc:check") `
     -Blockers @("FLOWCHAIN_RPC_PUBLIC_URL", "FLOWCHAIN_RPC_ALLOWED_ORIGINS", "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE", "FLOWCHAIN_RPC_TLS_TERMINATED")
 
+$backupReadinessStatus = Get-ReportStatus -Report $reports.backup
+$backupReadinessDetails = Get-AuditProp -Object $reports.backup -Name "backup"
+$backupSnapshotProofStatus = Get-AuditProp -Object $backupReadinessDetails -Name "snapshotProofStatus" -Default "not-run"
+$backupRestoreProofStatus = Get-AuditProp -Object $backupReadinessDetails -Name "restoreProofStatus" -Default "not-run"
+$backupRestoreVerified = Get-AuditProp -Object $backupReadinessDetails -Name "restoreVerified" -Default $false
 Add-AuditItem -Items $items -Id "state-backup" `
-    -Requirement "State backup path is configured, writable, and readable for live RPC operations." `
-    -Status $(if ((Get-ReportStatus -Report $reports.backup) -eq "passed") { "passed" } else { "blocked" }) `
-    -Evidence "backupStatus=$(Get-ReportStatus -Report $reports.backup), report=$($paths.backup)" `
-    -Commands @("npm run flowchain:backup:check") `
+    -Requirement "State backup path is configured and can create a manifest-backed snapshot that is verified through a restore rehearsal for live RPC operations." `
+    -Status $(if ($backupReadinessStatus -eq "passed" -and $backupRestoreValidationPassed) { "passed" } elseif ($backupReadinessStatus -eq "blocked" -and $backupRestoreValidationPassed) { "blocked" } else { "failed" }) `
+    -Evidence "backupStatus=$backupReadinessStatus, snapshotProof=$backupSnapshotProofStatus, restoreProof=$backupRestoreProofStatus, restoreVerified=$backupRestoreVerified, validationStatus=$backupRestoreValidationStatus, report=$($paths.backup)" `
+    -Commands @("npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify", "npm run flowchain:backup:check") `
     -Blockers @("FLOWCHAIN_RPC_STATE_BACKUP_PATH")
 
 Add-AuditItem -Items $items -Id "bridge-funds" `
@@ -664,6 +694,8 @@ $report = [ordered]@{
     ownerInputsValidationOutputRedacted = @($ownerInputsValidationOutput | ForEach-Object { "$_" })
     publicRpcValidationExitCode = $publicRpcValidationExitCode
     publicRpcValidationOutputRedacted = @($publicRpcValidationOutput | ForEach-Object { "$_" })
+    backupRestoreValidationExitCode = $backupRestoreValidationExitCode
+    backupRestoreValidationOutputRedacted = @($backupRestoreValidationOutput | ForEach-Object { "$_" })
     ownerInputsExitCode = $ownerInputsExitCode
     ownerInputsOutputRedacted = @($ownerInputsOutput | ForEach-Object { "$_" })
     ownerOnboardingExitCode = $ownerOnboardingExitCode
@@ -706,6 +738,10 @@ $report = [ordered]@{
         "npm run flowchain:owner-inputs",
         "npm run flowchain:public-rpc:edge-template",
         "npm run flowchain:public-rpc:validate",
+        "npm run flowchain:backup:restore:validate",
+        "npm run flowchain:backup:create",
+        "npm run flowchain:backup:restore:verify",
+        "npm run flowchain:backup:check",
         "npm run flowchain:service:monitor",
         "npm run flowchain:live-infra:check",
         "npm run flowchain:bridge:diagnose:tx",

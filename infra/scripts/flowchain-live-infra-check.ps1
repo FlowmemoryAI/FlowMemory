@@ -269,7 +269,7 @@ $finalReport = [ordered]@{
         ownerInputs = "Provide structurally valid owner public RPC, backup, and Base 8453 bridge env names without committing values."
         publicRpc = "Configure FLOWCHAIN_RPC_* env names and run the control-plane behind TLS/rate-limit/CORS enforcement."
         services = "Run npm run flowchain:service:start -- -LiveProfile after local state exists."
-        backup = "Provide FLOWCHAIN_RPC_STATE_BACKUP_PATH as an existing writable directory."
+        backup = "Provide FLOWCHAIN_RPC_STATE_BACKUP_PATH as an existing writable directory; backup readiness will create a manifest-backed snapshot and verify restore rehearsal."
         bridge = "Provide the Base 8453 env contract and an owner-verified lockbox with deployed bytecode."
     }
     broadcasts = $false

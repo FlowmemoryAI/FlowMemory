@@ -13,7 +13,10 @@ The repository now provides:
 - `npm run flowchain:public-rpc:check` for endpoint, TLS, CORS, rate-limit, health, discovery, readiness, state, and response-hygiene checks.
 - `npm run flowchain:public-rpc:edge-template` for a no-values Nginx public-edge template that proxies this chain's private RPC origin through owner TLS and rate limiting.
 - `npm run flowchain:public-rpc:validate` for a temporary local control-plane rehearsal of the public RPC readiness script, including allowed-origin acceptance, disallowed-origin rejection, endpoint checks, and response hygiene.
-- `npm run flowchain:backup:check` for writable backup path and state readback verification.
+- `npm run flowchain:backup:create` for manifest-backed live state snapshots.
+- `npm run flowchain:backup:restore:verify` for restore rehearsal from the latest snapshot without mutating live state.
+- `npm run flowchain:backup:restore:validate` for a local self-test that proves snapshot/restore round-trip integrity and detects corrupted snapshots.
+- `npm run flowchain:backup:check` for owner backup path readiness, including snapshot and restore proof.
 - `npm run flowchain:bridge:infra:check` for Base 8453 deployment input checks.
 - `npm run flowchain:bridge:diagnose:tx` for read-only diagnosis of an owner-supplied Base 8453 transaction hash.
 - `npm run flowchain:live-infra:check` as the aggregate gate, including owner input contract, public RPC, service status, backup, bridge, and no-secret checks.

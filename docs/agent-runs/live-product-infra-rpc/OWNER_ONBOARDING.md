@@ -1,6 +1,6 @@
 ﻿# FlowChain Owner Onboarding
 
-Generated: 2026-05-16T00:38:13.0029453Z
+Generated: 2026-05-16T04:56:21.9891941Z
 Status: passed
 
 FlowChain RPC is implemented by this repository. The owner does not need a third-party FlowChain RPC provider. Public RPC readiness means exposing the private local RPC origin through an owner-operated HTTPS edge with DNS, TLS, CORS, rate limits, and monitoring.
@@ -71,6 +71,9 @@ $env:FLOWCHAIN_PILOT_CONFIRMATIONS="<2 through 256>"
 - npm run flowchain:public-rpc:edge-template
 - npm run flowchain:public-rpc:validate
 - npm run flowchain:public-rpc:check
+- npm run flowchain:backup:restore:validate
+- npm run flowchain:backup:create
+- npm run flowchain:backup:restore:verify
 - npm run flowchain:backup:check
 - npm run flowchain:bridge:live:check
 - npm run flowchain:bridge:infra:check

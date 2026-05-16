@@ -1,6 +1,6 @@
 {
-    "schema":  "flowchain.backup_readiness_report.v0",
-    "generatedAt":  "2026-05-16T00:43:16.0512285Z",
+    "schema":  "flowchain.backup_readiness_report.v1",
+    "generatedAt":  "2026-05-16T05:22:36.9922951Z",
     "status":  "blocked",
     "requiredEnvNames":  [
                              "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
@@ -11,20 +11,29 @@
     "state":  {
                   "statePath":  "devnet/local/state.json",
                   "readable":  true,
-                  "latestHeight":  "25278",
-                  "latestHash":  "0x7f17742c188018086b616ab9636595874ea9248e3171c5a189fb17c11a904087",
-                  "latestRoot":  "0x0b3d0d8a58a2a945f3044056b5790809ba21040aa608e4823164e2fadc70d077"
+                  "latestHeight":  "30876",
+                  "latestHash":  "0xd76764ac1ea8f6ea1b0bd0108ab924b7bf4e8ec73661a28d4b8778df23823cbd",
+                  "latestRoot":  "0x2e486adec6f8fb441aec0d8474be375586c23c7e3495cffd2103c459e63bff15"
               },
     "backup":  {
                    "configured":  false,
+                   "pathValuePrinted":  false,
                    "exists":  false,
-                   "writable":  false,
+                   "directory":  false,
+                   "snapshotProofStatus":  "not-run",
+                   "restoreProofStatus":  "not-run",
                    "latestBackupTimestamp":  null,
                    "latestBackupArtifactName":  null,
                    "stateRootCompared":  false,
                    "stateRootMatch":  false,
-                   "stateFileHashMatch":  false
+                   "stateFileHashMatch":  false,
+                   "writeVerified":  false,
+                   "restoreVerified":  false
                },
+    "proofReports":  {
+                         "snapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\state-backup-report.json",
+                         "restore":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\state-restore-verify-report.json"
+                     },
     "problems":  [
                      {
                          "name":  "FLOWCHAIN_RPC_STATE_BACKUP_PATH",

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-16T00:43:26.8898375Z",
+    "generatedAt":  "2026-05-16T04:55:11.3580976Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -27,7 +27,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=25272, finalizedHeight=25272",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=25361, finalizedHeight=25361",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -189,13 +189,19 @@
                   {
                       "id":  "state-backup-boundary",
                       "layer":  "Storage/recovery",
-                      "requirement":  "Live state backup is a separate configured storage boundary that must prove writable/readable before public operation.",
+                      "requirement":  "Live state backup and restore are separate configured storage boundaries with manifest hash proof, restore rehearsal, and corruption detection before public operation.",
                       "status":  "blocked",
-                      "evidence":  "backupStatus=blocked",
+                      "evidence":  "backupStatus=blocked, validationStatus=passed, snapshotProof=not-run, restoreProof=not-run, corruptionDetected=True",
                       "files":  [
-                                    "infra/scripts/flowchain-public-rpc-backup-readiness.ps1"
+                                    "infra/scripts/flowchain-public-rpc-backup-readiness.ps1",
+                                    "infra/scripts/flowchain-state-backup.ps1",
+                                    "infra/scripts/flowchain-state-restore-verify.ps1",
+                                    "infra/scripts/flowchain-backup-restore-validation.ps1"
                                 ],
                       "commands":  [
+                                       "npm run flowchain:backup:create",
+                                       "npm run flowchain:backup:restore:verify",
+                                       "npm run flowchain:backup:restore:validate",
                                        "npm run flowchain:backup:check"
                                    ],
                       "blockers":  [
@@ -531,6 +537,7 @@
                         "publicRpcReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
                         "publicRpcValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation-report.json",
                         "backupReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
+                        "backupRestoreValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-report.json",
                         "bridgeLiveReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
                         "bridgeInfraReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
                         "bridgePilotLocal":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\services\\bridge-relayer\\out\\real-value-pilot-e2e\\bridge-real-value-pilot-e2e-report.json",

@@ -1,11 +1,11 @@
 {
     "schema":  "flowchain.live_infra_check_report.v0",
-    "generatedAt":  "2026-05-16T00:43:20.3578326Z",
+    "generatedAt":  "2026-05-16T05:22:41.4896696Z",
     "status":  "blocked",
     "repoPath":  "E:/FlowMemory/flowmemory-live-infra-rpc",
     "git":  {
                 "branch":  "agent/live-product-infra-rpc",
-                "commit":  "3e36ddc795e2c8f414711aba1c23be944d2af46d"
+                "commit":  "32e75ad85fbf471acfb8513efdc76b131b9dd46d"
             },
     "readiness":  {
                       "ownerInputsReady":  false,
@@ -144,7 +144,7 @@
                          "ownerInputs":  "Provide structurally valid owner public RPC, backup, and Base 8453 bridge env names without committing values.",
                          "publicRpc":  "Configure FLOWCHAIN_RPC_* env names and run the control-plane behind TLS/rate-limit/CORS enforcement.",
                          "services":  "Run npm run flowchain:service:start -- -LiveProfile after local state exists.",
-                         "backup":  "Provide FLOWCHAIN_RPC_STATE_BACKUP_PATH as an existing writable directory.",
+                         "backup":  "Provide FLOWCHAIN_RPC_STATE_BACKUP_PATH as an existing writable directory; backup readiness will create a manifest-backed snapshot and verify restore rehearsal.",
                          "bridge":  "Provide the Base 8453 env contract and an owner-verified lockbox with deployed bytecode."
                      },
     "broadcasts":  false,

@@ -1,0 +1,25 @@
+{
+    "schema":  "flowchain.backup_restore_validation_report.v1",
+    "generatedAt":  "2026-05-16T05:29:37.6426210Z",
+    "status":  "passed",
+    "stateReadable":  true,
+    "checks":  {
+                   "backupCommandPassed":  true,
+                   "restoreCommandPassed":  true,
+                   "backupRestoreHashRoundTrip":  true,
+                   "corruptedSnapshotDetected":  true,
+                   "corruptRestoreExitCode":  0
+               },
+    "reports":  {
+                    "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-backup-report.json",
+                    "restore":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-restore-report.json",
+                    "corruptRestore":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-corrupt-restore-report.json"
+                },
+    "requiredCommands":  [
+                             "npm run flowchain:backup:create",
+                             "npm run flowchain:backup:restore:verify"
+                         ],
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

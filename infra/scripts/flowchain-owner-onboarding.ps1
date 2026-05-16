@@ -75,7 +75,7 @@ $onboardingGroups = @(
         localOrigin = ""
         envNames = $backupEnv
         validationCommand = "npm run flowchain:backup:check"
-        decision = "Create or mount a writable backup directory before public operation."
+        decision = "Create or mount a writable backup directory before public operation, then verify snapshot creation and restore rehearsal."
     },
     [ordered]@{
         id = "base8453-bridge-observer"
@@ -120,6 +120,9 @@ $nextCommands = @(
     "npm run flowchain:public-rpc:edge-template",
     "npm run flowchain:public-rpc:validate",
     "npm run flowchain:public-rpc:check",
+    "npm run flowchain:backup:restore:validate",
+    "npm run flowchain:backup:create",
+    "npm run flowchain:backup:restore:verify",
     "npm run flowchain:backup:check",
     "npm run flowchain:bridge:live:check",
     "npm run flowchain:bridge:infra:check",

@@ -79,9 +79,9 @@ $checklistItems = @(
         externalSignupNeeded = $false
         acceptableOptions = @("Mounted disk/volume", "Owner-managed backup directory", "Persistent path on the always-on host")
         producesEnvNames = @("FLOWCHAIN_RPC_STATE_BACKUP_PATH")
-        ownerMustGet = "An existing writable directory path that the FlowChain service process can write to and read back from."
+        ownerMustGet = "An existing writable directory path that the FlowChain service process can use for manifest-backed snapshots and restore rehearsals."
         ownerMustNotSend = @("Cloud backup access key", "storage account secret")
-        validationCommand = "npm run flowchain:backup:check"
+        validationCommand = "npm run flowchain:backup:restore:validate; npm run flowchain:backup:check"
     },
     [ordered]@{
         id = "base8453-rpc"

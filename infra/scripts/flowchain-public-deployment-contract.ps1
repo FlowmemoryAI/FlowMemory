@@ -44,6 +44,7 @@ $paths = [ordered]@{
     publicRpc = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
     backup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
+    backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
     bridgeLive = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
@@ -190,6 +191,7 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:public-rpc:edge-template",
     "npm run flowchain:public-rpc:validate",
     "npm run flowchain:public-rpc:check -- -AllowBlocked",
+    "npm run flowchain:backup:restore:validate",
     "npm run flowchain:backup:check -- -AllowBlocked",
     "npm run flowchain:bridge:live:check -- -AllowBlocked",
     "npm run flowchain:bridge:infra:check -- -AllowBlocked",
@@ -207,6 +209,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-edge-template" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-edge-template.ps1"), "-ReportPath", $paths.publicRpcEdgeTemplate)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-validation.ps1"), "-ReportPath", $paths.publicRpcValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-readiness" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.publicRpc)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "backup-restore-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-restore-validation.ps1"), "-ReportPath", $paths.backupRestoreValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-backup" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-backup-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.backup)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-live" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-live-check.ps1"), "-AllowBlocked", "-ReportPath", $paths.bridgeLive)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-infra" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-env-bridge-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.bridgeInfra)
@@ -412,11 +415,32 @@ Add-DeploymentItem -Items $items -Id "public-rpc-edge" `
 
 $backup = $reports.backup
 $backupStatus = Get-DeploymentStatus -Report $backup
+$backupDetails = Get-DeploymentProp -Object $backup -Name "backup"
+$backupSnapshotProof = Get-DeploymentProp -Object $backupDetails -Name "snapshotProofStatus" -Default "not-run"
+$backupRestoreProof = Get-DeploymentProp -Object $backupDetails -Name "restoreProofStatus" -Default "not-run"
+$backupRestoreValidation = $reports.backupRestoreValidation
+$backupRestoreValidationStatus = Get-DeploymentStatus -Report $backupRestoreValidation
+$backupRestoreValidationChecks = Get-DeploymentProp -Object $backupRestoreValidation -Name "checks"
+$backupRestoreHashRoundTrip = Get-DeploymentProp -Object $backupRestoreValidationChecks -Name "backupRestoreHashRoundTrip" -Default $false
+$backupRestoreCorruptionDetected = Get-DeploymentProp -Object $backupRestoreValidationChecks -Name "corruptedSnapshotDetected" -Default $false
+$backupRestoreValidationPassed = $backupRestoreValidationStatus -eq "passed" `
+    -and ((Get-DeploymentProp -Object $backupRestoreValidationChecks -Name "backupCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupRestoreValidationChecks -Name "restoreCommandPassed" -Default $false) -eq $true) `
+    -and ($backupRestoreHashRoundTrip -eq $true) `
+    -and ($backupRestoreCorruptionDetected -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupRestoreValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $backupRestoreValidation -Name "noSecrets" -Default $false) -eq $true)
+Add-DeploymentItem -Items $items -Id "state-backup-restore-validation" `
+    -Requirement "Backup tooling must create a manifest-backed state snapshot, verify a restore rehearsal, and detect corrupted snapshots without owner secrets." `
+    -Status $(if ($backupRestoreValidationPassed) { "passed" } else { "failed" }) `
+    -Evidence "validationStatus=$backupRestoreValidationStatus, hashRoundTrip=$backupRestoreHashRoundTrip, corruptionDetected=$backupRestoreCorruptionDetected" `
+    -Commands @("npm run flowchain:backup:restore:validate")
+
 Add-DeploymentItem -Items $items -Id "state-backup" `
-    -Requirement "The public deployment must prove the configured state backup directory is writable and readable." `
-    -Status $(if ($backupStatus -eq "passed") { "passed" } elseif ($backupStatus -eq "blocked") { "blocked" } else { "failed" }) `
-    -Evidence "backupStatus=$backupStatus" `
-    -Commands @("npm run flowchain:backup:check") `
+    -Requirement "The public deployment must prove the configured state backup directory can create a manifest-backed snapshot and restore it in rehearsal." `
+    -Status $(if ($backupStatus -eq "passed" -and $backupRestoreValidationPassed) { "passed" } elseif ($backupStatus -eq "blocked" -and $backupRestoreValidationPassed) { "blocked" } else { "failed" }) `
+    -Evidence "backupStatus=$backupStatus, snapshotProof=$backupSnapshotProof, restoreProof=$backupRestoreProof" `
+    -Commands @("npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify", "npm run flowchain:backup:check") `
     -Blockers @("FLOWCHAIN_RPC_STATE_BACKUP_PATH")
 
 $bridgeLiveStatus = Get-DeploymentStatus -Report $reports.bridgeLive
@@ -493,6 +517,9 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:public-rpc:edge-template",
         "npm run flowchain:public-rpc:validate",
         "npm run flowchain:public-rpc:check",
+        "npm run flowchain:backup:restore:validate",
+        "npm run flowchain:backup:create",
+        "npm run flowchain:backup:restore:verify",
         "npm run flowchain:backup:check",
         "npm run flowchain:bridge:live:check",
         "npm run flowchain:bridge:infra:check",

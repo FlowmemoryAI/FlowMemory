@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.owner_signup_checklist_report.v0",
-    "generatedAt":  "2026-05-16T00:38:14.4872712Z",
+    "generatedAt":  "2026-05-16T04:56:23.4939647Z",
     "status":  "passed",
     "ownerInputsStatus":  "blocked",
     "flowChainRpcIsRepoOwned":  true,
@@ -98,12 +98,12 @@
                                "producesEnvNames":  [
                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
                                                     ],
-                               "ownerMustGet":  "An existing writable directory path that the FlowChain service process can write to and read back from.",
+                               "ownerMustGet":  "An existing writable directory path that the FlowChain service process can use for manifest-backed snapshots and restore rehearsals.",
                                "ownerMustNotSend":  [
                                                         "Cloud backup access key",
                                                         "storage account secret"
                                                     ],
-                               "validationCommand":  "npm run flowchain:backup:check"
+                               "validationCommand":  "npm run flowchain:backup:restore:validate; npm run flowchain:backup:check"
                            },
                            {
                                "id":  "base8453-rpc",

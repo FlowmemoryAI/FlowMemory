@@ -1,0 +1,42 @@
+{
+    "schema":  "flowchain.state_restore_verify_report.v1",
+    "generatedAt":  "2026-05-16T05:29:37.4482093Z",
+    "status":  "failed",
+    "requiredEnvNames":  [
+                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                         ],
+    "missingEnvNames":  [
+
+                        ],
+    "backupRootConfigured":  true,
+    "backupRootValuePrinted":  false,
+    "manifestPathValuePrinted":  false,
+    "restore":  {
+                    "attempted":  true,
+                    "verified":  false,
+                    "manifestFound":  true,
+                    "manifestReadable":  true,
+                    "snapshotName":  "flowchain-state-snapshot-20260516T052825359Z",
+                    "stateArtifactName":  "state.json",
+                    "expectedStateFileSha256":  "8548e90751a5751561842c7f70d09958454f7775851dc97c1cfdc9dd7334c8aa",
+                    "restoredStateFileSha256":  "324433649b012431a7546c21ee9f7a7a3c528839d2190ba7ffb2c0010172458c",
+                    "hashMatchesManifest":  false,
+                    "stateReadable":  true,
+                    "latestHeight":  "30997",
+                    "latestHash":  "0x84676404b014ef1f528eab7ffeb63cdc21435f9c18688e7e9be4b01380e5cf0f",
+                    "latestRoot":  "0xc7194ae9cc4d570e2b6b2914237c1afe298e1a623faecb562a30062ad939883f",
+                    "finalizedHeight":  "30997",
+                    "liveStateMutated":  false
+                },
+    "problems":  [
+                     {
+                         "name":  "state-backup-artifact",
+                         "category":  "artifact",
+                         "kind":  "failed",
+                         "reason":  "restored state hash does not match manifest"
+                     }
+                 ],
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

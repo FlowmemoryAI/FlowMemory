@@ -40,6 +40,7 @@ $reportPaths = [ordered]@{
     publicRpcReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
     backupReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
+    backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
     bridgeLiveReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfraReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
     bridgePilotLocal = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "services/bridge-relayer/out/real-value-pilot-e2e/bridge-real-value-pilot-e2e-report.json"
@@ -379,13 +380,32 @@ Add-ArchitectureItem -Items $items -Id "bridge-live-edge" -Layer "Bridge" `
     -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_BASE8453_TO_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
 
 $backupStatus = Get-ArchitectureStatus -Report $reports.backupReadiness
-$backupFiles = @("infra/scripts/flowchain-public-rpc-backup-readiness.ps1")
+$backupValidation = $reports.backupRestoreValidation
+$backupValidationStatus = Get-ArchitectureStatus -Report $backupValidation
+$backupValidationChecks = Get-ArchitectureProp -Object $backupValidation -Name "checks"
+$backupValidationCorruptionDetected = Get-ArchitectureProp -Object $backupValidationChecks -Name "corruptedSnapshotDetected" -Default $false
+$backupValidationPassed = $backupValidationStatus -eq "passed" `
+    -and ((Get-ArchitectureProp -Object $backupValidationChecks -Name "backupCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupValidationChecks -Name "restoreCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupValidationChecks -Name "backupRestoreHashRoundTrip" -Default $false) -eq $true) `
+    -and ($backupValidationCorruptionDetected -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $backupValidation -Name "noSecrets" -Default $false) -eq $true)
+$backupDetails = Get-ArchitectureProp -Object $reports.backupReadiness -Name "backup"
+$backupSnapshotProof = Get-ArchitectureProp -Object $backupDetails -Name "snapshotProofStatus" -Default "not-run"
+$backupRestoreProof = Get-ArchitectureProp -Object $backupDetails -Name "restoreProofStatus" -Default "not-run"
+$backupFiles = @(
+    "infra/scripts/flowchain-public-rpc-backup-readiness.ps1",
+    "infra/scripts/flowchain-state-backup.ps1",
+    "infra/scripts/flowchain-state-restore-verify.ps1",
+    "infra/scripts/flowchain-backup-restore-validation.ps1"
+)
 Add-ArchitectureItem -Items $items -Id "state-backup-boundary" -Layer "Storage/recovery" `
-    -Requirement "Live state backup is a separate configured storage boundary that must prove writable/readable before public operation." `
-    -Status $(if ($backupStatus -eq "passed") { "passed" } elseif ($backupStatus -eq "blocked") { "blocked" } else { "failed" }) `
-    -Evidence "backupStatus=$backupStatus" `
+    -Requirement "Live state backup and restore are separate configured storage boundaries with manifest hash proof, restore rehearsal, and corruption detection before public operation." `
+    -Status $(if ($backupStatus -eq "passed" -and $backupValidationPassed) { "passed" } elseif ($backupStatus -eq "blocked" -and $backupValidationPassed) { "blocked" } else { "failed" }) `
+    -Evidence "backupStatus=$backupStatus, validationStatus=$backupValidationStatus, snapshotProof=$backupSnapshotProof, restoreProof=$backupRestoreProof, corruptionDetected=$backupValidationCorruptionDetected" `
     -Files $backupFiles `
-    -Commands @("npm run flowchain:backup:check") `
+    -Commands @("npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify", "npm run flowchain:backup:restore:validate", "npm run flowchain:backup:check") `
     -Blockers @("FLOWCHAIN_RPC_STATE_BACKUP_PATH")
 
 $deploymentContract = $reports.publicDeploymentContract
