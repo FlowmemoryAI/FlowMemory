@@ -50,6 +50,7 @@ $paths = [ordered]@{
     bridgePilotLocal = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "services/bridge-relayer/out/real-value-pilot-e2e/bridge-real-value-pilot-e2e-report.json"
     baseTxDiagnostic = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/live-l1-bridge-e2e/base-tx-diagnostic.json"
     productionL1 = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/production-l1-e2e/flowchain-production-l1-e2e-report.json"
+    devPack = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"
     noSecret = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
 }
 
@@ -240,6 +241,9 @@ $liveWalletExitCode = $liveWalletResult.exitCode
 $testerNetworkResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-service-tester-network-e2e.ps1"))
 $testerNetworkOutput = @($testerNetworkResult.output)
 $testerNetworkExitCode = $testerNetworkResult.exitCode
+$devPackResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "npm.cmd run flowchain:dev-pack:e2e")
+$devPackOutput = @($devPackResult.output)
+$devPackExitCode = $devPackResult.exitCode
 $bridgePilotLocalResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "npm.cmd run flowchain:real-value-pilot:bridge")
 $bridgePilotLocalOutput = @($bridgePilotLocalResult.output)
 $bridgePilotLocalExitCode = $bridgePilotLocalResult.exitCode
@@ -343,6 +347,7 @@ $liveProduct = $reports.liveProduct
 $externalTester = $reports.externalTester
 $testerNetwork = $reports.testerNetwork
 $liveWallet = $reports.liveWallet
+$devPack = $reports.devPack
 $liveInfra = $reports.liveInfra
 $ownerInputs = $reports.ownerInputs
 $ownerOnboarding = $reports.ownerOnboarding
@@ -364,6 +369,21 @@ $liveWalletSenderAfter = [string](Get-AuditProp -Object $liveWalletBalances -Nam
 $liveWalletRecipientAfter = [string](Get-AuditProp -Object $liveWalletBalances -Name "recipientAfter")
 $liveWalletBefore = [string](Get-AuditProp -Object $liveWallet -Name "chainBeforeBlock")
 $liveWalletAfter = [string](Get-AuditProp -Object $liveWallet -Name "chainAfterBlock")
+$devPackChecks = Get-AuditProp -Object $devPack -Name "checks"
+$devPackPassed = $devPackExitCode -eq 0 `
+    -and (Get-ReportStatus -Report $devPack) -eq "passed" `
+    -and (Get-AuditProp -Object $devPackChecks -Name "discoveryLoaded" -Default $false) -eq $true `
+    -and (Get-AuditProp -Object $devPackChecks -Name "readinessLoaded" -Default $false) -eq $true `
+    -and (Get-AuditProp -Object $devPackChecks -Name "walletTransfersReadable" -Default $false) -eq $true `
+    -and (Get-AuditProp -Object $devPackChecks -Name "walletBalancesReadable" -Default $false) -eq $true `
+    -and (Get-AuditProp -Object $devPackChecks -Name "walletSendRuntimeBacked" -Default $false) -eq $true `
+    -and (Get-AuditProp -Object $devPackChecks -Name "cliJsonStatus" -Default $false) -eq $true `
+    -and (Get-AuditProp -Object $devPackChecks -Name "heightAdvanced" -Default $false) -eq $true `
+    -and (Get-AuditProp -Object $devPackChecks -Name "publicReadinessFailClosed" -Default $false) -eq $true `
+    -and (Get-AuditProp -Object $devPack -Name "envValuesPrinted" -Default $true) -eq $false `
+    -and (Get-AuditProp -Object $devPack -Name "noSecrets" -Default $false) -eq $true
+$devPackFirstHeight = [string](Get-AuditProp -Object $devPack -Name "firstHeight" -Default "")
+$devPackSecondHeight = [string](Get-AuditProp -Object $devPack -Name "secondHeight" -Default "")
 $localTesterRehearsalReady = Get-AuditProp -Object $externalTester -Name "localTesterRehearsalReady"
 $externalTesterHeight = [string](Get-AuditProp -Object $externalTester -Name "latestHeight")
 $ownerInputsStatus = Get-ReportStatus -Report $ownerInputs
@@ -716,6 +736,12 @@ Add-AuditItem -Items $items -Id "rpc-connect-local" `
     -Evidence "localTesterRehearsalReady=$localTesterRehearsalReady, latestHeight=$externalTesterHeight, report=$($paths.externalTester)" `
     -Commands @("npm run flowchain:tester:readiness -- -AllowBlocked")
 
+Add-AuditItem -Items $items -Id "developer-dev-pack" `
+    -Requirement "Developer SDK/devkit proof connects to the real RPC, checks readiness/discovery, reads wallet data, submits a runtime-backed local wallet send, and keeps public readiness fail-closed." `
+    -Status $(if ($devPackPassed) { "passed" } else { "failed" }) `
+    -Evidence "devPackStatus=$(Get-ReportStatus -Report $devPack), heights=$devPackFirstHeight->$devPackSecondHeight, methodCount=$(Get-AuditProp -Object $devPack -Name "methodCount"), publicReadyMethodCount=$(Get-AuditProp -Object $devPack -Name "publicReadyMethodCount"), report=$($paths.devPack)" `
+    -Commands @("npm run flowchain:dev-pack:e2e")
+
 Add-AuditItem -Items $items -Id "system-architecture-audit" `
     -Requirement "System architecture for runtime, RPC, wallets, bridge, backup, operations, verification, and fail-closed owner boundaries is explicit and evidence-backed." `
     -Status $(if ($architectureAuditReady) { "passed" } else { "failed" }) `
@@ -874,8 +900,8 @@ Add-AuditItem -Items $items -Id "aggregate-gate" `
 
 Add-AuditItem -Items $items -Id "no-secrets-no-broadcasts" `
     -Requirement "Reports and gates do not print secrets/env values and no live Base broadcast occurred." `
-    -Status $(if ((Get-ReportStatus -Report $reports.noSecret) -eq "passed" -and $liveProductNoLiveBroadcast -eq $true -and $liveProductEnvValuesPrinted -eq $false -and $baseTxDiagnosticBroadcasts -eq $false -and $baseTxDiagnosticPrintsEnvValues -eq $false -and $baseTxDiagnosticNoSecrets -eq $true) { "passed" } else { "failed" }) `
-    -Evidence "noSecretStatus=$(Get-ReportStatus -Report $reports.noSecret), liveProductNoLiveBroadcast=$liveProductNoLiveBroadcast, baseTxDiagnosticBroadcasts=$baseTxDiagnosticBroadcasts, baseTxDiagnosticNoSecrets=$baseTxDiagnosticNoSecrets, reports=$($paths.noSecret), $($paths.baseTxDiagnostic)" `
+    -Status $(if ((Get-ReportStatus -Report $reports.noSecret) -eq "passed" -and $liveProductNoLiveBroadcast -eq $true -and $liveProductEnvValuesPrinted -eq $false -and $baseTxDiagnosticBroadcasts -eq $false -and $baseTxDiagnosticPrintsEnvValues -eq $false -and $baseTxDiagnosticNoSecrets -eq $true -and (Get-AuditProp -Object $devPack -Name "noSecrets" -Default $false) -eq $true -and (Get-AuditProp -Object $devPack -Name "envValuesPrinted" -Default $true) -eq $false) { "passed" } else { "failed" }) `
+    -Evidence "noSecretStatus=$(Get-ReportStatus -Report $reports.noSecret), liveProductNoLiveBroadcast=$liveProductNoLiveBroadcast, baseTxDiagnosticBroadcasts=$baseTxDiagnosticBroadcasts, baseTxDiagnosticNoSecrets=$baseTxDiagnosticNoSecrets, devPackNoSecrets=$(Get-AuditProp -Object $devPack -Name "noSecrets" -Default $false), reports=$($paths.noSecret), $($paths.baseTxDiagnostic), $($paths.devPack)" `
     -Commands @("npm run flowchain:no-secret:scan")
 
 $failedItems = @($items | Where-Object { $_.status -eq "failed" })
@@ -900,6 +926,8 @@ $report = [ordered]@{
     liveWalletOutputRedacted = @($liveWalletOutput | ForEach-Object { "$_" })
     testerNetworkExitCode = $testerNetworkExitCode
     testerNetworkOutputRedacted = @($testerNetworkOutput | ForEach-Object { "$_" })
+    devPackExitCode = $devPackExitCode
+    devPackOutputRedacted = @($devPackOutput | ForEach-Object { "$_" })
     bridgePilotLocalExitCode = $bridgePilotLocalExitCode
     bridgePilotLocalOutputRedacted = @($bridgePilotLocalOutput | ForEach-Object { "$_" })
     baseTxDiagnosticExitCode = $baseTxDiagnosticExitCode
@@ -969,6 +997,7 @@ $report = [ordered]@{
         "npm run flowchain:backup:restore:verify",
         "npm run flowchain:backup:check",
         "npm run flowchain:service:monitor",
+        "npm run flowchain:dev-pack:e2e",
         "npm run flowchain:ops:snapshot",
         "npm run flowchain:ops:incident-drill",
         "npm run flowchain:live-infra:check",

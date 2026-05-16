@@ -60,6 +60,7 @@ $reportPaths = [ordered]@{
     liveProduct = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
+    devPack = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"
     publicDeploymentContract = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     noSecret = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
 }
@@ -622,22 +623,44 @@ Add-ArchitectureItem -Items $items -Id "owner-signup-checklist-boundary" -Layer 
 
 $noSecret = $reports.noSecret
 $liveProduct = $reports.liveProduct
+$devPack = $reports.devPack
 $noSecretStatus = Get-ArchitectureStatus -Report $noSecret
 $safetyReady = ($noSecretStatus -eq "passed") `
     -and ((Get-ArchitectureProp -Object $liveProduct -Name "noLiveBroadcast" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $liveProduct -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $baseTxDiagnostic -Name "broadcasts" -Default $true) -eq $false) `
-    -and ((Get-ArchitectureProp -Object $baseTxDiagnostic -Name "printsEnvValues" -Default $true) -eq $false)
+    -and ((Get-ArchitectureProp -Object $baseTxDiagnostic -Name "printsEnvValues" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $devPack -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $devPack -Name "envValuesPrinted" -Default $true) -eq $false)
 Add-ArchitectureItem -Items $items -Id "secret-broadcast-boundary" -Layer "Security" `
     -Requirement "Architecture reports and live-readiness commands preserve the no-secret and no-live-broadcast safety boundary." `
     -Status $(if ($safetyReady) { "passed" } else { "failed" }) `
-    -Evidence "noSecretStatus=$noSecretStatus, liveProductNoLiveBroadcast=$(Get-ArchitectureProp -Object $liveProduct -Name "noLiveBroadcast"), liveProductEnvValuesPrinted=$(Get-ArchitectureProp -Object $liveProduct -Name "envValuesPrinted"), baseTxBroadcasts=$(Get-ArchitectureProp -Object $baseTxDiagnostic -Name "broadcasts")" `
+    -Evidence "noSecretStatus=$noSecretStatus, liveProductNoLiveBroadcast=$(Get-ArchitectureProp -Object $liveProduct -Name "noLiveBroadcast"), liveProductEnvValuesPrinted=$(Get-ArchitectureProp -Object $liveProduct -Name "envValuesPrinted"), baseTxBroadcasts=$(Get-ArchitectureProp -Object $baseTxDiagnostic -Name "broadcasts"), devPackNoSecrets=$(Get-ArchitectureProp -Object $devPack -Name "noSecrets")" `
     -Files @("infra/scripts/flowchain-no-secret-scan.ps1") `
     -Commands @("npm run flowchain:no-secret:scan")
 
 $liveInfra = $reports.liveInfra
 $externalTester = $reports.externalTester
 $externalTesterPacket = $reports.externalTesterPacket
+$devPackStatus = Get-ArchitectureStatus -Report $devPack
+$devPackChecks = Get-ArchitectureProp -Object $devPack -Name "checks"
+$devPackReady = (Test-RepoFile -Path "services/flowchain-sdk/src/client.ts") `
+    -and (Test-RepoFile -Path "services/flowchain-sdk/src/cli.ts") `
+    -and (Test-RepoFile -Path "docs/developer/FLOWCHAIN_QUICKSTART.md") `
+    -and (Test-RepoFile -Path "docs/sdk/RPC_REFERENCE.generated.md") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:dev-pack:e2e") `
+    -and ($devPackStatus -eq "passed") `
+    -and ((Get-ArchitectureProp -Object $devPackChecks -Name "discoveryLoaded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $devPackChecks -Name "walletTransfersReadable" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $devPackChecks -Name "walletBalancesReadable" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $devPackChecks -Name "walletSendRuntimeBacked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $devPackChecks -Name "publicReadinessFailClosed" -Default $false) -eq $true)
+Add-ArchitectureItem -Items $items -Id "developer-dev-pack-boundary" -Layer "Developer ecosystem" `
+    -Requirement "Developer SDK/devkit and docs connect to the real FlowChain RPC, generate a live RPC reference, read wallet data, submit a runtime-backed local wallet send, and fail closed for public readiness." `
+    -Status $(if ($devPackReady) { "passed" } else { "failed" }) `
+    -Evidence "devPackStatus=$devPackStatus, methodCount=$(Get-ArchitectureProp -Object $devPack -Name "methodCount"), heights=$(Get-ArchitectureProp -Object $devPack -Name "firstHeight")->$(Get-ArchitectureProp -Object $devPack -Name "secondHeight"), report=$($reportPaths.devPack)" `
+    -Files @("services/flowchain-sdk/src/client.ts", "services/flowchain-sdk/src/cli.ts", "docs/developer/FLOWCHAIN_QUICKSTART.md", "docs/sdk/RPC_REFERENCE.generated.md") `
+    -Commands @("npm run flowchain:dev-pack:e2e")
 $productGateFiles = @(
     "infra/scripts/flowchain-live-infra-check.ps1",
     "infra/scripts/flowchain-live-product-e2e.ps1",
@@ -657,17 +680,19 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:live-product:e2e") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-deployment:contract") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:completion:audit") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:dev-pack:e2e") `
     -and ($liveInfraGateStatus -in @("passed", "blocked")) `
     -and ($liveProductGateStatus -in @("passed", "blocked")) `
     -and ($externalTesterStatus -in @("passed", "blocked")) `
     -and ($externalTesterNetworkFresh -eq $true) `
-    -and ($externalTesterPacketStatus -in @("passed", "blocked"))
+    -and ($externalTesterPacketStatus -in @("passed", "blocked")) `
+    -and ($devPackReady -eq $true)
 Add-ArchitectureItem -Items $items -Id "aggregate-verification-boundary" -Layer "Verification" `
-    -Requirement "Product-level verification composes runtime, RPC, wallets, bridge, backup, public deployment contract, external tester packet, and completion evidence into one auditable path." `
+    -Requirement "Product-level verification composes runtime, RPC, wallets, bridge, backup, public deployment contract, external tester packet, developer dev-pack, and completion evidence into one auditable path." `
     -Status $(if ($productGateReady) { "passed" } else { "failed" }) `
-    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus" `
+    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus, devPack=$devPackStatus" `
     -Files $productGateFiles `
-    -Commands @("npm run flowchain:live-infra:check", "npm run flowchain:live-product:e2e", "npm run flowchain:completion:audit", "npm run flowchain:external-tester:packet")
+    -Commands @("npm run flowchain:live-infra:check", "npm run flowchain:live-product:e2e", "npm run flowchain:completion:audit", "npm run flowchain:external-tester:packet", "npm run flowchain:dev-pack:e2e")
 
 $failedItems = @($items | Where-Object { $_.status -eq "failed" })
 $blockedItems = @($items | Where-Object { $_.status -eq "blocked" })
@@ -687,6 +712,11 @@ $dataFlows = @(
         name = "private-local-wallet-transfer"
         path = @("tester wallet create", "control-plane /wallets/create", "wallet public metadata", "control-plane /wallets/send", "live node inbox", "runtime block", "wallet balance/transfer reads")
         latestEvidence = $reportPaths.testerNetwork
+    },
+    [ordered]@{
+        name = "developer-dev-pack"
+        path = @("developer CLI/SDK", "control-plane /rpc", "rpc_discover", "wallet balance/history reads", "control-plane /wallets/send", "runtime block", "generated RPC reference")
+        latestEvidence = $reportPaths.devPack
     },
     [ordered]@{
         name = "public-rpc-exposure"

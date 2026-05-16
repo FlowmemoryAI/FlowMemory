@@ -1,6 +1,6 @@
 ﻿# FlowChain Architecture Audit
 
-Generated: 2026-05-16T13:42:53.5779585Z
+Generated: 2026-05-16T15:45:21.3315763Z
 Status: blocked
 Blocked only on known external owner inputs: True
 
@@ -21,7 +21,7 @@ Blocked only on known external owner inputs: True
 
 | Layer | Requirement | Status | Evidence |
 | --- | --- | --- | --- |
-| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=37668, finalizedHeight=37668 |
+| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=39216, finalizedHeight=39216 |
 | Operations | Operations has explicit status, monitor, ops snapshot, incident drills, and emergency controls that classify incidents separately from owner-input blockers. | passed | monitorStatus=passed, samples=2, heightAdvanced=True, opsSnapshot=blocked, criticalCount=0, incidentDrill=passed, incidentCases=8, incidentFailed=0 |
 | RPC/API | The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation and abuse rejection before it can be exposed publicly. | passed | validationStatus=passed, corsAllowed=True, corsRejected=True, endpointChecks=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True, abuseStatus=passed, abusePassed=True, abuseMissingChecks=0 |
 | Public edge | External RPC exposure is a distinct owner-operated edge with TLS, allowed origins, rate limits, endpoint checks, and response hygiene. | blocked | publicRpcStatus=blocked, publicRpcReady=False |
@@ -35,12 +35,14 @@ Blocked only on known external owner inputs: True
 | Governance/safety | The ignored owner env file is a first-class setup boundary that can drive owner-input, live-infra, and public deployment gates through one redacted command. | blocked | readinessStatus=blocked, validationStatus=passed, missingFails=True, unignoredFails=True, gitIgnored=True, blockedOnlyKnown=True |
 | Governance/safety | Owner onboarding distinguishes repo-owned FlowChain RPC from the external Base 8453 RPC dependency and gives no-values setup commands. | passed | onboardingStatus=passed, flowChainRpcIsOurs=True, thirdPartyFlowChainRpcProviderNeeded=False, publicRpcRequiresOwnerPublicEdge=True, base8453RpcIsExternalChainDependency=True, localEnvFileSupported=True |
 | Governance/safety | Owner signup checklist maps public RPC edge, always-on host, backup storage, Base 8453 RPC, bridge details, and local env-file setup to exact owner actions without requesting secrets. | passed | signupStatus=passed, itemCount=8, externalSignupCount=3, missingCoverage=0, repoOwned=True, localEnvFileSupported=True |
-| Security | Architecture reports and live-readiness commands preserve the no-secret and no-live-broadcast safety boundary. | passed | noSecretStatus=passed, liveProductNoLiveBroadcast=True, liveProductEnvValuesPrinted=False, baseTxBroadcasts=False |
-| Verification | Product-level verification composes runtime, RPC, wallets, bridge, backup, public deployment contract, external tester packet, and completion evidence into one auditable path. | passed | liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked |
+| Security | Architecture reports and live-readiness commands preserve the no-secret and no-live-broadcast safety boundary. | passed | noSecretStatus=passed, liveProductNoLiveBroadcast=True, liveProductEnvValuesPrinted=False, baseTxBroadcasts=False, devPackNoSecrets=True |
+| Developer ecosystem | Developer SDK/devkit and docs connect to the real FlowChain RPC, generate a live RPC reference, read wallet data, submit a runtime-backed local wallet send, and fail closed for public readiness. | passed | devPackStatus=passed, methodCount=79, heights=38861->38862, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-dev-pack\dev-pack-e2e-report.json |
+| Verification | Product-level verification composes runtime, RPC, wallets, bridge, backup, public deployment contract, external tester packet, developer dev-pack, and completion evidence into one auditable path. | passed | liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, devPack=passed |
 
 ## Data Flows
 
 - private-local-wallet-transfer: tester wallet create -> control-plane /wallets/create -> wallet public metadata -> control-plane /wallets/send -> live node inbox -> runtime block -> wallet balance/transfer reads
+- developer-dev-pack: developer CLI/SDK -> control-plane /rpc -> rpc_discover -> wallet balance/history reads -> control-plane /wallets/send -> runtime block -> generated RPC reference
 - public-rpc-exposure: owner TLS endpoint -> allowed-origin/rate-limit gate -> control-plane HTTP server -> JSON-RPC/REST methods -> runtime state reads
 - public-rpc-edge-template: placeholder edge config -> owner DNS/TLS -> rate-limited reverse proxy -> private FlowChain RPC origin -> readiness gates
 - owner-public-edge-onboarding: owner signup decisions -> public DNS/TLS/proxy -> repo-owned FlowChain RPC origin -> local-only env values -> public readiness gates

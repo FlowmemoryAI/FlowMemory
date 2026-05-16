@@ -40,6 +40,12 @@ function numberValue(value: JsonValue): number {
   return typeof value === "number" ? value : Number.parseInt(String(value ?? "0"), 10);
 }
 
+function heightValue(status: Record<string, JsonValue>): bigint | null {
+  const height = stringValue(status.currentBlock ?? status.blockHeight ?? status.latestHeight ?? status.height ?? null);
+  if (height === null || !/^\d+$/.test(height)) return null;
+  return BigInt(height);
+}
+
 function collectMissingEnvNames(value: JsonValue, names = new Set<string>()): string[] {
   if (Array.isArray(value)) {
     for (const entry of value) collectMissingEnvNames(entry, names);
@@ -71,6 +77,20 @@ function amountFromBalance(row: Record<string, JsonValue>): bigint {
 
 function sleep(ms: number) {
   return new Promise((resolveSleep) => setTimeout(resolveSleep, ms));
+}
+
+async function waitForHeightAdvance(client: FlowChainClient, firstStatus: Record<string, JsonValue>, timeoutMs: number): Promise<Record<string, JsonValue>> {
+  const firstHeight = heightValue(firstStatus);
+  if (firstHeight === null) return firstStatus;
+  const deadline = Date.now() + timeoutMs;
+  let latestStatus = firstStatus;
+  while (Date.now() < deadline) {
+    await sleep(1000);
+    latestStatus = asRecord(await client.chainStatus());
+    const latestHeight = heightValue(latestStatus);
+    if (latestHeight !== null && latestHeight > firstHeight) return latestStatus;
+  }
+  return latestStatus;
 }
 
 function repoRoot() {
@@ -142,8 +162,7 @@ async function main() {
   const discovery = asRecord(await client.rpcDiscover());
   const readiness = asRecord(await client.rpcReadiness());
   const firstStatus = asRecord(await client.chainStatus());
-  await sleep(2500);
-  const secondStatus = asRecord(await client.chainStatus());
+  const secondStatus = await waitForHeightAdvance(client, firstStatus, 30000);
   const walletBalances = asRecord(await client.walletBalances({ limit: 1 }));
   const walletTransfers = asRecord(await client.walletTransfers({ limit: 1 }));
   const sendCandidateBalances = asRecord(await client.walletBalances({ limit: 25 }));
@@ -170,8 +189,8 @@ async function main() {
   });
   const cliStatus = JSON.parse(cliStatusText) as JsonValue;
 
-  const firstHeight = stringValue(firstStatus.currentBlock ?? firstStatus.blockHeight ?? null);
-  const secondHeight = stringValue(secondStatus.currentBlock ?? secondStatus.blockHeight ?? null);
+  const firstHeight = stringValue(firstStatus.currentBlock ?? firstStatus.blockHeight ?? firstStatus.latestHeight ?? firstStatus.height ?? null);
+  const secondHeight = stringValue(secondStatus.currentBlock ?? secondStatus.blockHeight ?? secondStatus.latestHeight ?? secondStatus.height ?? null);
   const missingEnvNames = collectMissingEnvNames(readiness);
   const transactionSubmit = methodEntry(discovery, "transaction_submit");
   const walletTransferHistory = methodEntry(discovery, "wallet_transfer_history");
@@ -198,7 +217,7 @@ async function main() {
     schema: "flowchain.dev_pack_e2e_report.v0",
     generatedAt: new Date().toISOString(),
     status,
-    rpcUrl: "http://127.0.0.1:8787/rpc",
+    rpcUrl,
     checks,
     methodCount: numberValue(discovery.methodCount ?? 0),
     publicReadyMethodCount: numberValue(discovery.publicReadyMethodCount ?? 0),
