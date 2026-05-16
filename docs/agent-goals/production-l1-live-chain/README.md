@@ -58,6 +58,7 @@ exact missing variable or deployment artifact.
 - `13-live-product-verification.md`
 - `14-sdk-docs-developer-tooling.md`
 - `15-live-infrastructure-public-rpc.md`
+- `16-autonomous-worker-goal-queue.md`
 
 Launcher:
 
