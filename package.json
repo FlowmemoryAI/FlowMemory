@@ -8,7 +8,8 @@
     "services/verifier",
     "services/flowmemory",
     "services/control-plane",
-    "services/bridge-relayer"
+    "services/bridge-relayer",
+    "services/flowchain-sdk"
   ],
   "scripts": {
     "test": "npm test --prefix services/shared && npm test --prefix services/indexer && npm test --prefix services/verifier && npm test --prefix services/flowmemory && npm test --prefix services/control-plane && npm test --prefix services/bridge-relayer",
@@ -74,6 +75,8 @@
     "flowchain:architecture:audit": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-architecture-audit.ps1",
     "flowchain:public-deployment:contract": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-deployment-contract.ps1",
     "flowchain:completion:audit": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-completion-audit.ps1",
+    "flowchain:dev-pack:e2e": "npm run e2e --prefix services/flowchain-sdk",
+    "flowchain:devkit": "npm run cli --prefix services/flowchain-sdk --",
     "flowchain:truth-table": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-production-truth-table.ps1",
     "flowchain:l1-e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-full-smoke.ps1",
     "flowchain:l1:e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-full-smoke.ps1",
