@@ -378,6 +378,11 @@ interface RpcLog {
   removed?: boolean;
 }
 
+interface RpcBlock {
+  number?: string;
+  hash?: string | null;
+}
+
 function stableId(schema: string, value: JsonValue): `0x${string}` {
   return keccak256Utf8(canonicalJson({ schema, value }));
 }
@@ -463,6 +468,10 @@ function isMockMode(mode: BridgeMode): boolean {
 
 function isPilotMode(mode: BridgeMode): boolean {
   return mode === "mock-pilot" || mode === "base-mainnet-pilot";
+}
+
+function isBasePublicNetworkMode(mode: BridgeMode): boolean {
+  return mode === "base-mainnet-canary" || mode === "base-mainnet-pilot";
 }
 
 export function isPlaceholderFlowchainRecipient(value: `0x${string}`): boolean {
@@ -715,6 +724,9 @@ export function parseBridgeArgs(args: string[]): CliOptions {
   }
 
   const resolvedConfirmationDepth = confirmationDepth ?? 0;
+  if (isBasePublicNetworkMode(mode) && resolvedConfirmationDepth <= 0) {
+    throw new Error("Base mainnet bridge modes require --confirmations greater than zero");
+  }
 
   return {
     mode,
@@ -1871,6 +1883,49 @@ async function readLatestBlockNumber(rpcUrl: string): Promise<bigint> {
   return hexQuantityToBigInt(result, "eth_blockNumber");
 }
 
+async function readCanonicalBlockHash(rpcUrl: string, blockNumber: string): Promise<`0x${string}`> {
+  const block = await rpcCall<RpcBlock | null>(rpcUrl, "eth_getBlockByNumber", [blockNumber, false]);
+  if (block === null) {
+    throw new Error(`canonical block ${blockNumber} was not returned by RPC`);
+  }
+  if (block.number !== undefined && hexQuantityToBigInt(block.number, "canonical block number") !== hexQuantityToBigInt(blockNumber, "log blockNumber")) {
+    throw new Error(`canonical block number mismatch: requested ${blockNumber}, got ${block.number}`);
+  }
+  if (block.hash === undefined || block.hash === null) {
+    throw new Error(`canonical block ${blockNumber} is missing hash`);
+  }
+  return asHash(block.hash, "canonical block hash");
+}
+
+async function assertCanonicalBasePublicLogs(options: CliOptions, logs: RpcLog[]): Promise<void> {
+  if (!isBasePublicNetworkMode(options.mode)) {
+    return;
+  }
+  const canonicalBlockHashes = new Map<string, `0x${string}`>();
+  for (const log of logs) {
+    if (log.removed) {
+      throw new Error("removed bridge logs must be handled by a reorg-aware reader");
+    }
+    if (log.blockNumber === undefined) {
+      throw new Error("BridgeDeposit RPC log is missing blockNumber");
+    }
+    if (log.blockHash === undefined) {
+      throw new Error("BridgeDeposit RPC log is missing blockHash");
+    }
+    const logBlockHash = asHash(log.blockHash, "blockHash");
+    const blockNumberKey = log.blockNumber.toLowerCase();
+    let canonicalBlockHash = canonicalBlockHashes.get(blockNumberKey);
+    if (canonicalBlockHash === undefined) {
+      canonicalBlockHash = await readCanonicalBlockHash(options.rpcUrl ?? "", log.blockNumber);
+      canonicalBlockHashes.set(blockNumberKey, canonicalBlockHash);
+    }
+    if (canonicalBlockHash.toLowerCase() !== logBlockHash.toLowerCase()) {
+      const decimalBlockNumber = hexQuantityToBigInt(log.blockNumber, "blockNumber").toString();
+      throw new Error(`non-canonical BridgeDeposit log: block ${decimalBlockNumber} hash mismatch`);
+    }
+  }
+}
+
 interface BridgeLogReadResult {
   deposits: BridgeDeposit[];
   confirmation?: BridgeConfirmationEvidence;
@@ -1947,8 +2002,9 @@ async function readBridgeDepositLogsLocked(options: CliOptions): Promise<BridgeL
     topics: [[BRIDGE_DEPOSIT_TOPIC0, BRIDGE_DEPOSIT_LEGACY_TOPIC0]],
   }]);
 
+  await assertCanonicalBasePublicLogs(options, logs);
+
   const deposits = logs
-    .filter((log) => !log.removed)
     .map((log) => parseBridgeDepositLog(log, expectedChainId));
   for (const deposit of deposits) {
     assertApprovedLockbox(deposit.sourceContract, options);

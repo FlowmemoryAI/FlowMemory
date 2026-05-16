@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-16T15:45:21.3315763Z",
+    "generatedAt":  "2026-05-16T21:10:39.4697112Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -17,9 +17,9 @@
                               ],
     "itemCounts":  {
                        "passed":  12,
-                       "blocked":  5,
+                       "blocked":  6,
                        "failed":  0,
-                       "total":  17
+                       "total":  18
                    },
     "items":  [
                   {
@@ -27,7 +27,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=39216, finalizedHeight=39216",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=41476, finalizedHeight=41476",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -222,7 +222,7 @@
                       "layer":  "Deployment",
                       "requirement":  "The owner-operated public deployment contract is machine-checkable, includes rollback commands, and blocks sharing until public RPC, backup, bridge, and tester gates pass.",
                       "status":  "blocked",
-                      "evidence":  "deploymentStatus=blocked, deploymentReady=False, blockedOnlyKnown=True, blockedItems=5, failedItems=0",
+                      "evidence":  "deploymentStatus=blocked, deploymentReady=False, packetShareable=False, packetSmoke=True, blockedOnlyKnown=True, blockedItems=5, failedItems=0",
                       "files":  [
                                     "infra/scripts/flowchain-public-deployment-contract.ps1",
                                     "docs/OPERATIONS/FLOWCHAIN_OWNER_OPERATED_PUBLIC_RPC.md"
@@ -368,7 +368,7 @@
                       "layer":  "Developer ecosystem",
                       "requirement":  "Developer SDK/devkit and docs connect to the real FlowChain RPC, generate a live RPC reference, read wallet data, submit a runtime-backed local wallet send, and fail closed for public readiness.",
                       "status":  "passed",
-                      "evidence":  "devPackStatus=passed, methodCount=79, heights=38861-\u003e38862, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\dev-pack-e2e-report.json",
+                      "evidence":  "devPackStatus=passed, methodCount=79, heights=41114-\u003e41115, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\dev-pack-e2e-report.json",
                       "files":  [
                                     "services/flowchain-sdk/src/client.ts",
                                     "services/flowchain-sdk/src/cli.ts",
@@ -383,11 +383,44 @@
                                    ]
                   },
                   {
+                      "id":  "external-tester-launch-boundary",
+                      "layer":  "External tester launch",
+                      "requirement":  "Friends-and-family tester sharing requires fresh tester-wallet evidence and executable packet-route smoke, and remains blocked until public RPC, backup, and Base bridge gates pass.",
+                      "status":  "blocked",
+                      "evidence":  "externalTester=blocked, testerNetworkFresh=True, packet=blocked, packetShareable=False, packetSmoke=True, smokeRoutes=8, externalSharingReady=False",
+                      "files":  [
+                                    "infra/scripts/flowchain-external-tester-readiness.ps1",
+                                    "infra/scripts/flowchain-external-tester-packet.ps1",
+                                    "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:tester:readiness -- -AllowBlocked",
+                                       "npm run flowchain:external-tester:packet -- -AllowBlocked"
+                                   ],
+                      "blockers":  [
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                   ]
+                  },
+                  {
                       "id":  "aggregate-verification-boundary",
                       "layer":  "Verification",
-                      "requirement":  "Product-level verification composes runtime, RPC, wallets, bridge, backup, public deployment contract, external tester packet, developer dev-pack, and completion evidence into one auditable path.",
+                      "requirement":  "Product-level verification composes runtime, RPC, wallets, bridge, backup, public deployment contract, executable external tester packet smoke, developer dev-pack, and completion evidence into one auditable path.",
                       "status":  "passed",
-                      "evidence":  "liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, devPack=passed",
+                      "evidence":  "liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, packetSmoke=True, devPack=passed",
                       "files":  [
                                     "infra/scripts/flowchain-live-infra-check.ps1",
                                     "infra/scripts/flowchain-live-product-e2e.ps1",
@@ -603,6 +636,26 @@
                         "publicDeploymentContract":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
                         "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json"
                     },
+    "packetExecutableSmokeValidated":  true,
+    "externalTesterLaunchEvidence":  {
+                                         "externalTesterStatus":  "blocked",
+                                         "externalTesterPacketStatus":  "blocked",
+                                         "externalSharingReady":  false,
+                                         "packetShareable":  false,
+                                         "packetExecutableSmokeValidated":  true,
+                                         "packetSmokeRoutes":  [
+                                                                   "/health",
+                                                                   "/rpc/discover",
+                                                                   "/rpc/readiness",
+                                                                   "/chain/status",
+                                                                   "/wallets/create",
+                                                                   "/wallets/balances",
+                                                                   "/wallets/send",
+                                                                   "/wallets/transfers"
+                                                               ],
+                                         "testerNetworkFresh":  true,
+                                         "publicDeploymentContractPacketSmoke":  true
+                                     },
     "architectureMarkdownPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ARCHITECTURE_AUDIT.md",
     "noLiveBroadcast":  true,
     "envValuesPrinted":  false,

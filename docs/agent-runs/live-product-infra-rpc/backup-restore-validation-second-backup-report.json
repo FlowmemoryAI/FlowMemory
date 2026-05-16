@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.state_backup_report.v1",
-    "generatedAt":  "2026-05-16T15:36:05.1155742Z",
+    "generatedAt":  "2026-05-16T20:57:22.2560781Z",
     "status":  "passed",
     "requiredEnvNames":  [
                              "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
@@ -13,21 +13,26 @@
     "snapshot":  {
                      "attempted":  true,
                      "created":  true,
-                     "snapshotName":  "flowchain-state-snapshot-20260516T153522588Z",
+                     "snapshotName":  "flowchain-state-snapshot-20260516T205632692Z",
                      "stateArtifactName":  "state.json",
                      "manifestName":  "manifest.json",
                      "latestManifestName":  "latest-manifest.json",
-                     "stateFileSha256":  "498fc12362559065f7a086f9da4bde066b73bd401555d5ef2e72241b1152878a",
-                     "stateBytes":  18246141,
+                     "stateFileSha256":  "4209b2f9d6fd31d6966ced9dc692d92154dd01a3e6e0ec9f9bbcea81869b9316",
+                     "stateBytes":  19359762,
                      "sourceStateReadable":  true,
                      "snapshotReadable":  true,
                      "manifestReadable":  true,
                      "writeVerified":  true,
+                     "snapshotManifestSha256":  "eb6e273a020677680a77ca3f0b7d1bb3800f9b9ec760d7c1a7655ed32b132b65",
+                     "latestManifestSha256":  "eb6e273a020677680a77ca3f0b7d1bb3800f9b9ec760d7c1a7655ed32b132b65",
+                     "latestManifestReadable":  true,
+                     "latestPointerWrittenAtomically":  true,
+                     "latestPointerMatchesSnapshotManifest":  true,
                      "attempts":  1,
-                     "latestHeight":  "39088",
-                     "latestHash":  "0x89e6503af2b5b7b45e7f9bc4e6507a7d616c4e3e2337615d51b3efd5ef519e1c",
-                     "latestRoot":  "0x63d0131cc6aa61c07eb9d586b3088dfbd138547fd80f37c9aac2b14d60f53e55",
-                     "finalizedHeight":  "39088"
+                     "latestHeight":  "41347",
+                     "latestHash":  "0xa44cdfe7018f969386f677f46c52101651c9020c7d27df22fd23fe087bb3e46d",
+                     "latestRoot":  "0x1784b6919ae4ef6e371404a7e6f4dc6b9c627641692185dbe114f93cf89574b9",
+                     "finalizedHeight":  "41347"
                  },
     "problems":  [
 

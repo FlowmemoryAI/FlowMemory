@@ -70,6 +70,10 @@ $backup = [ordered]@{
     stateRootMatch = $false
     stateFileHashMatch = $false
     writeVerified = $false
+    latestPointerVerified = $false
+    latestPointerWrittenAtomically = $false
+    snapshotManifestHash = $null
+    latestManifestHash = $null
     restoreVerified = $false
 }
 
@@ -113,11 +117,18 @@ if (-not [string]::IsNullOrWhiteSpace($backupPathRaw)) {
             else {
                 $snapshot = $backupProof.snapshot
                 $backup.writeVerified = $snapshot.writeVerified -eq $true
+                $backup.latestPointerVerified = $snapshot.latestPointerMatchesSnapshotManifest -eq $true
+                $backup.latestPointerWrittenAtomically = $snapshot.latestPointerWrittenAtomically -eq $true
+                $backup.snapshotManifestHash = [string] $snapshot.snapshotManifestSha256
+                $backup.latestManifestHash = [string] $snapshot.latestManifestSha256
                 $backup.latestBackupArtifactName = [string] $snapshot.snapshotName
                 $backup.latestBackupTimestamp = [string] $backupProof.generatedAt
                 $backup.stateFileHashMatch = $snapshot.created -eq $true
                 $backup.stateRootCompared = -not [string]::IsNullOrWhiteSpace([string] $snapshot.latestRoot)
                 $backup.stateRootMatch = $backup.stateRootCompared
+                if (-not $backup.latestPointerVerified) {
+                    Add-FlowChainReadinessProblem -Problems $problems -Name "latest-manifest.json" -Reason "latest manifest pointer did not match snapshot manifest" -Kind "failed" -Category "artifact"
+                }
 
                 $restoreChild = Invoke-BackupReadinessChild -ArgumentList @(
                     "-NoProfile",

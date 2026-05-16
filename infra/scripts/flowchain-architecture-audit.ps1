@@ -499,15 +499,18 @@ $deploymentContractFailed = [int](Get-ArchitectureProp -Object $deploymentContra
 $deploymentContractBlocked = [int](Get-ArchitectureProp -Object $deploymentContractCounts -Name "blocked" -Default 0)
 $deploymentContractBlockedOnlyKnown = Get-ArchitectureProp -Object $deploymentContract -Name "blockedOnlyOnKnownExternalOwnerInputs" -Default $false
 $deploymentContractReady = (Get-ArchitectureProp -Object $deploymentContract -Name "deploymentReady" -Default $false) -eq $true
+$deploymentContractPacketShareable = Get-ArchitectureProp -Object $deploymentContract -Name "packetShareable" -Default $false
+$deploymentContractPacketSmoke = Get-ArchitectureProp -Object $deploymentContract -Name "packetExecutableSmokeValidated" -Default $false
 $deploymentContractSafe = ($deploymentContractStatus -in @("passed", "blocked")) `
     -and ($deploymentContractFailed -eq 0) `
     -and ($deploymentContractBlockedOnlyKnown -eq $true) `
+    -and ($deploymentContractPacketSmoke -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentContract -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentContract -Name "noLiveBroadcast" -Default $false) -eq $true)
 Add-ArchitectureItem -Items $items -Id "public-deployment-contract-boundary" -Layer "Deployment" `
     -Requirement "The owner-operated public deployment contract is machine-checkable, includes rollback commands, and blocks sharing until public RPC, backup, bridge, and tester gates pass." `
     -Status $(if ($deploymentContractStatus -eq "passed" -and $deploymentContractReady -eq $true -and $deploymentContractSafe) { "passed" } elseif ($deploymentContractStatus -eq "blocked" -and $deploymentContractSafe) { "blocked" } else { "failed" }) `
-    -Evidence "deploymentStatus=$deploymentContractStatus, deploymentReady=$deploymentContractReady, blockedOnlyKnown=$deploymentContractBlockedOnlyKnown, blockedItems=$deploymentContractBlocked, failedItems=$deploymentContractFailed" `
+    -Evidence "deploymentStatus=$deploymentContractStatus, deploymentReady=$deploymentContractReady, packetShareable=$deploymentContractPacketShareable, packetSmoke=$deploymentContractPacketSmoke, blockedOnlyKnown=$deploymentContractBlockedOnlyKnown, blockedItems=$deploymentContractBlocked, failedItems=$deploymentContractFailed" `
     -Files @("infra/scripts/flowchain-public-deployment-contract.ps1", "docs/OPERATIONS/FLOWCHAIN_OWNER_OPERATED_PUBLIC_RPC.md") `
     -Commands @("npm run flowchain:public-deployment:contract -- -AllowBlocked") `
     -Blockers @($knownExternalOwnerInputs)
@@ -675,6 +678,29 @@ $externalTesterStatus = Get-ArchitectureStatus -Report $externalTester
 $externalTesterPacketStatus = Get-ArchitectureStatus -Report $externalTesterPacket
 $externalTesterChecks = Get-ArchitectureProp -Object $externalTester -Name "checks"
 $externalTesterNetworkFresh = Get-ArchitectureProp -Object $externalTesterChecks -Name "testerWalletNetworkFresh" -Default $false
+$externalSharingReady = Get-ArchitectureProp -Object $externalTester -Name "externalSharingReady" -Default $false
+$externalTesterPacketShareable = Get-ArchitectureProp -Object $externalTesterPacket -Name "packetShareable" -Default $false
+$externalTesterPacketExecutableSmokeValidated = Get-ArchitectureProp -Object $externalTesterPacket -Name "packetExecutableSmokeValidated" -Default $false
+$externalTesterPacketSmokeRoutes = @((Get-ArchitectureProp -Object $externalTesterPacket -Name "packetSmokeRoutes" -Default @()))
+$externalTesterLaunchPassed = ($externalTesterStatus -eq "passed") `
+    -and ($externalTesterPacketStatus -eq "passed") `
+    -and ($externalSharingReady -eq $true) `
+    -and ($externalTesterPacketShareable -eq $true) `
+    -and ($externalTesterNetworkFresh -eq $true) `
+    -and ($externalTesterPacketExecutableSmokeValidated -eq $true)
+$externalTesterLaunchBlocked = ($externalTesterStatus -eq "blocked") `
+    -and ($externalTesterPacketStatus -eq "blocked") `
+    -and ($externalSharingReady -eq $false) `
+    -and ($externalTesterPacketShareable -eq $false) `
+    -and ($externalTesterNetworkFresh -eq $true) `
+    -and ($externalTesterPacketExecutableSmokeValidated -eq $true)
+Add-ArchitectureItem -Items $items -Id "external-tester-launch-boundary" -Layer "External tester launch" `
+    -Requirement "Friends-and-family tester sharing requires fresh tester-wallet evidence and executable packet-route smoke, and remains blocked until public RPC, backup, and Base bridge gates pass." `
+    -Status $(if ($externalTesterLaunchPassed) { "passed" } elseif ($externalTesterLaunchBlocked) { "blocked" } else { "failed" }) `
+    -Evidence "externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, packet=$externalTesterPacketStatus, packetShareable=$externalTesterPacketShareable, packetSmoke=$externalTesterPacketExecutableSmokeValidated, smokeRoutes=$($externalTesterPacketSmokeRoutes.Count), externalSharingReady=$externalSharingReady" `
+    -Files @("infra/scripts/flowchain-external-tester-readiness.ps1", "infra/scripts/flowchain-external-tester-packet.ps1", "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md") `
+    -Commands @("npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked") `
+    -Blockers @($knownExternalOwnerInputs)
 $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:live-infra:check") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:live-product:e2e") `
@@ -686,11 +712,12 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and ($externalTesterStatus -in @("passed", "blocked")) `
     -and ($externalTesterNetworkFresh -eq $true) `
     -and ($externalTesterPacketStatus -in @("passed", "blocked")) `
+    -and ($externalTesterPacketExecutableSmokeValidated -eq $true) `
     -and ($devPackReady -eq $true)
 Add-ArchitectureItem -Items $items -Id "aggregate-verification-boundary" -Layer "Verification" `
-    -Requirement "Product-level verification composes runtime, RPC, wallets, bridge, backup, public deployment contract, external tester packet, developer dev-pack, and completion evidence into one auditable path." `
+    -Requirement "Product-level verification composes runtime, RPC, wallets, bridge, backup, public deployment contract, executable external tester packet smoke, developer dev-pack, and completion evidence into one auditable path." `
     -Status $(if ($productGateReady) { "passed" } else { "failed" }) `
-    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus, devPack=$devPackStatus" `
+    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus, packetSmoke=$externalTesterPacketExecutableSmokeValidated, devPack=$devPackStatus" `
     -Files $productGateFiles `
     -Commands @("npm run flowchain:live-infra:check", "npm run flowchain:live-product:e2e", "npm run flowchain:completion:audit", "npm run flowchain:external-tester:packet", "npm run flowchain:dev-pack:e2e")
 
@@ -785,6 +812,17 @@ $report = [ordered]@{
     unknownMissingEnvNames = @($unknownOwnerInputs)
     knownExternalOwnerInputs = $knownExternalOwnerInputs
     reportPaths = $reportPaths
+    packetExecutableSmokeValidated = $externalTesterPacketExecutableSmokeValidated
+    externalTesterLaunchEvidence = [ordered]@{
+        externalTesterStatus = $externalTesterStatus
+        externalTesterPacketStatus = $externalTesterPacketStatus
+        externalSharingReady = $externalSharingReady
+        packetShareable = $externalTesterPacketShareable
+        packetExecutableSmokeValidated = $externalTesterPacketExecutableSmokeValidated
+        packetSmokeRoutes = @($externalTesterPacketSmokeRoutes)
+        testerNetworkFresh = $externalTesterNetworkFresh
+        publicDeploymentContractPacketSmoke = $deploymentContractPacketSmoke
+    }
     architectureMarkdownPath = $markdownFullPath
     noLiveBroadcast = $true
     envValuesPrinted = $false

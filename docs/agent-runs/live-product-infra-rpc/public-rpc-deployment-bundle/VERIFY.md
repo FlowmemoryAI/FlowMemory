@@ -2,6 +2,8 @@
 
 Run these on the owner host after DNS, TLS, allowed origins, rate limit, and backup path are configured locally.
 
+## Repository Checks
+
 - npm run flowchain:service:restart -- -LiveProfile
 - npm run flowchain:service:status
 - npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30
@@ -12,3 +14,9 @@ Run these on the owner host after DNS, TLS, allowed origins, rate limit, and bac
 - npm run flowchain:backup:check
 - npm run flowchain:public-deployment:contract -- -AllowBlocked
 - npm run flowchain:external-tester:packet -- -AllowBlocked
+
+## Owner-Host Preflight Checks
+
+- systemd-analyze verify <FLOWCHAIN_SYSTEMD_RENDERED_UNIT>
+- nginx -t
+- bash <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>

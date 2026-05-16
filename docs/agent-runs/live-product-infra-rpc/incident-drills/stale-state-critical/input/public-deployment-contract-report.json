@@ -1,9 +1,10 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-16T15:40:55.6782444Z",
+    "generatedAt":  "2026-05-16T21:02:42.8867946Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
+    "packetExecutableSmokeValidated":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
                        "passed":  12,
@@ -94,7 +95,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=39165, finalizedHeight=39165",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=41425, finalizedHeight=41425",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -231,9 +232,9 @@
                   },
                   {
                       "id":  "external-tester-sharing",
-                      "requirement":  "External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence.",
+                      "requirement":  "External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence plus executable packet-route smoke.",
                       "status":  "blocked",
-                      "evidence":  "externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, externalSharingReady=False, packet=blocked, packetShareable=False",
+                      "evidence":  "externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, packetSmoke=True, externalSharingReady=False, packet=blocked, packetShareable=False",
                       "commands":  [
                                        "npm run flowchain:tester:readiness",
                                        "npm run flowchain:external-tester:packet"
@@ -296,16 +297,16 @@
                               "steps":  [
                                             {
                                                 "name":  "service-status",
-                                                "startedAt":  "2026-05-16T15:30:17.2788879Z",
-                                                "finishedAt":  "2026-05-16T15:30:39.6383737Z",
+                                                "startedAt":  "2026-05-16T20:50:54.0692132Z",
+                                                "finishedAt":  "2026-05-16T20:51:21.9334293Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain service status: passed",
-                                                                       "Node: running PID=29932",
-                                                                       "Control plane: running PID=46940 bind=127.0.0.1:8787",
+                                                                       "Node: running PID=30776",
+                                                                       "Control plane: running PID=11188 bind=127.0.0.1:8787",
                                                                        "Public readiness: blocked",
-                                                                       "Latest height: 39005",
-                                                                       "Finalized height: 39005",
+                                                                       "Latest height: 41263",
+                                                                       "Finalized height: 41263",
                                                                        "Backup path: not-configured",
                                                                        "Bridge readiness: live=blocked, infra=blocked",
                                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json"
@@ -313,24 +314,24 @@
                                             },
                                             {
                                                 "name":  "service-monitor",
-                                                "startedAt":  "2026-05-16T15:30:39.6510385Z",
-                                                "finishedAt":  "2026-05-16T15:31:30.1866759Z",
+                                                "startedAt":  "2026-05-16T20:51:21.9484295Z",
+                                                "finishedAt":  "2026-05-16T20:52:16.7663912Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain service monitor status: passed",
                                                                        "Samples: 2",
-                                                                       "Height: 39012 -\u003e 39019",
+                                                                       "Height: 41270 -\u003e 41277",
                                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json"
                                                                    ]
                                             },
                                             {
                                                 "name":  "ops-snapshot",
-                                                "startedAt":  "2026-05-16T15:31:30.1906778Z",
-                                                "finishedAt":  "2026-05-16T15:31:31.7363792Z",
+                                                "startedAt":  "2026-05-16T20:52:16.7703915Z",
+                                                "finishedAt":  "2026-05-16T20:52:18.3722143Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain ops snapshot status: blocked",
-                                                                       "Latest height: 39019",
+                                                                       "Latest height: 41277",
                                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
                                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\OPS_SNAPSHOT.md",
                                                                        "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, external-tester-not-shareable, deployment-contract-not-ready"
@@ -338,8 +339,8 @@
                                             },
                                             {
                                                 "name":  "owner-onboarding",
-                                                "startedAt":  "2026-05-16T15:31:31.7423812Z",
-                                                "finishedAt":  "2026-05-16T15:31:33.1314698Z",
+                                                "startedAt":  "2026-05-16T20:52:18.3762142Z",
+                                                "finishedAt":  "2026-05-16T20:52:19.6700106Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain owner onboarding status: passed",
@@ -350,8 +351,8 @@
                                             },
                                             {
                                                 "name":  "owner-signup-checklist",
-                                                "startedAt":  "2026-05-16T15:31:33.1354700Z",
-                                                "finishedAt":  "2026-05-16T15:31:34.4718298Z",
+                                                "startedAt":  "2026-05-16T20:52:19.6750110Z",
+                                                "finishedAt":  "2026-05-16T20:52:20.9432243Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain owner signup checklist status: passed",
@@ -361,8 +362,8 @@
                                             },
                                             {
                                                 "name":  "owner-env-template",
-                                                "startedAt":  "2026-05-16T15:31:34.4748309Z",
-                                                "finishedAt":  "2026-05-16T15:31:35.8070590Z",
+                                                "startedAt":  "2026-05-16T20:52:20.9472213Z",
+                                                "finishedAt":  "2026-05-16T20:52:22.2378103Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain owner env template status: passed",
@@ -374,8 +375,8 @@
                                             },
                                             {
                                                 "name":  "owner-inputs",
-                                                "startedAt":  "2026-05-16T15:31:35.8100592Z",
-                                                "finishedAt":  "2026-05-16T15:31:37.2383869Z",
+                                                "startedAt":  "2026-05-16T20:52:22.2408081Z",
+                                                "finishedAt":  "2026-05-16T20:52:23.6462124Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain owner inputs status: blocked",
@@ -386,8 +387,8 @@
                                             },
                                             {
                                                 "name":  "public-rpc-edge-template",
-                                                "startedAt":  "2026-05-16T15:31:37.2413862Z",
-                                                "finishedAt":  "2026-05-16T15:31:38.3208377Z",
+                                                "startedAt":  "2026-05-16T20:52:23.6602108Z",
+                                                "finishedAt":  "2026-05-16T20:52:24.8842420Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain public RPC edge template status: passed",
@@ -397,8 +398,8 @@
                                             },
                                             {
                                                 "name":  "public-rpc-deployment-bundle",
-                                                "startedAt":  "2026-05-16T15:31:38.3238360Z",
-                                                "finishedAt":  "2026-05-16T15:31:39.7127634Z",
+                                                "startedAt":  "2026-05-16T20:52:24.8892375Z",
+                                                "finishedAt":  "2026-05-16T20:52:26.4066897Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain public RPC deployment bundle status: passed",
@@ -409,8 +410,8 @@
                                             },
                                             {
                                                 "name":  "public-rpc-validation",
-                                                "startedAt":  "2026-05-16T15:31:39.7167615Z",
-                                                "finishedAt":  "2026-05-16T15:33:03.6245410Z",
+                                                "startedAt":  "2026-05-16T20:52:26.4106884Z",
+                                                "finishedAt":  "2026-05-16T20:53:54.2949767Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain public RPC validation status: passed",
@@ -420,8 +421,8 @@
                                             },
                                             {
                                                 "name":  "public-rpc-abuse-test",
-                                                "startedAt":  "2026-05-16T15:33:03.6285417Z",
-                                                "finishedAt":  "2026-05-16T15:33:11.2402637Z",
+                                                "startedAt":  "2026-05-16T20:53:54.2979772Z",
+                                                "finishedAt":  "2026-05-16T20:54:03.6301568Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain public RPC abuse test status: passed",
@@ -431,8 +432,8 @@
                                             },
                                             {
                                                 "name":  "public-rpc-readiness",
-                                                "startedAt":  "2026-05-16T15:33:11.2432617Z",
-                                                "finishedAt":  "2026-05-16T15:33:31.4912330Z",
+                                                "startedAt":  "2026-05-16T20:54:03.6341573Z",
+                                                "finishedAt":  "2026-05-16T20:54:29.4953015Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain public RPC readiness status: blocked",
@@ -442,8 +443,8 @@
                                             },
                                             {
                                                 "name":  "backup-restore-validation",
-                                                "startedAt":  "2026-05-16T15:33:31.4952333Z",
-                                                "finishedAt":  "2026-05-16T15:38:45.4911469Z",
+                                                "startedAt":  "2026-05-16T20:54:29.4992996Z",
+                                                "finishedAt":  "2026-05-16T21:00:22.6449486Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain backup/restore validation status: passed",
@@ -452,8 +453,8 @@
                                             },
                                             {
                                                 "name":  "public-rpc-backup",
-                                                "startedAt":  "2026-05-16T15:38:45.4971490Z",
-                                                "finishedAt":  "2026-05-16T15:39:08.5548927Z",
+                                                "startedAt":  "2026-05-16T21:00:22.6489453Z",
+                                                "finishedAt":  "2026-05-16T21:00:46.9196230Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain backup readiness status: blocked",
@@ -463,8 +464,8 @@
                                             },
                                             {
                                                 "name":  "bridge-live",
-                                                "startedAt":  "2026-05-16T15:39:08.5588907Z",
-                                                "finishedAt":  "2026-05-16T15:39:09.8965886Z",
+                                                "startedAt":  "2026-05-16T21:00:46.9226236Z",
+                                                "finishedAt":  "2026-05-16T21:00:48.0414340Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain bridge live readiness status: blocked",
@@ -474,8 +475,8 @@
                                             },
                                             {
                                                 "name":  "bridge-infra",
-                                                "startedAt":  "2026-05-16T15:39:09.8995924Z",
-                                                "finishedAt":  "2026-05-16T15:39:11.3662595Z",
+                                                "startedAt":  "2026-05-16T21:00:48.0454316Z",
+                                                "finishedAt":  "2026-05-16T21:00:49.2023961Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain bridge infra readiness status: blocked",
@@ -485,8 +486,8 @@
                                             },
                                             {
                                                 "name":  "external-tester-packet",
-                                                "startedAt":  "2026-05-16T15:39:11.3722617Z",
-                                                "finishedAt":  "2026-05-16T15:40:53.2958312Z",
+                                                "startedAt":  "2026-05-16T21:00:49.2053966Z",
+                                                "finishedAt":  "2026-05-16T21:02:40.2290121Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain external tester packet status: blocked",
@@ -498,8 +499,8 @@
                                             },
                                             {
                                                 "name":  "no-secret-scan",
-                                                "startedAt":  "2026-05-16T15:40:53.2997063Z",
-                                                "finishedAt":  "2026-05-16T15:40:54.7795386Z",
+                                                "startedAt":  "2026-05-16T21:02:40.2334119Z",
+                                                "finishedAt":  "2026-05-16T21:02:41.8127706Z",
                                                 "exitCode":  0,
                                                 "outputRedacted":  [
                                                                        "FlowChain no-secret scan status: passed",

@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Bundle
 
-Generated: 2026-05-16T15:40:58.6464986Z
+Generated: 2026-05-16T21:10:38.7464585Z
 Status: passed
 
 This bundle packages placeholder-only files for an owner-operated HTTPS edge in front of the repo-owned private RPC origin `127.0.0.1:8787`.
@@ -9,9 +9,31 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 
 - README.md
 - nginx-flowchain-rpc.template.conf
+- flowchain-live.service.template
+- nginx-preflight.template.sh
+- NGINX_PREFLIGHT.md
 - owner-public-rpc.env.example
 - VERIFY.md
 - ROLLBACK.md
+- bundle-checks.json
+
+## Required Placeholders
+
+- <FLOWCHAIN_RPC_PUBLIC_HOST>
+- <FLOWCHAIN_RPC_PUBLIC_URL>
+- <FLOWCHAIN_RPC_ALLOWED_ORIGIN>
+- <FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>
+- <PATH_TO_TLS_CERTIFICATE>
+- <PATH_TO_TLS_CERTIFICATE_KEY>
+- <FLOWCHAIN_REPO_ABSOLUTE_PATH>
+- <FLOWCHAIN_SERVICE_USER>
+- <FLOWCHAIN_SERVICE_GROUP>
+- <FLOWCHAIN_OWNER_ENV_FILE>
+- <FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR>
+- <FLOWCHAIN_RPC_NGINX_RENDERED_CONF>
+- <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>
+- <FLOWCHAIN_SYSTEMD_RENDERED_UNIT>
+- <PREVIOUS_FLOWCHAIN_RPC_NGINX_CONF>
 
 ## Required Env Names
 
@@ -34,6 +56,12 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - npm run flowchain:public-deployment:contract -- -AllowBlocked
 - npm run flowchain:external-tester:packet -- -AllowBlocked
 
+## Owner-Host Preflight Commands
+
+- systemd-analyze verify <FLOWCHAIN_SYSTEMD_RENDERED_UNIT>
+- nginx -t
+- bash <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>
+
 ## Rollback Commands
 
 - npm run flowchain:ops:snapshot -- -AllowBlocked
@@ -41,3 +69,40 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - npm run flowchain:service:restart -- -LiveProfile
 - npm run flowchain:service:stop
 - npm run flowchain:emergency:stop-local
+- systemctl stop flowchain-live.service
+- cp <PREVIOUS_FLOWCHAIN_RPC_NGINX_CONF> <FLOWCHAIN_RPC_NGINX_RENDERED_CONF>
+- nginx -t
+- systemctl reload nginx
+- systemctl restart flowchain-live.service
+
+## Bundle Checks
+
+- edgeTemplatePassed: True
+- readmeWritten: True
+- nginxTemplateWritten: True
+- systemdServiceTemplateWritten: True
+- nginxPreflightScriptWritten: True
+- nginxPreflightChecklistWritten: True
+- ownerEnvExampleWritten: True
+- verifyRunbookWritten: True
+- rollbackRunbookWritten: True
+- bundleChecksJsonWritten: True
+- requiredPlaceholdersPresent: True
+- nginxRequiredTokensPresent: True
+- systemdLiveServiceTemplatePresent: True
+- nginxPreflightTokensPresent: True
+- includesPrivateOrigin: True
+- includesRateLimitPlaceholder: True
+- includesTlsPlaceholders: True
+- includesCorsOriginForwarding: True
+- includesNginxConfigTest: True
+- includesVerificationCommands: True
+- includesRollbackCommands: True
+- envExampleHasAllRequiredNames: True
+- ownerEnvExampleValuesBlank: True
+- noLiveBroadcastCommands: True
+- noLiveBroadcastArtifacts: True
+- valuesNotPrinted: True
+- envValuesNotPrinted: True
+- noSecrets: True
+- liveBroadcastsDisabled: True

@@ -1,6 +1,6 @@
 {
-    "schema":  "flowchain.public_rpc_deployment_bundle_report.v1",
-    "generatedAt":  "2026-05-16T15:40:58.6464986Z",
+    "schema":  "flowchain.public_rpc_deployment_bundle_report.v2",
+    "generatedAt":  "2026-05-16T21:10:38.7464585Z",
     "status":  "passed",
     "bundleDir":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle",
     "flowChainRpcIsRepoOwned":  true,
@@ -13,6 +13,26 @@
                              "FLOWCHAIN_RPC_TLS_TERMINATED",
                              "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
                          ],
+    "requiredPlaceholders":  [
+                                 "\u003cFLOWCHAIN_RPC_PUBLIC_HOST\u003e",
+                                 "\u003cFLOWCHAIN_RPC_PUBLIC_URL\u003e",
+                                 "\u003cFLOWCHAIN_RPC_ALLOWED_ORIGIN\u003e",
+                                 "\u003cFLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE\u003e",
+                                 "\u003cPATH_TO_TLS_CERTIFICATE\u003e",
+                                 "\u003cPATH_TO_TLS_CERTIFICATE_KEY\u003e",
+                                 "\u003cFLOWCHAIN_REPO_ABSOLUTE_PATH\u003e",
+                                 "\u003cFLOWCHAIN_SERVICE_USER\u003e",
+                                 "\u003cFLOWCHAIN_SERVICE_GROUP\u003e",
+                                 "\u003cFLOWCHAIN_OWNER_ENV_FILE\u003e",
+                                 "\u003cFLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR\u003e",
+                                 "\u003cFLOWCHAIN_RPC_NGINX_RENDERED_CONF\u003e",
+                                 "\u003cFLOWCHAIN_NGINX_PREFLIGHT_SCRIPT\u003e",
+                                 "\u003cFLOWCHAIN_SYSTEMD_RENDERED_UNIT\u003e",
+                                 "\u003cPREVIOUS_FLOWCHAIN_RPC_NGINX_CONF\u003e"
+                             ],
+    "missingRequiredPlaceholders":  [
+
+                                    ],
     "requiredCommands":  [
                              "npm run flowchain:service:restart -- -LiveProfile",
                              "npm run flowchain:service:status",
@@ -25,33 +45,68 @@
                              "npm run flowchain:public-deployment:contract -- -AllowBlocked",
                              "npm run flowchain:external-tester:packet -- -AllowBlocked"
                          ],
+    "ownerPreflightCommands":  [
+                                   "systemd-analyze verify \u003cFLOWCHAIN_SYSTEMD_RENDERED_UNIT\u003e",
+                                   "nginx -t",
+                                   "bash \u003cFLOWCHAIN_NGINX_PREFLIGHT_SCRIPT\u003e"
+                               ],
     "rollbackCommands":  [
                              "npm run flowchain:ops:snapshot -- -AllowBlocked",
                              "npm run flowchain:service:status",
                              "npm run flowchain:service:restart -- -LiveProfile",
                              "npm run flowchain:service:stop",
-                             "npm run flowchain:emergency:stop-local"
+                             "npm run flowchain:emergency:stop-local",
+                             "systemctl stop flowchain-live.service",
+                             "cp \u003cPREVIOUS_FLOWCHAIN_RPC_NGINX_CONF\u003e \u003cFLOWCHAIN_RPC_NGINX_RENDERED_CONF\u003e",
+                             "nginx -t",
+                             "systemctl reload nginx",
+                             "systemctl restart flowchain-live.service"
                          ],
     "files":  {
                   "readme":  "README.md",
                   "nginxTemplate":  "nginx-flowchain-rpc.template.conf",
+                  "systemdServiceTemplate":  "flowchain-live.service.template",
+                  "nginxPreflightScript":  "nginx-preflight.template.sh",
+                  "nginxPreflightChecklist":  "NGINX_PREFLIGHT.md",
                   "ownerEnvExample":  "owner-public-rpc.env.example",
                   "verify":  "VERIFY.md",
-                  "rollback":  "ROLLBACK.md"
+                  "rollback":  "ROLLBACK.md",
+                  "bundleChecks":  "bundle-checks.json"
               },
     "checks":  {
                    "edgeTemplatePassed":  true,
+                   "readmeWritten":  true,
                    "nginxTemplateWritten":  true,
+                   "systemdServiceTemplateWritten":  true,
+                   "nginxPreflightScriptWritten":  true,
+                   "nginxPreflightChecklistWritten":  true,
                    "ownerEnvExampleWritten":  true,
                    "verifyRunbookWritten":  true,
                    "rollbackRunbookWritten":  true,
+                   "bundleChecksJsonWritten":  true,
+                   "requiredPlaceholdersPresent":  true,
+                   "nginxRequiredTokensPresent":  true,
+                   "systemdLiveServiceTemplatePresent":  true,
+                   "nginxPreflightTokensPresent":  true,
                    "includesPrivateOrigin":  true,
                    "includesRateLimitPlaceholder":  true,
                    "includesTlsPlaceholders":  true,
-                   "envExampleHasAllRequiredNames":  true
+                   "includesCorsOriginForwarding":  true,
+                   "includesNginxConfigTest":  true,
+                   "includesVerificationCommands":  true,
+                   "includesRollbackCommands":  true,
+                   "envExampleHasAllRequiredNames":  true,
+                   "ownerEnvExampleValuesBlank":  true,
+                   "noLiveBroadcastCommands":  true,
+                   "noLiveBroadcastArtifacts":  true,
+                   "valuesNotPrinted":  true,
+                   "envValuesNotPrinted":  true,
+                   "noSecrets":  true,
+                   "liveBroadcastsDisabled":  true
                },
     "valuesPrinted":  false,
     "envValuesPrinted":  false,
     "noSecrets":  true,
-    "broadcasts":  false
+    "broadcasts":  false,
+    "liveBroadcasts":  false
 }

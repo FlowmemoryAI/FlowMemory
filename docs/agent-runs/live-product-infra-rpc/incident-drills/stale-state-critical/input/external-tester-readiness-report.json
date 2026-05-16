@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.external_tester_readiness_report.v0",
-    "generatedAt":  "2026-05-16T15:43:54.7145830Z",
+    "generatedAt":  "2026-05-16T21:06:01.8554332Z",
     "status":  "blocked",
     "localTesterRehearsalReady":  true,
     "externalSharingReady":  false,
@@ -9,18 +9,40 @@
                    "chainProducing":  true,
                    "testerWalletNetworkReady":  true,
                    "testerWalletNetworkFresh":  true,
+                   "packetExecutableSmokeValidated":  true,
                    "liveInfraReady":  false
                },
-    "latestHeight":  "39216",
+    "latestHeight":  "41476",
     "stateFileLastWriteAgeSeconds":  3,
     "testerNetwork":  {
                           "status":  "passed",
-                          "generatedAt":  "2026-05-16T15:21:42.9492605Z",
+                          "generatedAt":  "2026-05-16T20:40:49.6189540Z",
                           "testerCount":  4,
-                          "chainBeforeBlock":  "38840",
-                          "chainAfterBlock":  "38861",
+                          "chainBeforeBlock":  "41092",
+                          "chainAfterBlock":  "41113",
                           "walletCreateCount":  4,
                           "transferCount":  4,
+                          "packetExecutableSmokeValidated":  true,
+                          "packetSmokeChecks":  {
+                                                    "health":  true,
+                                                    "rpcDiscover":  true,
+                                                    "rpcReadiness":  true,
+                                                    "chainStatus":  true,
+                                                    "walletCreate":  true,
+                                                    "walletBalances":  true,
+                                                    "walletSend":  true,
+                                                    "walletTransfers":  true
+                                                },
+                          "packetSmokeRoutes":  [
+                                                    "/health",
+                                                    "/rpc/discover",
+                                                    "/rpc/readiness",
+                                                    "/chain/status",
+                                                    "/wallets/create",
+                                                    "/wallets/balances",
+                                                    "/wallets/send",
+                                                    "/wallets/transfers"
+                                                ],
                           "secretMaterialReturned":  false
                       },
     "missingEnvNames":  [
@@ -86,7 +108,9 @@
                                                     ],
                     "testerNetworkRefreshPerformed":  false,
                     "testerNetworkFreshBeforeRefresh":  true,
+                    "testerNetworkPacketSmokeBeforeRefresh":  true,
                     "testerNetworkFreshAfterRefresh":  true,
+                    "testerNetworkPacketSmokeAfterRefresh":  true,
                     "testerNetworkRefreshExitCode":  null,
                     "testerNetworkRefreshOutputRedactedTail":  [
 

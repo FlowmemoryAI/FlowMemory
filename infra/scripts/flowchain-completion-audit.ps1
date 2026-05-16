@@ -4,7 +4,7 @@ param(
     [int] $MonitorDurationSeconds = 20,
     [int] $MonitorPollSeconds = 5,
     [int] $MonitorMaxStateAgeSeconds = 90,
-    [int] $ChildTimeoutSeconds = 2400,
+    [int] $ChildTimeoutSeconds = 10800,
     [switch] $AllowBlocked
 )
 
@@ -591,6 +591,25 @@ $backupRestoreValidationPassed = $backupRestoreValidationExitCode -eq 0 `
 $externalTesterPacketStatus = Get-ReportStatus -Report $externalTesterPacket
 $externalTesterPacketShareable = Get-AuditProp -Object $externalTesterPacket -Name "packetShareable" -Default $false
 $externalTesterPacketPath = [string](Get-AuditProp -Object $externalTesterPacket -Name "packetPath" -Default $paths.externalTesterPacket)
+$externalTesterPacketExecutableSmokeValidated = Get-AuditProp -Object $externalTesterPacket -Name "packetExecutableSmokeValidated" -Default $false
+$externalTesterPacketSmokeChecks = Get-AuditProp -Object $externalTesterPacket -Name "packetSmokeChecks"
+$externalTesterPacketSmokeRoutes = @((Get-AuditProp -Object $externalTesterPacket -Name "packetSmokeRoutes" -Default @()))
+$externalTesterStatus = Get-ReportStatus -Report $externalTester
+$externalSharingReady = Get-AuditProp -Object $externalTester -Name "externalSharingReady" -Default $false
+$externalTesterChecks = Get-AuditProp -Object $externalTester -Name "checks"
+$externalTesterNetworkFresh = Get-AuditProp -Object $externalTesterChecks -Name "testerWalletNetworkFresh" -Default $false
+$externalTesterLaunchPassed = ($externalTesterStatus -eq "passed") `
+    -and ($externalTesterPacketStatus -eq "passed") `
+    -and ($externalSharingReady -eq $true) `
+    -and ($externalTesterPacketShareable -eq $true) `
+    -and ($externalTesterNetworkFresh -eq $true) `
+    -and ($externalTesterPacketExecutableSmokeValidated -eq $true)
+$externalTesterLaunchBlocked = ($externalTesterStatus -eq "blocked") `
+    -and ($externalTesterPacketStatus -eq "blocked") `
+    -and ($externalSharingReady -eq $false) `
+    -and ($externalTesterPacketShareable -eq $false) `
+    -and ($externalTesterNetworkFresh -eq $true) `
+    -and ($externalTesterPacketExecutableSmokeValidated -eq $true)
 $opsSnapshot = $reports.opsSnapshot
 $opsSnapshotStatus = Get-ReportStatus -Report $opsSnapshot
 $opsSnapshotCriticalCount = [int](Get-AuditProp -Object $opsSnapshot -Name "criticalCount" -Default 999999)
@@ -671,10 +690,12 @@ $publicDeploymentContractBlocked = [int](Get-AuditProp -Object $publicDeployment
 $publicDeploymentContractBlockedOnlyKnown = Get-AuditProp -Object $publicDeploymentContract -Name "blockedOnlyOnKnownExternalOwnerInputs" -Default $false
 $publicDeploymentContractDeploymentReady = Get-AuditProp -Object $publicDeploymentContract -Name "deploymentReady" -Default $false
 $publicDeploymentContractPacketShareable = Get-AuditProp -Object $publicDeploymentContract -Name "packetShareable" -Default $false
+$publicDeploymentContractPacketSmoke = Get-AuditProp -Object $publicDeploymentContract -Name "packetExecutableSmokeValidated" -Default $false
 $publicDeploymentContractSafe = ($publicDeploymentContractExitCode -eq 0) `
     -and ($publicDeploymentContractStatus -in @("passed", "blocked")) `
     -and ($publicDeploymentContractFailed -eq 0) `
     -and ($publicDeploymentContractBlockedOnlyKnown -eq $true) `
+    -and ($publicDeploymentContractPacketSmoke -eq $true) `
     -and ((Get-AuditProp -Object $publicDeploymentContract -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicDeploymentContract -Name "noLiveBroadcast" -Default $false) -eq $true)
 $architectureAudit = $reports.architectureAudit
@@ -751,7 +772,7 @@ Add-AuditItem -Items $items -Id "system-architecture-audit" `
 Add-AuditItem -Items $items -Id "public-deployment-contract" `
     -Requirement "Owner-operated public deployment contract is machine-checkable, has rollback commands, and fails closed until public RPC, backup, bridge, and tester sharing gates pass." `
     -Status $(if ($publicDeploymentContractSafe) { "passed" } else { "failed" }) `
-    -Evidence "deploymentStatus=$publicDeploymentContractStatus, deploymentReady=$publicDeploymentContractDeploymentReady, packetShareable=$publicDeploymentContractPacketShareable, blockedOnlyKnown=$publicDeploymentContractBlockedOnlyKnown, blockedItems=$publicDeploymentContractBlocked, failedItems=$publicDeploymentContractFailed, report=$($paths.publicDeploymentContract)" `
+    -Evidence "deploymentStatus=$publicDeploymentContractStatus, deploymentReady=$publicDeploymentContractDeploymentReady, packetShareable=$publicDeploymentContractPacketShareable, packetSmoke=$publicDeploymentContractPacketSmoke, blockedOnlyKnown=$publicDeploymentContractBlockedOnlyKnown, blockedItems=$publicDeploymentContractBlocked, failedItems=$publicDeploymentContractFailed, report=$($paths.publicDeploymentContract)" `
     -Commands @("npm run flowchain:public-deployment:contract -- -AllowBlocked")
 
 Add-AuditItem -Items $items -Id "owner-input-validator-self-test" `
@@ -829,10 +850,17 @@ Add-AuditItem -Items $items -Id "backup-restore-validator-self-test" `
     -Commands @("npm run flowchain:backup:restore:validate")
 
 Add-AuditItem -Items $items -Id "external-tester-packet" `
-    -Requirement "External tester handoff packet is generated and fails closed until sharing gates pass." `
-    -Status $(if (($externalTesterPacketStatus -eq "passed" -and $externalTesterPacketShareable -eq $true) -or ($externalTesterPacketStatus -eq "blocked" -and $externalTesterPacketShareable -eq $false)) { "passed" } else { "failed" }) `
-    -Evidence "packetStatus=$externalTesterPacketStatus, shareable=$externalTesterPacketShareable, packet=$externalTesterPacketPath" `
+    -Requirement "External tester handoff packet is generated, executable packet-route smoke is validated, and sharing fails closed until public gates pass." `
+    -Status $(if (($externalTesterPacketStatus -eq "passed" -and $externalTesterPacketShareable -eq $true -and $externalTesterPacketExecutableSmokeValidated -eq $true) -or ($externalTesterPacketStatus -eq "blocked" -and $externalTesterPacketShareable -eq $false -and $externalTesterPacketExecutableSmokeValidated -eq $true)) { "passed" } else { "failed" }) `
+    -Evidence "packetStatus=$externalTesterPacketStatus, shareable=$externalTesterPacketShareable, packetSmoke=$externalTesterPacketExecutableSmokeValidated, smokeRoutes=$($externalTesterPacketSmokeRoutes.Count), packet=$externalTesterPacketPath" `
     -Commands @("npm run flowchain:external-tester:packet")
+
+Add-AuditItem -Items $items -Id "friends-and-family-launch" `
+    -Requirement "Friends-and-family tester launch requires fresh tester-wallet evidence and executable packet-route smoke, and remains blocked until public RPC, backup, and Base bridge gates pass." `
+    -Status $(if ($externalTesterLaunchPassed) { "passed" } elseif ($externalTesterLaunchBlocked) { "blocked" } else { "failed" }) `
+    -Evidence "externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, packetStatus=$externalTesterPacketStatus, shareable=$externalTesterPacketShareable, packetSmoke=$externalTesterPacketExecutableSmokeValidated, smokeRoutes=$($externalTesterPacketSmokeRoutes.Count), externalSharingReady=$externalSharingReady" `
+    -Commands @("npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked") `
+    -Blockers @($missingEnv)
 
 Add-AuditItem -Items $items -Id "ops-snapshot" `
     -Requirement "Ops snapshot separates critical incidents from expected owner-input blockers and records incident commands." `
@@ -968,6 +996,20 @@ $report = [ordered]@{
     publicDeploymentContractOutputRedacted = @($publicDeploymentContractOutput | ForEach-Object { "$_" })
     architectureAuditExitCode = $architectureAuditExitCode
     architectureAuditOutputRedacted = @($architectureAuditOutput | ForEach-Object { "$_" })
+    packetExecutableSmokeValidated = $externalTesterPacketExecutableSmokeValidated
+    externalTesterLaunchEvidence = [ordered]@{
+        externalTesterStatus = $externalTesterStatus
+        externalSharingReady = $externalSharingReady
+        testerNetworkFresh = $externalTesterNetworkFresh
+        packetStatus = $externalTesterPacketStatus
+        packetShareable = $externalTesterPacketShareable
+        packetExecutableSmokeValidated = $externalTesterPacketExecutableSmokeValidated
+        packetSmokeChecks = $externalTesterPacketSmokeChecks
+        packetSmokeRoutes = @($externalTesterPacketSmokeRoutes)
+        packetPath = $externalTesterPacketPath
+        readinessStatus = (Get-ReportStatus -Report $externalTester)
+        publicDeploymentContractPacketSmoke = $publicDeploymentContractPacketSmoke
+    }
     childProcessTimeoutSeconds = $ChildTimeoutSeconds
     childProcessResults = @($script:AuditChildProcessResults)
     itemCounts = [ordered]@{

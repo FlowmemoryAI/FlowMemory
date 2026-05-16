@@ -17,6 +17,57 @@ $repoRoot = Set-FlowChainRepoRoot
 $stateFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $StatePath)
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
 
+function Get-StateBackupFileSha256 {
+    param([Parameter(Mandatory = $true)][string] $Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return $null
+    }
+    return ((Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash).ToLowerInvariant()
+}
+
+function Convert-StateBackupManifestCanonical {
+    param([AllowNull()][object] $Manifest)
+
+    if ($null -eq $Manifest) {
+        return ""
+    }
+    return ($Manifest | ConvertTo-Json -Depth 20 -Compress)
+}
+
+function Test-StateBackupManifestEquivalent {
+    param(
+        [AllowNull()][object] $Left,
+        [AllowNull()][object] $Right
+    )
+
+    return (Convert-StateBackupManifestCanonical -Manifest $Left) -eq (Convert-StateBackupManifestCanonical -Manifest $Right)
+}
+
+function Write-StateBackupJsonAtomic {
+    param(
+        [Parameter(Mandatory = $true)][string] $Path,
+        [Parameter(Mandatory = $true)][object] $Value,
+        [int] $Depth = 12
+    )
+
+    $parent = Split-Path -Parent $Path
+    if (-not [string]::IsNullOrWhiteSpace($parent)) {
+        New-Item -ItemType Directory -Force -Path $parent | Out-Null
+    }
+
+    $tempPath = Join-Path $parent "$([System.IO.Path]::GetFileName($Path)).tmp-$PID-$([Guid]::NewGuid().ToString("N"))"
+    try {
+        Write-FlowChainJson -Path $tempPath -Value $Value -Depth $Depth
+        Move-Item -LiteralPath $tempPath -Destination $Path -Force -ErrorAction Stop
+    }
+    finally {
+        if (Test-Path -LiteralPath $tempPath) {
+            Remove-Item -LiteralPath $tempPath -Force -ErrorAction SilentlyContinue
+        }
+    }
+}
+
 if ([string]::IsNullOrWhiteSpace($BackupRoot)) {
     $BackupRoot = Get-FlowChainEnvValue -Name "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
 }
@@ -41,6 +92,11 @@ $snapshot = [ordered]@{
     snapshotReadable = $false
     manifestReadable = $false
     writeVerified = $false
+    snapshotManifestSha256 = $null
+    latestManifestSha256 = $null
+    latestManifestReadable = $false
+    latestPointerWrittenAtomically = $false
+    latestPointerMatchesSnapshotManifest = $false
     attempts = 0
     latestHeight = $null
     latestHash = $null
@@ -125,7 +181,10 @@ if ($problems.Count -eq 0) {
 
                     Write-FlowChainJson -Path (Join-Path $tempDir "manifest.json") -Value $snapshotManifest -Depth 12
                     Move-Item -LiteralPath $tempDir -Destination $finalDir -ErrorAction Stop
-                    Write-FlowChainJson -Path (Join-Path $backupFullRoot "latest-manifest.json") -Value $snapshotManifest -Depth 12
+                    $finalManifestPath = Join-Path $finalDir "manifest.json"
+                    $latestManifestPath = Join-Path $backupFullRoot "latest-manifest.json"
+                    Write-StateBackupJsonAtomic -Path $latestManifestPath -Value $snapshotManifest -Depth 12
+                    $latestManifest = Read-FlowChainJsonIfExists -Path $latestManifestPath
 
                     $snapshotDir = $finalDir
                     $snapshot.snapshotName = $snapshotName
@@ -135,8 +194,19 @@ if ($problems.Count -eq 0) {
                     $snapshot.stateFileSha256 = $stateHash
                     $snapshot.stateBytes = [int64] $stateItem.Length
                     $snapshot.snapshotReadable = (Get-FlowChainStateFacts -StatePath (Join-Path $snapshotDir "state.json")).readable
-                    $snapshot.manifestReadable = $null -ne (Read-FlowChainJsonIfExists -Path (Join-Path $snapshotDir "manifest.json"))
-                    $snapshot.writeVerified = $snapshot.snapshotReadable -and $snapshot.manifestReadable
+                    $snapshotManifestReadback = Read-FlowChainJsonIfExists -Path $finalManifestPath
+                    $snapshot.manifestReadable = $null -ne $snapshotManifestReadback
+                    $snapshot.latestManifestReadable = $null -ne $latestManifest
+                    $snapshot.latestPointerWrittenAtomically = $snapshot.latestManifestReadable
+                    $snapshot.latestPointerMatchesSnapshotManifest = Test-StateBackupManifestEquivalent -Left $snapshotManifestReadback -Right $latestManifest
+                    $snapshot.snapshotManifestSha256 = Get-StateBackupFileSha256 -Path $finalManifestPath
+                    $snapshot.latestManifestSha256 = Get-StateBackupFileSha256 -Path $latestManifestPath
+                    $snapshot.writeVerified = $snapshot.snapshotReadable `
+                        -and $snapshot.manifestReadable `
+                        -and $snapshot.latestManifestReadable `
+                        -and $snapshot.latestPointerMatchesSnapshotManifest `
+                        -and (-not [string]::IsNullOrWhiteSpace([string] $snapshot.snapshotManifestSha256)) `
+                        -and $snapshot.snapshotManifestSha256 -eq $snapshot.latestManifestSha256
                     $snapshot.latestHeight = $copyFacts.latestHeight
                     $snapshot.latestHash = $copyFacts.latestHash
                     $snapshot.latestRoot = $copyFacts.latestRoot
@@ -155,6 +225,9 @@ if ($problems.Count -eq 0) {
 
             if (-not $snapshot.created) {
                 Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_STATE_BACKUP_PATH" -Reason "state backup snapshot could not be created" -Kind "failed" -Category "artifact"
+            }
+            elseif (-not $snapshot.latestPointerMatchesSnapshotManifest) {
+                Add-FlowChainReadinessProblem -Problems $problems -Name "latest-manifest.json" -Reason "latest backup pointer does not match the snapshot manifest" -Kind "failed" -Category "artifact"
             }
         }
     }

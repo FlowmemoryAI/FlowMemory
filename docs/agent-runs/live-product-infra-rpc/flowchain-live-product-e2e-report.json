@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.live_product_e2e_report.v0",
-    "generatedAt":  "2026-05-16T15:17:25.0018283Z",
+    "generatedAt":  "2026-05-16T20:35:49.6082104Z",
     "status":  "blocked",
     "productionLocalAggregateStatus":  "passed-with-live-blockers",
     "liveInfraStatus":  "blocked",
@@ -24,10 +24,12 @@
                       "status":  "passed",
                       "childReportStatus":  "stopped",
                       "exitCode":  0,
-                      "startedAt":  "2026-05-16T14:57:31.4239767Z",
-                      "endedAt":  "2026-05-16T14:57:36.7922041Z",
+                      "startedAt":  "2026-05-16T20:14:19.0809766Z",
+                      "endedAt":  "2026-05-16T20:14:27.1943581Z",
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Stop-live-service-before-aggregate.log",
-                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-stop-report.json"
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-stop-report.json",
+                      "childReportFresh":  true,
+                      "timedOut":  false
                   },
                   {
                       "name":  "Production-shaped local L1 aggregate",
@@ -35,21 +37,25 @@
                       "status":  "blocked",
                       "childReportStatus":  "passed-with-live-blockers",
                       "exitCode":  0,
-                      "startedAt":  "2026-05-16T14:57:36.9702086Z",
-                      "endedAt":  "2026-05-16T15:11:52.1320205Z",
+                      "startedAt":  "2026-05-16T20:14:27.3723625Z",
+                      "endedAt":  "2026-05-16T20:29:25.4474350Z",
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Production-shaped-local-L1-aggregate.log",
-                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\production-l1-e2e\\flowchain-production-l1-e2e-report.json"
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\production-l1-e2e\\flowchain-production-l1-e2e-report.json",
+                      "childReportFresh":  true,
+                      "timedOut":  false
                   },
                   {
                       "name":  "Restore live service profile",
                       "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-service-restart.ps1 -LiveProfile",
                       "status":  "passed",
-                      "childReportStatus":  "passed",
+                      "childReportStatus":  "",
                       "exitCode":  0,
-                      "startedAt":  "2026-05-16T15:11:52.1550184Z",
-                      "endedAt":  "2026-05-16T15:11:52.1930251Z",
+                      "startedAt":  "2026-05-16T20:29:25.4704395Z",
+                      "endedAt":  "2026-05-16T20:29:25.5074380Z",
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Restore-live-service-profile.log",
-                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-restart-report.json"
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-restart-report.json",
+                      "childReportFresh":  false,
+                      "timedOut":  false
                   },
                   {
                       "name":  "Verify live service profile attempt 3",
@@ -57,10 +63,12 @@
                       "status":  "passed",
                       "childReportStatus":  "passed",
                       "exitCode":  0,
-                      "startedAt":  "2026-05-16T15:12:55.3563828Z",
-                      "endedAt":  "2026-05-16T15:13:16.9095675Z",
+                      "startedAt":  "2026-05-16T20:30:37.9737624Z",
+                      "endedAt":  "2026-05-16T20:31:04.9179995Z",
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Verify-live-service-profile-attempt-3.log",
-                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json"
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
+                      "childReportFresh":  true,
+                      "timedOut":  false
                   },
                   {
                       "name":  "Live service wallet transfer E2E",
@@ -68,10 +76,12 @@
                       "status":  "passed",
                       "childReportStatus":  "passed",
                       "exitCode":  0,
-                      "startedAt":  "2026-05-16T15:13:16.9175670Z",
-                      "endedAt":  "2026-05-16T15:14:34.1036338Z",
+                      "startedAt":  "2026-05-16T20:31:04.9359973Z",
+                      "endedAt":  "2026-05-16T20:32:37.8485636Z",
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Live-service-wallet-transfer-E2E.log",
-                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-wallet-e2e-report.json"
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-wallet-e2e-report.json",
+                      "childReportFresh":  true,
+                      "timedOut":  false
                   },
                   {
                       "name":  "Live service tester network E2E",
@@ -79,10 +89,12 @@
                       "status":  "passed",
                       "childReportStatus":  "passed",
                       "exitCode":  0,
-                      "startedAt":  "2026-05-16T15:14:34.1076367Z",
-                      "endedAt":  "2026-05-16T15:16:11.7248741Z",
+                      "startedAt":  "2026-05-16T20:32:37.8555631Z",
+                      "endedAt":  "2026-05-16T20:34:23.7521771Z",
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Live-service-tester-network-E2E.log",
-                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json"
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json",
+                      "childReportFresh":  true,
+                      "timedOut":  false
                   },
                   {
                       "name":  "Live infrastructure readiness",
@@ -90,12 +102,17 @@
                       "status":  "blocked",
                       "childReportStatus":  "blocked",
                       "exitCode":  0,
-                      "startedAt":  "2026-05-16T15:16:11.7288742Z",
-                      "endedAt":  "2026-05-16T15:17:24.9648267Z",
+                      "startedAt":  "2026-05-16T20:34:23.7601757Z",
+                      "endedAt":  "2026-05-16T20:35:49.5402098Z",
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Live-infrastructure-readiness.log",
-                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-infra-check-report.json"
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-infra-check-report.json",
+                      "childReportFresh":  true,
+                      "timedOut":  false
                   }
               ],
+    "serviceRestoreAttempted":  true,
+    "productionTimeoutSeconds":  7200,
+    "serviceProbeTimeoutSeconds":  180,
     "missingEnvNames":  [
                             "FLOWCHAIN_PILOT_OPERATOR_ACK",
                             "FLOWCHAIN_BASE8453_RPC_URL",

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.backup_readiness_report.v1",
-    "generatedAt":  "2026-05-16T15:59:08.3919756Z",
+    "generatedAt":  "2026-05-16T21:05:56.7005278Z",
     "status":  "blocked",
     "requiredEnvNames":  [
                              "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
@@ -11,9 +11,9 @@
     "state":  {
                   "statePath":  "devnet/local/state.json",
                   "readable":  true,
-                  "latestHeight":  "39478",
-                  "latestHash":  "0xd5b2cd698d41890212bef3fc01c4d9e91817f8a19aa612a957f4330c1bee8f7f",
-                  "latestRoot":  "0x0b1f7db2daf12fb552088f41657c66ca87fb4286adf19bd20c082e6d6dfbf811"
+                  "latestHeight":  "41482",
+                  "latestHash":  "0x95116807d7cfce3b6159acb99dabc9323e93ddec0cb9be68fbcfbaff3eb165f5",
+                  "latestRoot":  "0x1784b6919ae4ef6e371404a7e6f4dc6b9c627641692185dbe114f93cf89574b9"
               },
     "backup":  {
                    "configured":  false,
@@ -28,6 +28,10 @@
                    "stateRootMatch":  false,
                    "stateFileHashMatch":  false,
                    "writeVerified":  false,
+                   "latestPointerVerified":  false,
+                   "latestPointerWrittenAtomically":  false,
+                   "snapshotManifestHash":  null,
+                   "latestManifestHash":  null,
                    "restoreVerified":  false
                },
     "proofReports":  {

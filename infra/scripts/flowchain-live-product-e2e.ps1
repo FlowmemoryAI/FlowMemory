@@ -1,5 +1,7 @@
 param(
     [string] $ReportDir = "docs/agent-runs/live-product-infra-rpc",
+    [int] $ProductionTimeoutSeconds = 7200,
+    [int] $ServiceProbeTimeoutSeconds = 180,
     [switch] $AllowBlocked
 )
 
@@ -14,6 +16,13 @@ $reportFullDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resol
 $logsDir = Join-Path $reportFullDir "logs"
 $reportPath = Join-Path $reportFullDir "flowchain-live-product-e2e-report.json"
 New-Item -ItemType Directory -Force -Path $logsDir | Out-Null
+
+if ($ProductionTimeoutSeconds -lt 1) {
+    throw "ProductionTimeoutSeconds must be at least 1."
+}
+if ($ServiceProbeTimeoutSeconds -lt 1) {
+    throw "ServiceProbeTimeoutSeconds must be at least 1."
+}
 
 function Stop-LiveProductProcessTree {
     param([Parameter(Mandatory = $true)][int] $ProcessId)
@@ -103,18 +112,24 @@ function Invoke-LiveProductStep {
     $output | Set-Content -LiteralPath $logPath -Encoding UTF8
     $endedAt = (Get-Date).ToUniversalTime().ToString("o")
     $childReportStatus = ""
+    $childReportFresh = $false
     if (-not [string]::IsNullOrWhiteSpace($ExpectedReportPath) -and (Test-Path -LiteralPath $ExpectedReportPath)) {
-        $childReport = Read-FlowChainJsonIfExists -Path $ExpectedReportPath
-        if ($null -ne $childReport -and $childReport.PSObject.Properties.Name -contains "status") {
-            $childReportStatus = "$($childReport.status)"
-        }
-        elseif (
-            $null -ne $childReport -and
-            $childReport.PSObject.Properties.Name -contains "passFailSummary" -and
-            $null -ne $childReport.passFailSummary -and
-            $childReport.passFailSummary.PSObject.Properties.Name -contains "overall"
-        ) {
-            $childReportStatus = "$($childReport.passFailSummary.overall)"
+        $reportItem = Get-Item -LiteralPath $ExpectedReportPath
+        $startedAtUtc = [DateTimeOffset]::Parse($startedAt, [System.Globalization.CultureInfo]::InvariantCulture).UtcDateTime
+        $childReportFresh = $reportItem.LastWriteTimeUtc -ge $startedAtUtc.AddSeconds(-2)
+        if ($childReportFresh) {
+            $childReport = Read-FlowChainJsonIfExists -Path $ExpectedReportPath
+            if ($null -ne $childReport -and $childReport.PSObject.Properties.Name -contains "status") {
+                $childReportStatus = "$($childReport.status)"
+            }
+            elseif (
+                $null -ne $childReport -and
+                $childReport.PSObject.Properties.Name -contains "passFailSummary" -and
+                $null -ne $childReport.passFailSummary -and
+                $childReport.passFailSummary.PSObject.Properties.Name -contains "overall"
+            ) {
+                $childReportStatus = "$($childReport.passFailSummary.overall)"
+            }
         }
     }
     $stepStatus = if ($childReportStatus -eq "failed") {
@@ -142,6 +157,8 @@ function Invoke-LiveProductStep {
         endedAt = $endedAt
         logPath = $logPath
         reportPath = $ExpectedReportPath
+        childReportFresh = $childReportFresh
+        timedOut = $timedOut
     }
 }
 
@@ -154,7 +171,7 @@ function Wait-LiveProductServiceProfile {
             -FilePath "powershell" `
             -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-status.ps1"), "-AllowBlocked") `
             -ExpectedReportPath $serviceStatusReportPath `
-            -TimeoutSeconds 90 `
+            -TimeoutSeconds $ServiceProbeTimeoutSeconds `
             -UseStartProcess
         $lastStep = $probe
         if ($probe.status -eq "passed") {
@@ -162,6 +179,13 @@ function Wait-LiveProductServiceProfile {
         }
     }
     return $lastStep
+}
+
+function New-LiveProductRestoreSteps {
+    $restoreSteps = @()
+    $restoreSteps += Invoke-LiveProductStep -Name "Restore live service profile" -FilePath "powershell" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-restart.ps1"), "-LiveProfile") -ExpectedReportPath $serviceRestartReportPath -UseStartProcess -NoWait
+    $restoreSteps += Wait-LiveProductServiceProfile
+    return @($restoreSteps)
 }
 
 $productionReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/production-l1-e2e/flowchain-production-l1-e2e-report.json"
@@ -180,10 +204,23 @@ else {
 
 Write-Host "FlowChain live-product:e2e aggregate starting."
 $steps = @()
-$steps += Invoke-LiveProductStep -Name "Stop live service before aggregate" -FilePath "powershell" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-stop.ps1")) -ExpectedReportPath $serviceStopReportPath -TimeoutSeconds 120 -UseStartProcess
-$steps += Invoke-LiveProductStep -Name "Production-shaped local L1 aggregate" -FilePath "cmd.exe" -ArgumentList @("/d", "/s", "/c", "npm.cmd run flowchain:production-l1:e2e") -ExpectedReportPath $productionReportPath -TimeoutSeconds 2400 -UseStartProcess
-$steps += Invoke-LiveProductStep -Name "Restore live service profile" -FilePath "powershell" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-restart.ps1"), "-LiveProfile") -ExpectedReportPath $serviceRestartReportPath -UseStartProcess -NoWait
-$steps += Wait-LiveProductServiceProfile
+$serviceRestoreAttempted = $false
+try {
+    $steps += Invoke-LiveProductStep -Name "Stop live service before aggregate" -FilePath "powershell" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-stop.ps1")) -ExpectedReportPath $serviceStopReportPath -TimeoutSeconds 120 -UseStartProcess
+    try {
+        $steps += Invoke-LiveProductStep -Name "Production-shaped local L1 aggregate" -FilePath "cmd.exe" -ArgumentList @("/d", "/s", "/c", "npm.cmd run flowchain:production-l1:e2e") -ExpectedReportPath $productionReportPath -TimeoutSeconds $ProductionTimeoutSeconds -UseStartProcess
+    }
+    finally {
+        $steps += New-LiveProductRestoreSteps
+        $serviceRestoreAttempted = $true
+    }
+}
+finally {
+    if (-not $serviceRestoreAttempted) {
+        $steps += New-LiveProductRestoreSteps
+        $serviceRestoreAttempted = $true
+    }
+}
 $steps += Invoke-LiveProductStep -Name "Live service wallet transfer E2E" -FilePath "cmd.exe" -ArgumentList @("/d", "/s", "/c", "npm.cmd run flowchain:wallet:live-service:e2e") -ExpectedReportPath $liveServiceWalletReportPath -TimeoutSeconds 600 -UseStartProcess
 $steps += Invoke-LiveProductStep -Name "Live service tester network E2E" -FilePath "cmd.exe" -ArgumentList @("/d", "/s", "/c", "npm.cmd run flowchain:wallet:live-tester:e2e") -ExpectedReportPath $liveServiceTesterNetworkReportPath -TimeoutSeconds 900 -UseStartProcess
 $steps += Invoke-LiveProductStep -Name "Live infrastructure readiness" -FilePath "cmd.exe" -ArgumentList @("/d", "/s", "/c", $liveInfraCommand) -ExpectedReportPath $liveInfraReportPath -TimeoutSeconds 900 -UseStartProcess
@@ -237,6 +274,9 @@ $report = [ordered]@{
     blockedStepNames = @($blockedSteps | ForEach-Object { $_.name })
     failedStepNames = @($failedSteps | ForEach-Object { $_.name })
     steps = $steps
+    serviceRestoreAttempted = $serviceRestoreAttempted
+    productionTimeoutSeconds = $ProductionTimeoutSeconds
+    serviceProbeTimeoutSeconds = $ServiceProbeTimeoutSeconds
     missingEnvNames = @($missingEnv | Select-Object -Unique)
     reportPaths = [ordered]@{
         serviceStop = $serviceStopReportPath

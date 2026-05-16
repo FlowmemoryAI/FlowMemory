@@ -1,5 +1,7 @@
 ﻿Started isolated process.
-FilePath: cmd.exe
-Arguments: /d /s /c npm.cmd run flowchain:service:status -- -AllowBlocked
-ProcessId: 24860
+FilePath: powershell
+Arguments: -NoProfile -ExecutionPolicy Bypass -File E:\FlowMemory\flowmemory-live-infra-rpc\infra\scripts\flowchain-service-status.ps1 -AllowBlocked
+ProcessId: 19708
+TimeoutSeconds: 180
+TimedOut: False
 ExitCode: 0

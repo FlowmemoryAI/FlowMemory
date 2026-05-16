@@ -122,6 +122,16 @@ function sampleBridgeDepositLog(
   };
 }
 
+function canonicalBlockForLog(
+  log: ReturnType<typeof sampleBridgeDepositLog>,
+  overrides: { number?: string; hash?: string | null } = {},
+) {
+  return {
+    number: overrides.number ?? log.blockNumber,
+    hash: overrides.hash ?? log.blockHash,
+  };
+}
+
 function pilotFixtureWithAmount(path: string, amount: string, overrides: Record<string, unknown> = {}): void {
   const fixture = JSON.parse(readFileSync(pilotFixtureUrl, "utf8")) as Record<string, unknown>;
   writeFileSync(path, `${JSON.stringify({ ...fixture, amount, ...overrides }, null, 2)}\n`);
@@ -648,6 +658,7 @@ test("observes Base Sepolia deposit logs through read-only RPC calls", async () 
 test("observes Base public-network pilot only after eth_chainId 0x2105 and confirmation depth", async () => {
   const calls: string[] = [];
   const stateDir = mkdtempSync(join(tmpdir(), "flowmemory-bridge-pilot-rpc-"));
+  const depositLog = sampleBridgeDepositLog(BASE_MAINNET_CHAIN_ID);
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async (_input, init) => {
     const body = JSON.parse(String(init?.body ?? "{}")) as { method: string };
@@ -663,7 +674,12 @@ test("observes Base public-network pilot only after eth_chainId 0x2105 and confi
       });
     }
     if (body.method === "eth_getLogs") {
-      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: [sampleBridgeDepositLog(BASE_MAINNET_CHAIN_ID)] }), {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: [depositLog] }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_getBlockByNumber") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: canonicalBlockForLog(depositLog) }), {
         headers: { "content-type": "application/json" },
       });
     }
@@ -707,7 +723,7 @@ test("observes Base public-network pilot only after eth_chainId 0x2105 and confi
       join(stateDir, "credit-state.json"),
     ]));
 
-    assert.deepEqual(calls, ["eth_chainId", "eth_blockNumber", "eth_getLogs"]);
+    assert.deepEqual(calls, ["eth_chainId", "eth_blockNumber", "eth_getLogs", "eth_getBlockByNumber"]);
     assert.equal(result.observations.length, 1);
     assert.equal(result.observations[0]?.deposit.sourceChainId, BASE_MAINNET_CHAIN_ID);
     assert.equal(result.observations[0]?.guardrails.confirmation?.depth, 5);
@@ -720,10 +736,81 @@ test("observes Base public-network pilot only after eth_chainId 0x2105 and confi
   }
 });
 
+test("Base public-network pilot rejects non-canonical or unanchored logs", async () => {
+  const canonicalLog = sampleBridgeDepositLog(BASE_MAINNET_CHAIN_ID);
+  const scenarios: {
+    name: string;
+    log: ReturnType<typeof sampleBridgeDepositLog>;
+    blockResult?: unknown;
+    expected: RegExp;
+  }[] = [
+    {
+      name: "missing block hash",
+      log: { ...canonicalLog, blockHash: undefined },
+      expected: /missing blockHash/,
+    },
+    {
+      name: "removed log",
+      log: { ...canonicalLog, removed: true },
+      expected: /removed bridge logs/,
+    },
+    {
+      name: "canonical hash mismatch",
+      log: canonicalLog,
+      blockResult: canonicalBlockForLog(canonicalLog, { hash: `0x${"8".repeat(64)}` }),
+      expected: /non-canonical BridgeDeposit log/,
+    },
+  ];
+
+  for (const scenario of scenarios) {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async (_input, init) => {
+      const body = JSON.parse(String(init?.body ?? "{}")) as { method: string };
+      if (body.method === "eth_chainId") {
+        return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x2105" }), {
+          headers: { "content-type": "application/json" },
+        });
+      }
+      if (body.method === "eth_blockNumber") {
+        return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x70" }), {
+          headers: { "content-type": "application/json" },
+        });
+      }
+      if (body.method === "eth_getLogs") {
+        return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: [scenario.log] }), {
+          headers: { "content-type": "application/json" },
+        });
+      }
+      if (body.method === "eth_getBlockByNumber") {
+        return new Response(JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          result: scenario.blockResult ?? canonicalBlockForLog(scenario.log),
+        }), {
+          headers: { "content-type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, error: { message: `unexpected method for ${scenario.name}` } }), {
+        status: 400,
+        headers: { "content-type": "application/json" },
+      });
+    };
+    try {
+      await assert.rejects(
+        () => runBridgePipeline(parseBridgeArgs(baseMainnetPilotRpcArgs(["--to-block", "100"]))),
+        scenario.expected,
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  }
+});
+
 test("Base public-network pilot cursor advances over confirmed ranges", async () => {
   const stateDir = mkdtempSync(join(tmpdir(), "flowmemory-bridge-cursor-rpc-"));
   const cursorPath = join(stateDir, "cursor-state.json");
   const ranges: { fromBlock?: string; toBlock?: string }[] = [];
+  const depositLog = sampleBridgeDepositLog(BASE_MAINNET_CHAIN_ID);
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async (_input, init) => {
     const body = JSON.parse(String(init?.body ?? "{}")) as { method: string; params: Record<string, unknown>[] };
@@ -746,8 +833,13 @@ test("Base public-network pilot cursor advances over confirmed ranges", async ()
       return new Response(JSON.stringify({
         jsonrpc: "2.0",
         id: 1,
-        result: ranges.length === 1 ? [sampleBridgeDepositLog(BASE_MAINNET_CHAIN_ID)] : [],
+        result: ranges.length === 1 ? [depositLog] : [],
       }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_getBlockByNumber") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: canonicalBlockForLog(depositLog) }), {
         headers: { "content-type": "application/json" },
       });
     }
@@ -841,6 +933,19 @@ test("Base public-network pilot cursor does not advance when no confirmed block 
 
 test("Base public-network pilot rejects placeholder recipients without blocking valid deposits", async () => {
   const stateDir = mkdtempSync(join(tmpdir(), "flowmemory-bridge-placeholder-rpc-"));
+  const depositLogs = [
+    sampleBridgeDepositLog(BASE_MAINNET_CHAIN_ID, "0x1111111111111111111111111111111111111111", {
+      depositId: `0x${"a".repeat(64)}`,
+      recipient: `0x${"5".repeat(64)}`,
+      txHash: `0x${"a".repeat(64)}`,
+      logIndex: "0x1",
+    }),
+    sampleBridgeDepositLog(BASE_MAINNET_CHAIN_ID, "0x1111111111111111111111111111111111111111", {
+      depositId: `0x${"b".repeat(64)}`,
+      txHash: `0x${"b".repeat(64)}`,
+      logIndex: "0x2",
+    }),
+  ];
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async (_input, init) => {
     const body = JSON.parse(String(init?.body ?? "{}")) as { method: string };
@@ -858,20 +963,13 @@ test("Base public-network pilot rejects placeholder recipients without blocking 
       return new Response(JSON.stringify({
         jsonrpc: "2.0",
         id: 1,
-        result: [
-          sampleBridgeDepositLog(BASE_MAINNET_CHAIN_ID, "0x1111111111111111111111111111111111111111", {
-            depositId: `0x${"a".repeat(64)}`,
-            recipient: `0x${"5".repeat(64)}`,
-            txHash: `0x${"a".repeat(64)}`,
-            logIndex: "0x1",
-          }),
-          sampleBridgeDepositLog(BASE_MAINNET_CHAIN_ID, "0x1111111111111111111111111111111111111111", {
-            depositId: `0x${"b".repeat(64)}`,
-            txHash: `0x${"b".repeat(64)}`,
-            logIndex: "0x2",
-          }),
-        ],
+        result: depositLogs,
       }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_getBlockByNumber") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: canonicalBlockForLog(depositLogs[0]) }), {
         headers: { "content-type": "application/json" },
       });
     }
