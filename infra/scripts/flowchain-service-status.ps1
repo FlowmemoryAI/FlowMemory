@@ -35,11 +35,14 @@ if (-not $controlPlaneReady) {
     $connections = @(Get-NetTCPConnection -LocalPort $ControlPlanePort -ErrorAction SilentlyContinue | Select-Object -First 1)
     if ($connections.Count -gt 0) {
         $portPid = [int]$connections[0].OwningProcess
-        try {
-            $commandLine = (Get-CimInstance Win32_Process -Filter "ProcessId=$portPid").CommandLine
-        }
-        catch {
-            $commandLine = ""
+        $commandLine = ""
+        if ($portPid -gt 0) {
+            try {
+                $commandLine = (Get-CimInstance Win32_Process -Filter "ProcessId=$portPid").CommandLine
+            }
+            catch {
+                $commandLine = ""
+            }
         }
         if ("$commandLine" -like "*$controlPlaneScriptPath*") {
             $controlPlaneStatus["running"] = $true
@@ -50,6 +53,7 @@ if (-not $controlPlaneReady) {
         else {
             $controlPlanePortProcess = [ordered]@{
                 pid = $portPid
+                cleanupPending = ($portPid -le 0)
                 currentRepoControlPlane = $false
             }
         }
@@ -71,7 +75,12 @@ if (-not $controlPlaneReady) {
     Add-FlowChainReadinessProblem -Problems $problems -Name "devnet/local/services/control-plane.pid" -Reason "control-plane process is not running from this repository" -Category "process"
 }
 if ($null -ne $controlPlanePortProcess -and -not $controlPlaneReady) {
-    Add-FlowChainReadinessProblem -Problems $problems -Name "127.0.0.1:$ControlPlanePort" -Reason "control-plane port is occupied by a process that was not launched from this repository" -Kind "failed" -Category "process"
+    if ($controlPlanePortProcess.cleanupPending) {
+        Add-FlowChainReadinessProblem -Problems $problems -Name "127.0.0.1:$ControlPlanePort" -Reason "control-plane port is still being released by Windows" -Category "process"
+    }
+    else {
+        Add-FlowChainReadinessProblem -Problems $problems -Name "127.0.0.1:$ControlPlanePort" -Reason "control-plane port is occupied by a process that was not launched from this repository" -Kind "failed" -Category "process"
+    }
 }
 if (-not $stateFacts.readable) {
     Add-FlowChainReadinessProblem -Problems $problems -Name "devnet/local/state.json" -Reason "state file is missing or unreadable" -Category "artifact"
@@ -110,7 +119,7 @@ $report = [ordered]@{
         commandLineMatched = $nodeStatus.commandLineMatched
     }
     controlPlane = [ordered]@{
-        status = if ($controlPlaneReady) { "running" } elseif ($null -ne $controlPlanePortProcess) { "port-occupied" } elseif ($controlPlaneStatus.running) { "pid-mismatch" } else { "stopped" }
+        status = if ($controlPlaneReady) { "running" } elseif ($null -ne $controlPlanePortProcess -and $controlPlanePortProcess.cleanupPending) { "port-cleanup-pending" } elseif ($null -ne $controlPlanePortProcess) { "port-occupied" } elseif ($controlPlaneStatus.running) { "pid-mismatch" } else { "stopped" }
         pid = $controlPlaneStatus.pid
         pidPath = "devnet/local/services/control-plane.pid"
         commandLineMatched = $controlPlaneReady

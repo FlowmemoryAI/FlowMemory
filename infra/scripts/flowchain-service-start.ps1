@@ -48,17 +48,46 @@ function Get-ControlPlanePortProcess {
         return $null
     }
     $pidValue = [int]$connections[0].OwningProcess
-    try {
-        $commandLine = (Get-CimInstance Win32_Process -Filter "ProcessId=$pidValue").CommandLine
-    }
-    catch {
-        $commandLine = ""
+    $commandLine = ""
+    if ($pidValue -gt 0) {
+        try {
+            $commandLine = (Get-CimInstance Win32_Process -Filter "ProcessId=$pidValue").CommandLine
+        }
+        catch {
+            $commandLine = ""
+        }
     }
     return [ordered]@{
         pid = $pidValue
         commandLine = "$commandLine"
+        cleanupPending = ($pidValue -le 0)
         isCurrentRepoControlPlane = ("$commandLine" -like "*$ExpectedScriptPath*")
     }
+}
+
+function Wait-ControlPlanePortSettled {
+    param(
+        [Parameter(Mandatory = $true)][int] $Port,
+        [Parameter(Mandatory = $true)][string] $ExpectedScriptPath,
+        [int] $TimeoutSeconds = 20
+    )
+
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    do {
+        $portProcess = Get-ControlPlanePortProcess -Port $Port -ExpectedScriptPath $ExpectedScriptPath
+        if ($null -eq $portProcess) {
+            return $null
+        }
+        if ($portProcess.isCurrentRepoControlPlane) {
+            return $portProcess
+        }
+        if (-not $portProcess.cleanupPending) {
+            return $portProcess
+        }
+        Start-Sleep -Seconds 1
+    } while ((Get-Date) -lt $deadline)
+
+    return (Get-ControlPlanePortProcess -Port $Port -ExpectedScriptPath $ExpectedScriptPath)
 }
 
 if ($LiveProfile -and $MaxBlocks -gt 0) {
@@ -95,9 +124,12 @@ if ($controlStatus.running -and -not $controlStatus.commandLineMatched) {
     $controlStatus = Test-FlowChainPid -PidPath $controlPlanePidPath -CommandLineIncludes @($controlPlaneScriptPath)
 }
 if (-not ($controlStatus.running -and $controlStatus.commandLineMatched)) {
-    $portProcess = Get-ControlPlanePortProcess -Port $ControlPlanePort -ExpectedScriptPath $controlPlaneScriptPath
+    $portProcess = Wait-ControlPlanePortSettled -Port $ControlPlanePort -ExpectedScriptPath $controlPlaneScriptPath
     if ($null -ne $portProcess) {
         if (-not $portProcess.isCurrentRepoControlPlane) {
+            if ($portProcess.cleanupPending) {
+                throw "Control-plane port $ControlPlanePort is still being released by Windows. Retry service start or choose another port."
+            }
             throw "Control-plane port $ControlPlanePort is already in use by a process that was not launched from this repository. Stop that process or choose another port."
         }
         Set-Content -LiteralPath $controlPlanePidPath -Value "$($portProcess.pid)"
