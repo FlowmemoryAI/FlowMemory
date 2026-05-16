@@ -60,6 +60,15 @@ function methodEntry(discovery: Record<string, JsonValue>, methodName: string): 
   return methods.find((method) => method.method === methodName) ?? null;
 }
 
+function accountIdFromBalance(row: Record<string, JsonValue>): string | null {
+  return stringValue(row.walletAddress ?? null) ?? stringValue(asRecord(row.balance ?? {}).accountId ?? null);
+}
+
+function amountFromBalance(row: Record<string, JsonValue>): bigint {
+  const amount = stringValue(row.amount ?? asRecord(row.balance ?? {}).units ?? "0") ?? "0";
+  return /^\d+$/.test(amount) ? BigInt(amount) : 0n;
+}
+
 function sleep(ms: number) {
   return new Promise((resolveSleep) => setTimeout(resolveSleep, ms));
 }
@@ -137,6 +146,21 @@ async function main() {
   const secondStatus = asRecord(await client.chainStatus());
   const walletBalances = asRecord(await client.walletBalances({ limit: 1 }));
   const walletTransfers = asRecord(await client.walletTransfers({ limit: 1 }));
+  const sendCandidateBalances = asRecord(await client.walletBalances({ limit: 25 }));
+  const balanceRows = asArray(sendCandidateBalances.balances).map((row) => asRecord(row));
+  const sender = balanceRows.find((row) => accountIdFromBalance(row) !== null && amountFromBalance(row) > 1n);
+  const recipient = balanceRows.find((row) => accountIdFromBalance(row) !== null && accountIdFromBalance(row) !== accountIdFromBalance(sender ?? {}));
+  if (sender === undefined || recipient === undefined) {
+    throw new Error("dev-pack e2e could not find two local wallet accounts with a spendable balance");
+  }
+  const walletSend = asRecord(await client.walletSend({
+    fromAccountId: accountIdFromBalance(sender) ?? "",
+    toAccountId: accountIdFromBalance(recipient) ?? "",
+    amountUnits: "1",
+    memo: `flowchain-dev-pack-e2e-${Date.now()}`,
+    applyBlock: true,
+    createRecipient: true,
+  }));
 
   const cliPath = resolve(root, "services", "flowchain-sdk", "src", "cli.ts");
   const cliStatusText = execFileSync(process.execPath, [cliPath, "status", "--json", "--rpc", rpcUrl], {
@@ -163,6 +187,7 @@ async function main() {
     readinessLoaded: String(readiness.schema ?? "") === "flowchain.rpc.readiness.v0",
     walletTransfersReadable: String(walletTransfers.schema ?? "") === "flowmemory.control_plane.wallet_transfer_history.v0",
     walletBalancesReadable: String(walletBalances.schema ?? "") === "flowmemory.control_plane.wallet_balance_list.v0",
+    walletSendRuntimeBacked: String(walletSend.schema ?? "") === "flowmemory.control_plane.wallet_send_result.v0",
     cliJsonStatus: String(asRecord(cliStatus).schema ?? "") === "flowmemory.control_plane.chain_status.v0",
     heightAdvanced: firstHeight !== null && secondHeight !== null && BigInt(secondHeight) > BigInt(firstHeight),
     publicReadinessFailClosed: readiness.publicRpcReady === false && readiness.productionReady === false,
@@ -206,11 +231,11 @@ async function main() {
       "- Typed JSON-RPC client over the real FlowChain `/rpc` surface.",
       "- CLI commands for discovery, readiness, status, wallet balances, wallet transfers, bridge readiness, bridge status, and diagnostics.",
       "- Generated RPC reference from live `rpc_discover`.",
-      "- Dev-pack E2E report proving local RPC attachment, height reads, wallet balance reads, wallet transfer reads, CLI JSON output, and public readiness fail-closed behavior.",
+      "- Dev-pack E2E report proving local RPC attachment, height reads, wallet balance reads, wallet transfer reads, a runtime-backed local wallet send, CLI JSON output, and public readiness fail-closed behavior.",
       "",
       "Remaining buildout:",
       "",
-      "- Add signed transaction submission examples once wallet signing boundaries are finalized for SDK use.",
+      "- Add signed transaction envelope examples once wallet signing boundaries are finalized for SDK use.",
       "- Add browser/Vite sample app.",
       "- Expand docs into full wallet, bridge, node operator, explorer, faucet, release, and troubleshooting guides.",
       "- Keep public/live readiness blocked until owner inputs and public deployment gates pass.",

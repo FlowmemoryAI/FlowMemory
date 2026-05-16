@@ -69,6 +69,18 @@ npm run flowchain:devkit -- wallet-transfers --json --limit 5
 These commands read the actual control-plane RPC. They do not return private
 keys, seed phrases, mnemonics, passphrases, or vault material.
 
+## Send A Local Wallet Transfer
+
+Choose two local no-value account IDs from `wallet-balances`, then submit a
+runtime-backed local transfer:
+
+```powershell
+npm run flowchain:devkit -- wallet-send --json --from <account-id> --to <account-id> --amount-units 1 --memo devkit-local-test
+```
+
+This uses the local control-plane wallet send path. It is for local no-value
+testing only and is not a live bridge or public endpoint action.
+
 ## Read Bridge Readiness
 
 ```powershell
@@ -85,8 +97,9 @@ npm run flowchain:dev-pack:e2e
 ```
 
 This command attaches to local RPC, verifies discovery/readiness, checks block
-height, reads wallet balances and transfer history, runs a CLI command with
-JSON output, and regenerates the RPC reference.
+height, reads wallet balances and transfer history, submits a runtime-backed
+local wallet send, runs a CLI command with JSON output, and regenerates the RPC
+reference.
 
 Outputs:
 
@@ -101,6 +114,5 @@ Outputs:
 - Public RPC remains blocked until owner public endpoint inputs are configured.
 - Live bridge remains blocked until owner Base 8453 inputs and operator
   acknowledgement are configured.
-- Signed transaction SDK examples are still a follow-up. Use the existing
-  wallet/service E2E scripts for wallet-send proof until that boundary is
-  wired into the SDK.
+- Signed transaction envelope SDK examples are still a follow-up. The current
+  devkit wallet send uses the existing local control-plane wallet-send path.

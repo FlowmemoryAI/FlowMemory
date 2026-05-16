@@ -19,6 +19,15 @@ export interface FlowChainClientOptions {
   timeoutMs?: number;
 }
 
+export interface WalletSendRequest {
+  fromAccountId: string;
+  toAccountId: string;
+  amountUnits: string | number;
+  memo?: string;
+  applyBlock?: boolean;
+  createRecipient?: boolean;
+}
+
 export class FlowChainRpcError extends Error {
   readonly code: number;
   readonly data?: JsonValue;
@@ -86,6 +95,43 @@ export class FlowChainClient {
     }
   }
 
+  async postControlPlane<T extends JsonValue = JsonValue>(path: string, payload: JsonValue): Promise<T> {
+    const endpoint = new URL(this.rpcUrl);
+    endpoint.pathname = path;
+    endpoint.search = "";
+    endpoint.hash = "";
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
+    try {
+      const response = await this.fetchImpl(endpoint, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      const text = await response.text();
+      let body: JsonValue;
+      try {
+        body = JSON.parse(text) as JsonValue;
+      } catch {
+        throw new FlowChainRpcError(`FlowChain control-plane returned non-JSON response: ${redactFlowChainText(text)}`, -32700);
+      }
+      if (!response.ok) {
+        throw new FlowChainRpcError(`FlowChain control-plane HTTP ${response.status}: ${redactFlowChainText(text)}`, response.status, body);
+      }
+      return body as T;
+    } catch (error) {
+      if (error instanceof FlowChainRpcError) throw error;
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new FlowChainRpcError(`FlowChain control-plane timed out after ${this.timeoutMs}ms`, -32001);
+      }
+      const message = error instanceof Error ? error.message : String(error);
+      throw new FlowChainRpcError(`FlowChain control-plane unreachable: ${message}`, -32000);
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
   rpcDiscover() {
     return this.call("rpc_discover");
   }
@@ -112,5 +158,9 @@ export class FlowChainClient {
 
   bridgeStatus() {
     return this.call("bridge_status");
+  }
+
+  walletSend(request: WalletSendRequest) {
+    return this.postControlPlane("/wallets/send", request as unknown as JsonValue);
   }
 }

@@ -20,6 +20,12 @@ const client = new FlowChainClient({ rpcUrl: "http://127.0.0.1:8787/rpc" });
 const readiness = await client.rpcReadiness();
 const status = await client.chainStatus();
 const transfers = await client.walletTransfers({ limit: 5 });
+const send = await client.walletSend({
+  fromAccountId: "local-account:sender",
+  toAccountId: "local-account:recipient",
+  amountUnits: "1",
+  memo: "sdk-local-test"
+});
 ```
 
 ## CLI Examples
@@ -30,6 +36,7 @@ npm run flowchain:devkit -- readiness --json
 npm run flowchain:devkit -- status --json
 npm run flowchain:devkit -- wallet-balances --json --limit 5
 npm run flowchain:devkit -- wallet-transfers --json --limit 5
+npm run flowchain:devkit -- wallet-send --json --from <account-id> --to <account-id> --amount-units 1
 npm run flowchain:devkit -- bridge-readiness --json
 ```
 

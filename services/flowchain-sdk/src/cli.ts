@@ -8,6 +8,10 @@ interface CliOptions {
   rpcUrl: string;
   json: boolean;
   limit: number;
+  fromAccountId?: string;
+  toAccountId?: string;
+  amountUnits?: string;
+  memo?: string;
 }
 
 const COMMANDS = new Set([
@@ -18,6 +22,7 @@ const COMMANDS = new Set([
   "wallet-transfers",
   "bridge-readiness",
   "bridge-status",
+  "wallet-send",
   "diagnostics",
   "help",
 ]);
@@ -28,6 +33,7 @@ function parseArgs(argv: string[]): CliOptions {
   let rpcUrl = process.env.FLOWCHAIN_RPC_URL ?? "http://127.0.0.1:8787/rpc";
   let json = false;
   let limit = 10;
+  const options: Partial<CliOptions> = {};
   while (args.length > 0) {
     const arg = args.shift();
     if (arg === "--json") {
@@ -36,12 +42,20 @@ function parseArgs(argv: string[]): CliOptions {
       rpcUrl = args.shift() ?? rpcUrl;
     } else if (arg === "--limit") {
       limit = Number.parseInt(args.shift() ?? "10", 10);
+    } else if (arg === "--from") {
+      options.fromAccountId = args.shift();
+    } else if (arg === "--to") {
+      options.toAccountId = args.shift();
+    } else if (arg === "--amount-units") {
+      options.amountUnits = args.shift();
+    } else if (arg === "--memo") {
+      options.memo = args.shift();
     } else if (arg !== undefined) {
       throw new Error(`unknown argument: ${arg}`);
     }
   }
   if (!COMMANDS.has(command)) throw new Error(`unknown command: ${command}`);
-  return { command, rpcUrl, json, limit };
+  return { command, rpcUrl, json, limit, ...options };
 }
 
 function printHelp() {
@@ -56,6 +70,7 @@ Commands:
   status            Print chain status
   wallet-balances   Print wallet balance rows
   wallet-transfers  Print wallet transfer history
+  wallet-send       Submit a local wallet send through the real control-plane wallet path
   bridge-readiness  Print bridge live readiness
   bridge-status     Print bridge status
   diagnostics       Print public-safe SDK diagnostics
@@ -95,6 +110,18 @@ async function run(argv = process.argv.slice(2)) {
         return client.bridgeReadiness();
       case "bridge-status":
         return client.bridgeStatus();
+      case "wallet-send":
+        if (options.fromAccountId === undefined || options.toAccountId === undefined || options.amountUnits === undefined) {
+          throw new Error("wallet-send requires --from, --to, and --amount-units");
+        }
+        return client.walletSend({
+          fromAccountId: options.fromAccountId,
+          toAccountId: options.toAccountId,
+          amountUnits: options.amountUnits,
+          memo: options.memo ?? "flowchain-devkit-wallet-send",
+          applyBlock: true,
+          createRecipient: true,
+        });
       case "diagnostics":
         return {
           schema: "flowchain.sdk.diagnostics.v0",

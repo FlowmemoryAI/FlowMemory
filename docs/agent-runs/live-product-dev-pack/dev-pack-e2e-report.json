@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.dev_pack_e2e_report.v0",
-  "generatedAt": "2026-05-16T13:53:09.417Z",
+  "generatedAt": "2026-05-16T13:58:15.301Z",
   "status": "passed",
   "rpcUrl": "http://127.0.0.1:8787/rpc",
   "checks": {
@@ -8,6 +8,7 @@
     "readinessLoaded": true,
     "walletTransfersReadable": true,
     "walletBalancesReadable": true,
+    "walletSendRuntimeBacked": true,
     "cliJsonStatus": true,
     "heightAdvanced": true,
     "publicReadinessFailClosed": true,
@@ -15,8 +16,8 @@
   },
   "methodCount": 79,
   "publicReadyMethodCount": 0,
-  "firstHeight": "37884",
-  "secondHeight": "37885",
+  "firstHeight": "37971",
+  "secondHeight": "37972",
   "missingEnvNames": [
     "FLOWCHAIN_BASE8453_FROM_BLOCK",
     "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
