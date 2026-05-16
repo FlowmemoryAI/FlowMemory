@@ -4,6 +4,7 @@ param(
     [int] $MonitorDurationSeconds = 20,
     [int] $MonitorPollSeconds = 5,
     [int] $MonitorMaxStateAgeSeconds = 90,
+    [int] $ChildTimeoutSeconds = 2400,
     [switch] $AllowBlocked
 )
 
@@ -32,7 +33,9 @@ $paths = [ordered]@{
     ownerInputsValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     publicRpcEdgeTemplate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-edge-template-report.json"
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
+    publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
+    opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     publicDeploymentContract = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     architectureAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"
     backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
@@ -60,6 +63,9 @@ function Get-AuditProp {
         [object] $Default = $null
     )
 
+    if ($null -ne $Object -and $Object -is [System.Collections.IDictionary] -and $Object.Contains($Name)) {
+        return $Object[$Name]
+    }
     if ($null -ne $Object -and $Object.PSObject.Properties.Name -contains $Name) {
         return $Object.$Name
     }
@@ -116,27 +122,105 @@ function Test-StepPassed {
     return $false
 }
 
+$script:AuditChildProcessResults = New-Object System.Collections.ArrayList
+
+function Stop-AuditProcessTree {
+    param([Parameter(Mandatory = $true)][int] $ProcessId)
+
+    $children = @()
+    try {
+        $children = @(Get-CimInstance Win32_Process -Filter "ParentProcessId=$ProcessId" -ErrorAction SilentlyContinue)
+    }
+    catch {
+        $children = @()
+    }
+
+    foreach ($child in $children) {
+        Stop-AuditProcessTree -ProcessId ([int] $child.ProcessId)
+    }
+
+    try {
+        Stop-Process -Id $ProcessId -Force -ErrorAction SilentlyContinue
+    }
+    catch {
+    }
+}
+
+function Read-AuditOutputFile {
+    param([Parameter(Mandatory = $true)][string] $Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return @()
+    }
+    return @(Get-Content -LiteralPath $Path -ErrorAction SilentlyContinue | ForEach-Object { "$_" })
+}
+
 function Invoke-AuditChildProcess {
     param([Parameter(Mandatory = $true)][string[]] $ArgumentList)
 
-    $previousErrorActionPreference = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
+    $startedAt = (Get-Date).ToUniversalTime()
+    $stamp = $startedAt.ToString("yyyyMMddTHHmmssfffZ")
+    $tempBase = Join-Path ([System.IO.Path]::GetTempPath()) "flowchain-completion-audit-$PID-$stamp-$([Guid]::NewGuid().ToString("N"))"
+    $stdoutPath = "$tempBase.out.log"
+    $stderrPath = "$tempBase.err.log"
+    $timedOut = $false
+    $exitCode = 1
+    $processId = $null
+    $output = @()
+
     try {
-        $output = (& powershell @ArgumentList 2>&1) | ForEach-Object { "$_" }
-        $exitCode = $LASTEXITCODE
+        $process = Start-Process -FilePath "powershell" -ArgumentList $ArgumentList -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath -NoNewWindow -PassThru
+        $processId = $process.Id
+        $timeoutMs = [Math]::Max(1, $ChildTimeoutSeconds) * 1000
+        if (-not $process.WaitForExit($timeoutMs)) {
+            $timedOut = $true
+            Stop-AuditProcessTree -ProcessId $process.Id
+            $exitCode = 124
+        }
+        else {
+            $exitCode = [int] $process.ExitCode
+        }
     }
     catch {
         $output = @($_.Exception.Message)
         $exitCode = 1
     }
-    finally {
-        $ErrorActionPreference = $previousErrorActionPreference
-    }
 
-    return [ordered]@{
-        output = @($output)
-        exitCode = $exitCode
+    $stdout = Read-AuditOutputFile -Path $stdoutPath
+    $stderr = Read-AuditOutputFile -Path $stderrPath
+    $output = @($output + $stdout + $stderr)
+    if ($timedOut) {
+        $output = @("Timed out after $ChildTimeoutSeconds seconds; child process tree was stopped.") + $output
     }
+    $finishedAt = (Get-Date).ToUniversalTime()
+
+    Remove-Item -LiteralPath $stdoutPath -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $stderrPath -Force -ErrorAction SilentlyContinue
+
+    $result = [ordered]@{
+        argumentList = @($ArgumentList)
+        processId = $processId
+        startedAt = $startedAt.ToString("o")
+        finishedAt = $finishedAt.ToString("o")
+        durationSeconds = [int][Math]::Max(0, [Math]::Floor(($finishedAt - $startedAt).TotalSeconds))
+        timedOut = $timedOut
+        timeoutSeconds = $ChildTimeoutSeconds
+        exitCode = $exitCode
+        output = @($output)
+    }
+    [void] $script:AuditChildProcessResults.Add([ordered]@{
+        argumentList = @($ArgumentList)
+        processId = $processId
+        startedAt = $result.startedAt
+        finishedAt = $result.finishedAt
+        durationSeconds = $result.durationSeconds
+        timedOut = $timedOut
+        timeoutSeconds = $ChildTimeoutSeconds
+        exitCode = $exitCode
+        outputLineCount = @($output).Count
+    })
+
+    return $result
 }
 
 $liveProductResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-product-e2e.ps1"), "-AllowBlocked")
@@ -190,12 +274,18 @@ $ownerEnvReadinessExitCode = $ownerEnvReadinessResult.exitCode
 $publicRpcEdgeTemplateResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-edge-template.ps1"))
 $publicRpcEdgeTemplateOutput = @($publicRpcEdgeTemplateResult.output)
 $publicRpcEdgeTemplateExitCode = $publicRpcEdgeTemplateResult.exitCode
+$publicRpcDeploymentBundleResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-deployment-bundle.ps1"))
+$publicRpcDeploymentBundleOutput = @($publicRpcDeploymentBundleResult.output)
+$publicRpcDeploymentBundleExitCode = $publicRpcDeploymentBundleResult.exitCode
 $liveInfraResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-infra-check.ps1"), "-AllowBlocked")
 $liveInfraOutput = @($liveInfraResult.output)
 $liveInfraExitCode = $liveInfraResult.exitCode
 $externalTesterPacketResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-packet.ps1"), "-AllowBlocked")
 $externalTesterPacketOutput = @($externalTesterPacketResult.output)
 $externalTesterPacketExitCode = $externalTesterPacketResult.exitCode
+$opsSnapshotResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-snapshot.ps1"), "-AllowBlocked", "-NoRefresh")
+$opsSnapshotOutput = @($opsSnapshotResult.output)
+$opsSnapshotExitCode = $opsSnapshotResult.exitCode
 $publicDeploymentContractResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-deployment-contract.ps1"), "-AllowBlocked", "-NoRefresh")
 $publicDeploymentContractOutput = @($publicDeploymentContractResult.output)
 $publicDeploymentContractExitCode = $publicDeploymentContractResult.exitCode
@@ -354,6 +444,25 @@ $publicRpcEdgeTemplatePassed = $publicRpcEdgeTemplateExitCode -eq 0 `
     -and $publicRpcEdgeTemplateForwardsOrigin -eq $true `
     -and ((Get-AuditProp -Object $publicRpcEdgeTemplate -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicRpcEdgeTemplate -Name "noSecrets" -Default $false) -eq $true)
+$publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
+$publicRpcDeploymentBundleStatus = Get-ReportStatus -Report $publicRpcDeploymentBundle
+$publicRpcDeploymentBundleChecks = Get-AuditProp -Object $publicRpcDeploymentBundle -Name "checks"
+$publicRpcDeploymentBundleRepoOwned = Get-AuditProp -Object $publicRpcDeploymentBundle -Name "flowChainRpcIsRepoOwned" -Default $false
+$publicRpcDeploymentBundleNginxTemplate = Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "nginxTemplateWritten" -Default $false
+$publicRpcDeploymentBundleVerifyRunbook = Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "verifyRunbookWritten" -Default $false
+$publicRpcDeploymentBundleRollbackRunbook = Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "rollbackRunbookWritten" -Default $false
+$publicRpcDeploymentBundlePassed = $publicRpcDeploymentBundleExitCode -eq 0 `
+    -and $publicRpcDeploymentBundleStatus -eq "passed" `
+    -and ($publicRpcDeploymentBundleRepoOwned -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "thirdPartyFlowChainRpcProviderNeeded" -Default $true) -eq $false) `
+    -and ($publicRpcDeploymentBundleNginxTemplate -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "ownerEnvExampleWritten" -Default $false) -eq $true) `
+    -and ($publicRpcDeploymentBundleVerifyRunbook -eq $true) `
+    -and ($publicRpcDeploymentBundleRollbackRunbook -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "envExampleHasAllRequiredNames" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "broadcasts" -Default $true) -eq $false)
 $ownerInputsValidationStatus = Get-ReportStatus -Report $ownerInputsValidation
 $ownerInputsValidationChecks = Get-AuditProp -Object $ownerInputsValidation -Name "checks"
 $ownerInputsValidationMissingBlocks = Get-AuditProp -Object $ownerInputsValidationChecks -Name "missingScenarioBlocks" -Default $false
@@ -408,6 +517,18 @@ $backupRestoreValidationPassed = $backupRestoreValidationExitCode -eq 0 `
 $externalTesterPacketStatus = Get-ReportStatus -Report $externalTesterPacket
 $externalTesterPacketShareable = Get-AuditProp -Object $externalTesterPacket -Name "packetShareable" -Default $false
 $externalTesterPacketPath = [string](Get-AuditProp -Object $externalTesterPacket -Name "packetPath" -Default $paths.externalTesterPacket)
+$opsSnapshot = $reports.opsSnapshot
+$opsSnapshotStatus = Get-ReportStatus -Report $opsSnapshot
+$opsSnapshotCriticalCount = [int](Get-AuditProp -Object $opsSnapshot -Name "criticalCount" -Default 999999)
+$opsSnapshotBlockedCount = [int](Get-AuditProp -Object $opsSnapshot -Name "blockedCount" -Default 0)
+$opsSnapshotChain = Get-AuditProp -Object $opsSnapshot -Name "chain"
+$opsSnapshotLatestHeight = [string](Get-AuditProp -Object $opsSnapshotChain -Name "latestHeight" -Default "")
+$opsSnapshotFinalizedHeight = [string](Get-AuditProp -Object $opsSnapshotChain -Name "finalizedHeight" -Default "")
+$opsSnapshotPassed = $opsSnapshotExitCode -eq 0 `
+    -and $opsSnapshotStatus -in @("passed", "blocked") `
+    -and $opsSnapshotCriticalCount -eq 0 `
+    -and (-not [string]::IsNullOrWhiteSpace($opsSnapshotLatestHeight)) `
+    -and (-not [string]::IsNullOrWhiteSpace($opsSnapshotFinalizedHeight))
 $productionLocalAggregateStatus = [string](Get-AuditProp -Object $liveProduct -Name "productionLocalAggregateStatus")
 $liveProductLiveInfraStatus = [string](Get-AuditProp -Object $liveProduct -Name "liveInfraStatus")
 $liveProductNoLiveBroadcast = Get-AuditProp -Object $liveProduct -Name "noLiveBroadcast"
@@ -588,6 +709,12 @@ Add-AuditItem -Items $items -Id "public-rpc-edge-template" `
     -Evidence "edgeTemplateStatus=$publicRpcEdgeTemplateStatus, repoOwned=$publicRpcEdgeTemplateRepoOwned, requiresTls=$publicRpcEdgeTemplateRequiresTls, requiresRateLimit=$publicRpcEdgeTemplateRequiresRateLimit, forwardsOrigin=$publicRpcEdgeTemplateForwardsOrigin, report=$($paths.publicRpcEdgeTemplate)" `
     -Commands @("npm run flowchain:public-rpc:edge-template")
 
+Add-AuditItem -Items $items -Id "public-rpc-deployment-bundle" `
+    -Requirement "Public RPC deployment bundle has no-secret Nginx, owner env, verification, and rollback artifacts for exposing FlowChain's own RPC." `
+    -Status $(if ($publicRpcDeploymentBundlePassed) { "passed" } else { "failed" }) `
+    -Evidence "bundleStatus=$publicRpcDeploymentBundleStatus, repoOwned=$publicRpcDeploymentBundleRepoOwned, nginxTemplate=$publicRpcDeploymentBundleNginxTemplate, verifyRunbook=$publicRpcDeploymentBundleVerifyRunbook, rollbackRunbook=$publicRpcDeploymentBundleRollbackRunbook, report=$($paths.publicRpcDeploymentBundle)" `
+    -Commands @("npm run flowchain:public-rpc:deployment-bundle")
+
 Add-AuditItem -Items $items -Id "public-rpc-readiness-validator-self-test" `
     -Requirement "Public RPC readiness validator proves endpoint checks, CORS allowed-origin acceptance, disallowed-origin rejection, bounded rate-limit rejection, retry-after evidence, and response hygiene against a temporary local control plane." `
     -Status $(if ($publicRpcValidationPassed) { "passed" } else { "failed" }) `
@@ -605,6 +732,12 @@ Add-AuditItem -Items $items -Id "external-tester-packet" `
     -Status $(if (($externalTesterPacketStatus -eq "passed" -and $externalTesterPacketShareable -eq $true) -or ($externalTesterPacketStatus -eq "blocked" -and $externalTesterPacketShareable -eq $false)) { "passed" } else { "failed" }) `
     -Evidence "packetStatus=$externalTesterPacketStatus, shareable=$externalTesterPacketShareable, packet=$externalTesterPacketPath" `
     -Commands @("npm run flowchain:external-tester:packet")
+
+Add-AuditItem -Items $items -Id "ops-snapshot" `
+    -Requirement "Ops snapshot separates critical incidents from expected owner-input blockers and records incident commands." `
+    -Status $(if ($opsSnapshotPassed) { "passed" } else { "failed" }) `
+    -Evidence "opsStatus=$opsSnapshotStatus, criticalCount=$opsSnapshotCriticalCount, blockedCount=$opsSnapshotBlockedCount, latestHeight=$opsSnapshotLatestHeight, finalizedHeight=$opsSnapshotFinalizedHeight, report=$($paths.opsSnapshot)" `
+    -Commands @("npm run flowchain:ops:snapshot -- -AllowBlocked")
 
 Add-AuditItem -Items $items -Id "public-rpc-external-sharing" `
     -Requirement "External/public RPC is configured behind owner TLS, CORS, rate limit, endpoint checks, and response hygiene." `
@@ -710,14 +843,20 @@ $report = [ordered]@{
     ownerEnvReadinessOutputRedacted = @($ownerEnvReadinessOutput | ForEach-Object { "$_" })
     publicRpcEdgeTemplateExitCode = $publicRpcEdgeTemplateExitCode
     publicRpcEdgeTemplateOutputRedacted = @($publicRpcEdgeTemplateOutput | ForEach-Object { "$_" })
+    publicRpcDeploymentBundleExitCode = $publicRpcDeploymentBundleExitCode
+    publicRpcDeploymentBundleOutputRedacted = @($publicRpcDeploymentBundleOutput | ForEach-Object { "$_" })
     liveInfraExitCode = $liveInfraExitCode
     liveInfraOutputRedacted = @($liveInfraOutput | ForEach-Object { "$_" })
     externalTesterPacketExitCode = $externalTesterPacketExitCode
     externalTesterPacketOutputRedacted = @($externalTesterPacketOutput | ForEach-Object { "$_" })
+    opsSnapshotExitCode = $opsSnapshotExitCode
+    opsSnapshotOutputRedacted = @($opsSnapshotOutput | ForEach-Object { "$_" })
     publicDeploymentContractExitCode = $publicDeploymentContractExitCode
     publicDeploymentContractOutputRedacted = @($publicDeploymentContractOutput | ForEach-Object { "$_" })
     architectureAuditExitCode = $architectureAuditExitCode
     architectureAuditOutputRedacted = @($architectureAuditOutput | ForEach-Object { "$_" })
+    childProcessTimeoutSeconds = $ChildTimeoutSeconds
+    childProcessResults = @($script:AuditChildProcessResults)
     itemCounts = [ordered]@{
         passed = @($items | Where-Object { $_.status -eq "passed" }).Count
         blocked = $blockedItems.Count
@@ -737,12 +876,14 @@ $report = [ordered]@{
         "npm run flowchain:owner-env:readiness -- -AllowBlocked",
         "npm run flowchain:owner-inputs",
         "npm run flowchain:public-rpc:edge-template",
+        "npm run flowchain:public-rpc:deployment-bundle",
         "npm run flowchain:public-rpc:validate",
         "npm run flowchain:backup:restore:validate",
         "npm run flowchain:backup:create",
         "npm run flowchain:backup:restore:verify",
         "npm run flowchain:backup:check",
         "npm run flowchain:service:monitor",
+        "npm run flowchain:ops:snapshot",
         "npm run flowchain:live-infra:check",
         "npm run flowchain:bridge:diagnose:tx",
         "npm run flowchain:tester:readiness",

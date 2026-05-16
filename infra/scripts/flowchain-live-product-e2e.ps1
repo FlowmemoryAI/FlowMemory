@@ -15,12 +15,29 @@ $logsDir = Join-Path $reportFullDir "logs"
 $reportPath = Join-Path $reportFullDir "flowchain-live-product-e2e-report.json"
 New-Item -ItemType Directory -Force -Path $logsDir | Out-Null
 
+function Stop-LiveProductProcessTree {
+    param([Parameter(Mandatory = $true)][int] $ProcessId)
+
+    $children = @()
+    try {
+        $children = @(Get-CimInstance Win32_Process -Filter "ParentProcessId=$ProcessId" -ErrorAction SilentlyContinue)
+    }
+    catch {
+        $children = @()
+    }
+    foreach ($child in $children) {
+        Stop-LiveProductProcessTree -ProcessId ([int] $child.ProcessId)
+    }
+    Stop-Process -Id $ProcessId -Force -ErrorAction SilentlyContinue
+}
+
 function Invoke-LiveProductStep {
     param(
         [Parameter(Mandatory = $true)][string] $Name,
         [Parameter(Mandatory = $true)][string] $FilePath,
         [string[]] $ArgumentList = @(),
         [string] $ExpectedReportPath = "",
+        [int] $TimeoutSeconds = 900,
         [switch] $UseStartProcess,
         [switch] $NoWait
     )
@@ -38,15 +55,28 @@ function Invoke-LiveProductStep {
                 WindowStyle = "Hidden"
             }
             if (-not $NoWait) {
-                $startArgs.Wait = $true
+                $timeoutMs = [Math]::Max(1, $TimeoutSeconds) * 1000
             }
             $process = Start-Process @startArgs
-            $exitCode = if ($NoWait) { 0 } else { $process.ExitCode }
+            $timedOut = $false
+            if ($NoWait) {
+                $exitCode = 0
+            }
+            elseif (-not $process.WaitForExit($timeoutMs)) {
+                $timedOut = $true
+                Stop-LiveProductProcessTree -ProcessId $process.Id
+                $exitCode = 124
+            }
+            else {
+                $exitCode = $process.ExitCode
+            }
             $output = @(
                 "$(if ($NoWait) { "Started detached process." } else { "Started isolated process." })",
                 "FilePath: $FilePath",
                 "Arguments: $($ArgumentList -join ' ')",
                 "ProcessId: $($process.Id)",
+                "TimeoutSeconds: $TimeoutSeconds",
+                "TimedOut: $timedOut",
                 "ExitCode: $exitCode"
             )
         }
@@ -121,9 +151,10 @@ function Wait-LiveProductServiceProfile {
         Start-Sleep -Seconds 5
         $probe = Invoke-LiveProductStep `
             -Name "Verify live service profile attempt $attempt" `
-            -FilePath "cmd.exe" `
-            -ArgumentList @("/d", "/s", "/c", "npm.cmd run flowchain:service:status -- -AllowBlocked") `
+            -FilePath "powershell" `
+            -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-status.ps1"), "-AllowBlocked") `
             -ExpectedReportPath $serviceStatusReportPath `
+            -TimeoutSeconds 90 `
             -UseStartProcess
         $lastStep = $probe
         if ($probe.status -eq "passed") {
@@ -149,13 +180,13 @@ else {
 
 Write-Host "FlowChain live-product:e2e aggregate starting."
 $steps = @()
-$steps += Invoke-LiveProductStep -Name "Stop live service before aggregate" -FilePath "powershell" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-stop.ps1")) -ExpectedReportPath $serviceStopReportPath -UseStartProcess
-$steps += Invoke-LiveProductStep -Name "Production-shaped local L1 aggregate" -FilePath "cmd.exe" -ArgumentList @("/d", "/s", "/c", "npm.cmd run flowchain:production-l1:e2e") -ExpectedReportPath $productionReportPath -UseStartProcess
+$steps += Invoke-LiveProductStep -Name "Stop live service before aggregate" -FilePath "powershell" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-stop.ps1")) -ExpectedReportPath $serviceStopReportPath -TimeoutSeconds 120 -UseStartProcess
+$steps += Invoke-LiveProductStep -Name "Production-shaped local L1 aggregate" -FilePath "cmd.exe" -ArgumentList @("/d", "/s", "/c", "npm.cmd run flowchain:production-l1:e2e") -ExpectedReportPath $productionReportPath -TimeoutSeconds 2400 -UseStartProcess
 $steps += Invoke-LiveProductStep -Name "Restore live service profile" -FilePath "powershell" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-restart.ps1"), "-LiveProfile") -ExpectedReportPath $serviceRestartReportPath -UseStartProcess -NoWait
 $steps += Wait-LiveProductServiceProfile
-$steps += Invoke-LiveProductStep -Name "Live service wallet transfer E2E" -FilePath "cmd.exe" -ArgumentList @("/d", "/s", "/c", "npm.cmd run flowchain:wallet:live-service:e2e") -ExpectedReportPath $liveServiceWalletReportPath -UseStartProcess
-$steps += Invoke-LiveProductStep -Name "Live service tester network E2E" -FilePath "cmd.exe" -ArgumentList @("/d", "/s", "/c", "npm.cmd run flowchain:wallet:live-tester:e2e") -ExpectedReportPath $liveServiceTesterNetworkReportPath -UseStartProcess
-$steps += Invoke-LiveProductStep -Name "Live infrastructure readiness" -FilePath "cmd.exe" -ArgumentList @("/d", "/s", "/c", $liveInfraCommand) -ExpectedReportPath $liveInfraReportPath -UseStartProcess
+$steps += Invoke-LiveProductStep -Name "Live service wallet transfer E2E" -FilePath "cmd.exe" -ArgumentList @("/d", "/s", "/c", "npm.cmd run flowchain:wallet:live-service:e2e") -ExpectedReportPath $liveServiceWalletReportPath -TimeoutSeconds 600 -UseStartProcess
+$steps += Invoke-LiveProductStep -Name "Live service tester network E2E" -FilePath "cmd.exe" -ArgumentList @("/d", "/s", "/c", "npm.cmd run flowchain:wallet:live-tester:e2e") -ExpectedReportPath $liveServiceTesterNetworkReportPath -TimeoutSeconds 900 -UseStartProcess
+$steps += Invoke-LiveProductStep -Name "Live infrastructure readiness" -FilePath "cmd.exe" -ArgumentList @("/d", "/s", "/c", $liveInfraCommand) -ExpectedReportPath $liveInfraReportPath -TimeoutSeconds 900 -UseStartProcess
 
 $productionReport = Read-FlowChainJsonIfExists -Path $productionReportPath
 $liveInfraReport = Read-FlowChainJsonIfExists -Path $liveInfraReportPath

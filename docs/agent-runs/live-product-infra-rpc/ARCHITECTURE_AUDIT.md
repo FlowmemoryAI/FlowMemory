@@ -1,6 +1,6 @@
 ﻿# FlowChain Architecture Audit
 
-Generated: 2026-05-16T05:40:03.6154266Z
+Generated: 2026-05-16T08:07:28.3494382Z
 Status: blocked
 Blocked only on known external owner inputs: True
 
@@ -21,7 +21,7 @@ Blocked only on known external owner inputs: True
 
 | Layer | Requirement | Status | Evidence |
 | --- | --- | --- | --- |
-| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=31145, finalizedHeight=31145 |
+| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=32963, finalizedHeight=32963 |
 | Operations | Operations has explicit status, monitor, ops snapshot, and emergency controls that classify incidents separately from owner-input blockers. | passed | monitorStatus=passed, samples=2, heightAdvanced=True, opsSnapshot=blocked, criticalCount=0 |
 | RPC/API | The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation before it can be exposed publicly. | passed | validationStatus=passed, corsAllowed=True, corsRejected=True, endpointChecks=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True |
 | Public edge | External RPC exposure is a distinct owner-operated edge with TLS, allowed origins, rate limits, endpoint checks, and response hygiene. | blocked | publicRpcStatus=blocked, publicRpcReady=False |

@@ -1,5 +1,5 @@
 ﻿Started isolated process.
 FilePath: cmd.exe
-Arguments: /d /s /c npm.cmd run flowchain:service:status
-ProcessId: 51504
-ExitCode: 1
+Arguments: /d /s /c npm.cmd run flowchain:service:status -- -AllowBlocked
+ProcessId: 15428
+ExitCode: 0
