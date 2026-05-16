@@ -1,0 +1,776 @@
+{
+    "schema":  "flowchain.production_truth_table_report.v1",
+    "generatedAt":  "2026-05-16T05:54:41.2420040+00:00",
+    "status":  "stale",
+    "maxReportAgeHours":  24,
+    "classificationCounts":  {
+                                 "passed":  8,
+                                 "blocked-owner-input":  12,
+                                 "blocked-repo-work":  0,
+                                 "failed":  0,
+                                 "stale":  1
+                             },
+    "productionGateCount":  21,
+    "completionReady":  false,
+    "blockedOnlyOnKnownOwnerInputs":  false,
+    "missingOwnerInputs":  [
+                               "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                               "FLOWCHAIN_BASE8453_RPC_URL",
+                               "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                               "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                               "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                               "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                               "FLOWCHAIN_BASE8453_TO_BLOCK",
+                               "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                               "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                               "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                               "FLOWCHAIN_RPC_PUBLIC_URL",
+                               "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                               "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                               "FLOWCHAIN_RPC_TLS_TERMINATED",
+                               "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                           ],
+    "nextRepoOwnedTasks":  [
+                               {
+                                   "id":  "completion-audit",
+                                   "classification":  "stale",
+                                   "command":  "npm run flowchain:completion:audit -- -AllowBlocked",
+                                   "reason":  "older-than-backup-restore-validation,older-than-ops-snapshot,older-than-public-rpc-deployment-bundle,older-than-public-deployment-contract"
+                               }
+                           ],
+    "items":  [
+                  {
+                      "id":  "service-status",
+                      "requirement":  "Private FlowChain node and control-plane services are running and readable.",
+                      "classification":  "passed",
+                      "rawStatus":  "passed",
+                      "evidence":  "status=passed; latestHeight=31145; finalizedHeight=31145",
+                      "command":  "npm run flowchain:service:status",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/service-status-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:36:13.5908453+00:00",
+                      "ageSeconds":  1107,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+
+                                   ],
+                      "ownerInputBlockers":  [
+
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "service-monitor",
+                      "requirement":  "Block production advances over multiple samples.",
+                      "classification":  "passed",
+                      "rawStatus":  "passed",
+                      "evidence":  "status=passed; latestHeight=31145",
+                      "command":  "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:36:13.9512861+00:00",
+                      "ageSeconds":  1107,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+
+                                   ],
+                      "ownerInputBlockers":  [
+
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "live-product-e2e",
+                      "requirement":  "Local live-product e2e covers runtime, wallet, live infra, and tester rehearsal without public claims.",
+                      "classification":  "blocked-owner-input",
+                      "rawStatus":  "blocked",
+                      "evidence":  "status=blocked; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_BASE8453_TO_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                      "command":  "npm run flowchain:live-product:e2e -- -AllowBlocked",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:22:42.6198561+00:00",
+                      "ageSeconds":  1918,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                   ],
+                      "ownerInputBlockers":  [
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                 "FLOWCHAIN_BASE8453_RPC_URL",
+                                                 "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                 "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                 "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                 "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                 "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                                 "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                 "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                 "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                                 "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                 "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                 "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                 "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                 "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "live-infra-check",
+                      "requirement":  "Live infrastructure readiness separates repo-owned checks from public owner-input blockers.",
+                      "classification":  "blocked-owner-input",
+                      "rawStatus":  "blocked",
+                      "evidence":  "status=blocked; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_BASE8453_TO_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS",
+                      "command":  "npm run flowchain:live-infra:check -- -AllowBlocked",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/flowchain-live-infra-check-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:22:41.4896696+00:00",
+                      "ageSeconds":  1919,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                   ],
+                      "ownerInputBlockers":  [
+                                                 "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                 "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                 "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                 "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                 "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                 "FLOWCHAIN_BASE8453_RPC_URL",
+                                                 "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                 "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                 "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                 "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                 "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                                 "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                 "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                 "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "wallet-live-service-e2e",
+                      "requirement":  "Wallet creation and wallet-to-wallet service flow works against the running private service.",
+                      "classification":  "passed",
+                      "rawStatus":  "passed",
+                      "evidence":  "status=passed",
+                      "command":  "npm run flowchain:wallet:live-service:e2e",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:25:00.1546690+00:00",
+                      "ageSeconds":  1781,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+
+                                   ],
+                      "ownerInputBlockers":  [
+
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "tester-network-e2e",
+                      "requirement":  "Separate tester wallets can transact and observe chain state in local rehearsal.",
+                      "classification":  "passed",
+                      "rawStatus":  "passed",
+                      "evidence":  "status=passed",
+                      "command":  "npm run flowchain:wallet:live-tester:e2e",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:21:38.8434482+00:00",
+                      "ageSeconds":  1982,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+
+                                   ],
+                      "ownerInputBlockers":  [
+
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "owner-inputs",
+                      "requirement":  "Owner-provided public RPC, backup, and Base 8453 bridge inputs are configured and valid.",
+                      "classification":  "blocked-owner-input",
+                      "rawStatus":  "blocked",
+                      "evidence":  "status=blocked; ownerInputReady=False; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_BASE8453_TO_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS",
+                      "command":  "npm run flowchain:owner-inputs -- -AllowBlocked",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-inputs-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:21:42.9934310+00:00",
+                      "ageSeconds":  1978,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                   ],
+                      "ownerInputBlockers":  [
+                                                 "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                 "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                 "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                 "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                 "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                 "FLOWCHAIN_BASE8453_RPC_URL",
+                                                 "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                 "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                 "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                 "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                 "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                                 "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                 "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                 "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "public-rpc-readiness",
+                      "requirement":  "Public FlowChain RPC has URL, TLS acknowledgement, CORS, rate limit, backup path, and response hygiene.",
+                      "classification":  "blocked-owner-input",
+                      "rawStatus":  "blocked",
+                      "evidence":  "status=blocked; publicRpcReady=False; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                      "command":  "npm run flowchain:public-rpc:check -- -AllowBlocked",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:22:00.3317290+00:00",
+                      "ageSeconds":  1961,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                   ],
+                      "ownerInputBlockers":  [
+                                                 "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                 "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                 "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                 "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                 "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "public-rpc-validation",
+                      "requirement":  "Public RPC validation harness is present and fail-closed before endpoint sharing.",
+                      "classification":  "passed",
+                      "rawStatus":  "passed",
+                      "evidence":  "status=passed; publicRpcReady=False",
+                      "command":  "npm run flowchain:public-rpc:validate",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T04:57:34.0258481+00:00",
+                      "ageSeconds":  3427,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+
+                                   ],
+                      "ownerInputBlockers":  [
+
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "public-rpc-deployment-bundle",
+                      "requirement":  "No-secret public RPC deployment bundle exists for HTTPS reverse proxying, verification, and rollback.",
+                      "classification":  "passed",
+                      "rawStatus":  "passed",
+                      "evidence":  "status=passed",
+                      "command":  "npm run flowchain:public-rpc:deployment-bundle",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:41:05.1425693+00:00",
+                      "ageSeconds":  816,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+
+                                   ],
+                      "ownerInputBlockers":  [
+
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "backup-readiness",
+                      "requirement":  "Configured production backup path can create and restore manifest-backed state snapshots.",
+                      "classification":  "blocked-owner-input",
+                      "rawStatus":  "blocked",
+                      "evidence":  "status=blocked; snapshotProofStatus=not-run; restoreProofStatus=not-run; blockers=FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                      "command":  "npm run flowchain:backup:check -- -AllowBlocked",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:22:36.9922951+00:00",
+                      "ageSeconds":  1924,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                   ],
+                      "ownerInputBlockers":  [
+                                                 "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "backup-restore-validation",
+                      "requirement":  "Local backup/restore rehearsal round-trips state and detects corrupt snapshots.",
+                      "classification":  "passed",
+                      "rawStatus":  "passed",
+                      "evidence":  "status=passed",
+                      "command":  "npm run flowchain:backup:restore:validate",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:29:37.6426210+00:00",
+                      "ageSeconds":  1504,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+
+                                   ],
+                      "ownerInputBlockers":  [
+
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "bridge-live-readiness",
+                      "requirement":  "Base 8453 live bridge pilot has required owner inputs, caps, confirmations, and operator acknowledgement.",
+                      "classification":  "blocked-owner-input",
+                      "rawStatus":  "blocked",
+                      "evidence":  "status=blocked; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_BASE8453_TO_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS",
+                      "command":  "npm run flowchain:bridge:live:check -- -AllowBlocked",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:22:38.3726485+00:00",
+                      "ageSeconds":  1923,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                   ],
+                      "ownerInputBlockers":  [
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                 "FLOWCHAIN_BASE8453_RPC_URL",
+                                                 "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                 "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                 "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                 "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                 "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                                 "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                 "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                 "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "bridge-infra-readiness",
+                      "requirement":  "Bridge infrastructure readiness is safe for external funded testing.",
+                      "classification":  "blocked-owner-input",
+                      "rawStatus":  "blocked",
+                      "evidence":  "status=blocked; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_BASE8453_TO_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS",
+                      "command":  "npm run flowchain:bridge:infra:check -- -AllowBlocked",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:22:39.7887947+00:00",
+                      "ageSeconds":  1921,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                   ],
+                      "ownerInputBlockers":  [
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                 "FLOWCHAIN_BASE8453_RPC_URL",
+                                                 "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                 "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                 "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                 "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                 "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                                 "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                 "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                 "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "external-tester-readiness",
+                      "requirement":  "External tester flow remains blocked until public RPC, backup, bridge, and local tester evidence pass.",
+                      "classification":  "blocked-owner-input",
+                      "rawStatus":  "blocked",
+                      "evidence":  "status=blocked; latestHeight=30727; externalSharingReady=False; localTesterRehearsalReady=True; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_BASE8453_TO_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS",
+                      "command":  "npm run flowchain:tester:readiness -- -AllowBlocked",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:03:06.2742039+00:00",
+                      "ageSeconds":  3095,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                   ],
+                      "ownerInputBlockers":  [
+                                                 "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                 "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                 "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                 "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                 "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                 "FLOWCHAIN_BASE8453_RPC_URL",
+                                                 "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                 "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                 "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                 "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                 "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                                 "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                 "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                 "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "external-tester-packet",
+                      "requirement":  "Friends-and-family tester packet is shareable only after all public gates pass.",
+                      "classification":  "blocked-owner-input",
+                      "rawStatus":  "blocked",
+                      "evidence":  "status=blocked; latestHeight=30727; packetShareable=False; externalSharingReady=False; localTesterRehearsalReady=True; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_BASE8453_TO_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS",
+                      "command":  "npm run flowchain:external-tester:packet -- -AllowBlocked",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:03:07.9302059+00:00",
+                      "ageSeconds":  3093,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                   ],
+                      "ownerInputBlockers":  [
+                                                 "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                 "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                 "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                 "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                 "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                 "FLOWCHAIN_BASE8453_RPC_URL",
+                                                 "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                 "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                 "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                 "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                 "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                                 "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                 "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                 "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "ops-snapshot",
+                      "requirement":  "Ops snapshot distinguishes critical incidents from expected owner-input blockers and gives incident commands.",
+                      "classification":  "blocked-owner-input",
+                      "rawStatus":  "blocked",
+                      "evidence":  "status=blocked; latestHeight=31145; finalizedHeight=31145",
+                      "command":  "npm run flowchain:ops:snapshot -- -AllowBlocked",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:36:14.4745825+00:00",
+                      "ageSeconds":  1107,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+
+                                   ],
+                      "ownerInputBlockers":  [
+
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "public-deployment-contract",
+                      "requirement":  "Public deployment contract is ready before endpoint exposure or tester packet sharing.",
+                      "classification":  "blocked-owner-input",
+                      "rawStatus":  "blocked",
+                      "evidence":  "status=blocked; deploymentReady=False; packetShareable=False; blockedOnlyOnKnownExternalOwnerInputs=True; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_BASE8453_TO_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS",
+                      "command":  "npm run flowchain:public-deployment:contract -- -AllowBlocked",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:40:03.4894237+00:00",
+                      "ageSeconds":  878,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                   ],
+                      "ownerInputBlockers":  [
+                                                 "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                 "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                 "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                 "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                 "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                 "FLOWCHAIN_BASE8453_RPC_URL",
+                                                 "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                 "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                 "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                 "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                 "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                                 "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                 "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                 "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "architecture-audit",
+                      "requirement":  "System architecture audit covers local runtime, public RPC, backup, bridge, tester, and no-secret gates.",
+                      "classification":  "blocked-owner-input",
+                      "rawStatus":  "blocked",
+                      "evidence":  "status=blocked; blockedOnlyOnKnownExternalOwnerInputs=True; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_BASE8453_TO_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                      "command":  "npm run flowchain:architecture:audit -- -AllowBlocked",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:40:03.6154266+00:00",
+                      "ageSeconds":  878,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                   ],
+                      "ownerInputBlockers":  [
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                 "FLOWCHAIN_BASE8453_RPC_URL",
+                                                 "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                 "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                 "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                 "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                 "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                                 "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                 "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                 "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                                 "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                 "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                 "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                 "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                 "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "completion-audit",
+                      "requirement":  "Completion audit is fresh and is the release gate for claiming production readiness.",
+                      "classification":  "stale",
+                      "rawStatus":  "blocked",
+                      "evidence":  "status=blocked; latestHeight=25272; completionReady=False; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_BASE8453_TO_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                      "command":  "npm run flowchain:completion:audit -- -AllowBlocked",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T00:43:28.0428635+00:00",
+                      "ageSeconds":  18673,
+                      "staleReasons":  [
+                                           "older-than-backup-restore-validation",
+                                           "older-than-ops-snapshot",
+                                           "older-than-public-rpc-deployment-bundle",
+                                           "older-than-public-deployment-contract"
+                                       ],
+                      "blockers":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                   ],
+                      "ownerInputBlockers":  [
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                 "FLOWCHAIN_BASE8453_RPC_URL",
+                                                 "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                 "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                 "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                 "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                 "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                                 "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                 "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                 "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                                 "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                 "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                 "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                 "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                 "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                             ],
+                      "productionGate":  true
+                  },
+                  {
+                      "id":  "no-secret-scan",
+                      "requirement":  "Generated reports, docs, and packets contain no secrets or owner-provided values.",
+                      "classification":  "passed",
+                      "rawStatus":  "passed",
+                      "evidence":  "status=passed",
+                      "command":  "npm run flowchain:no-secret:scan",
+                      "reportPath":  "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json",
+                      "reportExists":  true,
+                      "generatedAt":  "2026-05-16T05:22:41.1456636+00:00",
+                      "ageSeconds":  1920,
+                      "staleReasons":  [
+
+                                       ],
+                      "blockers":  [
+
+                                   ],
+                      "ownerInputBlockers":  [
+
+                                             ],
+                      "productionGate":  true
+                  }
+              ]
+}

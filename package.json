@@ -74,6 +74,7 @@
     "flowchain:architecture:audit": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-architecture-audit.ps1",
     "flowchain:public-deployment:contract": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-deployment-contract.ps1",
     "flowchain:completion:audit": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-completion-audit.ps1",
+    "flowchain:truth-table": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-production-truth-table.ps1",
     "flowchain:l1-e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-full-smoke.ps1",
     "flowchain:l1:e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-full-smoke.ps1",
     "flowchain:production-l1:e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-production-l1-e2e.ps1",
