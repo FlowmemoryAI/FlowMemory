@@ -1,16 +1,16 @@
 {
     "schema":  "flowchain.live_infra_check_report.v0",
-    "generatedAt":  "2026-05-16T11:35:47.9850542Z",
+    "generatedAt":  "2026-05-16T13:41:35.1359870Z",
     "status":  "blocked",
     "repoPath":  "E:/FlowMemory/flowmemory-live-infra-rpc",
     "git":  {
                 "branch":  "agent/live-product-infra-rpc",
-                "commit":  "9673e933c8f4ad37715363aee8845433349a2fcb"
+                "commit":  "931a39a196b3ea88f6909f5664334346c75dad82"
             },
     "readiness":  {
                       "ownerInputsReady":  false,
                       "publicRpcReady":  false,
-                      "servicesReady":  false,
+                      "servicesReady":  true,
                       "backupReady":  false,
                       "bridgeReady":  false,
                       "noSecretReady":  true
@@ -18,7 +18,7 @@
     "reportStatuses":  {
                            "ownerInputs":  "blocked",
                            "publicRpc":  "blocked",
-                           "services":  "blocked",
+                           "services":  "passed",
                            "backup":  "blocked",
                            "bridgeLive":  "blocked",
                            "bridgeInfra":  "blocked",
@@ -51,10 +51,10 @@
 
                              ],
     "missingProcessNames":  [
-                                "devnet/local/node/flowchain-node.pid"
+
                             ],
     "blockedProcessNames":  [
-                                "devnet/local/node/flowchain-node.pid"
+
                             ],
     "commandList":  [
                         "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-inputs.ps1 -AllowBlocked",
@@ -87,7 +87,7 @@
                   {
                       "name":  "Service process status",
                       "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-status.ps1 -AllowBlocked",
-                      "status":  "blocked",
+                      "status":  "passed",
                       "exitCode":  0,
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Service-process-status.log",
                       "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",

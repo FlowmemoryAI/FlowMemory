@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_readiness_report.v0",
-    "generatedAt":  "2026-05-16T10:58:35.1765620Z",
+    "generatedAt":  "2026-05-16T13:40:46.8333811Z",
     "status":  "blocked",
     "publicRpcReady":  false,
     "publicMode":  false,
@@ -42,8 +42,24 @@
                    "backupPathExists":  false,
                    "backupPathWritable":  false,
                    "stateFileReadable":  true,
-                   "responseHygienePassed":  true
+                   "responseHygienePassed":  true,
+                   "readinessDeploymentFlagsConsistent":  true,
+                   "discoveryMatchesReadinessDeployment":  true
                },
+    "deploymentChecks":  {
+                             "readinessEndpointPresent":  false,
+                             "readinessStatusReady":  null,
+                             "readinessPublicRpcReady":  null,
+                             "readinessProductionReady":  null,
+                             "readinessLocalOnlyFalse":  null,
+                             "readinessDeploymentModePublicEdge":  null,
+                             "discoverEndpointPresent":  false,
+                             "discoverPublicRpcReadyMatchesReadiness":  null,
+                             "discoverProductionReadyMatchesReadiness":  null,
+                             "discoverLocalOnlyMatchesReadiness":  null,
+                             "discoverDeploymentModeMatchesReadiness":  null,
+                             "publicReadyMethodCountNonzeroWhenReady":  null
+                         },
     "endpointChecks":  [
 
                        ],
@@ -58,13 +74,13 @@
     "localState":  {
                        "statePath":  "devnet/local/state.json",
                        "chainId":  "flowmemory-local-devnet-v0",
-                       "latestHeight":  "35514",
-                       "latestHash":  "0x9e462af41c084d172cbf53738601519e27533ac9078c4a0f1d18f8bc2d12f745",
-                       "latestRoot":  "0x4a4c440c9b92fb0f6f713b2286697c0f7a66dc635e95d280c91e4f9309b419a8",
-                       "latestBlockAgeSeconds":  2,
-                       "stateFileLastWriteAgeSeconds":  2,
-                       "finalizedHeight":  "35514",
-                       "finalizedHash":  "0x9e462af41c084d172cbf53738601519e27533ac9078c4a0f1d18f8bc2d12f745",
+                       "latestHeight":  "37662",
+                       "latestHash":  "0x08729a3efd8c41852ff0d6e5c2892d44d39e6efeb3fef638dde9a600131d03f4",
+                       "latestRoot":  "0x794b020b793262b13d2b1a8d2a2778e0ed5f4f7546b8cc631b85ae65df503913",
+                       "latestBlockAgeSeconds":  3,
+                       "stateFileLastWriteAgeSeconds":  3,
+                       "finalizedHeight":  "37662",
+                       "finalizedHash":  "0x08729a3efd8c41852ff0d6e5c2892d44d39e6efeb3fef638dde9a600131d03f4",
                        "mempoolDepth":  0,
                        "peerCount":  null
                    },

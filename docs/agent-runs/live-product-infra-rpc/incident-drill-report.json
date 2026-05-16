@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.incident_drill_report.v0",
-    "generatedAt":  "2026-05-16T11:00:34.6015594Z",
+    "generatedAt":  "2026-05-16T13:42:48.2136015Z",
     "status":  "passed",
     "incidentDrillReady":  true,
     "validationScope":  "synthetic-ops-snapshot-incidents-plus-live-postcheck",
@@ -40,7 +40,7 @@
                                     "exitCode":  0,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: blocked",
-                                                       "Latest height: 35521",
+                                                       "Latest height: 37668",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\OPS_SNAPSHOT.md",
                                                        "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, external-tester-not-shareable, deployment-contract-not-ready"
@@ -71,7 +71,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 35521",
+                                                       "Latest height: 37668",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\node-down-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\node-down-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: service-status-not-passed, node-not-running",
@@ -105,7 +105,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 35521",
+                                                       "Latest height: 37668",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: service-status-not-passed, control-plane-not-running",
@@ -138,7 +138,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 35521",
+                                                       "Latest height: 37668",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: state-stale",
@@ -170,7 +170,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 35521",
+                                                       "Latest height: 37668",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\height-not-advancing-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\height-not-advancing-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: height-not-advancing",
@@ -202,7 +202,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 35521",
+                                                       "Latest height: 37668",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: no-secret-scan-not-passed",
@@ -265,11 +265,11 @@
                                     "exitCode":  0,
                                     "outputTail":  [
                                                        "FlowChain service status: passed",
-                                                       "Node: running PID=23832",
-                                                       "Control plane: running PID=25292 bind=127.0.0.1:8787",
+                                                       "Node: running PID=48568",
+                                                       "Control plane: running PID=25276 bind=127.0.0.1:8787",
                                                        "Public readiness: blocked",
-                                                       "Latest height: 35545",
-                                                       "Finalized height: 35545",
+                                                       "Latest height: 37691",
+                                                       "Finalized height: 37691",
                                                        "Backup path: not-configured",
                                                        "Bridge readiness: live=blocked, infra=blocked",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\post-drill-service-status-report.json"
@@ -287,33 +287,33 @@
                             "readable":  true,
                             "statePathConfigured":  true,
                             "chainId":  "flowmemory-local-devnet-v0",
-                            "latestHeight":  "35535",
-                            "latestHash":  "0x18af1d774871e68ebee544f2da6e460e9c55a112dab97b8577cb27d8eeea225c",
-                            "latestRoot":  "0x4a4c440c9b92fb0f6f713b2286697c0f7a66dc635e95d280c91e4f9309b419a8",
-                            "latestBlockTimestamp":  "1778723534",
-                            "latestBlockAgeSeconds":  3,
-                            "stateFileLastWriteAgeSeconds":  3,
-                            "finalizedHeight":  "35535",
-                            "finalizedHash":  "0x18af1d774871e68ebee544f2da6e460e9c55a112dab97b8577cb27d8eeea225c",
+                            "latestHeight":  "37682",
+                            "latestHash":  "0x761a0247661f0a0afa8565d053e0ef428b2004585da222d857b5ef7c71ce7662",
+                            "latestRoot":  "0x794b020b793262b13d2b1a8d2a2778e0ed5f4f7546b8cc631b85ae65df503913",
+                            "latestBlockTimestamp":  "1778725681",
+                            "latestBlockAgeSeconds":  2,
+                            "stateFileLastWriteAgeSeconds":  2,
+                            "finalizedHeight":  "37682",
+                            "finalizedHash":  "0x761a0247661f0a0afa8565d053e0ef428b2004585da222d857b5ef7c71ce7662",
                             "mempoolDepth":  0,
                             "peerCount":  null,
-                            "blockCount":  35535
+                            "blockCount":  37682
                         },
     "liveStateAfter":  {
                            "readable":  true,
                            "statePathConfigured":  true,
                            "chainId":  "flowmemory-local-devnet-v0",
-                           "latestHeight":  "35551",
-                           "latestHash":  "0x33f79d034c3f31d7d3663ecb567a54969081f0ad1ecf1914f73cc61b5785d2f3",
-                           "latestRoot":  "0x4a4c440c9b92fb0f6f713b2286697c0f7a66dc635e95d280c91e4f9309b419a8",
-                           "latestBlockTimestamp":  "1778723550",
+                           "latestHeight":  "37697",
+                           "latestHash":  "0x90d014883a48cccd8d3b672963104ceb490d28495ffb140c1c898c523eb8d48c",
+                           "latestRoot":  "0x794b020b793262b13d2b1a8d2a2778e0ed5f4f7546b8cc631b85ae65df503913",
+                           "latestBlockTimestamp":  "1778725696",
                            "latestBlockAgeSeconds":  2,
                            "stateFileLastWriteAgeSeconds":  2,
-                           "finalizedHeight":  "35551",
-                           "finalizedHash":  "0x33f79d034c3f31d7d3663ecb567a54969081f0ad1ecf1914f73cc61b5785d2f3",
+                           "finalizedHeight":  "37697",
+                           "finalizedHash":  "0x90d014883a48cccd8d3b672963104ceb490d28495ffb140c1c898c523eb8d48c",
                            "mempoolDepth":  0,
                            "peerCount":  null,
-                           "blockCount":  35551
+                           "blockCount":  37697
                        },
     "reportPaths":  {
                         "report":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drill-report.json",

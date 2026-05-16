@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.live_product_e2e_report.v0",
-    "generatedAt":  "2026-05-16T11:35:48.3230639Z",
+    "generatedAt":  "2026-05-16T13:17:01.2286857Z",
     "status":  "blocked",
     "productionLocalAggregateStatus":  "passed-with-live-blockers",
     "liveInfraStatus":  "blocked",
@@ -24,8 +24,8 @@
                       "status":  "passed",
                       "childReportStatus":  "stopped",
                       "exitCode":  0,
-                      "startedAt":  "2026-05-16T11:15:58.8275074Z",
-                      "endedAt":  "2026-05-16T11:16:05.1312825Z",
+                      "startedAt":  "2026-05-16T12:57:25.1439256Z",
+                      "endedAt":  "2026-05-16T12:57:31.7363205Z",
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Stop-live-service-before-aggregate.log",
                       "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-stop-report.json"
                   },
@@ -35,8 +35,8 @@
                       "status":  "blocked",
                       "childReportStatus":  "passed-with-live-blockers",
                       "exitCode":  0,
-                      "startedAt":  "2026-05-16T11:16:05.2562881Z",
-                      "endedAt":  "2026-05-16T11:29:39.6754752Z",
+                      "startedAt":  "2026-05-16T12:57:31.8793228Z",
+                      "endedAt":  "2026-05-16T13:11:16.8646057Z",
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Production-shaped-local-L1-aggregate.log",
                       "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\production-l1-e2e\\flowchain-production-l1-e2e-report.json"
                   },
@@ -46,8 +46,8 @@
                       "status":  "passed",
                       "childReportStatus":  "passed",
                       "exitCode":  0,
-                      "startedAt":  "2026-05-16T11:29:39.7041682Z",
-                      "endedAt":  "2026-05-16T11:29:39.7484351Z",
+                      "startedAt":  "2026-05-16T13:11:16.9106061Z",
+                      "endedAt":  "2026-05-16T13:11:17.0352877Z",
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Restore-live-service-profile.log",
                       "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-restart-report.json"
                   },
@@ -57,8 +57,8 @@
                       "status":  "passed",
                       "childReportStatus":  "passed",
                       "exitCode":  0,
-                      "startedAt":  "2026-05-16T11:30:48.1362587Z",
-                      "endedAt":  "2026-05-16T11:31:12.8496198Z",
+                      "startedAt":  "2026-05-16T13:12:21.5825479Z",
+                      "endedAt":  "2026-05-16T13:12:44.1590609Z",
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Verify-live-service-profile-attempt-3.log",
                       "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json"
                   },
@@ -67,9 +67,9 @@
                       "command":  "cmd.exe /d /s /c npm.cmd run flowchain:wallet:live-service:e2e",
                       "status":  "passed",
                       "childReportStatus":  "passed",
-                      "exitCode":  1,
-                      "startedAt":  "2026-05-16T11:31:12.8556212Z",
-                      "endedAt":  "2026-05-16T11:32:52.3156615Z",
+                      "exitCode":  0,
+                      "startedAt":  "2026-05-16T13:12:44.1650600Z",
+                      "endedAt":  "2026-05-16T13:14:07.8077172Z",
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Live-service-wallet-transfer-E2E.log",
                       "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-wallet-e2e-report.json"
                   },
@@ -78,9 +78,9 @@
                       "command":  "cmd.exe /d /s /c npm.cmd run flowchain:wallet:live-tester:e2e",
                       "status":  "passed",
                       "childReportStatus":  "passed",
-                      "exitCode":  1,
-                      "startedAt":  "2026-05-16T11:32:52.3196603Z",
-                      "endedAt":  "2026-05-16T11:34:41.7462443Z",
+                      "exitCode":  0,
+                      "startedAt":  "2026-05-16T13:14:07.8117127Z",
+                      "endedAt":  "2026-05-16T13:15:44.9172416Z",
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Live-service-tester-network-E2E.log",
                       "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json"
                   },
@@ -90,8 +90,8 @@
                       "status":  "blocked",
                       "childReportStatus":  "blocked",
                       "exitCode":  0,
-                      "startedAt":  "2026-05-16T11:34:41.7502483Z",
-                      "endedAt":  "2026-05-16T11:35:48.2720614Z",
+                      "startedAt":  "2026-05-16T13:15:44.9212417Z",
+                      "endedAt":  "2026-05-16T13:17:01.1786866Z",
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Live-infrastructure-readiness.log",
                       "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-infra-check-report.json"
                   }

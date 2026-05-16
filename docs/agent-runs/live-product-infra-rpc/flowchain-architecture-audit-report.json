@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-16T11:43:21.7966045Z",
+    "generatedAt":  "2026-05-16T13:42:53.5779585Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -27,7 +27,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=36082, finalizedHeight=36082",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=37668, finalizedHeight=37668",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",

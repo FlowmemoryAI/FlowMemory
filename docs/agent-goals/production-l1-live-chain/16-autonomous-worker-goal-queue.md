@@ -11,9 +11,16 @@ Last aligned to local evidence from:
 - `docs/agent-runs/live-product-infra-rpc/OPS_SNAPSHOT.md`
 - `docs/agent-runs/live-product-infra-rpc/COMPLETION_AUDIT.md`
 - `docs/agent-goals/production-l1-live-chain/README.md`
+- `docs/agent-goals/production-l1-live-chain/17-developer-ecosystem-dev-pack.md`
 
 Do not treat this document as proof that the chain is complete. It is the work
 queue for getting there.
+
+The developer ecosystem benchmark and the expanded dev-pack worker prompt live
+in `17-developer-ecosystem-dev-pack.md`. Use that prompt when the next loop is
+about SDKs, CLI/devkit, generated RPC references, examples, node operator docs,
+wallet integration docs, bridge integration docs, explorer/indexer visibility,
+faucet/tester funds, troubleshooting, and release compatibility.
 
 ## Current Truth
 
@@ -1207,6 +1214,8 @@ urgent:
 10. Security/load/fuzz audit.
 11. Release installer and upgrade rehearsal.
 12. SDK and CLI developer tooling.
+13. Full developer ecosystem dev pack from
+    `17-developer-ecosystem-dev-pack.md`.
 
 Hard safety rules:
 - Do not broadcast transactions on Base 8453 unless owner env values exist and
