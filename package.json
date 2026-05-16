@@ -82,6 +82,7 @@
     "flowchain:public-rpc:edge-template": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-edge-template.ps1",
     "flowchain:public-rpc:deployment-bundle": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-bundle.ps1",
     "flowchain:public-rpc:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-validation.ps1",
+    "flowchain:public-rpc:abuse-test": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-abuse-test.ps1",
     "flowchain:backup:create": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-state-backup.ps1",
     "flowchain:backup:restore:verify": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-state-restore-verify.ps1",
     "flowchain:backup:restore:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-backup-restore-validation.ps1",

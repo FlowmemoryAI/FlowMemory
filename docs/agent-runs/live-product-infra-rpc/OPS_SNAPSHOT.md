@@ -1,9 +1,9 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-16T08:07:24.3953958Z
+Generated: 2026-05-16T08:59:58.4612227Z
 Status: blocked
-Latest height: 32963
-Finalized height: 32963
+Latest height: 33750
+Finalized height: 33750
 
 ## Findings
 
@@ -31,6 +31,7 @@ Finalized height: 32963
 
 ### publicExposure
 - npm run flowchain:public-rpc:check
+- npm run flowchain:public-rpc:abuse-test
 - npm run flowchain:external-tester:packet
 
 ### emergency

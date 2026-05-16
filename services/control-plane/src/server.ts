@@ -20,7 +20,22 @@ const jsonHeaders = {
   "content-type": "application/json",
 };
 const RATE_LIMIT_WINDOW_MS = 60_000;
+const MAX_REQUEST_BODY_BYTES = 256 * 1024;
+const MAX_JSON_RPC_BATCH_REQUESTS = 50;
 const rateLimitBuckets = new Map<string, { windowStartedAtMs: number; count: number }>();
+
+class HttpRequestError extends Error {
+  readonly statusCode: number;
+  readonly schema: string;
+  readonly reasonCode: string;
+
+  constructor(statusCode: number, schema: string, reasonCode: string, message: string) {
+    super(message);
+    this.statusCode = statusCode;
+    this.schema = schema;
+    this.reasonCode = reasonCode;
+  }
+}
 
 function jsonResult(response: ReturnType<typeof dispatchJsonRpc>): unknown {
   return Array.isArray(response) ? response : response?.result ?? response;
@@ -29,6 +44,73 @@ function jsonResult(response: ReturnType<typeof dispatchJsonRpc>): unknown {
 function writeJson(res: ServerResponse, statusCode: number, body: unknown): void {
   res.writeHead(statusCode, jsonHeaders);
   res.end(`${JSON.stringify(body)}\n`);
+}
+
+function writeRequestError(res: ServerResponse, error: unknown, fallbackMessage: string): void {
+  if (error instanceof HttpRequestError) {
+    writeJson(res, error.statusCode, {
+      schema: error.schema,
+      message: error.message,
+      reasonCode: error.reasonCode,
+      localOnly: true,
+      envValuesPrinted: false,
+      noSecrets: true,
+    });
+    return;
+  }
+
+  writeJson(res, 400, {
+    schema: "flowmemory.control_plane.request_error.v0",
+    message: error instanceof Error ? error.message : fallbackMessage,
+    reasonCode: "request.read_error",
+    localOnly: true,
+    envValuesPrinted: false,
+    noSecrets: true,
+  });
+}
+
+function jsonRpcHttpError(code: number, message: string, reasonCode: string, data: JsonObject = {}): JsonObject {
+  return {
+    jsonrpc: "2.0",
+    id: null,
+    error: {
+      code,
+      message,
+      data: {
+        schema: "flowmemory.control_plane.error.v0",
+        reasonCode,
+        localOnly: true,
+        envValuesPrinted: false,
+        noSecrets: true,
+        ...data,
+      },
+    },
+  };
+}
+
+function isJsonContentType(req: IncomingMessage): boolean {
+  const raw = req.headers["content-type"];
+  const contentType = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof contentType !== "string") {
+    return false;
+  }
+  const mediaType = contentType.split(";")[0]?.trim().toLowerCase();
+  return mediaType === "application/json" || (mediaType?.endsWith("+json") ?? false);
+}
+
+function requireJsonContentType(req: IncomingMessage, res: ServerResponse): boolean {
+  if (isJsonContentType(req)) {
+    return true;
+  }
+  writeJson(res, 415, {
+    schema: "flowmemory.control_plane.unsupported_media_type.v0",
+    message: "POST requests must use application/json",
+    reasonCode: "request.unsupported_media_type",
+    localOnly: true,
+    envValuesPrinted: false,
+    noSecrets: true,
+  });
+  return false;
 }
 
 function configuredAllowedOrigins(): string[] {
@@ -101,16 +183,65 @@ function applyRateLimit(req: IncomingMessage, res: ServerResponse): boolean {
   return true;
 }
 
-function readRequestBody(req: IncomingMessage): Promise<string> {
+function readRequestBody(req: IncomingMessage, maxBytes = MAX_REQUEST_BODY_BYTES): Promise<string> {
   return new Promise((resolve, reject) => {
     let body = "";
+    let receivedBytes = 0;
+    let exceededLimit = false;
+    const declaredLength = req.headers["content-length"];
+    const contentLength = Array.isArray(declaredLength) ? declaredLength[0] : declaredLength;
+    if (typeof contentLength === "string" && /^\d+$/.test(contentLength) && Number(contentLength) > maxBytes) {
+      exceededLimit = true;
+    }
     req.setEncoding("utf8");
     req.on("data", (chunk) => {
-      body += chunk;
+      receivedBytes += Buffer.byteLength(chunk, "utf8");
+      if (receivedBytes > maxBytes) {
+        exceededLimit = true;
+        return;
+      }
+      if (!exceededLimit) {
+        body += chunk;
+      }
     });
     req.on("error", reject);
-    req.on("end", () => resolve(body));
+    req.on("end", () => {
+      if (exceededLimit) {
+        reject(new HttpRequestError(
+          413,
+          "flowmemory.control_plane.payload_too_large.v0",
+          "request.payload_too_large",
+          `request body exceeded ${maxBytes} bytes`,
+        ));
+        return;
+      }
+      resolve(body);
+    });
   });
+}
+
+function validateJsonRpcHttpPayload(payload: unknown, res: ServerResponse): boolean {
+  if (!Array.isArray(payload)) {
+    return true;
+  }
+  if (payload.length === 0) {
+    writeJson(res, 400, jsonRpcHttpError(
+      -32600,
+      "JSON-RPC batch request must not be empty",
+      "request.batch_empty",
+    ));
+    return false;
+  }
+  if (payload.length > MAX_JSON_RPC_BATCH_REQUESTS) {
+    writeJson(res, 413, jsonRpcHttpError(
+      -32000,
+      `JSON-RPC batch request exceeds ${MAX_JSON_RPC_BATCH_REQUESTS} entries`,
+      "request.batch_too_large",
+      { maxBatchRequests: MAX_JSON_RPC_BATCH_REQUESTS },
+    ));
+    return false;
+  }
+  return true;
 }
 
 function publicWalletResult(state: ReturnType<typeof loadControlPlaneState>): JsonObject {
@@ -431,12 +562,19 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
     }
 
     if (req.method === "POST" && requestUrl?.pathname === "/wallets/create") {
+      if (!requireJsonContentType(req, res)) {
+        return;
+      }
       readRequestBody(req)
         .then((body) => {
           const payload = body.length > 0 ? JSON.parse(body) as unknown : {};
           writeJson(res, 200, createLocalWallet(state, payload));
         })
         .catch((error) => {
+          if (error instanceof HttpRequestError) {
+            writeRequestError(res, error, "wallet creation failed");
+            return;
+          }
           writeJson(res, 400, {
             schema: "flowmemory.control_plane.local_wallet_create_error.v0",
             message: error instanceof Error ? error.message : "wallet creation failed",
@@ -448,12 +586,19 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
     }
 
     if (req.method === "POST" && requestUrl?.pathname === "/wallets/send") {
+      if (!requireJsonContentType(req, res)) {
+        return;
+      }
       readRequestBody(req)
         .then((body) => {
           const payload = body.length > 0 ? JSON.parse(body) as unknown : {};
           writeJson(res, 200, executeWalletSend(state, payload));
         })
         .catch((error) => {
+          if (error instanceof HttpRequestError) {
+            writeRequestError(res, error, "wallet send failed");
+            return;
+          }
           writeJson(res, 400, {
             schema: "flowmemory.control_plane.wallet_send_error.v0",
             accepted: false,
@@ -476,9 +621,16 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
       return;
     }
 
+    if (!requireJsonContentType(req, res)) {
+      return;
+    }
+
     readRequestBody(req).then((body) => {
       try {
         const payload = JSON.parse(body) as unknown;
+        if (req.url === "/rpc" && !validateJsonRpcHttpPayload(payload, res)) {
+          return;
+        }
         const rpcPayload = req.url === "/bridge/observations"
           ? { jsonrpc: "2.0", id: "bridge-observation-submit", method: "bridge_observation_submit", params: { observation: payload } }
           : payload;
@@ -490,34 +642,22 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
         }
         writeJson(res, 200, response);
       } catch (error) {
-        writeJson(res, 400, {
-          jsonrpc: "2.0",
-          id: null,
-          error: {
-            code: -32700,
-            message: error instanceof Error ? error.message : "parse error",
-            data: {
-              schema: "flowmemory.control_plane.error.v0",
-              reasonCode: "parse.error",
-              localOnly: true,
-            },
-          },
-        });
+        writeJson(res, 400, jsonRpcHttpError(
+          -32700,
+          error instanceof Error ? error.message : "parse error",
+          "parse.error",
+        ));
       }
     }).catch((error) => {
-      writeJson(res, 400, {
-        jsonrpc: "2.0",
-        id: null,
-        error: {
-          code: -32700,
-          message: error instanceof Error ? error.message : "request read error",
-          data: {
-            schema: "flowmemory.control_plane.error.v0",
-            reasonCode: "request.read_error",
-            localOnly: true,
-          },
-        },
-      });
+      if (error instanceof HttpRequestError) {
+        writeRequestError(res, error, "request read error");
+        return;
+      }
+      writeJson(res, 400, jsonRpcHttpError(
+        -32700,
+        error instanceof Error ? error.message : "request read error",
+        "request.read_error",
+      ));
     });
   });
 

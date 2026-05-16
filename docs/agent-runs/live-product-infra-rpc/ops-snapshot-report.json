@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-16T08:07:24.3953958Z",
+    "generatedAt":  "2026-05-16T08:59:58.4612227Z",
     "status":  "blocked",
     "refresh":  {
                     "performed":  false,
@@ -9,9 +9,9 @@
                               ]
                 },
     "chain":  {
-                  "latestHeight":  "32963",
-                  "finalizedHeight":  "32963",
-                  "stateFileLastWriteAgeSeconds":  3,
+                  "latestHeight":  "33750",
+                  "finalizedHeight":  "33750",
+                  "stateFileLastWriteAgeSeconds":  1,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true
@@ -34,7 +34,8 @@
                          "message":  "Public RPC is not ready to share.",
                          "commands":  [
                                           "npm run flowchain:public-rpc:check",
-                                          "npm run flowchain:public-rpc:validate"
+                                          "npm run flowchain:public-rpc:validate",
+                                          "npm run flowchain:public-rpc:abuse-test"
                                       ]
                      },
                      {
@@ -93,6 +94,7 @@
                                                 ],
                              "publicExposure":  [
                                                     "npm run flowchain:public-rpc:check",
+                                                    "npm run flowchain:public-rpc:abuse-test",
                                                     "npm run flowchain:external-tester:packet"
                                                 ],
                              "emergency":  [

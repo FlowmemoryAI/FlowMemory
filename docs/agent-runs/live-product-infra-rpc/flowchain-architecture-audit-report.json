@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-16T08:07:28.3494382Z",
+    "generatedAt":  "2026-05-16T09:00:02.1398440Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -27,7 +27,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=32963, finalizedHeight=32963",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=33750, finalizedHeight=33750",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -68,17 +68,19 @@
                   {
                       "id":  "rpc-api-boundary",
                       "layer":  "RPC/API",
-                      "requirement":  "The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation before it can be exposed publicly.",
+                      "requirement":  "The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation and abuse rejection before it can be exposed publicly.",
                       "status":  "passed",
-                      "evidence":  "validationStatus=passed, corsAllowed=True, corsRejected=True, endpointChecks=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True",
+                      "evidence":  "validationStatus=passed, corsAllowed=True, corsRejected=True, endpointChecks=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True, abuseStatus=passed, abusePassed=True, abuseMissingChecks=0",
                       "files":  [
                                     "services/control-plane/src/server.ts",
                                     "services/control-plane/src/methods.ts",
                                     "infra/scripts/flowchain-public-rpc-readiness.ps1",
-                                    "infra/scripts/flowchain-public-rpc-validation.ps1"
+                                    "infra/scripts/flowchain-public-rpc-validation.ps1",
+                                    "infra/scripts/flowchain-public-rpc-abuse-test.ps1"
                                 ],
                       "commands":  [
-                                       "npm run flowchain:public-rpc:validate"
+                                       "npm run flowchain:public-rpc:validate",
+                                       "npm run flowchain:public-rpc:abuse-test"
                                    ],
                       "blockers":  [
 
@@ -542,6 +544,7 @@
                         "testerNetwork":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json",
                         "publicRpcReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
                         "publicRpcValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation-report.json",
+                        "publicRpcAbuseTest":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test-report.json",
                         "backupReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
                         "backupRestoreValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-report.json",
                         "bridgeLiveReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",

@@ -1407,6 +1407,105 @@ test("HTTP server enforces configured per-client rate limits without trusting sp
   }
 });
 
+test("HTTP server rejects abusive public RPC POST shapes before dispatch", async () => {
+  const server = startControlPlaneServer({ host: "127.0.0.1", port: 0 });
+
+  try {
+    await once(server, "listening");
+    const address = server.address();
+    assert.equal(typeof address, "object");
+    assert.notEqual(address, null);
+    const baseUrl = `http://127.0.0.1:${address?.port}`;
+    const origin = "http://127.0.0.1:5173";
+
+    const unsupported = await fetch(`${baseUrl}/rpc`, {
+      method: "POST",
+      headers: { "content-type": "text/plain", Origin: origin },
+      body: "not-json",
+    });
+    assert.equal(unsupported.status, 415);
+    const unsupportedBody = await unsupported.json() as JsonObject;
+    assert.equal(unsupportedBody.schema, "flowmemory.control_plane.unsupported_media_type.v0");
+    assert.equal(unsupportedBody.reasonCode, "request.unsupported_media_type");
+    assert.equal(unsupportedBody.noSecrets, true);
+
+    const malformed = await fetch(`${baseUrl}/rpc`, {
+      method: "POST",
+      headers: { "content-type": "application/json", Origin: origin },
+      body: "{",
+    });
+    assert.equal(malformed.status, 400);
+    const malformedBody = await malformed.json() as JsonObject;
+    const malformedError = malformedBody.error as JsonObject;
+    const malformedData = malformedError.data as JsonObject;
+    assert.equal(malformedBody.jsonrpc, "2.0");
+    assert.equal(malformedBody.id, null);
+    assert.equal(malformedError.code, -32700);
+    assert.equal(malformedData.schema, "flowmemory.control_plane.error.v0");
+    assert.equal(malformedData.reasonCode, "parse.error");
+    assert.equal(malformedData.noSecrets, true);
+
+    const emptyBatch = await fetch(`${baseUrl}/rpc`, {
+      method: "POST",
+      headers: { "content-type": "application/json", Origin: origin },
+      body: "[]",
+    });
+    assert.equal(emptyBatch.status, 400);
+    const emptyBatchBody = await emptyBatch.json() as JsonObject;
+    assert.equal(((emptyBatchBody.error as JsonObject).data as JsonObject).reasonCode, "request.batch_empty");
+
+    const oversizedBatchPayload = Array.from({ length: 51 }, (_, index) => ({
+      jsonrpc: "2.0",
+      id: index,
+      method: "health",
+    }));
+    const oversizedBatch = await fetch(`${baseUrl}/rpc`, {
+      method: "POST",
+      headers: { "content-type": "application/json", Origin: origin },
+      body: JSON.stringify(oversizedBatchPayload),
+    });
+    assert.equal(oversizedBatch.status, 413);
+    const oversizedBatchBody = await oversizedBatch.json() as JsonObject;
+    const oversizedBatchData = (oversizedBatchBody.error as JsonObject).data as JsonObject;
+    assert.equal(oversizedBatchData.reasonCode, "request.batch_too_large");
+    assert.equal(oversizedBatchData.maxBatchRequests, 50);
+
+    const oversizedBody = await fetch(`${baseUrl}/rpc`, {
+      method: "POST",
+      headers: { "content-type": "application/json", Origin: origin },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "health",
+        params: { padding: "x".repeat(300_000) },
+      }),
+    });
+    assert.equal(oversizedBody.status, 413);
+    const oversizedBodyJson = await oversizedBody.json() as JsonObject;
+    assert.equal(oversizedBodyJson.schema, "flowmemory.control_plane.payload_too_large.v0");
+    assert.equal(oversizedBodyJson.reasonCode, "request.payload_too_large");
+    assert.equal(oversizedBodyJson.noSecrets, true);
+
+    const notification = await fetch(`${baseUrl}/rpc`, {
+      method: "POST",
+      headers: { "content-type": "application/json", Origin: origin },
+      body: JSON.stringify({ jsonrpc: "2.0", method: "health" }),
+    });
+    assert.equal(notification.status, 204);
+    assert.equal(await notification.text(), "");
+  } finally {
+    await new Promise<void>((resolve, reject) => {
+      server.close((error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve();
+      });
+    });
+  }
+});
+
 test("control-plane cargo target override must stay inside the repository", () => {
   const previousTarget = process.env.FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR;
   process.env.FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR = tmpdir();

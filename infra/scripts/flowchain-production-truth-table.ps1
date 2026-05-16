@@ -107,6 +107,14 @@ $definitions = @(
         ownerInputGate = $false
     },
     [ordered]@{
+        id = "public-rpc-abuse-test"
+        requirement = "Public RPC abuse harness proves CORS rejection, media-type rejection, malformed JSON handling, batch/body caps, notification handling, rate limiting, and no-secret summaries."
+        path = "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
+        command = "npm run flowchain:public-rpc:abuse-test"
+        productionGate = $true
+        ownerInputGate = $false
+    },
+    [ordered]@{
         id = "public-rpc-deployment-bundle"
         requirement = "No-secret public RPC deployment bundle exists for HTTPS reverse proxying, verification, and rollback."
         path = "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"

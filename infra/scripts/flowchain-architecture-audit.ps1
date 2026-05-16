@@ -40,6 +40,7 @@ $reportPaths = [ordered]@{
     testerNetwork = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
     publicRpcReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
+    publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
     backupReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
     bridgeLiveReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
@@ -251,12 +252,14 @@ Add-ArchitectureItem -Items $items -Id "ops-observability-boundary" -Layer "Oper
     -Commands @("npm run flowchain:service:monitor", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:emergency:stop-local")
 
 $publicRpcValidation = $reports.publicRpcValidation
+$publicRpcAbuseTest = $reports.publicRpcAbuseTest
 $publicRpc = $reports.publicRpcReadiness
 $rpcFiles = @(
     "services/control-plane/src/server.ts",
     "services/control-plane/src/methods.ts",
     "infra/scripts/flowchain-public-rpc-readiness.ps1",
-    "infra/scripts/flowchain-public-rpc-validation.ps1"
+    "infra/scripts/flowchain-public-rpc-validation.ps1",
+    "infra/scripts/flowchain-public-rpc-abuse-test.ps1"
 )
 $publicRpcValidationStatus = Get-ArchitectureStatus -Report $publicRpcValidation
 $publicRpcValidationChecks = Get-ArchitectureProp -Object $publicRpcValidation -Name "checks"
@@ -267,8 +270,34 @@ $rateLimitProbe = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name 
 $rateLimitRejected = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name "rateLimitRejected" -Default $false
 $rateLimitRetryAfter = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name "rateLimitRetryAfterHeaderPresent" -Default $false
 $responseHygiene = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name "responseHygienePassed" -Default $false
+$publicRpcAbuseStatus = Get-ArchitectureStatus -Report $publicRpcAbuseTest
+$publicRpcAbuseReady = Get-ArchitectureProp -Object $publicRpcAbuseTest -Name "abuseTestReady" -Default $false
+$publicRpcAbuseChecks = Get-ArchitectureProp -Object $publicRpcAbuseTest -Name "checks"
+$publicRpcAbuseRequiredChecks = @(
+    "serverStarted",
+    "allowedOriginAccepted",
+    "disallowedOriginRejected",
+    "optionsPreflightPassed",
+    "unsupportedMediaTypeRejected",
+    "malformedJsonRejected",
+    "unknownMethodRejected",
+    "badParamsRejected",
+    "emptyBatchRejected",
+    "oversizedBatchRejected",
+    "oversizedBodyRejected",
+    "notificationNoContent",
+    "rateLimitRejected",
+    "responseHygienePassed"
+)
+$publicRpcAbuseMissingChecks = @($publicRpcAbuseRequiredChecks | Where-Object { (Get-ArchitectureProp -Object $publicRpcAbuseChecks -Name $_ -Default $false) -ne $true })
+$publicRpcAbusePassed = $publicRpcAbuseStatus -eq "passed" `
+    -and $publicRpcAbuseReady -eq $true `
+    -and $publicRpcAbuseMissingChecks.Count -eq 0 `
+    -and ((Get-ArchitectureProp -Object $publicRpcAbuseTest -Name "ownerValuesRequired" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $publicRpcAbuseTest -Name "noSecrets" -Default $false) -eq $true)
 $rpcBoundaryReady = (Test-AllRepoFilesExist -Paths $rpcFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:validate") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:abuse-test") `
     -and ($publicRpcValidationStatus -eq "passed") `
     -and ($corsAllowed -eq $true) `
     -and ($corsRejected -eq $true) `
@@ -276,13 +305,14 @@ $rpcBoundaryReady = (Test-AllRepoFilesExist -Paths $rpcFiles) `
     -and ($rateLimitProbe -eq $true) `
     -and ($rateLimitRejected -eq $true) `
     -and ($rateLimitRetryAfter -eq $true) `
-    -and ($responseHygiene -eq $true)
+    -and ($responseHygiene -eq $true) `
+    -and ($publicRpcAbusePassed -eq $true)
 Add-ArchitectureItem -Items $items -Id "rpc-api-boundary" -Layer "RPC/API" `
-    -Requirement "The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation before it can be exposed publicly." `
+    -Requirement "The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation and abuse rejection before it can be exposed publicly." `
     -Status $(if ($rpcBoundaryReady) { "passed" } else { "failed" }) `
-    -Evidence "validationStatus=$publicRpcValidationStatus, corsAllowed=$corsAllowed, corsRejected=$corsRejected, endpointChecks=$endpointChecks, rateLimitProbe=$rateLimitProbe, rateLimitRejected=$rateLimitRejected, rateLimitRetryAfter=$rateLimitRetryAfter, responseHygiene=$responseHygiene" `
+    -Evidence "validationStatus=$publicRpcValidationStatus, corsAllowed=$corsAllowed, corsRejected=$corsRejected, endpointChecks=$endpointChecks, rateLimitProbe=$rateLimitProbe, rateLimitRejected=$rateLimitRejected, rateLimitRetryAfter=$rateLimitRetryAfter, responseHygiene=$responseHygiene, abuseStatus=$publicRpcAbuseStatus, abusePassed=$publicRpcAbusePassed, abuseMissingChecks=$($publicRpcAbuseMissingChecks.Count)" `
     -Files $rpcFiles `
-    -Commands @("npm run flowchain:public-rpc:validate")
+    -Commands @("npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:abuse-test")
 
 $publicRpcStatus = Get-ArchitectureStatus -Report $publicRpc
 $publicRpcReady = Get-ArchitectureProp -Object $publicRpc -Name "publicRpcReady" -Default $false

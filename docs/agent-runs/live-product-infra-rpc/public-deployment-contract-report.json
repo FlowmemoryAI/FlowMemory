@@ -1,15 +1,15 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-16T08:07:26.2294977Z",
+    "generatedAt":  "2026-05-16T09:00:00.1100943Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
-                       "passed":  11,
+                       "passed":  12,
                        "blocked":  5,
                        "failed":  0,
-                       "total":  16
+                       "total":  17
                    },
     "items":  [
                   {
@@ -28,6 +28,7 @@
                                        "npm run flowchain:public-rpc:edge-template",
                                        "npm run flowchain:public-rpc:deployment-bundle",
                                        "npm run flowchain:public-rpc:validate",
+                                       "npm run flowchain:public-rpc:abuse-test",
                                        "npm run flowchain:public-rpc:check -- -AllowBlocked",
                                        "npm run flowchain:backup:restore:validate",
                                        "npm run flowchain:backup:check -- -AllowBlocked",
@@ -93,7 +94,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=32963, finalizedHeight=32963",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=33750, finalizedHeight=33750",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -152,12 +153,25 @@
                                    ]
                   },
                   {
+                      "id":  "public-rpc-abuse-test",
+                      "requirement":  "The local public RPC abuse harness proves CORS rejection, media-type rejection, malformed JSON handling, batch/body caps, notification handling, rate limiting, and no-secret response summaries.",
+                      "status":  "passed",
+                      "evidence":  "abuseStatus=passed, abuseReady=True, missingChecks=0",
+                      "commands":  [
+                                       "npm run flowchain:public-rpc:abuse-test"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "public-rpc-edge",
                       "requirement":  "The owner TLS edge must pass endpoint, CORS, rate-limit, readiness, and response-hygiene checks before sharing.",
                       "status":  "blocked",
-                      "evidence":  "publicRpcStatus=blocked, publicRpcReady=False, validationStatus=passed, validationPassed=True",
+                      "evidence":  "publicRpcStatus=blocked, publicRpcReady=False, validationStatus=passed, validationPassed=True, abuseStatus=passed, abusePassed=True",
                       "commands":  [
                                        "npm run flowchain:public-rpc:validate",
+                                       "npm run flowchain:public-rpc:abuse-test",
                                        "npm run flowchain:public-rpc:check"
                                    ],
                       "blockers":  [
@@ -332,6 +346,7 @@
                         "publicRpcDeploymentBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle-report.json",
                         "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
                         "publicRpcValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation-report.json",
+                        "publicRpcAbuseTest":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test-report.json",
                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
                         "backupRestoreValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-report.json",
                         "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
@@ -352,6 +367,7 @@
                                                  "npm run flowchain:public-rpc:edge-template",
                                                  "npm run flowchain:public-rpc:deployment-bundle",
                                                  "npm run flowchain:public-rpc:validate",
+                                                 "npm run flowchain:public-rpc:abuse-test",
                                                  "npm run flowchain:public-rpc:check",
                                                  "npm run flowchain:backup:restore:validate",
                                                  "npm run flowchain:backup:create",

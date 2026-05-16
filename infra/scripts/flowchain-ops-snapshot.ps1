@@ -150,7 +150,7 @@ $deploymentStatus = Get-OpsStatus -Report $reports.publicDeployment
 $noSecretStatus = Get-OpsStatus -Report $reports.noSecret
 
 if ($publicRpcStatus -ne "passed") {
-    Add-OpsFinding -Findings $findings -Severity "blocked" -Code "public-rpc-not-ready" -Message "Public RPC is not ready to share." -Commands @("npm run flowchain:public-rpc:check", "npm run flowchain:public-rpc:validate")
+    Add-OpsFinding -Findings $findings -Severity "blocked" -Code "public-rpc-not-ready" -Message "Public RPC is not ready to share." -Commands @("npm run flowchain:public-rpc:check", "npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:abuse-test")
 }
 if ($backupStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "backup-not-ready" -Message "State backup is not ready for public operation." -Commands @("npm run flowchain:backup:restore:validate", "npm run flowchain:backup:check")
@@ -189,6 +189,7 @@ $incidentCommands = [ordered]@{
     )
     publicExposure = @(
         "npm run flowchain:public-rpc:check",
+        "npm run flowchain:public-rpc:abuse-test",
         "npm run flowchain:external-tester:packet"
     )
     emergency = @(

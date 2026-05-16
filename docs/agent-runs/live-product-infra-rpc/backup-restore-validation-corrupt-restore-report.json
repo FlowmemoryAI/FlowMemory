@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.state_restore_verify_report.v1",
-    "generatedAt":  "2026-05-16T08:03:00.4018753Z",
+    "generatedAt":  "2026-05-16T08:55:23.8050771Z",
     "status":  "failed",
     "requiredEnvNames":  [
                              "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
@@ -16,16 +16,16 @@
                     "verified":  false,
                     "manifestFound":  true,
                     "manifestReadable":  true,
-                    "snapshotName":  "flowchain-state-snapshot-20260516T080153171Z",
+                    "snapshotName":  "flowchain-state-snapshot-20260516T085414681Z",
                     "stateArtifactName":  "state.json",
-                    "expectedStateFileSha256":  "3fa109c042264391a641bad0e6069310cb08e402c9b22e3ca21d1504a7a20a3d",
-                    "restoredStateFileSha256":  "8539f6baffba2e5e7c20f71ac66bc7c23e3ef4d56e7b201cca596aa2cb5f10fa",
+                    "expectedStateFileSha256":  "ac98d90d7a3b39606e959fafb2c6b26343377ca65747508681743ffd7b3ce242",
+                    "restoredStateFileSha256":  "b0fc945a44aa9b702b925a8fbb20a6729262c7e29292ebee72eb10339a2f4844",
                     "hashMatchesManifest":  false,
                     "stateReadable":  true,
-                    "latestHeight":  "32866",
-                    "latestHash":  "0x8e49a34ae9cd530bb3c1efd30b049723d802ad68edaf977fa5de831ceb6def5c",
-                    "latestRoot":  "0x9048b3f0695f94e53bcca7818cea8d0b1dfd462de187537dfcda217b277dbadc",
-                    "finalizedHeight":  "32866",
+                    "latestHeight":  "33650",
+                    "latestHash":  "0xf6805a20e0fa338b0be397ce34701a5b1ab6a877736afee5c7bd92ec2138e079",
+                    "latestRoot":  "0xfae1584c0e98c9346d6123f934d3f72a146f708b78c6c2fbbea9eeba366765fb",
+                    "finalizedHeight":  "33650",
                     "liveStateMutated":  false
                 },
     "problems":  [

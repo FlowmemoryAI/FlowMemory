@@ -45,6 +45,7 @@ $paths = [ordered]@{
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     publicRpc = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
+    publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
     backup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
     bridgeLive = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
@@ -194,6 +195,7 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:public-rpc:edge-template",
     "npm run flowchain:public-rpc:deployment-bundle",
     "npm run flowchain:public-rpc:validate",
+    "npm run flowchain:public-rpc:abuse-test",
     "npm run flowchain:public-rpc:check -- -AllowBlocked",
     "npm run flowchain:backup:restore:validate",
     "npm run flowchain:backup:check -- -AllowBlocked",
@@ -214,6 +216,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-edge-template" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-edge-template.ps1"), "-ReportPath", $paths.publicRpcEdgeTemplate)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-deployment-bundle" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-deployment-bundle.ps1"), "-ReportPath", $paths.publicRpcDeploymentBundle)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-validation.ps1"), "-ReportPath", $paths.publicRpcValidation)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-abuse-test" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-abuse-test.ps1"), "-ReportPath", $paths.publicRpcAbuseTest)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-readiness" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.publicRpc)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "backup-restore-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-restore-validation.ps1"), "-ReportPath", $paths.backupRestoreValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-backup" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-backup-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.backup)
@@ -432,11 +435,44 @@ $publicValidationPassed = ($publicValidationStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $publicValidationChecks -Name "rateLimitRejected" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $publicValidationChecks -Name "rateLimitRetryAfterHeaderPresent" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $publicValidationChecks -Name "responseHygienePassed" -Default $false) -eq $true)
+$publicAbuse = $reports.publicRpcAbuseTest
+$publicAbuseStatus = Get-DeploymentStatus -Report $publicAbuse
+$publicAbuseReady = Get-DeploymentProp -Object $publicAbuse -Name "abuseTestReady" -Default $false
+$publicAbuseChecks = Get-DeploymentProp -Object $publicAbuse -Name "checks"
+$publicAbuseRequiredChecks = @(
+    "serverStarted",
+    "allowedOriginAccepted",
+    "disallowedOriginRejected",
+    "optionsPreflightPassed",
+    "unsupportedMediaTypeRejected",
+    "malformedJsonRejected",
+    "unknownMethodRejected",
+    "badParamsRejected",
+    "emptyBatchRejected",
+    "oversizedBatchRejected",
+    "oversizedBodyRejected",
+    "notificationNoContent",
+    "rateLimitRejected",
+    "responseHygienePassed"
+)
+$publicAbuseMissingChecks = @($publicAbuseRequiredChecks | Where-Object { (Get-DeploymentProp -Object $publicAbuseChecks -Name $_ -Default $false) -ne $true })
+$publicAbusePassed = ($publicAbuseStatus -eq "passed") `
+    -and ($publicAbuseReady -eq $true) `
+    -and ($publicAbuseMissingChecks.Count -eq 0) `
+    -and ((Get-DeploymentProp -Object $publicAbuse -Name "ownerValuesRequired" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $publicAbuse -Name "noLiveBroadcast" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicAbuse -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $publicAbuse -Name "noSecrets" -Default $false) -eq $true)
+Add-DeploymentItem -Items $items -Id "public-rpc-abuse-test" `
+    -Requirement "The local public RPC abuse harness proves CORS rejection, media-type rejection, malformed JSON handling, batch/body caps, notification handling, rate limiting, and no-secret response summaries." `
+    -Status $(if ($publicAbusePassed) { "passed" } else { "failed" }) `
+    -Evidence "abuseStatus=$publicAbuseStatus, abuseReady=$publicAbuseReady, missingChecks=$($publicAbuseMissingChecks.Count)" `
+    -Commands @("npm run flowchain:public-rpc:abuse-test")
 Add-DeploymentItem -Items $items -Id "public-rpc-edge" `
     -Requirement "The owner TLS edge must pass endpoint, CORS, rate-limit, readiness, and response-hygiene checks before sharing." `
-    -Status $(if (($publicRpcStatus -eq "passed") -and ($publicRpcReady -eq $true) -and ($publicValidationPassed -eq $true)) { "passed" } elseif (($publicRpcStatus -eq "blocked") -and ($publicValidationPassed -eq $true)) { "blocked" } else { "failed" }) `
-    -Evidence "publicRpcStatus=$publicRpcStatus, publicRpcReady=$publicRpcReady, validationStatus=$publicValidationStatus, validationPassed=$publicValidationPassed" `
-    -Commands @("npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:check") `
+    -Status $(if (($publicRpcStatus -eq "passed") -and ($publicRpcReady -eq $true) -and ($publicValidationPassed -eq $true) -and ($publicAbusePassed -eq $true)) { "passed" } elseif (($publicRpcStatus -eq "blocked") -and ($publicValidationPassed -eq $true) -and ($publicAbusePassed -eq $true)) { "blocked" } else { "failed" }) `
+    -Evidence "publicRpcStatus=$publicRpcStatus, publicRpcReady=$publicRpcReady, validationStatus=$publicValidationStatus, validationPassed=$publicValidationPassed, abuseStatus=$publicAbuseStatus, abusePassed=$publicAbusePassed" `
+    -Commands @("npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:abuse-test", "npm run flowchain:public-rpc:check") `
     -Blockers @("FLOWCHAIN_RPC_PUBLIC_URL", "FLOWCHAIN_RPC_ALLOWED_ORIGINS", "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE", "FLOWCHAIN_RPC_TLS_TERMINATED")
 
 $backup = $reports.backup
@@ -545,6 +581,7 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:public-rpc:edge-template",
         "npm run flowchain:public-rpc:deployment-bundle",
         "npm run flowchain:public-rpc:validate",
+        "npm run flowchain:public-rpc:abuse-test",
         "npm run flowchain:public-rpc:check",
         "npm run flowchain:backup:restore:validate",
         "npm run flowchain:backup:create",

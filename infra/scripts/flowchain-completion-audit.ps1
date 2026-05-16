@@ -33,6 +33,7 @@ $paths = [ordered]@{
     ownerInputsValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     publicRpcEdgeTemplate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-edge-template-report.json"
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
+    publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
@@ -250,6 +251,9 @@ $ownerInputsValidationExitCode = $ownerInputsValidationResult.exitCode
 $publicRpcValidationResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-validation.ps1"))
 $publicRpcValidationOutput = @($publicRpcValidationResult.output)
 $publicRpcValidationExitCode = $publicRpcValidationResult.exitCode
+$publicRpcAbuseTestResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-abuse-test.ps1"))
+$publicRpcAbuseTestOutput = @($publicRpcAbuseTestResult.output)
+$publicRpcAbuseTestExitCode = $publicRpcAbuseTestResult.exitCode
 $backupRestoreValidationResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-restore-validation.ps1"))
 $backupRestoreValidationOutput = @($backupRestoreValidationResult.output)
 $backupRestoreValidationExitCode = $backupRestoreValidationResult.exitCode
@@ -344,6 +348,7 @@ $ownerEnvReadiness = $reports.ownerEnvReadiness
 $ownerEnvReadinessValidation = $reports.ownerEnvReadinessValidation
 $ownerInputsValidation = $reports.ownerInputsValidation
 $publicRpcValidation = $reports.publicRpcValidation
+$publicRpcAbuseTest = $reports.publicRpcAbuseTest
 $externalTesterPacket = $reports.externalTesterPacket
 $testerWalletCreatesCount = @((Get-AuditProp -Object $testerNetwork -Name "testerWalletCreates" -Default @())).Count
 $testerTransferCount = @((Get-AuditProp -Object $testerNetwork -Name "transferResults" -Default @())).Count
@@ -499,6 +504,34 @@ $publicRpcValidationPassed = $publicRpcValidationExitCode -eq 0 `
     -and $publicRpcValidationRateLimitRejected -eq $true `
     -and $publicRpcValidationRateLimitRetryAfter -eq $true `
     -and $publicRpcValidationHygiene -eq $true
+$publicRpcAbuseTestStatus = Get-ReportStatus -Report $publicRpcAbuseTest
+$publicRpcAbuseTestReady = Get-AuditProp -Object $publicRpcAbuseTest -Name "abuseTestReady" -Default $false
+$publicRpcAbuseTestChecks = Get-AuditProp -Object $publicRpcAbuseTest -Name "checks"
+$publicRpcAbuseRequiredChecks = @(
+    "serverStarted",
+    "allowedOriginAccepted",
+    "disallowedOriginRejected",
+    "optionsPreflightPassed",
+    "unsupportedMediaTypeRejected",
+    "malformedJsonRejected",
+    "unknownMethodRejected",
+    "badParamsRejected",
+    "emptyBatchRejected",
+    "oversizedBatchRejected",
+    "oversizedBodyRejected",
+    "notificationNoContent",
+    "rateLimitRejected",
+    "responseHygienePassed"
+)
+$publicRpcAbuseMissingChecks = @($publicRpcAbuseRequiredChecks | Where-Object { (Get-AuditProp -Object $publicRpcAbuseTestChecks -Name $_ -Default $false) -ne $true })
+$publicRpcAbuseTestPassed = $publicRpcAbuseTestExitCode -eq 0 `
+    -and $publicRpcAbuseTestStatus -eq "passed" `
+    -and $publicRpcAbuseTestReady -eq $true `
+    -and $publicRpcAbuseMissingChecks.Count -eq 0 `
+    -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "ownerValuesRequired" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "noLiveBroadcast" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "noSecrets" -Default $false) -eq $true)
 $backupRestoreValidation = $reports.backupRestoreValidation
 $backupRestoreValidationStatus = Get-ReportStatus -Report $backupRestoreValidation
 $backupRestoreValidationChecks = Get-AuditProp -Object $backupRestoreValidation -Name "checks"
@@ -721,6 +754,12 @@ Add-AuditItem -Items $items -Id "public-rpc-readiness-validator-self-test" `
     -Evidence "validationStatus=$publicRpcValidationStatus, allowedOriginAccepted=$publicRpcValidationAllowed, disallowedProbe=$publicRpcValidationDisallowedProbe, disallowedRejected=$publicRpcValidationDisallowedRejected, endpointChecks=$publicRpcValidationEndpointChecks, rateLimitProbe=$publicRpcValidationRateLimitProbe, rateLimitRejected=$publicRpcValidationRateLimitRejected, rateLimitRetryAfter=$publicRpcValidationRateLimitRetryAfter, responseHygiene=$publicRpcValidationHygiene, report=$($paths.publicRpcValidation)" `
     -Commands @("npm run flowchain:public-rpc:validate")
 
+Add-AuditItem -Items $items -Id "public-rpc-abuse-test" `
+    -Requirement "Public RPC abuse harness proves CORS rejection, media-type rejection, parse-error handling, method/params failure envelopes, batch/body caps, notification 204 handling, rate limiting, and no-secret response summaries." `
+    -Status $(if ($publicRpcAbuseTestPassed) { "passed" } else { "failed" }) `
+    -Evidence "abuseStatus=$publicRpcAbuseTestStatus, abuseReady=$publicRpcAbuseTestReady, missingChecks=$($publicRpcAbuseMissingChecks.Count), report=$($paths.publicRpcAbuseTest)" `
+    -Commands @("npm run flowchain:public-rpc:abuse-test")
+
 Add-AuditItem -Items $items -Id "backup-restore-validator-self-test" `
     -Requirement "Backup tooling creates a manifest-backed live-state snapshot, verifies a restore rehearsal without mutating live state, and rejects corrupted snapshots." `
     -Status $(if ($backupRestoreValidationPassed) { "passed" } else { "failed" }) `
@@ -827,6 +866,8 @@ $report = [ordered]@{
     ownerInputsValidationOutputRedacted = @($ownerInputsValidationOutput | ForEach-Object { "$_" })
     publicRpcValidationExitCode = $publicRpcValidationExitCode
     publicRpcValidationOutputRedacted = @($publicRpcValidationOutput | ForEach-Object { "$_" })
+    publicRpcAbuseTestExitCode = $publicRpcAbuseTestExitCode
+    publicRpcAbuseTestOutputRedacted = @($publicRpcAbuseTestOutput | ForEach-Object { "$_" })
     backupRestoreValidationExitCode = $backupRestoreValidationExitCode
     backupRestoreValidationOutputRedacted = @($backupRestoreValidationOutput | ForEach-Object { "$_" })
     ownerInputsExitCode = $ownerInputsExitCode
@@ -878,6 +919,7 @@ $report = [ordered]@{
         "npm run flowchain:public-rpc:edge-template",
         "npm run flowchain:public-rpc:deployment-bundle",
         "npm run flowchain:public-rpc:validate",
+        "npm run flowchain:public-rpc:abuse-test",
         "npm run flowchain:backup:restore:validate",
         "npm run flowchain:backup:create",
         "npm run flowchain:backup:restore:verify",
