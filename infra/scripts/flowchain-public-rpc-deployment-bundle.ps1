@@ -79,10 +79,10 @@ $readmeLines = @(
     "",
     "Files:",
     "",
-    "- `nginx-flowchain-rpc.template.conf`: HTTPS reverse-proxy template for the private origin `127.0.0.1:8787`.",
-    "- `owner-public-rpc.env.example`: local owner env-file shape with empty values.",
-    "- `VERIFY.md`: pre-share verification commands.",
-    "- `ROLLBACK.md`: rollback and emergency commands."
+    '- `nginx-flowchain-rpc.template.conf`: HTTPS reverse-proxy template for the private origin `127.0.0.1:8787`.',
+    '- `owner-public-rpc.env.example`: local owner env-file shape with empty values.',
+    '- `VERIFY.md`: pre-share verification commands.',
+    '- `ROLLBACK.md`: rollback and emergency commands.'
 )
 
 $verifyLines = @(
@@ -168,7 +168,7 @@ $markdownLines.Add("")
 $markdownLines.Add("Generated: $($report.generatedAt)")
 $markdownLines.Add("Status: $($report.status)")
 $markdownLines.Add("")
-$markdownLines.Add("This bundle packages placeholder-only files for an owner-operated HTTPS edge in front of the repo-owned private RPC origin `127.0.0.1:8787`.")
+$markdownLines.Add('This bundle packages placeholder-only files for an owner-operated HTTPS edge in front of the repo-owned private RPC origin `127.0.0.1:8787`.')
 $markdownLines.Add("")
 $markdownLines.Add("## Files")
 $markdownLines.Add("")
