@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-16T09:51:21.1261048Z",
+    "generatedAt":  "2026-05-16T11:00:39.9382386Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -27,7 +27,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=34458, finalizedHeight=34458",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=35521, finalizedHeight=35521",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -198,9 +198,9 @@
                   {
                       "id":  "state-backup-boundary",
                       "layer":  "Storage/recovery",
-                      "requirement":  "Live state backup and restore are separate configured storage boundaries with manifest hash proof, restore rehearsal, and corruption detection before public operation.",
+                      "requirement":  "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation.",
                       "status":  "blocked",
-                      "evidence":  "backupStatus=blocked, validationStatus=passed, snapshotProof=not-run, restoreProof=not-run, corruptionDetected=True",
+                      "evidence":  "backupStatus=blocked, validationStatus=passed, snapshotProof=not-run, restoreProof=not-run, requiredChecks=15, missingChecks=0",
                       "files":  [
                                     "infra/scripts/flowchain-public-rpc-backup-readiness.ps1",
                                     "infra/scripts/flowchain-state-backup.ps1",

@@ -1,0 +1,38 @@
+{
+    "schema":  "flowchain.state_backup_report.v1",
+    "generatedAt":  "2026-05-16T10:52:25.9523178Z",
+    "status":  "passed",
+    "requiredEnvNames":  [
+                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                         ],
+    "missingEnvNames":  [
+
+                        ],
+    "backupRootConfigured":  true,
+    "backupRootValuePrinted":  false,
+    "snapshot":  {
+                     "attempted":  true,
+                     "created":  true,
+                     "snapshotName":  "flowchain-state-snapshot-20260516T105150142Z",
+                     "stateArtifactName":  "state.json",
+                     "manifestName":  "manifest.json",
+                     "latestManifestName":  "latest-manifest.json",
+                     "stateFileSha256":  "2e1c38b23252c4734a0726dc747c9b5976dff5aa298f147ca3f8430a595f8ae1",
+                     "stateBytes":  16459024,
+                     "sourceStateReadable":  true,
+                     "snapshotReadable":  true,
+                     "manifestReadable":  true,
+                     "writeVerified":  true,
+                     "attempts":  1,
+                     "latestHeight":  "35393",
+                     "latestHash":  "0xf5a06bebe860bf851a953f5a483a69df90f4cfc42a3905718b9d91997f12ad62",
+                     "latestRoot":  "0x4a4c440c9b92fb0f6f713b2286697c0f7a66dc635e95d280c91e4f9309b419a8",
+                     "finalizedHeight":  "35393"
+                 },
+    "problems":  [
+
+                 ],
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

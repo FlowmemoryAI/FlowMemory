@@ -1,19 +1,37 @@
 {
     "schema":  "flowchain.backup_restore_validation_report.v1",
-    "generatedAt":  "2026-05-16T09:45:24.3866342Z",
+    "generatedAt":  "2026-05-16T10:54:29.4206529Z",
     "status":  "passed",
     "stateReadable":  true,
     "checks":  {
                    "backupCommandPassed":  true,
                    "restoreCommandPassed":  true,
                    "backupRestoreHashRoundTrip":  true,
+                   "secondBackupCommandPassed":  true,
+                   "latestManifestMatchesSecondSnapshot":  true,
+                   "latestRestoreCommandPassed":  true,
+                   "latestRestoreUsedLatestSnapshot":  true,
+                   "restoreTargetsLiveStateProtected":  true,
+                   "liveStateNonMutationProven":  true,
                    "corruptedSnapshotDetected":  true,
-                   "corruptRestoreExitCode":  0
+                   "corruptRestoreExitCode":  0,
+                   "manifestTamperDetected":  true,
+                   "missingStateArtifactDetected":  true,
+                   "missingSnapshotManifestDetected":  true,
+                   "latestPointerTamperDetected":  true,
+                   "wrongChainStateMismatchDetected":  true
                },
     "reports":  {
                     "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-backup-report.json",
+                    "secondBackup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-second-backup-report.json",
                     "restore":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-restore-report.json",
-                    "corruptRestore":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-corrupt-restore-report.json"
+                    "latestRestore":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-latest-restore-report.json",
+                    "corruptRestore":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-corrupt-restore-report.json",
+                    "tamperedManifest":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-tampered-manifest-report.json",
+                    "missingStateArtifact":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-missing-artifact-report.json",
+                    "missingSnapshotManifest":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-missing-snapshot-manifest-report.json",
+                    "latestPointerTamper":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-latest-pointer-tamper-report.json",
+                    "wrongChainStateMismatch":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-wrong-chain-state-mismatch-report.json"
                 },
     "requiredCommands":  [
                              "npm run flowchain:backup:create",

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-16T09:51:19.0614853Z",
+    "generatedAt":  "2026-05-16T11:00:37.8952381Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -94,7 +94,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=34458, finalizedHeight=34458",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=35521, finalizedHeight=35521",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -183,9 +183,9 @@
                   },
                   {
                       "id":  "state-backup-restore-validation",
-                      "requirement":  "Backup tooling must create a manifest-backed state snapshot, verify a restore rehearsal, and detect corrupted snapshots without owner secrets.",
+                      "requirement":  "Backup tooling must create manifest-backed state snapshots, restore the latest snapshot safely, reject tampered/missing/stale/wrong-chain backup evidence, and avoid owner secrets.",
                       "status":  "passed",
-                      "evidence":  "validationStatus=passed, hashRoundTrip=True, corruptionDetected=True",
+                      "evidence":  "validationStatus=passed, requiredChecks=15, missingChecks=0",
                       "commands":  [
                                        "npm run flowchain:backup:restore:validate"
                                    ],

@@ -539,16 +539,29 @@ $publicRpcAbuseTestPassed = $publicRpcAbuseTestExitCode -eq 0 `
 $backupRestoreValidation = $reports.backupRestoreValidation
 $backupRestoreValidationStatus = Get-ReportStatus -Report $backupRestoreValidation
 $backupRestoreValidationChecks = Get-AuditProp -Object $backupRestoreValidation -Name "checks"
-$backupRestoreValidationBackupPassed = Get-AuditProp -Object $backupRestoreValidationChecks -Name "backupCommandPassed" -Default $false
-$backupRestoreValidationRestorePassed = Get-AuditProp -Object $backupRestoreValidationChecks -Name "restoreCommandPassed" -Default $false
-$backupRestoreValidationHashRoundTrip = Get-AuditProp -Object $backupRestoreValidationChecks -Name "backupRestoreHashRoundTrip" -Default $false
-$backupRestoreValidationCorruptionDetected = Get-AuditProp -Object $backupRestoreValidationChecks -Name "corruptedSnapshotDetected" -Default $false
+$backupRestoreValidationRequiredChecks = @(
+    "backupCommandPassed",
+    "restoreCommandPassed",
+    "backupRestoreHashRoundTrip",
+    "secondBackupCommandPassed",
+    "latestManifestMatchesSecondSnapshot",
+    "latestRestoreCommandPassed",
+    "latestRestoreUsedLatestSnapshot",
+    "restoreTargetsLiveStateProtected",
+    "liveStateNonMutationProven",
+    "corruptedSnapshotDetected",
+    "manifestTamperDetected",
+    "missingStateArtifactDetected",
+    "missingSnapshotManifestDetected",
+    "latestPointerTamperDetected",
+    "wrongChainStateMismatchDetected"
+)
+$backupRestoreValidationMissingChecks = @($backupRestoreValidationRequiredChecks | Where-Object {
+    (Get-AuditProp -Object $backupRestoreValidationChecks -Name $_ -Default $false) -ne $true
+})
 $backupRestoreValidationPassed = $backupRestoreValidationExitCode -eq 0 `
     -and $backupRestoreValidationStatus -eq "passed" `
-    -and $backupRestoreValidationBackupPassed -eq $true `
-    -and $backupRestoreValidationRestorePassed -eq $true `
-    -and $backupRestoreValidationHashRoundTrip -eq $true `
-    -and $backupRestoreValidationCorruptionDetected -eq $true `
+    -and $backupRestoreValidationMissingChecks.Count -eq 0 `
     -and ((Get-AuditProp -Object $backupRestoreValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $backupRestoreValidation -Name "noSecrets" -Default $false) -eq $true)
 $externalTesterPacketStatus = Get-ReportStatus -Report $externalTesterPacket
@@ -780,9 +793,9 @@ Add-AuditItem -Items $items -Id "public-rpc-abuse-test" `
     -Commands @("npm run flowchain:public-rpc:abuse-test")
 
 Add-AuditItem -Items $items -Id "backup-restore-validator-self-test" `
-    -Requirement "Backup tooling creates a manifest-backed live-state snapshot, verifies a restore rehearsal without mutating live state, and rejects corrupted snapshots." `
+    -Requirement "Backup tooling creates manifest-backed live-state snapshots, verifies latest-snapshot restore rehearsal without targeting live state, and rejects corrupt, tampered, missing-artifact, stale-pointer, and wrong-chain cases." `
     -Status $(if ($backupRestoreValidationPassed) { "passed" } else { "failed" }) `
-    -Evidence "validationStatus=$backupRestoreValidationStatus, backupPassed=$backupRestoreValidationBackupPassed, restorePassed=$backupRestoreValidationRestorePassed, hashRoundTrip=$backupRestoreValidationHashRoundTrip, corruptionDetected=$backupRestoreValidationCorruptionDetected, report=$($paths.backupRestoreValidation)" `
+    -Evidence "validationStatus=$backupRestoreValidationStatus, requiredChecks=$($backupRestoreValidationRequiredChecks.Count), missingChecks=$($backupRestoreValidationMissingChecks.Count), report=$($paths.backupRestoreValidation)" `
     -Commands @("npm run flowchain:backup:restore:validate")
 
 Add-AuditItem -Items $items -Id "external-tester-packet" `

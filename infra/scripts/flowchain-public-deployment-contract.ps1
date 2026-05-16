@@ -483,19 +483,34 @@ $backupRestoreProof = Get-DeploymentProp -Object $backupDetails -Name "restorePr
 $backupRestoreValidation = $reports.backupRestoreValidation
 $backupRestoreValidationStatus = Get-DeploymentStatus -Report $backupRestoreValidation
 $backupRestoreValidationChecks = Get-DeploymentProp -Object $backupRestoreValidation -Name "checks"
-$backupRestoreHashRoundTrip = Get-DeploymentProp -Object $backupRestoreValidationChecks -Name "backupRestoreHashRoundTrip" -Default $false
-$backupRestoreCorruptionDetected = Get-DeploymentProp -Object $backupRestoreValidationChecks -Name "corruptedSnapshotDetected" -Default $false
+$backupRestoreValidationRequiredChecks = @(
+    "backupCommandPassed",
+    "restoreCommandPassed",
+    "backupRestoreHashRoundTrip",
+    "secondBackupCommandPassed",
+    "latestManifestMatchesSecondSnapshot",
+    "latestRestoreCommandPassed",
+    "latestRestoreUsedLatestSnapshot",
+    "restoreTargetsLiveStateProtected",
+    "liveStateNonMutationProven",
+    "corruptedSnapshotDetected",
+    "manifestTamperDetected",
+    "missingStateArtifactDetected",
+    "missingSnapshotManifestDetected",
+    "latestPointerTamperDetected",
+    "wrongChainStateMismatchDetected"
+)
+$backupRestoreValidationMissingChecks = @($backupRestoreValidationRequiredChecks | Where-Object {
+    (Get-DeploymentProp -Object $backupRestoreValidationChecks -Name $_ -Default $false) -ne $true
+})
 $backupRestoreValidationPassed = $backupRestoreValidationStatus -eq "passed" `
-    -and ((Get-DeploymentProp -Object $backupRestoreValidationChecks -Name "backupCommandPassed" -Default $false) -eq $true) `
-    -and ((Get-DeploymentProp -Object $backupRestoreValidationChecks -Name "restoreCommandPassed" -Default $false) -eq $true) `
-    -and ($backupRestoreHashRoundTrip -eq $true) `
-    -and ($backupRestoreCorruptionDetected -eq $true) `
+    -and ($backupRestoreValidationMissingChecks.Count -eq 0) `
     -and ((Get-DeploymentProp -Object $backupRestoreValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $backupRestoreValidation -Name "noSecrets" -Default $false) -eq $true)
 Add-DeploymentItem -Items $items -Id "state-backup-restore-validation" `
-    -Requirement "Backup tooling must create a manifest-backed state snapshot, verify a restore rehearsal, and detect corrupted snapshots without owner secrets." `
+    -Requirement "Backup tooling must create manifest-backed state snapshots, restore the latest snapshot safely, reject tampered/missing/stale/wrong-chain backup evidence, and avoid owner secrets." `
     -Status $(if ($backupRestoreValidationPassed) { "passed" } else { "failed" }) `
-    -Evidence "validationStatus=$backupRestoreValidationStatus, hashRoundTrip=$backupRestoreHashRoundTrip, corruptionDetected=$backupRestoreCorruptionDetected" `
+    -Evidence "validationStatus=$backupRestoreValidationStatus, requiredChecks=$($backupRestoreValidationRequiredChecks.Count), missingChecks=$($backupRestoreValidationMissingChecks.Count)" `
     -Commands @("npm run flowchain:backup:restore:validate")
 
 Add-DeploymentItem -Items $items -Id "state-backup" `

@@ -446,12 +446,28 @@ $backupStatus = Get-ArchitectureStatus -Report $reports.backupReadiness
 $backupValidation = $reports.backupRestoreValidation
 $backupValidationStatus = Get-ArchitectureStatus -Report $backupValidation
 $backupValidationChecks = Get-ArchitectureProp -Object $backupValidation -Name "checks"
-$backupValidationCorruptionDetected = Get-ArchitectureProp -Object $backupValidationChecks -Name "corruptedSnapshotDetected" -Default $false
+$backupValidationRequiredChecks = @(
+    "backupCommandPassed",
+    "restoreCommandPassed",
+    "backupRestoreHashRoundTrip",
+    "secondBackupCommandPassed",
+    "latestManifestMatchesSecondSnapshot",
+    "latestRestoreCommandPassed",
+    "latestRestoreUsedLatestSnapshot",
+    "restoreTargetsLiveStateProtected",
+    "liveStateNonMutationProven",
+    "corruptedSnapshotDetected",
+    "manifestTamperDetected",
+    "missingStateArtifactDetected",
+    "missingSnapshotManifestDetected",
+    "latestPointerTamperDetected",
+    "wrongChainStateMismatchDetected"
+)
+$backupValidationMissingChecks = @($backupValidationRequiredChecks | Where-Object {
+    (Get-ArchitectureProp -Object $backupValidationChecks -Name $_ -Default $false) -ne $true
+})
 $backupValidationPassed = $backupValidationStatus -eq "passed" `
-    -and ((Get-ArchitectureProp -Object $backupValidationChecks -Name "backupCommandPassed" -Default $false) -eq $true) `
-    -and ((Get-ArchitectureProp -Object $backupValidationChecks -Name "restoreCommandPassed" -Default $false) -eq $true) `
-    -and ((Get-ArchitectureProp -Object $backupValidationChecks -Name "backupRestoreHashRoundTrip" -Default $false) -eq $true) `
-    -and ($backupValidationCorruptionDetected -eq $true) `
+    -and ($backupValidationMissingChecks.Count -eq 0) `
     -and ((Get-ArchitectureProp -Object $backupValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $backupValidation -Name "noSecrets" -Default $false) -eq $true)
 $backupDetails = Get-ArchitectureProp -Object $reports.backupReadiness -Name "backup"
@@ -464,9 +480,9 @@ $backupFiles = @(
     "infra/scripts/flowchain-backup-restore-validation.ps1"
 )
 Add-ArchitectureItem -Items $items -Id "state-backup-boundary" -Layer "Storage/recovery" `
-    -Requirement "Live state backup and restore are separate configured storage boundaries with manifest hash proof, restore rehearsal, and corruption detection before public operation." `
+    -Requirement "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation." `
     -Status $(if ($backupStatus -eq "passed" -and $backupValidationPassed) { "passed" } elseif ($backupStatus -eq "blocked" -and $backupValidationPassed) { "blocked" } else { "failed" }) `
-    -Evidence "backupStatus=$backupStatus, validationStatus=$backupValidationStatus, snapshotProof=$backupSnapshotProof, restoreProof=$backupRestoreProof, corruptionDetected=$backupValidationCorruptionDetected" `
+    -Evidence "backupStatus=$backupStatus, validationStatus=$backupValidationStatus, snapshotProof=$backupSnapshotProof, restoreProof=$backupRestoreProof, requiredChecks=$($backupValidationRequiredChecks.Count), missingChecks=$($backupValidationMissingChecks.Count)" `
     -Files $backupFiles `
     -Commands @("npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify", "npm run flowchain:backup:restore:validate", "npm run flowchain:backup:check") `
     -Blockers @("FLOWCHAIN_RPC_STATE_BACKUP_PATH")

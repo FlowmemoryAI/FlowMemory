@@ -132,11 +132,28 @@ $definitions = @(
     },
     [ordered]@{
         id = "backup-restore-validation"
-        requirement = "Local backup/restore rehearsal round-trips state and detects corrupt snapshots."
+        requirement = "Local backup/restore rehearsal restores the latest snapshot safely and rejects corrupt, tampered, missing-artifact, stale-pointer, and wrong-chain evidence."
         path = "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
         command = "npm run flowchain:backup:restore:validate"
         productionGate = $true
         ownerInputGate = $false
+        requiredChecks = @(
+            "backupCommandPassed",
+            "restoreCommandPassed",
+            "backupRestoreHashRoundTrip",
+            "secondBackupCommandPassed",
+            "latestManifestMatchesSecondSnapshot",
+            "latestRestoreCommandPassed",
+            "latestRestoreUsedLatestSnapshot",
+            "restoreTargetsLiveStateProtected",
+            "liveStateNonMutationProven",
+            "corruptedSnapshotDetected",
+            "manifestTamperDetected",
+            "missingStateArtifactDetected",
+            "missingSnapshotManifestDetected",
+            "latestPointerTamperDetected",
+            "wrongChainStateMismatchDetected"
+        )
     },
     [ordered]@{
         id = "bridge-live-readiness"
@@ -231,8 +248,11 @@ function Get-TruthProp {
     if ($null -ne $Object -and $Object -is [System.Collections.IDictionary] -and $Object.Contains($Name)) {
         return $Object[$Name]
     }
-    if ($null -ne $Object -and $Object.PSObject.Properties.Name -contains $Name) {
-        return $Object.$Name
+    if ($null -ne $Object) {
+        $property = $Object.PSObject.Properties[$Name]
+        if ($null -ne $property) {
+            return $property.Value
+        }
     }
     return $Default
 }
@@ -389,6 +409,27 @@ function ConvertTo-TruthEvidence {
         Add-UniqueTruthValue -Target $facts -Value "restoreProofStatus=$(Get-TruthProp -Object $backup -Name "restoreProofStatus" -Default "unknown")"
     }
 
+    $checks = Get-TruthProp -Object $Report -Name "checks"
+    if ($null -ne $checks) {
+        foreach ($name in @(
+            "backupRestoreHashRoundTrip",
+            "latestRestoreUsedLatestSnapshot",
+            "restoreTargetsLiveStateProtected",
+            "liveStateNonMutationProven",
+            "corruptedSnapshotDetected",
+            "manifestTamperDetected",
+            "missingStateArtifactDetected",
+            "missingSnapshotManifestDetected",
+            "latestPointerTamperDetected",
+            "wrongChainStateMismatchDetected"
+        )) {
+            $value = Get-TruthProp -Object $checks -Name $name
+            if ($null -ne $value -and -not [string]::IsNullOrWhiteSpace("$value")) {
+                Add-UniqueTruthValue -Target $facts -Value "$name=$value"
+            }
+        }
+    }
+
     if (@($Blockers).Count -gt 0) {
         Add-UniqueTruthValue -Target $facts -Value "blockers=$(@($Blockers) -join ',')"
     }
@@ -410,6 +451,15 @@ function Get-TruthClassification {
 
     $rawStatus = (Get-TruthStatus -Report $Report).ToLowerInvariant()
     if ($rawStatus -in @("passed", "valid")) {
+        $requiredChecks = @((Get-TruthProp -Object $Definition -Name "requiredChecks" -Default @()))
+        if ($requiredChecks.Count -gt 0) {
+            $checks = Get-TruthProp -Object $Report -Name "checks"
+            foreach ($name in $requiredChecks) {
+                if ((Get-TruthProp -Object $checks -Name $name -Default $false) -ne $true) {
+                    return "failed"
+                }
+            }
+        }
         return "passed"
     }
     if ($rawStatus -in @("failed", "error", "invalid")) {

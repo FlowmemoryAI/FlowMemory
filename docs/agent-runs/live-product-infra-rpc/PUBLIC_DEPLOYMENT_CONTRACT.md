@@ -1,6 +1,6 @@
 ﻿# FlowChain Public Deployment Contract
 
-Generated: 2026-05-16T09:51:19.0614853Z
+Generated: 2026-05-16T11:00:37.8952381Z
 Status: blocked
 Deployment ready: False
 Packet shareable: False
@@ -17,13 +17,13 @@ This file records deployment gates, commands, and env names only. It must not co
 | Owner signup checklist maps every public RPC, backup, and Base 8453 bridge value to the exact thing the owner must get without requesting secrets in chat. | passed | signupStatus=passed, itemCount=8, externalSignupCount=3, missingCoverage=0, repoOwned=True, localEnvFileSupported=True |
 | Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added. | passed | templateStatus=passed, pathIsGitIgnored=True, requiredEnvNameCount=15, includesAllRequired=True |
 | Public RPC exposure has a no-values owner edge template and deployment bundle for HTTPS reverse proxying, rate limiting, verification, and rollback. | passed | edgeTemplateStatus=passed, bundleStatus=passed, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True |
-| The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable. | passed | serviceStatus=passed, privateBind=True, latestHeight=34458, finalizedHeight=34458 |
+| The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable. | passed | serviceStatus=passed, privateBind=True, latestHeight=35521, finalizedHeight=35521 |
 | The deployment has recent service-monitor evidence that block height advances over multiple samples. | passed | monitorStatus=passed, samples=2, heightAdvanced=True |
 | Owner deployment has a no-secret ops snapshot that separates critical incidents from expected owner-input blockers and lists incident commands. | passed | opsSnapshot=blocked, criticalCount=0, blockedCount=5 |
 | The owner deployment contract validates the required public RPC, backup, and Base 8453 input names without values. | blocked | ownerInputsStatus=blocked, ownerInputReady=False |
 | The local public RPC abuse harness proves CORS rejection, media-type rejection, malformed JSON handling, batch/body caps, notification handling, rate limiting, and no-secret response summaries. | passed | abuseStatus=passed, abuseReady=True, missingChecks=0 |
 | The owner TLS edge must pass endpoint, CORS, rate-limit, readiness, and response-hygiene checks before sharing. | blocked | publicRpcStatus=blocked, publicRpcReady=False, validationStatus=passed, validationPassed=True, abuseStatus=passed, abusePassed=True |
-| Backup tooling must create a manifest-backed state snapshot, verify a restore rehearsal, and detect corrupted snapshots without owner secrets. | passed | validationStatus=passed, hashRoundTrip=True, corruptionDetected=True |
+| Backup tooling must create manifest-backed state snapshots, restore the latest snapshot safely, reject tampered/missing/stale/wrong-chain backup evidence, and avoid owner secrets. | passed | validationStatus=passed, requiredChecks=15, missingChecks=0 |
 | The public deployment must prove the configured state backup directory can create a manifest-backed snapshot and restore it in rehearsal. | blocked | backupStatus=blocked, snapshotProof=not-run, restoreProof=not-run |
 | The public deployment must not invite bridge-funded testing until Base 8453 live and infra checks pass with owner guardrails. | blocked | bridgeLive=blocked, bridgeInfra=blocked |
 | External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence. | blocked | externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, externalSharingReady=False, packet=blocked, packetShareable=False |
