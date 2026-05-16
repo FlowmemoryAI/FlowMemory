@@ -35,6 +35,7 @@ $knownExternalOwnerInputs = @(
 $reportPaths = [ordered]@{
     serviceStatus = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
+    opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     liveWallet = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json"
     testerNetwork = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
     publicRpcReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
@@ -223,23 +224,30 @@ $monitor = $reports.serviceMonitor
 $monitorStatus = Get-ArchitectureStatus -Report $monitor
 $monitorAdvanced = Get-ArchitectureProp -Object $monitor -Name "heightAdvanced" -Default $false
 $monitorSamples = [int](Get-ArchitectureProp -Object $monitor -Name "sampleCount" -Default 0)
+$opsSnapshot = $reports.opsSnapshot
+$opsSnapshotStatus = Get-ArchitectureStatus -Report $opsSnapshot
+$opsCriticalCount = [int](Get-ArchitectureProp -Object $opsSnapshot -Name "criticalCount" -Default 999)
 $observabilityFiles = @(
     "infra/scripts/flowchain-service-monitor.ps1",
+    "infra/scripts/flowchain-ops-snapshot.ps1",
     "infra/scripts/flowchain-emergency-stop-local.ps1",
     "infra/scripts/flowchain-node-stop.ps1"
 )
 $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:service:monitor") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:snapshot") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:emergency:stop-local") `
     -and ($monitorStatus -eq "passed") `
     -and ($monitorAdvanced -eq $true) `
-    -and ($monitorSamples -ge 2)
+    -and ($monitorSamples -ge 2) `
+    -and ($opsSnapshotStatus -in @("passed", "blocked")) `
+    -and ($opsCriticalCount -eq 0)
 Add-ArchitectureItem -Items $items -Id "ops-observability-boundary" -Layer "Operations" `
-    -Requirement "Operations has explicit status, monitor, and emergency-stop controls that do not depend on public deployment being live." `
+    -Requirement "Operations has explicit status, monitor, ops snapshot, and emergency controls that classify incidents separately from owner-input blockers." `
     -Status $(if ($observabilityReady) { "passed" } else { "failed" }) `
-    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced" `
+    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount" `
     -Files $observabilityFiles `
-    -Commands @("npm run flowchain:service:monitor", "npm run flowchain:emergency:stop-local")
+    -Commands @("npm run flowchain:service:monitor", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:emergency:stop-local")
 
 $publicRpcValidation = $reports.publicRpcValidation
 $publicRpc = $reports.publicRpcReadiness

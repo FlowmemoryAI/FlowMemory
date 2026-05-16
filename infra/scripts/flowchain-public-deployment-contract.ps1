@@ -36,6 +36,7 @@ $knownOwnerInputs = @(
 $paths = [ordered]@{
     serviceStatus = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
+    opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     ownerOnboarding = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json"
     ownerSignupChecklist = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-signup-checklist-report.json"
     ownerEnvTemplate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-template-report.json"
@@ -184,6 +185,7 @@ $dependencyRefreshSteps = New-Object System.Collections.ArrayList
 $dependencyRefreshCommands = @(
     "npm run flowchain:service:status -- -AllowBlocked",
     "npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90",
+    "npm run flowchain:ops:snapshot -- -AllowBlocked",
     "npm run flowchain:owner:onboarding",
     "npm run flowchain:owner:signup-checklist",
     "npm run flowchain:owner-env:template",
@@ -202,6 +204,7 @@ $dependencyRefreshCommands = @(
 if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-status" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-status.ps1"), "-AllowBlocked", "-ReportPath", $paths.serviceStatus)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-monitor" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-monitor.ps1"), "-DurationSeconds", "20", "-PollSeconds", "5", "-MaxStateAgeSeconds", "90", "-ReportPath", $paths.serviceMonitor)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "ops-snapshot" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-snapshot.ps1"), "-AllowBlocked", "-NoRefresh", "-ReportPath", $paths.opsSnapshot)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-onboarding" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-onboarding.ps1"), "-ReportPath", $paths.ownerOnboarding)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-signup-checklist" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-signup-checklist.ps1"), "-ReportPath", $paths.ownerSignupChecklist)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-env-template" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-env-template.ps1"), "-ReportPath", $paths.ownerEnvTemplate)
@@ -383,6 +386,16 @@ Add-DeploymentItem -Items $items -Id "pre-share-monitoring" `
     -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced" `
     -Commands @("npm run flowchain:service:monitor")
 
+$opsSnapshot = $reports.opsSnapshot
+$opsSnapshotStatus = Get-DeploymentStatus -Report $opsSnapshot
+$opsCriticalCount = [int](Get-DeploymentProp -Object $opsSnapshot -Name "criticalCount" -Default 999)
+$opsBlockedCount = [int](Get-DeploymentProp -Object $opsSnapshot -Name "blockedCount" -Default 0)
+Add-DeploymentItem -Items $items -Id "ops-snapshot" `
+    -Requirement "Owner deployment has a no-secret ops snapshot that separates critical incidents from expected owner-input blockers and lists incident commands." `
+    -Status $(if (($opsSnapshotStatus -in @("passed", "blocked")) -and $opsCriticalCount -eq 0) { "passed" } else { "failed" }) `
+    -Evidence "opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, blockedCount=$opsBlockedCount" `
+    -Commands @("npm run flowchain:ops:snapshot -- -AllowBlocked")
+
 $ownerInputs = $reports.ownerInputs
 $ownerStatus = Get-DeploymentStatus -Report $ownerInputs
 $ownerReady = Get-DeploymentProp -Object $ownerInputs -Name "ownerInputReady" -Default $false
@@ -470,6 +483,7 @@ Add-DeploymentItem -Items $items -Id "external-tester-sharing" `
 
 $requiredRollbackScripts = @(
     "flowchain:service:status",
+    "flowchain:ops:snapshot",
     "flowchain:service:stop",
     "flowchain:service:restart",
     "flowchain:emergency:stop-local",
@@ -511,6 +525,7 @@ $operatorCommands = [ordered]@{
     preExposure = @(
         "npm run flowchain:service:status",
         "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
+        "npm run flowchain:ops:snapshot -- -AllowBlocked",
         "npm run flowchain:owner:onboarding",
         "npm run flowchain:owner-env:template",
         "npm run flowchain:owner-inputs",

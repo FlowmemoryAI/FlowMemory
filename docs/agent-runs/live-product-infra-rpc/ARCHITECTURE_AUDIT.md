@@ -1,6 +1,6 @@
 ﻿# FlowChain Architecture Audit
 
-Generated: 2026-05-16T04:55:11.3580976Z
+Generated: 2026-05-16T05:36:25.7062445Z
 Status: blocked
 Blocked only on known external owner inputs: True
 
@@ -21,8 +21,8 @@ Blocked only on known external owner inputs: True
 
 | Layer | Requirement | Status | Evidence |
 | --- | --- | --- | --- |
-| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=25361, finalizedHeight=25361 |
-| Operations | Operations has explicit status, monitor, and emergency-stop controls that do not depend on public deployment being live. | passed | monitorStatus=passed, samples=2, heightAdvanced=True |
+| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=31145, finalizedHeight=31145 |
+| Operations | Operations has explicit status, monitor, ops snapshot, and emergency controls that classify incidents separately from owner-input blockers. | passed | monitorStatus=passed, samples=2, heightAdvanced=True, opsSnapshot=blocked, criticalCount=0 |
 | RPC/API | The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation before it can be exposed publicly. | passed | validationStatus=passed, corsAllowed=True, corsRejected=True, endpointChecks=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True |
 | Public edge | External RPC exposure is a distinct owner-operated edge with TLS, allowed origins, rate limits, endpoint checks, and response hygiene. | blocked | publicRpcStatus=blocked, publicRpcReady=False |
 | Public edge | Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding. | passed | edgeTemplateStatus=passed, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True |
