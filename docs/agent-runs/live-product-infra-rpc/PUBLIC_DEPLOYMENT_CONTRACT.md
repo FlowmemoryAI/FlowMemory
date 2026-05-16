@@ -1,6 +1,6 @@
 ﻿# FlowChain Public Deployment Contract
 
-Generated: 2026-05-16T05:36:25.5576427Z
+Generated: 2026-05-16T05:40:03.4894237Z
 Status: blocked
 Deployment ready: False
 Packet shareable: False
@@ -16,7 +16,7 @@ This file records deployment gates, commands, and env names only. It must not co
 | Owner onboarding clearly distinguishes repo-owned FlowChain RPC from the external Base 8453 RPC dependency without values and documents local owner env-file loading. | passed | onboardingStatus=passed, flowChainRpcIsOurs=True, publicRpcRequiresOwnerPublicEdge=True, base8453RpcIsExternalChainDependency=True, localEnvFileSupported=True |
 | Owner signup checklist maps every public RPC, backup, and Base 8453 bridge value to the exact thing the owner must get without requesting secrets in chat. | passed | signupStatus=passed, itemCount=8, externalSignupCount=3, missingCoverage=0, repoOwned=True, localEnvFileSupported=True |
 | Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added. | passed | templateStatus=passed, pathIsGitIgnored=True, requiredEnvNameCount=15, includesAllRequired=True |
-| Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding. | passed | edgeTemplateStatus=passed, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True |
+| Public RPC exposure has a no-values owner edge template and deployment bundle for HTTPS reverse proxying, rate limiting, verification, and rollback. | passed | edgeTemplateStatus=passed, bundleStatus=passed, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True |
 | The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable. | passed | serviceStatus=passed, privateBind=True, latestHeight=31145, finalizedHeight=31145 |
 | The deployment has recent service-monitor evidence that block height advances over multiple samples. | passed | monitorStatus=passed, samples=2, heightAdvanced=True |
 | Owner deployment has a no-secret ops snapshot that separates critical incidents from expected owner-input blockers and lists incident commands. | passed | opsSnapshot=blocked, criticalCount=0, blockedCount=5 |
@@ -38,6 +38,7 @@ This file records deployment gates, commands, and env names only. It must not co
 - npm run flowchain:owner-env:template
 - npm run flowchain:owner-inputs
 - npm run flowchain:public-rpc:edge-template
+- npm run flowchain:public-rpc:deployment-bundle
 - npm run flowchain:public-rpc:validate
 - npm run flowchain:public-rpc:check
 - npm run flowchain:backup:restore:validate

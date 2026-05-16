@@ -13,6 +13,7 @@ The repository now provides:
 - `npm run flowchain:service:stop` and `npm run flowchain:service:restart`, which preserve runtime state.
 - `npm run flowchain:public-rpc:check` for endpoint, TLS, CORS, rate-limit, health, discovery, readiness, state, and response-hygiene checks.
 - `npm run flowchain:public-rpc:edge-template` for a no-values Nginx public-edge template that proxies this chain's private RPC origin through owner TLS and rate limiting.
+- `npm run flowchain:public-rpc:deployment-bundle` for a placeholder-only public RPC deployment bundle with edge config, env example, verification steps, and rollback steps.
 - `npm run flowchain:public-rpc:validate` for a temporary local control-plane rehearsal of the public RPC readiness script, including allowed-origin acceptance, disallowed-origin rejection, endpoint checks, and response hygiene.
 - `npm run flowchain:backup:create` for manifest-backed live state snapshots.
 - `npm run flowchain:backup:restore:verify` for restore rehearsal from the latest snapshot without mutating live state.

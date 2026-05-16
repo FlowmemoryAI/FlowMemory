@@ -42,6 +42,7 @@ $paths = [ordered]@{
     ownerEnvTemplate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-template-report.json"
     ownerInputs = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-report.json"
     publicRpcEdgeTemplate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-edge-template-report.json"
+    publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     publicRpc = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
     backup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
@@ -191,6 +192,7 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:owner-env:template",
     "npm run flowchain:owner-inputs -- -AllowBlocked",
     "npm run flowchain:public-rpc:edge-template",
+    "npm run flowchain:public-rpc:deployment-bundle",
     "npm run flowchain:public-rpc:validate",
     "npm run flowchain:public-rpc:check -- -AllowBlocked",
     "npm run flowchain:backup:restore:validate",
@@ -210,6 +212,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-env-template" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-env-template.ps1"), "-ReportPath", $paths.ownerEnvTemplate)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-inputs" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-inputs.ps1"), "-AllowBlocked", "-ReportPath", $paths.ownerInputs)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-edge-template" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-edge-template.ps1"), "-ReportPath", $paths.publicRpcEdgeTemplate)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-deployment-bundle" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-deployment-bundle.ps1"), "-ReportPath", $paths.publicRpcDeploymentBundle)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-validation.ps1"), "-ReportPath", $paths.publicRpcValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-readiness" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.publicRpc)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "backup-restore-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-restore-validation.ps1"), "-ReportPath", $paths.backupRestoreValidation)
@@ -338,6 +341,16 @@ $edgeTemplateThirdPartyNeeded = Get-DeploymentProp -Object $publicRpcEdgeTemplat
 $edgeTemplateRequiresTls = Get-DeploymentProp -Object $publicRpcEdgeTemplate -Name "requiresTlsTermination" -Default $false
 $edgeTemplateRequiresRateLimit = Get-DeploymentProp -Object $publicRpcEdgeTemplate -Name "requiresRateLimit" -Default $false
 $edgeTemplateForwardsOrigin = Get-DeploymentProp -Object $publicRpcEdgeTemplate -Name "forwardsOriginForCors" -Default $false
+$publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
+$publicRpcDeploymentBundleStatus = Get-DeploymentStatus -Report $publicRpcDeploymentBundle
+$deploymentBundleChecks = Get-DeploymentProp -Object $publicRpcDeploymentBundle -Name "checks"
+$deploymentBundleReady = $publicRpcDeploymentBundleStatus -eq "passed" `
+    -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "nginxTemplateWritten" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerEnvExampleWritten" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "verifyRunbookWritten" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "rollbackRunbookWritten" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcDeploymentBundle -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $publicRpcDeploymentBundle -Name "noSecrets" -Default $false) -eq $true)
 $publicRpcEdgeTemplateReady = ($publicRpcEdgeTemplateStatus -eq "passed") `
     -and ($edgeTemplateReady -eq $true) `
     -and ($edgeTemplateRepoOwned -eq $true) `
@@ -348,10 +361,10 @@ $publicRpcEdgeTemplateReady = ($publicRpcEdgeTemplateStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $publicRpcEdgeTemplate -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $publicRpcEdgeTemplate -Name "noSecrets" -Default $false) -eq $true)
 Add-DeploymentItem -Items $items -Id "public-rpc-edge-template" `
-    -Requirement "Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding." `
-    -Status $(if ($publicRpcEdgeTemplateReady) { "passed" } else { "failed" }) `
-    -Evidence "edgeTemplateStatus=$publicRpcEdgeTemplateStatus, repoOwned=$edgeTemplateRepoOwned, requiresTls=$edgeTemplateRequiresTls, requiresRateLimit=$edgeTemplateRequiresRateLimit, forwardsOrigin=$edgeTemplateForwardsOrigin" `
-    -Commands @("npm run flowchain:public-rpc:edge-template")
+    -Requirement "Public RPC exposure has a no-values owner edge template and deployment bundle for HTTPS reverse proxying, rate limiting, verification, and rollback." `
+    -Status $(if ($publicRpcEdgeTemplateReady -and $deploymentBundleReady) { "passed" } else { "failed" }) `
+    -Evidence "edgeTemplateStatus=$publicRpcEdgeTemplateStatus, bundleStatus=$publicRpcDeploymentBundleStatus, repoOwned=$edgeTemplateRepoOwned, requiresTls=$edgeTemplateRequiresTls, requiresRateLimit=$edgeTemplateRequiresRateLimit, forwardsOrigin=$edgeTemplateForwardsOrigin" `
+    -Commands @("npm run flowchain:public-rpc:edge-template", "npm run flowchain:public-rpc:deployment-bundle")
 
 $service = $reports.serviceStatus
 $serviceStatus = Get-DeploymentStatus -Report $service
@@ -530,6 +543,7 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:owner-env:template",
         "npm run flowchain:owner-inputs",
         "npm run flowchain:public-rpc:edge-template",
+        "npm run flowchain:public-rpc:deployment-bundle",
         "npm run flowchain:public-rpc:validate",
         "npm run flowchain:public-rpc:check",
         "npm run flowchain:backup:restore:validate",

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-16T05:36:25.5576427Z",
+    "generatedAt":  "2026-05-16T05:40:03.4894237Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -26,6 +26,7 @@
                                        "npm run flowchain:owner-env:template",
                                        "npm run flowchain:owner-inputs -- -AllowBlocked",
                                        "npm run flowchain:public-rpc:edge-template",
+                                       "npm run flowchain:public-rpc:deployment-bundle",
                                        "npm run flowchain:public-rpc:validate",
                                        "npm run flowchain:public-rpc:check -- -AllowBlocked",
                                        "npm run flowchain:backup:restore:validate",
@@ -77,11 +78,12 @@
                   },
                   {
                       "id":  "public-rpc-edge-template",
-                      "requirement":  "Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding.",
+                      "requirement":  "Public RPC exposure has a no-values owner edge template and deployment bundle for HTTPS reverse proxying, rate limiting, verification, and rollback.",
                       "status":  "passed",
-                      "evidence":  "edgeTemplateStatus=passed, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True",
+                      "evidence":  "edgeTemplateStatus=passed, bundleStatus=passed, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True",
                       "commands":  [
-                                       "npm run flowchain:public-rpc:edge-template"
+                                       "npm run flowchain:public-rpc:edge-template",
+                                       "npm run flowchain:public-rpc:deployment-bundle"
                                    ],
                       "blockers":  [
 
@@ -327,6 +329,7 @@
                         "ownerEnvTemplate":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-template-report.json",
                         "ownerInputs":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-report.json",
                         "publicRpcEdgeTemplate":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-edge-template-report.json",
+                        "publicRpcDeploymentBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle-report.json",
                         "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
                         "publicRpcValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation-report.json",
                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
@@ -347,6 +350,7 @@
                                                  "npm run flowchain:owner-env:template",
                                                  "npm run flowchain:owner-inputs",
                                                  "npm run flowchain:public-rpc:edge-template",
+                                                 "npm run flowchain:public-rpc:deployment-bundle",
                                                  "npm run flowchain:public-rpc:validate",
                                                  "npm run flowchain:public-rpc:check",
                                                  "npm run flowchain:backup:restore:validate",
