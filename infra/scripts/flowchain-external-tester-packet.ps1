@@ -15,6 +15,7 @@ $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Reso
 $packetFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $PacketPath)
 
 $readinessReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
+$testerNetworkReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
 $ownerInputsReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-report.json"
 $completionAuditReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json"
 
@@ -49,6 +50,7 @@ $ownerInputsOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File (Join
 $ownerInputsExitCode = $LASTEXITCODE
 
 $readiness = Read-FlowChainJsonIfExists -Path $readinessReportPath
+$testerNetwork = Read-FlowChainJsonIfExists -Path $testerNetworkReportPath
 $ownerInputs = Read-FlowChainJsonIfExists -Path $ownerInputsReportPath
 $completionAudit = Read-FlowChainJsonIfExists -Path $completionAuditReportPath
 
@@ -58,6 +60,11 @@ $completionStatus = [string](Get-PacketProp -Object $completionAudit -Name "stat
 $externalSharingReady = Get-PacketProp -Object $readiness -Name "externalSharingReady" -Default $false
 $localTesterRehearsalReady = Get-PacketProp -Object $readiness -Name "localTesterRehearsalReady" -Default $false
 $latestHeight = [string](Get-PacketProp -Object $readiness -Name "latestHeight" -Default "")
+$readinessChecks = Get-PacketProp -Object $readiness -Name "checks"
+$packetExecutableSmokeValidated = (Get-PacketProp -Object $readinessChecks -Name "packetExecutableSmokeValidated" -Default $false) -eq $true `
+    -and (Get-PacketProp -Object $testerNetwork -Name "packetExecutableSmokeValidated" -Default $false) -eq $true
+$packetSmokeRoutes = @(Get-PacketProp -Object $testerNetwork -Name "packetSmokeRoutes" -Default @())
+$packetSmokeChecks = Get-PacketProp -Object $testerNetwork -Name "packetSmokeChecks"
 
 $missingEnvNames = New-Object System.Collections.ArrayList
 foreach ($source in @($readiness, $ownerInputs, $completionAudit)) {
@@ -69,8 +76,8 @@ foreach ($name in @((Get-PacketProp -Object $ownerInputs -Name "invalidEnvNames"
     Add-UniquePacketName -Target $missingEnvNames -Value $name
 }
 
-$failed = $readinessExitCode -ne 0 -or $ownerInputsExitCode -ne 0 -or $readinessStatus -eq "failed" -or $ownerInputsStatus -eq "failed"
-$packetShareable = $externalSharingReady -eq $true -and $readinessStatus -eq "passed" -and $ownerInputsStatus -eq "passed"
+$failed = $readinessExitCode -ne 0 -or $ownerInputsExitCode -ne 0 -or $readinessStatus -eq "failed" -or $ownerInputsStatus -eq "failed" -or -not $packetExecutableSmokeValidated
+$packetShareable = $externalSharingReady -eq $true -and $readinessStatus -eq "passed" -and $ownerInputsStatus -eq "passed" -and $packetExecutableSmokeValidated
 $status = if ($failed) { "failed" } elseif ($packetShareable) { "passed" } else { "blocked" }
 $generatedAt = (Get-Date).ToUniversalTime().ToString("o")
 
@@ -127,6 +134,7 @@ $packetLines.Add("- Owner inputs: $ownerInputsStatus")
 $packetLines.Add("- Completion audit: $completionStatus")
 $packetLines.Add("- Local tester rehearsal ready: $localTesterRehearsalReady")
 $packetLines.Add("- External sharing ready: $externalSharingReady")
+$packetLines.Add("- Packet executable smoke validated: $packetExecutableSmokeValidated")
 $packetLines.Add("")
 if ($missingEnvNames.Count -gt 0) {
     $packetLines.Add("## Blocking Env Names")
@@ -162,9 +170,13 @@ $report = [ordered]@{
     completionAuditStatus = $completionStatus
     localTesterRehearsalReady = $localTesterRehearsalReady
     externalSharingReady = $externalSharingReady
+    packetExecutableSmokeValidated = $packetExecutableSmokeValidated
+    packetSmokeChecks = $packetSmokeChecks
+    packetSmokeRoutes = $packetSmokeRoutes
     missingEnvNames = @($missingEnvNames)
     reportPaths = [ordered]@{
         readiness = $readinessReportPath
+        testerNetwork = $testerNetworkReportPath
         ownerInputs = $ownerInputsReportPath
         completionAudit = $completionAuditReportPath
         packet = $packetFullPath

@@ -70,6 +70,24 @@ function Test-ReportFresh {
     }
 }
 
+function Test-PacketExecutableSmokeReport {
+    param([AllowNull()][object] $Report)
+
+    if ($null -eq $Report) {
+        return $false
+    }
+    if ((Get-PropertyValue -Object $Report -Name "packetExecutableSmokeValidated" -Default $false) -ne $true) {
+        return $false
+    }
+    $checks = Get-PropertyValue -Object $Report -Name "packetSmokeChecks"
+    foreach ($name in @("health", "rpcDiscover", "rpcReadiness", "chainStatus", "walletCreate", "walletBalances", "walletSend", "walletTransfers")) {
+        if ((Get-PropertyValue -Object $checks -Name $name -Default $false) -ne $true) {
+            return $false
+        }
+    }
+    return $true
+}
+
 function Invoke-ExternalTesterChild {
     param(
         [Parameter(Mandatory = $true)][string[]] $ArgumentList
@@ -103,12 +121,13 @@ $serviceExitCode = $LASTEXITCODE
 $liveInfraRefresh = Invoke-ExternalTesterChild -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-infra-check.ps1"), "-AllowBlocked")
 $testerNetworkReportBefore = Read-FlowChainJsonIfExists -Path $testerNetworkReportPath
 $testerNetworkFreshBefore = Test-ReportFresh -Report $testerNetworkReportBefore -MaxAgeMinutes $MaxTesterReportAgeMinutes
+$testerNetworkPacketSmokeBefore = Test-PacketExecutableSmokeReport -Report $testerNetworkReportBefore
 $testerNetworkRefreshPerformed = $false
 $testerNetworkRefresh = [ordered]@{
     exitCode = $null
     outputRedactedTail = @()
 }
-if (-not $NoRefreshTesterNetwork.IsPresent -and -not $testerNetworkFreshBefore) {
+if (-not $NoRefreshTesterNetwork.IsPresent -and (-not $testerNetworkFreshBefore -or -not $testerNetworkPacketSmokeBefore)) {
     $testerNetworkRefreshPerformed = $true
     $testerNetworkRefresh = Invoke-ExternalTesterChild -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-service-tester-network-e2e.ps1"))
 }
@@ -118,6 +137,7 @@ $liveInfraReport = Read-FlowChainJsonIfExists -Path $liveInfraReportPath
 $liveProductReport = Read-FlowChainJsonIfExists -Path $liveProductReportPath
 $testerNetworkReport = Read-FlowChainJsonIfExists -Path $testerNetworkReportPath
 $testerNetworkFresh = Test-ReportFresh -Report $testerNetworkReport -MaxAgeMinutes $MaxTesterReportAgeMinutes
+$testerNetworkPacketSmokeValidated = Test-PacketExecutableSmokeReport -Report $testerNetworkReport
 
 $missingEnvNames = New-Object System.Collections.ArrayList
 foreach ($name in @((Get-PropertyValue -Object $liveInfraReport -Name "missingEnvNames" -Default @()))) {
@@ -150,7 +170,8 @@ $testerNetworkReady = $null -ne $testerNetworkReport `
     -and [int] (Get-PropertyValue -Object $testerNetworkReport -Name "testerCount" -Default 0) -ge 4 `
     -and $testerWalletCreates.Count -ge 4 `
     -and $testerTransfers.Count -ge 4 `
-    -and $testerSecretBoundary
+    -and $testerSecretBoundary `
+    -and $testerNetworkPacketSmokeValidated
 
 $liveInfraReady = $liveInfraRefresh.exitCode -eq 0 -and $null -ne $liveInfraReport -and (Get-PropertyValue -Object $liveInfraReport -Name "status") -eq "passed"
 $externalSharingReady = $serviceReady -and $chainProducing -and $testerNetworkReady -and $liveInfraReady
@@ -176,6 +197,7 @@ $report = [ordered]@{
         chainProducing = $chainProducing
         testerWalletNetworkReady = $testerNetworkReady
         testerWalletNetworkFresh = $testerNetworkFresh
+        packetExecutableSmokeValidated = $testerNetworkPacketSmokeValidated
         liveInfraReady = $liveInfraReady
     }
     latestHeight = "$latestHeight"
@@ -188,6 +210,9 @@ $report = [ordered]@{
         chainAfterBlock = Get-PropertyValue -Object $testerNetworkReport -Name "chainAfterBlock"
         walletCreateCount = $testerWalletCreates.Count
         transferCount = $testerTransfers.Count
+        packetExecutableSmokeValidated = $testerNetworkPacketSmokeValidated
+        packetSmokeChecks = Get-PropertyValue -Object $testerNetworkReport -Name "packetSmokeChecks"
+        packetSmokeRoutes = Get-PropertyValue -Object $testerNetworkReport -Name "packetSmokeRoutes" -Default @()
         secretMaterialReturned = $false
     }
     missingEnvNames = @($missingEnvNames)
@@ -204,7 +229,9 @@ $report = [ordered]@{
         liveInfraOutputRedactedTail = @($liveInfraRefresh.outputRedactedTail)
         testerNetworkRefreshPerformed = $testerNetworkRefreshPerformed
         testerNetworkFreshBeforeRefresh = $testerNetworkFreshBefore
+        testerNetworkPacketSmokeBeforeRefresh = $testerNetworkPacketSmokeBefore
         testerNetworkFreshAfterRefresh = $testerNetworkFresh
+        testerNetworkPacketSmokeAfterRefresh = $testerNetworkPacketSmokeValidated
         testerNetworkRefreshExitCode = $testerNetworkRefresh.exitCode
         testerNetworkRefreshOutputRedactedTail = @($testerNetworkRefresh.outputRedactedTail)
     }

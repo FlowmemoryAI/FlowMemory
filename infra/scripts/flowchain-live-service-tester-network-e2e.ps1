@@ -247,11 +247,30 @@ foreach ($account in $accounts) {
     $historyCounts[$account] = $history.count
 }
 
+$packetWalletBalances = Invoke-LocalJson -Path "/wallets/balances"
+$packetWalletTransfers = Invoke-LocalJson -Path "/wallets/transfers"
 $chainAfter = Invoke-LocalJson -Path "/chain/status"
 $chainAfterBlock = Get-ChainBlockValue -Status $chainAfter
 $chainBeforeBlock = Get-ChainBlockValue -Status $chainBefore
 if ($chainBeforeBlock -match '^\d+$' -and $chainAfterBlock -match '^\d+$' -and ([int64] $chainAfterBlock) -le ([int64] $chainBeforeBlock)) {
     throw "Chain did not advance during tester network E2E. Before: $chainBeforeBlock After: $chainAfterBlock"
+}
+
+$packetSmokeChecks = [ordered]@{
+    health = $health.schema -eq "flowmemory.control_plane.health.v0"
+    rpcDiscover = $discover.schema -eq "flowchain.rpc.discovery.v0"
+    rpcReadiness = $readiness.schema -eq "flowchain.rpc.readiness.v0"
+    chainStatus = $chainAfter.schema -eq "flowmemory.control_plane.chain_status.v0"
+    walletCreate = @($walletCreates | Where-Object { $_.schema -eq "flowmemory.control_plane.local_wallet_create_result.v0" -and $_.secretMaterialReturned -eq $false }).Count -eq $walletCreates.Count
+    walletBalances = $packetWalletBalances.schema -eq "flowmemory.control_plane.wallet_balance_list.v0"
+    walletSend = $sendResults.Count -eq $transfers.Count
+    walletTransfers = $packetWalletTransfers.schema -eq "flowmemory.control_plane.wallet_transfer_history.v0"
+}
+$packetSmokeRoutes = @("/health", "/rpc/discover", "/rpc/readiness", "/chain/status", "/wallets/create", "/wallets/balances", "/wallets/send", "/wallets/transfers")
+$packetExecutableSmokeValidated = @($packetSmokeChecks.GetEnumerator() | Where-Object { $_.Value -ne $true }).Count -eq 0
+if (-not $packetExecutableSmokeValidated) {
+    $failedChecks = @($packetSmokeChecks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Name })
+    throw "External tester packet smoke did not validate: $($failedChecks -join ', ')"
 }
 
 $report = [ordered]@{
@@ -273,6 +292,9 @@ $report = [ordered]@{
     expectedBalances = $expectedBalances
     balancesAfter = $balancesAfter
     transferHistoryCounts = $historyCounts
+    packetExecutableSmokeValidated = $packetExecutableSmokeValidated
+    packetSmokeChecks = $packetSmokeChecks
+    packetSmokeRoutes = $packetSmokeRoutes
     localOnly = $true
     productionReady = $false
     noLiveBroadcast = $true

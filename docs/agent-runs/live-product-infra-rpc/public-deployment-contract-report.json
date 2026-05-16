@@ -1,9 +1,10 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-16T15:45:18.7071322Z",
+    "generatedAt":  "2026-05-16T15:59:28.5794239Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
+    "packetExecutableSmokeValidated":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
                        "passed":  12,
@@ -94,7 +95,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=39216, finalizedHeight=39216",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=39472, finalizedHeight=39472",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -231,9 +232,9 @@
                   },
                   {
                       "id":  "external-tester-sharing",
-                      "requirement":  "External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence.",
+                      "requirement":  "External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence plus executable packet-route smoke.",
                       "status":  "blocked",
-                      "evidence":  "externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, externalSharingReady=False, packet=blocked, packetShareable=False",
+                      "evidence":  "externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, packetSmoke=True, externalSharingReady=False, packet=blocked, packetShareable=False",
                       "commands":  [
                                        "npm run flowchain:tester:readiness",
                                        "npm run flowchain:external-tester:packet"

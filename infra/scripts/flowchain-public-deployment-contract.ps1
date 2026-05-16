@@ -540,12 +540,13 @@ $externalPacketStatus = Get-DeploymentStatus -Report $externalPacket
 $externalSharingReady = Get-DeploymentProp -Object $externalTester -Name "externalSharingReady" -Default $false
 $externalTesterChecks = Get-DeploymentProp -Object $externalTester -Name "checks"
 $externalTesterNetworkFresh = Get-DeploymentProp -Object $externalTesterChecks -Name "testerWalletNetworkFresh" -Default $false
+$packetExecutableSmokeValidated = Get-DeploymentProp -Object $externalPacket -Name "packetExecutableSmokeValidated" -Default $false
 $localTesterRehearsalReady = Get-DeploymentProp -Object $externalTester -Name "localTesterRehearsalReady" -Default $false
 $packetShareable = Get-DeploymentProp -Object $externalPacket -Name "packetShareable" -Default $false
 Add-DeploymentItem -Items $items -Id "external-tester-sharing" `
-    -Requirement "External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence." `
-    -Status $(if (($externalTesterStatus -eq "passed") -and ($externalPacketStatus -eq "passed") -and ($externalSharingReady -eq $true) -and ($packetShareable -eq $true) -and ($externalTesterNetworkFresh -eq $true)) { "passed" } elseif (($externalTesterStatus -eq "blocked") -and ($externalPacketStatus -eq "blocked") -and ($externalSharingReady -eq $false) -and ($packetShareable -eq $false) -and ($externalTesterNetworkFresh -eq $true)) { "blocked" } else { "failed" }) `
-    -Evidence "externalTester=$externalTesterStatus, localTesterRehearsalReady=$localTesterRehearsalReady, testerNetworkFresh=$externalTesterNetworkFresh, externalSharingReady=$externalSharingReady, packet=$externalPacketStatus, packetShareable=$packetShareable" `
+    -Requirement "External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence plus executable packet-route smoke." `
+    -Status $(if (($externalTesterStatus -eq "passed") -and ($externalPacketStatus -eq "passed") -and ($externalSharingReady -eq $true) -and ($packetShareable -eq $true) -and ($externalTesterNetworkFresh -eq $true) -and ($packetExecutableSmokeValidated -eq $true)) { "passed" } elseif (($externalTesterStatus -eq "blocked") -and ($externalPacketStatus -eq "blocked") -and ($externalSharingReady -eq $false) -and ($packetShareable -eq $false) -and ($externalTesterNetworkFresh -eq $true) -and ($packetExecutableSmokeValidated -eq $true)) { "blocked" } else { "failed" }) `
+    -Evidence "externalTester=$externalTesterStatus, localTesterRehearsalReady=$localTesterRehearsalReady, testerNetworkFresh=$externalTesterNetworkFresh, packetSmoke=$packetExecutableSmokeValidated, externalSharingReady=$externalSharingReady, packet=$externalPacketStatus, packetShareable=$packetShareable" `
     -Commands @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet") `
     -Blockers @($knownOwnerInputs)
 
@@ -626,6 +627,7 @@ $report = [ordered]@{
     status = $status
     deploymentReady = $status -eq "passed"
     packetShareable = $packetShareable
+    packetExecutableSmokeValidated = $packetExecutableSmokeValidated
     blockedOnlyOnKnownExternalOwnerInputs = $blockedOnlyOnKnownOwnerInputs
     itemCounts = [ordered]@{
         passed = @($items | Where-Object { $_.status -eq "passed" }).Count
