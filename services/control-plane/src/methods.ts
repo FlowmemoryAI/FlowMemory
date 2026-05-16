@@ -1513,18 +1513,252 @@ function health(_params: JsonValue | undefined, context: ControlPlaneContext): J
   };
 }
 
-function rpcMethodRows(): JsonObject[] {
+const PUBLIC_RPC_REQUIRED_ENV_NAMES = [
+  "FLOWCHAIN_RPC_PUBLIC_URL",
+  "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+  "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+  "FLOWCHAIN_RPC_TLS_TERMINATED",
+  "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+] as const;
+
+export const PUBLIC_RPC_METHOD_ALLOWLIST = new Set<ControlPlaneMethod>([
+  "rpc_discover",
+  "rpc_readiness",
+  "health",
+  "node_status",
+  "peer_list",
+  "chain_status",
+  "bridge_live_readiness",
+  "bridge_status",
+  "devnet_state",
+  "block_get",
+  "block_list",
+  "mempool_list",
+  "transaction_get",
+  "transaction_list",
+  "account_get",
+  "account_list",
+  "balance_get",
+  "token_get",
+  "token_list",
+  "token_balance_get",
+  "token_balance_list",
+  "pool_get",
+  "pool_list",
+  "lp_position_get",
+  "lp_position_list",
+  "swap_get",
+  "swap_list",
+  "product_flow_status",
+  "faucet_event_list",
+  "wallet_metadata_get",
+  "wallet_metadata_list",
+  "rootfield_get",
+  "rootfield_list",
+  "artifact_availability_get",
+  "artifact_availability_list",
+  "receipt_get",
+  "receipt_list",
+  "work_receipt_get",
+  "work_receipt_list",
+  "verifier_module_get",
+  "verifier_module_list",
+  "verifier_report_get",
+  "verifier_report_list",
+  "memory_cell_get",
+  "memory_cell_list",
+  "agent_get",
+  "agent_list",
+  "model_get",
+  "model_list",
+  "challenge_get",
+  "challenge_list",
+  "finality_get",
+  "finality_list",
+  "bridge_observation_get",
+  "bridge_observation_list",
+  "bridge_deposit_get",
+  "bridge_deposit_list",
+  "bridge_credit_get",
+  "bridge_credit_list",
+  "bridge_credit_status",
+  "withdrawal_get",
+  "withdrawal_list",
+  "provenance_get",
+]);
+
+export function isPublicRpcMethod(method: string): method is ControlPlaneMethod {
+  return PUBLIC_RPC_METHOD_ALLOWLIST.has(method as ControlPlaneMethod);
+}
+
+type RpcDeploymentStatus = {
+  allowedOrigins: string[];
+  degradedSources: string[];
+  deploymentMode: string;
+  invalidProductionEnvNames: string[];
+  issues: JsonObject[];
+  liveBridgeReadiness: JsonObject;
+  localOnly: boolean;
+  missingOptionalSources: string[];
+  missingProductionEnvNames: string[];
+  productionReady: boolean;
+  publicMode: boolean;
+  publicRpcReady: boolean;
+  rateLimitRaw: string;
+  runtimeLoaded: boolean;
+  status: string;
+  tlsTerminatedRaw: string;
+};
+
+function rpcDeploymentStatus(state: LoadedControlPlaneState): RpcDeploymentStatus {
+  const missingOptionalSources = Object.values(state.sources)
+    .filter((source) => source.status === "missing")
+    .map((source) => source.name);
+  const degradedSources = Object.values(state.sources)
+    .filter((source) => source.status === "degraded")
+    .map((source) => source.name);
+  const runtimeLoaded = state.devnet !== null
+    && state.sources.devnet?.status !== "missing"
+    && state.sources.devnet?.status !== "degraded";
+  const liveBridgeReadiness = bridgeLiveReadiness(undefined, { state }) as JsonObject;
+  const missingProductionEnvNames = PUBLIC_RPC_REQUIRED_ENV_NAMES
+    .filter((name) => typeof process.env[name] !== "string" || process.env[name]?.trim().length === 0);
+  const publicUrlRaw = process.env.FLOWCHAIN_RPC_PUBLIC_URL?.trim() ?? "";
+  const allowedOriginsRaw = process.env.FLOWCHAIN_RPC_ALLOWED_ORIGINS?.trim() ?? "";
+  const rateLimitRaw = process.env.FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE?.trim() ?? "";
+  const tlsTerminatedRaw = process.env.FLOWCHAIN_RPC_TLS_TERMINATED?.trim() ?? "";
+  const invalidProductionEnvNames = new Set<string>();
+  let publicMode = false;
+
+  if (publicUrlRaw.length > 0) {
+    try {
+      const publicUrl = new URL(publicUrlRaw);
+      const host = publicUrl.hostname.toLowerCase();
+      publicMode = !["127.0.0.1", "localhost", "::1"].includes(host);
+      if (!["http:", "https:"].includes(publicUrl.protocol)) {
+        invalidProductionEnvNames.add("FLOWCHAIN_RPC_PUBLIC_URL");
+      }
+      if (publicMode && publicUrl.protocol !== "https:") {
+        invalidProductionEnvNames.add("FLOWCHAIN_RPC_PUBLIC_URL");
+      }
+    } catch {
+      invalidProductionEnvNames.add("FLOWCHAIN_RPC_PUBLIC_URL");
+    }
+  }
+
+  const allowedOrigins = allowedOriginsRaw.length > 0
+    ? allowedOriginsRaw.split(",").map((entry) => entry.trim()).filter((entry) => entry.length > 0)
+    : [];
+  if (allowedOriginsRaw.length > 0 && allowedOrigins.length === 0) {
+    invalidProductionEnvNames.add("FLOWCHAIN_RPC_ALLOWED_ORIGINS");
+  }
+  if (publicMode && allowedOrigins.some((entry) => ["*", "null", "all", "ALL"].includes(entry))) {
+    invalidProductionEnvNames.add("FLOWCHAIN_RPC_ALLOWED_ORIGINS");
+  }
+  if (rateLimitRaw.length > 0 && !/^[1-9][0-9]*$/.test(rateLimitRaw)) {
+    invalidProductionEnvNames.add("FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE");
+  }
+  if (tlsTerminatedRaw.length > 0 && tlsTerminatedRaw.toLowerCase() !== "true") {
+    invalidProductionEnvNames.add("FLOWCHAIN_RPC_TLS_TERMINATED");
+  }
+
+  const issues: JsonObject[] = [];
+  if (!runtimeLoaded) {
+    issues.push({
+      reasonCode: "runtime_state_not_loaded",
+      status: "blocked",
+      sourceStatus: state.sources.devnet?.status ?? "missing",
+    });
+  }
+  if (degradedSources.length > 0) {
+    issues.push({
+      reasonCode: "degraded_sources",
+      status: "blocked",
+      sources: degradedSources,
+    });
+  }
+  if (missingProductionEnvNames.length > 0) {
+    issues.push({
+      reasonCode: "missing_public_rpc_deployment_env",
+      status: "blocked",
+      missingEnvNames: missingProductionEnvNames,
+    });
+  }
+  if (publicUrlRaw.length > 0 && !publicMode && !invalidProductionEnvNames.has("FLOWCHAIN_RPC_PUBLIC_URL")) {
+    issues.push({
+      reasonCode: "public_rpc_url_is_local",
+      status: "blocked",
+    });
+  }
+  if (invalidProductionEnvNames.size > 0) {
+    issues.push({
+      reasonCode: "invalid_public_rpc_deployment_env",
+      status: "failed",
+      invalidEnvNames: [...invalidProductionEnvNames].sort(),
+    });
+  }
+  if (liveBridgeReadiness.failClosedStatus !== "READY_FOR_OPERATOR_LIVE_PILOT") {
+    issues.push({
+      reasonCode: "bridge_live_readiness_not_ready",
+      status: "blocked",
+      missingEnvNames: liveBridgeReadiness.missingEnvNames,
+    });
+  }
+
+  const publicRpcReady = issues.length === 0 && publicMode;
+  const deploymentMode = publicRpcReady
+    ? "public-owner-edge"
+    : publicUrlRaw.length > 0 && !publicMode
+      ? "local-endpoint-rehearsal"
+      : publicMode
+        ? "public-owner-edge-blocked"
+        : "local-only";
+
+  return {
+    allowedOrigins,
+    degradedSources,
+    deploymentMode,
+    invalidProductionEnvNames: [...invalidProductionEnvNames].sort(),
+    issues,
+    liveBridgeReadiness,
+    localOnly: !publicRpcReady,
+    missingOptionalSources,
+    missingProductionEnvNames,
+    productionReady: publicRpcReady,
+    publicMode,
+    publicRpcReady,
+    rateLimitRaw,
+    runtimeLoaded,
+    status: publicRpcReady
+      ? "READY_FOR_CONFIGURED_OWNER_RPC_DEPLOYMENT"
+      : issues.some((issue) => issue.status === "failed") ? "FAILED" : "BLOCKED",
+    tlsTerminatedRaw,
+  };
+}
+
+function rpcMethodRows(deployment: Pick<RpcDeploymentStatus, "deploymentMode" | "productionReady"> = {
+  deploymentMode: "local-only",
+  productionReady: false,
+}): JsonObject[] {
   return Object.keys(CONTROL_PLANE_METHODS)
     .sort()
-    .map((method) => ({
-      schema: "flowmemory.control_plane.rpc_method.v0",
-      method,
-      category: rpcMethodCategory(method),
-      mode: method === "transaction_submit" || method === "bridge_observation_submit" ? "local-file-intake" : "read",
-      stable: true,
-      localOnly: true,
-      productionReady: false,
-    }));
+    .map((method) => {
+      const controlPlaneMethod = method as ControlPlaneMethod;
+      const localFileIntake = method === "transaction_submit" || method === "bridge_observation_submit";
+      const publicRpcEligible = PUBLIC_RPC_METHOD_ALLOWLIST.has(controlPlaneMethod);
+      const productionReady = deployment.productionReady && publicRpcEligible && !localFileIntake;
+      return {
+        schema: "flowmemory.control_plane.rpc_method.v0",
+        method,
+        category: rpcMethodCategory(method),
+        mode: localFileIntake ? "local-file-intake" : "read",
+        stable: true,
+        publicRpcEligible,
+        deploymentMode: deployment.deploymentMode,
+        localOnly: !productionReady,
+        productionReady,
+      };
+    });
 }
 
 function rpcMethodCategory(method: string): string {
@@ -1543,7 +1777,8 @@ function rpcMethodCategory(method: string): string {
 function rpcDiscover(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
   asObjectParams(params, "rpc_discover");
   const state = stateFor(context);
-  const methods = rpcMethodRows();
+  const deployment = rpcDeploymentStatus(state);
+  const methods = rpcMethodRows(deployment);
   return {
     schema: "flowchain.rpc.discovery.v0",
     protocol: "JSON-RPC 2.0",
@@ -1551,6 +1786,7 @@ function rpcDiscover(params: JsonValue | undefined, context: ControlPlaneContext
     rpcPath: "/rpc",
     chainId: typeof state.devnet?.chainId === "string" ? state.devnet.chainId : "flowmemory-local-devnet-v0",
     methodCount: methods.length,
+    publicReadyMethodCount: methods.filter((method) => method.productionReady === true).length,
     methods,
     httpMirrors: [
       "/health",
@@ -1569,138 +1805,60 @@ function rpcDiscover(params: JsonValue | undefined, context: ControlPlaneContext
     },
     boundaries: [
       "This endpoint describes the current FlowChain control-plane RPC surface.",
-      "Current methods are local-runtime-first and fixture-backed fallback unless hosted deployment gates are added.",
-      "Public production RPC readiness must be proven by rpc_readiness and live-product gates.",
+      "Discovery mirrors rpc_readiness deployment mode and public readiness flags.",
+      "Public production RPC readiness must be proven by rpc_readiness and live-product gates before it is advertised.",
     ],
-    localOnly: true,
-    productionReady: false,
+    deploymentMode: deployment.deploymentMode,
+    publicMode: deployment.publicMode,
+    publicRpcReady: deployment.publicRpcReady,
+    localOnly: deployment.localOnly,
+    productionReady: deployment.productionReady,
   };
 }
 
 function rpcReadiness(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
   asObjectParams(params, "rpc_readiness");
   const state = stateFor(context);
-  const missing = Object.values(state.sources).filter((source) => source.status === "missing").map((source) => source.name);
-  const degraded = Object.values(state.sources).filter((source) => source.status === "degraded").map((source) => source.name);
-  const runtimeLoaded = state.devnet !== null && state.sources.devnet?.status !== "missing" && state.sources.devnet?.status !== "degraded";
-  const liveBridgeReadiness = bridgeLiveReadiness(undefined, { state }) as JsonObject;
-  const missingProductionEnvNames = [
-    "FLOWCHAIN_RPC_PUBLIC_URL",
-    "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
-    "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
-    "FLOWCHAIN_RPC_TLS_TERMINATED",
-    "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
-  ].filter((name) => typeof process.env[name] !== "string" || process.env[name]?.trim().length === 0);
-  const publicUrlRaw = process.env.FLOWCHAIN_RPC_PUBLIC_URL?.trim() ?? "";
-  const allowedOriginsRaw = process.env.FLOWCHAIN_RPC_ALLOWED_ORIGINS?.trim() ?? "";
-  const rateLimitRaw = process.env.FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE?.trim() ?? "";
-  const tlsTerminatedRaw = process.env.FLOWCHAIN_RPC_TLS_TERMINATED?.trim() ?? "";
-  const invalidProductionEnvNames = new Set<string>();
-  let publicMode = false;
-  if (publicUrlRaw.length > 0) {
-    try {
-      const publicUrl = new URL(publicUrlRaw);
-      const host = publicUrl.hostname.toLowerCase();
-      publicMode = !["127.0.0.1", "localhost", "::1"].includes(host);
-      if (!["http:", "https:"].includes(publicUrl.protocol)) {
-        invalidProductionEnvNames.add("FLOWCHAIN_RPC_PUBLIC_URL");
-      }
-      if (publicMode && publicUrl.protocol !== "https:") {
-        invalidProductionEnvNames.add("FLOWCHAIN_RPC_PUBLIC_URL");
-      }
-    } catch {
-      invalidProductionEnvNames.add("FLOWCHAIN_RPC_PUBLIC_URL");
-    }
-  }
-  const allowedOrigins = allowedOriginsRaw.length > 0
-    ? allowedOriginsRaw.split(",").map((entry) => entry.trim()).filter((entry) => entry.length > 0)
-    : [];
-  if (allowedOriginsRaw.length > 0 && allowedOrigins.length === 0) {
-    invalidProductionEnvNames.add("FLOWCHAIN_RPC_ALLOWED_ORIGINS");
-  }
-  if (publicMode && allowedOrigins.some((entry) => ["*", "null", "all", "ALL"].includes(entry))) {
-    invalidProductionEnvNames.add("FLOWCHAIN_RPC_ALLOWED_ORIGINS");
-  }
-  if (rateLimitRaw.length > 0 && !/^[1-9][0-9]*$/.test(rateLimitRaw)) {
-    invalidProductionEnvNames.add("FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE");
-  }
-  if (tlsTerminatedRaw.length > 0 && tlsTerminatedRaw.toLowerCase() !== "true") {
-    invalidProductionEnvNames.add("FLOWCHAIN_RPC_TLS_TERMINATED");
-  }
-  const issues: JsonObject[] = [];
-  if (!runtimeLoaded) {
-    issues.push({
-      reasonCode: "runtime_state_not_loaded",
-      status: "blocked",
-      sourceStatus: state.sources.devnet?.status ?? "missing",
-    });
-  }
-  if (degraded.length > 0) {
-    issues.push({
-      reasonCode: "degraded_sources",
-      status: "blocked",
-      sources: degraded,
-    });
-  }
-  if (missingProductionEnvNames.length > 0) {
-    issues.push({
-      reasonCode: "missing_public_rpc_deployment_env",
-      status: "blocked",
-      missingEnvNames: missingProductionEnvNames,
-    });
-  }
-  if (invalidProductionEnvNames.size > 0) {
-    issues.push({
-      reasonCode: "invalid_public_rpc_deployment_env",
-      status: "failed",
-      invalidEnvNames: [...invalidProductionEnvNames].sort(),
-    });
-  }
-  if (liveBridgeReadiness.failClosedStatus !== "READY_FOR_OPERATOR_LIVE_PILOT") {
-    issues.push({
-      reasonCode: "bridge_live_readiness_not_ready",
-      status: "blocked",
-      missingEnvNames: liveBridgeReadiness.missingEnvNames,
-    });
-  }
+  const deployment = rpcDeploymentStatus(state);
+  const methods = rpcMethodRows(deployment);
 
   return {
     schema: "flowchain.rpc.readiness.v0",
     service: "flowmemory-control-plane-v0",
     rpcPath: "/rpc",
-    status: issues.length === 0
-      ? "READY_FOR_CONFIGURED_OWNER_RPC_DEPLOYMENT"
-      : issues.some((issue) => issue.status === "failed") ? "FAILED" : "BLOCKED",
-    localRuntimeReadable: runtimeLoaded,
-    publicRpcReady: issues.length === 0,
-    walletUsableAgainstRpc: runtimeLoaded,
-    explorerUsableAgainstRpc: runtimeLoaded,
-    bridgeRelayerUsableAgainstRpc: runtimeLoaded,
-    methodCount: rpcMethodRows().length,
+    status: deployment.status,
+    deploymentMode: deployment.deploymentMode,
+    localRuntimeReadable: deployment.runtimeLoaded,
+    publicRpcReady: deployment.publicRpcReady,
+    walletUsableAgainstRpc: deployment.runtimeLoaded,
+    explorerUsableAgainstRpc: deployment.runtimeLoaded,
+    bridgeRelayerUsableAgainstRpc: deployment.runtimeLoaded,
+    methodCount: methods.length,
+    publicReadyMethodCount: methods.filter((method) => method.productionReady === true).length,
     sourceStatuses: state.sources,
-    missingOptionalSources: missing,
-    degradedSources: degraded,
-    missingProductionEnvNames,
-    invalidProductionEnvNames: [...invalidProductionEnvNames].sort(),
+    missingOptionalSources: deployment.missingOptionalSources,
+    degradedSources: deployment.degradedSources,
+    missingProductionEnvNames: deployment.missingProductionEnvNames,
+    invalidProductionEnvNames: deployment.invalidProductionEnvNames,
     publicRpcControls: {
-      publicMode,
-      allowedOriginsConfigured: allowedOrigins.length > 0,
-      allowedOriginsWildcardRejectedForPublicMode: !publicMode || !allowedOrigins.some((entry) => ["*", "null", "all", "ALL"].includes(entry)),
-      rateLimitConfigured: /^[1-9][0-9]*$/.test(rateLimitRaw),
-      tlsTerminatedAcknowledged: tlsTerminatedRaw.toLowerCase() === "true",
+      publicMode: deployment.publicMode,
+      allowedOriginsConfigured: deployment.allowedOrigins.length > 0,
+      allowedOriginsWildcardRejectedForPublicMode: !deployment.publicMode || !deployment.allowedOrigins.some((entry) => ["*", "null", "all", "ALL"].includes(entry)),
+      rateLimitConfigured: /^[1-9][0-9]*$/.test(deployment.rateLimitRaw),
+      tlsTerminatedAcknowledged: deployment.tlsTerminatedRaw.toLowerCase() === "true",
       envValuesPrinted: false,
     },
     bridgeLiveReadiness: {
-      failClosedStatus: liveBridgeReadiness.failClosedStatus,
-      readyForOperatorLivePilot: liveBridgeReadiness.readyForOperatorLivePilot,
-      missingEnvNames: liveBridgeReadiness.missingEnvNames,
+      failClosedStatus: deployment.liveBridgeReadiness.failClosedStatus,
+      readyForOperatorLivePilot: deployment.liveBridgeReadiness.readyForOperatorLivePilot,
+      missingEnvNames: deployment.liveBridgeReadiness.missingEnvNames,
       envValuesPrinted: false,
     },
-    issues,
+    issues: deployment.issues,
     envValuesPrinted: false,
     noSecrets: true,
-    localOnly: true,
-    productionReady: false,
+    localOnly: deployment.localOnly,
+    productionReady: deployment.productionReady,
   };
 }
 

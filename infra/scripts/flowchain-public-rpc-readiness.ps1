@@ -47,6 +47,32 @@ $rateLimitCheck = [ordered]@{
     retryAfterHeaderPresent = $false
     skippedBecauseAboveProbeLimit = $false
 }
+$deploymentChecks = [ordered]@{
+    readinessEndpointPresent = $false
+    readinessStatusReady = $null
+    readinessPublicRpcReady = $null
+    readinessProductionReady = $null
+    readinessLocalOnlyFalse = $null
+    readinessDeploymentModePublicEdge = $null
+    discoverEndpointPresent = $false
+    discoverPublicRpcReadyMatchesReadiness = $null
+    discoverProductionReadyMatchesReadiness = $null
+    discoverLocalOnlyMatchesReadiness = $null
+    discoverDeploymentModeMatchesReadiness = $null
+    publicReadyMethodCountNonzeroWhenReady = $null
+}
+
+function Get-FlowChainJsonPropertyValue {
+    param(
+        [AllowNull()][object] $Object,
+        [Parameter(Mandatory = $true)][string] $Name
+    )
+
+    if ($null -ne $Object -and $Object.PSObject.Properties.Name -contains $Name) {
+        return $Object.$Name
+    }
+    return $null
+}
 
 foreach ($name in $requiredEnv) {
     if ([string]::IsNullOrWhiteSpace((Get-FlowChainEnvValue -Name $name))) {
@@ -385,9 +411,59 @@ elseif ($stateFacts.readable) {
 }
 
 if ($null -ne $readiness) {
+    $deploymentChecks.readinessEndpointPresent = $true
     $readinessStatus = Get-FlowChainJsonString -Object $readiness -Names @("status")
+    $readinessPublicRpcReady = Get-FlowChainJsonPropertyValue -Object $readiness -Name "publicRpcReady"
+    $readinessProductionReady = Get-FlowChainJsonPropertyValue -Object $readiness -Name "productionReady"
+    $readinessLocalOnly = Get-FlowChainJsonPropertyValue -Object $readiness -Name "localOnly"
+    $readinessDeploymentMode = Get-FlowChainJsonString -Object $readiness -Names @("deploymentMode")
+    $readinessPublicReadyMethodCount = Get-FlowChainJsonPropertyValue -Object $readiness -Name "publicReadyMethodCount"
+
+    $deploymentChecks.readinessStatusReady = $readinessStatus -eq "READY_FOR_CONFIGURED_OWNER_RPC_DEPLOYMENT"
+    $deploymentChecks.readinessPublicRpcReady = $readinessPublicRpcReady -eq $true
+    $deploymentChecks.readinessProductionReady = $readinessProductionReady -eq $true
+    $deploymentChecks.readinessLocalOnlyFalse = $readinessLocalOnly -eq $false
+    $deploymentChecks.readinessDeploymentModePublicEdge = $readinessDeploymentMode -eq "public-owner-edge"
+    $deploymentChecks.publicReadyMethodCountNonzeroWhenReady = if ($readinessStatus -eq "READY_FOR_CONFIGURED_OWNER_RPC_DEPLOYMENT") { [int64]$readinessPublicReadyMethodCount -gt 0 } else { $null }
+
     if ($readinessStatus -ne "READY_FOR_CONFIGURED_OWNER_RPC_DEPLOYMENT") {
         Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_PUBLIC_URL" -Reason "endpoint /rpc/readiness is not ready" -Category "endpoint"
+    }
+    elseif (
+        $deploymentChecks.readinessPublicRpcReady -ne $true -or
+        $deploymentChecks.readinessProductionReady -ne $true -or
+        $deploymentChecks.readinessLocalOnlyFalse -ne $true -or
+        $deploymentChecks.readinessDeploymentModePublicEdge -ne $true -or
+        $deploymentChecks.publicReadyMethodCountNonzeroWhenReady -ne $true
+    ) {
+        Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_PUBLIC_URL" -Reason "endpoint /rpc/readiness reports ready status with contradictory public deployment flags" -Kind "failed" -Category "endpoint"
+    }
+}
+
+if ($null -ne $discover) {
+    $deploymentChecks.discoverEndpointPresent = $true
+    if ($null -ne $readiness) {
+        $discoverPublicRpcReady = Get-FlowChainJsonPropertyValue -Object $discover -Name "publicRpcReady"
+        $discoverProductionReady = Get-FlowChainJsonPropertyValue -Object $discover -Name "productionReady"
+        $discoverLocalOnly = Get-FlowChainJsonPropertyValue -Object $discover -Name "localOnly"
+        $discoverDeploymentMode = Get-FlowChainJsonString -Object $discover -Names @("deploymentMode")
+        $readinessPublicRpcReady = Get-FlowChainJsonPropertyValue -Object $readiness -Name "publicRpcReady"
+        $readinessProductionReady = Get-FlowChainJsonPropertyValue -Object $readiness -Name "productionReady"
+        $readinessLocalOnly = Get-FlowChainJsonPropertyValue -Object $readiness -Name "localOnly"
+        $readinessDeploymentMode = Get-FlowChainJsonString -Object $readiness -Names @("deploymentMode")
+
+        $deploymentChecks.discoverPublicRpcReadyMatchesReadiness = $discoverPublicRpcReady -eq $readinessPublicRpcReady
+        $deploymentChecks.discoverProductionReadyMatchesReadiness = $discoverProductionReady -eq $readinessProductionReady
+        $deploymentChecks.discoverLocalOnlyMatchesReadiness = $discoverLocalOnly -eq $readinessLocalOnly
+        $deploymentChecks.discoverDeploymentModeMatchesReadiness = $discoverDeploymentMode -eq $readinessDeploymentMode
+        if (
+            $deploymentChecks.discoverPublicRpcReadyMatchesReadiness -ne $true -or
+            $deploymentChecks.discoverProductionReadyMatchesReadiness -ne $true -or
+            $deploymentChecks.discoverLocalOnlyMatchesReadiness -ne $true -or
+            $deploymentChecks.discoverDeploymentModeMatchesReadiness -ne $true
+        ) {
+            Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_PUBLIC_URL" -Reason "endpoint /rpc/discover deployment flags do not match /rpc/readiness" -Kind "failed" -Category "endpoint"
+        }
     }
 }
 
@@ -433,7 +509,21 @@ $report = [ordered]@{
         backupPathWritable = $backupCheck.writable
         stateFileReadable = $stateFacts.readable
         responseHygienePassed = $hygiene.passed
+        readinessDeploymentFlagsConsistent = $deploymentChecks.readinessStatusReady -ne $true -or (
+            $deploymentChecks.readinessPublicRpcReady -eq $true -and
+            $deploymentChecks.readinessProductionReady -eq $true -and
+            $deploymentChecks.readinessLocalOnlyFalse -eq $true -and
+            $deploymentChecks.readinessDeploymentModePublicEdge -eq $true -and
+            $deploymentChecks.publicReadyMethodCountNonzeroWhenReady -eq $true
+        )
+        discoveryMatchesReadinessDeployment = $deploymentChecks.discoverEndpointPresent -ne $true -or $deploymentChecks.readinessEndpointPresent -ne $true -or (
+            $deploymentChecks.discoverPublicRpcReadyMatchesReadiness -eq $true -and
+            $deploymentChecks.discoverProductionReadyMatchesReadiness -eq $true -and
+            $deploymentChecks.discoverLocalOnlyMatchesReadiness -eq $true -and
+            $deploymentChecks.discoverDeploymentModeMatchesReadiness -eq $true
+        )
     }
+    deploymentChecks = $deploymentChecks
     endpointChecks = @($endpointChecks)
     chainChecks = $chainChecks
     localState = [ordered]@{

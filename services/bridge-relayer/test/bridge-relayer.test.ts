@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawn } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -153,6 +154,34 @@ function pilotArgs(fixturePath: string, extra: string[] = []): string[] {
   ];
 }
 
+function runBridgeCli(args: string[], env: Record<string, string> = {}): Promise<{ stdout: string; stderr: string }> {
+  return new Promise((resolveRun, rejectRun) => {
+    const child = spawn(process.execPath, ["src/observe-base-lockbox.ts", ...args], {
+      cwd: fileURLToPath(new URL("..", import.meta.url)),
+      env: { ...process.env, ...env },
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
+    child.stdout.on("data", (chunk) => {
+      stdout += String(chunk);
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += String(chunk);
+    });
+    child.on("error", rejectRun);
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolveRun({ stdout, stderr });
+        return;
+      }
+      rejectRun(new Error(`bridge CLI exited ${code}\nstdout:\n${stdout}\nstderr:\n${stderr}`));
+    });
+  });
+}
+
 test("validates the committed mock bridge deposit fixture", () => {
   const fixture = JSON.parse(readFileSync(fixtureUrl, "utf8"));
   const deposit = validateDeposit(fixture);
@@ -260,6 +289,52 @@ test("mock pilot E2E path applies a Base 8453 credit exactly once across replay"
     validateSchema("bridge-runtime-credit-application.schema.json", firstRun.runtimeApplications[0]);
     validateSchema("bridge-pilot-evidence.schema.json", firstRun.pilotEvidence[0]);
     validateSchema("bridge-release-evidence.schema.json", firstRun.releaseEvidences[0]);
+  } finally {
+    rmSync(stateDir, { recursive: true, force: true });
+  }
+});
+
+test("mock pilot credit state is locked across concurrent CLI apply attempts", async () => {
+  const stateDir = mkdtempSync(join(tmpdir(), "flowmemory-bridge-concurrent-credit-"));
+  const statePath = join(stateDir, "credit-state.json");
+  try {
+    const argsFor = (name: string) => pilotArgs(fileURLToPath(pilotFixtureUrl), [
+      "--runtime-state",
+      statePath,
+      "--out",
+      join(stateDir, `${name}-observation.json`),
+      "--credit-out",
+      join(stateDir, `${name}-credit.json`),
+      "--handoff-out",
+      join(stateDir, `${name}-handoff.json`),
+    ]);
+
+    await Promise.all([
+      runBridgeCli(argsFor("a"), { FLOWCHAIN_BRIDGE_STATE_LOCK_TEST_HOLD_MS: "150" }),
+      runBridgeCli(argsFor("b"), { FLOWCHAIN_BRIDGE_STATE_LOCK_TEST_HOLD_MS: "150" }),
+    ]);
+
+    const handoffs = ["a", "b"].map((name) => (
+      JSON.parse(readFileSync(join(stateDir, `${name}-handoff.json`), "utf8")) as {
+        runtimeApplications: { status: string; applyCount: number }[];
+        credits: { status: string; rejectionReason?: string }[];
+      }
+    ));
+    const applicationStatuses = handoffs
+      .flatMap((handoff) => handoff.runtimeApplications.map((application) => application.status))
+      .sort();
+    const state = JSON.parse(readFileSync(statePath, "utf8")) as {
+      appliedReplayKeys: Record<string, string>;
+      applications: unknown[];
+    };
+
+    assert.deepEqual(applicationStatuses, ["applied", "idempotent_replay"]);
+    assert.equal(handoffs.flatMap((handoff) => handoff.runtimeApplications).reduce((sum, application) => sum + application.applyCount, 0), 1);
+    assert.equal(handoffs.flatMap((handoff) => handoff.credits).filter((credit) => credit.status === "applied").length, 1);
+    assert.equal(handoffs.flatMap((handoff) => handoff.credits).filter((credit) => credit.rejectionReason === "already_applied_replay_key").length, 1);
+    assert.equal(Object.keys(state.appliedReplayKeys).length, 1);
+    assert.equal(state.applications.length, 1);
+    validateSchema("bridge-runtime-credit-application-state.schema.json", state);
   } finally {
     rmSync(stateDir, { recursive: true, force: true });
   }

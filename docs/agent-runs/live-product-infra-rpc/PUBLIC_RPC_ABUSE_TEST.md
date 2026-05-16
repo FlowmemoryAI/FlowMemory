@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Abuse Test
 
-Generated: 2026-05-16T10:49:53.6351258Z
+Generated: 2026-05-16T11:40:28.8441917Z
 Status: passed
 Abuse test ready: True
 
@@ -16,6 +16,10 @@ This local harness starts a temporary private control-plane server and records p
 | Non-JSON POST bodies are rejected with HTTP 415 before JSON parsing. | passed | status=415, reason=request.unsupported_media_type |
 | Malformed JSON returns the stable JSON-RPC parse error envelope. | passed | status=400, errorCode=-32700, reason=parse.error |
 | Unsupported public methods fail closed as JSON-RPC method-not-found errors. | passed | status=200, errorCode=-32601, reason=method.not_found |
+| Public RPC rejects transaction_submit before local file-intake dispatch. | passed | status=200, errorCode=-32601, reason=method.not_found |
+| Public RPC rejects bridge_observation_submit before local bridge observation intake dispatch. | passed | status=200, errorCode=-32601, reason=method.not_found |
+| Public RPC rejects raw_json_get before raw fixture payloads can be returned. | passed | status=200, errorCode=-32601, reason=method.not_found |
+| Public HTTP bridge observation POST alias is rejected instead of wrapping into bridge_observation_submit. | passed | status=200, errorCode=-32601, reason=method.not_found |
 | Invalid method params return the stable JSON-RPC invalid-params error. | passed | status=200, errorCode=-32602, reason=params.invalid |
 | Empty JSON-RPC batches are rejected before dispatch. | passed | status=400, reason=request.batch_empty |
 | JSON-RPC batches above the local cap are rejected before dispatch. | passed | status=413, reason=request.batch_too_large, maxBatchRequests=50 |

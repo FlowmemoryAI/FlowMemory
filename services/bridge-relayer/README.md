@@ -54,6 +54,14 @@ RPC URL. Amounts remain uint256 decimal strings across observation, credit,
 runtime application, withdrawal intent, and release evidence. Re-running the
 same observed event is idempotent: the existing application is cited and the
 replay credit is rejected with evidence instead of applying a second credit.
+When `--runtime-state` is configured, credit application state is protected by
+an exclusive sidecar lock and atomic state-file replacement, so concurrent
+relayer processes cannot both apply the same replay key.
+
+Current gap: observed Base lockbox block ranges are still operator-supplied via
+`--from-block` and `--to-block`. The next exact hardening step is a persisted
+Base lockbox cursor file, updated only after a successful confirmed `eth_getLogs`
+range, with the same lock/atomic-write pattern used for `--runtime-state`.
 
 The control plane can read `services/bridge-relayer/out/bridge-observation.json`
 and can intake additional local bridge-agent observations through JSON-RPC

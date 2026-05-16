@@ -196,7 +196,10 @@ test("exposes RPC discovery and readiness without leaking env values", () => {
     }
     const response = dispatchJsonRpc({ jsonrpc: "2.0", id: 1, method: "rpc_discover" }) as RpcSuccessResponse;
     const readiness = dispatchJsonRpc({ jsonrpc: "2.0", id: 2, method: "rpc_readiness" }) as RpcSuccessResponse;
-    const methodNames = (response.result.methods as JsonObject[]).map((entry) => entry.method);
+    const methods = response.result.methods as JsonObject[];
+    const methodNames = methods.map((entry) => entry.method);
+    const rpcReadinessMethod = methods.find((entry) => entry.method === "rpc_readiness") as JsonObject;
+    const transactionSubmitMethod = methods.find((entry) => entry.method === "transaction_submit") as JsonObject;
 
     assert.equal(response.result.schema, "flowchain.rpc.discovery.v0");
     assert.equal(response.result.protocol, "JSON-RPC 2.0");
@@ -204,12 +207,25 @@ test("exposes RPC discovery and readiness without leaking env values", () => {
     assert.ok(methodNames.includes("bridge_credit_status"));
     assert.ok(methodNames.includes("rpc_readiness"));
     assert.equal(response.result.compatibility.evmJsonRpcCompatible, false);
+    assert.equal(response.result.deploymentMode, "local-only");
+    assert.equal(response.result.publicRpcReady, false);
+    assert.equal(response.result.localOnly, true);
     assert.equal(response.result.productionReady, false);
+    assert.equal(response.result.publicReadyMethodCount, 0);
+    assert.equal(rpcReadinessMethod.publicRpcEligible, true);
+    assert.equal(rpcReadinessMethod.productionReady, false);
+    assert.equal(transactionSubmitMethod.publicRpcEligible, false);
+    assert.equal(transactionSubmitMethod.localOnly, true);
 
     assert.equal(readiness.result.schema, "flowchain.rpc.readiness.v0");
+    assert.equal(readiness.result.status, "BLOCKED");
+    assert.equal(readiness.result.deploymentMode, "local-only");
+    assert.equal(readiness.result.publicRpcReady, false);
+    assert.equal(readiness.result.localOnly, true);
     assert.equal(readiness.result.envValuesPrinted, false);
     assert.equal(readiness.result.noSecrets, true);
     assert.equal(readiness.result.productionReady, false);
+    assert.equal(readiness.result.publicReadyMethodCount, 0);
     assert.ok((readiness.result.missingProductionEnvNames as string[]).includes("FLOWCHAIN_RPC_PUBLIC_URL"));
 
     process.env.FLOWCHAIN_RPC_PUBLIC_URL = "http://rpc.example.test";
@@ -219,6 +235,10 @@ test("exposes RPC discovery and readiness without leaking env values", () => {
     process.env.FLOWCHAIN_RPC_STATE_BACKUP_PATH = "configured-but-not-printed";
     const invalidReadiness = dispatchJsonRpc({ jsonrpc: "2.0", id: 3, method: "rpc_readiness" }) as RpcSuccessResponse;
     assert.equal(invalidReadiness.result.status, "FAILED");
+    assert.equal(invalidReadiness.result.deploymentMode, "public-owner-edge-blocked");
+    assert.equal(invalidReadiness.result.publicRpcReady, false);
+    assert.equal(invalidReadiness.result.localOnly, true);
+    assert.equal(invalidReadiness.result.productionReady, false);
     assert.ok((invalidReadiness.result.invalidProductionEnvNames as string[]).includes("FLOWCHAIN_RPC_PUBLIC_URL"));
     assert.ok((invalidReadiness.result.invalidProductionEnvNames as string[]).includes("FLOWCHAIN_RPC_ALLOWED_ORIGINS"));
     assert.ok((invalidReadiness.result.invalidProductionEnvNames as string[]).includes("FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE"));
@@ -1444,6 +1464,30 @@ test("HTTP server rejects abusive public RPC POST shapes before dispatch", async
     assert.equal(malformedData.schema, "flowmemory.control_plane.error.v0");
     assert.equal(malformedData.reasonCode, "parse.error");
     assert.equal(malformedData.noSecrets, true);
+
+    for (const method of ["transaction_submit", "bridge_observation_submit", "raw_json_get", "flow_sendRawTransaction"]) {
+      const blocked = await fetch(`${baseUrl}/rpc`, {
+        method: "POST",
+        headers: { "content-type": "application/json", Origin: origin },
+        body: JSON.stringify({ jsonrpc: "2.0", id: method, method, params: { source: "launchCore" } }),
+      });
+      assert.equal(blocked.status, 200);
+      const blockedBody = await blocked.json() as JsonObject;
+      const blockedError = blockedBody.error as JsonObject;
+      const blockedData = blockedError.data as JsonObject;
+      assert.equal(blockedError.code, -32601);
+      assert.equal(blockedData.reasonCode, "method.not_found");
+      assert.equal(blockedData.noSecrets, true);
+    }
+
+    const bridgeObservationPostAlias = await fetch(`${baseUrl}/bridge/observations`, {
+      method: "POST",
+      headers: { "content-type": "application/json", Origin: origin },
+      body: JSON.stringify({ observationId: "public-http-abuse" }),
+    });
+    assert.equal(bridgeObservationPostAlias.status, 200);
+    const bridgeObservationPostAliasBody = await bridgeObservationPostAlias.json() as JsonObject;
+    assert.equal(((bridgeObservationPostAliasBody.error as JsonObject).data as JsonObject).reasonCode, "method.not_found");
 
     const emptyBatch = await fetch(`${baseUrl}/rpc`, {
       method: "POST",

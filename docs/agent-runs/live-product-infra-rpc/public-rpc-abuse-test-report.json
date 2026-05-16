@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_abuse_test_report.v0",
-    "generatedAt":  "2026-05-16T10:49:53.6351258Z",
+    "generatedAt":  "2026-05-16T11:40:28.8441917Z",
     "status":  "passed",
     "abuseTestReady":  true,
     "validationScope":  "local-control-plane-public-rpc-abuse-harness",
@@ -17,6 +17,10 @@
                    "unsupportedMediaTypeRejected":  true,
                    "malformedJsonRejected":  true,
                    "unknownMethodRejected":  true,
+                   "transactionSubmitRejected":  true,
+                   "bridgeObservationSubmitRejected":  true,
+                   "rawJsonGetRejected":  true,
+                   "bridgeObservationPostAliasRejected":  true,
                    "badParamsRejected":  true,
                    "emptyBatchRejected":  true,
                    "oversizedBatchRejected":  true,
@@ -29,9 +33,9 @@
 
                      ],
     "caseCounts":  {
-                       "passed":  13,
+                       "passed":  17,
                        "failed":  0,
-                       "total":  13
+                       "total":  17
                    },
     "cases":  [
                   {
@@ -135,7 +139,79 @@
                                        "schema":  "flowmemory.control_plane.error.v0",
                                        "reasonCode":  "method.not_found",
                                        "errorCode":  -32601,
-                                       "noSecretsFlag":  null,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  false,
+                                       "errorMessage":  ""
+                                   }
+                  },
+                  {
+                      "id":  "transaction-submit-rejected",
+                      "requirement":  "Public RPC rejects transaction_submit before local file-intake dispatch.",
+                      "status":  "passed",
+                      "evidence":  "status=200, errorCode=-32601, reason=method.not_found",
+                      "response":  {
+                                       "id":  "transaction-submit-rejected",
+                                       "httpStatus":  200,
+                                       "schema":  "flowmemory.control_plane.error.v0",
+                                       "reasonCode":  "method.not_found",
+                                       "errorCode":  -32601,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  false,
+                                       "errorMessage":  ""
+                                   }
+                  },
+                  {
+                      "id":  "bridge-observation-submit-rejected",
+                      "requirement":  "Public RPC rejects bridge_observation_submit before local bridge observation intake dispatch.",
+                      "status":  "passed",
+                      "evidence":  "status=200, errorCode=-32601, reason=method.not_found",
+                      "response":  {
+                                       "id":  "bridge-observation-submit-rejected",
+                                       "httpStatus":  200,
+                                       "schema":  "flowmemory.control_plane.error.v0",
+                                       "reasonCode":  "method.not_found",
+                                       "errorCode":  -32601,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  false,
+                                       "errorMessage":  ""
+                                   }
+                  },
+                  {
+                      "id":  "raw-json-get-rejected",
+                      "requirement":  "Public RPC rejects raw_json_get before raw fixture payloads can be returned.",
+                      "status":  "passed",
+                      "evidence":  "status=200, errorCode=-32601, reason=method.not_found",
+                      "response":  {
+                                       "id":  "raw-json-get-rejected",
+                                       "httpStatus":  200,
+                                       "schema":  "flowmemory.control_plane.error.v0",
+                                       "reasonCode":  "method.not_found",
+                                       "errorCode":  -32601,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  false,
+                                       "errorMessage":  ""
+                                   }
+                  },
+                  {
+                      "id":  "bridge-observation-post-alias-rejected",
+                      "requirement":  "Public HTTP bridge observation POST alias is rejected instead of wrapping into bridge_observation_submit.",
+                      "status":  "passed",
+                      "evidence":  "status=200, errorCode=-32601, reason=method.not_found",
+                      "response":  {
+                                       "id":  "bridge-observation-post-alias-rejected",
+                                       "httpStatus":  200,
+                                       "schema":  "flowmemory.control_plane.error.v0",
+                                       "reasonCode":  "method.not_found",
+                                       "errorCode":  -32601,
+                                       "noSecretsFlag":  true,
                                        "corsHeaderPresent":  true,
                                        "retryAfterHeaderPresent":  false,
                                        "errorCaptured":  false,

@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -33,6 +33,8 @@ export const BRIDGE_DEPOSIT_TOPIC0 = keccak256Utf8(BRIDGE_DEPOSIT_EVENT_SIGNATUR
 export const BRIDGE_DEPOSIT_LEGACY_TOPIC0 = keccak256Utf8(BRIDGE_DEPOSIT_LEGACY_EVENT_SIGNATURE_TEXT);
 export const PILOT_MODE_TAG = keccak256Utf8("flowchain.base8453.owner-pilot.v0");
 export const FIXED_TEST_OBSERVED_AT = "2026-05-13T00:00:00.000Z";
+const APPLICATION_STATE_LOCK_TIMEOUT_MS = 10_000;
+const APPLICATION_STATE_LOCK_RETRY_MS = 25;
 
 type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue | undefined };
 
@@ -1062,6 +1064,70 @@ function loadApplicationState(path?: string): BridgeRuntimeCreditApplicationStat
   };
 }
 
+function sleepSync(ms: number): void {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+function acquireApplicationStateLock(statePath: string): { fd: number; lockPath: string } {
+  const resolvedStatePath = resolve(statePath);
+  const lockPath = `${resolvedStatePath}.lock`;
+  mkdirSync(dirname(resolvedStatePath), { recursive: true });
+  const deadline = Date.now() + APPLICATION_STATE_LOCK_TIMEOUT_MS;
+
+  for (;;) {
+    try {
+      const fd = openSync(lockPath, "wx", 0o600);
+      try {
+        writeFileSync(fd, `${JSON.stringify({
+          pid: process.pid,
+          statePath: resolvedStatePath,
+          acquiredAt: new Date().toISOString(),
+        }, null, 2)}\n`);
+        return { fd, lockPath };
+      } catch (error) {
+        closeSync(fd);
+        rmSync(lockPath, { force: true });
+        throw error;
+      }
+    } catch (error) {
+      const code = typeof error === "object" && error !== null && "code" in error
+        ? String((error as { code?: unknown }).code)
+        : "";
+      if (code !== "EEXIST") {
+        throw error;
+      }
+      if (Date.now() >= deadline) {
+        throw new Error(`timed out waiting for bridge runtime credit state lock: ${lockPath}`);
+      }
+      sleepSync(APPLICATION_STATE_LOCK_RETRY_MS);
+    }
+  }
+}
+
+function releaseApplicationStateLock(lock: { fd: number; lockPath: string }): void {
+  try {
+    closeSync(lock.fd);
+  } finally {
+    rmSync(lock.lockPath, { force: true });
+  }
+}
+
+function withApplicationStateLock<T>(statePath: string | undefined, operation: () => T): T {
+  if (statePath === undefined) {
+    return operation();
+  }
+  const lock = acquireApplicationStateLock(statePath);
+  try {
+    const testHoldMs = Number(process.env.FLOWCHAIN_BRIDGE_STATE_LOCK_TEST_HOLD_MS ?? "0");
+    if (Number.isFinite(testHoldMs) && testHoldMs > 0) {
+      sleepSync(Math.min(testHoldMs, 1_000));
+    }
+    return operation();
+  } finally {
+    releaseApplicationStateLock(lock);
+  }
+}
+
 function makeRuntimeApplication(
   credit: BridgeCredit,
   status: BridgeRuntimeCreditApplication["status"],
@@ -1107,46 +1173,55 @@ function saveApplicationState(path: string, state: BridgeRuntimeCreditApplicatio
   const outPath = resolve(path);
   mkdirSync(dirname(outPath), { recursive: true });
   assertNoSecrets(normalized);
-  writeFileSync(outPath, `${JSON.stringify(normalized, null, 2)}\n`);
+  const tmpPath = `${outPath}.${process.pid}.${Date.now()}.tmp`;
+  try {
+    writeFileSync(tmpPath, `${JSON.stringify(normalized, null, 2)}\n`, { flag: "wx" });
+    renameSync(tmpPath, outPath);
+  } catch (error) {
+    rmSync(tmpPath, { force: true });
+    throw error;
+  }
 }
 
 function applyCreditsExactlyOnce(
   credits: BridgeCredit[],
   runtimeStatePath?: string,
 ): BridgeRuntimeCreditApplication[] {
-  const state = loadApplicationState(runtimeStatePath);
-  const applications: BridgeRuntimeCreditApplication[] = [];
-  let changed = false;
+  return withApplicationStateLock(runtimeStatePath, () => {
+    const state = loadApplicationState(runtimeStatePath);
+    const applications: BridgeRuntimeCreditApplication[] = [];
+    let changed = false;
 
-  for (const credit of credits) {
-    if (credit.status !== "applied") {
-      if (credit.status === "rejected") {
-        applications.push(makeRuntimeApplication(credit, "rejected", undefined, credit.rejectionReason));
+    for (const credit of credits) {
+      if (credit.status !== "applied") {
+        if (credit.status === "rejected") {
+          applications.push(makeRuntimeApplication(credit, "rejected", undefined, credit.rejectionReason));
+        }
+        continue;
       }
-      continue;
+
+      const previousApplicationId = state.appliedReplayKeys[credit.replayKey];
+      if (previousApplicationId !== undefined) {
+        credit.status = "rejected";
+        credit.appliedAt = undefined;
+        credit.rejectionReason = "already_applied_replay_key";
+        applications.push(makeRuntimeApplication(credit, "idempotent_replay", previousApplicationId, credit.rejectionReason));
+        continue;
+      }
+
+      const application = makeRuntimeApplication(credit, "applied");
+      state.appliedReplayKeys[credit.replayKey] = application.applicationId;
+      state.applications.push(application);
+      applications.push(application);
+      changed = true;
     }
 
-    const previousApplicationId = state.appliedReplayKeys[credit.replayKey];
-    if (previousApplicationId !== undefined) {
-      credit.status = "rejected";
-      credit.appliedAt = undefined;
-      credit.rejectionReason = "already_applied_replay_key";
-      applications.push(makeRuntimeApplication(credit, "idempotent_replay", previousApplicationId, credit.rejectionReason));
-      continue;
+    if (runtimeStatePath !== undefined && changed) {
+      saveApplicationState(runtimeStatePath, state);
     }
 
-    const application = makeRuntimeApplication(credit, "applied");
-    state.appliedReplayKeys[credit.replayKey] = application.applicationId;
-    state.applications.push(application);
-    applications.push(application);
-    changed = true;
-  }
-
-  if (runtimeStatePath !== undefined && changed) {
-    saveApplicationState(runtimeStatePath, state);
-  }
-
-  return applications;
+    return applications;
+  });
 }
 
 export function makeRuntimeHandoff(

@@ -6,8 +6,9 @@ import { fileURLToPath } from "node:url";
 import { createEncryptedTestVault, exportLocalWalletPublicMetadata } from "../../../crypto/src/wallet.js";
 import { dispatchJsonRpc } from "./json-rpc.ts";
 import { loadControlPlaneState, resolveControlPlanePath } from "./fixture-state.ts";
+import { isPublicRpcMethod } from "./methods.ts";
 import { executeWalletSend } from "./wallet-runtime.ts";
-import type { JsonObject } from "./types.ts";
+import type { ControlPlaneContext, JsonObject, RpcResponse } from "./types.ts";
 
 interface ServerOptions {
   host: string;
@@ -69,10 +70,16 @@ function writeRequestError(res: ServerResponse, error: unknown, fallbackMessage:
   });
 }
 
-function jsonRpcHttpError(code: number, message: string, reasonCode: string, data: JsonObject = {}): JsonObject {
+function jsonRpcHttpError(
+  code: number,
+  message: string,
+  reasonCode: string,
+  data: JsonObject = {},
+  id: string | number | null = null,
+): JsonObject {
   return {
     jsonrpc: "2.0",
-    id: null,
+    id,
     error: {
       code,
       message,
@@ -86,6 +93,44 @@ function jsonRpcHttpError(code: number, message: string, reasonCode: string, dat
       },
     },
   };
+}
+
+function isJsonObject(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function jsonRpcRequestId(value: Record<string, unknown>): string | number | null {
+  const id = value.id;
+  return typeof id === "string" || typeof id === "number" || id === null ? id : null;
+}
+
+function publicRpcMethodNotFound(request: Record<string, unknown>): RpcResponse | undefined {
+  if (!("id" in request)) {
+    return undefined;
+  }
+  const method = typeof request.method === "string" ? request.method : "";
+  return jsonRpcHttpError(
+    -32601,
+    `control-plane method not found: ${method}`,
+    "method.not_found",
+    { method },
+    jsonRpcRequestId(request),
+  ) as RpcResponse;
+}
+
+function dispatchPublicJsonRpc(request: unknown, context: ControlPlaneContext): RpcResponse | RpcResponse[] | undefined {
+  if (Array.isArray(request)) {
+    const responses = request
+      .map((entry) => dispatchPublicJsonRpc(entry, context))
+      .filter((entry): entry is RpcResponse => entry !== undefined && !Array.isArray(entry));
+    return responses.length === 0 ? undefined : responses;
+  }
+
+  if (isJsonObject(request) && request.jsonrpc === "2.0" && typeof request.method === "string" && !isPublicRpcMethod(request.method)) {
+    return publicRpcMethodNotFound(request);
+  }
+
+  return dispatchJsonRpc(request, context);
 }
 
 function isJsonContentType(req: IncomingMessage): boolean {
@@ -616,7 +661,17 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
       return;
     }
 
-    if (req.method !== "POST" || (req.url !== "/rpc" && req.url !== "/bridge/observations")) {
+    if (req.method === "POST" && requestUrl?.pathname === "/bridge/observations") {
+      writeJson(res, 200, jsonRpcHttpError(
+        -32601,
+        "control-plane method not found: bridge_observation_submit",
+        "method.not_found",
+        { method: "bridge_observation_submit" },
+      ));
+      return;
+    }
+
+    if (req.method !== "POST" || req.url !== "/rpc") {
       writeJson(res, 404, { error: "not found" });
       return;
     }
@@ -631,10 +686,7 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
         if (req.url === "/rpc" && !validateJsonRpcHttpPayload(payload, res)) {
           return;
         }
-        const rpcPayload = req.url === "/bridge/observations"
-          ? { jsonrpc: "2.0", id: "bridge-observation-submit", method: "bridge_observation_submit", params: { observation: payload } }
-          : payload;
-        const response = dispatchJsonRpc(rpcPayload, { state });
+        const response = dispatchPublicJsonRpc(payload, { state });
         if (response === undefined) {
           res.writeHead(204, jsonHeaders);
           res.end();

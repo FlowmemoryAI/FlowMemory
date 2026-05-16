@@ -390,6 +390,52 @@ try {
         -Response $unknown `
         -Evidence "status=$($unknown.statusCode), errorCode=$(Get-AbuseResponseErrorCode -Response $unknown), reason=$(Get-AbuseResponseReasonCode -Response $unknown)"
 
+    $transactionSubmitBody = @{
+        jsonrpc = "2.0"
+        id = "blocked-transaction-submit"
+        method = "transaction_submit"
+        params = @{ signedEnvelope = @{ schema = "flowmemory.abuse_test_signed_envelope.v0"; signature = "0xabuse" } }
+    } | ConvertTo-Json -Depth 8 -Compress
+    $transactionSubmit = Invoke-AbuseHttpRequest -Method "POST" -Uri "$baseUrl/rpc" -Headers (New-AbuseHeaders) -ContentType "application/json" -Body $transactionSubmitBody
+    Add-AbuseCase -Id "transaction-submit-rejected" `
+        -Requirement "Public RPC rejects transaction_submit before local file-intake dispatch." `
+        -Passed (($transactionSubmit.statusCode -eq 200) -and ((Get-AbuseResponseErrorCode -Response $transactionSubmit) -eq -32601) -and ((Get-AbuseResponseReasonCode -Response $transactionSubmit) -eq "method.not_found")) `
+        -Response $transactionSubmit `
+        -Evidence "status=$($transactionSubmit.statusCode), errorCode=$(Get-AbuseResponseErrorCode -Response $transactionSubmit), reason=$(Get-AbuseResponseReasonCode -Response $transactionSubmit)"
+
+    $bridgeObservationSubmitBody = @{
+        jsonrpc = "2.0"
+        id = "blocked-bridge-observation-submit"
+        method = "bridge_observation_submit"
+        params = @{ observation = @{ observationId = "abuse-observation" } }
+    } | ConvertTo-Json -Depth 8 -Compress
+    $bridgeObservationSubmit = Invoke-AbuseHttpRequest -Method "POST" -Uri "$baseUrl/rpc" -Headers (New-AbuseHeaders) -ContentType "application/json" -Body $bridgeObservationSubmitBody
+    Add-AbuseCase -Id "bridge-observation-submit-rejected" `
+        -Requirement "Public RPC rejects bridge_observation_submit before local bridge observation intake dispatch." `
+        -Passed (($bridgeObservationSubmit.statusCode -eq 200) -and ((Get-AbuseResponseErrorCode -Response $bridgeObservationSubmit) -eq -32601) -and ((Get-AbuseResponseReasonCode -Response $bridgeObservationSubmit) -eq "method.not_found")) `
+        -Response $bridgeObservationSubmit `
+        -Evidence "status=$($bridgeObservationSubmit.statusCode), errorCode=$(Get-AbuseResponseErrorCode -Response $bridgeObservationSubmit), reason=$(Get-AbuseResponseReasonCode -Response $bridgeObservationSubmit)"
+
+    $rawJsonGetBody = @{
+        jsonrpc = "2.0"
+        id = "blocked-raw-json-get"
+        method = "raw_json_get"
+        params = @{ source = "launchCore" }
+    } | ConvertTo-Json -Depth 8 -Compress
+    $rawJsonGet = Invoke-AbuseHttpRequest -Method "POST" -Uri "$baseUrl/rpc" -Headers (New-AbuseHeaders) -ContentType "application/json" -Body $rawJsonGetBody
+    Add-AbuseCase -Id "raw-json-get-rejected" `
+        -Requirement "Public RPC rejects raw_json_get before raw fixture payloads can be returned." `
+        -Passed (($rawJsonGet.statusCode -eq 200) -and ((Get-AbuseResponseErrorCode -Response $rawJsonGet) -eq -32601) -and ((Get-AbuseResponseReasonCode -Response $rawJsonGet) -eq "method.not_found")) `
+        -Response $rawJsonGet `
+        -Evidence "status=$($rawJsonGet.statusCode), errorCode=$(Get-AbuseResponseErrorCode -Response $rawJsonGet), reason=$(Get-AbuseResponseReasonCode -Response $rawJsonGet)"
+
+    $bridgeObservationAlias = Invoke-AbuseHttpRequest -Method "POST" -Uri "$baseUrl/bridge/observations" -Headers (New-AbuseHeaders) -ContentType "application/json" -Body (@{ observationId = "abuse-observation-alias" } | ConvertTo-Json -Compress)
+    Add-AbuseCase -Id "bridge-observation-post-alias-rejected" `
+        -Requirement "Public HTTP bridge observation POST alias is rejected instead of wrapping into bridge_observation_submit." `
+        -Passed (($bridgeObservationAlias.statusCode -eq 200) -and ((Get-AbuseResponseErrorCode -Response $bridgeObservationAlias) -eq -32601) -and ((Get-AbuseResponseReasonCode -Response $bridgeObservationAlias) -eq "method.not_found")) `
+        -Response $bridgeObservationAlias `
+        -Evidence "status=$($bridgeObservationAlias.statusCode), errorCode=$(Get-AbuseResponseErrorCode -Response $bridgeObservationAlias), reason=$(Get-AbuseResponseReasonCode -Response $bridgeObservationAlias)"
+
     $badParamsBody = @{
         jsonrpc = "2.0"
         id = 2
@@ -508,6 +554,10 @@ $checks = [ordered]@{
     unsupportedMediaTypeRejected = @($cases | Where-Object { $_.id -eq "unsupported-media-type" -and $_.status -eq "passed" }).Count -eq 1
     malformedJsonRejected = @($cases | Where-Object { $_.id -eq "malformed-json" -and $_.status -eq "passed" }).Count -eq 1
     unknownMethodRejected = @($cases | Where-Object { $_.id -eq "unknown-method" -and $_.status -eq "passed" }).Count -eq 1
+    transactionSubmitRejected = @($cases | Where-Object { $_.id -eq "transaction-submit-rejected" -and $_.status -eq "passed" }).Count -eq 1
+    bridgeObservationSubmitRejected = @($cases | Where-Object { $_.id -eq "bridge-observation-submit-rejected" -and $_.status -eq "passed" }).Count -eq 1
+    rawJsonGetRejected = @($cases | Where-Object { $_.id -eq "raw-json-get-rejected" -and $_.status -eq "passed" }).Count -eq 1
+    bridgeObservationPostAliasRejected = @($cases | Where-Object { $_.id -eq "bridge-observation-post-alias-rejected" -and $_.status -eq "passed" }).Count -eq 1
     badParamsRejected = @($cases | Where-Object { $_.id -eq "bad-params" -and $_.status -eq "passed" }).Count -eq 1
     emptyBatchRejected = @($cases | Where-Object { $_.id -eq "empty-batch" -and $_.status -eq "passed" }).Count -eq 1
     oversizedBatchRejected = @($cases | Where-Object { $_.id -eq "oversized-batch" -and $_.status -eq "passed" }).Count -eq 1

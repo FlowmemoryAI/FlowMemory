@@ -6,6 +6,7 @@ machine-checkable audits.
 
 Last aligned to local evidence from:
 
+- `docs/agent-runs/live-product-infra-rpc/PRODUCTION_TRUTH_TABLE.md`
 - `docs/agent-runs/live-product-infra-rpc/PUBLIC_DEPLOYMENT_CONTRACT.md`
 - `docs/agent-runs/live-product-infra-rpc/OPS_SNAPSHOT.md`
 - `docs/agent-runs/live-product-infra-rpc/COMPLETION_AUDIT.md`
@@ -18,8 +19,31 @@ queue for getting there.
 
 FlowChain has a working local/private runtime profile with service evidence,
 wallet flow evidence, block-height advancement, owner onboarding docs,
-public-RPC edge templates, backup/restore rehearsal tooling, ops snapshotting,
-and fail-closed audits.
+public-RPC edge templates, hardened backup/restore rehearsal tooling, ops
+snapshotting, incident drills, public RPC abuse tests, and fail-closed audits.
+The public RPC discovery/readiness contract now self-reports deployment mode,
+`publicRpcReady`, `productionReady`, and `localOnly` consistently, and the
+local public-RPC validation rehearsal proves a local endpoint stays
+non-production instead of advertising itself as shareable.
+
+The latest service status after restoring explicit live profile observed live
+block height `35906`, and a direct follow-up check advanced block height from
+`35906` to `35908`. Wallet-to-wallet service flow passed in the latest full
+completion audit, separate tester wallets transacted, and the public deployment
+contract stayed fail-closed before endpoint sharing.
+
+The current production truth table is intentionally `stale` until the full
+completion audit is rerun after the latest public RPC changes. Its current
+classification is 10 gates passed, 12 blocked on known owner inputs, 0 blocked
+on repo-owned work, 0 failed, and 1 stale item: `completion-audit`, because the
+completion audit evidence is older than the refreshed public deployment
+contract.
+
+The latest backup/restore validation is stronger than a simple round trip. It
+proves the latest manifest points at the newest snapshot, restores the latest
+snapshot, avoids targeting live state during rehearsals, and rejects corrupt,
+tampered, missing-artifact, missing-manifest, stale-pointer, and wrong-chain
+evidence.
 
 It is still not production-live because the latest deployment contract remains
 blocked on external owner-provided deployment inputs and because several
@@ -139,25 +163,27 @@ Minimum proof:
 
 ### 3. Backup, Restore, and Disaster Recovery
 
-Current evidence has manifest-backed backup and restore rehearsal tooling, but
-the configured owner backup path is missing. The expensive work is production
-DR: scheduled backups, retention, restore-to-new-host proof, corruption
-detection, and runbooks that can be followed during an incident.
+Current evidence has hardened manifest-backed backup and restore rehearsal
+tooling, but the configured owner backup path is missing. The expensive work is
+production DR: owner-path proof, scheduled backups, retention,
+restore-to-new-host proof, measured RPO/RTO, and runbooks that can be followed
+during an incident.
 
 Missing buildout:
 
 - Owner-configured backup path validation using
   `FLOWCHAIN_RPC_STATE_BACKUP_PATH`.
 - Scheduled snapshot automation with rotation and retention.
-- Restore-to-clean-directory proof.
+- Restore-to-clean-directory proof against the owner-configured path.
 - Restore-to-new-host proof, or a no-secrets dry-run that documents every host
   requirement.
 - Backup manifest schema versioning.
 - Snapshot integrity checks for state DB, ledger, wallet test fixtures,
   runtime config, chain id, genesis hash, latest height, finalized height, and
   content hashes.
-- Corruption detection for missing files, modified files, mismatched manifest,
-  wrong chain id, and stale finalized height.
+- Continued adversarial validation for missing files, modified files,
+  mismatched manifests, wrong chain id, stale latest pointer, and stale
+  finalized height as new backup surfaces are added.
 - Recovery runbook for public RPC node, bridge observer, control plane, and
   external tester packet.
 - RPO and RTO targets with a script that measures whether the current setup
@@ -175,8 +201,9 @@ Minimum proof:
 - `npm run flowchain:backup:create`
 - `npm run flowchain:backup:restore:verify`
 - `npm run flowchain:backup:check`
-- New DR report showing restore rehearsal, corruption detection, measured RPO,
-  measured RTO, and remaining owner blockers.
+- DR report showing owner-path snapshot proof, latest-snapshot restore proof,
+  adversarial tamper/missing/wrong-chain rejection, measured RPO, measured RTO,
+  and remaining owner blockers.
 
 ### 4. Observability and Incident Operations
 
@@ -445,16 +472,22 @@ Minimum proof:
 
 ### 12. Final Completion Audit
 
-The completion audit is currently stale relative to the newest backup, ops, and
-public RPC bundle work. The expensive work is making the audit fast enough,
-fresh enough, and strict enough to be the actual release gate.
+The completion audit is currently the highest-priority repo-owned freshness
+gap. It was fresh earlier, but after public RPC hardening the truth table now
+marks it stale because the completion-audit evidence predates the refreshed
+public deployment contract. A timed parent audit run also showed why timeout
+handling matters: the aggregate can stop the live service before completing, so
+the audit loop must either finish, restart cleanly, or leave unmistakable
+recovery evidence. The service has since been restarted in explicit live
+profile and block production was rechecked.
 
 Missing buildout:
 
 - Completion audit refresh that includes latest backup/restore, ops snapshot,
   public RPC bundle, owner inputs, bridge checks, tester packet, public
   deployment contract, no-secret scan, unsafe-claim scan, and service monitor.
-- Timeout handling that does not leave orphan audit processes.
+- Timeout handling that does not leave orphan audit processes or leave the live
+  service stopped after parent interruption.
 - Freshness windows for every evidence file.
 - Clear distinction between failed repo-owned checks and blocked owner-input
   checks.

@@ -113,6 +113,7 @@ try {
     $readinessReport = Read-FlowChainJsonIfExists -Path $readinessReportPath
 
     $checks = Get-ValidationProp -Object $readinessReport -Name "checks"
+    $deploymentChecks = Get-ValidationProp -Object $readinessReport -Name "deploymentChecks"
     $cors = Get-ValidationProp -Object $readinessReport -Name "cors"
     $endpointChecks = @((Get-ValidationProp -Object $readinessReport -Name "endpointChecks" -Default @()))
     $failedEndpointChecks = @($endpointChecks | Where-Object { "$($_.status)" -ne "passed" })
@@ -123,6 +124,9 @@ try {
     $validationChecks = [ordered]@{
         readinessExitedCleanly = $readinessExitCode -eq 0
         localEndpointBlocksPublicReady = (Get-ValidationProp -Object $readinessReport -Name "status") -eq "blocked" -and (Get-ValidationProp -Object $readinessReport -Name "explicitLocalEndpoint") -eq $true -and (Get-ValidationProp -Object $readinessReport -Name "publicRpcReady") -eq $false
+        localEndpointSelfReportsNonProduction = (Get-ValidationProp -Object $deploymentChecks -Name "readinessEndpointPresent" -Default $false) -eq $true -and (Get-ValidationProp -Object $deploymentChecks -Name "readinessPublicRpcReady" -Default $true) -eq $false -and (Get-ValidationProp -Object $deploymentChecks -Name "readinessProductionReady" -Default $true) -eq $false -and (Get-ValidationProp -Object $deploymentChecks -Name "readinessLocalOnlyFalse" -Default $true) -eq $false -and (Get-ValidationProp -Object $deploymentChecks -Name "readinessDeploymentModePublicEdge" -Default $true) -eq $false
+        discoveryMatchesReadinessDeployment = (Get-ValidationProp -Object $checks -Name "discoveryMatchesReadinessDeployment" -Default $false) -eq $true
+        readinessDeploymentFlagsConsistent = (Get-ValidationProp -Object $checks -Name "readinessDeploymentFlagsConsistent" -Default $false) -eq $true
         noPublicRpcEnvMissing = $missingEnvNames.Count -eq 0
         noFailedEndpointChecks = $failedEndpointChecks.Count -eq 0
         allowedOriginAccepted = (Get-ValidationProp -Object $checks -Name "corsConfiguredOriginAccepted" -Default $false) -eq $true -and (Get-ValidationProp -Object $cors -Name "configuredOriginAccepted" -Default $false) -eq $true
