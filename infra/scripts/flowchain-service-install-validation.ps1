@@ -3,7 +3,9 @@ param(
     [string] $ReportPath = "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json",
     [string] $MarkdownPath = "docs/agent-runs/live-product-infra-rpc/SERVICE_INSTALL_VALIDATION.md",
     [string] $PlanReportPath = "docs/agent-runs/live-product-infra-rpc/service-install-windows-report.json",
-    [string] $PlanMarkdownPath = "docs/agent-runs/live-product-infra-rpc/WINDOWS_SERVICE_INSTALL.md"
+    [string] $PlanMarkdownPath = "docs/agent-runs/live-product-infra-rpc/WINDOWS_SERVICE_INSTALL.md",
+    [string] $BridgeRelayerPlanReportPath = "docs/agent-runs/live-product-infra-rpc/service-install-windows-bridge-relayer-report.json",
+    [string] $BridgeRelayerPlanMarkdownPath = "docs/agent-runs/live-product-infra-rpc/WINDOWS_SERVICE_INSTALL_BRIDGE_RELAYER.md"
 )
 
 $ErrorActionPreference = "Stop"
@@ -17,6 +19,8 @@ $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Reso
 $markdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $MarkdownPath)
 $planReportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $PlanReportPath)
 $planMarkdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $PlanMarkdownPath)
+$bridgeRelayerPlanReportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $BridgeRelayerPlanReportPath)
+$bridgeRelayerPlanMarkdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $BridgeRelayerPlanMarkdownPath)
 $installScriptPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "infra/scripts/flowchain-service-install-windows.ps1")
 $supervisorScriptPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "infra/scripts/flowchain-service-supervisor.ps1")
 $validationTmpDir = Join-Path $repoRoot "devnet/local/tmp/service-install-validation"
@@ -121,6 +125,26 @@ $planChecks = Get-ServiceInstallValidationProp -Object $planReport -Name "checks
 $planCommands = Get-ServiceInstallValidationProp -Object $planReport -Name "commands"
 $planScheduledTask = Get-ServiceInstallValidationProp -Object $planReport -Name "scheduledTask"
 
+$bridgeRelayerPlanResult = Invoke-ServiceInstallValidationChild -ArgumentList @(
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    $installScriptPath,
+    "-Action",
+    "Plan",
+    "-TaskName",
+    "$TaskName-BridgeRelayer",
+    "-StartBridgeRelayerLoop",
+    "-ReportPath",
+    $bridgeRelayerPlanReportFullPath,
+    "-MarkdownPath",
+    $bridgeRelayerPlanMarkdownFullPath
+)
+$bridgeRelayerPlanReport = Read-FlowChainJsonIfExists -Path $bridgeRelayerPlanReportFullPath
+$bridgeRelayerPlanChecks = Get-ServiceInstallValidationProp -Object $bridgeRelayerPlanReport -Name "checks"
+$bridgeRelayerPlanScheduledTask = Get-ServiceInstallValidationProp -Object $bridgeRelayerPlanReport -Name "scheduledTask"
+
 $requiredScripts = @(
     "flowchain:service:install:windows",
     "flowchain:service:install:validate",
@@ -139,6 +163,12 @@ $planMutationPerformed = [bool](Get-ServiceInstallValidationProp -Object $planRe
 $planPassed = [int]$planResult.exitCode -eq 0 -and $planStatus -eq "passed" -and $planAction -eq "Plan"
 $planDidNotMutate = $planPassed -and ($planMutationPerformed -eq $false)
 $scheduledTaskArguments = [string](Get-ServiceInstallValidationProp -Object $planScheduledTask -Name "arguments" -Default "")
+$bridgeRelayerPlanStatus = [string](Get-ServiceInstallValidationProp -Object $bridgeRelayerPlanReport -Name "status" -Default "missing")
+$bridgeRelayerPlanAction = [string](Get-ServiceInstallValidationProp -Object $bridgeRelayerPlanReport -Name "action" -Default "")
+$bridgeRelayerPlanMutationPerformed = [bool](Get-ServiceInstallValidationProp -Object $bridgeRelayerPlanReport -Name "taskMutationPerformed" -Default $true)
+$bridgeRelayerPlanPassed = [int]$bridgeRelayerPlanResult.exitCode -eq 0 -and $bridgeRelayerPlanStatus -eq "passed" -and $bridgeRelayerPlanAction -eq "Plan"
+$bridgeRelayerPlanDidNotMutate = $bridgeRelayerPlanPassed -and ($bridgeRelayerPlanMutationPerformed -eq $false)
+$bridgeRelayerScheduledTaskArguments = [string](Get-ServiceInstallValidationProp -Object $bridgeRelayerPlanScheduledTask -Name "arguments" -Default "")
 
 $checks = [ordered]@{
     installScriptExists = $installScriptExists
@@ -152,6 +182,11 @@ $checks = [ordered]@{
     actionUsesRepoWorkingDirectory = (Get-ServiceInstallValidationProp -Object $planChecks -Name "actionUsesRepoWorkingDirectory" -Default $false) -eq $true
     liveProfileDefault = (Get-ServiceInstallValidationProp -Object $planChecks -Name "liveProfileDefault" -Default $false) -eq $true
     noBridgeRelayerDefault = (Get-ServiceInstallValidationProp -Object $planChecks -Name "noBridgeRelayerDefault" -Default $false) -eq $true
+    bridgeRelayerOptInPlanCommandPassed = $bridgeRelayerPlanPassed
+    bridgeRelayerOptInPlanDidNotMutate = $bridgeRelayerPlanDidNotMutate
+    bridgeRelayerOptInStartsLoop = (Get-ServiceInstallValidationProp -Object $bridgeRelayerPlanScheduledTask -Name "startsBridgeRelayerLoop" -Default $false) -eq $true
+    bridgeRelayerOptInAddsSupervisorFlag = $bridgeRelayerScheduledTaskArguments -match "(^|\s)-StartBridgeRelayerLoop(\s|$)"
+    bridgeRelayerOptInUsesSupervisor = (Get-ServiceInstallValidationProp -Object $bridgeRelayerPlanChecks -Name "actionUsesSupervisor" -Default $false) -eq $true
     hasIntervalSeconds = (Get-ServiceInstallValidationProp -Object $planChecks -Name "hasIntervalSeconds" -Default $false) -eq $true
     hasMaxRestartAttempts = (Get-ServiceInstallValidationProp -Object $planChecks -Name "hasMaxRestartAttempts" -Default $false) -eq $true
     hasMaxStateAgeSeconds = (Get-ServiceInstallValidationProp -Object $planChecks -Name "hasMaxStateAgeSeconds" -Default $false) -eq $true
@@ -186,8 +221,19 @@ $report = [ordered]@{
             timedOut = [bool]$planResult.timedOut
             stdoutPath = [string]$planResult.stdoutPath
             stderrPath = [string]$planResult.stderrPath
+        },
+        [ordered]@{
+            name = "service-install-bridge-relayer-opt-in-plan"
+            exitCode = [int]$bridgeRelayerPlanResult.exitCode
+            timedOut = [bool]$bridgeRelayerPlanResult.timedOut
+            stdoutPath = [string]$bridgeRelayerPlanResult.stdoutPath
+            stderrPath = [string]$bridgeRelayerPlanResult.stderrPath
         }
     )
+    planReports = [ordered]@{
+        default = $planReportFullPath
+        bridgeRelayerOptIn = $bridgeRelayerPlanReportFullPath
+    }
     commands = [ordered]@{
         plan = "npm run flowchain:service:install:windows -- -Action Plan"
         install = "npm run flowchain:service:install:windows -- -Action Install"

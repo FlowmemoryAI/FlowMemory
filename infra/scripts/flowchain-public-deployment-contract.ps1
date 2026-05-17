@@ -571,6 +571,12 @@ $serviceInstallReady = ($serviceInstallValidationStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "scheduledTaskActionSupportsWorkingDirectory" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "actionUsesSupervisor" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "liveProfileDefault" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "noBridgeRelayerDefault" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInPlanCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInStartsLoop" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInAddsSupervisorFlag" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInUsesSupervisor" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "commandOmitsNonLiveProfile" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "commandsPresent" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $serviceInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
@@ -580,7 +586,7 @@ $serviceInstallReady = ($serviceInstallValidationStatus -eq "passed") `
 Add-DeploymentItem -Items $items -Id "service-install-automation" `
     -Requirement "The owner host has a no-secret Windows install, status, and uninstall path for registering the live supervisor as a reboot-persistent scheduled task." `
     -Status $(if ($serviceInstallReady) { "passed" } else { "failed" }) `
-    -Evidence "serviceInstallValidation=$serviceInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "planDidNotMutate"), liveProfileDefault=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "liveProfileDefault"), commandsPresent=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "commandsPresent")" `
+    -Evidence "serviceInstallValidation=$serviceInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "planDidNotMutate"), liveProfileDefault=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "liveProfileDefault"), relayerDefaultOff=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "noBridgeRelayerDefault"), relayerOptIn=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInStartsLoop"), commandsPresent=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "commandsPresent")" `
     -Commands @("npm run flowchain:service:install:validate", "npm run flowchain:service:install:windows -- -Action Plan", "npm run flowchain:service:install:windows -- -Action Install", "npm run flowchain:service:install:windows -- -Action Status", "npm run flowchain:service:install:windows -- -Action Uninstall")
 
 $opsSnapshot = $reports.opsSnapshot

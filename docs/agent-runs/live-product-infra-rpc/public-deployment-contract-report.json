@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-17T19:26:49.7845143Z",
+    "generatedAt":  "2026-05-17T19:31:09.0280686Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -152,7 +152,7 @@
                       "id":  "service-install-automation",
                       "requirement":  "The owner host has a no-secret Windows install, status, and uninstall path for registering the live supervisor as a reboot-persistent scheduled task.",
                       "status":  "passed",
-                      "evidence":  "serviceInstallValidation=passed, planDidNotMutate=True, liveProfileDefault=True, commandsPresent=True",
+                      "evidence":  "serviceInstallValidation=passed, planDidNotMutate=True, liveProfileDefault=True, relayerDefaultOff=True, relayerOptIn=True, commandsPresent=True",
                       "commands":  [
                                        "npm run flowchain:service:install:validate",
                                        "npm run flowchain:service:install:windows -- -Action Plan",

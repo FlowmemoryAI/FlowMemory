@@ -1,18 +1,18 @@
 {
     "schema":  "flowchain.service_install_windows_report.v0",
-    "generatedAt":  "2026-05-17T19:30:16.4192244Z",
+    "generatedAt":  "2026-05-17T19:30:20.1966447Z",
     "status":  "passed",
     "action":  "Plan",
     "plannedOnly":  true,
     "taskMutationPerformed":  false,
     "taskRegistered":  false,
     "taskRemoved":  false,
-    "taskName":  "FlowChainLiveSupervisor",
+    "taskName":  "FlowChainLiveSupervisor-BridgeRelayer",
     "taskPath":  "\\",
     "taskBefore":  {
                        "exists":  false,
                        "schedulerAvailable":  true,
-                       "taskName":  "FlowChainLiveSupervisor",
+                       "taskName":  "FlowChainLiveSupervisor-BridgeRelayer",
                        "taskPath":  "\\",
                        "state":  "",
                        "lastRunTime":  "",
@@ -23,7 +23,7 @@
     "taskAfter":  {
                       "exists":  false,
                       "schedulerAvailable":  true,
-                      "taskName":  "FlowChainLiveSupervisor",
+                      "taskName":  "FlowChainLiveSupervisor-BridgeRelayer",
                       "taskPath":  "\\",
                       "state":  "",
                       "lastRunTime":  "",
@@ -64,10 +64,10 @@
     "scheduledTask":  {
                           "trigger":  "AtLogOn",
                           "execute":  "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
-                          "arguments":  "-NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-service-supervisor.ps1 -StatePath devnet/local/state.json -NodeDir devnet/local/node -ServicesDir devnet/local/services -ControlPlaneHost 127.0.0.1 -ControlPlanePort 8787 -BlockMs 1000 -IntervalSeconds 30 -MaxRestartAttempts 3 -MaxStateAgeSeconds 90",
+                          "arguments":  "-NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-service-supervisor.ps1 -StatePath devnet/local/state.json -NodeDir devnet/local/node -ServicesDir devnet/local/services -ControlPlaneHost 127.0.0.1 -ControlPlanePort 8787 -BlockMs 1000 -IntervalSeconds 30 -MaxRestartAttempts 3 -MaxStateAgeSeconds 90 -StartBridgeRelayerLoop",
                           "workingDirectory":  "E:/FlowMemory/flowmemory-live-infra-rpc",
                           "supervisorScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-service-supervisor.ps1",
-                          "startsBridgeRelayerLoop":  false,
+                          "startsBridgeRelayerLoop":  true,
                           "liveProfileDefault":  true
                       },
     "supervisor":  {
@@ -95,7 +95,7 @@
                    "actionUsesSupervisor":  true,
                    "actionUsesRepoWorkingDirectory":  true,
                    "liveProfileDefault":  true,
-                   "noBridgeRelayerDefault":  true,
+                   "noBridgeRelayerDefault":  false,
                    "hasIntervalSeconds":  true,
                    "hasMaxRestartAttempts":  true,
                    "hasMaxStateAgeSeconds":  true,

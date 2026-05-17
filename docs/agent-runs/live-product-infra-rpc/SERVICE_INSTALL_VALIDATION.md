@@ -1,6 +1,6 @@
 ﻿# FlowChain Service Install Validation
 
-Generated: 2026-05-17T16:24:09.2069534Z
+Generated: 2026-05-17T19:30:20.6553366Z
 Status: passed
 
 This validation proves the Windows Scheduled Task install path is planned, no-secret, live-profile by default, and non-mutating when run in plan mode.
@@ -18,6 +18,11 @@ This validation proves the Windows Scheduled Task install path is planned, no-se
 - actionUsesRepoWorkingDirectory: True
 - liveProfileDefault: True
 - noBridgeRelayerDefault: True
+- bridgeRelayerOptInPlanCommandPassed: True
+- bridgeRelayerOptInPlanDidNotMutate: True
+- bridgeRelayerOptInStartsLoop: True
+- bridgeRelayerOptInAddsSupervisorFlag: True
+- bridgeRelayerOptInUsesSupervisor: True
 - hasIntervalSeconds: True
 - hasMaxRestartAttempts: True
 - hasMaxStateAgeSeconds: True
