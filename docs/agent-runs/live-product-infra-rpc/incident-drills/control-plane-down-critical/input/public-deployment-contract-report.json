@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-17T13:32:31.1587045Z",
+    "generatedAt":  "2026-05-17T14:49:22.5057567Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -87,9 +87,9 @@
                   },
                   {
                       "id":  "public-rpc-edge-template",
-                      "requirement":  "Public RPC exposure has a no-values owner edge template and deployment bundle for HTTPS reverse proxying, rate limiting, verification, and rollback.",
+                      "requirement":  "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, verification, and rollback.",
                       "status":  "passed",
-                      "evidence":  "edgeTemplateStatus=passed, bundleStatus=passed, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True",
+                      "evidence":  "edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True",
                       "commands":  [
                                        "npm run flowchain:public-rpc:edge-template",
                                        "npm run flowchain:public-rpc:deployment-bundle"
@@ -102,7 +102,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=55155, finalizedHeight=55155",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=55994, finalizedHeight=55994",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],

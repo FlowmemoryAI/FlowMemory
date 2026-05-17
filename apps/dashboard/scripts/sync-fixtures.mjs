@@ -39,6 +39,7 @@ const liveReadinessReportCopies = [
   "flowchain-live-infra-check-report.json",
   "service-status-report.json",
   "service-monitor-report.json",
+  "public-rpc-deployment-bundle-report.json",
   "public-rpc-readiness-report.json",
   "backup-readiness-report.json",
   "bridge-relayer-once-report.json",
@@ -176,6 +177,7 @@ function writeLiveReadinessSummary() {
   const serviceStatus = reports["service-status-report.json"];
   const monitor = reports["service-monitor-report.json"];
   const bridgeRelayer = reports["bridge-relayer-once-report.json"];
+  const publicRpcDeploymentBundle = reports["public-rpc-deployment-bundle-report.json"];
   const externalTesterPacket = reports["external-tester-packet-report.json"];
   const opsSnapshot = reports["ops-snapshot-report.json"];
   const opsAlertRules = reports["ops-alert-rules-report.json"];
@@ -225,6 +227,8 @@ function writeLiveReadinessSummary() {
       monitorHeightAdvanced: monitor?.heightAdvanced === true,
       bridgeRelayerStatus: asText(bridgeRelayer?.status, "not recorded"),
       bridgeQueuedTransactions: asText(bridgeRelayer?.counts?.queuedTransactions, "0"),
+      publicRpcDeploymentBundleStatus: asText(publicRpcDeploymentBundle?.status, "not recorded"),
+      publicRpcOwnerRenderValidationStatus: asText(publicRpcDeploymentBundle?.renderValidation?.status, "not recorded"),
       externalTesterPacketStatus: asText(externalTesterPacket?.status, "not recorded"),
       ownerInputReady: ownerInputs?.ownerInputReady === true,
       noSecretStatus: asText(noSecretScan?.status, "not recorded"),

@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Bundle
 
-Generated: 2026-05-17T13:32:34.7142058Z
+Generated: 2026-05-17T14:49:27.0094405Z
 Status: passed
 
 This bundle packages placeholder-only files for an owner-operated HTTPS edge in front of the repo-owned private RPC origin `127.0.0.1:8787`.
@@ -37,6 +37,7 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - <FLOWCHAIN_RPC_NGINX_RENDERED_CONF>
 - <FLOWCHAIN_NGINX_EXE>
 - <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>
+- <FLOWCHAIN_NGINX_WINDOWS_PREFLIGHT_SCRIPT>
 - <FLOWCHAIN_SYSTEMD_RENDERED_UNIT>
 - <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>
 - <PREVIOUS_FLOWCHAIN_RPC_NGINX_CONF>
@@ -78,7 +79,7 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - systemd-analyze verify <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>
 - nginx -t
 - bash <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>
-- powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>
+- powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_NGINX_WINDOWS_PREFLIGHT_SCRIPT>
 
 ## Rollback Commands
 
@@ -118,6 +119,13 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - renderScriptTokensPresent: True
 - nginxPreflightTokensPresent: True
 - windowsNginxPreflightTokensPresent: True
+- ownerRenderValidationPassed: True
+- ownerRenderCommandPassed: True
+- ownerRenderFilesHaveNoPlaceholders: True
+- ownerRenderWritesShellPreflight: True
+- ownerRenderWritesWindowsPreflight: True
+- ownerRenderDoesNotPrintTokenHash: True
+- ownerRenderFilesDoNotContainTokenHash: True
 - includesPrivateOrigin: True
 - includesRateLimitPlaceholder: True
 - includesTlsPlaceholders: True

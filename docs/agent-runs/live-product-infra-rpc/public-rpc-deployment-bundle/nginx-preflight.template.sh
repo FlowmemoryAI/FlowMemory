@@ -6,10 +6,10 @@ public_host="<FLOWCHAIN_RPC_PUBLIC_HOST>"
 public_url="<FLOWCHAIN_RPC_PUBLIC_URL>"
 allowed_origin="<FLOWCHAIN_RPC_ALLOWED_ORIGIN>"
 
-test "${rendered_conf}" != "<FLOWCHAIN_RPC_NGINX_RENDERED_CONF>"
-test "${public_host}" != "<FLOWCHAIN_RPC_PUBLIC_HOST>"
-test "${public_url}" != "<FLOWCHAIN_RPC_PUBLIC_URL>"
-test "${allowed_origin}" != "<FLOWCHAIN_RPC_ALLOWED_ORIGIN>"
+test -n "${rendered_conf}"
+test -n "${public_host}"
+test -n "${public_url}"
+test -n "${allowed_origin}"
 test -f "${rendered_conf}"
 
 case "${public_url}" in
@@ -17,7 +17,7 @@ case "${public_url}" in
   *) echo "FLOWCHAIN_RPC_PUBLIC_URL must be https"; exit 1 ;;
 esac
 
-if grep -Eq '<FLOWCHAIN_|<PATH_TO_TLS_' "${rendered_conf}"; then
+if grep -Eq '<(FLOWCHAIN_|PATH_TO_TLS_)' "${rendered_conf}"; then
   echo "Rendered Nginx config still contains placeholders."
   exit 1
 fi

@@ -14,7 +14,8 @@ if (-not $PublicUrl.StartsWith("https://", [System.StringComparison]::OrdinalIgn
 if ([string]::IsNullOrWhiteSpace($AllowedOrigin) -or -not $AllowedOrigin.StartsWith("https://", [System.StringComparison]::OrdinalIgnoreCase)) { throw "FLOWCHAIN_RPC_ALLOWED_ORIGIN must be an exact https origin." }
 
 $rendered = Get-Content -Raw -LiteralPath $RenderedConfig
-if ($rendered -match "<FLOWCHAIN_|<PATH_TO_TLS_|<FLOWCHAIN_NGINX_") { throw "Rendered Nginx config still contains placeholders." }
+$placeholderPattern = [regex]::Escape("<") + "(FLOWCHAIN_|PATH_TO_TLS_|FLOWCHAIN_NGINX_)"
+if ($rendered -match $placeholderPattern) { throw "Rendered Nginx config still contains placeholders." }
 @(
     "proxy_pass http://127.0.0.1:8787;",
     "limit_req_zone",

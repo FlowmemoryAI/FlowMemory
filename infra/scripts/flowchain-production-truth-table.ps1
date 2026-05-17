@@ -120,7 +120,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "public-rpc-deployment-bundle"
-        requirement = "No-secret public RPC deployment bundle exists for HTTPS reverse proxying, verification, and rollback."
+        requirement = "No-secret public RPC deployment bundle exists and owner-render validation proves HTTPS reverse proxy, service, shell preflight, Windows preflight, verification, and rollback artifacts render safely."
         path = "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
         command = "npm run flowchain:public-rpc:deployment-bundle"
         productionGate = $true

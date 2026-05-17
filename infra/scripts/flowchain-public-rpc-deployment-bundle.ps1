@@ -64,6 +64,186 @@ function Test-CheckMapPassed {
     return $true
 }
 
+function Test-BundlePathInsideRoot {
+    param(
+        [Parameter(Mandatory = $true)][string] $Path,
+        [Parameter(Mandatory = $true)][string] $Root
+    )
+
+    $fullPath = [System.IO.Path]::GetFullPath($Path)
+    $fullRoot = [System.IO.Path]::GetFullPath($Root).TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+    return $fullPath.Equals($fullRoot, [System.StringComparison]::OrdinalIgnoreCase) -or $fullPath.StartsWith("$fullRoot$([System.IO.Path]::DirectorySeparatorChar)", [System.StringComparison]::OrdinalIgnoreCase)
+}
+
+function Invoke-PublicRpcBundleRenderValidation {
+    param(
+        [Parameter(Mandatory = $true)][string] $RepoRoot,
+        [Parameter(Mandatory = $true)][string] $BundleDir
+    )
+
+    $safeTokenHash = "0000000000000000000000000000000000000000000000000000000000000000"
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "flowchain-public-rpc-render-validation-$PID-$([Guid]::NewGuid().ToString("N"))"
+    $ownerEnvFile = Join-Path $tempRoot "owner-public-rpc.env"
+    $renderDir = Join-Path $tempRoot "rendered"
+    $backupDir = Join-Path $tempRoot "backups"
+    $tlsCertPath = Join-Path $tempRoot "tls-cert.pem"
+    $tlsKeyPath = Join-Path $tempRoot "tls-key.pem"
+    $nginxExe = Join-Path $tempRoot "nginx.exe"
+    $renderScriptPath = Join-Path $BundleDir "render-public-rpc-bundle.template.ps1"
+    $renderedReportPath = Join-Path $renderDir "public-rpc-render-report.json"
+    $renderOutput = @()
+    $renderExitCode = 1
+    $problem = ""
+
+    $checks = [ordered]@{
+        renderScriptExists = $false
+        tempRootOutsideRepo = $false
+        ownerEnvOutsideRepo = $false
+        renderDirOutsideRepo = $false
+        renderCommandPassed = $false
+        renderedReportWritten = $false
+        renderedNginxWritten = $false
+        renderedSystemdServiceWritten = $false
+        renderedSystemdSupervisorWritten = $false
+        renderedShellPreflightWritten = $false
+        renderedWindowsPreflightWritten = $false
+        renderedFilesHaveNoPlaceholders = $false
+        renderedNginxHasHttpsHost = $false
+        renderedNginxHasRateLimit = $false
+        renderedSystemdUsesOwnerEnv = $false
+        renderedPreflightsUsePublicUrl = $false
+        renderedReportPassed = $false
+        renderedReportKeepsOwnerPathsOutsideRepo = $false
+        renderOutputDoesNotPrintTokenHash = $false
+        renderedFilesDoNotContainTokenHash = $false
+        renderedReportDoesNotContainTokenHash = $false
+        renderedReportNoSecrets = $false
+        cleanupAttempted = $false
+        broadcastsFalse = $true
+    }
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRoot, $renderDir, $backupDir | Out-Null
+        Set-Content -LiteralPath $tlsCertPath -Value "dummy certificate path sentinel" -Encoding UTF8
+        Set-Content -LiteralPath $tlsKeyPath -Value "dummy key path sentinel" -Encoding UTF8
+        Set-Content -LiteralPath $nginxExe -Value "dummy nginx path sentinel" -Encoding UTF8
+        Set-Content -LiteralPath $ownerEnvFile -Value (@(
+            "FLOWCHAIN_RPC_PUBLIC_URL=https://rpc.flowchain.example",
+            "FLOWCHAIN_RPC_ALLOWED_ORIGINS=https://wallet.flowchain.example",
+            "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE=60",
+            "FLOWCHAIN_RPC_TLS_TERMINATED=true",
+            "FLOWCHAIN_RPC_STATE_BACKUP_PATH=$backupDir",
+            "FLOWCHAIN_TESTER_WRITE_ENABLED=true",
+            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256=$safeTokenHash",
+            "FLOWCHAIN_TESTER_MAX_SEND_UNITS=10"
+        ) -join "`r`n") -Encoding UTF8
+
+        $checks.renderScriptExists = Test-Path -LiteralPath $renderScriptPath
+        $checks.tempRootOutsideRepo = -not (Test-BundlePathInsideRoot -Path $tempRoot -Root $RepoRoot)
+        $checks.ownerEnvOutsideRepo = -not (Test-BundlePathInsideRoot -Path $ownerEnvFile -Root $RepoRoot)
+        $checks.renderDirOutsideRepo = -not (Test-BundlePathInsideRoot -Path $renderDir -Root $RepoRoot)
+
+        if (-not $checks.renderScriptExists) {
+            throw "Owner render script was not generated."
+        }
+
+        $renderOutput = @(& powershell -NoProfile -ExecutionPolicy Bypass -File $renderScriptPath `
+            -BundleDir $BundleDir `
+            -RenderDir $renderDir `
+            -OwnerEnvFile $ownerEnvFile `
+            -RepoRoot $RepoRoot `
+            -ServiceUser "flowchain" `
+            -ServiceGroup "flowchain" `
+            -TlsCertificatePath $tlsCertPath `
+            -TlsCertificateKeyPath $tlsKeyPath `
+            -NginxExe $nginxExe 2>&1 | ForEach-Object { "$_" })
+        $renderExitCode = $LASTEXITCODE
+        $checks.renderCommandPassed = $renderExitCode -eq 0
+
+        $renderedNginxPath = Join-Path $renderDir "nginx-flowchain-rpc.conf"
+        $renderedSystemdPath = Join-Path $renderDir "flowchain-live.service"
+        $renderedSupervisorPath = Join-Path $renderDir "flowchain-supervisor.service"
+        $renderedShellPreflightPath = Join-Path $renderDir "nginx-preflight.sh"
+        $renderedWindowsPreflightPath = Join-Path $renderDir "nginx-preflight.ps1"
+        $renderedPaths = @(
+            $renderedNginxPath,
+            $renderedSystemdPath,
+            $renderedSupervisorPath,
+            $renderedShellPreflightPath,
+            $renderedWindowsPreflightPath
+        )
+
+        $checks.renderedReportWritten = Test-Path -LiteralPath $renderedReportPath
+        $checks.renderedNginxWritten = Test-Path -LiteralPath $renderedNginxPath
+        $checks.renderedSystemdServiceWritten = Test-Path -LiteralPath $renderedSystemdPath
+        $checks.renderedSystemdSupervisorWritten = Test-Path -LiteralPath $renderedSupervisorPath
+        $checks.renderedShellPreflightWritten = Test-Path -LiteralPath $renderedShellPreflightPath
+        $checks.renderedWindowsPreflightWritten = Test-Path -LiteralPath $renderedWindowsPreflightPath
+
+        $renderedTexts = @()
+        foreach ($path in $renderedPaths) {
+            if (Test-Path -LiteralPath $path) {
+                $renderedTexts += Get-Content -Raw -LiteralPath $path
+            }
+        }
+        $renderedAllText = $renderedTexts -join "`n"
+        $renderOutputText = @($renderOutput) -join "`n"
+        $checks.renderedFilesHaveNoPlaceholders = $renderedAllText -notmatch "<FLOWCHAIN_|<PATH_TO_"
+        $checks.renderedNginxHasHttpsHost = $renderedAllText.Contains("server_name rpc.flowchain.example;") -and $renderedAllText.Contains("https://rpc.flowchain.example")
+        $checks.renderedNginxHasRateLimit = $renderedAllText.Contains("rate=60r/m") -and $renderedAllText.Contains("limit_req zone=flowchain_rpc_per_ip")
+        $checks.renderedSystemdUsesOwnerEnv = $renderedAllText.Contains("EnvironmentFile=$ownerEnvFile") -and $renderedAllText.Contains("FLOWCHAIN_OWNER_ENV_FILE=$ownerEnvFile")
+        $checks.renderedPreflightsUsePublicUrl = $renderedAllText.Contains("https://rpc.flowchain.example") -and $renderedAllText.Contains("https://wallet.flowchain.example")
+        $checks.renderOutputDoesNotPrintTokenHash = -not $renderOutputText.Contains($safeTokenHash)
+        $checks.renderedFilesDoNotContainTokenHash = -not $renderedAllText.Contains($safeTokenHash)
+
+        $renderReport = Read-FlowChainJsonIfExists -Path $renderedReportPath
+        if ($null -ne $renderReport) {
+            $renderReportText = $renderReport | ConvertTo-Json -Depth 12
+            $checks.renderedReportPassed = "$($renderReport.status)" -eq "passed"
+            $checks.renderedReportKeepsOwnerPathsOutsideRepo = $renderReport.renderDirInsideRepo -eq $false -and $renderReport.ownerEnvFileInsideRepo -eq $false
+            $checks.renderedReportDoesNotContainTokenHash = -not $renderReportText.Contains($safeTokenHash)
+            Assert-FlowChainNoSecretText -Text $renderReportText -Label "public RPC owner render validation report"
+            $checks.renderedReportNoSecrets = $true
+        }
+
+        Assert-FlowChainNoSecretText -Text $renderOutputText -Label "public RPC owner render output"
+        Assert-FlowChainNoSecretText -Text $renderedAllText -Label "public RPC rendered owner files"
+    }
+    catch {
+        $problem = $_.Exception.Message
+    }
+    finally {
+        $tempBase = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
+        $tempFull = [System.IO.Path]::GetFullPath($tempRoot)
+        $tempLeaf = Split-Path -Leaf $tempFull
+        if ($tempFull.StartsWith($tempBase, [System.StringComparison]::OrdinalIgnoreCase) -and $tempLeaf.StartsWith("flowchain-public-rpc-render-validation-", [System.StringComparison]::Ordinal)) {
+            $checks.cleanupAttempted = $true
+            Remove-Item -LiteralPath $tempFull -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    $failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+    return [ordered]@{
+        schema = "flowchain.public_rpc_owner_render_validation.v0"
+        status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+        checks = $checks
+        failedChecks = @($failedChecks)
+        renderExitCode = [int]$renderExitCode
+        problem = $problem
+        renderedFileNames = @(
+            "nginx-flowchain-rpc.conf",
+            "flowchain-live.service",
+            "flowchain-supervisor.service",
+            "nginx-preflight.sh",
+            "nginx-preflight.ps1",
+            "public-rpc-render-report.json"
+        )
+        envValuesPrinted = $false
+        noSecrets = $failedChecks -notcontains "renderedReportNoSecrets"
+        broadcasts = $false
+    }
+}
+
 $repoRoot = Set-FlowChainRepoRoot
 $bundleFullDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $BundleDir)
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
@@ -106,6 +286,7 @@ $requiredPlaceholders = @(
     "<FLOWCHAIN_RPC_NGINX_RENDERED_CONF>",
     "<FLOWCHAIN_NGINX_EXE>",
     "<FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>",
+    "<FLOWCHAIN_NGINX_WINDOWS_PREFLIGHT_SCRIPT>",
     "<FLOWCHAIN_SYSTEMD_RENDERED_UNIT>",
     "<FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>",
     "<PREVIOUS_FLOWCHAIN_RPC_NGINX_CONF>",
@@ -132,7 +313,7 @@ $ownerPreflightCommands = @(
     "systemd-analyze verify <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>",
     "nginx -t",
     "bash <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>",
-    "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>"
+    "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_NGINX_WINDOWS_PREFLIGHT_SCRIPT>"
 )
 
 $ownerRenderCommands = @(
@@ -215,6 +396,7 @@ $preflightRequiredTokens = @(
     'public_url="<FLOWCHAIN_RPC_PUBLIC_URL>"',
     'allowed_origin="<FLOWCHAIN_RPC_ALLOWED_ORIGIN>"',
     'grep -Fq "proxy_pass http://127.0.0.1:8787;" "${rendered_conf}"',
+    "grep -Eq '<(FLOWCHAIN_|PATH_TO_TLS_)' `"`${rendered_conf}`"",
     "nginx -t",
     'curl -fsS --max-time 5 "http://127.0.0.1:8787/health" >/dev/null',
     'curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/rpc/readiness" >/dev/null'
@@ -233,6 +415,7 @@ $windowsPreflightRequiredTokens = @(
     'Invoke-RestMethod -Uri "http://127.0.0.1:8787/health"',
     '$publicBase = $PublicUrl.TrimEnd("/")',
     'Invoke-WebRequest -Uri "$publicBase/rpc/readiness"',
+    '$placeholderPattern = [regex]::Escape("<") + "(FLOWCHAIN_|PATH_TO_TLS_|FLOWCHAIN_NGINX_)"',
     '"method":"rpc_readiness"'
 )
 
@@ -248,10 +431,14 @@ $renderScriptRequiredTokens = @(
     'FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE',
     'FLOWCHAIN_RPC_TLS_TERMINATED',
     'FLOWCHAIN_TESTER_WRITE_ENABLED',
+    'FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256',
+    'FLOWCHAIN_TESTER_MAX_SEND_UNITS',
     'nginx-flowchain-rpc.template.conf',
     'flowchain-live.service.template',
     'flowchain-supervisor.service.template',
+    'nginx-preflight.template.sh',
     'nginx-preflight.template.ps1',
+    '<FLOWCHAIN_NGINX_WINDOWS_PREFLIGHT_SCRIPT>',
     'envValuesPrinted = $false',
     'noSecrets = $true'
 )
@@ -363,10 +550,10 @@ $nginxPreflightScriptLines = @(
     'public_url="<FLOWCHAIN_RPC_PUBLIC_URL>"',
     'allowed_origin="<FLOWCHAIN_RPC_ALLOWED_ORIGIN>"',
     "",
-    'test "${rendered_conf}" != "<FLOWCHAIN_RPC_NGINX_RENDERED_CONF>"',
-    'test "${public_host}" != "<FLOWCHAIN_RPC_PUBLIC_HOST>"',
-    'test "${public_url}" != "<FLOWCHAIN_RPC_PUBLIC_URL>"',
-    'test "${allowed_origin}" != "<FLOWCHAIN_RPC_ALLOWED_ORIGIN>"',
+    'test -n "${rendered_conf}"',
+    'test -n "${public_host}"',
+    'test -n "${public_url}"',
+    'test -n "${allowed_origin}"',
     'test -f "${rendered_conf}"',
     "",
     'case "${public_url}" in',
@@ -374,7 +561,7 @@ $nginxPreflightScriptLines = @(
     '  *) echo "FLOWCHAIN_RPC_PUBLIC_URL must be https"; exit 1 ;;',
     'esac',
     "",
-    'if grep -Eq ''<FLOWCHAIN_|<PATH_TO_TLS_'' "${rendered_conf}"; then',
+    'if grep -Eq ''<(FLOWCHAIN_|PATH_TO_TLS_)'' "${rendered_conf}"; then',
     '  echo "Rendered Nginx config still contains placeholders."',
     '  exit 1',
     'fi',
@@ -432,7 +619,8 @@ $windowsNginxPreflightScriptLines = @(
     'if ([string]::IsNullOrWhiteSpace($AllowedOrigin) -or -not $AllowedOrigin.StartsWith("https://", [System.StringComparison]::OrdinalIgnoreCase)) { throw "FLOWCHAIN_RPC_ALLOWED_ORIGIN must be an exact https origin." }',
     "",
     '$rendered = Get-Content -Raw -LiteralPath $RenderedConfig',
-    'if ($rendered -match "<FLOWCHAIN_|<PATH_TO_TLS_|<FLOWCHAIN_NGINX_") { throw "Rendered Nginx config still contains placeholders." }',
+    '$placeholderPattern = [regex]::Escape("<") + "(FLOWCHAIN_|PATH_TO_TLS_|FLOWCHAIN_NGINX_)"',
+    'if ($rendered -match $placeholderPattern) { throw "Rendered Nginx config still contains placeholders." }',
     '@(',
     '    "proxy_pass http://127.0.0.1:8787;",',
     '    "limit_req_zone",',
@@ -582,6 +770,9 @@ function Render-Template {
     if ($remainingPlaceholders.Count -gt 0) {
         throw "Rendered output still contains replacement placeholders: $(Split-Path -Leaf $OutPath)"
     }
+    if ($text -match '<FLOWCHAIN_|<PATH_TO_') {
+        throw "Rendered output still contains an unknown FlowChain placeholder: $(Split-Path -Leaf $OutPath)"
+    }
     Set-Content -LiteralPath $OutPath -Value $text -Encoding UTF8
 }
 
@@ -627,11 +818,21 @@ if ((Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_TLS_TE
 if ((Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_TESTER_WRITE_ENABLED").ToLowerInvariant() -ne "true") {
     throw "FLOWCHAIN_TESTER_WRITE_ENABLED must be true before rendering external tester gateway files."
 }
+$testerTokenHash = Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256"
+if ($testerTokenHash -notmatch '^[A-Fa-f0-9]{64}$') {
+    throw "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256 must be a SHA-256 hex digest before rendering external tester gateway files."
+}
+$testerMaxSendUnits = Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+if ($testerMaxSendUnits -notmatch '^[1-9][0-9]*$') {
+    throw "FLOWCHAIN_TESTER_MAX_SEND_UNITS must be a positive integer before rendering external tester gateway files."
+}
+[void](Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_STATE_BACKUP_PATH")
 
 $renderedNginxConf = Join-Path $renderFullPath "nginx-flowchain-rpc.conf"
 $renderedLiveUnit = Join-Path $renderFullPath "flowchain-live.service"
 $renderedSupervisorUnit = Join-Path $renderFullPath "flowchain-supervisor.service"
-$renderedPreflight = Join-Path $renderFullPath "nginx-preflight.ps1"
+$renderedShellPreflight = Join-Path $renderFullPath "nginx-preflight.sh"
+$renderedWindowsPreflight = Join-Path $renderFullPath "nginx-preflight.ps1"
 $renderedReport = Join-Path $renderFullPath "public-rpc-render-report.json"
 $cargoTarget = if ([string]::IsNullOrWhiteSpace($CargoTargetDir) -or $CargoTargetDir.StartsWith("<FLOWCHAIN_", [System.StringComparison]::Ordinal)) {
     Join-Path $repoFullPath "devnet/local/cargo-target-control-plane"
@@ -654,7 +855,8 @@ $replacements = @{
     "<FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR>" = $cargoTarget
     "<FLOWCHAIN_RPC_NGINX_RENDERED_CONF>" = $renderedNginxConf
     "<FLOWCHAIN_NGINX_EXE>" = (Get-RequiredParameter -Name "NginxExe" -Value $NginxExe)
-    "<FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>" = $renderedPreflight
+    "<FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>" = $renderedShellPreflight
+    "<FLOWCHAIN_NGINX_WINDOWS_PREFLIGHT_SCRIPT>" = $renderedWindowsPreflight
     "<FLOWCHAIN_SYSTEMD_RENDERED_UNIT>" = $renderedLiveUnit
     "<FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>" = $renderedSupervisorUnit
     "<PREVIOUS_FLOWCHAIN_RPC_NGINX_CONF>" = (Join-Path $renderFullPath "previous-nginx-flowchain-rpc.conf")
@@ -664,7 +866,8 @@ $replacements = @{
 Render-Template -TemplatePath (Join-Path $bundleFullPath "nginx-flowchain-rpc.template.conf") -OutPath $renderedNginxConf -Replacements $replacements
 Render-Template -TemplatePath (Join-Path $bundleFullPath "flowchain-live.service.template") -OutPath $renderedLiveUnit -Replacements $replacements
 Render-Template -TemplatePath (Join-Path $bundleFullPath "flowchain-supervisor.service.template") -OutPath $renderedSupervisorUnit -Replacements $replacements
-Render-Template -TemplatePath (Join-Path $bundleFullPath "nginx-preflight.template.ps1") -OutPath $renderedPreflight -Replacements $replacements
+Render-Template -TemplatePath (Join-Path $bundleFullPath "nginx-preflight.template.sh") -OutPath $renderedShellPreflight -Replacements $replacements
+Render-Template -TemplatePath (Join-Path $bundleFullPath "nginx-preflight.template.ps1") -OutPath $renderedWindowsPreflight -Replacements $replacements
 
 $report = [ordered]@{
     schema = "flowchain.public_rpc_owner_render_report.v0"
@@ -674,6 +877,7 @@ $report = [ordered]@{
         "nginx-flowchain-rpc.conf",
         "flowchain-live.service",
         "flowchain-supervisor.service",
+        "nginx-preflight.sh",
         "nginx-preflight.ps1"
     )
     requiredEnvNames = $requiredEnvNames
@@ -798,6 +1002,7 @@ $windowsNginxPreflightChecklistText = Join-BundleLines -Lines $windowsNginxPrefl
 $verifyText = Join-BundleLines -Lines $verifyLines
 $rollbackText = Join-BundleLines -Lines $rollbackLines
 $readmeText = Join-BundleLines -Lines $readmeLines
+$renderValidation = Invoke-PublicRpcBundleRenderValidation -RepoRoot $repoRoot -BundleDir $bundleFullDir
 $allBundleText = @(
     $readmeText,
     $nginxText,
@@ -838,6 +1043,13 @@ $checks = [ordered]@{
     renderScriptTokensPresent = Test-TextContainsAllTokens -Text $renderScriptText -Tokens $renderScriptRequiredTokens
     nginxPreflightTokensPresent = Test-TextContainsAllTokens -Text $nginxPreflightScriptText -Tokens $preflightRequiredTokens
     windowsNginxPreflightTokensPresent = Test-TextContainsAllTokens -Text $windowsNginxPreflightScriptText -Tokens $windowsPreflightRequiredTokens
+    ownerRenderValidationPassed = "$($renderValidation.status)" -eq "passed"
+    ownerRenderCommandPassed = ($renderValidation.checks.renderCommandPassed -eq $true)
+    ownerRenderFilesHaveNoPlaceholders = ($renderValidation.checks.renderedFilesHaveNoPlaceholders -eq $true)
+    ownerRenderWritesShellPreflight = ($renderValidation.checks.renderedShellPreflightWritten -eq $true)
+    ownerRenderWritesWindowsPreflight = ($renderValidation.checks.renderedWindowsPreflightWritten -eq $true)
+    ownerRenderDoesNotPrintTokenHash = ($renderValidation.checks.renderOutputDoesNotPrintTokenHash -eq $true)
+    ownerRenderFilesDoNotContainTokenHash = ($renderValidation.checks.renderedFilesDoNotContainTokenHash -eq $true)
     includesPrivateOrigin = ($nginxText.Contains("127.0.0.1:8787") -and $nginxPreflightScriptText.Contains("127.0.0.1:8787") -and $windowsNginxPreflightScriptText.Contains("127.0.0.1:8787"))
     includesRateLimitPlaceholder = $nginxText.Contains("<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>")
     includesTlsPlaceholders = ($nginxText.Contains("<PATH_TO_TLS_CERTIFICATE>") -and $nginxText.Contains("<PATH_TO_TLS_CERTIFICATE_KEY>"))
@@ -903,6 +1115,7 @@ $report = [ordered]@{
     ownerRenderCommands = $ownerRenderCommands
     ownerPreflightCommands = $ownerPreflightCommands
     rollbackCommands = $rollbackCommands
+    renderValidation = $renderValidation
     files = [ordered]@{
         readme = "README.md"
         nginxTemplate = "nginx-flowchain-rpc.template.conf"

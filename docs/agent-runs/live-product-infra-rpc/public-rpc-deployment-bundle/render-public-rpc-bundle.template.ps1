@@ -103,6 +103,9 @@ function Render-Template {
     if ($remainingPlaceholders.Count -gt 0) {
         throw "Rendered output still contains replacement placeholders: $(Split-Path -Leaf $OutPath)"
     }
+    if ($text -match '<FLOWCHAIN_|<PATH_TO_') {
+        throw "Rendered output still contains an unknown FlowChain placeholder: $(Split-Path -Leaf $OutPath)"
+    }
     Set-Content -LiteralPath $OutPath -Value $text -Encoding UTF8
 }
 
@@ -148,11 +151,21 @@ if ((Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_TLS_TE
 if ((Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_TESTER_WRITE_ENABLED").ToLowerInvariant() -ne "true") {
     throw "FLOWCHAIN_TESTER_WRITE_ENABLED must be true before rendering external tester gateway files."
 }
+$testerTokenHash = Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256"
+if ($testerTokenHash -notmatch '^[A-Fa-f0-9]{64}$') {
+    throw "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256 must be a SHA-256 hex digest before rendering external tester gateway files."
+}
+$testerMaxSendUnits = Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+if ($testerMaxSendUnits -notmatch '^[1-9][0-9]*$') {
+    throw "FLOWCHAIN_TESTER_MAX_SEND_UNITS must be a positive integer before rendering external tester gateway files."
+}
+[void](Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_STATE_BACKUP_PATH")
 
 $renderedNginxConf = Join-Path $renderFullPath "nginx-flowchain-rpc.conf"
 $renderedLiveUnit = Join-Path $renderFullPath "flowchain-live.service"
 $renderedSupervisorUnit = Join-Path $renderFullPath "flowchain-supervisor.service"
-$renderedPreflight = Join-Path $renderFullPath "nginx-preflight.ps1"
+$renderedShellPreflight = Join-Path $renderFullPath "nginx-preflight.sh"
+$renderedWindowsPreflight = Join-Path $renderFullPath "nginx-preflight.ps1"
 $renderedReport = Join-Path $renderFullPath "public-rpc-render-report.json"
 $cargoTarget = if ([string]::IsNullOrWhiteSpace($CargoTargetDir) -or $CargoTargetDir.StartsWith("<FLOWCHAIN_", [System.StringComparison]::Ordinal)) {
     Join-Path $repoFullPath "devnet/local/cargo-target-control-plane"
@@ -175,7 +188,8 @@ $replacements = @{
     "<FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR>" = $cargoTarget
     "<FLOWCHAIN_RPC_NGINX_RENDERED_CONF>" = $renderedNginxConf
     "<FLOWCHAIN_NGINX_EXE>" = (Get-RequiredParameter -Name "NginxExe" -Value $NginxExe)
-    "<FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>" = $renderedPreflight
+    "<FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>" = $renderedShellPreflight
+    "<FLOWCHAIN_NGINX_WINDOWS_PREFLIGHT_SCRIPT>" = $renderedWindowsPreflight
     "<FLOWCHAIN_SYSTEMD_RENDERED_UNIT>" = $renderedLiveUnit
     "<FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>" = $renderedSupervisorUnit
     "<PREVIOUS_FLOWCHAIN_RPC_NGINX_CONF>" = (Join-Path $renderFullPath "previous-nginx-flowchain-rpc.conf")
@@ -185,7 +199,8 @@ $replacements = @{
 Render-Template -TemplatePath (Join-Path $bundleFullPath "nginx-flowchain-rpc.template.conf") -OutPath $renderedNginxConf -Replacements $replacements
 Render-Template -TemplatePath (Join-Path $bundleFullPath "flowchain-live.service.template") -OutPath $renderedLiveUnit -Replacements $replacements
 Render-Template -TemplatePath (Join-Path $bundleFullPath "flowchain-supervisor.service.template") -OutPath $renderedSupervisorUnit -Replacements $replacements
-Render-Template -TemplatePath (Join-Path $bundleFullPath "nginx-preflight.template.ps1") -OutPath $renderedPreflight -Replacements $replacements
+Render-Template -TemplatePath (Join-Path $bundleFullPath "nginx-preflight.template.sh") -OutPath $renderedShellPreflight -Replacements $replacements
+Render-Template -TemplatePath (Join-Path $bundleFullPath "nginx-preflight.template.ps1") -OutPath $renderedWindowsPreflight -Replacements $replacements
 
 $report = [ordered]@{
     schema = "flowchain.public_rpc_owner_render_report.v0"
@@ -195,6 +210,7 @@ $report = [ordered]@{
         "nginx-flowchain-rpc.conf",
         "flowchain-live.service",
         "flowchain-supervisor.service",
+        "nginx-preflight.sh",
         "nginx-preflight.ps1"
     )
     requiredEnvNames = $requiredEnvNames

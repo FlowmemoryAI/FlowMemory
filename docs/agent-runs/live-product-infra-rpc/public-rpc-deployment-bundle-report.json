@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_bundle_report.v2",
-    "generatedAt":  "2026-05-17T13:32:34.7142058Z",
+    "generatedAt":  "2026-05-17T14:49:27.0094405Z",
     "status":  "passed",
     "bundleDir":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle",
     "flowChainRpcIsRepoOwned":  true,
@@ -31,6 +31,7 @@
                                  "\u003cFLOWCHAIN_RPC_NGINX_RENDERED_CONF\u003e",
                                  "\u003cFLOWCHAIN_NGINX_EXE\u003e",
                                  "\u003cFLOWCHAIN_NGINX_PREFLIGHT_SCRIPT\u003e",
+                                 "\u003cFLOWCHAIN_NGINX_WINDOWS_PREFLIGHT_SCRIPT\u003e",
                                  "\u003cFLOWCHAIN_SYSTEMD_RENDERED_UNIT\u003e",
                                  "\u003cFLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT\u003e",
                                  "\u003cPREVIOUS_FLOWCHAIN_RPC_NGINX_CONF\u003e",
@@ -61,7 +62,7 @@
                                    "systemd-analyze verify \u003cFLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT\u003e",
                                    "nginx -t",
                                    "bash \u003cFLOWCHAIN_NGINX_PREFLIGHT_SCRIPT\u003e",
-                                   "powershell -NoProfile -ExecutionPolicy Bypass -File \u003cFLOWCHAIN_NGINX_PREFLIGHT_SCRIPT\u003e"
+                                   "powershell -NoProfile -ExecutionPolicy Bypass -File \u003cFLOWCHAIN_NGINX_WINDOWS_PREFLIGHT_SCRIPT\u003e"
                                ],
     "rollbackCommands":  [
                              "npm run flowchain:ops:snapshot -- -AllowBlocked",
@@ -77,6 +78,52 @@
                              "systemctl restart flowchain-live.service",
                              "systemctl restart flowchain-supervisor.service"
                          ],
+    "renderValidation":  {
+                             "schema":  "flowchain.public_rpc_owner_render_validation.v0",
+                             "status":  "passed",
+                             "checks":  {
+                                            "renderScriptExists":  true,
+                                            "tempRootOutsideRepo":  true,
+                                            "ownerEnvOutsideRepo":  true,
+                                            "renderDirOutsideRepo":  true,
+                                            "renderCommandPassed":  true,
+                                            "renderedReportWritten":  true,
+                                            "renderedNginxWritten":  true,
+                                            "renderedSystemdServiceWritten":  true,
+                                            "renderedSystemdSupervisorWritten":  true,
+                                            "renderedShellPreflightWritten":  true,
+                                            "renderedWindowsPreflightWritten":  true,
+                                            "renderedFilesHaveNoPlaceholders":  true,
+                                            "renderedNginxHasHttpsHost":  true,
+                                            "renderedNginxHasRateLimit":  true,
+                                            "renderedSystemdUsesOwnerEnv":  true,
+                                            "renderedPreflightsUsePublicUrl":  true,
+                                            "renderedReportPassed":  true,
+                                            "renderedReportKeepsOwnerPathsOutsideRepo":  true,
+                                            "renderOutputDoesNotPrintTokenHash":  true,
+                                            "renderedFilesDoNotContainTokenHash":  true,
+                                            "renderedReportDoesNotContainTokenHash":  true,
+                                            "renderedReportNoSecrets":  true,
+                                            "cleanupAttempted":  true,
+                                            "broadcastsFalse":  true
+                                        },
+                             "failedChecks":  [
+
+                                              ],
+                             "renderExitCode":  0,
+                             "problem":  "",
+                             "renderedFileNames":  [
+                                                       "nginx-flowchain-rpc.conf",
+                                                       "flowchain-live.service",
+                                                       "flowchain-supervisor.service",
+                                                       "nginx-preflight.sh",
+                                                       "nginx-preflight.ps1",
+                                                       "public-rpc-render-report.json"
+                                                   ],
+                             "envValuesPrinted":  false,
+                             "noSecrets":  true,
+                             "broadcasts":  false
+                         },
     "files":  {
                   "readme":  "README.md",
                   "nginxTemplate":  "nginx-flowchain-rpc.template.conf",
@@ -114,6 +161,13 @@
                    "renderScriptTokensPresent":  true,
                    "nginxPreflightTokensPresent":  true,
                    "windowsNginxPreflightTokensPresent":  true,
+                   "ownerRenderValidationPassed":  true,
+                   "ownerRenderCommandPassed":  true,
+                   "ownerRenderFilesHaveNoPlaceholders":  true,
+                   "ownerRenderWritesShellPreflight":  true,
+                   "ownerRenderWritesWindowsPreflight":  true,
+                   "ownerRenderDoesNotPrintTokenHash":  true,
+                   "ownerRenderFilesDoNotContainTokenHash":  true,
                    "includesPrivateOrigin":  true,
                    "includesRateLimitPlaceholder":  true,
                    "includesTlsPlaceholders":  true,
