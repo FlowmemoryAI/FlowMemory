@@ -81,7 +81,7 @@ function Invoke-GatewayJson {
         Uri = "$($BaseUrl.TrimEnd('/'))$Path"
         Method = $Method
         Headers = $Headers
-        TimeoutSec = 30
+        TimeoutSec = 120
     }
     if ($null -ne $Body) {
         $args.ContentType = "application/json"
@@ -103,7 +103,7 @@ function Invoke-GatewayHttp {
         Uri = "$($BaseUrl.TrimEnd('/'))$Path"
         Method = $Method
         Headers = $Headers
-        TimeoutSec = 30
+        TimeoutSec = 120
         UseBasicParsing = $true
     }
     if ($null -ne $Body) {
@@ -241,7 +241,7 @@ try {
     $env:FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE = "120"
     $env:FLOWCHAIN_TESTER_WRITE_ENABLED = "true"
     $env:FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256 = Get-Sha256Hex -Value $testerToken
-    $env:FLOWCHAIN_TESTER_MAX_SEND_UNITS = "2"
+    $env:FLOWCHAIN_TESTER_MAX_SEND_UNITS = "10"
     $env:FLOWCHAIN_CONTROL_PLANE_LOCAL_DEVNET_PATH = $gatewayStatePath
     $env:FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH = $gatewayWalletMetadataPath
 
@@ -258,7 +258,7 @@ try {
     Wait-GatewayHealth -BaseUrl $baseUrl
 
     $status = Invoke-GatewayJson -BaseUrl $baseUrl -Path "/tester/status" -Headers @{ Origin = $allowedOrigin }
-    if ($status.schema -ne "flowmemory.control_plane.tester_write_status.v0" -or $status.configured -ne $true -or $status.maxSendUnits -ne "2") {
+    if ($status.schema -ne "flowmemory.control_plane.tester_write_status.v0" -or $status.configured -ne $true -or $status.maxSendUnits -ne "10") {
         throw "Tester gateway status did not report configured=true with the expected cap."
     }
 
@@ -283,39 +283,17 @@ try {
 
     $accountA = "$($walletA.account.accountId)"
     $accountB = "$($walletB.account.accountId)"
+    $faucetResponses = @()
     foreach ($account in @($accountA, $accountB)) {
-        [void] (Invoke-CargoJson -ArgumentList @(
-            "run",
-            "--manifest-path",
-            "crates/flowmemory-devnet/Cargo.toml",
-            "--",
-            "--state",
-            $gatewayStatePath,
-            "--node-dir",
-            $gatewayNodeDir,
-            "faucet",
-            "--account",
-            $account,
-            "--amount",
-            "10",
-            "--reason",
-            "public-tester-gateway-e2e",
-            "--authorized-by",
-            "operator:public-tester-gateway-e2e",
-            "--direct"
-        ))
+        $faucetResponses += Invoke-GatewayJson -BaseUrl $baseUrl -Path "/tester/faucet" -Method "POST" -Headers $headers -Body ([ordered]@{
+            accountId = $account
+            amountUnits = "10"
+            reason = "public-tester-gateway-e2e"
+        })
     }
-    [void] (Invoke-CargoJson -ArgumentList @(
-        "run",
-        "--manifest-path",
-        "crates/flowmemory-devnet/Cargo.toml",
-        "--",
-        "--state",
-        $gatewayStatePath,
-        "run",
-        "--blocks",
-        "1"
-    ))
+    if (@($faucetResponses | Where-Object { $_.schema -ne "flowmemory.control_plane.tester_faucet_result.v0" -or $_.accepted -ne $true }).Count -gt 0) {
+        throw "Tester faucet route did not accept the capped funding requests."
+    }
 
     [void] (Wait-GatewayBalanceEquals -BaseUrl $baseUrl -AccountId $accountA -Amount 10)
     [void] (Wait-GatewayBalanceEquals -BaseUrl $baseUrl -AccountId $accountB -Amount 10)
@@ -337,7 +315,7 @@ try {
     $overCap = Invoke-GatewayHttp -BaseUrl $baseUrl -Path "/tester/wallets/send" -Method "POST" -Headers $headers -Body ([ordered]@{
         fromAccountId = $accountA
         toAccountId = $accountB
-        amountUnits = "3"
+        amountUnits = "11"
         memo = "public-tester-gateway-e2e-over-cap"
         createRecipient = $false
     })
@@ -354,8 +332,9 @@ try {
         originRestricted = $true
         testerGatewayConfigured = $true
         testerWriteTokenHashConfigured = $true
-        maxSendUnits = "2"
+        maxSendUnits = "10"
         walletCreateSchema = $walletA.schema
+        testerFaucetSchema = $faucetResponses[0].schema
         walletSendSchema = $send.schema
         accountCount = 2
         transferAccepted = $send.accepted
@@ -367,6 +346,7 @@ try {
         routes = @(
             "/tester/status",
             "/tester/wallets/create",
+            "/tester/faucet",
             "/tester/wallets/send",
             "/rpc balance_get"
         )

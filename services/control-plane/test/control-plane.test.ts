@@ -1734,6 +1734,41 @@ test("HTTP tester write gateway requires bearer auth, caps sends, and returns pu
     assert.equal(JSON.stringify(created).includes("ciphertext"), false);
     assert.equal(JSON.stringify(created).includes("local-test-wallet-passphrase-a"), false);
     assert.equal(JSON.stringify(created).includes(testerToken), false);
+    const createdAccount = created.account as JsonObject;
+    const accountId = String(createdAccount.accountId);
+
+    const faucet = await fetch(`${baseUrl}/tester/faucet`, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${testerToken}` },
+      body: JSON.stringify({
+        accountId,
+        amountUnits: "2",
+        reason: "control-plane-tester-gateway-test",
+      }),
+    });
+    assert.equal(faucet.status, 200);
+    const faucetBody = await faucet.json() as JsonObject;
+    assert.equal(faucetBody.schema, "flowmemory.control_plane.tester_faucet_result.v0");
+    assert.equal(faucetBody.accepted, true);
+    assert.equal(faucetBody.noSecrets, true);
+    assert.equal(JSON.stringify(faucetBody).includes(testerToken), false);
+
+    const send = await fetch(`${baseUrl}/tester/wallets/send`, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${testerToken}` },
+      body: JSON.stringify({
+        fromAccountId: accountId,
+        toAccountId: "local-account:tester-recipient",
+        amountUnits: "1",
+        memo: "tester-send-test",
+        createRecipient: true,
+      }),
+    });
+    assert.equal(send.status, 200);
+    const sendBody = await send.json() as JsonObject;
+    assert.equal(sendBody.schema, "flowmemory.control_plane.tester_wallet_send_result.v0");
+    assert.equal(sendBody.accepted, true);
+    assert.equal(sendBody.noSecrets, true);
 
     const overCap = await fetch(`${baseUrl}/tester/wallets/send`, {
       method: "POST",

@@ -25,6 +25,13 @@ type ParsedWalletSend = {
   createRecipient: boolean;
 };
 
+type ParsedLocalFaucet = {
+  accountId: string;
+  amountUnits: string;
+  reason: string;
+  applyBlock: boolean;
+};
+
 function asObject(value: JsonValue | unknown): JsonObject | null {
   return value !== null && typeof value === "object" && !Array.isArray(value) ? value as JsonObject : null;
 }
@@ -108,6 +115,26 @@ function parseWalletSendPayload(payload: unknown): ParsedWalletSend {
     memo,
     applyBlock: record.applyBlock !== false,
     createRecipient: record.createRecipient !== false,
+  };
+}
+
+function parseLocalFaucetPayload(payload: unknown): ParsedLocalFaucet {
+  if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
+    throw new Error("local faucet payload must be an object");
+  }
+  const secret = findSecret(payload as JsonValue);
+  if (secret !== null) {
+    throw new Error(`local faucet payload contained secret-shaped material at ${secret.path}`);
+  }
+  const record = payload as Record<string, unknown>;
+  const reason = typeof record.reason === "string" && record.reason.trim().length > 0
+    ? record.reason.trim().slice(0, 160)
+    : "flowchain-local-tester-faucet";
+  return {
+    accountId: requiredText(record, ["accountId", "toAccountId", "walletAddress", "recipient"], "accountId"),
+    amountUnits: amountUnitsFromPayload(record),
+    reason,
+    applyBlock: record.applyBlock !== false,
   };
 }
 
@@ -316,6 +343,88 @@ export function executeWalletSend(state: LoadedControlPlaneState, payload: unkno
       to: toBalanceAfter?.toString() ?? null,
     },
     fixturePath,
+    statePath,
+    block,
+    summary,
+    localOnly: true,
+    productionReady: false,
+  };
+}
+
+export function executeLocalFaucet(state: LoadedControlPlaneState, payload: unknown): JsonObject {
+  const request = parseLocalFaucetPayload(payload);
+  const statePath = resolveControlPlanePath(state.paths.localDevnetPath);
+  const nodeDir = request.applyBlock
+    ? resolve(dirname(statePath), "wallet-runtime-node")
+    : resolve(dirname(statePath), "node");
+  const before = readRuntimeState(state);
+  const balanceBefore = balanceUnits(before, request.accountId);
+  const submitArgs = [
+    "run",
+    "--manifest-path",
+    "crates/flowmemory-devnet/Cargo.toml",
+    "--",
+    "--state",
+    statePath,
+    "--node-dir",
+    nodeDir,
+    "faucet",
+    "--account",
+    request.accountId,
+    "--amount",
+    request.amountUnits,
+    "--reason",
+    request.reason,
+    "--authorized-by",
+    `wallet-faucet:${request.accountId}`,
+  ];
+  if (request.applyBlock) {
+    submitArgs.push("--direct");
+  }
+
+  const submit = runCargoJson(submitArgs);
+  const block = request.applyBlock
+    ? runCargoJson([
+        "run",
+        "--manifest-path",
+        "crates/flowmemory-devnet/Cargo.toml",
+        "--",
+        "--state",
+        statePath,
+        "run",
+        "--blocks",
+        "1",
+      ])
+    : null;
+  const summary = runCargoJson([
+    "run",
+    "--manifest-path",
+    "crates/flowmemory-devnet/Cargo.toml",
+    "--",
+    "--state",
+    statePath,
+    "inspect-state",
+    "--summary",
+  ]);
+  const after = readRuntimeState(state);
+  const balanceAfter = balanceUnits(after, request.accountId);
+
+  return {
+    schema: "flowmemory.control_plane.local_faucet_result.v0",
+    accepted: true,
+    applied: request.applyBlock,
+    status: request.applyBlock ? "applied_local_runtime" : "queued_local_runtime",
+    txIds: Array.isArray(submit.queued) ? submit.queued : [],
+    accountId: request.accountId,
+    assetId: LOCAL_TEST_UNIT_ASSET_ID,
+    amountUnits: request.amountUnits,
+    reason: request.reason,
+    balancesBefore: {
+      account: balanceBefore?.toString() ?? "0",
+    },
+    balancesAfter: {
+      account: balanceAfter?.toString() ?? null,
+    },
     statePath,
     block,
     summary,

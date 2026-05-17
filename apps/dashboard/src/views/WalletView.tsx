@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   Activity,
   AlertTriangle,
@@ -94,6 +94,20 @@ type WalletSendResult = {
   message?: string;
 };
 
+type TesterFaucetResult = {
+  schema?: string;
+  accepted?: boolean;
+  applied?: boolean;
+  status?: string;
+  txIds?: string[];
+  accountId?: string;
+  assetId?: string;
+  amountUnits?: string;
+  balancesAfter?: {
+    account?: string | null;
+  };
+};
+
 type WalletTransfer = {
   transferId?: string;
   txId?: string;
@@ -145,6 +159,13 @@ type WalletApiResult<T> = {
 };
 
 type ActionPanel = "home" | "wallet" | "send" | "receive" | "swap" | "activity" | "security" | "settings" | "staking" | "tester";
+
+const ACTION_PANELS: ActionPanel[] = ["home", "wallet", "send", "receive", "swap", "activity", "security", "settings", "staking", "tester"];
+
+function panelFromQuery(value: string | null): ActionPanel | null {
+  if (value === null) return null;
+  return ACTION_PANELS.includes(value as ActionPanel) ? value as ActionPanel : null;
+}
 
 type LocalActivity = {
   id: string;
@@ -310,6 +331,8 @@ function FlowMark() {
 }
 
 export function WalletView({ workbench }: WalletViewProps) {
+  const [routeSearchParams] = useSearchParams();
+  const initialPanel = panelFromQuery(routeSearchParams.get("panel")) ?? "home";
   const controlPlaneUrl = workbench.controlPlane.url;
   const apiCandidates = useMemo(() => walletApiCandidates(controlPlaneUrl), [controlPlaneUrl]);
   const [walletApiUrl, setWalletApiUrl] = useState(controlPlaneUrl);
@@ -329,12 +352,14 @@ export function WalletView({ workbench }: WalletViewProps) {
   const [testerToken, setTesterToken] = useState("");
   const [testerLabel, setTesterLabel] = useState("friend-tester");
   const [testerPassphrase, setTesterPassphrase] = useState("");
+  const [testerFundAccount, setTesterFundAccount] = useState("");
+  const [testerFundAmountUnits, setTesterFundAmountUnits] = useState("1");
   const [testerFrom, setTesterFrom] = useState("");
   const [testerTo, setTesterTo] = useState("");
   const [testerAmountUnits, setTesterAmountUnits] = useState("1");
   const [swapAmount, setSwapAmount] = useState("");
   const [search, setSearch] = useState("");
-  const [activePanel, setActivePanel] = useState<ActionPanel>("home");
+  const [activePanel, setActivePanel] = useState<ActionPanel>(initialPanel);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [localActivity, setLocalActivity] = useState<LocalActivity[]>([]);
@@ -355,6 +380,7 @@ export function WalletView({ workbench }: WalletViewProps) {
   const testerGatewayConfigured = testerStatus?.configured === true;
   const testerTokenReady = testerToken.trim().length > 0;
   const testerCreateReady = testerGatewayConfigured && testerTokenReady && testerPassphrase.length >= 8 && !loading;
+  const testerFaucetReady = testerGatewayConfigured && testerTokenReady && Boolean(testerFundAccount.trim() || primaryWalletAddress) && Boolean(testerFundAmountUnits.trim()) && !loading;
   const testerSendReady = testerGatewayConfigured && testerTokenReady && Boolean(testerFrom.trim() || primaryWalletAddress) && Boolean(testerTo.trim()) && Boolean(testerAmountUnits.trim()) && !loading;
   const testerReportBlockers =
     externalTesterGate?.facts.find((fact) => fact.label === "blockers")?.value ??
@@ -438,6 +464,13 @@ export function WalletView({ workbench }: WalletViewProps) {
   useEffect(() => {
     void loadStatus();
   }, [apiCandidates]);
+
+  useEffect(() => {
+    const routePanel = panelFromQuery(routeSearchParams.get("panel"));
+    if (routePanel !== null && routePanel !== activePanel) {
+      setActivePanel(routePanel);
+    }
+  }, [activePanel, routeSearchParams]);
 
   useEffect(() => {
     let cancelled = false;
@@ -581,6 +614,55 @@ export function WalletView({ workbench }: WalletViewProps) {
       await loadStatus();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "tester wallet creation failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function submitTesterFaucet() {
+    const accountId = testerFundAccount.trim() || primaryWalletAddress;
+    if (!testerGatewayConfigured) {
+      setMessage("Tester write gateway is not configured on this control plane.");
+      return;
+    }
+    if (!testerTokenReady || !accountId || !testerFundAmountUnits.trim()) {
+      setMessage("Enter tester token, account, and amount units first.");
+      return;
+    }
+    setLoading(true);
+    setMessage(null);
+    try {
+      const { payload, url } = await fetchWalletApi<TesterFaucetResult>(apiCandidates, "/tester/faucet", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${testerToken.trim()}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          accountId,
+          amountUnits: testerFundAmountUnits.trim(),
+          reason: `flowchain-wallet-ui-tester-faucet-${Date.now()}`,
+        }),
+      });
+      setWalletApiUrl(url);
+      setLocalActivity((current) => [
+        {
+          id: payload.txIds?.[0] ?? `tester-faucet:${Date.now()}`,
+          type: payload.applied ? "Tester faucet applied" : "Tester faucet queued",
+          asset: safeText(payload.assetId, "local-test-unit"),
+          route: shortId(safeText(payload.accountId, accountId)),
+          amount: `${safeText(payload.amountUnits, testerFundAmountUnits)} units`,
+          status: statusLabel(payload.status),
+        },
+        ...current,
+      ]);
+      setTesterFrom(accountId);
+      setTesterFundAmountUnits("1");
+      setActivePanel("activity");
+      setMessage("Tester faucet accepted by the capped gateway.");
+      await loadStatus();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "tester faucet failed");
     } finally {
       setLoading(false);
     }
@@ -1146,6 +1228,21 @@ export function WalletView({ workbench }: WalletViewProps) {
                 <button type="button" disabled={!testerCreateReady} onClick={() => void submitTesterCreate()}>
                   <UserPlus size={17} aria-hidden="true" />
                   {loading ? "Creating" : "Create tester wallet"}
+                </button>
+              </div>
+
+              <div className="wallet-panel-form">
+                <label>
+                  <span>Fund account</span>
+                  <input value={testerFundAccount} onChange={(event) => setTesterFundAccount(event.target.value)} placeholder={primaryWalletAddress || "local-account:tester-a"} />
+                </label>
+                <label>
+                  <span>Faucet units</span>
+                  <input value={testerFundAmountUnits} onChange={(event) => setTesterFundAmountUnits(event.target.value)} inputMode="numeric" placeholder="1" />
+                </label>
+                <button type="button" disabled={!testerFaucetReady} onClick={() => void submitTesterFaucet()}>
+                  <Download size={17} aria-hidden="true" />
+                  {loading ? "Funding" : "Request tester faucet"}
                 </button>
               </div>
 

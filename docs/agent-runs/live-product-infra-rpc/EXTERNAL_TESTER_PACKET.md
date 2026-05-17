@@ -1,9 +1,9 @@
 ﻿# FlowChain External Tester Packet
 
-Generated: 2026-05-17T09:41:33.8623360Z
+Generated: 2026-05-17T11:17:54.6905312Z
 Status: blocked
 Shareable externally: False
-Latest observed height: 52155
+Latest observed height: 53525
 
 Do not share this network externally yet. Local wallet rehearsal is available, but external sharing remains blocked until the listed owner input names and live infrastructure gates pass.
 
@@ -12,7 +12,7 @@ Do not share this network externally yet. Local wallet rehearsal is available, b
 - Use pilot test units only.
 - Create a fresh test wallet through the service.
 - Use only the owner-provided tester bearer token for write requests.
-- Wait for a bridge credit or owner-funded pilot balance before sending.
+- Request a capped tester faucet credit, bridge credit, or owner-funded pilot balance before sending.
 - Send a small transfer to another tester and confirm it appears after new blocks are produced.
 - Do not reuse passwords from other services.
 - Do not send Base mainnet funds unless the owner has separately confirmed the bridge pilot is active and capped.
@@ -36,6 +36,8 @@ $headers = @{ Authorization = "Bearer <OWNER_TESTER_WRITE_TOKEN>" }
 $createBody = @{ label = "tester-one"; password = "<fresh-test-password>" } | ConvertTo-Json
 Invoke-RestMethod -Method Post -Uri '<OWNER_PUBLIC_ENDPOINT>/tester/wallets/create' -Headers $headers -ContentType 'application/json' -Body $createBody
 Invoke-RestMethod -Method Get -Uri '<OWNER_PUBLIC_ENDPOINT>/wallets/balances'
+$faucetBody = @{ accountId = "<sender-account-id>"; amountUnits = "1"; reason = "external-tester-pilot-faucet" } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri '<OWNER_PUBLIC_ENDPOINT>/tester/faucet' -Headers $headers -ContentType 'application/json' -Body $faucetBody
 $sendBody = @{ from = "<sender-account-id>"; to = "<recipient-account-id>"; amountUnits = "1"; memo = "external-tester-pilot"; createRecipient = $false } | ConvertTo-Json
 Invoke-RestMethod -Method Post -Uri '<OWNER_PUBLIC_ENDPOINT>/tester/wallets/send' -Headers $headers -ContentType 'application/json' -Body $sendBody
 Invoke-RestMethod -Method Get -Uri '<OWNER_PUBLIC_ENDPOINT>/wallets/transfers'

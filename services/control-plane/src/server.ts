@@ -8,7 +8,7 @@ import { createEncryptedTestVault, exportLocalWalletPublicMetadata } from "../..
 import { dispatchJsonRpc } from "./json-rpc.ts";
 import { loadControlPlaneState, resolveControlPlanePath } from "./fixture-state.ts";
 import { isPublicRpcMethod } from "./methods.ts";
-import { executeWalletSend } from "./wallet-runtime.ts";
+import { executeLocalFaucet, executeWalletSend } from "./wallet-runtime.ts";
 import type { ControlPlaneContext, JsonObject, RpcResponse } from "./types.ts";
 
 interface ServerOptions {
@@ -316,6 +316,24 @@ function enforceTesterSendCap(payload: unknown): unknown {
   };
 }
 
+function enforceTesterFaucetCap(payload: unknown): unknown {
+  const capped = enforceTesterSendCap(payload);
+  if (!isObjectRecord(capped)) {
+    throw new Error("tester faucet payload must be an object");
+  }
+  const accountId = capped.accountId ?? capped.toAccountId ?? capped.walletAddress ?? capped.recipient;
+  if (typeof accountId !== "string" || accountId.trim().length === 0) {
+    throw new Error("tester faucet requires accountId");
+  }
+  return {
+    ...capped,
+    accountId: accountId.trim(),
+    reason: typeof capped.reason === "string" && capped.reason.trim().length > 0
+      ? capped.reason.trim()
+      : `flowchain-tester-faucet-${Date.now()}`,
+  };
+}
+
 function publicTesterWalletCreateResult(result: JsonObject): JsonObject {
   return {
     schema: "flowmemory.control_plane.tester_wallet_create_result.v0",
@@ -332,6 +350,25 @@ function publicTesterWalletCreateResult(result: JsonObject): JsonObject {
     envValuesPrinted: false,
     noSecrets: true,
     localOnly: result.localOnly,
+  };
+}
+
+function publicTesterFaucetResult(result: JsonObject): JsonObject {
+  return {
+    schema: "flowmemory.control_plane.tester_faucet_result.v0",
+    accepted: result.accepted,
+    applied: result.applied,
+    status: result.status,
+    txIds: result.txIds,
+    accountId: result.accountId,
+    assetId: result.assetId,
+    amountUnits: result.amountUnits,
+    balancesBefore: result.balancesBefore,
+    balancesAfter: result.balancesAfter,
+    localOnly: result.localOnly,
+    productionReady: result.productionReady,
+    envValuesPrinted: false,
+    noSecrets: true,
   };
 }
 
@@ -803,6 +840,33 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
             envValuesPrinted: false,
             noSecrets: true,
             localOnly: true,
+          });
+        });
+      return;
+    }
+
+    if (req.method === "POST" && requestUrl?.pathname === "/tester/faucet") {
+      if (!requireJsonContentType(req, res) || !requireTesterWriteAccess(req, res)) {
+        return;
+      }
+      readRequestBody(req)
+        .then((body) => {
+          const payload = body.length > 0 ? JSON.parse(body) as unknown : {};
+          writeJson(res, 200, publicTesterFaucetResult(executeLocalFaucet(state, enforceTesterFaucetCap(payload))));
+        })
+        .catch((error) => {
+          if (error instanceof HttpRequestError) {
+            writeRequestError(res, error, "tester faucet failed");
+            return;
+          }
+          writeJson(res, 400, {
+            schema: "flowmemory.control_plane.tester_faucet_error.v0",
+            accepted: false,
+            message: error instanceof Error ? error.message : "tester faucet failed",
+            envValuesPrinted: false,
+            noSecrets: true,
+            localOnly: true,
+            productionReady: false,
           });
         });
       return;
