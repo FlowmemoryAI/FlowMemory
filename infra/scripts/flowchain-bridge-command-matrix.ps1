@@ -16,6 +16,8 @@ $requiredScripts = @(
     "flowchain:bridge:live:check",
     "flowchain:bridge:deploy:base8453",
     "flowchain:bridge:observe:base8453",
+    "flowchain:bridge:relayer:once",
+    "flowchain:bridge:relayer:guardrail:validate",
     "flowchain:bridge:pause",
     "flowchain:bridge:resume",
     "flowchain:bridge:withdraw:intent",

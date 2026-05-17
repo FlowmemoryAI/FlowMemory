@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-17T14:55:04.8951292Z",
+    "generatedAt":  "2026-05-17T16:09:52.9345855Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -28,7 +28,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=56047, finalizedHeight=56047",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=56856, finalizedHeight=56856",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -210,6 +210,7 @@
                                     "services/bridge-relayer/src/diagnose-base8453-tx.ts",
                                     "infra/scripts/bridge-base-mainnet-pilot-observe.ps1",
                                     "infra/scripts/flowchain-bridge-relayer-once.ps1",
+                                    "infra/scripts/flowchain-bridge-relayer-guardrail-validation.ps1",
                                     "infra/scripts/flowchain-service-start.ps1"
                                 ],
                       "commands":  [
@@ -232,19 +233,21 @@
                   {
                       "id":  "bridge-relayer-runtime-queue",
                       "layer":  "Bridge",
-                      "requirement":  "The live bridge relayer path checks owner guardrails, observes Base 8453 deposits with a staged cursor, builds runtime handoff, filters already-seen replay keys, queues new credits into the running L1, waits for main-state credit evidence, and commits the Base cursor only after safe proof without broadcasts.",
+                      "requirement":  "The live bridge relayer path checks owner guardrails, observes Base 8453 deposits with a staged cursor, builds runtime handoff, filters already-seen replay keys, queues new credits into the running L1, waits for main-state credit evidence, commits the Base cursor only after safe proof without broadcasts, and proves missing-owner-input runs leave cursor state untouched.",
                       "status":  "blocked",
-                      "evidence":  "relayer=blocked, observed=0, new=0, queued=0, applied=0, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run",
+                      "evidence":  "relayer=blocked, guardrail=passed, observed=0, new=0, queued=0, applied=0, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run",
                       "files":  [
                                     "infra/scripts/flowchain-bridge-live-check.ps1",
                                     "infra/scripts/flowchain-live-env-bridge-readiness.ps1",
                                     "services/bridge-relayer/src/diagnose-base8453-tx.ts",
                                     "infra/scripts/bridge-base-mainnet-pilot-observe.ps1",
                                     "infra/scripts/flowchain-bridge-relayer-once.ps1",
+                                    "infra/scripts/flowchain-bridge-relayer-guardrail-validation.ps1",
                                     "infra/scripts/flowchain-service-start.ps1"
                                 ],
                       "commands":  [
                                        "npm run flowchain:bridge:relayer:once",
+                                       "npm run flowchain:bridge:relayer:guardrail:validate",
                                        "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop"
                                    ],
                       "blockers":  [
@@ -758,6 +761,7 @@
                         "bridgeLiveReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
                         "bridgeInfraReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
                         "bridgeRelayerOnce":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-once-report.json",
+                        "bridgeRelayerGuardrailValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-guardrail-validation-report.json",
                         "bridgePilotLocal":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\services\\bridge-relayer\\out\\real-value-pilot-e2e\\bridge-real-value-pilot-e2e-report.json",
                         "baseTxDiagnostic":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\live-l1-bridge-e2e\\base-tx-diagnostic.json",
                         "ownerOnboarding":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-onboarding-report.json",

@@ -176,6 +176,14 @@ $definitions = @(
         ownerInputGate = $true
     },
     [ordered]@{
+        id = "bridge-relayer-guardrail-validation"
+        requirement = "Bridge relayer missing-owner-input runs fail closed without mutating final cursor state, staging cursor state, queueing credits, printing env values, or broadcasting."
+        path = "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
+        command = "npm run flowchain:bridge:relayer:guardrail:validate"
+        productionGate = $true
+        ownerInputGate = $false
+    },
+    [ordered]@{
         id = "external-tester-readiness"
         requirement = "External tester flow remains blocked until public RPC, backup, bridge, and local tester evidence pass."
         path = "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"

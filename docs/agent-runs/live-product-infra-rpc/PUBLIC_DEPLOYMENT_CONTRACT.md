@@ -1,6 +1,6 @@
 ﻿# FlowChain Public Deployment Contract
 
-Generated: 2026-05-17T14:55:02.4515245Z
+Generated: 2026-05-17T16:09:50.1944623Z
 Status: blocked
 Deployment ready: False
 Packet shareable: False
@@ -25,7 +25,7 @@ This file records deployment gates, commands, and env names only. It must not co
 | Owner signup checklist maps every public RPC, tester write gateway, backup, and Base 8453 bridge value to the exact thing the owner must get without requesting secrets in chat. | passed | signupStatus=passed, itemCount=9, externalSignupCount=3, missingCoverage=0, repoOwned=True, localEnvFileSupported=True |
 | Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added. | passed | templateStatus=passed, pathIsGitIgnored=True, requiredEnvNameCount=17, optionalEnvNameCount=2, includesAllRequired=True |
 | Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, verification, and rollback. | passed | edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True |
-| The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable. | passed | serviceStatus=passed, privateBind=True, latestHeight=56047, finalizedHeight=56047 |
+| The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable. | passed | serviceStatus=passed, privateBind=True, latestHeight=56856, finalizedHeight=56856 |
 | The deployment has recent service-monitor evidence that block height advances over multiple samples. | passed | monitorStatus=passed, samples=2, heightAdvanced=True |
 | The owner service has an autorecovery supervisor and an isolated recovery drill proving control-plane restart without touching live state. | passed | supervisorValidation=passed, restartAttempts=1 |
 | The owner host has a no-secret Windows install, status, and uninstall path for registering the live supervisor as a reboot-persistent scheduled task. | passed | serviceInstallValidation=passed, planDidNotMutate=True, liveProfileDefault=True, commandsPresent=True |
@@ -39,7 +39,7 @@ This file records deployment gates, commands, and env names only. It must not co
 | The owner host has a no-secret Windows install, status, and uninstall path for recurring manifest-backed state backups that fail closed without the owner backup path. | passed | backupInstallValidation=passed, planDidNotMutate=True, ownerBackupEnvRequired=True, commandOmitsAllowBlocked=True |
 | The public deployment must prove the configured state backup directory can create a manifest-backed snapshot and restore it in rehearsal. | blocked | backupStatus=blocked, snapshotProof=not-run, restoreProof=not-run |
 | The public deployment must not invite bridge-funded testing until Base 8453 live and infra checks pass with owner guardrails. | blocked | bridgeLive=blocked, bridgeInfra=blocked |
-| The bridge relayer has a no-broadcast one-shot path that checks owner guardrails, observes Base 8453 deposits with a staged cursor, filters replays, queues new credits into the running L1, waits for main-state credit evidence, records handoff-to-spendable latency, and only commits the Base cursor after safe proof. | blocked | relayer=blocked, observed=0, new=0, queued=0, applied=0, latencyGate=not-run, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run, handoffToSpendableSeconds= |
+| The bridge relayer has a no-broadcast one-shot path that checks owner guardrails, observes Base 8453 deposits with a staged cursor, filters replays, queues new credits into the running L1, waits for main-state credit evidence, records handoff-to-spendable latency, only commits the Base cursor after safe proof, and proves missing-owner-input runs leave cursor state untouched. | blocked | relayer=blocked, guardrail=passed, observed=0, new=0, queued=0, applied=0, latencyGate=not-run, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run, handoffToSpendableSeconds= |
 | External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence plus authenticated tester faucet/send gateway smoke. | blocked | externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, publicTesterGatewayReady=True, faucetRoute=True, packetSmoke=True, testerFaucet=True, capRejected=True, externalSharingReady=False, packet=blocked, packetShareable=False |
 | The public deployment has a local production-shaped proof for authenticated tester wallet creation, capped tester faucet funding, capped tester sends, balance settlement, and over-cap rejection. | passed | gatewayStatus=passed, testerFaucetSchema=flowmemory.control_plane.tester_faucet_result.v0, transferAccepted=True, capRejected=True |
 | Owner deployment has explicit status, stop, restart, emergency stop, and re-audit commands before exposure. | passed | missingRollbackScripts=0 |

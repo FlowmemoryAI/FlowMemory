@@ -1,6 +1,6 @@
 ﻿# FlowChain Alert Install Validation
 
-Generated: 2026-05-17T13:53:28.2424312Z
+Generated: 2026-05-17T15:07:36.5354672Z
 Status: passed
 
 This validation proves the scheduled alert refresh path is planned, no-secret, non-mutating in plan mode, and refreshes local alert evidence without external delivery.
