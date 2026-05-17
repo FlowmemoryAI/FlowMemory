@@ -61,6 +61,7 @@ $paths = [ordered]@{
     publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     backup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
+    backupInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-install-validation-report.json"
     bridgeLive = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
@@ -276,6 +277,7 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:tester:gateway:e2e",
     "npm run flowchain:public-rpc:check -- -AllowBlocked",
     "npm run flowchain:backup:restore:validate",
+    "npm run flowchain:backup:install:validate",
     "npm run flowchain:backup:check -- -AllowBlocked",
     "npm run flowchain:bridge:live:check -- -AllowBlocked",
     "npm run flowchain:bridge:infra:check -- -AllowBlocked",
@@ -301,6 +303,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-tester-gateway-e2e" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-tester-gateway-e2e.ps1"), "-ReportPath", $paths.publicTesterGateway)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-readiness" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.publicRpc)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "backup-restore-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-restore-validation.ps1"), "-ReportPath", $paths.backupRestoreValidation)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "backup-install-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-install-validation.ps1"), "-ReportPath", $paths.backupInstallValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-backup" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-backup-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.backup)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-live" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-live-check.ps1"), "-AllowBlocked", "-ReportPath", $paths.bridgeLive)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-infra" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-env-bridge-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.bridgeInfra)
@@ -651,6 +654,29 @@ Add-DeploymentItem -Items $items -Id "state-backup-restore-validation" `
     -Evidence "validationStatus=$backupRestoreValidationStatus, requiredChecks=$($backupRestoreValidationRequiredChecks.Count), missingChecks=$($backupRestoreValidationMissingChecks.Count)" `
     -Commands @("npm run flowchain:backup:restore:validate")
 
+$backupInstallValidation = $reports.backupInstallValidation
+$backupInstallValidationStatus = Get-DeploymentStatus -Report $backupInstallValidation
+$backupInstallChecks = Get-DeploymentProp -Object $backupInstallValidation -Name "checks"
+$backupInstallReady = ($backupInstallValidationStatus -eq "passed") `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "packageScriptsPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "planCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "schedulerCmdletsAvailable" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "scheduledTaskActionSupportsWorkingDirectory" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "actionUsesBackupScript" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "ownerBackupEnvRequired" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "commandOmitsAllowBlocked" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "commandsPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $backupInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:backup:install:windows") `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:backup:install:validate")
+Add-DeploymentItem -Items $items -Id "state-backup-schedule-automation" `
+    -Requirement "The owner host has a no-secret Windows install, status, and uninstall path for recurring manifest-backed state backups that fail closed without the owner backup path." `
+    -Status $(if ($backupInstallReady) { "passed" } else { "failed" }) `
+    -Evidence "backupInstallValidation=$backupInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $backupInstallChecks -Name "planDidNotMutate"), ownerBackupEnvRequired=$(Get-DeploymentProp -Object $backupInstallChecks -Name "ownerBackupEnvRequired"), commandOmitsAllowBlocked=$(Get-DeploymentProp -Object $backupInstallChecks -Name "commandOmitsAllowBlocked")" `
+    -Commands @("npm run flowchain:backup:install:validate", "npm run flowchain:backup:install:windows -- -Action Plan", "npm run flowchain:backup:install:windows -- -Action Install", "npm run flowchain:backup:install:windows -- -Action Status", "npm run flowchain:backup:install:windows -- -Action Uninstall")
+
 Add-DeploymentItem -Items $items -Id "state-backup" `
     -Requirement "The public deployment must prove the configured state backup directory can create a manifest-backed snapshot and restore it in rehearsal." `
     -Status $(if ($backupStatus -eq "passed" -and $backupRestoreValidationPassed) { "passed" } elseif ($backupStatus -eq "blocked" -and $backupRestoreValidationPassed) { "blocked" } else { "failed" }) `
@@ -755,6 +781,8 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:tester:gateway:e2e",
         "npm run flowchain:public-rpc:check",
         "npm run flowchain:backup:restore:validate",
+        "npm run flowchain:backup:install:validate",
+        "npm run flowchain:backup:install:windows -- -Action Plan",
         "npm run flowchain:backup:create",
         "npm run flowchain:backup:restore:verify",
         "npm run flowchain:backup:check",
@@ -768,6 +796,8 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:service:status",
         "npm run flowchain:service:install:windows -- -Action Status",
         "npm run flowchain:service:install:windows -- -Action Uninstall",
+        "npm run flowchain:backup:install:windows -- -Action Status",
+        "npm run flowchain:backup:install:windows -- -Action Uninstall",
         "npm run flowchain:service:stop",
         "npm run flowchain:service:restart -- -LiveProfile",
         "npm run flowchain:emergency:stop-local"

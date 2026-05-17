@@ -1,6 +1,6 @@
 ﻿# FlowChain Public Deployment Contract
 
-Generated: 2026-05-17T10:12:58.1906179Z
+Generated: 2026-05-17T10:20:17.1551020Z
 Status: blocked
 Deployment ready: False
 Packet shareable: False
@@ -25,7 +25,7 @@ This file records deployment gates, commands, and env names only. It must not co
 | Owner signup checklist maps every public RPC, tester write gateway, backup, and Base 8453 bridge value to the exact thing the owner must get without requesting secrets in chat. | passed | signupStatus=passed, itemCount=9, externalSignupCount=3, missingCoverage=0, repoOwned=True, localEnvFileSupported=True |
 | Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added. | passed | templateStatus=passed, pathIsGitIgnored=True, requiredEnvNameCount=17, optionalEnvNameCount=2, includesAllRequired=True |
 | Public RPC exposure has a no-values owner edge template and deployment bundle for HTTPS reverse proxying, rate limiting, verification, and rollback. | passed | edgeTemplateStatus=passed, bundleStatus=passed, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True |
-| The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable. | passed | serviceStatus=passed, privateBind=True, latestHeight=52358, finalizedHeight=52358 |
+| The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable. | passed | serviceStatus=passed, privateBind=True, latestHeight=52644, finalizedHeight=52644 |
 | The deployment has recent service-monitor evidence that block height advances over multiple samples. | passed | monitorStatus=passed, samples=2, heightAdvanced=True |
 | The owner service has an autorecovery supervisor and an isolated recovery drill proving control-plane restart without touching live state. | passed | supervisorValidation=passed, restartAttempts=1 |
 | The owner host has a no-secret Windows install, status, and uninstall path for registering the live supervisor as a reboot-persistent scheduled task. | passed | serviceInstallValidation=passed, planDidNotMutate=True, liveProfileDefault=True, commandsPresent=True |
@@ -35,6 +35,7 @@ This file records deployment gates, commands, and env names only. It must not co
 | The local public RPC abuse harness proves CORS rejection, media-type rejection, malformed JSON handling, batch/body caps, notification handling, rate limiting, and no-secret response summaries. | passed | abuseStatus=passed, abuseReady=True, missingChecks=0 |
 | The owner TLS edge must pass endpoint, CORS, rate-limit, readiness, and response-hygiene checks before sharing. | blocked | publicRpcStatus=blocked, publicRpcReady=False, validationStatus=passed, validationPassed=True, abuseStatus=passed, abusePassed=True |
 | Backup tooling must create manifest-backed state snapshots, restore the latest snapshot safely, reject tampered/missing/stale/wrong-chain backup evidence, and avoid owner secrets. | passed | validationStatus=passed, requiredChecks=15, missingChecks=0 |
+| The owner host has a no-secret Windows install, status, and uninstall path for recurring manifest-backed state backups that fail closed without the owner backup path. | passed | backupInstallValidation=passed, planDidNotMutate=True, ownerBackupEnvRequired=True, commandOmitsAllowBlocked=True |
 | The public deployment must prove the configured state backup directory can create a manifest-backed snapshot and restore it in rehearsal. | blocked | backupStatus=blocked, snapshotProof=not-run, restoreProof=not-run |
 | The public deployment must not invite bridge-funded testing until Base 8453 live and infra checks pass with owner guardrails. | blocked | bridgeLive=blocked, bridgeInfra=blocked |
 | External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence plus executable packet-route smoke. | blocked | externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, packetSmoke=True, externalSharingReady=False, packet=blocked, packetShareable=False |
@@ -60,6 +61,8 @@ This file records deployment gates, commands, and env names only. It must not co
 - npm run flowchain:tester:gateway:e2e
 - npm run flowchain:public-rpc:check
 - npm run flowchain:backup:restore:validate
+- npm run flowchain:backup:install:validate
+- npm run flowchain:backup:install:windows -- -Action Plan
 - npm run flowchain:backup:create
 - npm run flowchain:backup:restore:verify
 - npm run flowchain:backup:check
@@ -74,6 +77,8 @@ This file records deployment gates, commands, and env names only. It must not co
 - npm run flowchain:service:status
 - npm run flowchain:service:install:windows -- -Action Status
 - npm run flowchain:service:install:windows -- -Action Uninstall
+- npm run flowchain:backup:install:windows -- -Action Status
+- npm run flowchain:backup:install:windows -- -Action Uninstall
 - npm run flowchain:service:stop
 - npm run flowchain:service:restart -- -LiveProfile
 - npm run flowchain:emergency:stop-local

@@ -51,6 +51,7 @@ $reportPaths = [ordered]@{
     publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
     backupReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
+    backupInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-install-validation-report.json"
     bridgeLiveReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfraReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
     bridgePilotLocal = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "services/bridge-relayer/out/real-value-pilot-e2e/bridge-real-value-pilot-e2e-report.json"
@@ -544,18 +545,38 @@ $backupValidationPassed = $backupValidationStatus -eq "passed" `
 $backupDetails = Get-ArchitectureProp -Object $reports.backupReadiness -Name "backup"
 $backupSnapshotProof = Get-ArchitectureProp -Object $backupDetails -Name "snapshotProofStatus" -Default "not-run"
 $backupRestoreProof = Get-ArchitectureProp -Object $backupDetails -Name "restoreProofStatus" -Default "not-run"
+$backupInstallValidation = $reports.backupInstallValidation
+$backupInstallValidationStatus = Get-ArchitectureStatus -Report $backupInstallValidation
+$backupInstallChecks = Get-ArchitectureProp -Object $backupInstallValidation -Name "checks"
+$backupInstallFailedChecks = @((Get-ArchitectureProp -Object $backupInstallValidation -Name "failedChecks" -Default @()))
+$backupInstallReady = ($backupInstallValidationStatus -eq "passed") `
+    -and ($backupInstallFailedChecks.Count -eq 0) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "packageScriptsPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "planCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "schedulerCmdletsAvailable" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "scheduledTaskActionSupportsWorkingDirectory" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "actionUsesBackupScript" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "ownerBackupEnvRequired" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "commandOmitsAllowBlocked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $backupInstallValidation -Name "noSecrets" -Default $false) -eq $true)
 $backupFiles = @(
     "infra/scripts/flowchain-public-rpc-backup-readiness.ps1",
     "infra/scripts/flowchain-state-backup.ps1",
     "infra/scripts/flowchain-state-restore-verify.ps1",
-    "infra/scripts/flowchain-backup-restore-validation.ps1"
+    "infra/scripts/flowchain-backup-restore-validation.ps1",
+    "infra/scripts/flowchain-backup-install-windows.ps1",
+    "infra/scripts/flowchain-backup-install-validation.ps1",
+    "docs/agent-runs/live-product-infra-rpc/WINDOWS_BACKUP_INSTALL.md",
+    "docs/agent-runs/live-product-infra-rpc/BACKUP_INSTALL_VALIDATION.md"
 )
 Add-ArchitectureItem -Items $items -Id "state-backup-boundary" -Layer "Storage/recovery" `
-    -Requirement "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation." `
-    -Status $(if ($backupStatus -eq "passed" -and $backupValidationPassed) { "passed" } elseif ($backupStatus -eq "blocked" -and $backupValidationPassed) { "blocked" } else { "failed" }) `
-    -Evidence "backupStatus=$backupStatus, validationStatus=$backupValidationStatus, snapshotProof=$backupSnapshotProof, restoreProof=$backupRestoreProof, requiredChecks=$($backupValidationRequiredChecks.Count), missingChecks=$($backupValidationMissingChecks.Count)" `
+    -Requirement "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, scheduled backup install proof, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation." `
+    -Status $(if ($backupStatus -eq "passed" -and $backupValidationPassed -and $backupInstallReady) { "passed" } elseif ($backupStatus -eq "blocked" -and $backupValidationPassed -and $backupInstallReady) { "blocked" } else { "failed" }) `
+    -Evidence "backupStatus=$backupStatus, validationStatus=$backupValidationStatus, installValidation=$backupInstallValidationStatus, installFailedChecks=$($backupInstallFailedChecks.Count), snapshotProof=$backupSnapshotProof, restoreProof=$backupRestoreProof, requiredChecks=$($backupValidationRequiredChecks.Count), missingChecks=$($backupValidationMissingChecks.Count)" `
     -Files $backupFiles `
-    -Commands @("npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify", "npm run flowchain:backup:restore:validate", "npm run flowchain:backup:check") `
+    -Commands @("npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify", "npm run flowchain:backup:restore:validate", "npm run flowchain:backup:install:validate", "npm run flowchain:backup:install:windows -- -Action Plan", "npm run flowchain:backup:check") `
     -Blockers @("FLOWCHAIN_RPC_STATE_BACKUP_PATH")
 
 $deploymentContract = $reports.publicDeploymentContract

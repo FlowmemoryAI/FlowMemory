@@ -92,6 +92,8 @@
     "flowchain:backup:restore:verify": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-state-restore-verify.ps1",
     "flowchain:backup:restore:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-backup-restore-validation.ps1",
     "flowchain:backup:check": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-backup-readiness.ps1",
+    "flowchain:backup:install:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-backup-install-windows.ps1",
+    "flowchain:backup:install:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-backup-install-validation.ps1",
     "flowchain:service:start": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-start.ps1",
     "flowchain:service:status": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-status.ps1",
     "flowchain:service:monitor": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-monitor.ps1",
