@@ -26,6 +26,7 @@ $statusAfterStartPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/ag
 $stopReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-stop-report.json"
 $statusAfterStopPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-status-after-stop.json"
 $cleanupStopReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-cleanup-stop-report.json"
+$relayerPidPath = Join-Path $servicesFullDir "bridge-relayer-loop.pid"
 $validationTmpDir = Join-Path $repoRoot "devnet/local/tmp/bridge-relayer-loop-validation"
 New-Item -ItemType Directory -Force -Path $validationTmpDir | Out-Null
 
@@ -95,10 +96,87 @@ function Get-RelayerLoopProp {
         [object] $Default = $null
     )
 
+    if ($null -ne $Object -and $Object -is [System.Collections.IDictionary] -and $Object.Contains($Name)) {
+        return $Object[$Name]
+    }
     if ($null -ne $Object -and $Object.PSObject.Properties.Name -contains $Name) {
         return $Object.$Name
     }
     return $Default
+}
+
+function ConvertTo-RelayerLoopInt {
+    param(
+        [AllowNull()][object] $Value,
+        [int] $Default = 0
+    )
+
+    if ($null -eq $Value) {
+        return $Default
+    }
+
+    $parsed = 0
+    if ([int]::TryParse("$Value", [ref]$parsed)) {
+        return $parsed
+    }
+
+    return $Default
+}
+
+function Test-RelayerLoopValidationCommandLine {
+    param([AllowNull()][string] $CommandLine)
+
+    if ([string]::IsNullOrWhiteSpace($CommandLine)) {
+        return $false
+    }
+
+    return $CommandLine.IndexOf("flowchain-bridge-relayer-once.ps1", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+        -and $CommandLine.IndexOf($StatePath, [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+}
+
+function Get-RelayerLoopProcessProof {
+    param([int] $ProcessId)
+
+    $proof = [ordered]@{
+        pid = $ProcessId
+        processExists = $false
+        matchesValidationRelayer = $false
+    }
+
+    if ($ProcessId -le 0) {
+        return $proof
+    }
+
+    $process = $null
+    try {
+        $process = Get-CimInstance Win32_Process -Filter "ProcessId=$ProcessId" -ErrorAction SilentlyContinue
+    }
+    catch {
+        $process = $null
+    }
+
+    if ($null -eq $process) {
+        return $proof
+    }
+
+    $proof.processExists = $true
+    $proof.matchesValidationRelayer = Test-RelayerLoopValidationCommandLine -CommandLine ([string]$process.CommandLine)
+    return $proof
+}
+
+function Find-RelayerLoopValidationProcesses {
+    $matches = New-Object System.Collections.ArrayList
+    foreach ($process in @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue)) {
+        if (-not (Test-RelayerLoopValidationCommandLine -CommandLine ([string]$process.CommandLine))) {
+            continue
+        }
+        [void]$matches.Add([ordered]@{
+            pid = [int]$process.ProcessId
+            validationStatePathMatched = $true
+        })
+    }
+
+    return @($matches)
 }
 
 function Invoke-RelayerLoopStatus {
@@ -219,6 +297,14 @@ try {
     $stopRelayer = Get-RelayerLoopProp -Object $stopReport -Name "bridgeRelayerLoop" -Default ""
     $statusAfterStopRelayer = Get-RelayerLoopProp -Object $statusAfterStop -Name "bridgeRelayerLoop"
     $statusRelayerReport = Get-RelayerLoopProp -Object $statusRelayer -Name "report"
+    $stopPidFiles = Get-RelayerLoopProp -Object $stopReport -Name "pidFiles"
+    $relayerPidBeforeStop = ConvertTo-RelayerLoopInt -Value (Get-RelayerLoopProp -Object $startRelayer -Name "pid" -Default 0)
+    if ($relayerPidBeforeStop -le 0) {
+        $relayerPidBeforeStop = ConvertTo-RelayerLoopInt -Value (Get-RelayerLoopProp -Object $statusRelayer -Name "pid" -Default 0)
+    }
+    $relayerPidProofAfterStop = Get-RelayerLoopProcessProof -ProcessId $relayerPidBeforeStop
+    $validationRelayerProcessesAfterStop = @(Find-RelayerLoopValidationProcesses)
+    $relayerPidFileExistsAfterStop = Test-Path -LiteralPath $relayerPidPath
 
     $checks = [ordered]@{
         startCommandPassed = [int]$startStep[0].result.exitCode -eq 0
@@ -243,6 +329,10 @@ try {
         stopHandledRelayerLoop = [string]$stopRelayer -in @("stopped", "not-running")
         statusAfterStopCommandPassed = [int]$statusAfterStopStep[0].result.exitCode -eq 0
         statusAfterStopNotRunning = [string](Get-RelayerLoopProp -Object $statusAfterStopRelayer -Name "status" -Default "stopped") -ne "running"
+        relayerPidNoLongerMatchesAfterStop = $relayerPidBeforeStop -gt 0 -and ((Get-RelayerLoopProp -Object $relayerPidProofAfterStop -Name "matchesValidationRelayer" -Default $true) -eq $false)
+        relayerPidFileRemovedAfterStop = -not $relayerPidFileExistsAfterStop
+        stopReportRelayerPidFileRemoved = (Get-RelayerLoopProp -Object $stopPidFiles -Name "bridgeRelayerLoopExistsAfterStop" -Default $true) -eq $false
+        noValidationRelayerProcessAfterStop = $validationRelayerProcessesAfterStop.Count -eq 0
         envValuesPrintedFalse = $true
         noSecrets = $true
         broadcastsFalse = $true
@@ -287,6 +377,15 @@ try {
             statusRelayerLoop = $statusRelayer
             stopRelayerLoop = $stopRelayer
             statusAfterStopRelayerLoop = $statusAfterStopRelayer
+            relayerPidBeforeStop = $relayerPidBeforeStop
+            relayerPidProofAfterStop = $relayerPidProofAfterStop
+            relayerPidFile = [ordered]@{
+                path = (Join-Path $ServicesDir "bridge-relayer-loop.pid")
+                existsAfterStop = $relayerPidFileExistsAfterStop
+                stopReportExistsAfterStop = Get-RelayerLoopProp -Object $stopPidFiles -Name "bridgeRelayerLoopExistsAfterStop"
+            }
+            validationRelayerProcessCountAfterStop = $validationRelayerProcessesAfterStop.Count
+            validationRelayerProcessesAfterStop = @($validationRelayerProcessesAfterStop)
         }
         commands = [ordered]@{
             validate = "npm run flowchain:bridge:relayer:loop:validate"
@@ -309,7 +408,7 @@ try {
     $markdownLines.Add("Generated: $($report.generatedAt)")
     $markdownLines.Add("Status: $status")
     $markdownLines.Add("")
-    $markdownLines.Add("This validation starts an isolated live service with the bridge relayer loop enabled, verifies the loop is reported as running, then stops the service and confirms the relayer loop is not left running.")
+    $markdownLines.Add("This validation starts an isolated live service with the bridge relayer loop enabled, verifies the loop is reported as running, then stops the service and confirms the relayer loop is not left running, its PID file is removed, and no validation relayer process remains.")
     $markdownLines.Add("")
     $markdownLines.Add("## Checks")
     $markdownLines.Add("")

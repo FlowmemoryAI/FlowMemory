@@ -21,7 +21,8 @@ $relayerPidPath = Join-Path $servicesFullDir "bridge-relayer-loop.pid"
 function Stop-FlowChainPidFile {
     param(
         [Parameter(Mandatory = $true)][string] $PidPath,
-        [string[]] $CommandLineIncludes = @()
+        [string[]] $CommandLineIncludes = @(),
+        [int] $WaitSeconds = 5
     )
     $status = Test-FlowChainPid -PidPath $PidPath -CommandLineIncludes $CommandLineIncludes
     if ($status.running -and $null -ne $status.pid) {
@@ -29,7 +30,20 @@ function Stop-FlowChainPidFile {
             return "pid-mismatch-not-stopped"
         }
         Stop-Process -Id $status.pid -Force -ErrorAction SilentlyContinue
-        return "stopped"
+        $deadline = [DateTimeOffset]::UtcNow.AddSeconds($WaitSeconds)
+        do {
+            Start-Sleep -Milliseconds 100
+            $afterStop = Test-FlowChainPid -PidPath $PidPath -CommandLineIncludes $CommandLineIncludes
+            if (-not ($afterStop.running -and $afterStop.commandLineMatched)) {
+                Remove-Item -LiteralPath $PidPath -Force -ErrorAction SilentlyContinue
+                return "stopped"
+            }
+        } while ([DateTimeOffset]::UtcNow -lt $deadline)
+
+        return "still-running"
+    }
+    if (Test-Path -LiteralPath $PidPath) {
+        Remove-Item -LiteralPath $PidPath -Force -ErrorAction SilentlyContinue
     }
     return "not-running"
 }
@@ -48,10 +62,14 @@ catch {
 $report = [ordered]@{
     schema = "flowchain.service_stop_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = if ($nodeStop -eq "failed" -or $controlStop -eq "pid-mismatch-not-stopped" -or $relayerStop -eq "pid-mismatch-not-stopped") { "degraded" } else { "stopped" }
+    status = if ($nodeStop -eq "failed" -or $controlStop -in @("pid-mismatch-not-stopped", "still-running") -or $relayerStop -in @("pid-mismatch-not-stopped", "still-running")) { "degraded" } else { "stopped" }
     node = $nodeStop
     controlPlane = $controlStop
     bridgeRelayerLoop = $relayerStop
+    pidFiles = [ordered]@{
+        controlPlaneExistsAfterStop = Test-Path -LiteralPath $controlPlanePidPath
+        bridgeRelayerLoopExistsAfterStop = Test-Path -LiteralPath $relayerPidPath
+    }
     statePreserved = $true
     deletedRuntimeData = $false
     restartCommand = "npm run flowchain:service:restart"

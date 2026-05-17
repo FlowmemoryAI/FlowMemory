@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-17T21:59:56.9433995Z",
+    "generatedAt":  "2026-05-17T22:19:42.0213834Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -28,7 +28,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=60281, finalizedHeight=60281",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=60986, finalizedHeight=60986",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -460,7 +460,7 @@
                       "layer":  "Security",
                       "requirement":  "Architecture reports and live-readiness commands preserve the no-secret and no-live-broadcast safety boundary.",
                       "status":  "passed",
-                      "evidence":  "noSecretStatus=passed, liveProductNoLiveBroadcast=True, liveProductEnvValuesPrinted=False, baseTxBroadcasts=False, devPackNoSecrets=True",
+                      "evidence":  "noSecretStatus=passed, scansGeneratedReports=True, reportPathMatchesProductionGate=True, liveProductNoLiveBroadcast=True, liveProductEnvValuesPrinted=False, baseTxBroadcasts=False, devPackNoSecrets=True",
                       "files":  [
                                     "infra/scripts/flowchain-no-secret-scan.ps1"
                                 ],

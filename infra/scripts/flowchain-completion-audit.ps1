@@ -1125,10 +1125,14 @@ Add-AuditItem -Items $items -Id "aggregate-gate" `
     -Commands @("npm run flowchain:live-product:e2e -- -AllowBlocked") `
     -Blockers @($missingEnv)
 
+$noSecretChecks = Get-AuditProp -Object $reports.noSecret -Name "checks"
+$noSecretCoverageReady = ((Get-AuditProp -Object $noSecretChecks -Name "scansDashboardPublicData" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $noSecretChecks -Name "scansGeneratedLiveProductReports" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $noSecretChecks -Name "reportPathMatchesProductionGate" -Default $false) -eq $true)
 Add-AuditItem -Items $items -Id "no-secrets-no-broadcasts" `
     -Requirement "Reports and gates do not print secrets/env values and no live Base broadcast occurred." `
-    -Status $(if ((Get-ReportStatus -Report $reports.noSecret) -eq "passed" -and $liveProductNoLiveBroadcast -eq $true -and $liveProductEnvValuesPrinted -eq $false -and $baseTxDiagnosticBroadcasts -eq $false -and $baseTxDiagnosticPrintsEnvValues -eq $false -and $baseTxDiagnosticNoSecrets -eq $true -and (Get-AuditProp -Object $devPack -Name "noSecrets" -Default $false) -eq $true -and (Get-AuditProp -Object $devPack -Name "envValuesPrinted" -Default $true) -eq $false) { "passed" } else { "failed" }) `
-    -Evidence "noSecretStatus=$(Get-ReportStatus -Report $reports.noSecret), liveProductNoLiveBroadcast=$liveProductNoLiveBroadcast, baseTxDiagnosticBroadcasts=$baseTxDiagnosticBroadcasts, baseTxDiagnosticNoSecrets=$baseTxDiagnosticNoSecrets, devPackNoSecrets=$(Get-AuditProp -Object $devPack -Name "noSecrets" -Default $false), reports=$($paths.noSecret), $($paths.baseTxDiagnostic), $($paths.devPack)" `
+    -Status $(if ((Get-ReportStatus -Report $reports.noSecret) -eq "passed" -and $noSecretCoverageReady -and $liveProductNoLiveBroadcast -eq $true -and $liveProductEnvValuesPrinted -eq $false -and $baseTxDiagnosticBroadcasts -eq $false -and $baseTxDiagnosticPrintsEnvValues -eq $false -and $baseTxDiagnosticNoSecrets -eq $true -and (Get-AuditProp -Object $devPack -Name "noSecrets" -Default $false) -eq $true -and (Get-AuditProp -Object $devPack -Name "envValuesPrinted" -Default $true) -eq $false) { "passed" } else { "failed" }) `
+    -Evidence "noSecretStatus=$(Get-ReportStatus -Report $reports.noSecret), scansGeneratedReports=$(Get-AuditProp -Object $noSecretChecks -Name "scansGeneratedLiveProductReports"), reportPathMatchesProductionGate=$(Get-AuditProp -Object $noSecretChecks -Name "reportPathMatchesProductionGate"), liveProductNoLiveBroadcast=$liveProductNoLiveBroadcast, baseTxDiagnosticBroadcasts=$baseTxDiagnosticBroadcasts, baseTxDiagnosticNoSecrets=$baseTxDiagnosticNoSecrets, devPackNoSecrets=$(Get-AuditProp -Object $devPack -Name "noSecrets" -Default $false), reports=$($paths.noSecret), $($paths.baseTxDiagnostic), $($paths.devPack)" `
     -Commands @("npm run flowchain:no-secret:scan")
 
 $failedItems = @($items | Where-Object { $_.status -eq "failed" })

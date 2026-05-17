@@ -7,11 +7,12 @@ param(
         "devnet/local/product-e2e",
         "devnet/local/production-l1-wallet",
         "devnet/local/real-value-pilot",
+        "docs/agent-runs/live-product-infra-rpc",
         "fixtures/dashboard",
         "services/bridge-relayer/out",
         "services/control-plane/out"
     ),
-    [string] $ReportPath = "devnet/local/production-l1-e2e/no-secret-scan-report.json"
+    [string] $ReportPath = "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
 )
 
 $ErrorActionPreference = "Stop"
@@ -187,10 +188,18 @@ foreach ($path in $Paths) {
 }
 
 $status = if ($findings.Count -eq 0) { "passed" } else { "failed" }
+$normalizedScanPaths = @($Paths | ForEach-Object { ("$_" -replace "\\", "/").TrimStart("./").ToLowerInvariant() })
+$normalizedReportPath = ($ReportPath -replace "\\", "/").TrimStart("./").ToLowerInvariant()
+$checks = [ordered]@{
+    scansDashboardPublicData = $normalizedScanPaths -contains "apps/dashboard/public/data"
+    scansGeneratedLiveProductReports = $normalizedScanPaths -contains "docs/agent-runs/live-product-infra-rpc"
+    reportPathMatchesProductionGate = $normalizedReportPath -eq "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
+}
 $report = [ordered]@{
     schema = "flowchain.no_secret_scan_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
     status = $status
+    checks = $checks
     scannedCount = $scanned.Count
     scannedPaths = @($Paths)
     findings = @($findings)

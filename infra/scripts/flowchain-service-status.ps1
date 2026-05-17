@@ -27,6 +27,9 @@ $controlPlaneScriptPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Pa
 $nodePidPath = Join-Path $nodeFullDir "flowchain-node.pid"
 $controlPlanePidPath = Join-Path $servicesFullDir "control-plane.pid"
 $relayerPidPath = Join-Path $servicesFullDir "bridge-relayer-loop.pid"
+$nodePidPathLabel = Join-Path $NodeDir "flowchain-node.pid"
+$controlPlanePidPathLabel = Join-Path $ServicesDir "control-plane.pid"
+$relayerPidPathLabel = Join-Path $ServicesDir "bridge-relayer-loop.pid"
 $serviceStartReportPath = Join-Path $servicesFullDir "flowchain-service-start-report.json"
 
 $nodeStatus = Test-FlowChainPid -PidPath $nodePidPath -CommandLineIncludes @("flowmemory-devnet")
@@ -188,21 +191,21 @@ $report = [ordered]@{
     node = [ordered]@{
         status = if ($nodeStatus.running) { "running" } else { "stopped" }
         pid = $nodeStatus.pid
-        pidPath = "devnet/local/node/flowchain-node.pid"
+        pidPath = $nodePidPathLabel
         pidSource = $nodePidSource
         commandLineMatched = $nodeStatus.commandLineMatched
     }
     controlPlane = [ordered]@{
         status = if ($controlPlaneReady) { "running" } elseif ($null -ne $controlPlanePortProcess -and $controlPlanePortProcess.cleanupPending) { "port-cleanup-pending" } elseif ($null -ne $controlPlanePortProcess) { "port-occupied" } elseif ($controlPlaneStatus.running) { "pid-mismatch" } else { "stopped" }
         pid = $controlPlaneStatus.pid
-        pidPath = "devnet/local/services/control-plane.pid"
+        pidPath = $controlPlanePidPathLabel
         commandLineMatched = $controlPlaneReady
     }
     controlPlanePortProcess = $controlPlanePortProcess
     bridgeRelayerLoop = [ordered]@{
         status = if ($relayerStatus.running) { "running" } else { "stopped" }
         pid = $relayerStatus.pid
-        pidPath = "devnet/local/services/bridge-relayer-loop.pid"
+        pidPath = $relayerPidPathLabel
         commandLineMatched = $relayerStatus.commandLineMatched
         report = [ordered]@{
             path = $RelayerReportPath

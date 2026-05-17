@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-17T21:59:56.7923969Z",
+    "generatedAt":  "2026-05-17T22:19:41.8043763Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -120,7 +120,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=60281, finalizedHeight=60281",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=60986, finalizedHeight=60986",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -439,7 +439,7 @@
                       "id":  "no-secret-no-broadcast",
                       "requirement":  "Deployment contract and current readiness reports preserve no-secret, no-env-value, and no-live-broadcast boundaries.",
                       "status":  "passed",
-                      "evidence":  "noSecretStatus=passed",
+                      "evidence":  "noSecretStatus=passed, scansGeneratedReports=True, reportPathMatchesProductionGate=True",
                       "commands":  [
                                        "npm run flowchain:no-secret:scan"
                                    ],

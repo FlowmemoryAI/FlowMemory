@@ -882,6 +882,10 @@ $bridgeRelayerLoopReady = ($bridgeRelayerLoopStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $bridgeRelayerLoopChecks -Name "statusRelayerReportHealthy" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $bridgeRelayerLoopChecks -Name "stopHandledRelayerLoop" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $bridgeRelayerLoopChecks -Name "statusAfterStopNotRunning" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerLoopChecks -Name "relayerPidNoLongerMatchesAfterStop" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerLoopChecks -Name "relayerPidFileRemovedAfterStop" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerLoopChecks -Name "stopReportRelayerPidFileRemoved" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerLoopChecks -Name "noValidationRelayerProcessAfterStop" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $bridgeRelayerLoopValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $bridgeRelayerLoopValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $bridgeRelayerLoopValidation -Name "broadcasts" -Default $true) -eq $false)
@@ -993,10 +997,14 @@ Add-DeploymentItem -Items $items -Id "rollback-controls" `
 
 $noSecret = $reports.noSecret
 $noSecretStatus = Get-DeploymentStatus -Report $noSecret
+$noSecretChecks = Get-DeploymentProp -Object $noSecret -Name "checks"
+$noSecretCoverageReady = ((Get-DeploymentProp -Object $noSecretChecks -Name "scansDashboardPublicData" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $noSecretChecks -Name "scansGeneratedLiveProductReports" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $noSecretChecks -Name "reportPathMatchesProductionGate" -Default $false) -eq $true)
 Add-DeploymentItem -Items $items -Id "no-secret-no-broadcast" `
     -Requirement "Deployment contract and current readiness reports preserve no-secret, no-env-value, and no-live-broadcast boundaries." `
-    -Status $(if ($noSecretStatus -eq "passed") { "passed" } else { "failed" }) `
-    -Evidence "noSecretStatus=$noSecretStatus" `
+    -Status $(if ($noSecretStatus -eq "passed" -and $noSecretCoverageReady) { "passed" } else { "failed" }) `
+    -Evidence "noSecretStatus=$noSecretStatus, scansGeneratedReports=$(Get-DeploymentProp -Object $noSecretChecks -Name "scansGeneratedLiveProductReports"), reportPathMatchesProductionGate=$(Get-DeploymentProp -Object $noSecretChecks -Name "reportPathMatchesProductionGate")" `
     -Commands @("npm run flowchain:no-secret:scan")
 
 $failedItems = @($items | Where-Object { $_.status -eq "failed" })

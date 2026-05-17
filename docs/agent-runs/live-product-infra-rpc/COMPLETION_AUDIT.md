@@ -1,17 +1,17 @@
 ﻿# FlowChain Completion Audit
 
-Generated: 2026-05-17T22:02:13.6807279Z
+Generated: 2026-05-17T22:19:50.3479023Z
 Status: blocked
 Completion ready: False
 Refresh mode: no-refresh-existing-reports
-Latest observed height: 60281
+Latest observed height: 60986
 
 ## Prompt-To-Artifact Checklist
 
 | Requirement | Status | Evidence | Commands |
 | --- | --- | --- | --- |
 | Chain service is running in live profile and command lines match this worktree. | passed | service-status status=passed, node=running, controlPlane=running, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
-| Chain is producing/finalizing blocks and state is fresh. | passed | latestHeight=60281, stateFileLastWriteAgeSeconds=5, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
+| Chain is producing/finalizing blocks and state is fresh. | passed | latestHeight=60986, stateFileLastWriteAgeSeconds=3, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
 | Live service monitor observes running services and advancing block height over a sampling window. | passed | monitorStatus=passed, samples=2, heightAdvanced=True, heights=59873->59881, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-monitor-report.json | npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90 |
 | People can create wallets through the RPC service without receiving secret material. | passed | testerWalletCreates=4, secretMaterialReturned=false, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\live-service-tester-network-e2e-report.json | npm run flowchain:wallet:live-tester:e2e |
 | Wallet-to-wallet transfers sent through the running service settle on produced blocks. | passed | single-transfer blocks 58268->58281, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\live-service-wallet-e2e-report.json | npm run flowchain:wallet:live-service:e2e |
@@ -47,7 +47,7 @@ Latest observed height: 60281
 | Owner-supplied Base 8453 transaction diagnostic is read-only, no-secret, and fails closed when tx/env inputs are absent. | passed | diagnosticStatus=blocked, safeReason=missing-env, broadcasts=False, printsEnvValues=False, noSecrets=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\devnet\local\live-l1-bridge-e2e\base-tx-diagnostic.json | npm run flowchain:bridge:diagnose:tx |
 | Completion audit refreshes the live-infra aggregate gate before deciding readiness. | blocked | liveInfraStatus=blocked, ownerInputsReady=False, publicRpcReady=False, servicesReady=True, backupReady=False, bridgeReady=False, noSecretReady=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\flowchain-live-infra-check-report.json | npm run flowchain:live-infra:check -- -AllowBlocked |
 | Full product gate runs production local L1 aggregate, restores live service, proves wallet flows, and runs live infra readiness. | blocked | liveProductExitCode=0, liveProductStatus=blocked, productionLocalAggregate=passed-with-live-blockers, liveInfra=blocked, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\flowchain-live-product-e2e-report.json | npm run flowchain:live-product:e2e -- -AllowBlocked |
-| Reports and gates do not print secrets/env values and no live Base broadcast occurred. | passed | noSecretStatus=passed, liveProductNoLiveBroadcast=True, baseTxDiagnosticBroadcasts=False, baseTxDiagnosticNoSecrets=True, devPackNoSecrets=True, reports=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\no-secret-scan-report.json, E:\FlowMemory\flowmemory-live-infra-rpc\devnet\local\live-l1-bridge-e2e\base-tx-diagnostic.json, E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-dev-pack\dev-pack-e2e-report.json | npm run flowchain:no-secret:scan |
+| Reports and gates do not print secrets/env values and no live Base broadcast occurred. | passed | noSecretStatus=passed, scansGeneratedReports=True, reportPathMatchesProductionGate=True, liveProductNoLiveBroadcast=True, baseTxDiagnosticBroadcasts=False, baseTxDiagnosticNoSecrets=True, devPackNoSecrets=True, reports=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\no-secret-scan-report.json, E:\FlowMemory\flowmemory-live-infra-rpc\devnet\local\live-l1-bridge-e2e\base-tx-diagnostic.json, E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-dev-pack\dev-pack-e2e-report.json | npm run flowchain:no-secret:scan |
 
 ## Remaining External Owner Inputs
 

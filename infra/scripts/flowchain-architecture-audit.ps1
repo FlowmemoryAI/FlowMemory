@@ -637,6 +637,10 @@ $bridgeRelayerLoopReady = ($bridgeRelayerLoopStatus -eq "passed") `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopChecks -Name "statusRelayerReportHealthy" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopChecks -Name "stopHandledRelayerLoop" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopChecks -Name "statusAfterStopNotRunning" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopChecks -Name "relayerPidNoLongerMatchesAfterStop" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopChecks -Name "relayerPidFileRemovedAfterStop" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopChecks -Name "stopReportRelayerPidFileRemoved" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopChecks -Name "noValidationRelayerProcessAfterStop" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopValidation -Name "broadcasts" -Default $true) -eq $false)
@@ -890,7 +894,12 @@ $noSecret = $reports.noSecret
 $liveProduct = $reports.liveProduct
 $devPack = $reports.devPack
 $noSecretStatus = Get-ArchitectureStatus -Report $noSecret
+$noSecretChecks = Get-ArchitectureProp -Object $noSecret -Name "checks"
+$noSecretCoverageReady = ((Get-ArchitectureProp -Object $noSecretChecks -Name "scansDashboardPublicData" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $noSecretChecks -Name "scansGeneratedLiveProductReports" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $noSecretChecks -Name "reportPathMatchesProductionGate" -Default $false) -eq $true)
 $safetyReady = ($noSecretStatus -eq "passed") `
+    -and $noSecretCoverageReady `
     -and ((Get-ArchitectureProp -Object $liveProduct -Name "noLiveBroadcast" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $liveProduct -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $baseTxDiagnostic -Name "broadcasts" -Default $true) -eq $false) `
@@ -900,7 +909,7 @@ $safetyReady = ($noSecretStatus -eq "passed") `
 Add-ArchitectureItem -Items $items -Id "secret-broadcast-boundary" -Layer "Security" `
     -Requirement "Architecture reports and live-readiness commands preserve the no-secret and no-live-broadcast safety boundary." `
     -Status $(if ($safetyReady) { "passed" } else { "failed" }) `
-    -Evidence "noSecretStatus=$noSecretStatus, liveProductNoLiveBroadcast=$(Get-ArchitectureProp -Object $liveProduct -Name "noLiveBroadcast"), liveProductEnvValuesPrinted=$(Get-ArchitectureProp -Object $liveProduct -Name "envValuesPrinted"), baseTxBroadcasts=$(Get-ArchitectureProp -Object $baseTxDiagnostic -Name "broadcasts"), devPackNoSecrets=$(Get-ArchitectureProp -Object $devPack -Name "noSecrets")" `
+    -Evidence "noSecretStatus=$noSecretStatus, scansGeneratedReports=$(Get-ArchitectureProp -Object $noSecretChecks -Name "scansGeneratedLiveProductReports"), reportPathMatchesProductionGate=$(Get-ArchitectureProp -Object $noSecretChecks -Name "reportPathMatchesProductionGate"), liveProductNoLiveBroadcast=$(Get-ArchitectureProp -Object $liveProduct -Name "noLiveBroadcast"), liveProductEnvValuesPrinted=$(Get-ArchitectureProp -Object $liveProduct -Name "envValuesPrinted"), baseTxBroadcasts=$(Get-ArchitectureProp -Object $baseTxDiagnostic -Name "broadcasts"), devPackNoSecrets=$(Get-ArchitectureProp -Object $devPack -Name "noSecrets")" `
     -Files @("infra/scripts/flowchain-no-secret-scan.ps1") `
     -Commands @("npm run flowchain:no-secret:scan")
 

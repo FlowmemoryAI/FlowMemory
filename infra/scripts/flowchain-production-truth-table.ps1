@@ -321,6 +321,11 @@ $definitions = @(
         command = "npm run flowchain:no-secret:scan"
         productionGate = $true
         ownerInputGate = $false
+        requiredChecks = @(
+            "scansDashboardPublicData",
+            "scansGeneratedLiveProductReports",
+            "reportPathMatchesProductionGate"
+        )
     }
 )
 
