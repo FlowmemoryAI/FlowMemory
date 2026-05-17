@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_bundle_report.v2",
-    "generatedAt":  "2026-05-17T07:00:55.9852785Z",
+    "generatedAt":  "2026-05-17T08:08:32.3114389Z",
     "status":  "passed",
     "bundleDir":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle",
     "flowChainRpcIsRepoOwned":  true,
@@ -31,6 +31,7 @@
                                  "\u003cFLOWCHAIN_RPC_NGINX_RENDERED_CONF\u003e",
                                  "\u003cFLOWCHAIN_NGINX_PREFLIGHT_SCRIPT\u003e",
                                  "\u003cFLOWCHAIN_SYSTEMD_RENDERED_UNIT\u003e",
+                                 "\u003cFLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT\u003e",
                                  "\u003cPREVIOUS_FLOWCHAIN_RPC_NGINX_CONF\u003e"
                              ],
     "missingRequiredPlaceholders":  [
@@ -38,6 +39,8 @@
                                     ],
     "requiredCommands":  [
                              "npm run flowchain:service:restart -- -LiveProfile",
+                             "npm run flowchain:service:supervisor -- -Once",
+                             "npm run flowchain:service:supervisor:validate",
                              "npm run flowchain:service:status",
                              "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
                              "npm run flowchain:ops:snapshot -- -AllowBlocked",
@@ -50,6 +53,7 @@
                          ],
     "ownerPreflightCommands":  [
                                    "systemd-analyze verify \u003cFLOWCHAIN_SYSTEMD_RENDERED_UNIT\u003e",
+                                   "systemd-analyze verify \u003cFLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT\u003e",
                                    "nginx -t",
                                    "bash \u003cFLOWCHAIN_NGINX_PREFLIGHT_SCRIPT\u003e"
                                ],
@@ -59,16 +63,19 @@
                              "npm run flowchain:service:restart -- -LiveProfile",
                              "npm run flowchain:service:stop",
                              "npm run flowchain:emergency:stop-local",
+                             "systemctl stop flowchain-supervisor.service",
                              "systemctl stop flowchain-live.service",
                              "cp \u003cPREVIOUS_FLOWCHAIN_RPC_NGINX_CONF\u003e \u003cFLOWCHAIN_RPC_NGINX_RENDERED_CONF\u003e",
                              "nginx -t",
                              "systemctl reload nginx",
-                             "systemctl restart flowchain-live.service"
+                             "systemctl restart flowchain-live.service",
+                             "systemctl restart flowchain-supervisor.service"
                          ],
     "files":  {
                   "readme":  "README.md",
                   "nginxTemplate":  "nginx-flowchain-rpc.template.conf",
                   "systemdServiceTemplate":  "flowchain-live.service.template",
+                  "systemdSupervisorTemplate":  "flowchain-supervisor.service.template",
                   "nginxPreflightScript":  "nginx-preflight.template.sh",
                   "nginxPreflightChecklist":  "NGINX_PREFLIGHT.md",
                   "ownerEnvExample":  "owner-public-rpc.env.example",
@@ -81,6 +88,7 @@
                    "readmeWritten":  true,
                    "nginxTemplateWritten":  true,
                    "systemdServiceTemplateWritten":  true,
+                   "systemdSupervisorTemplateWritten":  true,
                    "nginxPreflightScriptWritten":  true,
                    "nginxPreflightChecklistWritten":  true,
                    "ownerEnvExampleWritten":  true,
@@ -90,6 +98,7 @@
                    "requiredPlaceholdersPresent":  true,
                    "nginxRequiredTokensPresent":  true,
                    "systemdLiveServiceTemplatePresent":  true,
+                   "systemdSupervisorTemplatePresent":  true,
                    "nginxPreflightTokensPresent":  true,
                    "includesPrivateOrigin":  true,
                    "includesRateLimitPlaceholder":  true,

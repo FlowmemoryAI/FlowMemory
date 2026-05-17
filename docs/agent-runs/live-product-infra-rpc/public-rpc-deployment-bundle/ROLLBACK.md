@@ -12,8 +12,10 @@ Use these commands if the public edge, RPC service, or tester sharing path behav
 
 ## Owner-Host Edge Rollback Commands
 
+- systemctl stop flowchain-supervisor.service
 - systemctl stop flowchain-live.service
 - cp <PREVIOUS_FLOWCHAIN_RPC_NGINX_CONF> <FLOWCHAIN_RPC_NGINX_RENDERED_CONF>
 - nginx -t
 - systemctl reload nginx
 - systemctl restart flowchain-live.service
+- systemctl restart flowchain-supervisor.service

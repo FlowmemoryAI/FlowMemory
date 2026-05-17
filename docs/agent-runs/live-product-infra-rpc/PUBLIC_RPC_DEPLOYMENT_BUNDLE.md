@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Bundle
 
-Generated: 2026-05-17T07:00:55.9852785Z
+Generated: 2026-05-17T08:08:32.3114389Z
 Status: passed
 
 This bundle packages placeholder-only files for an owner-operated HTTPS edge in front of the repo-owned private RPC origin `127.0.0.1:8787`.
@@ -10,6 +10,7 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - README.md
 - nginx-flowchain-rpc.template.conf
 - flowchain-live.service.template
+- flowchain-supervisor.service.template
 - nginx-preflight.template.sh
 - NGINX_PREFLIGHT.md
 - owner-public-rpc.env.example
@@ -33,6 +34,7 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - <FLOWCHAIN_RPC_NGINX_RENDERED_CONF>
 - <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>
 - <FLOWCHAIN_SYSTEMD_RENDERED_UNIT>
+- <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>
 - <PREVIOUS_FLOWCHAIN_RPC_NGINX_CONF>
 
 ## Required Env Names
@@ -49,6 +51,8 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 ## Verification Commands
 
 - npm run flowchain:service:restart -- -LiveProfile
+- npm run flowchain:service:supervisor -- -Once
+- npm run flowchain:service:supervisor:validate
 - npm run flowchain:service:status
 - npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30
 - npm run flowchain:ops:snapshot -- -AllowBlocked
@@ -62,6 +66,7 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 ## Owner-Host Preflight Commands
 
 - systemd-analyze verify <FLOWCHAIN_SYSTEMD_RENDERED_UNIT>
+- systemd-analyze verify <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>
 - nginx -t
 - bash <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>
 
@@ -72,11 +77,13 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - npm run flowchain:service:restart -- -LiveProfile
 - npm run flowchain:service:stop
 - npm run flowchain:emergency:stop-local
+- systemctl stop flowchain-supervisor.service
 - systemctl stop flowchain-live.service
 - cp <PREVIOUS_FLOWCHAIN_RPC_NGINX_CONF> <FLOWCHAIN_RPC_NGINX_RENDERED_CONF>
 - nginx -t
 - systemctl reload nginx
 - systemctl restart flowchain-live.service
+- systemctl restart flowchain-supervisor.service
 
 ## Bundle Checks
 
@@ -84,6 +91,7 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - readmeWritten: True
 - nginxTemplateWritten: True
 - systemdServiceTemplateWritten: True
+- systemdSupervisorTemplateWritten: True
 - nginxPreflightScriptWritten: True
 - nginxPreflightChecklistWritten: True
 - ownerEnvExampleWritten: True
@@ -93,6 +101,7 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - requiredPlaceholdersPresent: True
 - nginxRequiredTokensPresent: True
 - systemdLiveServiceTemplatePresent: True
+- systemdSupervisorTemplatePresent: True
 - nginxPreflightTokensPresent: True
 - includesPrivateOrigin: True
 - includesRateLimitPlaceholder: True

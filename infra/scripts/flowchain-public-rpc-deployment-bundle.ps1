@@ -106,11 +106,14 @@ $requiredPlaceholders = @(
     "<FLOWCHAIN_RPC_NGINX_RENDERED_CONF>",
     "<FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>",
     "<FLOWCHAIN_SYSTEMD_RENDERED_UNIT>",
+    "<FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>",
     "<PREVIOUS_FLOWCHAIN_RPC_NGINX_CONF>"
 )
 
 $requiredCommands = @(
     "npm run flowchain:service:restart -- -LiveProfile",
+    "npm run flowchain:service:supervisor -- -Once",
+    "npm run flowchain:service:supervisor:validate",
     "npm run flowchain:service:status",
     "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
     "npm run flowchain:ops:snapshot -- -AllowBlocked",
@@ -124,6 +127,7 @@ $requiredCommands = @(
 
 $ownerPreflightCommands = @(
     "systemd-analyze verify <FLOWCHAIN_SYSTEMD_RENDERED_UNIT>",
+    "systemd-analyze verify <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>",
     "nginx -t",
     "bash <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>"
 )
@@ -137,11 +141,13 @@ $localRollbackCommands = @(
 )
 
 $ownerRollbackCommands = @(
+    "systemctl stop flowchain-supervisor.service",
     "systemctl stop flowchain-live.service",
     "cp <PREVIOUS_FLOWCHAIN_RPC_NGINX_CONF> <FLOWCHAIN_RPC_NGINX_RENDERED_CONF>",
     "nginx -t",
     "systemctl reload nginx",
-    "systemctl restart flowchain-live.service"
+    "systemctl restart flowchain-live.service",
+    "systemctl restart flowchain-supervisor.service"
 )
 
 $rollbackCommands = @($localRollbackCommands + $ownerRollbackCommands)
@@ -175,6 +181,23 @@ $systemdRequiredTokens = @(
     "ExecStartPost=/usr/bin/env npm run flowchain:service:status",
     "ExecReload=/usr/bin/env npm run flowchain:service:restart -- -LiveProfile",
     "ExecStop=/usr/bin/env npm run flowchain:service:stop",
+    "NoNewPrivileges=true",
+    "ReadWritePaths=<FLOWCHAIN_REPO_ABSOLUTE_PATH>/devnet"
+)
+
+$systemdSupervisorRequiredTokens = @(
+    "[Unit]",
+    "[Service]",
+    "[Install]",
+    "Description=FlowChain live service supervisor",
+    "WorkingDirectory=<FLOWCHAIN_REPO_ABSOLUTE_PATH>",
+    "User=<FLOWCHAIN_SERVICE_USER>",
+    "Group=<FLOWCHAIN_SERVICE_GROUP>",
+    "EnvironmentFile=<FLOWCHAIN_OWNER_ENV_FILE>",
+    "Environment=FLOWCHAIN_OWNER_ENV_FILE=<FLOWCHAIN_OWNER_ENV_FILE>",
+    "ExecStart=/usr/bin/env npm run flowchain:service:supervisor -- -IntervalSeconds 30 -MaxRestartAttempts 3",
+    "Restart=always",
+    "RestartSec=15",
     "NoNewPrivileges=true",
     "ReadWritePaths=<FLOWCHAIN_REPO_ABSOLUTE_PATH>/devnet"
 )
@@ -257,6 +280,37 @@ $systemdServiceTemplateLines = @(
     "WantedBy=multi-user.target"
 )
 
+$systemdSupervisorTemplateLines = @(
+    "# FlowChain live service supervisor systemd template.",
+    "# Render on the owner host only. Keep rendered unit files and env files out of the repository.",
+    "[Unit]",
+    "Description=FlowChain live service supervisor",
+    "Wants=network-online.target",
+    "After=network-online.target flowchain-live.service",
+    "",
+    "[Service]",
+    "Type=simple",
+    "WorkingDirectory=<FLOWCHAIN_REPO_ABSOLUTE_PATH>",
+    "User=<FLOWCHAIN_SERVICE_USER>",
+    "Group=<FLOWCHAIN_SERVICE_GROUP>",
+    "EnvironmentFile=<FLOWCHAIN_OWNER_ENV_FILE>",
+    "Environment=FLOWCHAIN_OWNER_ENV_FILE=<FLOWCHAIN_OWNER_ENV_FILE>",
+    "Environment=FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR=<FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR>",
+    "ExecStart=/usr/bin/env npm run flowchain:service:supervisor -- -IntervalSeconds 30 -MaxRestartAttempts 3",
+    "Restart=always",
+    "RestartSec=15",
+    "TimeoutStartSec=120",
+    "TimeoutStopSec=60",
+    "KillMode=process",
+    "NoNewPrivileges=true",
+    "PrivateTmp=true",
+    "ProtectSystem=full",
+    "ReadWritePaths=<FLOWCHAIN_REPO_ABSOLUTE_PATH>/devnet <FLOWCHAIN_REPO_ABSOLUTE_PATH>/docs/agent-runs <FLOWCHAIN_REPO_ABSOLUTE_PATH>/services/bridge-relayer/out",
+    "",
+    "[Install]",
+    "WantedBy=multi-user.target"
+)
+
 $nginxPreflightScriptLines = @(
     "#!/usr/bin/env bash",
     "set -euo pipefail",
@@ -327,6 +381,7 @@ $readmeLines = @(
     "",
     '- `nginx-flowchain-rpc.template.conf`: HTTPS reverse-proxy template for the private origin `127.0.0.1:8787`.',
     '- `flowchain-live.service.template`: systemd unit template for the owner-host live service.',
+    '- `flowchain-supervisor.service.template`: systemd unit template for continuous service autorecovery.',
     '- `nginx-preflight.template.sh`: Nginx config-test and public read preflight script template.',
     '- `NGINX_PREFLIGHT.md`: Nginx render, TLS, rate-limit, CORS, and reload checklist.',
     '- `owner-public-rpc.env.example`: local owner env-file shape with blank values.',
@@ -379,6 +434,7 @@ $files = [ordered]@{
     readme = Join-Path $bundleFullDir "README.md"
     nginxTemplate = Join-Path $bundleFullDir "nginx-flowchain-rpc.template.conf"
     systemdServiceTemplate = Join-Path $bundleFullDir "flowchain-live.service.template"
+    systemdSupervisorTemplate = Join-Path $bundleFullDir "flowchain-supervisor.service.template"
     nginxPreflightScript = Join-Path $bundleFullDir "nginx-preflight.template.sh"
     nginxPreflightChecklist = Join-Path $bundleFullDir "NGINX_PREFLIGHT.md"
     ownerEnvExample = Join-Path $bundleFullDir "owner-public-rpc.env.example"
@@ -390,6 +446,7 @@ $files = [ordered]@{
 Set-Content -LiteralPath $files.readme -Value ($readmeLines -join "`r`n") -Encoding UTF8
 Set-Content -LiteralPath $files.nginxTemplate -Value ($nginxTemplateLines -join "`r`n") -Encoding UTF8
 Set-Content -LiteralPath $files.systemdServiceTemplate -Value ($systemdServiceTemplateLines -join "`r`n") -Encoding UTF8
+Set-Content -LiteralPath $files.systemdSupervisorTemplate -Value ($systemdSupervisorTemplateLines -join "`r`n") -Encoding UTF8
 Set-Content -LiteralPath $files.nginxPreflightScript -Value ($nginxPreflightScriptLines -join "`n") -Encoding UTF8
 Set-Content -LiteralPath $files.nginxPreflightChecklist -Value ($nginxPreflightChecklistLines -join "`r`n") -Encoding UTF8
 Set-Content -LiteralPath $files.ownerEnvExample -Value ($ownerEnvExampleLines -join "`r`n") -Encoding UTF8
@@ -399,6 +456,7 @@ Set-Content -LiteralPath $files.rollback -Value ($rollbackLines -join "`r`n") -E
 $nginxText = Join-BundleLines -Lines $nginxTemplateLines
 $ownerEnvText = Join-BundleLines -Lines $ownerEnvExampleLines
 $systemdText = Join-BundleLines -Lines $systemdServiceTemplateLines
+$systemdSupervisorText = Join-BundleLines -Lines $systemdSupervisorTemplateLines
 $nginxPreflightScriptText = Join-BundleLines -Lines $nginxPreflightScriptLines
 $nginxPreflightChecklistText = Join-BundleLines -Lines $nginxPreflightChecklistLines
 $verifyText = Join-BundleLines -Lines $verifyLines
@@ -409,6 +467,7 @@ $allBundleText = @(
     $nginxText,
     $ownerEnvText,
     $systemdText,
+    $systemdSupervisorText,
     $nginxPreflightScriptText,
     $nginxPreflightChecklistText,
     $verifyText,
@@ -423,6 +482,7 @@ $checks = [ordered]@{
     readmeWritten = Test-Path -LiteralPath $files.readme
     nginxTemplateWritten = Test-Path -LiteralPath $files.nginxTemplate
     systemdServiceTemplateWritten = Test-Path -LiteralPath $files.systemdServiceTemplate
+    systemdSupervisorTemplateWritten = Test-Path -LiteralPath $files.systemdSupervisorTemplate
     nginxPreflightScriptWritten = Test-Path -LiteralPath $files.nginxPreflightScript
     nginxPreflightChecklistWritten = Test-Path -LiteralPath $files.nginxPreflightChecklist
     ownerEnvExampleWritten = Test-Path -LiteralPath $files.ownerEnvExample
@@ -432,6 +492,7 @@ $checks = [ordered]@{
     requiredPlaceholdersPresent = ($missingRequiredPlaceholders.Count -eq 0)
     nginxRequiredTokensPresent = Test-TextContainsAllTokens -Text $nginxText -Tokens $nginxRequiredTokens
     systemdLiveServiceTemplatePresent = Test-TextContainsAllTokens -Text $systemdText -Tokens $systemdRequiredTokens
+    systemdSupervisorTemplatePresent = Test-TextContainsAllTokens -Text $systemdSupervisorText -Tokens $systemdSupervisorRequiredTokens
     nginxPreflightTokensPresent = Test-TextContainsAllTokens -Text $nginxPreflightScriptText -Tokens $preflightRequiredTokens
     includesPrivateOrigin = ($nginxText.Contains("127.0.0.1:8787") -and $nginxPreflightScriptText.Contains("127.0.0.1:8787"))
     includesRateLimitPlaceholder = $nginxText.Contains("<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>")
@@ -500,6 +561,7 @@ $report = [ordered]@{
         readme = "README.md"
         nginxTemplate = "nginx-flowchain-rpc.template.conf"
         systemdServiceTemplate = "flowchain-live.service.template"
+        systemdSupervisorTemplate = "flowchain-supervisor.service.template"
         nginxPreflightScript = "nginx-preflight.template.sh"
         nginxPreflightChecklist = "NGINX_PREFLIGHT.md"
         ownerEnvExample = "owner-public-rpc.env.example"
