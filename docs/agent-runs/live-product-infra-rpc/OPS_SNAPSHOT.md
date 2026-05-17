@@ -1,15 +1,16 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-17T09:28:24.9660983Z
+Generated: 2026-05-17T11:41:22.6741287Z
 Status: blocked
-Latest height: 51957
-Finalized height: 51957
+Latest height: 53846
+Finalized height: 53846
 
 ## Findings
 
 - blocked: public-rpc-not-ready - Public RPC is not ready to share.
 - blocked: backup-not-ready - State backup is not ready for public operation.
 - blocked: bridge-not-ready - Base 8453 bridge readiness is not ready for external funded testing.
+- blocked: bridge-relayer-not-ready - Bridge relayer one-shot proof is not ready.
 - blocked: external-tester-not-shareable - External tester packet must remain not-shareable.
 - blocked: deployment-contract-not-ready - Public deployment contract is not ready.
 

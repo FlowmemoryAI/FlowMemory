@@ -106,6 +106,14 @@ $rules = @(
         commands = @("npm run flowchain:no-secret:scan", "npm run flowchain:emergency:export-evidence")
     },
     [ordered]@{
+        id = "bridge-relayer-latency-failed"
+        severity = "critical"
+        findingCodes = @("bridge-relayer-latency-failed")
+        signal = "Bridge relayer failed or exceeded the handoff-to-spendable latency gate."
+        threshold = "relayer status failed or timing.latencyGate failed"
+        commands = @("npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:service:status", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
         id = "public-rpc-not-shareable"
         severity = "blocked"
         findingCodes = @("public-rpc-not-ready")
@@ -128,6 +136,14 @@ $rules = @(
         signal = "Base 8453 bridge readiness is not passed."
         threshold = "bridge live or infra readiness status is not passed"
         commands = @("npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
+        id = "bridge-relayer-not-ready"
+        severity = "blocked"
+        findingCodes = @("bridge-relayer-not-ready")
+        signal = "Bridge relayer one-shot proof is not ready."
+        threshold = "bridge relayer one-shot status is not passed"
+        commands = @("npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check")
     },
     [ordered]@{
         id = "external-tester-not-shareable"

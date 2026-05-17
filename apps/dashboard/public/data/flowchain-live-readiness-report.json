@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-17T11:37:29.0400389Z",
+  "generatedAt": "2026-05-17T11:41:39.4118750Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -8,8 +8,8 @@
   "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
   "privateRpcUrl": "http://127.0.0.1:8787",
   "metrics": {
-    "latestHeight": "53727",
-    "finalizedHeight": "53727",
+    "latestHeight": "53846",
+    "finalizedHeight": "53846",
     "monitorHeightAdvanced": true,
     "bridgeRelayerStatus": "blocked",
     "bridgeQueuedTransactions": "0",
@@ -105,7 +105,7 @@
       "label": "Private L1 origin",
       "status": "passed",
       "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
-      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=53727, finalizedHeight=53727",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=53846, finalizedHeight=53846",
       "commands": [
         "npm run flowchain:service:status"
       ],
@@ -310,7 +310,7 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T11:37:29.0400389Z"
+      "generatedAt": "2026-05-17T11:41:39.4118750Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
@@ -322,13 +322,13 @@
       "fileName": "service-status-report.json",
       "schema": "flowchain.service_status_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T11:31:38.3355641Z"
+      "generatedAt": "2026-05-17T11:41:21.8305199Z"
     },
     {
       "fileName": "service-monitor-report.json",
       "schema": "flowchain.service_monitor_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T09:34:09.0979376Z"
+      "generatedAt": "2026-05-17T11:41:22.1521404Z"
     },
     {
       "fileName": "public-rpc-readiness-report.json",

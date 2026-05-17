@@ -43,6 +43,7 @@ $paths = [ordered]@{
     backup = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     bridgeLive = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
+    bridgeRelayer = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     externalTester = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     publicDeployment = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     noSecret = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
@@ -163,6 +164,9 @@ $publicRpcStatus = Get-OpsStatus -Report $reports.publicRpc
 $backupStatus = Get-OpsStatus -Report $reports.backup
 $bridgeLiveStatus = Get-OpsStatus -Report $reports.bridgeLive
 $bridgeInfraStatus = Get-OpsStatus -Report $reports.bridgeInfra
+$bridgeRelayerStatus = Get-OpsStatus -Report $reports.bridgeRelayer
+$bridgeRelayerTiming = Get-OpsProp -Object $reports.bridgeRelayer -Name "timing"
+$bridgeRelayerLatencyGate = [string](Get-OpsProp -Object $bridgeRelayerTiming -Name "latencyGate" -Default "missing")
 $externalTesterStatus = Get-OpsStatus -Report $reports.externalTester
 $deploymentStatus = Get-OpsStatus -Report $reports.publicDeployment
 $noSecretStatus = Get-OpsStatus -Report $reports.noSecret
@@ -175,6 +179,12 @@ if ($backupStatus -ne "passed") {
 }
 if ($bridgeLiveStatus -ne "passed" -or $bridgeInfraStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "bridge-not-ready" -Message "Base 8453 bridge readiness is not ready for external funded testing." -Commands @("npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check", "npm run flowchain:bridge:emergency-stop")
+}
+if ($bridgeRelayerStatus -eq "failed" -or $bridgeRelayerLatencyGate -eq "failed") {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-relayer-latency-failed" -Message "Bridge relayer failed or exceeded the handoff-to-spendable latency gate." -Commands @("npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:service:status", "npm run flowchain:bridge:emergency-stop")
+}
+elseif ($bridgeRelayerStatus -ne "passed") {
+    Add-OpsFinding -Findings $findings -Severity "blocked" -Code "bridge-relayer-not-ready" -Message "Bridge relayer one-shot proof is not ready." -Commands @("npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check")
 }
 if ($externalTesterStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "external-tester-not-shareable" -Message "External tester packet must remain not-shareable." -Commands @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet")
@@ -245,6 +255,8 @@ $report = [ordered]@{
         backup = $backupStatus
         bridgeLive = $bridgeLiveStatus
         bridgeInfra = $bridgeInfraStatus
+        bridgeRelayer = $bridgeRelayerStatus
+        bridgeRelayerLatencyGate = $bridgeRelayerLatencyGate
         externalTester = $externalTesterStatus
         publicDeployment = $deploymentStatus
         noSecret = $noSecretStatus

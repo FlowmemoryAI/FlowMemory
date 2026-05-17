@@ -1,22 +1,23 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-17T09:28:24.7592775Z",
+    "generatedAt":  "2026-05-17T11:41:23.5583169Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
     "opsSnapshotPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
     "opsRefresh":  {
-                       "performed":  false,
+                       "performed":  true,
                        "exitCode":  0,
-                       "outputLineCount":  0
+                       "outputLineCount":  5
                    },
-    "ruleCount":  10,
-    "criticalRuleCount":  5,
-    "blockedRuleCount":  5,
+    "ruleCount":  12,
+    "criticalRuleCount":  6,
+    "blockedRuleCount":  6,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
                           "backup-not-ready",
                           "bridge-not-ready",
+                          "bridge-relayer-not-ready",
                           "external-tester-not-shareable",
                           "deployment-contract-not-ready"
                       ],
@@ -24,6 +25,7 @@
                                 "public-rpc-not-ready",
                                 "backup-not-ready",
                                 "bridge-not-ready",
+                                "bridge-relayer-not-ready",
                                 "external-tester-not-shareable",
                                 "deployment-contract-not-ready"
                             ],
@@ -35,9 +37,11 @@
                                 "height-not-advancing",
                                 "state-stale",
                                 "no-secret-scan-not-passed",
+                                "bridge-relayer-latency-failed",
                                 "public-rpc-not-ready",
                                 "backup-not-ready",
                                 "bridge-not-ready",
+                                "bridge-relayer-not-ready",
                                 "external-tester-not-shareable",
                                 "deployment-contract-not-ready"
                             ],
@@ -132,6 +136,20 @@
                                    ]
                   },
                   {
+                      "id":  "bridge-relayer-latency-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "bridge-relayer-latency-failed"
+                                       ],
+                      "signal":  "Bridge relayer failed or exceeded the handoff-to-spendable latency gate.",
+                      "threshold":  "relayer status failed or timing.latencyGate failed",
+                      "commands":  [
+                                       "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                                       "npm run flowchain:service:status",
+                                       "npm run flowchain:bridge:emergency-stop"
+                                   ]
+                  },
+                  {
                       "id":  "public-rpc-not-shareable",
                       "severity":  "blocked",
                       "findingCodes":  [
@@ -170,6 +188,20 @@
                                        "npm run flowchain:bridge:live:check",
                                        "npm run flowchain:bridge:infra:check",
                                        "npm run flowchain:bridge:emergency-stop"
+                                   ]
+                  },
+                  {
+                      "id":  "bridge-relayer-not-ready",
+                      "severity":  "blocked",
+                      "findingCodes":  [
+                                           "bridge-relayer-not-ready"
+                                       ],
+                      "signal":  "Bridge relayer one-shot proof is not ready.",
+                      "threshold":  "bridge relayer one-shot status is not passed",
+                      "commands":  [
+                                       "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                                       "npm run flowchain:bridge:live:check",
+                                       "npm run flowchain:bridge:infra:check"
                                    ]
                   },
                   {
