@@ -1,9 +1,9 @@
 ﻿# FlowChain Service Install Validation
 
-Generated: 2026-05-17T19:30:20.6553366Z
+Generated: 2026-05-17T21:54:33.5855110Z
 Status: passed
 
-This validation proves the Windows Scheduled Task install path is planned, no-secret, live-profile by default, and non-mutating when run in plan mode.
+This validation proves the Windows Scheduled Task install path is planned, no-secret, live-profile by default, non-mutating in plan/status mode, and has a safe absent-task uninstall no-op.
 
 ## Checks
 
@@ -27,6 +27,24 @@ This validation proves the Windows Scheduled Task install path is planned, no-se
 - hasMaxRestartAttempts: True
 - hasMaxStateAgeSeconds: True
 - commandOmitsNonLiveProfile: True
+- statusCommandPassed: True
+- statusActionReadOnly: True
+- statusDidNotMutate: True
+- statusTaskExistsStable: True
+- statusReportNoSecrets: True
+- statusReportEnvValuesPrintedFalse: True
+- statusReportBroadcastsFalse: True
+- uninstallAbsentPreflightTaskAbsent: True
+- uninstallAbsentCommandPassed: True
+- uninstallAbsentTaskCommandPassed: True
+- uninstallAbsentTaskWasAbsentBefore: True
+- uninstallAbsentDidNotCreateTask: True
+- uninstallAbsentTaskAbsentAfter: True
+- uninstallAbsentDidNotRemoveTask: True
+- uninstallAbsentTaskRemovedFalse: True
+- uninstallAbsentReportNoSecrets: True
+- uninstallAbsentReportEnvValuesPrintedFalse: True
+- uninstallAbsentReportBroadcastsFalse: True
 - commandsPresent: True
 - envValuesPrintedFalse: True
 - noSecrets: True

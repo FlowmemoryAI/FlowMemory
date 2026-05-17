@@ -1,6 +1,6 @@
 ﻿# FlowChain Public Deployment Contract
 
-Generated: 2026-05-17T21:22:58.9529031Z
+Generated: 2026-05-17T21:54:51.1086404Z
 Status: blocked
 Deployment ready: False
 Packet shareable: False
@@ -30,7 +30,7 @@ This file records deployment gates, commands, and env names only. It must not co
 | The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable. | passed | serviceStatus=passed, privateBind=True, latestHeight=60281, finalizedHeight=60281 |
 | The deployment has recent service-monitor evidence that block height advances over multiple samples. | passed | monitorStatus=passed, samples=2, heightAdvanced=True |
 | The owner service has an autorecovery supervisor and an isolated recovery drill proving control-plane restart without touching live state. | passed | supervisorValidation=passed, restartAttempts=1 |
-| The owner host has a no-secret Windows install, status, and uninstall path for registering the live supervisor as a reboot-persistent scheduled task. | passed | serviceInstallValidation=passed, planDidNotMutate=True, liveProfileDefault=True, relayerDefaultOff=True, relayerOptIn=True, commandsPresent=True |
+| The owner host has a no-secret Windows install, read-only status, and safe absent-task uninstall no-op path for registering the live supervisor as a reboot-persistent scheduled task. | passed | serviceInstallValidation=passed, planDidNotMutate=True, statusCommand=True, statusDidNotMutate=True, uninstallNoop=True, liveProfileDefault=True, relayerDefaultOff=True, relayerOptIn=True, commandsPresent=True |
 | Owner deployment has a no-secret ops snapshot that separates critical incidents from expected owner-input blockers and lists incident commands. | passed | opsSnapshot=blocked, criticalCount=0, blockedCount=6 |
 | Owner deployment has a no-secret alert rule manifest that maps every current ops finding to operator commands without committing delivery credentials. | passed | alertRules=passed, criticalRules=9, blockedRules=6, unmappedCurrentFindingCodes=0 |
 | The owner host has a no-secret Windows install, status, and uninstall path for recurring ops snapshot and alert-rule refresh without committed external delivery credentials. | passed | alertInstallValidation=passed, planDidNotMutate=True, hasAllowBlocked=True, noExternalDelivery=True |

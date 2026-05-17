@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-17T21:22:59.1109076Z",
+    "generatedAt":  "2026-05-17T21:54:56.5589414Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -81,9 +81,9 @@
                   {
                       "id":  "service-install-boundary",
                       "layer":  "Operations",
-                      "requirement":  "Owner-host service lifecycle includes a no-secret Windows Scheduled Task install, status, and uninstall path for reboot-persistent live supervisor autorecovery.",
+                      "requirement":  "Owner-host service lifecycle includes a no-secret Windows Scheduled Task install, read-only status, and safe absent-task uninstall no-op path for reboot-persistent live supervisor autorecovery.",
                       "status":  "passed",
-                      "evidence":  "installValidation=passed, failedChecks=0, planDidNotMutate=True, liveProfileDefault=True, relayerDefaultOff=True, relayerOptIn=True, schedulerCmdlets=True",
+                      "evidence":  "installValidation=passed, failedChecks=0, planDidNotMutate=True, statusCommand=True, statusDidNotMutate=True, uninstallNoop=True, liveProfileDefault=True, relayerDefaultOff=True, relayerOptIn=True, schedulerCmdlets=True",
                       "files":  [
                                     "infra/scripts/flowchain-service-install-windows.ps1",
                                     "infra/scripts/flowchain-service-install-validation.ps1",

@@ -5,7 +5,11 @@ param(
     [string] $PlanReportPath = "docs/agent-runs/live-product-infra-rpc/service-install-windows-report.json",
     [string] $PlanMarkdownPath = "docs/agent-runs/live-product-infra-rpc/WINDOWS_SERVICE_INSTALL.md",
     [string] $BridgeRelayerPlanReportPath = "docs/agent-runs/live-product-infra-rpc/service-install-windows-bridge-relayer-report.json",
-    [string] $BridgeRelayerPlanMarkdownPath = "docs/agent-runs/live-product-infra-rpc/WINDOWS_SERVICE_INSTALL_BRIDGE_RELAYER.md"
+    [string] $BridgeRelayerPlanMarkdownPath = "docs/agent-runs/live-product-infra-rpc/WINDOWS_SERVICE_INSTALL_BRIDGE_RELAYER.md",
+    [string] $StatusReportPath = "docs/agent-runs/live-product-infra-rpc/service-install-windows-status-report.json",
+    [string] $StatusMarkdownPath = "docs/agent-runs/live-product-infra-rpc/WINDOWS_SERVICE_INSTALL_STATUS.md",
+    [string] $UninstallAbsentReportPath = "docs/agent-runs/live-product-infra-rpc/service-install-windows-uninstall-absent-report.json",
+    [string] $UninstallAbsentMarkdownPath = "docs/agent-runs/live-product-infra-rpc/WINDOWS_SERVICE_INSTALL_UNINSTALL_ABSENT.md"
 )
 
 $ErrorActionPreference = "Stop"
@@ -21,6 +25,10 @@ $planReportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (
 $planMarkdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $PlanMarkdownPath)
 $bridgeRelayerPlanReportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $BridgeRelayerPlanReportPath)
 $bridgeRelayerPlanMarkdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $BridgeRelayerPlanMarkdownPath)
+$statusReportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $StatusReportPath)
+$statusMarkdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $StatusMarkdownPath)
+$uninstallAbsentReportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $UninstallAbsentReportPath)
+$uninstallAbsentMarkdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $UninstallAbsentMarkdownPath)
 $installScriptPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "infra/scripts/flowchain-service-install-windows.ps1")
 $supervisorScriptPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "infra/scripts/flowchain-service-supervisor.ps1")
 $validationTmpDir = Join-Path $repoRoot "devnet/local/tmp/service-install-validation"
@@ -103,6 +111,26 @@ function Test-PackageScript {
     return $PackageJson.scripts.PSObject.Properties.Name -contains $Name
 }
 
+function Test-ServiceInstallValidationScheduledTaskExists {
+    param(
+        [Parameter(Mandatory = $true)][string] $Name,
+        [Parameter(Mandatory = $true)][string] $Path
+    )
+
+    $getScheduledTask = Get-Command "Get-ScheduledTask" -ErrorAction SilentlyContinue
+    if ($null -eq $getScheduledTask) {
+        return $false
+    }
+
+    try {
+        $task = Get-ScheduledTask -TaskName $Name -TaskPath $Path -ErrorAction SilentlyContinue
+        return $null -ne $task
+    }
+    catch {
+        throw "Unable to preflight validation Scheduled Task '$Path$Name': $($_.Exception.Message)"
+    }
+}
+
 $packageJson = Get-Content -Raw -LiteralPath (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "package.json") | ConvertFrom-Json
 $planResult = Invoke-ServiceInstallValidationChild -ArgumentList @(
     "-NoProfile",
@@ -144,6 +172,69 @@ $bridgeRelayerPlanResult = Invoke-ServiceInstallValidationChild -ArgumentList @(
 $bridgeRelayerPlanReport = Read-FlowChainJsonIfExists -Path $bridgeRelayerPlanReportFullPath
 $bridgeRelayerPlanChecks = Get-ServiceInstallValidationProp -Object $bridgeRelayerPlanReport -Name "checks"
 $bridgeRelayerPlanScheduledTask = Get-ServiceInstallValidationProp -Object $bridgeRelayerPlanReport -Name "scheduledTask"
+
+$statusResult = Invoke-ServiceInstallValidationChild -ArgumentList @(
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    $installScriptPath,
+    "-Action",
+    "Status",
+    "-TaskName",
+    $TaskName,
+    "-ReportPath",
+    $statusReportFullPath,
+    "-MarkdownPath",
+    $statusMarkdownFullPath
+)
+$statusReport = Read-FlowChainJsonIfExists -Path $statusReportFullPath
+$statusReportStatus = [string](Get-ServiceInstallValidationProp -Object $statusReport -Name "status" -Default "missing")
+$statusReportAction = [string](Get-ServiceInstallValidationProp -Object $statusReport -Name "action" -Default "")
+$statusTaskMutationPerformed = [bool](Get-ServiceInstallValidationProp -Object $statusReport -Name "taskMutationPerformed" -Default $true)
+$statusCommandPassed = [int]$statusResult.exitCode -eq 0 -and $statusReportStatus -eq "passed" -and $statusReportAction -eq "Status"
+$statusTaskBefore = Get-ServiceInstallValidationProp -Object $statusReport -Name "taskBefore"
+$statusTaskAfter = Get-ServiceInstallValidationProp -Object $statusReport -Name "taskAfter"
+$statusTaskBeforeExists = (Get-ServiceInstallValidationProp -Object $statusTaskBefore -Name "exists" -Default $null)
+$statusTaskAfterExists = (Get-ServiceInstallValidationProp -Object $statusTaskAfter -Name "exists" -Default $null)
+$statusTaskExistsStable = $statusCommandPassed -and ($statusTaskBeforeExists -eq $statusTaskAfterExists)
+
+$uninstallAbsentTaskName = "$TaskName-ValidationAbsent"
+$uninstallAbsentTaskPath = "\"
+$uninstallAbsentPreflightTaskExists = Test-ServiceInstallValidationScheduledTaskExists -Name $uninstallAbsentTaskName -Path $uninstallAbsentTaskPath
+if ($uninstallAbsentPreflightTaskExists) {
+    $uninstallAbsentResult = [ordered]@{
+        exitCode = 1
+        timedOut = $false
+        stdoutPath = ""
+        stderrPath = ""
+        outputRedacted = @("Skipped absent-task uninstall no-op because validation task already exists: $uninstallAbsentTaskPath$uninstallAbsentTaskName")
+    }
+}
+else {
+    $uninstallAbsentResult = Invoke-ServiceInstallValidationChild -ArgumentList @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        $installScriptPath,
+        "-Action",
+        "Uninstall",
+        "-TaskName",
+        $uninstallAbsentTaskName,
+        "-ReportPath",
+        $uninstallAbsentReportFullPath,
+        "-MarkdownPath",
+        $uninstallAbsentMarkdownFullPath
+    )
+}
+$uninstallAbsentReport = Read-FlowChainJsonIfExists -Path $uninstallAbsentReportFullPath
+$uninstallAbsentStatus = [string](Get-ServiceInstallValidationProp -Object $uninstallAbsentReport -Name "status" -Default "missing")
+$uninstallAbsentAction = [string](Get-ServiceInstallValidationProp -Object $uninstallAbsentReport -Name "action" -Default "")
+$uninstallAbsentTaskBefore = Get-ServiceInstallValidationProp -Object $uninstallAbsentReport -Name "taskBefore"
+$uninstallAbsentTaskAfter = Get-ServiceInstallValidationProp -Object $uninstallAbsentReport -Name "taskAfter"
+$uninstallAbsentTaskRemoved = [bool](Get-ServiceInstallValidationProp -Object $uninstallAbsentReport -Name "taskRemoved" -Default $true)
+$uninstallAbsentCommandPassed = [int]$uninstallAbsentResult.exitCode -eq 0 -and $uninstallAbsentStatus -eq "passed" -and $uninstallAbsentAction -eq "Uninstall"
 
 $requiredScripts = @(
     "flowchain:service:install:windows",
@@ -191,6 +282,24 @@ $checks = [ordered]@{
     hasMaxRestartAttempts = (Get-ServiceInstallValidationProp -Object $planChecks -Name "hasMaxRestartAttempts" -Default $false) -eq $true
     hasMaxStateAgeSeconds = (Get-ServiceInstallValidationProp -Object $planChecks -Name "hasMaxStateAgeSeconds" -Default $false) -eq $true
     commandOmitsNonLiveProfile = $scheduledTaskArguments -notmatch "(^|\s)-NonLiveProfile(\s|$)"
+    statusCommandPassed = $statusCommandPassed
+    statusActionReadOnly = $statusTaskMutationPerformed -eq $false
+    statusDidNotMutate = $statusCommandPassed -and ($statusTaskMutationPerformed -eq $false) -and $statusTaskExistsStable
+    statusTaskExistsStable = $statusTaskExistsStable
+    statusReportNoSecrets = (Get-ServiceInstallValidationProp -Object $statusReport -Name "noSecrets" -Default $false) -eq $true
+    statusReportEnvValuesPrintedFalse = (Get-ServiceInstallValidationProp -Object $statusReport -Name "envValuesPrinted" -Default $true) -eq $false
+    statusReportBroadcastsFalse = (Get-ServiceInstallValidationProp -Object $statusReport -Name "broadcasts" -Default $true) -eq $false
+    uninstallAbsentPreflightTaskAbsent = $uninstallAbsentPreflightTaskExists -eq $false
+    uninstallAbsentCommandPassed = $uninstallAbsentCommandPassed
+    uninstallAbsentTaskCommandPassed = $uninstallAbsentCommandPassed
+    uninstallAbsentTaskWasAbsentBefore = (Get-ServiceInstallValidationProp -Object $uninstallAbsentTaskBefore -Name "exists" -Default $true) -eq $false
+    uninstallAbsentDidNotCreateTask = (Get-ServiceInstallValidationProp -Object $uninstallAbsentTaskAfter -Name "exists" -Default $true) -eq $false
+    uninstallAbsentTaskAbsentAfter = (Get-ServiceInstallValidationProp -Object $uninstallAbsentTaskAfter -Name "exists" -Default $true) -eq $false
+    uninstallAbsentDidNotRemoveTask = $uninstallAbsentTaskRemoved -eq $false
+    uninstallAbsentTaskRemovedFalse = $uninstallAbsentTaskRemoved -eq $false
+    uninstallAbsentReportNoSecrets = (Get-ServiceInstallValidationProp -Object $uninstallAbsentReport -Name "noSecrets" -Default $false) -eq $true
+    uninstallAbsentReportEnvValuesPrintedFalse = (Get-ServiceInstallValidationProp -Object $uninstallAbsentReport -Name "envValuesPrinted" -Default $true) -eq $false
+    uninstallAbsentReportBroadcastsFalse = (Get-ServiceInstallValidationProp -Object $uninstallAbsentReport -Name "broadcasts" -Default $true) -eq $false
     commandsPresent = -not [string]::IsNullOrWhiteSpace([string](Get-ServiceInstallValidationProp -Object $planCommands -Name "plan" -Default "")) `
         -and -not [string]::IsNullOrWhiteSpace([string](Get-ServiceInstallValidationProp -Object $planCommands -Name "install" -Default "")) `
         -and -not [string]::IsNullOrWhiteSpace([string](Get-ServiceInstallValidationProp -Object $planCommands -Name "status" -Default "")) `
@@ -228,11 +337,27 @@ $report = [ordered]@{
             timedOut = [bool]$bridgeRelayerPlanResult.timedOut
             stdoutPath = [string]$bridgeRelayerPlanResult.stdoutPath
             stderrPath = [string]$bridgeRelayerPlanResult.stderrPath
+        },
+        [ordered]@{
+            name = "service-install-status"
+            exitCode = [int]$statusResult.exitCode
+            timedOut = [bool]$statusResult.timedOut
+            stdoutPath = [string]$statusResult.stdoutPath
+            stderrPath = [string]$statusResult.stderrPath
+        },
+        [ordered]@{
+            name = "service-install-uninstall-absent"
+            exitCode = [int]$uninstallAbsentResult.exitCode
+            timedOut = [bool]$uninstallAbsentResult.timedOut
+            stdoutPath = [string]$uninstallAbsentResult.stdoutPath
+            stderrPath = [string]$uninstallAbsentResult.stderrPath
         }
     )
     planReports = [ordered]@{
         default = $planReportFullPath
         bridgeRelayerOptIn = $bridgeRelayerPlanReportFullPath
+        status = $statusReportFullPath
+        uninstallAbsent = $uninstallAbsentReportFullPath
     }
     commands = [ordered]@{
         plan = "npm run flowchain:service:install:windows -- -Action Plan"
@@ -256,7 +381,7 @@ $markdownLines.Add("")
 $markdownLines.Add("Generated: $($report.generatedAt)")
 $markdownLines.Add("Status: $status")
 $markdownLines.Add("")
-$markdownLines.Add("This validation proves the Windows Scheduled Task install path is planned, no-secret, live-profile by default, and non-mutating when run in plan mode.")
+$markdownLines.Add("This validation proves the Windows Scheduled Task install path is planned, no-secret, live-profile by default, non-mutating in plan/status mode, and has a safe absent-task uninstall no-op.")
 $markdownLines.Add("")
 $markdownLines.Add("## Checks")
 $markdownLines.Add("")

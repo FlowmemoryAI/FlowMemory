@@ -1,9 +1,9 @@
 ﻿# FlowChain Windows Service Install
 
-Generated: 2026-05-17T21:54:22.7524818Z
+Generated: 2026-05-17T21:54:33.2375040Z
 Status: passed
-Action: Plan
-Task: \FlowChainLiveSupervisor
+Action: Uninstall
+Task: \FlowChainLiveSupervisor-ValidationAbsent
 
 This runbook registers the live service supervisor as a Windows Scheduled Task at owner logon. It keeps the private node and control-plane RPC recovered after reboot or logon, while preserving the private local origin.
 

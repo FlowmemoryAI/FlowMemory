@@ -35,6 +35,10 @@ npm run flowchain:service:install:windows -- -Action Plan
 npm run flowchain:service:install:validate
 ```
 
+The validation command runs the install plan, the bridge-relayer opt-in plan, a
+read-only status check, and an absent-task uninstall no-op check. It refuses to
+remove a pre-existing validation task.
+
 After the plan and validation pass, the owner host can register the supervisor
 as a Windows Scheduled Task at logon:
 
@@ -60,6 +64,8 @@ inputs and pilot guardrails pass.
 - `service-supervisor-restart-report.json`
 - `service-supervisor-validation-report.json`
 - `service-install-windows-report.json`
+- `service-install-windows-status-report.json`
+- `service-install-windows-uninstall-absent-report.json`
 - `service-install-validation-report.json`
 
 All reports are redacted by the same no-secret checks used by the rest of the

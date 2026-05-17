@@ -358,12 +358,26 @@ $serviceInstallReady = (Test-AllRepoFilesExist -Paths $serviceInstallFiles) `
     -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInAddsSupervisorFlag" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInUsesSupervisor" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "commandOmitsNonLiveProfile" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "statusCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "statusActionReadOnly" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "statusDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "statusReportNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "statusReportEnvValuesPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "statusReportBroadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "uninstallAbsentPreflightTaskAbsent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "uninstallAbsentCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "uninstallAbsentTaskWasAbsentBefore" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "uninstallAbsentDidNotCreateTask" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "uninstallAbsentDidNotRemoveTask" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "uninstallAbsentReportNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "uninstallAbsentReportEnvValuesPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "uninstallAbsentReportBroadcastsFalse" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $serviceInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $serviceInstallValidation -Name "noSecrets" -Default $false) -eq $true)
 Add-ArchitectureItem -Items $items -Id "service-install-boundary" -Layer "Operations" `
-    -Requirement "Owner-host service lifecycle includes a no-secret Windows Scheduled Task install, status, and uninstall path for reboot-persistent live supervisor autorecovery." `
+    -Requirement "Owner-host service lifecycle includes a no-secret Windows Scheduled Task install, read-only status, and safe absent-task uninstall no-op path for reboot-persistent live supervisor autorecovery." `
     -Status $(if ($serviceInstallReady) { "passed" } else { "failed" }) `
-    -Evidence "installValidation=$serviceInstallValidationStatus, failedChecks=$($serviceInstallFailedChecks.Count), planDidNotMutate=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "planDidNotMutate"), liveProfileDefault=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "liveProfileDefault"), relayerDefaultOff=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "noBridgeRelayerDefault"), relayerOptIn=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInStartsLoop"), schedulerCmdlets=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "schedulerCmdletsAvailable")" `
+    -Evidence "installValidation=$serviceInstallValidationStatus, failedChecks=$($serviceInstallFailedChecks.Count), planDidNotMutate=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "planDidNotMutate"), statusCommand=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "statusCommandPassed"), statusDidNotMutate=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "statusDidNotMutate"), uninstallNoop=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "uninstallAbsentDidNotCreateTask"), liveProfileDefault=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "liveProfileDefault"), relayerDefaultOff=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "noBridgeRelayerDefault"), relayerOptIn=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInStartsLoop"), schedulerCmdlets=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "schedulerCmdletsAvailable")" `
     -Files $serviceInstallFiles `
     -Commands @("npm run flowchain:service:install:validate", "npm run flowchain:service:install:windows -- -Action Plan", "npm run flowchain:service:install:windows -- -Action Install", "npm run flowchain:service:install:windows -- -Action Status", "npm run flowchain:service:install:windows -- -Action Uninstall")
 

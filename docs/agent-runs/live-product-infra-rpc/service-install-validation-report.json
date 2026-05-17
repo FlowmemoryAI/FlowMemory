@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.service_install_validation_report.v0",
-    "generatedAt":  "2026-05-17T19:30:20.6553366Z",
+    "generatedAt":  "2026-05-17T21:54:33.5855110Z",
     "status":  "passed",
     "taskName":  "FlowChainLiveSupervisor",
     "checks":  {
@@ -24,6 +24,24 @@
                    "hasMaxRestartAttempts":  true,
                    "hasMaxStateAgeSeconds":  true,
                    "commandOmitsNonLiveProfile":  true,
+                   "statusCommandPassed":  true,
+                   "statusActionReadOnly":  true,
+                   "statusDidNotMutate":  true,
+                   "statusTaskExistsStable":  true,
+                   "statusReportNoSecrets":  true,
+                   "statusReportEnvValuesPrintedFalse":  true,
+                   "statusReportBroadcastsFalse":  true,
+                   "uninstallAbsentPreflightTaskAbsent":  true,
+                   "uninstallAbsentCommandPassed":  true,
+                   "uninstallAbsentTaskCommandPassed":  true,
+                   "uninstallAbsentTaskWasAbsentBefore":  true,
+                   "uninstallAbsentDidNotCreateTask":  true,
+                   "uninstallAbsentTaskAbsentAfter":  true,
+                   "uninstallAbsentDidNotRemoveTask":  true,
+                   "uninstallAbsentTaskRemovedFalse":  true,
+                   "uninstallAbsentReportNoSecrets":  true,
+                   "uninstallAbsentReportEnvValuesPrintedFalse":  true,
+                   "uninstallAbsentReportBroadcastsFalse":  true,
                    "commandsPresent":  true,
                    "envValuesPrintedFalse":  true,
                    "noSecrets":  true,
@@ -42,20 +60,36 @@
                                     "name":  "service-install-plan",
                                     "exitCode":  0,
                                     "timedOut":  false,
-                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-install-validation\\20260517143012951-52752-7614ce4a.stdout.log",
-                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-install-validation\\20260517143012951-52752-7614ce4a.stderr.log"
+                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-install-validation\\20260517165419353-54076-9a5e14f1.stdout.log",
+                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-install-validation\\20260517165419353-54076-9a5e14f1.stderr.log"
                                 },
                                 {
                                     "name":  "service-install-bridge-relayer-opt-in-plan",
                                     "exitCode":  0,
                                     "timedOut":  false,
-                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-install-validation\\20260517143016764-52752-89a7b158.stdout.log",
-                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-install-validation\\20260517143016764-52752-89a7b158.stderr.log"
+                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-install-validation\\20260517165423051-54076-6cabbf1b.stdout.log",
+                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-install-validation\\20260517165423051-54076-6cabbf1b.stderr.log"
+                                },
+                                {
+                                    "name":  "service-install-status",
+                                    "exitCode":  0,
+                                    "timedOut":  false,
+                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-install-validation\\20260517165426142-54076-73732609.stdout.log",
+                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-install-validation\\20260517165426142-54076-73732609.stderr.log"
+                                },
+                                {
+                                    "name":  "service-install-uninstall-absent",
+                                    "exitCode":  0,
+                                    "timedOut":  false,
+                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-install-validation\\20260517165430346-54076-12ccf5d6.stdout.log",
+                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-install-validation\\20260517165430346-54076-12ccf5d6.stderr.log"
                                 }
                             ],
     "planReports":  {
                         "default":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-windows-report.json",
-                        "bridgeRelayerOptIn":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-windows-bridge-relayer-report.json"
+                        "bridgeRelayerOptIn":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-windows-bridge-relayer-report.json",
+                        "status":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-windows-status-report.json",
+                        "uninstallAbsent":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-windows-uninstall-absent-report.json"
                     },
     "commands":  {
                      "plan":  "npm run flowchain:service:install:windows -- -Action Plan",
