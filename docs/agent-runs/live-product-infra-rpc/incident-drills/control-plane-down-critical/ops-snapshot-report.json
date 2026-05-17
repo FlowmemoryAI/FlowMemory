@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-17T07:04:40.4392281Z",
+    "generatedAt":  "2026-05-17T13:37:08.4376715Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
@@ -10,9 +10,9 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input"
                 },
     "chain":  {
-                  "latestHeight":  "50070",
-                  "finalizedHeight":  "50070",
-                  "stateFileLastWriteAgeSeconds":  2,
+                  "latestHeight":  "55209",
+                  "finalizedHeight":  "55209",
+                  "stateFileLastWriteAgeSeconds":  1,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true
@@ -24,6 +24,11 @@
                            "backup":  "blocked",
                            "bridgeLive":  "blocked",
                            "bridgeInfra":  "blocked",
+                           "bridgeRelayer":  "missing",
+                           "bridgeRelayerLatencyGate":  "missing",
+                           "bridgeRelayerCursorCommitRequired":  true,
+                           "bridgeRelayerCursorCommitted":  false,
+                           "bridgeRelayerCursorReason":  "missing",
                            "externalTester":  "blocked",
                            "publicDeployment":  "blocked",
                            "noSecret":  "passed"
@@ -77,6 +82,16 @@
                      },
                      {
                          "severity":  "blocked",
+                         "code":  "bridge-relayer-not-ready",
+                         "message":  "Bridge relayer one-shot proof is not ready.",
+                         "commands":  [
+                                          "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                                          "npm run flowchain:bridge:live:check",
+                                          "npm run flowchain:bridge:infra:check"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
                          "code":  "external-tester-not-shareable",
                          "message":  "External tester packet must remain not-shareable.",
                          "commands":  [
@@ -94,7 +109,7 @@
                      }
                  ],
     "criticalCount":  2,
-    "blockedCount":  5,
+    "blockedCount":  6,
     "incidentCommands":  {
                              "status":  [
                                             "npm run flowchain:ops:snapshot",
@@ -132,6 +147,7 @@
                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\backup-readiness-report.json",
                         "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\bridge-live-readiness-report.json",
                         "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\bridge-infra-readiness-report.json",
+                        "bridgeRelayer":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\bridge-relayer-once-report.json",
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\external-tester-readiness-report.json",
                         "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\public-deployment-contract-report.json",
                         "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\no-secret-scan-report.json"

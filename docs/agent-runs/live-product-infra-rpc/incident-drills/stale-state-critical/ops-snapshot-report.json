@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-17T07:04:42.0206679Z",
+    "generatedAt":  "2026-05-17T13:37:09.9457541Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
@@ -10,8 +10,8 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input"
                 },
     "chain":  {
-                  "latestHeight":  "50070",
-                  "finalizedHeight":  "50070",
+                  "latestHeight":  "55209",
+                  "finalizedHeight":  "55209",
                   "stateFileLastWriteAgeSeconds":  999999,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
@@ -24,6 +24,11 @@
                            "backup":  "blocked",
                            "bridgeLive":  "blocked",
                            "bridgeInfra":  "blocked",
+                           "bridgeRelayer":  "missing",
+                           "bridgeRelayerLatencyGate":  "missing",
+                           "bridgeRelayerCursorCommitRequired":  true,
+                           "bridgeRelayerCursorCommitted":  false,
+                           "bridgeRelayerCursorReason":  "missing",
                            "externalTester":  "blocked",
                            "publicDeployment":  "blocked",
                            "noSecret":  "passed"
@@ -68,6 +73,16 @@
                      },
                      {
                          "severity":  "blocked",
+                         "code":  "bridge-relayer-not-ready",
+                         "message":  "Bridge relayer one-shot proof is not ready.",
+                         "commands":  [
+                                          "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                                          "npm run flowchain:bridge:live:check",
+                                          "npm run flowchain:bridge:infra:check"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
                          "code":  "external-tester-not-shareable",
                          "message":  "External tester packet must remain not-shareable.",
                          "commands":  [
@@ -85,7 +100,7 @@
                      }
                  ],
     "criticalCount":  1,
-    "blockedCount":  5,
+    "blockedCount":  6,
     "incidentCommands":  {
                              "status":  [
                                             "npm run flowchain:ops:snapshot",
@@ -123,6 +138,7 @@
                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\backup-readiness-report.json",
                         "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\bridge-live-readiness-report.json",
                         "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\bridge-infra-readiness-report.json",
+                        "bridgeRelayer":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\bridge-relayer-once-report.json",
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\external-tester-readiness-report.json",
                         "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\public-deployment-contract-report.json",
                         "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\no-secret-scan-report.json"

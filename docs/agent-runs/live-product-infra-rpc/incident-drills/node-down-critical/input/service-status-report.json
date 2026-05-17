@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.service_status_report.v0",
-    "generatedAt":  "2026-05-17T07:03:41.2600092Z",
+    "generatedAt":  "2026-05-17T13:35:53.6697168Z",
     "status":  "failed",
     "bind":  {
                  "host":  "127.0.0.1",
@@ -9,14 +9,14 @@
              },
     "node":  {
                  "status":  "stopped",
-                 "pid":  53328,
+                 "pid":  44508,
                  "pidPath":  "devnet/local/node/flowchain-node.pid",
                  "pidSource":  "pid-file",
                  "commandLineMatched":  true
              },
     "controlPlane":  {
                          "status":  "running",
-                         "pid":  57976,
+                         "pid":  41884,
                          "pidPath":  "devnet/local/services/control-plane.pid",
                          "commandLineMatched":  true
                      },
@@ -40,12 +40,12 @@
                               },
     "chain":  {
                   "stateFileReadable":  true,
-                  "latestHeight":  "50070",
-                  "latestHash":  "0xe9841b6405f6517191bed7bfc246d1451424983a012a25f9ee5d91aa094f7b7e",
-                  "latestRoot":  "0x30060080244e59e3a29333f037b94345dd0052053e542e877de04ccdfbdaa8c0",
-                  "stateFileLastWriteAgeSeconds":  2,
-                  "finalizedHeight":  "50070",
-                  "finalizedHash":  "0xe9841b6405f6517191bed7bfc246d1451424983a012a25f9ee5d91aa094f7b7e",
+                  "latestHeight":  "55209",
+                  "latestHash":  "0x0ca467ba3293fce99ec1a327400437d1d08cb5e690311cca88fa9ee1e850d5fe",
+                  "latestRoot":  "0x1074f76b5cc88b2f65e6dbb548389dbc4e9a8152d33c24b68fbcb80c6db676f0",
+                  "stateFileLastWriteAgeSeconds":  1,
+                  "finalizedHeight":  "55209",
+                  "finalizedHash":  "0x0ca467ba3293fce99ec1a327400437d1d08cb5e690311cca88fa9ee1e850d5fe",
                   "mempoolDepth":  0,
                   "peerCount":  null
               },

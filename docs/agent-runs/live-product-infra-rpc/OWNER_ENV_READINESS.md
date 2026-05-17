@@ -1,6 +1,6 @@
 ﻿# FlowChain Owner Env Readiness
 
-Generated: 2026-05-17T07:00:53.2475202Z
+Generated: 2026-05-17T13:32:31.6247138Z
 Status: blocked
 
 This gate points the live checks at the ignored local owner env file and records only env names, statuses, and redacted child output.
@@ -34,6 +34,7 @@ Git ignored: True
 - `FLOWCHAIN_BASE8453_SUPPORTED_TOKEN`
 - `FLOWCHAIN_BASE8453_ASSET_DECIMALS`
 - `FLOWCHAIN_BASE8453_FROM_BLOCK`
+- `FLOWCHAIN_BASE8453_CURSOR_STATE`
 - `FLOWCHAIN_BASE8453_TO_BLOCK`
 - `FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI`
 - `FLOWCHAIN_PILOT_TOTAL_CAP_WEI`

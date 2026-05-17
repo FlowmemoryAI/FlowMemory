@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.bridge_live_readiness_report.v0",
-    "generatedAt":  "2026-05-17T07:04:06.6379347Z",
+    "generatedAt":  "2026-05-17T13:36:24.1419228Z",
     "status":  "blocked",
     "owner":  "bridge/ops",
     "command":  "npm run flowchain:bridge:live:check",
@@ -11,10 +11,13 @@
                              "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                              "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                              "FLOWCHAIN_BASE8453_FROM_BLOCK",
-                             "FLOWCHAIN_BASE8453_TO_BLOCK",
                              "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                              "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                              "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                         ],
+    "optionalEnvNames":  [
+                             "FLOWCHAIN_BASE8453_CURSOR_STATE",
+                             "FLOWCHAIN_BASE8453_TO_BLOCK"
                          ],
     "missingEnvNames":  [
                             "FLOWCHAIN_PILOT_OPERATOR_ACK",
@@ -23,7 +26,6 @@
                             "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                             "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                             "FLOWCHAIN_BASE8453_FROM_BLOCK",
-                            "FLOWCHAIN_BASE8453_TO_BLOCK",
                             "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                             "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                             "FLOWCHAIN_PILOT_CONFIRMATIONS"
@@ -72,11 +74,6 @@
                          "kind":  "blocked"
                      },
                      {
-                         "envName":  "FLOWCHAIN_BASE8453_TO_BLOCK",
-                         "reason":  "missing required env value",
-                         "kind":  "blocked"
-                     },
-                     {
                          "envName":  "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                          "reason":  "missing required env value",
                          "kind":  "blocked"
@@ -98,6 +95,13 @@
                       "maxBlockRange":  "5000",
                       "minConfirmationDepth":  "2"
                   },
+    "scanPolicy":  {
+                       "mode":  "cursor-confirmed-head",
+                       "fromBlockConfigured":  false,
+                       "toBlockConfigured":  false,
+                       "toBlockRequired":  false,
+                       "cursorStatePath":  "services/bridge-relayer/out/base8453-pilot-cursor-state.json"
+                   },
     "livePilotEnvLoader":  {
                                "configured":  false,
                                "imported":  false,
