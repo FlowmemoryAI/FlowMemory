@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-17T20:50:24.7184846Z",
+    "generatedAt":  "2026-05-17T20:55:41.2198531Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -104,9 +104,9 @@
                   },
                   {
                       "id":  "public-rpc-deployment-automation",
-                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, verification, and rollback phases without host mutation or owner-value leakage.",
+                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, verification, and rollback drill phases without host mutation or owner-value leakage.",
                       "status":  "passed",
-                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, hostMutationFalse=True",
+                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, rollbackDrill=True, hostMutationFalse=True",
                       "commands":  [
                                        "npm run flowchain:public-rpc:deployment:automation"
                                    ],

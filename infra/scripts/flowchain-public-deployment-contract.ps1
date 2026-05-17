@@ -502,6 +502,10 @@ $deploymentAutomationReady = $publicRpcDeploymentAutomationStatus -eq "passed" `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedNginxHasRateLimit" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedSystemdUsesOwnerEnv" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasReadinessProbe" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "rollbackRenderedConfigRestoredFromPrevious" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "rollbackOriginalConfigRestoredAfterDrill" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "rollbackArtifactsStayedInsideRenderDir" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $publicRpcDeploymentAutomation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $publicRpcDeploymentAutomation -Name "noSecrets" -Default $false) -eq $true) `
@@ -522,9 +526,9 @@ Add-DeploymentItem -Items $items -Id "public-rpc-edge-template" `
     -Commands @("npm run flowchain:public-rpc:edge-template", "npm run flowchain:public-rpc:deployment-bundle")
 
 Add-DeploymentItem -Items $items -Id "public-rpc-deployment-automation" `
-    -Requirement "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, verification, and rollback phases without host mutation or owner-value leakage." `
+    -Requirement "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, verification, and rollback drill phases without host mutation or owner-value leakage." `
     -Status $(if ($deploymentAutomationReady) { "passed" } else { "failed" }) `
-    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), hostMutationFalse=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false)" `
+    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), rollbackDrill=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false), hostMutationFalse=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false)" `
     -Commands @("npm run flowchain:public-rpc:deployment:automation")
 
 $service = $reports.serviceStatus

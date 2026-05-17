@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-17T20:50:24.8334869Z",
+    "generatedAt":  "2026-05-17T20:55:47.3747253Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -166,9 +166,9 @@
                   {
                       "id":  "public-rpc-deployment-automation-boundary",
                       "layer":  "Public edge",
-                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, post-deploy verification, and rollback phases without host mutation or owner-value leakage.",
+                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, post-deploy verification, and rollback drill phases without host mutation or owner-value leakage.",
                       "status":  "passed",
-                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, hostMutationFalse=True",
+                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, rollbackDrill=True, hostMutationFalse=True",
                       "files":  [
                                     "infra/scripts/flowchain-public-rpc-deployment-automation.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_AUTOMATION.md",

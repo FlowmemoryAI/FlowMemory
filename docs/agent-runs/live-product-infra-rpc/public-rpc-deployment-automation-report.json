@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_automation_report.v0",
-    "generatedAt":  "2026-05-17T19:22:44.3257361Z",
+    "generatedAt":  "2026-05-17T20:55:30.7297802Z",
     "status":  "passed",
     "action":  "Validate",
     "flowChainRpcIsRepoOwned":  true,
@@ -39,6 +39,14 @@
                    "renderedReportKeepsOwnerPathsOutsideRepo":  true,
                    "renderedReportNoSecrets":  true,
                    "renderedReportBroadcastsFalse":  true,
+                   "rollbackDrillPerformed":  true,
+                   "rollbackRenderedConfigExists":  true,
+                   "rollbackPreviousConfigWritten":  true,
+                   "rollbackRenderedConfigRestoredFromPrevious":  true,
+                   "rollbackOriginalConfigRestoredAfterDrill":  true,
+                   "rollbackArtifactsStayedInsideRenderDir":  true,
+                   "rollbackDrillNoSecrets":  true,
+                   "rollbackDrillBroadcastsFalse":  true,
                    "cleanupAttempted":  true
                },
     "failedChecks":  [
@@ -49,12 +57,28 @@
                      "performed":  true,
                      "exitCode":  0,
                      "outputRedacted":  [
-                                            "FlowChain public RPC bundle rendered. Report: C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-24840-40322b72ffb24d70ae1f4df7d1affdc0\\rendered\\public-rpc-render-report.json"
+                                            "FlowChain public RPC bundle rendered. Report: C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-41040-23cf85eedd604944a0a9dba904e2861c\\rendered\\public-rpc-render-report.json"
                                         ],
                      "failedChecks":  [
 
                                       ]
                  },
+    "rollbackDrill":  {
+                          "checks":  {
+                                         "rollbackDrillPerformed":  true,
+                                         "rollbackRenderedConfigExists":  true,
+                                         "rollbackPreviousConfigWritten":  true,
+                                         "rollbackRenderedConfigRestoredFromPrevious":  true,
+                                         "rollbackOriginalConfigRestoredAfterDrill":  true,
+                                         "rollbackArtifactsStayedInsideRenderDir":  true,
+                                         "rollbackDrillNoSecrets":  true,
+                                         "rollbackDrillBroadcastsFalse":  true
+                                     },
+                          "artifacts":  [
+                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-41040-23cf85eedd604944a0a9dba904e2861c\\rendered\\previous-nginx-flowchain-rpc.conf",
+                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-41040-23cf85eedd604944a0a9dba904e2861c\\rendered\\rollback-drill-current-before.conf"
+                                        ]
+                      },
     "renderedFileNames":  [
                               "nginx-flowchain-rpc.conf",
                               "flowchain-live.service",
@@ -79,6 +103,7 @@
                              "test-nginx-config",
                              "run-public-rpc-preflight",
                              "run-post-deploy-readiness-gates",
+                             "rollback-drill-no-host-mutation",
                              "rollback-or-emergency-stop"
                          ],
     "commands":  [

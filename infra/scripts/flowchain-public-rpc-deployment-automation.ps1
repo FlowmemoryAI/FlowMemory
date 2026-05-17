@@ -197,6 +197,56 @@ function Test-RenderedDeployment {
     }
 }
 
+function Test-PublicRpcRollbackDrill {
+    param([Parameter(Mandatory = $true)][string] $TargetRenderDir)
+
+    $renderedNginxPath = Join-Path $TargetRenderDir "nginx-flowchain-rpc.conf"
+    $previousNginxPath = Join-Path $TargetRenderDir "previous-nginx-flowchain-rpc.conf"
+    $backupBeforeDrillPath = Join-Path $TargetRenderDir "rollback-drill-current-before.conf"
+    $checks = [ordered]@{
+        rollbackDrillPerformed = $false
+        rollbackRenderedConfigExists = Test-Path -LiteralPath $renderedNginxPath
+        rollbackPreviousConfigWritten = $false
+        rollbackRenderedConfigRestoredFromPrevious = $false
+        rollbackOriginalConfigRestoredAfterDrill = $false
+        rollbackArtifactsStayedInsideRenderDir = $false
+        rollbackDrillNoSecrets = $false
+        rollbackDrillBroadcastsFalse = $true
+    }
+
+    if (-not $checks.rollbackRenderedConfigExists) {
+        return [ordered]@{
+            checks = $checks
+            artifacts = @($previousNginxPath, $backupBeforeDrillPath)
+        }
+    }
+
+    $originalText = Get-Content -Raw -LiteralPath $renderedNginxPath
+    $previousText = "# FlowChain rollback drill previous config`n$originalText"
+    Assert-FlowChainNoSecretText -Text $previousText -Label "public RPC rollback drill previous config"
+
+    Set-Content -LiteralPath $previousNginxPath -Value $previousText -Encoding UTF8
+    $actualPreviousText = Get-Content -Raw -LiteralPath $previousNginxPath
+    Assert-FlowChainNoSecretText -Text $actualPreviousText -Label "public RPC rollback drill written previous config"
+    Copy-Item -LiteralPath $renderedNginxPath -Destination $backupBeforeDrillPath -Force
+    Copy-Item -LiteralPath $previousNginxPath -Destination $renderedNginxPath -Force
+    $rolledBackText = Get-Content -Raw -LiteralPath $renderedNginxPath
+    Copy-Item -LiteralPath $backupBeforeDrillPath -Destination $renderedNginxPath -Force
+    $restoredOriginalText = Get-Content -Raw -LiteralPath $renderedNginxPath
+
+    $checks.rollbackDrillPerformed = $true
+    $checks.rollbackPreviousConfigWritten = Test-Path -LiteralPath $previousNginxPath
+    $checks.rollbackRenderedConfigRestoredFromPrevious = $rolledBackText -eq $actualPreviousText
+    $checks.rollbackOriginalConfigRestoredAfterDrill = $restoredOriginalText -eq $originalText
+    $checks.rollbackArtifactsStayedInsideRenderDir = (Test-DeployPathInsideRoot -Path $previousNginxPath -Root $TargetRenderDir) -and (Test-DeployPathInsideRoot -Path $backupBeforeDrillPath -Root $TargetRenderDir)
+    $checks.rollbackDrillNoSecrets = $true
+
+    return [ordered]@{
+        checks = $checks
+        artifacts = @($previousNginxPath, $backupBeforeDrillPath)
+    }
+}
+
 function New-ValidationOwnerInputs {
     param([Parameter(Mandatory = $true)][string] $TempRoot)
 
@@ -273,6 +323,10 @@ $rendered = [ordered]@{
     renderedFileNames = @()
     renderedReportPath = ""
 }
+$rollbackDrill = [ordered]@{
+    checks = [ordered]@{}
+    artifacts = @()
+}
 $problem = ""
 $cleanupAttempted = $false
 $ownerPathsOutsideRepo = $true
@@ -299,6 +353,7 @@ try {
         $scenario.exitCode = [int]$renderResult.exitCode
         $scenario.outputRedacted = @($renderResult.outputRedacted)
         $rendered = Test-RenderedDeployment -TargetRenderDir $renderDirForValidation -TargetOwnerEnvFile $validationInputs.ownerEnvFile -TokenHashSentinel $tokenHashSentinel
+        $rollbackDrill = Test-PublicRpcRollbackDrill -TargetRenderDir $renderDirForValidation
         $scenario.failedChecks = @($rendered.checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
     }
     elseif ($Action -eq "Render") {
@@ -354,6 +409,9 @@ if ($Action -eq "Validate" -or $Action -eq "Render") {
         $checks[$entry.Key] = $entry.Value
     }
     if ($Action -eq "Validate") {
+        foreach ($entry in $rollbackDrill.checks.GetEnumerator()) {
+            $checks[$entry.Key] = $entry.Value
+        }
         $checks.cleanupAttempted = $cleanupAttempted
     }
 }
@@ -373,6 +431,7 @@ $report = [ordered]@{
     failedChecks = @($failedChecks)
     problem = $problem
     scenario = $scenario
+    rollbackDrill = $rollbackDrill
     renderedFileNames = @($rendered.renderedFileNames)
     renderedReportPath = if ($Action -eq "Render") { $rendered.renderedReportPath } else { "" }
     ownerInputsRequired = @(
@@ -391,6 +450,7 @@ $report = [ordered]@{
         "test-nginx-config",
         "run-public-rpc-preflight",
         "run-post-deploy-readiness-gates",
+        "rollback-drill-no-host-mutation",
         "rollback-or-emergency-stop"
     )
     commands = New-CommandPlan

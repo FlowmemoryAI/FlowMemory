@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Automation
 
-Generated: 2026-05-17T19:22:44.3257361Z
+Generated: 2026-05-17T20:55:30.7297802Z
 Status: passed
 Action: Validate
 
@@ -40,6 +40,14 @@ This validator proves the owner-host public RPC deployment path can render concr
 - renderedReportKeepsOwnerPathsOutsideRepo: True
 - renderedReportNoSecrets: True
 - renderedReportBroadcastsFalse: True
+- rollbackDrillPerformed: True
+- rollbackRenderedConfigExists: True
+- rollbackPreviousConfigWritten: True
+- rollbackRenderedConfigRestoredFromPrevious: True
+- rollbackOriginalConfigRestoredAfterDrill: True
+- rollbackArtifactsStayedInsideRenderDir: True
+- rollbackDrillNoSecrets: True
+- rollbackDrillBroadcastsFalse: True
 - cleanupAttempted: True
 
 ## Deployment Phases
@@ -49,6 +57,7 @@ This validator proves the owner-host public RPC deployment path can render concr
 - test-nginx-config
 - run-public-rpc-preflight
 - run-post-deploy-readiness-gates
+- rollback-drill-no-host-mutation
 - rollback-or-emergency-stop
 
 ## Commands

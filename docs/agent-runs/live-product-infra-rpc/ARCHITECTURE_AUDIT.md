@@ -1,6 +1,6 @@
 ﻿# FlowChain Architecture Audit
 
-Generated: 2026-05-17T20:50:24.8334869Z
+Generated: 2026-05-17T20:55:47.3747253Z
 Status: blocked
 Blocked only on known external owner inputs: True
 
@@ -28,7 +28,7 @@ Blocked only on known external owner inputs: True
 | RPC/API | The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation and abuse rejection before it can be exposed publicly. | passed | validationStatus=passed, corsAllowed=True, corsRejected=True, endpointChecks=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True, abuseStatus=passed, abusePassed=True, abuseMissingChecks=0 |
 | Public edge | External RPC exposure is a distinct owner-operated edge with TLS, allowed origins, rate limits, endpoint checks, and response hygiene. | blocked | publicRpcStatus=blocked, publicRpcReady=False |
 | Public edge | Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, verification, and rollback. | passed | edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True |
-| Public edge | Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, post-deploy verification, and rollback phases without host mutation or owner-value leakage. | passed | automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, hostMutationFalse=True |
+| Public edge | Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, post-deploy verification, and rollback drill phases without host mutation or owner-value leakage. | passed | automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, rollbackDrill=True, hostMutationFalse=True |
 | Wallets | Wallet creation and wallet-to-wallet transfer are routed through the RPC/control-plane boundary into runtime blocks without returning secret material. | passed | walletStatus=passed, testerStatus=passed, testerWalletCreates=4, testerSecretLeak=False |
 | Bridge | The bridge architecture has a deterministic local proof for exact value, replay protection, wrong-chain rejection, unapproved-lockbox rejection, and no broadcast. | passed | broadcast=False, allAmountsEqual=True, wrongChainRejected=True, unapprovedContractRejected=True |
 | Bridge | Live Base 8453 bridge observation is isolated behind owner guardrails, read-only diagnostics, confirmation/cap settings, and no-broadcast checks. | blocked | bridgeLive=blocked, bridgeInfra=blocked, baseTxDiagnostic=blocked, baseTxSafe=True |
