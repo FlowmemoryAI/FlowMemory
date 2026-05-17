@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-17T19:39:24.8216957Z",
+  "generatedAt": "2026-05-17T19:56:04.9915085Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -14,6 +14,7 @@
     "bridgeRelayerStatus": "blocked",
     "bridgeQueuedTransactions": "0",
     "bridgeRelayerGuardrailStatus": "passed",
+    "bridgeRelayerLoopValidationStatus": "passed",
     "publicRpcDeploymentBundleStatus": "passed",
     "publicRpcOwnerRenderValidationStatus": "passed",
     "publicRpcDeploymentAutomationStatus": "passed",
@@ -482,11 +483,12 @@
       "id": "base8453-bridge-relayer-queue",
       "label": "Bridge relayer queue",
       "status": "blocked",
-      "summary": "The bridge relayer has a no-broadcast one-shot path that checks owner guardrails, observes Base 8453 deposits with a staged cursor, filters replays, queues new credits into the running L1, waits for main-state credit evidence, records handoff-to-spendable latency, only commits the Base cursor after safe proof, and proves missing-owner-input runs leave cursor state untouched.",
-      "evidence": "relayer=blocked, guardrail=passed, observed=0, new=0, queued=0, applied=0, latencyGate=not-run, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run, handoffToSpendableSeconds=",
+      "summary": "The bridge relayer has a no-broadcast one-shot path plus an isolated loop validation that checks owner guardrails, observes Base 8453 deposits with a staged cursor, filters replays, queues new credits into the running L1, waits for main-state credit evidence, records handoff-to-spendable latency, only commits the Base cursor after safe proof, and proves missing-owner-input runs leave cursor state untouched.",
+      "evidence": "relayer=blocked, guardrail=passed, loopValidation=passed, loopFailedChecks=0, observed=0, new=0, queued=0, applied=0, latencyGate=not-run, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run, handoffToSpendableSeconds=",
       "commands": [
         "npm run flowchain:bridge:relayer:once",
-        "npm run flowchain:bridge:relayer:guardrail:validate"
+        "npm run flowchain:bridge:relayer:guardrail:validate",
+        "npm run flowchain:bridge:relayer:loop:validate"
       ],
       "blockers": [
         "FLOWCHAIN_PILOT_OPERATOR_ACK",
@@ -586,7 +588,7 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T19:39:24.8216957Z"
+      "generatedAt": "2026-05-17T19:56:04.9915085Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
@@ -641,6 +643,12 @@
       "schema": "flowchain.bridge_relayer_guardrail_validation_report.v0",
       "status": "passed",
       "generatedAt": "2026-05-17T16:10:10.2458673Z"
+    },
+    {
+      "fileName": "bridge-relayer-loop-validation-report.json",
+      "schema": "flowchain.bridge_relayer_loop_validation_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-17T19:55:42.7930100Z"
     },
     {
       "fileName": "external-tester-packet-report.json",

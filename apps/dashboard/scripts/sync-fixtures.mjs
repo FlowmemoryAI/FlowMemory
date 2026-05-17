@@ -45,6 +45,7 @@ const liveReadinessReportCopies = [
   "backup-readiness-report.json",
   "bridge-relayer-once-report.json",
   "bridge-relayer-guardrail-validation-report.json",
+  "bridge-relayer-loop-validation-report.json",
   "external-tester-packet-report.json",
   "external-tester-readiness-report.json",
   "public-tester-gateway-e2e-report.json",
@@ -181,6 +182,7 @@ function writeLiveReadinessSummary() {
   const monitor = reports["service-monitor-report.json"];
   const bridgeRelayer = reports["bridge-relayer-once-report.json"];
   const bridgeRelayerGuardrail = reports["bridge-relayer-guardrail-validation-report.json"];
+  const bridgeRelayerLoopValidation = reports["bridge-relayer-loop-validation-report.json"];
   const publicRpcDeploymentBundle = reports["public-rpc-deployment-bundle-report.json"];
   const publicRpcDeploymentAutomation = reports["public-rpc-deployment-automation-report.json"];
   const externalTesterPacket = reports["external-tester-packet-report.json"];
@@ -239,6 +241,7 @@ function writeLiveReadinessSummary() {
       bridgeRelayerStatus: asText(bridgeRelayer?.status, "not recorded"),
       bridgeQueuedTransactions: asText(bridgeRelayer?.counts?.queuedTransactions, "0"),
       bridgeRelayerGuardrailStatus: asText(bridgeRelayerGuardrail?.status, "not recorded"),
+      bridgeRelayerLoopValidationStatus: asText(bridgeRelayerLoopValidation?.status, "not recorded"),
       publicRpcDeploymentBundleStatus: asText(publicRpcDeploymentBundle?.status, "not recorded"),
       publicRpcOwnerRenderValidationStatus: asText(publicRpcDeploymentBundle?.renderValidation?.status, "not recorded"),
       publicRpcDeploymentAutomationStatus: asText(publicRpcDeploymentAutomation?.status, "not recorded"),

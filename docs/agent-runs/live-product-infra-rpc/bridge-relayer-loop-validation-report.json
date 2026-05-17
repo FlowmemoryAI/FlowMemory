@@ -1,0 +1,115 @@
+{
+    "schema":  "flowchain.bridge_relayer_loop_validation_report.v0",
+    "generatedAt":  "2026-05-17T19:55:42.7930100Z",
+    "status":  "passed",
+    "statePath":  "devnet/local/bridge-relayer-loop-validation/state.json",
+    "nodeDir":  "devnet/local/bridge-relayer-loop-validation/node",
+    "servicesDir":  "devnet/local/bridge-relayer-loop-validation/services",
+    "controlPlane":  {
+                         "host":  "127.0.0.1",
+                         "port":  8798
+                     },
+    "bridgePollSeconds":  5,
+    "settleSeconds":  5,
+    "checks":  {
+                   "startCommandPassed":  true,
+                   "startReportWritten":  true,
+                   "liveProfile":  true,
+                   "relayerLoopRequested":  true,
+                   "relayerLoopStartedOrRunning":  true,
+                   "relayerPidRecorded":  true,
+                   "relayerPollSecondsRecorded":  true,
+                   "relayerQueuesRuntimeHandoffs":  true,
+                   "statusCommandPassed":  true,
+                   "statusReportsRelayerRunning":  true,
+                   "statusRelayerCommandLineMatched":  true,
+                   "stopCommandPassed":  true,
+                   "stopPreservedState":  true,
+                   "stopHandledRelayerLoop":  true,
+                   "statusAfterStopCommandPassed":  true,
+                   "statusAfterStopNotRunning":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "reportPaths":  {
+                        "validation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-loop-validation-report.json",
+                        "start":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-loop-validation\\services\\flowchain-service-start-report.json",
+                        "statusAfterStart":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-loop-status-after-start.json",
+                        "stop":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-loop-stop-report.json",
+                        "statusAfterStop":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-loop-status-after-stop.json"
+                    },
+    "observed":  {
+                     "startRelayerLoop":  {
+                                              "requested":  true,
+                                              "startedThisRun":  true,
+                                              "running":  true,
+                                              "pid":  54084,
+                                              "pollSeconds":  5,
+                                              "cursorState":  "services/bridge-relayer/out/base8453-pilot-cursor-state.json",
+                                              "queuesRuntimeHandoffs":  true
+                                          },
+                     "statusRelayerLoop":  {
+                                               "status":  "running",
+                                               "pid":  54084,
+                                               "pidPath":  "devnet/local/services/bridge-relayer-loop.pid",
+                                               "commandLineMatched":  true
+                                           },
+                     "stopRelayerLoop":  "stopped",
+                     "statusAfterStopRelayerLoop":  {
+                                                        "status":  "stopped",
+                                                        "pid":  54084,
+                                                        "pidPath":  "devnet/local/services/bridge-relayer-loop.pid",
+                                                        "commandLineMatched":  false
+                                                    }
+                 },
+    "commands":  {
+                     "validate":  "npm run flowchain:bridge:relayer:loop:validate",
+                     "start":  "npm run flowchain:service:start -- -LiveProfile -StartBridgeRelayerLoop",
+                     "status":  "npm run flowchain:service:status -- -AllowBlocked",
+                     "stop":  "npm run flowchain:service:stop"
+                 },
+    "steps":  [
+                  {
+                      "name":  "pre-clean-stop",
+                      "exitCode":  0,
+                      "timedOut":  false,
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\bridge-relayer-loop-validation\\20260517145422751-29804-f8d3ba0a.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\bridge-relayer-loop-validation\\20260517145422751-29804-f8d3ba0a.stderr.log"
+                  },
+                  {
+                      "name":  "start-live-service-with-relayer-loop",
+                      "exitCode":  0,
+                      "timedOut":  false,
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\bridge-relayer-loop-validation\\20260517145425964-29804-b0f2585c.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\bridge-relayer-loop-validation\\20260517145425964-29804-b0f2585c.stderr.log"
+                  },
+                  {
+                      "name":  "status-after-relayer-loop-start",
+                      "exitCode":  0,
+                      "timedOut":  false,
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\bridge-relayer-loop-validation\\20260517145526466-29804-b504b524.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\bridge-relayer-loop-validation\\20260517145526466-29804-b504b524.stderr.log"
+                  },
+                  {
+                      "name":  "stop-relayer-loop-service",
+                      "exitCode":  0,
+                      "timedOut":  false,
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\bridge-relayer-loop-validation\\20260517145530135-29804-99b9891e.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\bridge-relayer-loop-validation\\20260517145530135-29804-99b9891e.stderr.log"
+                  },
+                  {
+                      "name":  "status-after-relayer-loop-stop",
+                      "exitCode":  0,
+                      "timedOut":  false,
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\bridge-relayer-loop-validation\\20260517145538142-29804-3c6f7487.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\bridge-relayer-loop-validation\\20260517145538142-29804-3c6f7487.stderr.log"
+                  }
+              ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

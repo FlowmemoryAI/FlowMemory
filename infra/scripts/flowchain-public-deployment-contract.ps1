@@ -68,6 +68,7 @@ $paths = [ordered]@{
     bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
     bridgeRelayerOnce = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     bridgeRelayerGuardrailValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
+    bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     architectureAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"
@@ -303,6 +304,7 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:bridge:live:check -- -AllowBlocked",
     "npm run flowchain:bridge:infra:check -- -AllowBlocked",
     "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+    "npm run flowchain:bridge:relayer:loop:validate",
     "npm run flowchain:external-tester:packet -- -AllowBlocked",
     "npm run flowchain:no-secret:scan"
 )
@@ -333,6 +335,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-infra" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-env-bridge-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.bridgeInfra)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-relayer-once" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-once.ps1"), "-AllowBlocked", "-ReportPath", $paths.bridgeRelayerOnce)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-relayer-guardrail-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-guardrail-validation.ps1"), "-ReportPath", $paths.bridgeRelayerGuardrailValidation)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-relayer-loop-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-loop-validation.ps1"), "-ReportPath", $paths.bridgeRelayerLoopValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "external-tester-packet" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-packet.ps1"), "-AllowBlocked", "-ReportPath", $paths.externalTesterPacket)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "no-secret-scan" -ArgumentList @(
         "-NoProfile",
@@ -789,6 +792,21 @@ $bridgeRelayerGuardrailReady = $bridgeRelayerGuardrailStatus -eq "passed" `
     -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "broadcastsFalse" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "envValuesPrintedFalse" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "noSecrets" -Default $false) -eq $true)
+$bridgeRelayerLoopValidation = $reports.bridgeRelayerLoopValidation
+$bridgeRelayerLoopStatus = Get-DeploymentStatus -Report $bridgeRelayerLoopValidation
+$bridgeRelayerLoopChecks = Get-DeploymentProp -Object $bridgeRelayerLoopValidation -Name "checks"
+$bridgeRelayerLoopFailedChecks = @((Get-DeploymentProp -Object $bridgeRelayerLoopValidation -Name "failedChecks" -Default @()))
+$bridgeRelayerLoopReady = ($bridgeRelayerLoopStatus -eq "passed") `
+    -and ($bridgeRelayerLoopFailedChecks.Count -eq 0) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerLoopChecks -Name "startCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerLoopChecks -Name "relayerLoopRequested" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerLoopChecks -Name "statusReportsRelayerRunning" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerLoopChecks -Name "statusRelayerCommandLineMatched" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerLoopChecks -Name "stopHandledRelayerLoop" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerLoopChecks -Name "statusAfterStopNotRunning" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerLoopValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerLoopValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerLoopValidation -Name "broadcasts" -Default $true) -eq $false)
 $bridgeRelayerStatus = Get-DeploymentStatus -Report $bridgeRelayer
 $bridgeRelayerCounts = Get-DeploymentProp -Object $bridgeRelayer -Name "counts"
 $bridgeRelayerTiming = Get-DeploymentProp -Object $bridgeRelayer -Name "timing"
@@ -812,14 +830,16 @@ $bridgeRelayerReady = ($bridgeRelayerStatus -eq "passed") `
     -and $bridgeRelayerQueueReady `
     -and $bridgeRelayerCursorReady `
     -and $bridgeRelayerGuardrailReady `
+    -and $bridgeRelayerLoopReady `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:once") `
-    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:guardrail:validate")
-$bridgeRelayerBlockedSafely = ($bridgeRelayerStatus -eq "blocked") -and $bridgeRelayerGuardrailReady
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:guardrail:validate") `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:loop:validate")
+$bridgeRelayerBlockedSafely = ($bridgeRelayerStatus -eq "blocked") -and $bridgeRelayerGuardrailReady -and $bridgeRelayerLoopReady
 Add-DeploymentItem -Items $items -Id "base8453-bridge-relayer-queue" `
-    -Requirement "The bridge relayer has a no-broadcast one-shot path that checks owner guardrails, observes Base 8453 deposits with a staged cursor, filters replays, queues new credits into the running L1, waits for main-state credit evidence, records handoff-to-spendable latency, only commits the Base cursor after safe proof, and proves missing-owner-input runs leave cursor state untouched." `
+    -Requirement "The bridge relayer has a no-broadcast one-shot path plus an isolated loop validation that checks owner guardrails, observes Base 8453 deposits with a staged cursor, filters replays, queues new credits into the running L1, waits for main-state credit evidence, records handoff-to-spendable latency, only commits the Base cursor after safe proof, and proves missing-owner-input runs leave cursor state untouched." `
     -Status $(if ($bridgeRelayerReady) { "passed" } elseif ($bridgeRelayerBlockedSafely) { "blocked" } else { "failed" }) `
-    -Evidence "relayer=$bridgeRelayerStatus, guardrail=$bridgeRelayerGuardrailStatus, observed=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$bridgeRelayerNewCount, queued=$bridgeRelayerQueuedCount, applied=$bridgeRelayerAppliedCount, latencyGate=$bridgeRelayerLatencyGate, cursorCommitRequired=$bridgeRelayerCursorCommitRequired, cursorCommitted=$bridgeRelayerCursorCommitted, cursorReason=$bridgeRelayerCursorReason, handoffToSpendableSeconds=$(Get-DeploymentProp -Object $bridgeRelayerTiming -Name 'handoffToSpendableSeconds')" `
-    -Commands @("npm run flowchain:bridge:relayer:once", "npm run flowchain:bridge:relayer:guardrail:validate") `
+    -Evidence "relayer=$bridgeRelayerStatus, guardrail=$bridgeRelayerGuardrailStatus, loopValidation=$bridgeRelayerLoopStatus, loopFailedChecks=$($bridgeRelayerLoopFailedChecks.Count), observed=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$bridgeRelayerNewCount, queued=$bridgeRelayerQueuedCount, applied=$bridgeRelayerAppliedCount, latencyGate=$bridgeRelayerLatencyGate, cursorCommitRequired=$bridgeRelayerCursorCommitRequired, cursorCommitted=$bridgeRelayerCursorCommitted, cursorReason=$bridgeRelayerCursorReason, handoffToSpendableSeconds=$(Get-DeploymentProp -Object $bridgeRelayerTiming -Name 'handoffToSpendableSeconds')" `
+    -Commands @("npm run flowchain:bridge:relayer:once", "npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:loop:validate") `
     -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
 
 $externalTester = $reports.externalTester

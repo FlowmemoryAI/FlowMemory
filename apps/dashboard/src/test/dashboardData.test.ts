@@ -488,6 +488,7 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Current findings");
     expect(html).toContain("Incident commands");
     expect(html).toContain("network sends; stores secrets");
+    expect(html).toContain("Relayer loop");
     expect(html).toContain("public-rpc-not-ready");
     expect(html).not.toContain("local-tester-write-token");
   });
