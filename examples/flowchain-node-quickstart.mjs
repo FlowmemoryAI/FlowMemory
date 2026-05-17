@@ -19,8 +19,12 @@ function amountFromBalance(row) {
 
 async function main() {
   const rpcUrl = process.env.FLOWCHAIN_RPC_URL ?? "http://127.0.0.1:8787/rpc";
+  const timeoutMs = Number.parseInt(process.env.FLOWCHAIN_RPC_TIMEOUT_MS ?? "30000", 10);
   const shouldSend = process.argv.includes("--send");
-  const client = new FlowChainClient({ rpcUrl });
+  const client = new FlowChainClient({
+    rpcUrl,
+    timeoutMs: Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 30000,
+  });
 
   const discovery = asRecord(await client.rpcDiscover());
   const readiness = asRecord(await client.rpcReadiness());
