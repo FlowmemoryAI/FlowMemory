@@ -1,11 +1,11 @@
 {
     "schema":  "flowchain.live_infra_check_report.v0",
-    "generatedAt":  "2026-05-17T09:41:31.5871687Z",
+    "generatedAt":  "2026-05-17T10:40:41.7074251Z",
     "status":  "blocked",
     "repoPath":  "E:/FlowMemory/flowmemory-live-infra-rpc",
     "git":  {
                 "branch":  "agent/live-product-infra-rpc",
-                "commit":  "84a720a457f7f8f87b4e6918d3354da74287dda1"
+                "commit":  "ae362cd0831151d793c53854bd594dc673fb6e30"
             },
     "readiness":  {
                       "ownerInputsReady":  false,
@@ -22,6 +22,7 @@
                            "backup":  "blocked",
                            "bridgeLive":  "blocked",
                            "bridgeInfra":  "blocked",
+                           "bridgeRelayer":  "blocked",
                            "noSecretScan":  "passed"
                        },
     "missingEnvNames":  [
@@ -65,6 +66,7 @@
                         "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-backup-readiness.ps1 -AllowBlocked",
                         "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-live-check.ps1 -AllowBlocked",
                         "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-live-env-bridge-readiness.ps1 -AllowBlocked",
+                        "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-relayer-once.ps1 -AllowBlocked",
                         "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-no-secret-scan.ps1 -Paths docs/agent-runs/live-product-infra-rpc devnet/local/bridge-live-readiness devnet/local/services"
                     ],
     "steps":  [
@@ -123,6 +125,15 @@
                       "reason":  ""
                   },
                   {
+                      "name":  "Bridge relayer once",
+                      "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-relayer-once.ps1 -AllowBlocked",
+                      "status":  "blocked",
+                      "exitCode":  0,
+                      "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Bridge-relayer-once.log",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-once-report.json",
+                      "reason":  ""
+                  },
+                  {
                       "name":  "No-secret scan live infra reports",
                       "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-no-secret-scan.ps1 -Paths docs/agent-runs/live-product-infra-rpc devnet/local/bridge-live-readiness devnet/local/services",
                       "status":  "passed",
@@ -139,6 +150,7 @@
                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
                         "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
                         "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
+                        "bridgeRelayer":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-once-report.json",
                         "noSecretScan":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json",
                         "logs":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs"
                     },
@@ -147,7 +159,7 @@
                          "publicRpc":  "Configure FLOWCHAIN_RPC_* env names and run the control-plane behind TLS/rate-limit/CORS enforcement.",
                          "services":  "Run npm run flowchain:service:start -- -LiveProfile after local state exists.",
                          "backup":  "Provide FLOWCHAIN_RPC_STATE_BACKUP_PATH as an existing writable directory; backup readiness will create a manifest-backed snapshot and verify restore rehearsal.",
-                         "bridge":  "Provide the Base 8453 env contract and an owner-verified lockbox with deployed bytecode."
+                         "bridge":  "Provide the Base 8453 env contract and an owner-verified lockbox with deployed bytecode, then run the relayer once gate to queue new credits into the L1."
                      },
     "broadcasts":  false,
     "envValuesPrinted":  false,

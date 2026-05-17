@@ -188,16 +188,15 @@ if ($StartBridgeRelayerLoop) {
     if ($BridgePollSeconds -lt 5) {
         throw "BridgePollSeconds must be at least 5."
     }
-    $relayerStatus = Test-FlowChainPid -PidPath $relayerPidPath -CommandLineIncludes @("bridge-base-mainnet-pilot-observe.ps1")
+    $relayerStatus = Test-FlowChainPid -PidPath $relayerPidPath -CommandLineIncludes @("flowchain-bridge-relayer-once.ps1")
     if (-not $relayerStatus.running) {
         $relayerStdout = Join-Path $logsDir "bridge-relayer-loop.stdout.log"
         $relayerStderr = Join-Path $logsDir "bridge-relayer-loop.stderr.log"
-        $observeScript = Join-Path $PSScriptRoot "bridge-base-mainnet-pilot-observe.ps1"
-        $bridgeCursorState = "services/bridge-relayer/out/base8453-pilot-cursor-state.json"
+        $relayerOnceScript = Join-Path $PSScriptRoot "flowchain-bridge-relayer-once.ps1"
         $loopCommand = @"
 while (`$true) {
   try {
-    & "$observeScript" -CursorState "$bridgeCursorState" -ReportPath "devnet/local/bridge-live-readiness/bridge-relayer-loop-report.json"
+    & "$relayerOnceScript" -StatePath "$StatePath" -NodeDir "$NodeDir" -ReportPath "devnet/local/bridge-live-readiness/bridge-relayer-loop-report.json" -RunDir "devnet/local/bridge-relayer-loop" -AllowBlocked
   } catch {
     Write-Error `$_.Exception.Message
   }
@@ -219,7 +218,7 @@ while (`$true) {
 $nodePidPath = Join-Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $NodeDir) "flowchain-node.pid"
 $nodeStatus = Test-FlowChainPid -PidPath $nodePidPath -CommandLineIncludes @("flowmemory-devnet")
 $controlStatus = Test-FlowChainPid -PidPath $controlPlanePidPath -CommandLineIncludes @($controlPlaneScriptPath)
-$relayerStatusFinal = Test-FlowChainPid -PidPath $relayerPidPath -CommandLineIncludes @("bridge-base-mainnet-pilot-observe.ps1")
+$relayerStatusFinal = Test-FlowChainPid -PidPath $relayerPidPath -CommandLineIncludes @("flowchain-bridge-relayer-once.ps1")
 
 $report = [ordered]@{
     schema = "flowchain.service_start_report.v0"
@@ -252,6 +251,7 @@ $report = [ordered]@{
         pid = $relayerStatusFinal.pid
         pollSeconds = $BridgePollSeconds
         cursorState = "services/bridge-relayer/out/base8453-pilot-cursor-state.json"
+        queuesRuntimeHandoffs = $true
     }
     controlPlaneCargoWarmup = [ordered]@{
         targetDir = $controlPlaneCargoTargetDir

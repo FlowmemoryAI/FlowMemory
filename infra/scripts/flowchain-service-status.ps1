@@ -40,7 +40,7 @@ if (-not ($nodeStatus.running -and $nodeStatus.commandLineMatched)) {
     }
 }
 $controlPlaneStatus = Test-FlowChainPid -PidPath $controlPlanePidPath -CommandLineIncludes @($controlPlaneScriptPath)
-$relayerStatus = Test-FlowChainPid -PidPath $relayerPidPath -CommandLineIncludes @("bridge-base-mainnet-pilot-observe.ps1")
+$relayerStatus = Test-FlowChainPid -PidPath $relayerPidPath -CommandLineIncludes @("flowchain-bridge-relayer-once.ps1")
 $controlPlaneReady = $controlPlaneStatus.running -and $controlPlaneStatus.commandLineMatched
 $controlPlanePortProcess = $null
 if (-not $controlPlaneReady) {

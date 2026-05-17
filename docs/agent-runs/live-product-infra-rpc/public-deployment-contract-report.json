@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-17T10:27:19.8631144Z",
+    "generatedAt":  "2026-05-17T10:40:51.1243368Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -8,9 +8,9 @@
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
                        "passed":  18,
-                       "blocked":  5,
+                       "blocked":  6,
                        "failed":  0,
-                       "total":  23
+                       "total":  24
                    },
     "items":  [
                   {
@@ -41,6 +41,7 @@
                                        "npm run flowchain:backup:check -- -AllowBlocked",
                                        "npm run flowchain:bridge:live:check -- -AllowBlocked",
                                        "npm run flowchain:bridge:infra:check -- -AllowBlocked",
+                                       "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
                                        "npm run flowchain:external-tester:packet -- -AllowBlocked",
                                        "npm run flowchain:no-secret:scan"
                                    ],
@@ -101,7 +102,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=52644, finalizedHeight=52644",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=53013, finalizedHeight=53013",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -311,6 +312,26 @@
                                    ]
                   },
                   {
+                      "id":  "base8453-bridge-relayer-queue",
+                      "requirement":  "The bridge relayer has a no-broadcast one-shot path that checks owner guardrails, observes Base 8453 deposits, filters replays, queues new credits into the running L1, and waits for main-state credit evidence.",
+                      "status":  "blocked",
+                      "evidence":  "relayer=blocked, observed=0, new=0, queued=0, applied=0",
+                      "commands":  [
+                                       "npm run flowchain:bridge:relayer:once"
+                                   ],
+                      "blockers":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                   ]
+                  },
+                  {
                       "id":  "external-tester-sharing",
                       "requirement":  "External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence plus executable packet-route smoke.",
                       "status":  "blocked",
@@ -462,6 +483,7 @@
                         "backupInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-install-validation-report.json",
                         "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
                         "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
+                        "bridgeRelayerOnce":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-once-report.json",
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
                         "externalTesterPacket":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-packet-report.json",
                         "architectureAudit":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-architecture-audit-report.json",
@@ -494,6 +516,7 @@
                                                  "npm run flowchain:backup:check",
                                                  "npm run flowchain:bridge:live:check",
                                                  "npm run flowchain:bridge:infra:check",
+                                                 "npm run flowchain:bridge:relayer:once",
                                                  "npm run flowchain:tester:readiness",
                                                  "npm run flowchain:external-tester:packet",
                                                  "npm run flowchain:completion:audit"

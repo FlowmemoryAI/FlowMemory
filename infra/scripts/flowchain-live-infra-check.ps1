@@ -116,6 +116,7 @@ $serviceReportPath = Join-Path $reportFullDir "service-status-report.json"
 $backupReportPath = Join-Path $reportFullDir "backup-readiness-report.json"
 $bridgeLiveReportPath = Join-Path $reportFullDir "bridge-live-readiness-report.json"
 $bridgeInfraReportPath = Join-Path $reportFullDir "bridge-infra-readiness-report.json"
+$bridgeRelayerReportPath = Join-Path $reportFullDir "bridge-relayer-once-report.json"
 $noSecretReportPath = Join-Path $reportFullDir "no-secret-scan-report.json"
 
 Invoke-LiveInfraStep `
@@ -167,6 +168,14 @@ Invoke-LiveInfraStep `
     -AllowFailure
 
 Invoke-LiveInfraStep `
+    -Name "Bridge relayer once" `
+    -Command "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-relayer-once.ps1 -AllowBlocked" `
+    -FilePath "powershell" `
+    -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-once.ps1"), "-ReportPath", $bridgeRelayerReportPath, "-RunDir", "devnet/local/bridge-relayer-once", "-AllowBlocked") `
+    -ExpectedReportPath $bridgeRelayerReportPath `
+    -AllowFailure
+
+Invoke-LiveInfraStep `
     -Name "No-secret scan live infra reports" `
     -Command "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-no-secret-scan.ps1 -Paths docs/agent-runs/live-product-infra-rpc devnet/local/bridge-live-readiness devnet/local/services" `
     -FilePath "powershell" `
@@ -180,10 +189,11 @@ $serviceReport = Read-FlowChainJsonIfExists -Path $serviceReportPath
 $backupReport = Read-FlowChainJsonIfExists -Path $backupReportPath
 $bridgeLiveReport = Read-FlowChainJsonIfExists -Path $bridgeLiveReportPath
 $bridgeInfraReport = Read-FlowChainJsonIfExists -Path $bridgeInfraReportPath
+$bridgeRelayerReport = Read-FlowChainJsonIfExists -Path $bridgeRelayerReportPath
 $noSecretReport = Read-FlowChainJsonIfExists -Path $noSecretReportPath
 
 $missingEnvNames = New-Object System.Collections.ArrayList
-foreach ($report in @($ownerInputsReport, $publicReport, $backupReport, $bridgeLiveReport, $bridgeInfraReport)) {
+foreach ($report in @($ownerInputsReport, $publicReport, $backupReport, $bridgeLiveReport, $bridgeInfraReport, $bridgeRelayerReport)) {
     Add-MissingNamesFromReport -Target $missingEnvNames -Report $report -Category "env"
 }
 $invalidEnvNames = New-Object System.Collections.ArrayList
@@ -208,6 +218,7 @@ $reportStatuses = [ordered]@{
     backup = Get-ReportStatus -Report $backupReport
     bridgeLive = Get-ReportStatus -Report $bridgeLiveReport
     bridgeInfra = Get-ReportStatus -Report $bridgeInfraReport
+    bridgeRelayer = Get-ReportStatus -Report $bridgeRelayerReport
     noSecretScan = Get-ReportStatus -Report $noSecretReport
 }
 
@@ -215,7 +226,7 @@ $ownerInputsReady = ($ownerInputsReport -and $ownerInputsReport.PSObject.Propert
 $publicReady = ($publicReport -and $publicReport.PSObject.Properties.Name -contains "publicRpcReady" -and $publicReport.publicRpcReady -eq $true)
 $servicesReady = $reportStatuses.services -eq "passed"
 $backupReady = $reportStatuses.backup -eq "passed"
-$bridgeReady = $reportStatuses.bridgeLive -eq "passed" -and $reportStatuses.bridgeInfra -eq "passed"
+$bridgeReady = $reportStatuses.bridgeLive -eq "passed" -and $reportStatuses.bridgeInfra -eq "passed" -and $reportStatuses.bridgeRelayer -eq "passed"
 $noSecretReady = $reportStatuses.noSecretScan -eq "passed"
 
 $failedStatuses = @($reportStatuses.GetEnumerator() | Where-Object { $_.Value -eq "failed" -or $_.Value -eq "missing" })
@@ -262,6 +273,7 @@ $finalReport = [ordered]@{
         backup = $backupReportPath
         bridgeLive = $bridgeLiveReportPath
         bridgeInfra = $bridgeInfraReportPath
+        bridgeRelayer = $bridgeRelayerReportPath
         noSecretScan = $noSecretReportPath
         logs = $logsDir
     }
@@ -270,7 +282,7 @@ $finalReport = [ordered]@{
         publicRpc = "Configure FLOWCHAIN_RPC_* env names and run the control-plane behind TLS/rate-limit/CORS enforcement."
         services = "Run npm run flowchain:service:start -- -LiveProfile after local state exists."
         backup = "Provide FLOWCHAIN_RPC_STATE_BACKUP_PATH as an existing writable directory; backup readiness will create a manifest-backed snapshot and verify restore rehearsal."
-        bridge = "Provide the Base 8453 env contract and an owner-verified lockbox with deployed bytecode."
+        bridge = "Provide the Base 8453 env contract and an owner-verified lockbox with deployed bytecode, then run the relayer once gate to queue new credits into the L1."
     }
     broadcasts = $false
     envValuesPrinted = $false

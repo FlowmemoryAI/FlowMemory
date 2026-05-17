@@ -127,6 +127,7 @@
     "flowchain:bridge:diagnose:tx": "node services/bridge-relayer/src/diagnose-base8453-tx.ts",
     "flowchain:bridge:deploy:base8453": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base8453-deploy.ps1",
     "flowchain:bridge:observe:base8453": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base-mainnet-pilot-observe.ps1",
+    "flowchain:bridge:relayer:once": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-relayer-once.ps1",
     "flowchain:bridge:pause": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base8453-control.ps1 -Action Pause",
     "flowchain:bridge:resume": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base8453-control.ps1 -Action Resume",
     "flowchain:bridge:withdraw:intent": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base-mainnet-pilot-observe.ps1 -ApplyCredit -WithdrawalIntent -ReportPath devnet/local/bridge-live-readiness/bridge-withdraw-intent-report.json",

@@ -1,6 +1,6 @@
 ﻿# FlowChain Architecture Audit
 
-Generated: 2026-05-17T10:27:20.0419597Z
+Generated: 2026-05-17T10:40:57.2539256Z
 Status: blocked
 Blocked only on known external owner inputs: True
 
@@ -11,7 +11,7 @@ Blocked only on known external owner inputs: True
 - Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding.
 - Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.
 - Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.
-- Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven and live-blocked until owner guardrails are configured.
+- Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven, can queue new relayer handoffs into the L1, and remains live-blocked until owner guardrails are configured.
 - State backup, monitoring, reboot-persistent service install, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.
 - Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.
 - Owner signup checklist maps the external services and local setup values needed for public operation without requesting secrets.
@@ -22,7 +22,7 @@ Blocked only on known external owner inputs: True
 
 | Layer | Requirement | Status | Evidence |
 | --- | --- | --- | --- |
-| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=52644, finalizedHeight=52644 |
+| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=53013, finalizedHeight=53013 |
 | Operations | Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, alert rules, incident drills, and emergency controls that classify incidents separately from owner-input blockers. | passed | monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertInstall=passed, alertInstallFailedChecks=0, criticalRules=5, blockedRules=5, unmappedAlerts=0, incidentDrill=passed, incidentCases=8, incidentFailed=0 |
 | Operations | Owner-host service lifecycle includes a no-secret Windows Scheduled Task install, status, and uninstall path for reboot-persistent live supervisor autorecovery. | passed | installValidation=passed, failedChecks=0, planDidNotMutate=True, liveProfileDefault=True, schedulerCmdlets=True |
 | RPC/API | The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation and abuse rejection before it can be exposed publicly. | passed | validationStatus=passed, corsAllowed=True, corsRejected=True, endpointChecks=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True, abuseStatus=passed, abusePassed=True, abuseMissingChecks=0 |
@@ -31,8 +31,9 @@ Blocked only on known external owner inputs: True
 | Wallets | Wallet creation and wallet-to-wallet transfer are routed through the RPC/control-plane boundary into runtime blocks without returning secret material. | passed | walletStatus=passed, testerStatus=passed, testerWalletCreates=4, testerSecretLeak=False |
 | Bridge | The bridge architecture has a deterministic local proof for exact value, replay protection, wrong-chain rejection, unapproved-lockbox rejection, and no broadcast. | passed | broadcast=False, allAmountsEqual=True, wrongChainRejected=True, unapprovedContractRejected=True |
 | Bridge | Live Base 8453 bridge observation is isolated behind owner guardrails, read-only diagnostics, confirmation/cap settings, and no-broadcast checks. | blocked | bridgeLive=blocked, bridgeInfra=blocked, baseTxDiagnostic=blocked, baseTxSafe=True |
+| Bridge | The live bridge relayer path checks owner guardrails, observes Base 8453 deposits, builds runtime handoff, filters already-seen replay keys, queues new credits into the running L1, and waits for main-state credit evidence without broadcasts. | blocked | relayer=blocked, observed=0, new=0, queued=0, applied=0 |
 | Storage/recovery | Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, scheduled backup install proof, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation. | blocked | backupStatus=blocked, validationStatus=passed, installValidation=passed, installFailedChecks=0, snapshotProof=not-run, restoreProof=not-run, requiredChecks=15, missingChecks=0 |
-| Deployment | The owner-operated public deployment contract is machine-checkable, includes rollback commands, and blocks sharing until public RPC, backup, bridge, and tester gates pass. | blocked | deploymentStatus=blocked, deploymentReady=False, packetShareable=False, packetSmoke=True, blockedOnlyKnown=True, blockedItems=5, failedItems=0 |
+| Deployment | The owner-operated public deployment contract is machine-checkable, includes rollback commands, and blocks sharing until public RPC, backup, bridge, and tester gates pass. | blocked | deploymentStatus=blocked, deploymentReady=False, packetShareable=False, packetSmoke=True, blockedOnlyKnown=True, blockedItems=6, failedItems=0 |
 | Governance/safety | Live-only inputs are externally owned, listed by name only, self-tested for missing/invalid/valid direct env plus local owner env-file loading, and fail closed on missing or malformed owner env files without printing values. | passed | ownerInputsStatus=blocked, validationStatus=passed, ownerEnvFilePasses=True, missingOwnerEnvFileFails=True, malformedOwnerEnvFileFails=True, knownMissingInputs=17, unknownInputs=0 |
 | Governance/safety | The ignored owner env file is a first-class setup boundary that can drive owner-input, live-infra, and public deployment gates through one redacted command. | blocked | readinessStatus=blocked, validationStatus=passed, missingFails=True, unignoredFails=True, gitIgnored=True, blockedOnlyKnown=True |
 | Governance/safety | Owner onboarding distinguishes repo-owned FlowChain RPC from the external Base 8453 RPC dependency and gives no-values setup commands. | passed | onboardingStatus=passed, flowChainRpcIsOurs=True, thirdPartyFlowChainRpcProviderNeeded=False, publicRpcRequiresOwnerPublicEdge=True, base8453RpcIsExternalChainDependency=True, localEnvFileSupported=True |

@@ -100,6 +100,7 @@ For cursor-based pilot observation:
 
 ```powershell
 npm run flowchain:bridge:observe:base8453
+npm run flowchain:bridge:relayer:once
 ```
 
 Evidence paths:
@@ -110,7 +111,12 @@ services/bridge-relayer/out/base8453-pilot-bridge-credit.json
 services/bridge-relayer/out/base8453-pilot-bridge-handoff.json
 services/bridge-relayer/out/base8453-pilot-evidence.json
 devnet/local/bridge-live-readiness/bridge-observe-base8453-report.json
+docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json
 ```
+
+`flowchain:bridge:relayer:once` is the production queue gate. It observes,
+filters replayed credits, queues new bridge handoffs into the running L1, waits
+for main-state credit evidence, and remains no-broadcast.
 
 ## Emergency Commands
 
@@ -151,6 +157,7 @@ After dry-run, broadcast, and post-deploy verification, hand these paths to the 
 devnet/local/bridge-live-readiness/base8453-deploy-readiness.json
 docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json
 docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json
+docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json
 devnet/local/bridge-live-readiness/bridge-observe-base8453-report.json
 services/bridge-relayer/out/base8453-pilot-evidence.json
 ```

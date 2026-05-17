@@ -34,7 +34,7 @@ function Stop-FlowChainPidFile {
     return "not-running"
 }
 
-$relayerStop = Stop-FlowChainPidFile -PidPath $relayerPidPath -CommandLineIncludes @("bridge-base-mainnet-pilot-observe.ps1")
+$relayerStop = Stop-FlowChainPidFile -PidPath $relayerPidPath -CommandLineIncludes @("flowchain-bridge-relayer-once.ps1")
 $controlStop = Stop-FlowChainPidFile -PidPath $controlPlanePidPath -CommandLineIncludes @($controlPlaneScriptPath)
 $nodeStop = "not-run"
 try {

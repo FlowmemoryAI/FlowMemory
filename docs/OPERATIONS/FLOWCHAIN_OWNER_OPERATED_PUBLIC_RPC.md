@@ -23,6 +23,7 @@ The repository now provides:
 - `npm run flowchain:backup:check` for owner backup path readiness, including snapshot and restore proof.
 - `npm run flowchain:backup:install:windows` and `npm run flowchain:backup:install:validate` for a no-secret Windows Scheduled Task install/status/uninstall path for recurring state snapshots.
 - `npm run flowchain:bridge:infra:check` for Base 8453 deployment input checks.
+- `npm run flowchain:bridge:relayer:once` for the no-broadcast Base 8453 observer-to-L1 queue path.
 - `npm run flowchain:bridge:diagnose:tx` for read-only diagnosis of an owner-supplied Base 8453 transaction hash.
 - `npm run flowchain:live-infra:check` as the aggregate gate, including owner input contract, public RPC, service status, backup, bridge, and no-secret checks.
 - `npm run flowchain:wallet:live-service:e2e` for a private local RPC proof that `/wallets/send` queues into the running node inbox and the node applies the transfer in produced blocks.
@@ -184,16 +185,19 @@ npm run flowchain:service:restart -- -LiveProfile
 
 ## Optional Relayer Loop
 
-After the Base 8453 env contract is configured and checked, the owner can start the read-only observer loop:
+After the Base 8453 env contract is configured and checked, the owner can run a
+single relayer pass or start the relayer loop:
 
 ```powershell
+npm run flowchain:bridge:relayer:once
 npm run flowchain:service:start -- -LiveProfile -StartBridgeRelayerLoop
 ```
 
-This loop uses the existing Base observer path, advances
-`services/bridge-relayer/out/base8453-pilot-cursor-state.json` only after a
-confirmed successful read, and does not broadcast. Keep logs under
-`devnet/local/services/logs/`.
+This path advances `services/bridge-relayer/out/base8453-pilot-cursor-state.json`
+only after a confirmed successful read, builds an applied runtime handoff,
+filters already-seen replay keys, queues new bridge credits into the running L1,
+waits for main-state credit evidence, and does not broadcast. Keep loop logs
+under `devnet/local/services/logs/`.
 
 ## Base Transaction Diagnosis
 
@@ -234,6 +238,9 @@ Expected behavior:
 - Missing local runtime artifacts list artifact names such as `devnet/local/state.json`.
 - Stopped supervised processes list pid artifact names such as `devnet/local/services/control-plane.pid`.
 - Success requires public RPC, services, backup, bridge live check, bridge infra check, and no-secret scan to pass together.
+- Bridge readiness includes the relayer once gate, which must either be blocked
+  only on owner Base inputs or prove that new observed credits are queued into
+  the L1 main state.
 
 For the broader product gate, run:
 
@@ -383,6 +390,7 @@ docs/agent-runs/live-product-infra-rpc/COMPLETION_AUDIT.md
 docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json
 docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json
 docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json
+docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json
 docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json
 docs/agent-runs/live-product-infra-rpc/flowchain-live-infra-check-report.json
 docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json

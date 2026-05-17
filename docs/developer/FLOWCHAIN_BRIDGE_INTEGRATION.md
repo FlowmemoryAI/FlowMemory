@@ -10,6 +10,7 @@ npm run flowchain:devkit -- bridge-readiness --json
 npm run flowchain:devkit -- bridge-status --json
 npm run flowchain:bridge:live:check -- -AllowBlocked
 npm run flowchain:bridge:infra:check -- -AllowBlocked
+npm run flowchain:bridge:relayer:once -- -AllowBlocked
 ```
 
 Blocked is the correct result until owner Base 8453 and pilot env names are
@@ -48,6 +49,19 @@ npm run flowchain:devkit -- bridge-credit-status --json --credit <credit-id>
 Lookup keys may be `creditId`, `depositId`, `accountId`, `flowchainRecipient`,
 `txHash`, `baseTxHash`, or wallet address depending on the evidence packet.
 
+## Relayer Queue
+
+```powershell
+npm run flowchain:bridge:relayer:once
+npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop
+```
+
+The one-shot relayer gate checks live and infra guardrails, observes confirmed
+Base 8453 lockbox logs, builds a runtime handoff with `-ApplyCredit`, filters
+already-seen credit and replay keys from `devnet/local/state.json`, queues new
+credits into the running L1, and waits for those credits to appear in main
+state. It never broadcasts Base transactions.
+
 ## Safety Rules
 
 - Base mainnet pilot mode requires confirmations greater than zero.
@@ -57,6 +71,8 @@ Lookup keys may be `creditId`, `depositId`, `accountId`, `flowchainRecipient`,
 - Replay keys are consumed once.
 - Pilot per-deposit and total caps must pass before runtime credit application.
 - Cursor state is lock-protected, atomically replaced, and tamper-evident.
+- The service relayer loop uses the same one-shot queue path, so deposits become
+  L1 handoffs instead of proof artifacts only.
 - Emergency stop and pause commands must be tested before inviting external
   testers.
 

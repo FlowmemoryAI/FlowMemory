@@ -65,6 +65,7 @@ $paths = [ordered]@{
     backupInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-install-validation-report.json"
     bridgeLive = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
+    bridgeRelayerOnce = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     architectureAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"
@@ -284,6 +285,7 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:backup:check -- -AllowBlocked",
     "npm run flowchain:bridge:live:check -- -AllowBlocked",
     "npm run flowchain:bridge:infra:check -- -AllowBlocked",
+    "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
     "npm run flowchain:external-tester:packet -- -AllowBlocked",
     "npm run flowchain:no-secret:scan"
 )
@@ -311,6 +313,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-backup" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-backup-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.backup)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-live" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-live-check.ps1"), "-AllowBlocked", "-ReportPath", $paths.bridgeLive)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-infra" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-env-bridge-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.bridgeInfra)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-relayer-once" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-once.ps1"), "-AllowBlocked", "-ReportPath", $paths.bridgeRelayerOnce)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "external-tester-packet" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-packet.ps1"), "-AllowBlocked", "-ReportPath", $paths.externalTesterPacket)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "no-secret-scan" -ArgumentList @(
         "-NoProfile",
@@ -720,6 +723,21 @@ Add-DeploymentItem -Items $items -Id "base8453-bridge-edge" `
     -Commands @("npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check") `
     -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
 
+$bridgeRelayer = $reports.bridgeRelayerOnce
+$bridgeRelayerStatus = Get-DeploymentStatus -Report $bridgeRelayer
+$bridgeRelayerCounts = Get-DeploymentProp -Object $bridgeRelayer -Name "counts"
+$bridgeRelayerReady = ($bridgeRelayerStatus -eq "passed") `
+    -and ((Get-DeploymentProp -Object $bridgeRelayer -Name "broadcasts" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayer -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayer -Name "noSecrets" -Default $false) -eq $true) `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:once")
+Add-DeploymentItem -Items $items -Id "base8453-bridge-relayer-queue" `
+    -Requirement "The bridge relayer has a no-broadcast one-shot path that checks owner guardrails, observes Base 8453 deposits, filters replays, queues new credits into the running L1, and waits for main-state credit evidence." `
+    -Status $(if ($bridgeRelayerReady) { "passed" } elseif ($bridgeRelayerStatus -eq "blocked") { "blocked" } else { "failed" }) `
+    -Evidence "relayer=$bridgeRelayerStatus, observed=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'newCredits' -Default 0), queued=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'queuedTransactions' -Default 0), applied=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'appliedCredits' -Default 0)" `
+    -Commands @("npm run flowchain:bridge:relayer:once") `
+    -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
+
 $externalTester = $reports.externalTester
 $externalPacket = $reports.externalTesterPacket
 $externalTesterStatus = Get-DeploymentStatus -Report $externalTester
@@ -817,6 +835,7 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:backup:check",
         "npm run flowchain:bridge:live:check",
         "npm run flowchain:bridge:infra:check",
+        "npm run flowchain:bridge:relayer:once",
         "npm run flowchain:tester:readiness",
         "npm run flowchain:external-tester:packet",
         "npm run flowchain:completion:audit"

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-17T10:27:20.0419597Z",
+    "generatedAt":  "2026-05-17T10:40:57.2539256Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -9,7 +9,7 @@
                                   "Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding.",
                                   "Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.",
                                   "Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.",
-                                  "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven and live-blocked until owner guardrails are configured.",
+                                  "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven, can queue new relayer handoffs into the L1, and remains live-blocked until owner guardrails are configured.",
                                   "State backup, monitoring, reboot-persistent service install, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
                                   "Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.",
                                   "Owner signup checklist maps the external services and local setup values needed for public operation without requesting secrets.",
@@ -18,9 +18,9 @@
                               ],
     "itemCounts":  {
                        "passed":  14,
-                       "blocked":  6,
+                       "blocked":  7,
                        "failed":  0,
-                       "total":  20
+                       "total":  21
                    },
     "items":  [
                   {
@@ -28,7 +28,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=52644, finalizedHeight=52644",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=53013, finalizedHeight=53013",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -208,12 +208,44 @@
                                     "infra/scripts/flowchain-bridge-live-check.ps1",
                                     "infra/scripts/flowchain-live-env-bridge-readiness.ps1",
                                     "services/bridge-relayer/src/diagnose-base8453-tx.ts",
-                                    "infra/scripts/bridge-base-mainnet-pilot-observe.ps1"
+                                    "infra/scripts/bridge-base-mainnet-pilot-observe.ps1",
+                                    "infra/scripts/flowchain-bridge-relayer-once.ps1",
+                                    "infra/scripts/flowchain-service-start.ps1"
                                 ],
                       "commands":  [
                                        "npm run flowchain:bridge:live:check",
                                        "npm run flowchain:bridge:infra:check",
                                        "npm run flowchain:bridge:diagnose:tx"
+                                   ],
+                      "blockers":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                   ]
+                  },
+                  {
+                      "id":  "bridge-relayer-runtime-queue",
+                      "layer":  "Bridge",
+                      "requirement":  "The live bridge relayer path checks owner guardrails, observes Base 8453 deposits, builds runtime handoff, filters already-seen replay keys, queues new credits into the running L1, and waits for main-state credit evidence without broadcasts.",
+                      "status":  "blocked",
+                      "evidence":  "relayer=blocked, observed=0, new=0, queued=0, applied=0",
+                      "files":  [
+                                    "infra/scripts/flowchain-bridge-live-check.ps1",
+                                    "infra/scripts/flowchain-live-env-bridge-readiness.ps1",
+                                    "services/bridge-relayer/src/diagnose-base8453-tx.ts",
+                                    "infra/scripts/bridge-base-mainnet-pilot-observe.ps1",
+                                    "infra/scripts/flowchain-bridge-relayer-once.ps1",
+                                    "infra/scripts/flowchain-service-start.ps1"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:bridge:relayer:once",
+                                       "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop"
                                    ],
                       "blockers":  [
                                        "FLOWCHAIN_PILOT_OPERATOR_ACK",
@@ -260,7 +292,7 @@
                       "layer":  "Deployment",
                       "requirement":  "The owner-operated public deployment contract is machine-checkable, includes rollback commands, and blocks sharing until public RPC, backup, bridge, and tester gates pass.",
                       "status":  "blocked",
-                      "evidence":  "deploymentStatus=blocked, deploymentReady=False, packetShareable=False, packetSmoke=True, blockedOnlyKnown=True, blockedItems=5, failedItems=0",
+                      "evidence":  "deploymentStatus=blocked, deploymentReady=False, packetShareable=False, packetSmoke=True, blockedOnlyKnown=True, blockedItems=6, failedItems=0",
                       "files":  [
                                     "infra/scripts/flowchain-public-deployment-contract.ps1",
                                     "docs/OPERATIONS/FLOWCHAIN_OWNER_OPERATED_PUBLIC_RPC.md"
@@ -625,7 +657,7 @@
                                        "runtime block inclusion",
                                        "wallet spend path"
                                    ],
-                          "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
+                          "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-once-report.json",
                           "blockedBy":  [
                                             "FLOWCHAIN_PILOT_OPERATOR_ACK",
                                             "FLOWCHAIN_BASE8453_RPC_URL",
@@ -723,6 +755,7 @@
                         "backupInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-install-validation-report.json",
                         "bridgeLiveReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
                         "bridgeInfraReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
+                        "bridgeRelayerOnce":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-once-report.json",
                         "bridgePilotLocal":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\services\\bridge-relayer\\out\\real-value-pilot-e2e\\bridge-real-value-pilot-e2e-report.json",
                         "baseTxDiagnostic":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\live-l1-bridge-e2e\\base-tx-diagnostic.json",
                         "ownerOnboarding":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-onboarding-report.json",
