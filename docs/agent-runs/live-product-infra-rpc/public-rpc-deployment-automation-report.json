@@ -1,0 +1,101 @@
+{
+    "schema":  "flowchain.public_rpc_deployment_automation_report.v0",
+    "generatedAt":  "2026-05-17T19:22:44.3257361Z",
+    "status":  "passed",
+    "action":  "Validate",
+    "flowChainRpcIsRepoOwned":  true,
+    "thirdPartyFlowChainRpcProviderNeeded":  false,
+    "bundleReportStatus":  "passed",
+    "checks":  {
+                   "bundleReportPassed":  true,
+                   "renderScriptExists":  true,
+                   "packageScriptPresent":  true,
+                   "bundleHasOwnerRenderValidation":  true,
+                   "bundleHasShellPreflight":  true,
+                   "bundleHasWindowsPreflight":  true,
+                   "bundleHasRollbackRunbook":  true,
+                   "ownerPathsOutsideRepo":  true,
+                   "hostMutationPerformedFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true,
+                   "renderCommandPassed":  true,
+                   "renderedNginxWritten":  true,
+                   "renderedSystemdLiveWritten":  true,
+                   "renderedSystemdSupervisorWritten":  true,
+                   "renderedShellPreflightWritten":  true,
+                   "renderedWindowsPreflightWritten":  true,
+                   "renderedReportWritten":  true,
+                   "renderedReportPassed":  true,
+                   "renderedFilesHaveNoPlaceholders":  true,
+                   "renderedFilesKeepPrivateOrigin":  true,
+                   "renderedNginxHasTls":  true,
+                   "renderedNginxHasCorsForwarding":  true,
+                   "renderedNginxHasRateLimit":  true,
+                   "renderedSystemdUsesOwnerEnv":  true,
+                   "renderedPreflightHasReadinessProbe":  true,
+                   "renderedFilesDoNotContainTokenHash":  true,
+                   "renderedReportDoesNotContainTokenHash":  true,
+                   "renderedReportKeepsOwnerPathsOutsideRepo":  true,
+                   "renderedReportNoSecrets":  true,
+                   "renderedReportBroadcastsFalse":  true,
+                   "cleanupAttempted":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "problem":  "",
+    "scenario":  {
+                     "performed":  true,
+                     "exitCode":  0,
+                     "outputRedacted":  [
+                                            "FlowChain public RPC bundle rendered. Report: C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-24840-40322b72ffb24d70ae1f4df7d1affdc0\\rendered\\public-rpc-render-report.json"
+                                        ],
+                     "failedChecks":  [
+
+                                      ]
+                 },
+    "renderedFileNames":  [
+                              "nginx-flowchain-rpc.conf",
+                              "flowchain-live.service",
+                              "flowchain-supervisor.service",
+                              "nginx-preflight.sh",
+                              "nginx-preflight.ps1"
+                          ],
+    "renderedReportPath":  "",
+    "ownerInputsRequired":  [
+                                "FLOWCHAIN_RPC_PUBLIC_URL",
+                                "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                                "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                                "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+                            ],
+    "deploymentPhases":  [
+                             "render-owner-files",
+                             "verify-systemd-units",
+                             "test-nginx-config",
+                             "run-public-rpc-preflight",
+                             "run-post-deploy-readiness-gates",
+                             "rollback-or-emergency-stop"
+                         ],
+    "commands":  [
+                     "npm run flowchain:public-rpc:deployment-bundle",
+                     "npm run flowchain:public-rpc:deployment:automation",
+                     "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-automation.ps1 -Action Render -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -OwnerEnvFile \u003cFLOWCHAIN_OWNER_ENV_FILE\u003e -TlsCertificatePath \u003cPATH_TO_TLS_CERTIFICATE\u003e -TlsCertificateKeyPath \u003cPATH_TO_TLS_CERTIFICATE_KEY\u003e -NginxExe \u003cFLOWCHAIN_NGINX_EXE\u003e",
+                     "systemd-analyze verify \u003cFLOWCHAIN_SYSTEMD_RENDERED_UNIT\u003e",
+                     "systemd-analyze verify \u003cFLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT\u003e",
+                     "nginx -t",
+                     "bash \u003cFLOWCHAIN_NGINX_PREFLIGHT_SCRIPT\u003e",
+                     "powershell -NoProfile -ExecutionPolicy Bypass -File \u003cFLOWCHAIN_NGINX_WINDOWS_PREFLIGHT_SCRIPT\u003e",
+                     "npm run flowchain:public-rpc:validate",
+                     "npm run flowchain:public-rpc:abuse-test",
+                     "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+                 ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false,
+    "hostMutationPerformed":  false
+}

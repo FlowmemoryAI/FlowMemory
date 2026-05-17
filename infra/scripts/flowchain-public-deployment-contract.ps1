@@ -56,6 +56,7 @@ $paths = [ordered]@{
     ownerInputs = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-report.json"
     publicRpcEdgeTemplate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-edge-template-report.json"
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
+    publicRpcDeploymentAutomation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
     publicRpc = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
     publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
@@ -291,6 +292,7 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:owner-inputs -- -AllowBlocked",
     "npm run flowchain:public-rpc:edge-template",
     "npm run flowchain:public-rpc:deployment-bundle",
+    "npm run flowchain:public-rpc:deployment:automation",
     "npm run flowchain:public-rpc:validate",
     "npm run flowchain:public-rpc:abuse-test",
     "npm run flowchain:tester:gateway:e2e",
@@ -319,6 +321,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-inputs" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-inputs.ps1"), "-AllowBlocked", "-ReportPath", $paths.ownerInputs)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-edge-template" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-edge-template.ps1"), "-ReportPath", $paths.publicRpcEdgeTemplate)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-deployment-bundle" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-deployment-bundle.ps1"), "-ReportPath", $paths.publicRpcDeploymentBundle)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-deployment-automation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-deployment-automation.ps1"), "-ReportPath", $paths.publicRpcDeploymentAutomation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-validation.ps1"), "-ReportPath", $paths.publicRpcValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-abuse-test" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-abuse-test.ps1"), "-ReportPath", $paths.publicRpcAbuseTest)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-tester-gateway-e2e" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-tester-gateway-e2e.ps1"), "-ReportPath", $paths.publicTesterGateway)
@@ -474,6 +477,26 @@ $deploymentBundleReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "rollbackRunbookWritten" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $publicRpcDeploymentBundle -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $publicRpcDeploymentBundle -Name "noSecrets" -Default $false) -eq $true)
+$publicRpcDeploymentAutomation = $reports.publicRpcDeploymentAutomation
+$publicRpcDeploymentAutomationStatus = Get-DeploymentStatus -Report $publicRpcDeploymentAutomation
+$publicRpcDeploymentAutomationAction = [string](Get-DeploymentProp -Object $publicRpcDeploymentAutomation -Name "action" -Default "")
+$deploymentAutomationChecks = Get-DeploymentProp -Object $publicRpcDeploymentAutomation -Name "checks"
+$deploymentAutomationReady = $publicRpcDeploymentAutomationStatus -eq "passed" `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:deployment:automation") `
+    -and ($publicRpcDeploymentAutomationAction -eq "Validate") `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "bundleReportPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedFilesKeepPrivateOrigin" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedNginxHasTls" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedNginxHasCorsForwarding" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedNginxHasRateLimit" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedSystemdUsesOwnerEnv" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasReadinessProbe" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcDeploymentAutomation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $publicRpcDeploymentAutomation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcDeploymentAutomation -Name "broadcasts" -Default $true) -eq $false)
 $publicRpcEdgeTemplateReady = ($publicRpcEdgeTemplateStatus -eq "passed") `
     -and ($edgeTemplateReady -eq $true) `
     -and ($edgeTemplateRepoOwned -eq $true) `
@@ -488,6 +511,12 @@ Add-DeploymentItem -Items $items -Id "public-rpc-edge-template" `
     -Status $(if ($publicRpcEdgeTemplateReady -and $deploymentBundleReady) { "passed" } else { "failed" }) `
     -Evidence "edgeTemplateStatus=$publicRpcEdgeTemplateStatus, bundleStatus=$publicRpcDeploymentBundleStatus, renderValidation=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false)), repoOwned=$edgeTemplateRepoOwned, requiresTls=$edgeTemplateRequiresTls, requiresRateLimit=$edgeTemplateRequiresRateLimit, forwardsOrigin=$edgeTemplateForwardsOrigin" `
     -Commands @("npm run flowchain:public-rpc:edge-template", "npm run flowchain:public-rpc:deployment-bundle")
+
+Add-DeploymentItem -Items $items -Id "public-rpc-deployment-automation" `
+    -Requirement "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, verification, and rollback phases without host mutation or owner-value leakage." `
+    -Status $(if ($deploymentAutomationReady) { "passed" } else { "failed" }) `
+    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), hostMutationFalse=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false)" `
+    -Commands @("npm run flowchain:public-rpc:deployment:automation")
 
 $service = $reports.serviceStatus
 $serviceStatus = Get-DeploymentStatus -Report $service

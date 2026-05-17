@@ -1,6 +1,6 @@
 ﻿# FlowChain Architecture Audit
 
-Generated: 2026-05-17T19:05:57.4961259Z
+Generated: 2026-05-17T19:26:57.7468993Z
 Status: blocked
 Blocked only on known external owner inputs: True
 
@@ -22,12 +22,13 @@ Blocked only on known external owner inputs: True
 
 | Layer | Requirement | Status | Evidence |
 | --- | --- | --- | --- |
-| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=58518, finalizedHeight=58518 |
+| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=58713, finalizedHeight=58713 |
 | Operations | Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, alert rules, incident drills, and emergency controls that classify incidents separately from owner-input blockers. | passed | monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertInstall=passed, alertInstallFailedChecks=0, criticalRules=8, blockedRules=6, unmappedAlerts=0, incidentDrill=passed, incidentCases=9, incidentFailed=0 |
 | Operations | Owner-host service lifecycle includes a no-secret Windows Scheduled Task install, status, and uninstall path for reboot-persistent live supervisor autorecovery. | passed | installValidation=passed, failedChecks=0, planDidNotMutate=True, liveProfileDefault=True, schedulerCmdlets=True |
 | RPC/API | The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation and abuse rejection before it can be exposed publicly. | passed | validationStatus=passed, corsAllowed=True, corsRejected=True, endpointChecks=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True, abuseStatus=passed, abusePassed=True, abuseMissingChecks=0 |
 | Public edge | External RPC exposure is a distinct owner-operated edge with TLS, allowed origins, rate limits, endpoint checks, and response hygiene. | blocked | publicRpcStatus=blocked, publicRpcReady=False |
 | Public edge | Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, verification, and rollback. | passed | edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True |
+| Public edge | Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, post-deploy verification, and rollback phases without host mutation or owner-value leakage. | passed | automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, hostMutationFalse=True |
 | Wallets | Wallet creation and wallet-to-wallet transfer are routed through the RPC/control-plane boundary into runtime blocks without returning secret material. | passed | walletStatus=passed, testerStatus=passed, testerWalletCreates=4, testerSecretLeak=False |
 | Bridge | The bridge architecture has a deterministic local proof for exact value, replay protection, wrong-chain rejection, unapproved-lockbox rejection, and no broadcast. | passed | broadcast=False, allAmountsEqual=True, wrongChainRejected=True, unapprovedContractRejected=True |
 | Bridge | Live Base 8453 bridge observation is isolated behind owner guardrails, read-only diagnostics, confirmation/cap settings, and no-broadcast checks. | blocked | bridgeLive=blocked, bridgeInfra=blocked, baseTxDiagnostic=blocked, baseTxSafe=True |

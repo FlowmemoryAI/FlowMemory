@@ -66,6 +66,7 @@ $reportPaths = [ordered]@{
     ownerEnvReadinessValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-validation-report.json"
     publicRpcEdgeTemplate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-edge-template-report.json"
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
+    publicRpcDeploymentAutomation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
     ownerInputsValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     liveInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-infra-check-report.json"
     liveProduct = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json"
@@ -448,6 +449,26 @@ $deploymentBundleReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "rollbackRunbookWritten" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $publicRpcDeploymentBundle -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $publicRpcDeploymentBundle -Name "noSecrets" -Default $false) -eq $true)
+$publicRpcDeploymentAutomation = $reports.publicRpcDeploymentAutomation
+$publicRpcDeploymentAutomationStatus = Get-ArchitectureStatus -Report $publicRpcDeploymentAutomation
+$publicRpcDeploymentAutomationAction = [string](Get-ArchitectureProp -Object $publicRpcDeploymentAutomation -Name "action" -Default "")
+$deploymentAutomationChecks = Get-ArchitectureProp -Object $publicRpcDeploymentAutomation -Name "checks"
+$deploymentAutomationReady = $publicRpcDeploymentAutomationStatus -eq "passed" `
+    -and (Test-RepoFile -Path "infra/scripts/flowchain-public-rpc-deployment-automation.ps1") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:deployment:automation") `
+    -and ($publicRpcDeploymentAutomationAction -eq "Validate") `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedFilesKeepPrivateOrigin" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedNginxHasTls" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedNginxHasCorsForwarding" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedNginxHasRateLimit" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedSystemdUsesOwnerEnv" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasReadinessProbe" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcDeploymentAutomation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $publicRpcDeploymentAutomation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcDeploymentAutomation -Name "broadcasts" -Default $true) -eq $false)
 $publicRpcEdgeTemplateReady = (Test-RepoFile -Path "infra/scripts/flowchain-public-rpc-edge-template.ps1") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:edge-template") `
     -and ($publicRpcEdgeTemplateStatus -eq "passed") `
@@ -465,6 +486,13 @@ Add-ArchitectureItem -Items $items -Id "public-rpc-edge-template-boundary" -Laye
     -Evidence "edgeTemplateStatus=$publicRpcEdgeTemplateStatus, bundleStatus=$publicRpcDeploymentBundleStatus, renderValidation=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false)), repoOwned=$edgeTemplateRepoOwned, requiresTls=$edgeTemplateRequiresTls, requiresRateLimit=$edgeTemplateRequiresRateLimit, forwardsOrigin=$edgeTemplateForwardsOrigin" `
     -Files @("infra/scripts/flowchain-public-rpc-edge-template.ps1", "infra/scripts/flowchain-public-rpc-deployment-bundle.ps1", "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_EDGE_TEMPLATE.md", "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_BUNDLE.md", "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle/WINDOWS_NGINX_PREFLIGHT.md") `
     -Commands @("npm run flowchain:public-rpc:edge-template", "npm run flowchain:public-rpc:deployment-bundle")
+
+Add-ArchitectureItem -Items $items -Id "public-rpc-deployment-automation-boundary" -Layer "Public edge" `
+    -Requirement "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, post-deploy verification, and rollback phases without host mutation or owner-value leakage." `
+    -Status $(if ($deploymentAutomationReady) { "passed" } else { "failed" }) `
+    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), hostMutationFalse=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false)" `
+    -Files @("infra/scripts/flowchain-public-rpc-deployment-automation.ps1", "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_AUTOMATION.md", "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json") `
+    -Commands @("npm run flowchain:public-rpc:deployment:automation")
 
 $wallet = $reports.liveWallet
 $testerNetwork = $reports.testerNetwork

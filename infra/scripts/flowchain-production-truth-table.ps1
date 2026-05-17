@@ -127,6 +127,42 @@ $definitions = @(
         ownerInputGate = $false
     },
     [ordered]@{
+        id = "public-rpc-deployment-automation"
+        requirement = "Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, post-deploy verification, and rollback phases without host mutation or owner-value leakage."
+        path = "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
+        command = "npm run flowchain:public-rpc:deployment:automation"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "bundleReportPassed",
+            "renderScriptExists",
+            "packageScriptPresent",
+            "bundleHasOwnerRenderValidation",
+            "bundleHasShellPreflight",
+            "bundleHasWindowsPreflight",
+            "bundleHasRollbackRunbook",
+            "ownerPathsOutsideRepo",
+            "hostMutationPerformedFalse",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse",
+            "renderCommandPassed",
+            "renderedFilesHaveNoPlaceholders",
+            "renderedFilesKeepPrivateOrigin",
+            "renderedNginxHasTls",
+            "renderedNginxHasCorsForwarding",
+            "renderedNginxHasRateLimit",
+            "renderedSystemdUsesOwnerEnv",
+            "renderedPreflightHasReadinessProbe",
+            "renderedFilesDoNotContainTokenHash",
+            "renderedReportDoesNotContainTokenHash",
+            "renderedReportKeepsOwnerPathsOutsideRepo",
+            "renderedReportNoSecrets",
+            "renderedReportBroadcastsFalse",
+            "cleanupAttempted"
+        )
+    },
+    [ordered]@{
         id = "backup-readiness"
         requirement = "Configured production backup path can create and restore manifest-backed state snapshots."
         path = "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
@@ -238,7 +274,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("backup-restore-validation", "ops-snapshot", "public-rpc-deployment-bundle", "public-deployment-contract")
+        staleIfOlderThan = @("backup-restore-validation", "ops-snapshot", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"

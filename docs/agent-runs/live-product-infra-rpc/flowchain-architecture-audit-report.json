@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-17T19:05:57.4961259Z",
+    "generatedAt":  "2026-05-17T19:26:57.7468993Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -17,10 +17,10 @@
                                   "Every missing production edge fails closed on exact owner input names, with no secrets, env values, or live broadcasts."
                               ],
     "itemCounts":  {
-                       "passed":  14,
+                       "passed":  15,
                        "blocked":  7,
                        "failed":  0,
-                       "total":  21
+                       "total":  22
                    },
     "items":  [
                   {
@@ -28,7 +28,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=58518, finalizedHeight=58518",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=58713, finalizedHeight=58713",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -156,6 +156,24 @@
                       "commands":  [
                                        "npm run flowchain:public-rpc:edge-template",
                                        "npm run flowchain:public-rpc:deployment-bundle"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "public-rpc-deployment-automation-boundary",
+                      "layer":  "Public edge",
+                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, post-deploy verification, and rollback phases without host mutation or owner-value leakage.",
+                      "status":  "passed",
+                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, hostMutationFalse=True",
+                      "files":  [
+                                    "infra/scripts/flowchain-public-rpc-deployment-automation.ps1",
+                                    "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_AUTOMATION.md",
+                                    "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:public-rpc:deployment:automation"
                                    ],
                       "blockers":  [
 
@@ -771,6 +789,7 @@
                         "ownerEnvReadinessValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-validation-report.json",
                         "publicRpcEdgeTemplate":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-edge-template-report.json",
                         "publicRpcDeploymentBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle-report.json",
+                        "publicRpcDeploymentAutomation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-automation-report.json",
                         "ownerInputsValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-validation-report.json",
                         "liveInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-infra-check-report.json",
                         "liveProduct":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-product-e2e-report.json",

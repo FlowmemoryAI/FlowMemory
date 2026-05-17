@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-17T19:05:08.9298254Z",
+  "generatedAt": "2026-05-17T19:26:49.7845143Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -8,14 +8,16 @@
   "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
   "privateRpcUrl": "http://127.0.0.1:8787",
   "metrics": {
-    "latestHeight": "58681",
-    "finalizedHeight": "58681",
+    "latestHeight": "58713",
+    "finalizedHeight": "58713",
     "monitorHeightAdvanced": true,
     "bridgeRelayerStatus": "blocked",
     "bridgeQueuedTransactions": "0",
     "bridgeRelayerGuardrailStatus": "passed",
     "publicRpcDeploymentBundleStatus": "passed",
     "publicRpcOwnerRenderValidationStatus": "passed",
+    "publicRpcDeploymentAutomationStatus": "passed",
+    "publicRpcDeploymentAutomationAction": "Validate",
     "externalTesterPacketStatus": "blocked",
     "ownerInputReady": false,
     "noSecretStatus": "passed",
@@ -296,7 +298,7 @@
       "label": "Private L1 origin",
       "status": "passed",
       "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
-      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=58518, finalizedHeight=58518",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=58713, finalizedHeight=58713",
       "commands": [
         "npm run flowchain:service:status"
       ],
@@ -502,7 +504,7 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T19:05:08.9298254Z"
+      "generatedAt": "2026-05-17T19:26:49.7845143Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
@@ -514,7 +516,7 @@
       "fileName": "service-status-report.json",
       "schema": "flowchain.service_status_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T19:15:30.8358492Z"
+      "generatedAt": "2026-05-17T19:17:54.5328816Z"
     },
     {
       "fileName": "service-monitor-report.json",
@@ -527,6 +529,12 @@
       "schema": "flowchain.public_rpc_deployment_bundle_report.v2",
       "status": "passed",
       "generatedAt": "2026-05-17T18:59:06.5897373Z"
+    },
+    {
+      "fileName": "public-rpc-deployment-automation-report.json",
+      "schema": "flowchain.public_rpc_deployment_automation_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-17T19:22:44.3257361Z"
     },
     {
       "fileName": "public-rpc-readiness-report.json",
@@ -598,7 +606,7 @@
       "fileName": "no-secret-scan-report.json",
       "schema": "flowchain.no_secret_scan_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T19:14:48.3542130Z"
+      "generatedAt": "2026-05-17T19:16:14.9158782Z"
     }
   ],
   "envValuesPrinted": false,

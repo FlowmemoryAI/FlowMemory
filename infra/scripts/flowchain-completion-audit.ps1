@@ -41,6 +41,7 @@ $paths = [ordered]@{
     publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
     publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
+    publicRpcDeploymentAutomation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     incidentDrill = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json"
@@ -356,6 +357,9 @@ $publicRpcEdgeTemplateExitCode = $publicRpcEdgeTemplateResult.exitCode
 $publicRpcDeploymentBundleResult = Invoke-AuditChild -Path $paths.publicRpcDeploymentBundle -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-deployment-bundle.ps1"))
 $publicRpcDeploymentBundleOutput = @($publicRpcDeploymentBundleResult.output)
 $publicRpcDeploymentBundleExitCode = $publicRpcDeploymentBundleResult.exitCode
+$publicRpcDeploymentAutomationResult = Invoke-AuditChild -Path $paths.publicRpcDeploymentAutomation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-deployment-automation.ps1"))
+$publicRpcDeploymentAutomationOutput = @($publicRpcDeploymentAutomationResult.output)
+$publicRpcDeploymentAutomationExitCode = $publicRpcDeploymentAutomationResult.exitCode
 $liveInfraResult = Invoke-AuditChild -Path $paths.liveInfra -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-infra-check.ps1"), "-AllowBlocked")
 $liveInfraOutput = @($liveInfraResult.output)
 $liveInfraExitCode = $liveInfraResult.exitCode
@@ -573,6 +577,25 @@ $publicRpcDeploymentBundlePassed = $publicRpcDeploymentBundleExitCode -eq 0 `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "broadcasts" -Default $true) -eq $false)
+$publicRpcDeploymentAutomation = $reports.publicRpcDeploymentAutomation
+$publicRpcDeploymentAutomationStatus = Get-ReportStatus -Report $publicRpcDeploymentAutomation
+$publicRpcDeploymentAutomationAction = [string](Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "action" -Default "")
+$publicRpcDeploymentAutomationChecks = Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "checks"
+$publicRpcDeploymentAutomationPassed = $publicRpcDeploymentAutomationExitCode -eq 0 `
+    -and $publicRpcDeploymentAutomationStatus -eq "passed" `
+    -and ($publicRpcDeploymentAutomationAction -eq "Validate") `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedFilesKeepPrivateOrigin" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasTls" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasCorsForwarding" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasRateLimit" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedSystemdUsesOwnerEnv" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasReadinessProbe" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "broadcasts" -Default $true) -eq $false)
 $ownerInputsValidationStatus = Get-ReportStatus -Report $ownerInputsValidation
 $ownerInputsValidationChecks = Get-AuditProp -Object $ownerInputsValidation -Name "checks"
 $ownerInputsValidationMissingBlocks = Get-AuditProp -Object $ownerInputsValidationChecks -Name "missingScenarioBlocks" -Default $false
@@ -922,6 +945,12 @@ Add-AuditItem -Items $items -Id "public-rpc-deployment-bundle" `
     -Evidence "bundleStatus=$publicRpcDeploymentBundleStatus, repoOwned=$publicRpcDeploymentBundleRepoOwned, nginxTemplate=$publicRpcDeploymentBundleNginxTemplate, renderValidation=$publicRpcDeploymentBundleRenderValidation, verifyRunbook=$publicRpcDeploymentBundleVerifyRunbook, rollbackRunbook=$publicRpcDeploymentBundleRollbackRunbook, report=$($paths.publicRpcDeploymentBundle)" `
     -Commands @("npm run flowchain:public-rpc:deployment-bundle")
 
+Add-AuditItem -Items $items -Id "public-rpc-deployment-automation" `
+    -Requirement "Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, post-deploy verification, and rollback phases without host mutation or owner-value leakage." `
+    -Status $(if ($publicRpcDeploymentAutomationPassed) { "passed" } else { "failed" }) `
+    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), hostMutationFalse=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false), report=$($paths.publicRpcDeploymentAutomation)" `
+    -Commands @("npm run flowchain:public-rpc:deployment:automation")
+
 Add-AuditItem -Items $items -Id "public-rpc-readiness-validator-self-test" `
     -Requirement "Public RPC readiness validator proves endpoint checks, CORS allowed-origin acceptance, disallowed-origin rejection, bounded rate-limit rejection, retry-after evidence, and response hygiene against a temporary local control plane." `
     -Status $(if ($publicRpcValidationPassed) { "passed" } else { "failed" }) `
@@ -1085,6 +1114,8 @@ $report = [ordered]@{
     publicRpcEdgeTemplateOutputRedacted = @($publicRpcEdgeTemplateOutput | ForEach-Object { "$_" })
     publicRpcDeploymentBundleExitCode = $publicRpcDeploymentBundleExitCode
     publicRpcDeploymentBundleOutputRedacted = @($publicRpcDeploymentBundleOutput | ForEach-Object { "$_" })
+    publicRpcDeploymentAutomationExitCode = $publicRpcDeploymentAutomationExitCode
+    publicRpcDeploymentAutomationOutputRedacted = @($publicRpcDeploymentAutomationOutput | ForEach-Object { "$_" })
     liveInfraExitCode = $liveInfraExitCode
     liveInfraOutputRedacted = @($liveInfraOutput | ForEach-Object { "$_" })
     externalTesterPacketExitCode = $externalTesterPacketExitCode
@@ -1135,6 +1166,7 @@ $report = [ordered]@{
         "npm run flowchain:owner-inputs",
         "npm run flowchain:public-rpc:edge-template",
         "npm run flowchain:public-rpc:deployment-bundle",
+        "npm run flowchain:public-rpc:deployment:automation",
         "npm run flowchain:public-rpc:validate",
         "npm run flowchain:public-rpc:abuse-test",
         "npm run flowchain:tester:gateway:e2e",

@@ -1,17 +1,17 @@
 ﻿# FlowChain Completion Audit
 
-Generated: 2026-05-17T19:16:18.5571579Z
+Generated: 2026-05-17T19:27:45.2587685Z
 Status: blocked
 Completion ready: False
 Refresh mode: no-refresh-existing-reports
-Latest observed height: 58681
+Latest observed height: 58713
 
 ## Prompt-To-Artifact Checklist
 
 | Requirement | Status | Evidence | Commands |
 | --- | --- | --- | --- |
 | Chain service is running in live profile and command lines match this worktree. | passed | service-status status=passed, node=running, controlPlane=running, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
-| Chain is producing/finalizing blocks and state is fresh. | passed | latestHeight=58681, stateFileLastWriteAgeSeconds=2, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
+| Chain is producing/finalizing blocks and state is fresh. | passed | latestHeight=58713, stateFileLastWriteAgeSeconds=1, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
 | Live service monitor observes running services and advancing block height over a sampling window. | passed | monitorStatus=passed, samples=2, heightAdvanced=True, heights=58574->58581, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-monitor-report.json | npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90 |
 | People can create wallets through the RPC service without receiving secret material. | passed | testerWalletCreates=4, secretMaterialReturned=false, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\live-service-tester-network-e2e-report.json | npm run flowchain:wallet:live-tester:e2e |
 | Wallet-to-wallet transfers sent through the running service settle on produced blocks. | passed | single-transfer blocks 58268->58281, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\live-service-wallet-e2e-report.json | npm run flowchain:wallet:live-service:e2e |
@@ -29,6 +29,7 @@ Latest observed height: 58681
 | The ignored owner env file can drive owner-input, live-infra, and public deployment gates through one redacted command. | blocked | readinessStatus=blocked, pathGitIgnored=True, ownerInputsReady=False, liveInfraReady=False, publicDeploymentContractReady=False, blockedOnlyKnown=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\owner-env-readiness-report.json | npm run flowchain:owner-env:readiness -- -AllowBlocked |
 | Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding. | passed | edgeTemplateStatus=passed, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\public-rpc-edge-template-report.json | npm run flowchain:public-rpc:edge-template |
 | Public RPC deployment bundle has no-secret Nginx, owner env, owner render validation, verification, and rollback artifacts for exposing FlowChain's own RPC. | passed | bundleStatus=passed, repoOwned=True, nginxTemplate=True, renderValidation=True, verifyRunbook=True, rollbackRunbook=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\public-rpc-deployment-bundle-report.json | npm run flowchain:public-rpc:deployment-bundle |
+| Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, post-deploy verification, and rollback phases without host mutation or owner-value leakage. | passed | automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, hostMutationFalse=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\public-rpc-deployment-automation-report.json | npm run flowchain:public-rpc:deployment:automation |
 | Public RPC readiness validator proves endpoint checks, CORS allowed-origin acceptance, disallowed-origin rejection, bounded rate-limit rejection, retry-after evidence, and response hygiene against a temporary local control plane. | passed | validationStatus=passed, allowedOriginAccepted=True, disallowedProbe=True, disallowedRejected=True, endpointChecks=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\public-rpc-validation-report.json | npm run flowchain:public-rpc:validate |
 | Public RPC abuse harness proves CORS rejection, media-type rejection, parse-error handling, method/params failure envelopes, batch/body caps, notification 204 handling, rate limiting, and no-secret response summaries. | passed | abuseStatus=passed, abuseReady=True, missingChecks=0, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\public-rpc-abuse-test-report.json | npm run flowchain:public-rpc:abuse-test |
 | Public tester write gateway proves bearer auth configuration, public-only wallet creation, capped send settlement, and over-cap rejection on a temporary local control-plane. | passed | gatewayStatus=passed, configured=True, transferAccepted=True, capRejected=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\public-tester-gateway-e2e-report.json | npm run flowchain:tester:gateway:e2e |

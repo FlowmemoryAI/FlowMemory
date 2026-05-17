@@ -1,16 +1,16 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-17T19:05:08.9298254Z",
+    "generatedAt":  "2026-05-17T19:26:49.7845143Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
     "packetExecutableSmokeValidated":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
-                       "passed":  18,
+                       "passed":  19,
                        "blocked":  6,
                        "failed":  0,
-                       "total":  24
+                       "total":  25
                    },
     "items":  [
                   {
@@ -32,6 +32,7 @@
                                        "npm run flowchain:owner-inputs -- -AllowBlocked",
                                        "npm run flowchain:public-rpc:edge-template",
                                        "npm run flowchain:public-rpc:deployment-bundle",
+                                       "npm run flowchain:public-rpc:deployment:automation",
                                        "npm run flowchain:public-rpc:validate",
                                        "npm run flowchain:public-rpc:abuse-test",
                                        "npm run flowchain:tester:gateway:e2e",
@@ -99,10 +100,22 @@
                                    ]
                   },
                   {
+                      "id":  "public-rpc-deployment-automation",
+                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, verification, and rollback phases without host mutation or owner-value leakage.",
+                      "status":  "passed",
+                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, hostMutationFalse=True",
+                      "commands":  [
+                                       "npm run flowchain:public-rpc:deployment:automation"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=58518, finalizedHeight=58518",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=58713, finalizedHeight=58713",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -475,6 +488,7 @@
                         "ownerInputs":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-report.json",
                         "publicRpcEdgeTemplate":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-edge-template-report.json",
                         "publicRpcDeploymentBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle-report.json",
+                        "publicRpcDeploymentAutomation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-automation-report.json",
                         "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
                         "publicRpcValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation-report.json",
                         "publicRpcAbuseTest":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test-report.json",

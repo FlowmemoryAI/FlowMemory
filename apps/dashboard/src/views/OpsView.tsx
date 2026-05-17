@@ -98,6 +98,8 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
   const blockedCount = text(ops?.blockedCount ?? metrics.opsBlockedCount, "0");
   const bridgeGuardrailStatus = text(ops?.bridgeRelayerGuardrailStatus ?? metrics.bridgeRelayerGuardrailStatus, "not recorded");
   const bridgeGuardrailReady = text(ops?.bridgeRelayerGuardrailReady, bridgeGuardrailStatus === "passed" ? "true" : "false");
+  const publicRpcDeployAutomationStatus = text(metrics.publicRpcDeploymentAutomationStatus, "not recorded");
+  const publicRpcDeployAutomationAction = text(metrics.publicRpcDeploymentAutomationAction, "not recorded");
   const networkNotifications = text(ops?.sendsNetworkNotifications, "false");
   const storesSecrets = text(ops?.storesSecrets, "false");
 
@@ -141,6 +143,11 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
           <span>Bridge guardrail</span>
           <strong>{bridgeGuardrailStatus}</strong>
           <small>fail-closed proof ready {bridgeGuardrailReady}</small>
+        </div>
+        <div>
+          <span>RPC deploy automation</span>
+          <strong>{publicRpcDeployAutomationStatus}</strong>
+          <small>mode {publicRpcDeployAutomationAction}</small>
         </div>
         <div>
           <span>Delivery boundary</span>
