@@ -65,6 +65,67 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
   const pilotNextCommand = pilotOverview?.facts.find((fact) => fact.label === "next command")?.value ?? "npm run control-plane:serve";
   const bridgeReadinessStatus = bridgeReadiness?.facts.find((fact) => fact.label === "fail-closed status")?.value ?? "BLOCKED";
   const bridgeReadinessMissingEnv = bridgeReadiness?.facts.find((fact) => fact.label === "missing env names")?.value ?? "endpoint unavailable";
+  const launchSteps: Array<{
+    id: string;
+    label: string;
+    detail: string;
+    command: string;
+    status: DashboardStatus;
+    count: number | string;
+    Icon: typeof Wallet;
+    section: WorkbenchSectionKey;
+  }> = [
+    {
+      id: "wallets",
+      label: "Wallets",
+      detail: "Public wallet metadata and account records",
+      command: "npm run flowchain:wallet:live-service:e2e",
+      status: statusForCount(workbench.sections.walletMetadata.length + workbench.sections.accounts.length),
+      count: workbench.sections.walletMetadata.length + workbench.sections.accounts.length,
+      Icon: Wallet,
+      section: "walletMetadata",
+    },
+    {
+      id: "funding",
+      label: "Faucet funds",
+      detail: "Local balances and faucet events",
+      command: "npm run flowchain:faucet",
+      status: statusForCount(workbench.sections.balances.length + workbench.sections.faucetEvents.length),
+      count: workbench.sections.balances.length + workbench.sections.faucetEvents.length,
+      Icon: Coins,
+      section: "balances",
+    },
+    {
+      id: "explorer",
+      label: "Explorer",
+      detail: "Blocks, transactions, receipts, and rollups",
+      command: "npm run flowchain:product-e2e",
+      status: statusForCount(workbench.sections.blocks.length + workbench.sections.transactions.length + workbench.sections.explorerRecords.length),
+      count: workbench.sections.blocks.length + workbench.sections.transactions.length + workbench.sections.explorerRecords.length,
+      Icon: Database,
+      section: "explorerRecords",
+    },
+    {
+      id: "bridge",
+      label: "Bridge",
+      detail: "Base 8453 pilot readiness and local credits",
+      command: "npm run flowchain:bridge:infra:check",
+      status: bridgeReadiness?.status ?? statusForCount(bridgeRecordCount),
+      count: bridgeReadinessStatus,
+      Icon: ShieldAlert,
+      section: "realValuePilot",
+    },
+    {
+      id: "rpc",
+      label: "RPC",
+      detail: "Control-plane connection and advertised endpoints",
+      command: "npm run flowchain:public-rpc:check",
+      status: workbench.controlPlane.status === "available" ? "verified" : "pending",
+      count: workbench.controlPlane.endpoints.length,
+      Icon: Server,
+      section: "nodeStatus",
+    },
+  ];
   const productSurfaces: Array<{
     key: WorkbenchSectionKey;
     label: string;
@@ -232,6 +293,23 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
             Run <code>npm run flowchain:start</code>, then <code>npm run control-plane:serve</code>, then refresh.
           </span>
         </article>
+      </section>
+
+      <section className="tester-launch-rail" aria-label="External tester launch readiness">
+        {launchSteps.map(({ id, label, detail, command, status, count, Icon, section }) => (
+          <button key={id} className="tester-launch-step" type="button" onClick={() => setActiveSection(section)}>
+            <span className="tester-launch-step-head">
+              <span className="tester-launch-step-icon">
+                <Icon size={17} aria-hidden="true" />
+              </span>
+              <StatusBadge status={status} compact />
+            </span>
+            <strong>{label}</strong>
+            <span>{detail}</span>
+            <code>{command}</code>
+            <b>{count}</b>
+          </button>
+        ))}
       </section>
 
       <section className="pilot-status-panel" aria-label="Real-value pilot status">
