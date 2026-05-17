@@ -43,7 +43,6 @@ $publicSafeJsonRpcMethods = @(
     "pilot_lifecycle_record_list",
     "wallet_balance_list",
     "wallet_transfer_history",
-    "devnet_state",
     "block_get",
     "block_list",
     "mempool_list",
@@ -103,14 +102,14 @@ $publicSafeJsonRpcMethods = @(
 $explicitlyRejectedJsonRpcMethods = @(
     "transaction_submit",
     "bridge_observation_submit",
-    "raw_json_get"
+    "raw_json_get",
+    "devnet_state"
 )
 
 $publicReadMirrorPaths = @(
     "/health",
     "/rpc/discover",
     "/rpc/readiness",
-    "/state",
     "/explorer/summary",
     "/chain/status",
     "/product-flow/status",
@@ -170,13 +169,13 @@ $edgeRequirements = @(
         id = "public-rpc-allowlist"
         requirement = "Public /rpc dispatch is fail-closed to explicitly public-safe JSON-RPC read methods."
         status = "passed"
-        evidence = "origin enforces explicit allowlist and rejects transaction_submit, bridge_observation_submit, raw_json_get, and unknown methods"
+        evidence = "origin enforces explicit allowlist and rejects transaction_submit, bridge_observation_submit, raw_json_get, devnet_state, and unknown methods"
     },
     [ordered]@{
         id = "edge-path-allowlist"
         requirement = "The public edge does not proxy private write or admin routes; tester writes use the authenticated tester gateway only."
         status = "passed"
-        evidence = "template exposes /rpc, explicit read mirrors, /tester/faucet, and /tester/wallets/create|send; fallback location returns 404"
+        evidence = "template exposes /rpc, explicit read mirrors excluding /state, /tester/faucet, and /tester/wallets/create|send; fallback location returns 404"
     },
     [ordered]@{
         id = "authenticated-tester-write-gateway"
@@ -231,7 +230,7 @@ $nginxTemplate = @(
     "        proxy_read_timeout 60s;",
     "    }",
     "",
-    "    location ~ ^/(health|state|explorer/summary|chain/status|product-flow/status|bridge/(live-readiness|status|credits|credit-status|observations)|wallets/(balances|transfers|operator)|pilot/(status|lifecycle|deposits|credits|withdrawal-intents|release-evidence|cap-status|pause-status|retry-status|emergency-status))$ {",
+    "    location ~ ^/(health|explorer/summary|chain/status|product-flow/status|bridge/(live-readiness|status|credits|credit-status|observations)|wallets/(balances|transfers|operator)|pilot/(status|lifecycle|deposits|credits|withdrawal-intents|release-evidence|cap-status|pause-status|retry-status|emergency-status))$ {",
     "        if (`$request_method !~ ^(GET|OPTIONS)$) { return 405; }",
     "        limit_req zone=flowchain_rpc_per_ip burst=20 nodelay;",
     "        proxy_pass http://127.0.0.1:8787;",
@@ -312,6 +311,8 @@ $report = [ordered]@{
     publicSafeJsonRpcMethods = $publicSafeJsonRpcMethods
     explicitlyRejectedJsonRpcMethods = $explicitlyRejectedJsonRpcMethods
     publicReadMirrorPaths = $publicReadMirrorPaths
+    publicStateMirrorExcluded = -not $publicReadMirrorPaths.Contains("/state")
+    devnetStatePublicRpcExcluded = -not $publicSafeJsonRpcMethods.Contains("devnet_state")
     authenticatedTesterWritePaths = $authenticatedTesterWritePaths
     envNames = $publicRpcEnvNames
     edgeRequirements = $edgeRequirements
@@ -368,6 +369,8 @@ foreach ($method in $explicitlyRejectedJsonRpcMethods) {
 }
 $markdownLines.Add("")
 $markdownLines.Add("## Public Read Mirror Paths")
+$markdownLines.Add("")
+$markdownLines.Add("The local `/state` mirror is intentionally excluded from the public edge; use specific JSON-RPC read methods or explorer mirror paths instead.")
 $markdownLines.Add("")
 foreach ($path in $publicReadMirrorPaths) {
     $markdownLines.Add("- $path")

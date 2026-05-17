@@ -469,6 +469,8 @@ $edgeTemplateThirdPartyNeeded = Get-DeploymentProp -Object $publicRpcEdgeTemplat
 $edgeTemplateRequiresTls = Get-DeploymentProp -Object $publicRpcEdgeTemplate -Name "requiresTlsTermination" -Default $false
 $edgeTemplateRequiresRateLimit = Get-DeploymentProp -Object $publicRpcEdgeTemplate -Name "requiresRateLimit" -Default $false
 $edgeTemplateForwardsOrigin = Get-DeploymentProp -Object $publicRpcEdgeTemplate -Name "forwardsOriginForCors" -Default $false
+$edgeTemplateStateExcluded = Get-DeploymentProp -Object $publicRpcEdgeTemplate -Name "publicStateMirrorExcluded" -Default $false
+$edgeTemplateDevnetStateExcluded = Get-DeploymentProp -Object $publicRpcEdgeTemplate -Name "devnetStatePublicRpcExcluded" -Default $false
 $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
 $publicRpcDeploymentBundleStatus = Get-DeploymentStatus -Report $publicRpcDeploymentBundle
 $deploymentBundleChecks = Get-DeploymentProp -Object $publicRpcDeploymentBundle -Name "checks"
@@ -479,6 +481,8 @@ $deploymentBundleReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "windowsNginxPreflightTokensPresent" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesWindowsNginxConfigTest" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "publicStateMirrorExcluded" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "devnetStatePublicRpcExcluded" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerRenderFilesHaveNoPlaceholders" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerRenderDoesNotPrintTokenHash" -Default $false) -eq $true) `
@@ -519,12 +523,14 @@ $publicRpcEdgeTemplateReady = ($publicRpcEdgeTemplateStatus -eq "passed") `
     -and ($edgeTemplateRequiresTls -eq $true) `
     -and ($edgeTemplateRequiresRateLimit -eq $true) `
     -and ($edgeTemplateForwardsOrigin -eq $true) `
+    -and ($edgeTemplateStateExcluded -eq $true) `
+    -and ($edgeTemplateDevnetStateExcluded -eq $true) `
     -and ((Get-DeploymentProp -Object $publicRpcEdgeTemplate -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $publicRpcEdgeTemplate -Name "noSecrets" -Default $false) -eq $true)
 Add-DeploymentItem -Items $items -Id "public-rpc-edge-template" `
-    -Requirement "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, verification, and rollback." `
+    -Requirement "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, verification, rollback, and no broad local state mirror." `
     -Status $(if ($publicRpcEdgeTemplateReady -and $deploymentBundleReady) { "passed" } else { "failed" }) `
-    -Evidence "edgeTemplateStatus=$publicRpcEdgeTemplateStatus, bundleStatus=$publicRpcDeploymentBundleStatus, renderValidation=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false)), testerWritePreflight=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false)), repoOwned=$edgeTemplateRepoOwned, requiresTls=$edgeTemplateRequiresTls, requiresRateLimit=$edgeTemplateRequiresRateLimit, forwardsOrigin=$edgeTemplateForwardsOrigin" `
+    -Evidence "edgeTemplateStatus=$publicRpcEdgeTemplateStatus, bundleStatus=$publicRpcDeploymentBundleStatus, renderValidation=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false)), testerWritePreflight=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false)), repoOwned=$edgeTemplateRepoOwned, requiresTls=$edgeTemplateRequiresTls, requiresRateLimit=$edgeTemplateRequiresRateLimit, forwardsOrigin=$edgeTemplateForwardsOrigin, publicStateMirrorExcluded=$edgeTemplateStateExcluded, devnetStatePublicRpcExcluded=$edgeTemplateDevnetStateExcluded" `
     -Commands @("npm run flowchain:public-rpc:edge-template", "npm run flowchain:public-rpc:deployment-bundle")
 
 Add-DeploymentItem -Items $items -Id "public-rpc-deployment-automation" `
@@ -731,6 +737,7 @@ $publicAbuseRequiredChecks = @(
     "transactionSubmitRejected",
     "bridgeObservationSubmitRejected",
     "rawJsonGetRejected",
+    "devnetStateRejected",
     "bridgeObservationPostAliasRejected",
     "badParamsRejected",
     "emptyBatchRejected",
@@ -749,7 +756,7 @@ $publicAbusePassed = ($publicAbuseStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $publicAbuse -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $publicAbuse -Name "noSecrets" -Default $false) -eq $true)
 Add-DeploymentItem -Items $items -Id "public-rpc-abuse-test" `
-    -Requirement "The local public RPC abuse harness proves CORS rejection, media-type rejection, malformed JSON handling, batch/body caps, notification handling, rate limiting, and no-secret response summaries." `
+    -Requirement "The local public RPC abuse harness proves CORS rejection, media-type rejection, malformed JSON handling, broad local-state rejection, batch/body caps, notification handling, rate limiting, and no-secret response summaries." `
     -Status $(if ($publicAbusePassed) { "passed" } else { "failed" }) `
     -Evidence "abuseStatus=$publicAbuseStatus, abuseReady=$publicAbuseReady, missingChecks=$($publicAbuseMissingChecks.Count)" `
     -Commands @("npm run flowchain:public-rpc:abuse-test")

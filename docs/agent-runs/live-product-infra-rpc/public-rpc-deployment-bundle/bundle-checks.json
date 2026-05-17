@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_bundle_checks.v1",
-    "generatedAt":  "2026-05-17T21:59:30.3100824Z",
+    "generatedAt":  "2026-05-17T23:18:39.7510346Z",
     "status":  "passed",
     "requiredPlaceholders":  [
                                  "\u003cFLOWCHAIN_RPC_PUBLIC_HOST\u003e",
@@ -70,6 +70,8 @@
                    "includesRateLimitPlaceholder":  true,
                    "includesTlsPlaceholders":  true,
                    "includesCorsOriginForwarding":  true,
+                   "publicStateMirrorExcluded":  true,
+                   "devnetStatePublicRpcExcluded":  true,
                    "includesNginxConfigTest":  true,
                    "includesWindowsNginxConfigTest":  true,
                    "includesTesterWritePreflight":  true,

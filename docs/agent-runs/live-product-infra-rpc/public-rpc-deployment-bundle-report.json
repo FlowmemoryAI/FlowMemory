@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_bundle_report.v2",
-    "generatedAt":  "2026-05-17T21:59:30.3770835Z",
+    "generatedAt":  "2026-05-17T23:18:39.8274658Z",
     "status":  "passed",
     "bundleDir":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle",
     "flowChainRpcIsRepoOwned":  true,
@@ -172,6 +172,8 @@
                    "includesRateLimitPlaceholder":  true,
                    "includesTlsPlaceholders":  true,
                    "includesCorsOriginForwarding":  true,
+                   "publicStateMirrorExcluded":  true,
+                   "devnetStatePublicRpcExcluded":  true,
                    "includesNginxConfigTest":  true,
                    "includesWindowsNginxConfigTest":  true,
                    "includesTesterWritePreflight":  true,

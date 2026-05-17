@@ -63,6 +63,9 @@ npm run flowchain:public-rpc:check -- -AllowBlocked
 
 The generated bundle includes systemd, NGINX, verification, rollback, and
 preflight artifacts under `docs/agent-runs/live-product-infra-rpc/`.
+It intentionally does not expose the local `/state` mirror or `devnet_state`
+method on the public edge; public clients must use narrower read methods and
+the authenticated tester gateway.
 
 ## Backup And Restore
 

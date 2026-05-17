@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Bundle
 
-Generated: 2026-05-17T21:59:30.3770835Z
+Generated: 2026-05-17T23:18:39.8274658Z
 Status: passed
 
 This bundle packages placeholder-only files for an owner-operated HTTPS edge in front of the repo-owned private RPC origin `127.0.0.1:8787`.
@@ -130,6 +130,8 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - includesRateLimitPlaceholder: True
 - includesTlsPlaceholders: True
 - includesCorsOriginForwarding: True
+- publicStateMirrorExcluded: True
+- devnetStatePublicRpcExcluded: True
 - includesNginxConfigTest: True
 - includesWindowsNginxConfigTest: True
 - includesTesterWritePreflight: True

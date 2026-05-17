@@ -419,6 +419,7 @@ $publicRpcAbuseRequiredChecks = @(
     "transactionSubmitRejected",
     "bridgeObservationSubmitRejected",
     "rawJsonGetRejected",
+    "devnetStateRejected",
     "bridgeObservationPostAliasRejected",
     "badParamsRejected",
     "emptyBatchRejected",
@@ -447,7 +448,7 @@ $rpcBoundaryReady = (Test-AllRepoFilesExist -Paths $rpcFiles) `
     -and ($responseHygiene -eq $true) `
     -and ($publicRpcAbusePassed -eq $true)
 Add-ArchitectureItem -Items $items -Id "rpc-api-boundary" -Layer "RPC/API" `
-    -Requirement "The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation and abuse rejection before it can be exposed publicly." `
+    -Requirement "The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation, narrow public reads, and abuse rejection before it can be exposed publicly." `
     -Status $(if ($rpcBoundaryReady) { "passed" } else { "failed" }) `
     -Evidence "validationStatus=$publicRpcValidationStatus, corsAllowed=$corsAllowed, corsRejected=$corsRejected, endpointChecks=$endpointChecks, rateLimitProbe=$rateLimitProbe, rateLimitRejected=$rateLimitRejected, rateLimitRetryAfter=$rateLimitRetryAfter, responseHygiene=$responseHygiene, abuseStatus=$publicRpcAbuseStatus, abusePassed=$publicRpcAbusePassed, abuseMissingChecks=$($publicRpcAbuseMissingChecks.Count)" `
     -Files $rpcFiles `
@@ -471,6 +472,8 @@ $edgeTemplateThirdPartyNeeded = Get-ArchitectureProp -Object $publicRpcEdgeTempl
 $edgeTemplateRequiresTls = Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "requiresTlsTermination" -Default $false
 $edgeTemplateRequiresRateLimit = Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "requiresRateLimit" -Default $false
 $edgeTemplateForwardsOrigin = Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "forwardsOriginForCors" -Default $false
+$edgeTemplateStateExcluded = Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "publicStateMirrorExcluded" -Default $false
+$edgeTemplateDevnetStateExcluded = Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "devnetStatePublicRpcExcluded" -Default $false
 $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
 $publicRpcDeploymentBundleStatus = Get-ArchitectureStatus -Report $publicRpcDeploymentBundle
 $deploymentBundleChecks = Get-ArchitectureProp -Object $publicRpcDeploymentBundle -Name "checks"
@@ -482,6 +485,8 @@ $deploymentBundleReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "windowsNginxPreflightTokensPresent" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesWindowsNginxConfigTest" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "publicStateMirrorExcluded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "devnetStatePublicRpcExcluded" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderFilesHaveNoPlaceholders" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderDoesNotPrintTokenHash" -Default $false) -eq $true) `
@@ -524,12 +529,14 @@ $publicRpcEdgeTemplateReady = (Test-RepoFile -Path "infra/scripts/flowchain-publ
     -and ($edgeTemplateRequiresTls -eq $true) `
     -and ($edgeTemplateRequiresRateLimit -eq $true) `
     -and ($edgeTemplateForwardsOrigin -eq $true) `
+    -and ($edgeTemplateStateExcluded -eq $true) `
+    -and ($edgeTemplateDevnetStateExcluded -eq $true) `
     -and ((Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "noSecrets" -Default $false) -eq $true)
 Add-ArchitectureItem -Items $items -Id "public-rpc-edge-template-boundary" -Layer "Public edge" `
-    -Requirement "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, verification, and rollback." `
+    -Requirement "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, verification, rollback, and no broad local state mirror." `
     -Status $(if ($publicRpcEdgeTemplateReady -and $deploymentBundleReady) { "passed" } else { "failed" }) `
-    -Evidence "edgeTemplateStatus=$publicRpcEdgeTemplateStatus, bundleStatus=$publicRpcDeploymentBundleStatus, renderValidation=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false)), testerWritePreflight=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false)), repoOwned=$edgeTemplateRepoOwned, requiresTls=$edgeTemplateRequiresTls, requiresRateLimit=$edgeTemplateRequiresRateLimit, forwardsOrigin=$edgeTemplateForwardsOrigin" `
+    -Evidence "edgeTemplateStatus=$publicRpcEdgeTemplateStatus, bundleStatus=$publicRpcDeploymentBundleStatus, renderValidation=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false)), testerWritePreflight=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false)), repoOwned=$edgeTemplateRepoOwned, requiresTls=$edgeTemplateRequiresTls, requiresRateLimit=$edgeTemplateRequiresRateLimit, forwardsOrigin=$edgeTemplateForwardsOrigin, publicStateMirrorExcluded=$edgeTemplateStateExcluded, devnetStatePublicRpcExcluded=$edgeTemplateDevnetStateExcluded" `
     -Files @("infra/scripts/flowchain-public-rpc-edge-template.ps1", "infra/scripts/flowchain-public-rpc-deployment-bundle.ps1", "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_EDGE_TEMPLATE.md", "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_BUNDLE.md", "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle/WINDOWS_NGINX_PREFLIGHT.md") `
     -Commands @("npm run flowchain:public-rpc:edge-template", "npm run flowchain:public-rpc:deployment-bundle")
 

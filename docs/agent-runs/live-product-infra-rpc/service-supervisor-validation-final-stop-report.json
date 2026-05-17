@@ -1,10 +1,14 @@
 {
     "schema":  "flowchain.service_stop_report.v0",
-    "generatedAt":  "2026-05-17T16:24:02.8475879Z",
+    "generatedAt":  "2026-05-17T23:17:53.1670673Z",
     "status":  "stopped",
     "node":  "stop-requested",
     "controlPlane":  "stopped",
     "bridgeRelayerLoop":  "not-running",
+    "pidFiles":  {
+                     "controlPlaneExistsAfterStop":  false,
+                     "bridgeRelayerLoopExistsAfterStop":  false
+                 },
     "statePreserved":  true,
     "deletedRuntimeData":  false,
     "restartCommand":  "npm run flowchain:service:restart",

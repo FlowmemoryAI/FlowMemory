@@ -47,3 +47,7 @@ Explorer views should poll `chain_status` and compare:
 
 If height does not advance or the state file is stale, show a stale-data state
 instead of implying the chain is live.
+
+For public explorer builds, do not depend on the local `/state` mirror or
+`devnet_state`. Use the specific public-safe JSON-RPC reads and HTTP mirrors
+listed by `rpc_discover.publicHttpMirrors`.

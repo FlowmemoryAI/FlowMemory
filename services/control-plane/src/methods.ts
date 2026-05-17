@@ -1542,7 +1542,6 @@ export const PUBLIC_RPC_METHOD_ALLOWLIST = new Set<ControlPlaneMethod>([
   "pilot_lifecycle_record_list",
   "wallet_balance_list",
   "wallet_transfer_history",
-  "devnet_state",
   "block_get",
   "block_list",
   "mempool_list",
@@ -1791,6 +1790,17 @@ function rpcDiscover(params: JsonValue | undefined, context: ControlPlaneContext
   const state = stateFor(context);
   const deployment = rpcDeploymentStatus(state);
   const methods = rpcMethodRows(deployment);
+  const httpMirrors = [
+    "/health",
+    "/state",
+    "/chain/status",
+    "/explorer/summary",
+    "/bridge/live-readiness",
+    "/bridge/status",
+    "/wallets/balances",
+    "/wallets/transfers",
+  ];
+  const publicHttpMirrors = httpMirrors.filter((path) => path !== "/state");
   return {
     schema: "flowchain.rpc.discovery.v0",
     protocol: "JSON-RPC 2.0",
@@ -1800,16 +1810,8 @@ function rpcDiscover(params: JsonValue | undefined, context: ControlPlaneContext
     methodCount: methods.length,
     publicReadyMethodCount: methods.filter((method) => method.productionReady === true).length,
     methods,
-    httpMirrors: [
-      "/health",
-      "/state",
-      "/chain/status",
-      "/explorer/summary",
-      "/bridge/live-readiness",
-      "/bridge/status",
-      "/wallets/balances",
-      "/wallets/transfers",
-    ],
+    httpMirrors,
+    publicHttpMirrors,
     compatibility: {
       evmJsonRpcCompatible: false,
       solanaJsonRpcCompatible: false,
@@ -1819,6 +1821,7 @@ function rpcDiscover(params: JsonValue | undefined, context: ControlPlaneContext
       "This endpoint describes the current FlowChain control-plane RPC surface.",
       "Discovery mirrors rpc_readiness deployment mode and public readiness flags.",
       "Public production RPC readiness must be proven by rpc_readiness and live-product gates before it is advertised.",
+      "The /state mirror and devnet_state method are local debugging surfaces and are not part of the owner public edge.",
     ],
     deploymentMode: deployment.deploymentMode,
     publicMode: deployment.publicMode,

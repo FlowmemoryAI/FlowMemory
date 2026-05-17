@@ -243,6 +243,7 @@ async function main() {
   const secondHeight = stringValue(secondStatus.currentBlock ?? secondStatus.blockHeight ?? secondStatus.latestHeight ?? secondStatus.height ?? null);
   const missingEnvNames = collectMissingEnvNames(readiness);
   const transactionSubmit = methodEntry(discovery, "transaction_submit");
+  const devnetState = methodEntry(discovery, "devnet_state");
   const walletTransferHistory = methodEntry(discovery, "wallet_transfer_history");
 
   const referencePath = resolve(sdkDocsDir, "RPC_REFERENCE.generated.md");
@@ -280,6 +281,7 @@ async function main() {
     heightAdvanced: firstHeight !== null && secondHeight !== null && BigInt(secondHeight) > BigInt(firstHeight),
     publicReadinessFailClosed: readiness.publicRpcReady === false && readiness.productionReady === false,
     publicWriteMethodsBlockedFromPublicList: transactionSubmit?.publicRpcEligible === false && walletTransferHistory?.publicRpcEligible === true,
+    broadLocalStateBlockedFromPublicList: devnetState?.publicRpcEligible === false,
   };
   const status = Object.values(checks).every(Boolean) ? "passed" : "failed";
   const report: DevPackReport = {

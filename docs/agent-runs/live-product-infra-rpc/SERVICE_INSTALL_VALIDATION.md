@@ -1,6 +1,6 @@
 ﻿# FlowChain Service Install Validation
 
-Generated: 2026-05-17T21:54:33.5855110Z
+Generated: 2026-05-17T23:18:11.4497373Z
 Status: passed
 
 This validation proves the Windows Scheduled Task install path is planned, no-secret, live-profile by default, non-mutating in plan/status mode, and has a safe absent-task uninstall no-op.

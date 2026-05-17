@@ -429,6 +429,19 @@ try {
         -Response $rawJsonGet `
         -Evidence "status=$($rawJsonGet.statusCode), errorCode=$(Get-AbuseResponseErrorCode -Response $rawJsonGet), reason=$(Get-AbuseResponseReasonCode -Response $rawJsonGet)"
 
+    $devnetStateBody = @{
+        jsonrpc = "2.0"
+        id = "blocked-devnet-state"
+        method = "devnet_state"
+        params = @{ includeBlocks = $true }
+    } | ConvertTo-Json -Depth 8 -Compress
+    $devnetState = Invoke-AbuseHttpRequest -Method "POST" -Uri "$baseUrl/rpc" -Headers (New-AbuseHeaders) -ContentType "application/json" -Body $devnetStateBody
+    Add-AbuseCase -Id "devnet-state-rejected" `
+        -Requirement "Public RPC rejects broad devnet_state payloads before local state can be returned." `
+        -Passed (($devnetState.statusCode -eq 200) -and ((Get-AbuseResponseErrorCode -Response $devnetState) -eq -32601) -and ((Get-AbuseResponseReasonCode -Response $devnetState) -eq "method.not_found")) `
+        -Response $devnetState `
+        -Evidence "status=$($devnetState.statusCode), errorCode=$(Get-AbuseResponseErrorCode -Response $devnetState), reason=$(Get-AbuseResponseReasonCode -Response $devnetState)"
+
     $bridgeObservationAlias = Invoke-AbuseHttpRequest -Method "POST" -Uri "$baseUrl/bridge/observations" -Headers (New-AbuseHeaders) -ContentType "application/json" -Body (@{ observationId = "abuse-observation-alias" } | ConvertTo-Json -Compress)
     Add-AbuseCase -Id "bridge-observation-post-alias-rejected" `
         -Requirement "Public HTTP bridge observation POST alias is rejected instead of wrapping into bridge_observation_submit." `
@@ -564,6 +577,7 @@ $checks = [ordered]@{
     transactionSubmitRejected = @($cases | Where-Object { $_.id -eq "transaction-submit-rejected" -and $_.status -eq "passed" }).Count -eq 1
     bridgeObservationSubmitRejected = @($cases | Where-Object { $_.id -eq "bridge-observation-submit-rejected" -and $_.status -eq "passed" }).Count -eq 1
     rawJsonGetRejected = @($cases | Where-Object { $_.id -eq "raw-json-get-rejected" -and $_.status -eq "passed" }).Count -eq 1
+    devnetStateRejected = @($cases | Where-Object { $_.id -eq "devnet-state-rejected" -and $_.status -eq "passed" }).Count -eq 1
     bridgeObservationPostAliasRejected = @($cases | Where-Object { $_.id -eq "bridge-observation-post-alias-rejected" -and $_.status -eq "passed" }).Count -eq 1
     testerWriteGatewayFailsClosed = @($cases | Where-Object { $_.id -eq "tester-write-disabled-without-owner-token" -and $_.status -eq "passed" }).Count -eq 1
     badParamsRejected = @($cases | Where-Object { $_.id -eq "bad-params" -and $_.status -eq "passed" }).Count -eq 1

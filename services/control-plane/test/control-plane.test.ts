@@ -10,6 +10,7 @@ import { canonicalJson } from "../../shared/src/index.ts";
 import {
   dispatchJsonRpc,
   loadControlPlaneState,
+  repoRoot,
   type JsonObject,
   type RpcErrorResponse,
   type RpcSuccessResponse,
@@ -201,6 +202,7 @@ test("exposes RPC discovery and readiness without leaking env values", () => {
     const methodNames = methods.map((entry) => entry.method);
     const rpcReadinessMethod = methods.find((entry) => entry.method === "rpc_readiness") as JsonObject;
     const transactionSubmitMethod = methods.find((entry) => entry.method === "transaction_submit") as JsonObject;
+    const devnetStateMethod = methods.find((entry) => entry.method === "devnet_state") as JsonObject;
 
     assert.equal(response.result.schema, "flowchain.rpc.discovery.v0");
     assert.equal(response.result.protocol, "JSON-RPC 2.0");
@@ -217,6 +219,16 @@ test("exposes RPC discovery and readiness without leaking env values", () => {
     assert.equal(rpcReadinessMethod.productionReady, false);
     assert.equal(transactionSubmitMethod.publicRpcEligible, false);
     assert.equal(transactionSubmitMethod.localOnly, true);
+    assert.equal(devnetStateMethod.publicRpcEligible, false);
+    assert.deepEqual(response.result.publicHttpMirrors, [
+      "/health",
+      "/chain/status",
+      "/explorer/summary",
+      "/bridge/live-readiness",
+      "/bridge/status",
+      "/wallets/balances",
+      "/wallets/transfers",
+    ]);
 
     assert.equal(readiness.result.schema, "flowchain.rpc.readiness.v0");
     assert.equal(readiness.result.status, "BLOCKED");
@@ -1466,7 +1478,7 @@ test("HTTP server rejects abusive public RPC POST shapes before dispatch", async
     assert.equal(malformedData.reasonCode, "parse.error");
     assert.equal(malformedData.noSecrets, true);
 
-    for (const method of ["transaction_submit", "bridge_observation_submit", "raw_json_get", "flow_sendRawTransaction"]) {
+    for (const method of ["transaction_submit", "bridge_observation_submit", "raw_json_get", "devnet_state", "flow_sendRawTransaction"]) {
       const blocked = await fetch(`${baseUrl}/rpc`, {
         method: "POST",
         headers: { "content-type": "application/json", Origin: origin },
@@ -1668,14 +1680,30 @@ test("HTTP server creates local encrypted wallet metadata without returning secr
 test("HTTP tester write gateway requires bearer auth, caps sends, and returns public-only wallet data", async () => {
   const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-tester-gateway-"));
   const previousMetadataPath = process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH;
+  const previousLocalDevnetPath = process.env.FLOWCHAIN_CONTROL_PLANE_LOCAL_DEVNET_PATH;
   const previousTesterWriteEnabled = process.env.FLOWCHAIN_TESTER_WRITE_ENABLED;
   const previousTesterTokenHash = process.env.FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256;
   const previousTesterMaxSendUnits = process.env.FLOWCHAIN_TESTER_MAX_SEND_UNITS;
   const testerToken = "local-tester-write-token";
+  const localDevnetPath = join(dir, "state.json");
+  const localNodeDir = join(dir, "node");
   process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH = join(dir, "flowchain-operator-public-metadata.json");
+  process.env.FLOWCHAIN_CONTROL_PLANE_LOCAL_DEVNET_PATH = localDevnetPath;
   process.env.FLOWCHAIN_TESTER_WRITE_ENABLED = "true";
   process.env.FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256 = createHash("sha256").update(testerToken, "utf8").digest("hex");
   process.env.FLOWCHAIN_TESTER_MAX_SEND_UNITS = "2";
+  const init = spawnCargoSync([
+    "run",
+    "--manifest-path",
+    "crates/flowmemory-devnet/Cargo.toml",
+    "--",
+    "--state",
+    localDevnetPath,
+    "--node-dir",
+    localNodeDir,
+    "init",
+  ], { cwd: repoRoot(), encoding: "utf8", windowsHide: true });
+  assert.equal(init.status, 0, init.stderr);
   const server = startControlPlaneServer({ host: "127.0.0.1", port: 0 });
 
   try {
@@ -1800,6 +1828,11 @@ test("HTTP tester write gateway requires bearer auth, caps sends, and returns pu
       delete process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH;
     } else {
       process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH = previousMetadataPath;
+    }
+    if (previousLocalDevnetPath === undefined) {
+      delete process.env.FLOWCHAIN_CONTROL_PLANE_LOCAL_DEVNET_PATH;
+    } else {
+      process.env.FLOWCHAIN_CONTROL_PLANE_LOCAL_DEVNET_PATH = previousLocalDevnetPath;
     }
     if (previousTesterWriteEnabled === undefined) {
       delete process.env.FLOWCHAIN_TESTER_WRITE_ENABLED;

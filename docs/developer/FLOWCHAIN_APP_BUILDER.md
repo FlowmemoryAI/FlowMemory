@@ -36,6 +36,8 @@ plane is running. It calls:
 - `GET /rpc/readiness`
 
 It does not submit transactions or bridge actions.
+The local `/state` mirror and `devnet_state` method are for private debugging
+and are intentionally excluded from the owner public edge.
 
 ## Common Panels
 

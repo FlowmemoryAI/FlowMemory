@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Edge Template
 
-Generated: 2026-05-17T18:59:03.3498839Z
+Generated: 2026-05-17T23:18:37.0047187Z
 Status: passed
 
 FlowChain RPC is served by this repository on the private origin 127.0.0.1:8787. Public RPC means placing an owner-operated HTTPS edge in front of that origin.
@@ -15,8 +15,8 @@ This file contains placeholders only. Replace placeholders only on the owner hos
 | Public traffic terminates TLS before reaching the private origin. | passed | template includes HTTPS listener and HTTP redirect |
 | Public requests are rate-limited before they reach the private origin. | passed | template includes limit_req zone tied to FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE |
 | Browser Origin headers and the edge-confirmed client address are forwarded so CORS and per-client rate limits can be enforced. | passed | template forwards Origin, Host, X-Forwarded-Proto, and sets X-Forwarded-For from the edge remote address |
-| Public /rpc dispatch is fail-closed to explicitly public-safe JSON-RPC read methods. | passed | origin enforces explicit allowlist and rejects transaction_submit, bridge_observation_submit, raw_json_get, and unknown methods |
-| The public edge does not proxy private write or admin routes; tester writes use the authenticated tester gateway only. | passed | template exposes /rpc, explicit read mirrors, /tester/faucet, and /tester/wallets/create/send; fallback location returns 404 |
+| Public /rpc dispatch is fail-closed to explicitly public-safe JSON-RPC read methods. | passed | origin enforces explicit allowlist and rejects transaction_submit, bridge_observation_submit, raw_json_get, devnet_state, and unknown methods |
+| The public edge does not proxy private write or admin routes; tester writes use the authenticated tester gateway only. | passed | template exposes /rpc, explicit read mirrors excluding /state, /tester/faucet, and /tester/wallets/create/send; fallback location returns 404 |
 | Friends-and-family wallet creation, faucet funding, and sends have a dedicated bearer-authenticated gateway with a unit cap. | passed | origin requires FLOWCHAIN_TESTER_WRITE_* env names and bearer auth before /tester/faucet, /tester/wallets/create, or /tester/wallets/send executes |
 | Oversized public request bodies are rejected before they reach the private origin. | passed | template sets client_max_body_size 256k and origin enforces 262144-byte JSON body cap |
 | Template stores placeholders and env names only. | passed | valuesPrinted=false |
@@ -56,7 +56,7 @@ server {
         proxy_read_timeout 60s;
     }
 
-    location ~ ^/(health|state|explorer/summary|chain/status|product-flow/status|bridge/(live-readiness|status|credits|credit-status|observations)|wallets/(balances|transfers|operator)|pilot/(status|lifecycle|deposits|credits|withdrawal-intents|release-evidence|cap-status|pause-status|retry-status|emergency-status))$ {
+    location ~ ^/(health|explorer/summary|chain/status|product-flow/status|bridge/(live-readiness|status|credits|credit-status|observations)|wallets/(balances|transfers|operator)|pilot/(status|lifecycle|deposits|credits|withdrawal-intents|release-evidence|cap-status|pause-status|retry-status|emergency-status))$ {
         if ($request_method !~ ^(GET|OPTIONS)$) { return 405; }
         limit_req zone=flowchain_rpc_per_ip burst=20 nodelay;
         proxy_pass http://127.0.0.1:8787;
@@ -135,7 +135,6 @@ The origin only dispatches these public-safe JSON-RPC read methods through /rpc;
 - pilot_lifecycle_record_list
 - wallet_balance_list
 - wallet_transfer_history
-- devnet_state
 - block_get
 - block_list
 - mempool_list
@@ -196,13 +195,15 @@ The origin only dispatches these public-safe JSON-RPC read methods through /rpc;
 - transaction_submit
 - bridge_observation_submit
 - raw_json_get
+- devnet_state
 
 ## Public Read Mirror Paths
+
+The local /state mirror is intentionally excluded from the public edge; use specific JSON-RPC read methods or explorer mirror paths instead.
 
 - /health
 - /rpc/discover
 - /rpc/readiness
-- /state
 - /explorer/summary
 - /chain/status
 - /product-flow/status

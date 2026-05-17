@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Abuse Test
 
-Generated: 2026-05-17T18:48:14.2284618Z
+Generated: 2026-05-17T23:20:50.0829546Z
 Status: passed
 Abuse test ready: True
 
@@ -19,6 +19,7 @@ This local harness starts a temporary private control-plane server and records p
 | Public RPC rejects transaction_submit before local file-intake dispatch. | passed | status=200, errorCode=-32601, reason=method.not_found |
 | Public RPC rejects bridge_observation_submit before local bridge observation intake dispatch. | passed | status=200, errorCode=-32601, reason=method.not_found |
 | Public RPC rejects raw_json_get before raw fixture payloads can be returned. | passed | status=200, errorCode=-32601, reason=method.not_found |
+| Public RPC rejects broad devnet_state payloads before local state can be returned. | passed | status=200, errorCode=-32601, reason=method.not_found |
 | Public HTTP bridge observation POST alias is rejected instead of wrapping into bridge_observation_submit. | passed | status=200, errorCode=-32601, reason=method.not_found |
 | Authenticated tester write gateway fails closed when owner token env is not configured. | passed | status=403, schema=flowmemory.control_plane.tester_write_disabled.v0 |
 | Invalid method params return the stable JSON-RPC invalid-params error. | passed | status=200, errorCode=-32602, reason=params.invalid |

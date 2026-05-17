@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_abuse_test_report.v0",
-    "generatedAt":  "2026-05-17T18:48:14.2284618Z",
+    "generatedAt":  "2026-05-17T23:20:50.0829546Z",
     "status":  "passed",
     "abuseTestReady":  true,
     "validationScope":  "local-control-plane-public-rpc-abuse-harness",
@@ -20,6 +20,7 @@
                    "transactionSubmitRejected":  true,
                    "bridgeObservationSubmitRejected":  true,
                    "rawJsonGetRejected":  true,
+                   "devnetStateRejected":  true,
                    "bridgeObservationPostAliasRejected":  true,
                    "testerWriteGatewayFailsClosed":  true,
                    "badParamsRejected":  true,
@@ -34,9 +35,9 @@
 
                      ],
     "caseCounts":  {
-                       "passed":  18,
+                       "passed":  19,
                        "failed":  0,
-                       "total":  18
+                       "total":  19
                    },
     "cases":  [
                   {
@@ -190,6 +191,24 @@
                       "evidence":  "status=200, errorCode=-32601, reason=method.not_found",
                       "response":  {
                                        "id":  "raw-json-get-rejected",
+                                       "httpStatus":  200,
+                                       "schema":  "flowmemory.control_plane.error.v0",
+                                       "reasonCode":  "method.not_found",
+                                       "errorCode":  -32601,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  false,
+                                       "errorMessage":  ""
+                                   }
+                  },
+                  {
+                      "id":  "devnet-state-rejected",
+                      "requirement":  "Public RPC rejects broad devnet_state payloads before local state can be returned.",
+                      "status":  "passed",
+                      "evidence":  "status=200, errorCode=-32601, reason=method.not_found",
+                      "response":  {
+                                       "id":  "devnet-state-rejected",
                                        "httpStatus":  200,
                                        "schema":  "flowmemory.control_plane.error.v0",
                                        "reasonCode":  "method.not_found",
