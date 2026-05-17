@@ -91,6 +91,7 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
     workbench.sections.blocks.length + workbench.sections.transactions.length + workbench.sections.explorerRecords.length;
   const packetRoutes = stringList(testerLaunch.packetSmokeRoutes);
   const gatewayRoutes = stringList(testerLaunch.gatewayRoutes);
+  const hasTesterRoute = (route: string) => packetRoutes.includes(route) || gatewayRoutes.includes(route);
   const ownerInputs = asArray(report?.ownerInputs).filter(isRecord).map((input) => ({
     name: text(input.name),
     group: text(input.group, "operator input"),
@@ -174,6 +175,65 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
       command: "npm run flowchain:product-e2e",
       to: "/explorer",
       Icon: Compass,
+    },
+  ];
+
+  const gatewayProofCommand = commandGroup(testerCommands.gateway, ["npm run flowchain:tester:gateway:e2e"])[0];
+  const walletProofCommand = commandGroup(testerCommands.wallet, ["npm run flowchain:wallet:live-tester:e2e"])[0];
+  const testerWorkflowSteps: Array<{
+    id: string;
+    label: string;
+    detail: string;
+    route: string;
+    status: DashboardStatus;
+    command: string;
+    to: string;
+    Icon: typeof Wallet;
+    value: string;
+  }> = [
+    {
+      id: "create",
+      label: "Create tester wallet",
+      detail: "Friend creates browser-safe wallet metadata through the authenticated tester gateway.",
+      route: "/tester/wallets/create",
+      status: hasTesterRoute("/tester/wallets/create") ? testerGatewayGate?.status ?? statusFromText(testerLaunch.gatewayStatus) : "pending",
+      command: gatewayProofCommand,
+      to: "/wallet?panel=tester",
+      Icon: UserPlus,
+      value: hasTesterRoute("/tester/wallets/create") ? "route ready" : "route missing",
+    },
+    {
+      id: "faucet",
+      label: "Faucet fund",
+      detail: "Owner-capped test units fund the tester wallet without exposing secret material.",
+      route: "/tester/faucet",
+      status: statusFromText(testerLaunch.faucetRouteValidated),
+      command: gatewayProofCommand,
+      to: "/wallet?panel=tester",
+      Icon: Wallet,
+      value: hasTesterRoute("/tester/faucet") ? "route ready" : "route missing",
+    },
+    {
+      id: "send",
+      label: "Send capped transfer",
+      detail: "Tester-to-tester sends use the bearer gateway and enforce the configured max units.",
+      route: "/tester/wallets/send",
+      status: hasTesterRoute("/tester/wallets/send") ? testerGatewayGate?.status ?? statusFromText(testerLaunch.gatewayStatus) : "pending",
+      command: walletProofCommand,
+      to: "/wallet?panel=tester",
+      Icon: ArrowRightLeft,
+      value: hasTesterRoute("/tester/wallets/send") ? "route ready" : "route missing",
+    },
+    {
+      id: "inspect",
+      label: "Inspect explorer",
+      detail: "Blocks, faucet records, balances, and transfer rows are searchable after the send.",
+      route: "/explorer",
+      status: explorerRecordCount > 0 ? "verified" : "pending",
+      command: "npm run flowchain:product-e2e",
+      to: "/explorer",
+      Icon: Search,
+      value: `${explorerRecordCount} records`,
     },
   ];
 
@@ -261,6 +321,33 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
 
       <section className="tester-launch-layout">
         <div className="tester-launch-main">
+          <article className="panel tester-launch-workflow">
+            <div className="panel-heading">
+              <div>
+                <Route size={18} aria-hidden="true" />
+                <h2>Tester workflow</h2>
+              </div>
+              <StatusBadge status={testerPacketGate?.status ?? "pending"} compact />
+            </div>
+            <div className="tester-launch-rail">
+              {testerWorkflowSteps.map(({ id, label, detail, route, status, command, to, Icon, value }) => (
+                <Link key={id} className="tester-launch-step" to={to}>
+                  <span className="tester-launch-step-head">
+                    <span className="tester-launch-step-icon">
+                      <Icon size={17} aria-hidden="true" />
+                    </span>
+                    <StatusBadge status={status} compact />
+                  </span>
+                  <strong>{label}</strong>
+                  <span>{detail}</span>
+                  <code>{route}</code>
+                  <code>{command}</code>
+                  <b>{value}</b>
+                </Link>
+              ))}
+            </div>
+          </article>
+
           <article className="panel tester-launch-checklist">
             <div className="panel-heading">
               <div>

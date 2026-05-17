@@ -448,10 +448,17 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Shareable");
     expect(html).toContain("Packet smoke");
     expect(html).toContain("Gateway proof");
+    expect(html).toContain("Tester workflow");
+    expect(html).toContain("Create tester wallet");
+    expect(html).toContain("Faucet fund");
+    expect(html).toContain("Send capped transfer");
+    expect(html).toContain("Inspect explorer");
     expect(html).toContain("Owner inputs");
     expect(html).toContain("FLOWCHAIN_RPC_PUBLIC_URL");
     expect(html).toContain("FLOWCHAIN_TESTER_WRITE_ENABLED");
     expect(html).toContain("/tester/wallets/create");
+    expect(html).toContain("/tester/faucet");
+    expect(html).toContain("/tester/wallets/send");
     expect(html).toContain("npm run flowchain:external-tester:packet");
     expect(html).not.toContain("local-tester-write-token");
   });
