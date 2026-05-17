@@ -6,6 +6,7 @@ import {
   Compass,
   KeyRound,
   ListChecks,
+  Network,
   Route,
   Search,
   Server,
@@ -75,6 +76,7 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
   const report = isRecord(workbench.raw.liveReadinessReport) ? workbench.raw.liveReadinessReport : null;
   const metrics = isRecord(report?.metrics) ? report.metrics : {};
   const testerLaunch = isRecord(report?.testerLaunch) ? report.testerLaunch : {};
+  const connectPackNetwork = isRecord(testerLaunch.connectPackNetwork) ? testerLaunch.connectPackNetwork : {};
   const reportCommands = isRecord(report?.commands) ? report.commands : {};
   const testerCommands = isRecord(testerLaunch.commands) ? testerLaunch.commands : {};
   const liveReadinessRecords = workbench.sections.liveReadiness;
@@ -91,6 +93,8 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
     workbench.sections.blocks.length + workbench.sections.transactions.length + workbench.sections.explorerRecords.length;
   const packetRoutes = stringList(testerLaunch.packetSmokeRoutes);
   const gatewayRoutes = stringList(testerLaunch.gatewayRoutes);
+  const connectPackReadOnlyRoutes = stringList(testerLaunch.connectPackReadOnlyRoutes);
+  const connectPackTesterWriteRoutes = stringList(testerLaunch.connectPackTesterWriteRoutes);
   const hasTesterRoute = (route: string) => packetRoutes.includes(route) || gatewayRoutes.includes(route);
   const ownerInputs = asArray(report?.ownerInputs).filter(isRecord).map((input) => ({
     name: text(input.name),
@@ -155,6 +159,19 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
       ])[1],
       to: "/raw",
       Icon: Route,
+    },
+    {
+      id: "connect-pack",
+      label: "Connect pack",
+      status: statusFromText(testerLaunch.connectPackReady),
+      value: boolText(testerLaunch.connectPackReady),
+      detail: text(connectPackNetwork.chainId, "network profile"),
+      command: commandGroup(testerCommands.readiness, [
+        "npm run flowchain:tester:readiness -- -AllowBlocked",
+        "npm run flowchain:external-tester:packet -- -AllowBlocked",
+      ])[1],
+      to: "/raw",
+      Icon: Network,
     },
     {
       id: "bridge",
@@ -303,6 +320,11 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
           <small>{packetRoutes.length} routes</small>
         </div>
         <div>
+          <span>Connect pack</span>
+          <strong>{boolText(testerLaunch.connectPackReady)}</strong>
+          <small>{text(connectPackNetwork.chainId, "chain not recorded")}</small>
+        </div>
+        <div>
           <span>Gateway proof</span>
           <strong>{text(testerLaunch.gatewayStatus, "not recorded")}</strong>
           <small>configured {boolText(testerLaunch.gatewayConfigured)}</small>
@@ -345,6 +367,52 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
                   <b>{value}</b>
                 </Link>
               ))}
+            </div>
+          </article>
+
+          <article className="panel tester-launch-connect-pack">
+            <div className="panel-heading">
+              <div>
+                <Network size={18} aria-hidden="true" />
+                <h2>Connection profile</h2>
+              </div>
+              <StatusBadge status={statusFromText(testerLaunch.connectPackReady)} compact />
+            </div>
+            <div className="tester-launch-profile-grid">
+              <div>
+                <span>network</span>
+                <strong>{text(connectPackNetwork.name, "not recorded")}</strong>
+              </div>
+              <div>
+                <span>chain</span>
+                <strong>{text(connectPackNetwork.chainId, "not recorded")}</strong>
+              </div>
+              <div>
+                <span>RPC</span>
+                <code>{text(connectPackNetwork.rpcEndpointPlaceholder, "<OWNER_PUBLIC_ENDPOINT>/rpc")}</code>
+              </div>
+              <div>
+                <span>explorer</span>
+                <code>{text(connectPackNetwork.explorerSummaryUrlPlaceholder, "<OWNER_PUBLIC_ENDPOINT>/explorer/summary")}</code>
+              </div>
+            </div>
+            <div className="tester-launch-route-pair">
+              <div>
+                <strong>Read routes</strong>
+                <div>
+                  {connectPackReadOnlyRoutes.map((route) => (
+                    <code key={`read:${route}`}>{route}</code>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <strong>Write routes</strong>
+                <div>
+                  {connectPackTesterWriteRoutes.map((route) => (
+                    <code key={`write:${route}`}>{route}</code>
+                  ))}
+                </div>
+              </div>
             </div>
           </article>
 

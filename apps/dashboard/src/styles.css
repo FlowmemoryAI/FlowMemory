@@ -3080,6 +3080,7 @@ dd {
 .tester-launch-main,
 .tester-launch-side,
 .tester-launch-workflow,
+.tester-launch-connect-pack,
 .tester-launch-checklist,
 .tester-launch-routes,
 .tester-launch-owner-inputs,
@@ -3097,6 +3098,48 @@ dd {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
+}
+
+.tester-launch-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tester-launch-profile-grid div {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  min-width: 0;
+  min-height: 92px;
+  padding: 12px;
+  border: 1px solid #d4ddd6;
+  border-radius: 8px;
+  background: #f8faf6;
+}
+
+.tester-launch-profile-grid span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.tester-launch-profile-grid strong,
+.tester-launch-profile-grid code {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.tester-launch-profile-grid strong {
+  color: var(--ink);
+  font-size: 0.92rem;
+}
+
+.tester-launch-profile-grid code {
+  align-self: end;
+  width: 100%;
+  margin: 0;
 }
 
 .tester-launch-card {
@@ -3175,7 +3218,25 @@ dd {
 }
 
 .tester-launch-route-grid,
-.tester-launch-gateway-routes div {
+.tester-launch-gateway-routes div,
+.tester-launch-route-pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.tester-launch-route-pair > div {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f9faf6;
+}
+
+.tester-launch-route-pair > div > div {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 8px;
@@ -3183,16 +3244,25 @@ dd {
 
 .tester-launch-route-grid code,
 .tester-launch-gateway-routes code,
+.tester-launch-route-pair code,
 .tester-launch-owner-inputs code,
 .tester-launch-commands code {
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
-.tester-launch-gateway-routes {
+.tester-launch-gateway-routes,
+.tester-launch-route-pair {
   display: grid;
   gap: 8px;
   padding-top: 2px;
+}
+
+.tester-launch-route-pair strong {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .tester-launch-owner-inputs details,
@@ -4447,6 +4517,7 @@ code {
   .tester-launch-command-panel,
   .tester-launch-layout,
   .tester-launch-card-grid,
+  .tester-launch-profile-grid,
   .product-surface-grid,
   .pilot-status-body,
   .local-action-grid,
@@ -4555,7 +4626,8 @@ code {
 
   .explorer-category-strip,
   .explorer-facts,
-  .tester-launch-card-grid {
+  .tester-launch-card-grid,
+  .tester-launch-profile-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -4571,8 +4643,11 @@ code {
   .live-readiness-gates,
   .tester-launch-command-panel,
   .tester-launch-card-grid,
+  .tester-launch-profile-grid,
   .tester-launch-route-grid,
   .tester-launch-gateway-routes div,
+  .tester-launch-route-pair,
+  .tester-launch-route-pair > div > div,
   .workbench-switcher,
   .explorer-category-strip,
   .explorer-facts,
