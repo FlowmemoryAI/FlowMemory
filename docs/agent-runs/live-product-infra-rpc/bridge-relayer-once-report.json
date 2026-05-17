@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.bridge_relayer_once_report.v0",
-    "generatedAt":  "2026-05-17T11:37:18.2463948Z",
+    "generatedAt":  "2026-05-17T12:13:24.3398342Z",
     "status":  "blocked",
     "mode":  "base8453-pilot",
     "queueDisabled":  false,
@@ -16,20 +16,30 @@
                    "appliedCredits":  0
                },
     "timing":  {
-                   "runStartedAt":  "2026-05-17T11:37:16.1726492Z",
-                   "infraCheckedAt":  "2026-05-17T11:37:18.1623915Z",
+                   "runStartedAt":  "2026-05-17T12:13:22.8429132Z",
+                   "infraCheckedAt":  "2026-05-17T12:13:24.2728338Z",
                    "liveCheckedAt":  null,
                    "baseObservedAt":  null,
                    "handoffWrittenAt":  null,
                    "nodeIngestedAt":  null,
                    "creditAppliedAt":  null,
                    "firstSpendableAt":  null,
-                   "completedAt":  "2026-05-17T11:37:18.1853927Z",
-                   "totalSeconds":  2.013,
+                   "completedAt":  "2026-05-17T12:13:24.2918350Z",
+                   "totalSeconds":  1.449,
                    "handoffToSpendableSeconds":  null,
                    "codePathWithin60Seconds":  null,
                    "latencyGate":  "not-run"
                },
+    "cursorCommit":  {
+                         "mode":  "staged-cursor",
+                         "finalCursorPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\services\\bridge-relayer\\out\\base8453-pilot-cursor-state.json",
+                         "stagedCursorPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-once\\base8453-pilot-cursor-staged.json",
+                         "finalCommitRequired":  true,
+                         "finalCommitted":  false,
+                         "committedAt":  null,
+                         "reason":  "not-run",
+                         "crashRecovery":  "The Base scan cursor is staged during observation and the final cursor is advanced only after no-new-credit proof or post-apply L1 credit proof."
+                     },
     "ownerEnvFile":  {
                          "configured":  false,
                          "imported":  false,
@@ -53,7 +63,8 @@
                       "filteredHandoff":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-once\\base8453-handoff-new-credits-only.json",
                       "evidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\services\\bridge-relayer\\out\\base8453-pilot-evidence.json",
                       "runtimeState":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\services\\bridge-relayer\\out\\base8453-pilot-credit-application-state.json",
-                      "cursorState":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\services\\bridge-relayer\\out\\base8453-pilot-cursor-state.json"
+                      "cursorState":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\services\\bridge-relayer\\out\\base8453-pilot-cursor-state.json",
+                      "stagedCursorState":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-once\\base8453-pilot-cursor-staged.json"
                   },
     "steps":  [
                   {
@@ -62,7 +73,7 @@
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-once\\logs\\bridge-infra-readiness.log",
                       "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-once\\bridge-infra-readiness-report.json",
                       "reason":  "",
-                      "at":  "2026-05-17T11:37:17.9893844Z"
+                      "at":  "2026-05-17T12:13:24.1138292Z"
                   }
               ],
     "issues":  [

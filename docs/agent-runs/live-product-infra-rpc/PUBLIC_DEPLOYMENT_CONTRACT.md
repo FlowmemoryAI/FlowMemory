@@ -1,6 +1,6 @@
 ﻿# FlowChain Public Deployment Contract
 
-Generated: 2026-05-17T11:46:44.6421208Z
+Generated: 2026-05-17T12:13:42.4059924Z
 Status: blocked
 Deployment ready: False
 Packet shareable: False
@@ -30,7 +30,7 @@ This file records deployment gates, commands, and env names only. It must not co
 | The owner service has an autorecovery supervisor and an isolated recovery drill proving control-plane restart without touching live state. | passed | supervisorValidation=passed, restartAttempts=1 |
 | The owner host has a no-secret Windows install, status, and uninstall path for registering the live supervisor as a reboot-persistent scheduled task. | passed | serviceInstallValidation=passed, planDidNotMutate=True, liveProfileDefault=True, commandsPresent=True |
 | Owner deployment has a no-secret ops snapshot that separates critical incidents from expected owner-input blockers and lists incident commands. | passed | opsSnapshot=blocked, criticalCount=0, blockedCount=6 |
-| Owner deployment has a no-secret alert rule manifest that maps every current ops finding to operator commands without committing delivery credentials. | passed | alertRules=passed, criticalRules=6, blockedRules=6, unmappedCurrentFindingCodes=0 |
+| Owner deployment has a no-secret alert rule manifest that maps every current ops finding to operator commands without committing delivery credentials. | passed | alertRules=passed, criticalRules=7, blockedRules=6, unmappedCurrentFindingCodes=0 |
 | The owner host has a no-secret Windows install, status, and uninstall path for recurring ops snapshot and alert-rule refresh without committed external delivery credentials. | passed | alertInstallValidation=passed, planDidNotMutate=True, hasAllowBlocked=True, noExternalDelivery=True |
 | The owner deployment contract validates the required public RPC, tester write gateway, backup, and Base 8453 input names without values. | blocked | ownerInputsStatus=blocked, ownerInputReady=False |
 | The local public RPC abuse harness proves CORS rejection, media-type rejection, malformed JSON handling, batch/body caps, notification handling, rate limiting, and no-secret response summaries. | passed | abuseStatus=passed, abuseReady=True, missingChecks=0 |
@@ -39,7 +39,7 @@ This file records deployment gates, commands, and env names only. It must not co
 | The owner host has a no-secret Windows install, status, and uninstall path for recurring manifest-backed state backups that fail closed without the owner backup path. | passed | backupInstallValidation=passed, planDidNotMutate=True, ownerBackupEnvRequired=True, commandOmitsAllowBlocked=True |
 | The public deployment must prove the configured state backup directory can create a manifest-backed snapshot and restore it in rehearsal. | blocked | backupStatus=blocked, snapshotProof=not-run, restoreProof=not-run |
 | The public deployment must not invite bridge-funded testing until Base 8453 live and infra checks pass with owner guardrails. | blocked | bridgeLive=blocked, bridgeInfra=blocked |
-| The bridge relayer has a no-broadcast one-shot path that checks owner guardrails, observes Base 8453 deposits, filters replays, queues new credits into the running L1, waits for main-state credit evidence, and records handoff-to-spendable latency. | blocked | relayer=blocked, observed=0, new=0, queued=0, applied=0, latencyGate=not-run, handoffToSpendableSeconds= |
+| The bridge relayer has a no-broadcast one-shot path that checks owner guardrails, observes Base 8453 deposits with a staged cursor, filters replays, queues new credits into the running L1, waits for main-state credit evidence, records handoff-to-spendable latency, and only commits the Base cursor after safe proof. | blocked | relayer=blocked, observed=0, new=0, queued=0, applied=0, latencyGate=not-run, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run, handoffToSpendableSeconds= |
 | External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence plus authenticated tester faucet/send gateway smoke. | blocked | externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, publicTesterGatewayReady=True, faucetRoute=True, packetSmoke=True, testerFaucet=True, capRejected=True, externalSharingReady=False, packet=blocked, packetShareable=False |
 | The public deployment has a local production-shaped proof for authenticated tester wallet creation, capped tester faucet funding, capped tester sends, balance settlement, and over-cap rejection. | passed | gatewayStatus=passed, testerFaucetSchema=flowmemory.control_plane.tester_faucet_result.v0, transferAccepted=True, capRejected=True |
 | Owner deployment has explicit status, stop, restart, emergency stop, and re-audit commands before exposure. | passed | missingRollbackScripts=0 |

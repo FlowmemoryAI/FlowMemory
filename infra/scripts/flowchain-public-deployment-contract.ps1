@@ -741,19 +741,30 @@ $bridgeRelayer = $reports.bridgeRelayerOnce
 $bridgeRelayerStatus = Get-DeploymentStatus -Report $bridgeRelayer
 $bridgeRelayerCounts = Get-DeploymentProp -Object $bridgeRelayer -Name "counts"
 $bridgeRelayerTiming = Get-DeploymentProp -Object $bridgeRelayer -Name "timing"
+$bridgeRelayerCursorCommit = Get-DeploymentProp -Object $bridgeRelayer -Name "cursorCommit"
+$bridgeRelayerNewCount = [int](Get-DeploymentProp -Object $bridgeRelayerCounts -Name "newCredits" -Default 0)
+$bridgeRelayerQueuedCount = [int](Get-DeploymentProp -Object $bridgeRelayerCounts -Name "queuedTransactions" -Default 0)
 $bridgeRelayerAppliedCount = [int](Get-DeploymentProp -Object $bridgeRelayerCounts -Name "appliedCredits" -Default 0)
 $bridgeRelayerLatencyGate = Get-DeploymentProp -Object $bridgeRelayerTiming -Name "latencyGate" -Default "missing"
 $bridgeRelayerLatencyReady = $bridgeRelayerAppliedCount -eq 0 -or $bridgeRelayerLatencyGate -eq "passed"
+$bridgeRelayerQueueDisabled = Get-DeploymentProp -Object $bridgeRelayer -Name "queueDisabled" -Default $true
+$bridgeRelayerCursorCommitRequired = Get-DeploymentProp -Object $bridgeRelayerCursorCommit -Name "finalCommitRequired" -Default $true
+$bridgeRelayerCursorCommitted = Get-DeploymentProp -Object $bridgeRelayerCursorCommit -Name "finalCommitted" -Default $false
+$bridgeRelayerCursorReason = Get-DeploymentProp -Object $bridgeRelayerCursorCommit -Name "reason" -Default "missing"
+$bridgeRelayerQueueReady = ($bridgeRelayerNewCount -eq 0) -or (($bridgeRelayerQueueDisabled -eq $false) -and ($bridgeRelayerQueuedCount -ge $bridgeRelayerNewCount) -and ($bridgeRelayerAppliedCount -eq $bridgeRelayerNewCount))
+$bridgeRelayerCursorReady = ($bridgeRelayerStatus -ne "passed") -or ($bridgeRelayerCursorCommitted -eq $true) -or ($bridgeRelayerCursorCommitRequired -eq $false)
 $bridgeRelayerReady = ($bridgeRelayerStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $bridgeRelayer -Name "broadcasts" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $bridgeRelayer -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $bridgeRelayer -Name "noSecrets" -Default $false) -eq $true) `
     -and $bridgeRelayerLatencyReady `
+    -and $bridgeRelayerQueueReady `
+    -and $bridgeRelayerCursorReady `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:once")
 Add-DeploymentItem -Items $items -Id "base8453-bridge-relayer-queue" `
-    -Requirement "The bridge relayer has a no-broadcast one-shot path that checks owner guardrails, observes Base 8453 deposits, filters replays, queues new credits into the running L1, waits for main-state credit evidence, and records handoff-to-spendable latency." `
+    -Requirement "The bridge relayer has a no-broadcast one-shot path that checks owner guardrails, observes Base 8453 deposits with a staged cursor, filters replays, queues new credits into the running L1, waits for main-state credit evidence, records handoff-to-spendable latency, and only commits the Base cursor after safe proof." `
     -Status $(if ($bridgeRelayerReady) { "passed" } elseif ($bridgeRelayerStatus -eq "blocked") { "blocked" } else { "failed" }) `
-    -Evidence "relayer=$bridgeRelayerStatus, observed=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'newCredits' -Default 0), queued=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'queuedTransactions' -Default 0), applied=$bridgeRelayerAppliedCount, latencyGate=$bridgeRelayerLatencyGate, handoffToSpendableSeconds=$(Get-DeploymentProp -Object $bridgeRelayerTiming -Name 'handoffToSpendableSeconds')" `
+    -Evidence "relayer=$bridgeRelayerStatus, observed=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$bridgeRelayerNewCount, queued=$bridgeRelayerQueuedCount, applied=$bridgeRelayerAppliedCount, latencyGate=$bridgeRelayerLatencyGate, cursorCommitRequired=$bridgeRelayerCursorCommitRequired, cursorCommitted=$bridgeRelayerCursorCommitted, cursorReason=$bridgeRelayerCursorReason, handoffToSpendableSeconds=$(Get-DeploymentProp -Object $bridgeRelayerTiming -Name 'handoffToSpendableSeconds')" `
     -Commands @("npm run flowchain:bridge:relayer:once") `
     -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
 

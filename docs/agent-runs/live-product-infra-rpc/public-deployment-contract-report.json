@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-17T11:46:44.6421208Z",
+    "generatedAt":  "2026-05-17T12:13:42.4059924Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -167,7 +167,7 @@
                       "id":  "ops-alert-rules",
                       "requirement":  "Owner deployment has a no-secret alert rule manifest that maps every current ops finding to operator commands without committing delivery credentials.",
                       "status":  "passed",
-                      "evidence":  "alertRules=passed, criticalRules=6, blockedRules=6, unmappedCurrentFindingCodes=0",
+                      "evidence":  "alertRules=passed, criticalRules=7, blockedRules=6, unmappedCurrentFindingCodes=0",
                       "commands":  [
                                        "npm run flowchain:ops:alerts -- -AllowBlocked"
                                    ],
@@ -313,9 +313,9 @@
                   },
                   {
                       "id":  "base8453-bridge-relayer-queue",
-                      "requirement":  "The bridge relayer has a no-broadcast one-shot path that checks owner guardrails, observes Base 8453 deposits, filters replays, queues new credits into the running L1, waits for main-state credit evidence, and records handoff-to-spendable latency.",
+                      "requirement":  "The bridge relayer has a no-broadcast one-shot path that checks owner guardrails, observes Base 8453 deposits with a staged cursor, filters replays, queues new credits into the running L1, waits for main-state credit evidence, records handoff-to-spendable latency, and only commits the Base cursor after safe proof.",
                       "status":  "blocked",
-                      "evidence":  "relayer=blocked, observed=0, new=0, queued=0, applied=0, latencyGate=not-run, handoffToSpendableSeconds=",
+                      "evidence":  "relayer=blocked, observed=0, new=0, queued=0, applied=0, latencyGate=not-run, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run, handoffToSpendableSeconds=",
                       "commands":  [
                                        "npm run flowchain:bridge:relayer:once"
                                    ],

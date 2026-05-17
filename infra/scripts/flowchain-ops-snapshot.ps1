@@ -165,8 +165,17 @@ $backupStatus = Get-OpsStatus -Report $reports.backup
 $bridgeLiveStatus = Get-OpsStatus -Report $reports.bridgeLive
 $bridgeInfraStatus = Get-OpsStatus -Report $reports.bridgeInfra
 $bridgeRelayerStatus = Get-OpsStatus -Report $reports.bridgeRelayer
+$bridgeRelayerCounts = Get-OpsProp -Object $reports.bridgeRelayer -Name "counts"
 $bridgeRelayerTiming = Get-OpsProp -Object $reports.bridgeRelayer -Name "timing"
 $bridgeRelayerLatencyGate = [string](Get-OpsProp -Object $bridgeRelayerTiming -Name "latencyGate" -Default "missing")
+$bridgeRelayerCursorCommit = Get-OpsProp -Object $reports.bridgeRelayer -Name "cursorCommit"
+$bridgeRelayerNewCount = [int](Get-OpsProp -Object $bridgeRelayerCounts -Name "newCredits" -Default 0)
+$bridgeRelayerQueuedCount = [int](Get-OpsProp -Object $bridgeRelayerCounts -Name "queuedTransactions" -Default 0)
+$bridgeRelayerAppliedCount = [int](Get-OpsProp -Object $bridgeRelayerCounts -Name "appliedCredits" -Default 0)
+$bridgeRelayerQueueDisabled = Get-OpsProp -Object $reports.bridgeRelayer -Name "queueDisabled" -Default $true
+$bridgeRelayerCursorCommitRequired = Get-OpsProp -Object $bridgeRelayerCursorCommit -Name "finalCommitRequired" -Default $true
+$bridgeRelayerCursorCommitted = Get-OpsProp -Object $bridgeRelayerCursorCommit -Name "finalCommitted" -Default $false
+$bridgeRelayerCursorReason = [string](Get-OpsProp -Object $bridgeRelayerCursorCommit -Name "reason" -Default "missing")
 $externalTesterStatus = Get-OpsStatus -Report $reports.externalTester
 $deploymentStatus = Get-OpsStatus -Report $reports.publicDeployment
 $noSecretStatus = Get-OpsStatus -Report $reports.noSecret
@@ -182,6 +191,9 @@ if ($bridgeLiveStatus -ne "passed" -or $bridgeInfraStatus -ne "passed") {
 }
 if ($bridgeRelayerStatus -eq "failed" -or $bridgeRelayerLatencyGate -eq "failed") {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-relayer-latency-failed" -Message "Bridge relayer failed or exceeded the handoff-to-spendable latency gate." -Commands @("npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:service:status", "npm run flowchain:bridge:emergency-stop")
+}
+elseif ($bridgeRelayerStatus -eq "passed" -and ((($bridgeRelayerCursorCommitRequired -eq $true) -and ($bridgeRelayerCursorCommitted -ne $true)) -or ($bridgeRelayerQueueDisabled -eq $true) -or (($bridgeRelayerNewCount -gt 0) -and (($bridgeRelayerQueuedCount -lt $bridgeRelayerNewCount) -or ($bridgeRelayerAppliedCount -ne $bridgeRelayerNewCount))))) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-relayer-cursor-unsafe" -Message "Bridge relayer passed without a safe final cursor commit after L1 credit proof." -Commands @("npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop", "npm run flowchain:service:status")
 }
 elseif ($bridgeRelayerStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "bridge-relayer-not-ready" -Message "Bridge relayer one-shot proof is not ready." -Commands @("npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check")
@@ -257,6 +269,9 @@ $report = [ordered]@{
         bridgeInfra = $bridgeInfraStatus
         bridgeRelayer = $bridgeRelayerStatus
         bridgeRelayerLatencyGate = $bridgeRelayerLatencyGate
+        bridgeRelayerCursorCommitRequired = $bridgeRelayerCursorCommitRequired
+        bridgeRelayerCursorCommitted = $bridgeRelayerCursorCommitted
+        bridgeRelayerCursorReason = $bridgeRelayerCursorReason
         externalTester = $externalTesterStatus
         publicDeployment = $deploymentStatus
         noSecret = $noSecretStatus

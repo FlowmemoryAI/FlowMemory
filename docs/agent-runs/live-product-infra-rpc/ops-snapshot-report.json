@@ -1,20 +1,11 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-17T11:41:22.6741287Z",
+    "generatedAt":  "2026-05-17T12:13:32.4147229Z",
     "status":  "blocked",
     "refresh":  {
-                    "performed":  true,
+                    "performed":  false,
                     "steps":  [
-                                  {
-                                      "name":  "service-status",
-                                      "exitCode":  0,
-                                      "outputLineCount":  9
-                                  },
-                                  {
-                                      "name":  "service-monitor",
-                                      "exitCode":  0,
-                                      "outputLineCount":  4
-                                  }
+
                               ],
                     "inputReportDir":  ""
                 },
@@ -35,6 +26,9 @@
                            "bridgeInfra":  "blocked",
                            "bridgeRelayer":  "blocked",
                            "bridgeRelayerLatencyGate":  "not-run",
+                           "bridgeRelayerCursorCommitRequired":  true,
+                           "bridgeRelayerCursorCommitted":  false,
+                           "bridgeRelayerCursorReason":  "not-run",
                            "externalTester":  "blocked",
                            "publicDeployment":  "blocked",
                            "noSecret":  "passed"

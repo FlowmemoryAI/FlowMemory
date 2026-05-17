@@ -534,16 +534,28 @@ Add-ArchitectureItem -Items $items -Id "bridge-live-edge" -Layer "Bridge" `
 
 $bridgeRelayer = $reports.bridgeRelayerOnce
 $bridgeRelayerCounts = Get-ArchitectureProp -Object $bridgeRelayer -Name "counts"
+$bridgeRelayerCursorCommit = Get-ArchitectureProp -Object $bridgeRelayer -Name "cursorCommit"
+$bridgeRelayerNewCount = [int](Get-ArchitectureProp -Object $bridgeRelayerCounts -Name "newCredits" -Default 0)
+$bridgeRelayerQueuedCount = [int](Get-ArchitectureProp -Object $bridgeRelayerCounts -Name "queuedTransactions" -Default 0)
+$bridgeRelayerAppliedCount = [int](Get-ArchitectureProp -Object $bridgeRelayerCounts -Name "appliedCredits" -Default 0)
+$bridgeRelayerQueueDisabled = Get-ArchitectureProp -Object $bridgeRelayer -Name "queueDisabled" -Default $true
+$bridgeRelayerCursorCommitRequired = Get-ArchitectureProp -Object $bridgeRelayerCursorCommit -Name "finalCommitRequired" -Default $true
+$bridgeRelayerCursorCommitted = Get-ArchitectureProp -Object $bridgeRelayerCursorCommit -Name "finalCommitted" -Default $false
+$bridgeRelayerCursorReason = Get-ArchitectureProp -Object $bridgeRelayerCursorCommit -Name "reason" -Default "missing"
+$bridgeRelayerQueueReady = ($bridgeRelayerNewCount -eq 0) -or (($bridgeRelayerQueueDisabled -eq $false) -and ($bridgeRelayerQueuedCount -ge $bridgeRelayerNewCount) -and ($bridgeRelayerAppliedCount -eq $bridgeRelayerNewCount))
+$bridgeRelayerCursorReady = ($bridgeRelayerStatus -ne "passed") -or ($bridgeRelayerCursorCommitted -eq $true) -or ($bridgeRelayerCursorCommitRequired -eq $false)
 $bridgeRelayerReady = (Test-AllRepoFilesExist -Paths $bridgeLiveFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:once") `
     -and ($bridgeRelayerStatus -eq "passed") `
     -and ((Get-ArchitectureProp -Object $bridgeRelayer -Name "broadcasts" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayer -Name "envValuesPrinted" -Default $true) -eq $false) `
-    -and ((Get-ArchitectureProp -Object $bridgeRelayer -Name "noSecrets" -Default $false) -eq $true)
+    -and ((Get-ArchitectureProp -Object $bridgeRelayer -Name "noSecrets" -Default $false) -eq $true) `
+    -and $bridgeRelayerQueueReady `
+    -and $bridgeRelayerCursorReady
 Add-ArchitectureItem -Items $items -Id "bridge-relayer-runtime-queue" -Layer "Bridge" `
-    -Requirement "The live bridge relayer path checks owner guardrails, observes Base 8453 deposits, builds runtime handoff, filters already-seen replay keys, queues new credits into the running L1, and waits for main-state credit evidence without broadcasts." `
+    -Requirement "The live bridge relayer path checks owner guardrails, observes Base 8453 deposits with a staged cursor, builds runtime handoff, filters already-seen replay keys, queues new credits into the running L1, waits for main-state credit evidence, and commits the Base cursor only after safe proof without broadcasts." `
     -Status $(if ($bridgeRelayerReady) { "passed" } elseif ($bridgeRelayerStatus -eq "blocked") { "blocked" } else { "failed" }) `
-    -Evidence "relayer=$bridgeRelayerStatus, observed=$(Get-ArchitectureProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$(Get-ArchitectureProp -Object $bridgeRelayerCounts -Name 'newCredits' -Default 0), queued=$(Get-ArchitectureProp -Object $bridgeRelayerCounts -Name 'queuedTransactions' -Default 0), applied=$(Get-ArchitectureProp -Object $bridgeRelayerCounts -Name 'appliedCredits' -Default 0)" `
+    -Evidence "relayer=$bridgeRelayerStatus, observed=$(Get-ArchitectureProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$bridgeRelayerNewCount, queued=$bridgeRelayerQueuedCount, applied=$bridgeRelayerAppliedCount, cursorCommitRequired=$bridgeRelayerCursorCommitRequired, cursorCommitted=$bridgeRelayerCursorCommitted, cursorReason=$bridgeRelayerCursorReason" `
     -Files $bridgeLiveFiles `
     -Commands @("npm run flowchain:bridge:relayer:once", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop") `
     -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
@@ -915,7 +927,7 @@ $dataFlows = @(
     },
     [ordered]@{
         name = "base8453-bridge-credit"
-        path = @("Base 8453 lockbox event", "read-only bridge observer", "deposit validation", "bridge credit handoff", "runtime block inclusion", "wallet spend path")
+        path = @("Base 8453 lockbox event", "staged scan cursor", "read-only bridge observer", "deposit validation", "bridge credit handoff", "runtime block inclusion", "safe cursor commit", "wallet spend path")
         latestEvidence = $reportPaths.bridgeRelayerOnce
         blockedBy = @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
     },
@@ -933,7 +945,7 @@ $objectiveDeliverables = @(
     "Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding.",
     "Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.",
     "Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.",
-    "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven, can queue new relayer handoffs into the L1, and remains live-blocked until owner guardrails are configured.",
+    "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven, stages the Base scan cursor until L1 credit proof, can queue new relayer handoffs into the L1, and remains live-blocked until owner guardrails are configured.",
     "State backup, monitoring, reboot-persistent service install, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
     "Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.",
     "Owner signup checklist maps the external services and local setup values needed for public operation without requesting secrets.",

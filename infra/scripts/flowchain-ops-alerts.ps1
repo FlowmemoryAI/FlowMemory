@@ -114,6 +114,14 @@ $rules = @(
         commands = @("npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:service:status", "npm run flowchain:bridge:emergency-stop")
     },
     [ordered]@{
+        id = "bridge-relayer-cursor-unsafe"
+        severity = "critical"
+        findingCodes = @("bridge-relayer-cursor-unsafe")
+        signal = "Bridge relayer passed without safe staged cursor commit evidence."
+        threshold = "passed relayer report has cursorCommit.finalCommitRequired true with finalCommitted false, NoQueue enabled, or unapplied new credits"
+        commands = @("npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop", "npm run flowchain:service:status")
+    },
+    [ordered]@{
         id = "public-rpc-not-shareable"
         severity = "blocked"
         findingCodes = @("public-rpc-not-ready")

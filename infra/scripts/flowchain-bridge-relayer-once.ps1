@@ -12,6 +12,7 @@ param(
     [string] $EvidencePath = "services/bridge-relayer/out/base8453-pilot-evidence.json",
     [string] $RuntimeStatePath = "services/bridge-relayer/out/base8453-pilot-credit-application-state.json",
     [string] $CursorState = $(if ($env:FLOWCHAIN_BASE8453_CURSOR_STATE) { $env:FLOWCHAIN_BASE8453_CURSOR_STATE } else { "services/bridge-relayer/out/base8453-pilot-cursor-state.json" }),
+    [string] $CursorStagingPath = "",
     [string] $AuthorizedBy = "operator:bridge-relayer-once",
     [int] $WaitSeconds = 60,
     [switch] $NoQueue,
@@ -47,9 +48,13 @@ if ([string]::IsNullOrWhiteSpace($LiveReportPath)) {
 if ([string]::IsNullOrWhiteSpace($FilteredHandoffPath)) {
     $FilteredHandoffPath = Join-Path $RunDir "base8453-handoff-new-credits-only.json"
 }
+if ([string]::IsNullOrWhiteSpace($CursorStagingPath)) {
+    $CursorStagingPath = Join-Path $RunDir "base8453-pilot-cursor-staged.json"
+}
 $infraReportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $InfraReportPath)
 $liveReportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $LiveReportPath)
 $filteredHandoffFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $FilteredHandoffPath)
+$cursorStagingFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $CursorStagingPath)
 
 if ($WaitSeconds -lt 0) {
     throw "WaitSeconds must be at least 0."
@@ -73,6 +78,7 @@ $artifacts = [ordered]@{
     evidence = $evidenceFullPath
     runtimeState = $runtimeStateFullPath
     cursorState = $cursorStateFullPath
+    stagedCursorState = $cursorStagingFullPath
 }
 $counts = [ordered]@{
     observedCredits = 0
@@ -98,6 +104,16 @@ $timing = [ordered]@{
 $readiness = [ordered]@{
     infra = "not-run"
     live = "not-run"
+}
+$cursorCommit = [ordered]@{
+    mode = "staged-cursor"
+    finalCursorPath = $cursorStateFullPath
+    stagedCursorPath = $cursorStagingFullPath
+    finalCommitRequired = $true
+    finalCommitted = $false
+    committedAt = $null
+    reason = "not-run"
+    crashRecovery = "The Base scan cursor is staged during observation and the final cursor is advanced only after no-new-credit proof or post-apply L1 credit proof."
 }
 $ownerEnvState = [ordered]@{
     configured = $false
@@ -350,6 +366,62 @@ function Write-FilteredBridgeHandoff {
     Write-FlowChainJson -Path $Path -Value $filtered -Depth 64
 }
 
+function Initialize-RelayerStagedCursor {
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $cursorStagingFullPath) | Out-Null
+    if (Test-Path -LiteralPath $cursorStateFullPath) {
+        Copy-Item -LiteralPath $cursorStateFullPath -Destination $cursorStagingFullPath -Force
+        Add-RelayerStep -Name "stage-bridge-cursor" -Status "passed" -ReportPath $cursorStagingFullPath -Reason "Copied final Base cursor into staged cursor before observation."
+    }
+    else {
+        Remove-Item -LiteralPath $cursorStagingFullPath -Force -ErrorAction SilentlyContinue
+        Add-RelayerStep -Name "stage-bridge-cursor" -Status "passed" -ReportPath $cursorStagingFullPath -Reason "No existing final Base cursor; observer will create a staged cursor from configured start block."
+    }
+}
+
+function Commit-RelayerStagedCursor {
+    param(
+        [Parameter(Mandatory = $true)][string] $Reason,
+        [switch] $AllowNoScannedCursor
+    )
+
+    if (-not (Test-Path -LiteralPath $cursorStagingFullPath)) {
+        if ($AllowNoScannedCursor.IsPresent) {
+            $cursorCommit.finalCommitRequired = $false
+            $cursorCommit.finalCommitted = $false
+            $cursorCommit.committedAt = $null
+            $cursorCommit.reason = "no-staged-cursor-no-confirmed-scan-range"
+            Add-RelayerStep -Name "commit-bridge-cursor" -Status "passed" -ReportPath $cursorStagingFullPath -Reason "No staged Base cursor was written and no new credits were observed; no final cursor advance was required."
+            return $true
+        }
+        Add-RelayerIssue -Kind "code" -Code "bridge-cursor-staging-missing" -Owner "bridge-relayer/cursor" -Reason "The observer did not write a staged Base cursor, so the final cursor was not advanced."
+        $cursorCommit.reason = "staged-cursor-missing"
+        return $false
+    }
+
+    $cursorCommit.finalCommitRequired = $true
+    $targetDir = Split-Path -Parent $cursorStateFullPath
+    New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
+    $targetName = [System.IO.Path]::GetFileName($cursorStateFullPath)
+    $tempPath = Join-Path $targetDir ".$targetName.$PID.tmp"
+    Copy-Item -LiteralPath $cursorStagingFullPath -Destination $tempPath -Force
+    Move-Item -LiteralPath $tempPath -Destination $cursorStateFullPath -Force
+
+    $cursorCommit.finalCommitted = $true
+    $cursorCommit.committedAt = Get-RelayerUtcNow
+    $cursorCommit.reason = $Reason
+    Add-RelayerStep -Name "commit-bridge-cursor" -Status "passed" -ReportPath $cursorStateFullPath -Reason $Reason
+    return $true
+}
+
+function Hold-RelayerStagedCursor {
+    param([Parameter(Mandatory = $true)][string] $Reason)
+
+    $cursorCommit.finalCommitted = $false
+    $cursorCommit.committedAt = $null
+    $cursorCommit.reason = $Reason
+    Add-RelayerStep -Name "hold-bridge-cursor" -Status "passed" -ReportPath $cursorStagingFullPath -Reason $Reason
+}
+
 function Wait-ForRelayerCredits {
     param(
         [Parameter(Mandatory = $true)][object[]] $Credits,
@@ -428,6 +500,7 @@ function Complete-RelayerRun {
         readiness = $readiness
         counts = $counts
         timing = $timing
+        cursorCommit = $cursorCommit
         ownerEnvFile = $ownerEnvState
         artifacts = $artifacts
         steps = @($steps)
@@ -510,11 +583,13 @@ try {
     $beforeCreditIds = Get-ObjectKeys -Object $beforeState.bridgeCredits
     $beforeReplayKeys = Get-ObjectKeys -Object $beforeState.bridgeReplayIndex
 
+    Initialize-RelayerStagedCursor
+
     $observeArgs = @(
         "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "bridge-base-mainnet-pilot-observe.ps1"),
         "-ApplyCredit",
         "-RuntimeState", $runtimeStateFullPath,
-        "-CursorState", $cursorStateFullPath,
+        "-CursorState", $cursorStagingFullPath,
         "-Out", $observationFullPath,
         "-CreditOut", $creditFullPath,
         "-HandoffOut", $handoffFullPath,
@@ -546,6 +621,13 @@ try {
     $counts.newCredits = $newCredits.Count
     if ($newCredits.Count -eq 0) {
         Add-RelayerStep -Name "queue-new-bridge-credits" -Status "passed" -Reason "No new accepted credits were available after replay filtering."
+        if ($NoQueue.IsPresent) {
+            Hold-RelayerStagedCursor -Reason "NoQueue mode held the final Base cursor even though no new credits were available."
+            Complete-RelayerRun -Status "passed"
+        }
+        if (-not (Commit-RelayerStagedCursor -Reason "no-new-credits-after-replay-filter" -AllowNoScannedCursor)) {
+            Complete-RelayerRun -Status "failed"
+        }
         Complete-RelayerRun -Status "passed"
     }
 
@@ -553,6 +635,7 @@ try {
     Add-RelayerStep -Name "filter-new-bridge-handoff" -Status "passed" -ReportPath $filteredHandoffFullPath
 
     if ($NoQueue.IsPresent) {
+        Hold-RelayerStagedCursor -Reason "NoQueue mode held the final Base cursor so a later queueing run can rescan and apply new credits."
         Complete-RelayerRun -Status "passed"
     }
 
@@ -581,6 +664,9 @@ try {
     Set-RelayerTiming -Name "firstSpendableAt" -Value $timing.creditAppliedAt
 
     Add-RelayerStep -Name "verify-bridge-credits-in-main-state" -Status "passed" -ReportPath $stateFullPath
+    if (-not (Commit-RelayerStagedCursor -Reason "credits-applied-in-main-l1-state")) {
+        Complete-RelayerRun -Status "failed"
+    }
     Complete-RelayerRun -Status "passed"
 }
 catch {
