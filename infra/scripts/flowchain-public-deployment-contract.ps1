@@ -436,6 +436,9 @@ $publicRpcDeploymentBundleStatus = Get-DeploymentStatus -Report $publicRpcDeploy
 $deploymentBundleChecks = Get-DeploymentProp -Object $publicRpcDeploymentBundle -Name "checks"
 $deploymentBundleReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "nginxTemplateWritten" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "windowsNginxPreflightScriptWritten" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "windowsNginxPreflightTokensPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesWindowsNginxConfigTest" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerEnvExampleWritten" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "verifyRunbookWritten" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "rollbackRunbookWritten" -Default $false) -eq $true) `

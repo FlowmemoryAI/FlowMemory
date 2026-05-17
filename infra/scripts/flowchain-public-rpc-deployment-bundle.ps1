@@ -104,6 +104,7 @@ $requiredPlaceholders = @(
     "<FLOWCHAIN_OWNER_ENV_FILE>",
     "<FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR>",
     "<FLOWCHAIN_RPC_NGINX_RENDERED_CONF>",
+    "<FLOWCHAIN_NGINX_EXE>",
     "<FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>",
     "<FLOWCHAIN_SYSTEMD_RENDERED_UNIT>",
     "<FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>",
@@ -129,7 +130,8 @@ $ownerPreflightCommands = @(
     "systemd-analyze verify <FLOWCHAIN_SYSTEMD_RENDERED_UNIT>",
     "systemd-analyze verify <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>",
     "nginx -t",
-    "bash <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>"
+    "bash <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>"
 )
 
 $localRollbackCommands = @(
@@ -211,6 +213,22 @@ $preflightRequiredTokens = @(
     "nginx -t",
     'curl -fsS --max-time 5 "http://127.0.0.1:8787/health" >/dev/null',
     'curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/rpc/readiness" >/dev/null'
+)
+
+$windowsPreflightRequiredTokens = @(
+    'param(',
+    '[string] $RenderedConfig = "<FLOWCHAIN_RPC_NGINX_RENDERED_CONF>"',
+    '[string] $NginxExe = "<FLOWCHAIN_NGINX_EXE>"',
+    '[string] $PublicUrl = "<FLOWCHAIN_RPC_PUBLIC_URL>"',
+    '[string] $AllowedOrigin = "<FLOWCHAIN_RPC_ALLOWED_ORIGIN>"',
+    'proxy_pass http://127.0.0.1:8787;',
+    'proxy_set_header Origin $http_origin;',
+    'proxy_set_header X-Forwarded-Proto https;',
+    '& $NginxExe -t',
+    'Invoke-RestMethod -Uri "http://127.0.0.1:8787/health"',
+    '$publicBase = $PublicUrl.TrimEnd("/")',
+    'Invoke-WebRequest -Uri "$publicBase/rpc/readiness"',
+    '"method":"rpc_readiness"'
 )
 
 $forbiddenLiveBroadcastCommandTokens = @(
@@ -372,6 +390,67 @@ $nginxPreflightChecklistLines = @(
     "The preflight script uses only local health and public read/readiness requests. It does not send live transactions."
 )
 
+$windowsNginxPreflightScriptLines = @(
+    "param(",
+    '    [string] $RenderedConfig = "<FLOWCHAIN_RPC_NGINX_RENDERED_CONF>",',
+    '    [string] $NginxExe = "<FLOWCHAIN_NGINX_EXE>",',
+    '    [string] $PublicUrl = "<FLOWCHAIN_RPC_PUBLIC_URL>",',
+    '    [string] $AllowedOrigin = "<FLOWCHAIN_RPC_ALLOWED_ORIGIN>"',
+    ")",
+    "",
+    '$ErrorActionPreference = "Stop"',
+    "Set-StrictMode -Version Latest",
+    "",
+    'if (-not (Test-Path -LiteralPath $RenderedConfig)) { throw "Rendered Nginx config was not found." }',
+    'if (-not (Test-Path -LiteralPath $NginxExe)) { throw "nginx.exe was not found." }',
+    'if (-not $PublicUrl.StartsWith("https://", [System.StringComparison]::OrdinalIgnoreCase)) { throw "FLOWCHAIN_RPC_PUBLIC_URL must be https." }',
+    'if ([string]::IsNullOrWhiteSpace($AllowedOrigin) -or -not $AllowedOrigin.StartsWith("https://", [System.StringComparison]::OrdinalIgnoreCase)) { throw "FLOWCHAIN_RPC_ALLOWED_ORIGIN must be an exact https origin." }',
+    "",
+    '$rendered = Get-Content -Raw -LiteralPath $RenderedConfig',
+    'if ($rendered -match "<FLOWCHAIN_|<PATH_TO_TLS_|<FLOWCHAIN_NGINX_") { throw "Rendered Nginx config still contains placeholders." }',
+    '@(',
+    '    "proxy_pass http://127.0.0.1:8787;",',
+    '    "limit_req_zone",',
+    '    "limit_req zone=flowchain_rpc_per_ip",',
+    '    "ssl_certificate ",',
+    '    "ssl_certificate_key ",',
+    '    ''proxy_set_header Origin $http_origin;'',',
+    '    ''proxy_set_header X-Forwarded-Proto https;'',',
+    '    ''proxy_set_header X-Forwarded-For $remote_addr;''',
+    ') | ForEach-Object {',
+    '    if ($rendered.IndexOf($_, [System.StringComparison]::Ordinal) -lt 0) {',
+    '        throw "Rendered Nginx config missing required token: $_"',
+    '    }',
+    '}',
+    "",
+    '& $NginxExe -t',
+    'Invoke-RestMethod -Uri "http://127.0.0.1:8787/health" -Method Get -TimeoutSec 5 | Out-Null',
+    '$publicBase = $PublicUrl.TrimEnd("/")',
+    '$headers = @{ Origin = $AllowedOrigin }',
+    'Invoke-WebRequest -Uri "$publicBase/health" -Method Get -Headers $headers -TimeoutSec 10 | Out-Null',
+    'Invoke-WebRequest -Uri "$publicBase/rpc/readiness" -Method Get -Headers $headers -TimeoutSec 10 | Out-Null',
+    '$body = ''{"jsonrpc":"2.0","id":1,"method":"rpc_readiness","params":{}}''',
+    'Invoke-WebRequest -Uri "$publicBase/rpc" -Method Post -ContentType "application/json" -Headers $headers -Body $body -TimeoutSec 10 | Out-Null',
+    "",
+    'Write-Host "FlowChain public RPC Windows Nginx preflight passed."'
+)
+
+$windowsNginxPreflightChecklistLines = @(
+    "# Windows Nginx Public RPC Preflight",
+    "",
+    'Run this on the Windows owner host after rendering `nginx-flowchain-rpc.template.conf` outside the repository and before sharing the public URL.',
+    "",
+    "Checklist:",
+    "",
+    '- Render the Nginx template to `<FLOWCHAIN_RPC_NGINX_RENDERED_CONF>`.',
+    '- Replace `<FLOWCHAIN_RPC_PUBLIC_HOST>`, `<PATH_TO_TLS_CERTIFICATE>`, `<PATH_TO_TLS_CERTIFICATE_KEY>`, and `<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>` only on the owner host.',
+    '- Set `<FLOWCHAIN_NGINX_EXE>` to the local `nginx.exe` path.',
+    '- Confirm the private origin remains `127.0.0.1:8787`.',
+    '- Run `powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>` after installing the rendered config.',
+    "",
+    "The PowerShell preflight uses local health and public read/readiness requests only. It does not send live transactions."
+)
+
 $readmeLines = @(
     "# FlowChain Public RPC Deployment Bundle",
     "",
@@ -384,6 +463,8 @@ $readmeLines = @(
     '- `flowchain-supervisor.service.template`: systemd unit template for continuous service autorecovery.',
     '- `nginx-preflight.template.sh`: Nginx config-test and public read preflight script template.',
     '- `NGINX_PREFLIGHT.md`: Nginx render, TLS, rate-limit, CORS, and reload checklist.',
+    '- `nginx-preflight.template.ps1`: Windows Nginx config-test and public read preflight script template.',
+    '- `WINDOWS_NGINX_PREFLIGHT.md`: Windows Nginx render, TLS, rate-limit, CORS, and reload checklist.',
     '- `owner-public-rpc.env.example`: local owner env-file shape with blank values.',
     '- `VERIFY.md`: pre-share verification commands.',
     '- `ROLLBACK.md`: rollback and emergency commands.',
@@ -437,6 +518,8 @@ $files = [ordered]@{
     systemdSupervisorTemplate = Join-Path $bundleFullDir "flowchain-supervisor.service.template"
     nginxPreflightScript = Join-Path $bundleFullDir "nginx-preflight.template.sh"
     nginxPreflightChecklist = Join-Path $bundleFullDir "NGINX_PREFLIGHT.md"
+    windowsNginxPreflightScript = Join-Path $bundleFullDir "nginx-preflight.template.ps1"
+    windowsNginxPreflightChecklist = Join-Path $bundleFullDir "WINDOWS_NGINX_PREFLIGHT.md"
     ownerEnvExample = Join-Path $bundleFullDir "owner-public-rpc.env.example"
     verify = Join-Path $bundleFullDir "VERIFY.md"
     rollback = Join-Path $bundleFullDir "ROLLBACK.md"
@@ -449,6 +532,8 @@ Set-Content -LiteralPath $files.systemdServiceTemplate -Value ($systemdServiceTe
 Set-Content -LiteralPath $files.systemdSupervisorTemplate -Value ($systemdSupervisorTemplateLines -join "`r`n") -Encoding UTF8
 Set-Content -LiteralPath $files.nginxPreflightScript -Value ($nginxPreflightScriptLines -join "`n") -Encoding UTF8
 Set-Content -LiteralPath $files.nginxPreflightChecklist -Value ($nginxPreflightChecklistLines -join "`r`n") -Encoding UTF8
+Set-Content -LiteralPath $files.windowsNginxPreflightScript -Value ($windowsNginxPreflightScriptLines -join "`r`n") -Encoding UTF8
+Set-Content -LiteralPath $files.windowsNginxPreflightChecklist -Value ($windowsNginxPreflightChecklistLines -join "`r`n") -Encoding UTF8
 Set-Content -LiteralPath $files.ownerEnvExample -Value ($ownerEnvExampleLines -join "`r`n") -Encoding UTF8
 Set-Content -LiteralPath $files.verify -Value ($verifyLines -join "`r`n") -Encoding UTF8
 Set-Content -LiteralPath $files.rollback -Value ($rollbackLines -join "`r`n") -Encoding UTF8
@@ -459,6 +544,8 @@ $systemdText = Join-BundleLines -Lines $systemdServiceTemplateLines
 $systemdSupervisorText = Join-BundleLines -Lines $systemdSupervisorTemplateLines
 $nginxPreflightScriptText = Join-BundleLines -Lines $nginxPreflightScriptLines
 $nginxPreflightChecklistText = Join-BundleLines -Lines $nginxPreflightChecklistLines
+$windowsNginxPreflightScriptText = Join-BundleLines -Lines $windowsNginxPreflightScriptLines
+$windowsNginxPreflightChecklistText = Join-BundleLines -Lines $windowsNginxPreflightChecklistLines
 $verifyText = Join-BundleLines -Lines $verifyLines
 $rollbackText = Join-BundleLines -Lines $rollbackLines
 $readmeText = Join-BundleLines -Lines $readmeLines
@@ -470,6 +557,8 @@ $allBundleText = @(
     $systemdSupervisorText,
     $nginxPreflightScriptText,
     $nginxPreflightChecklistText,
+    $windowsNginxPreflightScriptText,
+    $windowsNginxPreflightChecklistText,
     $verifyText,
     $rollbackText
 ) -join "`n"
@@ -485,6 +574,8 @@ $checks = [ordered]@{
     systemdSupervisorTemplateWritten = Test-Path -LiteralPath $files.systemdSupervisorTemplate
     nginxPreflightScriptWritten = Test-Path -LiteralPath $files.nginxPreflightScript
     nginxPreflightChecklistWritten = Test-Path -LiteralPath $files.nginxPreflightChecklist
+    windowsNginxPreflightScriptWritten = Test-Path -LiteralPath $files.windowsNginxPreflightScript
+    windowsNginxPreflightChecklistWritten = Test-Path -LiteralPath $files.windowsNginxPreflightChecklist
     ownerEnvExampleWritten = Test-Path -LiteralPath $files.ownerEnvExample
     verifyRunbookWritten = Test-Path -LiteralPath $files.verify
     rollbackRunbookWritten = Test-Path -LiteralPath $files.rollback
@@ -494,11 +585,13 @@ $checks = [ordered]@{
     systemdLiveServiceTemplatePresent = Test-TextContainsAllTokens -Text $systemdText -Tokens $systemdRequiredTokens
     systemdSupervisorTemplatePresent = Test-TextContainsAllTokens -Text $systemdSupervisorText -Tokens $systemdSupervisorRequiredTokens
     nginxPreflightTokensPresent = Test-TextContainsAllTokens -Text $nginxPreflightScriptText -Tokens $preflightRequiredTokens
-    includesPrivateOrigin = ($nginxText.Contains("127.0.0.1:8787") -and $nginxPreflightScriptText.Contains("127.0.0.1:8787"))
+    windowsNginxPreflightTokensPresent = Test-TextContainsAllTokens -Text $windowsNginxPreflightScriptText -Tokens $windowsPreflightRequiredTokens
+    includesPrivateOrigin = ($nginxText.Contains("127.0.0.1:8787") -and $nginxPreflightScriptText.Contains("127.0.0.1:8787") -and $windowsNginxPreflightScriptText.Contains("127.0.0.1:8787"))
     includesRateLimitPlaceholder = $nginxText.Contains("<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>")
     includesTlsPlaceholders = ($nginxText.Contains("<PATH_TO_TLS_CERTIFICATE>") -and $nginxText.Contains("<PATH_TO_TLS_CERTIFICATE_KEY>"))
     includesCorsOriginForwarding = ($nginxText.Contains('proxy_set_header Origin $http_origin;') -and $nginxPreflightScriptText.Contains('Origin: ${allowed_origin}'))
     includesNginxConfigTest = ($nginxPreflightScriptText.Contains("nginx -t") -and $nginxPreflightChecklistText.Contains("nginx -t"))
+    includesWindowsNginxConfigTest = ($windowsNginxPreflightScriptText.Contains('& $NginxExe -t') -and $windowsNginxPreflightChecklistText.Contains("<FLOWCHAIN_NGINX_EXE>"))
     includesVerificationCommands = ((@(Get-MissingTextTokens -Text $verifyText -Tokens $requiredCommands).Count -eq 0) -and (@(Get-MissingTextTokens -Text $verifyText -Tokens $ownerPreflightCommands).Count -eq 0))
     includesRollbackCommands = (@(Get-MissingTextTokens -Text $rollbackText -Tokens $rollbackCommands).Count -eq 0)
     envExampleHasAllRequiredNames = (@(Get-MissingTextTokens -Text $ownerEnvText -Tokens $requiredEnvNames).Count -eq 0)
@@ -564,6 +657,8 @@ $report = [ordered]@{
         systemdSupervisorTemplate = "flowchain-supervisor.service.template"
         nginxPreflightScript = "nginx-preflight.template.sh"
         nginxPreflightChecklist = "NGINX_PREFLIGHT.md"
+        windowsNginxPreflightScript = "nginx-preflight.template.ps1"
+        windowsNginxPreflightChecklist = "WINDOWS_NGINX_PREFLIGHT.md"
         ownerEnvExample = "owner-public-rpc.env.example"
         verify = "VERIFY.md"
         rollback = "ROLLBACK.md"

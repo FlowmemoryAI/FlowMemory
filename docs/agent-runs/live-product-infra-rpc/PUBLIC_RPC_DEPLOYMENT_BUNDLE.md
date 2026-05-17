@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Bundle
 
-Generated: 2026-05-17T09:20:31.1862609Z
+Generated: 2026-05-17T10:12:48.9521256Z
 Status: passed
 
 This bundle packages placeholder-only files for an owner-operated HTTPS edge in front of the repo-owned private RPC origin `127.0.0.1:8787`.
@@ -13,6 +13,8 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - flowchain-supervisor.service.template
 - nginx-preflight.template.sh
 - NGINX_PREFLIGHT.md
+- nginx-preflight.template.ps1
+- WINDOWS_NGINX_PREFLIGHT.md
 - owner-public-rpc.env.example
 - VERIFY.md
 - ROLLBACK.md
@@ -32,6 +34,7 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - <FLOWCHAIN_OWNER_ENV_FILE>
 - <FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR>
 - <FLOWCHAIN_RPC_NGINX_RENDERED_CONF>
+- <FLOWCHAIN_NGINX_EXE>
 - <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>
 - <FLOWCHAIN_SYSTEMD_RENDERED_UNIT>
 - <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>
@@ -69,6 +72,7 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - systemd-analyze verify <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>
 - nginx -t
 - bash <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>
+- powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>
 
 ## Rollback Commands
 
@@ -94,6 +98,8 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - systemdSupervisorTemplateWritten: True
 - nginxPreflightScriptWritten: True
 - nginxPreflightChecklistWritten: True
+- windowsNginxPreflightScriptWritten: True
+- windowsNginxPreflightChecklistWritten: True
 - ownerEnvExampleWritten: True
 - verifyRunbookWritten: True
 - rollbackRunbookWritten: True
@@ -103,11 +109,13 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - systemdLiveServiceTemplatePresent: True
 - systemdSupervisorTemplatePresent: True
 - nginxPreflightTokensPresent: True
+- windowsNginxPreflightTokensPresent: True
 - includesPrivateOrigin: True
 - includesRateLimitPlaceholder: True
 - includesTlsPlaceholders: True
 - includesCorsOriginForwarding: True
 - includesNginxConfigTest: True
+- includesWindowsNginxConfigTest: True
 - includesVerificationCommands: True
 - includesRollbackCommands: True
 - envExampleHasAllRequiredNames: True

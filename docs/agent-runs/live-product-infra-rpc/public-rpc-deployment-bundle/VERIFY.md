@@ -23,3 +23,4 @@ Run these on the owner host after DNS, TLS, allowed origins, rate limit, and bac
 - systemd-analyze verify <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>
 - nginx -t
 - bash <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>
+- powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>

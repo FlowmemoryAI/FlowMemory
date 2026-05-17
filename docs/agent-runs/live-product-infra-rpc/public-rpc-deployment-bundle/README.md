@@ -9,6 +9,8 @@ Files:
 - `flowchain-supervisor.service.template`: systemd unit template for continuous service autorecovery.
 - `nginx-preflight.template.sh`: Nginx config-test and public read preflight script template.
 - `NGINX_PREFLIGHT.md`: Nginx render, TLS, rate-limit, CORS, and reload checklist.
+- `nginx-preflight.template.ps1`: Windows Nginx config-test and public read preflight script template.
+- `WINDOWS_NGINX_PREFLIGHT.md`: Windows Nginx render, TLS, rate-limit, CORS, and reload checklist.
 - `owner-public-rpc.env.example`: local owner env-file shape with blank values.
 - `VERIFY.md`: pre-share verification commands.
 - `ROLLBACK.md`: rollback and emergency commands.

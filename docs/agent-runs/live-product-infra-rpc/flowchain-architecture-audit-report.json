@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-17T10:06:08.5592165Z",
+    "generatedAt":  "2026-05-17T10:12:58.4828271Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -147,7 +147,8 @@
                                     "infra/scripts/flowchain-public-rpc-edge-template.ps1",
                                     "infra/scripts/flowchain-public-rpc-deployment-bundle.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_EDGE_TEMPLATE.md",
-                                    "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_BUNDLE.md"
+                                    "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_BUNDLE.md",
+                                    "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle/WINDOWS_NGINX_PREFLIGHT.md"
                                 ],
                       "commands":  [
                                        "npm run flowchain:public-rpc:edge-template",
