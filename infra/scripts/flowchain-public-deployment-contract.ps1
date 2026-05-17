@@ -50,6 +50,7 @@ $paths = [ordered]@{
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
     alertInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
+    opsEscalationDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-escalation-dry-run-report.json"
     ownerOnboarding = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json"
     ownerSignupChecklist = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-signup-checklist-report.json"
     ownerEnvTemplate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-template-report.json"
@@ -287,6 +288,7 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:ops:snapshot -- -AllowBlocked",
     "npm run flowchain:ops:alerts -- -AllowBlocked",
     "npm run flowchain:ops:alerts:install:validate",
+    "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked",
     "npm run flowchain:owner:onboarding",
     "npm run flowchain:owner:signup-checklist",
     "npm run flowchain:owner-env:template",
@@ -317,6 +319,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "ops-snapshot" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-snapshot.ps1"), "-AllowBlocked", "-NoRefresh", "-ReportPath", $paths.opsSnapshot)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "ops-alert-rules" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-alerts.ps1"), "-AllowBlocked", "-NoRefresh", "-ReportPath", $paths.opsAlertRules)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "alert-install-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-alert-install-validation.ps1"), "-ReportPath", $paths.alertInstallValidation)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "ops-escalation-dry-run" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-escalation-dry-run.ps1"), "-AllowBlocked", "-NoRefresh", "-ReportPath", $paths.opsEscalationDryRun, "-OpsSnapshotPath", $paths.opsSnapshot, "-OpsAlertRulesPath", $paths.opsAlertRules)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-onboarding" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-onboarding.ps1"), "-ReportPath", $paths.ownerOnboarding)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-signup-checklist" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-signup-checklist.ps1"), "-ReportPath", $paths.ownerSignupChecklist)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-env-template" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-env-template.ps1"), "-ReportPath", $paths.ownerEnvTemplate)
@@ -636,6 +639,29 @@ Add-DeploymentItem -Items $items -Id "ops-alert-schedule-automation" `
     -Evidence "alertInstallValidation=$alertInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $alertInstallChecks -Name "planDidNotMutate"), hasAllowBlocked=$(Get-DeploymentProp -Object $alertInstallChecks -Name "hasAllowBlocked"), noExternalDelivery=$(Get-DeploymentProp -Object $alertInstallChecks -Name "noExternalDelivery")" `
     -Commands @("npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:alerts:install:windows -- -Action Plan", "npm run flowchain:ops:alerts:install:windows -- -Action Install", "npm run flowchain:ops:alerts:install:windows -- -Action Status", "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall")
 
+$opsEscalationDryRun = $reports.opsEscalationDryRun
+$opsEscalationDryRunStatus = Get-DeploymentStatus -Report $opsEscalationDryRun
+$opsEscalationChecks = Get-DeploymentProp -Object $opsEscalationDryRun -Name "checks"
+$opsEscalationFailedChecks = @((Get-DeploymentProp -Object $opsEscalationDryRun -Name "failedChecks" -Default @()))
+$opsEscalationReady = ($opsEscalationDryRunStatus -eq "passed") `
+    -and ($opsEscalationFailedChecks.Count -eq 0) `
+    -and ((Get-DeploymentProp -Object $opsEscalationChecks -Name "notificationPlanNoNetworkDelivery" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $opsEscalationChecks -Name "notificationPlanStoresNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $opsEscalationChecks -Name "notificationPlanOutOfRepo" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $opsEscalationChecks -Name "everyCurrentFindingMapped" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $opsEscalationChecks -Name "everyCurrentFindingHasCommands" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $opsEscalationChecks -Name "dryRunEventsDoNotSend" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $opsEscalationChecks -Name "dryRunEventsStoreNoCredentials" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $opsEscalationDryRun -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $opsEscalationDryRun -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $opsEscalationDryRun -Name "broadcasts" -Default $true) -eq $false) `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:ops:escalation:dry-run")
+Add-DeploymentItem -Items $items -Id "ops-escalation-dry-run" `
+    -Requirement "Owner deployment has a no-secret escalation dry run that maps every current ops finding to local operator actions while proving repo-owned alert evidence does not send network delivery or store external delivery credentials." `
+    -Status $(if ($opsEscalationReady) { "passed" } else { "failed" }) `
+    -Evidence "dryRun=$opsEscalationDryRunStatus, failedChecks=$($opsEscalationFailedChecks.Count), events=$(Get-DeploymentProp -Object $opsEscalationDryRun -Name "dryRunEventCount"), noNetworkDelivery=$(Get-DeploymentProp -Object $opsEscalationChecks -Name "notificationPlanNoNetworkDelivery"), storesNoSecrets=$(Get-DeploymentProp -Object $opsEscalationChecks -Name "notificationPlanStoresNoSecrets")" `
+    -Commands @("npm run flowchain:ops:escalation:dry-run -- -AllowBlocked")
+
 $ownerInputs = $reports.ownerInputs
 $ownerStatus = Get-DeploymentStatus -Report $ownerInputs
 $ownerReady = Get-DeploymentProp -Object $ownerInputs -Name "ownerInputReady" -Default $false
@@ -929,6 +955,7 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:ops:snapshot -- -AllowBlocked",
         "npm run flowchain:ops:alerts -- -AllowBlocked",
         "npm run flowchain:ops:alerts:install:validate",
+        "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked",
         "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
         "npm run flowchain:owner:onboarding",
         "npm run flowchain:owner-env:template",

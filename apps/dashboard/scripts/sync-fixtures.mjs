@@ -53,6 +53,7 @@ const liveReadinessReportCopies = [
   "ops-alert-rules-report.json",
   "incident-drill-report.json",
   "alert-install-validation-report.json",
+  "ops-escalation-dry-run-report.json",
   "owner-inputs-report.json",
   "no-secret-scan-report.json",
 ];
@@ -192,6 +193,7 @@ function writeLiveReadinessSummary() {
   const opsAlertRules = reports["ops-alert-rules-report.json"];
   const incidentDrill = reports["incident-drill-report.json"];
   const alertInstallValidation = reports["alert-install-validation-report.json"];
+  const opsEscalationDryRun = reports["ops-escalation-dry-run-report.json"];
   const ownerInputs = reports["owner-inputs-report.json"];
   const noSecretScan = reports["no-secret-scan-report.json"];
   const gates = [...liveReadinessGateLabels.keys()].map((id) => gateFromContractItem(contract, id));
@@ -256,6 +258,8 @@ function writeLiveReadinessSummary() {
       opsActiveRuleCount: activeRuleIds.length,
       incidentDrillStatus: asText(incidentDrill?.status, "not recorded"),
       alertInstallValidationStatus: asText(alertInstallValidation?.status, "not recorded"),
+      opsEscalationDryRunStatus: asText(opsEscalationDryRun?.status, "not recorded"),
+      opsEscalationDryRunEvents: asText(opsEscalationDryRun?.dryRunEventCount, "0"),
       statusCounts: statusCounts(gates),
     },
     ops: {
@@ -264,6 +268,8 @@ function writeLiveReadinessSummary() {
       alertState: asText(opsAlertRules?.currentAlertState, "not recorded"),
       incidentDrillStatus: asText(incidentDrill?.status, "not recorded"),
       alertInstallValidationStatus: asText(alertInstallValidation?.status, "not recorded"),
+      escalationDryRunStatus: asText(opsEscalationDryRun?.status, "not recorded"),
+      escalationDryRunEvents: asText(opsEscalationDryRun?.dryRunEventCount, "0"),
       bridgeRelayerGuardrailStatus: asText(opsSnapshot?.reportStatuses?.bridgeRelayerGuardrail ?? bridgeRelayerGuardrail?.status, "not recorded"),
       bridgeRelayerGuardrailReady: opsSnapshot?.reportStatuses?.bridgeRelayerGuardrailReady === true,
       criticalCount: asText(opsSnapshot?.criticalCount, "0"),
@@ -287,6 +293,13 @@ function writeLiveReadinessSummary() {
       incidentCommands: Object.fromEntries(
         recordEntries(opsSnapshot?.incidentCommands).map(([group, commands]) => [sanitizeText(group), commandList(commands, 10)]),
       ),
+      dryRunEvents: asArray(opsEscalationDryRun?.dryRunEvents).map((event) => ({
+        findingCode: sanitizeText(event?.findingCode),
+        severity: sanitizeText(event?.severity),
+        ruleId: sanitizeText(event?.ruleId),
+        signal: sanitizeText(event?.signal),
+        commands: commandList(event?.commands, 6),
+      })),
       sendsNetworkNotifications: opsAlertRules?.notificationPlan?.sendsNetworkNotifications === true,
       storesSecrets: opsAlertRules?.notificationPlan?.storesSecrets === true,
     },

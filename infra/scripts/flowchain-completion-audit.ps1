@@ -44,6 +44,7 @@ $paths = [ordered]@{
     publicRpcDeploymentAutomation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
+    opsEscalationDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-escalation-dry-run-report.json"
     incidentDrill = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json"
     publicDeploymentContract = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     architectureAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"
@@ -372,6 +373,9 @@ $incidentDrillExitCode = $incidentDrillResult.exitCode
 $opsSnapshotResult = Invoke-AuditChild -Path $paths.opsSnapshot -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-snapshot.ps1"), "-AllowBlocked", "-NoRefresh")
 $opsSnapshotOutput = @($opsSnapshotResult.output)
 $opsSnapshotExitCode = $opsSnapshotResult.exitCode
+$opsEscalationDryRunResult = Invoke-AuditChild -Path $paths.opsEscalationDryRun -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-escalation-dry-run.ps1"), "-NoRefresh")
+$opsEscalationDryRunOutput = @($opsEscalationDryRunResult.output)
+$opsEscalationDryRunExitCode = $opsEscalationDryRunResult.exitCode
 $publicDeploymentContractResult = Invoke-AuditChild -Path $paths.publicDeploymentContract -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-deployment-contract.ps1"), "-AllowBlocked", "-NoRefresh")
 $publicDeploymentContractOutput = @($publicDeploymentContractResult.output)
 $publicDeploymentContractExitCode = $publicDeploymentContractResult.exitCode
@@ -736,6 +740,24 @@ $opsSnapshotPassed = $opsSnapshotExitCode -eq 0 `
     -and $opsSnapshotCriticalCount -eq 0 `
     -and (-not [string]::IsNullOrWhiteSpace($opsSnapshotLatestHeight)) `
     -and (-not [string]::IsNullOrWhiteSpace($opsSnapshotFinalizedHeight))
+$opsEscalationDryRun = $reports.opsEscalationDryRun
+$opsEscalationDryRunStatus = Get-ReportStatus -Report $opsEscalationDryRun
+$opsEscalationDryRunChecks = Get-AuditProp -Object $opsEscalationDryRun -Name "checks"
+$opsEscalationDryRunFailedChecks = @((Get-AuditProp -Object $opsEscalationDryRun -Name "failedChecks" -Default @()))
+$opsEscalationDryRunEventCount = [int](Get-AuditProp -Object $opsEscalationDryRun -Name "dryRunEventCount" -Default 0)
+$opsEscalationDryRunPassed = $opsEscalationDryRunExitCode -eq 0 `
+    -and $opsEscalationDryRunStatus -eq "passed" `
+    -and $opsEscalationDryRunFailedChecks.Count -eq 0 `
+    -and $opsEscalationDryRunEventCount -ge 1 `
+    -and ((Get-AuditProp -Object $opsEscalationDryRunChecks -Name "notificationPlanNoNetworkDelivery" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsEscalationDryRunChecks -Name "notificationPlanStoresNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsEscalationDryRunChecks -Name "everyCurrentFindingMapped" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsEscalationDryRunChecks -Name "everyCurrentFindingHasCommands" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsEscalationDryRunChecks -Name "dryRunEventsDoNotSend" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsEscalationDryRunChecks -Name "dryRunEventsStoreNoCredentials" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsEscalationDryRun -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $opsEscalationDryRun -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsEscalationDryRun -Name "broadcasts" -Default $true) -eq $false)
 $incidentDrill = $reports.incidentDrill
 $incidentDrillStatus = Get-ReportStatus -Report $incidentDrill
 $incidentDrillReady = Get-AuditProp -Object $incidentDrill -Name "incidentDrillReady" -Default $false
@@ -994,6 +1016,12 @@ Add-AuditItem -Items $items -Id "ops-snapshot" `
     -Evidence "opsStatus=$opsSnapshotStatus, criticalCount=$opsSnapshotCriticalCount, blockedCount=$opsSnapshotBlockedCount, latestHeight=$opsSnapshotLatestHeight, finalizedHeight=$opsSnapshotFinalizedHeight, report=$($paths.opsSnapshot)" `
     -Commands @("npm run flowchain:ops:snapshot -- -AllowBlocked")
 
+Add-AuditItem -Items $items -Id "ops-escalation-dry-run" `
+    -Requirement "Ops escalation dry run maps every current finding to local operator commands and proves the repo-owned alert path does not send network delivery or store external delivery credentials." `
+    -Status $(if ($opsEscalationDryRunPassed) { "passed" } else { "failed" }) `
+    -Evidence "dryRunStatus=$opsEscalationDryRunStatus, events=$opsEscalationDryRunEventCount, failedChecks=$($opsEscalationDryRunFailedChecks.Count), noNetworkDelivery=$(Get-AuditProp -Object $opsEscalationDryRunChecks -Name "notificationPlanNoNetworkDelivery"), storesNoSecrets=$(Get-AuditProp -Object $opsEscalationDryRunChecks -Name "notificationPlanStoresNoSecrets"), report=$($paths.opsEscalationDryRun)" `
+    -Commands @("npm run flowchain:ops:escalation:dry-run -- -NoRefresh")
+
 Add-AuditItem -Items $items -Id "incident-drill" `
     -Requirement "Incident drills prove node-down, control-plane-down, stale-state, stalled-height, and no-secret failures classify as critical while owner-input blockers stay non-critical." `
     -Status $(if ($incidentDrillPassed) { "passed" } else { "failed" }) `
@@ -1124,6 +1152,8 @@ $report = [ordered]@{
     incidentDrillOutputRedacted = @($incidentDrillOutput | ForEach-Object { "$_" })
     opsSnapshotExitCode = $opsSnapshotExitCode
     opsSnapshotOutputRedacted = @($opsSnapshotOutput | ForEach-Object { "$_" })
+    opsEscalationDryRunExitCode = $opsEscalationDryRunExitCode
+    opsEscalationDryRunOutputRedacted = @($opsEscalationDryRunOutput | ForEach-Object { "$_" })
     publicDeploymentContractExitCode = $publicDeploymentContractExitCode
     publicDeploymentContractOutputRedacted = @($publicDeploymentContractOutput | ForEach-Object { "$_" })
     architectureAuditExitCode = $architectureAuditExitCode
@@ -1177,6 +1207,7 @@ $report = [ordered]@{
         "npm run flowchain:service:monitor",
         "npm run flowchain:dev-pack:e2e",
         "npm run flowchain:ops:snapshot",
+        "npm run flowchain:ops:escalation:dry-run",
         "npm run flowchain:ops:incident-drill",
         "npm run flowchain:live-infra:check",
         "npm run flowchain:bridge:diagnose:tx",

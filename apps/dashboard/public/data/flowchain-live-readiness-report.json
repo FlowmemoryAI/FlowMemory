@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-17T19:56:04.9915085Z",
+  "generatedAt": "2026-05-17T20:11:39.3801580Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -8,8 +8,8 @@
   "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
   "privateRpcUrl": "http://127.0.0.1:8787",
   "metrics": {
-    "latestHeight": "58713",
-    "finalizedHeight": "58713",
+    "latestHeight": "59354",
+    "finalizedHeight": "59354",
     "monitorHeightAdvanced": true,
     "bridgeRelayerStatus": "blocked",
     "bridgeQueuedTransactions": "0",
@@ -29,6 +29,8 @@
     "opsActiveRuleCount": 6,
     "incidentDrillStatus": "passed",
     "alertInstallValidationStatus": "passed",
+    "opsEscalationDryRunStatus": "passed",
+    "opsEscalationDryRunEvents": "6",
     "statusCounts": {
       "passed": 6,
       "blocked": 5
@@ -40,12 +42,14 @@
     "alertState": "blocked",
     "incidentDrillStatus": "passed",
     "alertInstallValidationStatus": "passed",
+    "escalationDryRunStatus": "passed",
+    "escalationDryRunEvents": "6",
     "bridgeRelayerGuardrailStatus": "passed",
     "bridgeRelayerGuardrailReady": true,
     "criticalCount": "0",
     "blockedCount": "6",
-    "latestHeight": "58581",
-    "finalizedHeight": "58581",
+    "latestHeight": "59354",
+    "finalizedHeight": "59354",
     "monitorStatus": "passed",
     "monitorHeightAdvanced": true,
     "findings": [
@@ -212,6 +216,70 @@
         "npm run flowchain:emergency:export-evidence"
       ]
     },
+    "dryRunEvents": [
+      {
+        "findingCode": "public-rpc-not-ready",
+        "severity": "blocked",
+        "ruleId": "public-rpc-not-shareable",
+        "signal": "Public RPC readiness gate is not passed.",
+        "commands": [
+          "npm run flowchain:public-rpc:check",
+          "npm run flowchain:public-rpc:validate",
+          "npm run flowchain:public-rpc:abuse-test"
+        ]
+      },
+      {
+        "findingCode": "backup-not-ready",
+        "severity": "blocked",
+        "ruleId": "backup-not-ready",
+        "signal": "State backup readiness is not passed.",
+        "commands": [
+          "npm run flowchain:backup:restore:validate",
+          "npm run flowchain:backup:check"
+        ]
+      },
+      {
+        "findingCode": "bridge-not-ready",
+        "severity": "blocked",
+        "ruleId": "bridge-not-ready",
+        "signal": "Base 8453 bridge readiness is not passed.",
+        "commands": [
+          "npm run flowchain:bridge:live:check",
+          "npm run flowchain:bridge:infra:check",
+          "npm run flowchain:bridge:emergency-stop"
+        ]
+      },
+      {
+        "findingCode": "bridge-relayer-not-ready",
+        "severity": "blocked",
+        "ruleId": "bridge-relayer-not-ready",
+        "signal": "Bridge relayer one-shot proof is not ready.",
+        "commands": [
+          "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+          "npm run flowchain:bridge:live:check",
+          "npm run flowchain:bridge:infra:check"
+        ]
+      },
+      {
+        "findingCode": "external-tester-not-shareable",
+        "severity": "blocked",
+        "ruleId": "external-tester-not-shareable",
+        "signal": "External tester packet is not shareable.",
+        "commands": [
+          "npm run flowchain:tester:readiness",
+          "npm run flowchain:external-tester:packet"
+        ]
+      },
+      {
+        "findingCode": "deployment-contract-not-ready",
+        "severity": "blocked",
+        "ruleId": "deployment-contract-not-ready",
+        "signal": "Public deployment contract is not passed.",
+        "commands": [
+          "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+        ]
+      }
+    ],
     "sendsNetworkNotifications": false,
     "storesSecrets": false
   },
@@ -381,7 +449,7 @@
       "label": "Private L1 origin",
       "status": "passed",
       "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
-      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=58713, finalizedHeight=58713",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=59354, finalizedHeight=59354",
       "commands": [
         "npm run flowchain:service:status"
       ],
@@ -564,11 +632,11 @@
       "npm run flowchain:ops:snapshot -- -AllowBlocked",
       "npm run flowchain:ops:alerts -- -AllowBlocked",
       "npm run flowchain:ops:alerts:install:validate",
+      "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked",
       "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
       "npm run flowchain:owner:onboarding",
       "npm run flowchain:owner-env:template",
-      "npm run flowchain:owner-inputs",
-      "npm run flowchain:public-rpc:edge-template"
+      "npm run flowchain:owner-inputs"
     ],
     "rollback": [
       "npm run flowchain:service:status",
@@ -588,7 +656,7 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T19:56:04.9915085Z"
+      "generatedAt": "2026-05-17T20:11:39.3801580Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
@@ -600,13 +668,13 @@
       "fileName": "service-status-report.json",
       "schema": "flowchain.service_status_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T19:17:54.5328816Z"
+      "generatedAt": "2026-05-17T20:07:54.9446086Z"
     },
     {
       "fileName": "service-monitor-report.json",
       "schema": "flowchain.service_monitor_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T19:07:35.3821420Z"
+      "generatedAt": "2026-05-17T20:07:55.2580144Z"
     },
     {
       "fileName": "public-rpc-deployment-bundle-report.json",
@@ -672,13 +740,13 @@
       "fileName": "ops-snapshot-report.json",
       "schema": "flowchain.ops_snapshot_report.v1",
       "status": "blocked",
-      "generatedAt": "2026-05-17T19:07:35.9481557Z"
+      "generatedAt": "2026-05-17T20:07:55.8132470Z"
     },
     {
       "fileName": "ops-alert-rules-report.json",
       "schema": "flowchain.ops_alert_rules_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T19:07:36.5527457Z"
+      "generatedAt": "2026-05-17T20:07:56.3912617Z"
     },
     {
       "fileName": "incident-drill-report.json",
@@ -691,6 +759,12 @@
       "schema": "flowchain.alert_install_validation_report.v0",
       "status": "passed",
       "generatedAt": "2026-05-17T16:24:18.6483945Z"
+    },
+    {
+      "fileName": "ops-escalation-dry-run-report.json",
+      "schema": "flowchain.ops_escalation_dry_run_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-17T20:08:27.7892340Z"
     },
     {
       "fileName": "owner-inputs-report.json",

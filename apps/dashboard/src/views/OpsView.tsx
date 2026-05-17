@@ -23,6 +23,14 @@ interface OpsRule {
   commands: string[];
 }
 
+interface OpsDryRunEvent {
+  findingCode: string;
+  severity: string;
+  ruleId: string;
+  signal: string;
+  commands: string[];
+}
+
 function isRecord(value: unknown): value is UnknownRecord {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
@@ -83,6 +91,16 @@ function parseIncidentCommands(ops: UnknownRecord | null): Array<{ group: string
   }));
 }
 
+function parseDryRunEvents(ops: UnknownRecord | null): OpsDryRunEvent[] {
+  return asArray(ops?.dryRunEvents).filter(isRecord).map((event) => ({
+    findingCode: text(event.findingCode, "ops-finding"),
+    severity: text(event.severity, "observed"),
+    ruleId: text(event.ruleId, "ops-rule"),
+    signal: text(event.signal, "Ops dry-run signal"),
+    commands: stringList(event.commands),
+  }));
+}
+
 export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
   const liveReadiness = isRecord(workbench.raw.liveReadinessReport) ? workbench.raw.liveReadinessReport : null;
   const metrics = isRecord(liveReadiness?.metrics) ? liveReadiness.metrics : {};
@@ -90,9 +108,12 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
   const findings = parseFindings(ops);
   const activeRules = parseRules(ops);
   const incidentCommands = parseIncidentCommands(ops);
+  const dryRunEvents = parseDryRunEvents(ops);
   const alertState = text(ops?.alertState ?? metrics.opsAlertState, "not recorded");
   const snapshotStatus = text(ops?.snapshotStatus ?? metrics.opsSnapshotStatus, "not recorded");
   const incidentDrillStatus = text(ops?.incidentDrillStatus ?? metrics.incidentDrillStatus, "not recorded");
+  const escalationDryRunStatus = text(ops?.escalationDryRunStatus ?? metrics.opsEscalationDryRunStatus, "not recorded");
+  const escalationDryRunEvents = text(ops?.escalationDryRunEvents ?? metrics.opsEscalationDryRunEvents, "0");
   const latestHeight = text(ops?.latestHeight ?? metrics.latestHeight);
   const criticalCount = text(ops?.criticalCount ?? metrics.opsCriticalCount, "0");
   const blockedCount = text(ops?.blockedCount ?? metrics.opsBlockedCount, "0");
@@ -139,6 +160,11 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
           <span>Incident drill</span>
           <strong>{incidentDrillStatus}</strong>
           <small>synthetic failures mapped</small>
+        </div>
+        <div>
+          <span>Escalation dry run</span>
+          <strong>{escalationDryRunStatus}</strong>
+          <small>{escalationDryRunEvents} mapped events</small>
         </div>
         <div>
           <span>Bridge guardrail</span>
@@ -241,6 +267,27 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
                 </details>
               ))}
             </div>
+          </article>
+
+          <article>
+            <div className="ops-side-heading">
+              <BellRing size={17} aria-hidden="true" />
+              <strong>Escalation dry run</strong>
+            </div>
+            {dryRunEvents.length > 0 ? (
+              <div className="ops-rule-list">
+                {dryRunEvents.map((event) => (
+                  <div key={`${event.findingCode}:${event.ruleId}`}>
+                    <span>{event.severity}</span>
+                    <strong>{event.findingCode}</strong>
+                    <small>{event.signal}</small>
+                    <code>{event.commands[0] ?? "not recorded"}</code>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <small>No dry-run escalation events are loaded.</small>
+            )}
           </article>
         </aside>
       </section>
