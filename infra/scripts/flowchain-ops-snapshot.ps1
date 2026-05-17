@@ -203,6 +203,17 @@ $bridgeRelayerGuardrailReady = $bridgeRelayerGuardrailStatus -eq "passed" `
     -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "noSecrets" -Default $false) -eq $true)
 $externalTesterStatus = Get-OpsStatus -Report $reports.externalTester
 $deploymentStatus = Get-OpsStatus -Report $reports.publicDeployment
+$deploymentRefresh = Get-OpsProp -Object $reports.publicDeployment -Name "dependencyRefresh"
+$deploymentRefreshAborted = (Get-OpsProp -Object $deploymentRefresh -Name "aborted" -Default $false) -eq $true
+$deploymentRefreshAbortStep = [string](Get-OpsProp -Object $deploymentRefresh -Name "abortStepName" -Default "")
+$deploymentRefreshAbortReason = [string](Get-OpsProp -Object $deploymentRefresh -Name "abortReason" -Default "")
+$deploymentRefreshFailedSteps = @((Get-OpsProp -Object $deploymentRefresh -Name "failedStepNames" -Default @()) | Where-Object { -not [string]::IsNullOrWhiteSpace([string] $_) })
+$deploymentRefreshTimedOutSteps = @((Get-OpsProp -Object $deploymentRefresh -Name "timedOutStepNames" -Default @()) | Where-Object { -not [string]::IsNullOrWhiteSpace([string] $_) })
+$deploymentRefreshSkippedSteps = @((Get-OpsProp -Object $deploymentRefresh -Name "skippedStepNames" -Default @()) | Where-Object { -not [string]::IsNullOrWhiteSpace([string] $_) })
+$deploymentRefreshUnsafe = $deploymentRefreshAborted `
+    -or $deploymentRefreshFailedSteps.Count -gt 0 `
+    -or $deploymentRefreshTimedOutSteps.Count -gt 0 `
+    -or $deploymentRefreshSkippedSteps.Count -gt 0
 $noSecretStatus = Get-OpsStatus -Report $reports.noSecret
 
 if ($publicRpcStatus -ne "passed") {
@@ -228,6 +239,9 @@ if (-not $bridgeRelayerGuardrailReady) {
 }
 if ($externalTesterStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "external-tester-not-shareable" -Message "External tester packet must remain not-shareable." -Commands @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet")
+}
+if ($deploymentRefreshUnsafe) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "deployment-refresh-aborted" -Message "Public deployment dependency refresh aborted or skipped dependency gates." -Commands @("npm run flowchain:public-deployment:contract -- -AllowBlocked", "npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked", "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh")
 }
 if ($deploymentStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "deployment-contract-not-ready" -Message "Public deployment contract is not ready." -Commands @("npm run flowchain:public-deployment:contract -- -AllowBlocked")
@@ -316,6 +330,12 @@ $report = [ordered]@{
         bridgeRelayerCursorReason = $bridgeRelayerCursorReason
         externalTester = $externalTesterStatus
         publicDeployment = $deploymentStatus
+        deploymentRefreshAborted = $deploymentRefreshAborted
+        deploymentRefreshAbortStep = $deploymentRefreshAbortStep
+        deploymentRefreshAbortReason = $deploymentRefreshAbortReason
+        deploymentRefreshFailedSteps = $deploymentRefreshFailedSteps
+        deploymentRefreshTimedOutSteps = $deploymentRefreshTimedOutSteps
+        deploymentRefreshSkippedSteps = $deploymentRefreshSkippedSteps
         noSecret = $noSecretStatus
     }
     findings = @($findings)

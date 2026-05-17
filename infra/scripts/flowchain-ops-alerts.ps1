@@ -138,6 +138,14 @@ $rules = @(
         commands = @("npm run flowchain:service:status", "npm run flowchain:bridge:relayer:loop:validate", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop", "npm run flowchain:bridge:emergency-stop")
     },
     [ordered]@{
+        id = "deployment-refresh-aborted"
+        severity = "critical"
+        findingCodes = @("deployment-refresh-aborted")
+        signal = "Public deployment dependency refresh aborted or skipped child gates."
+        threshold = "deployment contract dependencyRefresh is aborted, failed, timed out, or skipped"
+        commands = @("npm run flowchain:public-deployment:contract -- -AllowBlocked", "npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked", "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh")
+    },
+    [ordered]@{
         id = "public-rpc-not-shareable"
         severity = "blocked"
         findingCodes = @("public-rpc-not-ready")

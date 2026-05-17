@@ -1,13 +1,13 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-17T23:54:07.1697630Z",
+    "generatedAt":  "2026-05-17T23:53:56.1900143Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
                     "steps":  [
 
                               ],
-                    "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input"
+                    "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input"
                 },
     "chain":  {
                   "latestHeight":  "62010",
@@ -20,7 +20,7 @@
     "reportStatuses":  {
                            "serviceStatus":  "passed",
                            "serviceMonitor":  "passed",
-                           "bridgeRelayerLoop":  "running",
+                           "bridgeRelayerLoop":  "stopped",
                            "bridgeRelayerLoopReport":  "blocked",
                            "bridgeRelayerLoopReportFresh":  false,
                            "bridgeRelayerLoopReportHealthy":  false,
@@ -39,33 +39,22 @@
                            "bridgeRelayerCursorCommitted":  false,
                            "bridgeRelayerCursorReason":  "not-run",
                            "externalTester":  "blocked",
-                           "publicDeployment":  "blocked",
-                           "deploymentRefreshAborted":  false,
-                           "deploymentRefreshAbortStep":  "",
-                           "deploymentRefreshAbortReason":  "",
+                           "publicDeployment":  "failed",
+                           "deploymentRefreshAborted":  true,
+                           "deploymentRefreshAbortStep":  "service-status",
+                           "deploymentRefreshAbortReason":  "synthetic incident drill deployment refresh abort",
                            "deploymentRefreshFailedSteps":  [
-
+                                                                "service-status"
                                                             ],
                            "deploymentRefreshTimedOutSteps":  [
-
+                                                                  "service-status"
                                                               ],
                            "deploymentRefreshSkippedSteps":  [
-
+                                                                 "service-monitor"
                                                              ],
                            "noSecret":  "passed"
                        },
     "findings":  [
-                     {
-                         "severity":  "critical",
-                         "code":  "bridge-relayer-loop-unhealthy",
-                         "message":  "Bridge relayer loop is running without fresh no-secret/no-broadcast health evidence.",
-                         "commands":  [
-                                          "npm run flowchain:service:status",
-                                          "npm run flowchain:bridge:relayer:loop:validate",
-                                          "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop",
-                                          "npm run flowchain:bridge:emergency-stop"
-                                      ]
-                     },
                      {
                          "severity":  "blocked",
                          "code":  "public-rpc-not-ready",
@@ -115,6 +104,16 @@
                                       ]
                      },
                      {
+                         "severity":  "critical",
+                         "code":  "deployment-refresh-aborted",
+                         "message":  "Public deployment dependency refresh aborted or skipped dependency gates.",
+                         "commands":  [
+                                          "npm run flowchain:public-deployment:contract -- -AllowBlocked",
+                                          "npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked",
+                                          "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh"
+                                      ]
+                     },
+                     {
                          "severity":  "blocked",
                          "code":  "deployment-contract-not-ready",
                          "message":  "Public deployment contract is not ready.",
@@ -161,17 +160,17 @@
                                                    ]
                          },
     "reportPaths":  {
-                        "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\service-status-report.json",
-                        "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\service-monitor-report.json",
-                        "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\public-rpc-readiness-report.json",
-                        "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\backup-readiness-report.json",
-                        "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\bridge-live-readiness-report.json",
-                        "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\bridge-infra-readiness-report.json",
-                        "bridgeRelayer":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\bridge-relayer-once-report.json",
-                        "bridgeRelayerGuardrail":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\bridge-relayer-guardrail-validation-report.json",
-                        "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\external-tester-readiness-report.json",
-                        "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\public-deployment-contract-report.json",
-                        "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\no-secret-scan-report.json"
+                        "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\service-status-report.json",
+                        "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\service-monitor-report.json",
+                        "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\public-rpc-readiness-report.json",
+                        "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\backup-readiness-report.json",
+                        "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\bridge-live-readiness-report.json",
+                        "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\bridge-infra-readiness-report.json",
+                        "bridgeRelayer":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\bridge-relayer-once-report.json",
+                        "bridgeRelayerGuardrail":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\bridge-relayer-guardrail-validation-report.json",
+                        "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\external-tester-readiness-report.json",
+                        "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\public-deployment-contract-report.json",
+                        "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\no-secret-scan-report.json"
                     },
     "broadcasts":  false,
     "envValuesPrinted":  false,

@@ -1,6 +1,6 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-17T23:54:05.6488426Z
+Generated: 2026-05-17T23:53:56.1900143Z
 Status: failed
 Latest height: 62010
 Finalized height: 62010
@@ -11,8 +11,8 @@ Finalized height: 62010
 - blocked: backup-not-ready - State backup is not ready for public operation.
 - blocked: bridge-not-ready - Base 8453 bridge readiness is not ready for external funded testing.
 - blocked: bridge-relayer-not-ready - Bridge relayer one-shot proof is not ready.
-- critical: bridge-relayer-guardrail-failed - Bridge relayer fail-closed guardrail proof is not passed.
 - blocked: external-tester-not-shareable - External tester packet must remain not-shareable.
+- critical: deployment-refresh-aborted - Public deployment dependency refresh aborted or skipped dependency gates.
 - blocked: deployment-contract-not-ready - Public deployment contract is not ready.
 
 ## Incident Commands

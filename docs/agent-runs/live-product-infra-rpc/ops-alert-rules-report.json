@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-17T23:18:14.5258197Z",
+    "generatedAt":  "2026-05-17T23:53:14.2004410Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  15,
-    "criticalRuleCount":  9,
+    "ruleCount":  16,
+    "criticalRuleCount":  10,
     "blockedRuleCount":  6,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -41,6 +41,7 @@
                                 "bridge-relayer-cursor-unsafe",
                                 "bridge-relayer-guardrail-failed",
                                 "bridge-relayer-loop-unhealthy",
+                                "deployment-refresh-aborted",
                                 "public-rpc-not-ready",
                                 "backup-not-ready",
                                 "bridge-not-ready",
@@ -193,6 +194,20 @@
                                        "npm run flowchain:bridge:relayer:loop:validate",
                                        "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop",
                                        "npm run flowchain:bridge:emergency-stop"
+                                   ]
+                  },
+                  {
+                      "id":  "deployment-refresh-aborted",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "deployment-refresh-aborted"
+                                       ],
+                      "signal":  "Public deployment dependency refresh aborted or skipped child gates.",
+                      "threshold":  "deployment contract dependencyRefresh is aborted, failed, timed out, or skipped",
+                      "commands":  [
+                                       "npm run flowchain:public-deployment:contract -- -AllowBlocked",
+                                       "npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked",
+                                       "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh"
                                    ]
                   },
                   {

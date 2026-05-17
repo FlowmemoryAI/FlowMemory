@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-17T20:48:41.7010819Z",
+    "generatedAt":  "2026-05-17T23:54:04.1138375Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
@@ -10,9 +10,9 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\input"
                 },
     "chain":  {
-                  "latestHeight":  "59865",
-                  "finalizedHeight":  "59865",
-                  "stateFileLastWriteAgeSeconds":  5,
+                  "latestHeight":  "62010",
+                  "finalizedHeight":  "62010",
+                  "stateFileLastWriteAgeSeconds":  4,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true
@@ -40,6 +40,18 @@
                            "bridgeRelayerCursorReason":  "not-run",
                            "externalTester":  "blocked",
                            "publicDeployment":  "blocked",
+                           "deploymentRefreshAborted":  false,
+                           "deploymentRefreshAbortStep":  "",
+                           "deploymentRefreshAbortReason":  "",
+                           "deploymentRefreshFailedSteps":  [
+
+                                                            ],
+                           "deploymentRefreshTimedOutSteps":  [
+
+                                                              ],
+                           "deploymentRefreshSkippedSteps":  [
+
+                                                             ],
                            "noSecret":  "failed"
                        },
     "findings":  [

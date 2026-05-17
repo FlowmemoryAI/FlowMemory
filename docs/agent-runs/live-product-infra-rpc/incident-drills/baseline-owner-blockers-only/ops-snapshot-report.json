@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-17T20:48:31.7955924Z",
+    "generatedAt":  "2026-05-17T23:53:54.2908550Z",
     "status":  "blocked",
     "refresh":  {
                     "performed":  false,
@@ -10,9 +10,9 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input"
                 },
     "chain":  {
-                  "latestHeight":  "59354",
-                  "finalizedHeight":  "59354",
-                  "stateFileLastWriteAgeSeconds":  5,
+                  "latestHeight":  "62010",
+                  "finalizedHeight":  "62010",
+                  "stateFileLastWriteAgeSeconds":  4,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true
@@ -21,12 +21,12 @@
                            "serviceStatus":  "passed",
                            "serviceMonitor":  "passed",
                            "bridgeRelayerLoop":  "stopped",
-                           "bridgeRelayerLoopReport":  "missing",
+                           "bridgeRelayerLoopReport":  "blocked",
                            "bridgeRelayerLoopReportFresh":  false,
                            "bridgeRelayerLoopReportHealthy":  false,
-                           "bridgeRelayerLoopReportNoSecrets":  false,
-                           "bridgeRelayerLoopReportNoBroadcasts":  false,
-                           "bridgeRelayerLoopBlockedOnlyOnOwnerInputs":  false,
+                           "bridgeRelayerLoopReportNoSecrets":  true,
+                           "bridgeRelayerLoopReportNoBroadcasts":  true,
+                           "bridgeRelayerLoopBlockedOnlyOnOwnerInputs":  true,
                            "publicRpc":  "blocked",
                            "backup":  "blocked",
                            "bridgeLive":  "blocked",
@@ -40,6 +40,18 @@
                            "bridgeRelayerCursorReason":  "not-run",
                            "externalTester":  "blocked",
                            "publicDeployment":  "blocked",
+                           "deploymentRefreshAborted":  false,
+                           "deploymentRefreshAbortStep":  "",
+                           "deploymentRefreshAbortReason":  "",
+                           "deploymentRefreshFailedSteps":  [
+
+                                                            ],
+                           "deploymentRefreshTimedOutSteps":  [
+
+                                                              ],
+                           "deploymentRefreshSkippedSteps":  [
+
+                                                             ],
                            "noSecret":  "passed"
                        },
     "findings":  [

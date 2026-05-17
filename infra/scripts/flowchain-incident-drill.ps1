@@ -313,6 +313,29 @@ Invoke-SyntheticOpsCase -Id "baseline-owner-blockers-only" `
     -ExpectedStatus "blocked" `
     -ExpectedCodes @("public-rpc-not-ready", "backup-not-ready", "bridge-not-ready", "external-tester-not-shareable", "deployment-contract-not-ready")
 
+Invoke-SyntheticOpsCase -Id "deployment-refresh-aborted-critical" `
+    -Requirement "A public deployment dependency refresh abort is classified as a critical incident with recovery commands." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("deployment-refresh-aborted") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "public-deployment-contract-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "failed"
+            $refresh = Get-DrillProp -Object $report -Name "dependencyRefresh"
+            if ($null -eq $refresh) {
+                $refresh = [ordered]@{}
+                Set-DrillProp -Object $report -Name "dependencyRefresh" -Value $refresh
+            }
+            Set-DrillProp -Object $refresh -Name "aborted" -Value $true
+            Set-DrillProp -Object $refresh -Name "abortStepName" -Value "service-status"
+            Set-DrillProp -Object $refresh -Name "abortReason" -Value "synthetic incident drill deployment refresh abort"
+            Set-DrillProp -Object $refresh -Name "failedStepNames" -Value @("service-status")
+            Set-DrillProp -Object $refresh -Name "timedOutStepNames" -Value @("service-status")
+            Set-DrillProp -Object $refresh -Name "skippedStepNames" -Value @("service-monitor")
+        }
+    }
+
 Invoke-SyntheticOpsCase -Id "node-down-critical" `
     -Requirement "A stopped block-producing node is classified as a critical incident with restart commands." `
     -ExpectedStatus "failed" `
@@ -503,6 +526,7 @@ $report = [ordered]@{
     }
     requiredScenarios = @(
         "baseline-owner-blockers-only",
+        "deployment-refresh-aborted-critical",
         "node-down-critical",
         "control-plane-down-critical",
         "stale-state-critical",

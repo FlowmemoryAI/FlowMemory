@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-17T20:48:39.8892112Z",
+    "generatedAt":  "2026-05-17T23:54:02.5270896Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
@@ -10,9 +10,9 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\height-not-advancing-critical\\input"
                 },
     "chain":  {
-                  "latestHeight":  "59865",
-                  "finalizedHeight":  "59865",
-                  "stateFileLastWriteAgeSeconds":  5,
+                  "latestHeight":  "62010",
+                  "finalizedHeight":  "62010",
+                  "stateFileLastWriteAgeSeconds":  4,
                   "monitorStatus":  "failed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  false
@@ -40,6 +40,18 @@
                            "bridgeRelayerCursorReason":  "not-run",
                            "externalTester":  "blocked",
                            "publicDeployment":  "blocked",
+                           "deploymentRefreshAborted":  false,
+                           "deploymentRefreshAbortStep":  "",
+                           "deploymentRefreshAbortReason":  "",
+                           "deploymentRefreshFailedSteps":  [
+
+                                                            ],
+                           "deploymentRefreshTimedOutSteps":  [
+
+                                                              ],
+                           "deploymentRefreshSkippedSteps":  [
+
+                                                             ],
                            "noSecret":  "passed"
                        },
     "findings":  [

@@ -1,7 +1,7 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
     "generatedAt":  "2026-05-17T23:47:05.9661811Z",
-    "status":  "blocked",
+    "status":  "failed",
     "deploymentReady":  false,
     "packetShareable":  false,
     "packetExecutableSmokeValidated":  true,
@@ -453,21 +453,21 @@
                               "delegatedToCaller":  true,
                               "childTimeoutSeconds":  1800,
                               "failurePolicy":  "stop-after-first-refresh-failure-or-timeout",
-                              "aborted":  false,
-                              "abortStepName":  "",
-                              "abortReason":  "",
+                              "aborted":  true,
+                              "abortStepName":  "service-status",
+                              "abortReason":  "synthetic incident drill deployment refresh abort",
                               "stepCount":  0,
                               "completedStepCount":  0,
                               "skippedStepCount":  0,
                               "totalDurationSeconds":  0,
                               "failedStepNames":  [
-
+                                                      "service-status"
                                                   ],
                               "timedOutStepNames":  [
-
+                                                        "service-status"
                                                     ],
                               "skippedStepNames":  [
-
+                                                       "service-monitor"
                                                    ],
                               "steps":  [
 

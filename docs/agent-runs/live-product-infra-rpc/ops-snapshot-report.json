@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-17T23:18:13.0349484Z",
+    "generatedAt":  "2026-05-17T23:53:09.4162257Z",
     "status":  "blocked",
     "refresh":  {
                     "performed":  false,
@@ -10,9 +10,9 @@
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "61752",
-                  "finalizedHeight":  "61752",
-                  "stateFileLastWriteAgeSeconds":  1,
+                  "latestHeight":  "62010",
+                  "finalizedHeight":  "62010",
+                  "stateFileLastWriteAgeSeconds":  4,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true
@@ -40,6 +40,18 @@
                            "bridgeRelayerCursorReason":  "not-run",
                            "externalTester":  "blocked",
                            "publicDeployment":  "blocked",
+                           "deploymentRefreshAborted":  false,
+                           "deploymentRefreshAbortStep":  "",
+                           "deploymentRefreshAbortReason":  "",
+                           "deploymentRefreshFailedSteps":  [
+
+                                                            ],
+                           "deploymentRefreshTimedOutSteps":  [
+
+                                                              ],
+                           "deploymentRefreshSkippedSteps":  [
+
+                                                             ],
                            "noSecret":  "passed"
                        },
     "findings":  [
