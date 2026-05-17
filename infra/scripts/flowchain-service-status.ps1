@@ -4,6 +4,8 @@ param(
     [string] $ServicesDir = "devnet/local/services",
     [string] $ControlPlaneHost = "127.0.0.1",
     [int] $ControlPlanePort = 8787,
+    [string] $RelayerReportPath = "devnet/local/bridge-live-readiness/bridge-relayer-loop-report.json",
+    [int] $RelayerReportMaxAgeSeconds = 180,
     [string] $ReportPath = "docs/agent-runs/live-product-infra-rpc/service-status-report.json",
     [switch] $AllowBlocked
 )
@@ -19,6 +21,7 @@ $stateFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resol
 $nodeFullDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $NodeDir)
 $servicesFullDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ServicesDir)
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
+$relayerReportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $RelayerReportPath)
 $controlPlaneScriptPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "services/control-plane/src/server.ts")
 
 $nodePidPath = Join-Path $nodeFullDir "flowchain-node.pid"
@@ -78,6 +81,44 @@ $publicReadinessReport = Read-FlowChainJsonIfExists -Path (Resolve-FlowChainPath
 $backupReadinessReport = Read-FlowChainJsonIfExists -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json")
 $bridgeLiveReport = Read-FlowChainJsonIfExists -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/bridge-live-readiness/bridge-live-readiness-report.json")
 $bridgeInfraReport = Read-FlowChainJsonIfExists -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json")
+$relayerLoopReport = Read-FlowChainJsonIfExists -Path $relayerReportFullPath
+
+function Get-ServiceStatusProp {
+    param(
+        [AllowNull()][object] $Object,
+        [Parameter(Mandatory = $true)][string] $Name,
+        [object] $Default = $null
+    )
+
+    if ($null -ne $Object -and $Object.PSObject.Properties.Name -contains $Name) {
+        return $Object.$Name
+    }
+    return $Default
+}
+
+function Get-ServiceStatusFileAgeSeconds {
+    param([Parameter(Mandatory = $true)][string] $Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return $null
+    }
+    return [math]::Round(((Get-Date).ToUniversalTime() - (Get-Item -LiteralPath $Path).LastWriteTimeUtc).TotalSeconds, 3)
+}
+
+if ($RelayerReportMaxAgeSeconds -lt 5) {
+    throw "RelayerReportMaxAgeSeconds must be at least 5."
+}
+
+$relayerLoopReportAgeSeconds = Get-ServiceStatusFileAgeSeconds -Path $relayerReportFullPath
+$relayerLoopReportStatus = if ($null -ne $relayerLoopReport) { [string](Get-ServiceStatusProp -Object $relayerLoopReport -Name "status" -Default "missing") } else { "missing" }
+$relayerLoopReportFresh = $null -ne $relayerLoopReportAgeSeconds -and [double]$relayerLoopReportAgeSeconds -le $RelayerReportMaxAgeSeconds
+$relayerLoopReportAcceptableStatus = $relayerLoopReportStatus -in @("passed", "blocked")
+$relayerLoopIssues = @(Get-ServiceStatusProp -Object $relayerLoopReport -Name "issues" -Default @())
+$relayerLoopCodeIssues = @($relayerLoopIssues | Where-Object { [string](Get-ServiceStatusProp -Object $_ -Name "kind" -Default "") -eq "code" })
+$relayerLoopBlockedOnlyOnOwnerInputs = if ($relayerLoopReportStatus -eq "blocked") { $relayerLoopCodeIssues.Count -eq 0 } else { $relayerLoopReportAcceptableStatus }
+$relayerLoopReportNoSecrets = $null -ne $relayerLoopReport -and (Get-ServiceStatusProp -Object $relayerLoopReport -Name "noSecrets" -Default $false) -eq $true -and (Get-ServiceStatusProp -Object $relayerLoopReport -Name "envValuesPrinted" -Default $true) -eq $false
+$relayerLoopReportNoBroadcasts = $null -ne $relayerLoopReport -and (Get-ServiceStatusProp -Object $relayerLoopReport -Name "broadcasts" -Default $true) -eq $false
+$relayerLoopReportHealthy = $relayerLoopReportFresh -and $relayerLoopReportAcceptableStatus -and $relayerLoopBlockedOnlyOnOwnerInputs -and $relayerLoopReportNoSecrets -and $relayerLoopReportNoBroadcasts
 
 $problems = New-Object System.Collections.ArrayList
 if (-not $nodeStatus.running) {
@@ -96,6 +137,26 @@ if ($null -ne $controlPlanePortProcess -and -not $controlPlaneReady) {
 }
 if (-not $stateFacts.readable) {
     Add-FlowChainReadinessProblem -Problems $problems -Name "devnet/local/state.json" -Reason "state file is missing or unreadable" -Category "artifact"
+}
+if ($relayerStatus.running) {
+    if ($null -eq $relayerLoopReport) {
+        Add-FlowChainReadinessProblem -Problems $problems -Name $RelayerReportPath -Reason "bridge relayer loop is running but no loop report has been written yet" -Category "artifact"
+    }
+    elseif (-not $relayerLoopReportFresh) {
+        Add-FlowChainReadinessProblem -Problems $problems -Name $RelayerReportPath -Reason "bridge relayer loop report is stale; ageSeconds=$relayerLoopReportAgeSeconds maxAgeSeconds=$RelayerReportMaxAgeSeconds" -Kind "failed" -Category "artifact"
+    }
+    elseif (-not $relayerLoopReportAcceptableStatus) {
+        Add-FlowChainReadinessProblem -Problems $problems -Name $RelayerReportPath -Reason "bridge relayer loop report status is $relayerLoopReportStatus" -Kind "failed" -Category "artifact"
+    }
+    elseif (-not $relayerLoopBlockedOnlyOnOwnerInputs) {
+        Add-FlowChainReadinessProblem -Problems $problems -Name $RelayerReportPath -Reason "bridge relayer loop blocked state includes code-owned issues" -Kind "failed" -Category "artifact"
+    }
+    elseif (-not $relayerLoopReportNoSecrets) {
+        Add-FlowChainReadinessProblem -Problems $problems -Name $RelayerReportPath -Reason "bridge relayer loop report did not prove no-secret output" -Kind "failed" -Category "security"
+    }
+    elseif (-not $relayerLoopReportNoBroadcasts) {
+        Add-FlowChainReadinessProblem -Problems $problems -Name $RelayerReportPath -Reason "bridge relayer loop report did not prove no-broadcast operation" -Kind "failed" -Category "bridge"
+    }
 }
 
 $liveProfile = $false
@@ -143,6 +204,19 @@ $report = [ordered]@{
         pid = $relayerStatus.pid
         pidPath = "devnet/local/services/bridge-relayer-loop.pid"
         commandLineMatched = $relayerStatus.commandLineMatched
+        report = [ordered]@{
+            path = $RelayerReportPath
+            status = $relayerLoopReportStatus
+            ageSeconds = $relayerLoopReportAgeSeconds
+            maxAgeSeconds = $RelayerReportMaxAgeSeconds
+            fresh = $relayerLoopReportFresh
+            acceptableStatus = $relayerLoopReportAcceptableStatus
+            blockedOnlyOnOwnerInputs = $relayerLoopBlockedOnlyOnOwnerInputs
+            codeIssueCount = $relayerLoopCodeIssues.Count
+            noSecrets = $relayerLoopReportNoSecrets
+            noBroadcasts = $relayerLoopReportNoBroadcasts
+            healthy = $relayerLoopReportHealthy
+        }
     }
     serviceProfile = [ordered]@{
         liveProfile = $liveProfile
@@ -178,6 +252,7 @@ Write-FlowChainJson -Path $reportFullPath -Value $report -Depth 16
 Write-Host "FlowChain service status: $status"
 Write-Host "Node: $($report.node.status) PID=$($report.node.pid)"
 Write-Host "Control plane: $($report.controlPlane.status) PID=$($report.controlPlane.pid) bind=$ControlPlaneHost`:$ControlPlanePort"
+Write-Host "Bridge relayer loop: $($report.bridgeRelayerLoop.status) report=$($report.bridgeRelayerLoop.report.status) healthy=$($report.bridgeRelayerLoop.report.healthy)"
 Write-Host "Public readiness: $($report.publicReadinessStatus)"
 Write-Host "Latest height: $($report.chain.latestHeight)"
 Write-Host "Finalized height: $($report.chain.finalizedHeight)"

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-17T20:25:59.8479147Z",
+    "generatedAt":  "2026-05-17T20:44:03.9110026Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -255,9 +255,9 @@
                   {
                       "id":  "bridge-relayer-runtime-queue",
                       "layer":  "Bridge",
-                      "requirement":  "The live bridge relayer path checks owner guardrails, validates the isolated relayer loop start/stop path, observes Base 8453 deposits with a staged cursor, builds runtime handoff, filters already-seen replay keys, queues new credits into the running L1, waits for main-state credit evidence, commits the Base cursor only after safe proof without broadcasts, and proves missing-owner-input runs leave cursor state untouched.",
+                      "requirement":  "The live bridge relayer path checks owner guardrails, validates the isolated relayer loop start/stop path plus fresh no-secret/no-broadcast loop health, observes Base 8453 deposits with a staged cursor, builds runtime handoff, filters already-seen replay keys, queues new credits into the running L1, waits for main-state credit evidence, commits the Base cursor only after safe proof without broadcasts, and proves missing-owner-input runs leave cursor state untouched.",
                       "status":  "blocked",
-                      "evidence":  "relayer=blocked, guardrail=passed, loopValidation=passed, loopFailedChecks=0, observed=0, new=0, queued=0, applied=0, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run",
+                      "evidence":  "relayer=blocked, guardrail=passed, loopValidation=passed, loopFailedChecks=0, loopReportHealthy=True, observed=0, new=0, queued=0, applied=0, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run",
                       "files":  [
                                     "infra/scripts/flowchain-bridge-live-check.ps1",
                                     "infra/scripts/flowchain-live-env-bridge-readiness.ps1",

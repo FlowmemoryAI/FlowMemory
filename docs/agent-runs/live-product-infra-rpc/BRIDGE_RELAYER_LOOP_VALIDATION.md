@@ -1,6 +1,6 @@
 ﻿# FlowChain Bridge Relayer Loop Validation
 
-Generated: 2026-05-17T19:55:42.7930100Z
+Generated: 2026-05-17T20:41:09.7434978Z
 Status: passed
 
 This validation starts an isolated live service with the bridge relayer loop enabled, verifies the loop is reported as running, then stops the service and confirms the relayer loop is not left running.
@@ -18,6 +18,12 @@ This validation starts an isolated live service with the bridge relayer loop ena
 - statusCommandPassed: True
 - statusReportsRelayerRunning: True
 - statusRelayerCommandLineMatched: True
+- statusRelayerReportFresh: True
+- statusRelayerReportAcceptable: True
+- statusRelayerReportBlockedOnlyOnOwnerInputs: True
+- statusRelayerReportNoSecrets: True
+- statusRelayerReportNoBroadcasts: True
+- statusRelayerReportHealthy: True
 - stopCommandPassed: True
 - stopPreservedState: True
 - stopHandledRelayerLoop: True

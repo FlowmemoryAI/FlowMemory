@@ -218,6 +218,7 @@ try {
     $statusRelayer = Get-RelayerLoopProp -Object $statusAfterStart -Name "bridgeRelayerLoop"
     $stopRelayer = Get-RelayerLoopProp -Object $stopReport -Name "bridgeRelayerLoop" -Default ""
     $statusAfterStopRelayer = Get-RelayerLoopProp -Object $statusAfterStop -Name "bridgeRelayerLoop"
+    $statusRelayerReport = Get-RelayerLoopProp -Object $statusRelayer -Name "report"
 
     $checks = [ordered]@{
         startCommandPassed = [int]$startStep[0].result.exitCode -eq 0
@@ -231,6 +232,12 @@ try {
         statusCommandPassed = [int]$statusStep[0].result.exitCode -eq 0
         statusReportsRelayerRunning = [string](Get-RelayerLoopProp -Object $statusRelayer -Name "status" -Default "") -eq "running"
         statusRelayerCommandLineMatched = (Get-RelayerLoopProp -Object $statusRelayer -Name "commandLineMatched" -Default $false) -eq $true
+        statusRelayerReportFresh = (Get-RelayerLoopProp -Object $statusRelayerReport -Name "fresh" -Default $false) -eq $true
+        statusRelayerReportAcceptable = (Get-RelayerLoopProp -Object $statusRelayerReport -Name "acceptableStatus" -Default $false) -eq $true
+        statusRelayerReportBlockedOnlyOnOwnerInputs = (Get-RelayerLoopProp -Object $statusRelayerReport -Name "blockedOnlyOnOwnerInputs" -Default $false) -eq $true
+        statusRelayerReportNoSecrets = (Get-RelayerLoopProp -Object $statusRelayerReport -Name "noSecrets" -Default $false) -eq $true
+        statusRelayerReportNoBroadcasts = (Get-RelayerLoopProp -Object $statusRelayerReport -Name "noBroadcasts" -Default $false) -eq $true
+        statusRelayerReportHealthy = (Get-RelayerLoopProp -Object $statusRelayerReport -Name "healthy" -Default $false) -eq $true
         stopCommandPassed = [int]$stopStep[0].result.exitCode -eq 0
         stopPreservedState = (Get-RelayerLoopProp -Object $stopReport -Name "statePreserved" -Default $false) -eq $true
         stopHandledRelayerLoop = [string]$stopRelayer -in @("stopped", "not-running")
