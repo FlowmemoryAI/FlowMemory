@@ -133,9 +133,18 @@ $serviceStatus = Get-OpsStatus -Report $service
 $monitorStatus = Get-OpsStatus -Report $monitor
 $node = Get-OpsProp -Object $service -Name "node"
 $controlPlane = Get-OpsProp -Object $service -Name "controlPlane"
+$bridgeRelayerLoop = Get-OpsProp -Object $service -Name "bridgeRelayerLoop"
+$bridgeRelayerLoopReport = Get-OpsProp -Object $bridgeRelayerLoop -Name "report"
 $chain = Get-OpsProp -Object $service -Name "chain"
 $nodeStatus = [string](Get-OpsProp -Object $node -Name "status" -Default "missing")
 $controlPlaneStatus = [string](Get-OpsProp -Object $controlPlane -Name "status" -Default "missing")
+$bridgeRelayerLoopStatus = [string](Get-OpsProp -Object $bridgeRelayerLoop -Name "status" -Default "stopped")
+$bridgeRelayerLoopReportStatus = [string](Get-OpsProp -Object $bridgeRelayerLoopReport -Name "status" -Default "missing")
+$bridgeRelayerLoopReportFresh = Get-OpsProp -Object $bridgeRelayerLoopReport -Name "fresh" -Default $false
+$bridgeRelayerLoopReportHealthy = Get-OpsProp -Object $bridgeRelayerLoopReport -Name "healthy" -Default $false
+$bridgeRelayerLoopReportNoSecrets = Get-OpsProp -Object $bridgeRelayerLoopReport -Name "noSecrets" -Default $false
+$bridgeRelayerLoopReportNoBroadcasts = Get-OpsProp -Object $bridgeRelayerLoopReport -Name "noBroadcasts" -Default $false
+$bridgeRelayerLoopReportBlockedOnlyOnOwnerInputs = Get-OpsProp -Object $bridgeRelayerLoopReport -Name "blockedOnlyOnOwnerInputs" -Default $false
 $latestHeight = [string](Get-OpsProp -Object $chain -Name "latestHeight" -Default "")
 $finalizedHeight = [string](Get-OpsProp -Object $chain -Name "finalizedHeight" -Default "")
 $stateAge = [int](Get-OpsProp -Object $chain -Name "stateFileLastWriteAgeSeconds" -Default 999999)
@@ -159,6 +168,9 @@ if ($stateAge -gt $MonitorMaxStateAgeSeconds) {
 }
 if ($monitorStatus -ne "passed" -or $monitorHeightAdvanced -ne $true -or $monitorSamples -lt 2) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "height-not-advancing" -Message "Service monitor did not prove advancing block height." -Commands @("npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30", "npm run flowchain:service:restart -- -LiveProfile")
+}
+if ($bridgeRelayerLoopStatus -eq "running" -and $bridgeRelayerLoopReportHealthy -ne $true) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-relayer-loop-unhealthy" -Message "Bridge relayer loop is running without fresh no-secret/no-broadcast health evidence." -Commands @("npm run flowchain:service:status", "npm run flowchain:bridge:relayer:loop:validate", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop", "npm run flowchain:bridge:emergency-stop")
 }
 
 $publicRpcStatus = Get-OpsStatus -Report $reports.publicRpc
@@ -257,6 +269,11 @@ $incidentCommands = [ordered]@{
         "npm run flowchain:bridge:emergency-stop",
         "npm run flowchain:emergency:export-evidence"
     )
+    bridgeRelayerLoop = @(
+        "npm run flowchain:service:status",
+        "npm run flowchain:bridge:relayer:loop:validate",
+        "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop"
+    )
 }
 
 $report = [ordered]@{
@@ -279,6 +296,13 @@ $report = [ordered]@{
     reportStatuses = [ordered]@{
         serviceStatus = $serviceStatus
         serviceMonitor = $monitorStatus
+        bridgeRelayerLoop = $bridgeRelayerLoopStatus
+        bridgeRelayerLoopReport = $bridgeRelayerLoopReportStatus
+        bridgeRelayerLoopReportFresh = $bridgeRelayerLoopReportFresh
+        bridgeRelayerLoopReportHealthy = $bridgeRelayerLoopReportHealthy
+        bridgeRelayerLoopReportNoSecrets = $bridgeRelayerLoopReportNoSecrets
+        bridgeRelayerLoopReportNoBroadcasts = $bridgeRelayerLoopReportNoBroadcasts
+        bridgeRelayerLoopBlockedOnlyOnOwnerInputs = $bridgeRelayerLoopReportBlockedOnlyOnOwnerInputs
         publicRpc = $publicRpcStatus
         backup = $backupStatus
         bridgeLive = $bridgeLiveStatus

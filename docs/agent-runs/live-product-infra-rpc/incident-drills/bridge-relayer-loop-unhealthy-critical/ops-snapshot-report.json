@@ -1,13 +1,13 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-17T20:48:36.2108308Z",
+    "generatedAt":  "2026-05-17T20:48:45.4332919Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
                     "steps":  [
 
                               ],
-                    "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input"
+                    "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input"
                 },
     "chain":  {
                   "latestHeight":  "59865",
@@ -18,9 +18,9 @@
                   "monitorHeightAdvanced":  true
               },
     "reportStatuses":  {
-                           "serviceStatus":  "failed",
+                           "serviceStatus":  "passed",
                            "serviceMonitor":  "passed",
-                           "bridgeRelayerLoop":  "stopped",
+                           "bridgeRelayerLoop":  "running",
                            "bridgeRelayerLoopReport":  "blocked",
                            "bridgeRelayerLoopReportFresh":  false,
                            "bridgeRelayerLoopReportHealthy":  false,
@@ -45,19 +45,13 @@
     "findings":  [
                      {
                          "severity":  "critical",
-                         "code":  "service-status-not-passed",
-                         "message":  "FlowChain service status is not passed.",
+                         "code":  "bridge-relayer-loop-unhealthy",
+                         "message":  "Bridge relayer loop is running without fresh no-secret/no-broadcast health evidence.",
                          "commands":  [
                                           "npm run flowchain:service:status",
-                                          "npm run flowchain:service:restart -- -LiveProfile"
-                                      ]
-                     },
-                     {
-                         "severity":  "critical",
-                         "code":  "control-plane-not-running",
-                         "message":  "The control-plane RPC service is not running.",
-                         "commands":  [
-                                          "npm run flowchain:service:restart -- -LiveProfile"
+                                          "npm run flowchain:bridge:relayer:loop:validate",
+                                          "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop",
+                                          "npm run flowchain:bridge:emergency-stop"
                                       ]
                      },
                      {
@@ -117,7 +111,7 @@
                                       ]
                      }
                  ],
-    "criticalCount":  2,
+    "criticalCount":  1,
     "blockedCount":  6,
     "incidentCommands":  {
                              "status":  [
@@ -155,17 +149,17 @@
                                                    ]
                          },
     "reportPaths":  {
-                        "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\service-status-report.json",
-                        "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\service-monitor-report.json",
-                        "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\public-rpc-readiness-report.json",
-                        "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\backup-readiness-report.json",
-                        "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\bridge-live-readiness-report.json",
-                        "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\bridge-infra-readiness-report.json",
-                        "bridgeRelayer":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\bridge-relayer-once-report.json",
-                        "bridgeRelayerGuardrail":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\bridge-relayer-guardrail-validation-report.json",
-                        "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\external-tester-readiness-report.json",
-                        "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\public-deployment-contract-report.json",
-                        "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\input\\no-secret-scan-report.json"
+                        "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\service-status-report.json",
+                        "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\service-monitor-report.json",
+                        "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\public-rpc-readiness-report.json",
+                        "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\backup-readiness-report.json",
+                        "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\bridge-live-readiness-report.json",
+                        "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\bridge-infra-readiness-report.json",
+                        "bridgeRelayer":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\bridge-relayer-once-report.json",
+                        "bridgeRelayerGuardrail":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\bridge-relayer-guardrail-validation-report.json",
+                        "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\external-tester-readiness-report.json",
+                        "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\public-deployment-contract-report.json",
+                        "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\no-secret-scan-report.json"
                     },
     "broadcasts":  false,
     "envValuesPrinted":  false,

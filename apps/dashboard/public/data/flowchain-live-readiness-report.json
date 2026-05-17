@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-17T20:44:03.4890909Z",
+  "generatedAt": "2026-05-17T20:50:24.7184846Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -8,8 +8,8 @@
   "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
   "privateRpcUrl": "http://127.0.0.1:8787",
   "metrics": {
-    "latestHeight": "59354",
-    "finalizedHeight": "59354",
+    "latestHeight": "59881",
+    "finalizedHeight": "59881",
     "monitorHeightAdvanced": true,
     "bridgeRelayerStatus": "blocked",
     "bridgeQueuedTransactions": "0",
@@ -49,8 +49,8 @@
     "bridgeRelayerGuardrailReady": true,
     "criticalCount": "0",
     "blockedCount": "6",
-    "latestHeight": "59354",
-    "finalizedHeight": "59354",
+    "latestHeight": "59881",
+    "finalizedHeight": "59881",
     "monitorStatus": "passed",
     "monitorHeightAdvanced": true,
     "findings": [
@@ -183,8 +183,8 @@
         ]
       }
     ],
-    "ruleCount": "14",
-    "criticalRuleCount": "8",
+    "ruleCount": "15",
+    "criticalRuleCount": "9",
     "blockedRuleCount": "6",
     "unmappedCurrentFindingCodes": [],
     "incidentCommands": {
@@ -215,6 +215,11 @@
         "npm run flowchain:emergency:stop-local",
         "npm run flowchain:bridge:emergency-stop",
         "npm run flowchain:emergency:export-evidence"
+      ],
+      "bridgeRelayerLoop": [
+        "npm run flowchain:service:status",
+        "npm run flowchain:bridge:relayer:loop:validate",
+        "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop"
       ]
     },
     "dryRunEvents": [
@@ -450,7 +455,7 @@
       "label": "Private L1 origin",
       "status": "passed",
       "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
-      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=59354, finalizedHeight=59354",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=59881, finalizedHeight=59881",
       "commands": [
         "npm run flowchain:service:status"
       ],
@@ -669,7 +674,7 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T20:44:03.4890909Z"
+      "generatedAt": "2026-05-17T20:50:24.7184846Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
@@ -681,13 +686,13 @@
       "fileName": "service-status-report.json",
       "schema": "flowchain.service_status_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T20:07:54.9446086Z"
+      "generatedAt": "2026-05-17T20:49:54.2260543Z"
     },
     {
       "fileName": "service-monitor-report.json",
       "schema": "flowchain.service_monitor_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T20:07:55.2580144Z"
+      "generatedAt": "2026-05-17T20:49:54.6410679Z"
     },
     {
       "fileName": "public-rpc-deployment-bundle-report.json",
@@ -759,19 +764,19 @@
       "fileName": "ops-snapshot-report.json",
       "schema": "flowchain.ops_snapshot_report.v1",
       "status": "blocked",
-      "generatedAt": "2026-05-17T20:07:55.8132470Z"
+      "generatedAt": "2026-05-17T20:49:55.2025767Z"
     },
     {
       "fileName": "ops-alert-rules-report.json",
       "schema": "flowchain.ops_alert_rules_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T20:07:56.3912617Z"
+      "generatedAt": "2026-05-17T20:49:55.7801224Z"
     },
     {
       "fileName": "incident-drill-report.json",
       "schema": "flowchain.incident_drill_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T19:05:05.1749267Z"
+      "generatedAt": "2026-05-17T20:50:01.3975197Z"
     },
     {
       "fileName": "alert-install-validation-report.json",
@@ -783,7 +788,7 @@
       "fileName": "ops-escalation-dry-run-report.json",
       "schema": "flowchain.ops_escalation_dry_run_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T20:08:27.7892340Z"
+      "generatedAt": "2026-05-17T20:49:56.6773808Z"
     },
     {
       "fileName": "owner-inputs-report.json",

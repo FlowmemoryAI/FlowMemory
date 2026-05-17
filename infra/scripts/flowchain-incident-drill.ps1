@@ -404,6 +404,38 @@ Invoke-SyntheticOpsCase -Id "bridge-relayer-guardrail-critical" `
         }
     }
 
+Invoke-SyntheticOpsCase -Id "bridge-relayer-loop-unhealthy-critical" `
+    -Requirement "A running bridge relayer loop without fresh no-secret/no-broadcast health evidence is classified as a critical incident." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("bridge-relayer-loop-unhealthy") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "service-status-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "passed"
+            $loop = Get-DrillProp -Object $report -Name "bridgeRelayerLoop"
+            if ($null -eq $loop) {
+                $loop = [ordered]@{}
+                Set-DrillProp -Object $report -Name "bridgeRelayerLoop" -Value $loop
+            }
+            Set-DrillProp -Object $loop -Name "status" -Value "running"
+            Set-DrillProp -Object $loop -Name "commandLineMatched" -Value $true
+            Set-DrillProp -Object $loop -Name "report" -Value ([ordered]@{
+                path = "devnet/local/bridge-live-readiness/bridge-relayer-loop-report.json"
+                status = "blocked"
+                ageSeconds = 999999
+                maxAgeSeconds = 180
+                fresh = $false
+                acceptableStatus = $true
+                blockedOnlyOnOwnerInputs = $true
+                codeIssueCount = 0
+                noSecrets = $true
+                noBroadcasts = $true
+                healthy = $false
+            })
+        }
+    }
+
 $recoveryReportPath = Join-Path $runDir "recovery-commands-report.json"
 $recoveryChild = Invoke-DrillChild -Name "recovery-command-print" -ArgumentList @(
     "-NoProfile",
@@ -477,6 +509,7 @@ $report = [ordered]@{
         "height-not-advancing-critical",
         "no-secret-scan-critical",
         "bridge-relayer-guardrail-critical",
+        "bridge-relayer-loop-unhealthy-critical",
         "recovery-command-print",
         "post-drill-live-status"
     )

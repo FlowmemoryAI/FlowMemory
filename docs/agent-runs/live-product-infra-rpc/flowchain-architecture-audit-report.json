@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-17T20:44:03.9110026Z",
+    "generatedAt":  "2026-05-17T20:50:24.8334869Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -28,7 +28,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=59354, finalizedHeight=59354",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=59881, finalizedHeight=59881",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -50,7 +50,7 @@
                       "layer":  "Operations",
                       "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertInstall=passed, alertInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=8, blockedRules=6, unmappedAlerts=0, incidentDrill=passed, incidentCases=9, incidentFailed=0",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertInstall=passed, alertInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=9, blockedRules=6, unmappedAlerts=0, incidentDrill=passed, incidentCases=10, incidentFailed=0",
                       "files":  [
                                     "infra/scripts/flowchain-service-monitor.ps1",
                                     "infra/scripts/flowchain-service-supervisor.ps1",

@@ -1,0 +1,146 @@
+{
+    "schema":  "flowchain.public_rpc_readiness_report.v0",
+    "generatedAt":  "2026-05-17T19:02:05.5015285Z",
+    "status":  "blocked",
+    "publicRpcReady":  false,
+    "publicMode":  false,
+    "explicitLocalEndpoint":  false,
+    "requiredEnvNames":  [
+                             "FLOWCHAIN_RPC_PUBLIC_URL",
+                             "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                             "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                             "FLOWCHAIN_RPC_TLS_TERMINATED",
+                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                         ],
+    "missingEnvNames":  [
+                            "FLOWCHAIN_RPC_PUBLIC_URL",
+                            "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                            "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                            "FLOWCHAIN_RPC_TLS_TERMINATED",
+                            "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                        ],
+    "endpointValuePrinted":  false,
+    "envValuesPrinted":  false,
+    "checks":  {
+                   "urlConfigured":  false,
+                   "httpsRequiredForPublicMode":  true,
+                   "tlsTerminatedAcknowledged":  false,
+                   "allowedOriginsConfigured":  false,
+                   "allowedOriginsWildcardRejected":  true,
+                   "numericRateLimit":  false,
+                   "rateLimitProbePerformed":  false,
+                   "rateLimitRejectionObserved":  false,
+                   "rateLimitRetryAfterHeaderPresent":  false,
+                   "rateLimitProbeWithinMax":  true,
+                   "corsProbePerformed":  false,
+                   "corsAllowOriginHeaderPresent":  false,
+                   "corsConfiguredOriginAccepted":  false,
+                   "corsDisallowedOriginProbePerformed":  false,
+                   "corsDisallowedOriginRejected":  false,
+                   "corsWildcardRejectedForPublicMode":  true,
+                   "backupPathConfigured":  false,
+                   "backupPathExists":  false,
+                   "backupPathWritable":  false,
+                   "stateFileReadable":  true,
+                   "responseHygienePassed":  true,
+                   "readinessDeploymentFlagsConsistent":  true,
+                   "discoveryMatchesReadinessDeployment":  true
+               },
+    "deploymentChecks":  {
+                             "readinessEndpointPresent":  false,
+                             "readinessStatusReady":  null,
+                             "readinessPublicRpcReady":  null,
+                             "readinessProductionReady":  null,
+                             "readinessLocalOnlyFalse":  null,
+                             "readinessDeploymentModePublicEdge":  null,
+                             "discoverEndpointPresent":  false,
+                             "discoverPublicRpcReadyMatchesReadiness":  null,
+                             "discoverProductionReadyMatchesReadiness":  null,
+                             "discoverLocalOnlyMatchesReadiness":  null,
+                             "discoverDeploymentModeMatchesReadiness":  null,
+                             "publicReadyMethodCountNonzeroWhenReady":  null
+                         },
+    "endpointChecks":  [
+
+                       ],
+    "chainChecks":  {
+                        "chainIdMatches":  null,
+                        "latestHeightMatches":  null,
+                        "latestHashMatches":  null,
+                        "latestRootMatches":  null,
+                        "finalizedHeightMatches":  null,
+                        "blockAgeWithinLimit":  true
+                    },
+    "localState":  {
+                       "statePath":  "devnet/local/state.json",
+                       "chainId":  "flowmemory-local-devnet-v0",
+                       "latestHeight":  "58511",
+                       "latestHash":  "0x801e8e7513544621ead44ac23d2c311fc32745ed4b9cb1c5a916fc824c2ea2ea",
+                       "latestRoot":  "0x2b5ca1eba51e83cb33fca2a3bbc2950f4d8e2bf258afc6d467293293cf368b7b",
+                       "latestBlockAgeSeconds":  5,
+                       "stateFileLastWriteAgeSeconds":  5,
+                       "finalizedHeight":  "58511",
+                       "finalizedHash":  "0x801e8e7513544621ead44ac23d2c311fc32745ed4b9cb1c5a916fc824c2ea2ea",
+                       "mempoolDepth":  0,
+                       "peerCount":  null
+                   },
+    "maxBlockAgeSeconds":  300,
+    "responseHygiene":  {
+                            "passed":  true,
+                            "findings":  [
+
+                                         ]
+                        },
+    "cors":  {
+                 "performed":  false,
+                 "allowOriginHeaderPresent":  false,
+                 "configuredOriginAccepted":  false,
+                 "disallowedOriginProbePerformed":  false,
+                 "disallowedOriginRejected":  false,
+                 "wildcardRejectedForPublicMode":  true,
+                 "headerValuePrinted":  false
+             },
+    "rateLimit":  {
+                      "configured":  false,
+                      "probePerformed":  false,
+                      "probeRequestLimit":  300,
+                      "configuredLimit":  null,
+                      "requestCount":  0,
+                      "rejectionObserved":  false,
+                      "retryAfterHeaderPresent":  false,
+                      "skippedBecauseAboveProbeLimit":  false
+                  },
+    "problems":  [
+                     {
+                         "name":  "FLOWCHAIN_RPC_PUBLIC_URL",
+                         "category":  "env",
+                         "kind":  "blocked",
+                         "reason":  "missing required public RPC env value"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                         "category":  "env",
+                         "kind":  "blocked",
+                         "reason":  "missing required public RPC env value"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                         "category":  "env",
+                         "kind":  "blocked",
+                         "reason":  "missing required public RPC env value"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_RPC_TLS_TERMINATED",
+                         "category":  "env",
+                         "kind":  "blocked",
+                         "reason":  "missing required public RPC env value"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                         "category":  "env",
+                         "kind":  "blocked",
+                         "reason":  "missing required public RPC env value"
+                     }
+                 ],
+    "noSecrets":  true
+}

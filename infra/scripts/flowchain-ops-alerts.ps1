@@ -130,6 +130,14 @@ $rules = @(
         commands = @("npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop")
     },
     [ordered]@{
+        id = "bridge-relayer-loop-unhealthy"
+        severity = "critical"
+        findingCodes = @("bridge-relayer-loop-unhealthy")
+        signal = "Bridge relayer loop is running without fresh no-secret/no-broadcast health evidence."
+        threshold = "service status reports bridgeRelayerLoop.status running and bridgeRelayerLoop.report.healthy is not true"
+        commands = @("npm run flowchain:service:status", "npm run flowchain:bridge:relayer:loop:validate", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
         id = "public-rpc-not-shareable"
         severity = "blocked"
         findingCodes = @("public-rpc-not-ready")

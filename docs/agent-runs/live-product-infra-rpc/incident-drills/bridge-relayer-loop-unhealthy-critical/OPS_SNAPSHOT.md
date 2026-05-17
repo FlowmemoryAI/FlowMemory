@@ -1,14 +1,13 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-17T20:48:34.1628818Z
+Generated: 2026-05-17T20:48:45.4332919Z
 Status: failed
-Latest height: 59354
-Finalized height: 59354
+Latest height: 59865
+Finalized height: 59865
 
 ## Findings
 
-- critical: service-status-not-passed - FlowChain service status is not passed.
-- critical: node-not-running - The block-producing node is not running.
+- critical: bridge-relayer-loop-unhealthy - Bridge relayer loop is running without fresh no-secret/no-broadcast health evidence.
 - blocked: public-rpc-not-ready - Public RPC is not ready to share.
 - blocked: backup-not-ready - State backup is not ready for public operation.
 - blocked: bridge-not-ready - Base 8453 bridge readiness is not ready for external funded testing.

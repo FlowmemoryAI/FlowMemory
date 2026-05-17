@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-17T20:07:55.8132470Z",
+    "generatedAt":  "2026-05-17T20:49:55.2025767Z",
     "status":  "blocked",
     "refresh":  {
                     "performed":  true,
@@ -8,7 +8,7 @@
                                   {
                                       "name":  "service-status",
                                       "exitCode":  0,
-                                      "outputLineCount":  9
+                                      "outputLineCount":  10
                                   },
                                   {
                                       "name":  "service-monitor",
@@ -19,9 +19,9 @@
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "59354",
-                  "finalizedHeight":  "59354",
-                  "stateFileLastWriteAgeSeconds":  5,
+                  "latestHeight":  "59881",
+                  "finalizedHeight":  "59881",
+                  "stateFileLastWriteAgeSeconds":  1,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true
@@ -29,6 +29,13 @@
     "reportStatuses":  {
                            "serviceStatus":  "passed",
                            "serviceMonitor":  "passed",
+                           "bridgeRelayerLoop":  "stopped",
+                           "bridgeRelayerLoopReport":  "blocked",
+                           "bridgeRelayerLoopReportFresh":  false,
+                           "bridgeRelayerLoopReportHealthy":  false,
+                           "bridgeRelayerLoopReportNoSecrets":  true,
+                           "bridgeRelayerLoopReportNoBroadcasts":  true,
+                           "bridgeRelayerLoopBlockedOnlyOnOwnerInputs":  true,
                            "publicRpc":  "blocked",
                            "backup":  "blocked",
                            "bridgeLive":  "blocked",
@@ -132,7 +139,12 @@
                                                "npm run flowchain:emergency:stop-local",
                                                "npm run flowchain:bridge:emergency-stop",
                                                "npm run flowchain:emergency:export-evidence"
-                                           ]
+                                           ],
+                             "bridgeRelayerLoop":  [
+                                                       "npm run flowchain:service:status",
+                                                       "npm run flowchain:bridge:relayer:loop:validate",
+                                                       "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop"
+                                                   ]
                          },
     "reportPaths":  {
                         "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",

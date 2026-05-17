@@ -1,9 +1,9 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-17T20:07:55.8132470Z
+Generated: 2026-05-17T20:49:55.2025767Z
 Status: blocked
-Latest height: 59354
-Finalized height: 59354
+Latest height: 59881
+Finalized height: 59881
 
 ## Findings
 
@@ -43,3 +43,8 @@ Finalized height: 59354
 - npm run flowchain:emergency:stop-local
 - npm run flowchain:bridge:emergency-stop
 - npm run flowchain:emergency:export-evidence
+
+### bridgeRelayerLoop
+- npm run flowchain:service:status
+- npm run flowchain:bridge:relayer:loop:validate
+- npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop

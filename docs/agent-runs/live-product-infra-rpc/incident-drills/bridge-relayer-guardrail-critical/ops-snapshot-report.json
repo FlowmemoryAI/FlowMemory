@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-17T19:04:00.4596097Z",
+    "generatedAt":  "2026-05-17T20:48:43.4896322Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
@@ -10,9 +10,9 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-guardrail-critical\\input"
                 },
     "chain":  {
-                  "latestHeight":  "58518",
-                  "finalizedHeight":  "58518",
-                  "stateFileLastWriteAgeSeconds":  4,
+                  "latestHeight":  "59865",
+                  "finalizedHeight":  "59865",
+                  "stateFileLastWriteAgeSeconds":  5,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true
@@ -20,6 +20,13 @@
     "reportStatuses":  {
                            "serviceStatus":  "passed",
                            "serviceMonitor":  "passed",
+                           "bridgeRelayerLoop":  "stopped",
+                           "bridgeRelayerLoopReport":  "blocked",
+                           "bridgeRelayerLoopReportFresh":  false,
+                           "bridgeRelayerLoopReportHealthy":  false,
+                           "bridgeRelayerLoopReportNoSecrets":  true,
+                           "bridgeRelayerLoopReportNoBroadcasts":  true,
+                           "bridgeRelayerLoopBlockedOnlyOnOwnerInputs":  true,
                            "publicRpc":  "blocked",
                            "backup":  "blocked",
                            "bridgeLive":  "blocked",
@@ -133,7 +140,12 @@
                                                "npm run flowchain:emergency:stop-local",
                                                "npm run flowchain:bridge:emergency-stop",
                                                "npm run flowchain:emergency:export-evidence"
-                                           ]
+                                           ],
+                             "bridgeRelayerLoop":  [
+                                                       "npm run flowchain:service:status",
+                                                       "npm run flowchain:bridge:relayer:loop:validate",
+                                                       "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop"
+                                                   ]
                          },
     "reportPaths":  {
                         "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-guardrail-critical\\input\\service-status-report.json",

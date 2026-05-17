@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-17T19:03:50.6077620Z",
+    "generatedAt":  "2026-05-17T20:48:31.7955924Z",
     "status":  "blocked",
     "refresh":  {
                     "performed":  false,
@@ -10,9 +10,9 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input"
                 },
     "chain":  {
-                  "latestHeight":  "58518",
-                  "finalizedHeight":  "58518",
-                  "stateFileLastWriteAgeSeconds":  4,
+                  "latestHeight":  "59354",
+                  "finalizedHeight":  "59354",
+                  "stateFileLastWriteAgeSeconds":  5,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true
@@ -20,6 +20,13 @@
     "reportStatuses":  {
                            "serviceStatus":  "passed",
                            "serviceMonitor":  "passed",
+                           "bridgeRelayerLoop":  "stopped",
+                           "bridgeRelayerLoopReport":  "missing",
+                           "bridgeRelayerLoopReportFresh":  false,
+                           "bridgeRelayerLoopReportHealthy":  false,
+                           "bridgeRelayerLoopReportNoSecrets":  false,
+                           "bridgeRelayerLoopReportNoBroadcasts":  false,
+                           "bridgeRelayerLoopBlockedOnlyOnOwnerInputs":  false,
                            "publicRpc":  "blocked",
                            "backup":  "blocked",
                            "bridgeLive":  "blocked",
@@ -123,7 +130,12 @@
                                                "npm run flowchain:emergency:stop-local",
                                                "npm run flowchain:bridge:emergency-stop",
                                                "npm run flowchain:emergency:export-evidence"
-                                           ]
+                                           ],
+                             "bridgeRelayerLoop":  [
+                                                       "npm run flowchain:service:status",
+                                                       "npm run flowchain:bridge:relayer:loop:validate",
+                                                       "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop"
+                                                   ]
                          },
     "reportPaths":  {
                         "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input\\service-status-report.json",

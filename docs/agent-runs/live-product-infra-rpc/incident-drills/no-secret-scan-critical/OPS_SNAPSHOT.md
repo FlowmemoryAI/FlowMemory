@@ -1,9 +1,9 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-17T19:03:58.8718762Z
+Generated: 2026-05-17T20:48:41.7010819Z
 Status: failed
-Latest height: 58518
-Finalized height: 58518
+Latest height: 59865
+Finalized height: 59865
 
 ## Findings
 
@@ -44,3 +44,8 @@ Finalized height: 58518
 - npm run flowchain:emergency:stop-local
 - npm run flowchain:bridge:emergency-stop
 - npm run flowchain:emergency:export-evidence
+
+### bridgeRelayerLoop
+- npm run flowchain:service:status
+- npm run flowchain:bridge:relayer:loop:validate
+- npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop
