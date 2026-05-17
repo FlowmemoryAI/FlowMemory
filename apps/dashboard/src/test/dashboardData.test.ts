@@ -6,6 +6,7 @@ import fixture from "../../../../fixtures/dashboard/flowmemory-dashboard-v0.json
 import devnetDashboardState from "../../../../fixtures/launch-core/generated/devnet/dashboard-state.json";
 import devnetState from "../../../../fixtures/launch-core/generated/devnet/state.json";
 import bridgeTestDeposit from "../../public/data/flowchain-bridge-test-deposit.json";
+import liveReadinessReport from "../../public/data/flowchain-live-readiness-report.json";
 import { validateDashboardData } from "../data/loadDashboardData";
 import { DASHBOARD_STATUSES } from "../data/status";
 import { computeOverviewMetrics, searchRecords } from "../data/selectors";
@@ -15,6 +16,7 @@ import {
   WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH,
   WORKBENCH_DEVNET_DASHBOARD_STATE_PATH,
   WORKBENCH_DEVNET_STATE_PATH,
+  WORKBENCH_LIVE_READINESS_REPORT_PATH,
   WORKBENCH_SECTIONS,
   buildWorkbenchSnapshot,
   fetchWorkbenchSnapshot,
@@ -112,6 +114,7 @@ describe("dashboard fixture", () => {
       devnetState,
       devnetDashboardState,
       bridgeTestDeposit,
+      liveReadinessReport,
     });
 
     expect(workbench.source).toBe("fixture-fallback");
@@ -146,6 +149,9 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.bridgeWithdrawals).toHaveLength(0);
     expect(workbench.sections.realValuePilot.length).toBeGreaterThan(0);
     expect(workbench.sections.realValuePilot[0].facts.find((fact) => fact.label === "scope")?.value).toBe("capped owner testing");
+    expect(workbench.sections.liveReadiness.length).toBeGreaterThan(0);
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "deployment ready")?.value).toBe("false");
+    expect(workbench.sections.liveReadiness.some((record) => record.id === "public-rpc-edge")).toBe(true);
     expect(workbench.sections.explorerRecords.length).toBeGreaterThan(0);
     expect(workbench.node.status).toBe("offline");
     expect(workbench.actions).toEqual([]);
@@ -349,6 +355,9 @@ describe("dashboard fixture", () => {
       if (url === WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH) {
         return Response.json(bridgeTestDeposit);
       }
+      if (url === WORKBENCH_LIVE_READINESS_REPORT_PATH) {
+        return Response.json(liveReadinessReport);
+      }
 
       return new Response("not found", { status: 404 });
     });
@@ -380,6 +389,26 @@ describe("dashboard fixture", () => {
     expect(fetchMock).toHaveBeenCalledWith("http://127.0.0.1:8787/pilot/lifecycle", expect.any(Object));
     expect(fetchMock).toHaveBeenCalledWith(WORKBENCH_DEVNET_STATE_PATH, expect.any(Object));
     expect(fetchMock).toHaveBeenCalledWith(WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH, expect.any(Object));
+    expect(fetchMock).toHaveBeenCalledWith(WORKBENCH_LIVE_READINESS_REPORT_PATH, expect.any(Object));
+  });
+
+  it("renders live public launch readiness from infra reports", () => {
+    const workbench = buildWorkbenchSnapshot(data, {
+      devnetState,
+      devnetDashboardState,
+      bridgeTestDeposit,
+      liveReadinessReport,
+    });
+    const html = renderToStaticMarkup(createElement(WorkbenchView, { data, workbench }));
+
+    expect(html).toContain("Public launch readiness");
+    expect(html).toContain("Public launch blocked");
+    expect(html).toContain("Public RPC edge");
+    expect(html).toContain("State backup proof");
+    expect(html).toContain("Bridge relayer queue");
+    expect(html).toContain("External tester packet");
+    expect(html).toContain("FLOWCHAIN_RPC_PUBLIC_URL");
+    expect(html).toContain("flowchain:public-deployment:contract");
   });
 
   it("renders bridge readiness live-blocked without env values", () => {
@@ -446,6 +475,7 @@ describe("dashboard fixture", () => {
       devnetState,
       devnetDashboardState,
       bridgeTestDeposit,
+      liveReadinessReport,
     });
     const html = renderToStaticMarkup(createElement(WorkbenchView, { data, workbench }));
 
@@ -454,6 +484,8 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Control-plane offline");
     expect(html).toContain("Real-value pilot");
     expect(html).toContain("Bridge live readiness");
+    expect(html).toContain("Public launch readiness");
+    expect(html).toContain("Live Readiness");
     expect(html).toContain("capped owner testing");
     expect(html).toContain("public readiness");
     expect(html).toContain("Wallet Metadata");

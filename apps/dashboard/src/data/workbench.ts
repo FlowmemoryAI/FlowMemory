@@ -5,6 +5,7 @@ export const DEFAULT_CONTROL_PLANE_URL = "http://127.0.0.1:8787";
 export const WORKBENCH_DEVNET_STATE_PATH = "/data/flowchain-local-devnet-state.json";
 export const WORKBENCH_DEVNET_DASHBOARD_STATE_PATH = "/data/flowchain-local-devnet-dashboard-state.json";
 export const WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH = "/data/flowchain-bridge-test-deposit.json";
+export const WORKBENCH_LIVE_READINESS_REPORT_PATH = "/data/flowchain-live-readiness-report.json";
 
 const FIXTURE_CHAIN_CONTEXT = "flowchain-private-local-testnet";
 const CONTROL_PLANE_TIMEOUT_MS = 900;
@@ -27,6 +28,7 @@ export type WorkbenchSectionKey =
   | "swaps"
   | "explorerRecords"
   | "realValuePilot"
+  | "liveReadiness"
   | "rootfields"
   | "agents"
   | "models"
@@ -119,6 +121,7 @@ export interface WorkbenchSnapshot {
     devnetState: unknown | null;
     devnetDashboardState: unknown | null;
     bridgeTestDeposit: unknown | null;
+    liveReadinessReport: unknown | null;
     controlPlanePilotStatus: unknown | null;
     controlPlaneBridgeReadiness: unknown | null;
     controlPlanePilotLifecycle: unknown | null;
@@ -259,6 +262,14 @@ export const WORKBENCH_SECTIONS: WorkbenchSectionDefinition[] = [
     expectedEndpoint: "GET /bridge/live-readiness + GET /pilot/lifecycle + GET /pilot/status",
     missingCommand: "npm run control-plane:serve",
     missingService: "FlowChain real-value pilot control-plane /pilot/status",
+  },
+  {
+    key: "liveReadiness",
+    label: "Live Readiness",
+    detail: "Public launch contract, private L1 origin, public RPC, backup, bridge relayer, tester packet, and no-secret gates from the latest infra reports.",
+    expectedEndpoint: WORKBENCH_LIVE_READINESS_REPORT_PATH,
+    missingCommand: "npm run flowchain:public-deployment:contract",
+    missingService: "FlowChain live deployment readiness summary",
   },
   {
     key: "rootfields",
@@ -508,6 +519,8 @@ function statusFrom(value: unknown, fallback: DashboardStatus = "observed"): Das
     normalized === "success" ||
     normalized === "active" ||
     normalized === "live" ||
+    normalized === "ok" ||
+    normalized === "passed" ||
     normalized === "ready_for_operator_live_pilot" ||
     normalized === "ready"
   ) {
@@ -2063,6 +2076,129 @@ function buildFinalityRecords(data: DashboardData, devnetState: unknown): Workbe
   return records;
 }
 
+function buildLiveReadinessRecords(liveReadinessReport: unknown | null): WorkbenchRecord[] {
+  const report = isRecord(liveReadinessReport) ? liveReadinessReport : null;
+
+  if (!report) {
+    return [
+      makeRecord("ops", WORKBENCH_LIVE_READINESS_REPORT_PATH, {
+        id: "live-readiness-report",
+        kind: "Public launch readiness",
+        title: "Live readiness report missing",
+        summary: "The dashboard did not load the generated live-readiness summary. Run the public deployment contract and sync dashboard fixtures.",
+        status: "unresolved",
+        facts: [
+          { label: "deployment ready", value: "false" },
+          { label: "packet shareable", value: "false" },
+          { label: "next command", value: "npm run flowchain:public-deployment:contract" },
+        ],
+        raw: null,
+      }),
+    ];
+  }
+
+  const metrics = isRecord(report.metrics) ? report.metrics : {};
+  const statusCounts = isRecord(metrics.statusCounts)
+    ? Object.entries(metrics.statusCounts)
+        .map(([status, count]) => `${status}:${text(count)}`)
+        .join(", ")
+    : "not recorded";
+  const gates = collectionFrom(report, ["gates"]);
+  const ownerInputs = collectionFrom(report, ["ownerInputs"]);
+  const sourceReports = collectionFrom(report, ["sourceReports"]);
+  const ownerInputGroups = ownerInputs.reduce<Map<string, string[]>>((groups, input) => {
+    const group = text(input.group, "operator input");
+    const current = groups.get(group) ?? [];
+    current.push(text(input.name));
+    groups.set(group, current);
+    return groups;
+  }, new Map());
+  const records: WorkbenchRecord[] = [
+    makeRecord("ops", WORKBENCH_LIVE_READINESS_REPORT_PATH, {
+      id: "live-readiness-summary",
+      kind: "Public launch readiness",
+      title: report.deploymentReady === true ? "Public launch gates passed" : "Public launch blocked",
+      summary: text(report.summary, "Public launch readiness is derived from the latest live infrastructure reports."),
+      status: statusFrom(report.status, "pending"),
+      facts: [
+        { label: "deployment ready", value: text(report.deploymentReady, "false") },
+        { label: "packet shareable", value: text(report.packetShareable, "false") },
+        { label: "private RPC", value: text(report.privateRpcUrl, DEFAULT_CONTROL_PLANE_URL) },
+        { label: "latest height", value: text(metrics.latestHeight) },
+        { label: "finalized height", value: text(metrics.finalizedHeight) },
+        { label: "height advanced", value: text(metrics.monitorHeightAdvanced, "false") },
+        { label: "owner input ready", value: text(metrics.ownerInputReady, "false") },
+        { label: "bridge relayer", value: text(metrics.bridgeRelayerStatus) },
+        { label: "tester packet", value: text(metrics.externalTesterPacketStatus) },
+        { label: "no-secret scan", value: text(metrics.noSecretStatus) },
+        { label: "status counts", value: statusCounts },
+        { label: "env values printed", value: text(report.envValuesPrinted, "false") },
+      ],
+      raw: report,
+    }),
+  ];
+
+  gates.forEach((gate, index) => {
+    const blockers = stringArray(gate.blockers);
+    const commands = stringArray(gate.commands);
+    records.push(
+      makeRecord("ops", WORKBENCH_LIVE_READINESS_REPORT_PATH, {
+        id: text(gate.id, `live-gate:${index + 1}`),
+        kind: "Launch gate",
+        title: text(gate.label ?? gate.id, `Launch gate ${index + 1}`),
+        summary: text(gate.summary, "Launch gate loaded from the deployment contract report."),
+        status: statusFrom(gate.status, "pending"),
+        facts: [
+          { label: "gate status", value: text(gate.status, "unresolved") },
+          { label: "blockers", value: blockers.join(", ") || "none" },
+          { label: "next command", value: commands[0] ?? "not recorded" },
+          { label: "command count", value: commands.length.toString() },
+          { label: "evidence", value: text(gate.evidence) },
+        ],
+        raw: gate,
+      }),
+    );
+  });
+
+  [...ownerInputGroups.entries()].forEach(([group, names]) => {
+    records.push(
+      makeRecord("ops", WORKBENCH_LIVE_READINESS_REPORT_PATH, {
+        id: `owner-inputs:${group}`,
+        kind: "Owner input group",
+        title: group,
+        summary: `${names.length} owner-provided env name${names.length === 1 ? "" : "s"} must be configured outside the repo before public sharing.`,
+        status: "pending",
+        facts: [
+          { label: "required names", value: names.join(", ") },
+          { label: "values printed", value: "false" },
+          { label: "setup command", value: "npm run flowchain:owner-env:template" },
+        ],
+        raw: { group, names },
+      }),
+    );
+  });
+
+  sourceReports.forEach((sourceReport, index) => {
+    records.push(
+      makeRecord("ops", WORKBENCH_LIVE_READINESS_REPORT_PATH, {
+        id: `source-report:${text(sourceReport.fileName, `${index + 1}`)}`,
+        kind: "Readiness source report",
+        title: text(sourceReport.fileName, `source report ${index + 1}`),
+        summary: `${text(sourceReport.schema)} reported ${text(sourceReport.status)}.`,
+        status: statusFrom(sourceReport.status, "observed"),
+        facts: [
+          { label: "schema", value: text(sourceReport.schema) },
+          { label: "status", value: text(sourceReport.status) },
+          { label: "generated", value: text(sourceReport.generatedAt) },
+        ],
+        raw: sourceReport,
+      }),
+    );
+  });
+
+  return records;
+}
+
 function buildHardwareSignalRecords(data: DashboardData, devnetState: unknown): WorkbenchRecord[] {
   const nativeSignals = collectionFrom(devnetState, [
     "hardwareSignals",
@@ -2122,6 +2258,7 @@ function buildRawJsonRecords(
   devnetState: unknown | null,
   devnetDashboardState: unknown | null,
   bridgeTestDeposit: unknown | null,
+  liveReadinessReport: unknown | null,
 ): WorkbenchRecord[] {
   return [
     makeRecord("indexer", data.metadata.fixturePath, {
@@ -2177,6 +2314,20 @@ function buildRawJsonRecords(
       ],
       raw: bridgeTestDeposit,
     }),
+    makeRecord("ops", WORKBENCH_LIVE_READINESS_REPORT_PATH, {
+      id: "raw-live-readiness",
+      kind: "Raw JSON",
+      title: WORKBENCH_LIVE_READINESS_REPORT_PATH,
+      summary: liveReadinessReport
+        ? "Live infrastructure readiness summary loaded for public launch gates."
+        : "Live infrastructure readiness summary was not loaded.",
+      status: liveReadinessReport ? "verified" : "unresolved",
+      facts: [
+        { label: "schema", value: isRecord(liveReadinessReport) ? text(liveReadinessReport.schema) : "missing" },
+        { label: "keys", value: topLevelKeys(liveReadinessReport) },
+      ],
+      raw: liveReadinessReport,
+    }),
     makeLocalRecord(
       "indexer",
       controlPlane.url,
@@ -2216,6 +2367,7 @@ function buildProvenanceRecords(
   devnetState: unknown | null,
   devnetDashboardState: unknown | null,
   bridgeTestDeposit: unknown | null,
+  liveReadinessReport: unknown | null,
 ): WorkbenchRecord[] {
   return [
     makeLocalRecord(
@@ -2293,6 +2445,20 @@ function buildProvenanceRecords(
       ],
       raw: bridgeTestDeposit,
     }),
+    makeRecord("ops", WORKBENCH_LIVE_READINESS_REPORT_PATH, {
+      id: "live-readiness-report",
+      kind: "Live readiness report",
+      title: WORKBENCH_LIVE_READINESS_REPORT_PATH,
+      summary: liveReadinessReport
+        ? "Generated summary of the public deployment contract and dependent infra readiness reports."
+        : "Generated live readiness report was not loaded.",
+      status: liveReadinessReport ? "verified" : "unresolved",
+      facts: [
+        { label: "schema", value: isRecord(liveReadinessReport) ? text(liveReadinessReport.schema) : "missing" },
+        { label: "source", value: "docs/agent-runs/live-product-infra-rpc" },
+      ],
+      raw: liveReadinessReport,
+    }),
   ];
 }
 
@@ -2369,6 +2535,7 @@ export function buildWorkbenchSnapshot(
     devnetState?: unknown | null;
     devnetDashboardState?: unknown | null;
     bridgeTestDeposit?: unknown | null;
+    liveReadinessReport?: unknown | null;
     loadIssues?: string[];
   } = {},
 ): WorkbenchSnapshot {
@@ -2384,6 +2551,7 @@ export function buildWorkbenchSnapshot(
   const controlPlaneState = extractControlPlaneState(controlPlane.state);
   const activeDevnetState = controlPlaneState ?? options.devnetState ?? null;
   const bridgeTestDeposit = options.bridgeTestDeposit ?? null;
+  const liveReadinessReport = options.liveReadinessReport ?? null;
   const source: WorkbenchSource = controlPlane.status === "available" && controlPlaneState ? "control-plane" : "fixture-fallback";
 
   const sections: Record<WorkbenchSectionKey, WorkbenchRecord[]> = {
@@ -2416,6 +2584,7 @@ export function buildWorkbenchSnapshot(
     bridgeCredits: buildBridgeRecords(activeDevnetState, "credits", bridgeTestDeposit),
     bridgeWithdrawals: buildBridgeRecords(activeDevnetState, "withdrawals", bridgeTestDeposit),
     realValuePilot: buildPilotRecords(controlPlane),
+    liveReadiness: buildLiveReadinessRecords(liveReadinessReport),
     provenance: [],
     hardwareSignals: buildHardwareSignalRecords(data, activeDevnetState),
     rawJson: [],
@@ -2427,6 +2596,7 @@ export function buildWorkbenchSnapshot(
     options.devnetState ?? null,
     options.devnetDashboardState ?? null,
     bridgeTestDeposit,
+    liveReadinessReport,
   );
   sections.rawJson = buildRawJsonRecords(
     data,
@@ -2434,6 +2604,7 @@ export function buildWorkbenchSnapshot(
     options.devnetState ?? null,
     options.devnetDashboardState ?? null,
     bridgeTestDeposit,
+    liveReadinessReport,
   );
   const displayedSections = source === "control-plane" ? relabelDevnetRecordsAsControlPlane(sections, controlPlane) : sections;
 
@@ -2451,6 +2622,7 @@ export function buildWorkbenchSnapshot(
       devnetState: options.devnetState ?? null,
       devnetDashboardState: options.devnetDashboardState ?? null,
       bridgeTestDeposit,
+      liveReadinessReport,
       controlPlanePilotStatus: controlPlane.pilotStatus ?? null,
       controlPlaneBridgeReadiness: controlPlane.bridgeLiveReadiness ?? null,
       controlPlanePilotLifecycle: controlPlane.pilotLifecycle ?? null,
@@ -2463,21 +2635,26 @@ export function buildWorkbenchSnapshot(
 }
 
 export async function fetchWorkbenchSnapshot(data: DashboardData): Promise<WorkbenchSnapshot> {
-  const [controlPlane, devnetStateResult, devnetDashboardStateResult, bridgeTestDepositResult] = await Promise.all([
+  const [controlPlane, devnetStateResult, devnetDashboardStateResult, bridgeTestDepositResult, liveReadinessResult] = await Promise.all([
     probeControlPlane(),
     fetchOptionalJson(WORKBENCH_DEVNET_STATE_PATH),
     fetchOptionalJson(WORKBENCH_DEVNET_DASHBOARD_STATE_PATH),
     fetchOptionalJson(WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH),
+    fetchOptionalJson(WORKBENCH_LIVE_READINESS_REPORT_PATH),
   ]);
-  const loadIssues = [devnetStateResult.error, devnetDashboardStateResult.error, bridgeTestDepositResult.error].filter(
-    (issue): issue is string => typeof issue === "string" && issue.length > 0,
-  );
+  const loadIssues = [
+    devnetStateResult.error,
+    devnetDashboardStateResult.error,
+    bridgeTestDepositResult.error,
+    liveReadinessResult.error,
+  ].filter((issue): issue is string => typeof issue === "string" && issue.length > 0);
 
   return buildWorkbenchSnapshot(data, {
     controlPlane,
     devnetState: devnetStateResult.value,
     devnetDashboardState: devnetDashboardStateResult.value,
     bridgeTestDeposit: bridgeTestDepositResult.value,
+    liveReadinessReport: liveReadinessResult.value,
     loadIssues,
   });
 }

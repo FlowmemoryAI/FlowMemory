@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Activity, Coins, Database, ListChecks, Network, PlayCircle, RefreshCw, Repeat2, Search, Server, ShieldAlert, Terminal, Wallet } from "lucide-react";
+import { Activity, Coins, Database, Globe2, HardDrive, KeyRound, ListChecks, Network, PlayCircle, RefreshCw, Repeat2, Rocket, Search, Server, ShieldAlert, Terminal, Wallet } from "lucide-react";
 import { EmptyState } from "../components/EmptyState";
 import { HashValue } from "../components/HashValue";
 import { ProvenanceLine } from "../components/ProvenanceLine";
@@ -45,6 +45,10 @@ function statusForCount(count: number): DashboardStatus {
   return count > 0 ? "verified" : "pending";
 }
 
+function factValue(record: WorkbenchRecord | undefined, label: string, fallback = "not recorded"): string {
+  return record?.facts.find((fact) => fact.label === label)?.value ?? fallback;
+}
+
 export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps) {
   const [activeSection, setActiveSection] = useState<WorkbenchSectionKey>(DEFAULT_SECTION);
   const [query, setQuery] = useState("");
@@ -58,6 +62,17 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
   const sourceStatus: DashboardStatus = workbench.source === "control-plane" ? "verified" : "stale";
   const bridgeRecordCount =
     workbench.sections.bridgeDeposits.length + workbench.sections.bridgeCredits.length + workbench.sections.bridgeWithdrawals.length;
+  const liveReadinessRecords = workbench.sections.liveReadiness;
+  const liveReadinessSummary = liveReadinessRecords.find((record) => record.kind === "Public launch readiness") ?? liveReadinessRecords[0];
+  const liveReadinessGates = liveReadinessRecords.filter((record) => record.kind === "Launch gate");
+  const launchReady = factValue(liveReadinessSummary, "deployment ready", "false");
+  const packetShareable = factValue(liveReadinessSummary, "packet shareable", "false");
+  const latestHeight = factValue(liveReadinessSummary, "latest height", "not recorded");
+  const finalizedHeight = factValue(liveReadinessSummary, "finalized height", "not recorded");
+  const publicRpcGate = liveReadinessGates.find((record) => record.id === "public-rpc-edge");
+  const backupGate = liveReadinessGates.find((record) => record.id === "state-backup");
+  const bridgeRelayerGate = liveReadinessGates.find((record) => record.id === "base8453-bridge-relayer-queue");
+  const testerPacketGate = liveReadinessGates.find((record) => record.id === "external-tester-sharing");
   const pilotRecords = workbench.sections.realValuePilot;
   const pilotOverview = pilotRecords.find((record) => record.kind === "Pilot status") ?? pilotRecords[0];
   const bridgeReadiness = pilotRecords.find((record) => record.kind === "Bridge live readiness");
@@ -75,6 +90,16 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
     Icon: typeof Wallet;
     section: WorkbenchSectionKey;
   }> = [
+    {
+      id: "launch",
+      label: "Public launch",
+      detail: "Deployment contract and shareability gates",
+      command: "npm run flowchain:public-deployment:contract",
+      status: liveReadinessSummary?.status ?? "pending",
+      count: launchReady === "true" ? "ready" : "blocked",
+      Icon: Rocket,
+      section: "liveReadiness",
+    },
     {
       id: "wallets",
       label: "Wallets",
@@ -183,6 +208,14 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
       Icon: ShieldAlert,
     },
     {
+      key: "liveReadiness",
+      label: "Live readiness",
+      detail: "Public RPC, backup, bridge relayer, tester packet, and no-secret launch gates.",
+      command: "npm run flowchain:public-deployment:contract",
+      count: liveReadinessRecords.length,
+      Icon: Rocket,
+    },
+    {
       key: "bridgeDeposits",
       label: "Bridge records",
       detail: "Local/Anvil/Base Sepolia test records only; real-funds bridge remains blocked.",
@@ -190,6 +223,16 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
       count: bridgeRecordCount,
       Icon: ShieldAlert,
     },
+  ];
+  const releaseGateTiles: Array<{
+    label: string;
+    record: WorkbenchRecord | undefined;
+    Icon: typeof Wallet;
+  }> = [
+    { label: "Public RPC", record: publicRpcGate, Icon: Globe2 },
+    { label: "Backup proof", record: backupGate, Icon: HardDrive },
+    { label: "Bridge relayer", record: bridgeRelayerGate, Icon: ShieldAlert },
+    { label: "Tester packet", record: testerPacketGate, Icon: KeyRound },
   ];
 
   const runLocalAction = async (endpoint: string, label: string) => {
@@ -293,6 +336,58 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
             Run <code>npm run flowchain:start</code>, then <code>npm run control-plane:serve</code>, then refresh.
           </span>
         </article>
+      </section>
+
+      <section className="live-readiness-overview" aria-label="Public L1 launch readiness">
+        <article className="panel live-readiness-summary">
+          <div className="panel-heading">
+            <div>
+              <Rocket size={18} aria-hidden="true" />
+              <h2>Public launch readiness</h2>
+            </div>
+            <StatusBadge status={liveReadinessSummary?.status ?? "pending"} compact />
+          </div>
+          <div className="live-readiness-copy">
+            <span className="eyebrow">deployment contract</span>
+            <h3>{liveReadinessSummary?.title ?? "Live readiness not loaded"}</h3>
+            <p>{liveReadinessSummary?.summary ?? "Run the public deployment contract, then refresh the dashboard."}</p>
+          </div>
+          <dl className="live-readiness-metrics">
+            <div>
+              <dt>launch ready</dt>
+              <dd>{displayValue(launchReady)}</dd>
+            </div>
+            <div>
+              <dt>tester packet</dt>
+              <dd>{displayValue(packetShareable)}</dd>
+            </div>
+            <div>
+              <dt>latest height</dt>
+              <dd>{displayValue(latestHeight)}</dd>
+            </div>
+            <div>
+              <dt>finalized</dt>
+              <dd>{displayValue(finalizedHeight)}</dd>
+            </div>
+          </dl>
+        </article>
+
+        <div className="live-readiness-gates">
+          {releaseGateTiles.map(({ label, record, Icon }) => (
+            <button key={label} className="live-readiness-gate" type="button" onClick={() => setActiveSection("liveReadiness")}>
+              <span className="live-readiness-gate-top">
+                <span className="live-readiness-gate-icon">
+                  <Icon size={16} aria-hidden="true" />
+                </span>
+                <StatusBadge status={record?.status ?? "pending"} compact />
+              </span>
+              <strong>{record?.title ?? label}</strong>
+              <span>{record?.summary ?? "Gate evidence is not loaded yet."}</span>
+              <code>{factValue(record, "next command", "npm run flowchain:public-deployment:contract")}</code>
+              <small>{factValue(record, "blockers", "none")}</small>
+            </button>
+          ))}
+        </div>
       </section>
 
       <section className="tester-launch-rail" aria-label="External tester launch readiness">

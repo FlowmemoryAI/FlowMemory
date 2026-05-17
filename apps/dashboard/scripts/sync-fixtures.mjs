@@ -1,10 +1,11 @@
-import { copyFileSync, existsSync, mkdirSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, "../../..");
 const destinationDir = resolve(repoRoot, "apps/dashboard/public/data");
+const liveInfraReportDir = resolve(repoRoot, "docs/agent-runs/live-product-infra-rpc");
 const fixtureCopies = [
   {
     label: "dashboard fixture",
@@ -33,6 +34,194 @@ const fixtureCopies = [
   },
 ];
 
+const liveReadinessReportCopies = [
+  "public-deployment-contract-report.json",
+  "flowchain-live-infra-check-report.json",
+  "service-status-report.json",
+  "service-monitor-report.json",
+  "public-rpc-readiness-report.json",
+  "backup-readiness-report.json",
+  "bridge-relayer-once-report.json",
+  "external-tester-packet-report.json",
+  "external-tester-readiness-report.json",
+  "owner-inputs-report.json",
+  "no-secret-scan-report.json",
+];
+
+const liveReadinessGateLabels = new Map([
+  ["private-service-origin", "Private L1 origin"],
+  ["pre-share-monitoring", "Block production monitor"],
+  ["service-autorecovery", "Service autorecovery"],
+  ["service-install-automation", "Windows service install"],
+  ["public-rpc-edge", "Public RPC edge"],
+  ["state-backup", "State backup proof"],
+  ["base8453-bridge-edge", "Base 8453 bridge edge"],
+  ["base8453-bridge-relayer-queue", "Bridge relayer queue"],
+  ["external-tester-sharing", "External tester packet"],
+  ["public-tester-write-gateway", "Tester write gateway"],
+  ["no-secret-no-broadcast", "No secrets or broadcasts"],
+]);
+
+function readJsonIfExists(fileName) {
+  const fullPath = resolve(liveInfraReportDir, fileName);
+  if (!existsSync(fullPath)) {
+    return null;
+  }
+
+  return JSON.parse(readFileSync(fullPath, "utf8"));
+}
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asText(value, fallback = "not recorded") {
+  if (value === null || value === undefined || value === "") {
+    return fallback;
+  }
+
+  return String(value);
+}
+
+function sanitizeText(value) {
+  return asText(value)
+    .replaceAll(repoRoot, "<repo>")
+    .replace(/[A-Za-z]:\\[^\s"',)]+/g, "<local-path>");
+}
+
+function sourceReportSummary(fileName, payload) {
+  return {
+    fileName,
+    schema: asText(payload?.schema),
+    status: asText(payload?.status, payload ? "observed" : "missing"),
+    generatedAt: asText(payload?.generatedAt),
+  };
+}
+
+function contractItemById(contract, id) {
+  return asArray(contract?.items).find((item) => item && item.id === id) ?? null;
+}
+
+function commandList(value, limit = 4) {
+  return asArray(value).map((command) => sanitizeText(command)).slice(0, limit);
+}
+
+function blockerList(value) {
+  return asArray(value).map((blocker) => sanitizeText(blocker));
+}
+
+function gateFromContractItem(contract, id) {
+  const item = contractItemById(contract, id);
+  const label = liveReadinessGateLabels.get(id) ?? id;
+
+  if (!item) {
+    return {
+      id,
+      label,
+      status: "unresolved",
+      summary: "The deployment contract did not include this gate in the current report.",
+      evidence: "missing from public deployment contract report",
+      commands: [],
+      blockers: [],
+    };
+  }
+
+  return {
+    id,
+    label,
+    status: asText(item.status, "unresolved"),
+    summary: sanitizeText(item.requirement ?? item.summary ?? label),
+    evidence: sanitizeText(item.evidence ?? "not recorded"),
+    commands: commandList(item.commands),
+    blockers: blockerList(item.blockers),
+  };
+}
+
+function ownerInputGroup(name) {
+  if (name.startsWith("FLOWCHAIN_TESTER_")) {
+    return "tester write gateway";
+  }
+  if (name === "FLOWCHAIN_RPC_STATE_BACKUP_PATH") {
+    return "backup storage";
+  }
+  if (name.startsWith("FLOWCHAIN_RPC_")) {
+    return "public RPC edge";
+  }
+  if (name.startsWith("FLOWCHAIN_BASE8453_") || name.startsWith("FLOWCHAIN_PILOT_")) {
+    return "Base 8453 bridge";
+  }
+
+  return "operator input";
+}
+
+function statusCounts(gates) {
+  return gates.reduce((counts, gate) => {
+    const status = asText(gate.status, "unresolved");
+    counts[status] = (counts[status] ?? 0) + 1;
+    return counts;
+  }, {});
+}
+
+function writeLiveReadinessSummary() {
+  const reports = Object.fromEntries(liveReadinessReportCopies.map((fileName) => [fileName, readJsonIfExists(fileName)]));
+  const contract = reports["public-deployment-contract-report.json"];
+  const serviceStatus = reports["service-status-report.json"];
+  const monitor = reports["service-monitor-report.json"];
+  const bridgeRelayer = reports["bridge-relayer-once-report.json"];
+  const externalTesterPacket = reports["external-tester-packet-report.json"];
+  const ownerInputs = reports["owner-inputs-report.json"];
+  const noSecretScan = reports["no-secret-scan-report.json"];
+  const gates = [...liveReadinessGateLabels.keys()].map((id) => gateFromContractItem(contract, id));
+  const knownOwnerInputs = asArray(contract?.knownOwnerInputs).map((name) => sanitizeText(name));
+  const requiredOwnerInputs = knownOwnerInputs.length > 0
+    ? knownOwnerInputs
+    : gates.flatMap((gate) => gate.blockers);
+  const latestHeight = asText(serviceStatus?.chain?.latestHeight, "not recorded");
+  const finalizedHeight = asText(serviceStatus?.chain?.finalizedHeight, "not recorded");
+  const privateRpcUrl = serviceStatus?.bind
+    ? `http://${asText(serviceStatus.bind.host, "127.0.0.1")}:${asText(serviceStatus.bind.port, "8787")}`
+    : "http://127.0.0.1:8787";
+  const summary = contract?.deploymentReady === true
+    ? "Public launch gates are passing; run the pre-exposure commands before sharing the tester packet."
+    : "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.";
+  const liveReadiness = {
+    schema: "flowchain.live_readiness_dashboard_report.v0",
+    generatedAt: new Date().toISOString(),
+    status: asText(contract?.status ?? reports["flowchain-live-infra-check-report.json"]?.status, "unresolved"),
+    deploymentReady: contract?.deploymentReady === true,
+    packetShareable: contract?.packetShareable === true || externalTesterPacket?.packetShareable === true,
+    blockedOnlyOnKnownExternalOwnerInputs: contract?.blockedOnlyOnKnownExternalOwnerInputs === true,
+    summary,
+    privateRpcUrl,
+    metrics: {
+      latestHeight,
+      finalizedHeight,
+      monitorHeightAdvanced: monitor?.heightAdvanced === true,
+      bridgeRelayerStatus: asText(bridgeRelayer?.status, "not recorded"),
+      bridgeQueuedTransactions: asText(bridgeRelayer?.counts?.queuedTransactions, "0"),
+      externalTesterPacketStatus: asText(externalTesterPacket?.status, "not recorded"),
+      ownerInputReady: ownerInputs?.ownerInputReady === true,
+      noSecretStatus: asText(noSecretScan?.status, "not recorded"),
+      statusCounts: statusCounts(gates),
+    },
+    ownerInputs: [...new Set(requiredOwnerInputs)].map((name) => ({
+      name,
+      group: ownerInputGroup(name),
+    })),
+    gates,
+    commands: {
+      preExposure: commandList(contract?.operatorCommands?.preExposure, 12),
+      rollback: commandList(contract?.operatorCommands?.rollback, 10),
+    },
+    sourceReports: liveReadinessReportCopies.map((fileName) => sourceReportSummary(fileName, reports[fileName])),
+    envValuesPrinted: false,
+    noSecrets: true,
+  };
+
+  writeFileSync(resolve(destinationDir, "flowchain-live-readiness-report.json"), `${JSON.stringify(liveReadiness, null, 2)}\n`);
+  console.log(`Synced FlowChain live readiness dashboard report: ${resolve(destinationDir, "flowchain-live-readiness-report.json")}`);
+}
+
 mkdirSync(destinationDir, { recursive: true });
 
 for (const fixture of fixtureCopies) {
@@ -42,3 +231,5 @@ for (const fixture of fixtureCopies) {
   copyFileSync(fixture.source, fixture.destination);
   console.log(`Synced ${fixture.label}: ${fixture.destination}`);
 }
+
+writeLiveReadinessSummary();
