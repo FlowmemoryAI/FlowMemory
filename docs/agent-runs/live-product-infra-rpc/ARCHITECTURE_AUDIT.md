@@ -1,6 +1,6 @@
 ﻿# FlowChain Architecture Audit
 
-Generated: 2026-05-17T09:53:29.7974270Z
+Generated: 2026-05-17T10:06:08.5592165Z
 Status: blocked
 Blocked only on known external owner inputs: True
 
@@ -12,7 +12,7 @@ Blocked only on known external owner inputs: True
 - Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.
 - Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.
 - Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven and live-blocked until owner guardrails are configured.
-- State backup, monitoring, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.
+- State backup, monitoring, reboot-persistent service install, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.
 - Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.
 - Owner signup checklist maps the external services and local setup values needed for public operation without requesting secrets.
 - The owner-operated public deployment contract has pre-exposure and rollback commands and cannot become shareable until all public gates pass.
@@ -22,8 +22,9 @@ Blocked only on known external owner inputs: True
 
 | Layer | Requirement | Status | Evidence |
 | --- | --- | --- | --- |
-| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=52174, finalizedHeight=52174 |
+| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=52358, finalizedHeight=52358 |
 | Operations | Operations has explicit status, monitor, ops snapshot, alert rules, incident drills, and emergency controls that classify incidents separately from owner-input blockers. | passed | monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, opsSnapshot=blocked, criticalCount=0, alertRules=passed, criticalRules=5, blockedRules=5, unmappedAlerts=0, incidentDrill=passed, incidentCases=8, incidentFailed=0 |
+| Operations | Owner-host service lifecycle includes a no-secret Windows Scheduled Task install, status, and uninstall path for reboot-persistent live supervisor autorecovery. | passed | installValidation=passed, failedChecks=0, planDidNotMutate=True, liveProfileDefault=True, schedulerCmdlets=True |
 | RPC/API | The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation and abuse rejection before it can be exposed publicly. | passed | validationStatus=passed, corsAllowed=True, corsRejected=True, endpointChecks=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True, abuseStatus=passed, abusePassed=True, abuseMissingChecks=0 |
 | Public edge | External RPC exposure is a distinct owner-operated edge with TLS, allowed origins, rate limits, endpoint checks, and response hygiene. | blocked | publicRpcStatus=blocked, publicRpcReady=False |
 | Public edge | Public RPC exposure has a no-values owner edge template and deployment bundle for HTTPS reverse proxying, rate limiting, verification, and rollback. | passed | edgeTemplateStatus=passed, bundleStatus=passed, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True |
@@ -45,6 +46,7 @@ Blocked only on known external owner inputs: True
 ## Data Flows
 
 - private-local-wallet-transfer: tester wallet create -> control-plane /wallets/create -> wallet public metadata -> control-plane /wallets/send -> live node inbox -> runtime block -> wallet balance/transfer reads
+- owner-host-service-lifecycle: Windows Scheduled Task -> repo working directory -> live service supervisor -> service status check -> restart with live profile -> private node/control-plane recovery
 - public-tester-gateway: tester bearer token -> public edge /tester/wallets/create -> public-only wallet metadata -> public edge /tester/wallets/send -> cap enforcement -> runtime block -> balance proof
 - developer-dev-pack: developer CLI/SDK -> control-plane /rpc -> rpc_discover -> wallet balance/history reads -> control-plane /wallets/send -> runtime block -> generated RPC reference
 - public-rpc-exposure: owner TLS endpoint -> allowed-origin/rate-limit gate -> control-plane HTTP server -> JSON-RPC/REST methods -> runtime state reads

@@ -46,6 +46,7 @@ $paths = [ordered]@{
     serviceStatus = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     serviceSupervisorValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
+    serviceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
     ownerOnboarding = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json"
@@ -262,6 +263,7 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:service:status -- -AllowBlocked",
     "npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90",
     "npm run flowchain:service:supervisor:validate",
+    "npm run flowchain:service:install:validate",
     "npm run flowchain:ops:snapshot -- -AllowBlocked",
     "npm run flowchain:owner:onboarding",
     "npm run flowchain:owner:signup-checklist",
@@ -285,6 +287,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-status" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-status.ps1"), "-AllowBlocked", "-ReportPath", $paths.serviceStatus)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-monitor" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-monitor.ps1"), "-DurationSeconds", "20", "-PollSeconds", "5", "-MaxStateAgeSeconds", "90", "-ReportPath", $paths.serviceMonitor)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-supervisor-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-supervisor-validation.ps1"), "-ReportPath", $paths.serviceSupervisorValidation)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-install-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-install-validation.ps1"), "-ReportPath", $paths.serviceInstallValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "ops-snapshot" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-snapshot.ps1"), "-AllowBlocked", "-NoRefresh", "-ReportPath", $paths.opsSnapshot)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "ops-alert-rules" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-alerts.ps1"), "-AllowBlocked", "-NoRefresh", "-ReportPath", $paths.opsAlertRules)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-onboarding" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-onboarding.ps1"), "-ReportPath", $paths.ownerOnboarding)
@@ -494,6 +497,29 @@ Add-DeploymentItem -Items $items -Id "service-autorecovery" `
     -Status $(if (($supervisorValidationStatus -eq "passed") -and ($supervisorRestartAttempts -ge 1)) { "passed" } else { "failed" }) `
     -Evidence "supervisorValidation=$supervisorValidationStatus, restartAttempts=$supervisorRestartAttempts" `
     -Commands @("npm run flowchain:service:supervisor:validate", "npm run flowchain:service:supervisor -- -IntervalSeconds 30 -MaxRestartAttempts 3")
+
+$serviceInstallValidation = $reports.serviceInstallValidation
+$serviceInstallValidationStatus = Get-DeploymentStatus -Report $serviceInstallValidation
+$serviceInstallChecks = Get-DeploymentProp -Object $serviceInstallValidation -Name "checks"
+$serviceInstallReady = ($serviceInstallValidationStatus -eq "passed") `
+    -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "packageScriptsPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "planCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "schedulerCmdletsAvailable" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "scheduledTaskActionSupportsWorkingDirectory" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "actionUsesSupervisor" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "liveProfileDefault" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "commandOmitsNonLiveProfile" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $serviceInstallChecks -Name "commandsPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $serviceInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $serviceInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:service:install:windows") `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:service:install:validate")
+Add-DeploymentItem -Items $items -Id "service-install-automation" `
+    -Requirement "The owner host has a no-secret Windows install, status, and uninstall path for registering the live supervisor as a reboot-persistent scheduled task." `
+    -Status $(if ($serviceInstallReady) { "passed" } else { "failed" }) `
+    -Evidence "serviceInstallValidation=$serviceInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "planDidNotMutate"), liveProfileDefault=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "liveProfileDefault"), commandsPresent=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "commandsPresent")" `
+    -Commands @("npm run flowchain:service:install:validate", "npm run flowchain:service:install:windows -- -Action Plan", "npm run flowchain:service:install:windows -- -Action Install", "npm run flowchain:service:install:windows -- -Action Status", "npm run flowchain:service:install:windows -- -Action Uninstall")
 
 $opsSnapshot = $reports.opsSnapshot
 $opsSnapshotStatus = Get-DeploymentStatus -Report $opsSnapshot
@@ -712,6 +738,8 @@ $operatorCommands = [ordered]@{
     preExposure = @(
         "npm run flowchain:service:status",
         "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
+        "npm run flowchain:service:install:validate",
+        "npm run flowchain:service:install:windows -- -Action Plan",
         "npm run flowchain:ops:snapshot -- -AllowBlocked",
         "npm run flowchain:ops:alerts -- -AllowBlocked",
         "npm run flowchain:owner:onboarding",
@@ -735,6 +763,8 @@ $operatorCommands = [ordered]@{
     )
     rollback = @(
         "npm run flowchain:service:status",
+        "npm run flowchain:service:install:windows -- -Action Status",
+        "npm run flowchain:service:install:windows -- -Action Uninstall",
         "npm run flowchain:service:stop",
         "npm run flowchain:service:restart -- -LiveProfile",
         "npm run flowchain:emergency:stop-local"

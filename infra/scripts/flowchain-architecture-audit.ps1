@@ -40,6 +40,7 @@ $reportPaths = [ordered]@{
     serviceStatus = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     serviceSupervisorValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
+    serviceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
     incidentDrill = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json"
@@ -241,6 +242,10 @@ $monitorSamples = [int](Get-ArchitectureProp -Object $monitor -Name "sampleCount
 $supervisorValidation = $reports.serviceSupervisorValidation
 $supervisorValidationStatus = Get-ArchitectureStatus -Report $supervisorValidation
 $supervisorRestartAttempts = [int](Get-ArchitectureProp -Object $supervisorValidation -Name "restartAttempts" -Default 0)
+$serviceInstallValidation = $reports.serviceInstallValidation
+$serviceInstallValidationStatus = Get-ArchitectureStatus -Report $serviceInstallValidation
+$serviceInstallChecks = Get-ArchitectureProp -Object $serviceInstallValidation -Name "checks"
+$serviceInstallFailedChecks = @((Get-ArchitectureProp -Object $serviceInstallValidation -Name "failedChecks" -Default @()))
 $opsSnapshot = $reports.opsSnapshot
 $opsSnapshotStatus = Get-ArchitectureStatus -Report $opsSnapshot
 $opsCriticalCount = [int](Get-ArchitectureProp -Object $opsSnapshot -Name "criticalCount" -Default 999)
@@ -294,6 +299,34 @@ Add-ArchitectureItem -Items $items -Id "ops-observability-boundary" -Layer "Oper
     -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
     -Files $observabilityFiles `
     -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
+
+$serviceInstallFiles = @(
+    "infra/scripts/flowchain-service-install-windows.ps1",
+    "infra/scripts/flowchain-service-install-validation.ps1",
+    "docs/agent-runs/live-product-infra-rpc/WINDOWS_SERVICE_INSTALL.md",
+    "docs/agent-runs/live-product-infra-rpc/SERVICE_INSTALL_VALIDATION.md"
+)
+$serviceInstallReady = (Test-AllRepoFilesExist -Paths $serviceInstallFiles) `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:service:install:windows") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:service:install:validate") `
+    -and ($serviceInstallValidationStatus -eq "passed") `
+    -and ($serviceInstallFailedChecks.Count -eq 0) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "packageScriptsPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "planCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "schedulerCmdletsAvailable" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "scheduledTaskActionSupportsWorkingDirectory" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "actionUsesSupervisor" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "liveProfileDefault" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "commandOmitsNonLiveProfile" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $serviceInstallValidation -Name "noSecrets" -Default $false) -eq $true)
+Add-ArchitectureItem -Items $items -Id "service-install-boundary" -Layer "Operations" `
+    -Requirement "Owner-host service lifecycle includes a no-secret Windows Scheduled Task install, status, and uninstall path for reboot-persistent live supervisor autorecovery." `
+    -Status $(if ($serviceInstallReady) { "passed" } else { "failed" }) `
+    -Evidence "installValidation=$serviceInstallValidationStatus, failedChecks=$($serviceInstallFailedChecks.Count), planDidNotMutate=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "planDidNotMutate"), liveProfileDefault=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "liveProfileDefault"), schedulerCmdlets=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "schedulerCmdletsAvailable")" `
+    -Files $serviceInstallFiles `
+    -Commands @("npm run flowchain:service:install:validate", "npm run flowchain:service:install:windows -- -Action Plan", "npm run flowchain:service:install:windows -- -Action Install", "npm run flowchain:service:install:windows -- -Action Status", "npm run flowchain:service:install:windows -- -Action Uninstall")
 
 $publicRpcValidation = $reports.publicRpcValidation
 $publicRpcAbuseTest = $reports.publicRpcAbuseTest
@@ -787,6 +820,11 @@ $dataFlows = @(
         latestEvidence = $reportPaths.testerNetwork
     },
     [ordered]@{
+        name = "owner-host-service-lifecycle"
+        path = @("Windows Scheduled Task", "repo working directory", "live service supervisor", "service status check", "restart with live profile", "private node/control-plane recovery")
+        latestEvidence = $reportPaths.serviceInstallValidation
+    },
+    [ordered]@{
         name = "public-tester-gateway"
         path = @("tester bearer token", "public edge /tester/wallets/create", "public-only wallet metadata", "public edge /tester/wallets/send", "cap enforcement", "runtime block", "balance proof")
         latestEvidence = $reportPaths.publicTesterGateway
@@ -838,7 +876,7 @@ $objectiveDeliverables = @(
     "Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.",
     "Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.",
     "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven and live-blocked until owner guardrails are configured.",
-    "State backup, monitoring, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
+    "State backup, monitoring, reboot-persistent service install, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
     "Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.",
     "Owner signup checklist maps the external services and local setup values needed for public operation without requesting secrets.",
     "The owner-operated public deployment contract has pre-exposure and rollback commands and cannot become shareable until all public gates pass.",

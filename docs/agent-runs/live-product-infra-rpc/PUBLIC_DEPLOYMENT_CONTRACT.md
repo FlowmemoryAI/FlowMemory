@@ -1,6 +1,6 @@
 ﻿# FlowChain Public Deployment Contract
 
-Generated: 2026-05-17T09:53:29.4104191Z
+Generated: 2026-05-17T10:06:08.6699331Z
 Status: blocked
 Deployment ready: False
 Packet shareable: False
@@ -25,9 +25,10 @@ This file records deployment gates, commands, and env names only. It must not co
 | Owner signup checklist maps every public RPC, tester write gateway, backup, and Base 8453 bridge value to the exact thing the owner must get without requesting secrets in chat. | passed | signupStatus=passed, itemCount=9, externalSignupCount=3, missingCoverage=0, repoOwned=True, localEnvFileSupported=True |
 | Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added. | passed | templateStatus=passed, pathIsGitIgnored=True, requiredEnvNameCount=17, optionalEnvNameCount=2, includesAllRequired=True |
 | Public RPC exposure has a no-values owner edge template and deployment bundle for HTTPS reverse proxying, rate limiting, verification, and rollback. | passed | edgeTemplateStatus=passed, bundleStatus=passed, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True |
-| The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable. | passed | serviceStatus=passed, privateBind=True, latestHeight=52174, finalizedHeight=52174 |
+| The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable. | passed | serviceStatus=passed, privateBind=True, latestHeight=52358, finalizedHeight=52358 |
 | The deployment has recent service-monitor evidence that block height advances over multiple samples. | passed | monitorStatus=passed, samples=2, heightAdvanced=True |
 | The owner service has an autorecovery supervisor and an isolated recovery drill proving control-plane restart without touching live state. | passed | supervisorValidation=passed, restartAttempts=1 |
+| The owner host has a no-secret Windows install, status, and uninstall path for registering the live supervisor as a reboot-persistent scheduled task. | passed | serviceInstallValidation=passed, planDidNotMutate=True, liveProfileDefault=True, commandsPresent=True |
 | Owner deployment has a no-secret ops snapshot that separates critical incidents from expected owner-input blockers and lists incident commands. | passed | opsSnapshot=blocked, criticalCount=0, blockedCount=5 |
 | Owner deployment has a no-secret alert rule manifest that maps every current ops finding to operator commands without committing delivery credentials. | passed | alertRules=passed, criticalRules=5, blockedRules=5, unmappedCurrentFindingCodes=0 |
 | The owner deployment contract validates the required public RPC, tester write gateway, backup, and Base 8453 input names without values. | blocked | ownerInputsStatus=blocked, ownerInputReady=False |
@@ -45,6 +46,8 @@ This file records deployment gates, commands, and env names only. It must not co
 
 - npm run flowchain:service:status
 - npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30
+- npm run flowchain:service:install:validate
+- npm run flowchain:service:install:windows -- -Action Plan
 - npm run flowchain:ops:snapshot -- -AllowBlocked
 - npm run flowchain:ops:alerts -- -AllowBlocked
 - npm run flowchain:owner:onboarding
@@ -69,6 +72,8 @@ This file records deployment gates, commands, and env names only. It must not co
 ## Rollback Commands
 
 - npm run flowchain:service:status
+- npm run flowchain:service:install:windows -- -Action Status
+- npm run flowchain:service:install:windows -- -Action Uninstall
 - npm run flowchain:service:stop
 - npm run flowchain:service:restart -- -LiveProfile
 - npm run flowchain:emergency:stop-local

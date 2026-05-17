@@ -97,6 +97,8 @@
     "flowchain:service:monitor": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-monitor.ps1",
     "flowchain:service:supervisor": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-supervisor.ps1",
     "flowchain:service:supervisor:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-supervisor-validation.ps1",
+    "flowchain:service:install:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-install-windows.ps1",
+    "flowchain:service:install:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-install-validation.ps1",
     "flowchain:ops:snapshot": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-ops-snapshot.ps1",
     "flowchain:ops:alerts": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-ops-alerts.ps1",
     "flowchain:ops:incident-drill": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-incident-drill.ps1",

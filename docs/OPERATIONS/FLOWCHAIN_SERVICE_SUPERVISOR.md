@@ -26,12 +26,41 @@ The validation command starts an isolated service instance under
 control-plane process, runs the supervisor once, verifies recovery, and stops
 the isolated instance. It does not stop the live owner service.
 
+## Install On Windows Owner Host
+
+Use the Windows install planner before creating any persistent OS task:
+
+```powershell
+npm run flowchain:service:install:windows -- -Action Plan
+npm run flowchain:service:install:validate
+```
+
+After the plan and validation pass, the owner host can register the supervisor
+as a Windows Scheduled Task at logon:
+
+```powershell
+npm run flowchain:service:install:windows -- -Action Install
+npm run flowchain:service:install:windows -- -Action Status
+```
+
+Rollback removes only the scheduled task registration:
+
+```powershell
+npm run flowchain:service:install:windows -- -Action Uninstall
+```
+
+The default task starts the live-profile supervisor and does not enable the
+bridge relayer loop. Add `-StartBridgeRelayerLoop` only after the bridge owner
+inputs and pilot guardrails pass.
+
 ## Reports
 
 - `service-supervisor-report.json`
 - `service-supervisor-status-report.json`
 - `service-supervisor-restart-report.json`
 - `service-supervisor-validation-report.json`
+- `service-install-windows-report.json`
+- `service-install-validation-report.json`
 
 All reports are redacted by the same no-secret checks used by the rest of the
 live infrastructure gate.

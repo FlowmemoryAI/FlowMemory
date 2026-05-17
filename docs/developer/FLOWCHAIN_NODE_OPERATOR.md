@@ -23,11 +23,22 @@ service alive after process exits or stale state evidence:
 ```powershell
 npm run flowchain:service:supervisor -- -IntervalSeconds 30 -MaxRestartAttempts 3
 npm run flowchain:service:supervisor:validate
+npm run flowchain:service:install:windows -- -Action Plan
+npm run flowchain:service:install:validate
 ```
 
 The supervisor checks `flowchain:service:status`, requires live profile by
 default, restarts with `flowchain:service:restart -- -LiveProfile`, and writes
 redacted reports under `docs/agent-runs/live-product-infra-rpc/`.
+
+On a Windows owner host, `flowchain:service:install:windows` can register,
+inspect, and remove a Scheduled Task that starts the live supervisor at logon:
+
+```powershell
+npm run flowchain:service:install:windows -- -Action Install
+npm run flowchain:service:install:windows -- -Action Status
+npm run flowchain:service:install:windows -- -Action Uninstall
+```
 
 ## Public RPC Boundary
 

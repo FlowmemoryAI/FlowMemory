@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-17T09:53:29.7974270Z",
+    "generatedAt":  "2026-05-17T10:06:08.5592165Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -10,17 +10,17 @@
                                   "Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.",
                                   "Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.",
                                   "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven and live-blocked until owner guardrails are configured.",
-                                  "State backup, monitoring, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
+                                  "State backup, monitoring, reboot-persistent service install, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
                                   "Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.",
                                   "Owner signup checklist maps the external services and local setup values needed for public operation without requesting secrets.",
                                   "The owner-operated public deployment contract has pre-exposure and rollback commands and cannot become shareable until all public gates pass.",
                                   "Every missing production edge fails closed on exact owner input names, with no secrets, env values, or live broadcasts."
                               ],
     "itemCounts":  {
-                       "passed":  13,
+                       "passed":  14,
                        "blocked":  6,
                        "failed":  0,
-                       "total":  19
+                       "total":  20
                    },
     "items":  [
                   {
@@ -28,7 +28,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=52174, finalizedHeight=52174",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=52358, finalizedHeight=52358",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -68,6 +68,29 @@
                                        "npm run flowchain:ops:alerts -- -AllowBlocked",
                                        "npm run flowchain:ops:incident-drill",
                                        "npm run flowchain:emergency:stop-local"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "service-install-boundary",
+                      "layer":  "Operations",
+                      "requirement":  "Owner-host service lifecycle includes a no-secret Windows Scheduled Task install, status, and uninstall path for reboot-persistent live supervisor autorecovery.",
+                      "status":  "passed",
+                      "evidence":  "installValidation=passed, failedChecks=0, planDidNotMutate=True, liveProfileDefault=True, schedulerCmdlets=True",
+                      "files":  [
+                                    "infra/scripts/flowchain-service-install-windows.ps1",
+                                    "infra/scripts/flowchain-service-install-validation.ps1",
+                                    "docs/agent-runs/live-product-infra-rpc/WINDOWS_SERVICE_INSTALL.md",
+                                    "docs/agent-runs/live-product-infra-rpc/SERVICE_INSTALL_VALIDATION.md"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:service:install:validate",
+                                       "npm run flowchain:service:install:windows -- -Action Plan",
+                                       "npm run flowchain:service:install:windows -- -Action Install",
+                                       "npm run flowchain:service:install:windows -- -Action Status",
+                                       "npm run flowchain:service:install:windows -- -Action Uninstall"
                                    ],
                       "blockers":  [
 
@@ -492,6 +515,18 @@
                           "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json"
                       },
                       {
+                          "name":  "owner-host-service-lifecycle",
+                          "path":  [
+                                       "Windows Scheduled Task",
+                                       "repo working directory",
+                                       "live service supervisor",
+                                       "service status check",
+                                       "restart with live profile",
+                                       "private node/control-plane recovery"
+                                   ],
+                          "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-validation-report.json"
+                      },
+                      {
                           "name":  "public-tester-gateway",
                           "path":  [
                                        "tester bearer token",
@@ -663,6 +698,7 @@
                         "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
                         "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json",
                         "serviceSupervisorValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-report.json",
+                        "serviceInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-validation-report.json",
                         "opsSnapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
                         "opsAlertRules":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-alert-rules-report.json",
                         "incidentDrill":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drill-report.json",

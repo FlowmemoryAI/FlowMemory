@@ -1,16 +1,16 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-17T09:53:29.4104191Z",
+    "generatedAt":  "2026-05-17T10:06:08.6699331Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
     "packetExecutableSmokeValidated":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
-                       "passed":  15,
+                       "passed":  16,
                        "blocked":  5,
                        "failed":  0,
-                       "total":  20
+                       "total":  21
                    },
     "items":  [
                   {
@@ -22,6 +22,7 @@
                                        "npm run flowchain:service:status -- -AllowBlocked",
                                        "npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90",
                                        "npm run flowchain:service:supervisor:validate",
+                                       "npm run flowchain:service:install:validate",
                                        "npm run flowchain:ops:snapshot -- -AllowBlocked",
                                        "npm run flowchain:owner:onboarding",
                                        "npm run flowchain:owner:signup-checklist",
@@ -97,7 +98,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=52174, finalizedHeight=52174",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=52358, finalizedHeight=52358",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -125,6 +126,22 @@
                       "commands":  [
                                        "npm run flowchain:service:supervisor:validate",
                                        "npm run flowchain:service:supervisor -- -IntervalSeconds 30 -MaxRestartAttempts 3"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "service-install-automation",
+                      "requirement":  "The owner host has a no-secret Windows install, status, and uninstall path for registering the live supervisor as a reboot-persistent scheduled task.",
+                      "status":  "passed",
+                      "evidence":  "serviceInstallValidation=passed, planDidNotMutate=True, liveProfileDefault=True, commandsPresent=True",
+                      "commands":  [
+                                       "npm run flowchain:service:install:validate",
+                                       "npm run flowchain:service:install:windows -- -Action Plan",
+                                       "npm run flowchain:service:install:windows -- -Action Install",
+                                       "npm run flowchain:service:install:windows -- -Action Status",
+                                       "npm run flowchain:service:install:windows -- -Action Uninstall"
                                    ],
                       "blockers":  [
 
@@ -391,6 +408,7 @@
                         "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
                         "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json",
                         "serviceSupervisorValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-report.json",
+                        "serviceInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-validation-report.json",
                         "opsSnapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
                         "opsAlertRules":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-alert-rules-report.json",
                         "ownerOnboarding":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-onboarding-report.json",
@@ -416,6 +434,8 @@
                              "preExposure":  [
                                                  "npm run flowchain:service:status",
                                                  "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
+                                                 "npm run flowchain:service:install:validate",
+                                                 "npm run flowchain:service:install:windows -- -Action Plan",
                                                  "npm run flowchain:ops:snapshot -- -AllowBlocked",
                                                  "npm run flowchain:ops:alerts -- -AllowBlocked",
                                                  "npm run flowchain:owner:onboarding",
@@ -439,6 +459,8 @@
                                              ],
                              "rollback":  [
                                               "npm run flowchain:service:status",
+                                              "npm run flowchain:service:install:windows -- -Action Status",
+                                              "npm run flowchain:service:install:windows -- -Action Uninstall",
                                               "npm run flowchain:service:stop",
                                               "npm run flowchain:service:restart -- -LiveProfile",
                                               "npm run flowchain:emergency:stop-local"
