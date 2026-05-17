@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Bundle
 
-Generated: 2026-05-16T21:10:38.7464585Z
+Generated: 2026-05-16T23:56:46.1109360Z
 Status: passed
 
 This bundle packages placeholder-only files for an owner-operated HTTPS edge in front of the repo-owned private RPC origin `127.0.0.1:8787`.
@@ -42,6 +42,9 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE
 - FLOWCHAIN_RPC_TLS_TERMINATED
 - FLOWCHAIN_RPC_STATE_BACKUP_PATH
+- FLOWCHAIN_TESTER_WRITE_ENABLED
+- FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256
+- FLOWCHAIN_TESTER_MAX_SEND_UNITS
 
 ## Verification Commands
 

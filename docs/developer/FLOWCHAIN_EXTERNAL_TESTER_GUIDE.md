@@ -29,6 +29,9 @@ Before a tester starts, the owner must send a tester packet with:
 - Network label, for example `FlowChain friends-and-family pilot`.
 - Public RPC URL ending in `/rpc`, preferably HTTPS.
 - Whether the RPC URL has a bearer token, basic auth, or IP allowlist.
+- Tester write gateway token if wallet creation or wallet-to-wallet sends are
+  part of the test. This token is separate from the read-only RPC URL and must
+  be sent out of band.
 - Approved wallet path:
   - a wallet app/build with instructions, or
   - pre-created no-value test account IDs, or
@@ -50,6 +53,7 @@ The owner should run these checks before inviting testers:
 
 ```powershell
 npm run flowchain:tester:readiness -- -AllowBlocked
+npm run flowchain:tester:gateway:e2e
 npm run flowchain:external-tester:packet -- -AllowBlocked
 npm run flowchain:public-rpc:validate
 npm run flowchain:bridge:live:check
@@ -209,8 +213,24 @@ If the owner gives pre-created test account IDs:
 3. Use the account IDs only during the approved test window.
 
 The current devkit can read wallet balances, read transfer history, and submit a
-wallet send through the control-plane wallet path. It is not a general-purpose
-wallet custody app.
+wallet send through the owner-approved tester write gateway. It is not a
+general-purpose wallet custody app.
+
+For public friends-and-family tests, the write gateway uses these paths:
+
+```text
+POST /tester/wallets/create
+POST /tester/wallets/send
+```
+
+Both require:
+
+```powershell
+$headers = @{ Authorization = "Bearer <OWNER_TESTER_WRITE_TOKEN>" }
+```
+
+Do not use the private local `/wallets/create` or `/wallets/send` routes against
+a public endpoint.
 
 ## Receive Test Funds Or Bridge Credits
 
@@ -260,13 +280,21 @@ ff-test-YYYYMMDD-your-initials
 Submit the transfer:
 
 ```powershell
-npm run flowchain:devkit -- wallet-send --json --rpc $env:FLOWCHAIN_RPC_URL --from <sender-account-id> --to <recipient-account-id> --amount-units 1 --memo ff-test-YYYYMMDD-your-initials
+$base = $env:FLOWCHAIN_RPC_URL -replace '/rpc$',''
+$headers = @{ Authorization = "Bearer <OWNER_TESTER_WRITE_TOKEN>" }
+$sendBody = @{
+  from = "<sender-account-id>"
+  to = "<recipient-account-id>"
+  amountUnits = "1"
+  memo = "ff-test-YYYYMMDD-your-initials"
+  createRecipient = $false
+} | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri "$base/tester/wallets/send" -Headers $headers -ContentType "application/json" -Body $sendBody
 ```
 
 Important:
 
-- `wallet-send` calls the control-plane wallet send path on the same host as the
-  RPC endpoint.
+- The tester write gateway is capped by `FLOWCHAIN_TESTER_MAX_SEND_UNITS`.
 - Use it only against the owner-approved pilot endpoint.
 - Never send more than the owner-approved limit.
 - Never use a real-value account unless the owner explicitly confirms a

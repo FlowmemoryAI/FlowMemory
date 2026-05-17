@@ -1,9 +1,9 @@
 ﻿# FlowChain External Tester Packet
 
-Generated: 2026-05-16T21:06:03.7392550Z
+Generated: 2026-05-16T23:59:44.4794821Z
 Status: blocked
 Shareable externally: False
-Latest observed height: 41476
+Latest observed height: 43568
 
 Do not share this network externally yet. Local wallet rehearsal is available, but external sharing remains blocked until the listed owner input names and live infrastructure gates pass.
 
@@ -11,6 +11,7 @@ Do not share this network externally yet. Local wallet rehearsal is available, b
 
 - Use pilot test units only.
 - Create a fresh test wallet through the service.
+- Use only the owner-provided tester bearer token for write requests.
 - Wait for a bridge credit or owner-funded pilot balance before sending.
 - Send a small transfer to another tester and confirm it appears after new blocks are produced.
 - Do not reuse passwords from other services.
@@ -25,16 +26,18 @@ Invoke-RestMethod -Method Get -Uri '<OWNER_PUBLIC_ENDPOINT>/health'
 Invoke-RestMethod -Method Get -Uri '<OWNER_PUBLIC_ENDPOINT>/rpc/discover'
 Invoke-RestMethod -Method Get -Uri '<OWNER_PUBLIC_ENDPOINT>/rpc/readiness'
 Invoke-RestMethod -Method Get -Uri '<OWNER_PUBLIC_ENDPOINT>/chain/status'
+Invoke-RestMethod -Method Get -Uri '<OWNER_PUBLIC_ENDPOINT>/tester/status'
 ```
 
 ## Wallet Flow
 
 ```powershell
+$headers = @{ Authorization = "Bearer <OWNER_TESTER_WRITE_TOKEN>" }
 $createBody = @{ label = "tester-one"; password = "<fresh-test-password>" } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri '<OWNER_PUBLIC_ENDPOINT>/wallets/create' -ContentType 'application/json' -Body $createBody
+Invoke-RestMethod -Method Post -Uri '<OWNER_PUBLIC_ENDPOINT>/tester/wallets/create' -Headers $headers -ContentType 'application/json' -Body $createBody
 Invoke-RestMethod -Method Get -Uri '<OWNER_PUBLIC_ENDPOINT>/wallets/balances'
-$sendBody = @{ from = "<sender-account-id>"; to = "<recipient-account-id>"; amountUnits = "1"; memo = "external-tester-pilot"; applyBlock = $false; createRecipient = $false } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri '<OWNER_PUBLIC_ENDPOINT>/wallets/send' -ContentType 'application/json' -Body $sendBody
+$sendBody = @{ from = "<sender-account-id>"; to = "<recipient-account-id>"; amountUnits = "1"; memo = "external-tester-pilot"; createRecipient = $false } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri '<OWNER_PUBLIC_ENDPOINT>/tester/wallets/send' -Headers $headers -ContentType 'application/json' -Body $sendBody
 Invoke-RestMethod -Method Get -Uri '<OWNER_PUBLIC_ENDPOINT>/wallets/transfers'
 ```
 
@@ -54,6 +57,9 @@ Invoke-RestMethod -Method Get -Uri '<OWNER_PUBLIC_ENDPOINT>/wallets/transfers'
 - FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE
 - FLOWCHAIN_RPC_TLS_TERMINATED
 - FLOWCHAIN_RPC_STATE_BACKUP_PATH
+- FLOWCHAIN_TESTER_WRITE_ENABLED
+- FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256
+- FLOWCHAIN_TESTER_MAX_SEND_UNITS
 - FLOWCHAIN_PILOT_OPERATOR_ACK
 - FLOWCHAIN_BASE8453_RPC_URL
 - FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS

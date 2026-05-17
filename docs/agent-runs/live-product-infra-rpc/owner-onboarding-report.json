@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.owner_onboarding_report.v0",
-    "generatedAt":  "2026-05-16T20:52:19.4350089Z",
+    "generatedAt":  "2026-05-16T23:55:19.0667987Z",
     "status":  "passed",
     "ownerInputsStatus":  "blocked",
     "flowChainRpcIsOurs":  true,
@@ -49,6 +49,22 @@
                                  "decision":  "Create or mount a writable backup directory before public operation, then verify snapshot creation and restore rehearsal."
                              },
                              {
+                                 "id":  "external-tester-write-gateway",
+                                 "title":  "External tester write gateway",
+                                 "ownsRpcImplementation":  true,
+                                 "thirdPartyFlowChainRpcProviderNeeded":  false,
+                                 "externalSignupNeeded":  false,
+                                 "signupCategory":  "Out-of-band shared tester bearer token hash and local send cap for friends-and-family pilot writes.",
+                                 "localOrigin":  "127.0.0.1:8787",
+                                 "envNames":  [
+                                                  "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                                                  "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                                                  "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+                                              ],
+                                 "validationCommand":  "npm run flowchain:owner-inputs",
+                                 "decision":  "Use the authenticated /tester/wallets/create and /tester/wallets/send gateway for capped pilot writes; do not expose private /wallets/* routes publicly."
+                             },
+                             {
                                  "id":  "base8453-bridge-observer",
                                  "title":  "Base 8453 bridge observer",
                                  "ownsRpcImplementation":  false,
@@ -79,6 +95,9 @@
                                "$env:FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE=\"\u003cpositive integer\u003e\"",
                                "$env:FLOWCHAIN_RPC_TLS_TERMINATED=\"true\"",
                                "$env:FLOWCHAIN_RPC_STATE_BACKUP_PATH=\"\u003cexisting writable backup directory\u003e\"",
+                               "$env:FLOWCHAIN_TESTER_WRITE_ENABLED=\"true\"",
+                               "$env:FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256=\"\u003csha256 hex of out-of-band tester bearer token\u003e\"",
+                               "$env:FLOWCHAIN_TESTER_MAX_SEND_UNITS=\"\u003cpositive local test-unit cap per send\u003e\"",
                                "$env:FLOWCHAIN_PILOT_OPERATOR_ACK=\"I_UNDERSTAND_THIS_IS_CAPPED_BASE8453_OWNER_PILOT\"",
                                "$env:FLOWCHAIN_BASE8453_RPC_URL=\"\u003cBase 8453 RPC endpoint or self-operated node endpoint\u003e\"",
                                "$env:FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS=\"\u003c20-byte lockbox address\u003e\"",
@@ -96,6 +115,9 @@
                             "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                             "FLOWCHAIN_RPC_TLS_TERMINATED",
                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                            "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                            "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
                             "FLOWCHAIN_PILOT_OPERATOR_ACK",
                             "FLOWCHAIN_BASE8453_RPC_URL",
                             "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",

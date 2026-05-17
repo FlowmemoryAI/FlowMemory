@@ -34,6 +34,7 @@ $paths = [ordered]@{
     publicRpcEdgeTemplate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-edge-template-report.json"
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
     publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
+    publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
@@ -259,6 +260,9 @@ $publicRpcValidationExitCode = $publicRpcValidationResult.exitCode
 $publicRpcAbuseTestResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-abuse-test.ps1"))
 $publicRpcAbuseTestOutput = @($publicRpcAbuseTestResult.output)
 $publicRpcAbuseTestExitCode = $publicRpcAbuseTestResult.exitCode
+$publicTesterGatewayResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-tester-gateway-e2e.ps1"))
+$publicTesterGatewayOutput = @($publicTesterGatewayResult.output)
+$publicTesterGatewayExitCode = $publicTesterGatewayResult.exitCode
 $backupRestoreValidationResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-restore-validation.ps1"))
 $backupRestoreValidationOutput = @($backupRestoreValidationResult.output)
 $backupRestoreValidationExitCode = $backupRestoreValidationResult.exitCode
@@ -358,6 +362,7 @@ $ownerEnvReadinessValidation = $reports.ownerEnvReadinessValidation
 $ownerInputsValidation = $reports.ownerInputsValidation
 $publicRpcValidation = $reports.publicRpcValidation
 $publicRpcAbuseTest = $reports.publicRpcAbuseTest
+$publicTesterGateway = $reports.publicTesterGateway
 $externalTesterPacket = $reports.externalTesterPacket
 $testerWalletCreatesCount = @((Get-AuditProp -Object $testerNetwork -Name "testerWalletCreates" -Default @())).Count
 $testerTransferCount = @((Get-AuditProp -Object $testerNetwork -Name "transferResults" -Default @())).Count
@@ -428,7 +433,7 @@ $ownerEnvTemplatePassed = $ownerEnvTemplateExitCode -eq 0 `
     -and $ownerEnvTemplateStatus -eq "passed" `
     -and $ownerEnvTemplateGitIgnored -eq $true `
     -and $ownerEnvTemplateIncludesRequired -eq $true `
-    -and $ownerEnvTemplateRequiredCount -eq 15 `
+    -and $ownerEnvTemplateRequiredCount -eq 18 `
     -and ((Get-AuditProp -Object $ownerEnvTemplate -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $ownerEnvTemplate -Name "noSecrets" -Default $false) -eq $true)
 $ownerEnvReadinessValidationStatus = Get-ReportStatus -Report $ownerEnvReadinessValidation
@@ -543,6 +548,7 @@ $publicRpcAbuseRequiredChecks = @(
     "bridgeObservationSubmitRejected",
     "rawJsonGetRejected",
     "bridgeObservationPostAliasRejected",
+    "testerWriteGatewayFailsClosed",
     "badParamsRejected",
     "emptyBatchRejected",
     "oversizedBatchRejected",
@@ -560,6 +566,15 @@ $publicRpcAbuseTestPassed = $publicRpcAbuseTestExitCode -eq 0 `
     -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "noLiveBroadcast" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "noSecrets" -Default $false) -eq $true)
+$publicTesterGatewayStatus = Get-ReportStatus -Report $publicTesterGateway
+$publicTesterGatewayPassed = $publicTesterGatewayExitCode -eq 0 `
+    -and $publicTesterGatewayStatus -eq "passed" `
+    -and ((Get-AuditProp -Object $publicTesterGateway -Name "testerGatewayConfigured" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicTesterGateway -Name "testerWriteTokenHashConfigured" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicTesterGateway -Name "transferAccepted" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicTesterGateway -Name "capRejected" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicTesterGateway -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $publicTesterGateway -Name "noSecrets" -Default $false) -eq $true)
 $backupRestoreValidation = $reports.backupRestoreValidation
 $backupRestoreValidationStatus = Get-ReportStatus -Report $backupRestoreValidation
 $backupRestoreValidationChecks = Get-AuditProp -Object $backupRestoreValidation -Name "checks"
@@ -782,7 +797,7 @@ Add-AuditItem -Items $items -Id "owner-input-validator-self-test" `
     -Commands @("npm run flowchain:owner-inputs:validate")
 
 Add-AuditItem -Items $items -Id "owner-input-contract" `
-    -Requirement "Owner public RPC, backup, and Base 8453 bridge inputs are validated without printing values." `
+    -Requirement "Owner public RPC, tester write gateway, backup, and Base 8453 bridge inputs are validated without printing values." `
     -Status $(if ($ownerInputsStatus -eq "passed" -and $ownerInputsReady -eq $true) { "passed" } elseif ($ownerInputsStatus -eq "blocked") { "blocked" } else { "failed" }) `
     -Evidence "ownerInputsStatus=$ownerInputsStatus, ownerInputReady=$ownerInputsReady, report=$($paths.ownerInputs)" `
     -Commands @("npm run flowchain:owner-inputs") `
@@ -795,7 +810,7 @@ Add-AuditItem -Items $items -Id "owner-onboarding-packet" `
     -Commands @("npm run flowchain:owner:onboarding")
 
 Add-AuditItem -Items $items -Id "owner-signup-checklist" `
-    -Requirement "Owner signup checklist maps public RPC edge, always-on host, backup storage, Base 8453 RPC, bridge details, and local env-file setup to exact owner actions without requesting secrets." `
+    -Requirement "Owner signup checklist maps public RPC edge, tester write token/cap, always-on host, backup storage, Base 8453 RPC, bridge details, and local env-file setup to exact owner actions without requesting secrets." `
     -Status $(if ($ownerSignupChecklistPassed) { "passed" } else { "failed" }) `
     -Evidence "signupStatus=$ownerSignupChecklistStatus, itemCount=$ownerSignupItemCount, externalSignupCount=$ownerSignupExternalCount, missingCoverage=$ownerSignupMissingCoverageCount, repoOwned=$ownerSignupRepoOwned, localEnvFileSupported=$ownerSignupLocalEnvFileSupported, report=$($paths.ownerSignupChecklist)" `
     -Commands @("npm run flowchain:owner:signup-checklist")
@@ -842,6 +857,12 @@ Add-AuditItem -Items $items -Id "public-rpc-abuse-test" `
     -Status $(if ($publicRpcAbuseTestPassed) { "passed" } else { "failed" }) `
     -Evidence "abuseStatus=$publicRpcAbuseTestStatus, abuseReady=$publicRpcAbuseTestReady, missingChecks=$($publicRpcAbuseMissingChecks.Count), report=$($paths.publicRpcAbuseTest)" `
     -Commands @("npm run flowchain:public-rpc:abuse-test")
+
+Add-AuditItem -Items $items -Id "public-tester-gateway-e2e" `
+    -Requirement "Public tester write gateway proves bearer auth configuration, public-only wallet creation, capped send settlement, and over-cap rejection on a temporary local control-plane." `
+    -Status $(if ($publicTesterGatewayPassed) { "passed" } else { "failed" }) `
+    -Evidence "gatewayStatus=$publicTesterGatewayStatus, configured=$(Get-AuditProp -Object $publicTesterGateway -Name "testerGatewayConfigured"), transferAccepted=$(Get-AuditProp -Object $publicTesterGateway -Name "transferAccepted"), capRejected=$(Get-AuditProp -Object $publicTesterGateway -Name "capRejected"), report=$($paths.publicTesterGateway)" `
+    -Commands @("npm run flowchain:tester:gateway:e2e")
 
 Add-AuditItem -Items $items -Id "backup-restore-validator-self-test" `
     -Requirement "Backup tooling creates manifest-backed live-state snapshots, verifies latest-snapshot restore rehearsal without targeting live state, and rejects corrupt, tampered, missing-artifact, stale-pointer, and wrong-chain cases." `
@@ -966,6 +987,8 @@ $report = [ordered]@{
     publicRpcValidationOutputRedacted = @($publicRpcValidationOutput | ForEach-Object { "$_" })
     publicRpcAbuseTestExitCode = $publicRpcAbuseTestExitCode
     publicRpcAbuseTestOutputRedacted = @($publicRpcAbuseTestOutput | ForEach-Object { "$_" })
+    publicTesterGatewayExitCode = $publicTesterGatewayExitCode
+    publicTesterGatewayOutputRedacted = @($publicTesterGatewayOutput | ForEach-Object { "$_" })
     backupRestoreValidationExitCode = $backupRestoreValidationExitCode
     backupRestoreValidationOutputRedacted = @($backupRestoreValidationOutput | ForEach-Object { "$_" })
     ownerInputsExitCode = $ownerInputsExitCode
@@ -1008,6 +1031,8 @@ $report = [ordered]@{
         packetSmokeRoutes = @($externalTesterPacketSmokeRoutes)
         packetPath = $externalTesterPacketPath
         readinessStatus = (Get-ReportStatus -Report $externalTester)
+        publicTesterGatewayStatus = $publicTesterGatewayStatus
+        publicTesterGatewayPassed = $publicTesterGatewayPassed
         publicDeploymentContractPacketSmoke = $publicDeploymentContractPacketSmoke
     }
     childProcessTimeoutSeconds = $ChildTimeoutSeconds
@@ -1034,6 +1059,7 @@ $report = [ordered]@{
         "npm run flowchain:public-rpc:deployment-bundle",
         "npm run flowchain:public-rpc:validate",
         "npm run flowchain:public-rpc:abuse-test",
+        "npm run flowchain:tester:gateway:e2e",
         "npm run flowchain:backup:restore:validate",
         "npm run flowchain:backup:create",
         "npm run flowchain:backup:restore:verify",
@@ -1088,7 +1114,7 @@ if ($completionReady) {
     $markdownLines.Add("All audited requirements are passed.")
 }
 else {
-    $markdownLines.Add("Do not mark the goal complete. The local L1 and private tester rehearsal are working, but public RPC, backup, and Base 8453 bridge readiness remain blocked on exact owner inputs.")
+    $markdownLines.Add("Do not mark the goal complete. The local L1 and private tester rehearsal are working, but public RPC, tester write gateway, backup, and Base 8453 bridge readiness remain blocked on exact owner inputs.")
 }
 
 $reportText = $report | ConvertTo-Json -Depth 20

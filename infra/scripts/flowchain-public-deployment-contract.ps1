@@ -21,6 +21,9 @@ $knownOwnerInputs = @(
     "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
     "FLOWCHAIN_RPC_TLS_TERMINATED",
     "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+    "FLOWCHAIN_TESTER_WRITE_ENABLED",
+    "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+    "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
     "FLOWCHAIN_PILOT_OPERATOR_ACK",
     "FLOWCHAIN_BASE8453_RPC_URL",
     "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -46,6 +49,7 @@ $paths = [ordered]@{
     publicRpc = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
     publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
+    publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     backup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
     bridgeLive = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
@@ -196,6 +200,7 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:public-rpc:deployment-bundle",
     "npm run flowchain:public-rpc:validate",
     "npm run flowchain:public-rpc:abuse-test",
+    "npm run flowchain:tester:gateway:e2e",
     "npm run flowchain:public-rpc:check -- -AllowBlocked",
     "npm run flowchain:backup:restore:validate",
     "npm run flowchain:backup:check -- -AllowBlocked",
@@ -217,6 +222,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-deployment-bundle" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-deployment-bundle.ps1"), "-ReportPath", $paths.publicRpcDeploymentBundle)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-validation.ps1"), "-ReportPath", $paths.publicRpcValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-abuse-test" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-abuse-test.ps1"), "-ReportPath", $paths.publicRpcAbuseTest)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-tester-gateway-e2e" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-tester-gateway-e2e.ps1"), "-ReportPath", $paths.publicTesterGateway)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-readiness" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.publicRpc)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "backup-restore-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-restore-validation.ps1"), "-ReportPath", $paths.backupRestoreValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-backup" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-backup-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.backup)
@@ -313,7 +319,7 @@ $ownerSignupChecklistReady = ($ownerSignupChecklistStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $ownerSignupChecklist -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $ownerSignupChecklist -Name "noSecrets" -Default $false) -eq $true)
 Add-DeploymentItem -Items $items -Id "owner-signup-checklist" `
-    -Requirement "Owner signup checklist maps every public RPC, backup, and Base 8453 bridge value to the exact thing the owner must get without requesting secrets in chat." `
+    -Requirement "Owner signup checklist maps every public RPC, tester write gateway, backup, and Base 8453 bridge value to the exact thing the owner must get without requesting secrets in chat." `
     -Status $(if ($ownerSignupChecklistReady) { "passed" } else { "failed" }) `
     -Evidence "signupStatus=$ownerSignupChecklistStatus, itemCount=$ownerSignupItemCount, externalSignupCount=$ownerSignupExternalCount, missingCoverage=$ownerSignupMissingCoverageCount, repoOwned=$ownerSignupRepoOwned, localEnvFileSupported=$ownerSignupLocalEnvFileSupported" `
     -Commands @("npm run flowchain:owner:signup-checklist")
@@ -416,7 +422,7 @@ $ownerInputs = $reports.ownerInputs
 $ownerStatus = Get-DeploymentStatus -Report $ownerInputs
 $ownerReady = Get-DeploymentProp -Object $ownerInputs -Name "ownerInputReady" -Default $false
 Add-DeploymentItem -Items $items -Id "owner-input-contract" `
-    -Requirement "The owner deployment contract validates the required public RPC, backup, and Base 8453 input names without values." `
+    -Requirement "The owner deployment contract validates the required public RPC, tester write gateway, backup, and Base 8453 input names without values." `
     -Status $(if (($ownerStatus -eq "passed") -and ($ownerReady -eq $true)) { "passed" } elseif ($ownerStatus -eq "blocked") { "blocked" } else { "failed" }) `
     -Evidence "ownerInputsStatus=$ownerStatus, ownerInputReady=$ownerReady" `
     -Commands @("npm run flowchain:owner-inputs") `
@@ -550,6 +556,19 @@ Add-DeploymentItem -Items $items -Id "external-tester-sharing" `
     -Commands @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet") `
     -Blockers @($knownOwnerInputs)
 
+$publicTesterGateway = $reports.publicTesterGateway
+$publicTesterGatewayStatus = Get-DeploymentStatus -Report $publicTesterGateway
+$publicTesterGatewayReady = ($publicTesterGatewayStatus -eq "passed") `
+    -and ((Get-DeploymentProp -Object $publicTesterGateway -Name "testerGatewayConfigured" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicTesterGateway -Name "transferAccepted" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicTesterGateway -Name "capRejected" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicTesterGateway -Name "noSecrets" -Default $false) -eq $true)
+Add-DeploymentItem -Items $items -Id "public-tester-write-gateway" `
+    -Requirement "The public deployment has a local production-shaped proof for authenticated tester wallet creation, capped tester sends, balance settlement, and over-cap rejection." `
+    -Status $(if ($publicTesterGatewayReady) { "passed" } else { "failed" }) `
+    -Evidence "gatewayStatus=$publicTesterGatewayStatus, transferAccepted=$(Get-DeploymentProp -Object $publicTesterGateway -Name "transferAccepted"), capRejected=$(Get-DeploymentProp -Object $publicTesterGateway -Name "capRejected")" `
+    -Commands @("npm run flowchain:tester:gateway:e2e")
+
 $requiredRollbackScripts = @(
     "flowchain:service:status",
     "flowchain:ops:snapshot",
@@ -602,6 +621,7 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:public-rpc:deployment-bundle",
         "npm run flowchain:public-rpc:validate",
         "npm run flowchain:public-rpc:abuse-test",
+        "npm run flowchain:tester:gateway:e2e",
         "npm run flowchain:public-rpc:check",
         "npm run flowchain:backup:restore:validate",
         "npm run flowchain:backup:create",

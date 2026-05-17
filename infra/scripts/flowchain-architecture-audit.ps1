@@ -20,6 +20,9 @@ $knownExternalOwnerInputs = @(
     "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
     "FLOWCHAIN_RPC_TLS_TERMINATED",
     "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+    "FLOWCHAIN_TESTER_WRITE_ENABLED",
+    "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+    "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
     "FLOWCHAIN_PILOT_OPERATOR_ACK",
     "FLOWCHAIN_BASE8453_RPC_URL",
     "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -60,6 +63,7 @@ $reportPaths = [ordered]@{
     liveProduct = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
+    publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     devPack = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"
     publicDeploymentContract = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     noSecret = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
@@ -618,7 +622,7 @@ $ownerSignupChecklistReady = (Test-RepoFile -Path "infra/scripts/flowchain-owner
     -and ((Get-ArchitectureProp -Object $ownerSignupChecklist -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $ownerSignupChecklist -Name "noSecrets" -Default $false) -eq $true)
 Add-ArchitectureItem -Items $items -Id "owner-signup-checklist-boundary" -Layer "Governance/safety" `
-    -Requirement "Owner signup checklist maps public RPC edge, always-on host, backup storage, Base 8453 RPC, bridge details, and local env-file setup to exact owner actions without requesting secrets." `
+    -Requirement "Owner signup checklist maps public RPC edge, tester write token/cap, always-on host, backup storage, Base 8453 RPC, bridge details, and local env-file setup to exact owner actions without requesting secrets." `
     -Status $(if ($ownerSignupChecklistReady) { "passed" } else { "failed" }) `
     -Evidence "signupStatus=$ownerSignupChecklistStatus, itemCount=$ownerSignupItemCount, externalSignupCount=$ownerSignupExternalCount, missingCoverage=$ownerSignupMissingCoverageCount, repoOwned=$ownerSignupRepoOwned, localEnvFileSupported=$ownerSignupLocalEnvFileSupported" `
     -Files @("infra/scripts/flowchain-owner-signup-checklist.ps1", "docs/agent-runs/live-product-infra-rpc/OWNER_SIGNUP_CHECKLIST.md") `
@@ -645,6 +649,7 @@ Add-ArchitectureItem -Items $items -Id "secret-broadcast-boundary" -Layer "Secur
 $liveInfra = $reports.liveInfra
 $externalTester = $reports.externalTester
 $externalTesterPacket = $reports.externalTesterPacket
+$publicTesterGateway = $reports.publicTesterGateway
 $devPackStatus = Get-ArchitectureStatus -Report $devPack
 $devPackChecks = Get-ArchitectureProp -Object $devPack -Name "checks"
 $devPackReady = (Test-RepoFile -Path "services/flowchain-sdk/src/client.ts") `
@@ -670,12 +675,19 @@ $productGateFiles = @(
     "infra/scripts/flowchain-completion-audit.ps1",
     "infra/scripts/flowchain-public-deployment-contract.ps1",
     "infra/scripts/flowchain-external-tester-readiness.ps1",
-    "infra/scripts/flowchain-external-tester-packet.ps1"
+    "infra/scripts/flowchain-external-tester-packet.ps1",
+    "infra/scripts/flowchain-public-tester-gateway-e2e.ps1"
 )
 $liveInfraGateStatus = Get-ArchitectureStatus -Report $liveInfra
 $liveProductGateStatus = Get-ArchitectureStatus -Report $liveProduct
 $externalTesterStatus = Get-ArchitectureStatus -Report $externalTester
 $externalTesterPacketStatus = Get-ArchitectureStatus -Report $externalTesterPacket
+$publicTesterGatewayStatus = Get-ArchitectureStatus -Report $publicTesterGateway
+$publicTesterGatewayReady = ($publicTesterGatewayStatus -eq "passed") `
+    -and ((Get-ArchitectureProp -Object $publicTesterGateway -Name "testerGatewayConfigured" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicTesterGateway -Name "transferAccepted" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicTesterGateway -Name "capRejected" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicTesterGateway -Name "noSecrets" -Default $false) -eq $true)
 $externalTesterChecks = Get-ArchitectureProp -Object $externalTester -Name "checks"
 $externalTesterNetworkFresh = Get-ArchitectureProp -Object $externalTesterChecks -Name "testerWalletNetworkFresh" -Default $false
 $externalSharingReady = Get-ArchitectureProp -Object $externalTester -Name "externalSharingReady" -Default $false
@@ -701,25 +713,33 @@ Add-ArchitectureItem -Items $items -Id "external-tester-launch-boundary" -Layer 
     -Files @("infra/scripts/flowchain-external-tester-readiness.ps1", "infra/scripts/flowchain-external-tester-packet.ps1", "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md") `
     -Commands @("npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked") `
     -Blockers @($knownExternalOwnerInputs)
+Add-ArchitectureItem -Items $items -Id "public-tester-gateway-boundary" -Layer "External tester launch" `
+    -Requirement "Public tester write gateway has a local production-shaped E2E proof for bearer auth, public-only wallet creation, capped wallet sends, balance settlement, and over-cap rejection." `
+    -Status $(if ($publicTesterGatewayReady) { "passed" } else { "failed" }) `
+    -Evidence "gatewayStatus=$publicTesterGatewayStatus, configured=$(Get-ArchitectureProp -Object $publicTesterGateway -Name "testerGatewayConfigured"), transferAccepted=$(Get-ArchitectureProp -Object $publicTesterGateway -Name "transferAccepted"), capRejected=$(Get-ArchitectureProp -Object $publicTesterGateway -Name "capRejected"), report=$($reportPaths.publicTesterGateway)" `
+    -Files @("services/control-plane/src/server.ts", "infra/scripts/flowchain-public-tester-gateway-e2e.ps1") `
+    -Commands @("npm run flowchain:tester:gateway:e2e")
 $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:live-infra:check") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:live-product:e2e") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-deployment:contract") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:completion:audit") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:dev-pack:e2e") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:tester:gateway:e2e") `
     -and ($liveInfraGateStatus -in @("passed", "blocked")) `
     -and ($liveProductGateStatus -in @("passed", "blocked")) `
     -and ($externalTesterStatus -in @("passed", "blocked")) `
     -and ($externalTesterNetworkFresh -eq $true) `
     -and ($externalTesterPacketStatus -in @("passed", "blocked")) `
     -and ($externalTesterPacketExecutableSmokeValidated -eq $true) `
+    -and ($publicTesterGatewayReady -eq $true) `
     -and ($devPackReady -eq $true)
 Add-ArchitectureItem -Items $items -Id "aggregate-verification-boundary" -Layer "Verification" `
-    -Requirement "Product-level verification composes runtime, RPC, wallets, bridge, backup, public deployment contract, executable external tester packet smoke, developer dev-pack, and completion evidence into one auditable path." `
+    -Requirement "Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, developer dev-pack, and completion evidence into one auditable path." `
     -Status $(if ($productGateReady) { "passed" } else { "failed" }) `
-    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus, packetSmoke=$externalTesterPacketExecutableSmokeValidated, devPack=$devPackStatus" `
+    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus, packetSmoke=$externalTesterPacketExecutableSmokeValidated, publicTesterGateway=$publicTesterGatewayStatus, devPack=$devPackStatus" `
     -Files $productGateFiles `
-    -Commands @("npm run flowchain:live-infra:check", "npm run flowchain:live-product:e2e", "npm run flowchain:completion:audit", "npm run flowchain:external-tester:packet", "npm run flowchain:dev-pack:e2e")
+    -Commands @("npm run flowchain:live-infra:check", "npm run flowchain:live-product:e2e", "npm run flowchain:completion:audit", "npm run flowchain:external-tester:packet", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:dev-pack:e2e")
 
 $failedItems = @($items | Where-Object { $_.status -eq "failed" })
 $blockedItems = @($items | Where-Object { $_.status -eq "blocked" })
@@ -739,6 +759,11 @@ $dataFlows = @(
         name = "private-local-wallet-transfer"
         path = @("tester wallet create", "control-plane /wallets/create", "wallet public metadata", "control-plane /wallets/send", "live node inbox", "runtime block", "wallet balance/transfer reads")
         latestEvidence = $reportPaths.testerNetwork
+    },
+    [ordered]@{
+        name = "public-tester-gateway"
+        path = @("tester bearer token", "public edge /tester/wallets/create", "public-only wallet metadata", "public edge /tester/wallets/send", "cap enforcement", "runtime block", "balance proof")
+        latestEvidence = $reportPaths.publicTesterGateway
     },
     [ordered]@{
         name = "developer-dev-pack"
@@ -763,7 +788,7 @@ $dataFlows = @(
     },
     [ordered]@{
         name = "owner-signup-checklist"
-        path = @("owner signup/setup list", "public RPC hostname", "always-on host", "backup storage", "Base 8453 RPC", "bridge pilot values", "local env-file loader")
+        path = @("owner signup/setup list", "public RPC hostname", "tester write token hash and cap", "always-on host", "backup storage", "Base 8453 RPC", "bridge pilot values", "local env-file loader")
         latestEvidence = $reportPaths.ownerSignupChecklist
     },
     [ordered]@{
@@ -785,6 +810,7 @@ $objectiveDeliverables = @(
     "RPC clients can connect through a private service now and through a public owner-operated edge only after TLS/CORS/rate-limit checks pass.",
     "Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding.",
     "Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.",
+    "Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.",
     "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven and live-blocked until owner guardrails are configured.",
     "State backup, monitoring, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
     "Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.",
@@ -821,6 +847,8 @@ $report = [ordered]@{
         packetExecutableSmokeValidated = $externalTesterPacketExecutableSmokeValidated
         packetSmokeRoutes = @($externalTesterPacketSmokeRoutes)
         testerNetworkFresh = $externalTesterNetworkFresh
+        publicTesterGatewayStatus = $publicTesterGatewayStatus
+        publicTesterGatewayReady = $publicTesterGatewayReady
         publicDeploymentContractPacketSmoke = $deploymentContractPacketSmoke
     }
     architectureMarkdownPath = $markdownFullPath
@@ -873,7 +901,7 @@ if ($status -eq "failed") {
     $markdownLines.Add("The architecture audit found failed local evidence. Do not treat the L1 architecture as ready.")
 }
 elseif ($status -eq "blocked") {
-    $markdownLines.Add("The local architecture is explicit and evidence-backed, but public RPC, backup, and/or Base 8453 live edges remain blocked until exact owner inputs are configured.")
+    $markdownLines.Add("The local architecture is explicit and evidence-backed, but public RPC, tester write gateway, backup, and/or Base 8453 live edges remain blocked until exact owner inputs are configured.")
 }
 else {
     $markdownLines.Add("All audited architecture boundaries are passed.")

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { once } from "node:events";
 import { mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -1659,6 +1660,126 @@ test("HTTP server creates local encrypted wallet metadata without returning secr
       delete process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH;
     } else {
       process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH = previousMetadataPath;
+    }
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("HTTP tester write gateway requires bearer auth, caps sends, and returns public-only wallet data", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-tester-gateway-"));
+  const previousMetadataPath = process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH;
+  const previousTesterWriteEnabled = process.env.FLOWCHAIN_TESTER_WRITE_ENABLED;
+  const previousTesterTokenHash = process.env.FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256;
+  const previousTesterMaxSendUnits = process.env.FLOWCHAIN_TESTER_MAX_SEND_UNITS;
+  const testerToken = "local-tester-write-token";
+  process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH = join(dir, "flowchain-operator-public-metadata.json");
+  process.env.FLOWCHAIN_TESTER_WRITE_ENABLED = "true";
+  process.env.FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256 = createHash("sha256").update(testerToken, "utf8").digest("hex");
+  process.env.FLOWCHAIN_TESTER_MAX_SEND_UNITS = "2";
+  const server = startControlPlaneServer({ host: "127.0.0.1", port: 0 });
+
+  try {
+    await once(server, "listening");
+    const address = server.address();
+    assert.equal(typeof address, "object");
+    assert.notEqual(address, null);
+    const baseUrl = `http://127.0.0.1:${address?.port}`;
+
+    const status = await fetch(`${baseUrl}/tester/status`);
+    assert.equal(status.status, 200);
+    const statusBody = await status.json() as JsonObject;
+    assert.equal(statusBody.schema, "flowmemory.control_plane.tester_write_status.v0");
+    assert.equal(statusBody.configured, true);
+    assert.equal(statusBody.tokenHashConfigured, true);
+    assert.equal(statusBody.maxSendUnits, "2");
+    assert.equal(JSON.stringify(statusBody).includes(testerToken), false);
+    assert.equal(JSON.stringify(statusBody).includes(process.env.FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256), false);
+
+    const unauthenticated = await fetch(`${baseUrl}/tester/wallets/create`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ label: "tester-public-a", password: "local-test-wallet-passphrase-a", replace: true }),
+    });
+    assert.equal(unauthenticated.status, 401);
+    const unauthenticatedBody = await unauthenticated.json() as JsonObject;
+    assert.equal(unauthenticatedBody.schema, "flowmemory.control_plane.tester_write_auth_required.v0");
+    assert.equal(unauthenticatedBody.noSecrets, true);
+
+    const rejected = await fetch(`${baseUrl}/tester/wallets/create`, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: "Bearer wrong-token" },
+      body: JSON.stringify({ label: "tester-public-a", password: "local-test-wallet-passphrase-a", replace: true }),
+    });
+    assert.equal(rejected.status, 403);
+    const rejectedBody = await rejected.json() as JsonObject;
+    assert.equal(rejectedBody.schema, "flowmemory.control_plane.tester_write_auth_rejected.v0");
+    assert.equal(rejectedBody.noSecrets, true);
+
+    const create = await fetch(`${baseUrl}/tester/wallets/create`, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${testerToken}` },
+      body: JSON.stringify({ label: "tester-public-a", password: "local-test-wallet-passphrase-a", replace: true }),
+    });
+    assert.equal(create.status, 200);
+    const created = await create.json() as JsonObject;
+    assert.equal(created.schema, "flowmemory.control_plane.tester_wallet_create_result.v0");
+    assert.equal(created.secretMaterialReturned, false);
+    assert.equal(created.credentialStored, false);
+    assert.equal(created.noSecrets, true);
+    assert.equal(created.isolated, true);
+    assert.equal((created.account as JsonObject).keyScheme, "secp256k1");
+    assert.equal(JSON.stringify(created).includes("vaultPath"), false);
+    assert.equal(JSON.stringify(created).includes("metadataPath"), false);
+    assert.equal(JSON.stringify(created).includes("privateKey"), false);
+    assert.equal(JSON.stringify(created).includes("ciphertext"), false);
+    assert.equal(JSON.stringify(created).includes("local-test-wallet-passphrase-a"), false);
+    assert.equal(JSON.stringify(created).includes(testerToken), false);
+
+    const overCap = await fetch(`${baseUrl}/tester/wallets/send`, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${testerToken}` },
+      body: JSON.stringify({
+        fromAccountId: "local-account:tester-a",
+        toAccountId: "local-account:tester-b",
+        amountUnits: "3",
+        memo: "cap-test",
+      }),
+    });
+    assert.equal(overCap.status, 400);
+    const overCapBody = await overCap.json() as JsonObject;
+    assert.equal(overCapBody.schema, "flowmemory.control_plane.tester_wallet_send_error.v0");
+    assert.equal(overCapBody.accepted, false);
+    assert.equal(overCapBody.noSecrets, true);
+    assert.equal(String(overCapBody.message).includes("FLOWCHAIN_TESTER_MAX_SEND_UNITS"), true);
+  } finally {
+    await new Promise<void>((resolve, reject) => {
+      server.close((error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve();
+      });
+    });
+    if (previousMetadataPath === undefined) {
+      delete process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH;
+    } else {
+      process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH = previousMetadataPath;
+    }
+    if (previousTesterWriteEnabled === undefined) {
+      delete process.env.FLOWCHAIN_TESTER_WRITE_ENABLED;
+    } else {
+      process.env.FLOWCHAIN_TESTER_WRITE_ENABLED = previousTesterWriteEnabled;
+    }
+    if (previousTesterTokenHash === undefined) {
+      delete process.env.FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256;
+    } else {
+      process.env.FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256 = previousTesterTokenHash;
+    }
+    if (previousTesterMaxSendUnits === undefined) {
+      delete process.env.FLOWCHAIN_TESTER_MAX_SEND_UNITS;
+    } else {
+      process.env.FLOWCHAIN_TESTER_MAX_SEND_UNITS = previousTesterMaxSendUnits;
     }
     rmSync(dir, { recursive: true, force: true });
   }

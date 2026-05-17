@@ -16,7 +16,10 @@ $publicRpcEnvNames = @(
     "FLOWCHAIN_RPC_PUBLIC_URL",
     "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
     "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
-    "FLOWCHAIN_RPC_TLS_TERMINATED"
+    "FLOWCHAIN_RPC_TLS_TERMINATED",
+    "FLOWCHAIN_TESTER_WRITE_ENABLED",
+    "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+    "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
 )
 
 $publicSafeJsonRpcMethods = @(
@@ -119,6 +122,7 @@ $publicReadMirrorPaths = @(
     "/wallets/balances",
     "/wallets/transfers",
     "/wallets/operator",
+    "/tester/status",
     "/pilot/status",
     "/pilot/lifecycle",
     "/pilot/deposits",
@@ -129,6 +133,11 @@ $publicReadMirrorPaths = @(
     "/pilot/pause-status",
     "/pilot/retry-status",
     "/pilot/emergency-status"
+)
+
+$authenticatedTesterWritePaths = @(
+    "/tester/wallets/create",
+    "/tester/wallets/send"
 )
 
 $edgeRequirements = @(
@@ -164,9 +173,15 @@ $edgeRequirements = @(
     },
     [ordered]@{
         id = "edge-path-allowlist"
-        requirement = "The public edge does not proxy private write or admin routes."
+        requirement = "The public edge does not proxy private write or admin routes; tester writes use the authenticated tester gateway only."
         status = "passed"
-        evidence = "template exposes /rpc plus explicit read mirrors only; fallback location returns 404"
+        evidence = "template exposes /rpc, explicit read mirrors, and /tester/wallets/create|send; fallback location returns 404"
+    },
+    [ordered]@{
+        id = "authenticated-tester-write-gateway"
+        requirement = "Friends-and-family wallet creation and sends have a dedicated bearer-authenticated gateway with a send cap."
+        status = "passed"
+        evidence = "origin requires FLOWCHAIN_TESTER_WRITE_* env names and bearer auth before /tester/wallets/create or /tester/wallets/send executes"
     },
     [ordered]@{
         id = "body-size-limit"
@@ -227,6 +242,31 @@ $nginxTemplate = @(
     "        proxy_read_timeout 60s;",
     "    }",
     "",
+    "    location ~ ^/tester/wallets/(create|send)$ {",
+    "        if (`$request_method !~ ^(POST|OPTIONS)$) { return 405; }",
+    "        limit_req zone=flowchain_rpc_per_ip burst=5 nodelay;",
+    "        proxy_pass http://127.0.0.1:8787;",
+    "        proxy_http_version 1.1;",
+    "        proxy_set_header Host `$host;",
+    "        proxy_set_header Origin `$http_origin;",
+    "        proxy_set_header Authorization `$http_authorization;",
+    "        proxy_set_header X-Forwarded-Proto https;",
+    "        proxy_set_header X-Forwarded-For `$remote_addr;",
+    "        proxy_read_timeout 60s;",
+    "    }",
+    "",
+    "    location = /tester/status {",
+    "        if (`$request_method !~ ^(GET|OPTIONS)$) { return 405; }",
+    "        limit_req zone=flowchain_rpc_per_ip burst=20 nodelay;",
+    "        proxy_pass http://127.0.0.1:8787;",
+    "        proxy_http_version 1.1;",
+    "        proxy_set_header Host `$host;",
+    "        proxy_set_header Origin `$http_origin;",
+    "        proxy_set_header X-Forwarded-Proto https;",
+    "        proxy_set_header X-Forwarded-For `$remote_addr;",
+    "        proxy_read_timeout 60s;",
+    "    }",
+    "",
     "    location ~ ^/rpc/(discover|readiness)$ {",
     "        if (`$request_method !~ ^(GET|OPTIONS)$) { return 405; }",
     "        limit_req zone=flowchain_rpc_per_ip burst=20 nodelay;",
@@ -271,6 +311,7 @@ $report = [ordered]@{
     publicSafeJsonRpcMethods = $publicSafeJsonRpcMethods
     explicitlyRejectedJsonRpcMethods = $explicitlyRejectedJsonRpcMethods
     publicReadMirrorPaths = $publicReadMirrorPaths
+    authenticatedTesterWritePaths = $authenticatedTesterWritePaths
     envNames = $publicRpcEnvNames
     edgeRequirements = $edgeRequirements
     nginxTemplate = $nginxTemplate
@@ -328,6 +369,14 @@ $markdownLines.Add("")
 $markdownLines.Add("## Public Read Mirror Paths")
 $markdownLines.Add("")
 foreach ($path in $publicReadMirrorPaths) {
+    $markdownLines.Add("- $path")
+}
+$markdownLines.Add("")
+$markdownLines.Add("## Authenticated Tester Write Paths")
+$markdownLines.Add("")
+$markdownLines.Add("These paths are for capped friends-and-family pilot sends only. The origin rejects them unless `FLOWCHAIN_TESTER_WRITE_ENABLED=true`, a bearer token matching `FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256` is provided, and `FLOWCHAIN_TESTER_MAX_SEND_UNITS` caps the send amount.")
+$markdownLines.Add("")
+foreach ($path in $authenticatedTesterWritePaths) {
     $markdownLines.Add("- $path")
 }
 $markdownLines.Add("")

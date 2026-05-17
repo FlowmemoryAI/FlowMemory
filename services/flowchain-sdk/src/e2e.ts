@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -161,10 +161,30 @@ async function main() {
   const client = new FlowChainClient({ rpcUrl, timeoutMs: 15000 });
   const discovery = asRecord(await client.rpcDiscover());
   const readiness = asRecord(await client.rpcReadiness());
+  const health = asRecord(await client.health());
+  const nodeStatus = asRecord(await client.nodeStatus());
   const firstStatus = asRecord(await client.chainStatus());
   const secondStatus = await waitForHeightAdvance(client, firstStatus, 30000);
+  const blocks = asRecord(await client.blockList({ limit: 1 }));
+  const firstBlock = asRecord(asArray(blocks.blocks)[0] ?? null);
+  const blockDetail = asRecord(await client.blockGet({ blockNumber: stringValue(firstBlock.blockNumber) ?? stringValue(firstStatus.currentBlock) ?? "0" }));
+  const transactions = asRecord(await client.transactionList({ limit: 1 }));
+  const firstTransaction = asRecord(asArray(transactions.transactions)[0] ?? null);
+  const transactionDetail = Object.keys(firstTransaction).length > 0
+    ? asRecord(await client.transactionGet({ txId: stringValue(firstTransaction.transactionId) ?? stringValue(firstTransaction.txHash) ?? "" }))
+    : {};
+  const mempool = asRecord(await client.mempoolList({ limit: 1 }));
+  const accounts = asRecord(await client.accountList({ limit: 5 }));
+  const firstAccount = asRecord(asArray(accounts.accounts)[0] ?? null);
+  const balance = asRecord(await client.balanceGet({ accountId: stringValue(firstAccount.accountId) ?? "" }));
+  const walletMetadata = asRecord(await client.walletMetadataList({ limit: 5 }));
   const walletBalances = asRecord(await client.walletBalances({ limit: 1 }));
   const walletTransfers = asRecord(await client.walletTransfers({ limit: 1 }));
+  const faucetEvents = asRecord(await client.faucetEventList({ limit: 1 }));
+  const finality = asRecord(await client.finalityList({ limit: 1 }));
+  const bridgeDeposits = asRecord(await client.bridgeDepositList({ limit: 1 }));
+  const bridgeCredits = asRecord(await client.bridgeCreditList({ limit: 1 }));
+  const withdrawals = asRecord(await client.withdrawalList({ limit: 1 }));
   const sendCandidateBalances = asRecord(await client.walletBalances({ limit: 25 }));
   const balanceRows = asArray(sendCandidateBalances.balances).map((row) => asRecord(row));
   const sender = balanceRows.find((row) => accountIdFromBalance(row) !== null && amountFromBalance(row) > 1n);
@@ -188,6 +208,36 @@ async function main() {
     windowsHide: true,
   });
   const cliStatus = JSON.parse(cliStatusText) as JsonValue;
+  const cliBlocksText = execFileSync(process.execPath, [cliPath, "blocks", "--json", "--limit", "1", "--rpc", rpcUrl], {
+    cwd: root,
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  const cliBlocks = JSON.parse(cliBlocksText) as JsonValue;
+  const nodeExamplePath = resolve(root, "examples", "flowchain-node-quickstart.mjs");
+  const nodeExampleText = execFileSync(process.execPath, [nodeExamplePath, "--send"], {
+    cwd: root,
+    encoding: "utf8",
+    windowsHide: true,
+    env: { ...process.env, FLOWCHAIN_RPC_URL: rpcUrl },
+  });
+  const nodeExample = JSON.parse(nodeExampleText) as JsonValue;
+  const browserExamplePath = resolve(root, "examples", "flowchain-browser-readiness", "index.html");
+  const browserExampleText = existsSync(browserExamplePath) ? readFileSync(browserExamplePath, "utf8") : "";
+  const requiredDocs = [
+    "docs/developer/FLOWCHAIN_QUICKSTART.md",
+    "docs/developer/FLOWCHAIN_WALLET_INTEGRATION.md",
+    "docs/developer/FLOWCHAIN_BRIDGE_INTEGRATION.md",
+    "docs/developer/FLOWCHAIN_NODE_OPERATOR.md",
+    "docs/developer/FLOWCHAIN_APP_BUILDER.md",
+    "docs/developer/FLOWCHAIN_EXPLORER_INDEXER.md",
+    "docs/developer/FLOWCHAIN_FAUCET_TESTER_FUNDS.md",
+    "docs/developer/FLOWCHAIN_RELEASE_COMPATIBILITY.md",
+    "docs/developer/FLOWCHAIN_TROUBLESHOOTING.md",
+    "docs/sdk/FLOWCHAIN_SDK.md",
+    "docs/sdk/RPC_REFERENCE.generated.md",
+  ];
+  const missingDocs = requiredDocs.filter((docPath) => !existsSync(resolve(root, docPath)));
 
   const firstHeight = stringValue(firstStatus.currentBlock ?? firstStatus.blockHeight ?? firstStatus.latestHeight ?? firstStatus.height ?? null);
   const secondHeight = stringValue(secondStatus.currentBlock ?? secondStatus.blockHeight ?? secondStatus.latestHeight ?? secondStatus.height ?? null);
@@ -204,10 +254,29 @@ async function main() {
   const checks = {
     discoveryLoaded: String(discovery.schema ?? "") === "flowchain.rpc.discovery.v0",
     readinessLoaded: String(readiness.schema ?? "") === "flowchain.rpc.readiness.v0",
+    healthReadable: String(health.schema ?? "") === "flowmemory.control_plane.health.v0",
+    nodeStatusReadable: String(nodeStatus.schema ?? "") === "flowmemory.control_plane.node_status.v0",
+    blockListReadable: String(blocks.schema ?? "") === "flowmemory.control_plane.block_list.v0",
+    blockGetReadable: String(blockDetail.schema ?? "") === "flowmemory.control_plane.block_detail.v0",
+    transactionListReadable: String(transactions.schema ?? "") === "flowmemory.control_plane.transaction_list.v0",
+    transactionGetReadable: Object.keys(transactionDetail).length === 0 || String(transactionDetail.schema ?? "") === "flowmemory.control_plane.transaction_detail.v0",
+    mempoolReadable: String(mempool.schema ?? "") === "flowmemory.control_plane.mempool_list.v0",
+    accountListReadable: String(accounts.schema ?? "") === "flowmemory.control_plane.account_list.v0",
+    balanceReadable: String(balance.schema ?? "") === "flowmemory.control_plane.balance.v0",
+    walletMetadataReadable: String(walletMetadata.schema ?? "") === "flowmemory.control_plane.wallet_public_metadata_list.v0",
     walletTransfersReadable: String(walletTransfers.schema ?? "") === "flowmemory.control_plane.wallet_transfer_history.v0",
     walletBalancesReadable: String(walletBalances.schema ?? "") === "flowmemory.control_plane.wallet_balance_list.v0",
+    faucetEventsReadable: String(faucetEvents.schema ?? "") === "flowmemory.control_plane.faucet_event_list.v0",
+    finalityReadable: String(finality.schema ?? "") === "flowmemory.control_plane.finality_list.v0",
+    bridgeLifecycleReadable: String(bridgeDeposits.schema ?? "") === "flowmemory.control_plane.bridge_deposit_list.v0"
+      && String(bridgeCredits.schema ?? "") === "flowmemory.control_plane.bridge_credit_list.v0"
+      && String(withdrawals.schema ?? "") === "flowmemory.control_plane.withdrawal_list.v0",
     walletSendRuntimeBacked: String(walletSend.schema ?? "") === "flowmemory.control_plane.wallet_send_result.v0",
     cliJsonStatus: String(asRecord(cliStatus).schema ?? "") === "flowmemory.control_plane.chain_status.v0",
+    cliJsonBlocks: String(asRecord(cliBlocks).schema ?? "") === "flowmemory.control_plane.block_list.v0",
+    nodeExamplePassed: String(asRecord(nodeExample).schema ?? "") === "flowchain.example.node_quickstart.v0" && asRecord(nodeExample).status === "passed",
+    browserExamplePresent: browserExampleText.includes("/rpc/discover") && browserExampleText.includes("/rpc/readiness"),
+    developerGuidesPresent: missingDocs.length === 0,
     heightAdvanced: firstHeight !== null && secondHeight !== null && BigInt(secondHeight) > BigInt(firstHeight),
     publicReadinessFailClosed: readiness.publicRpcReady === false && readiness.productionReady === false,
     publicWriteMethodsBlockedFromPublicList: transactionSubmit?.publicRpcEligible === false && walletTransferHistory?.publicRpcEligible === true,
@@ -249,14 +318,16 @@ async function main() {
       "- Private FlowChain SDK/devkit package under `services/flowchain-sdk`.",
       "- Typed JSON-RPC client over the real FlowChain `/rpc` surface.",
       "- CLI commands for discovery, readiness, status, wallet balances, wallet transfers, bridge readiness, bridge status, and diagnostics.",
+      "- CLI commands for blocks, transactions, mempool, accounts, balances, wallet metadata, faucet events, finality, bridge deposits, bridge credits, and withdrawals.",
+      "- Node.js SDK example under `examples/flowchain-node-quickstart.mjs` and browser readiness example under `examples/flowchain-browser-readiness/`.",
+      "- Developer guides for wallet integration, bridge integration, node operations, app building, explorer/indexer use, faucet/tester funds, release compatibility, and troubleshooting.",
       "- Generated RPC reference from live `rpc_discover`.",
-      "- Dev-pack E2E report proving local RPC attachment, height reads, wallet balance reads, wallet transfer reads, a runtime-backed local wallet send, CLI JSON output, and public readiness fail-closed behavior.",
+      "- Dev-pack E2E report proving local RPC attachment, height reads, explorer reads, wallet reads, bridge lifecycle reads, runtime-backed local wallet sends, CLI JSON output, sample example execution, and public readiness fail-closed behavior.",
       "",
       "Remaining buildout:",
       "",
       "- Add signed transaction envelope examples once wallet signing boundaries are finalized for SDK use.",
-      "- Add browser/Vite sample app.",
-      "- Expand docs into full wallet, bridge, node operator, explorer, faucet, release, and troubleshooting guides.",
+      "- Promote the browser example to a packaged Vite/React app if the dashboard app is split into a reusable external starter.",
       "- Keep public/live readiness blocked until owner inputs and public deployment gates pass.",
       "",
       `Report: \`${reportPath}\``,

@@ -1,11 +1,11 @@
 {
     "schema":  "flowchain.live_infra_check_report.v0",
-    "generatedAt":  "2026-05-16T21:06:01.0776000Z",
+    "generatedAt":  "2026-05-16T23:59:41.9214342Z",
     "status":  "blocked",
     "repoPath":  "E:/FlowMemory/flowmemory-live-infra-rpc",
     "git":  {
                 "branch":  "agent/live-product-infra-rpc",
-                "commit":  "3248b6623e5c3754a55e684b52e129f2b8c24ba2"
+                "commit":  "323ba081a6e80cad5c016228d99d56ad65325def"
             },
     "readiness":  {
                       "ownerInputsReady":  false,
@@ -30,6 +30,9 @@
                             "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                             "FLOWCHAIN_RPC_TLS_TERMINATED",
                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                            "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                            "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
                             "FLOWCHAIN_PILOT_OPERATOR_ACK",
                             "FLOWCHAIN_BASE8453_RPC_URL",
                             "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",

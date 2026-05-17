@@ -54,16 +54,33 @@ Base 8453 bridge configuration.
 
 ```powershell
 npm run flowchain:devkit -- status --json
+npm run flowchain:devkit -- node-status --json
+npm run flowchain:devkit -- watch-height --seconds 30
 ```
 
 The chain is locally alive when `nodeRunning=true` and `currentBlock` advances
 between checks.
+
+## Explore Blocks, Transactions, And Accounts
+
+```powershell
+npm run flowchain:devkit -- blocks --json --limit 5
+npm run flowchain:devkit -- transactions --json --limit 5
+npm run flowchain:devkit -- accounts --json --limit 5
+npm run flowchain:devkit -- finality --json --limit 5
+```
+
+These commands read the same local control-plane RPC that wallets and the
+tester packet use. They are the first checks to run before building an explorer,
+indexer, wallet panel, or app integration.
 
 ## Read Wallet Activity
 
 ```powershell
 npm run flowchain:devkit -- wallet-balances --json --limit 5
 npm run flowchain:devkit -- wallet-transfers --json --limit 5
+npm run flowchain:devkit -- wallet-metadata --json --limit 5
+npm run flowchain:devkit -- faucet-events --json --limit 5
 ```
 
 These commands read the actual control-plane RPC. They do not return private
@@ -85,6 +102,9 @@ testing only and is not a live bridge or public endpoint action.
 
 ```powershell
 npm run flowchain:devkit -- bridge-readiness --json
+npm run flowchain:devkit -- bridge-deposits --json --limit 5
+npm run flowchain:devkit -- bridge-credits --json --limit 5
+npm run flowchain:devkit -- withdrawals --json --limit 5
 ```
 
 Without owner Base 8453 inputs, the correct result is blocked with env names
@@ -93,13 +113,14 @@ only. The devkit must not invent live bridge values.
 ## Run The Dev Pack Proof
 
 ```powershell
+npm run flowchain:sdk:e2e
 npm run flowchain:dev-pack:e2e
 ```
 
-This command attaches to local RPC, verifies discovery/readiness, checks block
-height, reads wallet balances and transfer history, submits a runtime-backed
-local wallet send, runs a CLI command with JSON output, and regenerates the RPC
-reference.
+These commands attach to local RPC, verify discovery/readiness, check block
+height, read block/transaction/account/wallet/bridge surfaces, submit a
+runtime-backed local wallet send, run CLI commands with JSON output, verify the
+Node.js and browser examples, and regenerate the RPC reference.
 
 Outputs:
 
@@ -108,6 +129,16 @@ Outputs:
 - `docs/agent-runs/live-product-dev-pack/HANDOFF.md`
 - `docs/sdk/RPC_REFERENCE.generated.md`
 
+## Run The Examples
+
+```powershell
+node examples/flowchain-node-quickstart.mjs
+node examples/flowchain-node-quickstart.mjs --send
+```
+
+Open `examples/flowchain-browser-readiness/index.html` from a browser when you
+need a fetch-only readiness example for a public or local RPC origin.
+
 ## Current Limits
 
 - The SDK/devkit is FlowChain-native JSON-RPC, not EVM JSON-RPC.
@@ -115,4 +146,6 @@ Outputs:
 - Live bridge remains blocked until owner Base 8453 inputs and operator
   acknowledgement are configured.
 - Signed transaction envelope SDK examples are still a follow-up. The current
-  devkit wallet send uses the existing local control-plane wallet-send path.
+  devkit wallet send uses the existing local control-plane wallet-send path, and
+  public tester writes use the authenticated `/tester/wallets/*` gateway instead
+  of the private local wallet routes.

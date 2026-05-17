@@ -1,11 +1,12 @@
 {
     "schema":  "flowchain.owner_inputs_report.v0",
-    "generatedAt":  "2026-05-16T20:41:22.0243487Z",
+    "generatedAt":  "2026-05-16T23:47:16.3115875Z",
     "status":  "passed",
     "ownerInputReady":  true,
     "groups":  [
                    "public-rpc",
                    "backup",
+                   "external-tester-write",
                    "base8453-bridge"
                ],
     "inputs":  [
@@ -48,6 +49,30 @@
                        "valid":  true,
                        "status":  "present-valid",
                        "check":  "existing writable directory"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                       "group":  "external-tester-write",
+                       "present":  true,
+                       "valid":  true,
+                       "status":  "present-valid",
+                       "check":  "must equal true to expose the authenticated tester write gateway"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                       "group":  "external-tester-write",
+                       "present":  true,
+                       "valid":  true,
+                       "status":  "present-valid",
+                       "check":  "64-character SHA-256 hex digest of the out-of-band tester bearer token"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
+                       "group":  "external-tester-write",
+                       "present":  true,
+                       "valid":  true,
+                       "status":  "present-valid",
+                       "check":  "positive decimal integer test-unit cap per tester send"
                    },
                    {
                        "name":  "FLOWCHAIN_PILOT_OPERATOR_ACK",

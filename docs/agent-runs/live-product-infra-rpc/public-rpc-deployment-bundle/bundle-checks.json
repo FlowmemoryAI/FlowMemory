@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_bundle_checks.v1",
-    "generatedAt":  "2026-05-16T21:10:38.5927055Z",
+    "generatedAt":  "2026-05-16T23:56:46.0229337Z",
     "status":  "passed",
     "requiredPlaceholders":  [
                                  "\u003cFLOWCHAIN_RPC_PUBLIC_HOST\u003e",
@@ -27,7 +27,10 @@
                              "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
                              "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                              "FLOWCHAIN_RPC_TLS_TERMINATED",
-                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                             "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                             "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                             "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
                          ],
     "privateOrigin":  "127.0.0.1:8787",
     "checks":  {

@@ -1,6 +1,6 @@
 ﻿# FlowChain Owner Inputs
 
-Generated: 2026-05-16T20:41:23.6215001Z
+Generated: 2026-05-16T23:47:17.6382824Z
 Status: passed
 Owner input ready: True
 
@@ -13,6 +13,9 @@ This file intentionally records env names, validation checks, and pass/block/fai
 | FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE | public-rpc | present-valid | positive decimal integer |
 | FLOWCHAIN_RPC_TLS_TERMINATED | public-rpc | present-valid | must equal true after TLS termination is configured |
 | FLOWCHAIN_RPC_STATE_BACKUP_PATH | backup | present-valid | existing writable directory |
+| FLOWCHAIN_TESTER_WRITE_ENABLED | external-tester-write | present-valid | must equal true to expose the authenticated tester write gateway |
+| FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256 | external-tester-write | present-valid | 64-character SHA-256 hex digest of the out-of-band tester bearer token |
+| FLOWCHAIN_TESTER_MAX_SEND_UNITS | external-tester-write | present-valid | positive decimal integer test-unit cap per tester send |
 | FLOWCHAIN_PILOT_OPERATOR_ACK | base8453-bridge | present-valid | must equal the fixed capped-pilot acknowledgement |
 | FLOWCHAIN_BASE8453_RPC_URL | base8453-bridge | present-valid | absolute HTTP(S) Base 8453 endpoint |
 | FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS | base8453-bridge | present-valid | 20-byte hex address |
@@ -27,7 +30,7 @@ This file intentionally records env names, validation checks, and pass/block/fai
 ## Owner Env File
 
 - FLOWCHAIN_OWNER_ENV_FILE configured: True
-- Imported known env names: 15
+- Imported known env names: 18
 - Ignored unknown env names: 0
 
 ## Next Commands

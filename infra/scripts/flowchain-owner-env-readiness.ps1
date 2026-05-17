@@ -22,6 +22,9 @@ $knownOwnerInputs = @(
     "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
     "FLOWCHAIN_RPC_TLS_TERMINATED",
     "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+    "FLOWCHAIN_TESTER_WRITE_ENABLED",
+    "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+    "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
     "FLOWCHAIN_PILOT_OPERATOR_ACK",
     "FLOWCHAIN_BASE8453_RPC_URL",
     "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -229,8 +232,8 @@ try {
 
         [void] $steps.Add((Invoke-OwnerEnvReadinessStep `
             -Name "Public deployment contract with local env file" `
-            -Command "npm run flowchain:public-deployment:contract -- -AllowBlocked" `
-            -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-deployment-contract.ps1"), "-AllowBlocked") `
+            -Command "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh" `
+            -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-deployment-contract.ps1"), "-AllowBlocked", "-NoRefresh") `
             -ExpectedReportPath $paths.publicDeploymentContract))
     }
 }
@@ -338,6 +341,7 @@ $markdownLines.Add("## Setup Required")
 $markdownLines.Add("")
 $markdownLines.Add("- Public DNS plus TLS edge or tunnel forwarding HTTPS traffic to the local FlowChain control plane on ``127.0.0.1:8787``.")
 $markdownLines.Add("- Explicit browser origins and a per-minute public request limit for the RPC edge.")
+$markdownLines.Add("- A tester write gateway flag, SHA-256 token digest, and per-send cap before public friends-and-family wallet writes.")
 $markdownLines.Add("- An always-on host that keeps the node and control plane running.")
 $markdownLines.Add("- A writable state backup directory for public operation.")
 $markdownLines.Add("- A Base 8453 provider endpoint, deployed lockbox address, supported token address, block range, confirmations, and capped pilot limits for the bridge observer.")

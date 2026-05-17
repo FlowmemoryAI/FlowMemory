@@ -237,6 +237,7 @@ $report = [ordered]@{
     }
     ownerNextActions = @(
         "Configure the FLOWCHAIN_RPC_* public RPC and backup env names in the service environment.",
+        "Configure FLOWCHAIN_TESTER_WRITE_ENABLED, FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256, and FLOWCHAIN_TESTER_MAX_SEND_UNITS before public friends-and-family wallet writes.",
         "Configure the FLOWCHAIN_BASE8453_* and FLOWCHAIN_PILOT_* bridge env names after owner verification.",
         "Rerun npm run flowchain:live-infra:check and npm run flowchain:tester:readiness before sharing the network externally."
     )

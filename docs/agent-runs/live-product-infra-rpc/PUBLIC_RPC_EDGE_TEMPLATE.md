@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Edge Template
 
-Generated: 2026-05-16T21:02:44.4657979Z
+Generated: 2026-05-16T23:56:44.4422508Z
 Status: passed
 
 FlowChain RPC is served by this repository on the private origin 127.0.0.1:8787. Public RPC means placing an owner-operated HTTPS edge in front of that origin.
@@ -16,7 +16,8 @@ This file contains placeholders only. Replace placeholders only on the owner hos
 | Public requests are rate-limited before they reach the private origin. | passed | template includes limit_req zone tied to FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE |
 | Browser Origin headers and the edge-confirmed client address are forwarded so CORS and per-client rate limits can be enforced. | passed | template forwards Origin, Host, X-Forwarded-Proto, and sets X-Forwarded-For from the edge remote address |
 | Public /rpc dispatch is fail-closed to explicitly public-safe JSON-RPC read methods. | passed | origin enforces explicit allowlist and rejects transaction_submit, bridge_observation_submit, raw_json_get, and unknown methods |
-| The public edge does not proxy private write or admin routes. | passed | template exposes /rpc plus explicit read mirrors only; fallback location returns 404 |
+| The public edge does not proxy private write or admin routes; tester writes use the authenticated tester gateway only. | passed | template exposes /rpc, explicit read mirrors, and /tester/wallets/create/send; fallback location returns 404 |
+| Friends-and-family wallet creation and sends have a dedicated bearer-authenticated gateway with a send cap. | passed | origin requires FLOWCHAIN_TESTER_WRITE_* env names and bearer auth before /tester/wallets/create or /tester/wallets/send executes |
 | Oversized public request bodies are rejected before they reach the private origin. | passed | template sets client_max_body_size 256k and origin enforces 262144-byte JSON body cap |
 | Template stores placeholders and env names only. | passed | valuesPrinted=false |
 
@@ -56,6 +57,31 @@ server {
     }
 
     location ~ ^/(health|state|explorer/summary|chain/status|product-flow/status|bridge/(live-readiness|status|credits|credit-status|observations)|wallets/(balances|transfers|operator)|pilot/(status|lifecycle|deposits|credits|withdrawal-intents|release-evidence|cap-status|pause-status|retry-status|emergency-status))$ {
+        if ($request_method !~ ^(GET|OPTIONS)$) { return 405; }
+        limit_req zone=flowchain_rpc_per_ip burst=20 nodelay;
+        proxy_pass http://127.0.0.1:8787;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header Origin $http_origin;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_read_timeout 60s;
+    }
+
+    location ~ ^/tester/wallets/(create|send)$ {
+        if ($request_method !~ ^(POST|OPTIONS)$) { return 405; }
+        limit_req zone=flowchain_rpc_per_ip burst=5 nodelay;
+        proxy_pass http://127.0.0.1:8787;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header Origin $http_origin;
+        proxy_set_header Authorization $http_authorization;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_read_timeout 60s;
+    }
+
+    location = /tester/status {
         if ($request_method !~ ^(GET|OPTIONS)$) { return 405; }
         limit_req zone=flowchain_rpc_per_ip burst=20 nodelay;
         proxy_pass http://127.0.0.1:8787;
@@ -188,6 +214,7 @@ The origin only dispatches these public-safe JSON-RPC read methods through /rpc;
 - /wallets/balances
 - /wallets/transfers
 - /wallets/operator
+- /tester/status
 - /pilot/status
 - /pilot/lifecycle
 - /pilot/deposits
@@ -199,12 +226,22 @@ The origin only dispatches these public-safe JSON-RPC read methods through /rpc;
 - /pilot/retry-status
 - /pilot/emergency-status
 
+## Authenticated Tester Write Paths
+
+These paths are for capped friends-and-family pilot sends only. The origin rejects them unless FLOWCHAIN_TESTER_WRITE_ENABLED=true, a bearer token matching FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256 is provided, and FLOWCHAIN_TESTER_MAX_SEND_UNITS caps the send amount.
+
+- /tester/wallets/create
+- /tester/wallets/send
+
 ## Required Local Env Names
 
 - FLOWCHAIN_RPC_PUBLIC_URL
 - FLOWCHAIN_RPC_ALLOWED_ORIGINS
 - FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE
 - FLOWCHAIN_RPC_TLS_TERMINATED
+- FLOWCHAIN_TESTER_WRITE_ENABLED
+- FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256
+- FLOWCHAIN_TESTER_MAX_SEND_UNITS
 
 ## Verification Commands
 

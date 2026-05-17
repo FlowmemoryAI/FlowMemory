@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.owner_env_template_report.v0",
-    "generatedAt":  "2026-05-16T20:52:21.9305795Z",
+    "generatedAt":  "2026-05-16T23:55:21.6205408Z",
     "status":  "passed",
     "templatePath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\owner-inputs\\flowchain-owner.local.env",
     "templateRelativePath":  "devnet/local/owner-inputs/flowchain-owner.local.env",
@@ -18,6 +18,9 @@
                              "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                              "FLOWCHAIN_RPC_TLS_TERMINATED",
                              "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                             "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                             "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                             "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
                              "FLOWCHAIN_PILOT_OPERATOR_ACK",
                              "FLOWCHAIN_BASE8453_RPC_URL",
                              "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -29,7 +32,7 @@
                              "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                              "FLOWCHAIN_PILOT_CONFIRMATIONS"
                          ],
-    "requiredEnvNameCount":  15,
+    "requiredEnvNameCount":  18,
     "templateIncludesAllRequiredEnvNames":  true,
     "flowChainOwnerEnvFileCommand":  "$env:FLOWCHAIN_OWNER_ENV_FILE=\"E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\owner-inputs\\flowchain-owner.local.env\"",
     "valuesPrinted":  false,

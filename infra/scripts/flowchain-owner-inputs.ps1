@@ -31,6 +31,14 @@ $inputGroups = @(
         names = @("FLOWCHAIN_RPC_STATE_BACKUP_PATH")
     },
     [ordered]@{
+        group = "external-tester-write"
+        names = @(
+            "FLOWCHAIN_TESTER_WRITE_ENABLED",
+            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+            "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+        )
+    },
+    [ordered]@{
         group = "base8453-bridge"
         names = @(
             "FLOWCHAIN_PILOT_OPERATOR_ACK",
@@ -171,6 +179,27 @@ function Get-OwnerInputStatus {
             }
             if (-not $valid) {
                 Add-OwnerInputProblem -Problems $Problems -Name $Name -Reason "must point to an existing writable directory" -Kind "failed"
+            }
+        }
+        "FLOWCHAIN_TESTER_WRITE_ENABLED" {
+            $valid = $value.ToLowerInvariant() -eq "true"
+            $check = "must equal true to expose the authenticated tester write gateway"
+            if (-not $valid) {
+                Add-OwnerInputProblem -Problems $Problems -Name $Name -Reason "must equal true" -Kind "failed"
+            }
+        }
+        "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256" {
+            $valid = $value -cmatch '^[0-9a-fA-F]{64}$'
+            $check = "64-character SHA-256 hex digest of the out-of-band tester bearer token"
+            if (-not $valid) {
+                Add-OwnerInputProblem -Problems $Problems -Name $Name -Reason "must be a 64-character SHA-256 hex digest" -Kind "failed"
+            }
+        }
+        "FLOWCHAIN_TESTER_MAX_SEND_UNITS" {
+            $valid = Test-OwnerInputUInt -Value $value
+            $check = "positive decimal integer test-unit cap per tester send"
+            if (-not $valid) {
+                Add-OwnerInputProblem -Problems $Problems -Name $Name -Reason "must be a positive decimal integer" -Kind "failed"
             }
         }
         "FLOWCHAIN_PILOT_OPERATOR_ACK" {

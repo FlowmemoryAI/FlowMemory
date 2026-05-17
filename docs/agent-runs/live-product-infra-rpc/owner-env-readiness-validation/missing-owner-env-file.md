@@ -1,6 +1,6 @@
 ﻿# FlowChain Owner Env Readiness
 
-Generated: 2026-05-16T20:49:23.9829806Z
+Generated: 2026-05-16T23:55:24.0124453Z
 Status: failed
 
 This gate points the live checks at the ignored local owner env file and records only env names, statuses, and redacted child output.
@@ -13,6 +13,7 @@ Git ignored: False
 
 - Public DNS plus TLS edge or tunnel forwarding HTTPS traffic to the local FlowChain control plane on `127.0.0.1:8787`.
 - Explicit browser origins and a per-minute public request limit for the RPC edge.
+- A tester write gateway flag, SHA-256 token digest, and per-send cap before public friends-and-family wallet writes.
 - An always-on host that keeps the node and control plane running.
 - A writable state backup directory for public operation.
 - A Base 8453 provider endpoint, deployed lockbox address, supported token address, block range, confirmations, and capped pilot limits for the bridge observer.
@@ -24,6 +25,9 @@ Git ignored: False
 - `FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE`
 - `FLOWCHAIN_RPC_TLS_TERMINATED`
 - `FLOWCHAIN_RPC_STATE_BACKUP_PATH`
+- `FLOWCHAIN_TESTER_WRITE_ENABLED`
+- `FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256`
+- `FLOWCHAIN_TESTER_MAX_SEND_UNITS`
 - `FLOWCHAIN_PILOT_OPERATOR_ACK`
 - `FLOWCHAIN_BASE8453_RPC_URL`
 - `FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS`

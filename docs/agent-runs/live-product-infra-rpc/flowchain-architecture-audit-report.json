@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-16T21:10:39.4697112Z",
+    "generatedAt":  "2026-05-17T00:01:05.6410961Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -8,6 +8,7 @@
                                   "RPC clients can connect through a private service now and through a public owner-operated edge only after TLS/CORS/rate-limit checks pass.",
                                   "Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding.",
                                   "Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.",
+                                  "Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.",
                                   "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven and live-blocked until owner guardrails are configured.",
                                   "State backup, monitoring, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
                                   "Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.",
@@ -16,10 +17,10 @@
                                   "Every missing production edge fails closed on exact owner input names, with no secrets, env values, or live broadcasts."
                               ],
     "itemCounts":  {
-                       "passed":  12,
+                       "passed":  13,
                        "blocked":  6,
                        "failed":  0,
-                       "total":  18
+                       "total":  19
                    },
     "items":  [
                   {
@@ -27,7 +28,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=41476, finalizedHeight=41476",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=43568, finalizedHeight=43568",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -236,6 +237,9 @@
                                        "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                                        "FLOWCHAIN_RPC_TLS_TERMINATED",
                                        "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                       "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                                       "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                                       "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
                                        "FLOWCHAIN_PILOT_OPERATOR_ACK",
                                        "FLOWCHAIN_BASE8453_RPC_URL",
                                        "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -253,7 +257,7 @@
                       "layer":  "Governance/safety",
                       "requirement":  "Live-only inputs are externally owned, listed by name only, self-tested for missing/invalid/valid direct env plus local owner env-file loading, and fail closed on missing or malformed owner env files without printing values.",
                       "status":  "passed",
-                      "evidence":  "ownerInputsStatus=blocked, validationStatus=passed, ownerEnvFilePasses=True, missingOwnerEnvFileFails=True, malformedOwnerEnvFileFails=True, knownMissingInputs=15, unknownInputs=0",
+                      "evidence":  "ownerInputsStatus=blocked, validationStatus=passed, ownerEnvFilePasses=True, missingOwnerEnvFileFails=True, malformedOwnerEnvFileFails=True, knownMissingInputs=18, unknownInputs=0",
                       "files":  [
                                     "infra/scripts/flowchain-owner-inputs.ps1",
                                     "infra/scripts/flowchain-owner-inputs-validation.ps1"
@@ -277,7 +281,10 @@
                                        "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
                                        "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                                        "FLOWCHAIN_RPC_TLS_TERMINATED",
-                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                       "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                                       "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                                       "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
                                    ]
                   },
                   {
@@ -310,7 +317,10 @@
                                        "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
                                        "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                                        "FLOWCHAIN_RPC_TLS_TERMINATED",
-                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                       "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                                       "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                                       "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
                                    ]
                   },
                   {
@@ -333,9 +343,9 @@
                   {
                       "id":  "owner-signup-checklist-boundary",
                       "layer":  "Governance/safety",
-                      "requirement":  "Owner signup checklist maps public RPC edge, always-on host, backup storage, Base 8453 RPC, bridge details, and local env-file setup to exact owner actions without requesting secrets.",
+                      "requirement":  "Owner signup checklist maps public RPC edge, tester write token/cap, always-on host, backup storage, Base 8453 RPC, bridge details, and local env-file setup to exact owner actions without requesting secrets.",
                       "status":  "passed",
-                      "evidence":  "signupStatus=passed, itemCount=8, externalSignupCount=3, missingCoverage=0, repoOwned=True, localEnvFileSupported=True",
+                      "evidence":  "signupStatus=passed, itemCount=9, externalSignupCount=3, missingCoverage=0, repoOwned=True, localEnvFileSupported=True",
                       "files":  [
                                     "infra/scripts/flowchain-owner-signup-checklist.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/OWNER_SIGNUP_CHECKLIST.md"
@@ -368,7 +378,7 @@
                       "layer":  "Developer ecosystem",
                       "requirement":  "Developer SDK/devkit and docs connect to the real FlowChain RPC, generate a live RPC reference, read wallet data, submit a runtime-backed local wallet send, and fail closed for public readiness.",
                       "status":  "passed",
-                      "evidence":  "devPackStatus=passed, methodCount=79, heights=41114-\u003e41115, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\dev-pack-e2e-report.json",
+                      "evidence":  "devPackStatus=passed, methodCount=79, heights=43368-\u003e43369, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\dev-pack-e2e-report.json",
                       "files":  [
                                     "services/flowchain-sdk/src/client.ts",
                                     "services/flowchain-sdk/src/cli.ts",
@@ -403,6 +413,9 @@
                                        "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                                        "FLOWCHAIN_RPC_TLS_TERMINATED",
                                        "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                       "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                                       "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                                       "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
                                        "FLOWCHAIN_PILOT_OPERATOR_ACK",
                                        "FLOWCHAIN_BASE8453_RPC_URL",
                                        "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -416,24 +429,43 @@
                                    ]
                   },
                   {
+                      "id":  "public-tester-gateway-boundary",
+                      "layer":  "External tester launch",
+                      "requirement":  "Public tester write gateway has a local production-shaped E2E proof for bearer auth, public-only wallet creation, capped wallet sends, balance settlement, and over-cap rejection.",
+                      "status":  "passed",
+                      "evidence":  "gatewayStatus=passed, configured=True, transferAccepted=True, capRejected=True, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json",
+                      "files":  [
+                                    "services/control-plane/src/server.ts",
+                                    "infra/scripts/flowchain-public-tester-gateway-e2e.ps1"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:tester:gateway:e2e"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "aggregate-verification-boundary",
                       "layer":  "Verification",
-                      "requirement":  "Product-level verification composes runtime, RPC, wallets, bridge, backup, public deployment contract, executable external tester packet smoke, developer dev-pack, and completion evidence into one auditable path.",
+                      "requirement":  "Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, developer dev-pack, and completion evidence into one auditable path.",
                       "status":  "passed",
-                      "evidence":  "liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, packetSmoke=True, devPack=passed",
+                      "evidence":  "liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, packetSmoke=True, publicTesterGateway=passed, devPack=passed",
                       "files":  [
                                     "infra/scripts/flowchain-live-infra-check.ps1",
                                     "infra/scripts/flowchain-live-product-e2e.ps1",
                                     "infra/scripts/flowchain-completion-audit.ps1",
                                     "infra/scripts/flowchain-public-deployment-contract.ps1",
                                     "infra/scripts/flowchain-external-tester-readiness.ps1",
-                                    "infra/scripts/flowchain-external-tester-packet.ps1"
+                                    "infra/scripts/flowchain-external-tester-packet.ps1",
+                                    "infra/scripts/flowchain-public-tester-gateway-e2e.ps1"
                                 ],
                       "commands":  [
                                        "npm run flowchain:live-infra:check",
                                        "npm run flowchain:live-product:e2e",
                                        "npm run flowchain:completion:audit",
                                        "npm run flowchain:external-tester:packet",
+                                       "npm run flowchain:tester:gateway:e2e",
                                        "npm run flowchain:dev-pack:e2e"
                                    ],
                       "blockers":  [
@@ -454,6 +486,19 @@
                                        "wallet balance/transfer reads"
                                    ],
                           "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json"
+                      },
+                      {
+                          "name":  "public-tester-gateway",
+                          "path":  [
+                                       "tester bearer token",
+                                       "public edge /tester/wallets/create",
+                                       "public-only wallet metadata",
+                                       "public edge /tester/wallets/send",
+                                       "cap enforcement",
+                                       "runtime block",
+                                       "balance proof"
+                                   ],
+                          "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json"
                       },
                       {
                           "name":  "developer-dev-pack",
@@ -512,6 +557,7 @@
                           "path":  [
                                        "owner signup/setup list",
                                        "public RPC hostname",
+                                       "tester write token hash and cap",
                                        "always-on host",
                                        "backup storage",
                                        "Base 8453 RPC",
@@ -574,7 +620,10 @@
                             "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
                             "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                             "FLOWCHAIN_RPC_TLS_TERMINATED",
-                            "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                            "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                            "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                            "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
                         ],
     "diagnosticMissingEnvNames":  [
                                       "FLOWCHAIN_BASE8453_RPC_URL",
@@ -593,6 +642,9 @@
                                      "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                                      "FLOWCHAIN_RPC_TLS_TERMINATED",
                                      "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                     "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                                     "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                                     "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
                                      "FLOWCHAIN_PILOT_OPERATOR_ACK",
                                      "FLOWCHAIN_BASE8453_RPC_URL",
                                      "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -632,6 +684,7 @@
                         "liveProduct":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-product-e2e-report.json",
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
                         "externalTesterPacket":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-packet-report.json",
+                        "publicTesterGateway":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json",
                         "devPack":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\dev-pack-e2e-report.json",
                         "publicDeploymentContract":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
                         "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json"
@@ -654,6 +707,8 @@
                                                                    "/wallets/transfers"
                                                                ],
                                          "testerNetworkFresh":  true,
+                                         "publicTesterGatewayStatus":  "passed",
+                                         "publicTesterGatewayReady":  true,
                                          "publicDeploymentContractPacketSmoke":  true
                                      },
     "architectureMarkdownPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ARCHITECTURE_AUDIT.md",

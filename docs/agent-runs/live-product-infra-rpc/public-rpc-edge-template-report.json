@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_edge_template_report.v0",
-    "generatedAt":  "2026-05-16T21:02:44.4657979Z",
+    "generatedAt":  "2026-05-16T23:56:44.4422508Z",
     "status":  "passed",
     "edgeTemplateReady":  true,
     "flowChainRpcIsRepoOwned":  true,
@@ -110,6 +110,7 @@
                                   "/wallets/balances",
                                   "/wallets/transfers",
                                   "/wallets/operator",
+                                  "/tester/status",
                                   "/pilot/status",
                                   "/pilot/lifecycle",
                                   "/pilot/deposits",
@@ -121,11 +122,18 @@
                                   "/pilot/retry-status",
                                   "/pilot/emergency-status"
                               ],
+    "authenticatedTesterWritePaths":  [
+                                          "/tester/wallets/create",
+                                          "/tester/wallets/send"
+                                      ],
     "envNames":  [
                      "FLOWCHAIN_RPC_PUBLIC_URL",
                      "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
                      "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
-                     "FLOWCHAIN_RPC_TLS_TERMINATED"
+                     "FLOWCHAIN_RPC_TLS_TERMINATED",
+                     "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                     "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                     "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
                  ],
     "edgeRequirements":  [
                              {
@@ -160,9 +168,15 @@
                              },
                              {
                                  "id":  "edge-path-allowlist",
-                                 "requirement":  "The public edge does not proxy private write or admin routes.",
+                                 "requirement":  "The public edge does not proxy private write or admin routes; tester writes use the authenticated tester gateway only.",
                                  "status":  "passed",
-                                 "evidence":  "template exposes /rpc plus explicit read mirrors only; fallback location returns 404"
+                                 "evidence":  "template exposes /rpc, explicit read mirrors, and /tester/wallets/create|send; fallback location returns 404"
+                             },
+                             {
+                                 "id":  "authenticated-tester-write-gateway",
+                                 "requirement":  "Friends-and-family wallet creation and sends have a dedicated bearer-authenticated gateway with a send cap.",
+                                 "status":  "passed",
+                                 "evidence":  "origin requires FLOWCHAIN_TESTER_WRITE_* env names and bearer auth before /tester/wallets/create or /tester/wallets/send executes"
                              },
                              {
                                  "id":  "body-size-limit",
@@ -211,6 +225,31 @@
                           "    }",
                           "",
                           "    location ~ ^/(health|state|explorer/summary|chain/status|product-flow/status|bridge/(live-readiness|status|credits|credit-status|observations)|wallets/(balances|transfers|operator)|pilot/(status|lifecycle|deposits|credits|withdrawal-intents|release-evidence|cap-status|pause-status|retry-status|emergency-status))$ {",
+                          "        if ($request_method !~ ^(GET|OPTIONS)$) { return 405; }",
+                          "        limit_req zone=flowchain_rpc_per_ip burst=20 nodelay;",
+                          "        proxy_pass http://127.0.0.1:8787;",
+                          "        proxy_http_version 1.1;",
+                          "        proxy_set_header Host $host;",
+                          "        proxy_set_header Origin $http_origin;",
+                          "        proxy_set_header X-Forwarded-Proto https;",
+                          "        proxy_set_header X-Forwarded-For $remote_addr;",
+                          "        proxy_read_timeout 60s;",
+                          "    }",
+                          "",
+                          "    location ~ ^/tester/wallets/(create|send)$ {",
+                          "        if ($request_method !~ ^(POST|OPTIONS)$) { return 405; }",
+                          "        limit_req zone=flowchain_rpc_per_ip burst=5 nodelay;",
+                          "        proxy_pass http://127.0.0.1:8787;",
+                          "        proxy_http_version 1.1;",
+                          "        proxy_set_header Host $host;",
+                          "        proxy_set_header Origin $http_origin;",
+                          "        proxy_set_header Authorization $http_authorization;",
+                          "        proxy_set_header X-Forwarded-Proto https;",
+                          "        proxy_set_header X-Forwarded-For $remote_addr;",
+                          "        proxy_read_timeout 60s;",
+                          "    }",
+                          "",
+                          "    location = /tester/status {",
                           "        if ($request_method !~ ^(GET|OPTIONS)$) { return 405; }",
                           "        limit_req zone=flowchain_rpc_per_ip burst=20 nodelay;",
                           "        proxy_pass http://127.0.0.1:8787;",

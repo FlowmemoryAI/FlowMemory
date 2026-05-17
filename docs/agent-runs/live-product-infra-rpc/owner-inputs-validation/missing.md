@@ -1,6 +1,6 @@
 ﻿# FlowChain Owner Inputs
 
-Generated: 2026-05-16T20:41:18.2547436Z
+Generated: 2026-05-16T23:47:13.3693304Z
 Status: blocked
 Owner input ready: False
 
@@ -13,6 +13,9 @@ This file intentionally records env names, validation checks, and pass/block/fai
 | FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE | public-rpc | missing | required |
 | FLOWCHAIN_RPC_TLS_TERMINATED | public-rpc | missing | required |
 | FLOWCHAIN_RPC_STATE_BACKUP_PATH | backup | missing | required |
+| FLOWCHAIN_TESTER_WRITE_ENABLED | external-tester-write | missing | required |
+| FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256 | external-tester-write | missing | required |
+| FLOWCHAIN_TESTER_MAX_SEND_UNITS | external-tester-write | missing | required |
 | FLOWCHAIN_PILOT_OPERATOR_ACK | base8453-bridge | missing | required |
 | FLOWCHAIN_BASE8453_RPC_URL | base8453-bridge | missing | required |
 | FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS | base8453-bridge | missing | required |

@@ -140,8 +140,60 @@ export class FlowChainClient {
     return this.call("rpc_readiness");
   }
 
+  health() {
+    return this.call("health");
+  }
+
+  nodeStatus() {
+    return this.call("node_status");
+  }
+
+  peerList(params: JsonValue = { limit: 10 }) {
+    return this.call("peer_list", params);
+  }
+
   chainStatus() {
     return this.call("chain_status");
+  }
+
+  blockList(params: JsonValue = { limit: 10 }) {
+    return this.call("block_list", params);
+  }
+
+  blockGet(params: JsonValue) {
+    return this.call("block_get", params);
+  }
+
+  transactionList(params: JsonValue = { limit: 10 }) {
+    return this.call("transaction_list", params);
+  }
+
+  transactionGet(params: JsonValue) {
+    return this.call("transaction_get", params);
+  }
+
+  mempoolList(params: JsonValue = { limit: 10 }) {
+    return this.call("mempool_list", params);
+  }
+
+  accountList(params: JsonValue = { limit: 10 }) {
+    return this.call("account_list", params);
+  }
+
+  accountGet(params: JsonValue) {
+    return this.call("account_get", params);
+  }
+
+  balanceGet(params: JsonValue) {
+    return this.call("balance_get", params);
+  }
+
+  walletMetadataList(params: JsonValue = { limit: 10 }) {
+    return this.call("wallet_metadata_list", params);
+  }
+
+  walletMetadataGet(params: JsonValue) {
+    return this.call("wallet_metadata_get", params);
   }
 
   walletBalances(params: JsonValue = { limit: 10 }) {
@@ -152,12 +204,52 @@ export class FlowChainClient {
     return this.call("wallet_transfer_history", params);
   }
 
+  faucetEventList(params: JsonValue = { limit: 10 }) {
+    return this.call("faucet_event_list", params);
+  }
+
+  finalityList(params: JsonValue = { limit: 10 }) {
+    return this.call("finality_list", params);
+  }
+
+  finalityGet(params: JsonValue) {
+    return this.call("finality_get", params);
+  }
+
   bridgeReadiness() {
     return this.call("bridge_live_readiness");
   }
 
   bridgeStatus() {
     return this.call("bridge_status");
+  }
+
+  bridgeDepositList(params: JsonValue = { limit: 10 }) {
+    return this.call("bridge_deposit_list", params);
+  }
+
+  bridgeDepositGet(params: JsonValue) {
+    return this.call("bridge_deposit_get", params);
+  }
+
+  bridgeCreditList(params: JsonValue = { limit: 10 }) {
+    return this.call("bridge_credit_list", params);
+  }
+
+  bridgeCreditGet(params: JsonValue) {
+    return this.call("bridge_credit_get", params);
+  }
+
+  bridgeCreditStatus(params: JsonValue) {
+    return this.call("bridge_credit_status", params);
+  }
+
+  withdrawalList(params: JsonValue = { limit: 10 }) {
+    return this.call("withdrawal_list", params);
+  }
+
+  withdrawalGet(params: JsonValue) {
+    return this.call("withdrawal_get", params);
   }
 
   walletSend(request: WalletSendRequest) {

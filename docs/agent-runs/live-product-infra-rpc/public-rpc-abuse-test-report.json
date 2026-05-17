@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_abuse_test_report.v0",
-    "generatedAt":  "2026-05-16T20:54:03.4241520Z",
+    "generatedAt":  "2026-05-16T23:48:52.1019848Z",
     "status":  "passed",
     "abuseTestReady":  true,
     "validationScope":  "local-control-plane-public-rpc-abuse-harness",
@@ -21,6 +21,7 @@
                    "bridgeObservationSubmitRejected":  true,
                    "rawJsonGetRejected":  true,
                    "bridgeObservationPostAliasRejected":  true,
+                   "testerWriteGatewayFailsClosed":  true,
                    "badParamsRejected":  true,
                    "emptyBatchRejected":  true,
                    "oversizedBatchRejected":  true,
@@ -33,9 +34,9 @@
 
                      ],
     "caseCounts":  {
-                       "passed":  17,
+                       "passed":  18,
                        "failed":  0,
-                       "total":  17
+                       "total":  18
                    },
     "cases":  [
                   {
@@ -216,6 +217,24 @@
                                        "retryAfterHeaderPresent":  false,
                                        "errorCaptured":  false,
                                        "errorMessage":  ""
+                                   }
+                  },
+                  {
+                      "id":  "tester-write-disabled-without-owner-token",
+                      "requirement":  "Authenticated tester write gateway fails closed when owner token env is not configured.",
+                      "status":  "passed",
+                      "evidence":  "status=403, schema=flowmemory.control_plane.tester_write_disabled.v0",
+                      "response":  {
+                                       "id":  "tester-write-disabled-without-owner-token",
+                                       "httpStatus":  403,
+                                       "schema":  "flowmemory.control_plane.tester_write_disabled.v0",
+                                       "reasonCode":  "",
+                                       "errorCode":  null,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  true,
+                                       "errorMessage":  "The remote server returned an error: (403) Forbidden."
                                    }
                   },
                   {

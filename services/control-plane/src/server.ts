@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { basename, dirname, join } from "node:path";
@@ -23,6 +24,11 @@ const jsonHeaders = {
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const MAX_REQUEST_BODY_BYTES = 256 * 1024;
 const MAX_JSON_RPC_BATCH_REQUESTS = 50;
+const TESTER_WRITE_ENV_NAMES = [
+  "FLOWCHAIN_TESTER_WRITE_ENABLED",
+  "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+  "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
+] as const;
 const rateLimitBuckets = new Map<string, { windowStartedAtMs: number; count: number }>();
 
 class HttpRequestError extends Error {
@@ -45,6 +51,10 @@ function jsonResult(response: ReturnType<typeof dispatchJsonRpc>): unknown {
 function writeJson(res: ServerResponse, statusCode: number, body: unknown): void {
   res.writeHead(statusCode, jsonHeaders);
   res.end(`${JSON.stringify(body)}\n`);
+}
+
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
 function writeRequestError(res: ServerResponse, error: unknown, fallbackMessage: string): void {
@@ -186,6 +196,164 @@ function configuredRateLimitPerMinute(): number | null {
     return null;
   }
   return Number(raw.trim());
+}
+
+function sha256Hex(value: string): string {
+  return createHash("sha256").update(value, "utf8").digest("hex");
+}
+
+function testerWriteConfig() {
+  const enabledRaw = process.env.FLOWCHAIN_TESTER_WRITE_ENABLED ?? "";
+  const tokenHash = process.env.FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256 ?? "";
+  const maxSendUnitsRaw = process.env.FLOWCHAIN_TESTER_MAX_SEND_UNITS ?? "1";
+  const missingEnvNames: string[] = [];
+  const invalidEnvNames: string[] = [];
+  const enabled = enabledRaw.toLowerCase() === "true";
+  if (!enabled) missingEnvNames.push("FLOWCHAIN_TESTER_WRITE_ENABLED");
+  if (!/^[0-9a-fA-F]{64}$/.test(tokenHash)) {
+    if (tokenHash.trim().length === 0) missingEnvNames.push("FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256");
+    else invalidEnvNames.push("FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256");
+  }
+  if (!/^[1-9][0-9]*$/.test(maxSendUnitsRaw)) {
+    invalidEnvNames.push("FLOWCHAIN_TESTER_MAX_SEND_UNITS");
+  }
+  return {
+    enabled,
+    tokenHash: tokenHash.toLowerCase(),
+    maxSendUnits: /^[1-9][0-9]*$/.test(maxSendUnitsRaw) ? BigInt(maxSendUnitsRaw) : 1n,
+    maxSendUnitsText: /^[1-9][0-9]*$/.test(maxSendUnitsRaw) ? maxSendUnitsRaw : "1",
+    configured: enabled && /^[0-9a-fA-F]{64}$/.test(tokenHash) && /^[1-9][0-9]*$/.test(maxSendUnitsRaw),
+    missingEnvNames,
+    invalidEnvNames,
+  };
+}
+
+function authorizationBearerToken(req: IncomingMessage): string | null {
+  const raw = req.headers.authorization;
+  const authorization = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof authorization !== "string") return null;
+  const match = authorization.match(/^Bearer\s+(.+)$/i);
+  return match === null ? null : match[1].trim();
+}
+
+function requireTesterWriteAccess(req: IncomingMessage, res: ServerResponse): boolean {
+  const config = testerWriteConfig();
+  if (!config.configured) {
+    writeJson(res, 403, {
+      schema: "flowmemory.control_plane.tester_write_disabled.v0",
+      message: "tester write gateway is not configured",
+      missingEnvNames: config.missingEnvNames,
+      invalidEnvNames: config.invalidEnvNames,
+      envValuesPrinted: false,
+      noSecrets: true,
+    });
+    return false;
+  }
+
+  const token = authorizationBearerToken(req);
+  if (token === null || token.length === 0) {
+    writeJson(res, 401, {
+      schema: "flowmemory.control_plane.tester_write_auth_required.v0",
+      message: "tester write gateway requires bearer authorization",
+      envValuesPrinted: false,
+      noSecrets: true,
+    });
+    return false;
+  }
+
+  const expected = Buffer.from(config.tokenHash, "hex");
+  const actual = Buffer.from(sha256Hex(token), "hex");
+  if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) {
+    writeJson(res, 403, {
+      schema: "flowmemory.control_plane.tester_write_auth_rejected.v0",
+      message: "tester write bearer authorization was rejected",
+      envValuesPrinted: false,
+      noSecrets: true,
+    });
+    return false;
+  }
+  return true;
+}
+
+function testerWriteStatus(): JsonObject {
+  const config = testerWriteConfig();
+  return {
+    schema: "flowmemory.control_plane.tester_write_status.v0",
+    configured: config.configured,
+    enabled: config.enabled,
+    tokenHashConfigured: config.tokenHash.length === 64,
+    maxSendUnits: config.maxSendUnitsText,
+    missingEnvNames: config.missingEnvNames,
+    invalidEnvNames: config.invalidEnvNames,
+    requiredEnvNames: [...TESTER_WRITE_ENV_NAMES],
+    envValuesPrinted: false,
+    noSecrets: true,
+    localOnly: !config.configured,
+  };
+}
+
+function enforceTesterSendCap(payload: unknown): unknown {
+  const config = testerWriteConfig();
+  if (!isObjectRecord(payload)) {
+    throw new Error("tester wallet send payload must be an object");
+  }
+  const amountValue = payload.amountUnits ?? payload.amount_units;
+  if (typeof amountValue !== "string" && typeof amountValue !== "number") {
+    throw new Error("tester wallet send requires amountUnits");
+  }
+  const amountText = String(amountValue).trim();
+  if (!/^[1-9][0-9]*$/.test(amountText)) {
+    throw new Error("tester wallet send amountUnits must be a positive integer string");
+  }
+  if (BigInt(amountText) > config.maxSendUnits) {
+    throw new Error(`tester wallet send amount exceeds FLOWCHAIN_TESTER_MAX_SEND_UNITS`);
+  }
+  return {
+    ...payload,
+    amountUnits: amountText,
+    applyBlock: true,
+    createRecipient: payload.createRecipient === true,
+  };
+}
+
+function publicTesterWalletCreateResult(result: JsonObject): JsonObject {
+  return {
+    schema: "flowmemory.control_plane.tester_wallet_create_result.v0",
+    created: result.created,
+    alreadyExists: result.alreadyExists,
+    walletLabel: result.walletLabel,
+    isolated: result.isolated,
+    account: result.account,
+    accounts: result.accounts,
+    chainId: result.chainId,
+    keyScheme: result.keyScheme,
+    secretMaterialReturned: false,
+    credentialStored: false,
+    envValuesPrinted: false,
+    noSecrets: true,
+    localOnly: result.localOnly,
+  };
+}
+
+function publicTesterWalletSendResult(result: JsonObject): JsonObject {
+  return {
+    schema: "flowmemory.control_plane.tester_wallet_send_result.v0",
+    accepted: result.accepted,
+    applied: result.applied,
+    status: result.status,
+    transferId: result.transferId,
+    txIds: result.txIds,
+    assetId: result.assetId,
+    amountUnits: result.amountUnits,
+    from: result.from,
+    to: result.to,
+    balancesBefore: result.balancesBefore,
+    balancesAfter: result.balancesAfter,
+    localOnly: result.localOnly,
+    productionReady: result.productionReady,
+    envValuesPrinted: false,
+    noSecrets: true,
+  };
 }
 
 function rateLimitClientKey(req: IncomingMessage): string {
@@ -603,6 +771,67 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
 
     if (req.method === "GET" && requestUrl?.pathname === "/wallets/operator") {
       writeJson(res, 200, publicWalletResult(state));
+      return;
+    }
+
+    if (req.method === "GET" && requestUrl?.pathname === "/tester/status") {
+      writeJson(res, 200, testerWriteStatus());
+      return;
+    }
+
+    if (req.method === "POST" && requestUrl?.pathname === "/tester/wallets/create") {
+      if (!requireJsonContentType(req, res) || !requireTesterWriteAccess(req, res)) {
+        return;
+      }
+      readRequestBody(req)
+        .then((body) => {
+          const payload = body.length > 0 ? JSON.parse(body) as Record<string, unknown> : {};
+          writeJson(res, 200, publicTesterWalletCreateResult(createLocalWallet(state, {
+            ...payload,
+            isolated: true,
+          })));
+        })
+        .catch((error) => {
+          if (error instanceof HttpRequestError) {
+            writeRequestError(res, error, "tester wallet creation failed");
+            return;
+          }
+          writeJson(res, 400, {
+            schema: "flowmemory.control_plane.tester_wallet_create_error.v0",
+            message: error instanceof Error ? error.message : "tester wallet creation failed",
+            secretMaterialReturned: false,
+            envValuesPrinted: false,
+            noSecrets: true,
+            localOnly: true,
+          });
+        });
+      return;
+    }
+
+    if (req.method === "POST" && requestUrl?.pathname === "/tester/wallets/send") {
+      if (!requireJsonContentType(req, res) || !requireTesterWriteAccess(req, res)) {
+        return;
+      }
+      readRequestBody(req)
+        .then((body) => {
+          const payload = body.length > 0 ? JSON.parse(body) as unknown : {};
+          writeJson(res, 200, publicTesterWalletSendResult(executeWalletSend(state, enforceTesterSendCap(payload))));
+        })
+        .catch((error) => {
+          if (error instanceof HttpRequestError) {
+            writeRequestError(res, error, "tester wallet send failed");
+            return;
+          }
+          writeJson(res, 400, {
+            schema: "flowmemory.control_plane.tester_wallet_send_error.v0",
+            accepted: false,
+            message: error instanceof Error ? error.message : "tester wallet send failed",
+            envValuesPrinted: false,
+            noSecrets: true,
+            localOnly: true,
+            productionReady: false,
+          });
+        });
       return;
     }
 

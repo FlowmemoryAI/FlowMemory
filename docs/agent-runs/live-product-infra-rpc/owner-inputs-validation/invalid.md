@@ -1,6 +1,6 @@
 ﻿# FlowChain Owner Inputs
 
-Generated: 2026-05-16T20:41:20.3571975Z
+Generated: 2026-05-16T23:47:14.9254213Z
 Status: failed
 Owner input ready: False
 
@@ -13,6 +13,9 @@ This file intentionally records env names, validation checks, and pass/block/fai
 | FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE | public-rpc | present-invalid | positive decimal integer |
 | FLOWCHAIN_RPC_TLS_TERMINATED | public-rpc | present-invalid | must equal true after TLS termination is configured |
 | FLOWCHAIN_RPC_STATE_BACKUP_PATH | backup | present-invalid | existing writable directory |
+| FLOWCHAIN_TESTER_WRITE_ENABLED | external-tester-write | present-invalid | must equal true to expose the authenticated tester write gateway |
+| FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256 | external-tester-write | present-invalid | 64-character SHA-256 hex digest of the out-of-band tester bearer token |
+| FLOWCHAIN_TESTER_MAX_SEND_UNITS | external-tester-write | present-invalid | positive decimal integer test-unit cap per tester send |
 | FLOWCHAIN_PILOT_OPERATOR_ACK | base8453-bridge | present-invalid | must equal the fixed capped-pilot acknowledgement |
 | FLOWCHAIN_BASE8453_RPC_URL | base8453-bridge | present-invalid | absolute HTTP(S) Base 8453 endpoint |
 | FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS | base8453-bridge | present-invalid | 20-byte hex address |

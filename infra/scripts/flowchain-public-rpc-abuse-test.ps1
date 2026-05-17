@@ -436,6 +436,13 @@ try {
         -Response $bridgeObservationAlias `
         -Evidence "status=$($bridgeObservationAlias.statusCode), errorCode=$(Get-AbuseResponseErrorCode -Response $bridgeObservationAlias), reason=$(Get-AbuseResponseReasonCode -Response $bridgeObservationAlias)"
 
+    $testerWriteDisabled = Invoke-AbuseHttpRequest -Method "POST" -Uri "$baseUrl/tester/wallets/send" -Headers (New-AbuseHeaders) -ContentType "application/json" -Body (@{ from = "tester-a"; to = "tester-b"; amountUnits = "1" } | ConvertTo-Json -Compress)
+    Add-AbuseCase -Id "tester-write-disabled-without-owner-token" `
+        -Requirement "Authenticated tester write gateway fails closed when owner token env is not configured." `
+        -Passed (($testerWriteDisabled.statusCode -eq 403) -and ((Get-AbuseResponseSchema -Response $testerWriteDisabled) -eq "flowmemory.control_plane.tester_write_disabled.v0") -and ((Get-AbuseResponseNoSecretsFlag -Response $testerWriteDisabled) -eq $true)) `
+        -Response $testerWriteDisabled `
+        -Evidence "status=$($testerWriteDisabled.statusCode), schema=$(Get-AbuseResponseSchema -Response $testerWriteDisabled)"
+
     $badParamsBody = @{
         jsonrpc = "2.0"
         id = 2
@@ -558,6 +565,7 @@ $checks = [ordered]@{
     bridgeObservationSubmitRejected = @($cases | Where-Object { $_.id -eq "bridge-observation-submit-rejected" -and $_.status -eq "passed" }).Count -eq 1
     rawJsonGetRejected = @($cases | Where-Object { $_.id -eq "raw-json-get-rejected" -and $_.status -eq "passed" }).Count -eq 1
     bridgeObservationPostAliasRejected = @($cases | Where-Object { $_.id -eq "bridge-observation-post-alias-rejected" -and $_.status -eq "passed" }).Count -eq 1
+    testerWriteGatewayFailsClosed = @($cases | Where-Object { $_.id -eq "tester-write-disabled-without-owner-token" -and $_.status -eq "passed" }).Count -eq 1
     badParamsRejected = @($cases | Where-Object { $_.id -eq "bad-params" -and $_.status -eq "passed" }).Count -eq 1
     emptyBatchRejected = @($cases | Where-Object { $_.id -eq "empty-batch" -and $_.status -eq "passed" }).Count -eq 1
     oversizedBatchRejected = @($cases | Where-Object { $_.id -eq "oversized-batch" -and $_.status -eq "passed" }).Count -eq 1

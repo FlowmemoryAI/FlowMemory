@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_bundle_report.v2",
-    "generatedAt":  "2026-05-16T21:10:38.7464585Z",
+    "generatedAt":  "2026-05-16T23:56:46.1109360Z",
     "status":  "passed",
     "bundleDir":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle",
     "flowChainRpcIsRepoOwned":  true,
@@ -11,7 +11,10 @@
                              "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
                              "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                              "FLOWCHAIN_RPC_TLS_TERMINATED",
-                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                             "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                             "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                             "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
                          ],
     "requiredPlaceholders":  [
                                  "\u003cFLOWCHAIN_RPC_PUBLIC_HOST\u003e",

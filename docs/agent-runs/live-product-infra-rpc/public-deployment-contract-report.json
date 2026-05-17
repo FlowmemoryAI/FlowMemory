@@ -1,16 +1,16 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-16T21:07:34.5158466Z",
+    "generatedAt":  "2026-05-17T00:01:03.3094337Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
     "packetExecutableSmokeValidated":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
-                       "passed":  12,
+                       "passed":  13,
                        "blocked":  5,
                        "failed":  0,
-                       "total":  17
+                       "total":  18
                    },
     "items":  [
                   {
@@ -30,6 +30,7 @@
                                        "npm run flowchain:public-rpc:deployment-bundle",
                                        "npm run flowchain:public-rpc:validate",
                                        "npm run flowchain:public-rpc:abuse-test",
+                                       "npm run flowchain:tester:gateway:e2e",
                                        "npm run flowchain:public-rpc:check -- -AllowBlocked",
                                        "npm run flowchain:backup:restore:validate",
                                        "npm run flowchain:backup:check -- -AllowBlocked",
@@ -56,9 +57,9 @@
                   },
                   {
                       "id":  "owner-signup-checklist",
-                      "requirement":  "Owner signup checklist maps every public RPC, backup, and Base 8453 bridge value to the exact thing the owner must get without requesting secrets in chat.",
+                      "requirement":  "Owner signup checklist maps every public RPC, tester write gateway, backup, and Base 8453 bridge value to the exact thing the owner must get without requesting secrets in chat.",
                       "status":  "passed",
-                      "evidence":  "signupStatus=passed, itemCount=8, externalSignupCount=3, missingCoverage=0, repoOwned=True, localEnvFileSupported=True",
+                      "evidence":  "signupStatus=passed, itemCount=9, externalSignupCount=3, missingCoverage=0, repoOwned=True, localEnvFileSupported=True",
                       "commands":  [
                                        "npm run flowchain:owner:signup-checklist"
                                    ],
@@ -70,7 +71,7 @@
                       "id":  "owner-env-template",
                       "requirement":  "Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added.",
                       "status":  "passed",
-                      "evidence":  "templateStatus=passed, pathIsGitIgnored=True, requiredEnvNameCount=15, includesAllRequired=True",
+                      "evidence":  "templateStatus=passed, pathIsGitIgnored=True, requiredEnvNameCount=18, includesAllRequired=True",
                       "commands":  [
                                        "npm run flowchain:owner-env:template"
                                    ],
@@ -95,7 +96,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=41476, finalizedHeight=41476",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=43568, finalizedHeight=43568",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -129,7 +130,7 @@
                   },
                   {
                       "id":  "owner-input-contract",
-                      "requirement":  "The owner deployment contract validates the required public RPC, backup, and Base 8453 input names without values.",
+                      "requirement":  "The owner deployment contract validates the required public RPC, tester write gateway, backup, and Base 8453 input names without values.",
                       "status":  "blocked",
                       "evidence":  "ownerInputsStatus=blocked, ownerInputReady=False",
                       "commands":  [
@@ -141,6 +142,9 @@
                                        "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                                        "FLOWCHAIN_RPC_TLS_TERMINATED",
                                        "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                       "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                                       "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                                       "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
                                        "FLOWCHAIN_PILOT_OPERATOR_ACK",
                                        "FLOWCHAIN_BASE8453_RPC_URL",
                                        "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -245,6 +249,9 @@
                                        "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                                        "FLOWCHAIN_RPC_TLS_TERMINATED",
                                        "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                       "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                                       "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                                       "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
                                        "FLOWCHAIN_PILOT_OPERATOR_ACK",
                                        "FLOWCHAIN_BASE8453_RPC_URL",
                                        "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -255,6 +262,18 @@
                                        "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                                        "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                        "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                   ]
+                  },
+                  {
+                      "id":  "public-tester-write-gateway",
+                      "requirement":  "The public deployment has a local production-shaped proof for authenticated tester wallet creation, capped tester sends, balance settlement, and over-cap rejection.",
+                      "status":  "passed",
+                      "evidence":  "gatewayStatus=passed, transferAccepted=True, capRejected=True",
+                      "commands":  [
+                                       "npm run flowchain:tester:gateway:e2e"
+                                   ],
+                      "blockers":  [
+
                                    ]
                   },
                   {
@@ -304,6 +323,9 @@
                             "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                             "FLOWCHAIN_RPC_TLS_TERMINATED",
                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                            "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                            "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
                             "FLOWCHAIN_PILOT_OPERATOR_ACK",
                             "FLOWCHAIN_BASE8453_RPC_URL",
                             "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -324,6 +346,9 @@
                              "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                              "FLOWCHAIN_RPC_TLS_TERMINATED",
                              "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                             "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                             "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                             "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
                              "FLOWCHAIN_PILOT_OPERATOR_ACK",
                              "FLOWCHAIN_BASE8453_RPC_URL",
                              "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -348,6 +373,7 @@
                         "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
                         "publicRpcValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation-report.json",
                         "publicRpcAbuseTest":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test-report.json",
+                        "publicTesterGateway":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json",
                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
                         "backupRestoreValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-report.json",
                         "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
@@ -369,6 +395,7 @@
                                                  "npm run flowchain:public-rpc:deployment-bundle",
                                                  "npm run flowchain:public-rpc:validate",
                                                  "npm run flowchain:public-rpc:abuse-test",
+                                                 "npm run flowchain:tester:gateway:e2e",
                                                  "npm run flowchain:public-rpc:check",
                                                  "npm run flowchain:backup:restore:validate",
                                                  "npm run flowchain:backup:create",

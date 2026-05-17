@@ -1,11 +1,12 @@
 {
     "schema":  "flowchain.owner_inputs_report.v0",
-    "generatedAt":  "2026-05-16T20:41:20.3571975Z",
+    "generatedAt":  "2026-05-16T23:47:14.9254213Z",
     "status":  "failed",
     "ownerInputReady":  false,
     "groups":  [
                    "public-rpc",
                    "backup",
+                   "external-tester-write",
                    "base8453-bridge"
                ],
     "inputs":  [
@@ -48,6 +49,30 @@
                        "valid":  false,
                        "status":  "present-invalid",
                        "check":  "existing writable directory"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                       "group":  "external-tester-write",
+                       "present":  true,
+                       "valid":  false,
+                       "status":  "present-invalid",
+                       "check":  "must equal true to expose the authenticated tester write gateway"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                       "group":  "external-tester-write",
+                       "present":  true,
+                       "valid":  false,
+                       "status":  "present-invalid",
+                       "check":  "64-character SHA-256 hex digest of the out-of-band tester bearer token"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
+                       "group":  "external-tester-write",
+                       "present":  true,
+                       "valid":  false,
+                       "status":  "present-invalid",
+                       "check":  "positive decimal integer test-unit cap per tester send"
                    },
                    {
                        "name":  "FLOWCHAIN_PILOT_OPERATOR_ACK",
@@ -139,6 +164,9 @@
                             "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                             "FLOWCHAIN_RPC_TLS_TERMINATED",
                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                            "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                            "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
                             "FLOWCHAIN_PILOT_OPERATOR_ACK",
                             "FLOWCHAIN_BASE8453_RPC_URL",
                             "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -187,6 +215,21 @@
                          "name":  "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
                          "kind":  "failed",
                          "reason":  "must point to an existing writable directory"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                         "kind":  "failed",
+                         "reason":  "must equal true"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                         "kind":  "failed",
+                         "reason":  "must be a 64-character SHA-256 hex digest"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
+                         "kind":  "failed",
+                         "reason":  "must be a positive decimal integer"
                      },
                      {
                          "name":  "FLOWCHAIN_PILOT_OPERATOR_ACK",

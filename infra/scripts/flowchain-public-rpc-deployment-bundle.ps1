@@ -85,7 +85,10 @@ $requiredEnvNames = @(
     "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
     "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
     "FLOWCHAIN_RPC_TLS_TERMINATED",
-    "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+    "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+    "FLOWCHAIN_TESTER_WRITE_ENABLED",
+    "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+    "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
 )
 
 $requiredPlaceholders = @(
@@ -152,8 +155,10 @@ $nginxRequiredTokens = @(
     "limit_req zone=flowchain_rpc_per_ip",
     "proxy_pass http://127.0.0.1:8787;",
     'proxy_set_header Origin $http_origin;',
+    'proxy_set_header Authorization $http_authorization;',
     'proxy_set_header X-Forwarded-Proto https;',
-    'proxy_set_header X-Forwarded-For $remote_addr;'
+    'proxy_set_header X-Forwarded-For $remote_addr;',
+    '/tester/wallets/(create|send)'
 )
 
 $systemdRequiredTokens = @(
@@ -211,7 +216,10 @@ $ownerEnvExampleLines = @(
     "FLOWCHAIN_RPC_ALLOWED_ORIGINS=",
     "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE=",
     "FLOWCHAIN_RPC_TLS_TERMINATED=",
-    "FLOWCHAIN_RPC_STATE_BACKUP_PATH="
+    "FLOWCHAIN_RPC_STATE_BACKUP_PATH=",
+    "FLOWCHAIN_TESTER_WRITE_ENABLED=",
+    "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256=",
+    "FLOWCHAIN_TESTER_MAX_SEND_UNITS="
 )
 
 $systemdServiceTemplateLines = @(

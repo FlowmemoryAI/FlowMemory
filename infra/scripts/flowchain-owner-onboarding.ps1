@@ -39,6 +39,11 @@ $publicRpcEnv = @(
     "FLOWCHAIN_RPC_TLS_TERMINATED"
 )
 $backupEnv = @("FLOWCHAIN_RPC_STATE_BACKUP_PATH")
+$testerWriteEnv = @(
+    "FLOWCHAIN_TESTER_WRITE_ENABLED",
+    "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+    "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+)
 $bridgeEnv = @(
     "FLOWCHAIN_PILOT_OPERATOR_ACK",
     "FLOWCHAIN_BASE8453_RPC_URL",
@@ -78,6 +83,18 @@ $onboardingGroups = @(
         decision = "Create or mount a writable backup directory before public operation, then verify snapshot creation and restore rehearsal."
     },
     [ordered]@{
+        id = "external-tester-write-gateway"
+        title = "External tester write gateway"
+        ownsRpcImplementation = $true
+        thirdPartyFlowChainRpcProviderNeeded = $false
+        externalSignupNeeded = $false
+        signupCategory = "Out-of-band shared tester bearer token hash and local send cap for friends-and-family pilot writes."
+        localOrigin = "127.0.0.1:8787"
+        envNames = $testerWriteEnv
+        validationCommand = "npm run flowchain:owner-inputs"
+        decision = "Use the authenticated /tester/wallets/create and /tester/wallets/send gateway for capped pilot writes; do not expose private /wallets/* routes publicly."
+    },
+    [ordered]@{
         id = "base8453-bridge-observer"
         title = "Base 8453 bridge observer"
         ownsRpcImplementation = $false
@@ -98,6 +115,9 @@ $localShellTemplate = @(
     '$env:FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE="<positive integer>"',
     '$env:FLOWCHAIN_RPC_TLS_TERMINATED="true"',
     '$env:FLOWCHAIN_RPC_STATE_BACKUP_PATH="<existing writable backup directory>"',
+    '$env:FLOWCHAIN_TESTER_WRITE_ENABLED="true"',
+    '$env:FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256="<sha256 hex of out-of-band tester bearer token>"',
+    '$env:FLOWCHAIN_TESTER_MAX_SEND_UNITS="<positive local test-unit cap per send>"',
     '$env:FLOWCHAIN_PILOT_OPERATOR_ACK="I_UNDERSTAND_THIS_IS_CAPPED_BASE8453_OWNER_PILOT"',
     '$env:FLOWCHAIN_BASE8453_RPC_URL="<Base 8453 RPC endpoint or self-operated node endpoint>"',
     '$env:FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS="<20-byte lockbox address>"',

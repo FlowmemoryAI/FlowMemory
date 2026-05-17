@@ -84,6 +84,20 @@ $checklistItems = @(
         validationCommand = "npm run flowchain:backup:restore:validate; npm run flowchain:backup:check"
     },
     [ordered]@{
+        id = "external-tester-write-gateway"
+        title = "External tester write token and send cap"
+        externalSignupNeeded = $false
+        acceptableOptions = @("Owner-generated random bearer token stored out of band", "SHA-256 digest in ignored owner env file", "Small per-send local test-unit cap")
+        producesEnvNames = @(
+            "FLOWCHAIN_TESTER_WRITE_ENABLED",
+            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+            "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+        )
+        ownerMustGet = "A random tester bearer token for friends-and-family wallet writes, its SHA-256 hex digest for the owner env file, and a positive per-send local test-unit cap."
+        ownerMustNotSend = @("Raw tester bearer token in chat or GitHub", "owner env file contents", "token hash and raw token together")
+        validationCommand = "npm run flowchain:owner-inputs; npm run flowchain:external-tester:packet -- -AllowBlocked"
+    },
+    [ordered]@{
         id = "base8453-rpc"
         title = "Base mainnet RPC endpoint"
         externalSignupNeeded = $true
@@ -140,6 +154,9 @@ $requiredOwnerEnvNames = @(
     "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
     "FLOWCHAIN_RPC_TLS_TERMINATED",
     "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+    "FLOWCHAIN_TESTER_WRITE_ENABLED",
+    "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+    "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
     "FLOWCHAIN_PILOT_OPERATOR_ACK",
     "FLOWCHAIN_BASE8453_RPC_URL",
     "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
