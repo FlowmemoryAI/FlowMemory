@@ -1,0 +1,55 @@
+{
+    "schema":  "flowchain.backup_owner_path_dry_run_report.v0",
+    "generatedAt":  "2026-05-17T20:22:22.7898628Z",
+    "status":  "passed",
+    "dryRunScope":  "ignored-local-owner-path-rehearsal",
+    "dryRunRoot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\backup-owner-path-dry-run",
+    "backupRootValuePrinted":  false,
+    "childReadinessStatus":  "passed",
+    "childReadinessExitCode":  0,
+    "failedChecks":  [
+
+                     ],
+    "checks":  {
+                   "dryRunRootInsideIgnoredLocalState":  true,
+                   "ownerBackupEnvRestored":  true,
+                   "childReadinessCommandPassed":  true,
+                   "readinessReportWritten":  true,
+                   "readinessStatusPassed":  true,
+                   "backupRootConfigured":  true,
+                   "backupRootValuePrintedFalse":  true,
+                   "snapshotProofPassed":  true,
+                   "restoreProofPassed":  true,
+                   "writeVerified":  true,
+                   "latestPointerVerified":  true,
+                   "latestPointerWrittenAtomically":  true,
+                   "stateRootCompared":  true,
+                   "stateRootMatch":  true,
+                   "stateFileHashMatch":  true,
+                   "restoreVerified":  true,
+                   "backupReportPassed":  true,
+                   "restoreReportPassed":  true,
+                   "backupSnapshotCreated":  true,
+                   "restoreLiveStateProtected":  true,
+                   "restoreDidNotMutateLiveState":  true,
+                   "liveStateStillReadable":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "proofReports":  {
+                         "readiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-owner-path-dry-run\\backup-readiness-report.json",
+                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-owner-path-dry-run\\state-backup-report.json",
+                         "restore":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-owner-path-dry-run\\state-restore-verify-report.json"
+                     },
+    "childOutputRedacted":  [
+                                "FlowChain backup readiness status: passed",
+                                "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-owner-path-dry-run\\backup-readiness-report.json"
+                            ],
+    "liveStateSha256Before":  "89edd6caf471e7128287b81bbed160c9d3dc91e8e2881f1834ad6dc81f53ade7",
+    "liveStateSha256After":  "f4284c7c25c7974e96a0c024161c3b081916c1b3cb18f193df216d223fa9ea51",
+    "requiredOwnerInput":  "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

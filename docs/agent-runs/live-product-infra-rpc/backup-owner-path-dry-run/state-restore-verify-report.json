@@ -1,0 +1,64 @@
+{
+    "schema":  "flowchain.state_restore_verify_report.v1",
+    "generatedAt":  "2026-05-17T20:21:50.8477332Z",
+    "status":  "passed",
+    "requiredEnvNames":  [
+                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                         ],
+    "missingEnvNames":  [
+
+                        ],
+    "backupRootConfigured":  true,
+    "backupRootValuePrinted":  false,
+    "manifestPathValuePrinted":  false,
+    "latestSelection":  {
+                            "mode":  "latest-pointer",
+                            "latestManifestFound":  true,
+                            "selectedManifestPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\backup-owner-path-dry-run\\owner-path\\latest-manifest.json",
+                            "selectedSnapshotName":  "flowchain-state-snapshot-20260517T202011627Z",
+                            "newestSnapshotName":  "flowchain-state-snapshot-20260517T202011627Z",
+                            "latestPointerSnapshotName":  "flowchain-state-snapshot-20260517T202011627Z",
+                            "latestPointerMatchesNewest":  true,
+                            "latestPointerMatchesSnapshotManifest":  true,
+                            "snapshotManifestFound":  true,
+                            "snapshotManifestReadable":  true,
+                            "candidateCount":  1
+                        },
+    "restore":  {
+                    "attempted":  true,
+                    "verified":  true,
+                    "manifestFound":  true,
+                    "manifestReadable":  true,
+                    "snapshotName":  "flowchain-state-snapshot-20260517T202011627Z",
+                    "stateArtifactName":  "state.json",
+                    "expectedStateFileSha256":  "a254bb15d3916959b234658c17d28afe8231e6cb6d36d71dc6d2c3b968726ce2",
+                    "restoredStateFileSha256":  "a254bb15d3916959b234658c17d28afe8231e6cb6d36d71dc6d2c3b968726ce2",
+                    "hashMatchesManifest":  true,
+                    "stateReadable":  true,
+                    "stateFactsMatchManifest":  true,
+                    "stateFactsMismatches":  [
+
+                                             ],
+                    "manifestPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\backup-owner-path-dry-run\\owner-path\\latest-manifest.json",
+                    "backupStatePath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\backup-owner-path-dry-run\\owner-path\\flowchain-state-snapshot-20260517T202011627Z\\state.json",
+                    "restoredStatePath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\restore-rehearsal\\backup-readiness\\restore-verify-20260517T202118912Z\\state.json",
+                    "restoreRoot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\restore-rehearsal\\backup-readiness",
+                    "liveStatePath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\state.json",
+                    "liveStateSha256Before":  "b0f8aca68ec7e9e87dcc2325d8d58b7aaaeedfa1b3e62c8a43dd946d44c386be",
+                    "liveStateSha256After":  "f4284c7c25c7974e96a0c024161c3b081916c1b3cb18f193df216d223fa9ea51",
+                    "liveStateHashChangedDuringRehearsal":  true,
+                    "liveStatePathProtected":  true,
+                    "restoredStatePathEqualsLiveStatePath":  false,
+                    "latestHeight":  "59515",
+                    "latestHash":  "0xb05e0f6296353121d666df51d5d41ff07098b799167a2bf7e6460808cdeb558a",
+                    "latestRoot":  "0x2b5ca1eba51e83cb33fca2a3bbc2950f4d8e2bf258afc6d467293293cf368b7b",
+                    "finalizedHeight":  "59515",
+                    "liveStateMutated":  false
+                },
+    "problems":  [
+
+                 ],
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

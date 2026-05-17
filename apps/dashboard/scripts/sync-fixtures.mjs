@@ -43,6 +43,7 @@ const liveReadinessReportCopies = [
   "public-rpc-deployment-automation-report.json",
   "public-rpc-readiness-report.json",
   "backup-readiness-report.json",
+  "backup-owner-path-dry-run-report.json",
   "bridge-relayer-once-report.json",
   "bridge-relayer-guardrail-validation-report.json",
   "bridge-relayer-loop-validation-report.json",
@@ -65,6 +66,7 @@ const liveReadinessGateLabels = new Map([
   ["service-install-automation", "Windows service install"],
   ["public-rpc-edge", "Public RPC edge"],
   ["state-backup", "State backup proof"],
+  ["state-backup-owner-path-dry-run", "Backup dry run"],
   ["base8453-bridge-edge", "Base 8453 bridge edge"],
   ["base8453-bridge-relayer-queue", "Bridge relayer queue"],
   ["external-tester-sharing", "External tester packet"],
@@ -184,6 +186,7 @@ function writeLiveReadinessSummary() {
   const bridgeRelayer = reports["bridge-relayer-once-report.json"];
   const bridgeRelayerGuardrail = reports["bridge-relayer-guardrail-validation-report.json"];
   const bridgeRelayerLoopValidation = reports["bridge-relayer-loop-validation-report.json"];
+  const backupOwnerPathDryRun = reports["backup-owner-path-dry-run-report.json"];
   const publicRpcDeploymentBundle = reports["public-rpc-deployment-bundle-report.json"];
   const publicRpcDeploymentAutomation = reports["public-rpc-deployment-automation-report.json"];
   const externalTesterPacket = reports["external-tester-packet-report.json"];
@@ -244,6 +247,7 @@ function writeLiveReadinessSummary() {
       bridgeQueuedTransactions: asText(bridgeRelayer?.counts?.queuedTransactions, "0"),
       bridgeRelayerGuardrailStatus: asText(bridgeRelayerGuardrail?.status, "not recorded"),
       bridgeRelayerLoopValidationStatus: asText(bridgeRelayerLoopValidation?.status, "not recorded"),
+      backupOwnerPathDryRunStatus: asText(backupOwnerPathDryRun?.status, "not recorded"),
       publicRpcDeploymentBundleStatus: asText(publicRpcDeploymentBundle?.status, "not recorded"),
       publicRpcOwnerRenderValidationStatus: asText(publicRpcDeploymentBundle?.renderValidation?.status, "not recorded"),
       publicRpcDeploymentAutomationStatus: asText(publicRpcDeploymentAutomation?.status, "not recorded"),

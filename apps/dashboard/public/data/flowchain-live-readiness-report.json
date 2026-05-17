@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-17T20:11:39.3801580Z",
+  "generatedAt": "2026-05-17T20:25:59.5769127Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -15,6 +15,7 @@
     "bridgeQueuedTransactions": "0",
     "bridgeRelayerGuardrailStatus": "passed",
     "bridgeRelayerLoopValidationStatus": "passed",
+    "backupOwnerPathDryRunStatus": "passed",
     "publicRpcDeploymentBundleStatus": "passed",
     "publicRpcOwnerRenderValidationStatus": "passed",
     "publicRpcDeploymentAutomationStatus": "passed",
@@ -32,7 +33,7 @@
     "opsEscalationDryRunStatus": "passed",
     "opsEscalationDryRunEvents": "6",
     "statusCounts": {
-      "passed": 6,
+      "passed": 7,
       "blocked": 5
     }
   },
@@ -515,15 +516,27 @@
       "label": "State backup proof",
       "status": "blocked",
       "summary": "The public deployment must prove the configured state backup directory can create a manifest-backed snapshot and restore it in rehearsal.",
-      "evidence": "backupStatus=blocked, snapshotProof=not-run, restoreProof=not-run",
+      "evidence": "backupStatus=blocked, snapshotProof=not-run, restoreProof=not-run, ownerPathDryRun=passed",
       "commands": [
         "npm run flowchain:backup:create",
         "npm run flowchain:backup:restore:verify",
+        "npm run flowchain:backup:owner-path:dry-run",
         "npm run flowchain:backup:check"
       ],
       "blockers": [
         "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
       ]
+    },
+    {
+      "id": "state-backup-owner-path-dry-run",
+      "label": "Backup dry run",
+      "status": "passed",
+      "summary": "Backup readiness has an owner-path dry run that injects an ignored local backup path into the production backup gate and proves snapshot plus restore evidence without using the owner's real directory.",
+      "evidence": "dryRun=passed, failedChecks=0, readiness=passed, snapshotProof=True, restoreProof=True",
+      "commands": [
+        "npm run flowchain:backup:owner-path:dry-run"
+      ],
+      "blockers": []
     },
     {
       "id": "base8453-bridge-edge",
@@ -656,7 +669,7 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T20:11:39.3801580Z"
+      "generatedAt": "2026-05-17T20:25:59.5769127Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
@@ -699,6 +712,12 @@
       "schema": "flowchain.backup_readiness_report.v1",
       "status": "blocked",
       "generatedAt": "2026-05-17T19:03:08.3142430Z"
+    },
+    {
+      "fileName": "backup-owner-path-dry-run-report.json",
+      "schema": "flowchain.backup_owner_path_dry_run_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-17T20:22:22.7898628Z"
     },
     {
       "fileName": "bridge-relayer-once-report.json",

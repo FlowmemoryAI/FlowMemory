@@ -1,6 +1,6 @@
 ﻿# FlowChain Public Deployment Contract
 
-Generated: 2026-05-17T20:11:39.3801580Z
+Generated: 2026-05-17T20:25:59.5769127Z
 Status: blocked
 Deployment ready: False
 Packet shareable: False
@@ -38,8 +38,9 @@ This file records deployment gates, commands, and env names only. It must not co
 | The local public RPC abuse harness proves CORS rejection, media-type rejection, malformed JSON handling, batch/body caps, notification handling, rate limiting, and no-secret response summaries. | passed | abuseStatus=passed, abuseReady=True, missingChecks=0 |
 | The owner TLS edge must pass endpoint, CORS, rate-limit, readiness, and response-hygiene checks before sharing. | blocked | publicRpcStatus=blocked, publicRpcReady=False, validationStatus=passed, validationPassed=True, abuseStatus=passed, abusePassed=True |
 | Backup tooling must create manifest-backed state snapshots, restore the latest snapshot safely, reject tampered/missing/stale/wrong-chain backup evidence, and avoid owner secrets. | passed | validationStatus=passed, requiredChecks=15, missingChecks=0 |
+| Backup readiness has an owner-path dry run that injects an ignored local backup path into the production backup gate and proves snapshot plus restore evidence without using the owner's real directory. | passed | dryRun=passed, failedChecks=0, readiness=passed, snapshotProof=True, restoreProof=True |
 | The owner host has a no-secret Windows install, status, and uninstall path for recurring manifest-backed state backups that fail closed without the owner backup path. | passed | backupInstallValidation=passed, planDidNotMutate=True, ownerBackupEnvRequired=True, commandOmitsAllowBlocked=True |
-| The public deployment must prove the configured state backup directory can create a manifest-backed snapshot and restore it in rehearsal. | blocked | backupStatus=blocked, snapshotProof=not-run, restoreProof=not-run |
+| The public deployment must prove the configured state backup directory can create a manifest-backed snapshot and restore it in rehearsal. | blocked | backupStatus=blocked, snapshotProof=not-run, restoreProof=not-run, ownerPathDryRun=passed |
 | The public deployment must not invite bridge-funded testing until Base 8453 live and infra checks pass with owner guardrails. | blocked | bridgeLive=blocked, bridgeInfra=blocked |
 | The bridge relayer has a no-broadcast one-shot path plus an isolated loop validation that checks owner guardrails, observes Base 8453 deposits with a staged cursor, filters replays, queues new credits into the running L1, waits for main-state credit evidence, records handoff-to-spendable latency, only commits the Base cursor after safe proof, and proves missing-owner-input runs leave cursor state untouched. | blocked | relayer=blocked, guardrail=passed, loopValidation=passed, loopFailedChecks=0, observed=0, new=0, queued=0, applied=0, latencyGate=not-run, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run, handoffToSpendableSeconds= |
 | External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence plus authenticated tester faucet/send gateway smoke. | blocked | externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, publicTesterGatewayReady=True, faucetRoute=True, packetSmoke=True, testerFaucet=True, capRejected=True, externalSharingReady=False, packet=blocked, packetShareable=False |
@@ -70,6 +71,7 @@ This file records deployment gates, commands, and env names only. It must not co
 - npm run flowchain:backup:restore:validate
 - npm run flowchain:backup:install:validate
 - npm run flowchain:backup:install:windows -- -Action Plan
+- npm run flowchain:backup:owner-path:dry-run
 - npm run flowchain:backup:create
 - npm run flowchain:backup:restore:verify
 - npm run flowchain:backup:check

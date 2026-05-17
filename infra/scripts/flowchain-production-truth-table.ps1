@@ -196,6 +196,29 @@ $definitions = @(
         )
     },
     [ordered]@{
+        id = "backup-owner-path-dry-run"
+        requirement = "Backup owner-path dry run injects an ignored local backup path into the production backup readiness gate and proves snapshot plus restore evidence without using the owner's real directory."
+        path = "docs/agent-runs/live-product-infra-rpc/backup-owner-path-dry-run-report.json"
+        command = "npm run flowchain:backup:owner-path:dry-run"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "childReadinessCommandPassed",
+            "readinessStatusPassed",
+            "snapshotProofPassed",
+            "restoreProofPassed",
+            "writeVerified",
+            "latestPointerVerified",
+            "latestPointerWrittenAtomically",
+            "restoreLiveStateProtected",
+            "restoreDidNotMutateLiveState",
+            "ownerBackupEnvRestored",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+    },
+    [ordered]@{
         id = "bridge-live-readiness"
         requirement = "Base 8453 live bridge pilot has required owner inputs, caps, confirmations, and operator acknowledgement."
         path = "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"

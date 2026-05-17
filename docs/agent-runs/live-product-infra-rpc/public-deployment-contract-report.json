@@ -1,16 +1,16 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-17T20:11:39.3801580Z",
+    "generatedAt":  "2026-05-17T20:25:59.5769127Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
     "packetExecutableSmokeValidated":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
-                       "passed":  20,
+                       "passed":  21,
                        "blocked":  6,
                        "failed":  0,
-                       "total":  26
+                       "total":  27
                    },
     "items":  [
                   {
@@ -39,6 +39,7 @@
                                        "npm run flowchain:tester:gateway:e2e",
                                        "npm run flowchain:public-rpc:check -- -AllowBlocked",
                                        "npm run flowchain:backup:restore:validate",
+                                       "npm run flowchain:backup:owner-path:dry-run",
                                        "npm run flowchain:backup:install:validate",
                                        "npm run flowchain:backup:check -- -AllowBlocked",
                                        "npm run flowchain:bridge:live:check -- -AllowBlocked",
@@ -288,6 +289,18 @@
                                    ]
                   },
                   {
+                      "id":  "state-backup-owner-path-dry-run",
+                      "requirement":  "Backup readiness has an owner-path dry run that injects an ignored local backup path into the production backup gate and proves snapshot plus restore evidence without using the owner\u0027s real directory.",
+                      "status":  "passed",
+                      "evidence":  "dryRun=passed, failedChecks=0, readiness=passed, snapshotProof=True, restoreProof=True",
+                      "commands":  [
+                                       "npm run flowchain:backup:owner-path:dry-run"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "state-backup-schedule-automation",
                       "requirement":  "The owner host has a no-secret Windows install, status, and uninstall path for recurring manifest-backed state backups that fail closed without the owner backup path.",
                       "status":  "passed",
@@ -307,10 +320,11 @@
                       "id":  "state-backup",
                       "requirement":  "The public deployment must prove the configured state backup directory can create a manifest-backed snapshot and restore it in rehearsal.",
                       "status":  "blocked",
-                      "evidence":  "backupStatus=blocked, snapshotProof=not-run, restoreProof=not-run",
+                      "evidence":  "backupStatus=blocked, snapshotProof=not-run, restoreProof=not-run, ownerPathDryRun=passed",
                       "commands":  [
                                        "npm run flowchain:backup:create",
                                        "npm run flowchain:backup:restore:verify",
+                                       "npm run flowchain:backup:owner-path:dry-run",
                                        "npm run flowchain:backup:check"
                                    ],
                       "blockers":  [
@@ -511,6 +525,7 @@
                         "publicTesterGateway":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json",
                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
                         "backupRestoreValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-report.json",
+                        "backupOwnerPathDryRun":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-owner-path-dry-run-report.json",
                         "backupInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-install-validation-report.json",
                         "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
                         "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
@@ -545,6 +560,7 @@
                                                  "npm run flowchain:backup:restore:validate",
                                                  "npm run flowchain:backup:install:validate",
                                                  "npm run flowchain:backup:install:windows -- -Action Plan",
+                                                 "npm run flowchain:backup:owner-path:dry-run",
                                                  "npm run flowchain:backup:create",
                                                  "npm run flowchain:backup:restore:verify",
                                                  "npm run flowchain:backup:check",

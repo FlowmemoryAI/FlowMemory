@@ -410,6 +410,7 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Public launch blocked");
     expect(html).toContain("Public RPC edge");
     expect(html).toContain("State backup proof");
+    expect(html).toContain("Backup dry run");
     expect(html).toContain("Bridge relayer queue");
     expect(html).toContain("External tester packet");
     expect(html).toContain("FLOWCHAIN_RPC_PUBLIC_URL");

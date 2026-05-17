@@ -71,6 +71,7 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
   const finalizedHeight = factValue(liveReadinessSummary, "finalized height", "not recorded");
   const publicRpcGate = liveReadinessGates.find((record) => record.id === "public-rpc-edge");
   const backupGate = liveReadinessGates.find((record) => record.id === "state-backup");
+  const backupDryRunGate = liveReadinessGates.find((record) => record.id === "state-backup-owner-path-dry-run");
   const bridgeRelayerGate = liveReadinessGates.find((record) => record.id === "base8453-bridge-relayer-queue");
   const testerPacketGate = liveReadinessGates.find((record) => record.id === "external-tester-sharing");
   const pilotRecords = workbench.sections.realValuePilot;
@@ -231,6 +232,7 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
   }> = [
     { label: "Public RPC", record: publicRpcGate, Icon: Globe2 },
     { label: "Backup proof", record: backupGate, Icon: HardDrive },
+    { label: "Backup dry run", record: backupDryRunGate, Icon: ListChecks },
     { label: "Bridge relayer", record: bridgeRelayerGate, Icon: ShieldAlert },
     { label: "Tester packet", record: testerPacketGate, Icon: KeyRound },
   ];

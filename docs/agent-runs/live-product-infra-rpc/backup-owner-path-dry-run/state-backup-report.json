@@ -1,0 +1,43 @@
+{
+    "schema":  "flowchain.state_backup_report.v1",
+    "generatedAt":  "2026-05-17T20:21:17.2428432Z",
+    "status":  "passed",
+    "requiredEnvNames":  [
+                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                         ],
+    "missingEnvNames":  [
+
+                        ],
+    "backupRootConfigured":  true,
+    "backupRootValuePrinted":  false,
+    "snapshot":  {
+                     "attempted":  true,
+                     "created":  true,
+                     "snapshotName":  "flowchain-state-snapshot-20260517T202011627Z",
+                     "stateArtifactName":  "state.json",
+                     "manifestName":  "manifest.json",
+                     "latestManifestName":  "latest-manifest.json",
+                     "stateFileSha256":  "a254bb15d3916959b234658c17d28afe8231e6cb6d36d71dc6d2c3b968726ce2",
+                     "stateBytes":  27674493,
+                     "sourceStateReadable":  true,
+                     "snapshotReadable":  true,
+                     "manifestReadable":  true,
+                     "writeVerified":  true,
+                     "snapshotManifestSha256":  "fad8f606ac1722a72c15fb5253afa9125e759a751a1f8790560342cf19a598ea",
+                     "latestManifestSha256":  "fad8f606ac1722a72c15fb5253afa9125e759a751a1f8790560342cf19a598ea",
+                     "latestManifestReadable":  true,
+                     "latestPointerWrittenAtomically":  true,
+                     "latestPointerMatchesSnapshotManifest":  true,
+                     "attempts":  1,
+                     "latestHeight":  "59515",
+                     "latestHash":  "0xb05e0f6296353121d666df51d5d41ff07098b799167a2bf7e6460808cdeb558a",
+                     "latestRoot":  "0x2b5ca1eba51e83cb33fca2a3bbc2950f4d8e2bf258afc6d467293293cf368b7b",
+                     "finalizedHeight":  "59515"
+                 },
+    "problems":  [
+
+                 ],
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-17T20:08:28.8494978Z",
+    "generatedAt":  "2026-05-17T20:25:59.8479147Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -290,14 +290,15 @@
                   {
                       "id":  "state-backup-boundary",
                       "layer":  "Storage/recovery",
-                      "requirement":  "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, scheduled backup install proof, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation.",
+                      "requirement":  "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, owner-path dry-run proof, scheduled backup install proof, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation.",
                       "status":  "blocked",
-                      "evidence":  "backupStatus=blocked, validationStatus=passed, installValidation=passed, installFailedChecks=0, snapshotProof=not-run, restoreProof=not-run, requiredChecks=15, missingChecks=0",
+                      "evidence":  "backupStatus=blocked, validationStatus=passed, ownerPathDryRun=passed, ownerPathFailedChecks=0, installValidation=passed, installFailedChecks=0, snapshotProof=not-run, restoreProof=not-run, requiredChecks=15, missingChecks=0",
                       "files":  [
                                     "infra/scripts/flowchain-public-rpc-backup-readiness.ps1",
                                     "infra/scripts/flowchain-state-backup.ps1",
                                     "infra/scripts/flowchain-state-restore-verify.ps1",
                                     "infra/scripts/flowchain-backup-restore-validation.ps1",
+                                    "infra/scripts/flowchain-backup-owner-path-dry-run.ps1",
                                     "infra/scripts/flowchain-backup-install-windows.ps1",
                                     "infra/scripts/flowchain-backup-install-validation.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/WINDOWS_BACKUP_INSTALL.md",
@@ -307,6 +308,7 @@
                                        "npm run flowchain:backup:create",
                                        "npm run flowchain:backup:restore:verify",
                                        "npm run flowchain:backup:restore:validate",
+                                       "npm run flowchain:backup:owner-path:dry-run",
                                        "npm run flowchain:backup:install:validate",
                                        "npm run flowchain:backup:install:windows -- -Action Plan",
                                        "npm run flowchain:backup:check"
@@ -783,6 +785,7 @@
                         "publicRpcAbuseTest":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test-report.json",
                         "backupReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
                         "backupRestoreValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-report.json",
+                        "backupOwnerPathDryRun":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-owner-path-dry-run-report.json",
                         "backupInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-install-validation-report.json",
                         "bridgeLiveReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
                         "bridgeInfraReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",

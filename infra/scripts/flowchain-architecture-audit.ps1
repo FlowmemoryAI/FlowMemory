@@ -53,6 +53,7 @@ $reportPaths = [ordered]@{
     publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
     backupReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
+    backupOwnerPathDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-owner-path-dry-run-report.json"
     backupInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-install-validation-report.json"
     bridgeLiveReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfraReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
@@ -673,6 +674,22 @@ $backupValidationPassed = $backupValidationStatus -eq "passed" `
     -and ($backupValidationMissingChecks.Count -eq 0) `
     -and ((Get-ArchitectureProp -Object $backupValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $backupValidation -Name "noSecrets" -Default $false) -eq $true)
+$backupOwnerPathDryRun = $reports.backupOwnerPathDryRun
+$backupOwnerPathDryRunStatus = Get-ArchitectureStatus -Report $backupOwnerPathDryRun
+$backupOwnerPathDryRunChecks = Get-ArchitectureProp -Object $backupOwnerPathDryRun -Name "checks"
+$backupOwnerPathDryRunFailedChecks = @((Get-ArchitectureProp -Object $backupOwnerPathDryRun -Name "failedChecks" -Default @()))
+$backupOwnerPathDryRunReady = ($backupOwnerPathDryRunStatus -eq "passed") `
+    -and ($backupOwnerPathDryRunFailedChecks.Count -eq 0) `
+    -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "readinessStatusPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "snapshotProofPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "restoreProofPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "restoreLiveStateProtected" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "restoreDidNotMutateLiveState" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "ownerBackupEnvRestored" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRun -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRun -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRun -Name "broadcasts" -Default $true) -eq $false) `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:backup:owner-path:dry-run")
 $backupDetails = Get-ArchitectureProp -Object $reports.backupReadiness -Name "backup"
 $backupSnapshotProof = Get-ArchitectureProp -Object $backupDetails -Name "snapshotProofStatus" -Default "not-run"
 $backupRestoreProof = Get-ArchitectureProp -Object $backupDetails -Name "restoreProofStatus" -Default "not-run"
@@ -697,17 +714,18 @@ $backupFiles = @(
     "infra/scripts/flowchain-state-backup.ps1",
     "infra/scripts/flowchain-state-restore-verify.ps1",
     "infra/scripts/flowchain-backup-restore-validation.ps1",
+    "infra/scripts/flowchain-backup-owner-path-dry-run.ps1",
     "infra/scripts/flowchain-backup-install-windows.ps1",
     "infra/scripts/flowchain-backup-install-validation.ps1",
     "docs/agent-runs/live-product-infra-rpc/WINDOWS_BACKUP_INSTALL.md",
     "docs/agent-runs/live-product-infra-rpc/BACKUP_INSTALL_VALIDATION.md"
 )
 Add-ArchitectureItem -Items $items -Id "state-backup-boundary" -Layer "Storage/recovery" `
-    -Requirement "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, scheduled backup install proof, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation." `
-    -Status $(if ($backupStatus -eq "passed" -and $backupValidationPassed -and $backupInstallReady) { "passed" } elseif ($backupStatus -eq "blocked" -and $backupValidationPassed -and $backupInstallReady) { "blocked" } else { "failed" }) `
-    -Evidence "backupStatus=$backupStatus, validationStatus=$backupValidationStatus, installValidation=$backupInstallValidationStatus, installFailedChecks=$($backupInstallFailedChecks.Count), snapshotProof=$backupSnapshotProof, restoreProof=$backupRestoreProof, requiredChecks=$($backupValidationRequiredChecks.Count), missingChecks=$($backupValidationMissingChecks.Count)" `
+    -Requirement "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, owner-path dry-run proof, scheduled backup install proof, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation." `
+    -Status $(if ($backupStatus -eq "passed" -and $backupValidationPassed -and $backupOwnerPathDryRunReady -and $backupInstallReady) { "passed" } elseif ($backupStatus -eq "blocked" -and $backupValidationPassed -and $backupOwnerPathDryRunReady -and $backupInstallReady) { "blocked" } else { "failed" }) `
+    -Evidence "backupStatus=$backupStatus, validationStatus=$backupValidationStatus, ownerPathDryRun=$backupOwnerPathDryRunStatus, ownerPathFailedChecks=$($backupOwnerPathDryRunFailedChecks.Count), installValidation=$backupInstallValidationStatus, installFailedChecks=$($backupInstallFailedChecks.Count), snapshotProof=$backupSnapshotProof, restoreProof=$backupRestoreProof, requiredChecks=$($backupValidationRequiredChecks.Count), missingChecks=$($backupValidationMissingChecks.Count)" `
     -Files $backupFiles `
-    -Commands @("npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify", "npm run flowchain:backup:restore:validate", "npm run flowchain:backup:install:validate", "npm run flowchain:backup:install:windows -- -Action Plan", "npm run flowchain:backup:check") `
+    -Commands @("npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify", "npm run flowchain:backup:restore:validate", "npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:install:validate", "npm run flowchain:backup:install:windows -- -Action Plan", "npm run flowchain:backup:check") `
     -Blockers @("FLOWCHAIN_RPC_STATE_BACKUP_PATH")
 
 $deploymentContract = $reports.publicDeploymentContract

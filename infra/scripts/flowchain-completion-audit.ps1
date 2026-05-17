@@ -49,6 +49,7 @@ $paths = [ordered]@{
     publicDeploymentContract = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     architectureAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"
     backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
+    backupOwnerPathDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-owner-path-dry-run-report.json"
     liveWallet = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json"
     testerNetwork = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
     publicRpc = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
@@ -334,6 +335,9 @@ $publicTesterGatewayExitCode = $publicTesterGatewayResult.exitCode
 $backupRestoreValidationResult = Invoke-AuditChild -Path $paths.backupRestoreValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-restore-validation.ps1"))
 $backupRestoreValidationOutput = @($backupRestoreValidationResult.output)
 $backupRestoreValidationExitCode = $backupRestoreValidationResult.exitCode
+$backupOwnerPathDryRunResult = Invoke-AuditChild -Path $paths.backupOwnerPathDryRun -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-owner-path-dry-run.ps1"))
+$backupOwnerPathDryRunOutput = @($backupOwnerPathDryRunResult.output)
+$backupOwnerPathDryRunExitCode = $backupOwnerPathDryRunResult.exitCode
 $ownerInputsResult = Invoke-AuditChild -Path $paths.ownerInputs -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-inputs.ps1"), "-AllowBlocked")
 $ownerInputsOutput = @($ownerInputsResult.output)
 $ownerInputsExitCode = $ownerInputsResult.exitCode
@@ -706,6 +710,22 @@ $backupRestoreValidationPassed = $backupRestoreValidationExitCode -eq 0 `
     -and $backupRestoreValidationMissingChecks.Count -eq 0 `
     -and ((Get-AuditProp -Object $backupRestoreValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $backupRestoreValidation -Name "noSecrets" -Default $false) -eq $true)
+$backupOwnerPathDryRun = $reports.backupOwnerPathDryRun
+$backupOwnerPathDryRunStatus = Get-ReportStatus -Report $backupOwnerPathDryRun
+$backupOwnerPathDryRunChecks = Get-AuditProp -Object $backupOwnerPathDryRun -Name "checks"
+$backupOwnerPathDryRunFailedChecks = @((Get-AuditProp -Object $backupOwnerPathDryRun -Name "failedChecks" -Default @()))
+$backupOwnerPathDryRunPassed = $backupOwnerPathDryRunExitCode -eq 0 `
+    -and $backupOwnerPathDryRunStatus -eq "passed" `
+    -and $backupOwnerPathDryRunFailedChecks.Count -eq 0 `
+    -and ((Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "readinessStatusPassed" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "snapshotProofPassed" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "restoreProofPassed" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "restoreLiveStateProtected" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "restoreDidNotMutateLiveState" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "ownerBackupEnvRestored" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $backupOwnerPathDryRun -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $backupOwnerPathDryRun -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $backupOwnerPathDryRun -Name "broadcasts" -Default $true) -eq $false)
 $externalTesterPacketStatus = Get-ReportStatus -Report $externalTesterPacket
 $externalTesterPacketShareable = Get-AuditProp -Object $externalTesterPacket -Name "packetShareable" -Default $false
 $externalTesterPacketPath = [string](Get-AuditProp -Object $externalTesterPacket -Name "packetPath" -Default $paths.externalTesterPacket)
@@ -997,6 +1017,12 @@ Add-AuditItem -Items $items -Id "backup-restore-validator-self-test" `
     -Evidence "validationStatus=$backupRestoreValidationStatus, requiredChecks=$($backupRestoreValidationRequiredChecks.Count), missingChecks=$($backupRestoreValidationMissingChecks.Count), report=$($paths.backupRestoreValidation)" `
     -Commands @("npm run flowchain:backup:restore:validate")
 
+Add-AuditItem -Items $items -Id "backup-owner-path-dry-run" `
+    -Requirement "Backup owner-path dry run injects an ignored local backup path into the production backup readiness gate and proves snapshot plus restore evidence without using the owner's real directory." `
+    -Status $(if ($backupOwnerPathDryRunPassed) { "passed" } else { "failed" }) `
+    -Evidence "dryRunStatus=$backupOwnerPathDryRunStatus, failedChecks=$($backupOwnerPathDryRunFailedChecks.Count), readiness=$(Get-AuditProp -Object $backupOwnerPathDryRun -Name "childReadinessStatus"), snapshotProof=$(Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "snapshotProofPassed"), restoreProof=$(Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "restoreProofPassed"), report=$($paths.backupOwnerPathDryRun)" `
+    -Commands @("npm run flowchain:backup:owner-path:dry-run")
+
 Add-AuditItem -Items $items -Id "external-tester-packet" `
     -Requirement "External tester handoff packet is generated, executable packet-route smoke is validated, and sharing fails closed until public gates pass." `
     -Status $(if (($externalTesterPacketStatus -eq "passed" -and $externalTesterPacketShareable -eq $true -and $externalTesterPacketExecutableSmokeValidated -eq $true) -or ($externalTesterPacketStatus -eq "blocked" -and $externalTesterPacketShareable -eq $false -and $externalTesterPacketExecutableSmokeValidated -eq $true)) { "passed" } else { "failed" }) `
@@ -1042,9 +1068,9 @@ $backupRestoreProofStatus = Get-AuditProp -Object $backupReadinessDetails -Name 
 $backupRestoreVerified = Get-AuditProp -Object $backupReadinessDetails -Name "restoreVerified" -Default $false
 Add-AuditItem -Items $items -Id "state-backup" `
     -Requirement "State backup path is configured and can create a manifest-backed snapshot that is verified through a restore rehearsal for live RPC operations." `
-    -Status $(if ($backupReadinessStatus -eq "passed" -and $backupRestoreValidationPassed) { "passed" } elseif ($backupReadinessStatus -eq "blocked" -and $backupRestoreValidationPassed) { "blocked" } else { "failed" }) `
-    -Evidence "backupStatus=$backupReadinessStatus, snapshotProof=$backupSnapshotProofStatus, restoreProof=$backupRestoreProofStatus, restoreVerified=$backupRestoreVerified, validationStatus=$backupRestoreValidationStatus, report=$($paths.backup)" `
-    -Commands @("npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify", "npm run flowchain:backup:check") `
+    -Status $(if ($backupReadinessStatus -eq "passed" -and $backupRestoreValidationPassed -and $backupOwnerPathDryRunPassed) { "passed" } elseif ($backupReadinessStatus -eq "blocked" -and $backupRestoreValidationPassed -and $backupOwnerPathDryRunPassed) { "blocked" } else { "failed" }) `
+    -Evidence "backupStatus=$backupReadinessStatus, snapshotProof=$backupSnapshotProofStatus, restoreProof=$backupRestoreProofStatus, restoreVerified=$backupRestoreVerified, validationStatus=$backupRestoreValidationStatus, ownerPathDryRun=$backupOwnerPathDryRunStatus, report=$($paths.backup)" `
+    -Commands @("npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify", "npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:check") `
     -Blockers @("FLOWCHAIN_RPC_STATE_BACKUP_PATH")
 
 Add-AuditItem -Items $items -Id "bridge-funds" `
@@ -1126,6 +1152,8 @@ $report = [ordered]@{
     publicTesterGatewayOutputRedacted = @($publicTesterGatewayOutput | ForEach-Object { "$_" })
     backupRestoreValidationExitCode = $backupRestoreValidationExitCode
     backupRestoreValidationOutputRedacted = @($backupRestoreValidationOutput | ForEach-Object { "$_" })
+    backupOwnerPathDryRunExitCode = $backupOwnerPathDryRunExitCode
+    backupOwnerPathDryRunOutputRedacted = @($backupOwnerPathDryRunOutput | ForEach-Object { "$_" })
     ownerInputsExitCode = $ownerInputsExitCode
     ownerInputsOutputRedacted = @($ownerInputsOutput | ForEach-Object { "$_" })
     ownerOnboardingExitCode = $ownerOnboardingExitCode
@@ -1201,6 +1229,7 @@ $report = [ordered]@{
         "npm run flowchain:public-rpc:abuse-test",
         "npm run flowchain:tester:gateway:e2e",
         "npm run flowchain:backup:restore:validate",
+        "npm run flowchain:backup:owner-path:dry-run",
         "npm run flowchain:backup:create",
         "npm run flowchain:backup:restore:verify",
         "npm run flowchain:backup:check",
