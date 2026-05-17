@@ -39,6 +39,7 @@ $knownOwnerInputs = @(
 $paths = [ordered]@{
     serviceStatus = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
+    serviceSupervisorValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     ownerOnboarding = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json"
     ownerSignupChecklist = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-signup-checklist-report.json"
@@ -191,6 +192,7 @@ $dependencyRefreshSteps = New-Object System.Collections.ArrayList
 $dependencyRefreshCommands = @(
     "npm run flowchain:service:status -- -AllowBlocked",
     "npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90",
+    "npm run flowchain:service:supervisor:validate",
     "npm run flowchain:ops:snapshot -- -AllowBlocked",
     "npm run flowchain:owner:onboarding",
     "npm run flowchain:owner:signup-checklist",
@@ -213,6 +215,7 @@ $dependencyRefreshCommands = @(
 if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-status" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-status.ps1"), "-AllowBlocked", "-ReportPath", $paths.serviceStatus)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-monitor" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-monitor.ps1"), "-DurationSeconds", "20", "-PollSeconds", "5", "-MaxStateAgeSeconds", "90", "-ReportPath", $paths.serviceMonitor)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-supervisor-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-supervisor-validation.ps1"), "-ReportPath", $paths.serviceSupervisorValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "ops-snapshot" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-snapshot.ps1"), "-AllowBlocked", "-NoRefresh", "-ReportPath", $paths.opsSnapshot)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-onboarding" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-onboarding.ps1"), "-ReportPath", $paths.ownerOnboarding)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-signup-checklist" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-signup-checklist.ps1"), "-ReportPath", $paths.ownerSignupChecklist)
@@ -407,6 +410,15 @@ Add-DeploymentItem -Items $items -Id "pre-share-monitoring" `
     -Status $(if (($monitorStatus -eq "passed") -and ($monitorAdvanced -eq $true) -and ($monitorSamples -ge 2)) { "passed" } else { "failed" }) `
     -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced" `
     -Commands @("npm run flowchain:service:monitor")
+
+$supervisorValidation = $reports.serviceSupervisorValidation
+$supervisorValidationStatus = Get-DeploymentStatus -Report $supervisorValidation
+$supervisorRestartAttempts = [int](Get-DeploymentProp -Object $supervisorValidation -Name "restartAttempts" -Default 0)
+Add-DeploymentItem -Items $items -Id "service-autorecovery" `
+    -Requirement "The owner service has an autorecovery supervisor and an isolated recovery drill proving control-plane restart without touching live state." `
+    -Status $(if (($supervisorValidationStatus -eq "passed") -and ($supervisorRestartAttempts -ge 1)) { "passed" } else { "failed" }) `
+    -Evidence "supervisorValidation=$supervisorValidationStatus, restartAttempts=$supervisorRestartAttempts" `
+    -Commands @("npm run flowchain:service:supervisor:validate", "npm run flowchain:service:supervisor -- -IntervalSeconds 30 -MaxRestartAttempts 3")
 
 $opsSnapshot = $reports.opsSnapshot
 $opsSnapshotStatus = Get-DeploymentStatus -Report $opsSnapshot

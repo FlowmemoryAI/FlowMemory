@@ -1,16 +1,16 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-17T07:05:37.8362631Z",
+    "generatedAt":  "2026-05-17T08:05:32.4460399Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
     "packetExecutableSmokeValidated":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
-                       "passed":  13,
+                       "passed":  14,
                        "blocked":  5,
                        "failed":  0,
-                       "total":  18
+                       "total":  19
                    },
     "items":  [
                   {
@@ -21,6 +21,7 @@
                       "commands":  [
                                        "npm run flowchain:service:status -- -AllowBlocked",
                                        "npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90",
+                                       "npm run flowchain:service:supervisor:validate",
                                        "npm run flowchain:ops:snapshot -- -AllowBlocked",
                                        "npm run flowchain:owner:onboarding",
                                        "npm run flowchain:owner:signup-checklist",
@@ -96,7 +97,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=50070, finalizedHeight=50070",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=50110, finalizedHeight=50110",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -111,6 +112,19 @@
                       "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True",
                       "commands":  [
                                        "npm run flowchain:service:monitor"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "service-autorecovery",
+                      "requirement":  "The owner service has an autorecovery supervisor and an isolated recovery drill proving control-plane restart without touching live state.",
+                      "status":  "passed",
+                      "evidence":  "supervisorValidation=passed, restartAttempts=1",
+                      "commands":  [
+                                       "npm run flowchain:service:supervisor:validate",
+                                       "npm run flowchain:service:supervisor -- -IntervalSeconds 30 -MaxRestartAttempts 3"
                                    ],
                       "blockers":  [
 
@@ -363,6 +377,7 @@
     "reportPaths":  {
                         "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
                         "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json",
+                        "serviceSupervisorValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-report.json",
                         "opsSnapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
                         "ownerOnboarding":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-onboarding-report.json",
                         "ownerSignupChecklist":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-signup-checklist-report.json",

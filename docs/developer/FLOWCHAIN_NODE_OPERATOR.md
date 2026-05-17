@@ -15,6 +15,20 @@ npm run flowchain:service:stop
 Healthy local service evidence includes a running node, running control plane,
 fresh state file writes, and advancing height.
 
+## Service Supervisor
+
+Use the repo-native supervisor on the owner host to keep the local/private L1
+service alive after process exits or stale state evidence:
+
+```powershell
+npm run flowchain:service:supervisor -- -IntervalSeconds 30 -MaxRestartAttempts 3
+npm run flowchain:service:supervisor:validate
+```
+
+The supervisor checks `flowchain:service:status`, requires live profile by
+default, restarts with `flowchain:service:restart -- -LiveProfile`, and writes
+redacted reports under `docs/agent-runs/live-product-infra-rpc/`.
+
 ## Public RPC Boundary
 
 FlowChain public RPC is repo-owned. There is no third-party FlowChain RPC

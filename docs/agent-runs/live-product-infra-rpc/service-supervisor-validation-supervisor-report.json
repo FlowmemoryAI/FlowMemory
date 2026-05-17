@@ -1,0 +1,66 @@
+{
+    "schema":  "flowchain.service_supervisor_report.v0",
+    "generatedAt":  "2026-05-17T08:04:07.7736603Z",
+    "status":  "passed",
+    "once":  true,
+    "dryRun":  false,
+    "liveProfile":  true,
+    "intervalSeconds":  1,
+    "maxRestartAttempts":  1,
+    "restartAttempts":  1,
+    "maxStateAgeSeconds":  90,
+    "statePath":  "devnet/local/service-supervisor-validation/state.json",
+    "nodeDir":  "devnet/local/service-supervisor-validation/node",
+    "servicesDir":  "devnet/local/service-supervisor-validation/services",
+    "controlPlane":  {
+                         "host":  "127.0.0.1",
+                         "port":  8797
+                     },
+    "reportPaths":  {
+                        "supervisor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-supervisor-report.json",
+                        "status":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-status-after-crash.json",
+                        "restart":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-restart-report.json",
+                        "stop":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-stop-report.json"
+                    },
+    "iterations":  [
+                       {
+                           "sampledAt":  "2026-05-17T08:03:22.7854844Z",
+                           "restartReasons":  [
+                                                  "service-status-not-passed",
+                                                  "control-plane-not-running"
+                                              ],
+                           "restartNeeded":  true,
+                           "restartPerformed":  true,
+                           "before":  {
+                                          "exitCode":  0,
+                                          "reportStatus":  "blocked",
+                                          "nodeStatus":  "running",
+                                          "controlPlaneStatus":  "stopped",
+                                          "latestHeight":  "2452",
+                                          "finalizedHeight":  "2452",
+                                          "stateFileLastWriteAgeSeconds":  1,
+                                          "liveProfile":  true,
+                                          "maxBlocks":  0
+                                      },
+                           "restart":  {
+                                           "exitCode":  0,
+                                           "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260517030328556-18388-d72f305f.stdout.log",
+                                           "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260517030328556-18388-d72f305f.stderr.log"
+                                       },
+                           "after":  {
+                                         "exitCode":  0,
+                                         "reportStatus":  "passed",
+                                         "nodeStatus":  "running",
+                                         "controlPlaneStatus":  "running",
+                                         "latestHeight":  "2464",
+                                         "finalizedHeight":  "2464",
+                                         "stateFileLastWriteAgeSeconds":  0,
+                                         "liveProfile":  true,
+                                         "maxBlocks":  0
+                                     }
+                       }
+                   ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

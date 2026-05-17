@@ -7,7 +7,9 @@ param(
     [int] $BlockMs = 1000,
     [int] $MaxBlocks = 0,
     [switch] $LiveProfile,
-    [switch] $StartBridgeRelayerLoop
+    [switch] $StartBridgeRelayerLoop,
+    [string] $ReportPath = "docs/agent-runs/live-product-infra-rpc/service-restart-report.json",
+    [string] $StopReportPath = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -16,9 +18,26 @@ Set-StrictMode -Version Latest
 . "$PSScriptRoot\flowchain-common.ps1"
 
 $repoRoot = Set-FlowChainRepoRoot
-$reportPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-restart-report.json")
+$reportPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
 
-& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "flowchain-service-stop.ps1") -StatePath $StatePath -NodeDir $NodeDir -ServicesDir $ServicesDir
+$stopArgs = @(
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    (Join-Path $PSScriptRoot "flowchain-service-stop.ps1"),
+    "-StatePath",
+    $StatePath,
+    "-NodeDir",
+    $NodeDir,
+    "-ServicesDir",
+    $ServicesDir
+)
+if (-not [string]::IsNullOrWhiteSpace($StopReportPath)) {
+    $stopArgs += @("-ReportPath", $StopReportPath)
+}
+
+& powershell @stopArgs
 if ($LASTEXITCODE -ne 0) {
     throw "FlowChain service stop failed during restart."
 }

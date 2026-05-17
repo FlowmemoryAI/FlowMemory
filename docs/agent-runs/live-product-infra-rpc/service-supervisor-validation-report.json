@@ -1,0 +1,60 @@
+{
+    "schema":  "flowchain.service_supervisor_validation_report.v0",
+    "generatedAt":  "2026-05-17T08:04:12.5195847Z",
+    "status":  "passed",
+    "statePath":  "devnet/local/service-supervisor-validation/state.json",
+    "nodeDir":  "devnet/local/service-supervisor-validation/node",
+    "servicesDir":  "devnet/local/service-supervisor-validation/services",
+    "controlPlane":  {
+                         "host":  "127.0.0.1",
+                         "port":  8797,
+                         "killedPid":  52296
+                     },
+    "before":  {
+                   "status":  "passed"
+               },
+    "afterCrash":  {
+                       "status":  "blocked"
+                   },
+    "afterRecovery":  {
+                          "status":  "passed",
+                          "nodeRunning":  true,
+                          "controlPlaneRunning":  true,
+                          "latestHeight":  "2468",
+                          "liveProfile":  true,
+                          "maxBlocks":  0
+                      },
+    "restartAttempts":  1,
+    "reportPaths":  {
+                        "validation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-report.json",
+                        "before":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-status-before.json",
+                        "afterCrash":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-status-after-crash.json",
+                        "supervisor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-supervisor-report.json",
+                        "restart":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-restart-report.json",
+                        "stop":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-stop-report.json",
+                        "after":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-status-after.json"
+                    },
+    "steps":  [
+                  {
+                      "name":  "pre-clean-stop",
+                      "exitCode":  0,
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260517030214888-51420-88db4020.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260517030214888-51420-88db4020.stderr.log"
+                  },
+                  {
+                      "name":  "start-isolated-live-service",
+                      "exitCode":  0,
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260517030217757-51420-a84d4e7c.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260517030217757-51420-a84d4e7c.stderr.log"
+                  },
+                  {
+                      "name":  "supervisor-once-recovery",
+                      "exitCode":  0,
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260517030321604-51420-d0bb76c9.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260517030321604-51420-d0bb76c9.stderr.log"
+                  }
+              ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}
