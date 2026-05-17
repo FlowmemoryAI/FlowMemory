@@ -16,6 +16,10 @@ $reportFullDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resol
 $logsDir = Join-Path $reportFullDir "logs"
 $reportPath = Join-Path $reportFullDir "flowchain-live-product-e2e-report.json"
 New-Item -ItemType Directory -Force -Path $logsDir | Out-Null
+$optionalMissingEnvNames = @(
+    "FLOWCHAIN_BASE8453_CURSOR_STATE",
+    "FLOWCHAIN_BASE8453_TO_BLOCK"
+)
 
 if ($ProductionTimeoutSeconds -lt 1) {
     throw "ProductionTimeoutSeconds must be at least 1."
@@ -230,12 +234,12 @@ $liveInfraReport = Read-FlowChainJsonIfExists -Path $liveInfraReportPath
 $missingEnv = New-Object System.Collections.ArrayList
 if ($null -ne $productionReport -and $productionReport.PSObject.Properties.Name -contains "missingEnvNamesForLiveMode") {
     foreach ($name in @($productionReport.missingEnvNamesForLiveMode)) {
-        if (-not [string]::IsNullOrWhiteSpace("$name")) { [void] $missingEnv.Add("$name") }
+        if (-not [string]::IsNullOrWhiteSpace("$name") -and $name -notin $optionalMissingEnvNames) { [void] $missingEnv.Add("$name") }
     }
 }
 if ($null -ne $liveInfraReport -and $liveInfraReport.PSObject.Properties.Name -contains "missingEnvNames") {
     foreach ($name in @($liveInfraReport.missingEnvNames)) {
-        if (-not [string]::IsNullOrWhiteSpace("$name")) { [void] $missingEnv.Add("$name") }
+        if (-not [string]::IsNullOrWhiteSpace("$name") -and $name -notin $optionalMissingEnvNames) { [void] $missingEnv.Add("$name") }
     }
 }
 

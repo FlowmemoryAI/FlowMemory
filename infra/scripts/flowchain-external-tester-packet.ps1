@@ -13,6 +13,10 @@ Set-StrictMode -Version Latest
 $repoRoot = Set-FlowChainRepoRoot
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
 $packetFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $PacketPath)
+$optionalMissingEnvNames = @(
+    "FLOWCHAIN_BASE8453_CURSOR_STATE",
+    "FLOWCHAIN_BASE8453_TO_BLOCK"
+)
 
 $readinessReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
 $testerNetworkReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
@@ -69,7 +73,9 @@ $packetSmokeChecks = Get-PacketProp -Object $testerNetwork -Name "packetSmokeChe
 $missingEnvNames = New-Object System.Collections.ArrayList
 foreach ($source in @($readiness, $ownerInputs, $completionAudit)) {
     foreach ($name in @((Get-PacketProp -Object $source -Name "missingEnvNames" -Default @()))) {
-        Add-UniquePacketName -Target $missingEnvNames -Value $name
+        if ($name -notin $optionalMissingEnvNames) {
+            Add-UniquePacketName -Target $missingEnvNames -Value $name
+        }
     }
 }
 foreach ($name in @((Get-PacketProp -Object $ownerInputs -Name "invalidEnvNames" -Default @()))) {

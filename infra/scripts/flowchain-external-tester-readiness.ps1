@@ -13,6 +13,10 @@ Set-StrictMode -Version Latest
 
 $repoRoot = Set-FlowChainRepoRoot
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
+$optionalMissingEnvNames = @(
+    "FLOWCHAIN_BASE8453_CURSOR_STATE",
+    "FLOWCHAIN_BASE8453_TO_BLOCK"
+)
 $serviceStatusReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
 $liveInfraReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-infra-check-report.json"
 $liveProductReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json"
@@ -141,10 +145,14 @@ $testerNetworkPacketSmokeValidated = Test-PacketExecutableSmokeReport -Report $t
 
 $missingEnvNames = New-Object System.Collections.ArrayList
 foreach ($name in @((Get-PropertyValue -Object $liveInfraReport -Name "missingEnvNames" -Default @()))) {
-    Add-UniqueName -Target $missingEnvNames -Value $name
+    if ($name -notin $optionalMissingEnvNames) {
+        Add-UniqueName -Target $missingEnvNames -Value $name
+    }
 }
 foreach ($name in @((Get-PropertyValue -Object $liveProductReport -Name "missingEnvNames" -Default @()))) {
-    Add-UniqueName -Target $missingEnvNames -Value $name
+    if ($name -notin $optionalMissingEnvNames) {
+        Add-UniqueName -Target $missingEnvNames -Value $name
+    }
 }
 
 $serviceReady = $serviceExitCode -eq 0 `

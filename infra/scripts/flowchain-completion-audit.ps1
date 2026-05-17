@@ -17,6 +17,10 @@ Set-StrictMode -Version Latest
 $repoRoot = Set-FlowChainRepoRoot
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
 $markdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $MarkdownPath)
+$optionalMissingEnvNames = @(
+    "FLOWCHAIN_BASE8453_CURSOR_STATE",
+    "FLOWCHAIN_BASE8453_TO_BLOCK"
+)
 
 $paths = [ordered]@{
     serviceStatus = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
@@ -317,7 +321,9 @@ foreach ($entry in $paths.GetEnumerator()) {
 $missingEnv = New-Object System.Collections.ArrayList
 foreach ($sourceName in @("liveProduct", "liveInfra", "externalTester", "ownerInputs", "ownerEnvReadiness", "externalTesterPacket", "publicRpc", "bridgeLive", "bridgeInfra")) {
     foreach ($name in @((Get-AuditProp -Object $reports[$sourceName] -Name "missingEnvNames" -Default @()))) {
-        Add-Unique -Target $missingEnv -Value $name
+        if ($name -notin $optionalMissingEnvNames) {
+            Add-Unique -Target $missingEnv -Value $name
+        }
     }
 }
 foreach ($name in @((Get-AuditProp -Object $reports.ownerInputs -Name "invalidEnvNames" -Default @()))) {

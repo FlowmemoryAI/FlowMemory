@@ -13,6 +13,10 @@ $reportFullDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resol
 $logsDir = Join-Path $reportFullDir "logs"
 $reportPath = Join-Path $reportFullDir "flowchain-production-l1-e2e-report.json"
 $summaryPath = Join-Path $reportFullDir "flowchain-production-l1-e2e-summary.md"
+$optionalMissingEnvNames = @(
+    "FLOWCHAIN_BASE8453_CURSOR_STATE",
+    "FLOWCHAIN_BASE8453_TO_BLOCK"
+)
 
 if (Test-Path -LiteralPath $reportFullDir) {
     Remove-Item -LiteralPath $reportFullDir -Recurse -Force
@@ -573,7 +577,7 @@ $report = [ordered]@{
     restartRecoveryStatus = if ($restartReport) { "passed" } else { (@($steps | Where-Object { $_.name -eq "Restart recovery" })[0]).status }
     noSecretScanStatus = (@($steps | Where-Object { $_.name -eq "No-secret scan" })[0]).status
     unsafeClaimScanStatus = (@($steps | Where-Object { $_.name -eq "Unsafe-claim scan" })[0]).status
-    missingEnvNamesForLiveMode = [object[]](Get-JsonArrayProperty -Object $bridgeLiveReport -Name "missingEnvNames")
+    missingEnvNamesForLiveMode = [object[]](@((Get-JsonArrayProperty -Object $bridgeLiveReport -Name "missingEnvNames") | Where-Object { $_ -notin $optionalMissingEnvNames }))
     missingSubsystemCommands = @($missingSubsystemCommands)
     failureBlockerDetails = @($failureBlockerDetails)
     commandList = @($commandsRun)

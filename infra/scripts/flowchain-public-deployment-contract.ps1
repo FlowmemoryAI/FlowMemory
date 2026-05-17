@@ -1,6 +1,7 @@
 param(
     [string] $ReportPath = "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json",
     [string] $MarkdownPath = "docs/agent-runs/live-product-infra-rpc/PUBLIC_DEPLOYMENT_CONTRACT.md",
+    [int] $ChildTimeoutSeconds = 1800,
     [switch] $AllowBlocked,
     [switch] $NoRefresh
 )
@@ -14,6 +15,10 @@ Set-StrictMode -Version Latest
 $repoRoot = Set-FlowChainRepoRoot
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
 $markdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $MarkdownPath)
+
+if ($ChildTimeoutSeconds -lt 1) {
+    throw "ChildTimeoutSeconds must be at least 1."
+}
 
 $knownOwnerInputs = @(
     "FLOWCHAIN_RPC_PUBLIC_URL",
@@ -146,34 +151,96 @@ function ConvertTo-DeploymentSafeOutputLine {
     return $text
 }
 
+function Stop-DeploymentProcessTree {
+    param([Parameter(Mandatory = $true)][int] $ProcessId)
+
+    $children = @()
+    try {
+        $children = @(Get-CimInstance Win32_Process -Filter "ParentProcessId=$ProcessId" -ErrorAction SilentlyContinue)
+    }
+    catch {
+        $children = @()
+    }
+
+    foreach ($child in $children) {
+        Stop-DeploymentProcessTree -ProcessId ([int] $child.ProcessId)
+    }
+
+    try {
+        Stop-Process -Id $ProcessId -Force -ErrorAction SilentlyContinue
+    }
+    catch {
+    }
+}
+
+function Read-DeploymentOutputFile {
+    param([Parameter(Mandatory = $true)][string] $Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return @()
+    }
+    return @(Get-Content -LiteralPath $Path -ErrorAction SilentlyContinue | ForEach-Object { "$_" })
+}
+
 function Invoke-DeploymentChildProcess {
     param(
         [Parameter(Mandatory = $true)][string] $Name,
         [Parameter(Mandatory = $true)][string[]] $ArgumentList
     )
 
-    $startedAt = (Get-Date).ToUniversalTime().ToString("o")
-    $previousErrorActionPreference = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
+    $startedAt = (Get-Date).ToUniversalTime()
+    $stamp = $startedAt.ToString("yyyyMMddTHHmmssfffZ")
+    $tempBase = Join-Path ([System.IO.Path]::GetTempPath()) "flowchain-public-deployment-$PID-$stamp-$([Guid]::NewGuid().ToString("N"))"
+    $stdoutPath = "$tempBase.out.log"
+    $stderrPath = "$tempBase.err.log"
+    $timedOut = $false
+    $exitCode = 1
+    $processId = $null
+    $output = @()
+
     try {
-        $output = (& powershell @ArgumentList 2>&1) | ForEach-Object { ConvertTo-DeploymentSafeOutputLine -Line $_ }
-        $exitCode = $LASTEXITCODE
-        if ($null -eq $exitCode) {
-            $exitCode = 0
+        $process = Start-Process -FilePath "powershell" `
+            -ArgumentList (Join-FlowChainProcessArguments -ArgumentList $ArgumentList) `
+            -WorkingDirectory $repoRoot `
+            -PassThru `
+            -WindowStyle Hidden `
+            -RedirectStandardOutput $stdoutPath `
+            -RedirectStandardError $stderrPath
+        $processId = $process.Id
+        if (-not $process.WaitForExit($ChildTimeoutSeconds * 1000)) {
+            $timedOut = $true
+            Stop-DeploymentProcessTree -ProcessId $process.Id
+            $exitCode = 124
+        }
+        else {
+            $process.Refresh()
+            $exitCode = [int] $process.ExitCode
         }
     }
     catch {
-        $output = @(ConvertTo-DeploymentSafeOutputLine -Line $_.Exception.Message)
+        $output = @($_.Exception.Message)
         $exitCode = 1
     }
-    finally {
-        $ErrorActionPreference = $previousErrorActionPreference
+
+    $stdout = Read-DeploymentOutputFile -Path $stdoutPath
+    $stderr = Read-DeploymentOutputFile -Path $stderrPath
+    $output = @($output + $stdout + $stderr) | ForEach-Object { ConvertTo-DeploymentSafeOutputLine -Line $_ }
+    if ($timedOut) {
+        $output = @("Timed out after $ChildTimeoutSeconds seconds; child process tree was stopped.") + $output
     }
+    $finishedAt = (Get-Date).ToUniversalTime()
+
+    Remove-Item -LiteralPath $stdoutPath -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $stderrPath -Force -ErrorAction SilentlyContinue
 
     return [ordered]@{
         name = $Name
-        startedAt = $startedAt
-        finishedAt = (Get-Date).ToUniversalTime().ToString("o")
+        startedAt = $startedAt.ToString("o")
+        finishedAt = $finishedAt.ToString("o")
+        durationSeconds = [int][Math]::Max(0, [Math]::Floor(($finishedAt - $startedAt).TotalSeconds))
+        timedOut = $timedOut
+        timeoutSeconds = $ChildTimeoutSeconds
+        processId = $processId
         exitCode = [int] $exitCode
         outputRedacted = @($output)
     }
@@ -252,10 +319,13 @@ if (-not $NoRefresh.IsPresent) {
 }
 
 $dependencyRefreshFailedSteps = @($dependencyRefreshSteps | Where-Object { [int] $_.exitCode -ne 0 })
+$dependencyRefreshTimedOutSteps = @($dependencyRefreshSteps | Where-Object { $_.timedOut -eq $true })
 $dependencyRefresh = [ordered]@{
     performed = -not $NoRefresh.IsPresent
     delegatedToCaller = $NoRefresh.IsPresent
+    childTimeoutSeconds = $ChildTimeoutSeconds
     failedStepNames = @($dependencyRefreshFailedSteps | ForEach-Object { $_.name })
+    timedOutStepNames = @($dependencyRefreshTimedOutSteps | ForEach-Object { $_.name })
     steps = @($dependencyRefreshSteps)
 }
 
@@ -283,7 +353,7 @@ $items = New-Object System.Collections.ArrayList
 Add-DeploymentItem -Items $items -Id "dependency-report-refresh" `
     -Requirement "The deployment contract evaluates reports freshly generated by this command or an explicit caller such as the completion audit." `
     -Status $(if ($dependencyRefreshFailedSteps.Count -eq 0) { "passed" } else { "failed" }) `
-    -Evidence "refreshPerformed=$($dependencyRefresh.performed), delegatedToCaller=$($dependencyRefresh.delegatedToCaller), failedSteps=$($dependencyRefreshFailedSteps.Count)" `
+    -Evidence "refreshPerformed=$($dependencyRefresh.performed), delegatedToCaller=$($dependencyRefresh.delegatedToCaller), failedSteps=$($dependencyRefreshFailedSteps.Count), timedOutSteps=$($dependencyRefreshTimedOutSteps.Count), childTimeoutSeconds=$ChildTimeoutSeconds" `
     -Commands $dependencyRefreshCommands
 
 $ownerOnboarding = $reports.ownerOnboarding
@@ -707,6 +777,19 @@ $markdownLines.Add("Packet shareable: $packetShareable")
 $markdownLines.Add("Blocked only on known external owner inputs: $blockedOnlyOnKnownOwnerInputs")
 $markdownLines.Add("")
 $markdownLines.Add("This file records deployment gates, commands, and env names only. It must not contain owner-provided values.")
+$markdownLines.Add("")
+$markdownLines.Add("## Dependency Refresh")
+$markdownLines.Add("")
+$markdownLines.Add("- Performed: $($dependencyRefresh.performed)")
+$markdownLines.Add("- Delegated to caller: $($dependencyRefresh.delegatedToCaller)")
+$markdownLines.Add("- Child timeout seconds: $ChildTimeoutSeconds")
+$markdownLines.Add("- Failed steps: $($dependencyRefreshFailedSteps.Count)")
+$markdownLines.Add("- Timed out steps: $($dependencyRefreshTimedOutSteps.Count)")
+if ($dependencyRefreshTimedOutSteps.Count -gt 0) {
+    foreach ($step in @($dependencyRefreshTimedOutSteps)) {
+        $markdownLines.Add("- Timed out: $($step.name)")
+    }
+}
 $markdownLines.Add("")
 $markdownLines.Add("## Gate Checklist")
 $markdownLines.Add("")
