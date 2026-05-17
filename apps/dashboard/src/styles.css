@@ -3779,6 +3779,106 @@ code {
   white-space: nowrap;
 }
 
+.explorer-launch-boundary {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.56fr) minmax(0, 1.44fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.explorer-launch-summary,
+.explorer-launch-grid button {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.explorer-launch-summary {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.explorer-launch-summary span,
+.explorer-launch-grid strong {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.explorer-launch-summary strong {
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-size: 1.06rem;
+}
+
+.explorer-launch-summary small,
+.explorer-launch-grid button > span:not(.explorer-launch-top) {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.explorer-launch-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.explorer-launch-grid button {
+  display: grid;
+  grid-template-rows: auto auto minmax(48px, 1fr) auto;
+  gap: 8px;
+  min-height: 150px;
+  padding: 12px;
+  text-align: left;
+}
+
+.explorer-launch-grid button.active,
+.explorer-launch-grid button:hover {
+  border-color: #9bb5aa;
+  background: #eaf3ee;
+}
+
+.explorer-launch-top {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.explorer-launch-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: var(--accent-strong);
+  border: 1px solid #b7cac1;
+  border-radius: 8px;
+  background: #e7f1ec;
+}
+
+.explorer-launch-grid button > span:not(.explorer-launch-top) {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.explorer-launch-grid code {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--ink);
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .explorer-category-strip {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -4622,6 +4722,7 @@ code {
   .workbench-record-grid,
   .explorer-command-panel,
   .explorer-settlement-trace,
+  .explorer-launch-boundary,
   .explorer-layout,
   .ops-command-panel,
   .ops-layout {
@@ -4724,6 +4825,7 @@ code {
 
   .explorer-category-strip,
   .explorer-facts,
+  .explorer-launch-grid,
   .explorer-trace-steps,
   .tester-launch-card-grid,
   .tester-launch-profile-grid {
@@ -4750,6 +4852,7 @@ code {
   .workbench-switcher,
   .explorer-category-strip,
   .explorer-facts,
+  .explorer-launch-grid,
   .explorer-trace-steps,
   .wallet-tester-links {
     grid-template-columns: 1fr;

@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-17T22:38:16.7646917Z",
+  "generatedAt": "2026-05-17T23:41:08.3041449Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -8,8 +8,8 @@
   "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
   "privateRpcUrl": "http://127.0.0.1:8787",
   "metrics": {
-    "latestHeight": "61306",
-    "finalizedHeight": "61306",
+    "latestHeight": "62010",
+    "finalizedHeight": "62010",
     "monitorHeightAdvanced": true,
     "bridgeRelayerStatus": "blocked",
     "bridgeQueuedTransactions": "0",
@@ -50,8 +50,8 @@
     "bridgeRelayerGuardrailReady": true,
     "criticalCount": "0",
     "blockedCount": "6",
-    "latestHeight": "59881",
-    "finalizedHeight": "59881",
+    "latestHeight": "61752",
+    "finalizedHeight": "61752",
     "monitorStatus": "passed",
     "monitorHeightAdvanced": true,
     "findings": [
@@ -480,7 +480,7 @@
       "label": "Private L1 origin",
       "status": "passed",
       "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
-      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=61306, finalizedHeight=61306",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=62010, finalizedHeight=62010",
       "commands": [
         "npm run flowchain:service:status"
       ],
@@ -699,7 +699,7 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T22:38:16.7646917Z"
+      "generatedAt": "2026-05-17T23:41:08.3041449Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
@@ -711,31 +711,31 @@
       "fileName": "service-status-report.json",
       "schema": "flowchain.service_status_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T22:38:03.3866138Z"
+      "generatedAt": "2026-05-17T23:36:07.9111661Z"
     },
     {
       "fileName": "service-monitor-report.json",
       "schema": "flowchain.service_monitor_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T20:49:54.6410679Z"
+      "generatedAt": "2026-05-17T23:14:53.9864221Z"
     },
     {
       "fileName": "public-rpc-deployment-bundle-report.json",
       "schema": "flowchain.public_rpc_deployment_bundle_report.v2",
       "status": "passed",
-      "generatedAt": "2026-05-17T21:59:30.3770835Z"
+      "generatedAt": "2026-05-17T23:18:39.8274658Z"
     },
     {
       "fileName": "public-rpc-deployment-automation-report.json",
       "schema": "flowchain.public_rpc_deployment_automation_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T21:59:36.4339393Z"
+      "generatedAt": "2026-05-17T23:18:42.5882507Z"
     },
     {
       "fileName": "public-rpc-readiness-report.json",
       "schema": "flowchain.public_rpc_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T21:21:24.3599349Z"
+      "generatedAt": "2026-05-17T23:22:48.7790461Z"
     },
     {
       "fileName": "backup-readiness-report.json",
@@ -789,19 +789,19 @@
       "fileName": "public-tester-gateway-e2e-report.json",
       "schema": "flowchain.public_tester_gateway_e2e_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T21:06:45.7544746Z"
+      "generatedAt": "2026-05-17T23:22:17.8914280Z"
     },
     {
       "fileName": "ops-snapshot-report.json",
       "schema": "flowchain.ops_snapshot_report.v1",
       "status": "blocked",
-      "generatedAt": "2026-05-17T20:49:55.2025767Z"
+      "generatedAt": "2026-05-17T23:18:13.0349484Z"
     },
     {
       "fileName": "ops-alert-rules-report.json",
       "schema": "flowchain.ops_alert_rules_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T20:49:55.7801224Z"
+      "generatedAt": "2026-05-17T23:18:14.5258197Z"
     },
     {
       "fileName": "incident-drill-report.json",
@@ -813,25 +813,25 @@
       "fileName": "alert-install-validation-report.json",
       "schema": "flowchain.alert_install_validation_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T22:23:53.9585802Z"
+      "generatedAt": "2026-05-17T23:18:28.2826287Z"
     },
     {
       "fileName": "ops-escalation-dry-run-report.json",
       "schema": "flowchain.ops_escalation_dry_run_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T20:49:56.6773808Z"
+      "generatedAt": "2026-05-17T23:18:30.0433317Z"
     },
     {
       "fileName": "owner-inputs-report.json",
       "schema": "flowchain.owner_inputs_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T22:05:36.0412382Z"
+      "generatedAt": "2026-05-17T23:18:35.6544558Z"
     },
     {
       "fileName": "no-secret-scan-report.json",
       "schema": "flowchain.no_secret_scan_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T22:37:03.5950224Z"
+      "generatedAt": "2026-05-17T23:40:39.1565898Z"
     }
   ],
   "envValuesPrinted": false,

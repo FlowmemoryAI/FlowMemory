@@ -481,6 +481,11 @@ describe("dashboard fixture", () => {
 
     expect(html).toContain("Flowchain explorer");
     expect(html).toContain("Create, fund, send, inspect");
+    expect(html).toContain("Launch boundary");
+    expect(html).toContain("Private chain live");
+    expect(html).toContain("Public RPC");
+    expect(html).toContain("Tester sharing");
+    expect(html).toContain("Open readiness");
     expect(html).toContain("Open tester tools");
     expect(html).toContain("Funding proofs");
     expect(html).toContain("Blocks");

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRightLeft, Boxes, CircleDollarSign, ListFilter, Search, WalletCards } from "lucide-react";
+import { ArrowRightLeft, Boxes, CircleDollarSign, HardDrive, KeyRound, ListFilter, Search, Server, ShieldCheck, WalletCards } from "lucide-react";
 import { EmptyState } from "../components/EmptyState";
 import { HashValue } from "../components/HashValue";
 import { ProvenanceLine } from "../components/ProvenanceLine";
@@ -39,15 +39,21 @@ const CATEGORY_OPTIONS: Array<{ id: ExplorerCategory; label: string }> = [
 const WORKBENCH_EXPLORER_SECTIONS: Array<{ key: WorkbenchSectionKey; category: ExplorerRow["category"] }> = [
   { key: "transactions", category: "transactions" },
   { key: "explorerRecords", category: "records" },
+  { key: "liveReadiness", category: "records" },
   { key: "walletMetadata", category: "wallets" },
   { key: "balances", category: "wallets" },
   { key: "faucetEvents", category: "faucet" },
+  { key: "realValuePilot", category: "bridge" },
   { key: "bridgeDeposits", category: "bridge" },
   { key: "bridgeCredits", category: "bridge" },
   { key: "bridgeWithdrawals", category: "bridge" },
 ];
 
-function factValue(record: WorkbenchRecord, labels: string[], fallback = ""): string {
+function factValue(record: WorkbenchRecord | undefined, labels: string[], fallback = ""): string {
+  if (!record) {
+    return fallback;
+  }
+
   for (const label of labels) {
     const fact = record.facts.find((candidate) => candidate.label.toLowerCase() === label.toLowerCase());
     if (fact?.value) {
@@ -150,6 +156,16 @@ export function ExplorerView({ data, workbench }: { data: DashboardData; workben
   const recentWallet = rows.find((row) => row.category === "wallets");
   const recentFunding = rows.find((row) => row.category === "faucet" || row.category === "bridge");
   const recentTransfer = rows.find((row) => row.category === "transactions");
+  const liveReadinessRecords = workbench.sections.liveReadiness;
+  const liveReadinessSummary = liveReadinessRecords.find((record) => record.kind === "Public launch readiness") ?? liveReadinessRecords[0];
+  const liveReadinessGates = liveReadinessRecords.filter((record) => record.kind === "Launch gate");
+  const publicRpcGate = liveReadinessGates.find((record) => record.id === "public-rpc-edge");
+  const backupGate = liveReadinessGates.find((record) => record.id === "state-backup") ?? liveReadinessGates.find((record) => record.id === "state-backup-owner-path-dry-run");
+  const bridgeRelayerGate = liveReadinessGates.find((record) => record.id === "base8453-bridge-relayer-queue");
+  const testerPacketGate = liveReadinessGates.find((record) => record.id === "external-tester-sharing");
+  const launchReady = factValue(liveReadinessSummary, ["deployment ready"], "false");
+  const packetShareable = factValue(liveReadinessSummary, ["packet shareable"], "false");
+  const sourceStatus: DashboardStatus = workbench.source === "control-plane" ? "verified" : "stale";
   const testerTraceSteps: Array<{
     id: string;
     label: string;
@@ -194,6 +210,61 @@ export function ExplorerView({ data, workbench }: { data: DashboardData; workben
       status: rows.length > 0 ? "observed" : "pending",
       targetCategory: "all",
       Icon: Search,
+    },
+  ];
+  const launchBoundaryItems: Array<{
+    id: string;
+    label: string;
+    detail: string;
+    value: string;
+    status: DashboardStatus;
+    targetCategory: ExplorerCategory;
+    Icon: typeof WalletCards;
+  }> = [
+    {
+      id: "private-chain",
+      label: "Private chain",
+      detail: workbench.source === "control-plane" ? "Local control-plane connected" : "Fixture fallback active",
+      value: `height ${latestBlock}`,
+      status: sourceStatus,
+      targetCategory: "blocks",
+      Icon: ShieldCheck,
+    },
+    {
+      id: "public-rpc",
+      label: "Public RPC",
+      detail: publicRpcGate?.title ?? "Public RPC gate not loaded",
+      value: factValue(publicRpcGate, ["gate status"], publicRpcGate?.status ?? "pending"),
+      status: publicRpcGate?.status ?? "pending",
+      targetCategory: "records",
+      Icon: Server,
+    },
+    {
+      id: "backup",
+      label: "Backup",
+      detail: backupGate?.title ?? "State backup gate not loaded",
+      value: factValue(backupGate, ["gate status"], backupGate?.status ?? "pending"),
+      status: backupGate?.status ?? "pending",
+      targetCategory: "records",
+      Icon: HardDrive,
+    },
+    {
+      id: "tester-sharing",
+      label: "Tester sharing",
+      detail: testerPacketGate?.title ?? "Tester packet gate not loaded",
+      value: `packet ${packetShareable}`,
+      status: testerPacketGate?.status ?? "pending",
+      targetCategory: "records",
+      Icon: KeyRound,
+    },
+    {
+      id: "bridge-relayer",
+      label: "Bridge relayer",
+      detail: bridgeRelayerGate?.title ?? "Bridge relayer gate not loaded",
+      value: factValue(bridgeRelayerGate, ["gate status"], bridgeRelayerGate?.status ?? "pending"),
+      status: bridgeRelayerGate?.status ?? "pending",
+      targetCategory: "bridge",
+      Icon: ArrowRightLeft,
     },
   ];
 
@@ -275,6 +346,35 @@ export function ExplorerView({ data, workbench }: { data: DashboardData; workben
         </div>
       </section>
 
+      <section className="explorer-launch-boundary" aria-label="Public launch boundary">
+        <div className="explorer-launch-summary">
+          <span>Launch boundary</span>
+          <strong>{launchReady === "true" ? "Public launch ready" : "Private chain live"}</strong>
+          <small>{liveReadinessSummary?.summary ?? "Launch readiness evidence is not loaded yet."}</small>
+        </div>
+        <div className="explorer-launch-grid">
+          {launchBoundaryItems.map(({ Icon, detail, id, label, status, targetCategory, value }) => (
+            <button
+              key={id}
+              type="button"
+              className={category === targetCategory ? "active" : ""}
+              aria-pressed={category === targetCategory}
+              onClick={() => setCategory(targetCategory)}
+            >
+              <span className="explorer-launch-top">
+                <span className="explorer-launch-icon" aria-hidden="true">
+                  <Icon size={16} />
+                </span>
+                <StatusBadge status={status} compact />
+              </span>
+              <strong>{label}</strong>
+              <span>{detail}</span>
+              <code>{value}</code>
+            </button>
+          ))}
+        </div>
+      </section>
+
       <section className="explorer-category-strip" aria-label="Explorer categories">
         {CATEGORY_OPTIONS.map((option) => (
           <button key={option.id} className={category === option.id ? "active" : ""} type="button" onClick={() => setCategory(option.id)}>
@@ -335,6 +435,12 @@ export function ExplorerView({ data, workbench }: { data: DashboardData; workben
             <strong>Create, fund, send, inspect</strong>
             <small>Use the wallet tester panel, then return here to inspect records.</small>
             <Link to="/wallet?panel=tester">Open tester tools</Link>
+          </div>
+          <div>
+            <span>Launch gates</span>
+            <strong>{liveReadinessSummary?.title ?? "Public launch status"}</strong>
+            <small>Public RPC, backup, bridge relayer, and tester sharing evidence.</small>
+            <Link to="/">Open readiness</Link>
           </div>
           <div>
             <span>Bridge path</span>

@@ -1,17 +1,17 @@
 ﻿# FlowChain Completion Audit
 
-Generated: 2026-05-17T23:31:04.0596890Z
+Generated: 2026-05-17T23:42:30.8982833Z
 Status: blocked
 Completion ready: False
 Refresh mode: no-refresh-existing-reports
-Latest observed height: 61752
+Latest observed height: 62010
 
 ## Prompt-To-Artifact Checklist
 
 | Requirement | Status | Evidence | Commands |
 | --- | --- | --- | --- |
 | Chain service is running in live profile and command lines match this worktree. | passed | service-status status=passed, node=running, controlPlane=running, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
-| Chain is producing/finalizing blocks and state is fresh. | passed | latestHeight=61752, stateFileLastWriteAgeSeconds=1, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
+| Chain is producing/finalizing blocks and state is fresh. | passed | latestHeight=62010, stateFileLastWriteAgeSeconds=4, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
 | Live service monitor observes running services and advancing block height over a sampling window. | passed | monitorStatus=passed, samples=2, heightAdvanced=True, heights=61745->61752, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-monitor-report.json | npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90 |
 | People can create wallets through the RPC service without receiving secret material. | passed | testerWalletCreates=4, secretMaterialReturned=false, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\live-service-tester-network-e2e-report.json | npm run flowchain:wallet:live-tester:e2e |
 | Wallet-to-wallet transfers sent through the running service settle on produced blocks. | passed | single-transfer blocks 58268->58281, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\live-service-wallet-e2e-report.json | npm run flowchain:wallet:live-service:e2e |
