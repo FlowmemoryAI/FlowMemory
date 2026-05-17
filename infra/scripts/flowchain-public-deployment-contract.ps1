@@ -115,6 +115,20 @@ function Add-UniqueDeploymentName {
     }
 }
 
+function Test-DeploymentRoutePresent {
+    param(
+        [AllowNull()][object] $Routes,
+        [Parameter(Mandatory = $true)][string] $Route
+    )
+
+    foreach ($candidate in @($Routes)) {
+        if ("$candidate" -eq $Route) {
+            return $true
+        }
+    }
+    return $false
+}
+
 function Add-DeploymentItem {
     param(
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][System.Collections.ArrayList] $Items,
@@ -745,13 +759,18 @@ $externalPacketStatus = Get-DeploymentStatus -Report $externalPacket
 $externalSharingReady = Get-DeploymentProp -Object $externalTester -Name "externalSharingReady" -Default $false
 $externalTesterChecks = Get-DeploymentProp -Object $externalTester -Name "checks"
 $externalTesterNetworkFresh = Get-DeploymentProp -Object $externalTesterChecks -Name "testerWalletNetworkFresh" -Default $false
+$externalTesterPublicGatewayReady = Get-DeploymentProp -Object $externalTesterChecks -Name "publicTesterGatewayReady" -Default $false
+$externalTesterFaucetRouteValidated = Get-DeploymentProp -Object $externalTesterChecks -Name "publicTesterGatewayFaucetRouteValidated" -Default $false
 $packetExecutableSmokeValidated = Get-DeploymentProp -Object $externalPacket -Name "packetExecutableSmokeValidated" -Default $false
+$packetSmokeChecks = Get-DeploymentProp -Object $externalPacket -Name "packetSmokeChecks"
+$packetTesterFaucet = Get-DeploymentProp -Object $packetSmokeChecks -Name "testerFaucet" -Default $false
+$packetTesterCapRejected = Get-DeploymentProp -Object $packetSmokeChecks -Name "testerCapRejected" -Default $false
 $localTesterRehearsalReady = Get-DeploymentProp -Object $externalTester -Name "localTesterRehearsalReady" -Default $false
 $packetShareable = Get-DeploymentProp -Object $externalPacket -Name "packetShareable" -Default $false
 Add-DeploymentItem -Items $items -Id "external-tester-sharing" `
-    -Requirement "External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence plus executable packet-route smoke." `
-    -Status $(if (($externalTesterStatus -eq "passed") -and ($externalPacketStatus -eq "passed") -and ($externalSharingReady -eq $true) -and ($packetShareable -eq $true) -and ($externalTesterNetworkFresh -eq $true) -and ($packetExecutableSmokeValidated -eq $true)) { "passed" } elseif (($externalTesterStatus -eq "blocked") -and ($externalPacketStatus -eq "blocked") -and ($externalSharingReady -eq $false) -and ($packetShareable -eq $false) -and ($externalTesterNetworkFresh -eq $true) -and ($packetExecutableSmokeValidated -eq $true)) { "blocked" } else { "failed" }) `
-    -Evidence "externalTester=$externalTesterStatus, localTesterRehearsalReady=$localTesterRehearsalReady, testerNetworkFresh=$externalTesterNetworkFresh, packetSmoke=$packetExecutableSmokeValidated, externalSharingReady=$externalSharingReady, packet=$externalPacketStatus, packetShareable=$packetShareable" `
+    -Requirement "External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence plus authenticated tester faucet/send gateway smoke." `
+    -Status $(if (($externalTesterStatus -eq "passed") -and ($externalPacketStatus -eq "passed") -and ($externalSharingReady -eq $true) -and ($packetShareable -eq $true) -and ($externalTesterNetworkFresh -eq $true) -and ($externalTesterPublicGatewayReady -eq $true) -and ($externalTesterFaucetRouteValidated -eq $true) -and ($packetExecutableSmokeValidated -eq $true) -and ($packetTesterFaucet -eq $true) -and ($packetTesterCapRejected -eq $true)) { "passed" } elseif (($externalTesterStatus -eq "blocked") -and ($externalPacketStatus -eq "blocked") -and ($externalSharingReady -eq $false) -and ($packetShareable -eq $false) -and ($externalTesterNetworkFresh -eq $true) -and ($externalTesterPublicGatewayReady -eq $true) -and ($externalTesterFaucetRouteValidated -eq $true) -and ($packetExecutableSmokeValidated -eq $true) -and ($packetTesterFaucet -eq $true) -and ($packetTesterCapRejected -eq $true)) { "blocked" } else { "failed" }) `
+    -Evidence "externalTester=$externalTesterStatus, localTesterRehearsalReady=$localTesterRehearsalReady, testerNetworkFresh=$externalTesterNetworkFresh, publicTesterGatewayReady=$externalTesterPublicGatewayReady, faucetRoute=$externalTesterFaucetRouteValidated, packetSmoke=$packetExecutableSmokeValidated, testerFaucet=$packetTesterFaucet, capRejected=$packetTesterCapRejected, externalSharingReady=$externalSharingReady, packet=$externalPacketStatus, packetShareable=$packetShareable" `
     -Commands @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet") `
     -Blockers @($ownerMissingInputs)
 
@@ -759,13 +778,16 @@ $publicTesterGateway = $reports.publicTesterGateway
 $publicTesterGatewayStatus = Get-DeploymentStatus -Report $publicTesterGateway
 $publicTesterGatewayReady = ($publicTesterGatewayStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $publicTesterGateway -Name "testerGatewayConfigured" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicTesterGateway -Name "testerFaucetSchema" -Default "") -eq "flowmemory.control_plane.tester_faucet_result.v0") `
     -and ((Get-DeploymentProp -Object $publicTesterGateway -Name "transferAccepted" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $publicTesterGateway -Name "capRejected" -Default $false) -eq $true) `
-    -and ((Get-DeploymentProp -Object $publicTesterGateway -Name "noSecrets" -Default $false) -eq $true)
+    -and ((Get-DeploymentProp -Object $publicTesterGateway -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $publicTesterGateway -Name "noSecrets" -Default $false) -eq $true) `
+    -and (Test-DeploymentRoutePresent -Routes (Get-DeploymentProp -Object $publicTesterGateway -Name "routes" -Default @()) -Route "/tester/faucet")
 Add-DeploymentItem -Items $items -Id "public-tester-write-gateway" `
-    -Requirement "The public deployment has a local production-shaped proof for authenticated tester wallet creation, capped tester sends, balance settlement, and over-cap rejection." `
+    -Requirement "The public deployment has a local production-shaped proof for authenticated tester wallet creation, capped tester faucet funding, capped tester sends, balance settlement, and over-cap rejection." `
     -Status $(if ($publicTesterGatewayReady) { "passed" } else { "failed" }) `
-    -Evidence "gatewayStatus=$publicTesterGatewayStatus, transferAccepted=$(Get-DeploymentProp -Object $publicTesterGateway -Name "transferAccepted"), capRejected=$(Get-DeploymentProp -Object $publicTesterGateway -Name "capRejected")" `
+    -Evidence "gatewayStatus=$publicTesterGatewayStatus, testerFaucetSchema=$(Get-DeploymentProp -Object $publicTesterGateway -Name "testerFaucetSchema"), transferAccepted=$(Get-DeploymentProp -Object $publicTesterGateway -Name "transferAccepted"), capRejected=$(Get-DeploymentProp -Object $publicTesterGateway -Name "capRejected")" `
     -Commands @("npm run flowchain:tester:gateway:e2e")
 
 $requiredRollbackScripts = @(

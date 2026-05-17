@@ -1,7 +1,9 @@
 param(
     [string] $ReportPath = "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json",
     [int] $MaxTesterReportAgeMinutes = 30,
+    [int] $MaxPublicTesterGatewayReportAgeMinutes = 30,
     [switch] $NoRefreshTesterNetwork,
+    [switch] $NoRefreshPublicTesterGateway,
     [switch] $AllowBlocked
 )
 
@@ -21,6 +23,7 @@ $serviceStatusReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs
 $liveInfraReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-infra-check-report.json"
 $liveProductReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json"
 $testerNetworkReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
+$publicTesterGatewayReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
 
 function ConvertTo-ExternalTesterSafeLine {
     param([AllowNull()][object] $Line)
@@ -92,6 +95,38 @@ function Test-PacketExecutableSmokeReport {
     return $true
 }
 
+function Test-RoutePresent {
+    param(
+        [AllowNull()][object] $Routes,
+        [Parameter(Mandatory = $true)][string] $Route
+    )
+
+    foreach ($candidate in @($Routes)) {
+        if ("$candidate" -eq $Route) {
+            return $true
+        }
+    }
+    return $false
+}
+
+function Test-PublicTesterGatewayReport {
+    param([AllowNull()][object] $Report)
+
+    if ($null -eq $Report) {
+        return $false
+    }
+    return (Get-PropertyValue -Object $Report -Name "status") -eq "passed" `
+        -and (Get-PropertyValue -Object $Report -Name "testerGatewayConfigured" -Default $false) -eq $true `
+        -and (Get-PropertyValue -Object $Report -Name "testerWriteTokenHashConfigured" -Default $false) -eq $true `
+        -and (Get-PropertyValue -Object $Report -Name "testerFaucetSchema") -eq "flowmemory.control_plane.tester_faucet_result.v0" `
+        -and (Get-PropertyValue -Object $Report -Name "walletSendSchema") -eq "flowmemory.control_plane.tester_wallet_send_result.v0" `
+        -and (Get-PropertyValue -Object $Report -Name "transferAccepted" -Default $false) -eq $true `
+        -and (Get-PropertyValue -Object $Report -Name "capRejected" -Default $false) -eq $true `
+        -and (Get-PropertyValue -Object $Report -Name "noSecrets" -Default $false) -eq $true `
+        -and (Get-PropertyValue -Object $Report -Name "envValuesPrinted" -Default $true) -eq $false `
+        -and (Test-RoutePresent -Routes (Get-PropertyValue -Object $Report -Name "routes" -Default @()) -Route "/tester/faucet")
+}
+
 function Invoke-ExternalTesterChild {
     param(
         [Parameter(Mandatory = $true)][string[]] $ArgumentList
@@ -126,8 +161,16 @@ $liveInfraRefresh = Invoke-ExternalTesterChild -ArgumentList @("-NoProfile", "-E
 $testerNetworkReportBefore = Read-FlowChainJsonIfExists -Path $testerNetworkReportPath
 $testerNetworkFreshBefore = Test-ReportFresh -Report $testerNetworkReportBefore -MaxAgeMinutes $MaxTesterReportAgeMinutes
 $testerNetworkPacketSmokeBefore = Test-PacketExecutableSmokeReport -Report $testerNetworkReportBefore
+$publicTesterGatewayReportBefore = Read-FlowChainJsonIfExists -Path $publicTesterGatewayReportPath
+$publicTesterGatewayFreshBefore = Test-ReportFresh -Report $publicTesterGatewayReportBefore -MaxAgeMinutes $MaxPublicTesterGatewayReportAgeMinutes
+$publicTesterGatewayReadyBefore = Test-PublicTesterGatewayReport -Report $publicTesterGatewayReportBefore
 $testerNetworkRefreshPerformed = $false
 $testerNetworkRefresh = [ordered]@{
+    exitCode = $null
+    outputRedactedTail = @()
+}
+$publicTesterGatewayRefreshPerformed = $false
+$publicTesterGatewayRefresh = [ordered]@{
     exitCode = $null
     outputRedactedTail = @()
 }
@@ -135,13 +178,20 @@ if (-not $NoRefreshTesterNetwork.IsPresent -and (-not $testerNetworkFreshBefore 
     $testerNetworkRefreshPerformed = $true
     $testerNetworkRefresh = Invoke-ExternalTesterChild -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-service-tester-network-e2e.ps1"))
 }
+if (-not $NoRefreshPublicTesterGateway.IsPresent -and (-not $publicTesterGatewayFreshBefore -or -not $publicTesterGatewayReadyBefore)) {
+    $publicTesterGatewayRefreshPerformed = $true
+    $publicTesterGatewayRefresh = Invoke-ExternalTesterChild -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-tester-gateway-e2e.ps1"))
+}
 
 $serviceReport = Read-FlowChainJsonIfExists -Path $serviceStatusReportPath
 $liveInfraReport = Read-FlowChainJsonIfExists -Path $liveInfraReportPath
 $liveProductReport = Read-FlowChainJsonIfExists -Path $liveProductReportPath
 $testerNetworkReport = Read-FlowChainJsonIfExists -Path $testerNetworkReportPath
+$publicTesterGatewayReport = Read-FlowChainJsonIfExists -Path $publicTesterGatewayReportPath
 $testerNetworkFresh = Test-ReportFresh -Report $testerNetworkReport -MaxAgeMinutes $MaxTesterReportAgeMinutes
 $testerNetworkPacketSmokeValidated = Test-PacketExecutableSmokeReport -Report $testerNetworkReport
+$publicTesterGatewayFresh = Test-ReportFresh -Report $publicTesterGatewayReport -MaxAgeMinutes $MaxPublicTesterGatewayReportAgeMinutes
+$publicTesterGatewayReady = Test-PublicTesterGatewayReport -Report $publicTesterGatewayReport
 
 $missingEnvNames = New-Object System.Collections.ArrayList
 foreach ($name in @((Get-PropertyValue -Object $liveInfraReport -Name "missingEnvNames" -Default @()))) {
@@ -182,9 +232,11 @@ $testerNetworkReady = $null -ne $testerNetworkReport `
     -and $testerNetworkPacketSmokeValidated
 
 $liveInfraReady = $liveInfraRefresh.exitCode -eq 0 -and $null -ne $liveInfraReport -and (Get-PropertyValue -Object $liveInfraReport -Name "status") -eq "passed"
-$externalSharingReady = $serviceReady -and $chainProducing -and $testerNetworkReady -and $liveInfraReady
-$localTesterRehearsalReady = $serviceReady -and $chainProducing -and $testerNetworkReady
-$refreshFailed = $liveInfraRefresh.exitCode -ne 0 -or ($testerNetworkRefreshPerformed -and $testerNetworkRefresh.exitCode -ne 0)
+$externalSharingReady = $serviceReady -and $chainProducing -and $testerNetworkReady -and $publicTesterGatewayReady -and $liveInfraReady
+$localTesterRehearsalReady = $serviceReady -and $chainProducing -and $testerNetworkReady -and $publicTesterGatewayReady
+$refreshFailed = $liveInfraRefresh.exitCode -ne 0 `
+    -or ($testerNetworkRefreshPerformed -and $testerNetworkRefresh.exitCode -ne 0) `
+    -or ($publicTesterGatewayRefreshPerformed -and $publicTesterGatewayRefresh.exitCode -ne 0)
 
 $status = if ($externalSharingReady) {
     "passed"
@@ -206,6 +258,9 @@ $report = [ordered]@{
         testerWalletNetworkReady = $testerNetworkReady
         testerWalletNetworkFresh = $testerNetworkFresh
         packetExecutableSmokeValidated = $testerNetworkPacketSmokeValidated
+        publicTesterGatewayReady = $publicTesterGatewayReady
+        publicTesterGatewayFresh = $publicTesterGatewayFresh
+        publicTesterGatewayFaucetRouteValidated = Test-RoutePresent -Routes (Get-PropertyValue -Object $publicTesterGatewayReport -Name "routes" -Default @()) -Route "/tester/faucet"
         liveInfraReady = $liveInfraReady
     }
     latestHeight = "$latestHeight"
@@ -223,12 +278,28 @@ $report = [ordered]@{
         packetSmokeRoutes = Get-PropertyValue -Object $testerNetworkReport -Name "packetSmokeRoutes" -Default @()
         secretMaterialReturned = $false
     }
+    publicTesterGateway = [ordered]@{
+        status = Get-PropertyValue -Object $publicTesterGatewayReport -Name "status"
+        generatedAt = Get-PropertyValue -Object $publicTesterGatewayReport -Name "generatedAt"
+        fresh = $publicTesterGatewayFresh
+        ready = $publicTesterGatewayReady
+        maxSendUnits = Get-PropertyValue -Object $publicTesterGatewayReport -Name "maxSendUnits"
+        testerFaucetSchema = Get-PropertyValue -Object $publicTesterGatewayReport -Name "testerFaucetSchema"
+        walletCreateSchema = Get-PropertyValue -Object $publicTesterGatewayReport -Name "walletCreateSchema"
+        walletSendSchema = Get-PropertyValue -Object $publicTesterGatewayReport -Name "walletSendSchema"
+        transferAccepted = Get-PropertyValue -Object $publicTesterGatewayReport -Name "transferAccepted"
+        capRejected = Get-PropertyValue -Object $publicTesterGatewayReport -Name "capRejected"
+        routes = Get-PropertyValue -Object $publicTesterGatewayReport -Name "routes" -Default @()
+        envValuesPrinted = Get-PropertyValue -Object $publicTesterGatewayReport -Name "envValuesPrinted"
+        noSecrets = Get-PropertyValue -Object $publicTesterGatewayReport -Name "noSecrets"
+    }
     missingEnvNames = @($missingEnvNames)
     reportPaths = [ordered]@{
         serviceStatus = $serviceStatusReportPath
         liveInfra = $liveInfraReportPath
         liveProduct = $liveProductReportPath
         testerNetwork = $testerNetworkReportPath
+        publicTesterGateway = $publicTesterGatewayReportPath
         externalTesterReadiness = $reportFullPath
     }
     refresh = [ordered]@{
@@ -242,12 +313,19 @@ $report = [ordered]@{
         testerNetworkPacketSmokeAfterRefresh = $testerNetworkPacketSmokeValidated
         testerNetworkRefreshExitCode = $testerNetworkRefresh.exitCode
         testerNetworkRefreshOutputRedactedTail = @($testerNetworkRefresh.outputRedactedTail)
+        publicTesterGatewayRefreshPerformed = $publicTesterGatewayRefreshPerformed
+        publicTesterGatewayFreshBeforeRefresh = $publicTesterGatewayFreshBefore
+        publicTesterGatewayReadyBeforeRefresh = $publicTesterGatewayReadyBefore
+        publicTesterGatewayFreshAfterRefresh = $publicTesterGatewayFresh
+        publicTesterGatewayReadyAfterRefresh = $publicTesterGatewayReady
+        publicTesterGatewayRefreshExitCode = $publicTesterGatewayRefresh.exitCode
+        publicTesterGatewayRefreshOutputRedactedTail = @($publicTesterGatewayRefresh.outputRedactedTail)
     }
     ownerNextActions = @(
         "Configure the FLOWCHAIN_RPC_* public RPC and backup env names in the service environment.",
         "Configure FLOWCHAIN_TESTER_WRITE_ENABLED, FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256, and FLOWCHAIN_TESTER_MAX_SEND_UNITS before public friends-and-family wallet writes.",
         "Configure the FLOWCHAIN_BASE8453_* and FLOWCHAIN_PILOT_* bridge env names after owner verification.",
-        "Rerun npm run flowchain:live-infra:check and npm run flowchain:tester:readiness before sharing the network externally."
+        "Rerun npm run flowchain:live-infra:check, npm run flowchain:tester:gateway:e2e, and npm run flowchain:tester:readiness before sharing the network externally."
     )
     broadcasts = $false
     envValuesPrinted = $false

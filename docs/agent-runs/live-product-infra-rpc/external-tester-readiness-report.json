@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.external_tester_readiness_report.v0",
-    "generatedAt":  "2026-05-17T11:17:52.9289181Z",
+    "generatedAt":  "2026-05-17T11:32:22.9801706Z",
     "status":  "blocked",
     "localTesterRehearsalReady":  true,
     "externalSharingReady":  false,
@@ -10,10 +10,13 @@
                    "testerWalletNetworkReady":  true,
                    "testerWalletNetworkFresh":  true,
                    "packetExecutableSmokeValidated":  true,
+                   "publicTesterGatewayReady":  true,
+                   "publicTesterGatewayFresh":  true,
+                   "publicTesterGatewayFaucetRouteValidated":  true,
                    "liveInfraReady":  false
                },
-    "latestHeight":  "53525",
-    "stateFileLastWriteAgeSeconds":  2,
+    "latestHeight":  "53727",
+    "stateFileLastWriteAgeSeconds":  0,
     "testerNetwork":  {
                           "status":  "passed",
                           "generatedAt":  "2026-05-17T11:17:52.7007047Z",
@@ -45,6 +48,27 @@
                                                 ],
                           "secretMaterialReturned":  false
                       },
+    "publicTesterGateway":  {
+                                "status":  "passed",
+                                "generatedAt":  "2026-05-17T11:25:40.9242973Z",
+                                "fresh":  true,
+                                "ready":  true,
+                                "maxSendUnits":  "10",
+                                "testerFaucetSchema":  "flowmemory.control_plane.tester_faucet_result.v0",
+                                "walletCreateSchema":  "flowmemory.control_plane.tester_wallet_create_result.v0",
+                                "walletSendSchema":  "flowmemory.control_plane.tester_wallet_send_result.v0",
+                                "transferAccepted":  true,
+                                "capRejected":  true,
+                                "routes":  [
+                                               "/tester/status",
+                                               "/tester/wallets/create",
+                                               "/tester/faucet",
+                                               "/tester/wallets/send",
+                                               "/rpc balance_get"
+                                           ],
+                                "envValuesPrinted":  false,
+                                "noSecrets":  true
+                            },
     "missingEnvNames":  [
                             "FLOWCHAIN_RPC_PUBLIC_URL",
                             "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
@@ -69,6 +93,7 @@
                         "liveInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-infra-check-report.json",
                         "liveProduct":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-product-e2e-report.json",
                         "testerNetwork":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json",
+                        "publicTesterGateway":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json",
                         "externalTesterReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json"
                     },
     "refresh":  {
@@ -112,56 +137,30 @@
                                                         "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-infra-check-report.json",
                                                         "Missing env names: FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_TESTER_WRITE_ENABLED, FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256, FLOWCHAIN_TESTER_MAX_SEND_UNITS, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS"
                                                     ],
-                    "testerNetworkRefreshPerformed":  true,
-                    "testerNetworkFreshBeforeRefresh":  false,
+                    "testerNetworkRefreshPerformed":  false,
+                    "testerNetworkFreshBeforeRefresh":  true,
                     "testerNetworkPacketSmokeBeforeRefresh":  true,
                     "testerNetworkFreshAfterRefresh":  true,
                     "testerNetworkPacketSmokeAfterRefresh":  true,
-                    "testerNetworkRefreshExitCode":  0,
+                    "testerNetworkRefreshExitCode":  null,
                     "testerNetworkRefreshOutputRedactedTail":  [
-                                                                   "   Compiling proc-macro2 v1.0.106",
-                                                                   "   Compiling unicode-ident v1.0.24",
-                                                                   "   Compiling version_check v0.9.5",
-                                                                   "   Compiling quote v1.0.45",
-                                                                   "   Compiling typenum v1.20.0",
-                                                                   "   Compiling serde_core v1.0.228",
-                                                                   "   Compiling zmij v1.0.21",
-                                                                   "   Compiling thiserror v2.0.18",
-                                                                   "   Compiling anyhow v1.0.102",
-                                                                   "   Compiling serde_json v1.0.149",
-                                                                   "   Compiling serde v1.0.228",
-                                                                   "   Compiling memchr v2.8.0",
-                                                                   "   Compiling itoa v1.0.18",
-                                                                   "   Compiling keccak v0.1.6",
-                                                                   "   Compiling hex v0.4.3",
-                                                                   "   Compiling generic-array v0.14.7",
-                                                                   "   Compiling syn v2.0.117",
-                                                                   "   Compiling crypto-common v0.1.7",
-                                                                   "   Compiling block-buffer v0.10.4",
-                                                                   "   Compiling digest v0.10.7",
-                                                                   "   Compiling sha3 v0.10.9",
-                                                                   "   Compiling serde_derive v1.0.228",
-                                                                   "   Compiling thiserror-impl v2.0.18",
-                                                                   "   Compiling flowmemory-devnet v0.1.0 (E:\\FlowMemory\\flowmemory-live-infra-rpc\\crates\\flowmemory-devnet)",
-                                                                   "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 48.02s",
-                                                                   "     Running `devnet\\local\\cargo-target\\live-service-tester-network-e2e-44948\\debug\\flowmemory-devnet.exe --state E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\state.json --node-dir E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\node faucet --account 0x0f984f94eeb9ec49e6bbfa2348b6cb316b12befef8f0361e87ee049b994b6851 --amount 100 --reason live-service-tester-network-e2e --authorized-by operator:live-service-tester-network-e2e`",
-                                                                   "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.21s",
-                                                                   "     Running `devnet\\local\\cargo-target\\live-service-tester-network-e2e-44948\\debug\\flowmemory-devnet.exe --state E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\state.json --node-dir E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\node faucet --account 0x2120a7e00172e0d8dd1fb1ed72e16145887fc7be354f900352c86f3cf2889bc7 --amount 100 --reason live-service-tester-network-e2e --authorized-by operator:live-service-tester-network-e2e`",
-                                                                   "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.19s",
-                                                                   "     Running `devnet\\local\\cargo-target\\live-service-tester-network-e2e-44948\\debug\\flowmemory-devnet.exe --state E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\state.json --node-dir E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\node faucet --account 0x1876290edfd2c48e4ab646da4aeaebcdae5921f0c8847a5dcd85352b045137b4 --amount 100 --reason live-service-tester-network-e2e --authorized-by operator:live-service-tester-network-e2e`",
-                                                                   "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.18s",
-                                                                   "     Running `devnet\\local\\cargo-target\\live-service-tester-network-e2e-44948\\debug\\flowmemory-devnet.exe --state E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\state.json --node-dir E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\node faucet --account 0x851828cafc39143391e038b2c0b20e4b3b9e46046f607dc8733060e657d0d54c --amount 100 --reason live-service-tester-network-e2e --authorized-by operator:live-service-tester-network-e2e`",
-                                                                   "FlowChain live service tester network E2E passed.",
-                                                                   "Tester accounts: 4",
-                                                                   "Chain blocks: 53532 -\u003e 53550",
-                                                                   "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json"
-                                                               ]
+
+                                                               ],
+                    "publicTesterGatewayRefreshPerformed":  false,
+                    "publicTesterGatewayFreshBeforeRefresh":  true,
+                    "publicTesterGatewayReadyBeforeRefresh":  true,
+                    "publicTesterGatewayFreshAfterRefresh":  true,
+                    "publicTesterGatewayReadyAfterRefresh":  true,
+                    "publicTesterGatewayRefreshExitCode":  null,
+                    "publicTesterGatewayRefreshOutputRedactedTail":  [
+
+                                                                     ]
                 },
     "ownerNextActions":  [
                              "Configure the FLOWCHAIN_RPC_* public RPC and backup env names in the service environment.",
                              "Configure FLOWCHAIN_TESTER_WRITE_ENABLED, FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256, and FLOWCHAIN_TESTER_MAX_SEND_UNITS before public friends-and-family wallet writes.",
                              "Configure the FLOWCHAIN_BASE8453_* and FLOWCHAIN_PILOT_* bridge env names after owner verification.",
-                             "Rerun npm run flowchain:live-infra:check and npm run flowchain:tester:readiness before sharing the network externally."
+                             "Rerun npm run flowchain:live-infra:check, npm run flowchain:tester:gateway:e2e, and npm run flowchain:tester:readiness before sharing the network externally."
                          ],
     "broadcasts":  false,
     "envValuesPrinted":  false,

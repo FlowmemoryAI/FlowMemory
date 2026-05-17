@@ -20,6 +20,7 @@ $optionalMissingEnvNames = @(
 
 $readinessReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
 $testerNetworkReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
+$publicTesterGatewayReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
 $ownerInputsReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-report.json"
 $completionAuditReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json"
 
@@ -48,6 +49,20 @@ function Add-UniquePacketName {
     }
 }
 
+function Test-PacketRoutePresent {
+    param(
+        [AllowNull()][object] $Routes,
+        [Parameter(Mandatory = $true)][string] $Route
+    )
+
+    foreach ($candidate in @($Routes)) {
+        if ("$candidate" -eq $Route) {
+            return $true
+        }
+    }
+    return $false
+}
+
 $readinessOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "flowchain-external-tester-readiness.ps1") -AllowBlocked 2>&1
 $readinessExitCode = $LASTEXITCODE
 $ownerInputsOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "flowchain-owner-inputs.ps1") -AllowBlocked 2>&1
@@ -55,6 +70,7 @@ $ownerInputsExitCode = $LASTEXITCODE
 
 $readiness = Read-FlowChainJsonIfExists -Path $readinessReportPath
 $testerNetwork = Read-FlowChainJsonIfExists -Path $testerNetworkReportPath
+$publicTesterGateway = Read-FlowChainJsonIfExists -Path $publicTesterGatewayReportPath
 $ownerInputs = Read-FlowChainJsonIfExists -Path $ownerInputsReportPath
 $completionAudit = Read-FlowChainJsonIfExists -Path $completionAuditReportPath
 
@@ -65,10 +81,41 @@ $externalSharingReady = Get-PacketProp -Object $readiness -Name "externalSharing
 $localTesterRehearsalReady = Get-PacketProp -Object $readiness -Name "localTesterRehearsalReady" -Default $false
 $latestHeight = [string](Get-PacketProp -Object $readiness -Name "latestHeight" -Default "")
 $readinessChecks = Get-PacketProp -Object $readiness -Name "checks"
+$publicTesterGatewayReady = (Get-PacketProp -Object $readinessChecks -Name "publicTesterGatewayReady" -Default $false) -eq $true `
+    -and (Get-PacketProp -Object $publicTesterGateway -Name "status" -Default "missing") -eq "passed" `
+    -and (Get-PacketProp -Object $publicTesterGateway -Name "testerFaucetSchema" -Default "") -eq "flowmemory.control_plane.tester_faucet_result.v0" `
+    -and (Get-PacketProp -Object $publicTesterGateway -Name "transferAccepted" -Default $false) -eq $true `
+    -and (Get-PacketProp -Object $publicTesterGateway -Name "capRejected" -Default $false) -eq $true `
+    -and (Get-PacketProp -Object $publicTesterGateway -Name "noSecrets" -Default $false) -eq $true `
+    -and (Get-PacketProp -Object $publicTesterGateway -Name "envValuesPrinted" -Default $true) -eq $false `
+    -and (Test-PacketRoutePresent -Routes (Get-PacketProp -Object $publicTesterGateway -Name "routes" -Default @()) -Route "/tester/faucet")
 $packetExecutableSmokeValidated = (Get-PacketProp -Object $readinessChecks -Name "packetExecutableSmokeValidated" -Default $false) -eq $true `
-    -and (Get-PacketProp -Object $testerNetwork -Name "packetExecutableSmokeValidated" -Default $false) -eq $true
-$packetSmokeRoutes = @(Get-PacketProp -Object $testerNetwork -Name "packetSmokeRoutes" -Default @())
-$packetSmokeChecks = Get-PacketProp -Object $testerNetwork -Name "packetSmokeChecks"
+    -and (Get-PacketProp -Object $testerNetwork -Name "packetExecutableSmokeValidated" -Default $false) -eq $true `
+    -and $publicTesterGatewayReady
+$packetSmokeRoutesList = New-Object System.Collections.ArrayList
+foreach ($route in @((Get-PacketProp -Object $testerNetwork -Name "packetSmokeRoutes" -Default @()))) {
+    Add-UniquePacketName -Target $packetSmokeRoutesList -Value $route
+}
+foreach ($route in @((Get-PacketProp -Object $publicTesterGateway -Name "routes" -Default @()))) {
+    Add-UniquePacketName -Target $packetSmokeRoutesList -Value $route
+}
+$packetSmokeChecksRaw = Get-PacketProp -Object $testerNetwork -Name "packetSmokeChecks"
+$packetSmokeChecks = [ordered]@{
+    health = (Get-PacketProp -Object $packetSmokeChecksRaw -Name "health" -Default $false) -eq $true
+    rpcDiscover = (Get-PacketProp -Object $packetSmokeChecksRaw -Name "rpcDiscover" -Default $false) -eq $true
+    rpcReadiness = (Get-PacketProp -Object $packetSmokeChecksRaw -Name "rpcReadiness" -Default $false) -eq $true
+    chainStatus = (Get-PacketProp -Object $packetSmokeChecksRaw -Name "chainStatus" -Default $false) -eq $true
+    walletCreate = (Get-PacketProp -Object $packetSmokeChecksRaw -Name "walletCreate" -Default $false) -eq $true
+    walletBalances = (Get-PacketProp -Object $packetSmokeChecksRaw -Name "walletBalances" -Default $false) -eq $true
+    walletSend = (Get-PacketProp -Object $packetSmokeChecksRaw -Name "walletSend" -Default $false) -eq $true
+    walletTransfers = (Get-PacketProp -Object $packetSmokeChecksRaw -Name "walletTransfers" -Default $false) -eq $true
+    testerStatus = Test-PacketRoutePresent -Routes (Get-PacketProp -Object $publicTesterGateway -Name "routes" -Default @()) -Route "/tester/status"
+    testerWalletCreate = (Get-PacketProp -Object $publicTesterGateway -Name "walletCreateSchema" -Default "") -eq "flowmemory.control_plane.tester_wallet_create_result.v0"
+    testerFaucet = (Get-PacketProp -Object $publicTesterGateway -Name "testerFaucetSchema" -Default "") -eq "flowmemory.control_plane.tester_faucet_result.v0"
+    testerWalletSend = (Get-PacketProp -Object $publicTesterGateway -Name "walletSendSchema" -Default "") -eq "flowmemory.control_plane.tester_wallet_send_result.v0" -and (Get-PacketProp -Object $publicTesterGateway -Name "transferAccepted" -Default $false) -eq $true
+    testerCapRejected = (Get-PacketProp -Object $publicTesterGateway -Name "capRejected" -Default $false) -eq $true
+}
+$packetSmokeRoutes = @($packetSmokeRoutesList)
 
 $missingEnvNames = New-Object System.Collections.ArrayList
 foreach ($source in @($readiness, $ownerInputs, $completionAudit)) {
@@ -146,6 +193,7 @@ $packetLines.Add("- Completion audit: $completionStatus")
 $packetLines.Add("- Local tester rehearsal ready: $localTesterRehearsalReady")
 $packetLines.Add("- External sharing ready: $externalSharingReady")
 $packetLines.Add("- Packet executable smoke validated: $packetExecutableSmokeValidated")
+$packetLines.Add("- Authenticated tester gateway ready: $publicTesterGatewayReady")
 $packetLines.Add("")
 if ($missingEnvNames.Count -gt 0) {
     $packetLines.Add("## Blocking Env Names")
@@ -188,6 +236,7 @@ $report = [ordered]@{
     reportPaths = [ordered]@{
         readiness = $readinessReportPath
         testerNetwork = $testerNetworkReportPath
+        publicTesterGateway = $publicTesterGatewayReportPath
         ownerInputs = $ownerInputsReportPath
         completionAudit = $completionAuditReportPath
         packet = $packetFullPath

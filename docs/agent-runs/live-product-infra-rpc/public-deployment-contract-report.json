@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-17T11:25:50.6145885Z",
+    "generatedAt":  "2026-05-17T11:33:51.4189038Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -102,7 +102,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=53525, finalizedHeight=53525",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=53727, finalizedHeight=53727",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -333,9 +333,9 @@
                   },
                   {
                       "id":  "external-tester-sharing",
-                      "requirement":  "External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence plus executable packet-route smoke.",
+                      "requirement":  "External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence plus authenticated tester faucet/send gateway smoke.",
                       "status":  "blocked",
-                      "evidence":  "externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, packetSmoke=True, externalSharingReady=False, packet=blocked, packetShareable=False",
+                      "evidence":  "externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, publicTesterGatewayReady=True, faucetRoute=True, packetSmoke=True, testerFaucet=True, capRejected=True, externalSharingReady=False, packet=blocked, packetShareable=False",
                       "commands":  [
                                        "npm run flowchain:tester:readiness",
                                        "npm run flowchain:external-tester:packet"
@@ -362,9 +362,9 @@
                   },
                   {
                       "id":  "public-tester-write-gateway",
-                      "requirement":  "The public deployment has a local production-shaped proof for authenticated tester wallet creation, capped tester sends, balance settlement, and over-cap rejection.",
+                      "requirement":  "The public deployment has a local production-shaped proof for authenticated tester wallet creation, capped tester faucet funding, capped tester sends, balance settlement, and over-cap rejection.",
                       "status":  "passed",
-                      "evidence":  "gatewayStatus=passed, transferAccepted=True, capRejected=True",
+                      "evidence":  "gatewayStatus=passed, testerFaucetSchema=flowmemory.control_plane.tester_faucet_result.v0, transferAccepted=True, capRejected=True",
                       "commands":  [
                                        "npm run flowchain:tester:gateway:e2e"
                                    ],

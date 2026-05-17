@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-17T11:25:50.6145885Z",
+  "generatedAt": "2026-05-17T11:33:51.4189038Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -8,8 +8,8 @@
   "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
   "privateRpcUrl": "http://127.0.0.1:8787",
   "metrics": {
-    "latestHeight": "53525",
-    "finalizedHeight": "53525",
+    "latestHeight": "53727",
+    "finalizedHeight": "53727",
     "monitorHeightAdvanced": true,
     "bridgeRelayerStatus": "blocked",
     "bridgeQueuedTransactions": "0",
@@ -105,7 +105,7 @@
       "label": "Private L1 origin",
       "status": "passed",
       "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
-      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=53525, finalizedHeight=53525",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=53727, finalizedHeight=53727",
       "commands": [
         "npm run flowchain:service:status"
       ],
@@ -228,8 +228,8 @@
       "id": "external-tester-sharing",
       "label": "External tester packet",
       "status": "blocked",
-      "summary": "External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence plus executable packet-route smoke.",
-      "evidence": "externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, packetSmoke=True, externalSharingReady=False, packet=blocked, packetShareable=False",
+      "summary": "External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence plus authenticated tester faucet/send gateway smoke.",
+      "evidence": "externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, publicTesterGatewayReady=True, faucetRoute=True, packetSmoke=True, testerFaucet=True, capRejected=True, externalSharingReady=False, packet=blocked, packetShareable=False",
       "commands": [
         "npm run flowchain:tester:readiness",
         "npm run flowchain:external-tester:packet"
@@ -258,8 +258,8 @@
       "id": "public-tester-write-gateway",
       "label": "Tester write gateway",
       "status": "passed",
-      "summary": "The public deployment has a local production-shaped proof for authenticated tester wallet creation, capped tester sends, balance settlement, and over-cap rejection.",
-      "evidence": "gatewayStatus=passed, transferAccepted=True, capRejected=True",
+      "summary": "The public deployment has a local production-shaped proof for authenticated tester wallet creation, capped tester faucet funding, capped tester sends, balance settlement, and over-cap rejection.",
+      "evidence": "gatewayStatus=passed, testerFaucetSchema=flowmemory.control_plane.tester_faucet_result.v0, transferAccepted=True, capRejected=True",
       "commands": [
         "npm run flowchain:tester:gateway:e2e"
       ],
@@ -310,19 +310,19 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T11:25:50.6145885Z"
+      "generatedAt": "2026-05-17T11:33:51.4189038Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
       "schema": "flowchain.live_infra_check_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T11:15:54.4805289Z"
+      "generatedAt": "2026-05-17T11:32:21.9165998Z"
     },
     {
       "fileName": "service-status-report.json",
       "schema": "flowchain.service_status_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T11:16:26.6314848Z"
+      "generatedAt": "2026-05-17T11:31:38.3355641Z"
     },
     {
       "fileName": "service-monitor-report.json",
@@ -334,43 +334,43 @@
       "fileName": "public-rpc-readiness-report.json",
       "schema": "flowchain.public_rpc_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T11:14:49.0000013Z"
+      "generatedAt": "2026-05-17T11:31:04.3859803Z"
     },
     {
       "fileName": "backup-readiness-report.json",
       "schema": "flowchain.backup_readiness_report.v1",
       "status": "blocked",
-      "generatedAt": "2026-05-17T11:15:47.5828152Z"
+      "generatedAt": "2026-05-17T11:32:11.2470203Z"
     },
     {
       "fileName": "bridge-relayer-once-report.json",
       "schema": "flowchain.bridge_relayer_once_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T11:15:52.8468226Z"
+      "generatedAt": "2026-05-17T11:32:18.9323073Z"
     },
     {
       "fileName": "external-tester-packet-report.json",
       "schema": "flowchain.external_tester_packet_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T11:17:54.6905312Z"
+      "generatedAt": "2026-05-17T11:32:25.3635812Z"
     },
     {
       "fileName": "external-tester-readiness-report.json",
       "schema": "flowchain.external_tester_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T11:17:52.9289181Z"
+      "generatedAt": "2026-05-17T11:32:22.9801706Z"
     },
     {
       "fileName": "owner-inputs-report.json",
       "schema": "flowchain.owner_inputs_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T11:17:54.1345211Z"
+      "generatedAt": "2026-05-17T11:32:24.5624391Z"
     },
     {
       "fileName": "no-secret-scan-report.json",
       "schema": "flowchain.no_secret_scan_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T11:15:54.1785201Z"
+      "generatedAt": "2026-05-17T11:32:21.5726848Z"
     }
   ],
   "envValuesPrinted": false,
