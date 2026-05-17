@@ -3682,6 +3682,103 @@ code {
   line-height: 1.35;
 }
 
+.explorer-settlement-trace {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.62fr) minmax(0, 1.38fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.explorer-trace-head,
+.explorer-trace-steps button {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.explorer-trace-head {
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+}
+
+.explorer-trace-head span,
+.explorer-trace-copy strong {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.explorer-trace-head strong {
+  overflow-wrap: anywhere;
+  color: var(--ink);
+}
+
+.explorer-trace-head small,
+.explorer-trace-copy small {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.explorer-trace-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.explorer-trace-steps button {
+  display: grid;
+  grid-template-rows: auto minmax(52px, 1fr) auto auto;
+  gap: 8px;
+  align-items: start;
+  min-height: 148px;
+  padding: 12px;
+  text-align: left;
+}
+
+.explorer-trace-steps button.active,
+.explorer-trace-steps button:hover {
+  border-color: #9bb5aa;
+  background: #eaf3ee;
+}
+
+.explorer-trace-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: var(--accent-strong);
+  border: 1px solid #b7cac1;
+  border-radius: 8px;
+  background: #e7f1ec;
+}
+
+.explorer-trace-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.explorer-trace-copy small {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.explorer-trace-steps code {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--ink);
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .explorer-category-strip {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -4524,6 +4621,7 @@ code {
   .workbench-command-center,
   .workbench-record-grid,
   .explorer-command-panel,
+  .explorer-settlement-trace,
   .explorer-layout,
   .ops-command-panel,
   .ops-layout {
@@ -4626,6 +4724,7 @@ code {
 
   .explorer-category-strip,
   .explorer-facts,
+  .explorer-trace-steps,
   .tester-launch-card-grid,
   .tester-launch-profile-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4651,6 +4750,7 @@ code {
   .workbench-switcher,
   .explorer-category-strip,
   .explorer-facts,
+  .explorer-trace-steps,
   .wallet-tester-links {
     grid-template-columns: 1fr;
   }

@@ -132,6 +132,10 @@ function categoryCount(rows: ExplorerRow[], category: ExplorerCategory): number 
   return category === "all" ? rows.length : rows.filter((row) => row.category === category).length;
 }
 
+function traceStatus(row: ExplorerRow | undefined): DashboardStatus {
+  return row?.status ?? "pending";
+}
+
 export function ExplorerView({ data, workbench }: { data: DashboardData; workbench: WorkbenchSnapshot }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<ExplorerCategory>("all");
@@ -142,6 +146,56 @@ export function ExplorerView({ data, workbench }: { data: DashboardData; workben
   const transactionCount = rows.filter((row) => row.category === "transactions").length;
   const walletCount = rows.filter((row) => row.category === "wallets").length;
   const fundingCount = rows.filter((row) => row.category === "faucet" || row.category === "bridge").length;
+  const faucetCount = rows.filter((row) => row.category === "faucet").length;
+  const recentWallet = rows.find((row) => row.category === "wallets");
+  const recentFunding = rows.find((row) => row.category === "faucet" || row.category === "bridge");
+  const recentTransfer = rows.find((row) => row.category === "transactions");
+  const testerTraceSteps: Array<{
+    id: string;
+    label: string;
+    detail: string;
+    value: string;
+    status: DashboardStatus;
+    targetCategory: ExplorerCategory;
+    Icon: typeof WalletCards;
+  }> = [
+    {
+      id: "wallet",
+      label: "Wallet",
+      detail: recentWallet?.title ?? "Create tester wallet",
+      value: recentWallet?.primaryRef ?? `${walletCount} records`,
+      status: traceStatus(recentWallet),
+      targetCategory: "wallets",
+      Icon: WalletCards,
+    },
+    {
+      id: "fund",
+      label: "Fund",
+      detail: recentFunding?.title ?? "Faucet or bridge credit",
+      value: recentFunding?.amount || recentFunding?.primaryRef || `${fundingCount} proofs`,
+      status: traceStatus(recentFunding),
+      targetCategory: faucetCount > 0 ? "faucet" : "bridge",
+      Icon: CircleDollarSign,
+    },
+    {
+      id: "send",
+      label: "Send",
+      detail: recentTransfer?.title ?? "Wallet transfer",
+      value: recentTransfer?.primaryRef ?? `${transactionCount} tx`,
+      status: traceStatus(recentTransfer),
+      targetCategory: "transactions",
+      Icon: ArrowRightLeft,
+    },
+    {
+      id: "inspect",
+      label: "Inspect",
+      detail: "Explorer records",
+      value: `${rows.length} rows`,
+      status: rows.length > 0 ? "observed" : "pending",
+      targetCategory: "all",
+      Icon: Search,
+    },
+  ];
 
   return (
     <div className="view-stack">
@@ -189,6 +243,35 @@ export function ExplorerView({ data, workbench }: { data: DashboardData; workben
           <span>Funding proofs</span>
           <strong>{fundingCount}</strong>
           <small>faucet and bridge</small>
+        </div>
+      </section>
+
+      <section className="explorer-settlement-trace" aria-label="Tester settlement trace">
+        <div className="explorer-trace-head">
+          <span>Tester trace</span>
+          <strong>Create, fund, send, inspect</strong>
+          <small>Each step filters the explorer to the records a tester needs after using the wallet panel.</small>
+        </div>
+        <div className="explorer-trace-steps">
+          {testerTraceSteps.map(({ Icon, id, label, detail, status, targetCategory, value }) => (
+            <button
+              key={id}
+              type="button"
+              className={category === targetCategory ? "active" : ""}
+              aria-pressed={category === targetCategory}
+              onClick={() => setCategory(targetCategory)}
+            >
+              <span className="explorer-trace-icon" aria-hidden="true">
+                <Icon size={16} />
+              </span>
+              <span className="explorer-trace-copy">
+                <strong>{label}</strong>
+                <small>{detail}</small>
+              </span>
+              <code>{value.startsWith("0x") ? <HashValue value={value} trim="short" /> : value}</code>
+              <StatusBadge status={status} compact />
+            </button>
+          ))}
         </div>
       </section>
 
