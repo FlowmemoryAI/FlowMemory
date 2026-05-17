@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-17T16:08:35.8026979Z",
+    "generatedAt":  "2026-05-17T19:03:50.6077620Z",
     "status":  "blocked",
     "refresh":  {
                     "performed":  false,
@@ -10,8 +10,8 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input"
                 },
     "chain":  {
-                  "latestHeight":  "56856",
-                  "finalizedHeight":  "56856",
+                  "latestHeight":  "58518",
+                  "finalizedHeight":  "58518",
                   "stateFileLastWriteAgeSeconds":  4,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
@@ -24,11 +24,13 @@
                            "backup":  "blocked",
                            "bridgeLive":  "blocked",
                            "bridgeInfra":  "blocked",
-                           "bridgeRelayer":  "missing",
-                           "bridgeRelayerLatencyGate":  "missing",
+                           "bridgeRelayer":  "blocked",
+                           "bridgeRelayerGuardrail":  "passed",
+                           "bridgeRelayerGuardrailReady":  true,
+                           "bridgeRelayerLatencyGate":  "not-run",
                            "bridgeRelayerCursorCommitRequired":  true,
                            "bridgeRelayerCursorCommitted":  false,
-                           "bridgeRelayerCursorReason":  "missing",
+                           "bridgeRelayerCursorReason":  "not-run",
                            "externalTester":  "blocked",
                            "publicDeployment":  "blocked",
                            "noSecret":  "passed"
@@ -131,6 +133,7 @@
                         "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input\\bridge-live-readiness-report.json",
                         "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input\\bridge-infra-readiness-report.json",
                         "bridgeRelayer":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input\\bridge-relayer-once-report.json",
+                        "bridgeRelayerGuardrail":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input\\bridge-relayer-guardrail-validation-report.json",
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input\\external-tester-readiness-report.json",
                         "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input\\public-deployment-contract-report.json",
                         "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input\\no-secret-scan-report.json"

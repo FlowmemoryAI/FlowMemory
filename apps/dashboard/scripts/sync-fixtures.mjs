@@ -250,6 +250,8 @@ function writeLiveReadinessSummary() {
       alertState: asText(opsAlertRules?.currentAlertState, "not recorded"),
       incidentDrillStatus: asText(incidentDrill?.status, "not recorded"),
       alertInstallValidationStatus: asText(alertInstallValidation?.status, "not recorded"),
+      bridgeRelayerGuardrailStatus: asText(opsSnapshot?.reportStatuses?.bridgeRelayerGuardrail ?? bridgeRelayerGuardrail?.status, "not recorded"),
+      bridgeRelayerGuardrailReady: opsSnapshot?.reportStatuses?.bridgeRelayerGuardrailReady === true,
       criticalCount: asText(opsSnapshot?.criticalCount, "0"),
       blockedCount: asText(opsSnapshot?.blockedCount, "0"),
       latestHeight: asText(opsSnapshot?.chain?.latestHeight, latestHeight),

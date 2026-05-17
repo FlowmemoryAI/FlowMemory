@@ -65,7 +65,24 @@ function Read-SecretScanFileText {
     param([System.IO.FileInfo] $File)
 
     try {
-        $text = [System.IO.File]::ReadAllText($File.FullName)
+        $stream = [System.IO.File]::Open(
+            $File.FullName,
+            [System.IO.FileMode]::Open,
+            [System.IO.FileAccess]::Read,
+            ([System.IO.FileShare]::ReadWrite -bor [System.IO.FileShare]::Delete)
+        )
+        try {
+            $reader = [System.IO.StreamReader]::new($stream)
+            try {
+                $text = $reader.ReadToEnd()
+            }
+            finally {
+                $reader.Dispose()
+            }
+        }
+        finally {
+            $stream.Dispose()
+        }
         if ($null -eq $text) {
             return ""
         }

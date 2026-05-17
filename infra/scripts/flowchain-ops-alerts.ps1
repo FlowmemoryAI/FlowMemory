@@ -122,6 +122,14 @@ $rules = @(
         commands = @("npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop", "npm run flowchain:service:status")
     },
     [ordered]@{
+        id = "bridge-relayer-guardrail-failed"
+        severity = "critical"
+        findingCodes = @("bridge-relayer-guardrail-failed")
+        signal = "Bridge relayer fail-closed guardrail proof is missing or failed."
+        threshold = "guardrail validation report is not passed or any cursor/no-queue/no-secret/no-broadcast check is false"
+        commands = @("npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
         id = "public-rpc-not-shareable"
         severity = "blocked"
         findingCodes = @("public-rpc-not-ready")

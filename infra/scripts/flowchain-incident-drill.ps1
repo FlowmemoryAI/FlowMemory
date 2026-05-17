@@ -22,6 +22,8 @@ $baseReportPaths = [ordered]@{
     "backup-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     "bridge-live-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     "bridge-infra-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
+    "bridge-relayer-once-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
+    "bridge-relayer-guardrail-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     "external-tester-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     "public-deployment-contract-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     "no-secret-scan-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
@@ -97,6 +99,27 @@ function New-DrillFallbackReport {
                 status = "passed"
                 noSecrets = $true
                 envValuesPrinted = $false
+            }
+        }
+        "bridge-relayer-guardrail-validation-report.json" {
+            return [ordered]@{
+                schema = "flowchain.bridge_relayer_guardrail_validation_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "failed"
+                checks = [ordered]@{
+                    finalCursorUnchanged = $false
+                    stagedCursorNotWritten = $false
+                    finalCursorNotCommitted = $false
+                    noCreditsQueued = $false
+                    noCreditsApplied = $false
+                    ownerEnvNotImported = $false
+                    broadcastsFalse = $false
+                    envValuesPrintedFalse = $false
+                    noSecrets = $false
+                }
+                envValuesPrinted = $false
+                noSecrets = $false
+                broadcasts = $false
             }
         }
         default {
@@ -362,6 +385,25 @@ Invoke-SyntheticOpsCase -Id "no-secret-scan-critical" `
         }
     }
 
+Invoke-SyntheticOpsCase -Id "bridge-relayer-guardrail-critical" `
+    -Requirement "A failed bridge relayer guardrail proof is classified as a critical incident before any relayer loop can be trusted." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("bridge-relayer-guardrail-failed") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "bridge-relayer-guardrail-validation-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "failed"
+            $checks = Get-DrillProp -Object $report -Name "checks"
+            foreach ($name in @("finalCursorUnchanged", "stagedCursorNotWritten", "finalCursorNotCommitted", "noCreditsQueued", "noCreditsApplied", "ownerEnvNotImported", "broadcastsFalse", "envValuesPrintedFalse", "noSecrets")) {
+                Set-DrillProp -Object $checks -Name $name -Value $false
+            }
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $false
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
+        }
+    }
+
 $recoveryReportPath = Join-Path $runDir "recovery-commands-report.json"
 $recoveryChild = Invoke-DrillChild -Name "recovery-command-print" -ArgumentList @(
     "-NoProfile",
@@ -434,6 +476,7 @@ $report = [ordered]@{
         "stale-state-critical",
         "height-not-advancing-critical",
         "no-secret-scan-critical",
+        "bridge-relayer-guardrail-critical",
         "recovery-command-print",
         "post-drill-live-status"
     )

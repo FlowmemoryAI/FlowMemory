@@ -5,7 +5,8 @@ param(
     [int] $MonitorPollSeconds = 5,
     [int] $MonitorMaxStateAgeSeconds = 90,
     [int] $ChildTimeoutSeconds = 10800,
-    [switch] $AllowBlocked
+    [switch] $AllowBlocked,
+    [switch] $NoRefresh
 )
 
 $ErrorActionPreference = "Stop"
@@ -231,85 +232,146 @@ function Invoke-AuditChildProcess {
     return $result
 }
 
-$liveProductResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-product-e2e.ps1"), "-AllowBlocked")
+function Use-AuditExistingReport {
+    param(
+        [Parameter(Mandatory = $true)][string[]] $ArgumentList,
+        [Parameter(Mandatory = $true)][string] $Path,
+        [switch] $AllowBlockedStatus
+    )
+
+    $startedAt = (Get-Date).ToUniversalTime()
+    $report = Read-FlowChainJsonIfExists -Path $Path
+    $status = Get-ReportStatus -Report $report
+    $generatedAt = [string](Get-AuditProp -Object $report -Name "generatedAt" -Default "")
+    $reportExists = $null -ne $report
+    $exitCode = if ($status -eq "passed" -or ($AllowBlockedStatus.IsPresent -and $status -eq "blocked") -or ($reportExists -and $status -eq "missing")) { 0 } else { 1 }
+    $message = "NoRefresh used existing report: path=$Path, status=$status, generatedAt=$generatedAt"
+    $finishedAt = (Get-Date).ToUniversalTime()
+
+    $result = [ordered]@{
+        argumentList = @($ArgumentList)
+        processId = $null
+        startedAt = $startedAt.ToString("o")
+        finishedAt = $finishedAt.ToString("o")
+        durationSeconds = [int][Math]::Max(0, [Math]::Floor(($finishedAt - $startedAt).TotalSeconds))
+        timedOut = $false
+        timeoutSeconds = $ChildTimeoutSeconds
+        exitCode = $exitCode
+        output = @($message)
+    }
+    [void] $script:AuditChildProcessResults.Add([ordered]@{
+        argumentList = @($ArgumentList)
+        processId = $null
+        startedAt = $result.startedAt
+        finishedAt = $result.finishedAt
+        durationSeconds = $result.durationSeconds
+        timedOut = $false
+        timeoutSeconds = $ChildTimeoutSeconds
+        exitCode = $exitCode
+        outputLineCount = 1
+        noRefresh = $true
+        existingReportPath = $Path
+        existingReportStatus = $status
+        existingReportGeneratedAt = $generatedAt
+        existingReportHadStatusField = $status -ne "missing"
+    })
+
+    return $result
+}
+
+function Invoke-AuditChild {
+    param(
+        [Parameter(Mandatory = $true)][string[]] $ArgumentList,
+        [Parameter(Mandatory = $true)][string] $Path,
+        [switch] $AllowBlockedStatus
+    )
+
+    if ($NoRefresh.IsPresent) {
+        return Use-AuditExistingReport -ArgumentList $ArgumentList -Path $Path -AllowBlockedStatus:$AllowBlockedStatus
+    }
+
+    return Invoke-AuditChildProcess -ArgumentList $ArgumentList
+}
+
+$liveProductResult = Invoke-AuditChild -Path $paths.liveProduct -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-product-e2e.ps1"), "-AllowBlocked")
 $liveProductOutput = @($liveProductResult.output)
 $liveProductExitCode = $liveProductResult.exitCode
-$serviceStatusResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-status.ps1"), "-AllowBlocked")
+$serviceStatusResult = Invoke-AuditChild -Path $paths.serviceStatus -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-status.ps1"), "-AllowBlocked")
 $serviceStatusOutput = @($serviceStatusResult.output)
 $serviceStatusExitCode = $serviceStatusResult.exitCode
-$serviceMonitorResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-monitor.ps1"), "-DurationSeconds", "$MonitorDurationSeconds", "-PollSeconds", "$MonitorPollSeconds", "-MaxStateAgeSeconds", "$MonitorMaxStateAgeSeconds")
+$serviceMonitorResult = Invoke-AuditChild -Path $paths.serviceMonitor -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-monitor.ps1"), "-DurationSeconds", "$MonitorDurationSeconds", "-PollSeconds", "$MonitorPollSeconds", "-MaxStateAgeSeconds", "$MonitorMaxStateAgeSeconds")
 $serviceMonitorOutput = @($serviceMonitorResult.output)
 $serviceMonitorExitCode = $serviceMonitorResult.exitCode
-$liveWalletResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-service-wallet-e2e.ps1"))
+$liveWalletResult = Invoke-AuditChild -Path $paths.liveWallet -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-service-wallet-e2e.ps1"))
 $liveWalletOutput = @($liveWalletResult.output)
 $liveWalletExitCode = $liveWalletResult.exitCode
-$testerNetworkResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-service-tester-network-e2e.ps1"))
+$testerNetworkResult = Invoke-AuditChild -Path $paths.testerNetwork -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-service-tester-network-e2e.ps1"))
 $testerNetworkOutput = @($testerNetworkResult.output)
 $testerNetworkExitCode = $testerNetworkResult.exitCode
-$devPackResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "npm.cmd run flowchain:dev-pack:e2e")
+$devPackResult = Invoke-AuditChild -Path $paths.devPack -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "npm.cmd run flowchain:dev-pack:e2e")
 $devPackOutput = @($devPackResult.output)
 $devPackExitCode = $devPackResult.exitCode
-$bridgePilotLocalResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "npm.cmd run flowchain:real-value-pilot:bridge")
+$bridgePilotLocalResult = Invoke-AuditChild -Path $paths.bridgePilotLocal -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "npm.cmd run flowchain:real-value-pilot:bridge")
 $bridgePilotLocalOutput = @($bridgePilotLocalResult.output)
 $bridgePilotLocalExitCode = $bridgePilotLocalResult.exitCode
-$baseTxDiagnosticResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "npm.cmd run flowchain:bridge:diagnose:tx")
+$baseTxDiagnosticResult = Invoke-AuditChild -Path $paths.baseTxDiagnostic -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "npm.cmd run flowchain:bridge:diagnose:tx")
 $baseTxDiagnosticOutput = @($baseTxDiagnosticResult.output)
 $baseTxDiagnosticExitCode = $baseTxDiagnosticResult.exitCode
-$ownerInputsValidationResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-inputs-validation.ps1"))
+$ownerInputsValidationResult = Invoke-AuditChild -Path $paths.ownerInputsValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-inputs-validation.ps1"))
 $ownerInputsValidationOutput = @($ownerInputsValidationResult.output)
 $ownerInputsValidationExitCode = $ownerInputsValidationResult.exitCode
-$publicRpcValidationResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-validation.ps1"))
+$publicRpcValidationResult = Invoke-AuditChild -Path $paths.publicRpcValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-validation.ps1"))
 $publicRpcValidationOutput = @($publicRpcValidationResult.output)
 $publicRpcValidationExitCode = $publicRpcValidationResult.exitCode
-$publicRpcAbuseTestResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-abuse-test.ps1"))
+$publicRpcAbuseTestResult = Invoke-AuditChild -Path $paths.publicRpcAbuseTest -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-abuse-test.ps1"))
 $publicRpcAbuseTestOutput = @($publicRpcAbuseTestResult.output)
 $publicRpcAbuseTestExitCode = $publicRpcAbuseTestResult.exitCode
-$publicTesterGatewayResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-tester-gateway-e2e.ps1"))
+$publicTesterGatewayResult = Invoke-AuditChild -Path $paths.publicTesterGateway -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-tester-gateway-e2e.ps1"))
 $publicTesterGatewayOutput = @($publicTesterGatewayResult.output)
 $publicTesterGatewayExitCode = $publicTesterGatewayResult.exitCode
-$backupRestoreValidationResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-restore-validation.ps1"))
+$backupRestoreValidationResult = Invoke-AuditChild -Path $paths.backupRestoreValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-restore-validation.ps1"))
 $backupRestoreValidationOutput = @($backupRestoreValidationResult.output)
 $backupRestoreValidationExitCode = $backupRestoreValidationResult.exitCode
-$ownerInputsResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-inputs.ps1"), "-AllowBlocked")
+$ownerInputsResult = Invoke-AuditChild -Path $paths.ownerInputs -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-inputs.ps1"), "-AllowBlocked")
 $ownerInputsOutput = @($ownerInputsResult.output)
 $ownerInputsExitCode = $ownerInputsResult.exitCode
-$ownerOnboardingResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-onboarding.ps1"))
+$ownerOnboardingResult = Invoke-AuditChild -Path $paths.ownerOnboarding -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-onboarding.ps1"))
 $ownerOnboardingOutput = @($ownerOnboardingResult.output)
 $ownerOnboardingExitCode = $ownerOnboardingResult.exitCode
-$ownerSignupChecklistResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-signup-checklist.ps1"))
+$ownerSignupChecklistResult = Invoke-AuditChild -Path $paths.ownerSignupChecklist -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-signup-checklist.ps1"))
 $ownerSignupChecklistOutput = @($ownerSignupChecklistResult.output)
 $ownerSignupChecklistExitCode = $ownerSignupChecklistResult.exitCode
-$ownerEnvTemplateResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-env-template.ps1"))
+$ownerEnvTemplateResult = Invoke-AuditChild -Path $paths.ownerEnvTemplate -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-env-template.ps1"))
 $ownerEnvTemplateOutput = @($ownerEnvTemplateResult.output)
 $ownerEnvTemplateExitCode = $ownerEnvTemplateResult.exitCode
-$ownerEnvReadinessValidationResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-env-readiness-validation.ps1"))
+$ownerEnvReadinessValidationResult = Invoke-AuditChild -Path $paths.ownerEnvReadinessValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-env-readiness-validation.ps1"))
 $ownerEnvReadinessValidationOutput = @($ownerEnvReadinessValidationResult.output)
 $ownerEnvReadinessValidationExitCode = $ownerEnvReadinessValidationResult.exitCode
-$ownerEnvReadinessResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-env-readiness.ps1"), "-AllowBlocked")
+$ownerEnvReadinessResult = Invoke-AuditChild -Path $paths.ownerEnvReadiness -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-env-readiness.ps1"), "-AllowBlocked")
 $ownerEnvReadinessOutput = @($ownerEnvReadinessResult.output)
 $ownerEnvReadinessExitCode = $ownerEnvReadinessResult.exitCode
-$publicRpcEdgeTemplateResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-edge-template.ps1"))
+$publicRpcEdgeTemplateResult = Invoke-AuditChild -Path $paths.publicRpcEdgeTemplate -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-edge-template.ps1"))
 $publicRpcEdgeTemplateOutput = @($publicRpcEdgeTemplateResult.output)
 $publicRpcEdgeTemplateExitCode = $publicRpcEdgeTemplateResult.exitCode
-$publicRpcDeploymentBundleResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-deployment-bundle.ps1"))
+$publicRpcDeploymentBundleResult = Invoke-AuditChild -Path $paths.publicRpcDeploymentBundle -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-deployment-bundle.ps1"))
 $publicRpcDeploymentBundleOutput = @($publicRpcDeploymentBundleResult.output)
 $publicRpcDeploymentBundleExitCode = $publicRpcDeploymentBundleResult.exitCode
-$liveInfraResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-infra-check.ps1"), "-AllowBlocked")
+$liveInfraResult = Invoke-AuditChild -Path $paths.liveInfra -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-infra-check.ps1"), "-AllowBlocked")
 $liveInfraOutput = @($liveInfraResult.output)
 $liveInfraExitCode = $liveInfraResult.exitCode
-$externalTesterPacketResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-packet.ps1"), "-AllowBlocked")
+$externalTesterPacketResult = Invoke-AuditChild -Path $paths.externalTesterPacket -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-packet.ps1"), "-AllowBlocked")
 $externalTesterPacketOutput = @($externalTesterPacketResult.output)
 $externalTesterPacketExitCode = $externalTesterPacketResult.exitCode
-$incidentDrillResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-incident-drill.ps1"))
+$incidentDrillResult = Invoke-AuditChild -Path $paths.incidentDrill -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-incident-drill.ps1"))
 $incidentDrillOutput = @($incidentDrillResult.output)
 $incidentDrillExitCode = $incidentDrillResult.exitCode
-$opsSnapshotResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-snapshot.ps1"), "-AllowBlocked", "-NoRefresh")
+$opsSnapshotResult = Invoke-AuditChild -Path $paths.opsSnapshot -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-snapshot.ps1"), "-AllowBlocked", "-NoRefresh")
 $opsSnapshotOutput = @($opsSnapshotResult.output)
 $opsSnapshotExitCode = $opsSnapshotResult.exitCode
-$publicDeploymentContractResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-deployment-contract.ps1"), "-AllowBlocked", "-NoRefresh")
+$publicDeploymentContractResult = Invoke-AuditChild -Path $paths.publicDeploymentContract -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-deployment-contract.ps1"), "-AllowBlocked", "-NoRefresh")
 $publicDeploymentContractOutput = @($publicDeploymentContractResult.output)
 $publicDeploymentContractExitCode = $publicDeploymentContractResult.exitCode
-$architectureAuditResult = Invoke-AuditChildProcess -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-architecture-audit.ps1"), "-AllowBlocked")
+$architectureAuditResult = Invoke-AuditChild -Path $paths.architectureAudit -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-architecture-audit.ps1"), "-AllowBlocked")
 $architectureAuditOutput = @($architectureAuditResult.output)
 $architectureAuditExitCode = $architectureAuditResult.exitCode
 
@@ -977,6 +1039,8 @@ $report = [ordered]@{
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
     status = $status
     completionReady = $completionReady
+    refreshMode = $(if ($NoRefresh.IsPresent) { "no-refresh-existing-reports" } else { "full-child-refresh" })
+    childRefreshPerformed = -not $NoRefresh.IsPresent
     objective = "FlowChain live infrastructure/public RPC/deployment readiness with wallets, RPC connectivity, bridge readiness, block production, fail-closed owner inputs, no secrets, and no live broadcasts."
     latestHeight = $latestHeight
     liveProductExitCode = $liveProductExitCode
@@ -1101,6 +1165,7 @@ $markdownLines.Add("")
 $markdownLines.Add("Generated: $($report.generatedAt)")
 $markdownLines.Add("Status: $status")
 $markdownLines.Add("Completion ready: $completionReady")
+$markdownLines.Add("Refresh mode: $($report.refreshMode)")
 $markdownLines.Add("Latest observed height: $latestHeight")
 $markdownLines.Add("")
 $markdownLines.Add("## Prompt-To-Artifact Checklist")

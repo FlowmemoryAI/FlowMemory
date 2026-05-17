@@ -1,9 +1,9 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-17T16:08:35.8026979Z
+Generated: 2026-05-17T19:03:50.6077620Z
 Status: blocked
-Latest height: 56856
-Finalized height: 56856
+Latest height: 58518
+Finalized height: 58518
 
 ## Findings
 

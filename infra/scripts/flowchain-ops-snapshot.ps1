@@ -44,6 +44,7 @@ $paths = [ordered]@{
     bridgeLive = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
     bridgeRelayer = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
+    bridgeRelayerGuardrail = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     externalTester = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     publicDeployment = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     noSecret = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
@@ -176,6 +177,18 @@ $bridgeRelayerQueueDisabled = Get-OpsProp -Object $reports.bridgeRelayer -Name "
 $bridgeRelayerCursorCommitRequired = Get-OpsProp -Object $bridgeRelayerCursorCommit -Name "finalCommitRequired" -Default $true
 $bridgeRelayerCursorCommitted = Get-OpsProp -Object $bridgeRelayerCursorCommit -Name "finalCommitted" -Default $false
 $bridgeRelayerCursorReason = [string](Get-OpsProp -Object $bridgeRelayerCursorCommit -Name "reason" -Default "missing")
+$bridgeRelayerGuardrailStatus = Get-OpsStatus -Report $reports.bridgeRelayerGuardrail
+$bridgeRelayerGuardrailChecks = Get-OpsProp -Object $reports.bridgeRelayerGuardrail -Name "checks"
+$bridgeRelayerGuardrailReady = $bridgeRelayerGuardrailStatus -eq "passed" `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "finalCursorUnchanged" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "stagedCursorNotWritten" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "finalCursorNotCommitted" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "noCreditsQueued" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "noCreditsApplied" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "ownerEnvNotImported" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "broadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "envValuesPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "noSecrets" -Default $false) -eq $true)
 $externalTesterStatus = Get-OpsStatus -Report $reports.externalTester
 $deploymentStatus = Get-OpsStatus -Report $reports.publicDeployment
 $noSecretStatus = Get-OpsStatus -Report $reports.noSecret
@@ -197,6 +210,9 @@ elseif ($bridgeRelayerStatus -eq "passed" -and ((($bridgeRelayerCursorCommitRequ
 }
 elseif ($bridgeRelayerStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "bridge-relayer-not-ready" -Message "Bridge relayer one-shot proof is not ready." -Commands @("npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check")
+}
+if (-not $bridgeRelayerGuardrailReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-relayer-guardrail-failed" -Message "Bridge relayer fail-closed guardrail proof is not passed." -Commands @("npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop")
 }
 if ($externalTesterStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "external-tester-not-shareable" -Message "External tester packet must remain not-shareable." -Commands @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet")
@@ -268,6 +284,8 @@ $report = [ordered]@{
         bridgeLive = $bridgeLiveStatus
         bridgeInfra = $bridgeInfraStatus
         bridgeRelayer = $bridgeRelayerStatus
+        bridgeRelayerGuardrail = $bridgeRelayerGuardrailStatus
+        bridgeRelayerGuardrailReady = $bridgeRelayerGuardrailReady
         bridgeRelayerLatencyGate = $bridgeRelayerLatencyGate
         bridgeRelayerCursorCommitRequired = $bridgeRelayerCursorCommitRequired
         bridgeRelayerCursorCommitted = $bridgeRelayerCursorCommitted

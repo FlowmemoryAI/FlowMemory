@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Activity, BellRing, ListChecks, ShieldAlert, Terminal } from "lucide-react";
+import { Activity, BellRing, ListChecks, ShieldAlert, ShieldCheck, Terminal } from "lucide-react";
 import { EmptyState } from "../components/EmptyState";
 import { SectionHeader } from "../components/SectionHeader";
 import { StatusBadge } from "../components/StatusBadge";
@@ -96,6 +96,8 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
   const latestHeight = text(ops?.latestHeight ?? metrics.latestHeight);
   const criticalCount = text(ops?.criticalCount ?? metrics.opsCriticalCount, "0");
   const blockedCount = text(ops?.blockedCount ?? metrics.opsBlockedCount, "0");
+  const bridgeGuardrailStatus = text(ops?.bridgeRelayerGuardrailStatus ?? metrics.bridgeRelayerGuardrailStatus, "not recorded");
+  const bridgeGuardrailReady = text(ops?.bridgeRelayerGuardrailReady, bridgeGuardrailStatus === "passed" ? "true" : "false");
   const networkNotifications = text(ops?.sendsNetworkNotifications, "false");
   const storesSecrets = text(ops?.storesSecrets, "false");
 
@@ -136,6 +138,11 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
           <small>synthetic failures mapped</small>
         </div>
         <div>
+          <span>Bridge guardrail</span>
+          <strong>{bridgeGuardrailStatus}</strong>
+          <small>fail-closed proof ready {bridgeGuardrailReady}</small>
+        </div>
+        <div>
           <span>Delivery boundary</span>
           <strong>{networkNotifications}</strong>
           <small>network sends; stores secrets {storesSecrets}</small>
@@ -150,7 +157,13 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
                 <ShieldAlert size={18} aria-hidden="true" />
                 <h2>Current findings</h2>
               </div>
-              <StatusBadge status={statusFromOps(alertState)} compact />
+              <div className="ops-heading-status">
+                <StatusBadge status={statusFromOps(alertState)} compact />
+                <span>
+                  <ShieldCheck size={15} aria-hidden="true" />
+                  relayer guardrail {bridgeGuardrailStatus}
+                </span>
+              </div>
             </div>
             {findings.length > 0 ? (
               <div className="ops-finding-list">
