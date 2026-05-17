@@ -47,6 +47,7 @@ const liveReadinessReportCopies = [
   "bridge-relayer-guardrail-validation-report.json",
   "external-tester-packet-report.json",
   "external-tester-readiness-report.json",
+  "public-tester-gateway-e2e-report.json",
   "ops-snapshot-report.json",
   "ops-alert-rules-report.json",
   "incident-drill-report.json",
@@ -183,6 +184,8 @@ function writeLiveReadinessSummary() {
   const publicRpcDeploymentBundle = reports["public-rpc-deployment-bundle-report.json"];
   const publicRpcDeploymentAutomation = reports["public-rpc-deployment-automation-report.json"];
   const externalTesterPacket = reports["external-tester-packet-report.json"];
+  const externalTesterReadiness = reports["external-tester-readiness-report.json"];
+  const publicTesterGateway = reports["public-tester-gateway-e2e-report.json"];
   const opsSnapshot = reports["ops-snapshot-report.json"];
   const opsAlertRules = reports["ops-alert-rules-report.json"];
   const incidentDrill = reports["incident-drill-report.json"];
@@ -202,6 +205,10 @@ function writeLiveReadinessSummary() {
   const requiredOwnerInputs = knownOwnerInputs.length > 0
     ? knownOwnerInputs
     : gates.flatMap((gate) => gate.blockers);
+  const ownerInputSummaries = [...new Set(requiredOwnerInputs)].map((name) => ({
+    name,
+    group: ownerInputGroup(name),
+  }));
   const latestHeight = asText(serviceStatus?.chain?.latestHeight, "not recorded");
   const finalizedHeight = asText(serviceStatus?.chain?.finalizedHeight, "not recorded");
   const privateRpcUrl = serviceStatus?.bind
@@ -280,10 +287,42 @@ function writeLiveReadinessSummary() {
       sendsNetworkNotifications: opsAlertRules?.notificationPlan?.sendsNetworkNotifications === true,
       storesSecrets: opsAlertRules?.notificationPlan?.storesSecrets === true,
     },
-    ownerInputs: [...new Set(requiredOwnerInputs)].map((name) => ({
-      name,
-      group: ownerInputGroup(name),
-    })),
+    testerLaunch: {
+      status: asText(externalTesterPacket?.status ?? externalTesterReadiness?.status, "not recorded"),
+      readinessStatus: asText(externalTesterReadiness?.status, "not recorded"),
+      packetStatus: asText(externalTesterPacket?.status, "not recorded"),
+      gatewayStatus: asText(publicTesterGateway?.status, "not recorded"),
+      shareable: externalTesterPacket?.packetShareable === true,
+      externalSharingReady: externalTesterReadiness?.externalSharingReady === true || externalTesterPacket?.externalSharingReady === true,
+      localTesterRehearsalReady: externalTesterReadiness?.localTesterRehearsalReady === true,
+      publicTesterGatewayReady: externalTesterReadiness?.checks?.publicTesterGatewayReady === true,
+      gatewayConfigured: publicTesterGateway?.testerGatewayConfigured === true,
+      testerNetworkFresh: externalTesterReadiness?.checks?.testerWalletNetworkFresh === true,
+      faucetRouteValidated: externalTesterReadiness?.checks?.publicTesterGatewayFaucetRouteValidated === true,
+      packetExecutableSmokeValidated: externalTesterPacket?.packetExecutableSmokeValidated === true || externalTesterReadiness?.checks?.packetExecutableSmokeValidated === true,
+      packetSmokeRoutes: asArray(externalTesterPacket?.packetSmokeRoutes).map((route) => sanitizeText(route)),
+      gatewayRoutes: asArray(publicTesterGateway?.routes).map((route) => sanitizeText(route)),
+      ownerInputGroups: Object.fromEntries(
+        recordEntries(
+          ownerInputSummaries.reduce((groups, input) => {
+            groups[input.group] = [...(groups[input.group] ?? []), input.name];
+            return groups;
+          }, {}),
+        ),
+      ),
+      commands: {
+        readiness: [
+          "npm run flowchain:tester:readiness -- -AllowBlocked",
+          "npm run flowchain:external-tester:packet -- -AllowBlocked",
+        ],
+        gateway: ["npm run flowchain:tester:gateway:e2e"],
+        wallet: ["npm run flowchain:wallet:live-tester:e2e"],
+        explorer: ["npm run flowchain:public-deployment:contract -- -AllowBlocked"],
+      },
+      envValuesPrinted: false,
+      noSecrets: publicTesterGateway?.noSecrets === true,
+    },
+    ownerInputs: ownerInputSummaries,
     gates,
     commands: {
       preExposure: commandList(contract?.operatorCommands?.preExposure, 12),

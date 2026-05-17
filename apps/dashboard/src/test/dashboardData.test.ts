@@ -23,6 +23,7 @@ import {
   fetchWorkbenchSnapshot,
 } from "../data/workbench";
 import { WalletView } from "../views/WalletView";
+import { ExternalTesterLaunchView } from "../views/ExternalTesterLaunchView";
 import { ExplorerView } from "../views/ExplorerView";
 import { OpsView } from "../views/OpsView";
 import { WorkbenchView } from "../views/WorkbenchView";
@@ -430,6 +431,27 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Open ops status");
     expect(html).toContain("Friend access");
     expect(html).toContain("FLOWCHAIN_TESTER_WRITE_ENABLED");
+    expect(html).not.toContain("local-tester-write-token");
+  });
+
+  it("renders the dedicated friends-and-family launch flow without secrets", () => {
+    const workbench = buildWorkbenchSnapshot(data, {
+      devnetState,
+      devnetDashboardState,
+      bridgeTestDeposit,
+      liveReadinessReport,
+    });
+    const html = renderToStaticMarkup(createElement(MemoryRouter, { initialEntries: ["/tester"] }, createElement(ExternalTesterLaunchView, { workbench })));
+
+    expect(html).toContain("Friends-and-family launch");
+    expect(html).toContain("Shareable");
+    expect(html).toContain("Packet smoke");
+    expect(html).toContain("Gateway proof");
+    expect(html).toContain("Owner inputs");
+    expect(html).toContain("FLOWCHAIN_RPC_PUBLIC_URL");
+    expect(html).toContain("FLOWCHAIN_TESTER_WRITE_ENABLED");
+    expect(html).toContain("/tester/wallets/create");
+    expect(html).toContain("npm run flowchain:external-tester:packet");
     expect(html).not.toContain("local-tester-write-token");
   });
 

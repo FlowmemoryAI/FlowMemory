@@ -9,6 +9,7 @@ import { AlertsView } from "./views/AlertsView";
 import { BridgePilotView } from "./views/BridgePilotView";
 import { CanaryDeploymentView } from "./views/CanaryDeploymentView";
 import { DevnetBlocksView } from "./views/DevnetBlocksView";
+import { ExternalTesterLaunchView } from "./views/ExternalTesterLaunchView";
 import { ExplorerView } from "./views/ExplorerView";
 import { FlowMemoryView } from "./views/FlowMemoryView";
 import { FlowPulseStreamView } from "./views/FlowPulseStreamView";
@@ -121,6 +122,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<WorkbenchView data={data} workbench={workbench} onRefresh={() => setVersion((current) => current + 1)} />} />
         <Route path="/wallet" element={<WalletView workbench={workbench} />} />
+        <Route path="/tester" element={<ExternalTesterLaunchView workbench={workbench} />} />
         <Route path="/bridge" element={<BridgePilotView workbench={workbench} />} />
         <Route path="/explorer" element={<ExplorerView data={data} workbench={workbench} />} />
         <Route path="/ops" element={<OpsView workbench={workbench} />} />

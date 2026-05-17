@@ -17,6 +17,7 @@ import {
   RadioTower,
   ShieldAlert,
   ShieldCheck,
+  UserPlus,
   Wallet,
 } from "lucide-react";
 import type { DashboardData } from "../data/types";
@@ -33,6 +34,7 @@ interface AppShellProps {
 const NAV_ITEMS = [
   { to: "/", label: "Workbench", icon: Monitor },
   { to: "/wallet", label: "Wallet", icon: Wallet },
+  { to: "/tester", label: "Tester launch", icon: UserPlus },
   { to: "/bridge", label: "Bridge pilot", icon: ArrowRightLeft },
   { to: "/explorer", label: "Explorer", icon: Compass },
   { to: "/ops", label: "Ops", icon: ShieldAlert },

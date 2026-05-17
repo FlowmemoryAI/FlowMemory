@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-17T19:26:49.7845143Z",
+  "generatedAt": "2026-05-17T19:39:24.8216957Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -214,6 +214,88 @@
     "sendsNetworkNotifications": false,
     "storesSecrets": false
   },
+  "testerLaunch": {
+    "status": "blocked",
+    "readinessStatus": "blocked",
+    "packetStatus": "blocked",
+    "gatewayStatus": "passed",
+    "shareable": false,
+    "externalSharingReady": false,
+    "localTesterRehearsalReady": true,
+    "publicTesterGatewayReady": true,
+    "gatewayConfigured": true,
+    "testerNetworkFresh": true,
+    "faucetRouteValidated": true,
+    "packetExecutableSmokeValidated": true,
+    "packetSmokeRoutes": [
+      "/health",
+      "/rpc/discover",
+      "/rpc/readiness",
+      "/chain/status",
+      "/wallets/create",
+      "/wallets/balances",
+      "/wallets/send",
+      "/wallets/transfers",
+      "/tester/status",
+      "/tester/wallets/create",
+      "/tester/faucet",
+      "/tester/wallets/send",
+      "/rpc balance_get"
+    ],
+    "gatewayRoutes": [
+      "/tester/status",
+      "/tester/wallets/create",
+      "/tester/faucet",
+      "/tester/wallets/send",
+      "/rpc balance_get"
+    ],
+    "ownerInputGroups": {
+      "public RPC edge": [
+        "FLOWCHAIN_RPC_PUBLIC_URL",
+        "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+        "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+        "FLOWCHAIN_RPC_TLS_TERMINATED"
+      ],
+      "backup storage": [
+        "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+      ],
+      "tester write gateway": [
+        "FLOWCHAIN_TESTER_WRITE_ENABLED",
+        "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+        "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+      ],
+      "Base 8453 bridge": [
+        "FLOWCHAIN_PILOT_OPERATOR_ACK",
+        "FLOWCHAIN_BASE8453_RPC_URL",
+        "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+        "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+        "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+        "FLOWCHAIN_BASE8453_FROM_BLOCK",
+        "FLOWCHAIN_BASE8453_CURSOR_STATE",
+        "FLOWCHAIN_BASE8453_TO_BLOCK",
+        "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+        "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+        "FLOWCHAIN_PILOT_CONFIRMATIONS"
+      ]
+    },
+    "commands": {
+      "readiness": [
+        "npm run flowchain:tester:readiness -- -AllowBlocked",
+        "npm run flowchain:external-tester:packet -- -AllowBlocked"
+      ],
+      "gateway": [
+        "npm run flowchain:tester:gateway:e2e"
+      ],
+      "wallet": [
+        "npm run flowchain:wallet:live-tester:e2e"
+      ],
+      "explorer": [
+        "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+      ]
+    },
+    "envValuesPrinted": false,
+    "noSecrets": true
+  },
   "ownerInputs": [
     {
       "name": "FLOWCHAIN_RPC_PUBLIC_URL",
@@ -332,7 +414,7 @@
       "label": "Windows service install",
       "status": "passed",
       "summary": "The owner host has a no-secret Windows install, status, and uninstall path for registering the live supervisor as a reboot-persistent scheduled task.",
-      "evidence": "serviceInstallValidation=passed, planDidNotMutate=True, liveProfileDefault=True, commandsPresent=True",
+      "evidence": "serviceInstallValidation=passed, planDidNotMutate=True, liveProfileDefault=True, relayerDefaultOff=True, relayerOptIn=True, commandsPresent=True",
       "commands": [
         "npm run flowchain:service:install:validate",
         "npm run flowchain:service:install:windows -- -Action Plan",
@@ -504,7 +586,7 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T19:26:49.7845143Z"
+      "generatedAt": "2026-05-17T19:39:24.8216957Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
@@ -573,6 +655,12 @@
       "generatedAt": "2026-05-17T19:03:15.6449467Z"
     },
     {
+      "fileName": "public-tester-gateway-e2e-report.json",
+      "schema": "flowchain.public_tester_gateway_e2e_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-17T18:49:41.2441905Z"
+    },
+    {
       "fileName": "ops-snapshot-report.json",
       "schema": "flowchain.ops_snapshot_report.v1",
       "status": "blocked",
@@ -606,7 +694,7 @@
       "fileName": "no-secret-scan-report.json",
       "schema": "flowchain.no_secret_scan_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T19:16:14.9158782Z"
+      "generatedAt": "2026-05-17T19:31:27.0642221Z"
     }
   ],
   "envValuesPrinted": false,
