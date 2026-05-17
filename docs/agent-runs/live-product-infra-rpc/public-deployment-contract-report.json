@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-17T11:33:51.4189038Z",
+    "generatedAt":  "2026-05-17T11:37:29.0400389Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -313,9 +313,9 @@
                   },
                   {
                       "id":  "base8453-bridge-relayer-queue",
-                      "requirement":  "The bridge relayer has a no-broadcast one-shot path that checks owner guardrails, observes Base 8453 deposits, filters replays, queues new credits into the running L1, and waits for main-state credit evidence.",
+                      "requirement":  "The bridge relayer has a no-broadcast one-shot path that checks owner guardrails, observes Base 8453 deposits, filters replays, queues new credits into the running L1, waits for main-state credit evidence, and records handoff-to-spendable latency.",
                       "status":  "blocked",
-                      "evidence":  "relayer=blocked, observed=0, new=0, queued=0, applied=0",
+                      "evidence":  "relayer=blocked, observed=0, new=0, queued=0, applied=0, latencyGate=not-run, handoffToSpendableSeconds=",
                       "commands":  [
                                        "npm run flowchain:bridge:relayer:once"
                                    ],

@@ -740,15 +740,20 @@ Add-DeploymentItem -Items $items -Id "base8453-bridge-edge" `
 $bridgeRelayer = $reports.bridgeRelayerOnce
 $bridgeRelayerStatus = Get-DeploymentStatus -Report $bridgeRelayer
 $bridgeRelayerCounts = Get-DeploymentProp -Object $bridgeRelayer -Name "counts"
+$bridgeRelayerTiming = Get-DeploymentProp -Object $bridgeRelayer -Name "timing"
+$bridgeRelayerAppliedCount = [int](Get-DeploymentProp -Object $bridgeRelayerCounts -Name "appliedCredits" -Default 0)
+$bridgeRelayerLatencyGate = Get-DeploymentProp -Object $bridgeRelayerTiming -Name "latencyGate" -Default "missing"
+$bridgeRelayerLatencyReady = $bridgeRelayerAppliedCount -eq 0 -or $bridgeRelayerLatencyGate -eq "passed"
 $bridgeRelayerReady = ($bridgeRelayerStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $bridgeRelayer -Name "broadcasts" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $bridgeRelayer -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $bridgeRelayer -Name "noSecrets" -Default $false) -eq $true) `
+    -and $bridgeRelayerLatencyReady `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:once")
 Add-DeploymentItem -Items $items -Id "base8453-bridge-relayer-queue" `
-    -Requirement "The bridge relayer has a no-broadcast one-shot path that checks owner guardrails, observes Base 8453 deposits, filters replays, queues new credits into the running L1, and waits for main-state credit evidence." `
+    -Requirement "The bridge relayer has a no-broadcast one-shot path that checks owner guardrails, observes Base 8453 deposits, filters replays, queues new credits into the running L1, waits for main-state credit evidence, and records handoff-to-spendable latency." `
     -Status $(if ($bridgeRelayerReady) { "passed" } elseif ($bridgeRelayerStatus -eq "blocked") { "blocked" } else { "failed" }) `
-    -Evidence "relayer=$bridgeRelayerStatus, observed=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'newCredits' -Default 0), queued=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'queuedTransactions' -Default 0), applied=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'appliedCredits' -Default 0)" `
+    -Evidence "relayer=$bridgeRelayerStatus, observed=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'newCredits' -Default 0), queued=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'queuedTransactions' -Default 0), applied=$bridgeRelayerAppliedCount, latencyGate=$bridgeRelayerLatencyGate, handoffToSpendableSeconds=$(Get-DeploymentProp -Object $bridgeRelayerTiming -Name 'handoffToSpendableSeconds')" `
     -Commands @("npm run flowchain:bridge:relayer:once") `
     -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
 

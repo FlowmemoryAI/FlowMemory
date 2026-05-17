@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.bridge_relayer_once_report.v0",
-    "generatedAt":  "2026-05-17T11:32:18.9323073Z",
+    "generatedAt":  "2026-05-17T11:37:18.2463948Z",
     "status":  "blocked",
     "mode":  "base8453-pilot",
     "queueDisabled":  false,
@@ -14,6 +14,21 @@
                    "newCredits":  0,
                    "queuedTransactions":  0,
                    "appliedCredits":  0
+               },
+    "timing":  {
+                   "runStartedAt":  "2026-05-17T11:37:16.1726492Z",
+                   "infraCheckedAt":  "2026-05-17T11:37:18.1623915Z",
+                   "liveCheckedAt":  null,
+                   "baseObservedAt":  null,
+                   "handoffWrittenAt":  null,
+                   "nodeIngestedAt":  null,
+                   "creditAppliedAt":  null,
+                   "firstSpendableAt":  null,
+                   "completedAt":  "2026-05-17T11:37:18.1853927Z",
+                   "totalSeconds":  2.013,
+                   "handoffToSpendableSeconds":  null,
+                   "codePathWithin60Seconds":  null,
+                   "latencyGate":  "not-run"
                },
     "ownerEnvFile":  {
                          "configured":  false,
@@ -47,7 +62,7 @@
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-once\\logs\\bridge-infra-readiness.log",
                       "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-once\\bridge-infra-readiness-report.json",
                       "reason":  "",
-                      "at":  "2026-05-17T11:32:18.6574239Z"
+                      "at":  "2026-05-17T11:37:17.9893844Z"
                   }
               ],
     "issues":  [

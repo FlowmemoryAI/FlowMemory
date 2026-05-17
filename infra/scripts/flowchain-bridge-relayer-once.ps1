@@ -80,6 +80,21 @@ $counts = [ordered]@{
     queuedTransactions = 0
     appliedCredits = 0
 }
+$timing = [ordered]@{
+    runStartedAt = (Get-Date).ToUniversalTime().ToString("o")
+    infraCheckedAt = $null
+    liveCheckedAt = $null
+    baseObservedAt = $null
+    handoffWrittenAt = $null
+    nodeIngestedAt = $null
+    creditAppliedAt = $null
+    firstSpendableAt = $null
+    completedAt = $null
+    totalSeconds = $null
+    handoffToSpendableSeconds = $null
+    codePathWithin60Seconds = $null
+    latencyGate = "not-run"
+}
 $readiness = [ordered]@{
     infra = "not-run"
     live = "not-run"
@@ -154,6 +169,59 @@ function ConvertTo-RelayerSafeLine {
     }
     $text = [System.Text.RegularExpressions.Regex]::Replace($text, "https?://[^\s,)]+", "<redacted-url>")
     return $text
+}
+
+function Get-RelayerUtcNow {
+    return (Get-Date).ToUniversalTime().ToString("o")
+}
+
+function Set-RelayerTiming {
+    param(
+        [Parameter(Mandatory = $true)][string] $Name,
+        [AllowNull()][object] $Value = $null
+    )
+
+    if (-not ($timing.Keys -contains $Name)) {
+        throw "Unknown relayer timing field: $Name"
+    }
+    $timing[$Name] = if ($null -eq $Value) { Get-RelayerUtcNow } else { "$Value" }
+}
+
+function ConvertTo-RelayerDateTimeOffset {
+    param([AllowNull()][object] $Value)
+
+    if ($null -eq $Value -or [string]::IsNullOrWhiteSpace("$Value")) {
+        return $null
+    }
+    try {
+        return [System.DateTimeOffset]::Parse("$Value", [System.Globalization.CultureInfo]::InvariantCulture).ToUniversalTime()
+    }
+    catch {
+        return $null
+    }
+}
+
+function Get-RelayerSecondsBetween {
+    param(
+        [AllowNull()][object] $Start,
+        [AllowNull()][object] $End
+    )
+
+    $startAt = ConvertTo-RelayerDateTimeOffset -Value $Start
+    $endAt = ConvertTo-RelayerDateTimeOffset -Value $End
+    if ($null -eq $startAt -or $null -eq $endAt) {
+        return $null
+    }
+    return [math]::Round(($endAt - $startAt).TotalSeconds, 3)
+}
+
+function Get-RelayerFileWriteUtc {
+    param([Parameter(Mandatory = $true)][string] $Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return $null
+    }
+    return (Get-Item -LiteralPath $Path).LastWriteTimeUtc.ToString("o")
 }
 
 function Invoke-RelayerExternal {
@@ -328,6 +396,28 @@ function Wait-ForRelayerCredits {
 function Complete-RelayerRun {
     param([Parameter(Mandatory = $true)][string] $Status)
 
+    Set-RelayerTiming -Name "completedAt"
+    $timing.totalSeconds = Get-RelayerSecondsBetween -Start $timing.runStartedAt -End $timing.completedAt
+    $timing.handoffToSpendableSeconds = Get-RelayerSecondsBetween -Start $timing.handoffWrittenAt -End $timing.firstSpendableAt
+    if ($counts.appliedCredits -gt 0) {
+        if ($null -eq $timing.handoffToSpendableSeconds) {
+            $timing.latencyGate = "failed"
+            Add-RelayerIssue -Kind "code" -Code "bridge-latency-unmeasured" -Owner "bridge-relayer/runtime" -Reason "Bridge credit application latency could not be measured for the applied handoff."
+            $Status = "failed"
+        }
+        else {
+            $timing.codePathWithin60Seconds = ([double]$timing.handoffToSpendableSeconds -le 60)
+            $timing.latencyGate = if ($timing.codePathWithin60Seconds) { "passed" } else { "failed" }
+            if (-not $timing.codePathWithin60Seconds) {
+                Add-RelayerIssue -Kind "code" -Code "bridge-latency-over-60s" -Owner "bridge-relayer/runtime" -Reason "Bridge handoff-to-spendable latency was $($timing.handoffToSpendableSeconds)s, exceeding the 60s launch target."
+                $Status = "failed"
+            }
+        }
+    }
+    else {
+        $timing.latencyGate = if ($Status -eq "passed") { "not-run-no-new-credits" } else { "not-run" }
+    }
+
     $report = [ordered]@{
         schema = "flowchain.bridge_relayer_once_report.v0"
         generatedAt = (Get-Date).ToUniversalTime().ToString("o")
@@ -337,6 +427,7 @@ function Complete-RelayerRun {
         waitSeconds = $WaitSeconds
         readiness = $readiness
         counts = $counts
+        timing = $timing
         ownerEnvFile = $ownerEnvState
         artifacts = $artifacts
         steps = @($steps)
@@ -384,6 +475,7 @@ try {
     ) -ExpectedReportPath $infraReportFullPath
     $infraReport = Read-RelayerJson -Path $infraReportFullPath
     $readiness.infra = Get-RelayerReportStatus -Report $infraReport
+    Set-RelayerTiming -Name "infraCheckedAt"
     if ($readiness.infra -ne "passed") {
         Add-RelayerIssue -Kind "external" -Code "bridge-infra-not-passed" -Owner "owner/operator" -Reason "Base 8453 bridge infra readiness is $($readiness.infra)."
         Complete-RelayerRun -Status $(if ($readiness.infra -eq "blocked") { "blocked" } else { "failed" })
@@ -400,6 +492,7 @@ try {
     ) -ExpectedReportPath $liveReportFullPath
     $liveReport = Read-RelayerJson -Path $liveReportFullPath
     $readiness.live = Get-RelayerReportStatus -Report $liveReport
+    Set-RelayerTiming -Name "liveCheckedAt"
     if ($readiness.live -ne "passed") {
         Add-RelayerIssue -Kind "external" -Code "bridge-live-not-passed" -Owner "owner/operator" -Reason "Base 8453 bridge live readiness is $($readiness.live)."
         Complete-RelayerRun -Status $(if ($readiness.live -eq "blocked") { "blocked" } else { "failed" })
@@ -439,6 +532,11 @@ try {
         Add-RelayerIssue -Kind "code" -Code "handoff-missing" -Reason "Base observation did not produce a bridge runtime handoff."
         Complete-RelayerRun -Status "failed"
     }
+    Set-RelayerTiming -Name "handoffWrittenAt" -Value (Get-RelayerFileWriteUtc -Path $handoffFullPath)
+    $firstObservation = @($handoff.observations | Select-Object -First 1)
+    if ($firstObservation.Count -gt 0 -and $null -ne $firstObservation[0].observedAt) {
+        Set-RelayerTiming -Name "baseObservedAt" -Value $firstObservation[0].observedAt
+    }
 
     $credits = @($handoff.credits | Where-Object { "$($_.status)" -ne "rejected" })
     $counts.observedCredits = $credits.Count
@@ -471,6 +569,7 @@ try {
         Add-RelayerIssue -Kind "code" -Code "bridge-credit-not-queued" -Owner "runtime" -Reason "No runtime transactions were queued for new bridge credits."
         Complete-RelayerRun -Status "failed"
     }
+    Set-RelayerTiming -Name "nodeIngestedAt"
 
     $applied = Wait-ForRelayerCredits -Credits $newCredits -Path $stateFullPath -TimeoutSeconds $WaitSeconds
     $counts.appliedCredits = @($applied).Count
@@ -478,6 +577,8 @@ try {
         Add-RelayerIssue -Kind "code" -Code "bridge-credit-not-applied" -Owner "runtime" -Reason "Queued bridge credits did not appear in the main L1 state before the wait timeout."
         Complete-RelayerRun -Status "failed"
     }
+    Set-RelayerTiming -Name "creditAppliedAt"
+    Set-RelayerTiming -Name "firstSpendableAt" -Value $timing.creditAppliedAt
 
     Add-RelayerStep -Name "verify-bridge-credits-in-main-state" -Status "passed" -ReportPath $stateFullPath
     Complete-RelayerRun -Status "passed"
