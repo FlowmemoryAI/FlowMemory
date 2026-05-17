@@ -1,6 +1,7 @@
 param(
     [string] $StatePath = "devnet/local/state.json",
-    [string] $ReportPath = "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
+    [string] $ReportPath = "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json",
+    [int] $ChildTimeoutSeconds = 300
 )
 
 $ErrorActionPreference = "Stop"
@@ -13,6 +14,10 @@ $repoRoot = Set-FlowChainRepoRoot
 $stateFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $StatePath)
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
 $validationRoot = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/backup-restore-validation")
+
+if ($ChildTimeoutSeconds -lt 1) {
+    throw "ChildTimeoutSeconds must be at least 1."
+}
 
 Reset-FlowChainDirectory -Path $validationRoot | Out-Null
 $backupRoot = Join-Path $validationRoot "backup-root"
@@ -45,29 +50,106 @@ $missingSnapshotManifestRestoreReportPath = Resolve-FlowChainPath -RepoRoot $rep
 $latestPointerTamperRestoreReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-latest-pointer-tamper-report.json"
 $wrongChainStateMismatchRestoreReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-wrong-chain-state-mismatch-report.json"
 
-function Invoke-ValidationChild {
-    param([Parameter(Mandatory = $true)][string[]] $ArgumentList)
+$script:ValidationChildResults = New-Object System.Collections.ArrayList
 
-    $previousErrorActionPreference = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
+function Stop-ValidationProcessTree {
+    param([Parameter(Mandatory = $true)][int] $ProcessId)
+
+    $children = @()
     try {
-        $output = (& powershell @ArgumentList 2>&1) | ForEach-Object { "$_" }
-        $exitCode = $LASTEXITCODE
-        if ($null -eq $exitCode) {
-            $exitCode = 0
+        $children = @(Get-CimInstance Win32_Process -Filter "ParentProcessId=$ProcessId" -ErrorAction SilentlyContinue)
+    }
+    catch {
+        $children = @()
+    }
+
+    foreach ($child in $children) {
+        Stop-ValidationProcessTree -ProcessId ([int] $child.ProcessId)
+    }
+
+    try {
+        Stop-Process -Id $ProcessId -Force -ErrorAction SilentlyContinue
+    }
+    catch {
+    }
+}
+
+function Read-ValidationOutputFile {
+    param([Parameter(Mandatory = $true)][string] $Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return @()
+    }
+    return @(Get-Content -LiteralPath $Path -ErrorAction SilentlyContinue | ForEach-Object { "$_" })
+}
+
+function Invoke-ValidationChild {
+    param(
+        [Parameter(Mandatory = $true)][string] $Name,
+        [Parameter(Mandatory = $true)][string[]] $ArgumentList
+    )
+
+    $startedAt = (Get-Date).ToUniversalTime()
+    $stamp = $startedAt.ToString("yyyyMMddTHHmmssfffZ")
+    $tempBase = Join-Path ([System.IO.Path]::GetTempPath()) "flowchain-backup-restore-validation-$PID-$stamp-$([Guid]::NewGuid().ToString("N"))"
+    $stdoutPath = "$tempBase.out.log"
+    $stderrPath = "$tempBase.err.log"
+    $timedOut = $false
+    $exitCode = 1
+    $processId = $null
+    $output = @()
+
+    try {
+        $process = Start-Process -FilePath "powershell" `
+            -ArgumentList (Join-FlowChainProcessArguments -ArgumentList $ArgumentList) `
+            -WorkingDirectory $repoRoot `
+            -PassThru `
+            -WindowStyle Hidden `
+            -RedirectStandardOutput $stdoutPath `
+            -RedirectStandardError $stderrPath
+        $processId = $process.Id
+        if (-not $process.WaitForExit($ChildTimeoutSeconds * 1000)) {
+            $timedOut = $true
+            Stop-ValidationProcessTree -ProcessId $process.Id
+            $exitCode = 124
+        }
+        else {
+            $process.Refresh()
+            $exitCode = [int] $process.ExitCode
         }
     }
     catch {
         $output = @($_.Exception.Message)
         $exitCode = 1
     }
-    finally {
-        $ErrorActionPreference = $previousErrorActionPreference
+
+    $stdout = Read-ValidationOutputFile -Path $stdoutPath
+    $stderr = Read-ValidationOutputFile -Path $stderrPath
+    $output = @($output + $stdout + $stderr)
+    if ($timedOut) {
+        $output = @("Timed out after $ChildTimeoutSeconds seconds; child process tree was stopped.") + $output
     }
+    $finishedAt = (Get-Date).ToUniversalTime()
+
+    Remove-Item -LiteralPath $stdoutPath -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $stderrPath -Force -ErrorAction SilentlyContinue
+
+    [void] $script:ValidationChildResults.Add([ordered]@{
+        name = $Name
+        startedAt = $startedAt.ToString("o")
+        finishedAt = $finishedAt.ToString("o")
+        durationSeconds = [int][Math]::Max(0, [Math]::Floor(($finishedAt - $startedAt).TotalSeconds))
+        timedOut = $timedOut
+        timeoutSeconds = $ChildTimeoutSeconds
+        processId = $processId
+        exitCode = [int] $exitCode
+        outputLineCount = @($output).Count
+    })
 
     return [ordered]@{
         exitCode = [int] $exitCode
         output = @($output)
+        timedOut = $timedOut
     }
 }
 
@@ -97,12 +179,13 @@ function Copy-ValidationBackupRoot {
 
 function Invoke-ValidationRestore {
     param(
+        [Parameter(Mandatory = $true)][string] $Name,
         [Parameter(Mandatory = $true)][string] $BackupRootPath,
         [Parameter(Mandatory = $true)][string] $RestoreRootPath,
         [Parameter(Mandatory = $true)][string] $ReportPath
     )
 
-    return Invoke-ValidationChild -ArgumentList @(
+    return Invoke-ValidationChild -Name $Name -ArgumentList @(
         "-NoProfile",
         "-ExecutionPolicy",
         "Bypass",
@@ -126,7 +209,7 @@ function Test-ValidationRestoreFailed {
     return $null -ne $report -and "$($report.status)" -eq "failed"
 }
 
-$backupResult = Invoke-ValidationChild -ArgumentList @(
+$backupResult = Invoke-ValidationChild -Name "backup" -ArgumentList @(
     "-NoProfile",
     "-ExecutionPolicy",
     "Bypass",
@@ -141,7 +224,7 @@ $backupResult = Invoke-ValidationChild -ArgumentList @(
     "-CreateBackupRoot"
 )
 
-$restoreResult = Invoke-ValidationChild -ArgumentList @(
+$restoreResult = Invoke-ValidationChild -Name "restore" -ArgumentList @(
     "-NoProfile",
     "-ExecutionPolicy",
     "Bypass",
@@ -160,8 +243,8 @@ $restoreResult = Invoke-ValidationChild -ArgumentList @(
 $backupReport = Read-FlowChainJsonIfExists -Path $backupReportPath
 $restoreReport = Read-FlowChainJsonIfExists -Path $restoreReportPath
 
-$secondBackupResult = [ordered]@{ exitCode = 1; output = @("not-run") }
-$latestRestoreResult = [ordered]@{ exitCode = 1; output = @("not-run") }
+$secondBackupResult = [ordered]@{ exitCode = 1; output = @("not-run"); timedOut = $false }
+$latestRestoreResult = [ordered]@{ exitCode = 1; output = @("not-run"); timedOut = $false }
 $secondBackupReport = $null
 $latestRestoreReport = $null
 $latestManifestMatchesSecondSnapshot = $false
@@ -171,7 +254,7 @@ $secondSnapshotName = ""
 if ($backupResult.exitCode -eq 0 -and $null -ne $backupReport -and "$($backupReport.status)" -eq "passed") {
     $firstSnapshotName = Get-FlowChainJsonString -Object $backupReport.snapshot -Names @("snapshotName")
     Start-Sleep -Milliseconds 20
-    $secondBackupResult = Invoke-ValidationChild -ArgumentList @(
+    $secondBackupResult = Invoke-ValidationChild -Name "second-backup" -ArgumentList @(
         "-NoProfile",
         "-ExecutionPolicy",
         "Bypass",
@@ -192,7 +275,7 @@ if ($backupResult.exitCode -eq 0 -and $null -ne $backupReport -and "$($backupRep
         $latestManifestSnapshotName = Get-FlowChainJsonString -Object $latestManifest -Names @("snapshotName")
         $latestManifestMatchesSecondSnapshot = -not [string]::IsNullOrWhiteSpace($secondSnapshotName) -and $secondSnapshotName -eq $latestManifestSnapshotName
 
-        $latestRestoreResult = Invoke-ValidationRestore -BackupRootPath $backupRoot -RestoreRootPath $latestRestoreRoot -ReportPath $latestRestoreReportPath
+        $latestRestoreResult = Invoke-ValidationRestore -Name "latest-restore" -BackupRootPath $backupRoot -RestoreRootPath $latestRestoreRoot -ReportPath $latestRestoreReportPath
         $latestRestoreReport = Read-FlowChainJsonIfExists -Path $latestRestoreReportPath
         $latestRestoreUsedLatestSnapshot = $latestRestoreResult.exitCode -eq 0 `
             -and $null -ne $latestRestoreReport `
@@ -215,7 +298,7 @@ if (-not [string]::IsNullOrWhiteSpace($selectedSnapshotName)) {
     if (Test-Path -LiteralPath $corruptStatePath) {
         Add-Content -LiteralPath $corruptStatePath -Value "`n "
     }
-    $corruptResult = Invoke-ValidationRestore -BackupRootPath $corruptRoot -RestoreRootPath (Join-Path $validationRoot "corrupt-restore-root") -ReportPath $corruptRestoreReportPath
+    $corruptResult = Invoke-ValidationRestore -Name "corrupt-restore" -BackupRootPath $corruptRoot -RestoreRootPath (Join-Path $validationRoot "corrupt-restore-root") -ReportPath $corruptRestoreReportPath
     $corruptExitCode = $corruptResult.exitCode
     $corruptionDetected = Test-ValidationRestoreFailed -ReportPath $corruptRestoreReportPath
 
@@ -230,7 +313,7 @@ if (-not [string]::IsNullOrWhiteSpace($selectedSnapshotName)) {
         Set-ValidationProp -Object $tamperedManifest -Name "stateFileSha256" -Value ((Get-FileHash -Algorithm SHA256 -LiteralPath $tamperedStatePath).Hash).ToLowerInvariant()
         Write-FlowChainJson -Path $tamperedManifestPath -Value $tamperedManifest -Depth 12
     }
-    [void](Invoke-ValidationRestore -BackupRootPath $tamperedRoot -RestoreRootPath (Join-Path $validationRoot "tampered-restore-root") -ReportPath $tamperedRestoreReportPath)
+    [void](Invoke-ValidationRestore -Name "tampered-manifest-restore" -BackupRootPath $tamperedRoot -RestoreRootPath (Join-Path $validationRoot "tampered-restore-root") -ReportPath $tamperedRestoreReportPath)
     $tamperedManifestDetected = Test-ValidationRestoreFailed -ReportPath $tamperedRestoreReportPath
 
     Copy-ValidationBackupRoot -Destination $missingArtifactRoot
@@ -238,7 +321,7 @@ if (-not [string]::IsNullOrWhiteSpace($selectedSnapshotName)) {
     if (Test-Path -LiteralPath $missingStatePath) {
         Remove-Item -LiteralPath $missingStatePath -Force
     }
-    [void](Invoke-ValidationRestore -BackupRootPath $missingArtifactRoot -RestoreRootPath (Join-Path $validationRoot "missing-artifact-restore-root") -ReportPath $missingArtifactRestoreReportPath)
+    [void](Invoke-ValidationRestore -Name "missing-artifact-restore" -BackupRootPath $missingArtifactRoot -RestoreRootPath (Join-Path $validationRoot "missing-artifact-restore-root") -ReportPath $missingArtifactRestoreReportPath)
     $missingStateArtifactDetected = Test-ValidationRestoreFailed -ReportPath $missingArtifactRestoreReportPath
 
     Copy-ValidationBackupRoot -Destination $missingSnapshotManifestRoot
@@ -246,13 +329,13 @@ if (-not [string]::IsNullOrWhiteSpace($selectedSnapshotName)) {
     if (Test-Path -LiteralPath $missingSnapshotManifestPath) {
         Remove-Item -LiteralPath $missingSnapshotManifestPath -Force
     }
-    [void](Invoke-ValidationRestore -BackupRootPath $missingSnapshotManifestRoot -RestoreRootPath (Join-Path $validationRoot "missing-snapshot-manifest-restore-root") -ReportPath $missingSnapshotManifestRestoreReportPath)
+    [void](Invoke-ValidationRestore -Name "missing-snapshot-manifest-restore" -BackupRootPath $missingSnapshotManifestRoot -RestoreRootPath (Join-Path $validationRoot "missing-snapshot-manifest-restore-root") -ReportPath $missingSnapshotManifestRestoreReportPath)
     $missingSnapshotManifestDetected = Test-ValidationRestoreFailed -ReportPath $missingSnapshotManifestRestoreReportPath
 
     if (-not [string]::IsNullOrWhiteSpace($firstSnapshotName) -and -not [string]::IsNullOrWhiteSpace($secondSnapshotName) -and $firstSnapshotName -ne $secondSnapshotName) {
         Copy-ValidationBackupRoot -Destination $latestPointerTamperRoot
         Copy-Item -LiteralPath (Join-Path (Join-Path $latestPointerTamperRoot $firstSnapshotName) "manifest.json") -Destination (Join-Path $latestPointerTamperRoot "latest-manifest.json") -Force
-        [void](Invoke-ValidationRestore -BackupRootPath $latestPointerTamperRoot -RestoreRootPath (Join-Path $validationRoot "latest-pointer-tamper-restore-root") -ReportPath $latestPointerTamperRestoreReportPath)
+        [void](Invoke-ValidationRestore -Name "latest-pointer-tamper-restore" -BackupRootPath $latestPointerTamperRoot -RestoreRootPath (Join-Path $validationRoot "latest-pointer-tamper-restore-root") -ReportPath $latestPointerTamperRestoreReportPath)
         $latestPointerTamperDetected = Test-ValidationRestoreFailed -ReportPath $latestPointerTamperRestoreReportPath
     }
 
@@ -266,7 +349,7 @@ if (-not [string]::IsNullOrWhiteSpace($selectedSnapshotName)) {
         Write-FlowChainJson -Path $wrongLatestPath -Value $wrongManifest -Depth 12
         Write-FlowChainJson -Path $wrongSnapshotManifestPath -Value $wrongManifest -Depth 12
     }
-    [void](Invoke-ValidationRestore -BackupRootPath $wrongChainStateMismatchRoot -RestoreRootPath (Join-Path $validationRoot "wrong-chain-state-mismatch-restore-root") -ReportPath $wrongChainStateMismatchRestoreReportPath)
+    [void](Invoke-ValidationRestore -Name "wrong-chain-state-mismatch-restore" -BackupRootPath $wrongChainStateMismatchRoot -RestoreRootPath (Join-Path $validationRoot "wrong-chain-state-mismatch-restore-root") -ReportPath $wrongChainStateMismatchRestoreReportPath)
     $wrongChainStateMismatchDetected = Test-ValidationRestoreFailed -ReportPath $wrongChainStateMismatchRestoreReportPath
 }
 
@@ -326,6 +409,8 @@ $report = [ordered]@{
         "npm run flowchain:backup:create",
         "npm run flowchain:backup:restore:verify"
     )
+    childTimeoutSeconds = $ChildTimeoutSeconds
+    childProcessResults = @($script:ValidationChildResults)
     broadcasts = $false
     envValuesPrinted = $false
     noSecrets = $true
