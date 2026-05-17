@@ -961,6 +961,32 @@ input {
   line-height: 1.38;
 }
 
+.wallet-tester-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.wallet-tester-links a {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 12px;
+  color: #071d44;
+  border: 1px solid rgba(10, 33, 71, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.42);
+  font-weight: 780;
+  text-decoration: none;
+}
+
+.wallet-tester-links a:hover {
+  border-color: rgba(15, 95, 255, 0.34);
+  background: rgba(255, 255, 255, 0.68);
+}
+
 .wallet-panel-form label {
   display: grid;
   gap: 7px;
@@ -4313,7 +4339,8 @@ code {
   .live-readiness-gates,
   .workbench-switcher,
   .explorer-category-strip,
-  .explorer-facts {
+  .explorer-facts,
+  .wallet-tester-links {
     grid-template-columns: 1fr;
   }
 

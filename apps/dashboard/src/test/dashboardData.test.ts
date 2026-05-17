@@ -422,10 +422,12 @@ describe("dashboard fixture", () => {
       bridgeTestDeposit,
       liveReadinessReport,
     });
-    const html = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(WalletView, { workbench })));
+    const html = renderToStaticMarkup(createElement(MemoryRouter, { initialEntries: ["/wallet?panel=tester"] }, createElement(WalletView, { workbench })));
 
     expect(html).toContain("Tester gateway");
     expect(html).toContain("Open tester tools");
+    expect(html).toContain("Inspect tester activity");
+    expect(html).toContain("Open ops status");
     expect(html).toContain("Friend access");
     expect(html).toContain("FLOWCHAIN_TESTER_WRITE_ENABLED");
     expect(html).not.toContain("local-tester-write-token");

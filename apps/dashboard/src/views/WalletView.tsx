@@ -1264,6 +1264,17 @@ export function WalletView({ workbench }: WalletViewProps) {
                   {loading ? "Sending" : "Send tester units"}
                 </button>
               </div>
+
+              <div className="wallet-tester-links" aria-label="Tester inspection views">
+                <Link to="/explorer">
+                  <Search size={17} aria-hidden="true" />
+                  Inspect tester activity
+                </Link>
+                <Link to="/ops">
+                  <Bell size={17} aria-hidden="true" />
+                  Open ops status
+                </Link>
+              </div>
             </div>
           ) : null}
 
