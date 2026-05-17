@@ -25,6 +25,7 @@ import {
   Settings,
   ShieldCheck,
   SlidersHorizontal,
+  UserPlus,
   Wallet,
 } from "lucide-react";
 import type { WorkbenchSnapshot } from "../data/workbench";
@@ -77,6 +78,7 @@ type WalletSendResult = {
   applied?: boolean;
   transferId?: string;
   txIds?: string[];
+  assetId?: string;
   amountUnits?: string;
   status?: string;
   from?: {
@@ -124,12 +126,25 @@ type BridgeStatus = {
   liveRuntimeHandoffLoaded?: boolean;
 };
 
+type TesterStatus = {
+  schema?: string;
+  configured?: boolean;
+  enabled?: boolean;
+  tokenHashConfigured?: boolean;
+  maxSendUnits?: string;
+  missingEnvNames?: string[];
+  invalidEnvNames?: string[];
+  envValuesPrinted?: boolean;
+  noSecrets?: boolean;
+  localOnly?: boolean;
+};
+
 type WalletApiResult<T> = {
   payload: T;
   url: string;
 };
 
-type ActionPanel = "home" | "wallet" | "send" | "receive" | "swap" | "activity" | "security" | "settings" | "staking";
+type ActionPanel = "home" | "wallet" | "send" | "receive" | "swap" | "activity" | "security" | "settings" | "staking" | "tester";
 
 type LocalActivity = {
   id: string;
@@ -304,12 +319,19 @@ export function WalletView({ workbench }: WalletViewProps) {
   const [transfers, setTransfers] = useState<WalletTransfer[]>([]);
   const [credits, setCredits] = useState<PilotCredit[]>([]);
   const [bridgeStatus, setBridgeStatus] = useState<BridgeStatus | null>(null);
+  const [testerStatus, setTesterStatus] = useState<TesterStatus | null>(null);
   const [ethUsdRate, setEthUsdRate] = useState<number | null>(null);
   const [label, setLabel] = useState("flow-wallet");
   const [passphrase, setPassphrase] = useState("");
   const [replace, setReplace] = useState(false);
   const [sendTo, setSendTo] = useState("");
   const [sendAmount, setSendAmount] = useState("");
+  const [testerToken, setTesterToken] = useState("");
+  const [testerLabel, setTesterLabel] = useState("friend-tester");
+  const [testerPassphrase, setTesterPassphrase] = useState("");
+  const [testerFrom, setTesterFrom] = useState("");
+  const [testerTo, setTesterTo] = useState("");
+  const [testerAmountUnits, setTesterAmountUnits] = useState("1");
   const [swapAmount, setSwapAmount] = useState("");
   const [search, setSearch] = useState("");
   const [activePanel, setActivePanel] = useState<ActionPanel>("home");
@@ -327,6 +349,22 @@ export function WalletView({ workbench }: WalletViewProps) {
   const hasWallet = Boolean(activeAccountId || primaryWalletAddress);
   const networkBadge = bridgeStatus?.publicProductionL1Ready ? "Live" : bridgeStatus?.liveRuntimeHandoffLoaded ? "Pilot" : "Local";
   const canCreate = passphrase.length >= 8 && !loading;
+  const liveReadinessRecords = workbench.sections.liveReadiness;
+  const testerGatewayGate = liveReadinessRecords.find((record) => record.id === "public-tester-write-gateway");
+  const externalTesterGate = liveReadinessRecords.find((record) => record.id === "external-tester-sharing");
+  const testerGatewayConfigured = testerStatus?.configured === true;
+  const testerTokenReady = testerToken.trim().length > 0;
+  const testerCreateReady = testerGatewayConfigured && testerTokenReady && testerPassphrase.length >= 8 && !loading;
+  const testerSendReady = testerGatewayConfigured && testerTokenReady && Boolean(testerFrom.trim() || primaryWalletAddress) && Boolean(testerTo.trim()) && Boolean(testerAmountUnits.trim()) && !loading;
+  const testerReportBlockers =
+    externalTesterGate?.facts.find((fact) => fact.label === "blockers")?.value ??
+    testerGatewayGate?.facts.find((fact) => fact.label === "blockers")?.value ??
+    "FLOWCHAIN_TESTER_WRITE_ENABLED";
+  const testerBlockers = [
+    ...(testerStatus?.missingEnvNames ?? []),
+    ...(testerStatus?.invalidEnvNames ?? []),
+    ...(testerGatewayConfigured ? [] : [testerReportBlockers]),
+  ].filter((value, index, values) => value && values.indexOf(value) === index);
   const visibleCredits = credits.filter((credit) =>
     credit.sourceChainId === 8453 || credit.accountId === primaryWalletAddress || credit.status === "applied",
   );
@@ -358,6 +396,7 @@ export function WalletView({ workbench }: WalletViewProps) {
       setTransfers([]);
       setCredits([]);
       setBridgeStatus(null);
+      setTesterStatus(null);
       setMessage(
         desktopStatus.exists
           ? "Wallet loaded locally. Flowchain API is unavailable, so balances and activity cannot sync yet."
@@ -384,6 +423,8 @@ export function WalletView({ workbench }: WalletViewProps) {
       setTransfers(transferResult.payload.transfers ?? []);
       setCredits(creditResult.payload.credits ?? []);
       setBridgeStatus(bridgeResult.payload);
+      const testerResult = await fetchWalletApi<TesterStatus>(apiCandidates, "/tester/status").catch(() => null);
+      setTesterStatus(testerResult?.payload ?? null);
       setMessage(null);
     } catch (error) {
       const apiMessage = error instanceof Error ? error.message : "wallet data unavailable";
@@ -507,6 +548,94 @@ export function WalletView({ workbench }: WalletViewProps) {
     }
   }
 
+  async function submitTesterCreate() {
+    if (!testerGatewayConfigured) {
+      setMessage("Tester write gateway is not configured on this control plane.");
+      return;
+    }
+    if (!testerTokenReady || testerPassphrase.length < 8) {
+      setMessage("Enter the tester bearer token and an 8 character passphrase first.");
+      return;
+    }
+    setLoading(true);
+    setMessage(null);
+    try {
+      const { payload, url } = await fetchWalletApi<WalletCreateResult>(apiCandidates, "/tester/wallets/create", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${testerToken.trim()}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          label: testerLabel.trim() || "friend-tester",
+          password: testerPassphrase,
+          replace: false,
+        }),
+      });
+      setWalletApiUrl(url);
+      setResult(payload);
+      setStatus(payload);
+      setTesterPassphrase("");
+      setActivePanel("receive");
+      setMessage("Tester wallet created. Token stayed in this browser session only.");
+      await loadStatus();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "tester wallet creation failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function submitTesterSend() {
+    const fromAccountId = testerFrom.trim() || primaryWalletAddress;
+    if (!testerGatewayConfigured) {
+      setMessage("Tester write gateway is not configured on this control plane.");
+      return;
+    }
+    if (!testerTokenReady || !fromAccountId || !testerTo.trim() || !testerAmountUnits.trim()) {
+      setMessage("Enter tester token, sender, recipient, and amount units first.");
+      return;
+    }
+    setLoading(true);
+    setMessage(null);
+    try {
+      const { payload, url } = await fetchWalletApi<WalletSendResult>(apiCandidates, "/tester/wallets/send", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${testerToken.trim()}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          fromAccountId,
+          toAccountId: testerTo.trim(),
+          amountUnits: testerAmountUnits.trim(),
+          memo: "flowchain-tester-wallet-ui-send",
+        }),
+      });
+      setWalletApiUrl(url);
+      setLocalActivity((current) => [
+        {
+          id: payload.transferId ?? `tester-send:${Date.now()}`,
+          type: payload.applied ? "Tester send applied" : "Tester send queued",
+          asset: safeText(payload.assetId, "local-test-unit"),
+          route: `${shortId(payload.from?.runtimeAccountId ?? fromAccountId)} to ${shortId(payload.to?.runtimeAccountId ?? testerTo)}`,
+          amount: `${safeText(payload.amountUnits, testerAmountUnits)} units`,
+          status: statusLabel(payload.status),
+        },
+        ...current,
+      ]);
+      setTesterTo("");
+      setTesterAmountUnits("1");
+      setActivePanel("activity");
+      setMessage("Tester send accepted by the capped gateway.");
+      await loadStatus();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "tester wallet send failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function submitSwapDraft() {
     if (!swapAmount.trim()) {
       setMessage("Enter a swap amount first.");
@@ -593,6 +722,10 @@ export function WalletView({ workbench }: WalletViewProps) {
           <button className={activePanel === "activity" ? "active" : ""} type="button" onClick={() => setActivePanel("activity")}>
             <Activity size={19} aria-hidden="true" />
             Activity
+          </button>
+          <button className={activePanel === "tester" ? "active" : ""} type="button" onClick={() => setActivePanel("tester")}>
+            <UserPlus size={19} aria-hidden="true" />
+            Tester
           </button>
           <Link to="/bridge">
             <Network size={19} aria-hidden="true" />
@@ -720,6 +853,11 @@ export function WalletView({ workbench }: WalletViewProps) {
             <strong>Bridge</strong>
             <small>Bridge to Flowchain</small>
           </Link>
+          <button type="button" onClick={() => setActivePanel("tester")}>
+            <span><UserPlus size={22} aria-hidden="true" /></span>
+            <strong>Tester</strong>
+            <small>Friend access</small>
+          </button>
         </section>
 
         <section className="wallet-assets-section">
@@ -835,6 +973,32 @@ export function WalletView({ workbench }: WalletViewProps) {
           </button>
         </section>
 
+        <section className="wallet-side-card wallet-tester-card">
+          <div className="wallet-side-title">
+            <h2>Tester gateway</h2>
+            <b>{testerGatewayConfigured ? "Configured" : "Blocked"}</b>
+          </div>
+          <dl className="wallet-network-facts">
+            <div>
+              <dt>Max send</dt>
+              <dd>{testerStatus?.maxSendUnits ?? "not set"}</dd>
+            </div>
+            <div>
+              <dt>Token hash</dt>
+              <dd>{testerStatus?.tokenHashConfigured ? "set" : "missing"}</dd>
+            </div>
+            <div>
+              <dt>Packet</dt>
+              <dd>{externalTesterGate?.status === "verified" ? "shareable" : "blocked"}</dd>
+            </div>
+          </dl>
+          <small>{testerBlockers.length > 0 ? testerBlockers.join(", ") : "No tester gateway blockers reported."}</small>
+          <button className="wallet-text-action" type="button" onClick={() => setActivePanel("tester")}>
+            Open tester tools
+            <ChevronRight size={15} aria-hidden="true" />
+          </button>
+        </section>
+
         <section className="wallet-side-card wallet-bridge-card">
           <div>
             <Network size={24} aria-hidden="true" />
@@ -882,6 +1046,7 @@ export function WalletView({ workbench }: WalletViewProps) {
                 {activePanel === "security" ? "Security" : null}
                 {activePanel === "settings" || activePanel === "wallet" ? "Wallet settings" : null}
                 {activePanel === "staking" ? "Staking" : null}
+                {activePanel === "tester" ? "External tester tools" : null}
               </h2>
             </div>
             <button type="button" onClick={() => setActivePanel("home")}>Close</button>
@@ -934,6 +1099,74 @@ export function WalletView({ workbench }: WalletViewProps) {
                 <ArrowRightLeft size={17} aria-hidden="true" />
                 Get quote
               </button>
+            </div>
+          ) : null}
+
+          {activePanel === "tester" ? (
+            <div className="wallet-tester-panel">
+              <section className="wallet-tester-readiness">
+                <div>
+                  <strong>{testerGatewayConfigured ? "Tester gateway configured" : "Tester gateway blocked"}</strong>
+                  <span>{externalTesterGate?.summary ?? "External tester packet readiness is loaded from the live deployment report."}</span>
+                </div>
+                <dl>
+                  <div>
+                    <dt>gateway proof</dt>
+                    <dd>{testerGatewayGate?.status ?? "pending"}</dd>
+                  </div>
+                  <div>
+                    <dt>packet</dt>
+                    <dd>{externalTesterGate?.status ?? "pending"}</dd>
+                  </div>
+                  <div>
+                    <dt>max units</dt>
+                    <dd>{testerStatus?.maxSendUnits ?? "not set"}</dd>
+                  </div>
+                  <div>
+                    <dt>values printed</dt>
+                    <dd>{testerStatus?.envValuesPrinted === true ? "true" : "false"}</dd>
+                  </div>
+                </dl>
+                {testerBlockers.length > 0 ? <p>{testerBlockers.join(", ")}</p> : null}
+              </section>
+
+              <div className="wallet-panel-form">
+                <label>
+                  <span>Tester bearer token</span>
+                  <input value={testerToken} onChange={(event) => setTesterToken(event.target.value)} type="password" autoComplete="off" placeholder="Token from owner packet" />
+                </label>
+                <label>
+                  <span>Tester wallet label</span>
+                  <input value={testerLabel} onChange={(event) => setTesterLabel(event.target.value)} placeholder="friend-tester" />
+                </label>
+                <label>
+                  <span>Tester wallet passphrase</span>
+                  <input value={testerPassphrase} onChange={(event) => setTesterPassphrase(event.target.value)} type="password" autoComplete="new-password" placeholder="8 characters minimum" />
+                </label>
+                <button type="button" disabled={!testerCreateReady} onClick={() => void submitTesterCreate()}>
+                  <UserPlus size={17} aria-hidden="true" />
+                  {loading ? "Creating" : "Create tester wallet"}
+                </button>
+              </div>
+
+              <div className="wallet-panel-form">
+                <label>
+                  <span>Sender account</span>
+                  <input value={testerFrom} onChange={(event) => setTesterFrom(event.target.value)} placeholder={primaryWalletAddress || "local-account:tester-a"} />
+                </label>
+                <label>
+                  <span>Recipient account</span>
+                  <input value={testerTo} onChange={(event) => setTesterTo(event.target.value)} placeholder="local-account:tester-b" />
+                </label>
+                <label>
+                  <span>Amount units</span>
+                  <input value={testerAmountUnits} onChange={(event) => setTesterAmountUnits(event.target.value)} inputMode="numeric" placeholder="1" />
+                </label>
+                <button type="button" disabled={!testerSendReady} onClick={() => void submitTesterSend()}>
+                  <Send size={17} aria-hidden="true" />
+                  {loading ? "Sending" : "Send tester units"}
+                </button>
+              </div>
             </div>
           ) : null}
 

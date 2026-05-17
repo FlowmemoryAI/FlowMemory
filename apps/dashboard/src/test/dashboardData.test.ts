@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { MemoryRouter } from "react-router-dom";
 import canaryFixture from "../../../../fixtures/dashboard/flowmemory-dashboard-base-canary-v0.json";
 import fixture from "../../../../fixtures/dashboard/flowmemory-dashboard-v0.json";
 import devnetDashboardState from "../../../../fixtures/launch-core/generated/devnet/dashboard-state.json";
@@ -21,6 +22,7 @@ import {
   buildWorkbenchSnapshot,
   fetchWorkbenchSnapshot,
 } from "../data/workbench";
+import { WalletView } from "../views/WalletView";
 import { WorkbenchView } from "../views/WorkbenchView";
 
 describe("dashboard fixture", () => {
@@ -409,6 +411,22 @@ describe("dashboard fixture", () => {
     expect(html).toContain("External tester packet");
     expect(html).toContain("FLOWCHAIN_RPC_PUBLIC_URL");
     expect(html).toContain("flowchain:public-deployment:contract");
+  });
+
+  it("renders wallet tester gateway controls without secrets", () => {
+    const workbench = buildWorkbenchSnapshot(data, {
+      devnetState,
+      devnetDashboardState,
+      bridgeTestDeposit,
+      liveReadinessReport,
+    });
+    const html = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(WalletView, { workbench })));
+
+    expect(html).toContain("Tester gateway");
+    expect(html).toContain("Open tester tools");
+    expect(html).toContain("Friend access");
+    expect(html).toContain("FLOWCHAIN_TESTER_WRITE_ENABLED");
+    expect(html).not.toContain("local-tester-write-token");
   });
 
   it("renders bridge readiness live-blocked without env values", () => {

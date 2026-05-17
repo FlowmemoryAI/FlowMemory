@@ -184,9 +184,15 @@ function writeLiveReadinessSummary() {
   const summary = contract?.deploymentReady === true
     ? "Public launch gates are passing; run the pre-exposure commands before sharing the tester packet."
     : "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.";
+  const generatedAt = asText(
+    contract?.generatedAt ??
+      reports["flowchain-live-infra-check-report.json"]?.generatedAt ??
+      serviceStatus?.generatedAt,
+    "not recorded",
+  );
   const liveReadiness = {
     schema: "flowchain.live_readiness_dashboard_report.v0",
-    generatedAt: new Date().toISOString(),
+    generatedAt,
     status: asText(contract?.status ?? reports["flowchain-live-infra-check-report.json"]?.status, "unresolved"),
     deploymentReady: contract?.deploymentReady === true,
     packetShareable: contract?.packetShareable === true || externalTesterPacket?.packetShareable === true,
