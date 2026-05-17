@@ -48,6 +48,7 @@ const liveReadinessReportCopies = [
   "bridge-relayer-guardrail-validation-report.json",
   "bridge-relayer-loop-validation-report.json",
   "external-tester-packet-report.json",
+  "external-tester-connect-pack.json",
   "external-tester-readiness-report.json",
   "public-tester-gateway-e2e-report.json",
   "ops-snapshot-report.json",
@@ -190,6 +191,7 @@ function writeLiveReadinessSummary() {
   const publicRpcDeploymentBundle = reports["public-rpc-deployment-bundle-report.json"];
   const publicRpcDeploymentAutomation = reports["public-rpc-deployment-automation-report.json"];
   const externalTesterPacket = reports["external-tester-packet-report.json"];
+  const externalTesterConnectPack = reports["external-tester-connect-pack.json"];
   const externalTesterReadiness = reports["external-tester-readiness-report.json"];
   const publicTesterGateway = reports["public-tester-gateway-e2e-report.json"];
   const opsSnapshot = reports["ops-snapshot-report.json"];
@@ -216,6 +218,7 @@ function writeLiveReadinessSummary() {
     name,
     group: ownerInputGroup(name),
   }));
+  const connectPackCheckValues = Object.values(externalTesterPacket?.connectPackChecks ?? {});
   const latestHeight = asText(serviceStatus?.chain?.latestHeight, "not recorded");
   const finalizedHeight = asText(serviceStatus?.chain?.finalizedHeight, "not recorded");
   const privateRpcUrl = serviceStatus?.bind
@@ -253,6 +256,7 @@ function writeLiveReadinessSummary() {
       publicRpcDeploymentAutomationStatus: asText(publicRpcDeploymentAutomation?.status, "not recorded"),
       publicRpcDeploymentAutomationAction: asText(publicRpcDeploymentAutomation?.action, "not recorded"),
       externalTesterPacketStatus: asText(externalTesterPacket?.status, "not recorded"),
+      externalTesterConnectPackStatus: asText(externalTesterConnectPack?.status, "not recorded"),
       ownerInputReady: ownerInputs?.ownerInputReady === true,
       noSecretStatus: asText(noSecretScan?.status, "not recorded"),
       opsSnapshotStatus: asText(opsSnapshot?.status, "not recorded"),
@@ -311,8 +315,17 @@ function writeLiveReadinessSummary() {
       status: asText(externalTesterPacket?.status ?? externalTesterReadiness?.status, "not recorded"),
       readinessStatus: asText(externalTesterReadiness?.status, "not recorded"),
       packetStatus: asText(externalTesterPacket?.status, "not recorded"),
+      connectPackStatus: asText(externalTesterConnectPack?.status, "not recorded"),
       gatewayStatus: asText(publicTesterGateway?.status, "not recorded"),
       shareable: externalTesterPacket?.packetShareable === true,
+      connectPackShareable: externalTesterPacket?.connectPackShareable === true || externalTesterConnectPack?.shareable === true,
+      connectPackReady: connectPackCheckValues.length > 0 && connectPackCheckValues.every((value) => value === true),
+      connectPackNetwork: {
+        name: sanitizeText(externalTesterConnectPack?.network?.name),
+        chainId: sanitizeText(externalTesterConnectPack?.network?.chainId),
+        rpcEndpointPlaceholder: sanitizeText(externalTesterConnectPack?.network?.rpcEndpointPlaceholder),
+        explorerSummaryUrlPlaceholder: sanitizeText(externalTesterConnectPack?.network?.explorerSummaryUrlPlaceholder),
+      },
       externalSharingReady: externalTesterReadiness?.externalSharingReady === true || externalTesterPacket?.externalSharingReady === true,
       localTesterRehearsalReady: externalTesterReadiness?.localTesterRehearsalReady === true,
       publicTesterGatewayReady: externalTesterReadiness?.checks?.publicTesterGatewayReady === true,
@@ -321,6 +334,8 @@ function writeLiveReadinessSummary() {
       faucetRouteValidated: externalTesterReadiness?.checks?.publicTesterGatewayFaucetRouteValidated === true,
       packetExecutableSmokeValidated: externalTesterPacket?.packetExecutableSmokeValidated === true || externalTesterReadiness?.checks?.packetExecutableSmokeValidated === true,
       packetSmokeRoutes: asArray(externalTesterPacket?.packetSmokeRoutes).map((route) => sanitizeText(route)),
+      connectPackReadOnlyRoutes: asArray(externalTesterConnectPack?.endpoints?.readOnlyRoutes).map((route) => sanitizeText(route)),
+      connectPackTesterWriteRoutes: asArray(externalTesterConnectPack?.endpoints?.testerWriteRoutes).map((route) => sanitizeText(route)),
       gatewayRoutes: asArray(publicTesterGateway?.routes).map((route) => sanitizeText(route)),
       ownerInputGroups: Object.fromEntries(
         recordEntries(

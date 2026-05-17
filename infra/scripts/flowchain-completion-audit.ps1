@@ -732,6 +732,20 @@ $externalTesterPacketPath = [string](Get-AuditProp -Object $externalTesterPacket
 $externalTesterPacketExecutableSmokeValidated = Get-AuditProp -Object $externalTesterPacket -Name "packetExecutableSmokeValidated" -Default $false
 $externalTesterPacketSmokeChecks = Get-AuditProp -Object $externalTesterPacket -Name "packetSmokeChecks"
 $externalTesterPacketSmokeRoutes = @((Get-AuditProp -Object $externalTesterPacket -Name "packetSmokeRoutes" -Default @()))
+$externalTesterConnectPackShareable = Get-AuditProp -Object $externalTesterPacket -Name "connectPackShareable" -Default $false
+$externalTesterConnectPackChecks = Get-AuditProp -Object $externalTesterPacket -Name "connectPackChecks"
+$externalTesterConnectPackReady = ((Get-AuditProp -Object $externalTesterConnectPackChecks -Name "connectPackWritten" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $externalTesterConnectPackChecks -Name "connectPackSchemaValid" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $externalTesterConnectPackChecks -Name "connectPackHasNetworkProfile" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $externalTesterConnectPackChecks -Name "connectPackHasRpcPlaceholder" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $externalTesterConnectPackChecks -Name "connectPackHasTesterTokenPlaceholder" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $externalTesterConnectPackChecks -Name "connectPackHasReadOnlyRoutes" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $externalTesterConnectPackChecks -Name "connectPackHasTesterWriteRoutes" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $externalTesterConnectPackChecks -Name "connectPackShareableMatchesPacket" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $externalTesterConnectPackChecks -Name "connectPackNoConcreteUrl" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $externalTesterConnectPackChecks -Name "connectPackNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $externalTesterConnectPackChecks -Name "connectPackBroadcastsFalse" -Default $false) -eq $true) `
+    -and ($externalTesterConnectPackShareable -eq $externalTesterPacketShareable)
 $externalTesterStatus = Get-ReportStatus -Report $externalTester
 $externalSharingReady = Get-AuditProp -Object $externalTester -Name "externalSharingReady" -Default $false
 $externalTesterChecks = Get-AuditProp -Object $externalTester -Name "checks"
@@ -741,13 +755,15 @@ $externalTesterLaunchPassed = ($externalTesterStatus -eq "passed") `
     -and ($externalSharingReady -eq $true) `
     -and ($externalTesterPacketShareable -eq $true) `
     -and ($externalTesterNetworkFresh -eq $true) `
-    -and ($externalTesterPacketExecutableSmokeValidated -eq $true)
+    -and ($externalTesterPacketExecutableSmokeValidated -eq $true) `
+    -and ($externalTesterConnectPackReady -eq $true)
 $externalTesterLaunchBlocked = ($externalTesterStatus -eq "blocked") `
     -and ($externalTesterPacketStatus -eq "blocked") `
     -and ($externalSharingReady -eq $false) `
     -and ($externalTesterPacketShareable -eq $false) `
     -and ($externalTesterNetworkFresh -eq $true) `
-    -and ($externalTesterPacketExecutableSmokeValidated -eq $true)
+    -and ($externalTesterPacketExecutableSmokeValidated -eq $true) `
+    -and ($externalTesterConnectPackReady -eq $true)
 $opsSnapshot = $reports.opsSnapshot
 $opsSnapshotStatus = Get-ReportStatus -Report $opsSnapshot
 $opsSnapshotCriticalCount = [int](Get-AuditProp -Object $opsSnapshot -Name "criticalCount" -Default 999999)
@@ -1024,15 +1040,15 @@ Add-AuditItem -Items $items -Id "backup-owner-path-dry-run" `
     -Commands @("npm run flowchain:backup:owner-path:dry-run")
 
 Add-AuditItem -Items $items -Id "external-tester-packet" `
-    -Requirement "External tester handoff packet is generated, executable packet-route smoke is validated, and sharing fails closed until public gates pass." `
-    -Status $(if (($externalTesterPacketStatus -eq "passed" -and $externalTesterPacketShareable -eq $true -and $externalTesterPacketExecutableSmokeValidated -eq $true) -or ($externalTesterPacketStatus -eq "blocked" -and $externalTesterPacketShareable -eq $false -and $externalTesterPacketExecutableSmokeValidated -eq $true)) { "passed" } else { "failed" }) `
-    -Evidence "packetStatus=$externalTesterPacketStatus, shareable=$externalTesterPacketShareable, packetSmoke=$externalTesterPacketExecutableSmokeValidated, smokeRoutes=$($externalTesterPacketSmokeRoutes.Count), packet=$externalTesterPacketPath" `
+    -Requirement "External tester handoff packet and machine-readable connection pack are generated, executable packet-route smoke is validated, and sharing fails closed until public gates pass." `
+    -Status $(if (($externalTesterPacketStatus -eq "passed" -and $externalTesterPacketShareable -eq $true -and $externalTesterPacketExecutableSmokeValidated -eq $true -and $externalTesterConnectPackReady -eq $true) -or ($externalTesterPacketStatus -eq "blocked" -and $externalTesterPacketShareable -eq $false -and $externalTesterPacketExecutableSmokeValidated -eq $true -and $externalTesterConnectPackReady -eq $true)) { "passed" } else { "failed" }) `
+    -Evidence "packetStatus=$externalTesterPacketStatus, shareable=$externalTesterPacketShareable, packetSmoke=$externalTesterPacketExecutableSmokeValidated, smokeRoutes=$($externalTesterPacketSmokeRoutes.Count), connectPackReady=$externalTesterConnectPackReady, packet=$externalTesterPacketPath" `
     -Commands @("npm run flowchain:external-tester:packet")
 
 Add-AuditItem -Items $items -Id "friends-and-family-launch" `
-    -Requirement "Friends-and-family tester launch requires fresh tester-wallet evidence and executable packet-route smoke, and remains blocked until public RPC, backup, and Base bridge gates pass." `
+    -Requirement "Friends-and-family tester launch requires fresh tester-wallet evidence, executable packet-route smoke, and a machine-readable connection pack, and remains blocked until public RPC, backup, and Base bridge gates pass." `
     -Status $(if ($externalTesterLaunchPassed) { "passed" } elseif ($externalTesterLaunchBlocked) { "blocked" } else { "failed" }) `
-    -Evidence "externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, packetStatus=$externalTesterPacketStatus, shareable=$externalTesterPacketShareable, packetSmoke=$externalTesterPacketExecutableSmokeValidated, smokeRoutes=$($externalTesterPacketSmokeRoutes.Count), externalSharingReady=$externalSharingReady" `
+    -Evidence "externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, packetStatus=$externalTesterPacketStatus, shareable=$externalTesterPacketShareable, packetSmoke=$externalTesterPacketExecutableSmokeValidated, smokeRoutes=$($externalTesterPacketSmokeRoutes.Count), connectPackReady=$externalTesterConnectPackReady, externalSharingReady=$externalSharingReady" `
     -Commands @("npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked") `
     -Blockers @($missingEnv)
 
@@ -1196,6 +1212,9 @@ $report = [ordered]@{
         packetExecutableSmokeValidated = $externalTesterPacketExecutableSmokeValidated
         packetSmokeChecks = $externalTesterPacketSmokeChecks
         packetSmokeRoutes = @($externalTesterPacketSmokeRoutes)
+        connectPackShareable = $externalTesterConnectPackShareable
+        connectPackReady = $externalTesterConnectPackReady
+        connectPackChecks = $externalTesterConnectPackChecks
         packetPath = $externalTesterPacketPath
         readinessStatus = (Get-ReportStatus -Report $externalTester)
         publicTesterGatewayStatus = $publicTesterGatewayStatus

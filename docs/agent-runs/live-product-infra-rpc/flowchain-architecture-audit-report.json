@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-17T20:55:47.3747253Z",
+    "generatedAt":  "2026-05-17T21:22:59.1109076Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -28,7 +28,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=59881, finalizedHeight=59881",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=60281, finalizedHeight=60281",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -493,13 +493,14 @@
                   {
                       "id":  "external-tester-launch-boundary",
                       "layer":  "External tester launch",
-                      "requirement":  "Friends-and-family tester sharing requires fresh tester-wallet evidence and executable packet-route smoke, and remains blocked until public RPC, backup, and Base bridge gates pass.",
+                      "requirement":  "Friends-and-family tester sharing requires fresh tester-wallet evidence, executable packet-route smoke, and a machine-readable connection pack, and remains blocked until public RPC, backup, and Base bridge gates pass.",
                       "status":  "blocked",
-                      "evidence":  "externalTester=blocked, testerNetworkFresh=True, packet=blocked, packetShareable=False, packetSmoke=True, smokeRoutes=13, externalSharingReady=False",
+                      "evidence":  "externalTester=blocked, testerNetworkFresh=True, packet=blocked, packetShareable=False, packetSmoke=True, smokeRoutes=13, connectPackReady=True, externalSharingReady=False",
                       "files":  [
                                     "infra/scripts/flowchain-external-tester-readiness.ps1",
                                     "infra/scripts/flowchain-external-tester-packet.ps1",
-                                    "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md"
+                                    "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md",
+                                    "docs/agent-runs/live-product-infra-rpc/external-tester-connect-pack.json"
                                 ],
                       "commands":  [
                                        "npm run flowchain:tester:readiness -- -AllowBlocked",
@@ -549,7 +550,7 @@
                       "layer":  "Verification",
                       "requirement":  "Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, developer dev-pack, and completion evidence into one auditable path.",
                       "status":  "passed",
-                      "evidence":  "liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, packetSmoke=True, publicTesterGateway=passed, devPack=passed",
+                      "evidence":  "liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, packetSmoke=True, connectPackReady=True, publicTesterGateway=passed, devPack=passed",
                       "files":  [
                                     "infra/scripts/flowchain-live-infra-check.ps1",
                                     "infra/scripts/flowchain-live-product-e2e.ps1",
@@ -834,6 +835,21 @@
                                                                    "/tester/wallets/send",
                                                                    "/rpc balance_get"
                                                                ],
+                                         "connectPackShareable":  false,
+                                         "connectPackReady":  true,
+                                         "connectPackChecks":  {
+                                                                   "connectPackWritten":  true,
+                                                                   "connectPackSchemaValid":  true,
+                                                                   "connectPackHasNetworkProfile":  true,
+                                                                   "connectPackHasRpcPlaceholder":  true,
+                                                                   "connectPackHasTesterTokenPlaceholder":  true,
+                                                                   "connectPackHasReadOnlyRoutes":  true,
+                                                                   "connectPackHasTesterWriteRoutes":  true,
+                                                                   "connectPackShareableMatchesPacket":  true,
+                                                                   "connectPackNoConcreteUrl":  true,
+                                                                   "connectPackNoSecrets":  true,
+                                                                   "connectPackBroadcastsFalse":  true
+                                                               },
                                          "testerNetworkFresh":  true,
                                          "publicTesterGatewayStatus":  "passed",
                                          "publicTesterGatewayReady":  true,

@@ -1,10 +1,12 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-17T20:55:41.2198531Z",
+    "generatedAt":  "2026-05-17T21:22:58.9529031Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
     "packetExecutableSmokeValidated":  true,
+    "connectPackShareable":  false,
+    "connectPackReady":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
                        "passed":  21,
@@ -118,7 +120,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=59881, finalizedHeight=59881",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=60281, finalizedHeight=60281",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -376,9 +378,9 @@
                   },
                   {
                       "id":  "external-tester-sharing",
-                      "requirement":  "External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence plus authenticated tester faucet/send gateway smoke.",
+                      "requirement":  "External tester packet and machine-readable connection pack must remain not-shareable until owner public RPC, backup, and bridge gates pass, and they must rely on fresh tester-wallet evidence plus authenticated tester faucet/send gateway smoke.",
                       "status":  "blocked",
-                      "evidence":  "externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, publicTesterGatewayReady=True, faucetRoute=True, packetSmoke=True, testerFaucet=True, capRejected=True, externalSharingReady=False, packet=blocked, packetShareable=False",
+                      "evidence":  "externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, publicTesterGatewayReady=True, faucetRoute=True, packetSmoke=True, testerFaucet=True, capRejected=True, connectPackReady=True, externalSharingReady=False, packet=blocked, packetShareable=False",
                       "commands":  [
                                        "npm run flowchain:tester:readiness",
                                        "npm run flowchain:external-tester:packet"

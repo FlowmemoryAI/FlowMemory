@@ -919,10 +919,24 @@ $packetTesterFaucet = Get-DeploymentProp -Object $packetSmokeChecks -Name "teste
 $packetTesterCapRejected = Get-DeploymentProp -Object $packetSmokeChecks -Name "testerCapRejected" -Default $false
 $localTesterRehearsalReady = Get-DeploymentProp -Object $externalTester -Name "localTesterRehearsalReady" -Default $false
 $packetShareable = Get-DeploymentProp -Object $externalPacket -Name "packetShareable" -Default $false
+$connectPackShareable = Get-DeploymentProp -Object $externalPacket -Name "connectPackShareable" -Default $false
+$connectPackChecks = Get-DeploymentProp -Object $externalPacket -Name "connectPackChecks"
+$connectPackReady = ((Get-DeploymentProp -Object $connectPackChecks -Name "connectPackWritten" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $connectPackChecks -Name "connectPackSchemaValid" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $connectPackChecks -Name "connectPackHasNetworkProfile" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $connectPackChecks -Name "connectPackHasRpcPlaceholder" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $connectPackChecks -Name "connectPackHasTesterTokenPlaceholder" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $connectPackChecks -Name "connectPackHasReadOnlyRoutes" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $connectPackChecks -Name "connectPackHasTesterWriteRoutes" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $connectPackChecks -Name "connectPackShareableMatchesPacket" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $connectPackChecks -Name "connectPackNoConcreteUrl" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $connectPackChecks -Name "connectPackNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $connectPackChecks -Name "connectPackBroadcastsFalse" -Default $false) -eq $true) `
+    -and ($connectPackShareable -eq $packetShareable)
 Add-DeploymentItem -Items $items -Id "external-tester-sharing" `
-    -Requirement "External tester packet must remain not-shareable until owner public RPC, backup, and bridge gates pass, and it must rely on fresh tester-wallet evidence plus authenticated tester faucet/send gateway smoke." `
-    -Status $(if (($externalTesterStatus -eq "passed") -and ($externalPacketStatus -eq "passed") -and ($externalSharingReady -eq $true) -and ($packetShareable -eq $true) -and ($externalTesterNetworkFresh -eq $true) -and ($externalTesterPublicGatewayReady -eq $true) -and ($externalTesterFaucetRouteValidated -eq $true) -and ($packetExecutableSmokeValidated -eq $true) -and ($packetTesterFaucet -eq $true) -and ($packetTesterCapRejected -eq $true)) { "passed" } elseif (($externalTesterStatus -eq "blocked") -and ($externalPacketStatus -eq "blocked") -and ($externalSharingReady -eq $false) -and ($packetShareable -eq $false) -and ($externalTesterNetworkFresh -eq $true) -and ($externalTesterPublicGatewayReady -eq $true) -and ($externalTesterFaucetRouteValidated -eq $true) -and ($packetExecutableSmokeValidated -eq $true) -and ($packetTesterFaucet -eq $true) -and ($packetTesterCapRejected -eq $true)) { "blocked" } else { "failed" }) `
-    -Evidence "externalTester=$externalTesterStatus, localTesterRehearsalReady=$localTesterRehearsalReady, testerNetworkFresh=$externalTesterNetworkFresh, publicTesterGatewayReady=$externalTesterPublicGatewayReady, faucetRoute=$externalTesterFaucetRouteValidated, packetSmoke=$packetExecutableSmokeValidated, testerFaucet=$packetTesterFaucet, capRejected=$packetTesterCapRejected, externalSharingReady=$externalSharingReady, packet=$externalPacketStatus, packetShareable=$packetShareable" `
+    -Requirement "External tester packet and machine-readable connection pack must remain not-shareable until owner public RPC, backup, and bridge gates pass, and they must rely on fresh tester-wallet evidence plus authenticated tester faucet/send gateway smoke." `
+    -Status $(if (($externalTesterStatus -eq "passed") -and ($externalPacketStatus -eq "passed") -and ($externalSharingReady -eq $true) -and ($packetShareable -eq $true) -and ($externalTesterNetworkFresh -eq $true) -and ($externalTesterPublicGatewayReady -eq $true) -and ($externalTesterFaucetRouteValidated -eq $true) -and ($packetExecutableSmokeValidated -eq $true) -and ($packetTesterFaucet -eq $true) -and ($packetTesterCapRejected -eq $true) -and ($connectPackReady -eq $true)) { "passed" } elseif (($externalTesterStatus -eq "blocked") -and ($externalPacketStatus -eq "blocked") -and ($externalSharingReady -eq $false) -and ($packetShareable -eq $false) -and ($externalTesterNetworkFresh -eq $true) -and ($externalTesterPublicGatewayReady -eq $true) -and ($externalTesterFaucetRouteValidated -eq $true) -and ($packetExecutableSmokeValidated -eq $true) -and ($packetTesterFaucet -eq $true) -and ($packetTesterCapRejected -eq $true) -and ($connectPackReady -eq $true)) { "blocked" } else { "failed" }) `
+    -Evidence "externalTester=$externalTesterStatus, localTesterRehearsalReady=$localTesterRehearsalReady, testerNetworkFresh=$externalTesterNetworkFresh, publicTesterGatewayReady=$externalTesterPublicGatewayReady, faucetRoute=$externalTesterFaucetRouteValidated, packetSmoke=$packetExecutableSmokeValidated, testerFaucet=$packetTesterFaucet, capRejected=$packetTesterCapRejected, connectPackReady=$connectPackReady, externalSharingReady=$externalSharingReady, packet=$externalPacketStatus, packetShareable=$packetShareable" `
     -Commands @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet") `
     -Blockers @($ownerMissingInputs)
 
@@ -1037,6 +1051,8 @@ $report = [ordered]@{
     deploymentReady = $status -eq "passed"
     packetShareable = $packetShareable
     packetExecutableSmokeValidated = $packetExecutableSmokeValidated
+    connectPackShareable = $connectPackShareable
+    connectPackReady = $connectPackReady
     blockedOnlyOnKnownExternalOwnerInputs = $blockedOnlyOnKnownOwnerInputs
     itemCounts = [ordered]@{
         passed = @($items | Where-Object { $_.status -eq "passed" }).Count
@@ -1063,6 +1079,7 @@ $markdownLines.Add("Generated: $($report.generatedAt)")
 $markdownLines.Add("Status: $status")
 $markdownLines.Add("Deployment ready: $($report.deploymentReady)")
 $markdownLines.Add("Packet shareable: $packetShareable")
+$markdownLines.Add("Connect pack ready: $connectPackReady")
 $markdownLines.Add("Blocked only on known external owner inputs: $blockedOnlyOnKnownOwnerInputs")
 $markdownLines.Add("")
 $markdownLines.Add("This file records deployment gates, commands, and env names only. It must not contain owner-provided values.")

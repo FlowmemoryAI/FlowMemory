@@ -1,6 +1,6 @@
 ﻿# FlowChain Architecture Audit
 
-Generated: 2026-05-17T20:55:47.3747253Z
+Generated: 2026-05-17T21:22:59.1109076Z
 Status: blocked
 Blocked only on known external owner inputs: True
 
@@ -22,7 +22,7 @@ Blocked only on known external owner inputs: True
 
 | Layer | Requirement | Status | Evidence |
 | --- | --- | --- | --- |
-| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=59881, finalizedHeight=59881 |
+| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=60281, finalizedHeight=60281 |
 | Operations | Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers. | passed | monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertInstall=passed, alertInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=9, blockedRules=6, unmappedAlerts=0, incidentDrill=passed, incidentCases=10, incidentFailed=0 |
 | Operations | Owner-host service lifecycle includes a no-secret Windows Scheduled Task install, status, and uninstall path for reboot-persistent live supervisor autorecovery. | passed | installValidation=passed, failedChecks=0, planDidNotMutate=True, liveProfileDefault=True, relayerDefaultOff=True, relayerOptIn=True, schedulerCmdlets=True |
 | RPC/API | The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation and abuse rejection before it can be exposed publicly. | passed | validationStatus=passed, corsAllowed=True, corsRejected=True, endpointChecks=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True, abuseStatus=passed, abusePassed=True, abuseMissingChecks=0 |
@@ -41,9 +41,9 @@ Blocked only on known external owner inputs: True
 | Governance/safety | Owner signup checklist maps public RPC edge, tester write token/cap, always-on host, backup storage, Base 8453 RPC, bridge details, and local env-file setup to exact owner actions without requesting secrets. | passed | signupStatus=passed, itemCount=9, externalSignupCount=3, missingCoverage=0, repoOwned=True, localEnvFileSupported=True |
 | Security | Architecture reports and live-readiness commands preserve the no-secret and no-live-broadcast safety boundary. | passed | noSecretStatus=passed, liveProductNoLiveBroadcast=True, liveProductEnvValuesPrinted=False, baseTxBroadcasts=False, devPackNoSecrets=True |
 | Developer ecosystem | Developer SDK/devkit and docs connect to the real FlowChain RPC, generate a live RPC reference, read wallet data, submit a runtime-backed local wallet send, and fail closed for public readiness. | passed | devPackStatus=passed, methodCount=79, heights=43368->43369, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-dev-pack\dev-pack-e2e-report.json |
-| External tester launch | Friends-and-family tester sharing requires fresh tester-wallet evidence and executable packet-route smoke, and remains blocked until public RPC, backup, and Base bridge gates pass. | blocked | externalTester=blocked, testerNetworkFresh=True, packet=blocked, packetShareable=False, packetSmoke=True, smokeRoutes=13, externalSharingReady=False |
+| External tester launch | Friends-and-family tester sharing requires fresh tester-wallet evidence, executable packet-route smoke, and a machine-readable connection pack, and remains blocked until public RPC, backup, and Base bridge gates pass. | blocked | externalTester=blocked, testerNetworkFresh=True, packet=blocked, packetShareable=False, packetSmoke=True, smokeRoutes=13, connectPackReady=True, externalSharingReady=False |
 | External tester launch | Public tester write gateway has a local production-shaped E2E proof for bearer auth, public-only wallet creation, capped wallet sends, balance settlement, and over-cap rejection. | passed | gatewayStatus=passed, configured=True, transferAccepted=True, capRejected=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\public-tester-gateway-e2e-report.json |
-| Verification | Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, developer dev-pack, and completion evidence into one auditable path. | passed | liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, packetSmoke=True, publicTesterGateway=passed, devPack=passed |
+| Verification | Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, developer dev-pack, and completion evidence into one auditable path. | passed | liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, packetSmoke=True, connectPackReady=True, publicTesterGateway=passed, devPack=passed |
 
 ## Data Flows
 

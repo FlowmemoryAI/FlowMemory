@@ -1,6 +1,7 @@
 param(
     [string] $ReportPath = "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json",
     [string] $PacketPath = "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md",
+    [string] $ConnectPackPath = "docs/agent-runs/live-product-infra-rpc/external-tester-connect-pack.json",
     [switch] $AllowBlocked
 )
 
@@ -13,6 +14,7 @@ Set-StrictMode -Version Latest
 $repoRoot = Set-FlowChainRepoRoot
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
 $packetFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $PacketPath)
+$connectPackFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ConnectPackPath)
 $optionalMissingEnvNames = @(
     "FLOWCHAIN_BASE8453_CURSOR_STATE",
     "FLOWCHAIN_BASE8453_TO_BLOCK"
@@ -23,6 +25,8 @@ $testerNetworkReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs
 $publicTesterGatewayReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
 $ownerInputsReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-report.json"
 $completionAuditReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json"
+$serviceStatusReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
+$statePath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/launch-v0-state.json"
 
 function Get-PacketProp {
     param(
@@ -31,6 +35,9 @@ function Get-PacketProp {
         [object] $Default = $null
     )
 
+    if ($null -ne $Object -and $Object -is [System.Collections.IDictionary] -and $Object.Contains($Name)) {
+        return $Object[$Name]
+    }
     if ($null -ne $Object -and $Object.PSObject.Properties.Name -contains $Name) {
         return $Object.$Name
     }
@@ -73,6 +80,8 @@ $testerNetwork = Read-FlowChainJsonIfExists -Path $testerNetworkReportPath
 $publicTesterGateway = Read-FlowChainJsonIfExists -Path $publicTesterGatewayReportPath
 $ownerInputs = Read-FlowChainJsonIfExists -Path $ownerInputsReportPath
 $completionAudit = Read-FlowChainJsonIfExists -Path $completionAuditReportPath
+$serviceStatus = Read-FlowChainJsonIfExists -Path $serviceStatusReportPath
+$stateFacts = Get-FlowChainStateFacts -StatePath $statePath
 
 $readinessStatus = [string](Get-PacketProp -Object $readiness -Name "status" -Default "missing")
 $ownerInputsStatus = [string](Get-PacketProp -Object $ownerInputs -Name "status" -Default "missing")
@@ -133,6 +142,98 @@ $failed = $readinessExitCode -ne 0 -or $ownerInputsExitCode -ne 0 -or $readiness
 $packetShareable = $externalSharingReady -eq $true -and $readinessStatus -eq "passed" -and $ownerInputsStatus -eq "passed" -and $packetExecutableSmokeValidated
 $status = if ($failed) { "failed" } elseif ($packetShareable) { "passed" } else { "blocked" }
 $generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+$serviceChain = Get-PacketProp -Object $serviceStatus -Name "chain"
+$chainId = [string](Get-PacketProp -Object $stateFacts -Name "chainId" -Default "flowmemory-local-devnet-v0")
+if ([string]::IsNullOrWhiteSpace($chainId)) {
+    $chainId = "flowmemory-local-devnet-v0"
+}
+$latestHash = [string](Get-PacketProp -Object $serviceChain -Name "latestHash" -Default "")
+$finalizedHeight = [string](Get-PacketProp -Object $serviceChain -Name "finalizedHeight" -Default "")
+$readOnlyRoutes = @(
+    "/health",
+    "/rpc/discover",
+    "/rpc/readiness",
+    "/chain/status",
+    "/explorer/summary",
+    "/wallets/balances",
+    "/wallets/transfers",
+    "/tester/status"
+)
+$testerWriteRoutes = @(
+    "/tester/wallets/create",
+    "/tester/faucet",
+    "/tester/wallets/send"
+)
+$connectPack = [ordered]@{
+    schema = "flowchain.external_tester_connect_pack.v0"
+    generatedAt = $generatedAt
+    status = $status
+    shareable = $packetShareable
+    network = [ordered]@{
+        name = "FlowChain friends-and-family pilot"
+        chainId = $chainId
+        rpcEndpointPlaceholder = "<OWNER_PUBLIC_ENDPOINT>/rpc"
+        baseUrlPlaceholder = "<OWNER_PUBLIC_ENDPOINT>"
+        explorerSummaryUrlPlaceholder = "<OWNER_PUBLIC_ENDPOINT>/explorer/summary"
+        nativeCurrency = [ordered]@{
+            name = "FlowChain test unit"
+            symbol = "FLOW"
+            decimals = 0
+        }
+    }
+    currentEvidence = [ordered]@{
+        latestHeight = $latestHeight
+        finalizedHeight = $finalizedHeight
+        latestHash = $latestHash
+        localTesterRehearsalReady = $localTesterRehearsalReady
+        externalSharingReady = $externalSharingReady
+        packetExecutableSmokeValidated = $packetExecutableSmokeValidated
+        authenticatedTesterGatewayReady = $publicTesterGatewayReady
+    }
+    endpoints = [ordered]@{
+        readOnlyRoutes = @($readOnlyRoutes)
+        testerWriteRoutes = @($testerWriteRoutes)
+        authHeaderPlaceholder = "Authorization: Bearer <OWNER_TESTER_WRITE_TOKEN>"
+    }
+    scripts = [ordered]@{
+        setEndpoint = '$env:FLOWCHAIN_RPC_URL = "<OWNER_PUBLIC_ENDPOINT>/rpc"'
+        discover = 'npm run flowchain:devkit -- discover --json --rpc $env:FLOWCHAIN_RPC_URL'
+        readiness = 'npm run flowchain:devkit -- readiness --json --rpc $env:FLOWCHAIN_RPC_URL'
+        status = 'npm run flowchain:devkit -- status --json --rpc $env:FLOWCHAIN_RPC_URL'
+        walletBalances = 'npm run flowchain:devkit -- wallet-balances --json --rpc $env:FLOWCHAIN_RPC_URL'
+        walletTransfers = 'npm run flowchain:devkit -- wallet-transfers --json --rpc $env:FLOWCHAIN_RPC_URL'
+    }
+    safety = [ordered]@{
+        secretsAllowedInPacket = $false
+        ownerMustSendEndpointOutOfBand = $true
+        ownerMustSendTesterWriteTokenOutOfBand = $true
+        bridgeFundsAllowedOnlyAfterOwnerAck = $true
+        defaultTestAmountUnits = "1"
+    }
+    blockingEnvNames = @($missingEnvNames)
+    broadcasts = $false
+    envValuesPrinted = $false
+    noSecrets = $true
+}
+$connectPackText = ($connectPack | ConvertTo-Json -Depth 14).Replace('\u003c', '<').Replace('\u003e', '>')
+Assert-FlowChainNoSecretText -Text $connectPackText -Label "external tester connect pack"
+New-Item -ItemType Directory -Force -Path (Split-Path -Parent $connectPackFullPath) | Out-Null
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText($connectPackFullPath, ($connectPackText + [Environment]::NewLine), $utf8NoBom)
+$connectPackOnDisk = Read-FlowChainJsonIfExists -Path $connectPackFullPath
+$connectPackChecks = [ordered]@{
+    connectPackWritten = Test-Path -LiteralPath $connectPackFullPath
+    connectPackSchemaValid = (Get-PacketProp -Object $connectPackOnDisk -Name "schema" -Default "") -eq "flowchain.external_tester_connect_pack.v0"
+    connectPackHasNetworkProfile = -not [string]::IsNullOrWhiteSpace([string](Get-PacketProp -Object (Get-PacketProp -Object $connectPackOnDisk -Name "network") -Name "chainId" -Default ""))
+    connectPackHasRpcPlaceholder = $connectPackText.Contains("<OWNER_PUBLIC_ENDPOINT>/rpc")
+    connectPackHasTesterTokenPlaceholder = $connectPackText.Contains("<OWNER_TESTER_WRITE_TOKEN>")
+    connectPackHasReadOnlyRoutes = @($readOnlyRoutes | Where-Object { $connectPackText.Contains($_) }).Count -eq $readOnlyRoutes.Count
+    connectPackHasTesterWriteRoutes = @($testerWriteRoutes | Where-Object { $connectPackText.Contains($_) }).Count -eq $testerWriteRoutes.Count
+    connectPackShareableMatchesPacket = (Get-PacketProp -Object $connectPackOnDisk -Name "shareable" -Default $null) -eq $packetShareable
+    connectPackNoConcreteUrl = $connectPackText -notmatch 'https?://'
+    connectPackNoSecrets = $true
+    connectPackBroadcastsFalse = (Get-PacketProp -Object $connectPackOnDisk -Name "broadcasts" -Default $true) -eq $false
+}
 
 $packetLines = New-Object System.Collections.Generic.List[string]
 $packetLines.Add("# FlowChain External Tester Packet")
@@ -162,6 +263,20 @@ $packetLines.Add("")
 $packetLines.Add("## Endpoint Checks")
 $packetLines.Add("")
 $packetLines.Add("Replace <OWNER_PUBLIC_ENDPOINT> with the endpoint distributed by the owner outside this repository.")
+$packetLines.Add("")
+$packetLines.Add("## Connection Profile")
+$packetLines.Add("")
+$packetLines.Add("Machine-readable connection profile: $ConnectPackPath")
+$packetLines.Add("")
+$packetLines.Add('```json')
+$packetLines.Add("{")
+$packetLines.Add('  "network": "FlowChain friends-and-family pilot",')
+$packetLines.Add(('  "chainId": "{0}",' -f $chainId))
+$packetLines.Add('  "rpcEndpoint": "<OWNER_PUBLIC_ENDPOINT>/rpc",')
+$packetLines.Add('  "explorerSummary": "<OWNER_PUBLIC_ENDPOINT>/explorer/summary",')
+$packetLines.Add('  "testerWriteAuth": "Authorization: Bearer <OWNER_TESTER_WRITE_TOKEN>"')
+$packetLines.Add("}")
+$packetLines.Add('```')
 $packetLines.Add("")
 $packetLines.Add('```powershell')
 $packetLines.Add("Invoke-RestMethod -Method Get -Uri '<OWNER_PUBLIC_ENDPOINT>/health'")
@@ -223,7 +338,12 @@ $report = [ordered]@{
     status = $status
     packetShareable = $packetShareable
     packetPath = $packetFullPath
+    connectPackPath = $connectPackFullPath
+    connectPackShareable = Get-PacketProp -Object $connectPackOnDisk -Name "shareable" -Default $false
+    connectPackChecks = $connectPackChecks
     latestHeight = $latestHeight
+    finalizedHeight = $finalizedHeight
+    chainId = $chainId
     readinessStatus = $readinessStatus
     ownerInputsStatus = $ownerInputsStatus
     completionAuditStatus = $completionStatus
@@ -240,6 +360,8 @@ $report = [ordered]@{
         ownerInputs = $ownerInputsReportPath
         completionAudit = $completionAuditReportPath
         packet = $packetFullPath
+        connectPack = $connectPackFullPath
+        serviceStatus = $serviceStatusReportPath
     }
     readinessCommandExitCode = $readinessExitCode
     ownerInputsCommandExitCode = $ownerInputsExitCode

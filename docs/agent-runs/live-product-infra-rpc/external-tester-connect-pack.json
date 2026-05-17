@@ -1,0 +1,82 @@
+{
+    "schema":  "flowchain.external_tester_connect_pack.v0",
+    "generatedAt":  "2026-05-17T21:22:42.4548904Z",
+    "status":  "blocked",
+    "shareable":  false,
+    "network":  {
+                    "name":  "FlowChain friends-and-family pilot",
+                    "chainId":  "flowmemory-local-devnet-v0",
+                    "rpcEndpointPlaceholder":  "<OWNER_PUBLIC_ENDPOINT>/rpc",
+                    "baseUrlPlaceholder":  "<OWNER_PUBLIC_ENDPOINT>",
+                    "explorerSummaryUrlPlaceholder":  "<OWNER_PUBLIC_ENDPOINT>/explorer/summary",
+                    "nativeCurrency":  {
+                                           "name":  "FlowChain test unit",
+                                           "symbol":  "FLOW",
+                                           "decimals":  0
+                                       }
+                },
+    "currentEvidence":  {
+                            "latestHeight":  "60281",
+                            "finalizedHeight":  "60281",
+                            "latestHash":  "0x6b9d103dab82dd67f5615e049958feef714b3fbfd471f5ef46be0d18790fb787",
+                            "localTesterRehearsalReady":  true,
+                            "externalSharingReady":  false,
+                            "packetExecutableSmokeValidated":  true,
+                            "authenticatedTesterGatewayReady":  true
+                        },
+    "endpoints":  {
+                      "readOnlyRoutes":  [
+                                             "/health",
+                                             "/rpc/discover",
+                                             "/rpc/readiness",
+                                             "/chain/status",
+                                             "/explorer/summary",
+                                             "/wallets/balances",
+                                             "/wallets/transfers",
+                                             "/tester/status"
+                                         ],
+                      "testerWriteRoutes":  [
+                                                "/tester/wallets/create",
+                                                "/tester/faucet",
+                                                "/tester/wallets/send"
+                                            ],
+                      "authHeaderPlaceholder":  "Authorization: Bearer <OWNER_TESTER_WRITE_TOKEN>"
+                  },
+    "scripts":  {
+                    "setEndpoint":  "$env:FLOWCHAIN_RPC_URL = \"<OWNER_PUBLIC_ENDPOINT>/rpc\"",
+                    "discover":  "npm run flowchain:devkit -- discover --json --rpc $env:FLOWCHAIN_RPC_URL",
+                    "readiness":  "npm run flowchain:devkit -- readiness --json --rpc $env:FLOWCHAIN_RPC_URL",
+                    "status":  "npm run flowchain:devkit -- status --json --rpc $env:FLOWCHAIN_RPC_URL",
+                    "walletBalances":  "npm run flowchain:devkit -- wallet-balances --json --rpc $env:FLOWCHAIN_RPC_URL",
+                    "walletTransfers":  "npm run flowchain:devkit -- wallet-transfers --json --rpc $env:FLOWCHAIN_RPC_URL"
+                },
+    "safety":  {
+                   "secretsAllowedInPacket":  false,
+                   "ownerMustSendEndpointOutOfBand":  true,
+                   "ownerMustSendTesterWriteTokenOutOfBand":  true,
+                   "bridgeFundsAllowedOnlyAfterOwnerAck":  true,
+                   "defaultTestAmountUnits":  "1"
+               },
+    "blockingEnvNames":  [
+                             "FLOWCHAIN_RPC_PUBLIC_URL",
+                             "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                             "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                             "FLOWCHAIN_RPC_TLS_TERMINATED",
+                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                             "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                             "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                             "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
+                             "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                             "FLOWCHAIN_BASE8453_RPC_URL",
+                             "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                             "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                             "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                             "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                             "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                             "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                             "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                         ],
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}
