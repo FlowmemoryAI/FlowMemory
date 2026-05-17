@@ -1,9 +1,9 @@
 ﻿# FlowChain Windows Alert Install
 
-Generated: 2026-05-17T22:23:45.6649862Z
+Generated: 2026-05-17T22:23:53.5425739Z
 Status: passed
-Action: Plan
-Task: \FlowChainOpsAlerts
+Action: Uninstall
+Task: \FlowChainOpsAlerts-ValidationAbsent
 
 This runbook registers a Windows Scheduled Task that refreshes the no-secret ops snapshot and alert rules on a fixed interval. It writes local reports only and does not store external delivery credentials.
 

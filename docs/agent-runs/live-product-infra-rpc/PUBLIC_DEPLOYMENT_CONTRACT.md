@@ -1,6 +1,6 @@
 ﻿# FlowChain Public Deployment Contract
 
-Generated: 2026-05-17T22:19:41.8043763Z
+Generated: 2026-05-17T22:24:10.0528076Z
 Status: blocked
 Deployment ready: False
 Packet shareable: False
@@ -33,7 +33,7 @@ This file records deployment gates, commands, and env names only. It must not co
 | The owner host has a no-secret Windows install, read-only status, and safe absent-task uninstall no-op path for registering the live supervisor as a reboot-persistent scheduled task. | passed | serviceInstallValidation=passed, planDidNotMutate=True, statusCommand=True, statusDidNotMutate=True, uninstallNoop=True, liveProfileDefault=True, relayerDefaultOff=True, relayerOptIn=True, commandsPresent=True |
 | Owner deployment has a no-secret ops snapshot that separates critical incidents from expected owner-input blockers and lists incident commands. | passed | opsSnapshot=blocked, criticalCount=0, blockedCount=6 |
 | Owner deployment has a no-secret alert rule manifest that maps every current ops finding to operator commands without committing delivery credentials. | passed | alertRules=passed, criticalRules=9, blockedRules=6, unmappedCurrentFindingCodes=0 |
-| The owner host has a no-secret Windows install, status, and uninstall path for recurring ops snapshot and alert-rule refresh without committed external delivery credentials. | passed | alertInstallValidation=passed, planDidNotMutate=True, hasAllowBlocked=True, noExternalDelivery=True |
+| The owner host has a no-secret Windows install, status, and uninstall path for recurring ops snapshot and alert-rule refresh without committed external delivery credentials. | passed | alertInstallValidation=passed, planDidNotMutate=True, statusDidNotMutate=True, uninstallAbsentDidNotMutate=True, hasAllowBlocked=True, noExternalDelivery=True |
 | Owner deployment has a no-secret escalation dry run that maps every current ops finding to local operator actions while proving repo-owned alert evidence does not send network delivery or store external delivery credentials. | passed | dryRun=passed, failedChecks=0, events=6, noNetworkDelivery=True, storesNoSecrets=True |
 | The owner deployment contract validates the required public RPC, tester write gateway, backup, and Base 8453 input names without values. | blocked | ownerInputsStatus=blocked, ownerInputReady=False |
 | The local public RPC abuse harness proves CORS rejection, media-type rejection, malformed JSON handling, batch/body caps, notification handling, rate limiting, and no-secret response summaries. | passed | abuseStatus=passed, abuseReady=True, missingChecks=0 |

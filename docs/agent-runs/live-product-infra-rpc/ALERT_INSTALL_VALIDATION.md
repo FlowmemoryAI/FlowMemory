@@ -1,9 +1,9 @@
 ﻿# FlowChain Alert Install Validation
 
-Generated: 2026-05-17T16:24:18.6483945Z
+Generated: 2026-05-17T22:23:53.9585802Z
 Status: passed
 
-This validation proves the scheduled alert refresh path is planned, no-secret, non-mutating in plan mode, and refreshes local alert evidence without external delivery.
+This validation proves the scheduled alert refresh path is planned, status-checkable, absent-uninstall safe, no-secret, non-mutating in read-only/no-op modes, and refreshes local alert evidence without external delivery.
 
 ## Checks
 
@@ -12,6 +12,13 @@ This validation proves the scheduled alert refresh path is planned, no-secret, n
 - packageScriptsPresent: True
 - planCommandPassed: True
 - planDidNotMutate: True
+- statusCommandPassed: True
+- statusDidNotMutate: True
+- statusTaskStatePreserved: True
+- uninstallAbsentCommandPassed: True
+- uninstallAbsentDidNotMutate: True
+- uninstallAbsentTaskAbsentBefore: True
+- uninstallAbsentTaskAbsentAfter: True
 - schedulerCmdletsAvailable: True
 - scheduledTaskActionSupportsWorkingDirectory: True
 - scheduledTaskTriggerSupportsRepetition: True

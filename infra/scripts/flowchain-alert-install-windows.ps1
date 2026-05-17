@@ -195,7 +195,7 @@ $taskBefore = Get-AlertTaskSnapshot -Name $TaskName -Path $TaskPath -SchedulerAv
 $actionError = ""
 $taskRegistered = $false
 $taskRemoved = $false
-$taskMutationPerformed = $Action -in @("Install", "Uninstall")
+$taskMutationPerformed = $false
 
 try {
     switch ($Action) {
@@ -230,6 +230,7 @@ try {
                 -Description "FlowChain live L1 ops alert refresh. Writes no-secret local alert reports on a fixed interval." `
                 -Force | Out-Null
             $taskRegistered = $true
+            $taskMutationPerformed = $true
         }
         "Uninstall" {
             if (-not $schedulerCmdletsAvailable) {
@@ -238,6 +239,7 @@ try {
             if ($taskBefore.exists -eq $true) {
                 Unregister-ScheduledTask -TaskName $TaskName -TaskPath $TaskPath -Confirm:$false
                 $taskRemoved = $true
+                $taskMutationPerformed = $true
             }
         }
         "Status" {

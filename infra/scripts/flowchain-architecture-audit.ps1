@@ -314,6 +314,11 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ($alertInstallValidationStatus -eq "passed") `
     -and ($alertInstallFailedChecks.Count -eq 0) `
     -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "statusDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "statusTaskStatePreserved" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "uninstallAbsentCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "uninstallAbsentDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "uninstallAbsentTaskAbsentAfter" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "scheduledTaskTriggerSupportsRepetition" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
     -and ($opsEscalationDryRunStatus -eq "passed") `

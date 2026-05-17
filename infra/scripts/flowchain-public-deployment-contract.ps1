@@ -646,6 +646,13 @@ $alertInstallReady = ($alertInstallValidationStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "packageScriptsPresent" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "planCommandPassed" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "statusCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "statusDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "statusTaskStatePreserved" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "uninstallAbsentCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "uninstallAbsentDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "uninstallAbsentTaskAbsentBefore" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "uninstallAbsentTaskAbsentAfter" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "schedulerCmdletsAvailable" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "scheduledTaskTriggerSupportsRepetition" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "actionUsesAlertsScript" -Default $false) -eq $true) `
@@ -659,7 +666,7 @@ $alertInstallReady = ($alertInstallValidationStatus -eq "passed") `
 Add-DeploymentItem -Items $items -Id "ops-alert-schedule-automation" `
     -Requirement "The owner host has a no-secret Windows install, status, and uninstall path for recurring ops snapshot and alert-rule refresh without committed external delivery credentials." `
     -Status $(if ($alertInstallReady) { "passed" } else { "failed" }) `
-    -Evidence "alertInstallValidation=$alertInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $alertInstallChecks -Name "planDidNotMutate"), hasAllowBlocked=$(Get-DeploymentProp -Object $alertInstallChecks -Name "hasAllowBlocked"), noExternalDelivery=$(Get-DeploymentProp -Object $alertInstallChecks -Name "noExternalDelivery")" `
+    -Evidence "alertInstallValidation=$alertInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $alertInstallChecks -Name "planDidNotMutate"), statusDidNotMutate=$(Get-DeploymentProp -Object $alertInstallChecks -Name "statusDidNotMutate"), uninstallAbsentDidNotMutate=$(Get-DeploymentProp -Object $alertInstallChecks -Name "uninstallAbsentDidNotMutate"), hasAllowBlocked=$(Get-DeploymentProp -Object $alertInstallChecks -Name "hasAllowBlocked"), noExternalDelivery=$(Get-DeploymentProp -Object $alertInstallChecks -Name "noExternalDelivery")" `
     -Commands @("npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:alerts:install:windows -- -Action Plan", "npm run flowchain:ops:alerts:install:windows -- -Action Install", "npm run flowchain:ops:alerts:install:windows -- -Action Status", "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall")
 
 $opsEscalationDryRun = $reports.opsEscalationDryRun

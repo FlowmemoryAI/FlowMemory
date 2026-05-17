@@ -1,9 +1,9 @@
 {
     "schema":  "flowchain.alert_install_windows_report.v0",
-    "generatedAt":  "2026-05-17T22:23:45.6649862Z",
+    "generatedAt":  "2026-05-17T22:23:50.2188577Z",
     "status":  "passed",
-    "action":  "Plan",
-    "plannedOnly":  true,
+    "action":  "Status",
+    "plannedOnly":  false,
     "taskMutationPerformed":  false,
     "taskRegistered":  false,
     "taskRemoved":  false,
@@ -99,7 +99,7 @@
                    "intervalMinutesValid":  true,
                    "noExternalDelivery":  true,
                    "installStatusUninstallCommandsPresent":  true,
-                   "planDoesNotMutate":  true,
+                   "planDoesNotMutate":  null,
                    "envValuesPrintedFalse":  true,
                    "noSecrets":  true
                },

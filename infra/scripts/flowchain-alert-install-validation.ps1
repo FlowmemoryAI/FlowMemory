@@ -17,6 +17,10 @@ $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Reso
 $markdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $MarkdownPath)
 $planReportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $PlanReportPath)
 $planMarkdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $PlanMarkdownPath)
+$statusReportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-status-report.json")
+$statusMarkdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/WINDOWS_ALERT_INSTALL_STATUS.md")
+$uninstallAbsentReportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-uninstall-absent-report.json")
+$uninstallAbsentMarkdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/WINDOWS_ALERT_INSTALL_UNINSTALL_ABSENT.md")
 $installScriptPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "infra/scripts/flowchain-alert-install-windows.ps1")
 $alertsScriptPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "infra/scripts/flowchain-ops-alerts.ps1")
 $validationTmpDir = Join-Path $repoRoot "devnet/local/tmp/alert-install-validation"
@@ -80,6 +84,9 @@ function Get-AlertInstallValidationProp {
     if ($null -ne $Object -and $Object.PSObject.Properties.Name -contains $Name) {
         return $Object.$Name
     }
+    if ($null -ne $Object -and $Object -is [System.Collections.IDictionary] -and $Object.Contains($Name)) {
+        return $Object[$Name]
+    }
     return $Default
 }
 
@@ -116,6 +123,56 @@ $planChecks = Get-AlertInstallValidationProp -Object $planReport -Name "checks"
 $planCommands = Get-AlertInstallValidationProp -Object $planReport -Name "commands"
 $planScheduledTask = Get-AlertInstallValidationProp -Object $planReport -Name "scheduledTask"
 $scheduledTaskArguments = [string](Get-AlertInstallValidationProp -Object $planScheduledTask -Name "arguments" -Default "")
+$absentTaskName = "$TaskName-ValidationAbsent"
+if ($absentTaskName -notmatch '^[A-Za-z0-9_. -]{1,120}$') {
+    throw "Validation absent task name is invalid: $absentTaskName"
+}
+
+$existingAbsentTask = $null
+if (Get-Command "Get-ScheduledTask" -ErrorAction SilentlyContinue) {
+    $existingAbsentTask = Get-ScheduledTask -TaskName $absentTaskName -TaskPath "\" -ErrorAction SilentlyContinue
+}
+if ($null -ne $existingAbsentTask) {
+    throw "Refusing to use existing validation task: $absentTaskName"
+}
+
+$statusResult = Invoke-AlertInstallValidationChild -ArgumentList @(
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    $installScriptPath,
+    "-Action",
+    "Status",
+    "-TaskName",
+    $TaskName,
+    "-ReportPath",
+    $statusReportFullPath,
+    "-MarkdownPath",
+    $statusMarkdownFullPath
+)
+$statusReport = Read-FlowChainJsonIfExists -Path $statusReportFullPath
+
+$uninstallAbsentResult = Invoke-AlertInstallValidationChild -ArgumentList @(
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    $installScriptPath,
+    "-Action",
+    "Uninstall",
+    "-TaskName",
+    $absentTaskName,
+    "-ReportPath",
+    $uninstallAbsentReportFullPath,
+    "-MarkdownPath",
+    $uninstallAbsentMarkdownFullPath
+)
+$uninstallAbsentReport = Read-FlowChainJsonIfExists -Path $uninstallAbsentReportFullPath
+$statusTaskBefore = Get-AlertInstallValidationProp -Object $statusReport -Name "taskBefore"
+$statusTaskAfter = Get-AlertInstallValidationProp -Object $statusReport -Name "taskAfter"
+$uninstallAbsentTaskBefore = Get-AlertInstallValidationProp -Object $uninstallAbsentReport -Name "taskBefore"
+$uninstallAbsentTaskAfter = Get-AlertInstallValidationProp -Object $uninstallAbsentReport -Name "taskAfter"
 
 $requiredScripts = @(
     "flowchain:ops:alerts",
@@ -137,6 +194,13 @@ $checks = [ordered]@{
     packageScriptsPresent = $missingPackageScripts.Count -eq 0
     planCommandPassed = $planPassed
     planDidNotMutate = $planPassed -and ($planMutationPerformed -eq $false)
+    statusCommandPassed = [int]$statusResult.exitCode -eq 0 -and [string](Get-AlertInstallValidationProp -Object $statusReport -Name "status" -Default "missing") -eq "passed" -and [string](Get-AlertInstallValidationProp -Object $statusReport -Name "action" -Default "") -eq "Status"
+    statusDidNotMutate = (Get-AlertInstallValidationProp -Object $statusReport -Name "taskMutationPerformed" -Default $true) -eq $false
+    statusTaskStatePreserved = (Get-AlertInstallValidationProp -Object $statusTaskBefore -Name "exists" -Default $false) -eq (Get-AlertInstallValidationProp -Object $statusTaskAfter -Name "exists" -Default $true)
+    uninstallAbsentCommandPassed = [int]$uninstallAbsentResult.exitCode -eq 0 -and [string](Get-AlertInstallValidationProp -Object $uninstallAbsentReport -Name "status" -Default "missing") -eq "passed" -and [string](Get-AlertInstallValidationProp -Object $uninstallAbsentReport -Name "action" -Default "") -eq "Uninstall"
+    uninstallAbsentDidNotMutate = (Get-AlertInstallValidationProp -Object $uninstallAbsentReport -Name "taskMutationPerformed" -Default $true) -eq $false
+    uninstallAbsentTaskAbsentBefore = (Get-AlertInstallValidationProp -Object $uninstallAbsentTaskBefore -Name "exists" -Default $true) -eq $false
+    uninstallAbsentTaskAbsentAfter = (Get-AlertInstallValidationProp -Object $uninstallAbsentTaskAfter -Name "exists" -Default $true) -eq $false
     schedulerCmdletsAvailable = (Get-AlertInstallValidationProp -Object $planChecks -Name "schedulerCmdletsAvailable" -Default $false) -eq $true
     scheduledTaskActionSupportsWorkingDirectory = (Get-AlertInstallValidationProp -Object $planChecks -Name "scheduledTaskActionSupportsWorkingDirectory" -Default $false) -eq $true
     scheduledTaskTriggerSupportsRepetition = (Get-AlertInstallValidationProp -Object $planChecks -Name "scheduledTaskTriggerSupportsRepetition" -Default $false) -eq $true
@@ -172,6 +236,9 @@ $report = [ordered]@{
     missingPackageScripts = @($missingPackageScripts)
     planReportPath = $planReportFullPath
     planMarkdownPath = $planMarkdownFullPath
+    statusReportPath = $statusReportFullPath
+    uninstallAbsentReportPath = $uninstallAbsentReportFullPath
+    absentValidationTaskName = $absentTaskName
     childProcessResults = @(
         [ordered]@{
             name = "alert-install-plan"
@@ -179,6 +246,20 @@ $report = [ordered]@{
             timedOut = [bool]$planResult.timedOut
             stdoutPath = [string]$planResult.stdoutPath
             stderrPath = [string]$planResult.stderrPath
+        },
+        [ordered]@{
+            name = "alert-install-status"
+            exitCode = [int]$statusResult.exitCode
+            timedOut = [bool]$statusResult.timedOut
+            stdoutPath = [string]$statusResult.stdoutPath
+            stderrPath = [string]$statusResult.stderrPath
+        },
+        [ordered]@{
+            name = "alert-install-uninstall-absent"
+            exitCode = [int]$uninstallAbsentResult.exitCode
+            timedOut = [bool]$uninstallAbsentResult.timedOut
+            stdoutPath = [string]$uninstallAbsentResult.stdoutPath
+            stderrPath = [string]$uninstallAbsentResult.stderrPath
         }
     )
     commands = [ordered]@{
@@ -203,7 +284,7 @@ $markdownLines.Add("")
 $markdownLines.Add("Generated: $($report.generatedAt)")
 $markdownLines.Add("Status: $status")
 $markdownLines.Add("")
-$markdownLines.Add("This validation proves the scheduled alert refresh path is planned, no-secret, non-mutating in plan mode, and refreshes local alert evidence without external delivery.")
+$markdownLines.Add("This validation proves the scheduled alert refresh path is planned, status-checkable, absent-uninstall safe, no-secret, non-mutating in read-only/no-op modes, and refreshes local alert evidence without external delivery.")
 $markdownLines.Add("")
 $markdownLines.Add("## Checks")
 $markdownLines.Add("")
