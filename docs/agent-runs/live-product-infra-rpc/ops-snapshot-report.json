@@ -1,18 +1,27 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-17T12:13:32.4147229Z",
+    "generatedAt":  "2026-05-17T12:45:55.7733900Z",
     "status":  "blocked",
     "refresh":  {
-                    "performed":  false,
+                    "performed":  true,
                     "steps":  [
-
+                                  {
+                                      "name":  "service-status",
+                                      "exitCode":  0,
+                                      "outputLineCount":  9
+                                  },
+                                  {
+                                      "name":  "service-monitor",
+                                      "exitCode":  0,
+                                      "outputLineCount":  4
+                                  }
                               ],
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "53846",
-                  "finalizedHeight":  "53846",
-                  "stateFileLastWriteAgeSeconds":  5,
+                  "latestHeight":  "54751",
+                  "finalizedHeight":  "54751",
+                  "stateFileLastWriteAgeSeconds":  1,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true

@@ -24,6 +24,7 @@ import {
 } from "../data/workbench";
 import { WalletView } from "../views/WalletView";
 import { ExplorerView } from "../views/ExplorerView";
+import { OpsView } from "../views/OpsView";
 import { WorkbenchView } from "../views/WorkbenchView";
 
 describe("dashboard fixture", () => {
@@ -447,6 +448,23 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Transactions");
     expect(html).toContain("Wallets");
     expect(html).toContain("Bridge");
+    expect(html).not.toContain("local-tester-write-token");
+  });
+
+  it("renders the ops center from alert and incident reports without secrets", () => {
+    const workbench = buildWorkbenchSnapshot(data, {
+      devnetState,
+      devnetDashboardState,
+      bridgeTestDeposit,
+      liveReadinessReport,
+    });
+    const html = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(OpsView, { workbench })));
+
+    expect(html).toContain("Ops center");
+    expect(html).toContain("Current findings");
+    expect(html).toContain("Incident commands");
+    expect(html).toContain("network sends; stores secrets");
+    expect(html).toContain("public-rpc-not-ready");
     expect(html).not.toContain("local-tester-write-token");
   });
 

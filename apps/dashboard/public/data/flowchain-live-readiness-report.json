@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-17T12:38:53.9986639Z",
+  "generatedAt": "2026-05-17T12:48:22.6652373Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -8,18 +8,204 @@
   "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
   "privateRpcUrl": "http://127.0.0.1:8787",
   "metrics": {
-    "latestHeight": "54647",
-    "finalizedHeight": "54647",
+    "latestHeight": "54751",
+    "finalizedHeight": "54751",
     "monitorHeightAdvanced": true,
     "bridgeRelayerStatus": "blocked",
     "bridgeQueuedTransactions": "0",
     "externalTesterPacketStatus": "blocked",
     "ownerInputReady": false,
     "noSecretStatus": "passed",
+    "opsSnapshotStatus": "blocked",
+    "opsAlertState": "blocked",
+    "opsCriticalCount": "0",
+    "opsBlockedCount": "6",
+    "opsActiveRuleCount": 6,
+    "incidentDrillStatus": "passed",
+    "alertInstallValidationStatus": "passed",
     "statusCounts": {
       "passed": 6,
       "blocked": 5
     }
+  },
+  "ops": {
+    "snapshotStatus": "blocked",
+    "alertRulesStatus": "passed",
+    "alertState": "blocked",
+    "incidentDrillStatus": "passed",
+    "alertInstallValidationStatus": "passed",
+    "criticalCount": "0",
+    "blockedCount": "6",
+    "latestHeight": "54751",
+    "finalizedHeight": "54751",
+    "monitorStatus": "passed",
+    "monitorHeightAdvanced": true,
+    "findings": [
+      {
+        "severity": "blocked",
+        "code": "public-rpc-not-ready",
+        "message": "Public RPC is not ready to share.",
+        "commands": [
+          "npm run flowchain:public-rpc:check",
+          "npm run flowchain:public-rpc:validate",
+          "npm run flowchain:public-rpc:abuse-test"
+        ]
+      },
+      {
+        "severity": "blocked",
+        "code": "backup-not-ready",
+        "message": "State backup is not ready for public operation.",
+        "commands": [
+          "npm run flowchain:backup:restore:validate",
+          "npm run flowchain:backup:check"
+        ]
+      },
+      {
+        "severity": "blocked",
+        "code": "bridge-not-ready",
+        "message": "Base 8453 bridge readiness is not ready for external funded testing.",
+        "commands": [
+          "npm run flowchain:bridge:live:check",
+          "npm run flowchain:bridge:infra:check",
+          "npm run flowchain:bridge:emergency-stop"
+        ]
+      },
+      {
+        "severity": "blocked",
+        "code": "bridge-relayer-not-ready",
+        "message": "Bridge relayer one-shot proof is not ready.",
+        "commands": [
+          "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+          "npm run flowchain:bridge:live:check",
+          "npm run flowchain:bridge:infra:check"
+        ]
+      },
+      {
+        "severity": "blocked",
+        "code": "external-tester-not-shareable",
+        "message": "External tester packet must remain not-shareable.",
+        "commands": [
+          "npm run flowchain:tester:readiness",
+          "npm run flowchain:external-tester:packet"
+        ]
+      },
+      {
+        "severity": "blocked",
+        "code": "deployment-contract-not-ready",
+        "message": "Public deployment contract is not ready.",
+        "commands": [
+          "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+        ]
+      }
+    ],
+    "activeRuleIds": [
+      "public-rpc-not-shareable",
+      "backup-not-ready",
+      "bridge-not-ready",
+      "bridge-relayer-not-ready",
+      "external-tester-not-shareable",
+      "deployment-contract-not-ready"
+    ],
+    "activeRules": [
+      {
+        "id": "public-rpc-not-shareable",
+        "severity": "blocked",
+        "signal": "Public RPC readiness gate is not passed.",
+        "threshold": "public RPC check status is not passed",
+        "commands": [
+          "npm run flowchain:public-rpc:check",
+          "npm run flowchain:public-rpc:validate",
+          "npm run flowchain:public-rpc:abuse-test"
+        ]
+      },
+      {
+        "id": "backup-not-ready",
+        "severity": "blocked",
+        "signal": "State backup readiness is not passed.",
+        "threshold": "backup check status is not passed",
+        "commands": [
+          "npm run flowchain:backup:restore:validate",
+          "npm run flowchain:backup:check"
+        ]
+      },
+      {
+        "id": "bridge-not-ready",
+        "severity": "blocked",
+        "signal": "Base 8453 bridge readiness is not passed.",
+        "threshold": "bridge live or infra readiness status is not passed",
+        "commands": [
+          "npm run flowchain:bridge:live:check",
+          "npm run flowchain:bridge:infra:check",
+          "npm run flowchain:bridge:emergency-stop"
+        ]
+      },
+      {
+        "id": "bridge-relayer-not-ready",
+        "severity": "blocked",
+        "signal": "Bridge relayer one-shot proof is not ready.",
+        "threshold": "bridge relayer one-shot status is not passed",
+        "commands": [
+          "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+          "npm run flowchain:bridge:live:check",
+          "npm run flowchain:bridge:infra:check"
+        ]
+      },
+      {
+        "id": "external-tester-not-shareable",
+        "severity": "blocked",
+        "signal": "External tester packet is not shareable.",
+        "threshold": "tester readiness status is not passed",
+        "commands": [
+          "npm run flowchain:tester:readiness",
+          "npm run flowchain:external-tester:packet"
+        ]
+      },
+      {
+        "id": "deployment-contract-not-ready",
+        "severity": "blocked",
+        "signal": "Public deployment contract is not passed.",
+        "threshold": "deployment contract status is not passed",
+        "commands": [
+          "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+        ]
+      }
+    ],
+    "ruleCount": "13",
+    "criticalRuleCount": "7",
+    "blockedRuleCount": "6",
+    "unmappedCurrentFindingCodes": [],
+    "incidentCommands": {
+      "status": [
+        "npm run flowchain:ops:snapshot",
+        "npm run flowchain:service:status",
+        "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30"
+      ],
+      "restart": [
+        "npm run flowchain:service:restart -- -LiveProfile",
+        "npm run flowchain:service:status"
+      ],
+      "backupRecovery": [
+        "npm run flowchain:backup:restore:validate",
+        "npm run flowchain:backup:create",
+        "npm run flowchain:backup:restore:verify"
+      ],
+      "publicExposure": [
+        "npm run flowchain:public-rpc:check",
+        "npm run flowchain:public-rpc:abuse-test",
+        "npm run flowchain:external-tester:packet"
+      ],
+      "drills": [
+        "npm run flowchain:ops:incident-drill",
+        "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh"
+      ],
+      "emergency": [
+        "npm run flowchain:emergency:stop-local",
+        "npm run flowchain:bridge:emergency-stop",
+        "npm run flowchain:emergency:export-evidence"
+      ]
+    },
+    "sendsNetworkNotifications": false,
+    "storesSecrets": false
   },
   "ownerInputs": [
     {
@@ -105,7 +291,7 @@
       "label": "Private L1 origin",
       "status": "passed",
       "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
-      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=54647, finalizedHeight=54647",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=54751, finalizedHeight=54751",
       "commands": [
         "npm run flowchain:service:status"
       ],
@@ -310,7 +496,7 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T12:38:53.9986639Z"
+      "generatedAt": "2026-05-17T12:48:22.6652373Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
@@ -322,13 +508,13 @@
       "fileName": "service-status-report.json",
       "schema": "flowchain.service_status_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T12:38:11.0462713Z"
+      "generatedAt": "2026-05-17T12:45:54.8431903Z"
     },
     {
       "fileName": "service-monitor-report.json",
       "schema": "flowchain.service_monitor_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T12:22:13.8931652Z"
+      "generatedAt": "2026-05-17T12:45:55.2011970Z"
     },
     {
       "fileName": "public-rpc-readiness-report.json",
@@ -359,6 +545,30 @@
       "schema": "flowchain.external_tester_readiness_report.v0",
       "status": "blocked",
       "generatedAt": "2026-05-17T11:32:22.9801706Z"
+    },
+    {
+      "fileName": "ops-snapshot-report.json",
+      "schema": "flowchain.ops_snapshot_report.v1",
+      "status": "blocked",
+      "generatedAt": "2026-05-17T12:45:55.7733900Z"
+    },
+    {
+      "fileName": "ops-alert-rules-report.json",
+      "schema": "flowchain.ops_alert_rules_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-17T12:45:56.3437592Z"
+    },
+    {
+      "fileName": "incident-drill-report.json",
+      "schema": "flowchain.incident_drill_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-17T07:05:34.2838259Z"
+    },
+    {
+      "fileName": "alert-install-validation-report.json",
+      "schema": "flowchain.alert_install_validation_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-17T10:27:22.7634651Z"
     },
     {
       "fileName": "owner-inputs-report.json",

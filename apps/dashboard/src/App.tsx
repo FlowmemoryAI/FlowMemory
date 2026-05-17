@@ -13,6 +13,7 @@ import { ExplorerView } from "./views/ExplorerView";
 import { FlowMemoryView } from "./views/FlowMemoryView";
 import { FlowPulseStreamView } from "./views/FlowPulseStreamView";
 import { HardwareNodesView } from "./views/HardwareNodesView";
+import { OpsView } from "./views/OpsView";
 import { OverviewView } from "./views/OverviewView";
 import { RawJsonInspectorView } from "./views/RawJsonInspectorView";
 import { RootfieldsView } from "./views/RootfieldsView";
@@ -122,6 +123,7 @@ export default function App() {
         <Route path="/wallet" element={<WalletView workbench={workbench} />} />
         <Route path="/bridge" element={<BridgePilotView workbench={workbench} />} />
         <Route path="/explorer" element={<ExplorerView data={data} workbench={workbench} />} />
+        <Route path="/ops" element={<OpsView workbench={workbench} />} />
         <Route path="/overview" element={<OverviewView data={data} />} />
         <Route path="/canary" element={<CanaryDeploymentView data={canaryData} />} />
         <Route path="/flowmemory" element={<FlowMemoryView data={data} />} />

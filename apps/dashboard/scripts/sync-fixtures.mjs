@@ -44,6 +44,10 @@ const liveReadinessReportCopies = [
   "bridge-relayer-once-report.json",
   "external-tester-packet-report.json",
   "external-tester-readiness-report.json",
+  "ops-snapshot-report.json",
+  "ops-alert-rules-report.json",
+  "incident-drill-report.json",
+  "alert-install-validation-report.json",
   "owner-inputs-report.json",
   "no-secret-scan-report.json",
 ];
@@ -110,6 +114,10 @@ function blockerList(value) {
   return asArray(value).map((blocker) => sanitizeText(blocker));
 }
 
+function recordEntries(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? Object.entries(value) : [];
+}
+
 function gateFromContractItem(contract, id) {
   const item = contractItemById(contract, id);
   const label = liveReadinessGateLabels.get(id) ?? id;
@@ -169,9 +177,21 @@ function writeLiveReadinessSummary() {
   const monitor = reports["service-monitor-report.json"];
   const bridgeRelayer = reports["bridge-relayer-once-report.json"];
   const externalTesterPacket = reports["external-tester-packet-report.json"];
+  const opsSnapshot = reports["ops-snapshot-report.json"];
+  const opsAlertRules = reports["ops-alert-rules-report.json"];
+  const incidentDrill = reports["incident-drill-report.json"];
+  const alertInstallValidation = reports["alert-install-validation-report.json"];
   const ownerInputs = reports["owner-inputs-report.json"];
   const noSecretScan = reports["no-secret-scan-report.json"];
   const gates = [...liveReadinessGateLabels.keys()].map((id) => gateFromContractItem(contract, id));
+  const activeRuleIds = asArray(opsAlertRules?.activeRuleIds).map((id) => sanitizeText(id));
+  const alertRules = asArray(opsAlertRules?.rules).map((rule) => ({
+    id: sanitizeText(rule?.id),
+    severity: sanitizeText(rule?.severity),
+    signal: sanitizeText(rule?.signal),
+    threshold: sanitizeText(rule?.threshold),
+    commands: commandList(rule?.commands, 6),
+  }));
   const knownOwnerInputs = asArray(contract?.knownOwnerInputs).map((name) => sanitizeText(name));
   const requiredOwnerInputs = knownOwnerInputs.length > 0
     ? knownOwnerInputs
@@ -208,7 +228,44 @@ function writeLiveReadinessSummary() {
       externalTesterPacketStatus: asText(externalTesterPacket?.status, "not recorded"),
       ownerInputReady: ownerInputs?.ownerInputReady === true,
       noSecretStatus: asText(noSecretScan?.status, "not recorded"),
+      opsSnapshotStatus: asText(opsSnapshot?.status, "not recorded"),
+      opsAlertState: asText(opsAlertRules?.currentAlertState, "not recorded"),
+      opsCriticalCount: asText(opsSnapshot?.criticalCount, "0"),
+      opsBlockedCount: asText(opsSnapshot?.blockedCount, "0"),
+      opsActiveRuleCount: activeRuleIds.length,
+      incidentDrillStatus: asText(incidentDrill?.status, "not recorded"),
+      alertInstallValidationStatus: asText(alertInstallValidation?.status, "not recorded"),
       statusCounts: statusCounts(gates),
+    },
+    ops: {
+      snapshotStatus: asText(opsSnapshot?.status, "not recorded"),
+      alertRulesStatus: asText(opsAlertRules?.status, "not recorded"),
+      alertState: asText(opsAlertRules?.currentAlertState, "not recorded"),
+      incidentDrillStatus: asText(incidentDrill?.status, "not recorded"),
+      alertInstallValidationStatus: asText(alertInstallValidation?.status, "not recorded"),
+      criticalCount: asText(opsSnapshot?.criticalCount, "0"),
+      blockedCount: asText(opsSnapshot?.blockedCount, "0"),
+      latestHeight: asText(opsSnapshot?.chain?.latestHeight, latestHeight),
+      finalizedHeight: asText(opsSnapshot?.chain?.finalizedHeight, finalizedHeight),
+      monitorStatus: asText(opsSnapshot?.chain?.monitorStatus, "not recorded"),
+      monitorHeightAdvanced: opsSnapshot?.chain?.monitorHeightAdvanced === true,
+      findings: asArray(opsSnapshot?.findings).map((finding) => ({
+        severity: sanitizeText(finding?.severity),
+        code: sanitizeText(finding?.code),
+        message: sanitizeText(finding?.message),
+        commands: commandList(finding?.commands, 6),
+      })),
+      activeRuleIds,
+      activeRules: alertRules.filter((rule) => activeRuleIds.includes(rule.id)),
+      ruleCount: asText(opsAlertRules?.ruleCount, String(alertRules.length)),
+      criticalRuleCount: asText(opsAlertRules?.criticalRuleCount, "0"),
+      blockedRuleCount: asText(opsAlertRules?.blockedRuleCount, "0"),
+      unmappedCurrentFindingCodes: asArray(opsAlertRules?.unmappedCurrentFindingCodes).map((code) => sanitizeText(code)),
+      incidentCommands: Object.fromEntries(
+        recordEntries(opsSnapshot?.incidentCommands).map(([group, commands]) => [sanitizeText(group), commandList(commands, 10)]),
+      ),
+      sendsNetworkNotifications: opsAlertRules?.notificationPlan?.sendsNetworkNotifications === true,
+      storesSecrets: opsAlertRules?.notificationPlan?.storesSecrets === true,
     },
     ownerInputs: [...new Set(requiredOwnerInputs)].map((name) => ({
       name,

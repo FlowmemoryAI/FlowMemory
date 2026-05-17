@@ -15,6 +15,7 @@ import {
   Monitor,
   Network,
   RadioTower,
+  ShieldAlert,
   ShieldCheck,
   Wallet,
 } from "lucide-react";
@@ -34,6 +35,7 @@ const NAV_ITEMS = [
   { to: "/wallet", label: "Wallet", icon: Wallet },
   { to: "/bridge", label: "Bridge pilot", icon: ArrowRightLeft },
   { to: "/explorer", label: "Explorer", icon: Compass },
+  { to: "/ops", label: "Ops", icon: ShieldAlert },
   { to: "/overview", label: "Overview", icon: LayoutDashboard },
   { to: "/canary", label: "Base canary", icon: RadioReceiver },
   { to: "/flowmemory", label: "Flow Memory", icon: BrainCircuit },
