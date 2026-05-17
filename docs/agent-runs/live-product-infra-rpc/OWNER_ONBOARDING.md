@@ -1,6 +1,6 @@
 ﻿# FlowChain Owner Onboarding
 
-Generated: 2026-05-17T06:59:18.2000528Z
+Generated: 2026-05-17T08:23:02.9002500Z
 Status: passed
 
 FlowChain RPC is implemented by this repository. The owner does not need a third-party FlowChain RPC provider. Public RPC readiness means exposing the private local RPC origin through an owner-operated HTTPS edge with DNS, TLS, CORS, rate limits, and monitoring.
@@ -14,7 +14,7 @@ Base 8453 is different. The bridge observer reads Base mainnet, so that path nee
 | FlowChain public RPC edge | True | Public DNS/domain plus HTTPS host, tunnel, or reverse proxy for this chain's private RPC origin. | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED |
 | State backup | False | Existing writable directory or owner-managed storage mounted on the host. | FLOWCHAIN_RPC_STATE_BACKUP_PATH |
 | External tester write gateway | False | Out-of-band shared tester bearer token hash and local send cap for friends-and-family pilot writes. | FLOWCHAIN_TESTER_WRITE_ENABLED, FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256, FLOWCHAIN_TESTER_MAX_SEND_UNITS |
-| Base 8453 bridge observer | True | Base mainnet 8453 RPC provider or owner-operated Base node, plus deployed lockbox/token details. | FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_BASE8453_TO_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS |
+| Base 8453 bridge observer | True | Base mainnet 8453 RPC provider or owner-operated Base node, plus deployed lockbox/token details. | FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS, FLOWCHAIN_BASE8453_CURSOR_STATE, FLOWCHAIN_BASE8453_TO_BLOCK |
 
 ## Local Shell Template
 
@@ -40,7 +40,8 @@ $env:FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS="<20-byte lockbox address>"
 $env:FLOWCHAIN_BASE8453_SUPPORTED_TOKEN="<20-byte token address>"
 $env:FLOWCHAIN_BASE8453_ASSET_DECIMALS="<0 through 255>"
 $env:FLOWCHAIN_BASE8453_FROM_BLOCK="<first bounded Base block>"
-$env:FLOWCHAIN_BASE8453_TO_BLOCK="<last bounded Base block>"
+$env:FLOWCHAIN_BASE8453_CURSOR_STATE="services/bridge-relayer/out/base8453-pilot-cursor-state.json"
+$env:FLOWCHAIN_BASE8453_TO_BLOCK="<optional last bounded Base block>"
 $env:FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI="<positive capped amount>"
 $env:FLOWCHAIN_PILOT_TOTAL_CAP_WEI="<positive capped amount greater than or equal to max deposit>"
 $env:FLOWCHAIN_PILOT_CONFIRMATIONS="<2 through 256>"
@@ -62,7 +63,6 @@ $env:FLOWCHAIN_PILOT_CONFIRMATIONS="<2 through 256>"
 - Missing: FLOWCHAIN_BASE8453_SUPPORTED_TOKEN
 - Missing: FLOWCHAIN_BASE8453_ASSET_DECIMALS
 - Missing: FLOWCHAIN_BASE8453_FROM_BLOCK
-- Missing: FLOWCHAIN_BASE8453_TO_BLOCK
 - Missing: FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI
 - Missing: FLOWCHAIN_PILOT_TOTAL_CAP_WEI
 - Missing: FLOWCHAIN_PILOT_CONFIRMATIONS

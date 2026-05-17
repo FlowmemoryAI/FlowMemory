@@ -69,9 +69,12 @@ Configure:
 $env:FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS="<owner-verified lockbox address>"
 $env:FLOWCHAIN_BASE8453_ASSET_DECIMALS="<decimal count>"
 $env:FLOWCHAIN_BASE8453_FROM_BLOCK="<deployment or first observation block>"
-$env:FLOWCHAIN_BASE8453_TO_BLOCK="<bounded latest block>"
+$env:FLOWCHAIN_BASE8453_CURSOR_STATE="services/bridge-relayer/out/base8453-pilot-cursor-state.json"
 $env:FLOWCHAIN_PILOT_CONFIRMATIONS="<confirmation depth>"
 ```
+
+Set `FLOWCHAIN_BASE8453_TO_BLOCK` only when you need a one-off bounded scan.
+The normal pilot relayer loop uses the cursor state file and confirmed Base head.
 
 Then run:
 
@@ -86,14 +89,14 @@ Required verification:
 - Lockbox address is a 20-byte hex address.
 - `eth_getCode` returns deployed bytecode for the lockbox.
 - Token mode is native ETH via zero address or ERC-20 with deployed token bytecode.
-- Caps, range, decimals, and confirmations are numeric and bounded.
+- Caps, cursor/bootstrap range, decimals, and confirmations are numeric and bounded.
 - Operator acknowledgement is exact.
 
 Do not send funds until both checks pass with the owner-verified lockbox.
 
 ## Step 4: Observe Deposits
 
-For a bounded owner-supplied block range:
+For cursor-based pilot observation:
 
 ```powershell
 npm run flowchain:bridge:observe:base8453

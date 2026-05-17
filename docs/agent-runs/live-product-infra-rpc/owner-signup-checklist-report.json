@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.owner_signup_checklist_report.v0",
-    "generatedAt":  "2026-05-17T06:59:19.4400398Z",
+    "generatedAt":  "2026-05-17T08:23:04.2192376Z",
     "status":  "passed",
     "ownerInputsStatus":  "blocked",
     "flowChainRpcIsRepoOwned":  true,
@@ -154,7 +154,8 @@
                                "externalSignupNeeded":  false,
                                "acceptableOptions":  [
                                                          "Owner-provided deployed lockbox and token addresses",
-                                                         "Bounded first/last Base block range",
+                                                         "Bootstrap Base from-block plus cursor-state scanning",
+                                                         "Optional bounded upper block for one-off scans",
                                                          "Pilot caps and confirmations"
                                                      ],
                                "producesEnvNames":  [
@@ -163,12 +164,13 @@
                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                        "FLOWCHAIN_BASE8453_CURSOR_STATE",
                                                         "FLOWCHAIN_BASE8453_TO_BLOCK",
                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS"
                                                     ],
-                               "ownerMustGet":  "The bridge pilot lockbox/token details, bounded Base block range, max deposit, total cap, confirmations, and explicit capped-pilot acknowledgement.",
+                               "ownerMustGet":  "The bridge pilot lockbox/token details, bootstrap Base from-block, cursor-state location, optional one-off upper block, max deposit, total cap, confirmations, and explicit capped-pilot acknowledgement.",
                                "ownerMustNotSend":  [
                                                         "Private key for deploying or controlling contracts",
                                                         "wallet recovery words",
@@ -210,7 +212,6 @@
                                   "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                                   "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                                   "FLOWCHAIN_BASE8453_FROM_BLOCK",
-                                  "FLOWCHAIN_BASE8453_TO_BLOCK",
                                   "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                                   "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                   "FLOWCHAIN_PILOT_CONFIRMATIONS"
@@ -230,6 +231,7 @@
                              "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                              "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                              "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                             "FLOWCHAIN_BASE8453_CURSOR_STATE",
                              "FLOWCHAIN_BASE8453_TO_BLOCK",
                              "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                              "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
@@ -254,7 +256,6 @@
                             "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                             "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                             "FLOWCHAIN_BASE8453_FROM_BLOCK",
-                            "FLOWCHAIN_BASE8453_TO_BLOCK",
                             "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                             "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                             "FLOWCHAIN_PILOT_CONFIRMATIONS"

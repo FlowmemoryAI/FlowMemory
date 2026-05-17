@@ -1,6 +1,6 @@
 ﻿# FlowChain Owner Env Template
 
-Generated: 2026-05-17T06:59:20.8604802Z
+Generated: 2026-05-17T08:23:05.5322686Z
 Status: passed
 
 This command creates or preserves a local ignored owner env file. It writes only empty assignments and never records owner-provided values.
@@ -39,8 +39,11 @@ FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS=
 FLOWCHAIN_BASE8453_SUPPORTED_TOKEN=
 FLOWCHAIN_BASE8453_ASSET_DECIMALS=
 FLOWCHAIN_BASE8453_FROM_BLOCK=
-FLOWCHAIN_BASE8453_TO_BLOCK=
 FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI=
 FLOWCHAIN_PILOT_TOTAL_CAP_WEI=
 FLOWCHAIN_PILOT_CONFIRMATIONS=
+
+# Optional bridge scan controls.
+FLOWCHAIN_BASE8453_CURSOR_STATE=
+FLOWCHAIN_BASE8453_TO_BLOCK=
 ```

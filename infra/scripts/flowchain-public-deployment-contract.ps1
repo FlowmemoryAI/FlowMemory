@@ -30,6 +30,7 @@ $knownOwnerInputs = @(
     "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
     "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
     "FLOWCHAIN_BASE8453_FROM_BLOCK",
+    "FLOWCHAIN_BASE8453_CURSOR_STATE",
     "FLOWCHAIN_BASE8453_TO_BLOCK",
     "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
     "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
@@ -262,10 +263,11 @@ foreach ($entry in $paths.GetEnumerator()) {
     $reports[$entry.Key] = Get-DeploymentJson -Path $entry.Value
 }
 
+$optionalOwnerInputs = @("FLOWCHAIN_BASE8453_CURSOR_STATE", "FLOWCHAIN_BASE8453_TO_BLOCK")
 $missingEnvNames = New-Object System.Collections.ArrayList
 foreach ($report in $reports.Values) {
     foreach ($name in @((Get-DeploymentProp -Object $report -Name "missingEnvNames" -Default @()))) {
-        if ($name -in $knownOwnerInputs) {
+        if ($name -in $knownOwnerInputs -and $name -notin $optionalOwnerInputs) {
             Add-UniqueDeploymentName -Target $missingEnvNames -Value $name
         }
     }
@@ -332,17 +334,18 @@ $ownerEnvTemplateStatus = Get-DeploymentStatus -Report $ownerEnvTemplate
 $ownerEnvTemplateGitIgnored = Get-DeploymentProp -Object $ownerEnvTemplate -Name "pathIsGitIgnored" -Default $false
 $ownerEnvTemplateIncludesRequired = Get-DeploymentProp -Object $ownerEnvTemplate -Name "templateIncludesAllRequiredEnvNames" -Default $false
 $ownerEnvTemplateRequiredCount = [int](Get-DeploymentProp -Object $ownerEnvTemplate -Name "requiredEnvNameCount" -Default 0)
+$ownerEnvTemplateOptionalCount = @((Get-DeploymentProp -Object $ownerEnvTemplate -Name "optionalEnvNames" -Default @())).Count
 $ownerEnvTemplateReady = ($ownerEnvTemplateStatus -eq "passed") `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:owner-env:template") `
     -and ($ownerEnvTemplateGitIgnored -eq $true) `
     -and ($ownerEnvTemplateIncludesRequired -eq $true) `
-    -and ($ownerEnvTemplateRequiredCount -eq $knownOwnerInputs.Count) `
+    -and (($ownerEnvTemplateRequiredCount + $ownerEnvTemplateOptionalCount) -eq $knownOwnerInputs.Count) `
     -and ((Get-DeploymentProp -Object $ownerEnvTemplate -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $ownerEnvTemplate -Name "noSecrets" -Default $false) -eq $true)
 Add-DeploymentItem -Items $items -Id "owner-env-template" `
     -Requirement "Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added." `
     -Status $(if ($ownerEnvTemplateReady) { "passed" } else { "failed" }) `
-    -Evidence "templateStatus=$ownerEnvTemplateStatus, pathIsGitIgnored=$ownerEnvTemplateGitIgnored, requiredEnvNameCount=$ownerEnvTemplateRequiredCount, includesAllRequired=$ownerEnvTemplateIncludesRequired" `
+    -Evidence "templateStatus=$ownerEnvTemplateStatus, pathIsGitIgnored=$ownerEnvTemplateGitIgnored, requiredEnvNameCount=$ownerEnvTemplateRequiredCount, optionalEnvNameCount=$ownerEnvTemplateOptionalCount, includesAllRequired=$ownerEnvTemplateIncludesRequired" `
     -Commands @("npm run flowchain:owner-env:template")
 
 $publicRpcEdgeTemplate = $reports.publicRpcEdgeTemplate
@@ -433,12 +436,13 @@ Add-DeploymentItem -Items $items -Id "ops-snapshot" `
 $ownerInputs = $reports.ownerInputs
 $ownerStatus = Get-DeploymentStatus -Report $ownerInputs
 $ownerReady = Get-DeploymentProp -Object $ownerInputs -Name "ownerInputReady" -Default $false
+$ownerMissingInputs = @((Get-DeploymentProp -Object $ownerInputs -Name "missingEnvNames" -Default @()))
 Add-DeploymentItem -Items $items -Id "owner-input-contract" `
     -Requirement "The owner deployment contract validates the required public RPC, tester write gateway, backup, and Base 8453 input names without values." `
     -Status $(if (($ownerStatus -eq "passed") -and ($ownerReady -eq $true)) { "passed" } elseif ($ownerStatus -eq "blocked") { "blocked" } else { "failed" }) `
     -Evidence "ownerInputsStatus=$ownerStatus, ownerInputReady=$ownerReady" `
     -Commands @("npm run flowchain:owner-inputs") `
-    -Blockers @($knownOwnerInputs)
+    -Blockers @($ownerMissingInputs)
 
 $publicRpc = $reports.publicRpc
 $publicRpcStatus = Get-DeploymentStatus -Report $publicRpc
@@ -549,7 +553,7 @@ Add-DeploymentItem -Items $items -Id "base8453-bridge-edge" `
     -Status $(if (($bridgeLiveStatus -eq "passed") -and ($bridgeInfraStatus -eq "passed")) { "passed" } elseif (($bridgeLiveStatus -eq "blocked") -or ($bridgeInfraStatus -eq "blocked")) { "blocked" } else { "failed" }) `
     -Evidence "bridgeLive=$bridgeLiveStatus, bridgeInfra=$bridgeInfraStatus" `
     -Commands @("npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check") `
-    -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_BASE8453_TO_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
+    -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
 
 $externalTester = $reports.externalTester
 $externalPacket = $reports.externalTesterPacket
@@ -566,7 +570,7 @@ Add-DeploymentItem -Items $items -Id "external-tester-sharing" `
     -Status $(if (($externalTesterStatus -eq "passed") -and ($externalPacketStatus -eq "passed") -and ($externalSharingReady -eq $true) -and ($packetShareable -eq $true) -and ($externalTesterNetworkFresh -eq $true) -and ($packetExecutableSmokeValidated -eq $true)) { "passed" } elseif (($externalTesterStatus -eq "blocked") -and ($externalPacketStatus -eq "blocked") -and ($externalSharingReady -eq $false) -and ($packetShareable -eq $false) -and ($externalTesterNetworkFresh -eq $true) -and ($packetExecutableSmokeValidated -eq $true)) { "blocked" } else { "failed" }) `
     -Evidence "externalTester=$externalTesterStatus, localTesterRehearsalReady=$localTesterRehearsalReady, testerNetworkFresh=$externalTesterNetworkFresh, packetSmoke=$packetExecutableSmokeValidated, externalSharingReady=$externalSharingReady, packet=$externalPacketStatus, packetShareable=$packetShareable" `
     -Commands @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet") `
-    -Blockers @($knownOwnerInputs)
+    -Blockers @($ownerMissingInputs)
 
 $publicTesterGateway = $reports.publicTesterGateway
 $publicTesterGatewayStatus = Get-DeploymentStatus -Report $publicTesterGateway

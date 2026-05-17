@@ -1,9 +1,9 @@
 ﻿# FlowChain External Tester Packet
 
-Generated: 2026-05-17T07:04:11.7980700Z
+Generated: 2026-05-17T08:37:38.0170158Z
 Status: blocked
 Shareable externally: False
-Latest observed height: 50070
+Latest observed height: 51404
 
 Do not share this network externally yet. Local wallet rehearsal is available, but external sharing remains blocked until the listed owner input names and live infrastructure gates pass.
 
@@ -45,7 +45,7 @@ Invoke-RestMethod -Method Get -Uri '<OWNER_PUBLIC_ENDPOINT>/wallets/transfers'
 
 - External tester readiness: blocked
 - Owner inputs: blocked
-- Completion audit: failed
+- Completion audit: blocked
 - Local tester rehearsal ready: True
 - External sharing ready: False
 - Packet executable smoke validated: True
@@ -66,10 +66,10 @@ Invoke-RestMethod -Method Get -Uri '<OWNER_PUBLIC_ENDPOINT>/wallets/transfers'
 - FLOWCHAIN_BASE8453_SUPPORTED_TOKEN
 - FLOWCHAIN_BASE8453_ASSET_DECIMALS
 - FLOWCHAIN_BASE8453_FROM_BLOCK
-- FLOWCHAIN_BASE8453_TO_BLOCK
 - FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI
 - FLOWCHAIN_PILOT_TOTAL_CAP_WEI
 - FLOWCHAIN_PILOT_CONFIRMATIONS
+- FLOWCHAIN_BASE8453_TO_BLOCK
 
 ## Owner Verification Commands
 

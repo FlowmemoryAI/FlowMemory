@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.owner_inputs_report.v0",
-    "generatedAt":  "2026-05-17T06:49:59.5634820Z",
+    "generatedAt":  "2026-05-17T08:18:28.1104445Z",
     "status":  "failed",
     "ownerInputReady":  false,
     "groups":  [
@@ -123,14 +123,6 @@
                        "check":  "non-negative decimal block number"
                    },
                    {
-                       "name":  "FLOWCHAIN_BASE8453_TO_BLOCK",
-                       "group":  "base8453-bridge",
-                       "present":  true,
-                       "valid":  false,
-                       "status":  "present-invalid",
-                       "check":  "non-negative decimal block number"
-                   },
-                   {
                        "name":  "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                        "group":  "base8453-bridge",
                        "present":  true,
@@ -155,6 +147,10 @@
                        "check":  "positive decimal integer"
                    }
                ],
+    "optionalEnvNames":  [
+                             "FLOWCHAIN_BASE8453_CURSOR_STATE",
+                             "FLOWCHAIN_BASE8453_TO_BLOCK"
+                         ],
     "missingEnvNames":  [
 
                         ],
@@ -173,10 +169,10 @@
                             "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                             "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                             "FLOWCHAIN_BASE8453_FROM_BLOCK",
-                            "FLOWCHAIN_BASE8453_TO_BLOCK",
                             "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                             "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-                            "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                            "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                            "FLOWCHAIN_BASE8453_TO_BLOCK"
                         ],
     "ownerEnvFileState":  {
                               "configured":  false,
@@ -262,11 +258,6 @@
                          "reason":  "must be a non-negative decimal block number"
                      },
                      {
-                         "name":  "FLOWCHAIN_BASE8453_TO_BLOCK",
-                         "kind":  "failed",
-                         "reason":  "must be a non-negative decimal block number"
-                     },
-                     {
                          "name":  "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                          "kind":  "failed",
                          "reason":  "must be a positive decimal integer"
@@ -280,6 +271,11 @@
                          "name":  "FLOWCHAIN_PILOT_CONFIRMATIONS",
                          "kind":  "failed",
                          "reason":  "must be a positive decimal integer"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_BASE8453_TO_BLOCK",
+                         "kind":  "failed",
+                         "reason":  "optional upper bound must be a non-negative decimal block number"
                      }
                  ],
     "nextCommandsAfterOwnerInputs":  [

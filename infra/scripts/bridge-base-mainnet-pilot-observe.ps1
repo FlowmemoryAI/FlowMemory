@@ -29,7 +29,7 @@ param(
 
     [string]$RuntimeState = "services/bridge-relayer/out/base8453-pilot-credit-application-state.json",
 
-    [string]$CursorState = "services/bridge-relayer/out/base8453-pilot-cursor-state.json",
+    [string]$CursorState = $(if ($env:FLOWCHAIN_BASE8453_CURSOR_STATE) { $env:FLOWCHAIN_BASE8453_CURSOR_STATE } else { "services/bridge-relayer/out/base8453-pilot-cursor-state.json" }),
 
     [string]$Out = "services/bridge-relayer/out/base8453-pilot-bridge-observation.json",
 

@@ -387,6 +387,22 @@ function stableId(schema: string, value: JsonValue): `0x${string}` {
   return keccak256Utf8(canonicalJson({ schema, value }));
 }
 
+function bridgeCursorStateId(
+  mode: BridgeMode,
+  sourceChainId: BridgeSourceChainId,
+  lockboxAddress: `0x${string}`,
+  lastScannedBlock: string,
+  lastConfirmedHead: string,
+): `0x${string}` {
+  return stableId("flowmemory.bridge_lockbox_cursor_state.v0", {
+    mode,
+    sourceChainId,
+    lockboxAddress: lockboxAddress.toLowerCase(),
+    lastScannedBlock,
+    lastConfirmedHead,
+  });
+}
+
 function argValue(args: string[], index: number, name: string): string {
   const value = args[index + 1];
   if (!value || value.startsWith("--")) {
@@ -1256,9 +1272,20 @@ function loadBridgeCursorState(path: string, options: CliOptions, expectedChainI
   const lastConfirmedHead = asBlock(String(parsed.lastConfirmedHead ?? "0"), "cursor.lastConfirmedHead");
   const lastFromBlock = asBlock(String(parsed.lastFromBlock ?? "0"), "cursor.lastFromBlock");
   const lastToBlock = asBlock(String(parsed.lastToBlock ?? "0"), "cursor.lastToBlock");
+  const parsedStateId = asHash(String(parsed.stateId), "cursor.stateId");
+  const expectedStateId = bridgeCursorStateId(
+    parsed.mode,
+    parsed.sourceChainId,
+    lockboxAddress,
+    lastScannedBlock.toString(),
+    lastConfirmedHead.toString(),
+  );
+  if (parsedStateId.toLowerCase() !== expectedStateId.toLowerCase()) {
+    throw new Error("bridge cursor state id mismatch");
+  }
   return {
     schema: "flowmemory.bridge_lockbox_cursor_state.v0",
-    stateId: asHash(String(parsed.stateId), "cursor.stateId"),
+    stateId: parsedStateId,
     updatedAt: String(parsed.updatedAt ?? FIXED_TEST_OBSERVED_AT),
     mode: parsed.mode,
     sourceChainId: parsed.sourceChainId,
@@ -1285,13 +1312,14 @@ function saveBridgeCursorState(
   if (options.lockboxAddress === undefined) {
     throw new Error("bridge cursor save requires lockbox address");
   }
-  const stateId = stableId("flowmemory.bridge_lockbox_cursor_state.v0", {
-    mode: options.mode,
-    sourceChainId: expectedChainId,
-    lockboxAddress: options.lockboxAddress.toLowerCase(),
-    lastScannedBlock: toBlock.toString(),
-    lastConfirmedHead: confirmedHead < 0n ? "0" : confirmedHead.toString(),
-  });
+  const lastConfirmedHead = confirmedHead < 0n ? "0" : confirmedHead.toString();
+  const stateId = bridgeCursorStateId(
+    options.mode,
+    expectedChainId,
+    options.lockboxAddress,
+    toBlock.toString(),
+    lastConfirmedHead,
+  );
   const state: BridgeLockboxCursorState = {
     schema: "flowmemory.bridge_lockbox_cursor_state.v0",
     stateId,
@@ -1300,7 +1328,7 @@ function saveBridgeCursorState(
     sourceChainId: expectedChainId,
     lockboxAddress: options.lockboxAddress,
     lastScannedBlock: toBlock.toString(),
-    lastConfirmedHead: confirmedHead < 0n ? "0" : confirmedHead.toString(),
+    lastConfirmedHead,
     lastFromBlock: fromBlock.toString(),
     lastToBlock: toBlock.toString(),
     lastLogCount: logCount,

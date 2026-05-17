@@ -18,6 +18,7 @@ $zeroAddress = "0x0000000000000000000000000000000000000000"
 $maxBlockRange = [System.Numerics.BigInteger]::Parse("5000", [System.Globalization.CultureInfo]::InvariantCulture)
 $minConfirmations = [System.Numerics.BigInteger]::Parse("2", [System.Globalization.CultureInfo]::InvariantCulture)
 $maxConfirmations = [System.Numerics.BigInteger]::Parse("256", [System.Globalization.CultureInfo]::InvariantCulture)
+$defaultCursorState = "services/bridge-relayer/out/base8453-pilot-cursor-state.json"
 
 $requiredEnv = @(
     "FLOWCHAIN_PILOT_OPERATOR_ACK",
@@ -26,10 +27,13 @@ $requiredEnv = @(
     "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
     "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
     "FLOWCHAIN_BASE8453_FROM_BLOCK",
-    "FLOWCHAIN_BASE8453_TO_BLOCK",
     "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
     "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
     "FLOWCHAIN_PILOT_CONFIRMATIONS"
+)
+$optionalEnv = @(
+    "FLOWCHAIN_BASE8453_CURSOR_STATE",
+    "FLOWCHAIN_BASE8453_TO_BLOCK"
 )
 $broadcastEnvNames = @(
     "FLOWCHAIN_BASE8453_DEPLOYER_PRIVATE_KEY",
@@ -156,6 +160,19 @@ if ($null -ne $decimals -and ($decimals -lt 0 -or $decimals -gt 255)) {
 
 $fromBlock = Convert-FlowChainUInt -Name "FLOWCHAIN_BASE8453_FROM_BLOCK" -Value (Get-FlowChainEnvValue -Name "FLOWCHAIN_BASE8453_FROM_BLOCK") -Problems $problems -AllowZero
 $toBlock = Convert-FlowChainUInt -Name "FLOWCHAIN_BASE8453_TO_BLOCK" -Value (Get-FlowChainEnvValue -Name "FLOWCHAIN_BASE8453_TO_BLOCK") -Problems $problems -AllowZero
+$cursorState = Get-FlowChainEnvValue -Name "FLOWCHAIN_BASE8453_CURSOR_STATE"
+if ([string]::IsNullOrWhiteSpace($cursorState)) {
+    $cursorState = $defaultCursorState
+}
+$cursorStateFullPath = $null
+try {
+    $cursorStateFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $cursorState)
+    $checks.cursorStatePathInsideRepo = $true
+}
+catch {
+    Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_BASE8453_CURSOR_STATE" -Reason "cursor state path must stay inside the repository" -Kind "failed"
+    $checks.cursorStatePathInsideRepo = $false
+}
 if ($null -ne $fromBlock -and $null -ne $toBlock) {
     if ($fromBlock -gt $toBlock) {
         Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_BASE8453_FROM_BLOCK" -Reason "from block must be less than or equal to to block" -Kind "failed"
@@ -214,15 +231,20 @@ $report = [ordered]@{
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
     status = $status
     requiredEnvNames = $requiredEnv
+    optionalEnvNames = $optionalEnv
     deploymentBroadcastEnvNames = $broadcastEnvNames
     missingEnvNames = @($missingEnv | Select-Object -Unique)
     baseChainId = 8453
     assetMode = $assetMode
     checks = $checks
     blockRangePolicy = [ordered]@{
+        scanMode = if ($null -ne $toBlock) { "bounded-upper-block" } else { "cursor-confirmed-head" }
         maxRange = $maxBlockRange.ToString()
         fromBlockConfigured = $null -ne $fromBlock
         toBlockConfigured = $null -ne $toBlock
+        toBlockRequired = $false
+        cursorStatePath = $cursorState
+        cursorStateFullPath = $cursorStateFullPath
     }
     capPolicy = [ordered]@{
         maxDepositConfigured = $null -ne $maxDeposit

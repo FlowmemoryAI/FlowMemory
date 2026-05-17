@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.bridge_infra_readiness_report.v0",
-    "generatedAt":  "2026-05-17T07:04:07.8898887Z",
+    "generatedAt":  "2026-05-17T08:35:51.4330814Z",
     "status":  "blocked",
     "requiredEnvNames":  [
                              "FLOWCHAIN_PILOT_OPERATOR_ACK",
@@ -9,10 +9,13 @@
                              "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                              "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                              "FLOWCHAIN_BASE8453_FROM_BLOCK",
-                             "FLOWCHAIN_BASE8453_TO_BLOCK",
                              "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                              "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                              "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                         ],
+    "optionalEnvNames":  [
+                             "FLOWCHAIN_BASE8453_CURSOR_STATE",
+                             "FLOWCHAIN_BASE8453_TO_BLOCK"
                          ],
     "deploymentBroadcastEnvNames":  [
                                         "FLOWCHAIN_BASE8453_DEPLOYER_PRIVATE_KEY",
@@ -25,7 +28,6 @@
                             "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                             "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                             "FLOWCHAIN_BASE8453_FROM_BLOCK",
-                            "FLOWCHAIN_BASE8453_TO_BLOCK",
                             "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                             "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                             "FLOWCHAIN_PILOT_CONFIRMATIONS"
@@ -34,13 +36,18 @@
     "assetMode":  "unknown",
     "checks":  {
                    "operatorAcknowledgement":  false,
+                   "cursorStatePathInsideRepo":  true,
                    "emergencyCommandsDiscoverable":  true,
                    "diagnosticCommandsDiscoverable":  true
                },
     "blockRangePolicy":  {
+                             "scanMode":  "cursor-confirmed-head",
                              "maxRange":  "5000",
                              "fromBlockConfigured":  false,
-                             "toBlockConfigured":  false
+                             "toBlockConfigured":  false,
+                             "toBlockRequired":  false,
+                             "cursorStatePath":  "services/bridge-relayer/out/base8453-pilot-cursor-state.json",
+                             "cursorStateFullPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\services\\bridge-relayer\\out\\base8453-pilot-cursor-state.json"
                          },
     "capPolicy":  {
                       "maxDepositConfigured":  false,
@@ -97,12 +104,6 @@
                      },
                      {
                          "name":  "FLOWCHAIN_BASE8453_FROM_BLOCK",
-                         "category":  "env",
-                         "kind":  "blocked",
-                         "reason":  "missing required bridge readiness env value"
-                     },
-                     {
-                         "name":  "FLOWCHAIN_BASE8453_TO_BLOCK",
                          "category":  "env",
                          "kind":  "blocked",
                          "reason":  "missing required bridge readiness env value"

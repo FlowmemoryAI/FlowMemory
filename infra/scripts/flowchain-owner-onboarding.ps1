@@ -51,10 +51,13 @@ $bridgeEnv = @(
     "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
     "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
     "FLOWCHAIN_BASE8453_FROM_BLOCK",
-    "FLOWCHAIN_BASE8453_TO_BLOCK",
     "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
     "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
     "FLOWCHAIN_PILOT_CONFIRMATIONS"
+)
+$bridgeOptionalEnv = @(
+    "FLOWCHAIN_BASE8453_CURSOR_STATE",
+    "FLOWCHAIN_BASE8453_TO_BLOCK"
 )
 
 $onboardingGroups = @(
@@ -102,9 +105,9 @@ $onboardingGroups = @(
         externalSignupNeeded = $true
         signupCategory = "Base mainnet 8453 RPC provider or owner-operated Base node, plus deployed lockbox/token details."
         localOrigin = ""
-        envNames = $bridgeEnv
+        envNames = @($bridgeEnv + $bridgeOptionalEnv)
         validationCommand = "npm run flowchain:bridge:live:check"
-        decision = "This is not for FlowChain RPC. It is only for reading Base 8453 bridge events."
+        decision = "This is not for FlowChain RPC. It is only for reading Base 8453 bridge events. TO_BLOCK is optional because the relayer loop uses cursor state."
     }
 )
 
@@ -124,7 +127,8 @@ $localShellTemplate = @(
     '$env:FLOWCHAIN_BASE8453_SUPPORTED_TOKEN="<20-byte token address>"',
     '$env:FLOWCHAIN_BASE8453_ASSET_DECIMALS="<0 through 255>"',
     '$env:FLOWCHAIN_BASE8453_FROM_BLOCK="<first bounded Base block>"',
-    '$env:FLOWCHAIN_BASE8453_TO_BLOCK="<last bounded Base block>"',
+    '$env:FLOWCHAIN_BASE8453_CURSOR_STATE="services/bridge-relayer/out/base8453-pilot-cursor-state.json"',
+    '$env:FLOWCHAIN_BASE8453_TO_BLOCK="<optional last bounded Base block>"',
     '$env:FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI="<positive capped amount>"',
     '$env:FLOWCHAIN_PILOT_TOTAL_CAP_WEI="<positive capped amount greater than or equal to max deposit>"',
     '$env:FLOWCHAIN_PILOT_CONFIRMATIONS="<2 through 256>"'

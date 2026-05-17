@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.owner_inputs_report.v0",
-    "generatedAt":  "2026-05-17T06:50:00.9006119Z",
+    "generatedAt":  "2026-05-17T08:18:29.5108143Z",
     "status":  "passed",
     "ownerInputReady":  true,
     "groups":  [
@@ -123,14 +123,6 @@
                        "check":  "non-negative decimal block number"
                    },
                    {
-                       "name":  "FLOWCHAIN_BASE8453_TO_BLOCK",
-                       "group":  "base8453-bridge",
-                       "present":  true,
-                       "valid":  true,
-                       "status":  "present-valid",
-                       "check":  "non-negative decimal block number"
-                   },
-                   {
                        "name":  "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                        "group":  "base8453-bridge",
                        "present":  true,
@@ -155,6 +147,10 @@
                        "check":  "positive decimal integer"
                    }
                ],
+    "optionalEnvNames":  [
+                             "FLOWCHAIN_BASE8453_CURSOR_STATE",
+                             "FLOWCHAIN_BASE8453_TO_BLOCK"
+                         ],
     "missingEnvNames":  [
 
                         ],

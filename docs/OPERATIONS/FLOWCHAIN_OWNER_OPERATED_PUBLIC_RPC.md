@@ -78,11 +78,15 @@ $env:FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS="<deployed lockbox address>"
 $env:FLOWCHAIN_BASE8453_SUPPORTED_TOKEN="<0x0000000000000000000000000000000000000000 or ERC-20 address>"
 $env:FLOWCHAIN_BASE8453_ASSET_DECIMALS="<decimal count>"
 $env:FLOWCHAIN_BASE8453_FROM_BLOCK="<first bounded block>"
-$env:FLOWCHAIN_BASE8453_TO_BLOCK="<last bounded block>"
+$env:FLOWCHAIN_BASE8453_CURSOR_STATE="services/bridge-relayer/out/base8453-pilot-cursor-state.json"
 $env:FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI="<per-deposit cap>"
 $env:FLOWCHAIN_PILOT_TOTAL_CAP_WEI="<total cap>"
 $env:FLOWCHAIN_PILOT_CONFIRMATIONS="<confirmation depth>"
 ```
+
+`FLOWCHAIN_BASE8453_TO_BLOCK` is optional for one-off bounded scans. The service
+relayer loop uses the persisted cursor and confirmed Base head when it is not
+set.
 
 Do not commit these values.
 
@@ -184,7 +188,10 @@ After the Base 8453 env contract is configured and checked, the owner can start 
 npm run flowchain:service:start -- -LiveProfile -StartBridgeRelayerLoop
 ```
 
-This loop uses the existing Base observer path and does not broadcast. Keep logs under `devnet/local/services/logs/`.
+This loop uses the existing Base observer path, advances
+`services/bridge-relayer/out/base8453-pilot-cursor-state.json` only after a
+confirmed successful read, and does not broadcast. Keep logs under
+`devnet/local/services/logs/`.
 
 ## Base Transaction Diagnosis
 

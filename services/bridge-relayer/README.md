@@ -32,7 +32,7 @@ $env:FLOWCHAIN_BASE8453_APPROVED_LOCKBOX_ADDRESS="<approved-lockbox>"
 $env:FLOWCHAIN_BASE8453_SUPPORTED_TOKEN="<zero-address-for-native-or-erc20-address>"
 $env:FLOWCHAIN_BASE8453_ASSET_DECIMALS="<asset-decimals>"
 $env:FLOWCHAIN_BASE8453_FROM_BLOCK="<from>"
-$env:FLOWCHAIN_BASE8453_TO_BLOCK="<to>"
+$env:FLOWCHAIN_BASE8453_CURSOR_STATE="services/bridge-relayer/out/base8453-pilot-cursor-state.json"
 $env:FLOWCHAIN_PILOT_CONFIRMATIONS="2"
 $env:FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI="<tiny-cap>"
 $env:FLOWCHAIN_PILOT_TOTAL_CAP_WEI="<tiny-total-cap>"
@@ -46,6 +46,7 @@ Optional guardrail:
 
 ```powershell
 $env:FLOWCHAIN_PILOT_MAX_USD="1"
+$env:FLOWCHAIN_BASE8453_TO_BLOCK="<optional-bounded-upper-block>"
 ```
 
 The observer verifies `eth_chainId == 0x2105`, rejects unapproved lockboxes,
@@ -57,11 +58,12 @@ replay credit is rejected with evidence instead of applying a second credit.
 When `--runtime-state` is configured, credit application state is protected by
 an exclusive sidecar lock and atomic state-file replacement, so concurrent
 relayer processes cannot both apply the same replay key.
-
-Current gap: observed Base lockbox block ranges are still operator-supplied via
-`--from-block` and `--to-block`. The next exact hardening step is a persisted
-Base lockbox cursor file, updated only after a successful confirmed `eth_getLogs`
-range, with the same lock/atomic-write pattern used for `--runtime-state`.
+When `--cursor-state` is configured, Base 8453 scans advance from the last
+confirmed successful `eth_getLogs` range. The cursor file is protected by the
+same exclusive sidecar lock and atomic state-file replacement pattern as
+runtime credit application state. `FLOWCHAIN_BASE8453_TO_BLOCK` is optional and
+acts only as an operator-supplied upper bound; normal relayer-loop operation
+uses the persisted cursor and the confirmed Base head.
 
 The control plane can read `services/bridge-relayer/out/bridge-observation.json`
 and can intake additional local bridge-agent observations through JSON-RPC

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.owner_inputs_report.v0",
-    "generatedAt":  "2026-05-17T06:50:03.4440147Z",
+    "generatedAt":  "2026-05-17T08:18:32.1688920Z",
     "status":  "failed",
     "ownerInputReady":  false,
     "groups":  [
@@ -123,14 +123,6 @@
                        "check":  "required"
                    },
                    {
-                       "name":  "FLOWCHAIN_BASE8453_TO_BLOCK",
-                       "group":  "base8453-bridge",
-                       "present":  false,
-                       "valid":  false,
-                       "status":  "missing",
-                       "check":  "required"
-                   },
-                   {
                        "name":  "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                        "group":  "base8453-bridge",
                        "present":  false,
@@ -155,6 +147,10 @@
                        "check":  "required"
                    }
                ],
+    "optionalEnvNames":  [
+                             "FLOWCHAIN_BASE8453_CURSOR_STATE",
+                             "FLOWCHAIN_BASE8453_TO_BLOCK"
+                         ],
     "missingEnvNames":  [
                             "FLOWCHAIN_RPC_PUBLIC_URL",
                             "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
@@ -170,7 +166,6 @@
                             "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                             "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                             "FLOWCHAIN_BASE8453_FROM_BLOCK",
-                            "FLOWCHAIN_BASE8453_TO_BLOCK",
                             "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                             "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                             "FLOWCHAIN_PILOT_CONFIRMATIONS"
@@ -263,11 +258,6 @@
                      },
                      {
                          "name":  "FLOWCHAIN_BASE8453_FROM_BLOCK",
-                         "kind":  "blocked",
-                         "reason":  "missing required owner input"
-                     },
-                     {
-                         "name":  "FLOWCHAIN_BASE8453_TO_BLOCK",
                          "kind":  "blocked",
                          "reason":  "missing required owner input"
                      },

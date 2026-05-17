@@ -429,11 +429,13 @@ $ownerEnvTemplateStatus = Get-ReportStatus -Report $ownerEnvTemplate
 $ownerEnvTemplateGitIgnored = Get-AuditProp -Object $ownerEnvTemplate -Name "pathIsGitIgnored" -Default $false
 $ownerEnvTemplateIncludesRequired = Get-AuditProp -Object $ownerEnvTemplate -Name "templateIncludesAllRequiredEnvNames" -Default $false
 $ownerEnvTemplateRequiredCount = [int](Get-AuditProp -Object $ownerEnvTemplate -Name "requiredEnvNameCount" -Default 0)
+$ownerEnvTemplateOptionalCount = @((Get-AuditProp -Object $ownerEnvTemplate -Name "optionalEnvNames" -Default @())).Count
 $ownerEnvTemplatePassed = $ownerEnvTemplateExitCode -eq 0 `
     -and $ownerEnvTemplateStatus -eq "passed" `
     -and $ownerEnvTemplateGitIgnored -eq $true `
     -and $ownerEnvTemplateIncludesRequired -eq $true `
-    -and $ownerEnvTemplateRequiredCount -eq 18 `
+    -and $ownerEnvTemplateRequiredCount -eq 17 `
+    -and $ownerEnvTemplateOptionalCount -eq 2 `
     -and ((Get-AuditProp -Object $ownerEnvTemplate -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $ownerEnvTemplate -Name "noSecrets" -Default $false) -eq $true)
 $ownerEnvReadinessValidationStatus = Get-ReportStatus -Report $ownerEnvReadinessValidation
@@ -818,7 +820,7 @@ Add-AuditItem -Items $items -Id "owner-signup-checklist" `
 Add-AuditItem -Items $items -Id "owner-env-template" `
     -Requirement "Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added." `
     -Status $(if ($ownerEnvTemplatePassed) { "passed" } else { "failed" }) `
-    -Evidence "templateStatus=$ownerEnvTemplateStatus, pathIsGitIgnored=$ownerEnvTemplateGitIgnored, requiredEnvNameCount=$ownerEnvTemplateRequiredCount, includesAllRequired=$ownerEnvTemplateIncludesRequired, report=$($paths.ownerEnvTemplate)" `
+    -Evidence "templateStatus=$ownerEnvTemplateStatus, pathIsGitIgnored=$ownerEnvTemplateGitIgnored, requiredEnvNameCount=$ownerEnvTemplateRequiredCount, optionalEnvNameCount=$ownerEnvTemplateOptionalCount, includesAllRequired=$ownerEnvTemplateIncludesRequired, report=$($paths.ownerEnvTemplate)" `
     -Commands @("npm run flowchain:owner-env:template")
 
 Add-AuditItem -Items $items -Id "owner-env-readiness-validator-self-test" `
@@ -919,7 +921,7 @@ Add-AuditItem -Items $items -Id "bridge-funds" `
     -Status $(if ((Get-ReportStatus -Report $reports.bridgeLive) -eq "passed" -and (Get-ReportStatus -Report $reports.bridgeInfra) -eq "passed") { "passed" } else { "blocked" }) `
     -Evidence "bridgeLive=$(Get-ReportStatus -Report $reports.bridgeLive), bridgeInfra=$(Get-ReportStatus -Report $reports.bridgeInfra), reports=$($paths.bridgeLive), $($paths.bridgeInfra)" `
     -Commands @("npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check") `
-    -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_BASE8453_TO_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
+    -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
 
 Add-AuditItem -Items $items -Id "bridge-local-pilot-proof" `
     -Requirement "Local/mock bridge pilot proof preserves exact value, rejects replay/wrong-chain/unapproved-lockbox cases, and performs no broadcast." `

@@ -30,10 +30,13 @@ $requiredEnvNames = @(
     "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
     "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
     "FLOWCHAIN_BASE8453_FROM_BLOCK",
-    "FLOWCHAIN_BASE8453_TO_BLOCK",
     "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
     "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
     "FLOWCHAIN_PILOT_CONFIRMATIONS"
+)
+$optionalEnvNames = @(
+    "FLOWCHAIN_BASE8453_CURSOR_STATE",
+    "FLOWCHAIN_BASE8453_TO_BLOCK"
 )
 
 function Get-RelativeFlowChainPath {
@@ -61,6 +64,11 @@ $templateLines.Add("# Keep this local file ignored. Fill values only on the mach
 $templateLines.Add("# Point FLOWCHAIN_OWNER_ENV_FILE at this file, then run the owner/live readiness gates.")
 $templateLines.Add("")
 foreach ($name in $requiredEnvNames) {
+    $templateLines.Add("$name=")
+}
+$templateLines.Add("")
+$templateLines.Add("# Optional bridge scan controls.")
+foreach ($name in $optionalEnvNames) {
     $templateLines.Add("$name=")
 }
 
@@ -98,6 +106,7 @@ $report = [ordered]@{
     preservedExistingLocalFile = $preservedExisting
     writeSkippedReason = $writeSkippedReason
     requiredEnvNames = $requiredEnvNames
+    optionalEnvNames = $optionalEnvNames
     requiredEnvNameCount = $requiredEnvNames.Count
     templateIncludesAllRequiredEnvNames = $true
     flowChainOwnerEnvFileCommand = "`$env:FLOWCHAIN_OWNER_ENV_FILE=`"$templateFullPath`""

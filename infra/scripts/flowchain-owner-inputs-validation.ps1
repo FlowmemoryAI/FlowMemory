@@ -30,10 +30,13 @@ $requiredEnvNames = @(
     "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
     "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
     "FLOWCHAIN_BASE8453_FROM_BLOCK",
-    "FLOWCHAIN_BASE8453_TO_BLOCK",
     "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
     "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
     "FLOWCHAIN_PILOT_CONFIRMATIONS"
+)
+$optionalEnvNames = @(
+    "FLOWCHAIN_BASE8453_CURSOR_STATE",
+    "FLOWCHAIN_BASE8453_TO_BLOCK"
 )
 
 function Set-OwnerValidationEnv {
@@ -42,7 +45,7 @@ function Set-OwnerValidationEnv {
         [AllowNull()][string] $OwnerEnvFilePath = $null
     )
 
-    foreach ($name in $requiredEnvNames) {
+    foreach ($name in @($requiredEnvNames + $optionalEnvNames)) {
         $value = if ($Values.ContainsKey($name)) { [string] $Values[$name] } else { $null }
         [Environment]::SetEnvironmentVariable($name, $value, "Process")
     }
@@ -99,7 +102,7 @@ function Invoke-OwnerValidationScenario {
 }
 
 $originalEnv = @{}
-foreach ($name in $requiredEnvNames) {
+foreach ($name in @($requiredEnvNames + $optionalEnvNames)) {
     $originalEnv[$name] = [Environment]::GetEnvironmentVariable($name, "Process")
 }
 $originalOwnerEnvFile = [Environment]::GetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_FILE", "Process")
@@ -128,6 +131,7 @@ $validEnvFile = Join-Path $backupDir ".env.owner-validation.local"
     "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN=0x0000000000000000000000000000000000000000",
     "FLOWCHAIN_BASE8453_ASSET_DECIMALS=18",
     "FLOWCHAIN_BASE8453_FROM_BLOCK=1",
+    "FLOWCHAIN_BASE8453_CURSOR_STATE=services/bridge-relayer/out/base8453-pilot-cursor-state.json",
     "FLOWCHAIN_BASE8453_TO_BLOCK=2",
     "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI=1000000000000000",
     "FLOWCHAIN_PILOT_TOTAL_CAP_WEI=2000000000000000",
@@ -185,7 +189,7 @@ try {
     [void] $scenarios.Add((Invoke-OwnerValidationScenario -Name "malformed-owner-env-file" -ExpectedStatus "failed" -EnvValues @{} -OwnerEnvFilePath $malformedOwnerEnvFile))
 }
 finally {
-    foreach ($name in $requiredEnvNames) {
+    foreach ($name in @($requiredEnvNames + $optionalEnvNames)) {
         [Environment]::SetEnvironmentVariable($name, $originalEnv[$name], "Process")
     }
     [Environment]::SetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_FILE", $originalOwnerEnvFile, "Process")
@@ -198,6 +202,7 @@ $report = [ordered]@{
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
     status = $status
     requiredEnvNames = $requiredEnvNames
+    optionalEnvNames = $optionalEnvNames
     scenarioCount = $scenarios.Count
     scenarios = @($scenarios)
     checks = [ordered]@{

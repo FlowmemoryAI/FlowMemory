@@ -1,6 +1,6 @@
 ﻿# FlowChain Owner Signup Checklist
 
-Generated: 2026-05-17T06:59:19.4400398Z
+Generated: 2026-05-17T08:23:04.2192376Z
 Status: passed
 
 FlowChain RPC is implemented by this repository. Do not sign up for a third-party FlowChain RPC provider. Public RPC means putting an owner-operated HTTPS edge in front of the private origin `127.0.0.1:8787`.
@@ -18,7 +18,7 @@ Put real values in a local service environment or an ignored `FLOWCHAIN_OWNER_EN
 | Writable backup storage | False | Mounted disk/volume, Owner-managed backup directory, Persistent path on the always-on host | FLOWCHAIN_RPC_STATE_BACKUP_PATH | npm run flowchain:backup:restore:validate; npm run flowchain:backup:check |
 | External tester write token and send cap | False | Owner-generated random bearer token stored out of band, SHA-256 digest in ignored owner env file, Small per-send local test-unit cap | FLOWCHAIN_TESTER_WRITE_ENABLED, FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256, FLOWCHAIN_TESTER_MAX_SEND_UNITS | npm run flowchain:owner-inputs; npm run flowchain:external-tester:packet -- -AllowBlocked |
 | Base mainnet RPC endpoint | True | Alchemy Base mainnet endpoint, QuickNode Base endpoint, Infura Base endpoint, Owner-operated Base node | FLOWCHAIN_BASE8453_RPC_URL | npm run flowchain:bridge:live:check |
-| Base bridge pilot contract and caps | False | Owner-provided deployed lockbox and token addresses, Bounded first/last Base block range, Pilot caps and confirmations | FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_BASE8453_TO_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:bridge:live:check |
+| Base bridge pilot contract and caps | False | Owner-provided deployed lockbox and token addresses, Bootstrap Base from-block plus cursor-state scanning, Optional bounded upper block for one-off scans, Pilot caps and confirmations | FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_BASE8453_CURSOR_STATE, FLOWCHAIN_BASE8453_TO_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:bridge:live:check |
 | Local owner env file | False | Ignored local NAME=value file referenced by FLOWCHAIN_OWNER_ENV_FILE, Process/service environment variables | FLOWCHAIN_OWNER_ENV_FILE | npm run flowchain:owner-env:template; npm run flowchain:owner-env:readiness:validate; npm run flowchain:owner-env:readiness -- -AllowBlocked; npm run flowchain:owner-inputs:validate |
 
 ## What You Need To Get
@@ -30,7 +30,7 @@ Put real values in a local service environment or an ignored `FLOWCHAIN_OWNER_EN
 - Writable backup storage: An existing writable directory path that the FlowChain service process can use for manifest-backed snapshots and restore rehearsals.
 - External tester write token and send cap: A random tester bearer token for friends-and-family wallet writes, its SHA-256 hex digest for the owner env file, and a positive per-send local test-unit cap.
 - Base mainnet RPC endpoint: A Base chain 8453 HTTPS JSON-RPC endpoint for read-only bridge observation.
-- Base bridge pilot contract and caps: The bridge pilot lockbox/token details, bounded Base block range, max deposit, total cap, confirmations, and explicit capped-pilot acknowledgement.
+- Base bridge pilot contract and caps: The bridge pilot lockbox/token details, bootstrap Base from-block, cursor-state location, optional one-off upper block, max deposit, total cap, confirmations, and explicit capped-pilot acknowledgement.
 - Local owner env file: A local-only file path for real values, kept outside committed reports and loaded by the parser-only env-file importer. Run npm run flowchain:owner-env:template to create the ignored local scaffold, npm run flowchain:owner-env:readiness:validate to test path safety, then npm run flowchain:owner-env:readiness -- -AllowBlocked to verify it.
 
 ## Do Not Send
@@ -75,7 +75,6 @@ Put real values in a local service environment or an ignored `FLOWCHAIN_OWNER_EN
 - FLOWCHAIN_BASE8453_SUPPORTED_TOKEN: missing
 - FLOWCHAIN_BASE8453_ASSET_DECIMALS: missing
 - FLOWCHAIN_BASE8453_FROM_BLOCK: missing
-- FLOWCHAIN_BASE8453_TO_BLOCK: missing
 - FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI: missing
 - FLOWCHAIN_PILOT_TOTAL_CAP_WEI: missing
 - FLOWCHAIN_PILOT_CONFIRMATIONS: missing

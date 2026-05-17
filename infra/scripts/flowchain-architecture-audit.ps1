@@ -29,6 +29,7 @@ $knownExternalOwnerInputs = @(
     "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
     "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
     "FLOWCHAIN_BASE8453_FROM_BLOCK",
+    "FLOWCHAIN_BASE8453_CURSOR_STATE",
     "FLOWCHAIN_BASE8453_TO_BLOCK",
     "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
     "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
@@ -177,10 +178,13 @@ $readinessMissingEnvSourceNames = @(
     "bridgeInfraReadiness"
 )
 $missingOwnerInputs = New-Object System.Collections.ArrayList
+$optionalOwnerInputs = @("FLOWCHAIN_BASE8453_CURSOR_STATE", "FLOWCHAIN_BASE8453_TO_BLOCK")
 foreach ($sourceName in $readinessMissingEnvSourceNames) {
     $report = $reports[$sourceName]
     foreach ($name in @((Get-ArchitectureProp -Object $report -Name "missingEnvNames" -Default @()))) {
-        Add-UniqueArchitectureName -Target $missingOwnerInputs -Value $name
+        if ($name -notin $optionalOwnerInputs) {
+            Add-UniqueArchitectureName -Target $missingOwnerInputs -Value $name
+        }
     }
 }
 foreach ($name in @((Get-ArchitectureProp -Object $reports.ownerInputs -Name "invalidEnvNames" -Default @()))) {
@@ -459,7 +463,7 @@ Add-ArchitectureItem -Items $items -Id "bridge-live-edge" -Layer "Bridge" `
     -Evidence "bridgeLive=$bridgeLiveStatus, bridgeInfra=$bridgeInfraStatus, baseTxDiagnostic=$(Get-ArchitectureStatus -Report $baseTxDiagnostic), baseTxSafe=$baseTxSafe" `
     -Files $bridgeLiveFiles `
     -Commands @("npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check", "npm run flowchain:bridge:diagnose:tx") `
-    -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_BASE8453_TO_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
+    -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
 
 $backupStatus = Get-ArchitectureStatus -Report $reports.backupReadiness
 $backupValidation = $reports.backupRestoreValidation
@@ -805,7 +809,7 @@ $dataFlows = @(
         name = "base8453-bridge-credit"
         path = @("Base 8453 lockbox event", "read-only bridge observer", "deposit validation", "bridge credit handoff", "runtime block inclusion", "wallet spend path")
         latestEvidence = $reportPaths.bridgeInfraReadiness
-        blockedBy = @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_BASE8453_TO_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
+        blockedBy = @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
     },
     [ordered]@{
         name = "state-recovery"

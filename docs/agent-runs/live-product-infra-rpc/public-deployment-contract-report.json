@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-17T08:08:42.7362114Z",
+    "generatedAt":  "2026-05-17T08:39:50.4504425Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -72,7 +72,7 @@
                       "id":  "owner-env-template",
                       "requirement":  "Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added.",
                       "status":  "passed",
-                      "evidence":  "templateStatus=passed, pathIsGitIgnored=True, requiredEnvNameCount=18, includesAllRequired=True",
+                      "evidence":  "templateStatus=passed, pathIsGitIgnored=True, requiredEnvNameCount=17, optionalEnvNameCount=2, includesAllRequired=True",
                       "commands":  [
                                        "npm run flowchain:owner-env:template"
                                    ],
@@ -97,7 +97,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=50989, finalizedHeight=50989",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=51404, finalizedHeight=51404",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -165,7 +165,6 @@
                                        "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                                        "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                                        "FLOWCHAIN_BASE8453_FROM_BLOCK",
-                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
                                        "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                                        "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                        "FLOWCHAIN_PILOT_CONFIRMATIONS"
@@ -242,7 +241,6 @@
                                        "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                                        "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                                        "FLOWCHAIN_BASE8453_FROM_BLOCK",
-                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
                                        "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                                        "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                        "FLOWCHAIN_PILOT_CONFIRMATIONS"
@@ -272,7 +270,6 @@
                                        "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                                        "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                                        "FLOWCHAIN_BASE8453_FROM_BLOCK",
-                                       "FLOWCHAIN_BASE8453_TO_BLOCK",
                                        "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                                        "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                        "FLOWCHAIN_PILOT_CONFIRMATIONS"
@@ -346,7 +343,6 @@
                             "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                             "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                             "FLOWCHAIN_BASE8453_FROM_BLOCK",
-                            "FLOWCHAIN_BASE8453_TO_BLOCK",
                             "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                             "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                             "FLOWCHAIN_PILOT_CONFIRMATIONS"
@@ -369,6 +365,7 @@
                              "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                              "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                              "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                             "FLOWCHAIN_BASE8453_CURSOR_STATE",
                              "FLOWCHAIN_BASE8453_TO_BLOCK",
                              "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                              "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",

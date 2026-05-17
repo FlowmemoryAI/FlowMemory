@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.owner_onboarding_report.v0",
-    "generatedAt":  "2026-05-17T06:59:18.2000528Z",
+    "generatedAt":  "2026-05-17T08:23:02.9002500Z",
     "status":  "passed",
     "ownerInputsStatus":  "blocked",
     "flowChainRpcIsOurs":  true,
@@ -79,13 +79,14 @@
                                                   "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                                                   "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                                                   "FLOWCHAIN_BASE8453_FROM_BLOCK",
-                                                  "FLOWCHAIN_BASE8453_TO_BLOCK",
                                                   "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                                                   "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-                                                  "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                                  "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                                  "FLOWCHAIN_BASE8453_CURSOR_STATE",
+                                                  "FLOWCHAIN_BASE8453_TO_BLOCK"
                                               ],
                                  "validationCommand":  "npm run flowchain:bridge:live:check",
-                                 "decision":  "This is not for FlowChain RPC. It is only for reading Base 8453 bridge events."
+                                 "decision":  "This is not for FlowChain RPC. It is only for reading Base 8453 bridge events. TO_BLOCK is optional because the relayer loop uses cursor state."
                              }
                          ],
     "localShellTemplate":  [
@@ -104,7 +105,8 @@
                                "$env:FLOWCHAIN_BASE8453_SUPPORTED_TOKEN=\"\u003c20-byte token address\u003e\"",
                                "$env:FLOWCHAIN_BASE8453_ASSET_DECIMALS=\"\u003c0 through 255\u003e\"",
                                "$env:FLOWCHAIN_BASE8453_FROM_BLOCK=\"\u003cfirst bounded Base block\u003e\"",
-                               "$env:FLOWCHAIN_BASE8453_TO_BLOCK=\"\u003clast bounded Base block\u003e\"",
+                               "$env:FLOWCHAIN_BASE8453_CURSOR_STATE=\"services/bridge-relayer/out/base8453-pilot-cursor-state.json\"",
+                               "$env:FLOWCHAIN_BASE8453_TO_BLOCK=\"\u003coptional last bounded Base block\u003e\"",
                                "$env:FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI=\"\u003cpositive capped amount\u003e\"",
                                "$env:FLOWCHAIN_PILOT_TOTAL_CAP_WEI=\"\u003cpositive capped amount greater than or equal to max deposit\u003e\"",
                                "$env:FLOWCHAIN_PILOT_CONFIRMATIONS=\"\u003c2 through 256\u003e\""
@@ -124,7 +126,6 @@
                             "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                             "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                             "FLOWCHAIN_BASE8453_FROM_BLOCK",
-                            "FLOWCHAIN_BASE8453_TO_BLOCK",
                             "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                             "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                             "FLOWCHAIN_PILOT_CONFIRMATIONS"

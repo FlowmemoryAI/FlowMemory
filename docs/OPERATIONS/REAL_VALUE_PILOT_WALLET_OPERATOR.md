@@ -56,11 +56,15 @@ $env:FLOWCHAIN_PILOT_OPERATOR_ACK="I_UNDERSTAND_THIS_IS_CAPPED_BASE8453_OWNER_PI
 $env:FLOWCHAIN_BASE8453_RPC_URL="<local-shell-only-endpoint>"
 $env:FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS="<owner-verified-lockbox>"
 $env:FLOWCHAIN_BASE8453_FROM_BLOCK="<start-block>"
-$env:FLOWCHAIN_BASE8453_TO_BLOCK="<end-block>"
+$env:FLOWCHAIN_BASE8453_CURSOR_STATE="services/bridge-relayer/out/base8453-pilot-cursor-state.json"
 $env:FLOWCHAIN_BASE8453_CONFIRMATION_DEPTH="<tiny-pilot-depth>"
 $env:FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI="<tiny-cap>"
 $env:FLOWCHAIN_PILOT_TOTAL_CAP_WEI="<tiny-total-cap>"
 ```
+
+Use `FLOWCHAIN_BASE8453_TO_BLOCK` only as an optional upper bound for a one-off
+scan. The pilot relayer loop advances from the cursor state after confirmed
+reads.
 
 ## Commands
 

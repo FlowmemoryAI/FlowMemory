@@ -25,10 +25,14 @@ Live bridge pilot checks require:
 - `FLOWCHAIN_BASE8453_SUPPORTED_TOKEN`
 - `FLOWCHAIN_BASE8453_ASSET_DECIMALS`
 - `FLOWCHAIN_BASE8453_FROM_BLOCK`
-- `FLOWCHAIN_BASE8453_TO_BLOCK`
 - `FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI`
 - `FLOWCHAIN_PILOT_TOTAL_CAP_WEI`
 - `FLOWCHAIN_PILOT_CONFIRMATIONS`
+
+`FLOWCHAIN_BASE8453_TO_BLOCK` is optional. When it is absent, the Base 8453
+observer uses `FLOWCHAIN_BASE8453_CURSOR_STATE` or the default
+`services/bridge-relayer/out/base8453-pilot-cursor-state.json` and advances only
+after a confirmed successful `eth_getLogs` range.
 
 The devkit and readiness reports print missing names only, not values.
 
@@ -52,6 +56,7 @@ Lookup keys may be `creditId`, `depositId`, `accountId`, `flowchainRecipient`,
 - Credits use exact decimal-string accounting.
 - Replay keys are consumed once.
 - Pilot per-deposit and total caps must pass before runtime credit application.
+- Cursor state is lock-protected, atomically replaced, and tamper-evident.
 - Emergency stop and pause commands must be tested before inviting external
   testers.
 

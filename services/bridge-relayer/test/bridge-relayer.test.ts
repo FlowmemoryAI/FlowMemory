@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 import Ajv2020 from "ajv/dist/2020.js";
 
-import { assertNoSecrets, canonicalJson } from "../../shared/src/index.ts";
+import { assertNoSecrets, canonicalJson, keccak256Utf8 } from "../../shared/src/index.ts";
 import {
   LOCK_NATIVE_SELECTOR,
   diagnoseBase8453Tx,
@@ -63,6 +63,20 @@ function validateSchema(name: string, value: unknown): void {
   const validate = ajv.getSchema(`https://flowmemory.local/schemas/flowmemory/${name}`) ?? ajv.getSchema(name);
   assert.ok(validate, `missing schema ${name}`);
   assert.equal(validate(value), true, canonicalJson({ errors: validate.errors ?? [] }));
+}
+
+function testStableId(schema: string, value: Record<string, string | number>): `0x${string}` {
+  return keccak256Utf8(canonicalJson({ schema, value }));
+}
+
+function testCursorStateId(lastScannedBlock: string, lastConfirmedHead: string): `0x${string}` {
+  return testStableId("flowmemory.bridge_lockbox_cursor_state.v0", {
+    mode: "base-mainnet-pilot",
+    sourceChainId: BASE_MAINNET_CHAIN_ID,
+    lockboxAddress: "0x1111111111111111111111111111111111111111",
+    lastScannedBlock,
+    lastConfirmedHead,
+  });
 }
 
 function topic(value: bigint): `0x${string}` {
@@ -882,7 +896,7 @@ test("Base public-network pilot cursor does not advance when no confirmed block 
   const cursorPath = join(stateDir, "cursor-state.json");
   writeFileSync(cursorPath, `${JSON.stringify({
     schema: "flowmemory.bridge_lockbox_cursor_state.v0",
-    stateId: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    stateId: testCursorStateId("107", "107"),
     updatedAt: FIXED_TEST_OBSERVED_AT,
     mode: "base-mainnet-pilot",
     sourceChainId: BASE_MAINNET_CHAIN_ID,
@@ -925,6 +939,58 @@ test("Base public-network pilot cursor does not advance when no confirmed block 
     assert.equal(result.observations.length, 0);
     assert.deepEqual(calls, ["eth_chainId", "eth_blockNumber"]);
     assert.equal(cursor.lastScannedBlock, "107");
+  } finally {
+    globalThis.fetch = originalFetch;
+    rmSync(stateDir, { recursive: true, force: true });
+  }
+});
+
+test("Base public-network pilot rejects tampered cursor state before log scanning", async () => {
+  const stateDir = mkdtempSync(join(tmpdir(), "flowmemory-bridge-cursor-tamper-"));
+  const cursorPath = join(stateDir, "cursor-state.json");
+  writeFileSync(cursorPath, `${JSON.stringify({
+    schema: "flowmemory.bridge_lockbox_cursor_state.v0",
+    stateId: testCursorStateId("107", "107"),
+    updatedAt: FIXED_TEST_OBSERVED_AT,
+    mode: "base-mainnet-pilot",
+    sourceChainId: BASE_MAINNET_CHAIN_ID,
+    lockboxAddress: "0x1111111111111111111111111111111111111111",
+    lastScannedBlock: "900",
+    lastConfirmedHead: "107",
+    lastFromBlock: "100",
+    lastToBlock: "107",
+    lastLogCount: 1,
+    localOnly: false,
+    productionReady: true,
+  }, null, 2)}\n`);
+
+  const calls: string[] = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (_input, init) => {
+    const body = JSON.parse(String(init?.body ?? "{}")) as { method: string };
+    calls.push(body.method);
+    if (body.method === "eth_chainId") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x2105" }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, error: { message: "unexpected method" } }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  };
+
+  try {
+    await assert.rejects(
+      () => runBridgePipeline(parseBridgeArgs(baseMainnetPilotRpcArgs([
+        "--cursor-state",
+        cursorPath,
+      ]))),
+      /bridge cursor state id mismatch/,
+    );
+    assert.deepEqual(calls, ["eth_chainId"]);
+    const cursor = JSON.parse(readFileSync(cursorPath, "utf8")) as { lastScannedBlock: string };
+    assert.equal(cursor.lastScannedBlock, "900");
   } finally {
     globalThis.fetch = originalFetch;
     rmSync(stateDir, { recursive: true, force: true });

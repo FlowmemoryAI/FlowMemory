@@ -1,13 +1,13 @@
 {
     "schema":  "flowchain.external_tester_packet_report.v0",
-    "generatedAt":  "2026-05-17T07:04:11.7980700Z",
+    "generatedAt":  "2026-05-17T08:37:38.0170158Z",
     "status":  "blocked",
     "packetShareable":  false,
     "packetPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\EXTERNAL_TESTER_PACKET.md",
-    "latestHeight":  "50070",
+    "latestHeight":  "51404",
     "readinessStatus":  "blocked",
     "ownerInputsStatus":  "blocked",
-    "completionAuditStatus":  "failed",
+    "completionAuditStatus":  "blocked",
     "localTesterRehearsalReady":  true,
     "externalSharingReady":  false,
     "packetExecutableSmokeValidated":  true,
@@ -46,10 +46,10 @@
                             "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
                             "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
                             "FLOWCHAIN_BASE8453_FROM_BLOCK",
-                            "FLOWCHAIN_BASE8453_TO_BLOCK",
                             "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                             "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-                            "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                            "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                            "FLOWCHAIN_BASE8453_TO_BLOCK"
                         ],
     "reportPaths":  {
                         "readiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",

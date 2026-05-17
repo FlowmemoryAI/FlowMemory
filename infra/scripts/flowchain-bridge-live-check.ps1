@@ -52,6 +52,7 @@ $TotalCapWeiLimit = [System.Numerics.BigInteger]::Parse("1000000000000000", [Sys
 $MaxBlockRange = [System.Numerics.BigInteger]::Parse("5000", [System.Globalization.CultureInfo]::InvariantCulture)
 $MinConfirmationDepth = [System.Numerics.BigInteger]::Parse("2", [System.Globalization.CultureInfo]::InvariantCulture)
 $MaxConfirmationDepth = [System.Numerics.BigInteger]::Parse("256", [System.Globalization.CultureInfo]::InvariantCulture)
+$DefaultCursorState = "services/bridge-relayer/out/base8453-pilot-cursor-state.json"
 
 $requiredEnv = @(
     "FLOWCHAIN_PILOT_OPERATOR_ACK",
@@ -60,10 +61,13 @@ $requiredEnv = @(
     "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
     "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
     "FLOWCHAIN_BASE8453_FROM_BLOCK",
-    "FLOWCHAIN_BASE8453_TO_BLOCK",
     "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
     "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
     "FLOWCHAIN_PILOT_CONFIRMATIONS"
+)
+$optionalEnv = @(
+    "FLOWCHAIN_BASE8453_CURSOR_STATE",
+    "FLOWCHAIN_BASE8453_TO_BLOCK"
 )
 
 function Get-BridgeEnv {
@@ -247,6 +251,10 @@ if ($null -ne $confirmations) {
 
 $fromBlock = Convert-DecimalEnv -Name "FLOWCHAIN_BASE8453_FROM_BLOCK" -Value (Get-BridgeEnv -Name "FLOWCHAIN_BASE8453_FROM_BLOCK") -Problems $problems
 $toBlock = Convert-DecimalEnv -Name "FLOWCHAIN_BASE8453_TO_BLOCK" -Value (Get-BridgeEnv -Name "FLOWCHAIN_BASE8453_TO_BLOCK") -Problems $problems
+$cursorState = Get-BridgeEnv -Name "FLOWCHAIN_BASE8453_CURSOR_STATE"
+if ([string]::IsNullOrWhiteSpace($cursorState)) {
+    $cursorState = $DefaultCursorState
+}
 if ($null -ne $fromBlock -and $null -ne $toBlock) {
     if ($fromBlock -gt $toBlock) {
         Add-Problem -Problems $problems -EnvName "FLOWCHAIN_BASE8453_FROM_BLOCK" -Reason "from block must be <= to block" -Kind "failed"
@@ -266,6 +274,7 @@ $report = [ordered]@{
     owner = "bridge/ops"
     command = "npm run flowchain:bridge:live:check"
     requiredEnvNames = $requiredEnv
+    optionalEnvNames = $optionalEnv
     missingEnvNames = @($missingEnv | Select-Object -Unique)
     checks = $checks
     settlementPolicy = [ordered]@{
@@ -283,6 +292,13 @@ $report = [ordered]@{
         totalCapWei = $TotalCapWeiLimit.ToString()
         maxBlockRange = $MaxBlockRange.ToString()
         minConfirmationDepth = $MinConfirmationDepth.ToString()
+    }
+    scanPolicy = [ordered]@{
+        mode = if ($null -ne $toBlock) { "bounded-upper-block" } else { "cursor-confirmed-head" }
+        fromBlockConfigured = $null -ne $fromBlock
+        toBlockConfigured = $null -ne $toBlock
+        toBlockRequired = $false
+        cursorStatePath = $cursorState
     }
     livePilotEnvLoader = $livePilotEnvLoader
     broadcasts = $false

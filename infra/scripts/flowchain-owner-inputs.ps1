@@ -47,7 +47,6 @@ $inputGroups = @(
             "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
             "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
             "FLOWCHAIN_BASE8453_FROM_BLOCK",
-            "FLOWCHAIN_BASE8453_TO_BLOCK",
             "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
             "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
             "FLOWCHAIN_PILOT_CONFIRMATIONS"
@@ -296,6 +295,9 @@ foreach ($groupEntry in $inputGroups) {
 
 $fromValue = Get-FlowChainEnvValue -Name "FLOWCHAIN_BASE8453_FROM_BLOCK"
 $toValue = Get-FlowChainEnvValue -Name "FLOWCHAIN_BASE8453_TO_BLOCK"
+if (-not [string]::IsNullOrWhiteSpace($toValue) -and -not (Test-OwnerInputUInt -Value $toValue -AllowZero)) {
+    Add-OwnerInputProblem -Problems $problems -Name "FLOWCHAIN_BASE8453_TO_BLOCK" -Reason "optional upper bound must be a non-negative decimal block number" -Kind "failed"
+}
 if ((Test-OwnerInputUInt -Value $fromValue -AllowZero) -and (Test-OwnerInputUInt -Value $toValue -AllowZero)) {
     $fromBlock = [System.Numerics.BigInteger]::Parse($fromValue, [System.Globalization.CultureInfo]::InvariantCulture)
     $toBlock = [System.Numerics.BigInteger]::Parse($toValue, [System.Globalization.CultureInfo]::InvariantCulture)
@@ -313,7 +315,10 @@ $invalid = @($inputs | Where-Object { $_.present -eq $true -and $_.valid -ne $tr
 if (-not [string]::IsNullOrWhiteSpace($ownerEnvFileProblem)) {
     $invalid = @($invalid + "FLOWCHAIN_OWNER_ENV_FILE" | Select-Object -Unique)
 }
-$status = if ($invalid.Count -gt 0) { "failed" } elseif ($missing.Count -gt 0) { "blocked" } else { "passed" }
+$failedProblems = @($problems | Where-Object { $_.kind -eq "failed" })
+$failedProblemNames = @($failedProblems | ForEach-Object { $_.name })
+$invalid = @($invalid + $failedProblemNames | Select-Object -Unique)
+$status = if ($invalid.Count -gt 0 -or $failedProblems.Count -gt 0) { "failed" } elseif ($missing.Count -gt 0) { "blocked" } else { "passed" }
 
 $report = [ordered]@{
     schema = "flowchain.owner_inputs_report.v0"
@@ -322,6 +327,7 @@ $report = [ordered]@{
     ownerInputReady = $status -eq "passed"
     groups = @($inputGroups | ForEach-Object { $_.group })
     inputs = @($inputs)
+    optionalEnvNames = @("FLOWCHAIN_BASE8453_CURSOR_STATE", "FLOWCHAIN_BASE8453_TO_BLOCK")
     missingEnvNames = @($missing)
     invalidEnvNames = @($invalid)
     ownerEnvFileState = $ownerEnvFileState

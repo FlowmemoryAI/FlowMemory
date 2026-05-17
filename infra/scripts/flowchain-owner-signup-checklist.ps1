@@ -111,19 +111,20 @@ $checklistItems = @(
         id = "base8453-bridge-details"
         title = "Base bridge pilot contract and caps"
         externalSignupNeeded = $false
-        acceptableOptions = @("Owner-provided deployed lockbox and token addresses", "Bounded first/last Base block range", "Pilot caps and confirmations")
+        acceptableOptions = @("Owner-provided deployed lockbox and token addresses", "Bootstrap Base from-block plus cursor-state scanning", "Optional bounded upper block for one-off scans", "Pilot caps and confirmations")
         producesEnvNames = @(
             "FLOWCHAIN_PILOT_OPERATOR_ACK",
             "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
             "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
             "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
             "FLOWCHAIN_BASE8453_FROM_BLOCK",
+            "FLOWCHAIN_BASE8453_CURSOR_STATE",
             "FLOWCHAIN_BASE8453_TO_BLOCK",
             "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
             "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
             "FLOWCHAIN_PILOT_CONFIRMATIONS"
         )
-        ownerMustGet = "The bridge pilot lockbox/token details, bounded Base block range, max deposit, total cap, confirmations, and explicit capped-pilot acknowledgement."
+        ownerMustGet = "The bridge pilot lockbox/token details, bootstrap Base from-block, cursor-state location, optional one-off upper block, max deposit, total cap, confirmations, and explicit capped-pilot acknowledgement."
         ownerMustNotSend = @("Private key for deploying or controlling contracts", "wallet recovery words", "wallet recovery material")
         validationCommand = "npm run flowchain:bridge:live:check"
     },
@@ -163,7 +164,6 @@ $requiredOwnerEnvNames = @(
     "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
     "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
     "FLOWCHAIN_BASE8453_FROM_BLOCK",
-    "FLOWCHAIN_BASE8453_TO_BLOCK",
     "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
     "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
     "FLOWCHAIN_PILOT_CONFIRMATIONS"
