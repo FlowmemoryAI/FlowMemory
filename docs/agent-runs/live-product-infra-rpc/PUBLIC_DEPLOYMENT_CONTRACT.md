@@ -1,6 +1,6 @@
 ﻿# FlowChain Public Deployment Contract
 
-Generated: 2026-05-17T08:39:50.4504425Z
+Generated: 2026-05-17T08:45:30.8194773Z
 Status: blocked
 Deployment ready: False
 Packet shareable: False
@@ -21,6 +21,7 @@ This file records deployment gates, commands, and env names only. It must not co
 | The deployment has recent service-monitor evidence that block height advances over multiple samples. | passed | monitorStatus=passed, samples=2, heightAdvanced=True |
 | The owner service has an autorecovery supervisor and an isolated recovery drill proving control-plane restart without touching live state. | passed | supervisorValidation=passed, restartAttempts=1 |
 | Owner deployment has a no-secret ops snapshot that separates critical incidents from expected owner-input blockers and lists incident commands. | passed | opsSnapshot=blocked, criticalCount=0, blockedCount=5 |
+| Owner deployment has a no-secret alert rule manifest that maps every current ops finding to operator commands without committing delivery credentials. | passed | alertRules=passed, criticalRules=5, blockedRules=5, unmappedCurrentFindingCodes=0 |
 | The owner deployment contract validates the required public RPC, tester write gateway, backup, and Base 8453 input names without values. | blocked | ownerInputsStatus=blocked, ownerInputReady=False |
 | The local public RPC abuse harness proves CORS rejection, media-type rejection, malformed JSON handling, batch/body caps, notification handling, rate limiting, and no-secret response summaries. | passed | abuseStatus=passed, abuseReady=True, missingChecks=0 |
 | The owner TLS edge must pass endpoint, CORS, rate-limit, readiness, and response-hygiene checks before sharing. | blocked | publicRpcStatus=blocked, publicRpcReady=False, validationStatus=passed, validationPassed=True, abuseStatus=passed, abusePassed=True |
@@ -37,6 +38,7 @@ This file records deployment gates, commands, and env names only. It must not co
 - npm run flowchain:service:status
 - npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30
 - npm run flowchain:ops:snapshot -- -AllowBlocked
+- npm run flowchain:ops:alerts -- -AllowBlocked
 - npm run flowchain:owner:onboarding
 - npm run flowchain:owner-env:template
 - npm run flowchain:owner-inputs

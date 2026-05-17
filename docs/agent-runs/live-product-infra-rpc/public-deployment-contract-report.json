@@ -1,16 +1,16 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-17T08:39:50.4504425Z",
+    "generatedAt":  "2026-05-17T08:45:30.8194773Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
     "packetExecutableSmokeValidated":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
-                       "passed":  14,
+                       "passed":  15,
                        "blocked":  5,
                        "failed":  0,
-                       "total":  19
+                       "total":  20
                    },
     "items":  [
                   {
@@ -137,6 +137,18 @@
                       "evidence":  "opsSnapshot=blocked, criticalCount=0, blockedCount=5",
                       "commands":  [
                                        "npm run flowchain:ops:snapshot -- -AllowBlocked"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "ops-alert-rules",
+                      "requirement":  "Owner deployment has a no-secret alert rule manifest that maps every current ops finding to operator commands without committing delivery credentials.",
+                      "status":  "passed",
+                      "evidence":  "alertRules=passed, criticalRules=5, blockedRules=5, unmappedCurrentFindingCodes=0",
+                      "commands":  [
+                                       "npm run flowchain:ops:alerts -- -AllowBlocked"
                                    ],
                       "blockers":  [
 
@@ -376,6 +388,7 @@
                         "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json",
                         "serviceSupervisorValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-report.json",
                         "opsSnapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
+                        "opsAlertRules":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-alert-rules-report.json",
                         "ownerOnboarding":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-onboarding-report.json",
                         "ownerSignupChecklist":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-signup-checklist-report.json",
                         "ownerEnvTemplate":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-template-report.json",
@@ -400,6 +413,7 @@
                                                  "npm run flowchain:service:status",
                                                  "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
                                                  "npm run flowchain:ops:snapshot -- -AllowBlocked",
+                                                 "npm run flowchain:ops:alerts -- -AllowBlocked",
                                                  "npm run flowchain:owner:onboarding",
                                                  "npm run flowchain:owner-env:template",
                                                  "npm run flowchain:owner-inputs",

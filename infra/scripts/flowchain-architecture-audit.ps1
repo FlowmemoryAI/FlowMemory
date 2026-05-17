@@ -41,6 +41,7 @@ $reportPaths = [ordered]@{
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     serviceSupervisorValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
+    opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
     incidentDrill = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json"
     liveWallet = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json"
     testerNetwork = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
@@ -243,6 +244,11 @@ $supervisorRestartAttempts = [int](Get-ArchitectureProp -Object $supervisorValid
 $opsSnapshot = $reports.opsSnapshot
 $opsSnapshotStatus = Get-ArchitectureStatus -Report $opsSnapshot
 $opsCriticalCount = [int](Get-ArchitectureProp -Object $opsSnapshot -Name "criticalCount" -Default 999)
+$opsAlertRules = $reports.opsAlertRules
+$opsAlertRulesStatus = Get-ArchitectureStatus -Report $opsAlertRules
+$opsAlertCriticalRules = [int](Get-ArchitectureProp -Object $opsAlertRules -Name "criticalRuleCount" -Default 0)
+$opsAlertBlockedRules = [int](Get-ArchitectureProp -Object $opsAlertRules -Name "blockedRuleCount" -Default 0)
+$opsAlertUnmappedCodes = @((Get-ArchitectureProp -Object $opsAlertRules -Name "unmappedCurrentFindingCodes" -Default @()))
 $incidentDrill = $reports.incidentDrill
 $incidentDrillStatus = Get-ArchitectureStatus -Report $incidentDrill
 $incidentDrillReady = Get-ArchitectureProp -Object $incidentDrill -Name "incidentDrillReady" -Default $false
@@ -254,6 +260,7 @@ $observabilityFiles = @(
     "infra/scripts/flowchain-service-supervisor.ps1",
     "infra/scripts/flowchain-service-supervisor-validation.ps1",
     "infra/scripts/flowchain-ops-snapshot.ps1",
+    "infra/scripts/flowchain-ops-alerts.ps1",
     "infra/scripts/flowchain-incident-drill.ps1",
     "infra/scripts/flowchain-emergency-stop-local.ps1",
     "infra/scripts/flowchain-node-stop.ps1"
@@ -263,6 +270,7 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:service:supervisor") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:service:supervisor:validate") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:snapshot") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:incident-drill") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:emergency:stop-local") `
     -and ($monitorStatus -eq "passed") `
@@ -272,16 +280,20 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ($supervisorRestartAttempts -ge 1) `
     -and ($opsSnapshotStatus -in @("passed", "blocked")) `
     -and ($opsCriticalCount -eq 0) `
+    -and ($opsAlertRulesStatus -eq "passed") `
+    -and ($opsAlertCriticalRules -ge 5) `
+    -and ($opsAlertBlockedRules -ge 5) `
+    -and ($opsAlertUnmappedCodes.Count -eq 0) `
     -and ($incidentDrillStatus -eq "passed") `
     -and ($incidentDrillReady -eq $true) `
     -and ($incidentFailedCases -eq 0) `
     -and ($incidentTotalCases -ge 8)
 Add-ArchitectureItem -Items $items -Id "ops-observability-boundary" -Layer "Operations" `
-    -Requirement "Operations has explicit status, monitor, ops snapshot, incident drills, and emergency controls that classify incidents separately from owner-input blockers." `
+    -Requirement "Operations has explicit status, monitor, ops snapshot, alert rules, incident drills, and emergency controls that classify incidents separately from owner-input blockers." `
     -Status $(if ($observabilityReady) { "passed" } else { "failed" }) `
-    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
+    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
     -Files $observabilityFiles `
-    -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
+    -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
 
 $publicRpcValidation = $reports.publicRpcValidation
 $publicRpcAbuseTest = $reports.publicRpcAbuseTest

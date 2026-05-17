@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-17T08:40:10.9949547Z",
+    "generatedAt":  "2026-05-17T08:45:30.9194798Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -48,14 +48,15 @@
                   {
                       "id":  "ops-observability-boundary",
                       "layer":  "Operations",
-                      "requirement":  "Operations has explicit status, monitor, ops snapshot, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
+                      "requirement":  "Operations has explicit status, monitor, ops snapshot, alert rules, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, opsSnapshot=blocked, criticalCount=0, incidentDrill=passed, incidentCases=8, incidentFailed=0",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, opsSnapshot=blocked, criticalCount=0, alertRules=passed, criticalRules=5, blockedRules=5, unmappedAlerts=0, incidentDrill=passed, incidentCases=8, incidentFailed=0",
                       "files":  [
                                     "infra/scripts/flowchain-service-monitor.ps1",
                                     "infra/scripts/flowchain-service-supervisor.ps1",
                                     "infra/scripts/flowchain-service-supervisor-validation.ps1",
                                     "infra/scripts/flowchain-ops-snapshot.ps1",
+                                    "infra/scripts/flowchain-ops-alerts.ps1",
                                     "infra/scripts/flowchain-incident-drill.ps1",
                                     "infra/scripts/flowchain-emergency-stop-local.ps1",
                                     "infra/scripts/flowchain-node-stop.ps1"
@@ -64,6 +65,7 @@
                                        "npm run flowchain:service:monitor",
                                        "npm run flowchain:service:supervisor:validate",
                                        "npm run flowchain:ops:snapshot -- -AllowBlocked",
+                                       "npm run flowchain:ops:alerts -- -AllowBlocked",
                                        "npm run flowchain:ops:incident-drill",
                                        "npm run flowchain:emergency:stop-local"
                                    ],
@@ -662,6 +664,7 @@
                         "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json",
                         "serviceSupervisorValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-report.json",
                         "opsSnapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
+                        "opsAlertRules":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-alert-rules-report.json",
                         "incidentDrill":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drill-report.json",
                         "liveWallet":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-wallet-e2e-report.json",
                         "testerNetwork":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json",

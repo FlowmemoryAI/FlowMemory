@@ -71,12 +71,17 @@ latest-pointer tamper failures.
 
 ```powershell
 npm run flowchain:ops:snapshot -- -AllowBlocked
+npm run flowchain:ops:alerts -- -AllowBlocked
 npm run flowchain:ops:incident-drill -- -AllowBlocked
 npm run flowchain:completion:audit -- -AllowBlocked
 ```
 
-Incident drills cover node down, control plane down, height not advancing,
-stale state, no-secret scan critical, and owner-blockers-only baseline.
+Alert rules map node down, control plane down, stalled height, stale state,
+no-secret scan failures, public RPC, backup, bridge, tester sharing, and
+deployment-contract blockers to concrete operator commands without committing
+external alert credentials. Incident drills cover node down, control plane down,
+height not advancing, stale state, no-secret scan critical, and
+owner-blockers-only baseline.
 
 ## Public Exposure Rule
 

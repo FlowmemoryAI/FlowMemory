@@ -42,6 +42,7 @@ $paths = [ordered]@{
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     serviceSupervisorValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
+    opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
     ownerOnboarding = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json"
     ownerSignupChecklist = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-signup-checklist-report.json"
     ownerEnvTemplate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-template-report.json"
@@ -218,6 +219,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-monitor" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-monitor.ps1"), "-DurationSeconds", "20", "-PollSeconds", "5", "-MaxStateAgeSeconds", "90", "-ReportPath", $paths.serviceMonitor)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-supervisor-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-supervisor-validation.ps1"), "-ReportPath", $paths.serviceSupervisorValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "ops-snapshot" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-snapshot.ps1"), "-AllowBlocked", "-NoRefresh", "-ReportPath", $paths.opsSnapshot)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "ops-alert-rules" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-alerts.ps1"), "-AllowBlocked", "-NoRefresh", "-ReportPath", $paths.opsAlertRules)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-onboarding" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-onboarding.ps1"), "-ReportPath", $paths.ownerOnboarding)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-signup-checklist" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-signup-checklist.ps1"), "-ReportPath", $paths.ownerSignupChecklist)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-env-template" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-env-template.ps1"), "-ReportPath", $paths.ownerEnvTemplate)
@@ -433,6 +435,17 @@ Add-DeploymentItem -Items $items -Id "ops-snapshot" `
     -Evidence "opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, blockedCount=$opsBlockedCount" `
     -Commands @("npm run flowchain:ops:snapshot -- -AllowBlocked")
 
+$opsAlertRules = $reports.opsAlertRules
+$opsAlertRulesStatus = Get-DeploymentStatus -Report $opsAlertRules
+$opsAlertCriticalRules = [int](Get-DeploymentProp -Object $opsAlertRules -Name "criticalRuleCount" -Default 0)
+$opsAlertBlockedRules = [int](Get-DeploymentProp -Object $opsAlertRules -Name "blockedRuleCount" -Default 0)
+$opsAlertUnmappedCodes = @((Get-DeploymentProp -Object $opsAlertRules -Name "unmappedCurrentFindingCodes" -Default @()))
+Add-DeploymentItem -Items $items -Id "ops-alert-rules" `
+    -Requirement "Owner deployment has a no-secret alert rule manifest that maps every current ops finding to operator commands without committing delivery credentials." `
+    -Status $(if (($opsAlertRulesStatus -eq "passed") -and ($opsAlertCriticalRules -ge 5) -and ($opsAlertBlockedRules -ge 5) -and ($opsAlertUnmappedCodes.Count -eq 0)) { "passed" } else { "failed" }) `
+    -Evidence "alertRules=$opsAlertRulesStatus, criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedCurrentFindingCodes=$($opsAlertUnmappedCodes.Count)" `
+    -Commands @("npm run flowchain:ops:alerts -- -AllowBlocked")
+
 $ownerInputs = $reports.ownerInputs
 $ownerStatus = Get-DeploymentStatus -Report $ownerInputs
 $ownerReady = Get-DeploymentProp -Object $ownerInputs -Name "ownerInputReady" -Default $false
@@ -630,6 +643,7 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:service:status",
         "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
         "npm run flowchain:ops:snapshot -- -AllowBlocked",
+        "npm run flowchain:ops:alerts -- -AllowBlocked",
         "npm run flowchain:owner:onboarding",
         "npm run flowchain:owner-env:template",
         "npm run flowchain:owner-inputs",
