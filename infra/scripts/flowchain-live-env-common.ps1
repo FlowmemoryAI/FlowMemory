@@ -464,6 +464,43 @@ function Test-FlowChainPid {
     return $result
 }
 
+function Find-FlowChainNodeProcess {
+    param(
+        [Parameter(Mandatory = $true)][string] $StatePath,
+        [Parameter(Mandatory = $true)][string] $NodeDir
+    )
+
+    $stateFullPath = [System.IO.Path]::GetFullPath($StatePath)
+    $nodeFullDir = [System.IO.Path]::GetFullPath($NodeDir)
+    $matches = New-Object System.Collections.ArrayList
+
+    foreach ($process in @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue)) {
+        $commandLine = [string]$process.CommandLine
+        if ([string]::IsNullOrWhiteSpace($commandLine)) {
+            continue
+        }
+        if ($commandLine -notlike "*flowmemory-devnet*") {
+            continue
+        }
+        if ($commandLine -notlike "*--state*" -or $commandLine -notlike "*$stateFullPath*") {
+            continue
+        }
+        if ($commandLine -notlike "*--node-dir*" -or $commandLine -notlike "*$nodeFullDir*") {
+            continue
+        }
+        if ($commandLine -notlike "* node *") {
+            continue
+        }
+
+        [void]$matches.Add([ordered]@{
+            pid = [int]$process.ProcessId
+            name = [string]$process.Name
+        })
+    }
+
+    return @($matches | Sort-Object { $_.pid })
+}
+
 function Get-FlowChainPackageScripts {
     param([Parameter(Mandatory = $true)][string] $RepoRoot)
     $package = Get-Content -Raw -LiteralPath (Join-Path $RepoRoot "package.json") | ConvertFrom-Json

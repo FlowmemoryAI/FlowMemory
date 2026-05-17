@@ -18,6 +18,16 @@ $reportPath = Join-Path $nodeFullDir "flowchain-node-stop-report.json"
 
 New-Item -ItemType Directory -Force -Path $nodeFullDir | Out-Null
 $pidStatus = Test-FlowChainPid -PidPath $pidPath -CommandLineIncludes @("flowmemory-devnet")
+if (-not ($pidStatus.running -and $pidStatus.commandLineMatched)) {
+    $discoveredNodes = @(Find-FlowChainNodeProcess -StatePath $stateFullPath -NodeDir $nodeFullDir)
+    if ($discoveredNodes.Count -gt 0) {
+        $pidStatus["configured"] = $true
+        $pidStatus["running"] = $true
+        $pidStatus["pid"] = [int]$discoveredNodes[0].pid
+        $pidStatus["commandLineMatched"] = $true
+        Set-Content -LiteralPath $pidPath -Value "$($pidStatus.pid)" -Encoding ascii
+    }
+}
 if ($pidStatus.running -and -not $pidStatus.commandLineMatched) {
     $report = [ordered]@{
         schema = "flowchain.private_testnet.node_stop_report.v0"

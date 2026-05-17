@@ -11,6 +11,7 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 . "$PSScriptRoot\flowchain-common.ps1"
+. "$PSScriptRoot\flowchain-live-env-common.ps1"
 
 $repoRoot = Set-FlowChainRepoRoot
 Set-FlowChainCargoTargetDir -RepoRoot $repoRoot -Purpose "node-start" | Out-Null
@@ -78,6 +79,37 @@ if (Test-Path -LiteralPath $pidPath) {
                 return
             }
         }
+    }
+}
+
+$discoveredNodes = @(Find-FlowChainNodeProcess -StatePath $stateFullPath -NodeDir $nodeFullDir)
+if ($discoveredNodes.Count -gt 0) {
+    $discoveredPid = [int]$discoveredNodes[0].pid
+    Set-Content -LiteralPath $pidPath -Value "$discoveredPid" -Encoding ascii
+    if ($Wait -and $MaxBlocks -gt 0) {
+        & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "flowchain-node-stop.ps1") -StatePath $stateFullPath -NodeDir $nodeFullDir | Out-Null
+        if (Test-FlowChainNodePid -ProcessId $discoveredPid) {
+            throw "FlowChain bounded node proof could not stop discovered node PID $discoveredPid."
+        }
+    }
+    else {
+        $report = [ordered]@{
+            schema = "flowchain.private_testnet.node_start_report.v0"
+            generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+            status = "already-running"
+            pid = $discoveredPid
+            pidSource = "discovered-process"
+            statePath = $stateFullPath
+            nodeDir = $nodeFullDir
+            stdoutLog = $stdoutPath
+            stderrLog = $stderrPath
+            stopCommand = "npm run flowchain:node:stop"
+            statusCommand = "npm run flowchain:node:status"
+        }
+        Write-FlowChainJson -Path $reportPath -Value $report
+        Write-Host "FlowChain node is already running with PID $discoveredPid."
+        Write-Host "Status command: npm run flowchain:node:status"
+        return
     }
 }
 

@@ -27,6 +27,18 @@ $relayerPidPath = Join-Path $servicesFullDir "bridge-relayer-loop.pid"
 $serviceStartReportPath = Join-Path $servicesFullDir "flowchain-service-start-report.json"
 
 $nodeStatus = Test-FlowChainPid -PidPath $nodePidPath -CommandLineIncludes @("flowmemory-devnet")
+$nodePidSource = "pid-file"
+if (-not ($nodeStatus.running -and $nodeStatus.commandLineMatched)) {
+    $discoveredNodes = @(Find-FlowChainNodeProcess -StatePath $stateFullPath -NodeDir $nodeFullDir)
+    if ($discoveredNodes.Count -gt 0) {
+        $nodeStatus["configured"] = $true
+        $nodeStatus["running"] = $true
+        $nodeStatus["pid"] = [int]$discoveredNodes[0].pid
+        $nodeStatus["commandLineMatched"] = $true
+        $nodePidSource = "discovered-process"
+        Set-Content -LiteralPath $nodePidPath -Value "$($nodeStatus.pid)" -Encoding ascii
+    }
+}
 $controlPlaneStatus = Test-FlowChainPid -PidPath $controlPlanePidPath -CommandLineIncludes @($controlPlaneScriptPath)
 $relayerStatus = Test-FlowChainPid -PidPath $relayerPidPath -CommandLineIncludes @("bridge-base-mainnet-pilot-observe.ps1")
 $controlPlaneReady = $controlPlaneStatus.running -and $controlPlaneStatus.commandLineMatched
@@ -116,6 +128,7 @@ $report = [ordered]@{
         status = if ($nodeStatus.running) { "running" } else { "stopped" }
         pid = $nodeStatus.pid
         pidPath = "devnet/local/node/flowchain-node.pid"
+        pidSource = $nodePidSource
         commandLineMatched = $nodeStatus.commandLineMatched
     }
     controlPlane = [ordered]@{
