@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-17T12:20:09.8830876Z",
+  "generatedAt": "2026-05-17T12:38:53.9986639Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -8,8 +8,8 @@
   "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
   "privateRpcUrl": "http://127.0.0.1:8787",
   "metrics": {
-    "latestHeight": "54424",
-    "finalizedHeight": "54424",
+    "latestHeight": "54647",
+    "finalizedHeight": "54647",
     "monitorHeightAdvanced": true,
     "bridgeRelayerStatus": "blocked",
     "bridgeQueuedTransactions": "0",
@@ -105,7 +105,7 @@
       "label": "Private L1 origin",
       "status": "passed",
       "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
-      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=53846, finalizedHeight=53846",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=54647, finalizedHeight=54647",
       "commands": [
         "npm run flowchain:service:status"
       ],
@@ -310,7 +310,7 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-17T12:20:09.8830876Z"
+      "generatedAt": "2026-05-17T12:38:53.9986639Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
@@ -322,7 +322,7 @@
       "fileName": "service-status-report.json",
       "schema": "flowchain.service_status_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-17T12:22:13.5838745Z"
+      "generatedAt": "2026-05-17T12:38:11.0462713Z"
     },
     {
       "fileName": "service-monitor-report.json",
@@ -340,7 +340,7 @@
       "fileName": "backup-readiness-report.json",
       "schema": "flowchain.backup_readiness_report.v1",
       "status": "blocked",
-      "generatedAt": "2026-05-17T11:32:11.2470203Z"
+      "generatedAt": "2026-05-17T12:38:09.7358072Z"
     },
     {
       "fileName": "bridge-relayer-once-report.json",
