@@ -136,6 +136,7 @@ $publicReadMirrorPaths = @(
 )
 
 $authenticatedTesterWritePaths = @(
+    "/tester/faucet",
     "/tester/wallets/create",
     "/tester/wallets/send"
 )
@@ -175,13 +176,13 @@ $edgeRequirements = @(
         id = "edge-path-allowlist"
         requirement = "The public edge does not proxy private write or admin routes; tester writes use the authenticated tester gateway only."
         status = "passed"
-        evidence = "template exposes /rpc, explicit read mirrors, and /tester/wallets/create|send; fallback location returns 404"
+        evidence = "template exposes /rpc, explicit read mirrors, /tester/faucet, and /tester/wallets/create|send; fallback location returns 404"
     },
     [ordered]@{
         id = "authenticated-tester-write-gateway"
-        requirement = "Friends-and-family wallet creation and sends have a dedicated bearer-authenticated gateway with a send cap."
+        requirement = "Friends-and-family wallet creation, faucet funding, and sends have a dedicated bearer-authenticated gateway with a unit cap."
         status = "passed"
-        evidence = "origin requires FLOWCHAIN_TESTER_WRITE_* env names and bearer auth before /tester/wallets/create or /tester/wallets/send executes"
+        evidence = "origin requires FLOWCHAIN_TESTER_WRITE_* env names and bearer auth before /tester/faucet, /tester/wallets/create, or /tester/wallets/send executes"
     },
     [ordered]@{
         id = "body-size-limit"
@@ -242,7 +243,7 @@ $nginxTemplate = @(
     "        proxy_read_timeout 60s;",
     "    }",
     "",
-    "    location ~ ^/tester/wallets/(create|send)$ {",
+    "    location ~ ^/tester/(faucet|wallets/(create|send))$ {",
     "        if (`$request_method !~ ^(POST|OPTIONS)$) { return 405; }",
     "        limit_req zone=flowchain_rpc_per_ip burst=5 nodelay;",
     "        proxy_pass http://127.0.0.1:8787;",

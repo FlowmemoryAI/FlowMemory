@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_edge_template_report.v0",
-    "generatedAt":  "2026-05-17T09:20:29.1430522Z",
+    "generatedAt":  "2026-05-17T11:43:38.6747459Z",
     "status":  "passed",
     "edgeTemplateReady":  true,
     "flowChainRpcIsRepoOwned":  true,
@@ -123,6 +123,7 @@
                                   "/pilot/emergency-status"
                               ],
     "authenticatedTesterWritePaths":  [
+                                          "/tester/faucet",
                                           "/tester/wallets/create",
                                           "/tester/wallets/send"
                                       ],
@@ -170,13 +171,13 @@
                                  "id":  "edge-path-allowlist",
                                  "requirement":  "The public edge does not proxy private write or admin routes; tester writes use the authenticated tester gateway only.",
                                  "status":  "passed",
-                                 "evidence":  "template exposes /rpc, explicit read mirrors, and /tester/wallets/create|send; fallback location returns 404"
+                                 "evidence":  "template exposes /rpc, explicit read mirrors, /tester/faucet, and /tester/wallets/create|send; fallback location returns 404"
                              },
                              {
                                  "id":  "authenticated-tester-write-gateway",
-                                 "requirement":  "Friends-and-family wallet creation and sends have a dedicated bearer-authenticated gateway with a send cap.",
+                                 "requirement":  "Friends-and-family wallet creation, faucet funding, and sends have a dedicated bearer-authenticated gateway with a unit cap.",
                                  "status":  "passed",
-                                 "evidence":  "origin requires FLOWCHAIN_TESTER_WRITE_* env names and bearer auth before /tester/wallets/create or /tester/wallets/send executes"
+                                 "evidence":  "origin requires FLOWCHAIN_TESTER_WRITE_* env names and bearer auth before /tester/faucet, /tester/wallets/create, or /tester/wallets/send executes"
                              },
                              {
                                  "id":  "body-size-limit",
@@ -236,7 +237,7 @@
                           "        proxy_read_timeout 60s;",
                           "    }",
                           "",
-                          "    location ~ ^/tester/wallets/(create|send)$ {",
+                          "    location ~ ^/tester/(faucet|wallets/(create|send))$ {",
                           "        if ($request_method !~ ^(POST|OPTIONS)$) { return 405; }",
                           "        limit_req zone=flowchain_rpc_per_ip burst=5 nodelay;",
                           "        proxy_pass http://127.0.0.1:8787;",

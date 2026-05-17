@@ -166,7 +166,7 @@ $nginxRequiredTokens = @(
     'proxy_set_header Authorization $http_authorization;',
     'proxy_set_header X-Forwarded-Proto https;',
     'proxy_set_header X-Forwarded-For $remote_addr;',
-    '/tester/wallets/(create|send)'
+    '/tester/(faucet|wallets/(create|send))'
 )
 
 $systemdRequiredTokens = @(
