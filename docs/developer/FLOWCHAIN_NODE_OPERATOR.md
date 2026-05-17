@@ -94,6 +94,8 @@ npm run flowchain:backup:install:windows -- -Action Uninstall
 ```powershell
 npm run flowchain:ops:snapshot -- -AllowBlocked
 npm run flowchain:ops:alerts -- -AllowBlocked
+npm run flowchain:ops:alerts:install:windows -- -Action Plan
+npm run flowchain:ops:alerts:install:validate
 npm run flowchain:ops:incident-drill -- -AllowBlocked
 npm run flowchain:completion:audit -- -AllowBlocked
 ```
@@ -104,6 +106,16 @@ deployment-contract blockers to concrete operator commands without committing
 external alert credentials. Incident drills cover node down, control plane down,
 height not advancing, stale state, no-secret scan critical, and
 owner-blockers-only baseline.
+
+On a Windows owner host, the alert install command can register, inspect, and
+remove an interval Scheduled Task that refreshes local ops snapshot and alert
+reports:
+
+```powershell
+npm run flowchain:ops:alerts:install:windows -- -Action Install
+npm run flowchain:ops:alerts:install:windows -- -Action Status
+npm run flowchain:ops:alerts:install:windows -- -Action Uninstall
+```
 
 ## Public Exposure Rule
 

@@ -49,6 +49,7 @@ $paths = [ordered]@{
     serviceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
+    alertInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
     ownerOnboarding = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json"
     ownerSignupChecklist = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-signup-checklist-report.json"
     ownerEnvTemplate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-template-report.json"
@@ -266,6 +267,8 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:service:supervisor:validate",
     "npm run flowchain:service:install:validate",
     "npm run flowchain:ops:snapshot -- -AllowBlocked",
+    "npm run flowchain:ops:alerts -- -AllowBlocked",
+    "npm run flowchain:ops:alerts:install:validate",
     "npm run flowchain:owner:onboarding",
     "npm run flowchain:owner:signup-checklist",
     "npm run flowchain:owner-env:template",
@@ -292,6 +295,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-install-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-install-validation.ps1"), "-ReportPath", $paths.serviceInstallValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "ops-snapshot" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-snapshot.ps1"), "-AllowBlocked", "-NoRefresh", "-ReportPath", $paths.opsSnapshot)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "ops-alert-rules" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-alerts.ps1"), "-AllowBlocked", "-NoRefresh", "-ReportPath", $paths.opsAlertRules)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "alert-install-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-alert-install-validation.ps1"), "-ReportPath", $paths.alertInstallValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-onboarding" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-onboarding.ps1"), "-ReportPath", $paths.ownerOnboarding)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-signup-checklist" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-signup-checklist.ps1"), "-ReportPath", $paths.ownerSignupChecklist)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-env-template" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-env-template.ps1"), "-ReportPath", $paths.ownerEnvTemplate)
@@ -548,6 +552,29 @@ Add-DeploymentItem -Items $items -Id "ops-alert-rules" `
     -Evidence "alertRules=$opsAlertRulesStatus, criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedCurrentFindingCodes=$($opsAlertUnmappedCodes.Count)" `
     -Commands @("npm run flowchain:ops:alerts -- -AllowBlocked")
 
+$alertInstallValidation = $reports.alertInstallValidation
+$alertInstallValidationStatus = Get-DeploymentStatus -Report $alertInstallValidation
+$alertInstallChecks = Get-DeploymentProp -Object $alertInstallValidation -Name "checks"
+$alertInstallReady = ($alertInstallValidationStatus -eq "passed") `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "packageScriptsPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "planCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "schedulerCmdletsAvailable" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "scheduledTaskTriggerSupportsRepetition" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "actionUsesAlertsScript" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "hasAllowBlocked" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "scheduledCommandDoesNotDisableRefresh" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $alertInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:windows") `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:validate")
+Add-DeploymentItem -Items $items -Id "ops-alert-schedule-automation" `
+    -Requirement "The owner host has a no-secret Windows install, status, and uninstall path for recurring ops snapshot and alert-rule refresh without committed external delivery credentials." `
+    -Status $(if ($alertInstallReady) { "passed" } else { "failed" }) `
+    -Evidence "alertInstallValidation=$alertInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $alertInstallChecks -Name "planDidNotMutate"), hasAllowBlocked=$(Get-DeploymentProp -Object $alertInstallChecks -Name "hasAllowBlocked"), noExternalDelivery=$(Get-DeploymentProp -Object $alertInstallChecks -Name "noExternalDelivery")" `
+    -Commands @("npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:alerts:install:windows -- -Action Plan", "npm run flowchain:ops:alerts:install:windows -- -Action Install", "npm run flowchain:ops:alerts:install:windows -- -Action Status", "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall")
+
 $ownerInputs = $reports.ownerInputs
 $ownerStatus = Get-DeploymentStatus -Report $ownerInputs
 $ownerReady = Get-DeploymentProp -Object $ownerInputs -Name "ownerInputReady" -Default $false
@@ -771,6 +798,8 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:service:install:windows -- -Action Plan",
         "npm run flowchain:ops:snapshot -- -AllowBlocked",
         "npm run flowchain:ops:alerts -- -AllowBlocked",
+        "npm run flowchain:ops:alerts:install:validate",
+        "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
         "npm run flowchain:owner:onboarding",
         "npm run flowchain:owner-env:template",
         "npm run flowchain:owner-inputs",
@@ -798,6 +827,8 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:service:install:windows -- -Action Uninstall",
         "npm run flowchain:backup:install:windows -- -Action Status",
         "npm run flowchain:backup:install:windows -- -Action Uninstall",
+        "npm run flowchain:ops:alerts:install:windows -- -Action Status",
+        "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall",
         "npm run flowchain:service:stop",
         "npm run flowchain:service:restart -- -LiveProfile",
         "npm run flowchain:emergency:stop-local"

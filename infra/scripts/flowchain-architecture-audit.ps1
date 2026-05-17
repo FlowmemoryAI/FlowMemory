@@ -43,6 +43,7 @@ $reportPaths = [ordered]@{
     serviceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
+    alertInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
     incidentDrill = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json"
     liveWallet = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json"
     testerNetwork = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
@@ -255,6 +256,10 @@ $opsAlertRulesStatus = Get-ArchitectureStatus -Report $opsAlertRules
 $opsAlertCriticalRules = [int](Get-ArchitectureProp -Object $opsAlertRules -Name "criticalRuleCount" -Default 0)
 $opsAlertBlockedRules = [int](Get-ArchitectureProp -Object $opsAlertRules -Name "blockedRuleCount" -Default 0)
 $opsAlertUnmappedCodes = @((Get-ArchitectureProp -Object $opsAlertRules -Name "unmappedCurrentFindingCodes" -Default @()))
+$alertInstallValidation = $reports.alertInstallValidation
+$alertInstallValidationStatus = Get-ArchitectureStatus -Report $alertInstallValidation
+$alertInstallChecks = Get-ArchitectureProp -Object $alertInstallValidation -Name "checks"
+$alertInstallFailedChecks = @((Get-ArchitectureProp -Object $alertInstallValidation -Name "failedChecks" -Default @()))
 $incidentDrill = $reports.incidentDrill
 $incidentDrillStatus = Get-ArchitectureStatus -Report $incidentDrill
 $incidentDrillReady = Get-ArchitectureProp -Object $incidentDrill -Name "incidentDrillReady" -Default $false
@@ -267,6 +272,8 @@ $observabilityFiles = @(
     "infra/scripts/flowchain-service-supervisor-validation.ps1",
     "infra/scripts/flowchain-ops-snapshot.ps1",
     "infra/scripts/flowchain-ops-alerts.ps1",
+    "infra/scripts/flowchain-alert-install-windows.ps1",
+    "infra/scripts/flowchain-alert-install-validation.ps1",
     "infra/scripts/flowchain-incident-drill.ps1",
     "infra/scripts/flowchain-emergency-stop-local.ps1",
     "infra/scripts/flowchain-node-stop.ps1"
@@ -277,6 +284,8 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:service:supervisor:validate") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:snapshot") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:windows") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:validate") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:incident-drill") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:emergency:stop-local") `
     -and ($monitorStatus -eq "passed") `
@@ -290,16 +299,21 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ($opsAlertCriticalRules -ge 5) `
     -and ($opsAlertBlockedRules -ge 5) `
     -and ($opsAlertUnmappedCodes.Count -eq 0) `
+    -and ($alertInstallValidationStatus -eq "passed") `
+    -and ($alertInstallFailedChecks.Count -eq 0) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "scheduledTaskTriggerSupportsRepetition" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
     -and ($incidentDrillStatus -eq "passed") `
     -and ($incidentDrillReady -eq $true) `
     -and ($incidentFailedCases -eq 0) `
     -and ($incidentTotalCases -ge 8)
 Add-ArchitectureItem -Items $items -Id "ops-observability-boundary" -Layer "Operations" `
-    -Requirement "Operations has explicit status, monitor, ops snapshot, alert rules, incident drills, and emergency controls that classify incidents separately from owner-input blockers." `
+    -Requirement "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, alert rules, incident drills, and emergency controls that classify incidents separately from owner-input blockers." `
     -Status $(if ($observabilityReady) { "passed" } else { "failed" }) `
-    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
+    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertInstall=$alertInstallValidationStatus, alertInstallFailedChecks=$($alertInstallFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
     -Files $observabilityFiles `
-    -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
+    -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
 
 $serviceInstallFiles = @(
     "infra/scripts/flowchain-service-install-windows.ps1",

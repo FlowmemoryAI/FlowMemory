@@ -11,6 +11,7 @@ The repository now provides:
 - `npm run flowchain:service:monitor` for repeated live service sampling that proves height progression over an operator-selected window.
 - `npm run flowchain:ops:snapshot` for one no-secret operator report that classifies critical incidents, public-readiness blockers, and incident commands.
 - `npm run flowchain:ops:incident-drill` for a synthetic no-values incident drill that proves node-down, control-plane-down, stale-state, stalled-height, and no-secret failures are classified as critical while owner-input blockers stay non-critical.
+- `npm run flowchain:ops:alerts:install:windows` and `npm run flowchain:ops:alerts:install:validate` for a no-secret Windows Scheduled Task install/status/uninstall path for recurring local alert refresh.
 - `npm run flowchain:service:stop` and `npm run flowchain:service:restart`, which preserve runtime state.
 - `npm run flowchain:public-rpc:check` for endpoint, TLS, CORS, rate-limit, health, discovery, readiness, state, and response-hygiene checks.
 - `npm run flowchain:public-rpc:edge-template` for a no-values Nginx public-edge template that proxies this chain's private RPC origin through owner TLS and rate limiting.

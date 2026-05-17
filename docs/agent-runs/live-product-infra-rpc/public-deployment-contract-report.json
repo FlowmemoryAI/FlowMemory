@@ -1,16 +1,16 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-17T10:20:17.1551020Z",
+    "generatedAt":  "2026-05-17T10:27:19.8631144Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
     "packetExecutableSmokeValidated":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
-                       "passed":  17,
+                       "passed":  18,
                        "blocked":  5,
                        "failed":  0,
-                       "total":  22
+                       "total":  23
                    },
     "items":  [
                   {
@@ -24,6 +24,8 @@
                                        "npm run flowchain:service:supervisor:validate",
                                        "npm run flowchain:service:install:validate",
                                        "npm run flowchain:ops:snapshot -- -AllowBlocked",
+                                       "npm run flowchain:ops:alerts -- -AllowBlocked",
+                                       "npm run flowchain:ops:alerts:install:validate",
                                        "npm run flowchain:owner:onboarding",
                                        "npm run flowchain:owner:signup-checklist",
                                        "npm run flowchain:owner-env:template",
@@ -167,6 +169,22 @@
                       "evidence":  "alertRules=passed, criticalRules=5, blockedRules=5, unmappedCurrentFindingCodes=0",
                       "commands":  [
                                        "npm run flowchain:ops:alerts -- -AllowBlocked"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "ops-alert-schedule-automation",
+                      "requirement":  "The owner host has a no-secret Windows install, status, and uninstall path for recurring ops snapshot and alert-rule refresh without committed external delivery credentials.",
+                      "status":  "passed",
+                      "evidence":  "alertInstallValidation=passed, planDidNotMutate=True, hasAllowBlocked=True, noExternalDelivery=True",
+                      "commands":  [
+                                       "npm run flowchain:ops:alerts:install:validate",
+                                       "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
+                                       "npm run flowchain:ops:alerts:install:windows -- -Action Install",
+                                       "npm run flowchain:ops:alerts:install:windows -- -Action Status",
+                                       "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall"
                                    ],
                       "blockers":  [
 
@@ -428,6 +446,7 @@
                         "serviceInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-validation-report.json",
                         "opsSnapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
                         "opsAlertRules":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-alert-rules-report.json",
+                        "alertInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\alert-install-validation-report.json",
                         "ownerOnboarding":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-onboarding-report.json",
                         "ownerSignupChecklist":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-signup-checklist-report.json",
                         "ownerEnvTemplate":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-template-report.json",
@@ -456,6 +475,8 @@
                                                  "npm run flowchain:service:install:windows -- -Action Plan",
                                                  "npm run flowchain:ops:snapshot -- -AllowBlocked",
                                                  "npm run flowchain:ops:alerts -- -AllowBlocked",
+                                                 "npm run flowchain:ops:alerts:install:validate",
+                                                 "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
                                                  "npm run flowchain:owner:onboarding",
                                                  "npm run flowchain:owner-env:template",
                                                  "npm run flowchain:owner-inputs",
@@ -483,6 +504,8 @@
                                               "npm run flowchain:service:install:windows -- -Action Uninstall",
                                               "npm run flowchain:backup:install:windows -- -Action Status",
                                               "npm run flowchain:backup:install:windows -- -Action Uninstall",
+                                              "npm run flowchain:ops:alerts:install:windows -- -Action Status",
+                                              "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall",
                                               "npm run flowchain:service:stop",
                                               "npm run flowchain:service:restart -- -LiveProfile",
                                               "npm run flowchain:emergency:stop-local"
