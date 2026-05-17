@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_bundle_checks.v1",
-    "generatedAt":  "2026-05-17T11:43:59.7322103Z",
+    "generatedAt":  "2026-05-17T12:19:29.9069011Z",
     "status":  "passed",
     "requiredPlaceholders":  [
                                  "\u003cFLOWCHAIN_RPC_PUBLIC_HOST\u003e",
@@ -19,7 +19,8 @@
                                  "\u003cFLOWCHAIN_NGINX_PREFLIGHT_SCRIPT\u003e",
                                  "\u003cFLOWCHAIN_SYSTEMD_RENDERED_UNIT\u003e",
                                  "\u003cFLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT\u003e",
-                                 "\u003cPREVIOUS_FLOWCHAIN_RPC_NGINX_CONF\u003e"
+                                 "\u003cPREVIOUS_FLOWCHAIN_RPC_NGINX_CONF\u003e",
+                                 "\u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e"
                              ],
     "missingRequiredPlaceholders":  [
 
@@ -41,6 +42,7 @@
                    "nginxTemplateWritten":  true,
                    "systemdServiceTemplateWritten":  true,
                    "systemdSupervisorTemplateWritten":  true,
+                   "renderScriptWritten":  true,
                    "nginxPreflightScriptWritten":  true,
                    "nginxPreflightChecklistWritten":  true,
                    "windowsNginxPreflightScriptWritten":  true,
@@ -53,6 +55,7 @@
                    "nginxRequiredTokensPresent":  true,
                    "systemdLiveServiceTemplatePresent":  true,
                    "systemdSupervisorTemplatePresent":  true,
+                   "renderScriptTokensPresent":  true,
                    "nginxPreflightTokensPresent":  true,
                    "windowsNginxPreflightTokensPresent":  true,
                    "includesPrivateOrigin":  true,

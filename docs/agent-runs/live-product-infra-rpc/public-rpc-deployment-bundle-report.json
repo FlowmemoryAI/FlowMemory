@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_bundle_report.v2",
-    "generatedAt":  "2026-05-17T11:43:59.8881590Z",
+    "generatedAt":  "2026-05-17T12:19:30.0696319Z",
     "status":  "passed",
     "bundleDir":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle",
     "flowChainRpcIsRepoOwned":  true,
@@ -33,7 +33,8 @@
                                  "\u003cFLOWCHAIN_NGINX_PREFLIGHT_SCRIPT\u003e",
                                  "\u003cFLOWCHAIN_SYSTEMD_RENDERED_UNIT\u003e",
                                  "\u003cFLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT\u003e",
-                                 "\u003cPREVIOUS_FLOWCHAIN_RPC_NGINX_CONF\u003e"
+                                 "\u003cPREVIOUS_FLOWCHAIN_RPC_NGINX_CONF\u003e",
+                                 "\u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e"
                              ],
     "missingRequiredPlaceholders":  [
 
@@ -52,6 +53,9 @@
                              "npm run flowchain:public-deployment:contract -- -AllowBlocked",
                              "npm run flowchain:external-tester:packet -- -AllowBlocked"
                          ],
+    "ownerRenderCommands":  [
+                                "powershell -NoProfile -ExecutionPolicy Bypass -File render-public-rpc-bundle.template.ps1 -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -OwnerEnvFile \u003cFLOWCHAIN_OWNER_ENV_FILE\u003e -RepoRoot \u003cFLOWCHAIN_REPO_ABSOLUTE_PATH\u003e -ServiceUser \u003cFLOWCHAIN_SERVICE_USER\u003e -ServiceGroup \u003cFLOWCHAIN_SERVICE_GROUP\u003e -TlsCertificatePath \u003cPATH_TO_TLS_CERTIFICATE\u003e -TlsCertificateKeyPath \u003cPATH_TO_TLS_CERTIFICATE_KEY\u003e -NginxExe \u003cFLOWCHAIN_NGINX_EXE\u003e"
+                            ],
     "ownerPreflightCommands":  [
                                    "systemd-analyze verify \u003cFLOWCHAIN_SYSTEMD_RENDERED_UNIT\u003e",
                                    "systemd-analyze verify \u003cFLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT\u003e",
@@ -78,6 +82,7 @@
                   "nginxTemplate":  "nginx-flowchain-rpc.template.conf",
                   "systemdServiceTemplate":  "flowchain-live.service.template",
                   "systemdSupervisorTemplate":  "flowchain-supervisor.service.template",
+                  "renderScript":  "render-public-rpc-bundle.template.ps1",
                   "nginxPreflightScript":  "nginx-preflight.template.sh",
                   "nginxPreflightChecklist":  "NGINX_PREFLIGHT.md",
                   "windowsNginxPreflightScript":  "nginx-preflight.template.ps1",
@@ -93,6 +98,7 @@
                    "nginxTemplateWritten":  true,
                    "systemdServiceTemplateWritten":  true,
                    "systemdSupervisorTemplateWritten":  true,
+                   "renderScriptWritten":  true,
                    "nginxPreflightScriptWritten":  true,
                    "nginxPreflightChecklistWritten":  true,
                    "windowsNginxPreflightScriptWritten":  true,
@@ -105,6 +111,7 @@
                    "nginxRequiredTokensPresent":  true,
                    "systemdLiveServiceTemplatePresent":  true,
                    "systemdSupervisorTemplatePresent":  true,
+                   "renderScriptTokensPresent":  true,
                    "nginxPreflightTokensPresent":  true,
                    "windowsNginxPreflightTokensPresent":  true,
                    "includesPrivateOrigin":  true,

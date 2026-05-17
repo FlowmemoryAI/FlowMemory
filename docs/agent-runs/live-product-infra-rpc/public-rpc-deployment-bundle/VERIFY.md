@@ -2,6 +2,10 @@
 
 Run these on the owner host after DNS, TLS, allowed origins, rate limit, and backup path are configured locally.
 
+## Owner-Host Render Commands
+
+- powershell -NoProfile -ExecutionPolicy Bypass -File render-public-rpc-bundle.template.ps1 -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -OwnerEnvFile <FLOWCHAIN_OWNER_ENV_FILE> -RepoRoot <FLOWCHAIN_REPO_ABSOLUTE_PATH> -ServiceUser <FLOWCHAIN_SERVICE_USER> -ServiceGroup <FLOWCHAIN_SERVICE_GROUP> -TlsCertificatePath <PATH_TO_TLS_CERTIFICATE> -TlsCertificateKeyPath <PATH_TO_TLS_CERTIFICATE_KEY> -NginxExe <FLOWCHAIN_NGINX_EXE>
+
 ## Repository Checks
 
 - npm run flowchain:service:restart -- -LiveProfile

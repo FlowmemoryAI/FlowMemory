@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Bundle
 
-Generated: 2026-05-17T11:43:59.8881590Z
+Generated: 2026-05-17T12:19:30.0696319Z
 Status: passed
 
 This bundle packages placeholder-only files for an owner-operated HTTPS edge in front of the repo-owned private RPC origin `127.0.0.1:8787`.
@@ -11,6 +11,7 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - nginx-flowchain-rpc.template.conf
 - flowchain-live.service.template
 - flowchain-supervisor.service.template
+- render-public-rpc-bundle.template.ps1
 - nginx-preflight.template.sh
 - NGINX_PREFLIGHT.md
 - nginx-preflight.template.ps1
@@ -39,6 +40,7 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - <FLOWCHAIN_SYSTEMD_RENDERED_UNIT>
 - <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>
 - <PREVIOUS_FLOWCHAIN_RPC_NGINX_CONF>
+- <FLOWCHAIN_DEPLOY_RENDER_DIR>
 
 ## Required Env Names
 
@@ -65,6 +67,10 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - npm run flowchain:backup:check
 - npm run flowchain:public-deployment:contract -- -AllowBlocked
 - npm run flowchain:external-tester:packet -- -AllowBlocked
+
+## Owner-Host Render Commands
+
+- powershell -NoProfile -ExecutionPolicy Bypass -File render-public-rpc-bundle.template.ps1 -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -OwnerEnvFile <FLOWCHAIN_OWNER_ENV_FILE> -RepoRoot <FLOWCHAIN_REPO_ABSOLUTE_PATH> -ServiceUser <FLOWCHAIN_SERVICE_USER> -ServiceGroup <FLOWCHAIN_SERVICE_GROUP> -TlsCertificatePath <PATH_TO_TLS_CERTIFICATE> -TlsCertificateKeyPath <PATH_TO_TLS_CERTIFICATE_KEY> -NginxExe <FLOWCHAIN_NGINX_EXE>
 
 ## Owner-Host Preflight Commands
 
@@ -96,6 +102,7 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - nginxTemplateWritten: True
 - systemdServiceTemplateWritten: True
 - systemdSupervisorTemplateWritten: True
+- renderScriptWritten: True
 - nginxPreflightScriptWritten: True
 - nginxPreflightChecklistWritten: True
 - windowsNginxPreflightScriptWritten: True
@@ -108,6 +115,7 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - nginxRequiredTokensPresent: True
 - systemdLiveServiceTemplatePresent: True
 - systemdSupervisorTemplatePresent: True
+- renderScriptTokensPresent: True
 - nginxPreflightTokensPresent: True
 - windowsNginxPreflightTokensPresent: True
 - includesPrivateOrigin: True
