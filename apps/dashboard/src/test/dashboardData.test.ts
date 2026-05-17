@@ -23,6 +23,7 @@ import {
   fetchWorkbenchSnapshot,
 } from "../data/workbench";
 import { WalletView } from "../views/WalletView";
+import { ExplorerView } from "../views/ExplorerView";
 import { WorkbenchView } from "../views/WorkbenchView";
 
 describe("dashboard fixture", () => {
@@ -426,6 +427,26 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Open tester tools");
     expect(html).toContain("Friend access");
     expect(html).toContain("FLOWCHAIN_TESTER_WRITE_ENABLED");
+    expect(html).not.toContain("local-tester-write-token");
+  });
+
+  it("renders the explorer route for tester-visible chain activity without secrets", () => {
+    const workbench = buildWorkbenchSnapshot(data, {
+      devnetState,
+      devnetDashboardState,
+      bridgeTestDeposit,
+      liveReadinessReport,
+    });
+    const html = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(ExplorerView, { data, workbench })));
+
+    expect(html).toContain("Flowchain explorer");
+    expect(html).toContain("Create, fund, send, inspect");
+    expect(html).toContain("Open tester tools");
+    expect(html).toContain("Funding proofs");
+    expect(html).toContain("Blocks");
+    expect(html).toContain("Transactions");
+    expect(html).toContain("Wallets");
+    expect(html).toContain("Bridge");
     expect(html).not.toContain("local-tester-write-token");
   });
 

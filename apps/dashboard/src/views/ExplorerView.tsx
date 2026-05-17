@@ -1,0 +1,272 @@
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowRightLeft, Boxes, CircleDollarSign, ListFilter, Search, WalletCards } from "lucide-react";
+import { EmptyState } from "../components/EmptyState";
+import { HashValue } from "../components/HashValue";
+import { ProvenanceLine } from "../components/ProvenanceLine";
+import { SectionHeader } from "../components/SectionHeader";
+import { StatusBadge } from "../components/StatusBadge";
+import type { DashboardData, DashboardStatus, Provenance } from "../data/types";
+import type { WorkbenchRecord, WorkbenchSectionKey, WorkbenchSnapshot } from "../data/workbench";
+
+type ExplorerCategory = "all" | "blocks" | "transactions" | "wallets" | "faucet" | "bridge" | "records";
+
+type ExplorerRow = {
+  id: string;
+  category: Exclude<ExplorerCategory, "all">;
+  title: string;
+  summary: string;
+  status: DashboardStatus;
+  primaryRef: string;
+  secondaryRef: string;
+  blockNumber: number | null;
+  amount: string;
+  updatedAt: string;
+  facts: Array<{ label: string; value: string }>;
+  provenance: Provenance;
+};
+
+const CATEGORY_OPTIONS: Array<{ id: ExplorerCategory; label: string }> = [
+  { id: "all", label: "All" },
+  { id: "blocks", label: "Blocks" },
+  { id: "transactions", label: "Transactions" },
+  { id: "wallets", label: "Wallets" },
+  { id: "faucet", label: "Faucet" },
+  { id: "bridge", label: "Bridge" },
+  { id: "records", label: "Records" },
+];
+
+const WORKBENCH_EXPLORER_SECTIONS: Array<{ key: WorkbenchSectionKey; category: ExplorerRow["category"] }> = [
+  { key: "transactions", category: "transactions" },
+  { key: "explorerRecords", category: "records" },
+  { key: "walletMetadata", category: "wallets" },
+  { key: "balances", category: "wallets" },
+  { key: "faucetEvents", category: "faucet" },
+  { key: "bridgeDeposits", category: "bridge" },
+  { key: "bridgeCredits", category: "bridge" },
+  { key: "bridgeWithdrawals", category: "bridge" },
+];
+
+function factValue(record: WorkbenchRecord, labels: string[], fallback = ""): string {
+  for (const label of labels) {
+    const fact = record.facts.find((candidate) => candidate.label.toLowerCase() === label.toLowerCase());
+    if (fact?.value) {
+      return fact.value;
+    }
+  }
+  return fallback;
+}
+
+function parseBlockNumber(value: string): number | null {
+  if (!/^\d+$/.test(value)) {
+    return null;
+  }
+  return Number(value);
+}
+
+function workbenchRecordToRow(record: WorkbenchRecord, category: ExplorerRow["category"]): ExplorerRow {
+  const blockNumber = parseBlockNumber(factValue(record, ["block", "block number"]));
+  const primaryRef = factValue(record, ["tx", "tx hash", "transaction", "hash", "account", "wallet", "deposit", "credit"], record.id);
+  const secondaryRef = factValue(record, ["from", "to", "recipient", "asset", "source"], record.kind);
+  const amount = factValue(record, ["amount", "balance", "credited", "delta"], "");
+
+  return {
+    id: `${category}:${record.id}`,
+    category,
+    title: record.title,
+    summary: record.summary,
+    status: record.status,
+    primaryRef,
+    secondaryRef,
+    blockNumber,
+    amount,
+    updatedAt: record.provenance.capturedAt ?? "",
+    facts: record.facts.slice(0, 4),
+    provenance: record.provenance,
+  };
+}
+
+function buildExplorerRows(data: DashboardData, workbench: WorkbenchSnapshot): ExplorerRow[] {
+  const blockRows: ExplorerRow[] = data.devnetBlocks.map((block) => ({
+    id: `blocks:${block.blockHash}`,
+    category: "blocks",
+    title: `Block ${block.blockNumber}`,
+    summary: `${block.observationCount} observations, ${block.reportCount} reports, finality distance ${block.finalityDistance}`,
+    status: block.status,
+    primaryRef: block.blockHash,
+    secondaryRef: block.parentHash,
+    blockNumber: block.blockNumber,
+    amount: "",
+    updatedAt: block.lastUpdated ?? block.timestamp,
+    facts: [
+      { label: "state root", value: block.stateRoot },
+      { label: "receipt root", value: block.receiptsRoot },
+      { label: "reports", value: String(block.reportCount) },
+      { label: "distance", value: String(block.finalityDistance) },
+    ],
+    provenance: block.provenance,
+  }));
+
+  const workbenchRows = WORKBENCH_EXPLORER_SECTIONS.flatMap(({ key, category }) =>
+    workbench.sections[key].map((record) => workbenchRecordToRow(record, category)),
+  );
+
+  return [...blockRows, ...workbenchRows].sort((left, right) => {
+    const rightBlock = right.blockNumber ?? -1;
+    const leftBlock = left.blockNumber ?? -1;
+    if (rightBlock !== leftBlock) {
+      return rightBlock - leftBlock;
+    }
+    return right.updatedAt.localeCompare(left.updatedAt);
+  });
+}
+
+function rowMatches(row: ExplorerRow, query: string): boolean {
+  if (!query) {
+    return true;
+  }
+  return JSON.stringify(row).toLowerCase().includes(query);
+}
+
+function categoryCount(rows: ExplorerRow[], category: ExplorerCategory): number {
+  return category === "all" ? rows.length : rows.filter((row) => row.category === category).length;
+}
+
+export function ExplorerView({ data, workbench }: { data: DashboardData; workbench: WorkbenchSnapshot }) {
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<ExplorerCategory>("all");
+  const rows = useMemo(() => buildExplorerRows(data, workbench), [data, workbench]);
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredRows = rows.filter((row) => (category === "all" || row.category === category) && rowMatches(row, normalizedQuery));
+  const latestBlock = rows.find((row) => row.category === "blocks")?.blockNumber ?? data.chain.currentBlock;
+  const transactionCount = rows.filter((row) => row.category === "transactions").length;
+  const walletCount = rows.filter((row) => row.category === "wallets").length;
+  const fundingCount = rows.filter((row) => row.category === "faucet" || row.category === "bridge").length;
+
+  return (
+    <div className="view-stack">
+      <SectionHeader
+        eyebrow="explorer"
+        title="Flowchain explorer"
+        detail="Search blocks, transactions, wallet records, faucet events, and bridge evidence from the running local chain and generated readiness fixtures."
+        action={
+          <div className="workbench-header-actions">
+            <label className="search-box">
+              <Search size={16} aria-hidden="true" />
+              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search tx, wallet, block, credit" />
+            </label>
+            <label className="explorer-filter">
+              <ListFilter size={16} aria-hidden="true" />
+              <select value={category} onChange={(event) => setCategory(event.target.value as ExplorerCategory)} aria-label="Explorer record category">
+                {CATEGORY_OPTIONS.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        }
+      />
+
+      <section className="explorer-command-panel" aria-label="Explorer status">
+        <div>
+          <span>Chain head</span>
+          <strong>{latestBlock}</strong>
+          <small>{workbench.source === "control-plane" ? "local API" : "fixture fallback"}</small>
+        </div>
+        <div>
+          <span>Transactions</span>
+          <strong>{transactionCount}</strong>
+          <small>runtime-backed records</small>
+        </div>
+        <div>
+          <span>Wallet records</span>
+          <strong>{walletCount}</strong>
+          <small>public metadata only</small>
+        </div>
+        <div>
+          <span>Funding proofs</span>
+          <strong>{fundingCount}</strong>
+          <small>faucet and bridge</small>
+        </div>
+      </section>
+
+      <section className="explorer-category-strip" aria-label="Explorer categories">
+        {CATEGORY_OPTIONS.map((option) => (
+          <button key={option.id} className={category === option.id ? "active" : ""} type="button" onClick={() => setCategory(option.id)}>
+            <span>{option.label}</span>
+            <strong>{categoryCount(rows, option.id)}</strong>
+          </button>
+        ))}
+      </section>
+
+      <section className="explorer-layout">
+        <div className="explorer-stream" aria-label="Explorer records">
+          {filteredRows.length > 0 ? (
+            filteredRows.slice(0, 80).map((row) => (
+              <article key={row.id} className={`explorer-row explorer-row-${row.category}`}>
+                <div className="explorer-row-icon" aria-hidden="true">
+                  {row.category === "blocks" ? <Boxes size={18} /> : null}
+                  {row.category === "transactions" || row.category === "records" ? <ArrowRightLeft size={18} /> : null}
+                  {row.category === "wallets" ? <WalletCards size={18} /> : null}
+                  {row.category === "faucet" || row.category === "bridge" ? <CircleDollarSign size={18} /> : null}
+                </div>
+                <div className="explorer-row-main">
+                  <div className="explorer-row-title">
+                    <span>{row.category}</span>
+                    <h2>{row.title}</h2>
+                    <StatusBadge status={row.status} compact />
+                  </div>
+                  <p>{row.summary}</p>
+                  <dl className="explorer-facts">
+                    <div>
+                      <dt>primary</dt>
+                      <dd>{row.primaryRef.startsWith("0x") ? <HashValue value={row.primaryRef} trim="short" /> : row.primaryRef}</dd>
+                    </div>
+                    <div>
+                      <dt>secondary</dt>
+                      <dd>{row.secondaryRef.startsWith("0x") ? <HashValue value={row.secondaryRef} trim="short" /> : row.secondaryRef}</dd>
+                    </div>
+                    <div>
+                      <dt>block</dt>
+                      <dd>{row.blockNumber ?? "not indexed"}</dd>
+                    </div>
+                    <div>
+                      <dt>amount</dt>
+                      <dd>{row.amount || "n/a"}</dd>
+                    </div>
+                  </dl>
+                  <ProvenanceLine provenance={row.provenance} lastUpdated={row.updatedAt} />
+                </div>
+              </article>
+            ))
+          ) : (
+            <EmptyState title="No explorer records match" detail="Adjust the search or category filter to inspect local chain activity." />
+          )}
+        </div>
+
+        <aside className="explorer-side-panel" aria-label="Explorer actions">
+          <div>
+            <span>Tester path</span>
+            <strong>Create, fund, send, inspect</strong>
+            <small>Use the wallet tester panel, then return here to inspect records.</small>
+            <Link to="/wallet?panel=tester">Open tester tools</Link>
+          </div>
+          <div>
+            <span>Bridge path</span>
+            <strong>Base to Flowchain</strong>
+            <small>Bridge pilot records remain blocked until owner Base inputs are configured.</small>
+            <Link to="/bridge">Open bridge</Link>
+          </div>
+          <div>
+            <span>Raw evidence</span>
+            <strong>{rows.length} indexed rows</strong>
+            <small>Open the raw inspector for the source reports behind this view.</small>
+            <Link to="/raw">Open raw JSON</Link>
+          </div>
+        </aside>
+      </section>
+    </div>
+  );
+}
