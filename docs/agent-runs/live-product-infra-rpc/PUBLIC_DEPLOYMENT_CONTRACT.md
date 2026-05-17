@@ -1,6 +1,6 @@
 ﻿# FlowChain Public Deployment Contract
 
-Generated: 2026-05-17T21:54:51.1086404Z
+Generated: 2026-05-17T21:59:56.7923969Z
 Status: blocked
 Deployment ready: False
 Packet shareable: False
@@ -25,8 +25,8 @@ This file records deployment gates, commands, and env names only. It must not co
 | Owner onboarding clearly distinguishes repo-owned FlowChain RPC from the external Base 8453 RPC dependency without values and documents local owner env-file loading. | passed | onboardingStatus=passed, flowChainRpcIsOurs=True, publicRpcRequiresOwnerPublicEdge=True, base8453RpcIsExternalChainDependency=True, localEnvFileSupported=True |
 | Owner signup checklist maps every public RPC, tester write gateway, backup, and Base 8453 bridge value to the exact thing the owner must get without requesting secrets in chat. | passed | signupStatus=passed, itemCount=9, externalSignupCount=3, missingCoverage=0, repoOwned=True, localEnvFileSupported=True |
 | Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added. | passed | templateStatus=passed, pathIsGitIgnored=True, requiredEnvNameCount=17, optionalEnvNameCount=2, includesAllRequired=True |
-| Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, verification, and rollback. | passed | edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True |
-| Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, verification, and rollback drill phases without host mutation or owner-value leakage. | passed | automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, rollbackDrill=True, hostMutationFalse=True |
+| Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, verification, and rollback. | passed | edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, testerWritePreflight=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True |
+| Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, verification, and rollback drill phases without host mutation or owner-value leakage. | passed | automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, testerUnauthProbe=True, rollbackDrill=True, hostMutationFalse=True |
 | The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable. | passed | serviceStatus=passed, privateBind=True, latestHeight=60281, finalizedHeight=60281 |
 | The deployment has recent service-monitor evidence that block height advances over multiple samples. | passed | monitorStatus=passed, samples=2, heightAdvanced=True |
 | The owner service has an autorecovery supervisor and an isolated recovery drill proving control-plane restart without touching live state. | passed | supervisorValidation=passed, restartAttempts=1 |

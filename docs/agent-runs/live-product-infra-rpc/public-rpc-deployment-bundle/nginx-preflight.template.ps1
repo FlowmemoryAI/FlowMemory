@@ -39,5 +39,25 @@ Invoke-WebRequest -Uri "$publicBase/health" -Method Get -Headers $headers -Timeo
 Invoke-WebRequest -Uri "$publicBase/rpc/readiness" -Method Get -Headers $headers -TimeoutSec 10 | Out-Null
 $body = '{"jsonrpc":"2.0","id":1,"method":"rpc_readiness","params":{}}'
 Invoke-WebRequest -Uri "$publicBase/rpc" -Method Post -ContentType "application/json" -Headers $headers -Body $body -TimeoutSec 10 | Out-Null
+$testerStatus = Invoke-WebRequest -Uri "$publicBase/tester/status" -Method Get -Headers $headers -TimeoutSec 10
+if ([int]$testerStatus.StatusCode -ne 200) { throw "Tester status preflight did not return HTTP 200." }
+$testerUnauthStatusCode = 0
+$testerUnauthBody = ""
+try {
+    Invoke-WebRequest -Uri "$publicBase/tester/wallets/create" -Method Post -ContentType "application/json" -Headers $headers -Body "{}" -TimeoutSec 10 | Out-Null
+    $testerUnauthStatusCode = 200
+}
+catch {
+    if ($_.Exception.PSObject.Properties.Name -contains "Response" -and $null -ne $_.Exception.Response) {
+        $testerUnauthStatusCode = [int]$_.Exception.Response.StatusCode
+        $stream = $_.Exception.Response.GetResponseStream()
+        if ($null -ne $stream) {
+            $reader = [System.IO.StreamReader]::new($stream)
+            try { $testerUnauthBody = $reader.ReadToEnd() } finally { $reader.Dispose() }
+        }
+    } else { throw }
+}
+if ($testerUnauthStatusCode -ne 401) { throw "Tester write unauthenticated preflight did not return HTTP 401." }
+if ($testerUnauthBody.IndexOf("flowmemory.control_plane.tester_write_auth_required.v0", [System.StringComparison]::Ordinal) -lt 0) { throw "Tester write unauthenticated preflight did not return auth-required schema." }
 
 Write-Host "FlowChain public RPC Windows Nginx preflight passed."

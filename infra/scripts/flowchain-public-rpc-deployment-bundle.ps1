@@ -399,7 +399,12 @@ $preflightRequiredTokens = @(
     "grep -Eq '<(FLOWCHAIN_|PATH_TO_TLS_)' `"`${rendered_conf}`"",
     "nginx -t",
     'curl -fsS --max-time 5 "http://127.0.0.1:8787/health" >/dev/null',
-    'curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/rpc/readiness" >/dev/null'
+    'curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/rpc/readiness" >/dev/null',
+    '${public_url%/}/tester/status',
+    'tester_unauth_status=',
+    '${public_url%/}/tester/wallets/create',
+    'test "${tester_unauth_status}" = "401"',
+    'flowmemory.control_plane.tester_write_auth_required.v0'
 )
 
 $windowsPreflightRequiredTokens = @(
@@ -415,6 +420,9 @@ $windowsPreflightRequiredTokens = @(
     'Invoke-RestMethod -Uri "http://127.0.0.1:8787/health"',
     '$publicBase = $PublicUrl.TrimEnd("/")',
     'Invoke-WebRequest -Uri "$publicBase/rpc/readiness"',
+    '$testerStatus = Invoke-WebRequest -Uri "$publicBase/tester/status"',
+    '$testerUnauthStatusCode -ne 401',
+    'flowmemory.control_plane.tester_write_auth_required.v0',
     '$placeholderPattern = [regex]::Escape("<") + "(FLOWCHAIN_|PATH_TO_TLS_|FLOWCHAIN_NGINX_)"',
     '"method":"rpc_readiness"'
 )
@@ -581,6 +589,12 @@ $nginxPreflightScriptLines = @(
     'curl -fsS --max-time 10 "${public_url%/}/health" >/dev/null',
     'curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/rpc/readiness" >/dev/null',
     'curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" -H "Content-Type: application/json" --data ''{"jsonrpc":"2.0","id":1,"method":"rpc_readiness","params":{}}'' "${public_url%/}/rpc" >/dev/null',
+    'tester_unauth_body="$(mktemp)"',
+    'trap ''rm -f "${tester_unauth_body}"'' EXIT',
+    'curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/tester/status" >/dev/null',
+    'tester_unauth_status="$(curl -sS -o "${tester_unauth_body}" -w "%{http_code}" --max-time 10 -H "Origin: ${allowed_origin}" -H "Content-Type: application/json" --data ''{}'' "${public_url%/}/tester/wallets/create")"',
+    'test "${tester_unauth_status}" = "401"',
+    'grep -Fq "flowmemory.control_plane.tester_write_auth_required.v0" "${tester_unauth_body}"',
     "",
     'echo "FlowChain public RPC Nginx preflight passed."'
 )
@@ -644,6 +658,26 @@ $windowsNginxPreflightScriptLines = @(
     'Invoke-WebRequest -Uri "$publicBase/rpc/readiness" -Method Get -Headers $headers -TimeoutSec 10 | Out-Null',
     '$body = ''{"jsonrpc":"2.0","id":1,"method":"rpc_readiness","params":{}}''',
     'Invoke-WebRequest -Uri "$publicBase/rpc" -Method Post -ContentType "application/json" -Headers $headers -Body $body -TimeoutSec 10 | Out-Null',
+    '$testerStatus = Invoke-WebRequest -Uri "$publicBase/tester/status" -Method Get -Headers $headers -TimeoutSec 10',
+    'if ([int]$testerStatus.StatusCode -ne 200) { throw "Tester status preflight did not return HTTP 200." }',
+    '$testerUnauthStatusCode = 0',
+    '$testerUnauthBody = ""',
+    'try {',
+    '    Invoke-WebRequest -Uri "$publicBase/tester/wallets/create" -Method Post -ContentType "application/json" -Headers $headers -Body "{}" -TimeoutSec 10 | Out-Null',
+    '    $testerUnauthStatusCode = 200',
+    '}',
+    'catch {',
+    '    if ($_.Exception.PSObject.Properties.Name -contains "Response" -and $null -ne $_.Exception.Response) {',
+    '        $testerUnauthStatusCode = [int]$_.Exception.Response.StatusCode',
+    '        $stream = $_.Exception.Response.GetResponseStream()',
+    '        if ($null -ne $stream) {',
+    '            $reader = [System.IO.StreamReader]::new($stream)',
+    '            try { $testerUnauthBody = $reader.ReadToEnd() } finally { $reader.Dispose() }',
+    '        }',
+    '    } else { throw }',
+    '}',
+    'if ($testerUnauthStatusCode -ne 401) { throw "Tester write unauthenticated preflight did not return HTTP 401." }',
+    'if ($testerUnauthBody.IndexOf("flowmemory.control_plane.tester_write_auth_required.v0", [System.StringComparison]::Ordinal) -lt 0) { throw "Tester write unauthenticated preflight did not return auth-required schema." }',
     "",
     'Write-Host "FlowChain public RPC Windows Nginx preflight passed."'
 )
@@ -1056,6 +1090,7 @@ $checks = [ordered]@{
     includesCorsOriginForwarding = ($nginxText.Contains('proxy_set_header Origin $http_origin;') -and $nginxPreflightScriptText.Contains('Origin: ${allowed_origin}'))
     includesNginxConfigTest = ($nginxPreflightScriptText.Contains("nginx -t") -and $nginxPreflightChecklistText.Contains("nginx -t"))
     includesWindowsNginxConfigTest = ($windowsNginxPreflightScriptText.Contains('& $NginxExe -t') -and $windowsNginxPreflightChecklistText.Contains("<FLOWCHAIN_NGINX_EXE>"))
+    includesTesterWritePreflight = ($nginxPreflightScriptText.Contains('/tester/status') -and $nginxPreflightScriptText.Contains('/tester/wallets/create') -and $nginxPreflightScriptText.Contains('flowmemory.control_plane.tester_write_auth_required.v0') -and $windowsNginxPreflightScriptText.Contains('/tester/status') -and $windowsNginxPreflightScriptText.Contains('/tester/wallets/create') -and $windowsNginxPreflightScriptText.Contains('flowmemory.control_plane.tester_write_auth_required.v0'))
     includesVerificationCommands = ((@(Get-MissingTextTokens -Text $verifyText -Tokens $requiredCommands).Count -eq 0) -and (@(Get-MissingTextTokens -Text $verifyText -Tokens $ownerRenderCommands).Count -eq 0) -and (@(Get-MissingTextTokens -Text $verifyText -Tokens $ownerPreflightCommands).Count -eq 0))
     includesRollbackCommands = (@(Get-MissingTextTokens -Text $rollbackText -Tokens $rollbackCommands).Count -eq 0)
     envExampleHasAllRequiredNames = (@(Get-MissingTextTokens -Text $ownerEnvText -Tokens $requiredEnvNames).Count -eq 0)

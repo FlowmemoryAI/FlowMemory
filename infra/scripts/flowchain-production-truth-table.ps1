@@ -120,15 +120,29 @@ $definitions = @(
     },
     [ordered]@{
         id = "public-rpc-deployment-bundle"
-        requirement = "No-secret public RPC deployment bundle exists and owner-render validation proves HTTPS reverse proxy, service, shell preflight, Windows preflight, verification, and rollback artifacts render safely."
+        requirement = "No-secret public RPC deployment bundle exists and owner-render validation proves HTTPS reverse proxy, service, shell preflight, Windows preflight, tester write preflight, verification, and rollback artifacts render safely."
         path = "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
         command = "npm run flowchain:public-rpc:deployment-bundle"
         productionGate = $true
         ownerInputGate = $false
+        requiredChecks = @(
+            "nginxTemplateWritten",
+            "nginxPreflightScriptWritten",
+            "windowsNginxPreflightScriptWritten",
+            "windowsNginxPreflightTokensPresent",
+            "includesWindowsNginxConfigTest",
+            "includesTesterWritePreflight",
+            "ownerRenderValidationPassed",
+            "ownerRenderFilesHaveNoPlaceholders",
+            "ownerRenderDoesNotPrintTokenHash",
+            "ownerEnvExampleWritten",
+            "verifyRunbookWritten",
+            "rollbackRunbookWritten"
+        )
     },
     [ordered]@{
         id = "public-rpc-deployment-automation"
-        requirement = "Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, post-deploy verification, and rollback phases without host mutation or owner-value leakage."
+        requirement = "Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, post-deploy verification, and rollback phases without host mutation or owner-value leakage."
         path = "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
         command = "npm run flowchain:public-rpc:deployment:automation"
         productionGate = $true
@@ -154,6 +168,7 @@ $definitions = @(
             "renderedNginxHasRateLimit",
             "renderedSystemdUsesOwnerEnv",
             "renderedPreflightHasReadinessProbe",
+            "renderedPreflightHasTesterUnauthProbe",
             "renderedFilesDoNotContainTokenHash",
             "renderedReportDoesNotContainTokenHash",
             "renderedReportKeepsOwnerPathsOutsideRepo",

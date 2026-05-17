@@ -568,6 +568,7 @@ $publicRpcDeploymentBundleNginxTemplate = Get-AuditProp -Object $publicRpcDeploy
 $publicRpcDeploymentBundleVerifyRunbook = Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "verifyRunbookWritten" -Default $false
 $publicRpcDeploymentBundleRollbackRunbook = Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "rollbackRunbookWritten" -Default $false
 $publicRpcDeploymentBundleRenderValidation = Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false
+$publicRpcDeploymentBundleTesterWritePreflight = Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false
 $publicRpcDeploymentBundlePassed = $publicRpcDeploymentBundleExitCode -eq 0 `
     -and $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ($publicRpcDeploymentBundleRepoOwned -eq $true) `
@@ -579,6 +580,7 @@ $publicRpcDeploymentBundlePassed = $publicRpcDeploymentBundleExitCode -eq 0 `
     -and ($publicRpcDeploymentBundleVerifyRunbook -eq $true) `
     -and ($publicRpcDeploymentBundleRollbackRunbook -eq $true) `
     -and ($publicRpcDeploymentBundleRenderValidation -eq $true) `
+    -and ($publicRpcDeploymentBundleTesterWritePreflight -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "ownerRenderFilesHaveNoPlaceholders" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "ownerRenderDoesNotPrintTokenHash" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "envExampleHasAllRequiredNames" -Default $false) -eq $true) `
@@ -600,6 +602,7 @@ $publicRpcDeploymentAutomationPassed = $publicRpcDeploymentAutomationExitCode -e
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasRateLimit" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedSystemdUsesOwnerEnv" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasReadinessProbe" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "noSecrets" -Default $false) -eq $true) `
@@ -998,15 +1001,15 @@ Add-AuditItem -Items $items -Id "public-rpc-edge-template" `
     -Commands @("npm run flowchain:public-rpc:edge-template")
 
 Add-AuditItem -Items $items -Id "public-rpc-deployment-bundle" `
-    -Requirement "Public RPC deployment bundle has no-secret Nginx, owner env, owner render validation, verification, and rollback artifacts for exposing FlowChain's own RPC." `
+    -Requirement "Public RPC deployment bundle has no-secret Nginx, owner env, owner render validation, tester write preflight, verification, and rollback artifacts for exposing FlowChain's own RPC." `
     -Status $(if ($publicRpcDeploymentBundlePassed) { "passed" } else { "failed" }) `
-    -Evidence "bundleStatus=$publicRpcDeploymentBundleStatus, repoOwned=$publicRpcDeploymentBundleRepoOwned, nginxTemplate=$publicRpcDeploymentBundleNginxTemplate, renderValidation=$publicRpcDeploymentBundleRenderValidation, verifyRunbook=$publicRpcDeploymentBundleVerifyRunbook, rollbackRunbook=$publicRpcDeploymentBundleRollbackRunbook, report=$($paths.publicRpcDeploymentBundle)" `
+    -Evidence "bundleStatus=$publicRpcDeploymentBundleStatus, repoOwned=$publicRpcDeploymentBundleRepoOwned, nginxTemplate=$publicRpcDeploymentBundleNginxTemplate, renderValidation=$publicRpcDeploymentBundleRenderValidation, testerWritePreflight=$publicRpcDeploymentBundleTesterWritePreflight, verifyRunbook=$publicRpcDeploymentBundleVerifyRunbook, rollbackRunbook=$publicRpcDeploymentBundleRollbackRunbook, report=$($paths.publicRpcDeploymentBundle)" `
     -Commands @("npm run flowchain:public-rpc:deployment-bundle")
 
 Add-AuditItem -Items $items -Id "public-rpc-deployment-automation" `
-    -Requirement "Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, post-deploy verification, and rollback phases without host mutation or owner-value leakage." `
+    -Requirement "Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, post-deploy verification, and rollback phases without host mutation or owner-value leakage." `
     -Status $(if ($publicRpcDeploymentAutomationPassed) { "passed" } else { "failed" }) `
-    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), hostMutationFalse=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false), report=$($paths.publicRpcDeploymentAutomation)" `
+    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), testerUnauthProbe=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false), hostMutationFalse=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false), report=$($paths.publicRpcDeploymentAutomation)" `
     -Commands @("npm run flowchain:public-rpc:deployment:automation")
 
 Add-AuditItem -Items $items -Id "public-rpc-readiness-validator-self-test" `

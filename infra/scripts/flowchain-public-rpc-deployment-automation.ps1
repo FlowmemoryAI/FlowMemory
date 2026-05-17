@@ -183,6 +183,7 @@ function Test-RenderedDeployment {
         renderedNginxHasRateLimit = $renderedAllText.Contains("limit_req_zone") -and $renderedAllText.Contains("limit_req zone=flowchain_rpc_per_ip")
         renderedSystemdUsesOwnerEnv = $renderedAllText.Contains("EnvironmentFile=$TargetOwnerEnvFile") -and $renderedAllText.Contains("FLOWCHAIN_OWNER_ENV_FILE=$TargetOwnerEnvFile")
         renderedPreflightHasReadinessProbe = $renderedAllText.Contains("/rpc/readiness") -and $renderedAllText.Contains("rpc_readiness")
+        renderedPreflightHasTesterUnauthProbe = $renderedAllText.Contains("/tester/status") -and $renderedAllText.Contains("/tester/wallets/create") -and $renderedAllText.Contains("flowmemory.control_plane.tester_write_auth_required.v0")
         renderedFilesDoNotContainTokenHash = -not $renderedAllText.Contains($TokenHashSentinel)
         renderedReportDoesNotContainTokenHash = -not $renderReportText.Contains($TokenHashSentinel)
         renderedReportKeepsOwnerPathsOutsideRepo = $null -ne $renderReport -and $renderReport.renderDirInsideRepo -eq $false -and $renderReport.ownerEnvFileInsideRepo -eq $false

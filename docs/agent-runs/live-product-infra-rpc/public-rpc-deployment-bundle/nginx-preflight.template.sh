@@ -37,5 +37,11 @@ curl -fsS --max-time 5 "http://127.0.0.1:8787/health" >/dev/null
 curl -fsS --max-time 10 "${public_url%/}/health" >/dev/null
 curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/rpc/readiness" >/dev/null
 curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","id":1,"method":"rpc_readiness","params":{}}' "${public_url%/}/rpc" >/dev/null
+tester_unauth_body="$(mktemp)"
+trap 'rm -f "${tester_unauth_body}"' EXIT
+curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/tester/status" >/dev/null
+tester_unauth_status="$(curl -sS -o "${tester_unauth_body}" -w "%{http_code}" --max-time 10 -H "Origin: ${allowed_origin}" -H "Content-Type: application/json" --data '{}' "${public_url%/}/tester/wallets/create")"
+test "${tester_unauth_status}" = "401"
+grep -Fq "flowmemory.control_plane.tester_write_auth_required.v0" "${tester_unauth_body}"
 
 echo "FlowChain public RPC Nginx preflight passed."
