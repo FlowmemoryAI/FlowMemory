@@ -10,3 +10,5 @@ export * from "./pilot-envelope-validation.js";
 export * from "./pilot-operator.js";
 export * from "./transactions.js";
 export * from "./wallet.js";
+export * from "./wallet-documents.js";
+export * from "./wallet-envelope.js";

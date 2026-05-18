@@ -4,7 +4,7 @@
   "title": "FlowChain Local Wallet Public Metadata V0",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema", "vaultId", "createdAtUnixMs", "updatedAtUnixMs", "accounts"],
+  "required": ["schema", "vaultId", "createdAtUnixMs", "updatedAtUnixMs", "accounts", "boundary"],
   "properties": {
     "schema": { "const": "flowchain.local_wallet_public_metadata.v0" },
     "vaultId": { "$ref": "#/$defs/hex32" },
@@ -17,7 +17,8 @@
     "importedAccounts": {
       "type": "array",
       "items": { "$ref": "#/$defs/importedAccount" }
-    }
+    },
+    "boundary": { "type": "string", "minLength": 1 }
   },
   "$defs": {
     "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
@@ -27,27 +28,40 @@
       "additionalProperties": false,
       "required": [
         "accountId",
+        "address",
         "signerId",
         "signerKeyId",
         "signerRole",
         "signerRoleCode",
         "publicKey",
+        "publicKeyHash",
+        "keyScheme",
         "label",
         "status",
+        "active",
         "createdAtUnixMs",
+        "chainId",
+        "lastKnownNonce",
         "nextNonce"
       ],
       "properties": {
         "accountId": { "$ref": "#/$defs/hex32" },
+        "address": { "$ref": "#/$defs/hex32" },
         "signerId": { "$ref": "#/$defs/hex32" },
         "signerKeyId": { "$ref": "#/$defs/hex32" },
         "signerRole": { "enum": ["operator", "agent", "verifier", "hardware"] },
         "signerRoleCode": { "type": "integer", "minimum": 1, "maximum": 255 },
         "publicKey": { "type": "string", "pattern": "^0x([0-9a-fA-F]{66}|[0-9a-fA-F]{130})$" },
+        "publicKeyHash": { "$ref": "#/$defs/hex32" },
+        "keyScheme": { "const": "secp256k1" },
         "label": { "type": "string", "minLength": 1 },
         "status": { "enum": ["active", "rotated", "revoked"] },
+        "active": { "type": "boolean" },
         "createdAtUnixMs": { "$ref": "#/$defs/uintString" },
-        "nextNonce": { "$ref": "#/$defs/uintString" }
+        "chainId": { "$ref": "#/$defs/uintString" },
+        "lastKnownNonce": { "$ref": "#/$defs/uintString" },
+        "nextNonce": { "$ref": "#/$defs/uintString" },
+        "rotatedFromSignerKeyId": { "$ref": "#/$defs/hex32" }
       }
     },
     "importedAccount": {
@@ -55,31 +69,44 @@
       "additionalProperties": false,
       "required": [
         "accountId",
+        "address",
         "signerId",
         "signerKeyId",
         "signerRole",
         "signerRoleCode",
         "publicKey",
+        "publicKeyHash",
+        "keyScheme",
         "label",
         "status",
+        "active",
         "createdAtUnixMs",
+        "chainId",
+        "lastKnownNonce",
         "nextNonce",
         "importedFromVaultId",
         "importedAtUnixMs"
       ],
       "properties": {
         "accountId": { "$ref": "#/$defs/hex32" },
+        "address": { "$ref": "#/$defs/hex32" },
         "signerId": { "$ref": "#/$defs/hex32" },
         "signerKeyId": { "$ref": "#/$defs/hex32" },
         "signerRole": { "enum": ["operator", "agent", "verifier", "hardware"] },
         "signerRoleCode": { "type": "integer", "minimum": 1, "maximum": 255 },
         "publicKey": { "type": "string", "pattern": "^0x([0-9a-fA-F]{66}|[0-9a-fA-F]{130})$" },
+        "publicKeyHash": { "$ref": "#/$defs/hex32" },
+        "keyScheme": { "const": "secp256k1" },
         "label": { "type": "string", "minLength": 1 },
         "status": { "enum": ["active", "rotated", "revoked"] },
+        "active": { "type": "boolean" },
         "createdAtUnixMs": { "$ref": "#/$defs/uintString" },
+        "chainId": { "$ref": "#/$defs/uintString" },
+        "lastKnownNonce": { "$ref": "#/$defs/uintString" },
         "nextNonce": { "$ref": "#/$defs/uintString" },
         "importedFromVaultId": { "$ref": "#/$defs/hex32" },
-        "importedAtUnixMs": { "$ref": "#/$defs/uintString" }
+        "importedAtUnixMs": { "$ref": "#/$defs/uintString" },
+        "rotatedFromSignerKeyId": { "$ref": "#/$defs/hex32" }
       }
     }
   }
