@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-18T02:25:32.8348182Z",
+    "generatedAt":  "2026-05-18T03:45:40.1467269Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -55,6 +55,40 @@
     "rulesWithoutCommands":  [
 
                              ],
+    "activeRuleIdsWithoutCommands":  [
+
+                                     ],
+    "commandsWithInlineEnvAssignment":  [
+
+                                        ],
+    "commandsWithUrls":  [
+
+                         ],
+    "findingsWithoutCommands":  [
+
+                                ],
+    "checks":  {
+                   "opsSnapshotLoaded":  true,
+                   "opsRefreshSucceeded":  true,
+                   "ruleCountSufficient":  true,
+                   "criticalRuleCountSufficient":  true,
+                   "blockedRuleCountSufficient":  true,
+                   "currentFindingsLoaded":  true,
+                   "everyCurrentFindingMapped":  true,
+                   "everyRuleHasCommands":  true,
+                   "everyActiveRuleHasCommands":  true,
+                   "commandsAvoidInlineEnvAssignment":  true,
+                   "commandsAvoidUrls":  true,
+                   "findingsWithoutCommandsEmpty":  true,
+                   "notificationPlanStoresNoSecrets":  true,
+                   "notificationPlanNoNetworkDelivery":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
     "notificationPlan":  {
                              "deliveryMode":  "owner-configured-out-of-repo",
                              "committedDestinations":  [

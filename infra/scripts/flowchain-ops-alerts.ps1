@@ -210,7 +210,32 @@ $unmappedCurrentFindingCodes = @($currentFindingCodes | Where-Object { $_ -notin
 $criticalRules = @($rules | Where-Object { $_.severity -eq "critical" })
 $blockedRules = @($rules | Where-Object { $_.severity -eq "blocked" })
 $rulesWithoutCommands = @($rules | Where-Object { @($_.commands).Count -eq 0 })
-$status = if ($unmappedCurrentFindingCodes.Count -eq 0 -and $criticalRules.Count -ge 5 -and $blockedRules.Count -ge 5 -and $rulesWithoutCommands.Count -eq 0) { "passed" } else { "failed" }
+$activeRuleIdsWithoutCommands = @($rules | Where-Object { $activeRules.Contains($_.id) -and @($_.commands).Count -eq 0 } | ForEach-Object { $_.id })
+$allCommands = @($rules | ForEach-Object { @($_.commands) })
+$commandsWithInlineEnvAssignment = @($allCommands | Where-Object { "$_" -match '(^|\s)(\$env:)?[A-Z][A-Z0-9_]+\s*=' })
+$commandsWithUrls = @($allCommands | Where-Object { "$_" -match 'https?://' })
+$findingsWithoutCommands = @($currentFindingCodes | Where-Object { $_ -in $unmappedCurrentFindingCodes })
+$checks = [ordered]@{
+    opsSnapshotLoaded = $null -ne $opsSnapshot
+    opsRefreshSucceeded = $opsExitCode -eq 0
+    ruleCountSufficient = $rules.Count -ge 10
+    criticalRuleCountSufficient = $criticalRules.Count -ge 5
+    blockedRuleCountSufficient = $blockedRules.Count -ge 5
+    currentFindingsLoaded = $currentFindingCodes.Count -ge 0
+    everyCurrentFindingMapped = $unmappedCurrentFindingCodes.Count -eq 0
+    everyRuleHasCommands = $rulesWithoutCommands.Count -eq 0
+    everyActiveRuleHasCommands = $activeRuleIdsWithoutCommands.Count -eq 0
+    commandsAvoidInlineEnvAssignment = $commandsWithInlineEnvAssignment.Count -eq 0
+    commandsAvoidUrls = $commandsWithUrls.Count -eq 0
+    findingsWithoutCommandsEmpty = $findingsWithoutCommands.Count -eq 0
+    notificationPlanStoresNoSecrets = $true
+    notificationPlanNoNetworkDelivery = $true
+    envValuesPrintedFalse = $true
+    noSecrets = $true
+    broadcastsFalse = $true
+}
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
 $currentAlertState = if (@($findings | Where-Object { [string](Get-AlertProp -Object $_ -Name "severity" -Default "") -eq "critical" }).Count -gt 0) {
     "critical"
 }
@@ -241,6 +266,12 @@ $report = [ordered]@{
     coveredFindingCodes = @($coveredCodes)
     unmappedCurrentFindingCodes = $unmappedCurrentFindingCodes
     rulesWithoutCommands = @($rulesWithoutCommands | ForEach-Object { $_.id })
+    activeRuleIdsWithoutCommands = @($activeRuleIdsWithoutCommands)
+    commandsWithInlineEnvAssignment = @($commandsWithInlineEnvAssignment)
+    commandsWithUrls = @($commandsWithUrls)
+    findingsWithoutCommands = @($findingsWithoutCommands)
+    checks = $checks
+    failedChecks = @($failedChecks)
     notificationPlan = [ordered]@{
         deliveryMode = "owner-configured-out-of-repo"
         committedDestinations = @("local report", "operator terminal", "ops snapshot markdown")

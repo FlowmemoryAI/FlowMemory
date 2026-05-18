@@ -894,9 +894,33 @@ $definitions = @(
             criticalRuleCount = 5
             blockedRuleCount = 5
         }
+        requiredChecks = @(
+            "opsSnapshotLoaded",
+            "opsRefreshSucceeded",
+            "ruleCountSufficient",
+            "criticalRuleCountSufficient",
+            "blockedRuleCountSufficient",
+            "currentFindingsLoaded",
+            "everyCurrentFindingMapped",
+            "everyRuleHasCommands",
+            "everyActiveRuleHasCommands",
+            "commandsAvoidInlineEnvAssignment",
+            "commandsAvoidUrls",
+            "findingsWithoutCommandsEmpty",
+            "notificationPlanStoresNoSecrets",
+            "notificationPlanNoNetworkDelivery",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
         requiredEmptyArrays = @(
             "unmappedCurrentFindingCodes",
-            "rulesWithoutCommands"
+            "rulesWithoutCommands",
+            "activeRuleIdsWithoutCommands",
+            "commandsWithInlineEnvAssignment",
+            "commandsWithUrls",
+            "findingsWithoutCommands",
+            "failedChecks"
         )
         requiredReportProperties = [ordered]@{
             "envValuesPrinted" = $false

@@ -1247,13 +1247,45 @@ $opsAlertCriticalRuleCount = [int](Get-AuditProp -Object $opsAlertRules -Name "c
 $opsAlertBlockedRuleCount = [int](Get-AuditProp -Object $opsAlertRules -Name "blockedRuleCount" -Default 0)
 $opsAlertUnmappedCodes = @((Get-AuditProp -Object $opsAlertRules -Name "unmappedCurrentFindingCodes" -Default @()))
 $opsAlertRulesWithoutCommands = @((Get-AuditProp -Object $opsAlertRules -Name "rulesWithoutCommands" -Default @()))
+$opsAlertActiveRulesWithoutCommands = @((Get-AuditProp -Object $opsAlertRules -Name "activeRuleIdsWithoutCommands" -Default @()))
+$opsAlertCommandsWithInlineEnvAssignment = @((Get-AuditProp -Object $opsAlertRules -Name "commandsWithInlineEnvAssignment" -Default @()))
+$opsAlertCommandsWithUrls = @((Get-AuditProp -Object $opsAlertRules -Name "commandsWithUrls" -Default @()))
+$opsAlertFindingsWithoutCommands = @((Get-AuditProp -Object $opsAlertRules -Name "findingsWithoutCommands" -Default @()))
+$opsAlertFailedChecks = @((Get-AuditProp -Object $opsAlertRules -Name "failedChecks" -Default @()))
+$opsAlertChecks = Get-AuditProp -Object $opsAlertRules -Name "checks"
+$opsAlertRequiredChecks = @(
+    "opsSnapshotLoaded",
+    "opsRefreshSucceeded",
+    "ruleCountSufficient",
+    "criticalRuleCountSufficient",
+    "blockedRuleCountSufficient",
+    "currentFindingsLoaded",
+    "everyCurrentFindingMapped",
+    "everyRuleHasCommands",
+    "everyActiveRuleHasCommands",
+    "commandsAvoidInlineEnvAssignment",
+    "commandsAvoidUrls",
+    "findingsWithoutCommandsEmpty",
+    "notificationPlanStoresNoSecrets",
+    "notificationPlanNoNetworkDelivery",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$opsAlertMissingChecks = @(Get-MissingAuditChecks -Checks $opsAlertChecks -Names $opsAlertRequiredChecks)
 $opsAlertRulesPassed = $opsAlertRulesExitCode -eq 0 `
     -and $opsAlertRulesStatus -eq "passed" `
+    -and $opsAlertFailedChecks.Count -eq 0 `
+    -and $opsAlertMissingChecks.Count -eq 0 `
     -and $opsAlertRuleCount -ge 10 `
     -and $opsAlertCriticalRuleCount -ge 5 `
     -and $opsAlertBlockedRuleCount -ge 5 `
     -and $opsAlertUnmappedCodes.Count -eq 0 `
     -and $opsAlertRulesWithoutCommands.Count -eq 0 `
+    -and $opsAlertActiveRulesWithoutCommands.Count -eq 0 `
+    -and $opsAlertCommandsWithInlineEnvAssignment.Count -eq 0 `
+    -and $opsAlertCommandsWithUrls.Count -eq 0 `
+    -and $opsAlertFindingsWithoutCommands.Count -eq 0 `
     -and ((Get-AuditProp -Object $opsAlertRules -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $opsAlertRules -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsAlertRules -Name "broadcasts" -Default $true) -eq $false)
@@ -1598,7 +1630,7 @@ Add-AuditItem -Items $items -Id "ops-snapshot" `
 Add-AuditItem -Items $items -Id "ops-alert-rules" `
     -Requirement "Ops alert rules map every current ops finding to local operator commands with critical and blocked rule coverage, no unmapped current findings, and no external delivery credentials." `
     -Status $(if ($opsAlertRulesPassed) { "passed" } else { "failed" }) `
-    -Evidence "alertRules=$opsAlertRulesStatus, rules=$opsAlertRuleCount, criticalRules=$opsAlertCriticalRuleCount, blockedRules=$opsAlertBlockedRuleCount, unmapped=$($opsAlertUnmappedCodes.Count), rulesWithoutCommands=$($opsAlertRulesWithoutCommands.Count), report=$($paths.opsAlertRules)" `
+    -Evidence "alertRules=$opsAlertRulesStatus, rules=$opsAlertRuleCount, criticalRules=$opsAlertCriticalRuleCount, blockedRules=$opsAlertBlockedRuleCount, failedChecks=$($opsAlertFailedChecks.Count), missingChecks=$($opsAlertMissingChecks.Count), unmapped=$($opsAlertUnmappedCodes.Count), rulesWithoutCommands=$($opsAlertRulesWithoutCommands.Count), commandUrls=$($opsAlertCommandsWithUrls.Count), inlineEnvAssignments=$($opsAlertCommandsWithInlineEnvAssignment.Count), report=$($paths.opsAlertRules)" `
     -Commands @("npm run flowchain:ops:alerts -- -AllowBlocked")
 
 Add-AuditItem -Items $items -Id "ops-alert-install-validation" `
