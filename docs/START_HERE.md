@@ -8,8 +8,9 @@ This is the first document to read after `AGENTS.md`.
 2. `docs/FLOWMEMORY_HQ_CONTEXT.md`
 3. `docs/CURRENT_STATE.md`
 4. `docs/ROOTFLOW_V0.md`, `docs/FLOW_MEMORY_V0.md`, and `docs/V0_LAUNCH_ACCEPTANCE.md` for launch-core work
-5. The task-specific document or issue
-6. Any relevant decision records in `docs/DECISIONS/`
+5. `docs/developer/README.md` for FlowChain L1, wallets, RPC, bridge, SDK, external tester, explorer/indexer, or faucet work
+6. The task-specific document or issue
+7. Any relevant decision records in `docs/DECISIONS/`
 
 ## Before You Edit
 

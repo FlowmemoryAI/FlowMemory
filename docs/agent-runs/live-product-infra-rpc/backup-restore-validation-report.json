@@ -1,0 +1,168 @@
+{
+    "schema":  "flowchain.backup_restore_validation_report.v2",
+    "generatedAt":  "2026-05-18T04:26:09.7173769Z",
+    "status":  "passed",
+    "stateReadable":  true,
+    "corruptRestoreExitCode":  0,
+    "checks":  {
+                   "backupCommandPassed":  true,
+                   "restoreCommandPassed":  true,
+                   "backupRestoreHashRoundTrip":  true,
+                   "secondBackupCommandPassed":  true,
+                   "latestManifestMatchesSecondSnapshot":  true,
+                   "latestRestoreCommandPassed":  true,
+                   "latestRestoreUsedLatestSnapshot":  true,
+                   "restoreTargetsLiveStateProtected":  true,
+                   "liveStateNonMutationProven":  true,
+                   "corruptedSnapshotDetected":  true,
+                   "manifestTamperDetected":  true,
+                   "missingStateArtifactDetected":  true,
+                   "missingSnapshotManifestDetected":  true,
+                   "latestPointerTamperDetected":  true,
+                   "wrongChainStateMismatchDetected":  true,
+                   "valuesPrintedFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "reports":  {
+                    "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-backup-report.json",
+                    "secondBackup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-second-backup-report.json",
+                    "restore":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-restore-report.json",
+                    "latestRestore":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-latest-restore-report.json",
+                    "corruptRestore":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-corrupt-restore-report.json",
+                    "tamperedManifest":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-tampered-manifest-report.json",
+                    "missingStateArtifact":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-missing-artifact-report.json",
+                    "missingSnapshotManifest":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-missing-snapshot-manifest-report.json",
+                    "latestPointerTamper":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-latest-pointer-tamper-report.json",
+                    "wrongChainStateMismatch":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-wrong-chain-state-mismatch-report.json"
+                },
+    "requiredCommands":  [
+                             "npm run flowchain:backup:create",
+                             "npm run flowchain:backup:restore:verify"
+                         ],
+    "childTimeoutSeconds":  300,
+    "childProcessResults":  [
+                                {
+                                    "name":  "backup",
+                                    "startedAt":  "2026-05-18T04:17:44.1008046Z",
+                                    "finishedAt":  "2026-05-18T04:19:35.8595239Z",
+                                    "durationSeconds":  111,
+                                    "timedOut":  false,
+                                    "timeoutSeconds":  300,
+                                    "processId":  45328,
+                                    "exitCode":  0,
+                                    "outputLineCount":  2
+                                },
+                                {
+                                    "name":  "restore",
+                                    "startedAt":  "2026-05-18T04:19:35.8975268Z",
+                                    "finishedAt":  "2026-05-18T04:20:14.2259418Z",
+                                    "durationSeconds":  38,
+                                    "timedOut":  false,
+                                    "timeoutSeconds":  300,
+                                    "processId":  25784,
+                                    "exitCode":  0,
+                                    "outputLineCount":  2
+                                },
+                                {
+                                    "name":  "second-backup",
+                                    "startedAt":  "2026-05-18T04:20:14.4536344Z",
+                                    "finishedAt":  "2026-05-18T04:22:10.3455811Z",
+                                    "durationSeconds":  115,
+                                    "timedOut":  false,
+                                    "timeoutSeconds":  300,
+                                    "processId":  59060,
+                                    "exitCode":  0,
+                                    "outputLineCount":  2
+                                },
+                                {
+                                    "name":  "latest-restore",
+                                    "startedAt":  "2026-05-18T04:22:10.3561872Z",
+                                    "finishedAt":  "2026-05-18T04:22:46.4830535Z",
+                                    "durationSeconds":  36,
+                                    "timedOut":  false,
+                                    "timeoutSeconds":  300,
+                                    "processId":  51488,
+                                    "exitCode":  0,
+                                    "outputLineCount":  2
+                                },
+                                {
+                                    "name":  "corrupt-restore",
+                                    "startedAt":  "2026-05-18T04:22:46.5960529Z",
+                                    "finishedAt":  "2026-05-18T04:23:24.0343797Z",
+                                    "durationSeconds":  37,
+                                    "timedOut":  false,
+                                    "timeoutSeconds":  300,
+                                    "processId":  44940,
+                                    "exitCode":  0,
+                                    "outputLineCount":  2
+                                },
+                                {
+                                    "name":  "tampered-manifest-restore",
+                                    "startedAt":  "2026-05-18T04:23:24.4061896Z",
+                                    "finishedAt":  "2026-05-18T04:24:02.3375518Z",
+                                    "durationSeconds":  37,
+                                    "timedOut":  false,
+                                    "timeoutSeconds":  300,
+                                    "processId":  55004,
+                                    "exitCode":  0,
+                                    "outputLineCount":  2
+                                },
+                                {
+                                    "name":  "missing-artifact-restore",
+                                    "startedAt":  "2026-05-18T04:24:02.4102143Z",
+                                    "finishedAt":  "2026-05-18T04:24:04.4032225Z",
+                                    "durationSeconds":  1,
+                                    "timedOut":  false,
+                                    "timeoutSeconds":  300,
+                                    "processId":  59900,
+                                    "exitCode":  0,
+                                    "outputLineCount":  2
+                                },
+                                {
+                                    "name":  "missing-snapshot-manifest-restore",
+                                    "startedAt":  "2026-05-18T04:24:04.4662258Z",
+                                    "finishedAt":  "2026-05-18T04:24:46.5586076Z",
+                                    "durationSeconds":  42,
+                                    "timedOut":  false,
+                                    "timeoutSeconds":  300,
+                                    "processId":  60872,
+                                    "exitCode":  0,
+                                    "outputLineCount":  2
+                                },
+                                {
+                                    "name":  "latest-pointer-tamper-restore",
+                                    "startedAt":  "2026-05-18T04:24:46.6192126Z",
+                                    "finishedAt":  "2026-05-18T04:25:29.8011958Z",
+                                    "durationSeconds":  43,
+                                    "timedOut":  false,
+                                    "timeoutSeconds":  300,
+                                    "processId":  61780,
+                                    "exitCode":  0,
+                                    "outputLineCount":  2
+                                },
+                                {
+                                    "name":  "wrong-chain-state-mismatch-restore",
+                                    "startedAt":  "2026-05-18T04:25:29.8702001Z",
+                                    "finishedAt":  "2026-05-18T04:26:09.6733775Z",
+                                    "durationSeconds":  39,
+                                    "timedOut":  false,
+                                    "timeoutSeconds":  300,
+                                    "processId":  13104,
+                                    "exitCode":  0,
+                                    "outputLineCount":  2
+                                }
+                            ],
+    "valuesPrinted":  false,
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

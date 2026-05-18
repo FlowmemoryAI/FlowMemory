@@ -25,8 +25,8 @@
     "handoffId": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
     "generatedAt": { "type": "string" },
     "mode": { "type": "string", "enum": ["mock", "mock-pilot", "local-anvil", "base-sepolia", "base-mainnet-canary", "base-mainnet-pilot"] },
-    "productionReady": { "const": false },
-    "localOnly": { "const": true },
+    "productionReady": { "type": "boolean" },
+    "localOnly": { "type": "boolean" },
     "observations": {
       "type": "array",
       "items": { "$ref": "bridge-observation.schema.json" }

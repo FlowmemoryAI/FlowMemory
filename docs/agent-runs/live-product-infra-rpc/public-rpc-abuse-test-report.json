@@ -1,0 +1,414 @@
+{
+    "schema":  "flowchain.public_rpc_abuse_test_report.v0",
+    "generatedAt":  "2026-05-18T06:53:41.3099734Z",
+    "status":  "passed",
+    "abuseTestReady":  true,
+    "validationScope":  "local-control-plane-public-rpc-abuse-harness",
+    "ownerValuesRequired":  false,
+    "localOnly":  true,
+    "serverBoundToLocalhost":  true,
+    "bodyLimitBytes":  262144,
+    "batchLimit":  50,
+    "checks":  {
+                   "serverStarted":  true,
+                   "allowedOriginAccepted":  true,
+                   "disallowedOriginRejected":  true,
+                   "optionsPreflightPassed":  true,
+                   "unsupportedMediaTypeRejected":  true,
+                   "malformedJsonRejected":  true,
+                   "unknownMethodRejected":  true,
+                   "transactionSubmitRejected":  true,
+                   "bridgeObservationSubmitRejected":  true,
+                   "rawJsonGetRejected":  true,
+                   "devnetStateRejected":  true,
+                   "bridgeObservationPostAliasRejected":  true,
+                   "testerWriteGatewayFailsClosed":  true,
+                   "badParamsRejected":  true,
+                   "emptyBatchRejected":  true,
+                   "oversizedBatchRejected":  true,
+                   "oversizedBodyRejected":  true,
+                   "notificationNoContent":  true,
+                   "rateLimitRejected":  true,
+                   "responseHygienePassed":  true,
+                   "failedCasesAbsent":  true,
+                   "fatalErrorAbsent":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "noLiveBroadcast":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "caseCounts":  {
+                       "passed":  19,
+                       "failed":  0,
+                       "total":  19
+                   },
+    "cases":  [
+                  {
+                      "id":  "allowed-origin-health",
+                      "requirement":  "Allowed browser origin can read health with a non-wildcard CORS echo.",
+                      "status":  "passed",
+                      "evidence":  "status=200, corsEchoMatchesConfiguredOrigin=True",
+                      "response":  {
+                                       "id":  "allowed-origin-health",
+                                       "httpStatus":  200,
+                                       "schema":  "flowmemory.control_plane.health.v0",
+                                       "reasonCode":  "",
+                                       "errorCode":  null,
+                                       "noSecretsFlag":  null,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  false,
+                                       "errorMessage":  ""
+                                   }
+                  },
+                  {
+                      "id":  "disallowed-origin-rejected",
+                      "requirement":  "Disallowed browser origin is rejected before public RPC handling.",
+                      "status":  "passed",
+                      "evidence":  "status=403, corsHeaderPresent=False",
+                      "response":  {
+                                       "id":  "disallowed-origin-rejected",
+                                       "httpStatus":  403,
+                                       "schema":  "flowmemory.control_plane.cors_rejected.v0",
+                                       "reasonCode":  "",
+                                       "errorCode":  null,
+                                       "noSecretsFlag":  null,
+                                       "corsHeaderPresent":  false,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  true,
+                                       "errorMessage":  "The remote server returned an error: (403) Forbidden."
+                                   }
+                  },
+                  {
+                      "id":  "options-preflight",
+                      "requirement":  "Allowed CORS preflight is handled without dispatching JSON-RPC.",
+                      "status":  "passed",
+                      "evidence":  "status=204, corsEchoMatchesConfiguredOrigin=True",
+                      "response":  {
+                                       "id":  "options-preflight",
+                                       "httpStatus":  204,
+                                       "schema":  "",
+                                       "reasonCode":  "",
+                                       "errorCode":  null,
+                                       "noSecretsFlag":  null,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  false,
+                                       "errorMessage":  ""
+                                   }
+                  },
+                  {
+                      "id":  "unsupported-media-type",
+                      "requirement":  "Non-JSON POST bodies are rejected with HTTP 415 before JSON parsing.",
+                      "status":  "passed",
+                      "evidence":  "status=415, reason=request.unsupported_media_type",
+                      "response":  {
+                                       "id":  "unsupported-media-type",
+                                       "httpStatus":  415,
+                                       "schema":  "flowmemory.control_plane.unsupported_media_type.v0",
+                                       "reasonCode":  "request.unsupported_media_type",
+                                       "errorCode":  null,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  true,
+                                       "errorMessage":  "The remote server returned an error: (415) Unsupported Media Type."
+                                   }
+                  },
+                  {
+                      "id":  "malformed-json",
+                      "requirement":  "Malformed JSON returns the stable JSON-RPC parse error envelope.",
+                      "status":  "passed",
+                      "evidence":  "status=400, errorCode=-32700, reason=parse.error",
+                      "response":  {
+                                       "id":  "malformed-json",
+                                       "httpStatus":  400,
+                                       "schema":  "flowmemory.control_plane.error.v0",
+                                       "reasonCode":  "parse.error",
+                                       "errorCode":  -32700,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  true,
+                                       "errorMessage":  "The remote server returned an error: (400) Bad Request."
+                                   }
+                  },
+                  {
+                      "id":  "unknown-method",
+                      "requirement":  "Unsupported public methods fail closed as JSON-RPC method-not-found errors.",
+                      "status":  "passed",
+                      "evidence":  "status=200, errorCode=-32601, reason=method.not_found",
+                      "response":  {
+                                       "id":  "unknown-method",
+                                       "httpStatus":  200,
+                                       "schema":  "flowmemory.control_plane.error.v0",
+                                       "reasonCode":  "method.not_found",
+                                       "errorCode":  -32601,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  false,
+                                       "errorMessage":  ""
+                                   }
+                  },
+                  {
+                      "id":  "transaction-submit-rejected",
+                      "requirement":  "Public RPC rejects transaction_submit before local file-intake dispatch.",
+                      "status":  "passed",
+                      "evidence":  "status=200, errorCode=-32601, reason=method.not_found",
+                      "response":  {
+                                       "id":  "transaction-submit-rejected",
+                                       "httpStatus":  200,
+                                       "schema":  "flowmemory.control_plane.error.v0",
+                                       "reasonCode":  "method.not_found",
+                                       "errorCode":  -32601,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  false,
+                                       "errorMessage":  ""
+                                   }
+                  },
+                  {
+                      "id":  "bridge-observation-submit-rejected",
+                      "requirement":  "Public RPC rejects bridge_observation_submit before local bridge observation intake dispatch.",
+                      "status":  "passed",
+                      "evidence":  "status=200, errorCode=-32601, reason=method.not_found",
+                      "response":  {
+                                       "id":  "bridge-observation-submit-rejected",
+                                       "httpStatus":  200,
+                                       "schema":  "flowmemory.control_plane.error.v0",
+                                       "reasonCode":  "method.not_found",
+                                       "errorCode":  -32601,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  false,
+                                       "errorMessage":  ""
+                                   }
+                  },
+                  {
+                      "id":  "raw-json-get-rejected",
+                      "requirement":  "Public RPC rejects raw_json_get before raw fixture payloads can be returned.",
+                      "status":  "passed",
+                      "evidence":  "status=200, errorCode=-32601, reason=method.not_found",
+                      "response":  {
+                                       "id":  "raw-json-get-rejected",
+                                       "httpStatus":  200,
+                                       "schema":  "flowmemory.control_plane.error.v0",
+                                       "reasonCode":  "method.not_found",
+                                       "errorCode":  -32601,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  false,
+                                       "errorMessage":  ""
+                                   }
+                  },
+                  {
+                      "id":  "devnet-state-rejected",
+                      "requirement":  "Public RPC rejects broad devnet_state payloads before local state can be returned.",
+                      "status":  "passed",
+                      "evidence":  "status=200, errorCode=-32601, reason=method.not_found",
+                      "response":  {
+                                       "id":  "devnet-state-rejected",
+                                       "httpStatus":  200,
+                                       "schema":  "flowmemory.control_plane.error.v0",
+                                       "reasonCode":  "method.not_found",
+                                       "errorCode":  -32601,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  false,
+                                       "errorMessage":  ""
+                                   }
+                  },
+                  {
+                      "id":  "bridge-observation-post-alias-rejected",
+                      "requirement":  "Public HTTP bridge observation POST alias is rejected instead of wrapping into bridge_observation_submit.",
+                      "status":  "passed",
+                      "evidence":  "status=200, errorCode=-32601, reason=method.not_found",
+                      "response":  {
+                                       "id":  "bridge-observation-post-alias-rejected",
+                                       "httpStatus":  200,
+                                       "schema":  "flowmemory.control_plane.error.v0",
+                                       "reasonCode":  "method.not_found",
+                                       "errorCode":  -32601,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  false,
+                                       "errorMessage":  ""
+                                   }
+                  },
+                  {
+                      "id":  "tester-write-disabled-without-owner-token",
+                      "requirement":  "Authenticated tester write gateway fails closed when owner token env is not configured.",
+                      "status":  "passed",
+                      "evidence":  "status=403, schema=flowmemory.control_plane.tester_write_disabled.v0",
+                      "response":  {
+                                       "id":  "tester-write-disabled-without-owner-token",
+                                       "httpStatus":  403,
+                                       "schema":  "flowmemory.control_plane.tester_write_disabled.v0",
+                                       "reasonCode":  "",
+                                       "errorCode":  null,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  true,
+                                       "errorMessage":  "The remote server returned an error: (403) Forbidden."
+                                   }
+                  },
+                  {
+                      "id":  "bad-params",
+                      "requirement":  "Invalid method params return the stable JSON-RPC invalid-params error.",
+                      "status":  "passed",
+                      "evidence":  "status=200, errorCode=-32602, reason=params.invalid",
+                      "response":  {
+                                       "id":  "bad-params",
+                                       "httpStatus":  200,
+                                       "schema":  "flowmemory.control_plane.error.v0",
+                                       "reasonCode":  "params.invalid",
+                                       "errorCode":  -32602,
+                                       "noSecretsFlag":  null,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  false,
+                                       "errorMessage":  ""
+                                   }
+                  },
+                  {
+                      "id":  "empty-batch",
+                      "requirement":  "Empty JSON-RPC batches are rejected before dispatch.",
+                      "status":  "passed",
+                      "evidence":  "status=400, reason=request.batch_empty",
+                      "response":  {
+                                       "id":  "empty-batch",
+                                       "httpStatus":  400,
+                                       "schema":  "flowmemory.control_plane.error.v0",
+                                       "reasonCode":  "request.batch_empty",
+                                       "errorCode":  -32600,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  true,
+                                       "errorMessage":  "The remote server returned an error: (400) Bad Request."
+                                   }
+                  },
+                  {
+                      "id":  "oversized-batch",
+                      "requirement":  "JSON-RPC batches above the local cap are rejected before dispatch.",
+                      "status":  "passed",
+                      "evidence":  "status=413, reason=request.batch_too_large, maxBatchRequests=50",
+                      "response":  {
+                                       "id":  "oversized-batch",
+                                       "httpStatus":  413,
+                                       "schema":  "flowmemory.control_plane.error.v0",
+                                       "reasonCode":  "request.batch_too_large",
+                                       "errorCode":  -32000,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  true,
+                                       "errorMessage":  "The remote server returned an error: (413) Payload Too Large."
+                                   }
+                  },
+                  {
+                      "id":  "oversized-body",
+                      "requirement":  "Request bodies above the local payload cap are rejected with HTTP 413.",
+                      "status":  "passed",
+                      "evidence":  "status=413, schema=flowmemory.control_plane.payload_too_large.v0, reason=request.payload_too_large",
+                      "response":  {
+                                       "id":  "oversized-body",
+                                       "httpStatus":  413,
+                                       "schema":  "flowmemory.control_plane.payload_too_large.v0",
+                                       "reasonCode":  "request.payload_too_large",
+                                       "errorCode":  null,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  true,
+                                       "errorMessage":  "The remote server returned an error: (413) Payload Too Large."
+                                   }
+                  },
+                  {
+                      "id":  "notification-no-content",
+                      "requirement":  "JSON-RPC notifications do not leak data and return HTTP 204.",
+                      "status":  "passed",
+                      "evidence":  "status=204, bodyEmpty=True",
+                      "response":  {
+                                       "id":  "notification-no-content",
+                                       "httpStatus":  204,
+                                       "schema":  "",
+                                       "reasonCode":  "",
+                                       "errorCode":  null,
+                                       "noSecretsFlag":  null,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  false,
+                                       "errorMessage":  ""
+                                   }
+                  },
+                  {
+                      "id":  "rate-limit",
+                      "requirement":  "Per-client rate limiting returns HTTP 429 with Retry-After and no secret material.",
+                      "status":  "passed",
+                      "evidence":  "first=200, second=200, third=429, retryAfterPresent=True",
+                      "response":  {
+                                       "id":  "rate-limit",
+                                       "httpStatus":  429,
+                                       "schema":  "flowmemory.control_plane.rate_limited.v0",
+                                       "reasonCode":  "",
+                                       "errorCode":  null,
+                                       "noSecretsFlag":  true,
+                                       "corsHeaderPresent":  true,
+                                       "retryAfterHeaderPresent":  true,
+                                       "errorCaptured":  true,
+                                       "errorMessage":  "The remote server returned an error: (429) Too Many Requests."
+                                   }
+                  },
+                  {
+                      "id":  "response-hygiene",
+                      "requirement":  "Abuse-test response summaries do not contain raw env values or secret-shaped material.",
+                      "status":  "passed",
+                      "evidence":  "findings=0",
+                      "response":  {
+                                       "id":  "response-hygiene",
+                                       "httpStatus":  null,
+                                       "schema":  "",
+                                       "reasonCode":  "",
+                                       "errorCode":  null,
+                                       "noSecretsFlag":  null,
+                                       "corsHeaderPresent":  false,
+                                       "retryAfterHeaderPresent":  false,
+                                       "errorCaptured":  false,
+                                       "errorMessage":  ""
+                                   }
+                  }
+              ],
+    "responseHygiene":  {
+                            "passed":  true,
+                            "findings":  [
+
+                                         ]
+                        },
+    "reportPaths":  {
+                        "report":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test-report.json",
+                        "markdown":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\PUBLIC_RPC_ABUSE_TEST.md",
+                        "stdout":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test\\control-plane.stdout.log",
+                        "stderr":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test\\control-plane.stderr.log"
+                    },
+    "fatalErrorCaptured":  false,
+    "fatalErrorMessage":  "",
+    "noLiveBroadcast":  true,
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

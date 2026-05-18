@@ -19,7 +19,8 @@ export type SourceSubsystem =
   | "devnet"
   | "worker"
   | "hardware"
-  | "alerts";
+  | "alerts"
+  | "ops";
 
 export interface Provenance {
   subsystem: SourceSubsystem;

@@ -91,7 +91,7 @@ const transferSubmit = dispatchJsonRpc({
   id: 1,
   method: "transaction_submit",
   params: {
-    signedEnvelope: transferEnvelope,
+    signedEnvelope: signedEnvelopePayload(transferDocument, transferEnvelope),
     submittedBy: "wallet-e2e"
   }
 }, { state: controlPlaneState });
@@ -235,7 +235,7 @@ async function signProductAndDexActions({ controlPlaneState }) {
     id: 2,
     method: "transaction_submit",
     params: {
-      signedEnvelope: readJson(resolve(outDir, envelopes.poolCreate.envelopePath)),
+      signedEnvelope: signedEnvelopePayload(poolCreate, readJson(resolve(outDir, envelopes.poolCreate.envelopePath))),
       submittedBy: "wallet-e2e"
     }
   }, { state: controlPlaneState });
@@ -269,6 +269,10 @@ async function signEnvelope(vault, signerKeyId, document, nonce) {
   assert.equal(verification.valid, true, document.schema);
   envelope.verification = verification;
   return envelope;
+}
+
+function signedEnvelopePayload(document, envelope) {
+  return { document, envelope };
 }
 
 function applyTransfer({ envelope, from, to, assetId, amount }) {

@@ -111,9 +111,9 @@
   },
   "hashHelpers": {
     "transactionId": "0x8434b0e00b03709b812c040565671c17a0e99922c556530c2a7ec882fb27fe78",
-    "blockHash": "0xf2cac01d94c98df96a689e9462828a46957853818fb6ac18ddcb0b886c513de9",
-    "txRoot": "0x0102ac1e88b75e52263d799e80ab3fec362ebaba16f9a028847c1142f307fa61",
-    "receiptRoot": "0xda05aba2e8eb534fe3ddfd41f9943427383451da414360f653ded77d7788dc91",
+    "blockHash": "0x7a692d484e63dc74b07b288469e2e4e427de2b4e02378aa49485599ef9637b40",
+    "txRoot": "0xbbc11a7b5aef46a1423e773ef0b1e62d93dd96ad0299e7613e0f1f87ae5d94cb",
+    "receiptRoot": "0xc76ad9147f1c9d601e6d74a7ee714a495ba6b87af1b7327d448d3f9a871ce461",
     "eventRoot": "0x79f1cea508f73aabb709ced7e26c7766461aed99d83755bf46e39985a5a46d86",
     "accountStateRoot": "0x940d2538669b56dc34b7dc946c09e928f24298673423d57df8779c705cc02e8b",
     "tokenStateRoot": "0x37da78c25557c97df14386cc788b9590061764c35c460c8f4efc189ef2232962",
@@ -122,13 +122,13 @@
     "bridgeCreditId": "0x3c14dea922babb89523ff15036914734f22933eaeb87ba15b4fed0c4044763e3",
     "bridgeEvidenceHash": "0x4c16ac231c783477ececf9c6db9451607fd1a36270899b49ab601a1e87ffea30",
     "withdrawalIntentId": "0x285142e2ab4c97d1a2793ce1189337a2fe635175d0a9443a91b9e8eebd26d935",
-    "finalityReceiptId": "0x2a9a8f1c26070d56176e9c07b8e35a54a9aa8ee7dada33a2d279dd6d1d748fcc",
+    "finalityReceiptId": "0x952325f3191f47f6e7241f756ab1e92003857c1b208e4e3515e35da8a401e9af",
     "replayKeys": {
       "accountNonce": "0x9e12ec4c6a69f58e84a13b8e105ed70f2c88a24ffa6304782fa87137465f59de",
       "roleScopedNonce": "0xd80523d183e98157147281a1e57ecb76a11616c3fbd28977061147eda9101599",
       "bridgeSourceEvent": "0x1047f0e7d1c7da9c22348c58b0ac642e40d252a983d436f55fd5b4ea4cee270f",
       "withdrawalIntent": "0x285142e2ab4c97d1a2793ce1189337a2fe635175d0a9443a91b9e8eebd26d935",
-      "finalityVote": "0x467821617cc7eb72fa76c03e85d4ed95ff222624a894c2ff4dfe8977275730ea"
+      "finalityVote": "0x19b435a030c9ea5870383259369f8f2ec9f9a5778a5c40bbfbe71b0a17268d30"
     }
   },
   "positive": [
@@ -826,6 +826,12 @@
         "sourceChainId": 31337,
         "destinationChainId": 8453,
         "token": "0x2222222222222222222222222222222222222222",
+        "asset": {
+          "sourceChainId": 31337,
+          "sourceToken": "0x2222222222222222222222222222222222222222",
+          "destinationAssetId": "0xf75726e75be7373f3b97142c5401342b778a0984950588839ccb28c5ce7a94b5",
+          "decimals": 18
+        },
         "amount": "10000000",
         "flowchainAccount": "0xd73d877ada523f7171fec59bb80a282b1c697f5ee07d126a8f0aacc0e3e28ed3",
         "baseRecipient": "0x4444444444444444444444444444444444444444",
@@ -841,7 +847,7 @@
         "schemaVersion": 1,
         "networkProfile": "local-chain",
         "networkProfileHash": "0xbd64b702ecdbcab44fabefc7e5836219cde02f5d6a3f0abc0026dcdb9b46a56a",
-        "envelopeId": "0x91976b3cdc5cff4589a25a1b7db75f434da7f9c61c8576efb23ff77ec12070e4",
+        "envelopeId": "0x10411a14053f35fff300c3ee8f742fcde3cb477de6fe42f99ae4559f32486302",
         "domain": "flowchain.production-l1.v0.transaction-envelope:profile:local-chain:chain:31337",
         "domainSeparator": "0x6e2e8ddd3eba28f318b038b64534e672e57324225ac7e8ae19729dfda1f7a2a8",
         "chainId": "31337",
@@ -859,7 +865,7 @@
         "payloadTypeHash": "0x99b4e331e591a8195b46b135b3fdfbcb90e7e7c95f7479d55c6ff4b29e6d0cc4",
         "objectTypeHash": "0xf54d0a70abd4a36a0d64f6b0704100bc0e86970d2d72d79613d7a033d083a66a",
         "objectId": "0x055fd9650e3005276ba93e5e0355aa73ade35054413e25f42091b009d21997ec",
-        "payloadHash": "0x7103a19da3dc42366377840ef816144c99e1151861590bc0f7cac316ffdc6628",
+        "payloadHash": "0xed0d4a221aac62583f6e6327ec69839225a256f607f5c08d89e95f451e8d75da",
         "issuedAtUnixMs": "1778702400000",
         "expiresAtUnixMs": "1778706000000",
         "localExecutionCost": {
@@ -876,23 +882,23 @@
         "feeHash": "0x84226d772ddfcad0ed9437e0dbccdf42f4b05660112b16fdd53b089b83781b93",
         "signatureAlgorithm": "secp256k1-keccak256-eip712-local-v0",
         "signatureAlgorithmHash": "0x1a6f483c4f6880a162cefa906f3dd9dc228115e89c04c539d63601752d3d57ae",
-        "signingDigest": "0x24b72c559647bff3f839f065a7f90d3222cfca896632ef33c2676e2e6d1ab922",
-        "signature": "0x55ff3ff9962dc359b95f2c54561c92547d09d98ba9d2697aabedb4f7401e9b2f514c61d92abe27eb34c0e4efe5610e3edfb1b4f5cdd85147c0b483d334d52bda",
-        "transactionId": "0xfb9d966380c2ea63c992d9d46d49cdb35345de52dfb84655bc30363259176c96"
+        "signingDigest": "0x4a5a839707ef5c5835e0b9f41bb9774ea175c579dd86ddb26a8d96634fc2ec17",
+        "signature": "0xdc81b75e6b2b845b6c5e64e851b98533623cd1b452a0560b2be059bb46c9e3787d5187f2c46370c394cbed77c91c57606662a0b2bafd8fecdd229a8c21d868dc",
+        "transactionId": "0xca65b22f85f7f61224e0cb270f7de01239de84f2356a272fb70a5ee1ef228807"
       },
       "expected": {
         "objectId": "0x055fd9650e3005276ba93e5e0355aa73ade35054413e25f42091b009d21997ec",
-        "payloadHash": "0x7103a19da3dc42366377840ef816144c99e1151861590bc0f7cac316ffdc6628",
-        "envelopeId": "0x91976b3cdc5cff4589a25a1b7db75f434da7f9c61c8576efb23ff77ec12070e4",
-        "signingDigest": "0x24b72c559647bff3f839f065a7f90d3222cfca896632ef33c2676e2e6d1ab922",
-        "transactionId": "0xfb9d966380c2ea63c992d9d46d49cdb35345de52dfb84655bc30363259176c96"
+        "payloadHash": "0xed0d4a221aac62583f6e6327ec69839225a256f607f5c08d89e95f451e8d75da",
+        "envelopeId": "0x10411a14053f35fff300c3ee8f742fcde3cb477de6fe42f99ae4559f32486302",
+        "signingDigest": "0x4a5a839707ef5c5835e0b9f41bb9774ea175c579dd86ddb26a8d96634fc2ec17",
+        "transactionId": "0xca65b22f85f7f61224e0cb270f7de01239de84f2356a272fb70a5ee1ef228807"
       },
       "runtime": {
         "ok": true,
         "signerAddress": "0xfd705a53418d74f973461f4360da507b319710eb",
         "signerAccountId": "0xd73d877ada523f7171fec59bb80a282b1c697f5ee07d126a8f0aacc0e3e28ed3",
-        "payloadHash": "0x7103a19da3dc42366377840ef816144c99e1151861590bc0f7cac316ffdc6628",
-        "transactionId": "0xfb9d966380c2ea63c992d9d46d49cdb35345de52dfb84655bc30363259176c96",
+        "payloadHash": "0xed0d4a221aac62583f6e6327ec69839225a256f607f5c08d89e95f451e8d75da",
+        "transactionId": "0xca65b22f85f7f61224e0cb270f7de01239de84f2356a272fb70a5ee1ef228807",
         "nonce": "10",
         "chainId": "31337",
         "networkProfile": "local-chain"

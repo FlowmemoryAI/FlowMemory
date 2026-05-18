@@ -37,4 +37,3 @@ It runs:
 npm run wallet:pilot-e2e --prefix crypto
 npm run wallet:e2e --prefix crypto
 ```
-

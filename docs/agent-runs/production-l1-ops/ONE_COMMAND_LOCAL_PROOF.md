@@ -24,4 +24,3 @@ The command writes:
 - JSON report: `devnet/local/production-l1-e2e/flowchain-production-l1-e2e-report.json`
 - Readable summary: `devnet/local/production-l1-e2e/flowchain-production-l1-e2e-summary.md`
 - Evidence bundle: `devnet/local/production-l1-e2e/evidence/flowchain-production-l1-evidence.zip`
-

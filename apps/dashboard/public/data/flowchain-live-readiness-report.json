@@ -1,0 +1,866 @@
+{
+  "schema": "flowchain.live_readiness_dashboard_report.v0",
+  "generatedAt": "2026-05-18T15:18:49.2356414Z",
+  "status": "blocked",
+  "deploymentReady": false,
+  "packetShareable": false,
+  "blockedOnlyOnKnownExternalOwnerInputs": true,
+  "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
+  "privateRpcUrl": "http://127.0.0.1:8787",
+  "metrics": {
+    "latestHeight": "73360",
+    "finalizedHeight": "73360",
+    "monitorHeightAdvanced": true,
+    "bridgeRelayerStatus": "blocked",
+    "bridgeQueuedTransactions": "0",
+    "bridgeRelayerChildTimeoutSeconds": "300",
+    "bridgeRelayerStepCount": 1,
+    "bridgeRelayerTimedOutStepCount": 0,
+    "bridgeRelayerNoChildTimeouts": true,
+    "bridgeRelayerGuardrailStatus": "passed",
+    "bridgeRelayerLoopValidationStatus": "passed",
+    "backupOwnerPathDryRunStatus": "passed",
+    "publicRpcDeploymentBundleStatus": "passed",
+    "publicRpcOwnerRenderValidationStatus": "passed",
+    "publicRpcDeploymentAutomationStatus": "passed",
+    "publicRpcDeploymentAutomationAction": "Validate",
+    "externalTesterPacketStatus": "blocked",
+    "externalTesterConnectPackStatus": "blocked",
+    "ownerInputReady": false,
+    "noSecretStatus": "passed",
+    "opsSnapshotStatus": "blocked",
+    "opsAlertState": "blocked",
+    "opsCriticalCount": "0",
+    "opsBlockedCount": "6",
+    "opsActiveRuleCount": 6,
+    "opsRuleCount": "18",
+    "opsCriticalRuleCount": "11",
+    "opsBlockedRuleCount": "7",
+    "opsUnmappedCurrentFindingCount": 0,
+    "incidentDrillStatus": "passed",
+    "alertInstallValidationStatus": "passed",
+    "opsEscalationDryRunStatus": "passed",
+    "opsEscalationDryRunEvents": "6",
+    "statusCounts": {
+      "passed": 7,
+      "blocked": 5
+    }
+  },
+  "ops": {
+    "snapshotStatus": "blocked",
+    "alertRulesStatus": "passed",
+    "alertState": "blocked",
+    "incidentDrillStatus": "passed",
+    "alertInstallValidationStatus": "passed",
+    "escalationDryRunStatus": "passed",
+    "escalationDryRunEvents": "6",
+    "bridgeRelayerGuardrailStatus": "passed",
+    "bridgeRelayerGuardrailReady": true,
+    "criticalCount": "0",
+    "blockedCount": "6",
+    "latestHeight": "73289",
+    "finalizedHeight": "73289",
+    "monitorStatus": "passed",
+    "monitorHeightAdvanced": true,
+    "findings": [
+      {
+        "severity": "blocked",
+        "code": "public-rpc-not-ready",
+        "message": "Public RPC is not ready to share.",
+        "commands": [
+          "npm run flowchain:public-rpc:check",
+          "npm run flowchain:public-rpc:validate",
+          "npm run flowchain:public-rpc:abuse-test"
+        ]
+      },
+      {
+        "severity": "blocked",
+        "code": "backup-not-ready",
+        "message": "State backup is not ready for public operation.",
+        "commands": [
+          "npm run flowchain:backup:restore:validate",
+          "npm run flowchain:backup:check"
+        ]
+      },
+      {
+        "severity": "blocked",
+        "code": "bridge-not-ready",
+        "message": "Base 8453 bridge readiness is not ready for external funded testing.",
+        "commands": [
+          "npm run flowchain:bridge:live:check",
+          "npm run flowchain:bridge:infra:check",
+          "npm run flowchain:bridge:emergency-stop"
+        ]
+      },
+      {
+        "severity": "blocked",
+        "code": "bridge-relayer-not-ready",
+        "message": "Bridge relayer one-shot proof is not ready.",
+        "commands": [
+          "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+          "npm run flowchain:bridge:live:check",
+          "npm run flowchain:bridge:infra:check"
+        ]
+      },
+      {
+        "severity": "blocked",
+        "code": "external-tester-not-shareable",
+        "message": "External tester packet must remain not-shareable.",
+        "commands": [
+          "npm run flowchain:tester:readiness",
+          "npm run flowchain:external-tester:packet"
+        ]
+      },
+      {
+        "severity": "blocked",
+        "code": "deployment-contract-not-ready",
+        "message": "Public deployment contract is not ready.",
+        "commands": [
+          "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+        ]
+      }
+    ],
+    "activeRuleIds": [
+      "public-rpc-not-shareable",
+      "backup-not-ready",
+      "bridge-not-ready",
+      "bridge-relayer-not-ready",
+      "external-tester-not-shareable",
+      "deployment-contract-not-ready"
+    ],
+    "coveredFindingCodes": [
+      "node-not-running",
+      "control-plane-not-running",
+      "service-status-not-passed",
+      "chain-height-unreadable",
+      "height-not-advancing",
+      "state-stale",
+      "no-secret-scan-not-passed",
+      "bridge-relayer-latency-failed",
+      "bridge-relayer-cursor-unsafe",
+      "bridge-relayer-guardrail-failed",
+      "bridge-relayer-loop-unhealthy",
+      "deployment-refresh-aborted",
+      "external-tester-evidence-unsafe",
+      "public-rpc-not-ready",
+      "backup-not-ready",
+      "bridge-not-ready",
+      "bridge-relayer-not-ready",
+      "external-tester-not-shareable",
+      "external-tester-evidence-invalid",
+      "deployment-contract-not-ready"
+    ],
+    "activeRules": [
+      {
+        "id": "public-rpc-not-shareable",
+        "severity": "blocked",
+        "signal": "Public RPC readiness gate is not passed.",
+        "threshold": "public RPC check status is not passed",
+        "commands": [
+          "npm run flowchain:public-rpc:check",
+          "npm run flowchain:public-rpc:validate",
+          "npm run flowchain:public-rpc:abuse-test"
+        ]
+      },
+      {
+        "id": "backup-not-ready",
+        "severity": "blocked",
+        "signal": "State backup readiness is not passed.",
+        "threshold": "backup check status is not passed",
+        "commands": [
+          "npm run flowchain:backup:restore:validate",
+          "npm run flowchain:backup:check"
+        ]
+      },
+      {
+        "id": "bridge-not-ready",
+        "severity": "blocked",
+        "signal": "Base 8453 bridge readiness is not passed.",
+        "threshold": "bridge live or infra readiness status is not passed",
+        "commands": [
+          "npm run flowchain:bridge:live:check",
+          "npm run flowchain:bridge:infra:check",
+          "npm run flowchain:bridge:emergency-stop"
+        ]
+      },
+      {
+        "id": "bridge-relayer-not-ready",
+        "severity": "blocked",
+        "signal": "Bridge relayer one-shot proof is not ready.",
+        "threshold": "bridge relayer one-shot status is not passed",
+        "commands": [
+          "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+          "npm run flowchain:bridge:live:check",
+          "npm run flowchain:bridge:infra:check"
+        ]
+      },
+      {
+        "id": "external-tester-not-shareable",
+        "severity": "blocked",
+        "signal": "External tester packet is not shareable.",
+        "threshold": "tester readiness status is not passed",
+        "commands": [
+          "npm run flowchain:tester:readiness",
+          "npm run flowchain:external-tester:packet"
+        ]
+      },
+      {
+        "id": "deployment-contract-not-ready",
+        "severity": "blocked",
+        "signal": "Public deployment contract is not passed.",
+        "threshold": "deployment contract status is not passed",
+        "commands": [
+          "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+        ]
+      }
+    ],
+    "ruleCount": "18",
+    "criticalRuleCount": "11",
+    "blockedRuleCount": "7",
+    "unmappedCurrentFindingCodes": [],
+    "incidentCommands": {
+      "status": [
+        "npm run flowchain:ops:snapshot",
+        "npm run flowchain:service:status",
+        "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30"
+      ],
+      "restart": [
+        "npm run flowchain:service:restart -- -LiveProfile",
+        "npm run flowchain:service:status"
+      ],
+      "backupRecovery": [
+        "npm run flowchain:backup:restore:validate",
+        "npm run flowchain:backup:create",
+        "npm run flowchain:backup:restore:verify"
+      ],
+      "publicExposure": [
+        "npm run flowchain:public-rpc:check",
+        "npm run flowchain:public-rpc:abuse-test",
+        "npm run flowchain:external-tester:packet"
+      ],
+      "drills": [
+        "npm run flowchain:ops:incident-drill",
+        "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh"
+      ],
+      "emergency": [
+        "npm run flowchain:emergency:stop-local",
+        "npm run flowchain:bridge:emergency-stop",
+        "npm run flowchain:emergency:export-evidence"
+      ],
+      "bridgeRelayerLoop": [
+        "npm run flowchain:service:status",
+        "npm run flowchain:bridge:relayer:loop:validate",
+        "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop"
+      ]
+    },
+    "dryRunEvents": [
+      {
+        "findingCode": "public-rpc-not-ready",
+        "severity": "blocked",
+        "ruleId": "public-rpc-not-shareable",
+        "signal": "Public RPC readiness gate is not passed.",
+        "commands": [
+          "npm run flowchain:public-rpc:check",
+          "npm run flowchain:public-rpc:validate",
+          "npm run flowchain:public-rpc:abuse-test"
+        ]
+      },
+      {
+        "findingCode": "backup-not-ready",
+        "severity": "blocked",
+        "ruleId": "backup-not-ready",
+        "signal": "State backup readiness is not passed.",
+        "commands": [
+          "npm run flowchain:backup:restore:validate",
+          "npm run flowchain:backup:check"
+        ]
+      },
+      {
+        "findingCode": "bridge-not-ready",
+        "severity": "blocked",
+        "ruleId": "bridge-not-ready",
+        "signal": "Base 8453 bridge readiness is not passed.",
+        "commands": [
+          "npm run flowchain:bridge:live:check",
+          "npm run flowchain:bridge:infra:check",
+          "npm run flowchain:bridge:emergency-stop"
+        ]
+      },
+      {
+        "findingCode": "bridge-relayer-not-ready",
+        "severity": "blocked",
+        "ruleId": "bridge-relayer-not-ready",
+        "signal": "Bridge relayer one-shot proof is not ready.",
+        "commands": [
+          "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+          "npm run flowchain:bridge:live:check",
+          "npm run flowchain:bridge:infra:check"
+        ]
+      },
+      {
+        "findingCode": "external-tester-not-shareable",
+        "severity": "blocked",
+        "ruleId": "external-tester-not-shareable",
+        "signal": "External tester packet is not shareable.",
+        "commands": [
+          "npm run flowchain:tester:readiness",
+          "npm run flowchain:external-tester:packet"
+        ]
+      },
+      {
+        "findingCode": "deployment-contract-not-ready",
+        "severity": "blocked",
+        "ruleId": "deployment-contract-not-ready",
+        "signal": "Public deployment contract is not passed.",
+        "commands": [
+          "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+        ]
+      }
+    ],
+    "sendsNetworkNotifications": false,
+    "storesSecrets": false
+  },
+  "testerLaunch": {
+    "status": "blocked",
+    "readinessStatus": "blocked",
+    "packetStatus": "blocked",
+    "connectPackStatus": "blocked",
+    "gatewayStatus": "passed",
+    "shareable": false,
+    "connectPackShareable": false,
+    "connectPackReady": true,
+    "connectPackNetwork": {
+      "name": "FlowChain friends-and-family pilot",
+      "chainId": "flowmemory-local-devnet-v0",
+      "rpcEndpointPlaceholder": "<OWNER_PUBLIC_ENDPOINT>/rpc",
+      "explorerSummaryUrlPlaceholder": "<OWNER_PUBLIC_ENDPOINT>/explorer/summary"
+    },
+    "externalSharingReady": false,
+    "localTesterRehearsalReady": true,
+    "publicTesterGatewayReady": true,
+    "gatewayConfigured": true,
+    "testerNetworkFresh": true,
+    "faucetRouteValidated": true,
+    "packetExecutableSmokeValidated": true,
+    "packetSmokeRoutes": [
+      "/health",
+      "/rpc/discover",
+      "/rpc/readiness",
+      "/chain/status",
+      "/wallets/create",
+      "/wallets/balances",
+      "/wallets/send",
+      "/wallets/transfers",
+      "/tester/status",
+      "/tester/wallets/create",
+      "/tester/faucet",
+      "/tester/wallets/send",
+      "/rpc balance_get"
+    ],
+    "connectPackReadOnlyRoutes": [
+      "/health",
+      "/rpc/discover",
+      "/rpc/readiness",
+      "/chain/status",
+      "/explorer/summary",
+      "/wallets/balances",
+      "/wallets/transfers",
+      "/tester/status"
+    ],
+    "connectPackTesterWriteRoutes": [
+      "/tester/wallets/create",
+      "/tester/faucet",
+      "/tester/wallets/send"
+    ],
+    "gatewayRoutes": [
+      "/tester/status",
+      "/tester/wallets/create",
+      "/tester/faucet",
+      "/tester/wallets/send",
+      "/rpc balance_get"
+    ],
+    "ownerInputGroups": {
+      "public RPC edge": [
+        "FLOWCHAIN_RPC_PUBLIC_URL",
+        "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+        "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+        "FLOWCHAIN_RPC_TLS_TERMINATED"
+      ],
+      "backup storage": [
+        "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+      ],
+      "tester write gateway": [
+        "FLOWCHAIN_TESTER_WRITE_ENABLED",
+        "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+        "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+      ],
+      "Base 8453 bridge": [
+        "FLOWCHAIN_PILOT_OPERATOR_ACK",
+        "FLOWCHAIN_BASE8453_RPC_URL",
+        "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+        "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+        "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+        "FLOWCHAIN_BASE8453_FROM_BLOCK",
+        "FLOWCHAIN_BASE8453_CURSOR_STATE",
+        "FLOWCHAIN_BASE8453_TO_BLOCK",
+        "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+        "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+        "FLOWCHAIN_PILOT_CONFIRMATIONS"
+      ]
+    },
+    "commands": {
+      "readiness": [
+        "npm run flowchain:tester:readiness -- -AllowBlocked",
+        "npm run flowchain:external-tester:packet -- -AllowBlocked"
+      ],
+      "gateway": [
+        "npm run flowchain:tester:gateway:e2e"
+      ],
+      "wallet": [
+        "npm run flowchain:wallet:live-tester:e2e"
+      ],
+      "explorer": [
+        "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+      ]
+    },
+    "envValuesPrinted": false,
+    "noSecrets": true
+  },
+  "ownerInputs": [
+    {
+      "name": "FLOWCHAIN_RPC_PUBLIC_URL",
+      "group": "public RPC edge"
+    },
+    {
+      "name": "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+      "group": "public RPC edge"
+    },
+    {
+      "name": "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+      "group": "public RPC edge"
+    },
+    {
+      "name": "FLOWCHAIN_RPC_TLS_TERMINATED",
+      "group": "public RPC edge"
+    },
+    {
+      "name": "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+      "group": "backup storage"
+    },
+    {
+      "name": "FLOWCHAIN_TESTER_WRITE_ENABLED",
+      "group": "tester write gateway"
+    },
+    {
+      "name": "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+      "group": "tester write gateway"
+    },
+    {
+      "name": "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
+      "group": "tester write gateway"
+    },
+    {
+      "name": "FLOWCHAIN_PILOT_OPERATOR_ACK",
+      "group": "Base 8453 bridge"
+    },
+    {
+      "name": "FLOWCHAIN_BASE8453_RPC_URL",
+      "group": "Base 8453 bridge"
+    },
+    {
+      "name": "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+      "group": "Base 8453 bridge"
+    },
+    {
+      "name": "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+      "group": "Base 8453 bridge"
+    },
+    {
+      "name": "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+      "group": "Base 8453 bridge"
+    },
+    {
+      "name": "FLOWCHAIN_BASE8453_FROM_BLOCK",
+      "group": "Base 8453 bridge"
+    },
+    {
+      "name": "FLOWCHAIN_BASE8453_CURSOR_STATE",
+      "group": "Base 8453 bridge"
+    },
+    {
+      "name": "FLOWCHAIN_BASE8453_TO_BLOCK",
+      "group": "Base 8453 bridge"
+    },
+    {
+      "name": "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+      "group": "Base 8453 bridge"
+    },
+    {
+      "name": "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+      "group": "Base 8453 bridge"
+    },
+    {
+      "name": "FLOWCHAIN_PILOT_CONFIRMATIONS",
+      "group": "Base 8453 bridge"
+    }
+  ],
+  "gates": [
+    {
+      "id": "private-service-origin",
+      "label": "Private L1 origin",
+      "status": "passed",
+      "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=73312, finalizedHeight=73312",
+      "commands": [
+        "npm run flowchain:service:status"
+      ],
+      "blockers": []
+    },
+    {
+      "id": "pre-share-monitoring",
+      "label": "Block production monitor",
+      "status": "passed",
+      "summary": "The deployment has recent service-monitor evidence that block height advances over multiple samples.",
+      "evidence": "monitorStatus=passed, samples=2, heightAdvanced=True",
+      "commands": [
+        "npm run flowchain:service:monitor"
+      ],
+      "blockers": []
+    },
+    {
+      "id": "service-autorecovery",
+      "label": "Service autorecovery",
+      "status": "passed",
+      "summary": "The owner service has an autorecovery supervisor and an isolated recovery drill proving control-plane restart without touching live state.",
+      "evidence": "supervisorValidation=passed, restartAttempts=1",
+      "commands": [
+        "npm run flowchain:service:supervisor:validate",
+        "npm run flowchain:service:supervisor -- -IntervalSeconds 30 -MaxRestartAttempts 3"
+      ],
+      "blockers": []
+    },
+    {
+      "id": "service-install-automation",
+      "label": "Windows service install",
+      "status": "passed",
+      "summary": "The owner host has a no-secret Windows install, read-only status, and safe absent-task uninstall no-op path for registering the live supervisor as a reboot-persistent scheduled task.",
+      "evidence": "serviceInstallValidation=passed, planDidNotMutate=True, statusCommand=True, statusDidNotMutate=True, uninstallNoop=True, liveProfileDefault=True, relayerDefaultOff=True, relayerOptIn=True, commandsPresent=True",
+      "commands": [
+        "npm run flowchain:service:install:validate",
+        "npm run flowchain:service:install:windows -- -Action Plan",
+        "npm run flowchain:service:install:windows -- -Action Install",
+        "npm run flowchain:service:install:windows -- -Action Status"
+      ],
+      "blockers": []
+    },
+    {
+      "id": "public-rpc-edge",
+      "label": "Public RPC edge",
+      "status": "blocked",
+      "summary": "The owner TLS edge must pass endpoint, CORS, rate-limit, readiness, and response-hygiene checks before sharing.",
+      "evidence": "publicRpcStatus=blocked, publicRpcReady=False, validationStatus=passed, validationPassed=True, abuseStatus=passed, abusePassed=True",
+      "commands": [
+        "npm run flowchain:public-rpc:validate",
+        "npm run flowchain:public-rpc:abuse-test",
+        "npm run flowchain:public-rpc:check"
+      ],
+      "blockers": [
+        "FLOWCHAIN_RPC_PUBLIC_URL",
+        "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+        "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+        "FLOWCHAIN_RPC_TLS_TERMINATED"
+      ]
+    },
+    {
+      "id": "state-backup",
+      "label": "State backup proof",
+      "status": "blocked",
+      "summary": "The public deployment must prove the configured state backup directory can create a manifest-backed snapshot and restore it in rehearsal.",
+      "evidence": "backupStatus=blocked, snapshotProof=not-run, restoreProof=not-run, ownerPathDryRun=passed",
+      "commands": [
+        "npm run flowchain:backup:create",
+        "npm run flowchain:backup:restore:verify",
+        "npm run flowchain:backup:owner-path:dry-run",
+        "npm run flowchain:backup:check"
+      ],
+      "blockers": [
+        "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+      ]
+    },
+    {
+      "id": "state-backup-owner-path-dry-run",
+      "label": "Backup dry run",
+      "status": "passed",
+      "summary": "Backup readiness has an owner-path dry run that injects an ignored local backup path into the production backup gate and proves snapshot plus restore evidence without using the owner's real directory.",
+      "evidence": "dryRun=passed, failedChecks=0, readiness=passed, snapshotProof=True, restoreProof=True",
+      "commands": [
+        "npm run flowchain:backup:owner-path:dry-run"
+      ],
+      "blockers": []
+    },
+    {
+      "id": "base8453-bridge-edge",
+      "label": "Base 8453 bridge edge",
+      "status": "blocked",
+      "summary": "The public deployment must not invite bridge-funded testing until Base 8453 live and infra checks pass with owner guardrails.",
+      "evidence": "bridgeLive=blocked, bridgeInfra=blocked",
+      "commands": [
+        "npm run flowchain:bridge:live:check",
+        "npm run flowchain:bridge:infra:check"
+      ],
+      "blockers": [
+        "FLOWCHAIN_PILOT_OPERATOR_ACK",
+        "FLOWCHAIN_BASE8453_RPC_URL",
+        "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+        "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+        "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+        "FLOWCHAIN_BASE8453_FROM_BLOCK",
+        "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+        "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+        "FLOWCHAIN_PILOT_CONFIRMATIONS"
+      ]
+    },
+    {
+      "id": "base8453-bridge-relayer-queue",
+      "label": "Bridge relayer queue",
+      "status": "blocked",
+      "summary": "The bridge relayer has a no-broadcast one-shot path plus an isolated loop validation that checks owner guardrails, proves fresh no-secret/no-broadcast loop health, observes Base 8453 deposits with a staged cursor, filters replays, queues new credits into the running L1, waits for main-state credit evidence, records handoff-to-spendable latency, only commits the Base cursor after safe proof, and proves missing-owner-input runs leave cursor state untouched.",
+      "evidence": "relayer=blocked, guardrail=passed, loopValidation=passed, loopFailedChecks=0, loopReportHealthy=True, observed=0, new=0, queued=0, applied=0, latencyGate=not-run, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run, handoffToSpendableSeconds=",
+      "commands": [
+        "npm run flowchain:bridge:relayer:once",
+        "npm run flowchain:bridge:relayer:guardrail:validate",
+        "npm run flowchain:bridge:relayer:loop:validate"
+      ],
+      "blockers": [
+        "FLOWCHAIN_PILOT_OPERATOR_ACK",
+        "FLOWCHAIN_BASE8453_RPC_URL",
+        "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+        "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+        "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+        "FLOWCHAIN_BASE8453_FROM_BLOCK",
+        "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+        "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+        "FLOWCHAIN_PILOT_CONFIRMATIONS"
+      ]
+    },
+    {
+      "id": "external-tester-sharing",
+      "label": "External tester packet",
+      "status": "blocked",
+      "summary": "External tester packet and machine-readable connection pack must remain not-shareable until owner public RPC, backup, and bridge gates pass, and they must rely on fresh tester-wallet evidence plus authenticated tester faucet/send gateway smoke.",
+      "evidence": "externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, publicTesterGatewayReady=True, faucetRoute=True, packetSmoke=True, testerFaucet=True, capRejected=True, connectPackReady=True, externalSharingReady=False, packet=blocked, packetShareable=False",
+      "commands": [
+        "npm run flowchain:tester:readiness",
+        "npm run flowchain:external-tester:packet"
+      ],
+      "blockers": [
+        "FLOWCHAIN_RPC_PUBLIC_URL",
+        "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+        "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+        "FLOWCHAIN_RPC_TLS_TERMINATED",
+        "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+        "FLOWCHAIN_PILOT_OPERATOR_ACK",
+        "FLOWCHAIN_BASE8453_RPC_URL",
+        "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+        "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+        "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+        "FLOWCHAIN_BASE8453_FROM_BLOCK",
+        "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+        "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+        "FLOWCHAIN_PILOT_CONFIRMATIONS"
+      ]
+    },
+    {
+      "id": "public-tester-write-gateway",
+      "label": "Tester write gateway",
+      "status": "passed",
+      "summary": "The public deployment has a local production-shaped proof for authenticated tester wallet creation, capped tester faucet funding, capped tester sends, balance settlement, and over-cap rejection.",
+      "evidence": "gatewayStatus=passed, testerFaucetSchema=flowmemory.control_plane.tester_faucet_result.v0, transferAccepted=True, capRejected=True",
+      "commands": [
+        "npm run flowchain:tester:gateway:e2e"
+      ],
+      "blockers": []
+    },
+    {
+      "id": "no-secret-no-broadcast",
+      "label": "No secrets or broadcasts",
+      "status": "passed",
+      "summary": "Deployment contract and current readiness reports preserve no-secret, no-env-value, and no-live-broadcast boundaries.",
+      "evidence": "noSecretStatus=passed, scansGeneratedReports=True, reportPathMatchesProductionGate=True",
+      "commands": [
+        "npm run flowchain:no-secret:scan"
+      ],
+      "blockers": []
+    }
+  ],
+  "commands": {
+    "preExposure": [
+      "npm run flowchain:service:status",
+      "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
+      "npm run flowchain:service:install:validate",
+      "npm run flowchain:service:install:windows -- -Action Plan",
+      "npm run flowchain:ops:snapshot -- -AllowBlocked",
+      "npm run flowchain:ops:alerts -- -AllowBlocked",
+      "npm run flowchain:ops:alerts:install:validate",
+      "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked",
+      "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
+      "npm run flowchain:owner:onboarding",
+      "npm run flowchain:owner-env:template",
+      "npm run flowchain:owner-inputs"
+    ],
+    "rollback": [
+      "npm run flowchain:service:status",
+      "npm run flowchain:service:install:windows -- -Action Status",
+      "npm run flowchain:service:install:windows -- -Action Uninstall",
+      "npm run flowchain:backup:install:windows -- -Action Status",
+      "npm run flowchain:backup:install:windows -- -Action Uninstall",
+      "npm run flowchain:ops:alerts:install:windows -- -Action Status",
+      "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall",
+      "npm run flowchain:service:stop",
+      "npm run flowchain:service:restart -- -LiveProfile",
+      "npm run flowchain:emergency:stop-local"
+    ]
+  },
+  "sourceReports": [
+    {
+      "fileName": "public-deployment-contract-report.json",
+      "schema": "flowchain.public_deployment_contract_report.v0",
+      "status": "blocked",
+      "generatedAt": "2026-05-18T15:18:49.2356414Z"
+    },
+    {
+      "fileName": "flowchain-live-infra-check-report.json",
+      "schema": "flowchain.live_infra_check_report.v0",
+      "status": "blocked",
+      "generatedAt": "2026-05-18T15:21:26.2767425Z"
+    },
+    {
+      "fileName": "service-status-report.json",
+      "schema": "flowchain.service_status_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-18T15:22:05.2861073Z"
+    },
+    {
+      "fileName": "service-monitor-report.json",
+      "schema": "flowchain.service_monitor_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-18T15:16:04.8496922Z"
+    },
+    {
+      "fileName": "public-rpc-deployment-bundle-report.json",
+      "schema": "flowchain.public_rpc_deployment_bundle_report.v3",
+      "status": "passed",
+      "generatedAt": "2026-05-18T06:51:17.2713954Z"
+    },
+    {
+      "fileName": "public-rpc-deployment-automation-report.json",
+      "schema": "flowchain.public_rpc_deployment_automation_report.v1",
+      "status": "passed",
+      "generatedAt": "2026-05-18T06:51:20.1880423Z"
+    },
+    {
+      "fileName": "public-rpc-readiness-report.json",
+      "schema": "flowchain.public_rpc_readiness_report.v0",
+      "status": "blocked",
+      "generatedAt": "2026-05-18T15:20:06.8347091Z"
+    },
+    {
+      "fileName": "backup-readiness-report.json",
+      "schema": "flowchain.backup_readiness_report.v1",
+      "status": "blocked",
+      "generatedAt": "2026-05-18T15:21:18.9644465Z"
+    },
+    {
+      "fileName": "backup-owner-path-dry-run-report.json",
+      "schema": "flowchain.backup_owner_path_dry_run_report.v1",
+      "status": "passed",
+      "generatedAt": "2026-05-18T04:44:23.9884243Z"
+    },
+    {
+      "fileName": "bridge-relayer-once-report.json",
+      "schema": "flowchain.bridge_relayer_once_report.v0",
+      "status": "blocked",
+      "generatedAt": "2026-05-18T15:21:24.2522874Z"
+    },
+    {
+      "fileName": "bridge-relayer-guardrail-validation-report.json",
+      "schema": "flowchain.bridge_relayer_guardrail_validation_report.v1",
+      "status": "passed",
+      "generatedAt": "2026-05-18T04:31:12.2070538Z"
+    },
+    {
+      "fileName": "bridge-relayer-loop-validation-report.json",
+      "schema": "flowchain.bridge_relayer_loop_validation_report.v1",
+      "status": "passed",
+      "generatedAt": "2026-05-18T04:36:28.6180686Z"
+    },
+    {
+      "fileName": "external-tester-packet-report.json",
+      "schema": "flowchain.external_tester_packet_report.v0",
+      "status": "blocked",
+      "generatedAt": "2026-05-18T15:23:34.1357530Z"
+    },
+    {
+      "fileName": "external-tester-connect-pack.json",
+      "schema": "flowchain.external_tester_connect_pack.v0",
+      "status": "blocked",
+      "generatedAt": "2026-05-18T15:23:34.1357530Z"
+    },
+    {
+      "fileName": "external-tester-readiness-report.json",
+      "schema": "flowchain.external_tester_readiness_report.v0",
+      "status": "blocked",
+      "generatedAt": "2026-05-18T15:23:31.9122762Z"
+    },
+    {
+      "fileName": "public-tester-gateway-e2e-report.json",
+      "schema": "flowchain.public_tester_gateway_e2e_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-18T14:55:36.9733820Z"
+    },
+    {
+      "fileName": "ops-snapshot-report.json",
+      "schema": "flowchain.ops_snapshot_report.v1",
+      "status": "blocked",
+      "generatedAt": "2026-05-18T15:16:05.4387092Z"
+    },
+    {
+      "fileName": "ops-alert-rules-report.json",
+      "schema": "flowchain.ops_alert_rules_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-18T15:16:06.7011437Z"
+    },
+    {
+      "fileName": "incident-drill-report.json",
+      "schema": "flowchain.incident_drill_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-18T15:14:02.2188427Z"
+    },
+    {
+      "fileName": "alert-install-validation-report.json",
+      "schema": "flowchain.alert_install_validation_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-18T06:51:03.8641137Z"
+    },
+    {
+      "fileName": "ops-escalation-dry-run-report.json",
+      "schema": "flowchain.ops_escalation_dry_run_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-18T06:51:05.9119884Z"
+    },
+    {
+      "fileName": "owner-inputs-report.json",
+      "schema": "flowchain.owner_inputs_report.v0",
+      "status": "blocked",
+      "generatedAt": "2026-05-18T15:23:33.2844595Z"
+    },
+    {
+      "fileName": "no-secret-scan-report.json",
+      "schema": "flowchain.no_secret_scan_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-18T17:48:56.2016268Z"
+    }
+  ],
+  "envValuesPrinted": false,
+  "noSecrets": true
+}

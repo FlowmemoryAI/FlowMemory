@@ -44,4 +44,3 @@ Ignored proof path:
 ```text
 devnet/local/production-l1-wallet/wallet-e2e/wallet-e2e-proof.json
 ```
-

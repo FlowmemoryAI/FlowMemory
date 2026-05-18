@@ -186,6 +186,12 @@ export async function buildProductionL1Vectors() {
       sourceChainId: Number(CHAIN_ID),
       destinationChainId: 8453,
       token: bridgeSourceEvent.token,
+      asset: {
+        sourceChainId: Number(CHAIN_ID),
+        sourceToken: bridgeSourceEvent.token,
+        destinationAssetId: assets.token,
+        decimals: 18
+      },
       amount: "10000000",
       flowchainAccount: accounts.user.accountId,
       baseRecipient: "0x4444444444444444444444444444444444444444",

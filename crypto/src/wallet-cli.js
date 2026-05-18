@@ -278,7 +278,8 @@ try {
     }
   } else if (command === "submit") {
     const envelope = readJson(required("envelope"));
-    const response = await submitEnvelope(envelope);
+    const document = args.document ? readJson(args.document) : undefined;
+    const response = await submitEnvelope(envelope, document);
     console.log(JSON.stringify(response, null, 2));
     process.exitCode = response.error ? 1 : 0;
   } else if (command === "query") {
@@ -476,17 +477,18 @@ function runVerificationSmoke() {
   process.exitCode = result.valid ? 0 : 1;
 }
 
-async function submitEnvelope(envelope) {
+async function submitEnvelope(envelope, document) {
   const { dispatchJsonRpc, loadControlPlaneState } = await import("../../services/control-plane/src/index.ts");
   const state = loadControlPlaneState({
     txIntakePath: args["intake-path"] ?? "devnet/local/intake/transactions.ndjson"
   });
+  const signedEnvelope = document === undefined ? envelope : { document, envelope };
   return dispatchJsonRpc({
     jsonrpc: "2.0",
     id: 1,
     method: "transaction_submit",
     params: {
-      signedEnvelope: envelope,
+      signedEnvelope,
       submittedBy: args["submitted-by"] ?? "flowchain-wallet-cli"
     }
   }, { state });
@@ -566,7 +568,7 @@ function usage() {
   node src/wallet-cli.js sign-swap --vault <ignored-vault> --owner <account> --pool-id <id> --input-token-id <id> --output-token-id <id> --input-amount <n> --minimum-output <n> --deadline-block <n> --nonce <n> --chain-id <id>
   node src/wallet-cli.js sign-withdrawal-intent --vault <ignored-vault> --account <account> --base-address <0x...> --amount <n> --bridge-asset <0x...> --credit-id <id> --deposit-id <id> --nonce <n> --chain-id <id>
   node src/wallet-cli.js verify --envelope <wallet-envelope> [--document <path>] [--chain-id <id>] [--expected-nonce <n>] [--network-profile <profile>] [--require-canonical] [--runtime]
-  node src/wallet-cli.js submit --envelope <wallet-envelope> [--intake-path <ignored-ndjson>]
+  node src/wallet-cli.js submit --envelope <wallet-envelope> --document <path> [--intake-path <ignored-ndjson>]
   node src/wallet-cli.js query --method <control-plane-method> [--params <json-or-file>]
   node src/wallet-cli.js derive-metadata --public-key <compressed-or-uncompressed-public-key> [--role user] [--label <label>]`);
 }

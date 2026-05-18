@@ -36,4 +36,3 @@ The local control-plane accepted:
 
 - transfer envelope: `accepted_local`;
 - pool-create DEX envelope: `accepted_local`.
-

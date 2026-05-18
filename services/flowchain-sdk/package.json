@@ -1,0 +1,13 @@
+{
+  "name": "@flowmemory/flowchain-sdk-v0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "cli": "node src/cli.ts",
+    "e2e": "node src/e2e.ts",
+    "test": "node --test test/*.test.ts"
+  }
+}

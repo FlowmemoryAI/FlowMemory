@@ -31,4 +31,3 @@ Rules:
 - Broadcast actions require explicit acknowledgement and owner-supplied env.
 - Live commands print env names and caps, never env values.
 - Only tiny owner pilot funds should be used after strict proof commands pass.
-

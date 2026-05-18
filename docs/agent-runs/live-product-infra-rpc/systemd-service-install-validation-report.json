@@ -1,0 +1,78 @@
+{
+    "schema":  "flowchain.systemd_service_install_validation_report.v0",
+    "generatedAt":  "2026-05-18T05:14:07.5290463Z",
+    "status":  "passed",
+    "bundleDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle",
+    "paths":  {
+                  "liveServiceTemplate":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle\\flowchain-live.service.template",
+                  "supervisorTemplate":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle\\flowchain-supervisor.service.template",
+                  "renderScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle\\render-public-rpc-bundle.template.ps1",
+                  "verifyRunbook":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle\\VERIFY.md",
+                  "rollbackRunbook":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle\\ROLLBACK.md"
+              },
+    "installCommands":  [
+                            "sudo install -o root -g root -m 0644 \u003cFLOWCHAIN_RENDER_DIR\u003e/flowchain-live.service /etc/systemd/system/flowchain-live.service",
+                            "sudo install -o root -g root -m 0644 \u003cFLOWCHAIN_RENDER_DIR\u003e/flowchain-supervisor.service /etc/systemd/system/flowchain-supervisor.service",
+                            "sudo systemctl daemon-reload",
+                            "sudo systemctl enable --now flowchain-live.service",
+                            "sudo systemctl enable --now flowchain-supervisor.service"
+                        ],
+    "statusCommands":  [
+                           "systemctl status flowchain-live.service --no-pager",
+                           "systemctl status flowchain-supervisor.service --no-pager",
+                           "journalctl -u flowchain-live.service -u flowchain-supervisor.service --since -1h --no-pager",
+                           "npm run flowchain:service:status",
+                           "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30"
+                       ],
+    "uninstallCommands":  [
+                              "sudo systemctl disable --now flowchain-supervisor.service",
+                              "sudo systemctl disable --now flowchain-live.service",
+                              "sudo rm -f /etc/systemd/system/flowchain-supervisor.service /etc/systemd/system/flowchain-live.service",
+                              "sudo systemctl daemon-reload"
+                          ],
+    "checks":  {
+                   "validationPackageScriptPresent":  true,
+                   "publicRpcBundleExists":  true,
+                   "liveServiceTemplateExists":  true,
+                   "supervisorTemplateExists":  true,
+                   "renderScriptExists":  true,
+                   "verifyRunbookExists":  true,
+                   "rollbackRunbookExists":  true,
+                   "liveServiceUsesLiveProfile":  true,
+                   "liveServiceRunsStatusAfterStart":  true,
+                   "liveServiceReloadRestartsLiveProfile":  true,
+                   "liveServiceStopPreservesState":  true,
+                   "liveServiceRestartOnFailure":  true,
+                   "liveServiceRemainAfterExit":  true,
+                   "supervisorUsesAutorecoveryLoop":  true,
+                   "supervisorRestartAlways":  true,
+                   "bridgeRelayerDefaultOff":  true,
+                   "ownerEnvFileUsed":  true,
+                   "repoWorkingDirectoryUsed":  true,
+                   "cargoTargetDirIsExternalized":  true,
+                   "leastPrivilegeHardeningPresent":  true,
+                   "writePathsScoped":  true,
+                   "installTargetPresent":  true,
+                   "renderScriptRendersSystemdUnits":  true,
+                   "verifyRunbookMentionsSystemdVerify":  true,
+                   "rollbackRunbookMentionsSystemctl":  true,
+                   "installCommandsPresent":  true,
+                   "statusCommandsPresent":  true,
+                   "uninstallCommandsPresent":  true,
+                   "hostMutationPerformedFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "hostMutationPerformed":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

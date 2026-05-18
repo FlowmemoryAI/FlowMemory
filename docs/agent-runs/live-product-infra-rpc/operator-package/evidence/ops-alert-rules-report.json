@@ -1,0 +1,364 @@
+{
+    "schema":  "flowchain.ops_alert_rules_report.v0",
+    "generatedAt":  "2026-05-18T15:16:06.7011437Z",
+    "status":  "passed",
+    "currentAlertState":  "blocked",
+    "opsSnapshotStatus":  "blocked",
+    "opsSnapshotPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
+    "opsRefresh":  {
+                       "performed":  false,
+                       "exitCode":  0,
+                       "outputLineCount":  0
+                   },
+    "ruleCount":  18,
+    "criticalRuleCount":  11,
+    "blockedRuleCount":  7,
+    "activeRuleIds":  [
+                          "public-rpc-not-shareable",
+                          "backup-not-ready",
+                          "bridge-not-ready",
+                          "bridge-relayer-not-ready",
+                          "external-tester-not-shareable",
+                          "deployment-contract-not-ready"
+                      ],
+    "currentFindingCodes":  [
+                                "public-rpc-not-ready",
+                                "backup-not-ready",
+                                "bridge-not-ready",
+                                "bridge-relayer-not-ready",
+                                "external-tester-not-shareable",
+                                "deployment-contract-not-ready"
+                            ],
+    "coveredFindingCodes":  [
+                                "node-not-running",
+                                "control-plane-not-running",
+                                "service-status-not-passed",
+                                "chain-height-unreadable",
+                                "height-not-advancing",
+                                "state-stale",
+                                "no-secret-scan-not-passed",
+                                "bridge-relayer-latency-failed",
+                                "bridge-relayer-cursor-unsafe",
+                                "bridge-relayer-guardrail-failed",
+                                "bridge-relayer-loop-unhealthy",
+                                "deployment-refresh-aborted",
+                                "external-tester-evidence-unsafe",
+                                "public-rpc-not-ready",
+                                "backup-not-ready",
+                                "bridge-not-ready",
+                                "bridge-relayer-not-ready",
+                                "external-tester-not-shareable",
+                                "external-tester-evidence-invalid",
+                                "deployment-contract-not-ready"
+                            ],
+    "unmappedCurrentFindingCodes":  [
+
+                                    ],
+    "rulesWithoutCommands":  [
+
+                             ],
+    "activeRuleIdsWithoutCommands":  [
+
+                                     ],
+    "commandsWithInlineEnvAssignment":  [
+
+                                        ],
+    "commandsWithUrls":  [
+
+                         ],
+    "findingsWithoutCommands":  [
+
+                                ],
+    "checks":  {
+                   "opsSnapshotLoaded":  true,
+                   "opsRefreshSucceeded":  true,
+                   "ruleCountSufficient":  true,
+                   "criticalRuleCountSufficient":  true,
+                   "blockedRuleCountSufficient":  true,
+                   "currentFindingsLoaded":  true,
+                   "everyCurrentFindingMapped":  true,
+                   "everyRuleHasCommands":  true,
+                   "everyActiveRuleHasCommands":  true,
+                   "commandsAvoidInlineEnvAssignment":  true,
+                   "commandsAvoidUrls":  true,
+                   "findingsWithoutCommandsEmpty":  true,
+                   "notificationPlanStoresNoSecrets":  true,
+                   "notificationPlanNoNetworkDelivery":  true,
+                   "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "notificationPlan":  {
+                             "deliveryMode":  "owner-configured-out-of-repo",
+                             "committedDestinations":  [
+                                                           "local report",
+                                                           "operator terminal",
+                                                           "ops snapshot markdown"
+                                                       ],
+                             "externalDestinationsAllowedOnlyOutsideRepo":  [
+                                                                                "pager service",
+                                                                                "email",
+                                                                                "chat alert channel"
+                                                                            ],
+                             "storesSecrets":  false,
+                             "sendsNetworkNotifications":  false
+                         },
+    "rules":  [
+                  {
+                      "id":  "node-process-down",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "node-not-running"
+                                       ],
+                      "signal":  "Node process is not running.",
+                      "threshold":  "any failed service-status sample",
+                      "commands":  [
+                                       "npm run flowchain:service:status",
+                                       "npm run flowchain:service:restart -- -LiveProfile",
+                                       "npm run flowchain:emergency:stop-local"
+                                   ]
+                  },
+                  {
+                      "id":  "control-plane-down",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "control-plane-not-running"
+                                       ],
+                      "signal":  "Control-plane RPC process is not running.",
+                      "threshold":  "any failed service-status sample",
+                      "commands":  [
+                                       "npm run flowchain:service:status",
+                                       "npm run flowchain:service:restart -- -LiveProfile"
+                                   ]
+                  },
+                  {
+                      "id":  "block-production-stalled",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "service-status-not-passed",
+                                           "chain-height-unreadable",
+                                           "height-not-advancing"
+                                       ],
+                      "signal":  "Block height is unreadable or did not advance.",
+                      "threshold":  "service monitor has fewer than two advancing samples",
+                      "commands":  [
+                                       "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
+                                       "npm run flowchain:service:restart -- -LiveProfile"
+                                   ]
+                  },
+                  {
+                      "id":  "state-file-stale",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "state-stale"
+                                       ],
+                      "signal":  "Runtime state file is older than the monitor freshness threshold.",
+                      "threshold":  "stateFileLastWriteAgeSeconds exceeds configured maximum",
+                      "commands":  [
+                                       "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
+                                       "npm run flowchain:service:restart -- -LiveProfile"
+                                   ]
+                  },
+                  {
+                      "id":  "secret-boundary-breach",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "no-secret-scan-not-passed"
+                                       ],
+                      "signal":  "No-secret scan did not pass.",
+                      "threshold":  "any no-secret scan failure",
+                      "commands":  [
+                                       "npm run flowchain:no-secret:scan",
+                                       "npm run flowchain:emergency:export-evidence"
+                                   ]
+                  },
+                  {
+                      "id":  "bridge-relayer-latency-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "bridge-relayer-latency-failed"
+                                       ],
+                      "signal":  "Bridge relayer failed or exceeded the handoff-to-spendable latency gate.",
+                      "threshold":  "relayer status failed or timing.latencyGate failed",
+                      "commands":  [
+                                       "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                                       "npm run flowchain:service:status",
+                                       "npm run flowchain:bridge:emergency-stop"
+                                   ]
+                  },
+                  {
+                      "id":  "bridge-relayer-cursor-unsafe",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "bridge-relayer-cursor-unsafe"
+                                       ],
+                      "signal":  "Bridge relayer passed without safe staged cursor commit evidence.",
+                      "threshold":  "passed relayer report has cursorCommit.finalCommitRequired true with finalCommitted false, NoQueue enabled, or unapplied new credits",
+                      "commands":  [
+                                       "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                                       "npm run flowchain:bridge:emergency-stop",
+                                       "npm run flowchain:service:status"
+                                   ]
+                  },
+                  {
+                      "id":  "bridge-relayer-guardrail-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "bridge-relayer-guardrail-failed"
+                                       ],
+                      "signal":  "Bridge relayer fail-closed guardrail proof is missing or failed.",
+                      "threshold":  "guardrail validation report is not passed or any cursor/no-queue/no-secret/no-broadcast check is false",
+                      "commands":  [
+                                       "npm run flowchain:bridge:relayer:guardrail:validate",
+                                       "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                                       "npm run flowchain:bridge:emergency-stop"
+                                   ]
+                  },
+                  {
+                      "id":  "bridge-relayer-loop-unhealthy",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "bridge-relayer-loop-unhealthy"
+                                       ],
+                      "signal":  "Bridge relayer loop is running without fresh no-secret/no-broadcast health evidence.",
+                      "threshold":  "service status reports bridgeRelayerLoop.status running and bridgeRelayerLoop.report.healthy is not true",
+                      "commands":  [
+                                       "npm run flowchain:service:status",
+                                       "npm run flowchain:bridge:relayer:loop:validate",
+                                       "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop",
+                                       "npm run flowchain:bridge:emergency-stop"
+                                   ]
+                  },
+                  {
+                      "id":  "deployment-refresh-aborted",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "deployment-refresh-aborted"
+                                       ],
+                      "signal":  "Public deployment dependency refresh aborted or skipped child gates.",
+                      "threshold":  "deployment contract dependencyRefresh is aborted, failed, timed out, or skipped",
+                      "commands":  [
+                                       "npm run flowchain:public-deployment:contract -- -AllowBlocked",
+                                       "npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked",
+                                       "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh"
+                                   ]
+                  },
+                  {
+                      "id":  "external-tester-evidence-unsafe",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "external-tester-evidence-unsafe"
+                                       ],
+                      "signal":  "External tester returned evidence contains a secret marker, credential URL, or env assignment.",
+                      "threshold":  "tester evidence validation reports any secretMarkerFindings, credentialUrlFindings, or envAssignmentFindings",
+                      "commands":  [
+                                       "npm run flowchain:tester:evidence:validate",
+                                       "npm run flowchain:no-secret:scan",
+                                       "npm run flowchain:emergency:export-evidence"
+                                   ]
+                  },
+                  {
+                      "id":  "public-rpc-not-shareable",
+                      "severity":  "blocked",
+                      "findingCodes":  [
+                                           "public-rpc-not-ready"
+                                       ],
+                      "signal":  "Public RPC readiness gate is not passed.",
+                      "threshold":  "public RPC check status is not passed",
+                      "commands":  [
+                                       "npm run flowchain:public-rpc:check",
+                                       "npm run flowchain:public-rpc:validate",
+                                       "npm run flowchain:public-rpc:abuse-test"
+                                   ]
+                  },
+                  {
+                      "id":  "backup-not-ready",
+                      "severity":  "blocked",
+                      "findingCodes":  [
+                                           "backup-not-ready"
+                                       ],
+                      "signal":  "State backup readiness is not passed.",
+                      "threshold":  "backup check status is not passed",
+                      "commands":  [
+                                       "npm run flowchain:backup:restore:validate",
+                                       "npm run flowchain:backup:check"
+                                   ]
+                  },
+                  {
+                      "id":  "bridge-not-ready",
+                      "severity":  "blocked",
+                      "findingCodes":  [
+                                           "bridge-not-ready"
+                                       ],
+                      "signal":  "Base 8453 bridge readiness is not passed.",
+                      "threshold":  "bridge live or infra readiness status is not passed",
+                      "commands":  [
+                                       "npm run flowchain:bridge:live:check",
+                                       "npm run flowchain:bridge:infra:check",
+                                       "npm run flowchain:bridge:emergency-stop"
+                                   ]
+                  },
+                  {
+                      "id":  "bridge-relayer-not-ready",
+                      "severity":  "blocked",
+                      "findingCodes":  [
+                                           "bridge-relayer-not-ready"
+                                       ],
+                      "signal":  "Bridge relayer one-shot proof is not ready.",
+                      "threshold":  "bridge relayer one-shot status is not passed",
+                      "commands":  [
+                                       "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                                       "npm run flowchain:bridge:live:check",
+                                       "npm run flowchain:bridge:infra:check"
+                                   ]
+                  },
+                  {
+                      "id":  "external-tester-not-shareable",
+                      "severity":  "blocked",
+                      "findingCodes":  [
+                                           "external-tester-not-shareable"
+                                       ],
+                      "signal":  "External tester packet is not shareable.",
+                      "threshold":  "tester readiness status is not passed",
+                      "commands":  [
+                                       "npm run flowchain:tester:readiness",
+                                       "npm run flowchain:external-tester:packet"
+                                   ]
+                  },
+                  {
+                      "id":  "external-tester-evidence-invalid",
+                      "severity":  "blocked",
+                      "findingCodes":  [
+                                           "external-tester-evidence-invalid"
+                                       ],
+                      "signal":  "External tester returned evidence is incomplete or transfer proof is inconsistent.",
+                      "threshold":  "tester evidence validation is not passed, required files are missing, JSON is invalid, or transfer proof checks fail",
+                      "commands":  [
+                                       "npm run flowchain:tester:evidence:validate",
+                                       "npm run flowchain:external-tester:packet -- -AllowBlocked"
+                                   ]
+                  },
+                  {
+                      "id":  "deployment-contract-not-ready",
+                      "severity":  "blocked",
+                      "findingCodes":  [
+                                           "deployment-contract-not-ready"
+                                       ],
+                      "signal":  "Public deployment contract is not passed.",
+                      "threshold":  "deployment contract status is not passed",
+                      "commands":  [
+                                       "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+                                   ]
+                  }
+              ],
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "secretMarkerFindings":  [
+
+                             ]
+}

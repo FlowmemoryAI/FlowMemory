@@ -1,0 +1,163 @@
+{
+    "schema":  "flowchain.public_rpc_readiness_report.v0",
+    "generatedAt":  "2026-05-18T06:53:29.7121806Z",
+    "status":  "blocked",
+    "publicRpcReady":  false,
+    "publicMode":  false,
+    "explicitLocalEndpoint":  true,
+    "requiredEnvNames":  [
+                             "FLOWCHAIN_RPC_PUBLIC_URL",
+                             "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                             "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                             "FLOWCHAIN_RPC_TLS_TERMINATED",
+                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                         ],
+    "missingEnvNames":  [
+
+                        ],
+    "endpointValuePrinted":  false,
+    "envValuesPrinted":  false,
+    "checks":  {
+                   "urlConfigured":  true,
+                   "httpsRequiredForPublicMode":  true,
+                   "tlsTerminatedAcknowledged":  true,
+                   "allowedOriginsConfigured":  true,
+                   "allowedOriginsWildcardRejected":  true,
+                   "numericRateLimit":  true,
+                   "rateLimitProbePerformed":  true,
+                   "rateLimitRejectionObserved":  true,
+                   "rateLimitRetryAfterHeaderPresent":  true,
+                   "rateLimitProbeWithinMax":  true,
+                   "corsProbePerformed":  true,
+                   "corsAllowOriginHeaderPresent":  true,
+                   "corsConfiguredOriginAccepted":  true,
+                   "corsDisallowedOriginProbePerformed":  true,
+                   "corsDisallowedOriginRejected":  true,
+                   "corsWildcardRejectedForPublicMode":  true,
+                   "backupPathConfigured":  true,
+                   "backupPathExists":  true,
+                   "backupPathWritable":  true,
+                   "stateFileReadable":  true,
+                   "responseHygienePassed":  true,
+                   "readinessDeploymentFlagsConsistent":  true,
+                   "discoveryMatchesReadinessDeployment":  true
+               },
+    "deploymentChecks":  {
+                             "readinessEndpointPresent":  true,
+                             "readinessStatusReady":  false,
+                             "readinessPublicRpcReady":  false,
+                             "readinessProductionReady":  false,
+                             "readinessLocalOnlyFalse":  false,
+                             "readinessDeploymentModePublicEdge":  false,
+                             "discoverEndpointPresent":  true,
+                             "discoverPublicRpcReadyMatchesReadiness":  true,
+                             "discoverProductionReadyMatchesReadiness":  true,
+                             "discoverLocalOnlyMatchesReadiness":  true,
+                             "discoverDeploymentModeMatchesReadiness":  true,
+                             "publicReadyMethodCountNonzeroWhenReady":  null
+                         },
+    "endpointChecks":  [
+                           {
+                               "endpoint":  "/health",
+                               "status":  "passed"
+                           },
+                           {
+                               "endpoint":  "/rpc/discover",
+                               "status":  "passed"
+                           },
+                           {
+                               "endpoint":  "/rpc/readiness",
+                               "status":  "passed"
+                           },
+                           {
+                               "endpoint":  "/chain/status",
+                               "status":  "passed"
+                           },
+                           {
+                               "endpoint":  "/wallets/operator",
+                               "status":  "passed"
+                           },
+                           {
+                               "endpoint":  "/bridge/live-readiness",
+                               "status":  "passed"
+                           },
+                           {
+                               "endpoint":  "/rpc:chain_status",
+                               "status":  "passed"
+                           },
+                           {
+                               "endpoint":  "/rpc:node_status",
+                               "status":  "passed"
+                           },
+                           {
+                               "endpoint":  "/rpc:mempool_list",
+                               "status":  "passed"
+                           },
+                           {
+                               "endpoint":  "/rpc:peer_list",
+                               "status":  "passed"
+                           }
+                       ],
+    "chainChecks":  {
+                        "chainIdMatches":  true,
+                        "latestHeightMatches":  true,
+                        "latestHashMatches":  true,
+                        "latestRootMatches":  true,
+                        "finalizedHeightMatches":  true,
+                        "blockAgeWithinLimit":  true
+                    },
+    "localState":  {
+                       "statePath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\state.json",
+                       "chainId":  "flowmemory-local-devnet-v0",
+                       "latestHeight":  "67047",
+                       "latestHash":  "0xb22f49302c652f2c2db0408e9081ffe71e9cf58ef9fe88b46ad4b9f9230cf71e",
+                       "latestRoot":  "0xada5bd6137e0fad456c9e610ec43e688701169b7a8ba98f5277d8f9f68e28445",
+                       "latestBlockAgeSeconds":  4,
+                       "stateFileLastWriteAgeSeconds":  4,
+                       "finalizedHeight":  "67047",
+                       "finalizedHash":  "0xb22f49302c652f2c2db0408e9081ffe71e9cf58ef9fe88b46ad4b9f9230cf71e",
+                       "mempoolDepth":  0,
+                       "peerCount":  null
+                   },
+    "maxBlockAgeSeconds":  300,
+    "responseHygiene":  {
+                            "passed":  true,
+                            "findings":  [
+
+                                         ]
+                        },
+    "cors":  {
+                 "performed":  true,
+                 "allowOriginHeaderPresent":  true,
+                 "configuredOriginAccepted":  true,
+                 "disallowedOriginProbePerformed":  true,
+                 "disallowedOriginRejected":  true,
+                 "wildcardRejectedForPublicMode":  true,
+                 "headerValuePrinted":  false
+             },
+    "rateLimit":  {
+                      "configured":  true,
+                      "probePerformed":  true,
+                      "probeRequestLimit":  300,
+                      "configuredLimit":  20,
+                      "requestCount":  21,
+                      "rejectionObserved":  true,
+                      "retryAfterHeaderPresent":  true,
+                      "skippedBecauseAboveProbeLimit":  false
+                  },
+    "problems":  [
+                     {
+                         "name":  "FLOWCHAIN_RPC_PUBLIC_URL",
+                         "category":  "env",
+                         "kind":  "blocked",
+                         "reason":  "explicit local URL can be checked but does not prove public RPC readiness"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_RPC_PUBLIC_URL",
+                         "category":  "endpoint",
+                         "kind":  "blocked",
+                         "reason":  "endpoint /rpc/readiness is not ready"
+                     }
+                 ],
+    "noSecrets":  true
+}

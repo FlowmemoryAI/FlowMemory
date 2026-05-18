@@ -3,6 +3,17 @@ import type { DashboardData } from "./types";
 export const DEFAULT_DASHBOARD_DATA_PATH = "/data/flowmemory-dashboard-v0.json";
 export const DEFAULT_CANARY_DASHBOARD_DATA_PATH = "/data/flowmemory-dashboard-base-canary-v0.json";
 
+export function publicAssetPath(path: string): string {
+  const baseUrl = (import.meta as ImportMeta & { env?: { BASE_URL?: string } }).env?.BASE_URL ?? "/";
+  if (/^[a-z][a-z0-9+.-]*:/i.test(path)) {
+    return path;
+  }
+  if (baseUrl === "./") {
+    return `./${path.replace(/^\/+/, "")}`;
+  }
+  return path;
+}
+
 function assertArray(value: unknown, label: string): void {
   if (!Array.isArray(value)) {
     throw new Error(`Dashboard fixture field "${label}" must be an array.`);
@@ -45,7 +56,7 @@ export function validateDashboardData(payload: unknown): DashboardData {
 export async function fetchDashboardData(
   path = DEFAULT_DASHBOARD_DATA_PATH,
 ): Promise<DashboardData> {
-  const response = await fetch(path, { cache: "no-store" });
+  const response = await fetch(publicAssetPath(path), { cache: "no-store" });
   if (!response.ok) {
     throw new Error(`Unable to load dashboard fixture at ${path}: ${response.status}`);
   }

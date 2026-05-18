@@ -17,10 +17,7 @@ if ($LASTEXITCODE -ne 0) {
     throw "Prerequisite check failed."
 }
 
-if (Test-Path -LiteralPath $smokeRoot) {
-    Remove-Item -LiteralPath $smokeRoot -Recurse -Force
-}
-New-Item -ItemType Directory -Force -Path $smokeRoot | Out-Null
+$smokeRoot = Reset-FlowChainDirectory -Path $smokeRoot
 
 Invoke-FlowChainCommand -Label "Run service tests" -FilePath "npm" -ArgumentList @("test")
 Invoke-FlowChainCommand -Label "Run crypto tests" -FilePath "npm" -ArgumentList @("test", "--prefix", "crypto")

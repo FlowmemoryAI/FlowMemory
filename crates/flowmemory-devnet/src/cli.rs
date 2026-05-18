@@ -1,13 +1,15 @@
 use crate::hash::{hash_json, normalize_value};
 use crate::model::{
-    BRIDGE_PILOT_ACCOUNT_OWNER, BridgeCredit, BridgeCreditReceipt, FLOWPULSE_TOPIC0,
-    ImportedFlowPulseObservation, ImportedVerifierReport, LOCAL_TEST_UNIT_ASSET_ID,
-    LocalAuthorization, Transaction, bridge_event_reference_key, build_block, demo_transactions,
-    deterministic_bridge_account_id, deterministic_bridge_account_mapping_id,
+    BRIDGE_PILOT_ACCOUNT_OWNER, BridgeConfirmationProof, BridgeCredit, BridgeCreditReceipt,
+    BridgePilotCapProof, FLOWPULSE_TOPIC0, ImportedFlowPulseObservation, ImportedVerifierReport,
+    LOCAL_TEST_UNIT_ASSET_ID, LocalAuthorization, Transaction, bridge_event_reference_key,
+    build_block, demo_transactions, deterministic_bridge_account_mapping_id,
     deterministic_bridge_asset_mapping_id, envelope_tx, genesis_state, product_demo_transactions,
     queue_authorized_transaction, queue_transaction, state_map_roots, state_root,
 };
-use crate::storage::{default_state_path, load_or_genesis, load_state, reset_state, save_state};
+use crate::storage::{
+    default_state_path, load_or_genesis, load_state, reset_state, save_state, write_json_pretty,
+};
 use anyhow::{Context, Result, anyhow};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -745,11 +747,21 @@ fn write_txs_to_inbox(
     fs::create_dir_all(&inbox)
         .with_context(|| format!("failed to create inbox directory {}", inbox.display()))?;
 
-    let mut queued = Vec::new();
-    for tx in txs {
-        let envelope = local_authorized_envelope(tx, authorized_by.clone());
-        let tx_id = envelope.tx_id.clone();
-        let path = inbox.join(format!("{}.json", file_safe_id(&tx_id)));
+    let envelopes = txs
+        .into_iter()
+        .map(|tx| local_authorized_envelope(tx, authorized_by.clone()))
+        .collect::<Vec<_>>();
+    let queued = envelopes
+        .iter()
+        .map(|envelope| envelope.tx_id.clone())
+        .collect::<Vec<_>>();
+
+    if envelopes.len() == 1 {
+        let envelope = envelopes
+            .into_iter()
+            .next()
+            .expect("single inbox envelope should exist");
+        let path = inbox.join(format!("{}.json", file_safe_id(&envelope.tx_id)));
         write_json(
             path,
             &serde_json::json!({
@@ -758,8 +770,33 @@ fn write_txs_to_inbox(
                 "authorization": envelope.authorization
             }),
         )?;
-        queued.push(tx_id);
+        return Ok(queued);
     }
+
+    if envelopes.is_empty() {
+        return Ok(queued);
+    }
+
+    let batch_id = hash_json(
+        "flowmemory.local_devnet.inbox_tx_batch.v0",
+        &serde_json::json!({ "queued": queued }),
+    );
+    let tx_values = envelopes
+        .iter()
+        .map(|envelope| serde_json::to_value(&envelope.tx))
+        .collect::<Result<Vec<_>, _>>()?;
+    let authorization = envelopes
+        .first()
+        .and_then(|envelope| envelope.authorization.clone());
+    let path = inbox.join(format!("{}.json", file_safe_id(&batch_id)));
+    write_json(
+        path,
+        &serde_json::json!({
+            "schema": "flowmemory.local_devnet.inbox_tx_batch.v0",
+            "txs": tx_values,
+            "authorization": authorization
+        }),
+    )?;
     Ok(queued)
 }
 
@@ -1134,6 +1171,8 @@ fn bridge_handoff_transactions(value: &Value) -> Result<Vec<Transaction>> {
             continue;
         }
 
+        let local_only = bool_field_default(credit, "localOnly", true);
+        let production_ready = bool_field_default(credit, "productionReady", false);
         let source = credit
             .get("source")
             .and_then(Value::as_object)
@@ -1160,7 +1199,14 @@ fn bridge_handoff_transactions(value: &Value) -> Result<Vec<Transaction>> {
                 .ok_or_else(|| anyhow!("bridge credit missing amount"))?,
             "amount",
         )?;
-        let account_id = deterministic_bridge_account_id(&flowchain_recipient);
+        let credit_id = string_value(credit, "creditId")?;
+        let deposit_id = string_value(credit, "depositId")?;
+        let observation_id = string_value(credit, "observationId")?;
+        let replay_key = string_value(credit, "replayKey")?;
+        let confirmation_proof =
+            confirmation_proof_for_credit(value, &observation_id, &deposit_id)?;
+        let pilot_cap_proof = pilot_cap_proof_for_credit(value, &observation_id, &credit_id)?;
+        let account_id = flowchain_recipient.clone();
         let asset_id = LOCAL_TEST_UNIT_ASSET_ID.to_string();
         let asset_mapping_id =
             deterministic_bridge_asset_mapping_id(&source_chain_id, &source_token, &asset_id);
@@ -1173,6 +1219,8 @@ fn bridge_handoff_transactions(value: &Value) -> Result<Vec<Transaction>> {
                 source_chain_id: source_chain_id.clone(),
                 source_token: source_token.clone(),
                 local_asset_id: asset_id.clone(),
+                local_only,
+                production_ready,
             });
         }
         if account_mappings.insert(account_mapping_id.clone()) {
@@ -1181,6 +1229,8 @@ fn bridge_handoff_transactions(value: &Value) -> Result<Vec<Transaction>> {
                 flowchain_recipient: flowchain_recipient.clone(),
                 account_id: account_id.clone(),
                 owner: BRIDGE_PILOT_ACCOUNT_OWNER.to_string(),
+                local_only,
+                production_ready,
             });
         }
         if local_accounts.insert(account_id.clone()) {
@@ -1190,7 +1240,6 @@ fn bridge_handoff_transactions(value: &Value) -> Result<Vec<Transaction>> {
             });
         }
 
-        let credit_id = string_value(credit, "creditId")?;
         txs.push(Transaction::CreditBridgeFromBaseEvent {
             bridge_credit_id: credit_id.clone(),
             receipt_id: credit_id,
@@ -1203,13 +1252,18 @@ fn bridge_handoff_transactions(value: &Value) -> Result<Vec<Transaction>> {
             source_contract,
             tx_hash,
             log_index,
-            deposit_id: string_value(credit, "depositId")?,
-            observation_id: string_value(credit, "observationId")?,
-            replay_key: string_value(credit, "replayKey")?,
-            memo: "real-value-pilot bridge handoff credit; local/testnet accounting only"
-                .to_string(),
-            local_only: bool_field_default(credit, "localOnly", true),
-            production_ready: bool_field_default(credit, "productionReady", false),
+            deposit_id,
+            observation_id,
+            replay_key,
+            memo: if production_ready && !local_only {
+                "live Base bridge credit".to_string()
+            } else {
+                "explicit mock bridge handoff credit".to_string()
+            },
+            local_only,
+            production_ready,
+            confirmation_proof,
+            pilot_cap_proof,
         });
     }
 
@@ -1253,6 +1307,184 @@ fn value_to_u64(value: &Value, label: &str) -> Result<u64> {
 
 fn bool_field_default(value: &Value, key: &str, default: bool) -> bool {
     value.get(key).and_then(Value::as_bool).unwrap_or(default)
+}
+
+fn confirmation_proof_for_credit(
+    handoff: &Value,
+    observation_id: &str,
+    deposit_id: &str,
+) -> Result<Option<BridgeConfirmationProof>> {
+    let confirmation = matching_pilot_evidence(handoff, observation_id, None)
+        .and_then(|evidence| evidence.get("guardrails"))
+        .and_then(|guardrails| guardrails.get("confirmation"))
+        .or_else(|| {
+            matching_observation(handoff, observation_id, deposit_id)
+                .and_then(|observation| observation.get("guardrails"))
+                .and_then(|guardrails| guardrails.get("confirmation"))
+        });
+    confirmation.map(confirmation_proof_from_value).transpose()
+}
+
+fn pilot_cap_proof_for_credit(
+    handoff: &Value,
+    observation_id: &str,
+    credit_id: &str,
+) -> Result<Option<BridgePilotCapProof>> {
+    let pilot_guardrails = matching_pilot_evidence(handoff, observation_id, Some(credit_id))
+        .and_then(|evidence| evidence.get("guardrails"));
+    let observation_guardrails = matching_observation_by_observation_id(handoff, observation_id)
+        .and_then(|observation| observation.get("guardrails"));
+    let guardrails = pilot_guardrails.or_else(|| {
+        observation_guardrails.filter(|guardrails| {
+            guardrails.get("maxDepositAmount").is_some()
+                || guardrails.get("totalCapAmount").is_some()
+                || guardrails.get("supportedTokens").is_some()
+        })
+    });
+
+    let Some(guardrails) = guardrails else {
+        return Ok(None);
+    };
+
+    let max_deposit_amount_units = optional_u64_field(guardrails, "maxDepositAmount")?.unwrap_or(0);
+    let total_cap_amount_units = optional_u64_field(guardrails, "totalCapAmount")?.unwrap_or(0);
+    let supported_tokens = guardrails
+        .get("supportedTokens")
+        .and_then(Value::as_array)
+        .map(|entries| {
+            entries
+                .iter()
+                .map(|entry| {
+                    entry
+                        .as_str()
+                        .map(|token| token.to_ascii_lowercase())
+                        .ok_or_else(|| anyhow!("supportedTokens entries must be strings"))
+                })
+                .collect::<Result<Vec<_>>>()
+        })
+        .transpose()?
+        .unwrap_or_default();
+
+    Ok(Some(BridgePilotCapProof {
+        approved_lockbox: bool_field_default(guardrails, "approvedContract", false),
+        operator_acknowledged: bool_field_default(guardrails, "operatorAcknowledged", false),
+        no_secrets: bool_field_default(guardrails, "noSecrets", false),
+        max_usd: guardrails
+            .get("maxUsd")
+            .map(|value| value_to_string(value, "maxUsd"))
+            .transpose()?,
+        max_deposit_amount_units,
+        total_cap_amount_units,
+        pilot_mode_tag: guardrails
+            .get("pilotModeTag")
+            .and_then(Value::as_str)
+            .map(ToOwned::to_owned),
+        supported_tokens,
+    }))
+}
+
+fn confirmation_proof_from_value(value: &Value) -> Result<BridgeConfirmationProof> {
+    let object = value
+        .as_object()
+        .ok_or_else(|| anyhow!("confirmation proof must be an object"))?;
+    let depth = value_to_u64(
+        object
+            .get("depth")
+            .ok_or_else(|| anyhow!("confirmation proof missing depth"))?,
+        "confirmation.depth",
+    )?;
+    let satisfied = object
+        .get("satisfied")
+        .and_then(Value::as_bool)
+        .ok_or_else(|| anyhow!("confirmation proof missing satisfied"))?;
+    Ok(BridgeConfirmationProof {
+        depth,
+        satisfied,
+        latest_block_number: optional_string_field(object, "latestBlockNumber")?,
+        required_confirmed_block_number: optional_string_field(
+            object,
+            "requiredConfirmedBlockNumber",
+        )?,
+        requested_to_block: optional_string_field(object, "requestedToBlock")?,
+    })
+}
+
+fn optional_u64_field(value: &Value, key: &str) -> Result<Option<u64>> {
+    value
+        .get(key)
+        .map(|entry| value_to_u64(entry, key))
+        .transpose()
+}
+
+fn optional_string_field(
+    object: &serde_json::Map<String, Value>,
+    key: &str,
+) -> Result<Option<String>> {
+    object
+        .get(key)
+        .map(|entry| value_to_string(entry, key))
+        .transpose()
+}
+
+fn matching_pilot_evidence<'a>(
+    handoff: &'a Value,
+    observation_id: &str,
+    credit_id: Option<&str>,
+) -> Option<&'a Value> {
+    handoff
+        .get("pilotEvidence")
+        .and_then(Value::as_array)?
+        .iter()
+        .find(|evidence| {
+            evidence
+                .get("observationId")
+                .and_then(Value::as_str)
+                .is_some_and(|candidate| candidate == observation_id)
+                && credit_id.is_none_or(|credit_id| {
+                    evidence
+                        .get("creditId")
+                        .and_then(Value::as_str)
+                        .is_some_and(|candidate| candidate == credit_id)
+                })
+        })
+}
+
+fn matching_observation<'a>(
+    handoff: &'a Value,
+    observation_id: &str,
+    deposit_id: &str,
+) -> Option<&'a Value> {
+    handoff
+        .get("observations")
+        .and_then(Value::as_array)?
+        .iter()
+        .find(|observation| {
+            observation
+                .get("observationId")
+                .and_then(Value::as_str)
+                .is_some_and(|candidate| candidate == observation_id)
+                && observation
+                    .get("deposit")
+                    .and_then(|deposit| deposit.get("depositId"))
+                    .and_then(Value::as_str)
+                    .is_some_and(|candidate| candidate == deposit_id)
+        })
+}
+
+fn matching_observation_by_observation_id<'a>(
+    handoff: &'a Value,
+    observation_id: &str,
+) -> Option<&'a Value> {
+    handoff
+        .get("observations")
+        .and_then(Value::as_array)?
+        .iter()
+        .find(|observation| {
+            observation
+                .get("observationId")
+                .and_then(Value::as_str)
+                .is_some_and(|candidate| candidate == observation_id)
+        })
 }
 
 fn observation_from_flowpulse_fixture(value: &Value) -> Result<ImportedFlowPulseObservation> {
@@ -1491,9 +1723,7 @@ fn write_runtime_boundary_files(state_path: &Path, state: &crate::model::ChainSt
 }
 
 fn write_json<T: Serialize>(path: PathBuf, value: &T) -> Result<()> {
-    let body = serde_json::to_string_pretty(value)?;
-    fs::write(&path, format!("{body}\n"))
-        .with_context(|| format!("failed to write {}", path.display()))
+    write_json_pretty(&path, value).with_context(|| format!("failed to write {}", path.display()))
 }
 
 fn print_json<T: Serialize>(value: &T) -> Result<()> {

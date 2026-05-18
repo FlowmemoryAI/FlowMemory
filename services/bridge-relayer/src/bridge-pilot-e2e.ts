@@ -3,7 +3,7 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { assertNoSecrets } from "../../shared/src/index.ts";
+import { assertNoSecrets, canonicalJson } from "../../shared/src/index.ts";
 import {
   BASE_MAINNET_CHAIN_ID,
   BASE_MAINNET_CHAIN_ID_HEX,
@@ -29,6 +29,8 @@ interface PilotE2EOptions {
   maxUsd: string;
   maxDepositAmount: string;
   totalCapAmount: string;
+  supportedTokens: string[];
+  assetDecimals: string;
 }
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -36,6 +38,7 @@ const DEFAULT_FIXTURE = resolve(REPO_ROOT, "fixtures/bridge/base8453-pilot-mock-
 const DEFAULT_DUPLICATE_FIXTURE = resolve(REPO_ROOT, "fixtures/bridge/base8453-pilot-duplicate-mock-deposits.json");
 const DEFAULT_OUT_DIR = resolve(REPO_ROOT, "services/bridge-relayer/out/real-value-pilot-e2e");
 const DEFAULT_APPROVED_LOCKBOX = "0x1111111111111111111111111111111111111111";
+const DEFAULT_SUPPORTED_TOKEN = "0x3333333333333333333333333333333333333333";
 const WRONG_APPROVED_LOCKBOX = "0x9999999999999999999999999999999999999999";
 
 function argValue(args: string[], index: number, name: string): string {
@@ -60,6 +63,8 @@ function parsePilotE2EArgs(args: string[]): PilotE2EOptions {
   let maxUsd = "1";
   let maxDepositAmount = "20000000";
   let totalCapAmount = "20000000";
+  let supportedTokens = [DEFAULT_SUPPORTED_TOKEN];
+  let assetDecimals = "6";
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
@@ -106,10 +111,24 @@ function parsePilotE2EArgs(args: string[]): PilotE2EOptions {
     } else if (arg === "--total-cap-amount") {
       totalCapAmount = argValue(args, index, arg);
       index += 1;
+    } else if (arg === "--supported-token") {
+      supportedTokens = [...supportedTokens, argValue(args, index, arg)];
+      index += 1;
+    } else if (arg === "--supported-tokens") {
+      supportedTokens = argValue(args, index, arg)
+        .split(",")
+        .map((token) => token.trim())
+        .filter(Boolean);
+      index += 1;
+    } else if (arg === "--asset-decimals") {
+      assetDecimals = argValue(args, index, arg);
+      index += 1;
     } else {
       throw new Error(`unknown argument: ${arg}`);
     }
   }
+
+  supportedTokens = [...new Set(supportedTokens.map((token) => token.toLowerCase()))];
 
   if (mode === "base-mainnet-pilot") {
     const missing = [
@@ -137,6 +156,8 @@ function parsePilotE2EArgs(args: string[]): PilotE2EOptions {
     maxUsd,
     maxDepositAmount,
     totalCapAmount,
+    supportedTokens,
+    assetDecimals,
   };
 }
 
@@ -153,10 +174,13 @@ function pipelineArgs(options: PilotE2EOptions, statePath: string, fixturePath =
     options.maxDepositAmount,
     "--total-cap-amount",
     options.totalCapAmount,
+    "--asset-decimals",
+    options.assetDecimals,
     "--apply-credit",
     "--withdrawal-intent",
     "--runtime-state",
     statePath,
+    ...options.supportedTokens.flatMap((token) => ["--supported-token", token]),
   ];
 
   if (options.mode === "mock-pilot") {
@@ -248,29 +272,93 @@ async function runDuplicateReplay(options: PilotE2EOptions, statePath: string): 
   return duplicateRun;
 }
 
+function buildExactValueReport(firstRun: BridgePipelineResult): Record<string, unknown> {
+  const observation = first(firstRun.observations, "observations");
+  const credit = first(firstRun.credits, "credits");
+  const application = first(firstRun.runtimeApplications, "runtime applications");
+  const withdrawal = first(firstRun.withdrawalIntents, "withdrawal intents");
+  const releaseEvidence = first(firstRun.releaseEvidences, "release evidence");
+
+  const amounts = {
+    eventAmount: observation.deposit.amount,
+    observedDepositAmount: observation.deposit.amount,
+    pendingCreditAmount: credit.amount,
+    creditApplicationRequestAmount: application.amount,
+    runtimeWalletCreditAmount: application.amount,
+    transferAmount: withdrawal.amount,
+    withdrawalIntentAmount: withdrawal.amount,
+    releaseEvidenceAmount: releaseEvidence.releaseCall.amount,
+  };
+  const uniqueAmounts = new Set(Object.values(amounts));
+  assert.equal(uniqueAmounts.size, 1, canonicalJson({ amounts }));
+
+  assert.equal(credit.token, observation.deposit.token);
+  assert.equal(withdrawal.token, credit.token);
+  assert.equal(releaseEvidence.releaseCall.token, withdrawal.token);
+  assert.deepEqual(credit.asset, observation.asset);
+  assert.deepEqual(application.asset, credit.asset);
+  assert.deepEqual(withdrawal.asset, credit.asset);
+  assert.deepEqual(releaseEvidence.asset, credit.asset);
+  assert.equal(withdrawal.flowchainAccount, credit.flowchainRecipient);
+  assert.equal(releaseEvidence.releaseCall.recipient, withdrawal.baseRecipient);
+
+  return {
+    schema: "flowmemory.bridge_exact_value_report.v0",
+    generatedAt: new Date().toISOString(),
+    mode: firstRun.handoff.mode,
+    allAmountsEqual: true,
+    amountSourceOfTruth: "uint256 decimal string",
+    amounts,
+    assetIdentity: {
+      sourceChainId: observation.deposit.sourceChainId,
+      sourceToken: observation.deposit.token,
+      destinationAssetId: credit.asset.destinationAssetId,
+      decimals: credit.asset.decimals,
+      flowchainRecipient: credit.flowchainRecipient,
+      baseRecipient: withdrawal.baseRecipient,
+      txHash: observation.deposit.txHash,
+      logIndex: observation.deposit.logIndex,
+      creditId: credit.creditId,
+    },
+    replayKey: observation.replayKey,
+    depositId: observation.deposit.depositId,
+    noSecrets: true,
+  };
+}
+
 async function assertNegativeCoverage(options: PilotE2EOptions): Promise<{
   wrongChainRejected: boolean;
+  wrongChainRejectionReason: string;
   unapprovedContractRejected: boolean;
+  unapprovedContractRejectionReason: string;
 }> {
-  await assert.rejects(
-    () => runBridgePipeline(parseBridgeArgs(pipelineArgs({
+  const wrongChainRun = await runBridgePipeline(parseBridgeArgs(pipelineArgs({
       ...options,
       fixturePath: resolve(REPO_ROOT, "fixtures/bridge/base-sepolia-mock-deposit.json"),
-    }, resolve(options.outDir, "wrong-chain-state.json")))),
-    /pilot deposit must be from Base chain 8453/,
-  );
+    }, resolve(options.outDir, "wrong-chain-state.json"))));
+  const wrongChainCredit = first(wrongChainRun.credits, "wrong-chain credits");
+  assert.equal(wrongChainCredit.status, "rejected");
+  assert.equal(wrongChainCredit.rejectionReason, "wrong_source_chain");
+  assert.equal(wrongChainRun.runtimeApplications.filter((application) => application.status === "applied").length, 0);
+  assert.equal(wrongChainRun.withdrawalIntents.length, 0);
+  assert.equal(wrongChainRun.releaseEvidences.length, 0);
 
-  await assert.rejects(
-    () => runBridgePipeline(parseBridgeArgs(pipelineArgs({
+  const unapprovedRun = await runBridgePipeline(parseBridgeArgs(pipelineArgs({
       ...options,
       approvedLockbox: WRONG_APPROVED_LOCKBOX,
-    }, resolve(options.outDir, "unapproved-state.json")))),
-    /unapproved bridge lockbox address/,
-  );
+    }, resolve(options.outDir, "unapproved-state.json"))));
+  const unapprovedCredit = first(unapprovedRun.credits, "unapproved credits");
+  assert.equal(unapprovedCredit.status, "rejected");
+  assert.equal(unapprovedCredit.rejectionReason, "unapproved_lockbox");
+  assert.equal(unapprovedRun.runtimeApplications.filter((application) => application.status === "applied").length, 0);
+  assert.equal(unapprovedRun.withdrawalIntents.length, 0);
+  assert.equal(unapprovedRun.releaseEvidences.length, 0);
 
   return {
     wrongChainRejected: true,
+    wrongChainRejectionReason: wrongChainCredit.rejectionReason,
     unapprovedContractRejected: true,
+    unapprovedContractRejectionReason: unapprovedCredit.rejectionReason,
   };
 }
 
@@ -280,7 +368,7 @@ async function main(): Promise<void> {
   mkdirSync(options.outDir, { recursive: true });
 
   console.log(`Step 1 complete: resolved bridge pilot E2E mode ${options.mode}.`);
-  console.log("Next operator command: node services/bridge-relayer/src/bridge-pilot-e2e.ts --mode mock-pilot");
+  console.log("Next operator command: npm run flowchain:real-value-pilot:bridge");
 
   const statePath = resolve(options.outDir, "bridge-credit-application-state.json");
   const duplicateStatePath = resolve(options.outDir, "bridge-duplicate-credit-application-state.json");
@@ -309,6 +397,8 @@ async function main(): Promise<void> {
   const withdrawalPath = resolve(options.outDir, "bridge-withdrawal-intent.json");
   const handoffPath = resolve(options.outDir, "bridge-runtime-handoff.json");
   const replayHandoffPath = resolve(options.outDir, "bridge-replay-handoff.json");
+  const exactValuePath = resolve(options.outDir, "bridge-exact-value-report.json");
+  const exactValueReport = buildExactValueReport(firstRun);
 
   writeJson(observationPath, observation);
   writeJson(creditPath, credit);
@@ -317,6 +407,7 @@ async function main(): Promise<void> {
   writeJson(withdrawalPath, withdrawal);
   writeJson(handoffPath, firstRun.handoff);
   writeJson(replayHandoffPath, duplicateRun.handoff);
+  writeJson(exactValuePath, exactValueReport);
 
   [
     observation,
@@ -327,6 +418,7 @@ async function main(): Promise<void> {
     firstRun.handoff,
     replayRun.handoff,
     duplicateRun.handoff,
+    exactValueReport,
   ].forEach((artifact) => assertNoSecrets(artifact));
 
   const report = {
@@ -348,6 +440,7 @@ async function main(): Promise<void> {
       runtimeHandoffPath: relativeToRepo(handoffPath),
       replayHandoffPath: relativeToRepo(replayHandoffPath),
       applicationStatePath: relativeToRepo(statePath),
+      exactValueReportPath: relativeToRepo(exactValuePath),
     },
     deterministicIds: {
       observationId: observation.observationId,
@@ -376,6 +469,7 @@ async function main(): Promise<void> {
       broadcast: releaseEvidence.releaseCall.broadcast,
       method: releaseEvidence.releaseCall.method,
     },
+    exactValueConservation: exactValueReport,
     negativeCoverage,
     requiredEnvironmentVariables: [
       "FLOWCHAIN_BASE8453_RPC_URL",

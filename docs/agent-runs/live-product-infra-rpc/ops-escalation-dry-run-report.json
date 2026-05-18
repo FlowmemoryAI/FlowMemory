@@ -1,0 +1,214 @@
+{
+    "schema":  "flowchain.ops_escalation_dry_run_report.v0",
+    "generatedAt":  "2026-05-18T06:51:05.9119884Z",
+    "status":  "passed",
+    "currentAlertState":  "blocked",
+    "opsSnapshotStatus":  "blocked",
+    "opsAlertRulesStatus":  "passed",
+    "dryRunEventCount":  6,
+    "activeRuleIds":  [
+                          "public-rpc-not-shareable",
+                          "backup-not-ready",
+                          "bridge-not-ready",
+                          "bridge-relayer-not-ready",
+                          "external-tester-not-shareable",
+                          "deployment-contract-not-ready"
+                      ],
+    "currentFindingCodes":  [
+                                "public-rpc-not-ready",
+                                "backup-not-ready",
+                                "bridge-not-ready",
+                                "bridge-relayer-not-ready",
+                                "external-tester-not-shareable",
+                                "deployment-contract-not-ready"
+                            ],
+    "unmappedFindingCodes":  [
+
+                             ],
+    "findingsWithoutCommands":  [
+
+                                ],
+    "activeRuleIdsMissingFromManifest":  [
+
+                                         ],
+    "activeRuleIdsWithoutCommands":  [
+
+                                     ],
+    "commandsWithUrls":  [
+
+                         ],
+    "commandsWithInlineEnvAssignment":  [
+
+                                        ],
+    "missingPackageScripts":  [
+
+                              ],
+    "checks":  {
+                   "opsSnapshotLoaded":  true,
+                   "opsAlertRulesLoaded":  true,
+                   "opsSnapshotStatusSafe":  true,
+                   "opsAlertRulesPassed":  true,
+                   "alertRefreshCommandPassed":  true,
+                   "packageScriptsPresent":  true,
+                   "notificationPlanNoNetworkDelivery":  true,
+                   "notificationPlanStoresNoSecrets":  true,
+                   "notificationPlanOutOfRepo":  true,
+                   "activeRulesExistInManifest":  true,
+                   "activeRulesHaveCommands":  true,
+                   "everyCurrentFindingMapped":  true,
+                   "everyCurrentFindingHasCommands":  true,
+                   "noCommandUrls":  true,
+                   "noInlineEnvAssignments":  true,
+                   "dryRunEventsDoNotSend":  true,
+                   "dryRunEventsStoreNoCredentials":  true,
+                   "envValuesPrintedFalse":  true,
+                   "sourceReportsSecretMarkerFindingsEmpty":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "opsRefresh":  {
+                       "performed":  false,
+                       "exitCode":  0,
+                       "outputLineCount":  0,
+                       "outputRedacted":  [
+
+                                          ]
+                   },
+    "dryRunEvents":  [
+                         {
+                             "findingCode":  "public-rpc-not-ready",
+                             "severity":  "blocked",
+                             "ruleId":  "public-rpc-not-shareable",
+                             "signal":  "Public RPC readiness gate is not passed.",
+                             "dryRunChannels":  [
+                                                    "local-report",
+                                                    "operator-terminal",
+                                                    "ops-markdown"
+                                                ],
+                             "commands":  [
+                                              "npm run flowchain:public-rpc:check",
+                                              "npm run flowchain:public-rpc:validate",
+                                              "npm run flowchain:public-rpc:abuse-test"
+                                          ],
+                             "wouldSendNetworkDelivery":  false,
+                             "wouldStoreCredentials":  false,
+                             "dryRunOnly":  true
+                         },
+                         {
+                             "findingCode":  "backup-not-ready",
+                             "severity":  "blocked",
+                             "ruleId":  "backup-not-ready",
+                             "signal":  "State backup readiness is not passed.",
+                             "dryRunChannels":  [
+                                                    "local-report",
+                                                    "operator-terminal",
+                                                    "ops-markdown"
+                                                ],
+                             "commands":  [
+                                              "npm run flowchain:backup:restore:validate",
+                                              "npm run flowchain:backup:check"
+                                          ],
+                             "wouldSendNetworkDelivery":  false,
+                             "wouldStoreCredentials":  false,
+                             "dryRunOnly":  true
+                         },
+                         {
+                             "findingCode":  "bridge-not-ready",
+                             "severity":  "blocked",
+                             "ruleId":  "bridge-not-ready",
+                             "signal":  "Base 8453 bridge readiness is not passed.",
+                             "dryRunChannels":  [
+                                                    "local-report",
+                                                    "operator-terminal",
+                                                    "ops-markdown"
+                                                ],
+                             "commands":  [
+                                              "npm run flowchain:bridge:live:check",
+                                              "npm run flowchain:bridge:infra:check",
+                                              "npm run flowchain:bridge:emergency-stop"
+                                          ],
+                             "wouldSendNetworkDelivery":  false,
+                             "wouldStoreCredentials":  false,
+                             "dryRunOnly":  true
+                         },
+                         {
+                             "findingCode":  "bridge-relayer-not-ready",
+                             "severity":  "blocked",
+                             "ruleId":  "bridge-relayer-not-ready",
+                             "signal":  "Bridge relayer one-shot proof is not ready.",
+                             "dryRunChannels":  [
+                                                    "local-report",
+                                                    "operator-terminal",
+                                                    "ops-markdown"
+                                                ],
+                             "commands":  [
+                                              "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                                              "npm run flowchain:bridge:live:check",
+                                              "npm run flowchain:bridge:infra:check"
+                                          ],
+                             "wouldSendNetworkDelivery":  false,
+                             "wouldStoreCredentials":  false,
+                             "dryRunOnly":  true
+                         },
+                         {
+                             "findingCode":  "external-tester-not-shareable",
+                             "severity":  "blocked",
+                             "ruleId":  "external-tester-not-shareable",
+                             "signal":  "External tester packet is not shareable.",
+                             "dryRunChannels":  [
+                                                    "local-report",
+                                                    "operator-terminal",
+                                                    "ops-markdown"
+                                                ],
+                             "commands":  [
+                                              "npm run flowchain:tester:readiness",
+                                              "npm run flowchain:external-tester:packet"
+                                          ],
+                             "wouldSendNetworkDelivery":  false,
+                             "wouldStoreCredentials":  false,
+                             "dryRunOnly":  true
+                         },
+                         {
+                             "findingCode":  "deployment-contract-not-ready",
+                             "severity":  "blocked",
+                             "ruleId":  "deployment-contract-not-ready",
+                             "signal":  "Public deployment contract is not passed.",
+                             "dryRunChannels":  [
+                                                    "local-report",
+                                                    "operator-terminal",
+                                                    "ops-markdown"
+                                                ],
+                             "commands":  [
+                                              "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+                                          ],
+                             "wouldSendNetworkDelivery":  false,
+                             "wouldStoreCredentials":  false,
+                             "dryRunOnly":  true
+                         }
+                     ],
+    "deliveryBoundary":  {
+                             "mode":  "owner-configured-out-of-repo",
+                             "repoChannels":  [
+                                                  "local report",
+                                                  "operator terminal",
+                                                  "ops markdown"
+                                              ],
+                             "externalDeliveryConfiguredInRepo":  false,
+                             "sendsNetworkDelivery":  false,
+                             "storesCredentials":  false
+                         },
+    "reportPaths":  {
+                        "opsSnapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
+                        "opsAlertRules":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-alert-rules-report.json"
+                    },
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

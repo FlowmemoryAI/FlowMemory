@@ -1,0 +1,246 @@
+{
+    "schema":  "flowchain.ops_metrics.v0",
+    "generatedAt":  "2026-05-18T15:16:07.2932969Z",
+    "sourceReports":  {
+                          "opsSnapshotStatus":  "blocked",
+                          "opsAlertRulesStatus":  "passed",
+                          "serviceStatusStatus":  "passed",
+                          "serviceMonitorStatus":  "passed",
+                          "externalTesterEvidenceStatus":  "passed",
+                          "liveCutoverStatus":  "blocked",
+                          "truthTableStatus":  "blocked-owner-input",
+                          "noSecretStatus":  "passed"
+                      },
+    "metrics":  [
+                    {
+                        "name":  "flowchain_latest_height",
+                        "type":  "gauge",
+                        "help":  "Latest FlowChain block height from ops snapshot.",
+                        "value":  73289
+                    },
+                    {
+                        "name":  "flowchain_finalized_height",
+                        "type":  "gauge",
+                        "help":  "Finalized FlowChain block height from ops snapshot.",
+                        "value":  73289
+                    },
+                    {
+                        "name":  "flowchain_state_file_age_seconds",
+                        "type":  "gauge",
+                        "help":  "Age of the live state file in seconds.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_monitor_samples_total",
+                        "type":  "gauge",
+                        "help":  "Service monitor samples recorded in the current ops snapshot.",
+                        "value":  2
+                    },
+                    {
+                        "name":  "flowchain_height_advanced",
+                        "type":  "gauge",
+                        "help":  "One when service monitor proved advancing block height.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_ops_critical_findings",
+                        "type":  "gauge",
+                        "help":  "Current critical ops finding count.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_ops_blocked_findings",
+                        "type":  "gauge",
+                        "help":  "Current owner-blocked ops finding count.",
+                        "value":  6
+                    },
+                    {
+                        "name":  "flowchain_ops_alert_rules_total",
+                        "type":  "gauge",
+                        "help":  "Configured ops alert rule count.",
+                        "value":  18
+                    },
+                    {
+                        "name":  "flowchain_ops_alert_rules_critical",
+                        "type":  "gauge",
+                        "help":  "Configured critical ops alert rule count.",
+                        "value":  11
+                    },
+                    {
+                        "name":  "flowchain_ops_alert_rules_blocked",
+                        "type":  "gauge",
+                        "help":  "Configured owner-blocked ops alert rule count.",
+                        "value":  7
+                    },
+                    {
+                        "name":  "flowchain_ops_active_alert_rules",
+                        "type":  "gauge",
+                        "help":  "Active ops alert rule count for the current findings.",
+                        "value":  6
+                    },
+                    {
+                        "name":  "flowchain_service_status_ready",
+                        "type":  "gauge",
+                        "help":  "One when service status report is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_service_monitor_ready",
+                        "type":  "gauge",
+                        "help":  "One when service monitor report is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_ready",
+                        "type":  "gauge",
+                        "help":  "One when public RPC readiness is passed.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_backup_ready",
+                        "type":  "gauge",
+                        "help":  "One when backup readiness is passed.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_live_ready",
+                        "type":  "gauge",
+                        "help":  "One when bridge live readiness is passed.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_infra_ready",
+                        "type":  "gauge",
+                        "help":  "One when bridge infrastructure readiness is passed.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_guardrail_ready",
+                        "type":  "gauge",
+                        "help":  "One when bridge relayer fail-closed guardrail is ready.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_healthy",
+                        "type":  "gauge",
+                        "help":  "One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_external_tester_ready",
+                        "type":  "gauge",
+                        "help":  "One when external tester readiness is passed.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_external_tester_evidence_ready",
+                        "type":  "gauge",
+                        "help":  "One when external tester returned evidence validation is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_evidence_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in the external tester returned evidence validation report.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_external_tester_evidence_missing_files",
+                        "type":  "gauge",
+                        "help":  "Missing required files in the external tester returned evidence folder.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_external_tester_evidence_secret_findings",
+                        "type":  "gauge",
+                        "help":  "Secret marker findings in external tester returned evidence.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_external_tester_evidence_height_advanced",
+                        "type":  "gauge",
+                        "help":  "One when returned tester evidence shows block height advanced.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_evidence_transfer_consistent",
+                        "type":  "gauge",
+                        "help":  "One when returned tester evidence has matching transfer, transaction, amount, and balance deltas.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_deployment_ready",
+                        "type":  "gauge",
+                        "help":  "One when public deployment contract is passed.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_live_cutover_ready",
+                        "type":  "gauge",
+                        "help":  "One when the live cutover rehearsal is passed.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_live_cutover_owner_blocked",
+                        "type":  "gauge",
+                        "help":  "One when live cutover is blocked only on known owner inputs.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_live_cutover_missing_owner_inputs",
+                        "type":  "gauge",
+                        "help":  "Number of required owner input names still blocking live cutover.",
+                        "value":  14
+                    },
+                    {
+                        "name":  "flowchain_no_secret_ready",
+                        "type":  "gauge",
+                        "help":  "One when no-secret scan is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_truth_gates_total",
+                        "type":  "gauge",
+                        "help":  "Total production truth table gates.",
+                        "value":  49
+                    },
+                    {
+                        "name":  "flowchain_truth_gates_passed",
+                        "type":  "gauge",
+                        "help":  "Passed production truth table gates.",
+                        "value":  33
+                    },
+                    {
+                        "name":  "flowchain_truth_gates_owner_blocked",
+                        "type":  "gauge",
+                        "help":  "Owner-input blocked production truth table gates.",
+                        "value":  16
+                    },
+                    {
+                        "name":  "flowchain_truth_gates_repo_blocked",
+                        "type":  "gauge",
+                        "help":  "Repo-blocked production truth table gates.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_truth_gates_failed",
+                        "type":  "gauge",
+                        "help":  "Failed production truth table gates.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_truth_gates_stale",
+                        "type":  "gauge",
+                        "help":  "Stale production truth table gates.",
+                        "value":  0
+                    }
+                ],
+    "metricCount":  37,
+    "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "secretMarkerFindings":  [
+
+                             ],
+    "broadcasts":  false
+}

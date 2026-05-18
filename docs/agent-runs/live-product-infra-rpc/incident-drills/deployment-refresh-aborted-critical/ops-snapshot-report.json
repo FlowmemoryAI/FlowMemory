@@ -1,0 +1,196 @@
+{
+    "schema":  "flowchain.ops_snapshot_report.v1",
+    "generatedAt":  "2026-05-18T15:12:31.7094854Z",
+    "status":  "failed",
+    "refresh":  {
+                    "performed":  false,
+                    "steps":  [
+
+                              ],
+                    "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input"
+                },
+    "chain":  {
+                  "latestHeight":  "73233",
+                  "finalizedHeight":  "73233",
+                  "stateFileLastWriteAgeSeconds":  4,
+                  "monitorStatus":  "passed",
+                  "monitorSamples":  2,
+                  "monitorHeightAdvanced":  true
+              },
+    "reportStatuses":  {
+                           "serviceStatus":  "passed",
+                           "serviceMonitor":  "passed",
+                           "bridgeRelayerLoop":  "stopped",
+                           "bridgeRelayerLoopReport":  "blocked",
+                           "bridgeRelayerLoopReportFresh":  false,
+                           "bridgeRelayerLoopReportHealthy":  false,
+                           "bridgeRelayerLoopReportNoSecrets":  true,
+                           "bridgeRelayerLoopReportNoBroadcasts":  true,
+                           "bridgeRelayerLoopBlockedOnlyOnOwnerInputs":  true,
+                           "publicRpc":  "blocked",
+                           "backup":  "blocked",
+                           "bridgeLive":  "blocked",
+                           "bridgeInfra":  "blocked",
+                           "bridgeRelayer":  "blocked",
+                           "bridgeRelayerGuardrail":  "passed",
+                           "bridgeRelayerGuardrailReady":  true,
+                           "bridgeRelayerLatencyGate":  "not-run",
+                           "bridgeRelayerCursorCommitRequired":  true,
+                           "bridgeRelayerCursorCommitted":  false,
+                           "bridgeRelayerCursorReason":  "not-run",
+                           "externalTester":  "blocked",
+                           "externalTesterEvidence":  "missing",
+                           "externalTesterEvidenceFailedChecks":  0,
+                           "externalTesterEvidenceMissingFiles":  0,
+                           "externalTesterEvidenceInvalidJson":  0,
+                           "externalTesterEvidenceSecretFindings":  0,
+                           "externalTesterEvidenceCredentialUrls":  0,
+                           "externalTesterEvidenceEnvAssignments":  0,
+                           "externalTesterEvidenceTransferConsistent":  false,
+                           "publicDeployment":  "failed",
+                           "deploymentRefreshAborted":  true,
+                           "deploymentRefreshAbortStep":  "service-status",
+                           "deploymentRefreshAbortReason":  "synthetic incident drill deployment refresh abort",
+                           "deploymentRefreshFailedSteps":  [
+                                                                "service-status"
+                                                            ],
+                           "deploymentRefreshTimedOutSteps":  [
+                                                                  "service-status"
+                                                              ],
+                           "deploymentRefreshSkippedSteps":  [
+                                                                 "service-monitor"
+                                                             ],
+                           "noSecret":  "passed"
+                       },
+    "findings":  [
+                     {
+                         "severity":  "blocked",
+                         "code":  "public-rpc-not-ready",
+                         "message":  "Public RPC is not ready to share.",
+                         "commands":  [
+                                          "npm run flowchain:public-rpc:check",
+                                          "npm run flowchain:public-rpc:validate",
+                                          "npm run flowchain:public-rpc:abuse-test"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
+                         "code":  "backup-not-ready",
+                         "message":  "State backup is not ready for public operation.",
+                         "commands":  [
+                                          "npm run flowchain:backup:restore:validate",
+                                          "npm run flowchain:backup:check"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
+                         "code":  "bridge-not-ready",
+                         "message":  "Base 8453 bridge readiness is not ready for external funded testing.",
+                         "commands":  [
+                                          "npm run flowchain:bridge:live:check",
+                                          "npm run flowchain:bridge:infra:check",
+                                          "npm run flowchain:bridge:emergency-stop"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
+                         "code":  "bridge-relayer-not-ready",
+                         "message":  "Bridge relayer one-shot proof is not ready.",
+                         "commands":  [
+                                          "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                                          "npm run flowchain:bridge:live:check",
+                                          "npm run flowchain:bridge:infra:check"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
+                         "code":  "external-tester-not-shareable",
+                         "message":  "External tester packet must remain not-shareable.",
+                         "commands":  [
+                                          "npm run flowchain:tester:readiness",
+                                          "npm run flowchain:external-tester:packet"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
+                         "code":  "external-tester-evidence-invalid",
+                         "message":  "External tester returned evidence validation is not passed or transfer proof is inconsistent.",
+                         "commands":  [
+                                          "npm run flowchain:tester:evidence:validate",
+                                          "npm run flowchain:external-tester:packet -- -AllowBlocked"
+                                      ]
+                     },
+                     {
+                         "severity":  "critical",
+                         "code":  "deployment-refresh-aborted",
+                         "message":  "Public deployment dependency refresh aborted or skipped dependency gates.",
+                         "commands":  [
+                                          "npm run flowchain:public-deployment:contract -- -AllowBlocked",
+                                          "npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked",
+                                          "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
+                         "code":  "deployment-contract-not-ready",
+                         "message":  "Public deployment contract is not ready.",
+                         "commands":  [
+                                          "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+                                      ]
+                     }
+                 ],
+    "criticalCount":  1,
+    "blockedCount":  7,
+    "incidentCommands":  {
+                             "status":  [
+                                            "npm run flowchain:ops:snapshot",
+                                            "npm run flowchain:service:status",
+                                            "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30"
+                                        ],
+                             "restart":  [
+                                             "npm run flowchain:service:restart -- -LiveProfile",
+                                             "npm run flowchain:service:status"
+                                         ],
+                             "backupRecovery":  [
+                                                    "npm run flowchain:backup:restore:validate",
+                                                    "npm run flowchain:backup:create",
+                                                    "npm run flowchain:backup:restore:verify"
+                                                ],
+                             "publicExposure":  [
+                                                    "npm run flowchain:public-rpc:check",
+                                                    "npm run flowchain:public-rpc:abuse-test",
+                                                    "npm run flowchain:external-tester:packet"
+                                                ],
+                             "drills":  [
+                                            "npm run flowchain:ops:incident-drill",
+                                            "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh"
+                                        ],
+                             "emergency":  [
+                                               "npm run flowchain:emergency:stop-local",
+                                               "npm run flowchain:bridge:emergency-stop",
+                                               "npm run flowchain:emergency:export-evidence"
+                                           ],
+                             "bridgeRelayerLoop":  [
+                                                       "npm run flowchain:service:status",
+                                                       "npm run flowchain:bridge:relayer:loop:validate",
+                                                       "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop"
+                                                   ]
+                         },
+    "reportPaths":  {
+                        "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\service-status-report.json",
+                        "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\service-monitor-report.json",
+                        "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\public-rpc-readiness-report.json",
+                        "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\backup-readiness-report.json",
+                        "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\bridge-live-readiness-report.json",
+                        "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\bridge-infra-readiness-report.json",
+                        "bridgeRelayer":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\bridge-relayer-once-report.json",
+                        "bridgeRelayerGuardrail":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\bridge-relayer-guardrail-validation-report.json",
+                        "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\external-tester-readiness-report.json",
+                        "externalTesterEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\external-tester-evidence-validation-report.json",
+                        "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\public-deployment-contract-report.json",
+                        "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\input\\no-secret-scan-report.json"
+                    },
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

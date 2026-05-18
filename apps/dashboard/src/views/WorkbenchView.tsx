@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Activity, Coins, Database, ListChecks, Network, PlayCircle, RefreshCw, Repeat2, Search, Server, ShieldAlert, Terminal, Wallet } from "lucide-react";
+import { Activity, Coins, Database, Globe2, HardDrive, KeyRound, ListChecks, Network, PlayCircle, RefreshCw, Repeat2, Rocket, Search, Server, ShieldAlert, Terminal, Wallet } from "lucide-react";
 import { EmptyState } from "../components/EmptyState";
 import { HashValue } from "../components/HashValue";
 import { ProvenanceLine } from "../components/ProvenanceLine";
@@ -45,6 +45,10 @@ function statusForCount(count: number): DashboardStatus {
   return count > 0 ? "verified" : "pending";
 }
 
+function factValue(record: WorkbenchRecord | undefined, label: string, fallback = "not recorded"): string {
+  return record?.facts.find((fact) => fact.label === label)?.value ?? fallback;
+}
+
 export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps) {
   const [activeSection, setActiveSection] = useState<WorkbenchSectionKey>(DEFAULT_SECTION);
   const [query, setQuery] = useState("");
@@ -78,14 +82,101 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
     : activeDefinition;
   const sourceStatus: DashboardStatus = workbench.source === "control-plane" ? "verified" : "stale";
   const bridgeRecordCount =
+    workbench.sections.bridgeDeposits.length + workbench.sections.bridgeCredits.length + workbench.sections.bridgeWithdrawals.length;
+  const liveReadinessRecords = workbench.sections.liveReadiness;
+  const liveReadinessSummary = liveReadinessRecords.find((record) => record.kind === "Public launch readiness") ?? liveReadinessRecords[0];
+  const liveReadinessGates = liveReadinessRecords.filter((record) => record.kind === "Launch gate");
+  const launchReady = factValue(liveReadinessSummary, "deployment ready", "false");
+  const packetShareable = factValue(liveReadinessSummary, "packet shareable", "false");
+  const latestHeight = factValue(liveReadinessSummary, "latest height", "not recorded");
+  const finalizedHeight = factValue(liveReadinessSummary, "finalized height", "not recorded");
+  const publicRpcGate = liveReadinessGates.find((record) => record.id === "public-rpc-edge");
+  const backupGate = liveReadinessGates.find((record) => record.id === "state-backup");
+  const backupDryRunGate = liveReadinessGates.find((record) => record.id === "state-backup-owner-path-dry-run");
+  const bridgeRelayerGate = liveReadinessGates.find((record) => record.id === "base8453-bridge-relayer-queue");
+  const testerPacketGate = liveReadinessGates.find((record) => record.id === "external-tester-sharing");
     workbench.sections.bridgeDeposits.length +
     workbench.sections.bridgeCredits.length +
     workbench.sections.bridgeWithdrawals.length +
     workbench.sections.bridgeReleases.length;
   const pilotRecords = workbench.sections.realValuePilot;
-  const pilotOverview = pilotRecords[0];
+  const pilotOverview = pilotRecords.find((record) => record.kind === "Pilot status") ?? pilotRecords[0];
+  const bridgeReadiness = pilotRecords.find((record) => record.kind === "Bridge live readiness");
   const pilotState = pilotOverview?.facts.find((fact) => fact.label === "state")?.value ?? "degraded";
   const pilotNextCommand = pilotOverview?.facts.find((fact) => fact.label === "next command")?.value ?? "npm run control-plane:serve";
+  const bridgeReadinessStatus = bridgeReadiness?.facts.find((fact) => fact.label === "fail-closed status")?.value ?? "BLOCKED";
+  const bridgeReadinessMissingEnv = bridgeReadiness?.facts.find((fact) => fact.label === "missing env names")?.value ?? "endpoint unavailable";
+  const launchSteps: Array<{
+    id: string;
+    label: string;
+    detail: string;
+    command: string;
+    status: DashboardStatus;
+    count: number | string;
+    Icon: typeof Wallet;
+    section: WorkbenchSectionKey;
+  }> = [
+    {
+      id: "launch",
+      label: "Public launch",
+      detail: "Deployment contract and shareability gates",
+      command: "npm run flowchain:public-deployment:contract",
+      status: liveReadinessSummary?.status ?? "pending",
+      count: launchReady === "true" ? "ready" : "blocked",
+      Icon: Rocket,
+      section: "liveReadiness",
+    },
+    {
+      id: "wallets",
+      label: "Wallets",
+      detail: "Public wallet metadata and account records",
+      command: "npm run flowchain:wallet:live-service:e2e",
+      status: statusForCount(workbench.sections.walletMetadata.length + workbench.sections.accounts.length),
+      count: workbench.sections.walletMetadata.length + workbench.sections.accounts.length,
+      Icon: Wallet,
+      section: "walletMetadata",
+    },
+    {
+      id: "funding",
+      label: "Faucet funds",
+      detail: "Local balances and faucet events",
+      command: "npm run flowchain:faucet",
+      status: statusForCount(workbench.sections.balances.length + workbench.sections.faucetEvents.length),
+      count: workbench.sections.balances.length + workbench.sections.faucetEvents.length,
+      Icon: Coins,
+      section: "balances",
+    },
+    {
+      id: "explorer",
+      label: "Explorer",
+      detail: "Blocks, transactions, receipts, and rollups",
+      command: "npm run flowchain:product-e2e",
+      status: statusForCount(workbench.sections.blocks.length + workbench.sections.transactions.length + workbench.sections.explorerRecords.length),
+      count: workbench.sections.blocks.length + workbench.sections.transactions.length + workbench.sections.explorerRecords.length,
+      Icon: Database,
+      section: "explorerRecords",
+    },
+    {
+      id: "bridge",
+      label: "Bridge",
+      detail: "Base 8453 pilot readiness and local credits",
+      command: "npm run flowchain:bridge:infra:check",
+      status: bridgeReadiness?.status ?? statusForCount(bridgeRecordCount),
+      count: bridgeReadinessStatus,
+      Icon: ShieldAlert,
+      section: "realValuePilot",
+    },
+    {
+      id: "rpc",
+      label: "RPC",
+      detail: "Control-plane connection and advertised endpoints",
+      command: "npm run flowchain:public-rpc:check",
+      status: workbench.controlPlane.status === "available" ? "verified" : "pending",
+      count: workbench.controlPlane.endpoints.length,
+      Icon: Server,
+      section: "nodeStatus",
+    },
+  ];
   const productSurfaces: Array<{
     key: WorkbenchSectionKey;
     label: string;
@@ -143,6 +234,14 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
       Icon: ShieldAlert,
     },
     {
+      key: "liveReadiness",
+      label: "Live readiness",
+      detail: "Public RPC, backup, bridge relayer, tester packet, and no-secret launch gates.",
+      command: "npm run flowchain:public-deployment:contract",
+      count: liveReadinessRecords.length,
+      Icon: Rocket,
+    },
+    {
       key: "bridgeDeposits",
       label: "Bridge records",
       detail: "Local/Anvil/Base Sepolia test records only; real-funds bridge remains blocked.",
@@ -158,6 +257,17 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
       count: workbench.sections.errorsRecovery.length,
       Icon: Terminal,
     },
+  ];
+  const releaseGateTiles: Array<{
+    label: string;
+    record: WorkbenchRecord | undefined;
+    Icon: typeof Wallet;
+  }> = [
+    { label: "Public RPC", record: publicRpcGate, Icon: Globe2 },
+    { label: "Backup proof", record: backupGate, Icon: HardDrive },
+    { label: "Backup dry run", record: backupDryRunGate, Icon: ListChecks },
+    { label: "Bridge relayer", record: bridgeRelayerGate, Icon: ShieldAlert },
+    { label: "Tester packet", record: testerPacketGate, Icon: KeyRound },
   ];
 
   const runLocalAction = async (endpoint: string, label: string) => {
@@ -263,6 +373,75 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
         </article>
       </section>
 
+      <section className="live-readiness-overview" aria-label="Public L1 launch readiness">
+        <article className="panel live-readiness-summary">
+          <div className="panel-heading">
+            <div>
+              <Rocket size={18} aria-hidden="true" />
+              <h2>Public launch readiness</h2>
+            </div>
+            <StatusBadge status={liveReadinessSummary?.status ?? "pending"} compact />
+          </div>
+          <div className="live-readiness-copy">
+            <span className="eyebrow">deployment contract</span>
+            <h3>{liveReadinessSummary?.title ?? "Live readiness not loaded"}</h3>
+            <p>{liveReadinessSummary?.summary ?? "Run the public deployment contract, then refresh the dashboard."}</p>
+          </div>
+          <dl className="live-readiness-metrics">
+            <div>
+              <dt>launch ready</dt>
+              <dd>{displayValue(launchReady)}</dd>
+            </div>
+            <div>
+              <dt>tester packet</dt>
+              <dd>{displayValue(packetShareable)}</dd>
+            </div>
+            <div>
+              <dt>latest height</dt>
+              <dd>{displayValue(latestHeight)}</dd>
+            </div>
+            <div>
+              <dt>finalized</dt>
+              <dd>{displayValue(finalizedHeight)}</dd>
+            </div>
+          </dl>
+        </article>
+
+        <div className="live-readiness-gates">
+          {releaseGateTiles.map(({ label, record, Icon }) => (
+            <button key={label} className="live-readiness-gate" type="button" onClick={() => setActiveSection("liveReadiness")}>
+              <span className="live-readiness-gate-top">
+                <span className="live-readiness-gate-icon">
+                  <Icon size={16} aria-hidden="true" />
+                </span>
+                <StatusBadge status={record?.status ?? "pending"} compact />
+              </span>
+              <strong>{record?.title ?? label}</strong>
+              <span>{record?.summary ?? "Gate evidence is not loaded yet."}</span>
+              <code>{factValue(record, "next command", "npm run flowchain:public-deployment:contract")}</code>
+              <small>{factValue(record, "blockers", "none")}</small>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="tester-launch-rail" aria-label="External tester launch readiness">
+        {launchSteps.map(({ id, label, detail, command, status, count, Icon, section }) => (
+          <button key={id} className="tester-launch-step" type="button" onClick={() => setActiveSection(section)}>
+            <span className="tester-launch-step-head">
+              <span className="tester-launch-step-icon">
+                <Icon size={17} aria-hidden="true" />
+              </span>
+              <StatusBadge status={status} compact />
+            </span>
+            <strong>{label}</strong>
+            <span>{detail}</span>
+            <code>{command}</code>
+            <b>{count}</b>
+          </button>
+        ))}
+      </section>
+
       <section className="pilot-status-panel" aria-label="Real-value pilot status">
         <article>
           <div className="panel-heading">
@@ -294,6 +473,43 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
               <div>
                 <dt>evidence rows</dt>
                 <dd>{pilotRecords.length}</dd>
+              </div>
+            </dl>
+          </div>
+        </article>
+        <article>
+          <div className="panel-heading">
+            <div>
+              <ShieldAlert size={18} aria-hidden="true" />
+              <h2>Bridge live readiness</h2>
+            </div>
+            <StatusBadge status={bridgeReadiness?.status ?? "pending"} compact />
+          </div>
+          <div className="pilot-status-body">
+            <div>
+              <span className="eyebrow">base 8453 fail-closed check</span>
+              <h3>{bridgeReadinessStatus}</h3>
+              <p>
+                {bridgeReadiness?.summary ??
+                  "Live readiness is blocked until the local control-plane exposes bridge readiness details."}
+              </p>
+            </div>
+            <dl className="workbench-fact-grid">
+              <div>
+                <dt>base chain</dt>
+                <dd>{displayValue(bridgeReadiness?.facts.find((fact) => fact.label === "base chain")?.value ?? "8453")}</dd>
+              </div>
+              <div>
+                <dt>lockbox configured</dt>
+                <dd>{displayValue(bridgeReadiness?.facts.find((fact) => fact.label === "lockbox configured")?.value ?? "false")}</dd>
+              </div>
+              <div>
+                <dt>missing env names</dt>
+                <dd>{displayValue(bridgeReadinessMissingEnv)}</dd>
+              </div>
+              <div>
+                <dt>env values printed</dt>
+                <dd>{displayValue(bridgeReadiness?.facts.find((fact) => fact.label === "env values printed")?.value ?? "false")}</dd>
               </div>
             </dl>
           </div>

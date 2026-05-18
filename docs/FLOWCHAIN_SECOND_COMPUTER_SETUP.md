@@ -66,6 +66,14 @@ If the repo is already cloned, run from the repo root:
 powershell -ExecutionPolicy Bypass -File .\INSTALL_FLOWCHAIN_WINDOWS.ps1
 ```
 
+To create and verify an offline source bundle from an already working machine:
+
+```powershell
+npm run flowchain:second-computer:bundle -- -Force
+npm run flowchain:second-computer:verify
+npm run flowchain:second-computer:readiness
+```
+
 ## Manual Developer Path
 
 Use this only when intentionally installing tools yourself or debugging the

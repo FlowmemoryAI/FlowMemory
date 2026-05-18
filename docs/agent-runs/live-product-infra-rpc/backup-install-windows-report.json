@@ -1,0 +1,108 @@
+{
+    "schema":  "flowchain.backup_install_windows_report.v0",
+    "generatedAt":  "2026-05-17T16:34:53.0537102Z",
+    "status":  "passed",
+    "action":  "Plan",
+    "plannedOnly":  true,
+    "taskMutationPerformed":  false,
+    "taskRegistered":  false,
+    "taskRemoved":  false,
+    "taskName":  "FlowChainStateBackup",
+    "taskPath":  "\\",
+    "dailyAt":  "03:00",
+    "taskBefore":  {
+                       "exists":  false,
+                       "schedulerAvailable":  true,
+                       "taskName":  "FlowChainStateBackup",
+                       "taskPath":  "\\",
+                       "state":  "",
+                       "lastRunTime":  "",
+                       "nextRunTime":  "",
+                       "lastTaskResult":  "",
+                       "queryError":  ""
+                   },
+    "taskAfter":  {
+                      "exists":  false,
+                      "schedulerAvailable":  true,
+                      "taskName":  "FlowChainStateBackup",
+                      "taskPath":  "\\",
+                      "state":  "",
+                      "lastRunTime":  "",
+                      "nextRunTime":  "",
+                      "lastTaskResult":  "",
+                      "queryError":  ""
+                  },
+    "schedulerCmdlets":  [
+                             {
+                                 "name":  "Get-ScheduledTask",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "Get-ScheduledTaskInfo",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "New-ScheduledTaskAction",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "New-ScheduledTaskTrigger",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "New-ScheduledTaskSettingsSet",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "Register-ScheduledTask",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "Unregister-ScheduledTask",
+                                 "available":  true
+                             }
+                         ],
+    "scheduledTask":  {
+                          "trigger":  "Daily",
+                          "dailyAt":  "03:00",
+                          "execute":  "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                          "arguments":  "-NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-state-backup.ps1 -StatePath devnet/local/state.json -ReportPath docs/agent-runs/live-product-infra-rpc/scheduled-state-backup-report.json",
+                          "workingDirectory":  "E:/FlowMemory/flowmemory-live-infra-rpc",
+                          "backupScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-state-backup.ps1",
+                          "ownerEnvFileConfigured":  false
+                      },
+    "backup":  {
+                   "statePath":  "devnet/local/state.json",
+                   "reportPath":  "docs/agent-runs/live-product-infra-rpc/scheduled-state-backup-report.json",
+                   "requiredEnvNames":  [
+                                            "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                        ]
+               },
+    "commands":  {
+                     "plan":  "npm run flowchain:backup:install:windows -- -Action Plan",
+                     "validate":  "npm run flowchain:backup:install:validate",
+                     "install":  "npm run flowchain:backup:install:windows -- -Action Install",
+                     "status":  "npm run flowchain:backup:install:windows -- -Action Status",
+                     "uninstall":  "npm run flowchain:backup:install:windows -- -Action Uninstall",
+                     "backupCheck":  "npm run flowchain:backup:check -- -AllowBlocked"
+                 },
+    "checks":  {
+                   "backupScriptExists":  true,
+                   "schedulerCmdletsAvailable":  true,
+                   "scheduledTaskActionSupportsWorkingDirectory":  true,
+                   "actionUsesBackupScript":  true,
+                   "actionUsesRepoWorkingDirectory":  true,
+                   "hasStatePath":  true,
+                   "hasReportPath":  true,
+                   "reliesOnOwnerBackupEnv":  true,
+                   "ownerEnvFileCanBeInjected":  true,
+                   "installStatusUninstallCommandsPresent":  true,
+                   "planDoesNotMutate":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true
+               },
+    "actionErrorRedacted":  "",
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

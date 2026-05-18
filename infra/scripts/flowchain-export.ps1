@@ -32,21 +32,30 @@ Invoke-FlowChainCommand -Label "Export devnet handoff fixtures" -FilePath "cargo
     $outFullPath
 )
 
+$dashboardPath = Join-Path $outFullPath "dashboard-state.json"
+$exportedStatePath = Join-Path $outFullPath "state.json"
+$dashboardState = Get-Content -Raw -LiteralPath $dashboardPath | ConvertFrom-Json
 $manifestPath = Join-Path $outFullPath "export-manifest.json"
 $manifest = [ordered]@{
     schema = "flowchain.private_testnet.export_manifest.v0"
     exportedAt = (Get-Date).ToUniversalTime().ToString("o")
     sourceStatePath = $stateFullPath
     outDir = $outFullPath
+    statePath = $exportedStatePath
+    stateRoot = $dashboardState.stateRoot
+    mapRoots = $dashboardState.mapRoots
     includesPrivateOperatorKey = $false
     files = @(
         "dashboard-state.json",
         "indexer-handoff.json",
         "verifier-handoff.json",
+        "control-plane-handoff.json",
+        "genesis-config.json",
+        "operator-key-references.json",
         "state.json"
     )
 }
-Write-FlowChainJson -Path $manifestPath -Value $manifest
+Write-FlowChainJson -Path $manifestPath -Value $manifest -Depth 24
 Assert-FlowChainNoSecretFiles -Path $outFullPath
 
 if (-not $NoZip) {

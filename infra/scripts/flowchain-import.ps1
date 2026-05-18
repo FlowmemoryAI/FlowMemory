@@ -40,7 +40,13 @@ if (-not (Test-Path -LiteralPath $importedState)) {
 Assert-FlowChainNoSecretFiles -Path $importFullPath
 $stateParent = Split-Path -Parent $stateFullPath
 New-Item -ItemType Directory -Force -Path $stateParent | Out-Null
-Copy-Item -LiteralPath $importedState -Destination $stateFullPath -Force
+$stateFileName = Split-Path -Leaf $stateFullPath
+$tempStatePath = Join-Path $stateParent ".$stateFileName.$PID.import.tmp"
+if (Test-Path -LiteralPath $tempStatePath) {
+    Remove-Item -LiteralPath $tempStatePath -Force
+}
+Copy-Item -LiteralPath $importedState -Destination $tempStatePath -Force
+Move-Item -LiteralPath $tempStatePath -Destination $stateFullPath -Force
 
 Invoke-FlowChainCommand -Label "Inspect imported devnet state" -FilePath "cargo" -ArgumentList @(
     "run",

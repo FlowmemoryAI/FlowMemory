@@ -44,6 +44,8 @@ export const DEFAULT_CONTROL_PLANE_PATHS: ControlPlanePaths = {
   bridgeObservationPath: "services/bridge-relayer/out/bridge-observation.json",
   bridgeRuntimeHandoffPath: "fixtures/bridge/local-runtime-bridge-handoff.json",
   bridgeObservationIntakePath: "devnet/local/intake/bridge-observations.ndjson",
+  walletTransferProofPath: "devnet/local/production-l1-wallet/wallet-e2e/wallet-e2e-proof.json",
+  walletPublicMetadataPath: "devnet/local/wallet/flowchain-operator/flowchain-operator-public-metadata.json",
 };
 
 export function resolveControlPlanePath(path: string): string {
@@ -69,29 +71,86 @@ function sourceRecord(
   };
 }
 
-function maybeReadJson(path: string): JsonObject | null {
-  if (!existsSync(resolveControlPlanePath(path))) {
-    return null;
-  }
-  return readJson<JsonObject>(path);
+type JsonFileRead<T> =
+  | { status: "loaded"; value: T }
+  | { status: "missing" }
+  | { status: "degraded"; recovery: string };
+
+type NdjsonRead = {
+  rows: JsonObject[];
+  status: "loaded" | "missing" | "degraded";
+  recovery?: string;
+};
+
+function jsonError(error: unknown): string {
+  return error instanceof Error ? error.message.replace(/\s+/g, " ") : "unknown JSON parse error";
 }
 
-function readNdjson(path: string): JsonObject[] {
+function readJsonFile<T>(path: string): JsonFileRead<T> {
+  if (!existsSync(resolveControlPlanePath(path))) {
+    return { status: "missing" };
+  }
+  try {
+    return { status: "loaded", value: readJson<T>(path) };
+  } catch (error) {
+    return {
+      status: "degraded",
+      recovery: `skipped malformed JSON at ${path}: ${jsonError(error)}`,
+    };
+  }
+}
+
+function maybeReadJson(path: string): JsonObject | null {
+  const result = readJsonFile<JsonObject>(path);
+  return result.status === "loaded" ? result.value : null;
+}
+
+function readNdjson(path: string): NdjsonRead {
   const resolved = resolveControlPlanePath(path);
   if (!existsSync(resolved)) {
-    return [];
+    return { rows: [], status: "missing" };
   }
-  return readFileSync(resolved, "utf8")
+  const rows: JsonObject[] = [];
+  let malformedRows = 0;
+  readFileSync(resolved, "utf8")
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter((line) => line.length > 0)
-    .map((line) => JSON.parse(line) as JsonObject);
+    .forEach((line) => {
+      try {
+        rows.push(JSON.parse(line) as JsonObject);
+      } catch {
+        malformedRows += 1;
+      }
+    });
+  if (malformedRows > 0) {
+    return {
+      rows,
+      status: "degraded",
+      recovery: `skipped ${malformedRows} malformed NDJSON row(s) at ${path}`,
+    };
+  }
+  return { rows, status: rows.length === 0 ? "missing" : "loaded" };
 }
 
 function loadOrBuildIndexer(path: string, sources: Record<string, DataSourceRecord>): PersistedIndexerState {
   if (existsSync(resolveControlPlanePath(path))) {
-    sources.indexer = sourceRecord("indexer", path, "loaded");
-    return readJson<PersistedIndexerState>(path);
+    const persisted = readJsonFile<PersistedIndexerState>(path);
+    if (persisted.status === "loaded") {
+      sources.indexer = sourceRecord("indexer", path, "loaded");
+      return persisted.value;
+    }
+
+    const state = indexFlowPulseReceipts(loadIndexerFixtureReceipts(), {
+      finalizedBlockNumber: "123458",
+    });
+    sources.indexer = sourceRecord(
+      "indexer",
+      path,
+      "degraded",
+      `${persisted.recovery}; built in memory from services/indexer/fixtures/flowpulse-receipts.json`,
+    );
+    return persistedIndexerState(state);
   }
 
   const state = indexFlowPulseReceipts(loadIndexerFixtureReceipts(), {
@@ -108,8 +167,20 @@ function loadOrBuildVerifier(
   sources: Record<string, DataSourceRecord>,
 ): PersistedVerifierReports {
   if (existsSync(resolveControlPlanePath(path))) {
-    sources.verifier = sourceRecord("verifier", path, "loaded");
-    return readJson<PersistedVerifierReports>(path);
+    const persisted = readJsonFile<PersistedVerifierReports>(path);
+    if (persisted.status === "loaded") {
+      sources.verifier = sourceRecord("verifier", path, "loaded");
+      return persisted.value;
+    }
+
+    const reports = verifyObservations(indexer.state.observations, resolver);
+    sources.verifier = sourceRecord(
+      "verifier",
+      path,
+      "degraded",
+      `${persisted.recovery}; built in memory from indexer observations and artifact fixtures`,
+    );
+    return persistedVerifierReports(reports);
   }
 
   const reports = verifyObservations(indexer.state.observations, resolver);
@@ -119,8 +190,19 @@ function loadOrBuildVerifier(
 
 function loadArtifacts(path: string, sources: Record<string, DataSourceRecord>): ArtifactResolverFixture {
   if (existsSync(resolveControlPlanePath(path))) {
-    sources.artifacts = sourceRecord("artifacts", path, "loaded");
-    return readJson<ArtifactResolverFixture>(path);
+    const fixture = readJsonFile<ArtifactResolverFixture>(path);
+    if (fixture.status === "loaded") {
+      sources.artifacts = sourceRecord("artifacts", path, "loaded");
+      return fixture.value;
+    }
+
+    sources.artifacts = sourceRecord(
+      "artifacts",
+      path,
+      "degraded",
+      `${fixture.recovery}; loaded default services/verifier artifact fixture`,
+    );
+    return loadVerifierArtifactFixture();
   }
 
   sources.artifacts = sourceRecord("artifacts", path, "recovered", "loaded default services/verifier artifact fixture");
@@ -147,8 +229,19 @@ function loadOrBuildLaunchCore(
   sources: Record<string, DataSourceRecord>,
 ): LaunchCoreOutput {
   if (existsSync(resolveControlPlanePath(paths.launchCorePath))) {
-    sources.launchCore = sourceRecord("launchCore", paths.launchCorePath, "loaded");
-    return readJson<LaunchCoreOutput>(paths.launchCorePath);
+    const launchCore = readJsonFile<LaunchCoreOutput>(paths.launchCorePath);
+    if (launchCore.status === "loaded") {
+      sources.launchCore = sourceRecord("launchCore", paths.launchCorePath, "loaded");
+      return launchCore.value;
+    }
+
+    sources.launchCore = sourceRecord(
+      "launchCore",
+      paths.launchCorePath,
+      "degraded",
+      `${launchCore.recovery}; built in memory from indexer and verifier state`,
+    );
+    return buildLaunchCore(indexer, verifier, launchPaths(paths));
   }
 
   sources.launchCore = sourceRecord("launchCore", paths.launchCorePath, "recovered", "built in memory from indexer and verifier state");
@@ -160,31 +253,49 @@ function loadOptionalSource(
   path: string,
   sources: Record<string, DataSourceRecord>,
 ): JsonObject | null {
-  const value = maybeReadJson(path);
-  sources[name] = sourceRecord(name, path, value === null ? "missing" : "loaded");
-  return value;
+  const result = readJsonFile<JsonObject>(path);
+  if (result.status === "loaded") {
+    sources[name] = sourceRecord(name, path, "loaded");
+    return result.value;
+  }
+  if (result.status === "degraded") {
+    sources[name] = sourceRecord(name, path, "degraded", result.recovery);
+    return null;
+  }
+  sources[name] = sourceRecord(name, path, "missing");
+  return null;
 }
 
 function loadDevnetSource(paths: ControlPlanePaths, sources: Record<string, DataSourceRecord>): JsonObject | null {
+  const skipped: string[] = [];
   for (const [path, recovery] of [
     [paths.localDevnetPath, undefined],
     [paths.localDevnetLaunchPath, "loaded from devnet/local launch runtime state"],
     [paths.devnetPath, "loaded committed devnet fixture fallback"],
   ] as const) {
-    const value = maybeReadJson(path);
-    if (value !== null) {
-      sources.devnet = sourceRecord("devnet", path, path === paths.localDevnetPath ? "loaded" : "recovered", recovery);
-      return value;
+    const result = readJsonFile<JsonObject>(path);
+    if (result.status === "loaded") {
+      const status = skipped.length > 0 ? "degraded" : path === paths.localDevnetPath ? "loaded" : "recovered";
+      const combinedRecovery = skipped.length > 0
+        ? `${skipped.join("; ")}; ${recovery ?? "loaded usable devnet runtime state"}`
+        : recovery;
+      sources.devnet = sourceRecord("devnet", path, status, combinedRecovery);
+      return result.value;
+    }
+    if (result.status === "degraded") {
+      skipped.push(result.recovery);
     }
   }
-  sources.devnet = sourceRecord("devnet", paths.localDevnetPath, "missing");
+  sources.devnet = skipped.length > 0
+    ? sourceRecord("devnet", paths.localDevnetPath, "degraded", `no usable devnet JSON source loaded; ${skipped.join("; ")}`)
+    : sourceRecord("devnet", paths.localDevnetPath, "missing");
   return null;
 }
 
 function loadTxIntake(path: string, sources: Record<string, DataSourceRecord>): JsonObject[] {
-  const rows = readNdjson(path);
-  sources.txIntake = sourceRecord("txIntake", path, rows.length === 0 ? "missing" : "loaded");
-  return rows;
+  const intake = readNdjson(path);
+  sources.txIntake = sourceRecord("txIntake", path, intake.status, intake.recovery);
+  return intake.rows;
 }
 
 function loadBridgeObservations(
@@ -192,32 +303,56 @@ function loadBridgeObservations(
   sources: Record<string, DataSourceRecord>,
 ): JsonObject[] {
   const observations: JsonObject[] = [];
-  const persisted = maybeReadJson(paths.bridgeObservationPath);
-  if (persisted !== null) {
-    observations.push(persisted);
+  const persisted = readJsonFile<JsonObject>(paths.bridgeObservationPath);
+  if (persisted.status === "loaded") {
+    observations.push(persisted.value);
     sources.bridgeObservation = sourceRecord("bridgeObservation", paths.bridgeObservationPath, "loaded");
   } else {
     const bridgeFixturePath = "fixtures/bridge/base-sepolia-mock-deposit.json";
-    const fixture = maybeReadJson(bridgeFixturePath);
-    if (fixture !== null) {
-      observations.push(makeObservation(validateDeposit(fixture), "mock") as unknown as JsonObject);
-      sources.bridgeObservation = sourceRecord("bridgeObservation", bridgeFixturePath, "recovered", "built from committed mock bridge deposit fixture");
+    const fixture = readJsonFile<JsonObject>(bridgeFixturePath);
+    if (fixture.status === "loaded") {
+      observations.push(makeObservation(validateDeposit(fixture.value), "mock") as unknown as JsonObject);
+      sources.bridgeObservation = sourceRecord(
+        "bridgeObservation",
+        bridgeFixturePath,
+        persisted.status === "degraded" ? "degraded" : "recovered",
+        persisted.status === "degraded"
+          ? `${persisted.recovery}; built from committed mock bridge deposit fixture`
+          : "built from committed mock bridge deposit fixture",
+      );
     } else {
-      sources.bridgeObservation = sourceRecord("bridgeObservation", paths.bridgeObservationPath, "missing");
+      sources.bridgeObservation = sourceRecord(
+        "bridgeObservation",
+        paths.bridgeObservationPath,
+        persisted.status === "degraded" || fixture.status === "degraded" ? "degraded" : "missing",
+        [persisted.status === "degraded" ? persisted.recovery : null, fixture.status === "degraded" ? fixture.recovery : null]
+          .filter((entry): entry is string => entry !== null)
+          .join("; ") || undefined,
+      );
     }
   }
 
-  const intakeRows = readNdjson(paths.bridgeObservationIntakePath);
-  if (intakeRows.length > 0) {
-    observations.push(...intakeRows);
+  const intake = readNdjson(paths.bridgeObservationIntakePath);
+  if (intake.rows.length > 0) {
+    observations.push(...intake.rows);
   }
-  sources.bridgeObservationIntake = sourceRecord("bridgeObservationIntake", paths.bridgeObservationIntakePath, intakeRows.length === 0 ? "missing" : "loaded");
+  sources.bridgeObservationIntake = sourceRecord("bridgeObservationIntake", paths.bridgeObservationIntakePath, intake.status, intake.recovery);
   return observations;
 }
 
 export function controlPlanePaths(overrides: Partial<ControlPlanePaths> = {}): ControlPlanePaths {
   return {
     ...DEFAULT_CONTROL_PLANE_PATHS,
+    localDevnetPath: process.env.FLOWCHAIN_CONTROL_PLANE_LOCAL_DEVNET_PATH
+      ?? DEFAULT_CONTROL_PLANE_PATHS.localDevnetPath,
+    localDevnetLaunchPath: process.env.FLOWCHAIN_CONTROL_PLANE_LOCAL_DEVNET_LAUNCH_PATH
+      ?? DEFAULT_CONTROL_PLANE_PATHS.localDevnetLaunchPath,
+    bridgeRuntimeHandoffPath: process.env.FLOWCHAIN_CONTROL_PLANE_BRIDGE_RUNTIME_HANDOFF_PATH
+      ?? DEFAULT_CONTROL_PLANE_PATHS.bridgeRuntimeHandoffPath,
+    bridgeObservationPath: process.env.FLOWCHAIN_CONTROL_PLANE_BRIDGE_OBSERVATION_PATH
+      ?? DEFAULT_CONTROL_PLANE_PATHS.bridgeObservationPath,
+    walletPublicMetadataPath: process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH
+      ?? DEFAULT_CONTROL_PLANE_PATHS.walletPublicMetadataPath,
     ...overrides,
   };
 }
@@ -238,6 +373,8 @@ export function loadControlPlaneState(overrides: Partial<ControlPlanePaths> = {}
   const txIntake = loadTxIntake(paths.txIntakePath, sources);
   const bridgeObservations = loadBridgeObservations(paths, sources);
   const bridgeRuntimeHandoff = loadOptionalSource("bridgeRuntimeHandoff", paths.bridgeRuntimeHandoffPath, sources);
+  const walletTransferProof = loadOptionalSource("walletTransferProof", paths.walletTransferProofPath, sources);
+  const walletPublicMetadata = loadOptionalSource("walletPublicMetadata", paths.walletPublicMetadataPath, sources);
 
   return {
     schema: "flowmemory.control_plane.state.v0",
@@ -254,6 +391,8 @@ export function loadControlPlaneState(overrides: Partial<ControlPlanePaths> = {}
     txIntake,
     bridgeObservations,
     bridgeRuntimeHandoff,
+    walletTransferProof,
+    walletPublicMetadata,
     paths,
     sources,
   };

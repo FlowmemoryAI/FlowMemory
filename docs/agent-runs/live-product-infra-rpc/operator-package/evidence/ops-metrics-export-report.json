@@ -1,0 +1,109 @@
+{
+    "schema":  "flowchain.ops_metrics_export_report.v0",
+    "generatedAt":  "2026-05-18T15:16:07.4381775Z",
+    "status":  "passed",
+    "refresh":  {
+                    "performed":  true,
+                    "steps":  [
+                                  {
+                                      "name":  "ops-snapshot",
+                                      "exitCode":  0,
+                                      "outputLineCount":  5
+                                  },
+                                  {
+                                      "name":  "ops-alerts",
+                                      "exitCode":  0,
+                                      "outputLineCount":  5
+                                  }
+                              ]
+                },
+    "reportPaths":  {
+                        "opsSnapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
+                        "opsAlerts":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-alert-rules-report.json",
+                        "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
+                        "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json",
+                        "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
+                        "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
+                        "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
+                        "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
+                        "bridgeRelayerGuardrail":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-guardrail-validation-report.json",
+                        "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
+                        "externalTesterEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-evidence-validation-report.json",
+                        "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
+                        "liveCutover":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-cutover-rehearsal-report.json",
+                        "truthTable":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\production-truth-table-report.json",
+                        "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json"
+                    },
+    "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.json",
+    "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
+    "metricCount":  37,
+    "requiredMetricNames":  [
+                                "flowchain_latest_height",
+                                "flowchain_finalized_height",
+                                "flowchain_state_file_age_seconds",
+                                "flowchain_height_advanced",
+                                "flowchain_ops_critical_findings",
+                                "flowchain_ops_blocked_findings",
+                                "flowchain_ops_alert_rules_total",
+                                "flowchain_ops_active_alert_rules",
+                                "flowchain_service_status_ready",
+                                "flowchain_public_rpc_ready",
+                                "flowchain_backup_ready",
+                                "flowchain_bridge_live_ready",
+                                "flowchain_bridge_relayer_guardrail_ready",
+                                "flowchain_external_tester_evidence_ready",
+                                "flowchain_external_tester_evidence_failed_checks",
+                                "flowchain_external_tester_evidence_missing_files",
+                                "flowchain_external_tester_evidence_secret_findings",
+                                "flowchain_external_tester_evidence_height_advanced",
+                                "flowchain_external_tester_evidence_transfer_consistent",
+                                "flowchain_public_deployment_ready",
+                                "flowchain_live_cutover_ready",
+                                "flowchain_live_cutover_owner_blocked",
+                                "flowchain_live_cutover_missing_owner_inputs",
+                                "flowchain_no_secret_ready",
+                                "flowchain_truth_gates_total",
+                                "flowchain_truth_gates_failed",
+                                "flowchain_truth_gates_stale"
+                            ],
+    "missingMetricNames":  [
+
+                           ],
+    "checks":  {
+                   "packageScriptPresent":  true,
+                   "opsSnapshotLoaded":  true,
+                   "opsAlertRulesLoaded":  true,
+                   "serviceStatusLoaded":  true,
+                   "serviceMonitorLoaded":  true,
+                   "externalTesterEvidenceLoaded":  true,
+                   "liveCutoverLoaded":  true,
+                   "truthTableLoaded":  true,
+                   "noSecretLoaded":  true,
+                   "metricsJsonWritten":  true,
+                   "prometheusTextWritten":  true,
+                   "markdownWritten":  true,
+                   "metricCountSufficient":  true,
+                   "requiredMetricsPresent":  true,
+                   "externalTesterEvidenceMetricsPresent":  true,
+                   "prometheusHasHelpAndType":  true,
+                   "prometheusContainsNoUrls":  true,
+                   "prometheusContainsNoEnvAssignments":  true,
+                   "metricsJsonNoSecrets":  true,
+                   "metricsJsonSecretMarkerFindingsEmpty":  true,
+                   "metricsJsonEnvValuesPrintedFalse":  true,
+                   "metricsJsonBroadcastsFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

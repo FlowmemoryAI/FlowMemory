@@ -1,0 +1,476 @@
+{
+    "schema":  "flowchain.incident_drill_report.v0",
+    "generatedAt":  "2026-05-18T15:14:02.2188427Z",
+    "status":  "passed",
+    "incidentDrillReady":  true,
+    "validationScope":  "synthetic-ops-snapshot-incidents-plus-live-postcheck",
+    "ownerValuesRequired":  false,
+    "mutatesLiveState":  false,
+    "syntheticIncidentInputs":  true,
+    "checks":  {
+                   "incidentDrillReady":  true,
+                   "ownerValuesRequiredFalse":  true,
+                   "mutatesLiveStateFalse":  true,
+                   "syntheticIncidentInputs":  true,
+                   "allRequiredScenariosCovered":  true,
+                   "allCasesPassed":  true,
+                   "failedCasesAbsent":  true,
+                   "minimumCaseCountMet":  true,
+                   "recoveryCommandPrinted":  true,
+                   "postDrillLiveStatusPassed":  true,
+                   "liveStateBeforeReadable":  true,
+                   "liveStateAfterReadable":  true,
+                   "liveBlockHeightAdvancedOrEqual":  true,
+                   "noLiveBroadcast":  true,
+                   "broadcastsFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "secretMarkerFindingsEmpty":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "caseCounts":  {
+                       "passed":  11,
+                       "failed":  0,
+                       "total":  11
+                   },
+    "requiredScenarios":  [
+                              "baseline-owner-blockers-only",
+                              "deployment-refresh-aborted-critical",
+                              "node-down-critical",
+                              "control-plane-down-critical",
+                              "stale-state-critical",
+                              "height-not-advancing-critical",
+                              "no-secret-scan-critical",
+                              "bridge-relayer-guardrail-critical",
+                              "bridge-relayer-loop-unhealthy-critical",
+                              "recovery-command-print",
+                              "post-drill-live-status"
+                          ],
+    "missingRequiredScenarios":  [
+
+                                 ],
+    "cases":  [
+                  {
+                      "id":  "baseline-owner-blockers-only",
+                      "requirement":  "Expected owner-input blockers remain blocked without being classified as critical incidents.",
+                      "status":  "passed",
+                      "evidence":  "expectedStatus=blocked, actualStatus=blocked, exitCode=0, missingCodes=0, commandsPresent=True, safeFlags=True",
+                      "expectedCodes":  [
+                                            "public-rpc-not-ready",
+                                            "backup-not-ready",
+                                            "bridge-not-ready",
+                                            "external-tester-not-shareable",
+                                            "deployment-contract-not-ready"
+                                        ],
+                      "child":  {
+                                    "name":  "baseline-owner-blockers-only",
+                                    "exitCode":  0,
+                                    "outputTail":  [
+                                                       "FlowChain ops snapshot status: blocked",
+                                                       "Latest height: 73233",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\ops-snapshot-report.json",
+                                                       "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\OPS_SNAPSHOT.md",
+                                                       "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, external-tester-evidence-invalid, deployment-contract-not-ready"
+                                                   ]
+                                },
+                      "reportStatus":  "blocked",
+                      "criticalCount":  0,
+                      "blockedCount":  7,
+                      "findingCodes":  [
+                                           "public-rpc-not-ready",
+                                           "backup-not-ready",
+                                           "bridge-not-ready",
+                                           "bridge-relayer-not-ready",
+                                           "external-tester-not-shareable",
+                                           "external-tester-evidence-invalid",
+                                           "deployment-contract-not-ready"
+                                       ]
+                  },
+                  {
+                      "id":  "deployment-refresh-aborted-critical",
+                      "requirement":  "A public deployment dependency refresh abort is classified as a critical incident with recovery commands.",
+                      "status":  "passed",
+                      "evidence":  "expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True",
+                      "expectedCodes":  [
+                                            "deployment-refresh-aborted"
+                                        ],
+                      "child":  {
+                                    "name":  "deployment-refresh-aborted-critical",
+                                    "exitCode":  1,
+                                    "outputTail":  [
+                                                       "FlowChain ops snapshot status: failed",
+                                                       "Latest height: 73233",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\ops-snapshot-report.json",
+                                                       "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\OPS_SNAPSHOT.md",
+                                                       "Critical findings: deployment-refresh-aborted",
+                                                       "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, external-tester-evidence-invalid, deployment-contract-not-ready"
+                                                   ]
+                                },
+                      "reportStatus":  "failed",
+                      "criticalCount":  1,
+                      "blockedCount":  7,
+                      "findingCodes":  [
+                                           "public-rpc-not-ready",
+                                           "backup-not-ready",
+                                           "bridge-not-ready",
+                                           "bridge-relayer-not-ready",
+                                           "external-tester-not-shareable",
+                                           "external-tester-evidence-invalid",
+                                           "deployment-refresh-aborted",
+                                           "deployment-contract-not-ready"
+                                       ]
+                  },
+                  {
+                      "id":  "node-down-critical",
+                      "requirement":  "A stopped block-producing node is classified as a critical incident with restart commands.",
+                      "status":  "passed",
+                      "evidence":  "expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True",
+                      "expectedCodes":  [
+                                            "service-status-not-passed",
+                                            "node-not-running"
+                                        ],
+                      "child":  {
+                                    "name":  "node-down-critical",
+                                    "exitCode":  1,
+                                    "outputTail":  [
+                                                       "FlowChain ops snapshot status: failed",
+                                                       "Latest height: 73233",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\node-down-critical\\ops-snapshot-report.json",
+                                                       "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\node-down-critical\\OPS_SNAPSHOT.md",
+                                                       "Critical findings: service-status-not-passed, node-not-running",
+                                                       "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, external-tester-evidence-invalid, deployment-contract-not-ready"
+                                                   ]
+                                },
+                      "reportStatus":  "failed",
+                      "criticalCount":  2,
+                      "blockedCount":  7,
+                      "findingCodes":  [
+                                           "service-status-not-passed",
+                                           "node-not-running",
+                                           "public-rpc-not-ready",
+                                           "backup-not-ready",
+                                           "bridge-not-ready",
+                                           "bridge-relayer-not-ready",
+                                           "external-tester-not-shareable",
+                                           "external-tester-evidence-invalid",
+                                           "deployment-contract-not-ready"
+                                       ]
+                  },
+                  {
+                      "id":  "control-plane-down-critical",
+                      "requirement":  "A stopped control-plane RPC service is classified as a critical incident.",
+                      "status":  "passed",
+                      "evidence":  "expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True",
+                      "expectedCodes":  [
+                                            "service-status-not-passed",
+                                            "control-plane-not-running"
+                                        ],
+                      "child":  {
+                                    "name":  "control-plane-down-critical",
+                                    "exitCode":  1,
+                                    "outputTail":  [
+                                                       "FlowChain ops snapshot status: failed",
+                                                       "Latest height: 73233",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\ops-snapshot-report.json",
+                                                       "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\OPS_SNAPSHOT.md",
+                                                       "Critical findings: service-status-not-passed, control-plane-not-running",
+                                                       "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, external-tester-evidence-invalid, deployment-contract-not-ready"
+                                                   ]
+                                },
+                      "reportStatus":  "failed",
+                      "criticalCount":  2,
+                      "blockedCount":  7,
+                      "findingCodes":  [
+                                           "service-status-not-passed",
+                                           "control-plane-not-running",
+                                           "public-rpc-not-ready",
+                                           "backup-not-ready",
+                                           "bridge-not-ready",
+                                           "bridge-relayer-not-ready",
+                                           "external-tester-not-shareable",
+                                           "external-tester-evidence-invalid",
+                                           "deployment-contract-not-ready"
+                                       ]
+                  },
+                  {
+                      "id":  "stale-state-critical",
+                      "requirement":  "A stale state file is classified as a critical incident even when service reports are otherwise readable.",
+                      "status":  "passed",
+                      "evidence":  "expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True",
+                      "expectedCodes":  [
+                                            "state-stale"
+                                        ],
+                      "child":  {
+                                    "name":  "stale-state-critical",
+                                    "exitCode":  1,
+                                    "outputTail":  [
+                                                       "FlowChain ops snapshot status: failed",
+                                                       "Latest height: 73233",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\ops-snapshot-report.json",
+                                                       "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\OPS_SNAPSHOT.md",
+                                                       "Critical findings: state-stale",
+                                                       "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, external-tester-evidence-invalid, deployment-contract-not-ready"
+                                                   ]
+                                },
+                      "reportStatus":  "failed",
+                      "criticalCount":  1,
+                      "blockedCount":  7,
+                      "findingCodes":  [
+                                           "state-stale",
+                                           "public-rpc-not-ready",
+                                           "backup-not-ready",
+                                           "bridge-not-ready",
+                                           "bridge-relayer-not-ready",
+                                           "external-tester-not-shareable",
+                                           "external-tester-evidence-invalid",
+                                           "deployment-contract-not-ready"
+                                       ]
+                  },
+                  {
+                      "id":  "height-not-advancing-critical",
+                      "requirement":  "A monitor window with stagnant block height is classified as a critical incident.",
+                      "status":  "passed",
+                      "evidence":  "expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True",
+                      "expectedCodes":  [
+                                            "height-not-advancing"
+                                        ],
+                      "child":  {
+                                    "name":  "height-not-advancing-critical",
+                                    "exitCode":  1,
+                                    "outputTail":  [
+                                                       "FlowChain ops snapshot status: failed",
+                                                       "Latest height: 73233",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\height-not-advancing-critical\\ops-snapshot-report.json",
+                                                       "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\height-not-advancing-critical\\OPS_SNAPSHOT.md",
+                                                       "Critical findings: height-not-advancing",
+                                                       "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, external-tester-evidence-invalid, deployment-contract-not-ready"
+                                                   ]
+                                },
+                      "reportStatus":  "failed",
+                      "criticalCount":  1,
+                      "blockedCount":  7,
+                      "findingCodes":  [
+                                           "height-not-advancing",
+                                           "public-rpc-not-ready",
+                                           "backup-not-ready",
+                                           "bridge-not-ready",
+                                           "bridge-relayer-not-ready",
+                                           "external-tester-not-shareable",
+                                           "external-tester-evidence-invalid",
+                                           "deployment-contract-not-ready"
+                                       ]
+                  },
+                  {
+                      "id":  "no-secret-scan-critical",
+                      "requirement":  "A failed no-secret scan is classified as a critical incident before sharing any public artifacts.",
+                      "status":  "passed",
+                      "evidence":  "expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True",
+                      "expectedCodes":  [
+                                            "no-secret-scan-not-passed"
+                                        ],
+                      "child":  {
+                                    "name":  "no-secret-scan-critical",
+                                    "exitCode":  1,
+                                    "outputTail":  [
+                                                       "FlowChain ops snapshot status: failed",
+                                                       "Latest height: 73233",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\ops-snapshot-report.json",
+                                                       "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\OPS_SNAPSHOT.md",
+                                                       "Critical findings: no-secret-scan-not-passed",
+                                                       "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, external-tester-evidence-invalid, deployment-contract-not-ready"
+                                                   ]
+                                },
+                      "reportStatus":  "failed",
+                      "criticalCount":  1,
+                      "blockedCount":  7,
+                      "findingCodes":  [
+                                           "public-rpc-not-ready",
+                                           "backup-not-ready",
+                                           "bridge-not-ready",
+                                           "bridge-relayer-not-ready",
+                                           "external-tester-not-shareable",
+                                           "external-tester-evidence-invalid",
+                                           "deployment-contract-not-ready",
+                                           "no-secret-scan-not-passed"
+                                       ]
+                  },
+                  {
+                      "id":  "bridge-relayer-guardrail-critical",
+                      "requirement":  "A failed bridge relayer guardrail proof is classified as a critical incident before any relayer loop can be trusted.",
+                      "status":  "passed",
+                      "evidence":  "expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True",
+                      "expectedCodes":  [
+                                            "bridge-relayer-guardrail-failed"
+                                        ],
+                      "child":  {
+                                    "name":  "bridge-relayer-guardrail-critical",
+                                    "exitCode":  1,
+                                    "outputTail":  [
+                                                       "FlowChain ops snapshot status: failed",
+                                                       "Latest height: 73233",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-guardrail-critical\\ops-snapshot-report.json",
+                                                       "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-guardrail-critical\\OPS_SNAPSHOT.md",
+                                                       "Critical findings: bridge-relayer-guardrail-failed",
+                                                       "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, external-tester-evidence-invalid, deployment-contract-not-ready"
+                                                   ]
+                                },
+                      "reportStatus":  "failed",
+                      "criticalCount":  1,
+                      "blockedCount":  7,
+                      "findingCodes":  [
+                                           "public-rpc-not-ready",
+                                           "backup-not-ready",
+                                           "bridge-not-ready",
+                                           "bridge-relayer-not-ready",
+                                           "bridge-relayer-guardrail-failed",
+                                           "external-tester-not-shareable",
+                                           "external-tester-evidence-invalid",
+                                           "deployment-contract-not-ready"
+                                       ]
+                  },
+                  {
+                      "id":  "bridge-relayer-loop-unhealthy-critical",
+                      "requirement":  "A running bridge relayer loop without fresh no-secret/no-broadcast health evidence is classified as a critical incident.",
+                      "status":  "passed",
+                      "evidence":  "expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True",
+                      "expectedCodes":  [
+                                            "bridge-relayer-loop-unhealthy"
+                                        ],
+                      "child":  {
+                                    "name":  "bridge-relayer-loop-unhealthy-critical",
+                                    "exitCode":  1,
+                                    "outputTail":  [
+                                                       "FlowChain ops snapshot status: failed",
+                                                       "Latest height: 73233",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\ops-snapshot-report.json",
+                                                       "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\OPS_SNAPSHOT.md",
+                                                       "Critical findings: bridge-relayer-loop-unhealthy",
+                                                       "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, external-tester-evidence-invalid, deployment-contract-not-ready"
+                                                   ]
+                                },
+                      "reportStatus":  "failed",
+                      "criticalCount":  1,
+                      "blockedCount":  7,
+                      "findingCodes":  [
+                                           "bridge-relayer-loop-unhealthy",
+                                           "public-rpc-not-ready",
+                                           "backup-not-ready",
+                                           "bridge-not-ready",
+                                           "bridge-relayer-not-ready",
+                                           "external-tester-not-shareable",
+                                           "external-tester-evidence-invalid",
+                                           "deployment-contract-not-ready"
+                                       ]
+                  },
+                  {
+                      "id":  "recovery-command-print",
+                      "requirement":  "Emergency recovery commands are printable to a no-values report without stopping live services.",
+                      "status":  "passed",
+                      "evidence":  "exitCode=0, recoverySteps=8, emergencyCommands=4",
+                      "expectedCodes":  [
+
+                                        ],
+                      "child":  {
+                                    "name":  "recovery-command-print",
+                                    "exitCode":  0,
+                                    "outputTail":  [
+                                                       "FlowChain recovery steps:",
+                                                       "- npm run flowchain:emergency:export-evidence",
+                                                       "- npm run flowchain:doctor",
+                                                       "- npm run flowchain:init",
+                                                       "- npm run flowchain:node:start",
+                                                       "- npm run flowchain:node:status",
+                                                       "- npm run control-plane:serve",
+                                                       "- npm run workbench:dev",
+                                                       "- npm run flowchain:bridge:live:check",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\recovery-commands-report.json"
+                                                   ]
+                                },
+                      "reportStatus":  "printed",
+                      "criticalCount":  null,
+                      "blockedCount":  null,
+                      "findingCodes":  {
+
+                                       }
+                  },
+                  {
+                      "id":  "post-drill-live-status",
+                      "requirement":  "Incident drills leave the live local chain services running and readable.",
+                      "status":  "passed",
+                      "evidence":  "exitCode=0, status=passed, node=running, controlPlane=running",
+                      "expectedCodes":  [
+
+                                        ],
+                      "child":  {
+                                    "name":  "post-drill-live-status",
+                                    "exitCode":  0,
+                                    "outputTail":  [
+                                                       "FlowChain service status: passed",
+                                                       "Node: running PID=26992",
+                                                       "Control plane: running PID=62452 bind=127.0.0.1:8787",
+                                                       "Bridge relayer loop: stopped report=blocked healthy=False",
+                                                       "Public readiness: blocked",
+                                                       "Latest height: 73257",
+                                                       "Finalized height: 73257",
+                                                       "Backup path: not-configured",
+                                                       "Bridge readiness: live=blocked, infra=blocked",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\post-drill-service-status-report.json"
+                                                   ]
+                                },
+                      "reportStatus":  "passed",
+                      "criticalCount":  null,
+                      "blockedCount":  null,
+                      "findingCodes":  {
+
+                                       }
+                  }
+              ],
+    "liveStateBefore":  {
+                            "readable":  true,
+                            "statePathConfigured":  true,
+                            "chainId":  "flowmemory-local-devnet-v0",
+                            "latestHeight":  "73246",
+                            "latestHash":  "0x8cefac7a6aadb99de851ace6ec3bcf60104d2ea547bfac42145b4902a1c52d5d",
+                            "latestRoot":  "0xf32d9dfe092f6f869f27a932a863b152f2564f17bb36ac9db68983a061b5afff",
+                            "latestBlockTimestamp":  "1778761245",
+                            "latestBlockAgeSeconds":  3,
+                            "stateFileLastWriteAgeSeconds":  3,
+                            "finalizedHeight":  "73246",
+                            "finalizedHash":  "0x8cefac7a6aadb99de851ace6ec3bcf60104d2ea547bfac42145b4902a1c52d5d",
+                            "mempoolDepth":  0,
+                            "peerCount":  null,
+                            "blockCount":  73246
+                        },
+    "liveStateAfter":  {
+                           "readable":  true,
+                           "statePathConfigured":  true,
+                           "chainId":  "flowmemory-local-devnet-v0",
+                           "latestHeight":  "73264",
+                           "latestHash":  "0x52d8b70ed4cf6faf0ff7bd961205076c2658b0bef8146acd7ed96ff170cfb7f2",
+                           "latestRoot":  "0xf32d9dfe092f6f869f27a932a863b152f2564f17bb36ac9db68983a061b5afff",
+                           "latestBlockTimestamp":  "1778761263",
+                           "latestBlockAgeSeconds":  1,
+                           "stateFileLastWriteAgeSeconds":  1,
+                           "finalizedHeight":  "73264",
+                           "finalizedHash":  "0x52d8b70ed4cf6faf0ff7bd961205076c2658b0bef8146acd7ed96ff170cfb7f2",
+                           "mempoolDepth":  0,
+                           "peerCount":  null,
+                           "blockCount":  73264
+                       },
+    "reportPaths":  {
+                        "report":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drill-report.json",
+                        "markdown":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\INCIDENT_DRILL.md",
+                        "runDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills",
+                        "recovery":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\recovery-commands-report.json",
+                        "postDrillServiceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\post-drill-service-status-report.json"
+                    },
+    "noLiveBroadcast":  true,
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

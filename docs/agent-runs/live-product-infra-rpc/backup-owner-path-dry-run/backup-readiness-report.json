@@ -1,0 +1,46 @@
+{
+    "schema":  "flowchain.backup_readiness_report.v1",
+    "generatedAt":  "2026-05-18T04:43:48.1411808Z",
+    "status":  "passed",
+    "requiredEnvNames":  [
+                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                         ],
+    "missingEnvNames":  [
+
+                        ],
+    "state":  {
+                  "statePath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\state.json",
+                  "readable":  true,
+                  "latestHeight":  "65552",
+                  "latestHash":  "0xb8afff089644c9fda65e41c087b08c1458d9f951ca9ca5fef1ab9eb642f1afd7",
+                  "latestRoot":  "0xd90c3fc45ca18fd7e4e036f755ea98399570fb9328102ccfbef155f20c52d9d7"
+              },
+    "backup":  {
+                   "configured":  true,
+                   "pathValuePrinted":  false,
+                   "exists":  true,
+                   "directory":  true,
+                   "snapshotProofStatus":  "passed",
+                   "restoreProofStatus":  "passed",
+                   "latestBackupTimestamp":  "2026-05-18T04:43:10.2325853Z",
+                   "latestBackupArtifactName":  "flowchain-state-snapshot-20260518T044155394Z",
+                   "stateRootCompared":  true,
+                   "stateRootMatch":  true,
+                   "stateFileHashMatch":  true,
+                   "writeVerified":  true,
+                   "latestPointerVerified":  true,
+                   "latestPointerWrittenAtomically":  true,
+                   "snapshotManifestHash":  "fbefe5555823bd6576896dff117a9c67012526cc66179017448a5f31c7173b26",
+                   "latestManifestHash":  "fbefe5555823bd6576896dff117a9c67012526cc66179017448a5f31c7173b26",
+                   "restoreVerified":  true
+               },
+    "proofReports":  {
+                         "snapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-owner-path-dry-run\\state-backup-report.json",
+                         "restore":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-owner-path-dry-run\\state-restore-verify-report.json"
+                     },
+    "problems":  [
+
+                 ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

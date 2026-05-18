@@ -1,0 +1,54 @@
+{
+    "schema":  "flowchain.public_rpc_validation_report.v0",
+    "generatedAt":  "2026-05-18T06:53:30.2703225Z",
+    "status":  "passed",
+    "validationScope":  "local-control-plane-public-rpc-readiness-rehearsal",
+    "publicRpcReady":  false,
+    "expectedBlockedBecauseEndpointIsLocal":  true,
+    "checks":  {
+                   "readinessExitedCleanly":  true,
+                   "localEndpointBlocksPublicReady":  true,
+                   "localEndpointSelfReportsNonProduction":  true,
+                   "discoveryMatchesReadinessDeployment":  true,
+                   "readinessDeploymentFlagsConsistent":  true,
+                   "noPublicRpcEnvMissing":  true,
+                   "noFailedEndpointChecks":  true,
+                   "allowedOriginAccepted":  true,
+                   "disallowedOriginProbePerformed":  true,
+                   "disallowedOriginRejected":  true,
+                   "rateLimitProbePerformed":  true,
+                   "rateLimitRejected":  true,
+                   "rateLimitRetryAfterHeaderPresent":  true,
+                   "responseHygienePassed":  true,
+                   "failedProblemsAbsent":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "readinessStatus":  "blocked",
+    "readinessExitCode":  0,
+    "endpointCheckCount":  10,
+    "failedEndpointCheckCount":  0,
+    "missingEnvCount":  0,
+    "failedProblemCount":  0,
+    "reportPaths":  {
+                        "validation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation-report.json",
+                        "readiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation\\public-rpc-readiness-report.json",
+                        "stdout":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation\\control-plane.stdout.log",
+                        "stderr":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation\\control-plane.stderr.log"
+                    },
+    "readinessOutputRedacted":  [
+                                    "FlowChain public RPC readiness status: blocked",
+                                    "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation\\public-rpc-readiness-report.json"
+                                ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

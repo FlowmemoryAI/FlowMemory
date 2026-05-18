@@ -1,0 +1,144 @@
+{
+    "schema":  "flowchain.live_product_e2e_report.v0",
+    "generatedAt":  "2026-05-18T14:16:22.4953008Z",
+    "status":  "blocked",
+    "productionLocalAggregateStatus":  "passed-with-live-blockers",
+    "liveInfraStatus":  "blocked",
+    "stepCounts":  {
+                       "passed":  5,
+                       "blocked":  2,
+                       "failed":  0,
+                       "total":  7
+                   },
+    "blockedStepNames":  [
+                             "Production-shaped local L1 aggregate",
+                             "Live infrastructure readiness"
+                         ],
+    "failedStepNames":  [
+
+                        ],
+    "steps":  [
+                  {
+                      "name":  "Stop live service before aggregate",
+                      "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-service-stop.ps1",
+                      "status":  "passed",
+                      "childReportStatus":  "stopped",
+                      "exitCode":  0,
+                      "startedAt":  "2026-05-18T13:56:21.1067060Z",
+                      "endedAt":  "2026-05-18T13:56:29.5368590Z",
+                      "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Stop-live-service-before-aggregate.log",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-stop-report.json",
+                      "childReportFresh":  true,
+                      "timedOut":  false
+                  },
+                  {
+                      "name":  "Production-shaped local L1 aggregate",
+                      "command":  "cmd.exe /d /s /c npm.cmd run flowchain:production-l1:e2e",
+                      "status":  "blocked",
+                      "childReportStatus":  "passed-with-live-blockers",
+                      "exitCode":  0,
+                      "startedAt":  "2026-05-18T13:56:29.6488638Z",
+                      "endedAt":  "2026-05-18T14:09:25.8973076Z",
+                      "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Production-shaped-local-L1-aggregate.log",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\production-l1-e2e\\flowchain-production-l1-e2e-report.json",
+                      "childReportFresh":  true,
+                      "timedOut":  false
+                  },
+                  {
+                      "name":  "Restore live service profile",
+                      "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-service-restart.ps1 -LiveProfile",
+                      "status":  "passed",
+                      "childReportStatus":  "",
+                      "exitCode":  0,
+                      "startedAt":  "2026-05-18T14:09:25.9143091Z",
+                      "endedAt":  "2026-05-18T14:09:25.9813116Z",
+                      "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Restore-live-service-profile.log",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-restart-report.json",
+                      "childReportFresh":  false,
+                      "timedOut":  false
+                  },
+                  {
+                      "name":  "Verify live service profile attempt 2",
+                      "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-service-status.ps1 -AllowBlocked",
+                      "status":  "passed",
+                      "childReportStatus":  "passed",
+                      "exitCode":  0,
+                      "startedAt":  "2026-05-18T14:10:14.4146983Z",
+                      "endedAt":  "2026-05-18T14:10:49.4251121Z",
+                      "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Verify-live-service-profile-attempt-2.log",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
+                      "childReportFresh":  true,
+                      "timedOut":  false
+                  },
+                  {
+                      "name":  "Live service wallet transfer E2E",
+                      "command":  "cmd.exe /d /s /c npm.cmd run flowchain:wallet:live-service:e2e",
+                      "status":  "passed",
+                      "childReportStatus":  "passed",
+                      "exitCode":  0,
+                      "startedAt":  "2026-05-18T14:10:49.4361132Z",
+                      "endedAt":  "2026-05-18T14:12:27.5545206Z",
+                      "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Live-service-wallet-transfer-E2E.log",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-wallet-e2e-report.json",
+                      "childReportFresh":  true,
+                      "timedOut":  false
+                  },
+                  {
+                      "name":  "Live service tester network E2E",
+                      "command":  "cmd.exe /d /s /c npm.cmd run flowchain:wallet:live-tester:e2e",
+                      "status":  "passed",
+                      "childReportStatus":  "passed",
+                      "exitCode":  0,
+                      "startedAt":  "2026-05-18T14:12:27.5595169Z",
+                      "endedAt":  "2026-05-18T14:14:28.4538239Z",
+                      "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Live-service-tester-network-E2E.log",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json",
+                      "childReportFresh":  true,
+                      "timedOut":  false
+                  },
+                  {
+                      "name":  "Live infrastructure readiness",
+                      "command":  "cmd.exe /d /s /c npm.cmd run flowchain:live-infra:check -- -AllowBlocked",
+                      "status":  "blocked",
+                      "childReportStatus":  "blocked",
+                      "exitCode":  0,
+                      "startedAt":  "2026-05-18T14:14:28.4598263Z",
+                      "endedAt":  "2026-05-18T14:16:22.4583006Z",
+                      "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Live-infrastructure-readiness.log",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-infra-check-report.json",
+                      "childReportFresh":  true,
+                      "timedOut":  false
+                  }
+              ],
+    "serviceRestoreAttempted":  true,
+    "productionTimeoutSeconds":  7200,
+    "serviceProbeTimeoutSeconds":  180,
+    "missingEnvNames":  [
+                            "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                            "FLOWCHAIN_BASE8453_RPC_URL",
+                            "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                            "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                            "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                            "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                            "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                            "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                            "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                            "FLOWCHAIN_RPC_PUBLIC_URL",
+                            "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                            "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                            "FLOWCHAIN_RPC_TLS_TERMINATED",
+                            "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                        ],
+    "reportPaths":  {
+                        "serviceStop":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-stop-report.json",
+                        "productionLocalAggregate":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\production-l1-e2e\\flowchain-production-l1-e2e-report.json",
+                        "serviceRestart":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-restart-report.json",
+                        "liveServiceWallet":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-wallet-e2e-report.json",
+                        "liveServiceTesterNetwork":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json",
+                        "liveInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-infra-check-report.json",
+                        "liveProduct":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-product-e2e-report.json"
+                    },
+    "noLiveBroadcast":  true,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

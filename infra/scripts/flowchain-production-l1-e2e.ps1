@@ -13,6 +13,10 @@ $reportFullDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resol
 $logsDir = Join-Path $reportFullDir "logs"
 $reportPath = Join-Path $reportFullDir "flowchain-production-l1-e2e-report.json"
 $summaryPath = Join-Path $reportFullDir "flowchain-production-l1-e2e-summary.md"
+$optionalMissingEnvNames = @(
+    "FLOWCHAIN_BASE8453_CURSOR_STATE",
+    "FLOWCHAIN_BASE8453_TO_BLOCK"
+)
 
 if (Test-Path -LiteralPath $reportFullDir) {
     Remove-Item -LiteralPath $reportFullDir -Recurse -Force
@@ -150,6 +154,37 @@ function Get-PortStatus {
     }
 }
 
+function Get-FileSha256 {
+    param([string] $Path)
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return "missing"
+    }
+    try {
+        return ((Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash).ToLowerInvariant()
+    }
+    catch {
+        return "unknown"
+    }
+}
+
+function Get-StateRootFromLog {
+    param([string] $Path)
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return "unknown"
+    }
+    try {
+        $text = Get-Content -Raw -LiteralPath $Path
+        $match = [regex]::Match($text, '"stateRoot"\s*:\s*"(0x[0-9a-fA-F]{64})"')
+        if ($match.Success) {
+            return $match.Groups[1].Value
+        }
+    }
+    catch {
+        return "unknown"
+    }
+    return "unknown"
+}
+
 function Get-StateFacts {
     param([string] $StatePath)
     $facts = [ordered]@{
@@ -224,6 +259,57 @@ function Read-JsonIfExists {
     return $null
 }
 
+function Import-LivePilotEnvLoaderIfConfigured {
+    $loaderPath = [Environment]::GetEnvironmentVariable("FLOWCHAIN_LIVE_PILOT_ENV_LOADER", "Process")
+    if ([string]::IsNullOrWhiteSpace($loaderPath)) {
+        return
+    }
+    $fullLoaderPath = [System.IO.Path]::GetFullPath($loaderPath)
+    if (-not (Test-Path -LiteralPath $fullLoaderPath)) {
+        throw "FLOWCHAIN_LIVE_PILOT_ENV_LOADER points to a missing file."
+    }
+    if ([System.IO.Path]::GetExtension($fullLoaderPath) -ne ".ps1") {
+        throw "FLOWCHAIN_LIVE_PILOT_ENV_LOADER must point to a PowerShell loader script."
+    }
+    . $fullLoaderPath
+}
+
+function Get-JsonArrayProperty {
+    param(
+        [AllowNull()][object] $Object,
+        [Parameter(Mandatory = $true)][string] $Name
+    )
+
+    if ($null -eq $Object -or -not ($Object.PSObject.Properties.Name -contains $Name)) {
+        return [object[]]@()
+    }
+    $value = $Object.$Name
+    if ($null -eq $value) {
+        return [object[]]@()
+    }
+    if ($value -is [System.Management.Automation.PSCustomObject] -and @($value.PSObject.Properties).Count -eq 0) {
+        return [object[]]@()
+    }
+    return [object[]]@($value)
+}
+
+function Get-JsonStringPropertyOrFallback {
+    param(
+        [AllowNull()][object] $Object,
+        [Parameter(Mandatory = $true)][string] $Name,
+        [Parameter(Mandatory = $true)][string] $Fallback
+    )
+
+    if ($null -eq $Object -or -not ($Object.PSObject.Properties.Name -contains $Name)) {
+        return $Fallback
+    }
+    $value = $Object.$Name
+    if ($null -eq $value -or [string]::IsNullOrWhiteSpace("$value")) {
+        return $Fallback
+    }
+    return "$value"
+}
+
 Write-Host "FlowChain production-l1:e2e mock-safe gate starting."
 Write-Host "Report directory: $reportFullDir"
 
@@ -250,7 +336,8 @@ else {
 
 $packageJson = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "package.json") | ConvertFrom-Json
 $rootScripts = @($packageJson.scripts.PSObject.Properties.Name)
-$realValuePilotReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/real-value-pilot/flowchain-real-value-pilot-e2e-report.json"
+$realValuePilotCoordinationReportDir = Join-Path $reportFullDir "real-value-pilot-coordination"
+$realValuePilotReportPath = Join-Path $realValuePilotCoordinationReportDir "flowchain-real-value-pilot-e2e-report.json"
 $realValuePilotLogPath = Join-Path $logsDir "Real-value-pilot-coordination-E2E.log"
 $missingSubsystemCommands = New-Object System.Collections.ArrayList
 foreach ($entry in @(
@@ -280,32 +367,65 @@ Invoke-ProductionStep -Name "Wallet transfer E2E" -Owner "wallet/runtime" -Comma
 Invoke-ProductionStep -Name "Product E2E" -Owner "runtime/product" -Command "npm run flowchain:product:e2e -- -SkipFullSmoke" -FilePath "powershell" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-product-e2e.ps1"), "-SkipFullSmoke") -ExpectedReportPath (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/product-e2e/flowchain-product-e2e-report.json")
 Invoke-ProductionStep -Name "Token and DEX E2E" -Owner "runtime/token-dex" -Command "npm run flowchain:dex:e2e" -FilePath "npm" -ArgumentList @("run", "flowchain:dex:e2e") -ExpectedReportPath (Join-Path $reportFullDir "dex/dex-e2e-report.json")
 Invoke-ProductionStep -Name "Bridge mock pilot E2E" -Owner "bridge-relayer" -Command "npm run flowchain:bridge:mock:e2e" -FilePath "npm" -ArgumentList @("run", "flowchain:bridge:mock:e2e")
-Invoke-ProductionStep -Name "Real-value pilot coordination E2E" -Owner "hq/ops" -Command "npm run flowchain:real-value-pilot:e2e -- -AllowIncomplete -SkipBaseline" -FilePath "powershell" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-real-value-pilot-e2e.ps1"), "-AllowIncomplete", "-SkipBaseline") -Blocks "liveReadiness" -AllowFailure -ExpectedReportPath $realValuePilotReportPath
-Invoke-ProductionStep -Name "Bridge live readiness check" -Owner "bridge/ops" -Command "npm run flowchain:bridge:live:check" -FilePath "powershell" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-live-check.ps1"), "-AllowBlocked") -Blocks "liveReadiness" -AllowFailure -ExpectedReportPath (Join-Path $reportFullDir "bridge-live-readiness-report.json")
+Invoke-ProductionStep -Name "Real-value pilot coordination E2E" -Owner "hq/ops" -Command "npm run flowchain:real-value-pilot:e2e -- -AllowIncomplete -SkipBaseline" -FilePath "powershell" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-real-value-pilot-e2e.ps1"), "-AllowIncomplete", "-SkipBaseline", "-ReportDir", $realValuePilotCoordinationReportDir) -Blocks "liveReadiness" -AllowFailure -ExpectedReportPath $realValuePilotReportPath
+Import-LivePilotEnvLoaderIfConfigured
+Invoke-ProductionStep -Name "Bridge live readiness check" -Owner "bridge/ops" -Command "npm run flowchain:bridge:live:check" -FilePath "powershell" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-live-check.ps1"), "-ReportPath", (Join-Path $reportFullDir "bridge-live-readiness-report.json"), "-AllowBlocked") -Blocks "liveReadiness" -AllowFailure -ExpectedReportPath (Join-Path $reportFullDir "bridge-live-readiness-report.json")
 Invoke-ProductionStep -Name "Control-plane smoke" -Owner "control-plane" -Command "npm run flowchain:control-plane:smoke" -FilePath "npm" -ArgumentList @("run", "flowchain:control-plane:smoke")
 Invoke-ProductionStep -Name "Dashboard build" -Owner "dashboard" -Command "npm run flowchain:dashboard:build" -FilePath "npm" -ArgumentList @("run", "flowchain:dashboard:build")
 Invoke-ProductionStep -Name "Export local state" -Owner "storage" -Command "npm run flowchain:export" -FilePath "npm" -ArgumentList @("run", "flowchain:export")
 
 $mainStatePath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/state.json"
 $bundlePath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/export/flowchain-local-state.zip"
+$exportedStatePath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/export/latest/state.json"
 $importedStatePath = Join-Path $reportFullDir "imported-state.json"
 $importDir = Join-Path $reportFullDir "imported"
-Invoke-ProductionStep -Name "Import local state" -Owner "storage" -Command "npm run flowchain:import -- --BundlePath devnet/local/export/flowchain-local-state.zip -StatePath devnet/local/production-l1-e2e/imported-state.json -Force" -FilePath "powershell" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-import.ps1"), "-BundlePath", $bundlePath, "-StatePath", $importedStatePath, "-ImportDir", $importDir, "-Force")
+$importStep = Invoke-ProductionStep -Name "Import local state" -Owner "storage" -Command "npm run flowchain:import -- --BundlePath devnet/local/export/flowchain-local-state.zip -StatePath devnet/local/production-l1-e2e/imported-state.json -Force" -FilePath "powershell" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-import.ps1"), "-BundlePath", $bundlePath, "-StatePath", $importedStatePath, "-ImportDir", $importDir, "-Force")
 
-$originalFacts = Get-StateFacts -StatePath $mainStatePath
+$exportedFacts = Get-StateFacts -StatePath $exportedStatePath
 $importedFacts = Get-StateFacts -StatePath $importedStatePath
+$exportedStateSha256 = Get-FileSha256 -Path $exportedStatePath
+$importedStateSha256 = Get-FileSha256 -Path $importedStatePath
+$stateFileSha256Match = ($exportedStateSha256 -notin @("missing", "unknown") -and $exportedStateSha256 -eq $importedStateSha256)
+$importedStateRootForReport = $importedFacts.stateRoot
+$importedStateRootSource = "inspect-state"
+if ($importedStateRootForReport -eq "unknown") {
+    $importedStateRootFromLog = Get-StateRootFromLog -Path $importStep.logPath
+    if ($importedStateRootFromLog -ne "unknown") {
+        $importedStateRootForReport = $importedStateRootFromLog
+        $importedStateRootSource = "import-log-inspect-state"
+    }
+}
+if ($importedStateRootForReport -eq "unknown" -and $stateFileSha256Match -and $exportedFacts.stateRoot -ne "unknown") {
+    $importedStateRootForReport = $exportedFacts.stateRoot
+    $importedStateRootSource = "matched-state-file-sha256"
+}
 $rootComparePath = Join-Path $reportFullDir "export-import-root-compare.json"
-$rootCompareStatus = if ($originalFacts.stateRoot -ne "unknown" -and $originalFacts.stateRoot -eq $importedFacts.stateRoot) { "passed" } else { "failed" }
+$rootCompareStatus = if ($exportedFacts.stateRoot -ne "unknown" -and $importedStateRootForReport -ne "unknown" -and $exportedFacts.stateRoot -eq $importedStateRootForReport) { "passed" } else { "failed" }
+$rootCompareReason = if ($rootCompareStatus -eq "passed") {
+    ""
+}
+elseif ($exportedFacts.stateRoot -eq "unknown" -or $importedStateRootForReport -eq "unknown") {
+    "exported/imported state root was unknown after inspect-state and state-file hash fallback"
+}
+else {
+    "exported/imported state roots did not match"
+}
 Write-FlowChainJson -Path $rootComparePath -Value ([ordered]@{
         schema = "flowchain.export_import_root_compare.v0"
         generatedAt = (Get-Date).ToUniversalTime().ToString("o")
         status = $rootCompareStatus
-        originalStateRoot = $originalFacts.stateRoot
-        importedStateRoot = $importedFacts.stateRoot
+        originalStateRoot = $exportedFacts.stateRoot
+        exportedStateRoot = $exportedFacts.stateRoot
+        importedStateRoot = $importedStateRootForReport
+        importedStateRootSource = $importedStateRootSource
+        exportedStateSha256 = $exportedStateSha256
+        importedStateSha256 = $importedStateSha256
+        stateFileSha256Match = $stateFileSha256Match
         exportBundle = $bundlePath
+        exportedStatePath = $exportedStatePath
         importedStatePath = $importedStatePath
     })
-Add-InternalStep -Name "Verify root after restore" -Owner "storage" -Command "compare original/imported state root" -Status $rootCompareStatus -Blocks "mockPath" -ReportPath $rootComparePath -Reason $(if ($rootCompareStatus -eq "passed") { "" } else { "state roots did not match" })
+Add-InternalStep -Name "Verify root after restore" -Owner "storage" -Command "compare exported/imported state root" -Status $rootCompareStatus -Blocks "mockPath" -ReportPath $rootComparePath -Reason $rootCompareReason
 
 Invoke-ProductionStep -Name "Restart recovery" -Owner "runtime/storage" -Command "npm run flowchain:restart:verify" -FilePath "npm" -ArgumentList @("run", "flowchain:restart:verify") -ExpectedReportPath (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/node-smoke/one-node-smoke-report.json")
 Invoke-ProductionStep -Name "No-secret scan" -Owner "security" -Command "npm run flowchain:no-secret:scan" -FilePath "npm" -ArgumentList @("run", "flowchain:no-secret:scan") -ExpectedReportPath (Join-Path $reportFullDir "no-secret-scan-report.json")
@@ -324,13 +444,14 @@ $restartReport = Read-JsonIfExists -Path (Resolve-FlowChainPath -RepoRoot $repoR
 $mockFailures = @($steps | Where-Object { $_.blocks -eq "mockPath" -and $_.status -ne "passed" })
 $liveFailed = @($steps | Where-Object { $_.blocks -eq "liveReadiness" -and $_.status -eq "failed" })
 $liveBlocked = @($steps | Where-Object { $_.blocks -eq "liveReadiness" -and $_.status -ne "passed" })
+$bridgeLiveReportBlocked = ($bridgeLiveReport -and $bridgeLiveReport.status -ne "passed")
 $overallStatus = if ($mockFailures.Count -gt 0) {
     "failed"
 }
-elseif ($liveFailed.Count -gt 0) {
+elseif ($liveFailed.Count -gt 0 -or ($bridgeLiveReport -and $bridgeLiveReport.status -eq "failed")) {
     "failed"
 }
-elseif ($liveBlocked.Count -gt 0 -or $missingSubsystemCommands.Count -gt 0) {
+elseif ($liveBlocked.Count -gt 0 -or $missingSubsystemCommands.Count -gt 0 -or $bridgeLiveReportBlocked) {
     "passed-with-live-blockers"
 }
 else {
@@ -402,6 +523,8 @@ $restartCommands = @(
     "npm run workbench:dev"
 )
 
+$tokenDexStepStatus = (@($steps | Where-Object { $_.name -eq "Token and DEX E2E" })[0]).status
+
 $report = [ordered]@{
     schema = "flowchain.production_l1.e2e_report.v0"
     timestamp = (Get-Date).ToUniversalTime().ToString("o")
@@ -443,8 +566,8 @@ $report = [ordered]@{
     stateRoot = $stateFacts.stateRoot
     walletE2EStatus = (@($steps | Where-Object { $_.name -eq "Wallet E2E" })[0]).status
     transferE2EStatus = (@($steps | Where-Object { $_.name -eq "Wallet transfer E2E" })[0]).status
-    tokenE2EStatus = if ($dexReport) { $dexReport.tokenStatus } else { "unknown" }
-    dexE2EStatus = if ($dexReport) { $dexReport.dexStatus } else { "unknown" }
+    tokenE2EStatus = Get-JsonStringPropertyOrFallback -Object $dexReport -Name "tokenStatus" -Fallback $tokenDexStepStatus
+    dexE2EStatus = Get-JsonStringPropertyOrFallback -Object $dexReport -Name "dexStatus" -Fallback $tokenDexStepStatus
     productE2EStatus = if ($productReport) { $productReport.status } else { (@($steps | Where-Object { $_.name -eq "Product E2E" })[0]).status }
     bridgeMockStatus = (@($steps | Where-Object { $_.name -eq "Bridge mock pilot E2E" })[0]).status
     bridgeLiveReadinessStatus = if ($bridgeLiveReport) { $bridgeLiveReport.status } else { (@($steps | Where-Object { $_.name -eq "Bridge live readiness check" })[0]).status }
@@ -454,7 +577,7 @@ $report = [ordered]@{
     restartRecoveryStatus = if ($restartReport) { "passed" } else { (@($steps | Where-Object { $_.name -eq "Restart recovery" })[0]).status }
     noSecretScanStatus = (@($steps | Where-Object { $_.name -eq "No-secret scan" })[0]).status
     unsafeClaimScanStatus = (@($steps | Where-Object { $_.name -eq "Unsafe-claim scan" })[0]).status
-    missingEnvNamesForLiveMode = if ($bridgeLiveReport) { @($bridgeLiveReport.missingEnvNames) } else { @() }
+    missingEnvNamesForLiveMode = [object[]](@((Get-JsonArrayProperty -Object $bridgeLiveReport -Name "missingEnvNames") | Where-Object { $_ -notin $optionalMissingEnvNames }))
     missingSubsystemCommands = @($missingSubsystemCommands)
     failureBlockerDetails = @($failureBlockerDetails)
     commandList = @($commandsRun)
@@ -488,10 +611,10 @@ $report = [ordered]@{
     passFailSummary = [ordered]@{
         overall = $overallStatus
         mockPath = if ($mockFailures.Count -eq 0) { "passed" } else { "failed" }
-        liveReadiness = if ($liveBlocked.Count -eq 0 -and $missingSubsystemCommands.Count -eq 0) { "passed" } else { "blocked" }
+        liveReadiness = if ($liveBlocked.Count -eq 0 -and $missingSubsystemCommands.Count -eq 0 -and -not $bridgeLiveReportBlocked) { "passed" } else { "blocked" }
         liveBroadcast = "not-run; requires explicit operator acknowledgement and owner-supplied live env"
         failedMockSteps = @($mockFailures | ForEach-Object { $_.name })
-        blockedLiveSteps = @($liveBlocked | ForEach-Object { $_.name })
+        blockedLiveSteps = @($liveBlocked | ForEach-Object { $_.name }) + $(if ($bridgeLiveReportBlocked) { @("Bridge live readiness report: $($bridgeLiveReport.status)") } else { @() })
     }
 }
 

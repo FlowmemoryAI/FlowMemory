@@ -8,12 +8,17 @@ import {
   BrainCircuit,
   Boxes,
   ClipboardCheck,
+  ArrowRightLeft,
+  Compass,
   RadioReceiver,
   LayoutDashboard,
   Monitor,
   Network,
   RadioTower,
+  ShieldAlert,
   ShieldCheck,
+  UserPlus,
+  Wallet,
 } from "lucide-react";
 import type { DashboardData } from "../data/types";
 import type { WorkbenchSnapshot } from "../data/workbench";
@@ -28,6 +33,11 @@ interface AppShellProps {
 
 const NAV_ITEMS = [
   { to: "/", label: "Workbench", icon: Monitor },
+  { to: "/wallet", label: "Wallet", icon: Wallet },
+  { to: "/tester", label: "Tester launch", icon: UserPlus },
+  { to: "/bridge", label: "Bridge pilot", icon: ArrowRightLeft },
+  { to: "/explorer", label: "Explorer", icon: Compass },
+  { to: "/ops", label: "Ops", icon: ShieldAlert },
   { to: "/overview", label: "Overview", icon: LayoutDashboard },
   { to: "/canary", label: "Base canary", icon: RadioReceiver },
   { to: "/flowmemory", label: "Flow Memory", icon: BrainCircuit },
@@ -43,6 +53,12 @@ const NAV_ITEMS = [
 
 export function AppShell({ data, canaryData, workbench, children }: AppShellProps) {
   const location = useLocation();
+  const isBridgeRoute = location.pathname.startsWith("/bridge");
+  const isWalletRoute = location.pathname.startsWith("/wallet");
+  if (isBridgeRoute || isWalletRoute) {
+    return <>{children}</>;
+  }
+
   const isCanaryRoute = location.pathname.startsWith("/canary");
   const activeData = isCanaryRoute && canaryData ? canaryData : data;
   const bannerMode = isCanaryRoute

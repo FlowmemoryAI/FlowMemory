@@ -1,0 +1,110 @@
+{
+    "schema":  "flowchain.alert_install_windows_report.v0",
+    "generatedAt":  "2026-05-18T06:50:59.5836727Z",
+    "status":  "passed",
+    "action":  "Status",
+    "plannedOnly":  false,
+    "taskMutationPerformed":  false,
+    "taskRegistered":  false,
+    "taskRemoved":  false,
+    "taskName":  "FlowChainOpsAlerts",
+    "taskPath":  "\\",
+    "intervalMinutes":  15,
+    "taskBefore":  {
+                       "exists":  false,
+                       "schedulerAvailable":  true,
+                       "taskName":  "FlowChainOpsAlerts",
+                       "taskPath":  "\\",
+                       "state":  "",
+                       "lastRunTime":  "",
+                       "nextRunTime":  "",
+                       "lastTaskResult":  "",
+                       "queryError":  ""
+                   },
+    "taskAfter":  {
+                      "exists":  false,
+                      "schedulerAvailable":  true,
+                      "taskName":  "FlowChainOpsAlerts",
+                      "taskPath":  "\\",
+                      "state":  "",
+                      "lastRunTime":  "",
+                      "nextRunTime":  "",
+                      "lastTaskResult":  "",
+                      "queryError":  ""
+                  },
+    "schedulerCmdlets":  [
+                             {
+                                 "name":  "Get-ScheduledTask",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "Get-ScheduledTaskInfo",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "New-ScheduledTaskAction",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "New-ScheduledTaskTrigger",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "New-ScheduledTaskSettingsSet",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "Register-ScheduledTask",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "Unregister-ScheduledTask",
+                                 "available":  true
+                             }
+                         ],
+    "scheduledTask":  {
+                          "trigger":  "Interval",
+                          "intervalMinutes":  15,
+                          "execute":  "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                          "arguments":  "-NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-ops-alerts.ps1 -AllowBlocked -ReportPath docs/agent-runs/live-product-infra-rpc/scheduled-ops-alert-rules-report.json -MarkdownPath docs/agent-runs/live-product-infra-rpc/SCHEDULED_OPS_ALERT_RULES.md -OpsSnapshotPath docs/agent-runs/live-product-infra-rpc/scheduled-ops-snapshot-report.json",
+                          "workingDirectory":  "E:/FlowMemory/flowmemory-live-infra-rpc",
+                          "alertsScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-ops-alerts.ps1",
+                          "ownerEnvFileConfigured":  false,
+                          "sendsExternalNotifications":  false
+                      },
+    "alerts":  {
+                   "reportPath":  "docs/agent-runs/live-product-infra-rpc/scheduled-ops-alert-rules-report.json",
+                   "markdownPath":  "docs/agent-runs/live-product-infra-rpc/SCHEDULED_OPS_ALERT_RULES.md",
+                   "opsSnapshotPath":  "docs/agent-runs/live-product-infra-rpc/scheduled-ops-snapshot-report.json"
+               },
+    "commands":  {
+                     "plan":  "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
+                     "validate":  "npm run flowchain:ops:alerts:install:validate",
+                     "install":  "npm run flowchain:ops:alerts:install:windows -- -Action Install",
+                     "status":  "npm run flowchain:ops:alerts:install:windows -- -Action Status",
+                     "uninstall":  "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall",
+                     "alerts":  "npm run flowchain:ops:alerts -- -AllowBlocked"
+                 },
+    "checks":  {
+                   "alertsScriptExists":  true,
+                   "schedulerCmdletsAvailable":  true,
+                   "scheduledTaskActionSupportsWorkingDirectory":  true,
+                   "scheduledTaskTriggerSupportsRepetition":  true,
+                   "actionUsesAlertsScript":  true,
+                   "actionUsesRepoWorkingDirectory":  true,
+                   "hasAllowBlocked":  true,
+                   "hasReportPath":  true,
+                   "hasMarkdownPath":  true,
+                   "hasOpsSnapshotPath":  true,
+                   "intervalMinutesValid":  true,
+                   "noExternalDelivery":  true,
+                   "installStatusUninstallCommandsPresent":  true,
+                   "planDoesNotMutate":  null,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true
+               },
+    "actionErrorRedacted":  "",
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

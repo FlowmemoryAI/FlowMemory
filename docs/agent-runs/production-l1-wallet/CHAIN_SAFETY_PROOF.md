@@ -41,4 +41,3 @@ Withdrawal safety:
 - `sign-withdrawal-intent` requires a 20-byte Base destination address.
 - malformed Base destination addresses are rejected before signing.
 - withdrawal intent stays `testMode: true`, `broadcast: false`, and `productionReady: false`.
-

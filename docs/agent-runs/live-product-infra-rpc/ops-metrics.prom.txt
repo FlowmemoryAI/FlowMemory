@@ -1,0 +1,111 @@
+﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
+# TYPE flowchain_latest_height gauge
+flowchain_latest_height 73289
+# HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
+# TYPE flowchain_finalized_height gauge
+flowchain_finalized_height 73289
+# HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
+# TYPE flowchain_state_file_age_seconds gauge
+flowchain_state_file_age_seconds 0
+# HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
+# TYPE flowchain_monitor_samples_total gauge
+flowchain_monitor_samples_total 2
+# HELP flowchain_height_advanced One when service monitor proved advancing block height.
+# TYPE flowchain_height_advanced gauge
+flowchain_height_advanced 1
+# HELP flowchain_ops_critical_findings Current critical ops finding count.
+# TYPE flowchain_ops_critical_findings gauge
+flowchain_ops_critical_findings 0
+# HELP flowchain_ops_blocked_findings Current owner-blocked ops finding count.
+# TYPE flowchain_ops_blocked_findings gauge
+flowchain_ops_blocked_findings 6
+# HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
+# TYPE flowchain_ops_alert_rules_total gauge
+flowchain_ops_alert_rules_total 18
+# HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
+# TYPE flowchain_ops_alert_rules_critical gauge
+flowchain_ops_alert_rules_critical 11
+# HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
+# TYPE flowchain_ops_alert_rules_blocked gauge
+flowchain_ops_alert_rules_blocked 7
+# HELP flowchain_ops_active_alert_rules Active ops alert rule count for the current findings.
+# TYPE flowchain_ops_active_alert_rules gauge
+flowchain_ops_active_alert_rules 6
+# HELP flowchain_service_status_ready One when service status report is passed.
+# TYPE flowchain_service_status_ready gauge
+flowchain_service_status_ready 1
+# HELP flowchain_service_monitor_ready One when service monitor report is passed.
+# TYPE flowchain_service_monitor_ready gauge
+flowchain_service_monitor_ready 1
+# HELP flowchain_public_rpc_ready One when public RPC readiness is passed.
+# TYPE flowchain_public_rpc_ready gauge
+flowchain_public_rpc_ready 0
+# HELP flowchain_backup_ready One when backup readiness is passed.
+# TYPE flowchain_backup_ready gauge
+flowchain_backup_ready 0
+# HELP flowchain_bridge_live_ready One when bridge live readiness is passed.
+# TYPE flowchain_bridge_live_ready gauge
+flowchain_bridge_live_ready 0
+# HELP flowchain_bridge_infra_ready One when bridge infrastructure readiness is passed.
+# TYPE flowchain_bridge_infra_ready gauge
+flowchain_bridge_infra_ready 0
+# HELP flowchain_bridge_relayer_guardrail_ready One when bridge relayer fail-closed guardrail is ready.
+# TYPE flowchain_bridge_relayer_guardrail_ready gauge
+flowchain_bridge_relayer_guardrail_ready 1
+# HELP flowchain_bridge_relayer_loop_healthy One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence.
+# TYPE flowchain_bridge_relayer_loop_healthy gauge
+flowchain_bridge_relayer_loop_healthy 0
+# HELP flowchain_external_tester_ready One when external tester readiness is passed.
+# TYPE flowchain_external_tester_ready gauge
+flowchain_external_tester_ready 0
+# HELP flowchain_external_tester_evidence_ready One when external tester returned evidence validation is passed.
+# TYPE flowchain_external_tester_evidence_ready gauge
+flowchain_external_tester_evidence_ready 1
+# HELP flowchain_external_tester_evidence_failed_checks Failed checks in the external tester returned evidence validation report.
+# TYPE flowchain_external_tester_evidence_failed_checks gauge
+flowchain_external_tester_evidence_failed_checks 0
+# HELP flowchain_external_tester_evidence_missing_files Missing required files in the external tester returned evidence folder.
+# TYPE flowchain_external_tester_evidence_missing_files gauge
+flowchain_external_tester_evidence_missing_files 0
+# HELP flowchain_external_tester_evidence_secret_findings Secret marker findings in external tester returned evidence.
+# TYPE flowchain_external_tester_evidence_secret_findings gauge
+flowchain_external_tester_evidence_secret_findings 0
+# HELP flowchain_external_tester_evidence_height_advanced One when returned tester evidence shows block height advanced.
+# TYPE flowchain_external_tester_evidence_height_advanced gauge
+flowchain_external_tester_evidence_height_advanced 1
+# HELP flowchain_external_tester_evidence_transfer_consistent One when returned tester evidence has matching transfer, transaction, amount, and balance deltas.
+# TYPE flowchain_external_tester_evidence_transfer_consistent gauge
+flowchain_external_tester_evidence_transfer_consistent 1
+# HELP flowchain_public_deployment_ready One when public deployment contract is passed.
+# TYPE flowchain_public_deployment_ready gauge
+flowchain_public_deployment_ready 0
+# HELP flowchain_live_cutover_ready One when the live cutover rehearsal is passed.
+# TYPE flowchain_live_cutover_ready gauge
+flowchain_live_cutover_ready 0
+# HELP flowchain_live_cutover_owner_blocked One when live cutover is blocked only on known owner inputs.
+# TYPE flowchain_live_cutover_owner_blocked gauge
+flowchain_live_cutover_owner_blocked 1
+# HELP flowchain_live_cutover_missing_owner_inputs Number of required owner input names still blocking live cutover.
+# TYPE flowchain_live_cutover_missing_owner_inputs gauge
+flowchain_live_cutover_missing_owner_inputs 14
+# HELP flowchain_no_secret_ready One when no-secret scan is passed.
+# TYPE flowchain_no_secret_ready gauge
+flowchain_no_secret_ready 1
+# HELP flowchain_truth_gates_total Total production truth table gates.
+# TYPE flowchain_truth_gates_total gauge
+flowchain_truth_gates_total 49
+# HELP flowchain_truth_gates_passed Passed production truth table gates.
+# TYPE flowchain_truth_gates_passed gauge
+flowchain_truth_gates_passed 33
+# HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
+# TYPE flowchain_truth_gates_owner_blocked gauge
+flowchain_truth_gates_owner_blocked 16
+# HELP flowchain_truth_gates_repo_blocked Repo-blocked production truth table gates.
+# TYPE flowchain_truth_gates_repo_blocked gauge
+flowchain_truth_gates_repo_blocked 0
+# HELP flowchain_truth_gates_failed Failed production truth table gates.
+# TYPE flowchain_truth_gates_failed gauge
+flowchain_truth_gates_failed 0
+# HELP flowchain_truth_gates_stale Stale production truth table gates.
+# TYPE flowchain_truth_gates_stale gauge
+flowchain_truth_gates_stale 0

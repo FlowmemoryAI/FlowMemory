@@ -21,4 +21,3 @@ Evidence:
 - `devnet/local/export/flowchain-local-state.zip`
 - `devnet/local/production-l1-e2e/export-import-root-compare.json`
 - `devnet/local/node-smoke/one-node-smoke-report.json`
-

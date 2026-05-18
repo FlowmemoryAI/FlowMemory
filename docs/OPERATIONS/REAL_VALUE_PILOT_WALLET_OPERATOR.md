@@ -47,6 +47,25 @@ For capped Base mainnet canary reads, also set:
 $env:FLOWCHAIN_PILOT_REAL_FUNDS_ACK="I_ACCEPT_CAPPED_REAL_VALUE_PILOT"
 ```
 
+The operator live-readiness surface uses the Base `8453` env names below. The
+API and dashboard show names and configured booleans only; they must not show
+values.
+
+```powershell
+$env:FLOWCHAIN_PILOT_OPERATOR_ACK="I_UNDERSTAND_THIS_IS_CAPPED_BASE8453_OWNER_PILOT"
+$env:FLOWCHAIN_BASE8453_RPC_URL="<local-shell-only-endpoint>"
+$env:FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS="<owner-verified-lockbox>"
+$env:FLOWCHAIN_BASE8453_FROM_BLOCK="<start-block>"
+$env:FLOWCHAIN_BASE8453_CURSOR_STATE="services/bridge-relayer/out/base8453-pilot-cursor-state.json"
+$env:FLOWCHAIN_BASE8453_CONFIRMATION_DEPTH="<tiny-pilot-depth>"
+$env:FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI="<tiny-cap>"
+$env:FLOWCHAIN_PILOT_TOTAL_CAP_WEI="<tiny-total-cap>"
+```
+
+Use `FLOWCHAIN_BASE8453_TO_BLOCK` only as an optional upper bound for a one-off
+scan. The pilot relayer loop advances from the cursor state after confirmed
+reads.
+
 ## Commands
 
 Create the non-secret local operator config:
@@ -74,6 +93,33 @@ Run the deterministic pilot wallet/operator E2E:
 ```powershell
 npm run wallet:pilot-e2e --prefix crypto
 ```
+
+Run the local operator UI/API surfaces:
+
+```powershell
+npm run flowchain:start
+npm run control-plane:serve
+npm run workbench:dev
+```
+
+Before any real Base funds are sent, inspect:
+
+```text
+http://127.0.0.1:8787/chain/status
+http://127.0.0.1:8787/bridge/live-readiness
+http://127.0.0.1:8787/pilot/lifecycle
+http://127.0.0.1:8787/wallets/balances
+http://127.0.0.1:8787/wallets/transfers
+```
+
+The live pilot remains blocked until `/bridge/live-readiness` returns
+`READY_FOR_OPERATOR_LIVE_PILOT`, `envValuesPrinted: false`, no missing required
+env names, and an owner-verified lockbox address. After a deposit is observed,
+use `/pilot/lifecycle` and the dashboard `Real-Value Pilot` table to confirm
+exact equality across deposit, observed, credited, wallet delta, transferable,
+withdrawal, and release amounts. Use `/wallets/balances` and
+`/wallets/transfers` to confirm the credited wallet can transfer the exact
+credited amount and balances update exactly.
 
 ## Validation
 

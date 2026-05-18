@@ -1,6 +1,6 @@
 {
   "schema": "flowmemory.bridge_runtime_handoff.v0",
-  "handoffId": "0x279765b249cacfff787c0475a776ae7f0ef573b79cdd12cb12f2f2648f3f5b44",
+  "handoffId": "0x8ee5f92131fafd5610d92b0cfe8d4b3d71438bf6bf2892043cc4ce0206de1b27",
   "generatedAt": "2026-05-13T00:00:00.000Z",
   "mode": "mock",
   "productionReady": false,
@@ -8,11 +8,17 @@
   "observations": [
     {
       "schema": "flowmemory.bridge_deposit_observation.v0",
-      "observationId": "0xcb73355c07ccfb69a065d32fb31bad09412bdd280ad629668393a9b0f6acfe61",
+      "observationId": "0x3f1e8bf44000d4701242d208e1b871c653ba6ba799f83e15e0137d938885a05d",
       "replayKey": "0x09369f3f035589d3b8923878255ed053279ce160c31e28860fb2babee9e9ef62",
       "observedAt": "2026-05-13T00:00:00.000Z",
       "mode": "mock",
       "productionReady": false,
+      "asset": {
+        "sourceChainId": 84532,
+        "sourceToken": "0x3333333333333333333333333333333333333333",
+        "destinationAssetId": "0xa822b6df476163d54b3dbe6ddc4d72177772bf0ecdfc9282998420387b0cb40d",
+        "decimals": 18
+      },
       "deposit": {
         "schema": "flowmemory.bridge_deposit.v0",
         "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
@@ -23,24 +29,25 @@
         "token": "0x3333333333333333333333333333333333333333",
         "amount": "20000000",
         "sender": "0x4444444444444444444444444444444444444444",
-        "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "flowchainRecipient": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
         "nonce": "1",
-        "metadataHash": "0x6666666666666666666666666666666666666666666666666666666666666666",
+        "metadataHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
         "status": "observed"
       },
       "guardrails": {
         "explicitChainId": true,
         "explicitContract": true,
         "explicitBlockRange": false,
-        "noSecrets": true
+        "noSecrets": true,
+        "assetDecimals": 18
       }
     }
   ],
   "credits": [
     {
       "schema": "flowmemory.bridge_credit.v0",
-      "creditId": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46",
-      "observationId": "0xcb73355c07ccfb69a065d32fb31bad09412bdd280ad629668393a9b0f6acfe61",
+      "creditId": "0x32cb77b8981b433ebd79273961cfa6cc35cfc830a31fe22f3ae2703f415f0b3e",
+      "observationId": "0x3f1e8bf44000d4701242d208e1b871c653ba6ba799f83e15e0137d938885a05d",
       "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
       "replayKey": "0x09369f3f035589d3b8923878255ed053279ce160c31e28860fb2babee9e9ef62",
       "source": {
@@ -50,8 +57,14 @@
         "logIndex": 0
       },
       "token": "0x3333333333333333333333333333333333333333",
+      "asset": {
+        "sourceChainId": 84532,
+        "sourceToken": "0x3333333333333333333333333333333333333333",
+        "destinationAssetId": "0xa822b6df476163d54b3dbe6ddc4d72177772bf0ecdfc9282998420387b0cb40d",
+        "decimals": 18
+      },
       "amount": "20000000",
-      "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+      "flowchainRecipient": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
       "status": "applied",
       "appliedAt": "2026-05-13T00:00:00.000Z",
       "localOnly": true,
@@ -61,14 +74,20 @@
   "withdrawalIntents": [
     {
       "schema": "flowmemory.bridge_withdrawal_intent.v0",
-      "withdrawalIntentId": "0x9d081c875d81344f34de114ef90716717693bff006bc3dea770f52fa6005ffd6",
-      "creditId": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46",
+      "withdrawalIntentId": "0x22a8633ced906af1f313e9f8b24459d939d502df621e3e1861c5cb10ebc2a1ed",
+      "creditId": "0x32cb77b8981b433ebd79273961cfa6cc35cfc830a31fe22f3ae2703f415f0b3e",
       "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
       "sourceChainId": 84532,
       "destinationChainId": 84532,
       "token": "0x3333333333333333333333333333333333333333",
+      "asset": {
+        "sourceChainId": 84532,
+        "sourceToken": "0x3333333333333333333333333333333333333333",
+        "destinationAssetId": "0xa822b6df476163d54b3dbe6ddc4d72177772bf0ecdfc9282998420387b0cb40d",
+        "decimals": 18
+      },
       "amount": "20000000",
-      "flowchainAccount": "0x5555555555555555555555555555555555555555555555555555555555555555",
+      "flowchainAccount": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
       "baseRecipient": "0x4444444444444444444444444444444444444444",
       "status": "requested",
       "requestedAt": "2026-05-13T00:00:00.000Z",
@@ -81,11 +100,17 @@
   "runtimeApplications": [
     {
       "schema": "flowmemory.bridge_runtime_credit_application.v0",
-      "applicationId": "0x1680fe504f978faa413b9baac9bab57b1daa3419b30e90e9d31907592bab3a07",
-      "creditId": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46",
+      "applicationId": "0xa830f7203b26ba1e4276786bebc3165b31e8bbdbba4632372e59e8dad0cd035b",
+      "creditId": "0x32cb77b8981b433ebd79273961cfa6cc35cfc830a31fe22f3ae2703f415f0b3e",
       "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
       "replayKey": "0x09369f3f035589d3b8923878255ed053279ce160c31e28860fb2babee9e9ef62",
-      "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+      "flowchainRecipient": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      "asset": {
+        "sourceChainId": 84532,
+        "sourceToken": "0x3333333333333333333333333333333333333333",
+        "destinationAssetId": "0xa822b6df476163d54b3dbe6ddc4d72177772bf0ecdfc9282998420387b0cb40d",
+        "decimals": 18
+      },
       "amount": "20000000",
       "status": "applied",
       "appliedAt": "2026-05-13T00:00:00.000Z",
@@ -98,20 +123,26 @@
   "releaseEvidences": [
     {
       "schema": "flowmemory.bridge_release_evidence.v0",
-      "releaseEvidenceId": "0x0ec3a52fbb7d47b223b59ff4fbac9fb4ce7791c7df73089c5b9f5e4d3dfa128c",
+      "releaseEvidenceId": "0xe340c184022052451e54f6cab9df35da636403c2c3e6a5cf1ea0cd0777727218",
       "generatedAt": "2026-05-13T00:00:00.000Z",
-      "withdrawalIntentId": "0x9d081c875d81344f34de114ef90716717693bff006bc3dea770f52fa6005ffd6",
-      "creditId": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46",
+      "withdrawalIntentId": "0x22a8633ced906af1f313e9f8b24459d939d502df621e3e1861c5cb10ebc2a1ed",
+      "creditId": "0x32cb77b8981b433ebd79273961cfa6cc35cfc830a31fe22f3ae2703f415f0b3e",
       "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
       "sourceChainId": 84532,
       "destinationChainId": 84532,
       "lockbox": "0x1111111111111111111111111111111111111111",
+      "asset": {
+        "sourceChainId": 84532,
+        "sourceToken": "0x3333333333333333333333333333333333333333",
+        "destinationAssetId": "0xa822b6df476163d54b3dbe6ddc4d72177772bf0ecdfc9282998420387b0cb40d",
+        "decimals": 18
+      },
       "releaseCall": {
         "method": "releaseERC20",
         "recipient": "0x4444444444444444444444444444444444444444",
         "token": "0x3333333333333333333333333333333333333333",
         "amount": "20000000",
-        "evidenceHash": "0x5eaa6d5475b239cc1409764a8cf5e9dcf79d0203da9008de7fd29eaa4e054982",
+        "evidenceHash": "0x07299fd40acadd04fa95da305da4d6620afa21fb98c212e20b87375052ae77a4",
         "broadcast": false
       },
       "operatorNote": "Pilot release evidence only. Review before any separate release-authority transaction; this relayer does not broadcast.",
@@ -136,28 +167,28 @@
     {
       "phase": "deposit_observed",
       "status": "observed",
-      "objectId": "0xcb73355c07ccfb69a065d32fb31bad09412bdd280ad629668393a9b0f6acfe61",
+      "objectId": "0x3f1e8bf44000d4701242d208e1b871c653ba6ba799f83e15e0137d938885a05d",
       "title": "Deposit observed",
       "summary": "Observed lockbox deposit 0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269 on chain 84532."
     },
     {
       "phase": "credit_pending",
       "status": "pending",
-      "objectId": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46",
+      "objectId": "0x32cb77b8981b433ebd79273961cfa6cc35cfc830a31fe22f3ae2703f415f0b3e",
       "title": "Credit pending",
-      "summary": "20000000 test units queued for 0x5555555555555555555555555555555555555555555555555555555555555555."
+      "summary": "20000000 test units queued for 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef."
     },
     {
       "phase": "credit_applied",
       "status": "applied",
-      "objectId": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46",
+      "objectId": "0x32cb77b8981b433ebd79273961cfa6cc35cfc830a31fe22f3ae2703f415f0b3e",
       "title": "Credit applied",
       "summary": "20000000 test units applied in local bridge smoke state."
     },
     {
       "phase": "withdrawal_requested",
       "status": "requested",
-      "objectId": "0x9d081c875d81344f34de114ef90716717693bff006bc3dea770f52fa6005ffd6",
+      "objectId": "0x22a8633ced906af1f313e9f8b24459d939d502df621e3e1861c5cb10ebc2a1ed",
       "title": "Withdrawal requested",
       "summary": "Test-mode local-to-Base withdrawal intent recorded with no broadcast or real release."
     }
@@ -165,7 +196,7 @@
   "workbenchRecords": [
     {
       "sectionKey": "transactions",
-      "id": "0xcb73355c07ccfb69a065d32fb31bad09412bdd280ad629668393a9b0f6acfe61",
+      "id": "0x3f1e8bf44000d4701242d208e1b871c653ba6ba799f83e15e0137d938885a05d",
       "kind": "Bridge deposit observation",
       "title": "0x2222222222222222222222222222222222222222222222222222222222222222",
       "summary": "Deposit 0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269 observed from mock.",
@@ -188,19 +219,19 @@
           "value": "20000000"
         }
       ],
-      "rawRef": "0xcb73355c07ccfb69a065d32fb31bad09412bdd280ad629668393a9b0f6acfe61"
+      "rawRef": "0x3f1e8bf44000d4701242d208e1b871c653ba6ba799f83e15e0137d938885a05d"
     },
     {
       "sectionKey": "receipts",
-      "id": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46",
+      "id": "0x32cb77b8981b433ebd79273961cfa6cc35cfc830a31fe22f3ae2703f415f0b3e",
       "kind": "Bridge credit",
-      "title": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46",
+      "title": "0x32cb77b8981b433ebd79273961cfa6cc35cfc830a31fe22f3ae2703f415f0b3e",
       "summary": "Credit applied for deposit 0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269.",
       "status": "verified",
       "facts": [
         {
           "label": "recipient",
-          "value": "0x5555555555555555555555555555555555555555555555555555555555555555"
+          "value": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
         },
         {
           "label": "amount",
@@ -215,13 +246,13 @@
           "value": "0x09369f3f035589d3b8923878255ed053279ce160c31e28860fb2babee9e9ef62"
         }
       ],
-      "rawRef": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46"
+      "rawRef": "0x32cb77b8981b433ebd79273961cfa6cc35cfc830a31fe22f3ae2703f415f0b3e"
     },
     {
       "sectionKey": "transactions",
-      "id": "0x9d081c875d81344f34de114ef90716717693bff006bc3dea770f52fa6005ffd6",
+      "id": "0x22a8633ced906af1f313e9f8b24459d939d502df621e3e1861c5cb10ebc2a1ed",
       "kind": "Bridge withdrawal intent",
-      "title": "0x9d081c875d81344f34de114ef90716717693bff006bc3dea770f52fa6005ffd6",
+      "title": "0x22a8633ced906af1f313e9f8b24459d939d502df621e3e1861c5cb10ebc2a1ed",
       "summary": "Test-mode withdrawal intent recorded; no mainnet or real-funds release is broadcast.",
       "status": "pending",
       "facts": [
@@ -242,7 +273,7 @@
           "value": "test_record_only"
         }
       ],
-      "rawRef": "0x9d081c875d81344f34de114ef90716717693bff006bc3dea770f52fa6005ffd6"
+      "rawRef": "0x22a8633ced906af1f313e9f8b24459d939d502df621e3e1861c5cb10ebc2a1ed"
     }
   ],
   "limitations": [

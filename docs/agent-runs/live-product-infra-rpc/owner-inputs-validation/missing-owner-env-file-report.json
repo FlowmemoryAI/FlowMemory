@@ -1,0 +1,295 @@
+{
+    "schema":  "flowchain.owner_inputs_report.v0",
+    "generatedAt":  "2026-05-17T18:46:08.5296443Z",
+    "status":  "failed",
+    "ownerInputReady":  false,
+    "groups":  [
+                   "public-rpc",
+                   "backup",
+                   "external-tester-write",
+                   "base8453-bridge"
+               ],
+    "inputs":  [
+                   {
+                       "name":  "FLOWCHAIN_RPC_PUBLIC_URL",
+                       "group":  "public-rpc",
+                       "present":  false,
+                       "valid":  false,
+                       "status":  "missing",
+                       "check":  "required"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                       "group":  "public-rpc",
+                       "present":  false,
+                       "valid":  false,
+                       "status":  "missing",
+                       "check":  "required"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                       "group":  "public-rpc",
+                       "present":  false,
+                       "valid":  false,
+                       "status":  "missing",
+                       "check":  "required"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_RPC_TLS_TERMINATED",
+                       "group":  "public-rpc",
+                       "present":  false,
+                       "valid":  false,
+                       "status":  "missing",
+                       "check":  "required"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                       "group":  "backup",
+                       "present":  false,
+                       "valid":  false,
+                       "status":  "missing",
+                       "check":  "required"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                       "group":  "external-tester-write",
+                       "present":  false,
+                       "valid":  false,
+                       "status":  "missing",
+                       "check":  "required"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                       "group":  "external-tester-write",
+                       "present":  false,
+                       "valid":  false,
+                       "status":  "missing",
+                       "check":  "required"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
+                       "group":  "external-tester-write",
+                       "present":  false,
+                       "valid":  false,
+                       "status":  "missing",
+                       "check":  "required"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                       "group":  "base8453-bridge",
+                       "present":  false,
+                       "valid":  false,
+                       "status":  "missing",
+                       "check":  "required"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_BASE8453_RPC_URL",
+                       "group":  "base8453-bridge",
+                       "present":  false,
+                       "valid":  false,
+                       "status":  "missing",
+                       "check":  "required"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                       "group":  "base8453-bridge",
+                       "present":  false,
+                       "valid":  false,
+                       "status":  "missing",
+                       "check":  "required"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                       "group":  "base8453-bridge",
+                       "present":  false,
+                       "valid":  false,
+                       "status":  "missing",
+                       "check":  "required"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                       "group":  "base8453-bridge",
+                       "present":  false,
+                       "valid":  false,
+                       "status":  "missing",
+                       "check":  "required"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                       "group":  "base8453-bridge",
+                       "present":  false,
+                       "valid":  false,
+                       "status":  "missing",
+                       "check":  "required"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                       "group":  "base8453-bridge",
+                       "present":  false,
+                       "valid":  false,
+                       "status":  "missing",
+                       "check":  "required"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                       "group":  "base8453-bridge",
+                       "present":  false,
+                       "valid":  false,
+                       "status":  "missing",
+                       "check":  "required"
+                   },
+                   {
+                       "name":  "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                       "group":  "base8453-bridge",
+                       "present":  false,
+                       "valid":  false,
+                       "status":  "missing",
+                       "check":  "required"
+                   }
+               ],
+    "optionalEnvNames":  [
+                             "FLOWCHAIN_BASE8453_CURSOR_STATE",
+                             "FLOWCHAIN_BASE8453_TO_BLOCK"
+                         ],
+    "missingEnvNames":  [
+                            "FLOWCHAIN_RPC_PUBLIC_URL",
+                            "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                            "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                            "FLOWCHAIN_RPC_TLS_TERMINATED",
+                            "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                            "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                            "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
+                            "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                            "FLOWCHAIN_BASE8453_RPC_URL",
+                            "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                            "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                            "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                            "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                            "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                            "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                            "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                        ],
+    "invalidEnvNames":  [
+                            "FLOWCHAIN_OWNER_ENV_FILE"
+                        ],
+    "ownerEnvFileState":  {
+                              "configured":  true,
+                              "imported":  false,
+                              "importedEnvNames":  [
+
+                                                   ],
+                              "ignoredEnvNames":  [
+
+                                                  ],
+                              "problem":  "FLOWCHAIN_OWNER_ENV_FILE points to a missing file."
+                          },
+    "ownerEnvFileProblem":  "FLOWCHAIN_OWNER_ENV_FILE points to a missing file.",
+    "problems":  [
+                     {
+                         "name":  "FLOWCHAIN_OWNER_ENV_FILE",
+                         "kind":  "failed",
+                         "reason":  "FLOWCHAIN_OWNER_ENV_FILE points to a missing file."
+                     },
+                     {
+                         "name":  "FLOWCHAIN_RPC_PUBLIC_URL",
+                         "kind":  "blocked",
+                         "reason":  "missing required owner input"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                         "kind":  "blocked",
+                         "reason":  "missing required owner input"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                         "kind":  "blocked",
+                         "reason":  "missing required owner input"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_RPC_TLS_TERMINATED",
+                         "kind":  "blocked",
+                         "reason":  "missing required owner input"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                         "kind":  "blocked",
+                         "reason":  "missing required owner input"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                         "kind":  "blocked",
+                         "reason":  "missing required owner input"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                         "kind":  "blocked",
+                         "reason":  "missing required owner input"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
+                         "kind":  "blocked",
+                         "reason":  "missing required owner input"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                         "kind":  "blocked",
+                         "reason":  "missing required owner input"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_BASE8453_RPC_URL",
+                         "kind":  "blocked",
+                         "reason":  "missing required owner input"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                         "kind":  "blocked",
+                         "reason":  "missing required owner input"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                         "kind":  "blocked",
+                         "reason":  "missing required owner input"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                         "kind":  "blocked",
+                         "reason":  "missing required owner input"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                         "kind":  "blocked",
+                         "reason":  "missing required owner input"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                         "kind":  "blocked",
+                         "reason":  "missing required owner input"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                         "kind":  "blocked",
+                         "reason":  "missing required owner input"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                         "kind":  "blocked",
+                         "reason":  "missing required owner input"
+                     }
+                 ],
+    "nextCommandsAfterOwnerInputs":  [
+                                         "npm run flowchain:owner-env:template",
+                                         "npm run flowchain:owner-env:readiness:validate",
+                                         "npm run flowchain:owner-env:readiness -- -AllowBlocked",
+                                         "npm run flowchain:owner:onboarding",
+                                         "npm run flowchain:owner:signup-checklist",
+                                         "npm run flowchain:service:monitor",
+                                         "npm run flowchain:live-infra:check",
+                                         "npm run flowchain:tester:readiness",
+                                         "npm run flowchain:external-tester:packet",
+                                         "npm run flowchain:live-product:e2e"
+                                     ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

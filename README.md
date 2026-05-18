@@ -47,6 +47,8 @@ powershell -ExecutionPolicy Bypass -File .\INSTALL_FLOWCHAIN_WINDOWS.ps1
 ```
 
 Detailed guide: `docs/EASY_SECOND_COMPUTER_SETUP.md`.
+FlowChain developer, wallet, bridge, node-operator, explorer/indexer, faucet,
+and troubleshooting guides start at `docs/developer/README.md`.
 
 Every contributor and agent should read:
 
@@ -59,7 +61,9 @@ Every contributor and agent should read:
 7. `docs/V0_LAUNCH_ACCEPTANCE.md`
 8. `docs/PRODUCTION_READINESS_CHECKLIST.md`
 9. `docs/MARKETING_CLAIMS_GUARDRAILS.md`
-10. `docs/DAILY_HQ_RUNBOOK.md` if operating HQ or coordinating agents
+10. `docs/developer/README.md` if working on FlowChain L1, wallets, RPC,
+    bridge, SDK, or external tester flows
+11. `docs/DAILY_HQ_RUNBOOK.md` if operating HQ or coordinating agents
 
 Then work only inside the assigned scope.
 

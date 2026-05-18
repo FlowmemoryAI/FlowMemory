@@ -43,4 +43,3 @@ Verification output:
   "errors": []
 }
 ```
-

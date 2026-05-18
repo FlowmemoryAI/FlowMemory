@@ -63,4 +63,3 @@ Blocked reason for live pilot:
 - `flowchain:real-value-pilot:contracts` is missing; owner `contracts`, issue #133.
 - `flowchain:real-value-pilot:bridge` is missing; owner `bridge-relayer`, issue #138.
 - `flowchain:real-value-pilot:runtime` is missing; owner `chain-runtime`, issue #134.
-

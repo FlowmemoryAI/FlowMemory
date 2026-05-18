@@ -1,5 +1,7 @@
 import { fileURLToPath } from "node:url";
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
 
 import { dispatchJsonRpc } from "./json-rpc.ts";
 import { loadControlPlaneState } from "./fixture-state.ts";
@@ -90,6 +92,8 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
   }
 
   const requests = [
+    { jsonrpc: "2.0", id: "rpcDiscover", method: "rpc_discover" },
+    { jsonrpc: "2.0", id: "rpcReadiness", method: "rpc_readiness" },
     { jsonrpc: "2.0", id: "health", method: "health" },
     { jsonrpc: "2.0", id: "node", method: "node_status" },
     { jsonrpc: "2.0", id: "peers", method: "peer_list", params: { limit: 10 } },
@@ -103,6 +107,8 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
     { jsonrpc: "2.0", id: "pilotPauseStatus", method: "pilot_pause_status" },
     { jsonrpc: "2.0", id: "pilotRetryStatus", method: "pilot_retry_status" },
     { jsonrpc: "2.0", id: "pilotEmergencyStatus", method: "pilot_emergency_status" },
+    { jsonrpc: "2.0", id: "bridgeLiveReadiness", method: "bridge_live_readiness" },
+    { jsonrpc: "2.0", id: "pilotLifecycleRecords", method: "pilot_lifecycle_record_list", params: { limit: 10 } },
     { jsonrpc: "2.0", id: "devnet", method: "devnet_state", params: { includeBlocks: true } },
     { jsonrpc: "2.0", id: "blocks", method: "block_list", params: { limit: 10 } },
     { jsonrpc: "2.0", id: "block", method: "block_get", params: { blockNumber: stringField(block.blockNumber, "blockNumber"), includeTransactions: true } },
@@ -137,6 +143,8 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
     { jsonrpc: "2.0", id: "faucet", method: "faucet_event_list", params: { limit: 10 } },
     { jsonrpc: "2.0", id: "wallets", method: "wallet_metadata_list", params: { limit: 10 } },
     { jsonrpc: "2.0", id: "wallet", method: "wallet_metadata_get", params: { walletId: accountId } },
+    { jsonrpc: "2.0", id: "walletBalances", method: "wallet_balance_list", params: { limit: 10 } },
+    { jsonrpc: "2.0", id: "walletTransfers", method: "wallet_transfer_history", params: { limit: 10 } },
     { jsonrpc: "2.0", id: "rootfields", method: "rootfield_list", params: { limit: 10 } },
     { jsonrpc: "2.0", id: "rootfield", method: "rootfield_get", params: { rootfieldId } },
     { jsonrpc: "2.0", id: "agents", method: "agent_list", params: { limit: 10 } },
@@ -214,5 +222,13 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  console.log(JSON.stringify(runControlPlaneSmoke(), null, 2));
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-smoke-"));
+  try {
+    console.log(JSON.stringify(runControlPlaneSmoke({
+      txIntakePath: join(dir, "transactions.ndjson"),
+      bridgeObservationIntakePath: join(dir, "bridge-observations.ndjson"),
+    }), null, 2));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 }

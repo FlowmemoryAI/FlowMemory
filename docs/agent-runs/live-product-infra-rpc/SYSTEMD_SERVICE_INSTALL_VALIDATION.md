@@ -1,0 +1,67 @@
+﻿# FlowChain Systemd Service Install Validation
+
+Generated: 2026-05-18T05:14:07.5290463Z
+Status: passed
+
+This validation proves the owner Linux systemd install plan is present, no-secret, non-mutating, live-profile by default, and includes autorecovery through the FlowChain supervisor.
+
+## Checks
+
+| Check | Result |
+| --- | --- |
+| validationPackageScriptPresent | True |
+| publicRpcBundleExists | True |
+| liveServiceTemplateExists | True |
+| supervisorTemplateExists | True |
+| renderScriptExists | True |
+| verifyRunbookExists | True |
+| rollbackRunbookExists | True |
+| liveServiceUsesLiveProfile | True |
+| liveServiceRunsStatusAfterStart | True |
+| liveServiceReloadRestartsLiveProfile | True |
+| liveServiceStopPreservesState | True |
+| liveServiceRestartOnFailure | True |
+| liveServiceRemainAfterExit | True |
+| supervisorUsesAutorecoveryLoop | True |
+| supervisorRestartAlways | True |
+| bridgeRelayerDefaultOff | True |
+| ownerEnvFileUsed | True |
+| repoWorkingDirectoryUsed | True |
+| cargoTargetDirIsExternalized | True |
+| leastPrivilegeHardeningPresent | True |
+| writePathsScoped | True |
+| installTargetPresent | True |
+| renderScriptRendersSystemdUnits | True |
+| verifyRunbookMentionsSystemdVerify | True |
+| rollbackRunbookMentionsSystemctl | True |
+| installCommandsPresent | True |
+| statusCommandsPresent | True |
+| uninstallCommandsPresent | True |
+| hostMutationPerformedFalse | True |
+| envValuesPrintedFalse | True |
+| secretMarkerFindingsEmpty | True |
+| noSecrets | True |
+| broadcastsFalse | True |
+
+## Install Plan
+
+- `sudo install -o root -g root -m 0644 <FLOWCHAIN_RENDER_DIR>/flowchain-live.service /etc/systemd/system/flowchain-live.service`
+- `sudo install -o root -g root -m 0644 <FLOWCHAIN_RENDER_DIR>/flowchain-supervisor.service /etc/systemd/system/flowchain-supervisor.service`
+- `sudo systemctl daemon-reload`
+- `sudo systemctl enable --now flowchain-live.service`
+- `sudo systemctl enable --now flowchain-supervisor.service`
+
+## Status Plan
+
+- `systemctl status flowchain-live.service --no-pager`
+- `systemctl status flowchain-supervisor.service --no-pager`
+- `journalctl -u flowchain-live.service -u flowchain-supervisor.service --since -1h --no-pager`
+- `npm run flowchain:service:status`
+- `npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30`
+
+## Uninstall Plan
+
+- `sudo systemctl disable --now flowchain-supervisor.service`
+- `sudo systemctl disable --now flowchain-live.service`
+- `sudo rm -f /etc/systemd/system/flowchain-supervisor.service /etc/systemd/system/flowchain-live.service`
+- `sudo systemctl daemon-reload`

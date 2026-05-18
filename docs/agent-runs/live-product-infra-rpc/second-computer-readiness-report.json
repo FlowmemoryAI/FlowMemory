@@ -1,0 +1,68 @@
+{
+    "schema":  "flowchain.second_computer_readiness_report.v0",
+    "generatedAt":  "2026-05-18T06:21:35.5840229+00:00",
+    "status":  "passed",
+    "checks":  {
+                   "bundlePackageScriptPresent":  true,
+                   "verifyPackageScriptPresent":  true,
+                   "readinessPackageScriptPresent":  true,
+                   "setupDocExists":  true,
+                   "setupDocMentionsBundle":  true,
+                   "setupDocMentionsVerify":  true,
+                   "bundleCommandPassed":  true,
+                   "verifyCommandPassed":  true,
+                   "bundleReportPassed":  true,
+                   "verifyReportPassed":  true,
+                   "stageNoSecretScanPassed":  true,
+                   "bundleZipCreated":  true,
+                   "bundleSha256Present":  true,
+                   "manifestWritten":  true,
+                   "manifestNextCommandsPresent":  true,
+                   "excludesGitMetadata":  true,
+                   "excludesNodeModules":  true,
+                   "excludesLocalRuntime":  true,
+                   "excludesEnvFiles":  true,
+                   "excludesSecretMarkerFiles":  true,
+                   "verifyChecksPassed":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "missingNextCommands":  [
+
+                            ],
+    "failedVerifyChecks":  [
+
+                           ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "commandResults":  [
+                           {
+                               "label":  "second-computer source bundle",
+                               "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-second-computer-bundle.ps1 -Force",
+                               "exitCode":  0,
+                               "durationSeconds":  69,
+                               "outputLineCount":  5
+                           },
+                           {
+                               "label":  "second-computer local verify",
+                               "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-second-computer-verify.ps1 -ReportPath devnet/local/second-computer/flowchain-second-computer-verify-report.json",
+                               "exitCode":  0,
+                               "durationSeconds":  2,
+                               "outputLineCount":  2
+                           }
+                       ],
+    "bundleReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\second-computer\\flowchain-second-computer-bundle-report.json",
+    "verifyReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\second-computer\\flowchain-second-computer-verify-report.json",
+    "stageNoSecretScanPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\second-computer\\stage\\FlowMemory\\SECOND_COMPUTER_BUNDLE_NO_SECRET_SCAN.json",
+    "bundleExists":  true,
+    "bundleSha256Present":  true,
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

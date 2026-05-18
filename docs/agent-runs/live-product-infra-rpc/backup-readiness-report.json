@@ -1,0 +1,51 @@
+{
+    "schema":  "flowchain.backup_readiness_report.v1",
+    "generatedAt":  "2026-05-18T15:21:18.9644465Z",
+    "status":  "blocked",
+    "requiredEnvNames":  [
+                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                         ],
+    "missingEnvNames":  [
+                            "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                        ],
+    "state":  {
+                  "statePath":  "devnet/local/state.json",
+                  "readable":  true,
+                  "latestHeight":  "73351",
+                  "latestHash":  "0x9b8c2d673d53f16d494b537c1f8c22064239cbc1c64136f425174204ee4c3661",
+                  "latestRoot":  "0xf32d9dfe092f6f869f27a932a863b152f2564f17bb36ac9db68983a061b5afff"
+              },
+    "backup":  {
+                   "configured":  false,
+                   "pathValuePrinted":  false,
+                   "exists":  false,
+                   "directory":  false,
+                   "snapshotProofStatus":  "not-run",
+                   "restoreProofStatus":  "not-run",
+                   "latestBackupTimestamp":  null,
+                   "latestBackupArtifactName":  null,
+                   "stateRootCompared":  false,
+                   "stateRootMatch":  false,
+                   "stateFileHashMatch":  false,
+                   "writeVerified":  false,
+                   "latestPointerVerified":  false,
+                   "latestPointerWrittenAtomically":  false,
+                   "snapshotManifestHash":  null,
+                   "latestManifestHash":  null,
+                   "restoreVerified":  false
+               },
+    "proofReports":  {
+                         "snapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\state-backup-report.json",
+                         "restore":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\state-restore-verify-report.json"
+                     },
+    "problems":  [
+                     {
+                         "name":  "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                         "category":  "env",
+                         "kind":  "blocked",
+                         "reason":  "missing required backup path env value"
+                     }
+                 ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

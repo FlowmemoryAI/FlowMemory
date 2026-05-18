@@ -1,0 +1,196 @@
+{
+    "schema":  "flowchain.live_service_tester_network_e2e_report.v0",
+    "generatedAt":  "2026-05-18T15:23:31.6512667Z",
+    "status":  "passed",
+    "rpcEndpoint":  "local-private-127.0.0.1",
+    "runId":  "20260518152205745-61344",
+    "checks":  {
+                   "serviceStatusSucceeded":  true,
+                   "healthSchemaOk":  true,
+                   "rpcDiscoverSchemaOk":  true,
+                   "rpcReadinessSchemaOk":  true,
+                   "testerCountAtLeastFour":  true,
+                   "walletCreatesPublicOnly":  true,
+                   "walletAccountsUnique":  true,
+                   "fundingTxIdsPresent":  true,
+                   "transferCountMatches":  true,
+                   "allTransfersQueued":  true,
+                   "allTransferIdsPresent":  true,
+                   "allTransferTxIdsPresent":  true,
+                   "balancesMatchExpected":  true,
+                   "historyCountsAtLeastTwo":  true,
+                   "chainStatusReadableBefore":  true,
+                   "chainStatusReadableAfter":  true,
+                   "blockHeightAdvanced":  true,
+                   "packetExecutableSmokeValidated":  true,
+                   "packetSmokeChecksAllPassed":  true,
+                   "localOnly":  true,
+                   "productionReadyFalse":  true,
+                   "noLiveBroadcast":  true,
+                   "broadcastsFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "secretMarkerFindingsEmpty":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "serviceHealthSchema":  "flowmemory.control_plane.health.v0",
+    "rpcDiscoverSchema":  "flowchain.rpc.discovery.v0",
+    "rpcReadinessSchema":  "flowchain.rpc.readiness.v0",
+    "chainBeforeBlock":  "73368",
+    "chainAfterBlock":  "73383",
+    "testerCount":  4,
+    "testerAccountIds":  [
+                             "0xa1cf7085baf5ef173f4157238ca172432238bb130c798ba4cbfc2c1aa8657d1f",
+                             "0x8d3279330d53bd341f74a69de2f85f9ab2e5c14f54b001e1195b6fb9a6096c0b",
+                             "0xeafedd1d39b6d66b3eff072b82fa1d04065b275f7eb9414808b6c8de6ff10791",
+                             "0x51ab88a5130e4671bb9fe5b31ac21cad1d0e723687c66c6e8c4435863a32f3b3"
+                         ],
+    "testerWalletCreates":  [
+                                {
+                                    "tester":  "tester-a",
+                                    "schema":  "flowmemory.control_plane.local_wallet_create_result.v0",
+                                    "created":  true,
+                                    "alreadyExists":  false,
+                                    "isolated":  true,
+                                    "accountId":  "0xa1cf7085baf5ef173f4157238ca172432238bb130c798ba4cbfc2c1aa8657d1f",
+                                    "keyScheme":  "secp256k1",
+                                    "secretMaterialReturned":  false,
+                                    "credentialStored":  false
+                                },
+                                {
+                                    "tester":  "tester-b",
+                                    "schema":  "flowmemory.control_plane.local_wallet_create_result.v0",
+                                    "created":  true,
+                                    "alreadyExists":  false,
+                                    "isolated":  true,
+                                    "accountId":  "0x8d3279330d53bd341f74a69de2f85f9ab2e5c14f54b001e1195b6fb9a6096c0b",
+                                    "keyScheme":  "secp256k1",
+                                    "secretMaterialReturned":  false,
+                                    "credentialStored":  false
+                                },
+                                {
+                                    "tester":  "tester-c",
+                                    "schema":  "flowmemory.control_plane.local_wallet_create_result.v0",
+                                    "created":  true,
+                                    "alreadyExists":  false,
+                                    "isolated":  true,
+                                    "accountId":  "0xeafedd1d39b6d66b3eff072b82fa1d04065b275f7eb9414808b6c8de6ff10791",
+                                    "keyScheme":  "secp256k1",
+                                    "secretMaterialReturned":  false,
+                                    "credentialStored":  false
+                                },
+                                {
+                                    "tester":  "tester-d",
+                                    "schema":  "flowmemory.control_plane.local_wallet_create_result.v0",
+                                    "created":  true,
+                                    "alreadyExists":  false,
+                                    "isolated":  true,
+                                    "accountId":  "0x51ab88a5130e4671bb9fe5b31ac21cad1d0e723687c66c6e8c4435863a32f3b3",
+                                    "keyScheme":  "secp256k1",
+                                    "secretMaterialReturned":  false,
+                                    "credentialStored":  false
+                                }
+                            ],
+    "fundingTxIds":  [
+                         "0x24cebddb6b4f6afa69226d344a981ff832c0dadd237a7bbfd81898b0d2cb41cb",
+                         "0x3e2d4ad191e4166c5ec1a3687a915b330db00b10a5e274f66163944a601303b5",
+                         "0xee877dc81985394bb3a0474ec196f6640801c382aede8934e56543879d823b32",
+                         "0xe59c0a9be9e7b36d808103bf2fb06eee1aa3ac0404555d78a023921a7abe5d03",
+                         "0xb40ac24fdd36366074a57ab680c7f27c4f8479b8a1fad00d48b1c11c0b8739dc",
+                         "0x0aa4c3cc003cada893b2a42f17a3bfe42d8637870f0496a6955f2e242995dca9",
+                         "0x55e06f7deb01a0f64653b1b1e5e895c8ab33b0ed7c0a793c06264ba584f5e2ef",
+                         "0x92557551aade58ca628ecc13489485ff0d0f92d06a80ffc3c27d9fc73dd2e401"
+                     ],
+    "transferResults":  [
+                            {
+                                "from":  "0xa1cf7085baf5ef173f4157238ca172432238bb130c798ba4cbfc2c1aa8657d1f",
+                                "to":  "0x8d3279330d53bd341f74a69de2f85f9ab2e5c14f54b001e1195b6fb9a6096c0b",
+                                "amount":  "11",
+                                "transferId":  "0x60577ebfd4e6c3894baca1613d1279078a2f3d80bad115c539078dff7ed3cf47",
+                                "txIds":  [
+                                              "0x674816495802fdbbbba41e89088e39c4a7b44d06454f9414aa8a87a64256120e"
+                                          ],
+                                "status":  "queued_local_runtime"
+                            },
+                            {
+                                "from":  "0x8d3279330d53bd341f74a69de2f85f9ab2e5c14f54b001e1195b6fb9a6096c0b",
+                                "to":  "0xeafedd1d39b6d66b3eff072b82fa1d04065b275f7eb9414808b6c8de6ff10791",
+                                "amount":  "13",
+                                "transferId":  "0xb2cef0c452601a0bc0dc59f2a11bbc50afa809c4c7e00ea91c8ceb9859f9d7cf",
+                                "txIds":  [
+                                              "0x03891cd525bbd4f888f1153bdbb2f15e8a1baa83ed83f1e1798764d8b1fd2321"
+                                          ],
+                                "status":  "queued_local_runtime"
+                            },
+                            {
+                                "from":  "0xeafedd1d39b6d66b3eff072b82fa1d04065b275f7eb9414808b6c8de6ff10791",
+                                "to":  "0x51ab88a5130e4671bb9fe5b31ac21cad1d0e723687c66c6e8c4435863a32f3b3",
+                                "amount":  "17",
+                                "transferId":  "0x76bca9b0ef735044c1967232b84b2de9939f07bc5cbb199805a48951b3fe1c24",
+                                "txIds":  [
+                                              "0x8eb0612e59f268d83d9b0b14b6b7cb5277466f42143832c7e3ff1f74786af386"
+                                          ],
+                                "status":  "queued_local_runtime"
+                            },
+                            {
+                                "from":  "0x51ab88a5130e4671bb9fe5b31ac21cad1d0e723687c66c6e8c4435863a32f3b3",
+                                "to":  "0xa1cf7085baf5ef173f4157238ca172432238bb130c798ba4cbfc2c1aa8657d1f",
+                                "amount":  "19",
+                                "transferId":  "0x61d89af799cad79f06e3514a9567dbdf55855ae346504b06d73419cbea80ae0f",
+                                "txIds":  [
+                                              "0xea015b456f5eb0b21d85a630a102313c199086faa833aeb418bbad9b786e3809"
+                                          ],
+                                "status":  "queued_local_runtime"
+                            }
+                        ],
+    "expectedBalances":  {
+                             "0xa1cf7085baf5ef173f4157238ca172432238bb130c798ba4cbfc2c1aa8657d1f":  108,
+                             "0x8d3279330d53bd341f74a69de2f85f9ab2e5c14f54b001e1195b6fb9a6096c0b":  98,
+                             "0xeafedd1d39b6d66b3eff072b82fa1d04065b275f7eb9414808b6c8de6ff10791":  96,
+                             "0x51ab88a5130e4671bb9fe5b31ac21cad1d0e723687c66c6e8c4435863a32f3b3":  98
+                         },
+    "balancesAfter":  {
+                          "0xa1cf7085baf5ef173f4157238ca172432238bb130c798ba4cbfc2c1aa8657d1f":  "108",
+                          "0x8d3279330d53bd341f74a69de2f85f9ab2e5c14f54b001e1195b6fb9a6096c0b":  "98",
+                          "0xeafedd1d39b6d66b3eff072b82fa1d04065b275f7eb9414808b6c8de6ff10791":  "96",
+                          "0x51ab88a5130e4671bb9fe5b31ac21cad1d0e723687c66c6e8c4435863a32f3b3":  "98"
+                      },
+    "transferHistoryCounts":  {
+                                  "0xa1cf7085baf5ef173f4157238ca172432238bb130c798ba4cbfc2c1aa8657d1f":  2,
+                                  "0x8d3279330d53bd341f74a69de2f85f9ab2e5c14f54b001e1195b6fb9a6096c0b":  2,
+                                  "0xeafedd1d39b6d66b3eff072b82fa1d04065b275f7eb9414808b6c8de6ff10791":  2,
+                                  "0x51ab88a5130e4671bb9fe5b31ac21cad1d0e723687c66c6e8c4435863a32f3b3":  2
+                              },
+    "packetExecutableSmokeValidated":  true,
+    "packetSmokeChecks":  {
+                              "health":  true,
+                              "rpcDiscover":  true,
+                              "rpcReadiness":  true,
+                              "chainStatus":  true,
+                              "walletCreate":  true,
+                              "walletBalances":  true,
+                              "walletSend":  true,
+                              "walletTransfers":  true
+                          },
+    "packetSmokeRoutes":  [
+                              "/health",
+                              "/rpc/discover",
+                              "/rpc/readiness",
+                              "/chain/status",
+                              "/wallets/create",
+                              "/wallets/balances",
+                              "/wallets/send",
+                              "/wallets/transfers"
+                          ],
+    "localOnly":  true,
+    "productionReady":  false,
+    "noLiveBroadcast":  true,
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

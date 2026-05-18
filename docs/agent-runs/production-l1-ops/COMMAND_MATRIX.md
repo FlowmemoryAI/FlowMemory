@@ -43,4 +43,3 @@ Missing strict live-pilot proof commands:
 - `flowchain:real-value-pilot:contracts`, owner `contracts`, reason: chain ID, lockbox, caps, pause, release/recovery, and replay proof; GitHub issue #133.
 - `flowchain:real-value-pilot:bridge`, owner `bridge-relayer`, reason: Base observation, deterministic credit, duplicate handling, and withdrawal/release evidence; GitHub issue #138.
 - `flowchain:real-value-pilot:runtime`, owner `chain-runtime`, reason: credit-once, restart, export/import preservation; GitHub issue #134.
-

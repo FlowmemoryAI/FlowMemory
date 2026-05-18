@@ -1,0 +1,52 @@
+{
+    "schema":  "flowchain.service_monitor_report.v0",
+    "generatedAt":  "2026-05-15T11:44:11.9543638Z",
+    "status":  "failed",
+    "durationSeconds":  1,
+    "pollSeconds":  5,
+    "maxStateAgeSeconds":  90,
+    "sampleCount":  1,
+    "firstHeight":  "12380",
+    "latestHeight":  "12380",
+    "heightAdvanced":  false,
+    "samples":  [
+                    {
+                        "sampledAt":  "2026-05-15T11:44:05.8411519Z",
+                        "exitCode":  0,
+                        "serviceStatus":  "passed",
+                        "nodeStatus":  "running",
+                        "controlPlaneStatus":  "running",
+                        "latestHeight":  "12380",
+                        "finalizedHeight":  "12380",
+                        "stateFileLastWriteAgeSeconds":  0,
+                        "outputRedacted":  [
+                                               "FlowChain service status: passed",
+                                               "Node: running PID=14052",
+                                               "Control plane: running PID=29264 bind=127.0.0.1:8787",
+                                               "Public readiness: blocked",
+                                               "Latest height: 12380",
+                                               "Finalized height: 12380",
+                                               "Backup path: not-configured",
+                                               "Bridge readiness: live=blocked, infra=blocked",
+                                               "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json"
+                                           ]
+                    }
+                ],
+    "issues":  [
+                   {
+                       "code":  "insufficient-samples",
+                       "reason":  "service monitor requires at least two samples to prove height progression"
+                   },
+                   {
+                       "code":  "height-did-not-advance",
+                       "reason":  "latest height did not advance during the monitor window"
+                   }
+               ],
+    "reportPaths":  {
+                        "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
+                        "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-negative-report.json"
+                    },
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}
