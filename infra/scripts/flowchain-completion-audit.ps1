@@ -42,6 +42,7 @@ $paths = [ordered]@{
     publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     publicRpcDeploymentAutomation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
+    operatorPackage = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     opsEscalationDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-escalation-dry-run-report.json"
@@ -365,6 +366,9 @@ $publicRpcDeploymentBundleExitCode = $publicRpcDeploymentBundleResult.exitCode
 $publicRpcDeploymentAutomationResult = Invoke-AuditChild -Path $paths.publicRpcDeploymentAutomation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-deployment-automation.ps1"))
 $publicRpcDeploymentAutomationOutput = @($publicRpcDeploymentAutomationResult.output)
 $publicRpcDeploymentAutomationExitCode = $publicRpcDeploymentAutomationResult.exitCode
+$operatorPackageResult = Invoke-AuditChild -Path $paths.operatorPackage -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-operator-package.ps1"))
+$operatorPackageOutput = @($operatorPackageResult.output)
+$operatorPackageExitCode = $operatorPackageResult.exitCode
 $liveInfraResult = Invoke-AuditChild -Path $paths.liveInfra -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-infra-check.ps1"), "-AllowBlocked")
 $liveInfraOutput = @($liveInfraResult.output)
 $liveInfraExitCode = $liveInfraResult.exitCode
@@ -607,6 +611,30 @@ $publicRpcDeploymentAutomationPassed = $publicRpcDeploymentAutomationExitCode -e
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "broadcasts" -Default $true) -eq $false)
+$operatorPackage = $reports.operatorPackage
+$operatorPackageStatus = Get-ReportStatus -Report $operatorPackage
+$operatorPackageChecks = Get-AuditProp -Object $operatorPackage -Name "checks"
+$operatorPackageFailedChecks = @((Get-AuditProp -Object $operatorPackage -Name "failedChecks" -Default @()))
+$operatorPackageCommandCount = [int](Get-AuditProp -Object $operatorPackage -Name "commandCount" -Default 0)
+$operatorPackageRunbookCount = [int](Get-AuditProp -Object $operatorPackage -Name "runbookCount" -Default 0)
+$operatorPackageEvidenceReportCount = [int](Get-AuditProp -Object $operatorPackage -Name "evidenceReportCount" -Default 0)
+$operatorPackagePassed = $operatorPackageExitCode -eq 0 `
+    -and $operatorPackageStatus -eq "passed" `
+    -and $operatorPackageFailedChecks.Count -eq 0 `
+    -and $operatorPackageCommandCount -ge 20 `
+    -and $operatorPackageRunbookCount -ge 10 `
+    -and $operatorPackageEvidenceReportCount -ge 15 `
+    -and ((Get-AuditProp -Object $operatorPackageChecks -Name "packageScriptsPresent" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackageChecks -Name "commandMatrixWritten" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackageChecks -Name "runbookDocsCopied" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackageChecks -Name "evidenceReportsCopied" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackageChecks -Name "ownerInputNamesOnly" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackageChecks -Name "flowChainRpcIsRepoOwned" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackageChecks -Name "thirdPartyFlowChainRpcProviderNeededFalse" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackageChecks -Name "noSecretScanPassed" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackage -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $operatorPackage -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackage -Name "broadcasts" -Default $true) -eq $false)
 $ownerInputsValidationStatus = Get-ReportStatus -Report $ownerInputsValidation
 $ownerInputsValidationChecks = Get-AuditProp -Object $ownerInputsValidation -Name "checks"
 $ownerInputsValidationMissingBlocks = Get-AuditProp -Object $ownerInputsValidationChecks -Name "missingScenarioBlocks" -Default $false
@@ -1012,6 +1040,12 @@ Add-AuditItem -Items $items -Id "public-rpc-deployment-automation" `
     -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), testerUnauthProbe=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false), hostMutationFalse=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false), report=$($paths.publicRpcDeploymentAutomation)" `
     -Commands @("npm run flowchain:public-rpc:deployment:automation")
 
+Add-AuditItem -Items $items -Id "node-operator-package" `
+    -Requirement "Node operator package collects no-secret runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates." `
+    -Status $(if ($operatorPackagePassed) { "passed" } else { "failed" }) `
+    -Evidence "operatorPackageStatus=$operatorPackageStatus, commands=$operatorPackageCommandCount, runbooks=$operatorPackageRunbookCount, evidenceReports=$operatorPackageEvidenceReportCount, failedChecks=$($operatorPackageFailedChecks.Count), report=$($paths.operatorPackage)" `
+    -Commands @("npm run flowchain:operator:package")
+
 Add-AuditItem -Items $items -Id "public-rpc-readiness-validator-self-test" `
     -Requirement "Public RPC readiness validator proves endpoint checks, CORS allowed-origin acceptance, disallowed-origin rejection, bounded rate-limit rejection, retry-after evidence, and response hygiene against a temporary local control plane." `
     -Status $(if ($publicRpcValidationPassed) { "passed" } else { "failed" }) `
@@ -1195,6 +1229,8 @@ $report = [ordered]@{
     publicRpcDeploymentBundleOutputRedacted = @($publicRpcDeploymentBundleOutput | ForEach-Object { "$_" })
     publicRpcDeploymentAutomationExitCode = $publicRpcDeploymentAutomationExitCode
     publicRpcDeploymentAutomationOutputRedacted = @($publicRpcDeploymentAutomationOutput | ForEach-Object { "$_" })
+    operatorPackageExitCode = $operatorPackageExitCode
+    operatorPackageOutputRedacted = @($operatorPackageOutput | ForEach-Object { "$_" })
     liveInfraExitCode = $liveInfraExitCode
     liveInfraOutputRedacted = @($liveInfraOutput | ForEach-Object { "$_" })
     externalTesterPacketExitCode = $externalTesterPacketExitCode
@@ -1251,6 +1287,7 @@ $report = [ordered]@{
         "npm run flowchain:public-rpc:edge-template",
         "npm run flowchain:public-rpc:deployment-bundle",
         "npm run flowchain:public-rpc:deployment:automation",
+        "npm run flowchain:operator:package",
         "npm run flowchain:public-rpc:validate",
         "npm run flowchain:public-rpc:abuse-test",
         "npm run flowchain:tester:gateway:e2e",

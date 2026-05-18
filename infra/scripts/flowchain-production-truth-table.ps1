@@ -178,6 +178,29 @@ $definitions = @(
         )
     },
     [ordered]@{
+        id = "node-operator-package"
+        requirement = "No-secret node operator package collects runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates."
+        path = "docs/agent-runs/live-product-infra-rpc/operator-package-report.json"
+        command = "npm run flowchain:operator:package"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptsPresent",
+            "commandMatrixWritten",
+            "readmeWritten",
+            "manifestWritten",
+            "runbookDocsCopied",
+            "evidenceReportsCopied",
+            "ownerInputNamesOnly",
+            "flowChainRpcIsRepoOwned",
+            "thirdPartyFlowChainRpcProviderNeededFalse",
+            "noSecretScanPassed",
+            "envValuesPrintedFalse",
+            "broadcastsFalse",
+            "noSecrets"
+        )
+    },
+    [ordered]@{
         id = "backup-readiness"
         requirement = "Configured production backup path can create and restore manifest-backed state snapshots."
         path = "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
@@ -312,7 +335,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("backup-restore-validation", "ops-snapshot", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "public-deployment-contract")
+        staleIfOlderThan = @("backup-restore-validation", "ops-snapshot", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "node-operator-package", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"
@@ -473,6 +496,9 @@ function ConvertTo-TruthEvidence {
         "packetShareable",
         "externalSharingReady",
         "localTesterRehearsalReady",
+        "commandCount",
+        "runbookCount",
+        "evidenceReportCount",
         "completionReady",
         "blockedOnlyOnKnownExternalOwnerInputs"
     )) {

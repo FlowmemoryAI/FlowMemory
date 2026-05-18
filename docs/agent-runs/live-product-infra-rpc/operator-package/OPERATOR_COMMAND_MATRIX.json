@@ -1,0 +1,146 @@
+{
+    "schema":  "flowchain.operator_command_matrix.v0",
+    "generatedAt":  "2026-05-18T00:38:05.3564569Z",
+    "commands":  [
+                     {
+                         "phase":  "preflight",
+                         "command":  "npm run flowchain:prereq",
+                         "purpose":  "Check required local tooling."
+                     },
+                     {
+                         "phase":  "preflight",
+                         "command":  "npm run flowchain:doctor",
+                         "purpose":  "Summarize repo and runtime health."
+                     },
+                     {
+                         "phase":  "service",
+                         "command":  "npm run flowchain:service:start -- -LiveProfile",
+                         "purpose":  "Start the private live-profile node and RPC service."
+                     },
+                     {
+                         "phase":  "service",
+                         "command":  "npm run flowchain:service:status -- -AllowBlocked",
+                         "purpose":  "Verify node, control-plane, height, and state freshness."
+                     },
+                     {
+                         "phase":  "service",
+                         "command":  "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
+                         "purpose":  "Observe block production over a sampling window."
+                     },
+                     {
+                         "phase":  "service",
+                         "command":  "npm run flowchain:service:restart -- -LiveProfile",
+                         "purpose":  "Restart without deleting runtime state."
+                     },
+                     {
+                         "phase":  "service",
+                         "command":  "npm run flowchain:service:stop",
+                         "purpose":  "Stop local services without deleting state."
+                     },
+                     {
+                         "phase":  "autorecovery",
+                         "command":  "npm run flowchain:service:supervisor:validate",
+                         "purpose":  "Prove the supervisor can recover a failed local control plane."
+                     },
+                     {
+                         "phase":  "autorecovery",
+                         "command":  "npm run flowchain:service:install:windows -- -Action Plan",
+                         "purpose":  "Render the no-secret Windows Scheduled Task install plan."
+                     },
+                     {
+                         "phase":  "autorecovery",
+                         "command":  "npm run flowchain:service:install:validate",
+                         "purpose":  "Validate install/status/uninstall paths without mutating the owner host."
+                     },
+                     {
+                         "phase":  "public-rpc",
+                         "command":  "npm run flowchain:public-rpc:deployment-bundle",
+                         "purpose":  "Generate owner-host public RPC edge artifacts."
+                     },
+                     {
+                         "phase":  "public-rpc",
+                         "command":  "npm run flowchain:public-rpc:deployment:automation",
+                         "purpose":  "Validate render, preflight, verify, and rollback phases."
+                     },
+                     {
+                         "phase":  "public-rpc",
+                         "command":  "npm run flowchain:public-rpc:validate",
+                         "purpose":  "Run local public-profile RPC readiness validation."
+                     },
+                     {
+                         "phase":  "public-rpc",
+                         "command":  "npm run flowchain:public-rpc:abuse-test",
+                         "purpose":  "Run CORS, media-type, batch/body cap, rate-limit, and response hygiene probes."
+                     },
+                     {
+                         "phase":  "backup",
+                         "command":  "npm run flowchain:backup:restore:validate",
+                         "purpose":  "Prove restore safety and tamper rejection locally."
+                     },
+                     {
+                         "phase":  "backup",
+                         "command":  "npm run flowchain:backup:owner-path:dry-run",
+                         "purpose":  "Exercise backup readiness with an ignored local owner-path stand-in."
+                     },
+                     {
+                         "phase":  "backup",
+                         "command":  "npm run flowchain:backup:install:windows -- -Action Plan",
+                         "purpose":  "Render the daily snapshot Scheduled Task plan."
+                     },
+                     {
+                         "phase":  "backup",
+                         "command":  "npm run flowchain:backup:install:validate",
+                         "purpose":  "Validate backup task plan/status/uninstall behavior."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:snapshot -- -AllowBlocked",
+                         "purpose":  "Classify critical incidents separately from owner-input blockers."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:alerts -- -AllowBlocked",
+                         "purpose":  "Refresh local alert rules and finding coverage."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
+                         "purpose":  "Render recurring alert refresh Scheduled Task plan."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:incident-drill",
+                         "purpose":  "Rehearse node, RPC, stale-state, stalled-height, and no-secret incidents."
+                     },
+                     {
+                         "phase":  "bridge",
+                         "command":  "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                         "purpose":  "Run the no-broadcast relayer gate; remains blocked until owner Base inputs exist."
+                     },
+                     {
+                         "phase":  "bridge",
+                         "command":  "npm run flowchain:bridge:relayer:guardrail:validate",
+                         "purpose":  "Prove missing owner inputs cannot mutate cursor state or queue credits."
+                     },
+                     {
+                         "phase":  "testers",
+                         "command":  "npm run flowchain:external-tester:packet -- -AllowBlocked",
+                         "purpose":  "Regenerate the friends-and-family packet and fail closed until public gates pass."
+                     },
+                     {
+                         "phase":  "release",
+                         "command":  "npm run flowchain:completion:audit -- -AllowBlocked",
+                         "purpose":  "Run the production readiness gate without false public-ready claims."
+                     },
+                     {
+                         "phase":  "release",
+                         "command":  "npm run flowchain:truth-table -- -AllowBlocked",
+                         "purpose":  "Classify every tracked gate as passed, owner-blocked, repo-blocked, failed, or stale."
+                     },
+                     {
+                         "phase":  "release",
+                         "command":  "npm run flowchain:no-secret:scan",
+                         "purpose":  "Verify generated reports and packets contain no secret markers."
+                     }
+                 ]
+}

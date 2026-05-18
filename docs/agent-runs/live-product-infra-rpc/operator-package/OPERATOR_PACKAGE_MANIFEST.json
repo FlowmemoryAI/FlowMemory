@@ -1,0 +1,426 @@
+{
+    "schema":  "flowchain.operator_package_manifest.v0",
+    "generatedAt":  "2026-05-18T00:38:05.3564569Z",
+    "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
+    "flowChainRpcIsRepoOwned":  true,
+    "thirdPartyFlowChainRpcProviderNeeded":  false,
+    "ownerInputNames":  [
+                            "FLOWCHAIN_RPC_PUBLIC_URL",
+                            "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                            "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                            "FLOWCHAIN_RPC_TLS_TERMINATED",
+                            "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                            "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                            "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
+                            "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                            "FLOWCHAIN_BASE8453_RPC_URL",
+                            "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                            "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                            "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                            "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                            "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                            "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                            "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                        ],
+    "requiredScripts":  [
+                            "flowchain:prereq",
+                            "flowchain:doctor",
+                            "flowchain:service:start",
+                            "flowchain:service:status",
+                            "flowchain:service:monitor",
+                            "flowchain:service:restart",
+                            "flowchain:service:stop",
+                            "flowchain:service:supervisor",
+                            "flowchain:service:supervisor:validate",
+                            "flowchain:service:install:windows",
+                            "flowchain:service:install:validate",
+                            "flowchain:public-rpc:deployment-bundle",
+                            "flowchain:public-rpc:deployment:automation",
+                            "flowchain:public-rpc:validate",
+                            "flowchain:public-rpc:abuse-test",
+                            "flowchain:backup:create",
+                            "flowchain:backup:restore:verify",
+                            "flowchain:backup:restore:validate",
+                            "flowchain:backup:owner-path:dry-run",
+                            "flowchain:backup:install:windows",
+                            "flowchain:backup:install:validate",
+                            "flowchain:ops:snapshot",
+                            "flowchain:ops:alerts",
+                            "flowchain:ops:alerts:install:windows",
+                            "flowchain:ops:alerts:install:validate",
+                            "flowchain:ops:incident-drill",
+                            "flowchain:bridge:relayer:once",
+                            "flowchain:bridge:relayer:guardrail:validate",
+                            "flowchain:external-tester:packet",
+                            "flowchain:completion:audit",
+                            "flowchain:truth-table",
+                            "flowchain:no-secret:scan"
+                        ],
+    "commandMatrix":  [
+                          {
+                              "phase":  "preflight",
+                              "command":  "npm run flowchain:prereq",
+                              "purpose":  "Check required local tooling."
+                          },
+                          {
+                              "phase":  "preflight",
+                              "command":  "npm run flowchain:doctor",
+                              "purpose":  "Summarize repo and runtime health."
+                          },
+                          {
+                              "phase":  "service",
+                              "command":  "npm run flowchain:service:start -- -LiveProfile",
+                              "purpose":  "Start the private live-profile node and RPC service."
+                          },
+                          {
+                              "phase":  "service",
+                              "command":  "npm run flowchain:service:status -- -AllowBlocked",
+                              "purpose":  "Verify node, control-plane, height, and state freshness."
+                          },
+                          {
+                              "phase":  "service",
+                              "command":  "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
+                              "purpose":  "Observe block production over a sampling window."
+                          },
+                          {
+                              "phase":  "service",
+                              "command":  "npm run flowchain:service:restart -- -LiveProfile",
+                              "purpose":  "Restart without deleting runtime state."
+                          },
+                          {
+                              "phase":  "service",
+                              "command":  "npm run flowchain:service:stop",
+                              "purpose":  "Stop local services without deleting state."
+                          },
+                          {
+                              "phase":  "autorecovery",
+                              "command":  "npm run flowchain:service:supervisor:validate",
+                              "purpose":  "Prove the supervisor can recover a failed local control plane."
+                          },
+                          {
+                              "phase":  "autorecovery",
+                              "command":  "npm run flowchain:service:install:windows -- -Action Plan",
+                              "purpose":  "Render the no-secret Windows Scheduled Task install plan."
+                          },
+                          {
+                              "phase":  "autorecovery",
+                              "command":  "npm run flowchain:service:install:validate",
+                              "purpose":  "Validate install/status/uninstall paths without mutating the owner host."
+                          },
+                          {
+                              "phase":  "public-rpc",
+                              "command":  "npm run flowchain:public-rpc:deployment-bundle",
+                              "purpose":  "Generate owner-host public RPC edge artifacts."
+                          },
+                          {
+                              "phase":  "public-rpc",
+                              "command":  "npm run flowchain:public-rpc:deployment:automation",
+                              "purpose":  "Validate render, preflight, verify, and rollback phases."
+                          },
+                          {
+                              "phase":  "public-rpc",
+                              "command":  "npm run flowchain:public-rpc:validate",
+                              "purpose":  "Run local public-profile RPC readiness validation."
+                          },
+                          {
+                              "phase":  "public-rpc",
+                              "command":  "npm run flowchain:public-rpc:abuse-test",
+                              "purpose":  "Run CORS, media-type, batch/body cap, rate-limit, and response hygiene probes."
+                          },
+                          {
+                              "phase":  "backup",
+                              "command":  "npm run flowchain:backup:restore:validate",
+                              "purpose":  "Prove restore safety and tamper rejection locally."
+                          },
+                          {
+                              "phase":  "backup",
+                              "command":  "npm run flowchain:backup:owner-path:dry-run",
+                              "purpose":  "Exercise backup readiness with an ignored local owner-path stand-in."
+                          },
+                          {
+                              "phase":  "backup",
+                              "command":  "npm run flowchain:backup:install:windows -- -Action Plan",
+                              "purpose":  "Render the daily snapshot Scheduled Task plan."
+                          },
+                          {
+                              "phase":  "backup",
+                              "command":  "npm run flowchain:backup:install:validate",
+                              "purpose":  "Validate backup task plan/status/uninstall behavior."
+                          },
+                          {
+                              "phase":  "ops",
+                              "command":  "npm run flowchain:ops:snapshot -- -AllowBlocked",
+                              "purpose":  "Classify critical incidents separately from owner-input blockers."
+                          },
+                          {
+                              "phase":  "ops",
+                              "command":  "npm run flowchain:ops:alerts -- -AllowBlocked",
+                              "purpose":  "Refresh local alert rules and finding coverage."
+                          },
+                          {
+                              "phase":  "ops",
+                              "command":  "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
+                              "purpose":  "Render recurring alert refresh Scheduled Task plan."
+                          },
+                          {
+                              "phase":  "ops",
+                              "command":  "npm run flowchain:ops:incident-drill",
+                              "purpose":  "Rehearse node, RPC, stale-state, stalled-height, and no-secret incidents."
+                          },
+                          {
+                              "phase":  "bridge",
+                              "command":  "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                              "purpose":  "Run the no-broadcast relayer gate; remains blocked until owner Base inputs exist."
+                          },
+                          {
+                              "phase":  "bridge",
+                              "command":  "npm run flowchain:bridge:relayer:guardrail:validate",
+                              "purpose":  "Prove missing owner inputs cannot mutate cursor state or queue credits."
+                          },
+                          {
+                              "phase":  "testers",
+                              "command":  "npm run flowchain:external-tester:packet -- -AllowBlocked",
+                              "purpose":  "Regenerate the friends-and-family packet and fail closed until public gates pass."
+                          },
+                          {
+                              "phase":  "release",
+                              "command":  "npm run flowchain:completion:audit -- -AllowBlocked",
+                              "purpose":  "Run the production readiness gate without false public-ready claims."
+                          },
+                          {
+                              "phase":  "release",
+                              "command":  "npm run flowchain:truth-table -- -AllowBlocked",
+                              "purpose":  "Classify every tracked gate as passed, owner-blocked, repo-blocked, failed, or stale."
+                          },
+                          {
+                              "phase":  "release",
+                              "command":  "npm run flowchain:no-secret:scan",
+                              "purpose":  "Verify generated reports and packets contain no secret markers."
+                          }
+                      ],
+    "runbooks":  [
+                     {
+                         "source":  "docs/developer/FLOWCHAIN_NODE_OPERATOR.md",
+                         "destination":  "docs/FLOWCHAIN_NODE_OPERATOR.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/developer/FLOWCHAIN_QUICKSTART.md",
+                         "destination":  "docs/FLOWCHAIN_QUICKSTART.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/developer/FLOWCHAIN_BRIDGE_INTEGRATION.md",
+                         "destination":  "docs/FLOWCHAIN_BRIDGE_INTEGRATION.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/developer/FLOWCHAIN_EXPLORER_INDEXER.md",
+                         "destination":  "docs/FLOWCHAIN_EXPLORER_INDEXER.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/OPERATIONS/FLOWCHAIN_SERVICE_SUPERVISOR.md",
+                         "destination":  "docs/FLOWCHAIN_SERVICE_SUPERVISOR.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/OPERATIONS/FLOWCHAIN_OWNER_OPERATED_PUBLIC_RPC.md",
+                         "destination":  "docs/FLOWCHAIN_OWNER_OPERATED_PUBLIC_RPC.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/FLOWCHAIN_TROUBLESHOOTING.md",
+                         "destination":  "docs/FLOWCHAIN_TROUBLESHOOTING.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_BUNDLE.md",
+                         "destination":  "runbooks/PUBLIC_RPC_DEPLOYMENT_BUNDLE.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/WINDOWS_SERVICE_INSTALL.md",
+                         "destination":  "runbooks/WINDOWS_SERVICE_INSTALL.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/WINDOWS_BACKUP_INSTALL.md",
+                         "destination":  "runbooks/WINDOWS_BACKUP_INSTALL.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/WINDOWS_ALERT_INSTALL.md",
+                         "destination":  "runbooks/WINDOWS_ALERT_INSTALL.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md",
+                         "destination":  "runbooks/EXTERNAL_TESTER_PACKET.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     }
+                 ],
+    "evidence":  [
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/service-status-report.json",
+                         "destination":  "evidence/service-status-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json",
+                         "destination":  "evidence/service-monitor-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json",
+                         "destination":  "evidence/service-supervisor-validation-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json",
+                         "destination":  "evidence/service-install-validation-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json",
+                         "destination":  "evidence/public-rpc-deployment-bundle-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json",
+                         "destination":  "evidence/public-rpc-deployment-automation-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json",
+                         "destination":  "evidence/backup-restore-validation-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/backup-owner-path-dry-run-report.json",
+                         "destination":  "evidence/backup-owner-path-dry-run-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/backup-install-validation-report.json",
+                         "destination":  "evidence/backup-install-validation-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json",
+                         "destination":  "evidence/ops-snapshot-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json",
+                         "destination":  "evidence/ops-alert-rules-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json",
+                         "destination":  "evidence/incident-drill-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json",
+                         "destination":  "evidence/bridge-relayer-once-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json",
+                         "destination":  "evidence/bridge-relayer-guardrail-validation-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json",
+                         "destination":  "evidence/external-tester-packet-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json",
+                         "destination":  "evidence/flowchain-architecture-audit-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json",
+                         "destination":  "evidence/flowchain-completion-audit-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json",
+                         "destination":  "evidence/production-truth-table-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json",
+                         "destination":  "evidence/dev-pack-e2e-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     }
+                 ],
+    "noLiveBroadcast":  true,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

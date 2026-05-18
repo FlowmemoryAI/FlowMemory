@@ -41,6 +41,7 @@ $reportPaths = [ordered]@{
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     serviceSupervisorValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
     serviceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
+    operatorPackage = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
     alertInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
@@ -383,12 +384,43 @@ $serviceInstallReady = (Test-AllRepoFilesExist -Paths $serviceInstallFiles) `
     -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "uninstallAbsentReportBroadcastsFalse" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $serviceInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $serviceInstallValidation -Name "noSecrets" -Default $false) -eq $true)
+$operatorPackage = $reports.operatorPackage
+$operatorPackageStatus = Get-ArchitectureStatus -Report $operatorPackage
+$operatorPackageChecks = Get-ArchitectureProp -Object $operatorPackage -Name "checks"
+$operatorPackageFailedChecks = @((Get-ArchitectureProp -Object $operatorPackage -Name "failedChecks" -Default @()))
+$operatorPackageCommandCount = [int](Get-ArchitectureProp -Object $operatorPackage -Name "commandCount" -Default 0)
+$operatorPackageRunbookCount = [int](Get-ArchitectureProp -Object $operatorPackage -Name "runbookCount" -Default 0)
+$operatorPackageEvidenceReportCount = [int](Get-ArchitectureProp -Object $operatorPackage -Name "evidenceReportCount" -Default 0)
+$operatorPackageReady = (Test-PackageScript -PackageJson $packageJson -Name "flowchain:operator:package") `
+    -and ($operatorPackageStatus -eq "passed") `
+    -and ($operatorPackageFailedChecks.Count -eq 0) `
+    -and ($operatorPackageCommandCount -ge 20) `
+    -and ($operatorPackageRunbookCount -ge 10) `
+    -and ($operatorPackageEvidenceReportCount -ge 15) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageChecks -Name "packageScriptsPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageChecks -Name "commandMatrixWritten" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageChecks -Name "runbookDocsCopied" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageChecks -Name "evidenceReportsCopied" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageChecks -Name "ownerInputNamesOnly" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageChecks -Name "flowChainRpcIsRepoOwned" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageChecks -Name "thirdPartyFlowChainRpcProviderNeededFalse" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageChecks -Name "noSecretScanPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackage -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $operatorPackage -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackage -Name "broadcasts" -Default $true) -eq $false)
 Add-ArchitectureItem -Items $items -Id "service-install-boundary" -Layer "Operations" `
     -Requirement "Owner-host service lifecycle includes a no-secret Windows Scheduled Task install, read-only status, and safe absent-task uninstall no-op path for reboot-persistent live supervisor autorecovery." `
     -Status $(if ($serviceInstallReady) { "passed" } else { "failed" }) `
     -Evidence "installValidation=$serviceInstallValidationStatus, failedChecks=$($serviceInstallFailedChecks.Count), planDidNotMutate=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "planDidNotMutate"), statusCommand=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "statusCommandPassed"), statusDidNotMutate=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "statusDidNotMutate"), uninstallNoop=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "uninstallAbsentDidNotCreateTask"), liveProfileDefault=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "liveProfileDefault"), relayerDefaultOff=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "noBridgeRelayerDefault"), relayerOptIn=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInStartsLoop"), schedulerCmdlets=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "schedulerCmdletsAvailable")" `
     -Files $serviceInstallFiles `
     -Commands @("npm run flowchain:service:install:validate", "npm run flowchain:service:install:windows -- -Action Plan", "npm run flowchain:service:install:windows -- -Action Install", "npm run flowchain:service:install:windows -- -Action Status", "npm run flowchain:service:install:windows -- -Action Uninstall")
+
+Add-ArchitectureItem -Items $items -Id "node-operator-package-boundary" -Layer "Operations" `
+    -Requirement "Node operator packaging collects no-secret runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates." `
+    -Status $(if ($operatorPackageReady) { "passed" } else { "failed" }) `
+    -Evidence "operatorPackage=$operatorPackageStatus, commands=$operatorPackageCommandCount, runbooks=$operatorPackageRunbookCount, evidenceReports=$operatorPackageEvidenceReportCount, failedChecks=$($operatorPackageFailedChecks.Count), noSecretScan=$(Get-ArchitectureProp -Object $operatorPackageChecks -Name "noSecretScanPassed" -Default $false)" `
+    -Files @("infra/scripts/flowchain-operator-package.ps1", "docs/developer/FLOWCHAIN_NODE_OPERATOR.md") `
+    -Commands @("npm run flowchain:operator:package")
 
 $publicRpcValidation = $reports.publicRpcValidation
 $publicRpcAbuseTest = $reports.publicRpcAbuseTest
@@ -964,6 +996,7 @@ $productGateFiles = @(
     "infra/scripts/flowchain-live-product-e2e.ps1",
     "infra/scripts/flowchain-completion-audit.ps1",
     "infra/scripts/flowchain-public-deployment-contract.ps1",
+    "infra/scripts/flowchain-operator-package.ps1",
     "infra/scripts/flowchain-external-tester-readiness.ps1",
     "infra/scripts/flowchain-external-tester-packet.ps1",
     "infra/scripts/flowchain-public-tester-gateway-e2e.ps1"
@@ -1030,6 +1063,7 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:live-product:e2e") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-deployment:contract") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:completion:audit") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:operator:package") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:dev-pack:e2e") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:tester:gateway:e2e") `
     -and ($liveInfraGateStatus -in @("passed", "blocked")) `
@@ -1040,13 +1074,14 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and ($externalTesterPacketExecutableSmokeValidated -eq $true) `
     -and ($externalTesterConnectPackReady -eq $true) `
     -and ($publicTesterGatewayReady -eq $true) `
+    -and ($operatorPackageReady -eq $true) `
     -and ($devPackReady -eq $true)
 Add-ArchitectureItem -Items $items -Id "aggregate-verification-boundary" -Layer "Verification" `
-    -Requirement "Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, developer dev-pack, and completion evidence into one auditable path." `
+    -Requirement "Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, node-operator package, developer dev-pack, and completion evidence into one auditable path." `
     -Status $(if ($productGateReady) { "passed" } else { "failed" }) `
-    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus, packetSmoke=$externalTesterPacketExecutableSmokeValidated, connectPackReady=$externalTesterConnectPackReady, publicTesterGateway=$publicTesterGatewayStatus, devPack=$devPackStatus" `
+    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus, packetSmoke=$externalTesterPacketExecutableSmokeValidated, connectPackReady=$externalTesterConnectPackReady, publicTesterGateway=$publicTesterGatewayStatus, operatorPackage=$operatorPackageStatus, devPack=$devPackStatus" `
     -Files $productGateFiles `
-    -Commands @("npm run flowchain:live-infra:check", "npm run flowchain:live-product:e2e", "npm run flowchain:completion:audit", "npm run flowchain:external-tester:packet", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:dev-pack:e2e")
+    -Commands @("npm run flowchain:live-infra:check", "npm run flowchain:live-product:e2e", "npm run flowchain:completion:audit", "npm run flowchain:external-tester:packet", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:operator:package", "npm run flowchain:dev-pack:e2e")
 
 $failedItems = @($items | Where-Object { $_.status -eq "failed" })
 $blockedItems = @($items | Where-Object { $_.status -eq "blocked" })
@@ -1071,6 +1106,11 @@ $dataFlows = @(
         name = "owner-host-service-lifecycle"
         path = @("Windows Scheduled Task", "repo working directory", "live service supervisor", "service status check", "restart with live profile", "private node/control-plane recovery")
         latestEvidence = $reportPaths.serviceInstallValidation
+    },
+    [ordered]@{
+        name = "node-operator-package"
+        path = @("operator package command", "copied runbooks", "command matrix", "owner-input names", "latest evidence reports", "no-secret scan")
+        latestEvidence = $reportPaths.operatorPackage
     },
     [ordered]@{
         name = "public-tester-gateway"
@@ -1124,7 +1164,7 @@ $objectiveDeliverables = @(
     "Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.",
     "Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.",
     "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven, bounds relayer child processes, stages the Base scan cursor until L1 credit proof, can queue new relayer handoffs into the L1, and remains live-blocked until owner guardrails are configured.",
-    "State backup, monitoring, reboot-persistent service install, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
+    "State backup, monitoring, reboot-persistent service install, node-operator packaging, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
     "Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.",
     "Owner signup checklist maps the external services and local setup values needed for public operation without requesting secrets.",
     "The owner-operated public deployment contract has pre-exposure and rollback commands and cannot become shareable until all public gates pass.",

@@ -1,0 +1,72 @@
+{
+    "schema":  "flowchain.service_status_report.v0",
+    "generatedAt":  "2026-05-17T23:36:07.9111661Z",
+    "status":  "passed",
+    "bind":  {
+                 "host":  "127.0.0.1",
+                 "port":  8787,
+                 "localDefaultPrivate":  true
+             },
+    "node":  {
+                 "status":  "running",
+                 "pid":  26000,
+                 "pidPath":  "devnet\\local\\node\\flowchain-node.pid",
+                 "pidSource":  "pid-file",
+                 "commandLineMatched":  true
+             },
+    "controlPlane":  {
+                         "status":  "running",
+                         "pid":  9884,
+                         "pidPath":  "devnet\\local\\services\\control-plane.pid",
+                         "commandLineMatched":  true
+                     },
+    "controlPlanePortProcess":  null,
+    "bridgeRelayerLoop":  {
+                              "status":  "stopped",
+                              "pid":  null,
+                              "pidPath":  "devnet\\local\\services\\bridge-relayer-loop.pid",
+                              "commandLineMatched":  false,
+                              "report":  {
+                                             "path":  "devnet/local/bridge-live-readiness/bridge-relayer-loop-report.json",
+                                             "status":  "blocked",
+                                             "ageSeconds":  4946.751,
+                                             "maxAgeSeconds":  180,
+                                             "fresh":  false,
+                                             "acceptableStatus":  true,
+                                             "blockedOnlyOnOwnerInputs":  true,
+                                             "codeIssueCount":  0,
+                                             "noSecrets":  true,
+                                             "noBroadcasts":  true,
+                                             "healthy":  false
+                                         }
+                          },
+    "serviceProfile":  {
+                           "liveProfile":  true,
+                           "maxBlocks":  0,
+                           "boundedLiveModeRejected":  false
+                       },
+    "publicReadinessStatus":  "blocked",
+    "backupPathStatus":  "not-configured",
+    "bridgeReadinessStatus":  {
+                                  "bridgeLiveCheck":  "blocked",
+                                  "bridgeInfraCheck":  "blocked"
+                              },
+    "chain":  {
+                  "stateFileReadable":  true,
+                  "latestHeight":  "62010",
+                  "latestHash":  "0x5209ce38c4cead28a234e8bc5643fe55baaa1a2e4d3075db9ffbeece3c41e7df",
+                  "latestRoot":  "0xa0f148038c759b5c89382493c711569838172f808f0ad668e8b8ea1aaf740096",
+                  "stateFileLastWriteAgeSeconds":  4,
+                  "finalizedHeight":  "62010",
+                  "finalizedHash":  "0x5209ce38c4cead28a234e8bc5643fe55baaa1a2e4d3075db9ffbeece3c41e7df",
+                  "mempoolDepth":  0,
+                  "peerCount":  null
+              },
+    "stopCommand":  "npm run flowchain:service:stop",
+    "restartCommand":  "npm run flowchain:service:restart",
+    "problems":  [
+
+                 ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

@@ -1,6 +1,6 @@
 # FlowChain Production Truth Table
 
-Generated: 2026-05-18T00:25:44.2598918+00:00
+Generated: 2026-05-18T00:39:29.4247953+00:00
 Status: blocked-owner-input
 Completion ready: False
 Blocked only on known owner inputs: True
@@ -9,7 +9,7 @@ Blocked only on known owner inputs: True
 
 | Classification | Count |
 | --- | ---: |
-| passed | 13 |
+| passed | 14 |
 | blocked-owner-input | 13 |
 | blocked-repo-work | 0 |
 | failed | 0 |
@@ -58,6 +58,7 @@ Blocked only on known owner inputs: True
 | public-rpc-abuse-test | passed | passed | status=passed | `npm run flowchain:public-rpc:abuse-test` |
 | public-rpc-deployment-bundle | passed | passed | status=passed | `npm run flowchain:public-rpc:deployment-bundle` |
 | public-rpc-deployment-automation | passed | passed | status=passed | `npm run flowchain:public-rpc:deployment:automation` |
+| node-operator-package | passed | passed | status=passed; commandCount=28; runbookCount=12; evidenceReportCount=19 | `npm run flowchain:operator:package` |
 | backup-readiness | blocked-owner-input | blocked | status=blocked; snapshotProofStatus=not-run; restoreProofStatus=not-run; blockers=FLOWCHAIN_RPC_STATE_BACKUP_PATH | `npm run flowchain:backup:check -- -AllowBlocked` |
 | backup-restore-validation | passed | passed | status=passed; backupRestoreHashRoundTrip=True; latestRestoreUsedLatestSnapshot=True; restoreTargetsLiveStateProtected=True; liveStateNonMutationProven=True; corruptedSnapshotDetected=True; manifestTamperDetected=True; missingStateArtifactDetected=True; missingSnapshotManifestDetected=True; latestPointerTamperDetected=True; wrongChainStateMismatchDetected=True | `npm run flowchain:backup:restore:validate` |
 | backup-owner-path-dry-run | passed | passed | status=passed | `npm run flowchain:backup:owner-path:dry-run` |

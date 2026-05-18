@@ -38,6 +38,7 @@
     "flowchain:prereq": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-check-prereqs.ps1",
     "flowchain:doctor": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-doctor.ps1",
     "flowchain:init": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-init.ps1",
+    "flowchain:operator:package": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-operator-package.ps1",
     "flowchain:second-computer:bundle": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-second-computer-bundle.ps1",
     "flowchain:second-computer:verify": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-second-computer-verify.ps1",
     "flowchain:start": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-start.ps1",
