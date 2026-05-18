@@ -1439,6 +1439,7 @@ $definitions = @(
             "opsAlertRulesLoaded",
             "serviceStatusLoaded",
             "serviceMonitorLoaded",
+            "externalTesterEvidenceLoaded",
             "liveCutoverLoaded",
             "truthTableLoaded",
             "noSecretLoaded",
@@ -1447,6 +1448,7 @@ $definitions = @(
             "markdownWritten",
             "metricCountSufficient",
             "requiredMetricsPresent",
+            "externalTesterEvidenceMetricsPresent",
             "prometheusHasHelpAndType",
             "prometheusContainsNoUrls",
             "prometheusContainsNoEnvAssignments",
@@ -1465,7 +1467,7 @@ $definitions = @(
             "secretMarkerFindings"
         )
         requiredMinimums = [ordered]@{
-            metricCount = 25
+            metricCount = 35
         }
         requiredReportProperties = [ordered]@{
             "envValuesPrinted" = $false

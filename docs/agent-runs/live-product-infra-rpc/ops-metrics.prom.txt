@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 67685
+flowchain_latest_height 73106
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 67685
+flowchain_finalized_height 73106
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 4
+flowchain_state_file_age_seconds 0
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -58,6 +58,24 @@ flowchain_bridge_relayer_loop_healthy 0
 # HELP flowchain_external_tester_ready One when external tester readiness is passed.
 # TYPE flowchain_external_tester_ready gauge
 flowchain_external_tester_ready 0
+# HELP flowchain_external_tester_evidence_ready One when external tester returned evidence validation is passed.
+# TYPE flowchain_external_tester_evidence_ready gauge
+flowchain_external_tester_evidence_ready 1
+# HELP flowchain_external_tester_evidence_failed_checks Failed checks in the external tester returned evidence validation report.
+# TYPE flowchain_external_tester_evidence_failed_checks gauge
+flowchain_external_tester_evidence_failed_checks 0
+# HELP flowchain_external_tester_evidence_missing_files Missing required files in the external tester returned evidence folder.
+# TYPE flowchain_external_tester_evidence_missing_files gauge
+flowchain_external_tester_evidence_missing_files 0
+# HELP flowchain_external_tester_evidence_secret_findings Secret marker findings in external tester returned evidence.
+# TYPE flowchain_external_tester_evidence_secret_findings gauge
+flowchain_external_tester_evidence_secret_findings 0
+# HELP flowchain_external_tester_evidence_height_advanced One when returned tester evidence shows block height advanced.
+# TYPE flowchain_external_tester_evidence_height_advanced gauge
+flowchain_external_tester_evidence_height_advanced 1
+# HELP flowchain_external_tester_evidence_transfer_consistent One when returned tester evidence has matching transfer, transaction, amount, and balance deltas.
+# TYPE flowchain_external_tester_evidence_transfer_consistent gauge
+flowchain_external_tester_evidence_transfer_consistent 1
 # HELP flowchain_public_deployment_ready One when public deployment contract is passed.
 # TYPE flowchain_public_deployment_ready gauge
 flowchain_public_deployment_ready 0
@@ -75,10 +93,10 @@ flowchain_live_cutover_missing_owner_inputs 14
 flowchain_no_secret_ready 1
 # HELP flowchain_truth_gates_total Total production truth table gates.
 # TYPE flowchain_truth_gates_total gauge
-flowchain_truth_gates_total 48
+flowchain_truth_gates_total 49
 # HELP flowchain_truth_gates_passed Passed production truth table gates.
 # TYPE flowchain_truth_gates_passed gauge
-flowchain_truth_gates_passed 32
+flowchain_truth_gates_passed 33
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
 flowchain_truth_gates_owner_blocked 16

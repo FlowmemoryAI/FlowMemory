@@ -1,11 +1,12 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-18T07:44:32.6709016Z",
+    "generatedAt":  "2026-05-18T15:01:20.6996155Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
                           "serviceStatusStatus":  "passed",
                           "serviceMonitorStatus":  "passed",
+                          "externalTesterEvidenceStatus":  "passed",
                           "liveCutoverStatus":  "blocked",
                           "truthTableStatus":  "blocked-owner-input",
                           "noSecretStatus":  "passed"
@@ -15,19 +16,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  67685
+                        "value":  73106
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  67685
+                        "value":  73106
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  4
+                        "value":  0
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -132,6 +133,42 @@
                         "value":  0
                     },
                     {
+                        "name":  "flowchain_external_tester_evidence_ready",
+                        "type":  "gauge",
+                        "help":  "One when external tester returned evidence validation is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_evidence_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in the external tester returned evidence validation report.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_external_tester_evidence_missing_files",
+                        "type":  "gauge",
+                        "help":  "Missing required files in the external tester returned evidence folder.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_external_tester_evidence_secret_findings",
+                        "type":  "gauge",
+                        "help":  "Secret marker findings in external tester returned evidence.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_external_tester_evidence_height_advanced",
+                        "type":  "gauge",
+                        "help":  "One when returned tester evidence shows block height advanced.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_evidence_transfer_consistent",
+                        "type":  "gauge",
+                        "help":  "One when returned tester evidence has matching transfer, transaction, amount, and balance deltas.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_public_deployment_ready",
                         "type":  "gauge",
                         "help":  "One when public deployment contract is passed.",
@@ -165,13 +202,13 @@
                         "name":  "flowchain_truth_gates_total",
                         "type":  "gauge",
                         "help":  "Total production truth table gates.",
-                        "value":  48
+                        "value":  49
                     },
                     {
                         "name":  "flowchain_truth_gates_passed",
                         "type":  "gauge",
                         "help":  "Passed production truth table gates.",
-                        "value":  32
+                        "value":  33
                     },
                     {
                         "name":  "flowchain_truth_gates_owner_blocked",
@@ -198,7 +235,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  31,
+    "metricCount":  37,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

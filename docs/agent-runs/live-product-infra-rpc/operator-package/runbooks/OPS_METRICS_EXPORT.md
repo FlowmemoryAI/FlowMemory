@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-18T07:44:32.8809078Z
+Generated: 2026-05-18T15:01:20.9004675Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 31
+- Metric count: 37
 
 ## Required Metrics
 
@@ -24,6 +24,12 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_backup_ready: present
 - flowchain_bridge_live_ready: present
 - flowchain_bridge_relayer_guardrail_ready: present
+- flowchain_external_tester_evidence_ready: present
+- flowchain_external_tester_evidence_failed_checks: present
+- flowchain_external_tester_evidence_missing_files: present
+- flowchain_external_tester_evidence_secret_findings: present
+- flowchain_external_tester_evidence_height_advanced: present
+- flowchain_external_tester_evidence_transfer_consistent: present
 - flowchain_public_deployment_ready: present
 - flowchain_live_cutover_ready: present
 - flowchain_live_cutover_owner_blocked: present
@@ -42,6 +48,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | opsAlertRulesLoaded | True |
 | serviceStatusLoaded | True |
 | serviceMonitorLoaded | True |
+| externalTesterEvidenceLoaded | True |
 | liveCutoverLoaded | True |
 | truthTableLoaded | True |
 | noSecretLoaded | True |
@@ -50,6 +57,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | markdownWritten | True |
 | metricCountSufficient | True |
 | requiredMetricsPresent | True |
+| externalTesterEvidenceMetricsPresent | True |
 | prometheusHasHelpAndType | True |
 | prometheusContainsNoUrls | True |
 | prometheusContainsNoEnvAssignments | True |

@@ -30,6 +30,7 @@ $paths = [ordered]@{
     bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
     bridgeRelayerGuardrail = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
+    externalTesterEvidence = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
     publicDeployment = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     liveCutover = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json"
     truthTable = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
@@ -206,6 +207,7 @@ $opsSnapshot = $reports.opsSnapshot
 $opsAlerts = $reports.opsAlerts
 $serviceStatus = $reports.serviceStatus
 $serviceMonitor = $reports.serviceMonitor
+$externalTesterEvidence = $reports.externalTesterEvidence
 $liveCutover = $reports.liveCutover
 $truthTable = $reports.truthTable
 $noSecret = $reports.noSecret
@@ -214,6 +216,13 @@ $metrics = New-Object System.Collections.ArrayList
 $chain = Get-MetricsProp -Object $opsSnapshot -Name "chain"
 $reportStatuses = Get-MetricsProp -Object $opsSnapshot -Name "reportStatuses"
 $truthCounts = Get-MetricsProp -Object $truthTable -Name "classificationCounts"
+$externalTesterEvidenceChecks = Get-MetricsProp -Object $externalTesterEvidence -Name "checks"
+$externalTesterEvidenceTransferConsistent = (Get-MetricsProp -Object $externalTesterEvidenceChecks -Name "transferFound" -Default $false) -eq $true `
+    -and (Get-MetricsProp -Object $externalTesterEvidenceChecks -Name "transferMatchesAccounts" -Default $false) -eq $true `
+    -and (Get-MetricsProp -Object $externalTesterEvidenceChecks -Name "transferAmountMatches" -Default $false) -eq $true `
+    -and (Get-MetricsProp -Object $externalTesterEvidenceChecks -Name "transactionIdMatches" -Default $false) -eq $true `
+    -and (Get-MetricsProp -Object $externalTesterEvidenceChecks -Name "senderDebited" -Default $false) -eq $true `
+    -and (Get-MetricsProp -Object $externalTesterEvidenceChecks -Name "recipientCredited" -Default $false) -eq $true
 
 Add-MetricGauge -Metrics $metrics -Name "flowchain_latest_height" -Help "Latest FlowChain block height from ops snapshot." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $chain -Name "latestHeight"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_finalized_height" -Help "Finalized FlowChain block height from ops snapshot." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $chain -Name "finalizedHeight"))
@@ -235,6 +244,12 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_infra_ready" -Help "On
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_guardrail_ready" -Help "One when bridge relayer fail-closed guardrail is ready." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRelayerGuardrailReady"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_loop_healthy" -Help "One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRelayerLoopReportHealthy"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_ready" -Help "One when external tester readiness is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTester"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_ready" -Help "One when external tester returned evidence validation is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $externalTesterEvidence))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_failed_checks" -Help "Failed checks in the external tester returned evidence validation report." -Value (@((Get-MetricsProp -Object $externalTesterEvidence -Name "failedChecks" -Default @())).Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_missing_files" -Help "Missing required files in the external tester returned evidence folder." -Value (@((Get-MetricsProp -Object $externalTesterEvidence -Name "missingRequiredFiles" -Default @())).Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_secret_findings" -Help "Secret marker findings in external tester returned evidence." -Value (@((Get-MetricsProp -Object $externalTesterEvidence -Name "secretMarkerFindings" -Default @())).Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_height_advanced" -Help "One when returned tester evidence shows block height advanced." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $externalTesterEvidenceChecks -Name "blockHeightAdvanced"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_transfer_consistent" -Help "One when returned tester evidence has matching transfer, transaction, amount, and balance deltas." -Value (ConvertTo-MetricBool -Value $externalTesterEvidenceTransferConsistent)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_deployment_ready" -Help "One when public deployment contract is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "publicDeployment"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_ready" -Help "One when the live cutover rehearsal is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $liveCutover))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_owner_blocked" -Help "One when live cutover is blocked only on known owner inputs." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $liveCutover -Name "blockedOnlyOnKnownExternalOwnerInputs"))
@@ -261,6 +276,7 @@ $metricsJson = [ordered]@{
         opsAlertRulesStatus = Get-MetricsStatus -Report $opsAlerts
         serviceStatusStatus = Get-MetricsStatus -Report $serviceStatus
         serviceMonitorStatus = Get-MetricsStatus -Report $serviceMonitor
+        externalTesterEvidenceStatus = Get-MetricsStatus -Report $externalTesterEvidence
         liveCutoverStatus = Get-MetricsStatus -Report $liveCutover
         truthTableStatus = Get-MetricsStatus -Report $truthTable
         noSecretStatus = Get-MetricsStatus -Report $noSecret
@@ -296,6 +312,12 @@ $requiredMetricNames = @(
     "flowchain_backup_ready",
     "flowchain_bridge_live_ready",
     "flowchain_bridge_relayer_guardrail_ready",
+    "flowchain_external_tester_evidence_ready",
+    "flowchain_external_tester_evidence_failed_checks",
+    "flowchain_external_tester_evidence_missing_files",
+    "flowchain_external_tester_evidence_secret_findings",
+    "flowchain_external_tester_evidence_height_advanced",
+    "flowchain_external_tester_evidence_transfer_consistent",
     "flowchain_public_deployment_ready",
     "flowchain_live_cutover_ready",
     "flowchain_live_cutover_owner_blocked",
@@ -315,14 +337,23 @@ $checks = [ordered]@{
     opsAlertRulesLoaded = $null -ne $opsAlerts
     serviceStatusLoaded = $null -ne $serviceStatus
     serviceMonitorLoaded = $null -ne $serviceMonitor
+    externalTesterEvidenceLoaded = $null -ne $externalTesterEvidence
     liveCutoverLoaded = $null -ne $liveCutover
     truthTableLoaded = $null -ne $truthTable
     noSecretLoaded = $null -ne $noSecret
     metricsJsonWritten = $null -ne $metricsJsonFromFile
     prometheusTextWritten = Test-Path -LiteralPath $prometheusTextFullPath
     markdownWritten = $true
-    metricCountSufficient = @($metrics).Count -ge 25
+    metricCountSufficient = @($metrics).Count -ge 35
     requiredMetricsPresent = $missingMetricNames.Count -eq 0
+    externalTesterEvidenceMetricsPresent = @(
+        "flowchain_external_tester_evidence_ready",
+        "flowchain_external_tester_evidence_failed_checks",
+        "flowchain_external_tester_evidence_missing_files",
+        "flowchain_external_tester_evidence_secret_findings",
+        "flowchain_external_tester_evidence_height_advanced",
+        "flowchain_external_tester_evidence_transfer_consistent"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     prometheusHasHelpAndType = $prometheusTextFromFile.Contains("# HELP flowchain_latest_height") -and $prometheusTextFromFile.Contains("# TYPE flowchain_latest_height gauge")
     prometheusContainsNoUrls = $prometheusTextFromFile -notmatch 'https?://'
     prometheusContainsNoEnvAssignments = $prometheusTextFromFile -notmatch 'FLOWCHAIN_[A-Z0-9_]+\s*='
