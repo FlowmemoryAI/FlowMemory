@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 65760
+flowchain_latest_height 67685
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 65760
+flowchain_finalized_height 67685
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 0
+flowchain_state_file_age_seconds 4
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -61,18 +61,27 @@ flowchain_external_tester_ready 0
 # HELP flowchain_public_deployment_ready One when public deployment contract is passed.
 # TYPE flowchain_public_deployment_ready gauge
 flowchain_public_deployment_ready 0
+# HELP flowchain_live_cutover_ready One when the live cutover rehearsal is passed.
+# TYPE flowchain_live_cutover_ready gauge
+flowchain_live_cutover_ready 0
+# HELP flowchain_live_cutover_owner_blocked One when live cutover is blocked only on known owner inputs.
+# TYPE flowchain_live_cutover_owner_blocked gauge
+flowchain_live_cutover_owner_blocked 1
+# HELP flowchain_live_cutover_missing_owner_inputs Number of required owner input names still blocking live cutover.
+# TYPE flowchain_live_cutover_missing_owner_inputs gauge
+flowchain_live_cutover_missing_owner_inputs 14
 # HELP flowchain_no_secret_ready One when no-secret scan is passed.
 # TYPE flowchain_no_secret_ready gauge
 flowchain_no_secret_ready 1
 # HELP flowchain_truth_gates_total Total production truth table gates.
 # TYPE flowchain_truth_gates_total gauge
-flowchain_truth_gates_total 46
+flowchain_truth_gates_total 48
 # HELP flowchain_truth_gates_passed Passed production truth table gates.
 # TYPE flowchain_truth_gates_passed gauge
-flowchain_truth_gates_passed 31
+flowchain_truth_gates_passed 32
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
-flowchain_truth_gates_owner_blocked 15
+flowchain_truth_gates_owner_blocked 16
 # HELP flowchain_truth_gates_repo_blocked Repo-blocked production truth table gates.
 # TYPE flowchain_truth_gates_repo_blocked gauge
 flowchain_truth_gates_repo_blocked 0

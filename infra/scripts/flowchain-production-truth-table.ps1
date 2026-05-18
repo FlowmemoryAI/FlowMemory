@@ -1382,6 +1382,7 @@ $definitions = @(
             "opsAlertRulesLoaded",
             "serviceStatusLoaded",
             "serviceMonitorLoaded",
+            "liveCutoverLoaded",
             "truthTableLoaded",
             "noSecretLoaded",
             "metricsJsonWritten",

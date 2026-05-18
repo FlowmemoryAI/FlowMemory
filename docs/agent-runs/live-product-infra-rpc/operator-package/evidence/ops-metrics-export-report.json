@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics_export_report.v0",
-    "generatedAt":  "2026-05-18T04:59:50.4785306Z",
+    "generatedAt":  "2026-05-18T07:44:32.8809078Z",
     "status":  "passed",
     "refresh":  {
                     "performed":  true,
@@ -29,12 +29,13 @@
                         "bridgeRelayerGuardrail":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-guardrail-validation-report.json",
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
                         "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
+                        "liveCutover":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-cutover-rehearsal-report.json",
                         "truthTable":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\production-truth-table-report.json",
                         "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json"
                     },
     "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.json",
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
-    "metricCount":  28,
+    "metricCount":  31,
     "requiredMetricNames":  [
                                 "flowchain_latest_height",
                                 "flowchain_finalized_height",
@@ -50,6 +51,9 @@
                                 "flowchain_bridge_live_ready",
                                 "flowchain_bridge_relayer_guardrail_ready",
                                 "flowchain_public_deployment_ready",
+                                "flowchain_live_cutover_ready",
+                                "flowchain_live_cutover_owner_blocked",
+                                "flowchain_live_cutover_missing_owner_inputs",
                                 "flowchain_no_secret_ready",
                                 "flowchain_truth_gates_total",
                                 "flowchain_truth_gates_failed",
@@ -64,6 +68,7 @@
                    "opsAlertRulesLoaded":  true,
                    "serviceStatusLoaded":  true,
                    "serviceMonitorLoaded":  true,
+                   "liveCutoverLoaded":  true,
                    "truthTableLoaded":  true,
                    "noSecretLoaded":  true,
                    "metricsJsonWritten":  true,

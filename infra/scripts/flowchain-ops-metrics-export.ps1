@@ -31,6 +31,7 @@ $paths = [ordered]@{
     bridgeRelayerGuardrail = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     publicDeployment = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
+    liveCutover = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json"
     truthTable = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
     noSecret = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
 }
@@ -205,6 +206,7 @@ $opsSnapshot = $reports.opsSnapshot
 $opsAlerts = $reports.opsAlerts
 $serviceStatus = $reports.serviceStatus
 $serviceMonitor = $reports.serviceMonitor
+$liveCutover = $reports.liveCutover
 $truthTable = $reports.truthTable
 $noSecret = $reports.noSecret
 
@@ -234,6 +236,9 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_guardrail_read
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_loop_healthy" -Help "One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRelayerLoopReportHealthy"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_ready" -Help "One when external tester readiness is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTester"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_deployment_ready" -Help "One when public deployment contract is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "publicDeployment"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_ready" -Help "One when the live cutover rehearsal is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $liveCutover))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_owner_blocked" -Help "One when live cutover is blocked only on known owner inputs." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $liveCutover -Name "blockedOnlyOnKnownExternalOwnerInputs"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_missing_owner_inputs" -Help "Number of required owner input names still blocking live cutover." -Value @((Get-MetricsProp -Object $liveCutover -Name "missingEnvNames" -Default @())).Count
 Add-MetricGauge -Metrics $metrics -Name "flowchain_no_secret_ready" -Help "One when no-secret scan is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $noSecret))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_truth_gates_total" -Help "Total production truth table gates." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $truthTable -Name "productionGateCount"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_truth_gates_passed" -Help "Passed production truth table gates." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $truthCounts -Name "passed"))
@@ -256,6 +261,7 @@ $metricsJson = [ordered]@{
         opsAlertRulesStatus = Get-MetricsStatus -Report $opsAlerts
         serviceStatusStatus = Get-MetricsStatus -Report $serviceStatus
         serviceMonitorStatus = Get-MetricsStatus -Report $serviceMonitor
+        liveCutoverStatus = Get-MetricsStatus -Report $liveCutover
         truthTableStatus = Get-MetricsStatus -Report $truthTable
         noSecretStatus = Get-MetricsStatus -Report $noSecret
     }
@@ -291,6 +297,9 @@ $requiredMetricNames = @(
     "flowchain_bridge_live_ready",
     "flowchain_bridge_relayer_guardrail_ready",
     "flowchain_public_deployment_ready",
+    "flowchain_live_cutover_ready",
+    "flowchain_live_cutover_owner_blocked",
+    "flowchain_live_cutover_missing_owner_inputs",
     "flowchain_no_secret_ready",
     "flowchain_truth_gates_total",
     "flowchain_truth_gates_failed",
@@ -306,6 +315,7 @@ $checks = [ordered]@{
     opsAlertRulesLoaded = $null -ne $opsAlerts
     serviceStatusLoaded = $null -ne $serviceStatus
     serviceMonitorLoaded = $null -ne $serviceMonitor
+    liveCutoverLoaded = $null -ne $liveCutover
     truthTableLoaded = $null -ne $truthTable
     noSecretLoaded = $null -ne $noSecret
     metricsJsonWritten = $null -ne $metricsJsonFromFile

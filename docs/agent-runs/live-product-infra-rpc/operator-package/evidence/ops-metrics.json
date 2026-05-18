@@ -1,11 +1,12 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-18T04:59:50.2945199Z",
+    "generatedAt":  "2026-05-18T07:44:32.6709016Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
                           "serviceStatusStatus":  "passed",
                           "serviceMonitorStatus":  "passed",
+                          "liveCutoverStatus":  "blocked",
                           "truthTableStatus":  "blocked-owner-input",
                           "noSecretStatus":  "passed"
                       },
@@ -14,19 +15,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  65760
+                        "value":  67685
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  65760
+                        "value":  67685
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  0
+                        "value":  4
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -137,6 +138,24 @@
                         "value":  0
                     },
                     {
+                        "name":  "flowchain_live_cutover_ready",
+                        "type":  "gauge",
+                        "help":  "One when the live cutover rehearsal is passed.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_live_cutover_owner_blocked",
+                        "type":  "gauge",
+                        "help":  "One when live cutover is blocked only on known owner inputs.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_live_cutover_missing_owner_inputs",
+                        "type":  "gauge",
+                        "help":  "Number of required owner input names still blocking live cutover.",
+                        "value":  14
+                    },
+                    {
                         "name":  "flowchain_no_secret_ready",
                         "type":  "gauge",
                         "help":  "One when no-secret scan is passed.",
@@ -146,19 +165,19 @@
                         "name":  "flowchain_truth_gates_total",
                         "type":  "gauge",
                         "help":  "Total production truth table gates.",
-                        "value":  46
+                        "value":  48
                     },
                     {
                         "name":  "flowchain_truth_gates_passed",
                         "type":  "gauge",
                         "help":  "Passed production truth table gates.",
-                        "value":  31
+                        "value":  32
                     },
                     {
                         "name":  "flowchain_truth_gates_owner_blocked",
                         "type":  "gauge",
                         "help":  "Owner-input blocked production truth table gates.",
-                        "value":  15
+                        "value":  16
                     },
                     {
                         "name":  "flowchain_truth_gates_repo_blocked",
@@ -179,7 +198,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  28,
+    "metricCount":  31,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,
