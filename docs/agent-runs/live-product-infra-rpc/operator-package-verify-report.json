@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_verify_report.v0",
-    "generatedAt":  "2026-05-18T06:11:44.7883544Z",
+    "generatedAt":  "2026-05-18T06:15:09.9855364Z",
     "status":  "passed",
     "packageReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-report.json",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
@@ -37,6 +37,7 @@
                    "ownerInputNamesOnly":  true,
                    "noForbiddenLocalFiles":  true,
                    "noSecretScanPassed":  true,
+                   "secretMarkerFindingsEmpty":  true,
                    "envValuesPrintedFalse":  true,
                    "broadcastsFalse":  true,
                    "noSecrets":  true
@@ -44,6 +45,9 @@
     "failedChecks":  [
 
                      ],
+    "secretMarkerFindings":  [
+
+                             ],
     "noLiveBroadcast":  true,
     "envValuesPrinted":  false,
     "noSecrets":  true,

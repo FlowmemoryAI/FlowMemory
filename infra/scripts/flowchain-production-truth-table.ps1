@@ -812,9 +812,14 @@ $definitions = @(
             "flowChainRpcIsRepoOwned",
             "thirdPartyFlowChainRpcProviderNeededFalse",
             "noSecretScanPassed",
+            "secretMarkerFindingsEmpty",
             "envValuesPrintedFalse",
             "broadcastsFalse",
             "noSecrets"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
         )
     },
     [ordered]@{
@@ -838,9 +843,14 @@ $definitions = @(
             "ownerInputNamesOnly",
             "noForbiddenLocalFiles",
             "noSecretScanPassed",
+            "secretMarkerFindingsEmpty",
             "envValuesPrintedFalse",
             "broadcastsFalse",
             "noSecrets"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
         )
     },
     [ordered]@{

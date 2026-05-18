@@ -119,6 +119,7 @@ $scanExitCode = $LASTEXITCODE
 $scanReport = Read-FlowChainJsonIfExists -Path $scanReportPath
 $scanStatus = [string](Get-OperatorVerifyProp -Object $scanReport -Name "status" -Default "missing")
 $secretFindings = @((Get-OperatorVerifyProp -Object $scanReport -Name "findings" -Default @()))
+$scanSecretFindings = @((Get-OperatorVerifyProp -Object $scanReport -Name "secretMarkerFindings" -Default @()))
 
 $forbiddenFiles = @()
 if (Test-Path -LiteralPath $packageFullPath) {
@@ -150,7 +151,8 @@ $checks = [ordered]@{
     operatorDoctorPassedOrOwnerBlocked = ($operatorDoctorStatus -eq "passed") -or ($operatorDoctorStatus -eq "blocked" -and $operatorDoctorBlockedOnlyOwnerInputs)
     ownerInputNamesOnly = $manifestOwnerInputs.Count -eq 17 -and $reportOwnerInputs.Count -eq 17 -and $badOwnerInputNames.Count -eq 0
     noForbiddenLocalFiles = $forbiddenFiles.Count -eq 0
-    noSecretScanPassed = $scanExitCode -eq 0 -and $scanStatus -eq "passed" -and $secretFindings.Count -eq 0
+    noSecretScanPassed = $scanExitCode -eq 0 -and $scanStatus -eq "passed" -and $secretFindings.Count -eq 0 -and $scanSecretFindings.Count -eq 0
+    secretMarkerFindingsEmpty = $scanSecretFindings.Count -eq 0
     envValuesPrintedFalse = (Get-OperatorVerifyProp -Object $packageReport -Name "envValuesPrinted" -Default $true) -eq $false
     broadcastsFalse = (Get-OperatorVerifyProp -Object $packageReport -Name "broadcasts" -Default $true) -eq $false
     noSecrets = (Get-OperatorVerifyProp -Object $packageReport -Name "noSecrets" -Default $false) -eq $true
@@ -176,6 +178,7 @@ $report = [ordered]@{
     noSecretScanReportPath = $scanReportPath
     checks = $checks
     failedChecks = @($failedChecks)
+    secretMarkerFindings = @($scanSecretFindings)
     noLiveBroadcast = $true
     envValuesPrinted = $false
     noSecrets = $true
