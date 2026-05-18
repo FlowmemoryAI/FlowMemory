@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Package
 
-Generated: 2026-05-18T02:09:03.6573826Z
+Generated: 2026-05-18T02:15:30.3366570Z
 Status: passed
 
 ## Package
@@ -8,8 +8,8 @@ Status: passed
 - Directory: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\operator-package`
 - Manifest: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\operator-package\OPERATOR_PACKAGE_MANIFEST.json`
 - Command matrix: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\operator-package\OPERATOR_COMMAND_MATRIX.json`
-- Runbooks copied: 20
-- Evidence reports copied: 28
+- Runbooks copied: 21
+- Evidence reports copied: 29
 
 ## Checks
 
@@ -61,5 +61,5 @@ Status: passed
 - `npm run flowchain:service:supervisor:validate`
 - `npm run flowchain:service:install:windows -- -Action Plan`
 - `npm run flowchain:service:install:validate`
+- `npm run flowchain:service:install:systemd:validate`
 - `npm run flowchain:second-computer:readiness`
-- `npm run flowchain:owner:onboarding`

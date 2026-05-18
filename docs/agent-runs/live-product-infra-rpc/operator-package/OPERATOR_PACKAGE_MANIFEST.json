@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-18T02:09:01.8843384Z",
+    "generatedAt":  "2026-05-18T02:15:28.6507559Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -35,6 +35,7 @@
                             "flowchain:service:supervisor:validate",
                             "flowchain:service:install:windows",
                             "flowchain:service:install:validate",
+                            "flowchain:service:install:systemd:validate",
                             "flowchain:second-computer:bundle",
                             "flowchain:second-computer:verify",
                             "flowchain:second-computer:readiness",
@@ -120,6 +121,11 @@
                               "phase":  "autorecovery",
                               "command":  "npm run flowchain:service:install:validate",
                               "purpose":  "Validate install/status/uninstall paths without mutating the owner host."
+                          },
+                          {
+                              "phase":  "autorecovery",
+                              "command":  "npm run flowchain:service:install:systemd:validate",
+                              "purpose":  "Validate Linux systemd live-service and supervisor install plans without mutating the owner host."
                           },
                           {
                               "phase":  "handoff",
@@ -357,6 +363,13 @@
                          "reason":  "copied"
                      },
                      {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/SYSTEMD_SERVICE_INSTALL_VALIDATION.md",
+                         "destination":  "runbooks/SYSTEMD_SERVICE_INSTALL_VALIDATION.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
                          "source":  "docs/agent-runs/live-product-infra-rpc/WINDOWS_BACKUP_INSTALL.md",
                          "destination":  "runbooks/WINDOWS_BACKUP_INSTALL.md",
                          "copied":  true,
@@ -431,6 +444,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json",
                          "destination":  "evidence/service-install-validation-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json",
+                         "destination":  "evidence/systemd-service-install-validation-report.json",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"

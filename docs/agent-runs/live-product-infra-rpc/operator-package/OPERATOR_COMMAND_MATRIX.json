@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-18T02:09:01.8843384Z",
+    "generatedAt":  "2026-05-18T02:15:28.6507559Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -51,6 +51,11 @@
                          "phase":  "autorecovery",
                          "command":  "npm run flowchain:service:install:validate",
                          "purpose":  "Validate install/status/uninstall paths without mutating the owner host."
+                     },
+                     {
+                         "phase":  "autorecovery",
+                         "command":  "npm run flowchain:service:install:systemd:validate",
+                         "purpose":  "Validate Linux systemd live-service and supervisor install plans without mutating the owner host."
                      },
                      {
                          "phase":  "handoff",

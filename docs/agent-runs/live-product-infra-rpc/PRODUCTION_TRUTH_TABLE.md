@@ -1,6 +1,6 @@
 # FlowChain Production Truth Table
 
-Generated: 2026-05-18T02:09:51.3645844+00:00
+Generated: 2026-05-18T02:16:59.0836790+00:00
 Status: blocked-owner-input
 Completion ready: False
 Blocked only on known owner inputs: True
@@ -9,7 +9,7 @@ Blocked only on known owner inputs: True
 
 | Classification | Count |
 | --- | ---: |
-| passed | 27 |
+| passed | 28 |
 | blocked-owner-input | 15 |
 | blocked-repo-work | 0 |
 | failed | 0 |
@@ -51,6 +51,7 @@ Blocked only on known owner inputs: True
 | operator-doctor | blocked-owner-input | blocked | status=blocked; latestHeight=63944; finalizedHeight=63944; blockedOnlyOnOwnerInputs=True; failedChecksCount=0 | `npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json` |
 | service-supervisor-validation | passed | passed | status=passed; restartAttempts=1 | `npm run flowchain:service:supervisor:validate` |
 | service-install-validation | passed | passed | status=passed; packageScriptsPresent=True; planDidNotMutate=True; statusDidNotMutate=True; planCommandPassed=True; schedulerCmdletsAvailable=True; actionUsesSupervisor=True; liveProfileDefault=True; bridgeRelayerOptInStartsLoop=True; failedChecksCount=0 | `npm run flowchain:service:install:validate` |
+| systemd-service-install-validation | passed | passed | status=passed; failedChecksCount=0 | `npm run flowchain:service:install:systemd:validate` |
 | live-product-e2e | blocked-owner-input | blocked | status=blocked; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_TESTER_WRITE_ENABLED,FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256,FLOWCHAIN_TESTER_MAX_SEND_UNITS | `npm run flowchain:live-product:e2e -- -AllowBlocked` |
 | live-infra-check | blocked-owner-input | blocked | status=blocked; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_TESTER_WRITE_ENABLED,FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256,FLOWCHAIN_TESTER_MAX_SEND_UNITS,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS | `npm run flowchain:live-infra:check -- -AllowBlocked` |
 | wallet-live-service-e2e | passed | passed | status=passed | `npm run flowchain:wallet:live-service:e2e` |
@@ -66,8 +67,8 @@ Blocked only on known owner inputs: True
 | public-rpc-abuse-test | passed | passed | status=passed; failedChecksCount=0 | `npm run flowchain:public-rpc:abuse-test` |
 | public-rpc-deployment-bundle | passed | passed | status=passed; flowChainRpcIsRepoOwned=True; thirdPartyFlowChainRpcProviderNeeded=False | `npm run flowchain:public-rpc:deployment-bundle` |
 | public-rpc-deployment-automation | passed | passed | status=passed; flowChainRpcIsRepoOwned=True; thirdPartyFlowChainRpcProviderNeeded=False; failedChecksCount=0 | `npm run flowchain:public-rpc:deployment:automation` |
-| node-operator-package | passed | passed | status=passed; commandCount=37; runbookCount=20; evidenceReportCount=28; packageScriptsPresent=True; failedChecksCount=0 | `npm run flowchain:operator:package` |
-| node-operator-package-verify | passed | passed | status=passed; commandCount=37; expectedFileCount=43; ownerInputNameCount=17; failedChecksCount=0 | `npm run flowchain:operator:package:verify` |
+| node-operator-package | passed | passed | status=passed; commandCount=38; runbookCount=21; evidenceReportCount=29; packageScriptsPresent=True; failedChecksCount=0 | `npm run flowchain:operator:package` |
+| node-operator-package-verify | passed | passed | status=passed; commandCount=38; expectedFileCount=45; ownerInputNameCount=17; failedChecksCount=0 | `npm run flowchain:operator:package:verify` |
 | second-computer-readiness | passed | passed | status=passed; bundleCommandPassed=True; verifyCommandPassed=True; stageNoSecretScanPassed=True; manifestNextCommandsPresent=True; failedChecksCount=0; missingNextCommandsCount=0; failedVerifyChecksCount=0 | `npm run flowchain:second-computer:readiness` |
 | backup-readiness | blocked-owner-input | blocked | status=blocked; snapshotProofStatus=not-run; restoreProofStatus=not-run; blockers=FLOWCHAIN_RPC_STATE_BACKUP_PATH | `npm run flowchain:backup:check -- -AllowBlocked` |
 | backup-restore-validation | passed | passed | status=passed; backupRestoreHashRoundTrip=True; latestRestoreUsedLatestSnapshot=True; restoreTargetsLiveStateProtected=True; liveStateNonMutationProven=True; corruptedSnapshotDetected=True; manifestTamperDetected=True; missingStateArtifactDetected=True; missingSnapshotManifestDetected=True; latestPointerTamperDetected=True; wrongChainStateMismatchDetected=True | `npm run flowchain:backup:restore:validate` |

@@ -152,6 +152,57 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "systemd-service-install-validation"
+        requirement = "Owner Linux/VPS service lifecycle validates no-secret systemd live-service and supervisor templates, install/status/uninstall command plans, and autorecovery defaults without mutating the host."
+        path = "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"
+        command = "npm run flowchain:service:install:systemd:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "validationPackageScriptPresent",
+            "publicRpcBundleExists",
+            "liveServiceTemplateExists",
+            "supervisorTemplateExists",
+            "renderScriptExists",
+            "verifyRunbookExists",
+            "rollbackRunbookExists",
+            "liveServiceUsesLiveProfile",
+            "liveServiceRunsStatusAfterStart",
+            "liveServiceReloadRestartsLiveProfile",
+            "liveServiceStopPreservesState",
+            "liveServiceRestartOnFailure",
+            "liveServiceRemainAfterExit",
+            "supervisorUsesAutorecoveryLoop",
+            "supervisorRestartAlways",
+            "bridgeRelayerDefaultOff",
+            "ownerEnvFileUsed",
+            "repoWorkingDirectoryUsed",
+            "cargoTargetDirIsExternalized",
+            "leastPrivilegeHardeningPresent",
+            "writePathsScoped",
+            "installTargetPresent",
+            "renderScriptRendersSystemdUnits",
+            "verifyRunbookMentionsSystemdVerify",
+            "rollbackRunbookMentionsSystemctl",
+            "installCommandsPresent",
+            "statusCommandsPresent",
+            "uninstallCommandsPresent",
+            "hostMutationPerformedFalse",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks"
+        )
+        requiredReportProperties = [ordered]@{
+            "hostMutationPerformed" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "live-product-e2e"
         requirement = "Local live-product e2e covers runtime, wallet, live infra, and tester rehearsal without public claims."
         path = "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json"

@@ -33,6 +33,7 @@ npm run flowchain:service:supervisor -- -IntervalSeconds 30 -MaxRestartAttempts 
 npm run flowchain:service:supervisor:validate
 npm run flowchain:service:install:windows -- -Action Plan
 npm run flowchain:service:install:validate
+npm run flowchain:service:install:systemd:validate
 ```
 
 The supervisor checks `flowchain:service:status`, requires live profile by
@@ -47,6 +48,11 @@ npm run flowchain:service:install:windows -- -Action Install
 npm run flowchain:service:install:windows -- -Action Status
 npm run flowchain:service:install:windows -- -Action Uninstall
 ```
+
+On a Linux VPS, `flowchain:service:install:systemd:validate` checks the rendered
+systemd live-service and supervisor templates, install/status/uninstall command
+plans, owner env-file wiring, scoped write paths, and autorecovery defaults
+without mutating the host.
 
 ## Public RPC Boundary
 

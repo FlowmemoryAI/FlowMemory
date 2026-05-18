@@ -9,6 +9,7 @@ The repository now provides:
 - `npm run flowchain:service:start` for supervised node and control-plane processes on Windows.
 - `npm run flowchain:service:status` for safe process, bind, height, backup, and bridge status.
 - `npm run flowchain:service:monitor` for repeated live service sampling that proves height progression over an operator-selected window.
+- `npm run flowchain:service:install:systemd:validate` for a no-secret Linux systemd live-service and supervisor install plan check.
 - `npm run flowchain:ops:snapshot` for one no-secret operator report that classifies critical incidents, public-readiness blockers, and incident commands.
 - `npm run flowchain:ops:incident-drill` for a synthetic no-values incident drill that proves node-down, control-plane-down, stale-state, stalled-height, and no-secret failures are classified as critical while owner-input blockers stay non-critical.
 - `npm run flowchain:ops:alerts:install:windows` and `npm run flowchain:ops:alerts:install:validate` for a no-secret Windows Scheduled Task install/status/uninstall path for recurring local alert refresh.
