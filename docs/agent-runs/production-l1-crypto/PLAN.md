@@ -1,4 +1,4 @@
-# Production L1 Crypto Plan
+# Owner-Gated L1 Crypto Plan
 
 Status: in progress
 

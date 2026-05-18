@@ -1,4 +1,4 @@
-# Production L1 Crypto Checklist
+# Owner-Gated L1 Crypto Checklist
 
 - [x] Read required repository context.
 - [x] Inventory existing crypto exports, wallet-only exports, runtime-safe exports, fixtures, and schemas.

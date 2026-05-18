@@ -1,4 +1,4 @@
-# Production L1 Crypto Notes
+# Owner-Gated L1 Crypto Notes
 
 ## Initial Boundaries
 

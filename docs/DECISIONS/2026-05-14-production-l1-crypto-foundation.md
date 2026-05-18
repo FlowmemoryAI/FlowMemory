@@ -1,4 +1,4 @@
-# Production L1 Crypto Foundation
+# Owner-Gated L1 Crypto Foundation
 
 Date: 2026-05-14
 

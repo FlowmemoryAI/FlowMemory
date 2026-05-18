@@ -1,4 +1,4 @@
-# Production L1 Crypto Handoff
+# Owner-Gated L1 Crypto Handoff
 
 Status: complete for the local/private production-L1-shaped crypto foundation.
 

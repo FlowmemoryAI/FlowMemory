@@ -1,4 +1,4 @@
-# Production L1 Crypto Experiments
+# Owner-Gated L1 Crypto Experiments
 
 This file records runnable checks and implementation experiments for the production-L1 crypto work.
 
