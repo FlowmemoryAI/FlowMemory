@@ -1,11 +1,11 @@
 {
     "schema":  "flowchain.operator_package_verify_report.v0",
-    "generatedAt":  "2026-05-18T00:44:50.6289017Z",
+    "generatedAt":  "2026-05-18T00:59:16.5658770Z",
     "status":  "passed",
     "packageReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-report.json",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "packageStatus":  "passed",
-    "expectedFileCount":  26,
+    "expectedFileCount":  27,
     "missingFiles":  [
 
                      ],
@@ -13,6 +13,8 @@
 
                        ],
     "commandCount":  29,
+    "operatorDoctorStatus":  "blocked",
+    "operatorDoctorFailedCheckCount":  0,
     "ownerInputNameCount":  17,
     "badOwnerInputNames":  [
 
@@ -29,6 +31,9 @@
                    "expectedFilesPresent":  true,
                    "reportRunbookCountEnough":  true,
                    "reportEvidenceCountEnough":  true,
+                   "operatorDoctorEvidencePresent":  true,
+                   "operatorDoctorNoFailedChecks":  true,
+                   "operatorDoctorPassedOrOwnerBlocked":  true,
                    "ownerInputNamesOnly":  true,
                    "noForbiddenLocalFiles":  true,
                    "noSecretScanPassed":  true,

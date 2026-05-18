@@ -1,6 +1,6 @@
 # FlowChain Production Truth Table
 
-Generated: 2026-05-18T00:53:30.0426315+00:00
+Generated: 2026-05-18T00:59:38.9238606+00:00
 Status: blocked-owner-input
 Completion ready: False
 Blocked only on known owner inputs: True
@@ -10,7 +10,7 @@ Blocked only on known owner inputs: True
 | Classification | Count |
 | --- | ---: |
 | passed | 15 |
-| blocked-owner-input | 13 |
+| blocked-owner-input | 14 |
 | blocked-repo-work | 0 |
 | failed | 0 |
 | stale | 0 |
@@ -48,6 +48,7 @@ Blocked only on known owner inputs: True
 | --- | --- | --- | --- | --- |
 | service-status | passed | passed | status=passed; latestHeight=62993; finalizedHeight=62993 | `npm run flowchain:service:status` |
 | service-monitor | passed | passed | status=passed; latestHeight=62993 | `npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30` |
+| operator-doctor | blocked-owner-input | blocked | status=blocked; latestHeight=62993; finalizedHeight=62993; blockedOnlyOnOwnerInputs=True | `npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json` |
 | live-product-e2e | blocked-owner-input | blocked | status=blocked; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_TESTER_WRITE_ENABLED,FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256,FLOWCHAIN_TESTER_MAX_SEND_UNITS | `npm run flowchain:live-product:e2e -- -AllowBlocked` |
 | live-infra-check | blocked-owner-input | blocked | status=blocked; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_TESTER_WRITE_ENABLED,FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256,FLOWCHAIN_TESTER_MAX_SEND_UNITS,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS | `npm run flowchain:live-infra:check -- -AllowBlocked` |
 | wallet-live-service-e2e | passed | passed | status=passed | `npm run flowchain:wallet:live-service:e2e` |
@@ -58,8 +59,8 @@ Blocked only on known owner inputs: True
 | public-rpc-abuse-test | passed | passed | status=passed | `npm run flowchain:public-rpc:abuse-test` |
 | public-rpc-deployment-bundle | passed | passed | status=passed | `npm run flowchain:public-rpc:deployment-bundle` |
 | public-rpc-deployment-automation | passed | passed | status=passed | `npm run flowchain:public-rpc:deployment:automation` |
-| node-operator-package | passed | passed | status=passed; commandCount=29; runbookCount=12; evidenceReportCount=19 | `npm run flowchain:operator:package` |
-| node-operator-package-verify | passed | passed | status=passed; commandCount=29; expectedFileCount=26; ownerInputNameCount=17 | `npm run flowchain:operator:package:verify` |
+| node-operator-package | passed | passed | status=passed; commandCount=29; runbookCount=12; evidenceReportCount=20 | `npm run flowchain:operator:package` |
+| node-operator-package-verify | passed | passed | status=passed; commandCount=29; expectedFileCount=27; ownerInputNameCount=17 | `npm run flowchain:operator:package:verify` |
 | backup-readiness | blocked-owner-input | blocked | status=blocked; snapshotProofStatus=not-run; restoreProofStatus=not-run; blockers=FLOWCHAIN_RPC_STATE_BACKUP_PATH | `npm run flowchain:backup:check -- -AllowBlocked` |
 | backup-restore-validation | passed | passed | status=passed; backupRestoreHashRoundTrip=True; latestRestoreUsedLatestSnapshot=True; restoreTargetsLiveStateProtected=True; liveStateNonMutationProven=True; corruptedSnapshotDetected=True; manifestTamperDetected=True; missingStateArtifactDetected=True; missingSnapshotManifestDetected=True; latestPointerTamperDetected=True; wrongChainStateMismatchDetected=True | `npm run flowchain:backup:restore:validate` |
 | backup-owner-path-dry-run | passed | passed | status=passed | `npm run flowchain:backup:owner-path:dry-run` |

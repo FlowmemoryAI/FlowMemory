@@ -55,6 +55,14 @@ $definitions = @(
         ownerInputGate = $false
     },
     [ordered]@{
+        id = "operator-doctor"
+        requirement = "Operator doctor reports host tools, package scripts, state path, disk, service evidence, ports, owner-input groups, and owner env-file status without printing owner values."
+        path = "docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json"
+        command = "npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json"
+        productionGate = $true
+        ownerInputGate = $true
+    },
+    [ordered]@{
         id = "live-product-e2e"
         requirement = "Local live-product e2e covers runtime, wallet, live infra, and tester rehearsal without public claims."
         path = "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json"
@@ -361,7 +369,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("backup-restore-validation", "ops-snapshot", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "backup-restore-validation", "ops-snapshot", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"
@@ -528,7 +536,8 @@ function ConvertTo-TruthEvidence {
         "expectedFileCount",
         "ownerInputNameCount",
         "completionReady",
-        "blockedOnlyOnKnownExternalOwnerInputs"
+        "blockedOnlyOnKnownExternalOwnerInputs",
+        "blockedOnlyOnOwnerInputs"
     )) {
         $value = Get-TruthProp -Object $Report -Name $name
         if ($null -ne $value -and -not [string]::IsNullOrWhiteSpace("$value")) {

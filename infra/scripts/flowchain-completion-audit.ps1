@@ -25,6 +25,7 @@ $optionalMissingEnvNames = @(
 
 $paths = [ordered]@{
     serviceStatus = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
+    operatorDoctor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json"
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     liveProduct = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json"
     liveInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-infra-check-report.json"
@@ -304,6 +305,9 @@ $liveProductExitCode = $liveProductResult.exitCode
 $serviceStatusResult = Invoke-AuditChild -Path $paths.serviceStatus -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-status.ps1"), "-AllowBlocked")
 $serviceStatusOutput = @($serviceStatusResult.output)
 $serviceStatusExitCode = $serviceStatusResult.exitCode
+$operatorDoctorResult = Invoke-AuditChild -Path $paths.operatorDoctor -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-doctor.ps1"), "-ReportPath", "docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json")
+$operatorDoctorOutput = @($operatorDoctorResult.output)
+$operatorDoctorExitCode = $operatorDoctorResult.exitCode
 $serviceMonitorResult = Invoke-AuditChild -Path $paths.serviceMonitor -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-monitor.ps1"), "-DurationSeconds", "$MonitorDurationSeconds", "-PollSeconds", "$MonitorPollSeconds", "-MaxStateAgeSeconds", "$MonitorMaxStateAgeSeconds")
 $serviceMonitorOutput = @($serviceMonitorResult.output)
 $serviceMonitorExitCode = $serviceMonitorResult.exitCode
@@ -424,6 +428,16 @@ $chain = Get-AuditProp -Object $service -Name "chain"
 $latestHeight = [string](Get-AuditProp -Object $chain -Name "latestHeight" -Default "0")
 $stateAge = [int] (Get-AuditProp -Object $chain -Name "stateFileLastWriteAgeSeconds" -Default 999999)
 $chainProducing = $latestHeight -match '^\d+$' -and [int64] $latestHeight -gt 0 -and $stateAge -le 60
+$operatorDoctor = $reports.operatorDoctor
+$operatorDoctorStatus = Get-ReportStatus -Report $operatorDoctor
+$operatorDoctorFailedChecks = @((Get-AuditProp -Object $operatorDoctor -Name "failedChecks" -Default @()))
+$operatorDoctorBlockedChecks = @((Get-AuditProp -Object $operatorDoctor -Name "blockedChecks" -Default @()))
+$operatorDoctorCheckCount = @((Get-AuditProp -Object $operatorDoctor -Name "checks" -Default @())).Count
+$operatorDoctorBlockedOnlyOwnerInputs = (Get-AuditProp -Object $operatorDoctor -Name "blockedOnlyOnOwnerInputs" -Default $false) -eq $true
+$operatorDoctorReady = $operatorDoctorExitCode -eq 0 `
+    -and ($operatorDoctorStatus -in @("passed", "blocked", "degraded")) `
+    -and ($operatorDoctorFailedChecks.Count -eq 0) `
+    -and (($operatorDoctorStatus -ne "blocked") -or $operatorDoctorBlockedOnlyOwnerInputs)
 $monitorStatus = Get-ReportStatus -Report $serviceMonitor
 $monitorHeightAdvanced = Get-AuditProp -Object $serviceMonitor -Name "heightAdvanced" -Default $false
 $monitorFirstHeight = [string](Get-AuditProp -Object $serviceMonitor -Name "firstHeight" -Default "")
@@ -953,6 +967,12 @@ Add-AuditItem -Items $items -Id "block-production" `
     -Evidence "latestHeight=$latestHeight, stateFileLastWriteAgeSeconds=$stateAge, report=$($paths.serviceStatus)" `
     -Commands @("npm run flowchain:service:status")
 
+Add-AuditItem -Items $items -Id "operator-doctor" `
+    -Requirement "Operator doctor checks host tools, package scripts, state path, disk, service evidence, ports, owner-input groups, and owner env-file status without printing owner values." `
+    -Status $(if ($operatorDoctorReady) { "passed" } else { "failed" }) `
+    -Evidence "doctorStatus=$operatorDoctorStatus, checks=$operatorDoctorCheckCount, failedChecks=$($operatorDoctorFailedChecks.Count), blockedChecks=$($operatorDoctorBlockedChecks.Count), blockedOnlyOwner=$operatorDoctorBlockedOnlyOwnerInputs, report=$($paths.operatorDoctor)" `
+    -Commands @("npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json")
+
 Add-AuditItem -Items $items -Id "sustained-block-production" `
     -Requirement "Live service monitor observes running services and advancing block height over a sampling window." `
     -Status $(if ($monitorPassed) { "passed" } else { "failed" }) `
@@ -1216,6 +1236,8 @@ $report = [ordered]@{
     liveProductOutputRedacted = @($liveProductOutput | ForEach-Object { "$_" })
     serviceStatusExitCode = $serviceStatusExitCode
     serviceStatusOutputRedacted = @($serviceStatusOutput | ForEach-Object { "$_" })
+    operatorDoctorExitCode = $operatorDoctorExitCode
+    operatorDoctorOutputRedacted = @($operatorDoctorOutput | ForEach-Object { "$_" })
     serviceMonitorExitCode = $serviceMonitorExitCode
     serviceMonitorOutputRedacted = @($serviceMonitorOutput | ForEach-Object { "$_" })
     liveWalletExitCode = $liveWalletExitCode
@@ -1315,6 +1337,7 @@ $report = [ordered]@{
         "npm run flowchain:owner-env:readiness:validate",
         "npm run flowchain:owner-env:readiness -- -AllowBlocked",
         "npm run flowchain:owner-inputs",
+        "npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json",
         "npm run flowchain:public-rpc:edge-template",
         "npm run flowchain:public-rpc:deployment-bundle",
         "npm run flowchain:public-rpc:deployment:automation",

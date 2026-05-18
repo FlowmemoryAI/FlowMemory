@@ -182,6 +182,11 @@ New-Item -ItemType Directory -Force -Path $packageFullPath | Out-Null
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $reportFullPath) | Out-Null
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $markdownFullPath) | Out-Null
 
+& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "flowchain-doctor.ps1") -ReportPath "docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json"
+if ($LASTEXITCODE -ne 0) {
+    throw "FlowChain operator doctor failed."
+}
+
 $copiedRunbooks = New-Object System.Collections.ArrayList
 foreach ($file in @(
     [ordered]@{ source = "docs/developer/FLOWCHAIN_NODE_OPERATOR.md"; target = "docs/FLOWCHAIN_NODE_OPERATOR.md"; required = $true },
@@ -203,6 +208,7 @@ foreach ($file in @(
 $copiedEvidence = New-Object System.Collections.ArrayList
 foreach ($file in @(
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/service-status-report.json"; target = "evidence/service-status-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json"; target = "evidence/operator-doctor-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"; target = "evidence/service-monitor-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"; target = "evidence/service-supervisor-validation-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"; target = "evidence/service-install-validation-report.json"; required = $true },

@@ -56,6 +56,7 @@ $expectedFiles = @(
     "runbooks/WINDOWS_BACKUP_INSTALL.md",
     "runbooks/WINDOWS_ALERT_INSTALL.md",
     "runbooks/EXTERNAL_TESTER_PACKET.md",
+    "evidence/operator-doctor-report.json",
     "evidence/service-status-report.json",
     "evidence/service-monitor-report.json",
     "evidence/service-install-validation-report.json",
@@ -81,6 +82,10 @@ $reportOwnerInputs = @((Get-OperatorVerifyProp -Object $packageReport -Name "own
 $manifestCommands = @((Get-OperatorVerifyProp -Object $manifest -Name "commandMatrix" -Default @()))
 $matrixCommands = @((Get-OperatorVerifyProp -Object $matrix -Name "commands" -Default @()))
 $badOwnerInputNames = @($manifestOwnerInputs | Where-Object { "$_" -notmatch '^FLOWCHAIN_[A-Z0-9_]+$' -or "$_" -match '=' -or "$_" -match 'https?://' })
+$operatorDoctor = Read-FlowChainJsonIfExists -Path (Join-Path $packageFullPath "evidence/operator-doctor-report.json")
+$operatorDoctorStatus = [string](Get-OperatorVerifyProp -Object $operatorDoctor -Name "status" -Default "missing")
+$operatorDoctorFailedChecks = @((Get-OperatorVerifyProp -Object $operatorDoctor -Name "failedChecks" -Default @()))
+$operatorDoctorBlockedOnlyOwnerInputs = (Get-OperatorVerifyProp -Object $operatorDoctor -Name "blockedOnlyOnOwnerInputs" -Default $false) -eq $true
 
 $scanReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-verify-no-secret-scan-report.json"
 & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "flowchain-no-secret-scan.ps1") -Paths @($packageFullPath, $packageReportFullPath) -ReportPath $scanReportPath
@@ -114,6 +119,9 @@ $checks = [ordered]@{
     expectedFilesPresent = $missingFiles.Count -eq 0
     reportRunbookCountEnough = [int](Get-OperatorVerifyProp -Object $packageReport -Name "runbookCount" -Default 0) -ge 10
     reportEvidenceCountEnough = [int](Get-OperatorVerifyProp -Object $packageReport -Name "evidenceReportCount" -Default 0) -ge 15
+    operatorDoctorEvidencePresent = $null -ne $operatorDoctor
+    operatorDoctorNoFailedChecks = $operatorDoctorFailedChecks.Count -eq 0
+    operatorDoctorPassedOrOwnerBlocked = ($operatorDoctorStatus -eq "passed") -or ($operatorDoctorStatus -eq "blocked" -and $operatorDoctorBlockedOnlyOwnerInputs)
     ownerInputNamesOnly = $manifestOwnerInputs.Count -eq 17 -and $reportOwnerInputs.Count -eq 17 -and $badOwnerInputNames.Count -eq 0
     noForbiddenLocalFiles = $forbiddenFiles.Count -eq 0
     noSecretScanPassed = $scanExitCode -eq 0 -and $scanStatus -eq "passed" -and $secretFindings.Count -eq 0
@@ -135,6 +143,8 @@ $report = [ordered]@{
     missingFiles = @($missingFiles)
     forbiddenFiles = @($forbiddenFiles)
     commandCount = $manifestCommands.Count
+    operatorDoctorStatus = $operatorDoctorStatus
+    operatorDoctorFailedCheckCount = $operatorDoctorFailedChecks.Count
     ownerInputNameCount = $manifestOwnerInputs.Count
     badOwnerInputNames = @($badOwnerInputNames)
     noSecretScanReportPath = $scanReportPath

@@ -38,6 +38,7 @@ $knownExternalOwnerInputs = @(
 
 $reportPaths = [ordered]@{
     serviceStatus = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
+    operatorDoctor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json"
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     serviceSupervisorValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
     serviceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
@@ -244,6 +245,24 @@ Add-ArchitectureItem -Items $items -Id "runtime-node-boundary" -Layer "L1 runtim
     -Evidence "serviceStatus=$serviceStatus, liveProfile=$liveProfile, maxBlocks=$maxBlocks, nodeRunning=$nodeRunning, controlPlaneRunning=$controlPlaneRunning, latestHeight=$latestHeight, finalizedHeight=$finalizedHeight" `
     -Files $runtimeFiles `
     -Commands @("npm run flowchain:service:status", "npm run flowchain:service:restart -- -LiveProfile")
+
+$operatorDoctor = $reports.operatorDoctor
+$operatorDoctorStatus = Get-ArchitectureStatus -Report $operatorDoctor
+$operatorDoctorFailedChecks = @((Get-ArchitectureProp -Object $operatorDoctor -Name "failedChecks" -Default @()))
+$operatorDoctorBlockedChecks = @((Get-ArchitectureProp -Object $operatorDoctor -Name "blockedChecks" -Default @()))
+$operatorDoctorCheckCount = @((Get-ArchitectureProp -Object $operatorDoctor -Name "checks" -Default @())).Count
+$operatorDoctorBlockedOnlyOwnerInputs = (Get-ArchitectureProp -Object $operatorDoctor -Name "blockedOnlyOnOwnerInputs" -Default $false) -eq $true
+$operatorDoctorReady = (Test-PackageScript -PackageJson $packageJson -Name "flowchain:doctor") `
+    -and ($operatorDoctorStatus -in @("passed", "blocked", "degraded")) `
+    -and ($operatorDoctorFailedChecks.Count -eq 0) `
+    -and ($operatorDoctorCheckCount -ge 40) `
+    -and (($operatorDoctorStatus -ne "blocked") -or $operatorDoctorBlockedOnlyOwnerInputs)
+Add-ArchitectureItem -Items $items -Id "operator-doctor-boundary" -Layer "Operations" `
+    -Requirement "Operator doctor covers host tools, package scripts, state path, disk, service evidence, ports, owner-input groups, and owner env-file status without printing owner values." `
+    -Status $(if ($operatorDoctorReady) { "passed" } else { "failed" }) `
+    -Evidence "doctorStatus=$operatorDoctorStatus, checks=$operatorDoctorCheckCount, failedChecks=$($operatorDoctorFailedChecks.Count), blockedChecks=$($operatorDoctorBlockedChecks.Count), blockedOnlyOwner=$operatorDoctorBlockedOnlyOwnerInputs" `
+    -Files @("infra/scripts/flowchain-doctor.ps1") `
+    -Commands @("npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json")
 
 $monitor = $reports.serviceMonitor
 $monitorStatus = Get-ArchitectureStatus -Report $monitor
@@ -1023,6 +1042,7 @@ $productGateFiles = @(
     "infra/scripts/flowchain-live-product-e2e.ps1",
     "infra/scripts/flowchain-completion-audit.ps1",
     "infra/scripts/flowchain-public-deployment-contract.ps1",
+    "infra/scripts/flowchain-doctor.ps1",
     "infra/scripts/flowchain-operator-package.ps1",
     "infra/scripts/flowchain-operator-package-verify.ps1",
     "infra/scripts/flowchain-external-tester-readiness.ps1",
@@ -1091,6 +1111,7 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:live-product:e2e") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-deployment:contract") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:completion:audit") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:doctor") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:operator:package") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:operator:package:verify") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:dev-pack:e2e") `
@@ -1103,15 +1124,16 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and ($externalTesterPacketExecutableSmokeValidated -eq $true) `
     -and ($externalTesterConnectPackReady -eq $true) `
     -and ($publicTesterGatewayReady -eq $true) `
+    -and ($operatorDoctorReady -eq $true) `
     -and ($operatorPackageReady -eq $true) `
     -and ($operatorPackageVerifyReady -eq $true) `
     -and ($devPackReady -eq $true)
 Add-ArchitectureItem -Items $items -Id "aggregate-verification-boundary" -Layer "Verification" `
-    -Requirement "Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, node-operator package, developer dev-pack, and completion evidence into one auditable path." `
+    -Requirement "Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, operator doctor, node-operator package, developer dev-pack, and completion evidence into one auditable path." `
     -Status $(if ($productGateReady) { "passed" } else { "failed" }) `
-    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus, packetSmoke=$externalTesterPacketExecutableSmokeValidated, connectPackReady=$externalTesterConnectPackReady, publicTesterGateway=$publicTesterGatewayStatus, operatorPackage=$operatorPackageStatus, operatorPackageVerify=$operatorPackageVerifyStatus, devPack=$devPackStatus" `
+    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus, packetSmoke=$externalTesterPacketExecutableSmokeValidated, connectPackReady=$externalTesterConnectPackReady, publicTesterGateway=$publicTesterGatewayStatus, operatorDoctor=$operatorDoctorStatus, operatorPackage=$operatorPackageStatus, operatorPackageVerify=$operatorPackageVerifyStatus, devPack=$devPackStatus" `
     -Files $productGateFiles `
-    -Commands @("npm run flowchain:live-infra:check", "npm run flowchain:live-product:e2e", "npm run flowchain:completion:audit", "npm run flowchain:external-tester:packet", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:operator:package", "npm run flowchain:operator:package:verify", "npm run flowchain:dev-pack:e2e")
+    -Commands @("npm run flowchain:live-infra:check", "npm run flowchain:live-product:e2e", "npm run flowchain:completion:audit", "npm run flowchain:external-tester:packet", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json", "npm run flowchain:operator:package", "npm run flowchain:operator:package:verify", "npm run flowchain:dev-pack:e2e")
 
 $failedItems = @($items | Where-Object { $_.status -eq "failed" })
 $blockedItems = @($items | Where-Object { $_.status -eq "blocked" })
@@ -1139,7 +1161,7 @@ $dataFlows = @(
     },
     [ordered]@{
         name = "node-operator-package"
-        path = @("operator package command", "copied runbooks", "command matrix", "owner-input names", "latest evidence reports", "independent verifier", "no-secret scan")
+        path = @("operator doctor", "operator package command", "copied runbooks", "command matrix", "owner-input names", "latest evidence reports", "independent verifier", "no-secret scan")
         latestEvidence = $reportPaths.operatorPackageVerify
     },
     [ordered]@{
@@ -1194,7 +1216,7 @@ $objectiveDeliverables = @(
     "Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.",
     "Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.",
     "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven, bounds relayer child processes, stages the Base scan cursor until L1 credit proof, can queue new relayer handoffs into the L1, and remains live-blocked until owner guardrails are configured.",
-    "State backup, monitoring, reboot-persistent service install, node-operator packaging, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
+    "State backup, monitoring, reboot-persistent service install, operator doctor diagnostics, node-operator packaging, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
     "Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.",
     "Owner signup checklist maps the external services and local setup values needed for public operation without requesting secrets.",
     "The owner-operated public deployment contract has pre-exposure and rollback commands and cannot become shareable until all public gates pass.",

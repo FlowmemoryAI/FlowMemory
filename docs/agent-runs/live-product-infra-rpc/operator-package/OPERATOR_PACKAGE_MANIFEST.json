@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-18T00:44:42.5039157Z",
+    "generatedAt":  "2026-05-18T00:59:08.7143432Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -295,6 +295,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/service-status-report.json",
                          "destination":  "evidence/service-status-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json",
+                         "destination":  "evidence/operator-doctor-report.json",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"
