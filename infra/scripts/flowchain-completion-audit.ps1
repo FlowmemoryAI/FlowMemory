@@ -1032,6 +1032,8 @@ $ownerInputsValidationPassed = $ownerInputsValidationExitCode -eq 0 `
     -and $ownerInputsValidationMalformedEnvFileFails -eq $true
 $publicRpcValidationStatus = Get-ReportStatus -Report $publicRpcValidation
 $publicRpcValidationChecks = Get-AuditProp -Object $publicRpcValidation -Name "checks"
+$publicRpcValidationFailedChecks = @((Get-AuditProp -Object $publicRpcValidation -Name "failedChecks" -Default @()))
+$publicRpcValidationSecretFindings = @((Get-AuditProp -Object $publicRpcValidation -Name "secretMarkerFindings" -Default @()))
 $publicRpcValidationAllowed = Get-AuditProp -Object $publicRpcValidationChecks -Name "allowedOriginAccepted" -Default $false
 $publicRpcValidationDisallowedProbe = Get-AuditProp -Object $publicRpcValidationChecks -Name "disallowedOriginProbePerformed" -Default $false
 $publicRpcValidationDisallowedRejected = Get-AuditProp -Object $publicRpcValidationChecks -Name "disallowedOriginRejected" -Default $false
@@ -1040,8 +1042,13 @@ $publicRpcValidationRateLimitProbe = Get-AuditProp -Object $publicRpcValidationC
 $publicRpcValidationRateLimitRejected = Get-AuditProp -Object $publicRpcValidationChecks -Name "rateLimitRejected" -Default $false
 $publicRpcValidationRateLimitRetryAfter = Get-AuditProp -Object $publicRpcValidationChecks -Name "rateLimitRetryAfterHeaderPresent" -Default $false
 $publicRpcValidationHygiene = Get-AuditProp -Object $publicRpcValidationChecks -Name "responseHygienePassed" -Default $false
+$publicRpcValidationSecretFindingsEmpty = Get-AuditProp -Object $publicRpcValidationChecks -Name "secretMarkerFindingsEmpty" -Default $false
+$publicRpcValidationFailedCheckCount = $publicRpcValidationFailedChecks.Count
+$publicRpcValidationSecretFindingCount = $publicRpcValidationSecretFindings.Count
 $publicRpcValidationPassed = $publicRpcValidationExitCode -eq 0 `
     -and $publicRpcValidationStatus -eq "passed" `
+    -and $publicRpcValidationFailedCheckCount -eq 0 `
+    -and $publicRpcValidationSecretFindingCount -eq 0 `
     -and $publicRpcValidationAllowed -eq $true `
     -and $publicRpcValidationDisallowedProbe -eq $true `
     -and $publicRpcValidationDisallowedRejected -eq $true `
@@ -1049,7 +1056,11 @@ $publicRpcValidationPassed = $publicRpcValidationExitCode -eq 0 `
     -and $publicRpcValidationRateLimitProbe -eq $true `
     -and $publicRpcValidationRateLimitRejected -eq $true `
     -and $publicRpcValidationRateLimitRetryAfter -eq $true `
-    -and $publicRpcValidationHygiene -eq $true
+    -and $publicRpcValidationHygiene -eq $true `
+    -and $publicRpcValidationSecretFindingsEmpty -eq $true `
+    -and ((Get-AuditProp -Object $publicRpcValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $publicRpcValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcValidation -Name "broadcasts" -Default $true) -eq $false)
 $publicRpcAbuseTestStatus = Get-ReportStatus -Report $publicRpcAbuseTest
 $publicRpcAbuseTestReady = Get-AuditProp -Object $publicRpcAbuseTest -Name "abuseTestReady" -Default $false
 $publicRpcAbuseTestChecks = Get-AuditProp -Object $publicRpcAbuseTest -Name "checks"
@@ -1822,7 +1833,7 @@ Add-AuditItem -Items $items -Id "node-operator-package-verify" `
 Add-AuditItem -Items $items -Id "public-rpc-readiness-validator-self-test" `
     -Requirement "Public RPC readiness validator proves endpoint checks, CORS allowed-origin acceptance, disallowed-origin rejection, bounded rate-limit rejection, retry-after evidence, and response hygiene against a temporary local control plane." `
     -Status $(if ($publicRpcValidationPassed) { "passed" } else { "failed" }) `
-    -Evidence "validationStatus=$publicRpcValidationStatus, allowedOriginAccepted=$publicRpcValidationAllowed, disallowedProbe=$publicRpcValidationDisallowedProbe, disallowedRejected=$publicRpcValidationDisallowedRejected, endpointChecks=$publicRpcValidationEndpointChecks, rateLimitProbe=$publicRpcValidationRateLimitProbe, rateLimitRejected=$publicRpcValidationRateLimitRejected, rateLimitRetryAfter=$publicRpcValidationRateLimitRetryAfter, responseHygiene=$publicRpcValidationHygiene, report=$($paths.publicRpcValidation)" `
+    -Evidence "validationStatus=$publicRpcValidationStatus, allowedOriginAccepted=$publicRpcValidationAllowed, disallowedProbe=$publicRpcValidationDisallowedProbe, disallowedRejected=$publicRpcValidationDisallowedRejected, endpointChecks=$publicRpcValidationEndpointChecks, rateLimitProbe=$publicRpcValidationRateLimitProbe, rateLimitRejected=$publicRpcValidationRateLimitRejected, rateLimitRetryAfter=$publicRpcValidationRateLimitRetryAfter, responseHygiene=$publicRpcValidationHygiene, failedChecks=$publicRpcValidationFailedCheckCount, secretFindings=$publicRpcValidationSecretFindingCount, report=$($paths.publicRpcValidation)" `
     -Commands @("npm run flowchain:public-rpc:validate")
 
 Add-AuditItem -Items $items -Id "public-rpc-abuse-test" `

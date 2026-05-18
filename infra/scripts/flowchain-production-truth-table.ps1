@@ -447,6 +447,38 @@ $definitions = @(
         command = "npm run flowchain:public-rpc:validate"
         productionGate = $true
         ownerInputGate = $false
+        requiredChecks = @(
+            "readinessExitedCleanly",
+            "localEndpointBlocksPublicReady",
+            "localEndpointSelfReportsNonProduction",
+            "discoveryMatchesReadinessDeployment",
+            "readinessDeploymentFlagsConsistent",
+            "noPublicRpcEnvMissing",
+            "noFailedEndpointChecks",
+            "allowedOriginAccepted",
+            "disallowedOriginProbePerformed",
+            "disallowedOriginRejected",
+            "rateLimitProbePerformed",
+            "rateLimitRejected",
+            "rateLimitRetryAfterHeaderPresent",
+            "responseHygienePassed",
+            "failedProblemsAbsent",
+            "secretMarkerFindingsEmpty",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "publicRpcReady" = $false
+            "expectedBlockedBecauseEndpointIsLocal" = $true
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
     },
     [ordered]@{
         id = "public-rpc-abuse-test"

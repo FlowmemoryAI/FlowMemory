@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_validation_report.v0",
-    "generatedAt":  "2026-05-17T23:20:40.1805454Z",
+    "generatedAt":  "2026-05-18T05:31:31.5830506Z",
     "status":  "passed",
     "validationScope":  "local-control-plane-public-rpc-readiness-rehearsal",
     "publicRpcReady":  false,
@@ -20,11 +20,18 @@
                    "rateLimitRejected":  true,
                    "rateLimitRetryAfterHeaderPresent":  true,
                    "responseHygienePassed":  true,
-                   "failedProblemsAbsent":  true
+                   "failedProblemsAbsent":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
                },
     "failedChecks":  [
 
                      ],
+    "secretMarkerFindings":  [
+
+                             ],
     "readinessStatus":  "blocked",
     "readinessExitCode":  0,
     "endpointCheckCount":  10,

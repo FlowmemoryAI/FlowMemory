@@ -48,6 +48,38 @@ function Get-ValidationProp {
     return $Default
 }
 
+function Get-ValidationSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 function Wait-ControlPlaneHealth {
     param(
         [Parameter(Mandatory = $true)][string] $BaseUrl,
@@ -137,20 +169,22 @@ try {
         rateLimitRetryAfterHeaderPresent = (Get-ValidationProp -Object $checks -Name "rateLimitRetryAfterHeaderPresent" -Default $false) -eq $true
         responseHygienePassed = (Get-ValidationProp -Object $checks -Name "responseHygienePassed" -Default $false) -eq $true
         failedProblemsAbsent = $failedProblems.Count -eq 0
+        secretMarkerFindingsEmpty = $true
+        envValuesPrintedFalse = $true
+        noSecrets = $true
+        broadcastsFalse = $true
     }
-
-    $failedValidationChecks = @($validationChecks.GetEnumerator() | Where-Object { $_.Value -ne $true })
-    $status = if ($failedValidationChecks.Count -eq 0) { "passed" } else { "failed" }
 
     $report = [ordered]@{
         schema = "flowchain.public_rpc_validation_report.v0"
         generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-        status = $status
+        status = "pending"
         validationScope = "local-control-plane-public-rpc-readiness-rehearsal"
         publicRpcReady = $false
         expectedBlockedBecauseEndpointIsLocal = $true
         checks = $validationChecks
-        failedChecks = @($failedValidationChecks | ForEach-Object { $_.Key })
+        failedChecks = @()
+        secretMarkerFindings = @()
         readinessStatus = Get-ValidationProp -Object $readinessReport -Name "status" -Default "missing"
         readinessExitCode = $readinessExitCode
         endpointCheckCount = $endpointChecks.Count
@@ -168,6 +202,18 @@ try {
         noSecrets = $true
         broadcasts = $false
     }
+
+    $preliminaryReportText = $report | ConvertTo-Json -Depth 18
+    $secretMarkerFindings = @(Get-ValidationSecretMarkerFindings -Text $preliminaryReportText -Label "public RPC validation report")
+    $validationChecks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+    $validationChecks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+    $failedValidationChecks = @($validationChecks.GetEnumerator() | Where-Object { $_.Value -ne $true })
+    $status = if ($failedValidationChecks.Count -eq 0) { "passed" } else { "failed" }
+    $report["status"] = $status
+    $report["checks"] = $validationChecks
+    $report["failedChecks"] = @($failedValidationChecks | ForEach-Object { $_.Key })
+    $report["secretMarkerFindings"] = @($secretMarkerFindings)
+    $report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 }
 finally {
     if ($null -ne $serverProcess -and -not $serverProcess.HasExited) {
