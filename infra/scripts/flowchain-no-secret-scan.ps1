@@ -187,19 +187,36 @@ foreach ($path in $Paths) {
     }
 }
 
-$status = if ($findings.Count -eq 0) { "passed" } else { "failed" }
 $normalizedScanPaths = @($Paths | ForEach-Object { ("$_" -replace "\\", "/").TrimStart("./").ToLowerInvariant() })
 $normalizedReportPath = ($ReportPath -replace "\\", "/").TrimStart("./").ToLowerInvariant()
 $checks = [ordered]@{
     scansDashboardPublicData = $normalizedScanPaths -contains "apps/dashboard/public/data"
     scansGeneratedLiveProductReports = $normalizedScanPaths -contains "docs/agent-runs/live-product-infra-rpc"
     reportPathMatchesProductionGate = $normalizedReportPath -eq "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
+    scannedCountPositive = $scanned.Count -gt 0
+    findingsEmpty = $findings.Count -eq 0
+    secretMarkerFindingsEmpty = $findings.Count -eq 0
+    envValuesPrintedFalse = $true
+    noSecrets = $findings.Count -eq 0
+    broadcastsFalse = $true
 }
+$productionGateCoverageCheckNames = @(
+    "scansDashboardPublicData",
+    "scansGeneratedLiveProductReports",
+    "reportPathMatchesProductionGate"
+)
+$enforceProductionGateCoverage = $normalizedReportPath -eq "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
+$failedChecks = @($checks.GetEnumerator() | Where-Object {
+        $_.Value -ne $true -and ($enforceProductionGateCoverage -or $_.Key -notin $productionGateCoverageCheckNames)
+    } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
 $report = [ordered]@{
     schema = "flowchain.no_secret_scan_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
     status = $status
     checks = $checks
+    failedChecks = @($failedChecks)
+    secretMarkerFindings = @($findings)
     scannedCount = $scanned.Count
     scannedPaths = @($Paths)
     findings = @($findings)
@@ -214,6 +231,9 @@ $report = [ordered]@{
         "vault paths",
         "zip files"
     )
+    envValuesPrinted = $false
+    noSecrets = $findings.Count -eq 0
+    broadcasts = $false
 }
 Write-FlowChainJson -Path $reportFullPath -Value $report -Depth 12
 

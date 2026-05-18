@@ -1,6 +1,6 @@
 ﻿# FlowChain Completion Audit
 
-Generated: 2026-05-18T05:52:39.0166467Z
+Generated: 2026-05-18T05:57:20.4704079Z
 Status: blocked
 Completion ready: False
 Refresh mode: no-refresh-existing-reports
@@ -59,7 +59,7 @@ Latest observed height: 66326
 | Bridge relayer loop validation proves isolated live-service loop start, fresh blocked-only-on-owner-input loop health, clean stop, PID-file cleanup, and no leftover validation relayer process. | passed | loopStatus=passed, failedChecks=0, missingChecks=0, secretFindings=0, loopHealthy=True, stopped=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\bridge-relayer-loop-validation-report.json | npm run flowchain:bridge:relayer:loop:validate |
 | Completion audit refreshes the live-infra aggregate gate before deciding readiness. | blocked | liveInfraStatus=blocked, ownerInputsReady=False, publicRpcReady=False, servicesReady=True, backupReady=False, bridgeReady=False, noSecretReady=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\flowchain-live-infra-check-report.json | npm run flowchain:live-infra:check -- -AllowBlocked |
 | Full product gate runs production local L1 aggregate, restores live service, proves wallet flows, and runs live infra readiness. | blocked | liveProductExitCode=0, liveProductStatus=blocked, productionLocalAggregate=passed-with-live-blockers, liveInfra=blocked, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\flowchain-live-product-e2e-report.json | npm run flowchain:live-product:e2e -- -AllowBlocked |
-| Reports and gates do not print secrets/env values and no live Base broadcast occurred. | passed | noSecretStatus=passed, scansGeneratedReports=True, reportPathMatchesProductionGate=True, liveProductNoLiveBroadcast=True, baseTxDiagnosticBroadcasts=False, baseTxDiagnosticNoSecrets=True, devPackNoSecrets=True, reports=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\no-secret-scan-report.json, E:\FlowMemory\flowmemory-live-infra-rpc\devnet\local\live-l1-bridge-e2e\base-tx-diagnostic.json, E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-dev-pack\dev-pack-e2e-report.json | npm run flowchain:no-secret:scan |
+| Reports and gates do not print secrets/env values and no live Base broadcast occurred. | passed | noSecretStatus=passed, scansGeneratedReports=True, reportPathMatchesProductionGate=True, failedChecks=0, secretFindings=0, findings=0, liveProductNoLiveBroadcast=True, baseTxDiagnosticBroadcasts=False, baseTxDiagnosticNoSecrets=True, devPackNoSecrets=True, reports=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\no-secret-scan-report.json, E:\FlowMemory\flowmemory-live-infra-rpc\devnet\local\live-l1-bridge-e2e\base-tx-diagnostic.json, E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-dev-pack\dev-pack-e2e-report.json | npm run flowchain:no-secret:scan |
 
 ## Remaining External Owner Inputs
 

@@ -2095,10 +2095,29 @@ $noSecretChecks = Get-AuditProp -Object $reports.noSecret -Name "checks"
 $noSecretCoverageReady = ((Get-AuditProp -Object $noSecretChecks -Name "scansDashboardPublicData" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $noSecretChecks -Name "scansGeneratedLiveProductReports" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $noSecretChecks -Name "reportPathMatchesProductionGate" -Default $false) -eq $true)
+$noSecretFailedChecks = @((Get-AuditProp -Object $reports.noSecret -Name "failedChecks" -Default @()))
+$noSecretSecretFindings = @((Get-AuditProp -Object $reports.noSecret -Name "secretMarkerFindings" -Default @()))
+$noSecretFindings = @((Get-AuditProp -Object $reports.noSecret -Name "findings" -Default @()))
+$noSecretFailedCheckCount = @($noSecretFailedChecks | Where-Object { $null -ne $_ }).Count
+$noSecretSecretFindingCount = @($noSecretSecretFindings | Where-Object { $null -ne $_ }).Count
+$noSecretFindingCount = @($noSecretFindings | Where-Object { $null -ne $_ }).Count
+$noSecretSafetyReady = $noSecretCoverageReady `
+    -and $noSecretFailedCheckCount -eq 0 `
+    -and $noSecretSecretFindingCount -eq 0 `
+    -and $noSecretFindingCount -eq 0 `
+    -and ((Get-AuditProp -Object $noSecretChecks -Name "scannedCountPositive" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $noSecretChecks -Name "findingsEmpty" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $noSecretChecks -Name "secretMarkerFindingsEmpty" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $noSecretChecks -Name "envValuesPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $noSecretChecks -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $noSecretChecks -Name "broadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $reports.noSecret -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $reports.noSecret -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $reports.noSecret -Name "broadcasts" -Default $true) -eq $false)
 Add-AuditItem -Items $items -Id "no-secrets-no-broadcasts" `
     -Requirement "Reports and gates do not print secrets/env values and no live Base broadcast occurred." `
-    -Status $(if ((Get-ReportStatus -Report $reports.noSecret) -eq "passed" -and $noSecretCoverageReady -and $liveProductNoLiveBroadcast -eq $true -and $liveProductEnvValuesPrinted -eq $false -and $baseTxDiagnosticBroadcasts -eq $false -and $baseTxDiagnosticPrintsEnvValues -eq $false -and $baseTxDiagnosticNoSecrets -eq $true -and (Get-AuditProp -Object $devPack -Name "noSecrets" -Default $false) -eq $true -and (Get-AuditProp -Object $devPack -Name "envValuesPrinted" -Default $true) -eq $false) { "passed" } else { "failed" }) `
-    -Evidence "noSecretStatus=$(Get-ReportStatus -Report $reports.noSecret), scansGeneratedReports=$(Get-AuditProp -Object $noSecretChecks -Name "scansGeneratedLiveProductReports"), reportPathMatchesProductionGate=$(Get-AuditProp -Object $noSecretChecks -Name "reportPathMatchesProductionGate"), liveProductNoLiveBroadcast=$liveProductNoLiveBroadcast, baseTxDiagnosticBroadcasts=$baseTxDiagnosticBroadcasts, baseTxDiagnosticNoSecrets=$baseTxDiagnosticNoSecrets, devPackNoSecrets=$(Get-AuditProp -Object $devPack -Name "noSecrets" -Default $false), reports=$($paths.noSecret), $($paths.baseTxDiagnostic), $($paths.devPack)" `
+    -Status $(if ((Get-ReportStatus -Report $reports.noSecret) -eq "passed" -and $noSecretSafetyReady -and $liveProductNoLiveBroadcast -eq $true -and $liveProductEnvValuesPrinted -eq $false -and $baseTxDiagnosticBroadcasts -eq $false -and $baseTxDiagnosticPrintsEnvValues -eq $false -and $baseTxDiagnosticNoSecrets -eq $true -and (Get-AuditProp -Object $devPack -Name "noSecrets" -Default $false) -eq $true -and (Get-AuditProp -Object $devPack -Name "envValuesPrinted" -Default $true) -eq $false) { "passed" } else { "failed" }) `
+    -Evidence "noSecretStatus=$(Get-ReportStatus -Report $reports.noSecret), scansGeneratedReports=$(Get-AuditProp -Object $noSecretChecks -Name "scansGeneratedLiveProductReports"), reportPathMatchesProductionGate=$(Get-AuditProp -Object $noSecretChecks -Name "reportPathMatchesProductionGate"), failedChecks=$noSecretFailedCheckCount, secretFindings=$noSecretSecretFindingCount, findings=$noSecretFindingCount, liveProductNoLiveBroadcast=$liveProductNoLiveBroadcast, baseTxDiagnosticBroadcasts=$baseTxDiagnosticBroadcasts, baseTxDiagnosticNoSecrets=$baseTxDiagnosticNoSecrets, devPackNoSecrets=$(Get-AuditProp -Object $devPack -Name "noSecrets" -Default $false), reports=$($paths.noSecret), $($paths.baseTxDiagnostic), $($paths.devPack)" `
     -Commands @("npm run flowchain:no-secret:scan")
 
 $failedItems = @($items | Where-Object { $_.status -eq "failed" })

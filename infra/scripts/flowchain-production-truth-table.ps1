@@ -1417,8 +1417,24 @@ $definitions = @(
         requiredChecks = @(
             "scansDashboardPublicData",
             "scansGeneratedLiveProductReports",
-            "reportPathMatchesProductionGate"
+            "reportPathMatchesProductionGate",
+            "scannedCountPositive",
+            "findingsEmpty",
+            "secretMarkerFindingsEmpty",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
         )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings",
+            "findings"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
     }
 )
 
