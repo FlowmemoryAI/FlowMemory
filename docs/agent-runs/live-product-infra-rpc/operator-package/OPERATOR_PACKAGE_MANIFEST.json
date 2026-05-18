@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-18T01:33:30.8488503Z",
+    "generatedAt":  "2026-05-18T01:41:15.0564113Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -52,6 +52,7 @@
                             "flowchain:ops:incident-drill",
                             "flowchain:bridge:relayer:once",
                             "flowchain:bridge:relayer:guardrail:validate",
+                            "flowchain:bridge:relayer:loop:validate",
                             "flowchain:external-tester:packet",
                             "flowchain:dashboard:ui:readiness",
                             "flowchain:operator:package:verify",
@@ -181,6 +182,11 @@
                               "purpose":  "Prove missing owner inputs cannot mutate cursor state or queue credits."
                           },
                           {
+                              "phase":  "bridge",
+                              "command":  "npm run flowchain:bridge:relayer:loop:validate",
+                              "purpose":  "Validate relayer loop start, fresh health reporting, clean stop, PID cleanup, and no leftover validation relayer process."
+                          },
+                          {
                               "phase":  "testers",
                               "command":  "npm run flowchain:external-tester:packet -- -AllowBlocked",
                               "purpose":  "Regenerate the friends-and-family packet and fail closed until public gates pass."
@@ -285,6 +291,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/WINDOWS_ALERT_INSTALL.md",
                          "destination":  "runbooks/WINDOWS_ALERT_INSTALL.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/BRIDGE_RELAYER_LOOP_VALIDATION.md",
+                         "destination":  "runbooks/BRIDGE_RELAYER_LOOP_VALIDATION.md",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"
@@ -406,6 +419,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json",
                          "destination":  "evidence/bridge-relayer-guardrail-validation-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json",
+                         "destination":  "evidence/bridge-relayer-loop-validation-report.json",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"

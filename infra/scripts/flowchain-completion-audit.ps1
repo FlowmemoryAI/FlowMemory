@@ -27,6 +27,8 @@ $paths = [ordered]@{
     serviceStatus = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
     operatorDoctor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json"
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
+    serviceSupervisorValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
+    serviceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
     liveProduct = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json"
     liveInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-infra-check-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
@@ -62,6 +64,8 @@ $paths = [ordered]@{
     backup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     bridgeLive = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
+    bridgeRelayerGuardrailValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
+    bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
     bridgePilotLocal = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "services/bridge-relayer/out/real-value-pilot-e2e/bridge-real-value-pilot-e2e-report.json"
     baseTxDiagnostic = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/live-l1-bridge-e2e/base-tx-diagnostic.json"
     productionL1 = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/production-l1-e2e/flowchain-production-l1-e2e-report.json"
@@ -138,6 +142,17 @@ function Test-StepPassed {
         }
     }
     return $false
+}
+
+function Get-MissingAuditChecks {
+    param(
+        [AllowNull()][object] $Checks,
+        [Parameter(Mandatory = $true)][string[]] $Names
+    )
+
+    return @($Names | Where-Object {
+        (Get-AuditProp -Object $Checks -Name $_ -Default $false) -ne $true
+    })
 }
 
 $script:AuditChildProcessResults = New-Object System.Collections.ArrayList
@@ -314,6 +329,12 @@ $operatorDoctorExitCode = $operatorDoctorResult.exitCode
 $serviceMonitorResult = Invoke-AuditChild -Path $paths.serviceMonitor -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-monitor.ps1"), "-DurationSeconds", "$MonitorDurationSeconds", "-PollSeconds", "$MonitorPollSeconds", "-MaxStateAgeSeconds", "$MonitorMaxStateAgeSeconds")
 $serviceMonitorOutput = @($serviceMonitorResult.output)
 $serviceMonitorExitCode = $serviceMonitorResult.exitCode
+$serviceSupervisorValidationResult = Invoke-AuditChild -Path $paths.serviceSupervisorValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-supervisor-validation.ps1"))
+$serviceSupervisorValidationOutput = @($serviceSupervisorValidationResult.output)
+$serviceSupervisorValidationExitCode = $serviceSupervisorValidationResult.exitCode
+$serviceInstallValidationResult = Invoke-AuditChild -Path $paths.serviceInstallValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-install-validation.ps1"))
+$serviceInstallValidationOutput = @($serviceInstallValidationResult.output)
+$serviceInstallValidationExitCode = $serviceInstallValidationResult.exitCode
 $liveWalletResult = Invoke-AuditChild -Path $paths.liveWallet -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-service-wallet-e2e.ps1"))
 $liveWalletOutput = @($liveWalletResult.output)
 $liveWalletExitCode = $liveWalletResult.exitCode
@@ -350,6 +371,12 @@ $backupRestoreValidationExitCode = $backupRestoreValidationResult.exitCode
 $backupOwnerPathDryRunResult = Invoke-AuditChild -Path $paths.backupOwnerPathDryRun -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-owner-path-dry-run.ps1"))
 $backupOwnerPathDryRunOutput = @($backupOwnerPathDryRunResult.output)
 $backupOwnerPathDryRunExitCode = $backupOwnerPathDryRunResult.exitCode
+$bridgeRelayerGuardrailValidationResult = Invoke-AuditChild -Path $paths.bridgeRelayerGuardrailValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-guardrail-validation.ps1"))
+$bridgeRelayerGuardrailValidationOutput = @($bridgeRelayerGuardrailValidationResult.output)
+$bridgeRelayerGuardrailValidationExitCode = $bridgeRelayerGuardrailValidationResult.exitCode
+$bridgeRelayerLoopValidationResult = Invoke-AuditChild -Path $paths.bridgeRelayerLoopValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-loop-validation.ps1"))
+$bridgeRelayerLoopValidationOutput = @($bridgeRelayerLoopValidationResult.output)
+$bridgeRelayerLoopValidationExitCode = $bridgeRelayerLoopValidationResult.exitCode
 $ownerInputsResult = Invoke-AuditChild -Path $paths.ownerInputs -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-inputs.ps1"), "-AllowBlocked")
 $ownerInputsOutput = @($ownerInputsResult.output)
 $ownerInputsExitCode = $ownerInputsResult.exitCode
@@ -461,6 +488,88 @@ $monitorPassed = $serviceMonitorExitCode -eq 0 `
     -and $monitorSampleCount -ge 2 `
     -and $monitorFirstHeight -match '^\d+$' `
     -and $monitorLatestHeight -match '^\d+$'
+$serviceSupervisorValidation = $reports.serviceSupervisorValidation
+$serviceSupervisorValidationStatus = Get-ReportStatus -Report $serviceSupervisorValidation
+$serviceSupervisorBefore = Get-AuditProp -Object $serviceSupervisorValidation -Name "before"
+$serviceSupervisorAfterCrash = Get-AuditProp -Object $serviceSupervisorValidation -Name "afterCrash"
+$serviceSupervisorAfterRecovery = Get-AuditProp -Object $serviceSupervisorValidation -Name "afterRecovery"
+$serviceSupervisorRestartAttempts = [int](Get-AuditProp -Object $serviceSupervisorValidation -Name "restartAttempts" -Default 0)
+$serviceSupervisorValidationPassed = $serviceSupervisorValidationExitCode -eq 0 `
+    -and $serviceSupervisorValidationStatus -eq "passed" `
+    -and (Get-AuditProp -Object $serviceSupervisorBefore -Name "status" -Default "") -eq "passed" `
+    -and (Get-AuditProp -Object $serviceSupervisorAfterCrash -Name "status" -Default "") -eq "blocked" `
+    -and (Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "status" -Default "") -eq "passed" `
+    -and ((Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "nodeRunning" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "controlPlaneRunning" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "liveProfile" -Default $false) -eq $true) `
+    -and ([int](Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "maxBlocks" -Default -1) -eq 0) `
+    -and ($serviceSupervisorRestartAttempts -ge 1) `
+    -and ((Get-AuditProp -Object $serviceSupervisorValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $serviceSupervisorValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $serviceSupervisorValidation -Name "broadcasts" -Default $true) -eq $false)
+$serviceInstallValidation = $reports.serviceInstallValidation
+$serviceInstallValidationStatus = Get-ReportStatus -Report $serviceInstallValidation
+$serviceInstallChecks = Get-AuditProp -Object $serviceInstallValidation -Name "checks"
+$serviceInstallFailedChecks = @((Get-AuditProp -Object $serviceInstallValidation -Name "failedChecks" -Default @()))
+$serviceInstallMissingPackageScripts = @((Get-AuditProp -Object $serviceInstallValidation -Name "missingPackageScripts" -Default @()))
+$serviceInstallRequiredChecks = @(
+    "installScriptExists",
+    "supervisorScriptExists",
+    "packageScriptsPresent",
+    "planCommandPassed",
+    "planDidNotMutate",
+    "schedulerCmdletsAvailable",
+    "scheduledTaskActionSupportsWorkingDirectory",
+    "actionUsesSupervisor",
+    "actionUsesRepoWorkingDirectory",
+    "liveProfileDefault",
+    "noBridgeRelayerDefault",
+    "triggerModeBothByDefault",
+    "triggerIncludesStartup",
+    "triggerIncludesLogon",
+    "rebootPersistentTrigger",
+    "bridgeRelayerOptInPlanCommandPassed",
+    "bridgeRelayerOptInPlanDidNotMutate",
+    "bridgeRelayerOptInStartsLoop",
+    "bridgeRelayerOptInAddsSupervisorFlag",
+    "bridgeRelayerOptInUsesSupervisor",
+    "bridgeRelayerOptInKeepsBothTriggers",
+    "hasIntervalSeconds",
+    "hasMaxRestartAttempts",
+    "hasMaxStateAgeSeconds",
+    "commandOmitsNonLiveProfile",
+    "statusCommandPassed",
+    "statusActionReadOnly",
+    "statusDidNotMutate",
+    "statusTaskExistsStable",
+    "statusReportNoSecrets",
+    "statusReportEnvValuesPrintedFalse",
+    "statusReportBroadcastsFalse",
+    "uninstallAbsentPreflightTaskAbsent",
+    "uninstallAbsentCommandPassed",
+    "uninstallAbsentTaskCommandPassed",
+    "uninstallAbsentTaskWasAbsentBefore",
+    "uninstallAbsentDidNotCreateTask",
+    "uninstallAbsentTaskAbsentAfter",
+    "uninstallAbsentDidNotRemoveTask",
+    "uninstallAbsentTaskRemovedFalse",
+    "uninstallAbsentReportNoSecrets",
+    "uninstallAbsentReportEnvValuesPrintedFalse",
+    "uninstallAbsentReportBroadcastsFalse",
+    "commandsPresent",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$serviceInstallMissingChecks = @(Get-MissingAuditChecks -Checks $serviceInstallChecks -Names $serviceInstallRequiredChecks)
+$serviceInstallValidationPassed = $serviceInstallValidationExitCode -eq 0 `
+    -and $serviceInstallValidationStatus -eq "passed" `
+    -and $serviceInstallFailedChecks.Count -eq 0 `
+    -and $serviceInstallMissingPackageScripts.Count -eq 0 `
+    -and $serviceInstallMissingChecks.Count -eq 0 `
+    -and ((Get-AuditProp -Object $serviceInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $serviceInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $serviceInstallValidation -Name "broadcasts" -Default $true) -eq $false)
 $liveProduct = $reports.liveProduct
 $externalTester = $reports.externalTester
 $testerNetwork = $reports.testerNetwork
@@ -843,6 +952,80 @@ $backupOwnerPathDryRunPassed = $backupOwnerPathDryRunExitCode -eq 0 `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRun -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRun -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRun -Name "broadcasts" -Default $true) -eq $false)
+$bridgeRelayerGuardrailValidation = $reports.bridgeRelayerGuardrailValidation
+$bridgeRelayerGuardrailValidationStatus = Get-ReportStatus -Report $bridgeRelayerGuardrailValidation
+$bridgeRelayerGuardrailChecks = Get-AuditProp -Object $bridgeRelayerGuardrailValidation -Name "checks"
+$bridgeRelayerGuardrailFailedChecks = @((Get-AuditProp -Object $bridgeRelayerGuardrailValidation -Name "failedChecks" -Default @()))
+$bridgeRelayerGuardrailRequiredChecks = @(
+    "relayerCommandExitedZeroWithAllowBlocked",
+    "relayerReportWritten",
+    "relayerStatusBlocked",
+    "relayerChildTimeoutRecorded",
+    "relayerNoChildTimeouts",
+    "blockedBeforeLiveReadiness",
+    "externalOwnerIssueRecorded",
+    "finalCursorUnchanged",
+    "stagedCursorNotWritten",
+    "finalCursorNotCommitted",
+    "noCreditsObserved",
+    "noCreditsQueued",
+    "noCreditsApplied",
+    "ownerEnvNotImported",
+    "broadcastsFalse",
+    "envValuesPrintedFalse",
+    "noSecrets"
+)
+$bridgeRelayerGuardrailMissingChecks = @(Get-MissingAuditChecks -Checks $bridgeRelayerGuardrailChecks -Names $bridgeRelayerGuardrailRequiredChecks)
+$bridgeRelayerGuardrailValidationPassed = $bridgeRelayerGuardrailValidationExitCode -eq 0 `
+    -and $bridgeRelayerGuardrailValidationStatus -eq "passed" `
+    -and $bridgeRelayerGuardrailFailedChecks.Count -eq 0 `
+    -and $bridgeRelayerGuardrailMissingChecks.Count -eq 0 `
+    -and ((Get-AuditProp -Object $bridgeRelayerGuardrailValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $bridgeRelayerGuardrailValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $bridgeRelayerGuardrailValidation -Name "broadcasts" -Default $true) -eq $false)
+$bridgeRelayerLoopValidation = $reports.bridgeRelayerLoopValidation
+$bridgeRelayerLoopValidationStatus = Get-ReportStatus -Report $bridgeRelayerLoopValidation
+$bridgeRelayerLoopChecks = Get-AuditProp -Object $bridgeRelayerLoopValidation -Name "checks"
+$bridgeRelayerLoopFailedChecks = @((Get-AuditProp -Object $bridgeRelayerLoopValidation -Name "failedChecks" -Default @()))
+$bridgeRelayerLoopRequiredChecks = @(
+    "startCommandPassed",
+    "startReportWritten",
+    "liveProfile",
+    "relayerLoopRequested",
+    "relayerLoopStartedOrRunning",
+    "relayerPidRecorded",
+    "relayerPollSecondsRecorded",
+    "relayerQueuesRuntimeHandoffs",
+    "statusCommandPassed",
+    "statusReportsRelayerRunning",
+    "statusRelayerCommandLineMatched",
+    "statusRelayerReportFresh",
+    "statusRelayerReportAcceptable",
+    "statusRelayerReportBlockedOnlyOnOwnerInputs",
+    "statusRelayerReportNoSecrets",
+    "statusRelayerReportNoBroadcasts",
+    "statusRelayerReportHealthy",
+    "stopCommandPassed",
+    "stopPreservedState",
+    "stopHandledRelayerLoop",
+    "statusAfterStopCommandPassed",
+    "statusAfterStopNotRunning",
+    "relayerPidNoLongerMatchesAfterStop",
+    "relayerPidFileRemovedAfterStop",
+    "stopReportRelayerPidFileRemoved",
+    "noValidationRelayerProcessAfterStop",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$bridgeRelayerLoopMissingChecks = @(Get-MissingAuditChecks -Checks $bridgeRelayerLoopChecks -Names $bridgeRelayerLoopRequiredChecks)
+$bridgeRelayerLoopValidationPassed = $bridgeRelayerLoopValidationExitCode -eq 0 `
+    -and $bridgeRelayerLoopValidationStatus -eq "passed" `
+    -and $bridgeRelayerLoopFailedChecks.Count -eq 0 `
+    -and $bridgeRelayerLoopMissingChecks.Count -eq 0 `
+    -and ((Get-AuditProp -Object $bridgeRelayerLoopValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $bridgeRelayerLoopValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $bridgeRelayerLoopValidation -Name "broadcasts" -Default $true) -eq $false)
 $externalTesterPacketStatus = Get-ReportStatus -Report $externalTesterPacket
 $externalTesterPacketShareable = Get-AuditProp -Object $externalTesterPacket -Name "packetShareable" -Default $false
 $externalTesterPacketPath = [string](Get-AuditProp -Object $externalTesterPacket -Name "packetPath" -Default $paths.externalTesterPacket)
@@ -1058,6 +1241,18 @@ Add-AuditItem -Items $items -Id "sustained-block-production" `
     -Status $(if ($monitorPassed) { "passed" } else { "failed" }) `
     -Evidence "monitorStatus=$monitorStatus, samples=$monitorSampleCount, heightAdvanced=$monitorHeightAdvanced, heights=$monitorFirstHeight->$monitorLatestHeight, report=$($paths.serviceMonitor)" `
     -Commands @("npm run flowchain:service:monitor -- -DurationSeconds $MonitorDurationSeconds -PollSeconds $MonitorPollSeconds -MaxStateAgeSeconds $MonitorMaxStateAgeSeconds")
+
+Add-AuditItem -Items $items -Id "service-supervisor-autorecovery" `
+    -Requirement "Live service supervisor can recover a crashed local control-plane under the live profile without deleting chain state." `
+    -Status $(if ($serviceSupervisorValidationPassed) { "passed" } else { "failed" }) `
+    -Evidence "supervisorValidation=$serviceSupervisorValidationStatus, restartAttempts=$serviceSupervisorRestartAttempts, before=$(Get-AuditProp -Object $serviceSupervisorBefore -Name "status" -Default "missing"), afterCrash=$(Get-AuditProp -Object $serviceSupervisorAfterCrash -Name "status" -Default "missing"), afterRecovery=$(Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "status" -Default "missing"), report=$($paths.serviceSupervisorValidation)" `
+    -Commands @("npm run flowchain:service:supervisor:validate")
+
+Add-AuditItem -Items $items -Id "service-install-validation" `
+    -Requirement "Owner-host Windows service install validation proves no-secret Scheduled Task plan/status/uninstall no-op behavior and a bridge-relayer opt-in plan for reboot-persistent live supervisor operation." `
+    -Status $(if ($serviceInstallValidationPassed) { "passed" } else { "failed" }) `
+    -Evidence "serviceInstall=$serviceInstallValidationStatus, failedChecks=$($serviceInstallFailedChecks.Count), missingChecks=$($serviceInstallMissingChecks.Count), missingScripts=$($serviceInstallMissingPackageScripts.Count), planDidNotMutate=$(Get-AuditProp -Object $serviceInstallChecks -Name "planDidNotMutate" -Default $false), statusDidNotMutate=$(Get-AuditProp -Object $serviceInstallChecks -Name "statusDidNotMutate" -Default $false), relayerOptIn=$(Get-AuditProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInStartsLoop" -Default $false), report=$($paths.serviceInstallValidation)" `
+    -Commands @("npm run flowchain:service:install:validate", "npm run flowchain:service:install:windows -- -Action Plan")
 
 Add-AuditItem -Items $items -Id "wallet-create" `
     -Requirement "People can create wallets through the RPC service without receiving secret material." `
@@ -1292,6 +1487,18 @@ Add-AuditItem -Items $items -Id "base-tx-diagnostic-fail-closed" `
     -Evidence "diagnosticStatus=$baseTxDiagnosticStatus, safeReason=$baseTxDiagnosticSafeReason, broadcasts=$baseTxDiagnosticBroadcasts, printsEnvValues=$baseTxDiagnosticPrintsEnvValues, noSecrets=$baseTxDiagnosticNoSecrets, report=$($paths.baseTxDiagnostic)" `
     -Commands @("npm run flowchain:bridge:diagnose:tx")
 
+Add-AuditItem -Items $items -Id "bridge-relayer-guardrail-validation" `
+    -Requirement "Bridge relayer missing-owner-input guardrail validation fails closed without mutating final cursor state, staging cursor state, queueing credits, printing env values, or broadcasting." `
+    -Status $(if ($bridgeRelayerGuardrailValidationPassed) { "passed" } else { "failed" }) `
+    -Evidence "guardrailStatus=$bridgeRelayerGuardrailValidationStatus, failedChecks=$($bridgeRelayerGuardrailFailedChecks.Count), missingChecks=$($bridgeRelayerGuardrailMissingChecks.Count), finalCursorUnchanged=$(Get-AuditProp -Object $bridgeRelayerGuardrailChecks -Name "finalCursorUnchanged" -Default $false), noCreditsQueued=$(Get-AuditProp -Object $bridgeRelayerGuardrailChecks -Name "noCreditsQueued" -Default $false), report=$($paths.bridgeRelayerGuardrailValidation)" `
+    -Commands @("npm run flowchain:bridge:relayer:guardrail:validate")
+
+Add-AuditItem -Items $items -Id "bridge-relayer-loop-validation" `
+    -Requirement "Bridge relayer loop validation proves isolated live-service loop start, fresh blocked-only-on-owner-input loop health, clean stop, PID-file cleanup, and no leftover validation relayer process." `
+    -Status $(if ($bridgeRelayerLoopValidationPassed) { "passed" } else { "failed" }) `
+    -Evidence "loopStatus=$bridgeRelayerLoopValidationStatus, failedChecks=$($bridgeRelayerLoopFailedChecks.Count), missingChecks=$($bridgeRelayerLoopMissingChecks.Count), loopHealthy=$(Get-AuditProp -Object $bridgeRelayerLoopChecks -Name "statusRelayerReportHealthy" -Default $false), stopped=$(Get-AuditProp -Object $bridgeRelayerLoopChecks -Name "statusAfterStopNotRunning" -Default $false), report=$($paths.bridgeRelayerLoopValidation)" `
+    -Commands @("npm run flowchain:bridge:relayer:loop:validate")
+
 Add-AuditItem -Items $items -Id "live-infra-aggregate-refresh" `
     -Requirement "Completion audit refreshes the live-infra aggregate gate before deciding readiness." `
     -Status $(if ($liveInfraStatus -eq "passed") { "passed" } elseif ($liveInfraStatus -eq "blocked") { "blocked" } else { "failed" }) `
@@ -1338,6 +1545,10 @@ $report = [ordered]@{
     operatorDoctorOutputRedacted = @($operatorDoctorOutput | ForEach-Object { "$_" })
     serviceMonitorExitCode = $serviceMonitorExitCode
     serviceMonitorOutputRedacted = @($serviceMonitorOutput | ForEach-Object { "$_" })
+    serviceSupervisorValidationExitCode = $serviceSupervisorValidationExitCode
+    serviceSupervisorValidationOutputRedacted = @($serviceSupervisorValidationOutput | ForEach-Object { "$_" })
+    serviceInstallValidationExitCode = $serviceInstallValidationExitCode
+    serviceInstallValidationOutputRedacted = @($serviceInstallValidationOutput | ForEach-Object { "$_" })
     liveWalletExitCode = $liveWalletExitCode
     liveWalletOutputRedacted = @($liveWalletOutput | ForEach-Object { "$_" })
     testerNetworkExitCode = $testerNetworkExitCode
@@ -1362,6 +1573,10 @@ $report = [ordered]@{
     backupRestoreValidationOutputRedacted = @($backupRestoreValidationOutput | ForEach-Object { "$_" })
     backupOwnerPathDryRunExitCode = $backupOwnerPathDryRunExitCode
     backupOwnerPathDryRunOutputRedacted = @($backupOwnerPathDryRunOutput | ForEach-Object { "$_" })
+    bridgeRelayerGuardrailValidationExitCode = $bridgeRelayerGuardrailValidationExitCode
+    bridgeRelayerGuardrailValidationOutputRedacted = @($bridgeRelayerGuardrailValidationOutput | ForEach-Object { "$_" })
+    bridgeRelayerLoopValidationExitCode = $bridgeRelayerLoopValidationExitCode
+    bridgeRelayerLoopValidationOutputRedacted = @($bridgeRelayerLoopValidationOutput | ForEach-Object { "$_" })
     ownerInputsExitCode = $ownerInputsExitCode
     ownerInputsOutputRedacted = @($ownerInputsOutput | ForEach-Object { "$_" })
     ownerOnboardingExitCode = $ownerOnboardingExitCode
@@ -1423,6 +1638,14 @@ $report = [ordered]@{
         dashboardUiReadinessPassed = $dashboardUiReadinessPassed
         dashboardUiBrowserProjects = @($dashboardUiBrowserProjects)
         dashboardUiCoveredRoutes = @($dashboardUiCoveredRoutes)
+        serviceSupervisorValidationStatus = $serviceSupervisorValidationStatus
+        serviceSupervisorValidationPassed = $serviceSupervisorValidationPassed
+        serviceInstallValidationStatus = $serviceInstallValidationStatus
+        serviceInstallValidationPassed = $serviceInstallValidationPassed
+        bridgeRelayerGuardrailValidationStatus = $bridgeRelayerGuardrailValidationStatus
+        bridgeRelayerGuardrailValidationPassed = $bridgeRelayerGuardrailValidationPassed
+        bridgeRelayerLoopValidationStatus = $bridgeRelayerLoopValidationStatus
+        bridgeRelayerLoopValidationPassed = $bridgeRelayerLoopValidationPassed
         publicDeploymentContractPacketSmoke = $publicDeploymentContractPacketSmoke
     }
     childProcessTimeoutSeconds = $ChildTimeoutSeconds
@@ -1461,7 +1684,11 @@ $report = [ordered]@{
         "npm run flowchain:backup:restore:verify",
         "npm run flowchain:backup:check",
         "npm run flowchain:service:monitor",
+        "npm run flowchain:service:supervisor:validate",
+        "npm run flowchain:service:install:validate",
         "npm run flowchain:dev-pack:e2e",
+        "npm run flowchain:bridge:relayer:guardrail:validate",
+        "npm run flowchain:bridge:relayer:loop:validate",
         "npm run flowchain:ops:snapshot",
         "npm run flowchain:ops:alerts",
         "npm run flowchain:ops:alerts:install:validate",

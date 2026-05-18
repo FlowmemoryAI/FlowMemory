@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-18T01:33:30.8488503Z",
+    "generatedAt":  "2026-05-18T01:41:15.0564113Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -121,6 +121,11 @@
                          "phase":  "bridge",
                          "command":  "npm run flowchain:bridge:relayer:guardrail:validate",
                          "purpose":  "Prove missing owner inputs cannot mutate cursor state or queue credits."
+                     },
+                     {
+                         "phase":  "bridge",
+                         "command":  "npm run flowchain:bridge:relayer:loop:validate",
+                         "purpose":  "Validate relayer loop start, fresh health reporting, clean stop, PID cleanup, and no leftover validation relayer process."
                      },
                      {
                          "phase":  "testers",

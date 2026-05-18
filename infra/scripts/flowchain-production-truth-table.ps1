@@ -63,6 +63,95 @@ $definitions = @(
         ownerInputGate = $true
     },
     [ordered]@{
+        id = "service-supervisor-validation"
+        requirement = "Service supervisor validation proves a crashed local control-plane can be recovered under the live profile without deleting chain state."
+        path = "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
+        command = "npm run flowchain:service:supervisor:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredMinimums = [ordered]@{
+            restartAttempts = 1
+        }
+        requiredReportProperties = [ordered]@{
+            "before.status" = "passed"
+            "afterCrash.status" = "blocked"
+            "afterRecovery.status" = "passed"
+            "afterRecovery.nodeRunning" = $true
+            "afterRecovery.controlPlaneRunning" = $true
+            "afterRecovery.liveProfile" = $true
+            "afterRecovery.maxBlocks" = 0
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "service-install-validation"
+        requirement = "Owner-host service lifecycle validates no-secret Windows Scheduled Task plan/status/uninstall behavior and a bridge-relayer opt-in plan for reboot-persistent live supervisor operation."
+        path = "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
+        command = "npm run flowchain:service:install:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "installScriptExists",
+            "supervisorScriptExists",
+            "packageScriptsPresent",
+            "planCommandPassed",
+            "planDidNotMutate",
+            "schedulerCmdletsAvailable",
+            "scheduledTaskActionSupportsWorkingDirectory",
+            "actionUsesSupervisor",
+            "actionUsesRepoWorkingDirectory",
+            "liveProfileDefault",
+            "noBridgeRelayerDefault",
+            "triggerModeBothByDefault",
+            "triggerIncludesStartup",
+            "triggerIncludesLogon",
+            "rebootPersistentTrigger",
+            "bridgeRelayerOptInPlanCommandPassed",
+            "bridgeRelayerOptInPlanDidNotMutate",
+            "bridgeRelayerOptInStartsLoop",
+            "bridgeRelayerOptInAddsSupervisorFlag",
+            "bridgeRelayerOptInUsesSupervisor",
+            "bridgeRelayerOptInKeepsBothTriggers",
+            "hasIntervalSeconds",
+            "hasMaxRestartAttempts",
+            "hasMaxStateAgeSeconds",
+            "commandOmitsNonLiveProfile",
+            "statusCommandPassed",
+            "statusActionReadOnly",
+            "statusDidNotMutate",
+            "statusTaskExistsStable",
+            "statusReportNoSecrets",
+            "statusReportEnvValuesPrintedFalse",
+            "statusReportBroadcastsFalse",
+            "uninstallAbsentPreflightTaskAbsent",
+            "uninstallAbsentCommandPassed",
+            "uninstallAbsentTaskCommandPassed",
+            "uninstallAbsentTaskWasAbsentBefore",
+            "uninstallAbsentDidNotCreateTask",
+            "uninstallAbsentTaskAbsentAfter",
+            "uninstallAbsentDidNotRemoveTask",
+            "uninstallAbsentTaskRemovedFalse",
+            "uninstallAbsentReportNoSecrets",
+            "uninstallAbsentReportEnvValuesPrintedFalse",
+            "uninstallAbsentReportBroadcastsFalse",
+            "commandsPresent",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingPackageScripts"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "live-product-e2e"
         requirement = "Local live-product e2e covers runtime, wallet, live infra, and tester rehearsal without public claims."
         path = "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json"
@@ -313,6 +402,80 @@ $definitions = @(
         command = "npm run flowchain:bridge:relayer:guardrail:validate"
         productionGate = $true
         ownerInputGate = $false
+        requiredChecks = @(
+            "relayerCommandExitedZeroWithAllowBlocked",
+            "relayerReportWritten",
+            "relayerStatusBlocked",
+            "relayerChildTimeoutRecorded",
+            "relayerNoChildTimeouts",
+            "blockedBeforeLiveReadiness",
+            "externalOwnerIssueRecorded",
+            "finalCursorUnchanged",
+            "stagedCursorNotWritten",
+            "finalCursorNotCommitted",
+            "noCreditsObserved",
+            "noCreditsQueued",
+            "noCreditsApplied",
+            "ownerEnvNotImported",
+            "broadcastsFalse",
+            "envValuesPrintedFalse",
+            "noSecrets"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "bridge-relayer-loop-validation"
+        requirement = "Bridge relayer loop validation proves the live service can start an isolated relayer loop, report fresh blocked-only-on-owner-input loop health, then stop it cleanly without stale PID files or leftover relayer processes."
+        path = "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
+        command = "npm run flowchain:bridge:relayer:loop:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "startCommandPassed",
+            "startReportWritten",
+            "liveProfile",
+            "relayerLoopRequested",
+            "relayerLoopStartedOrRunning",
+            "relayerPidRecorded",
+            "relayerPollSecondsRecorded",
+            "relayerQueuesRuntimeHandoffs",
+            "statusCommandPassed",
+            "statusReportsRelayerRunning",
+            "statusRelayerCommandLineMatched",
+            "statusRelayerReportFresh",
+            "statusRelayerReportAcceptable",
+            "statusRelayerReportBlockedOnlyOnOwnerInputs",
+            "statusRelayerReportNoSecrets",
+            "statusRelayerReportNoBroadcasts",
+            "statusRelayerReportHealthy",
+            "stopCommandPassed",
+            "stopPreservedState",
+            "stopHandledRelayerLoop",
+            "statusAfterStopCommandPassed",
+            "statusAfterStopNotRunning",
+            "relayerPidNoLongerMatchesAfterStop",
+            "relayerPidFileRemovedAfterStop",
+            "stopReportRelayerPidFileRemoved",
+            "noValidationRelayerProcessAfterStop",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
     },
     [ordered]@{
         id = "external-tester-readiness"
@@ -500,7 +663,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "backup-restore-validation", "ops-snapshot", "ops-alert-rules", "ops-alert-install-validation", "ops-escalation-dry-run", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "backup-restore-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "ops-snapshot", "ops-alert-rules", "ops-alert-install-validation", "ops-escalation-dry-run", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"
@@ -756,6 +919,9 @@ function ConvertTo-TruthEvidence {
         "criticalRuleCount",
         "blockedRuleCount",
         "dryRunEventCount",
+        "restartAttempts",
+        "bridgePollSeconds",
+        "settleSeconds",
         "opsSnapshotStatus",
         "opsAlertRulesStatus",
         "completionReady",
@@ -804,6 +970,16 @@ function ConvertTo-TruthEvidence {
             "statusDidNotMutate",
             "uninstallAbsentDidNotMutate",
             "noExternalDelivery",
+            "planCommandPassed",
+            "planDidNotMutate",
+            "schedulerCmdletsAvailable",
+            "actionUsesSupervisor",
+            "liveProfileDefault",
+            "bridgeRelayerOptInStartsLoop",
+            "statusRelayerReportHealthy",
+            "statusAfterStopNotRunning",
+            "relayerPidFileRemovedAfterStop",
+            "noValidationRelayerProcessAfterStop",
             "opsSnapshotLoaded",
             "opsAlertRulesLoaded",
             "opsAlertRulesPassed",
