@@ -1272,6 +1272,63 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "external-tester-evidence-validation"
+        requirement = "External tester evidence validation proves redacted friends-and-family evidence contains required files, advancing block height, matching wallet transfer and balances, amount caps, and no-secret boundaries."
+        path = "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
+        command = "npm run flowchain:tester:evidence:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptPresent",
+            "guideExists",
+            "guideListsSuggestedFiles",
+            "guideHasOwnerReviewChecklist",
+            "guideHasStopRules",
+            "evidenceDirInsideRepo",
+            "evidenceDirExists",
+            "requiredFilesPresent",
+            "requiredJsonValid",
+            "notesPresent",
+            "readinessPassed",
+            "diagnosticsPassed",
+            "diagnosticsNoSecrets",
+            "heightsNumeric",
+            "blockHeightAdvanced",
+            "sendAccepted",
+            "transferIdPresent",
+            "transactionIdPresent",
+            "transferFound",
+            "transferMatchesAccounts",
+            "transferAmountMatches",
+            "transactionIdMatches",
+            "transferBlockHeightInWindow",
+            "includedHeightMatchesTransfer",
+            "amountWithinLimit",
+            "balancesPresent",
+            "senderDebited",
+            "recipientCredited",
+            "secretMarkerFindingsEmpty",
+            "credentialUrlFindingsEmpty",
+            "envAssignmentFindingsEmpty",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingRequiredFiles",
+            "invalidJsonFiles",
+            "secretMarkerFindings",
+            "credentialUrlFindings",
+            "envAssignmentFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "dashboard-ui-readiness"
         requirement = "Dashboard browser readiness proves desktop and mobile users can create a tester wallet, request faucet funds, send tester units, inspect the result in Explorer, and avoid token/secret leakage or horizontal overflow."
         path = "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
@@ -1602,7 +1659,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "external-tester-packet-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"

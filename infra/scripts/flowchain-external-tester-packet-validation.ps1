@@ -22,6 +22,7 @@ $paths = [ordered]@{
     connectPack = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-connect-pack.json"
     testerNetworkReport = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
     publicTesterGatewayReport = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
+    ownerInputsReport = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-report.json"
 }
 
 function Get-ValidationProp {
@@ -98,27 +99,13 @@ $packetReport = Read-FlowChainJsonIfExists -Path $paths.packetReport
 $connectPack = Read-FlowChainJsonIfExists -Path $paths.connectPack
 $testerNetwork = Read-FlowChainJsonIfExists -Path $paths.testerNetworkReport
 $publicTesterGateway = Read-FlowChainJsonIfExists -Path $paths.publicTesterGatewayReport
+$ownerInputs = Read-FlowChainJsonIfExists -Path $paths.ownerInputsReport
 $packetText = if (Test-Path -LiteralPath $paths.packetMarkdown) { Get-Content -Raw -LiteralPath $paths.packetMarkdown } else { "" }
 $connectPackText = if (Test-Path -LiteralPath $paths.connectPack) { Get-Content -Raw -LiteralPath $paths.connectPack } else { "" }
 
-$requiredMissingEnvNames = @(
-    "FLOWCHAIN_RPC_PUBLIC_URL",
-    "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
-    "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
-    "FLOWCHAIN_RPC_TLS_TERMINATED",
-    "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
-    "FLOWCHAIN_TESTER_WRITE_ENABLED",
-    "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
-    "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
-    "FLOWCHAIN_PILOT_OPERATOR_ACK",
-    "FLOWCHAIN_BASE8453_RPC_URL",
-    "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
-    "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
-    "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
-    "FLOWCHAIN_BASE8453_FROM_BLOCK",
-    "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
-    "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-    "FLOWCHAIN_PILOT_CONFIRMATIONS"
+$optionalMissingEnvNames = @(
+    "FLOWCHAIN_BASE8453_CURSOR_STATE",
+    "FLOWCHAIN_BASE8453_TO_BLOCK"
 )
 $requiredReadOnlyRoutes = @(
     "/health",
@@ -183,8 +170,10 @@ $packetSmokeChecks = Get-ValidationProp -Object $packetReport -Name "packetSmoke
 $connectPackChecks = Get-ValidationProp -Object $packetReport -Name "connectPackChecks"
 $packetSmokeRoutes = @((Get-ValidationProp -Object $packetReport -Name "packetSmokeRoutes" -Default @()))
 $missingEnvNames = @((Get-ValidationProp -Object $packetReport -Name "missingEnvNames" -Default @()))
+$currentOwnerMissingEnvNames = @((Get-ValidationProp -Object $ownerInputs -Name "missingEnvNames" -Default @()) | Where-Object { $_ -notin $optionalMissingEnvNames } | ForEach-Object { "$_" })
 $connectPackNetwork = Get-ValidationProp -Object $connectPack -Name "network"
 $connectPackEndpoints = Get-ValidationProp -Object $connectPack -Name "endpoints"
+$connectPackBlockingEnvNames = @((Get-ValidationProp -Object $connectPack -Name "blockingEnvNames" -Default @()))
 $readOnlyRoutes = @((Get-ValidationProp -Object $connectPackEndpoints -Name "readOnlyRoutes" -Default @()))
 $testerWriteRoutes = @((Get-ValidationProp -Object $connectPackEndpoints -Name "testerWriteRoutes" -Default @()))
 $testerGatewayRoutes = @((Get-ValidationProp -Object $publicTesterGateway -Name "routes" -Default @()))
@@ -241,7 +230,11 @@ $checks = [ordered]@{
     packetMarkdownHasEndpointChecks = Test-ValidationTextHasAll -Text $packetText -Tokens @("/health", "/rpc/discover", "/rpc/readiness", "/chain/status", "/tester/status")
     packetMarkdownHasWalletFlow = Test-ValidationTextHasAll -Text $packetText -Tokens @("/tester/wallets/create", "/tester/faucet", "/tester/wallets/send", "/wallets/transfers")
     packetMarkdownListsOwnerCommands = Test-ValidationTextHasAll -Text $packetText -Tokens @("flowchain:owner-inputs", "flowchain:owner-env:readiness", "flowchain:live-infra:check", "flowchain:completion:audit")
-    requiredOwnerEnvNamesListed = Test-ValidationArrayContainsAll -Values $missingEnvNames -Expected $requiredMissingEnvNames
+    requiredOwnerEnvNamesListed = $missingEnvNames.Count -gt 0 `
+        -and (Test-ValidationArrayContainsAll -Values $missingEnvNames -Expected $currentOwnerMissingEnvNames) `
+        -and (Test-ValidationArrayContainsAll -Values $currentOwnerMissingEnvNames -Expected $missingEnvNames) `
+        -and (Test-ValidationArrayContainsAll -Values $connectPackBlockingEnvNames -Expected $missingEnvNames) `
+        -and (Test-ValidationTextHasAll -Text $packetText -Tokens $missingEnvNames)
     envValuesPrintedFalse = (Get-ValidationProp -Object $packetReport -Name "envValuesPrinted" -Default $true) -eq $false
     noSecrets = (Get-ValidationProp -Object $packetReport -Name "noSecrets" -Default $false) -eq $true
     broadcastsFalse = (Get-ValidationProp -Object $packetReport -Name "broadcasts" -Default $true) -eq $false

@@ -18,7 +18,19 @@ function Import-FlowChainOwnerEnvFileIfConfigured {
     $script:FlowChainOwnerEnvFileImported = $true
     $envFilePath = [Environment]::GetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_FILE", "Process")
     if ([string]::IsNullOrWhiteSpace($envFilePath)) {
-        return
+        try {
+            $defaultEnvFilePath = [System.IO.Path]::GetFullPath((Join-Path (Get-Location).Path "devnet/local/owner-inputs/flowchain-owner.local.env"))
+            if (Test-Path -LiteralPath $defaultEnvFilePath) {
+                $envFilePath = $defaultEnvFilePath
+                [Environment]::SetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_FILE", $envFilePath, "Process")
+            }
+        }
+        catch {
+            $envFilePath = ""
+        }
+        if ([string]::IsNullOrWhiteSpace($envFilePath)) {
+            return
+        }
     }
 
     $allowedNames = @(

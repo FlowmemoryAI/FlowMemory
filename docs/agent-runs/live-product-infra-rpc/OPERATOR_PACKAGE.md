@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Package
 
-Generated: 2026-05-18T07:44:49.3383493Z
+Generated: 2026-05-18T14:49:04.4645844Z
 Status: passed
 
 ## Package
@@ -8,8 +8,8 @@ Status: passed
 - Directory: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\operator-package`
 - Manifest: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\operator-package\OPERATOR_PACKAGE_MANIFEST.json`
 - Command matrix: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\operator-package\OPERATOR_COMMAND_MATRIX.json`
-- Runbooks copied: 26
-- Evidence reports copied: 36
+- Runbooks copied: 27
+- Evidence reports copied: 37
 
 ## Checks
 

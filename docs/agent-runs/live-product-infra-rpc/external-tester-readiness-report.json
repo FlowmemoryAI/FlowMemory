@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.external_tester_readiness_report.v0",
-    "generatedAt":  "2026-05-18T07:50:41.9638313Z",
+    "generatedAt":  "2026-05-18T14:55:37.3491033Z",
     "status":  "blocked",
     "localTesterRehearsalReady":  true,
     "externalSharingReady":  false,
@@ -15,14 +15,14 @@
                    "publicTesterGatewayFaucetRouteValidated":  true,
                    "liveInfraReady":  false
                },
-    "latestHeight":  "67752",
-    "stateFileLastWriteAgeSeconds":  3,
+    "latestHeight":  "73007",
+    "stateFileLastWriteAgeSeconds":  0,
     "testerNetwork":  {
                           "status":  "passed",
-                          "generatedAt":  "2026-05-18T07:30:23.3484381Z",
+                          "generatedAt":  "2026-05-18T14:48:43.5756579Z",
                           "testerCount":  4,
-                          "chainBeforeBlock":  "67506",
-                          "chainAfterBlock":  "67522",
+                          "chainBeforeBlock":  "72939",
+                          "chainAfterBlock":  "72955",
                           "walletCreateCount":  4,
                           "transferCount":  4,
                           "packetExecutableSmokeValidated":  true,
@@ -50,7 +50,7 @@
                       },
     "publicTesterGateway":  {
                                 "status":  "passed",
-                                "generatedAt":  "2026-05-18T07:31:58.8517091Z",
+                                "generatedAt":  "2026-05-18T14:55:36.9733820Z",
                                 "fresh":  true,
                                 "ready":  true,
                                 "maxSendUnits":  "10",
@@ -83,10 +83,7 @@
                             "FLOWCHAIN_BASE8453_FROM_BLOCK",
                             "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                             "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-                            "FLOWCHAIN_PILOT_CONFIRMATIONS",
-                            "FLOWCHAIN_TESTER_WRITE_ENABLED",
-                            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
-                            "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+                            "FLOWCHAIN_PILOT_CONFIRMATIONS"
                         ],
     "reportPaths":  {
                         "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
@@ -146,14 +143,15 @@
                     "testerNetworkRefreshOutputRedactedTail":  [
 
                                                                ],
-                    "publicTesterGatewayRefreshPerformed":  false,
-                    "publicTesterGatewayFreshBeforeRefresh":  true,
+                    "publicTesterGatewayRefreshPerformed":  true,
+                    "publicTesterGatewayFreshBeforeRefresh":  false,
                     "publicTesterGatewayReadyBeforeRefresh":  true,
                     "publicTesterGatewayFreshAfterRefresh":  true,
                     "publicTesterGatewayReadyAfterRefresh":  true,
-                    "publicTesterGatewayRefreshExitCode":  null,
+                    "publicTesterGatewayRefreshExitCode":  0,
                     "publicTesterGatewayRefreshOutputRedactedTail":  [
-
+                                                                         "FlowChain public tester gateway E2E status: passed",
+                                                                         "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json"
                                                                      ]
                 },
     "ownerNextActions":  [

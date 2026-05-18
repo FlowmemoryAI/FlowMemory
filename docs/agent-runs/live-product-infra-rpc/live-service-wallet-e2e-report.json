@@ -1,9 +1,9 @@
 {
     "schema":  "flowchain.live_service_wallet_e2e_report.v0",
-    "generatedAt":  "2026-05-18T05:46:33.9170437Z",
+    "generatedAt":  "2026-05-18T14:12:27.3795125Z",
     "status":  "passed",
     "rpcEndpoint":  "local-private-127.0.0.1",
-    "runId":  "20260518054518408-43788",
+    "runId":  "20260518141125962-31668",
     "checks":  {
                    "serviceStatusSucceeded":  true,
                    "healthSchemaOk":  true,
@@ -34,20 +34,20 @@
 
                              ],
     "serviceHealthSchema":  "flowmemory.control_plane.health.v0",
-    "chainBeforeBlock":  "66276",
-    "chainAfterBlock":  "66289",
-    "senderAccountId":  "local-account:live-service-wallet:20260518054518408-43788:sender",
-    "recipientAccountId":  "local-account:live-service-wallet:20260518054518408-43788:recipient",
+    "chainBeforeBlock":  "72481",
+    "chainAfterBlock":  "72493",
+    "senderAccountId":  "local-account:live-service-wallet:20260518141125962-31668:sender",
+    "recipientAccountId":  "local-account:live-service-wallet:20260518141125962-31668:recipient",
     "fundSenderTxIds":  [
-                            "0xbe8763d80a33f783fc228c8213c42a8a286fa97d54785a4ab7351f00ad1c24fa",
-                            "0xcefea02183e3add7c8311a1c32f26c86e82ecf571f851aad6ed8a5641654eacf"
+                            "0x29997de38b9b49f8ca6d5dd71d47c588e6d3d7073b41b11ed72f49fe4c4ed55c",
+                            "0xbae59f49bdd368f6a8245c8f0984ff7b46da71a524b485e361bc91275ccc9441"
                         ],
     "sendTxIds":  [
-                      "0x65e08b8a25d6cb2c34237b11fccf952714969968ecf59741487d1484a09ff4fe",
-                      "0x4f486b083de26cfe793af8ca1170027b98254795171f0786ba23da16c9f29f92"
+                      "0xc75f7654a4e03e2a988183cc6d0b04bac654717e1854dcf464e81cbdab37ceec",
+                      "0xdfae80f18e70136e6e3971fc82247bab6cf145c8ff7e98bc8e5d5cb620923263"
                   ],
     "sendStatus":  "queued_local_runtime",
-    "transferId":  "0x8f17d3b7cd9577929846ae4c10166380b8511955c083c832849e3bf008aaf95c",
+    "transferId":  "0xf1edac099f15a6d2ae3f4eea77831ea91a5d2e03ad306dcdba6bd013752a8c4f",
     "balances":  {
                      "senderFunded":  "100",
                      "senderAfter":  "75",

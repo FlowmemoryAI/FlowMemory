@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-18T07:44:47.1991183Z",
+    "generatedAt":  "2026-05-18T14:49:02.2748343Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -186,6 +186,11 @@
                          "phase":  "testers",
                          "command":  "npm run flowchain:external-tester:packet:validate",
                          "purpose":  "Validate the packet and connect pack are no-secret, locally executable, and not externally shareable before owner inputs."
+                     },
+                     {
+                         "phase":  "testers",
+                         "command":  "npm run flowchain:tester:evidence:validate",
+                         "purpose":  "Validate redacted friends-and-family evidence intake for block-height advancement, wallet transfer consistency, and no-secret boundaries."
                      },
                      {
                          "phase":  "testers",

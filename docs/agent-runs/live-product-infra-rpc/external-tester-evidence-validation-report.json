@@ -1,0 +1,84 @@
+{
+    "schema":  "flowchain.external_tester_evidence_validation_report.v0",
+    "generatedAt":  "2026-05-18T14:25:50.5374641Z",
+    "status":  "passed",
+    "evidenceDir":  "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-sample",
+    "guidePath":  "docs/developer/FLOWCHAIN_EXTERNAL_TESTER_GUIDE.md",
+    "maxAmountUnits":  1,
+    "requiredFiles":  [
+                          "01-readiness.json",
+                          "02-status-before.json",
+                          "03-wallet-balances-before.json",
+                          "04-wallet-send.json",
+                          "05-status-after.json",
+                          "06-wallet-transfers-after.json",
+                          "07-wallet-balances-after.json",
+                          "10-diagnostics.json",
+                          "NOTES.md"
+                      ],
+    "missingRequiredFiles":  [
+
+                             ],
+    "invalidJsonFiles":  [
+
+                         ],
+    "checks":  {
+                   "packageScriptPresent":  true,
+                   "guideExists":  true,
+                   "guideListsSuggestedFiles":  true,
+                   "guideHasOwnerReviewChecklist":  true,
+                   "guideHasStopRules":  true,
+                   "evidenceDirInsideRepo":  true,
+                   "evidenceDirExists":  true,
+                   "requiredFilesPresent":  true,
+                   "requiredJsonValid":  true,
+                   "notesPresent":  true,
+                   "readinessPassed":  true,
+                   "diagnosticsPassed":  true,
+                   "diagnosticsNoSecrets":  true,
+                   "heightsNumeric":  true,
+                   "blockHeightAdvanced":  true,
+                   "sendAccepted":  true,
+                   "transferIdPresent":  true,
+                   "transactionIdPresent":  true,
+                   "transferFound":  true,
+                   "transferMatchesAccounts":  true,
+                   "transferAmountMatches":  true,
+                   "transactionIdMatches":  true,
+                   "transferBlockHeightInWindow":  true,
+                   "includedHeightMatchesTransfer":  true,
+                   "amountWithinLimit":  true,
+                   "balancesPresent":  true,
+                   "senderDebited":  true,
+                   "recipientCredited":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "credentialUrlFindingsEmpty":  true,
+                   "envAssignmentFindingsEmpty":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "credentialUrlFindings":  [
+
+                              ],
+    "envAssignmentFindings":  [
+
+                              ],
+    "summary":  {
+                    "heightBefore":  "100",
+                    "heightAfter":  "103",
+                    "transferIdPresent":  true,
+                    "transactionIdPresent":  true,
+                    "amountUnits":  "1",
+                    "transferBlockHeight":  "102"
+                },
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

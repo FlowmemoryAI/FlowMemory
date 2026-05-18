@@ -133,6 +133,7 @@ $requiredScripts = @(
     "flowchain:bridge:relayer:loop:validate",
     "flowchain:external-tester:packet",
     "flowchain:external-tester:packet:validate",
+    "flowchain:tester:evidence:validate",
     "flowchain:tester:token:setup",
     "flowchain:dashboard:ui:readiness",
     "flowchain:live:cutover:rehearsal",
@@ -180,6 +181,7 @@ $commandMatrix = @(
     [ordered]@{ phase = "bridge"; command = "npm run flowchain:bridge:relayer:loop:validate"; purpose = "Validate relayer loop start, fresh health reporting, clean stop, PID cleanup, and no leftover validation relayer process." },
     [ordered]@{ phase = "testers"; command = "npm run flowchain:external-tester:packet -- -AllowBlocked"; purpose = "Regenerate the friends-and-family packet and fail closed until public gates pass." },
     [ordered]@{ phase = "testers"; command = "npm run flowchain:external-tester:packet:validate"; purpose = "Validate the packet and connect pack are no-secret, locally executable, and not externally shareable before owner inputs." },
+    [ordered]@{ phase = "testers"; command = "npm run flowchain:tester:evidence:validate"; purpose = "Validate redacted friends-and-family evidence intake for block-height advancement, wallet transfer consistency, and no-secret boundaries." },
     [ordered]@{ phase = "testers"; command = "npm run flowchain:tester:token:setup"; purpose = "Create or preserve the raw tester bearer token in ignored local storage and write only its digest to the ignored owner env file." },
     [ordered]@{ phase = "testers"; command = "npm run flowchain:dashboard:ui:readiness"; purpose = "Run desktop and mobile browser verification for tester wallet create, faucet, send, and Explorer inspection." },
     [ordered]@{ phase = "cutover"; command = "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked"; purpose = "Run owner-env, public deployment, tester packet, completion, truth table, and no-secret gates as one redacted rehearsal." },
@@ -247,6 +249,7 @@ foreach ($file in @(
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/SECOND_COMPUTER_READINESS.md"; target = "runbooks/SECOND_COMPUTER_READINESS.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md"; target = "runbooks/EXTERNAL_TESTER_PACKET.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET_VALIDATION.md"; target = "runbooks/EXTERNAL_TESTER_PACKET_VALIDATION.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_EVIDENCE_VALIDATION.md"; target = "runbooks/EXTERNAL_TESTER_EVIDENCE_VALIDATION.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/LIVE_CUTOVER_REHEARSAL.md"; target = "runbooks/LIVE_CUTOVER_REHEARSAL.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/DASHBOARD_UI_READINESS.md"; target = "runbooks/DASHBOARD_UI_READINESS.md"; required = $true }
 )) {
@@ -285,6 +288,7 @@ foreach ($file in @(
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"; target = "evidence/bridge-relayer-loop-validation-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"; target = "evidence/external-tester-packet-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/external-tester-packet-validation-report.json"; target = "evidence/external-tester-packet-validation-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"; target = "evidence/external-tester-evidence-validation-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"; target = "evidence/dashboard-ui-readiness-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json"; target = "evidence/live-cutover-rehearsal-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"; target = "evidence/flowchain-architecture-audit-report.json"; required = $true },

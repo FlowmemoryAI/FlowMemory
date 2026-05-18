@@ -78,6 +78,7 @@ $reportPaths = [ordered]@{
     liveProduct = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
+    externalTesterEvidenceValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
     publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     dashboardUiReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
     devPack = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"
@@ -881,7 +882,7 @@ Add-ArchitectureItem -Items $items -Id "public-deployment-contract-boundary" -La
     -Evidence "deploymentStatus=$deploymentContractStatus, deploymentReady=$deploymentContractReady, packetShareable=$deploymentContractPacketShareable, packetSmoke=$deploymentContractPacketSmoke, blockedOnlyKnown=$deploymentContractBlockedOnlyKnown, blockedItems=$deploymentContractBlocked, failedItems=$deploymentContractFailed" `
     -Files @("infra/scripts/flowchain-public-deployment-contract.ps1", "docs/OPERATIONS/FLOWCHAIN_OWNER_OPERATED_PUBLIC_RPC.md") `
     -Commands @("npm run flowchain:public-deployment:contract -- -AllowBlocked") `
-    -Blockers @($knownExternalOwnerInputs)
+    -Blockers @($missingOwnerInputs)
 
 $ownerInputs = $reports.ownerInputs
 $ownerInputsValidation = $reports.ownerInputsValidation
@@ -1049,6 +1050,7 @@ $productGateFiles = @(
     "infra/scripts/flowchain-operator-package-verify.ps1",
     "infra/scripts/flowchain-external-tester-readiness.ps1",
     "infra/scripts/flowchain-external-tester-packet.ps1",
+    "infra/scripts/flowchain-external-tester-evidence-validation.ps1",
     "infra/scripts/flowchain-public-tester-gateway-e2e.ps1",
     "infra/scripts/flowchain-dashboard-ui-readiness.ps1",
     "apps/dashboard/playwright.config.ts",
@@ -1089,6 +1091,14 @@ $externalSharingReady = Get-ArchitectureProp -Object $externalTester -Name "exte
 $externalTesterPacketShareable = Get-ArchitectureProp -Object $externalTesterPacket -Name "packetShareable" -Default $false
 $externalTesterPacketExecutableSmokeValidated = Get-ArchitectureProp -Object $externalTesterPacket -Name "packetExecutableSmokeValidated" -Default $false
 $externalTesterPacketSmokeRoutes = @((Get-ArchitectureProp -Object $externalTesterPacket -Name "packetSmokeRoutes" -Default @()))
+$externalTesterEvidenceValidation = $reports.externalTesterEvidenceValidation
+$externalTesterEvidenceValidationStatus = Get-ArchitectureStatus -Report $externalTesterEvidenceValidation
+$externalTesterEvidenceValidationFailedChecks = @((Get-ArchitectureProp -Object $externalTesterEvidenceValidation -Name "failedChecks" -Default @()))
+$externalTesterEvidenceValidationPassed = ($externalTesterEvidenceValidationStatus -eq "passed") `
+    -and ($externalTesterEvidenceValidationFailedChecks.Count -eq 0) `
+    -and ((Get-ArchitectureProp -Object $externalTesterEvidenceValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $externalTesterEvidenceValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $externalTesterEvidenceValidation -Name "broadcasts" -Default $true) -eq $false)
 $externalTesterConnectPackShareable = Get-ArchitectureProp -Object $externalTesterPacket -Name "connectPackShareable" -Default $false
 $externalTesterConnectPackChecks = Get-ArchitectureProp -Object $externalTesterPacket -Name "connectPackChecks"
 $externalTesterConnectPackReady = ((Get-ArchitectureProp -Object $externalTesterConnectPackChecks -Name "connectPackWritten" -Default $false) -eq $true) `
@@ -1109,21 +1119,23 @@ $externalTesterLaunchPassed = ($externalTesterStatus -eq "passed") `
     -and ($externalTesterPacketShareable -eq $true) `
     -and ($externalTesterNetworkFresh -eq $true) `
     -and ($externalTesterPacketExecutableSmokeValidated -eq $true) `
-    -and ($externalTesterConnectPackReady -eq $true)
+    -and ($externalTesterConnectPackReady -eq $true) `
+    -and ($externalTesterEvidenceValidationPassed -eq $true)
 $externalTesterLaunchBlocked = ($externalTesterStatus -eq "blocked") `
     -and ($externalTesterPacketStatus -eq "blocked") `
     -and ($externalSharingReady -eq $false) `
     -and ($externalTesterPacketShareable -eq $false) `
     -and ($externalTesterNetworkFresh -eq $true) `
     -and ($externalTesterPacketExecutableSmokeValidated -eq $true) `
-    -and ($externalTesterConnectPackReady -eq $true)
+    -and ($externalTesterConnectPackReady -eq $true) `
+    -and ($externalTesterEvidenceValidationPassed -eq $true)
 Add-ArchitectureItem -Items $items -Id "external-tester-launch-boundary" -Layer "External tester launch" `
-    -Requirement "Friends-and-family tester sharing requires fresh tester-wallet evidence, executable packet-route smoke, and a machine-readable connection pack, and remains blocked until public RPC, backup, and Base bridge gates pass." `
+    -Requirement "Friends-and-family tester sharing requires fresh tester-wallet evidence, executable packet-route smoke, a machine-readable connection pack, and returned-evidence validation, and remains blocked until public RPC, backup, and Base bridge gates pass." `
     -Status $(if ($externalTesterLaunchPassed) { "passed" } elseif ($externalTesterLaunchBlocked) { "blocked" } else { "failed" }) `
-    -Evidence "externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, packet=$externalTesterPacketStatus, packetShareable=$externalTesterPacketShareable, packetSmoke=$externalTesterPacketExecutableSmokeValidated, smokeRoutes=$($externalTesterPacketSmokeRoutes.Count), connectPackReady=$externalTesterConnectPackReady, externalSharingReady=$externalSharingReady" `
-    -Files @("infra/scripts/flowchain-external-tester-readiness.ps1", "infra/scripts/flowchain-external-tester-packet.ps1", "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md", "docs/agent-runs/live-product-infra-rpc/external-tester-connect-pack.json") `
-    -Commands @("npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked") `
-    -Blockers @($knownExternalOwnerInputs)
+    -Evidence "externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, packet=$externalTesterPacketStatus, packetShareable=$externalTesterPacketShareable, packetSmoke=$externalTesterPacketExecutableSmokeValidated, smokeRoutes=$($externalTesterPacketSmokeRoutes.Count), connectPackReady=$externalTesterConnectPackReady, evidenceValidation=$externalTesterEvidenceValidationPassed, externalSharingReady=$externalSharingReady" `
+    -Files @("infra/scripts/flowchain-external-tester-readiness.ps1", "infra/scripts/flowchain-external-tester-packet.ps1", "infra/scripts/flowchain-external-tester-evidence-validation.ps1", "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md", "docs/agent-runs/live-product-infra-rpc/external-tester-connect-pack.json", "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_EVIDENCE_VALIDATION.md") `
+    -Commands @("npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked", "npm run flowchain:tester:evidence:validate") `
+    -Blockers @($missingOwnerInputs)
 Add-ArchitectureItem -Items $items -Id "public-tester-gateway-boundary" -Layer "External tester launch" `
     -Requirement "Public tester write gateway has a local production-shaped E2E proof for bearer auth, public-only wallet creation, capped wallet sends, balance settlement, and over-cap rejection." `
     -Status $(if ($publicTesterGatewayReady) { "passed" } else { "failed" }) `
@@ -1146,6 +1158,7 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:operator:package:verify") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:dev-pack:e2e") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:tester:gateway:e2e") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:tester:evidence:validate") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:dashboard:ui:readiness") `
     -and ($liveInfraGateStatus -in @("passed", "blocked")) `
     -and ($liveProductGateStatus -in @("passed", "blocked")) `
@@ -1153,6 +1166,7 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and ($externalTesterNetworkFresh -eq $true) `
     -and ($externalTesterPacketStatus -in @("passed", "blocked")) `
     -and ($externalTesterPacketExecutableSmokeValidated -eq $true) `
+    -and ($externalTesterEvidenceValidationPassed -eq $true) `
     -and ($externalTesterConnectPackReady -eq $true) `
     -and ($publicTesterGatewayReady -eq $true) `
     -and ($dashboardUiReady -eq $true) `

@@ -22,6 +22,7 @@ $optionalMissingEnvNames = @(
 $serviceStatusReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
 $liveInfraReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-infra-check-report.json"
 $liveProductReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json"
+$ownerInputsReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-report.json"
 $testerNetworkReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
 $publicTesterGatewayReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
 
@@ -186,6 +187,7 @@ if (-not $NoRefreshPublicTesterGateway.IsPresent -and (-not $publicTesterGateway
 $serviceReport = Read-FlowChainJsonIfExists -Path $serviceStatusReportPath
 $liveInfraReport = Read-FlowChainJsonIfExists -Path $liveInfraReportPath
 $liveProductReport = Read-FlowChainJsonIfExists -Path $liveProductReportPath
+$ownerInputsReport = Read-FlowChainJsonIfExists -Path $ownerInputsReportPath
 $testerNetworkReport = Read-FlowChainJsonIfExists -Path $testerNetworkReportPath
 $publicTesterGatewayReport = Read-FlowChainJsonIfExists -Path $publicTesterGatewayReportPath
 $testerNetworkFresh = Test-ReportFresh -Report $testerNetworkReport -MaxAgeMinutes $MaxTesterReportAgeMinutes
@@ -204,6 +206,19 @@ foreach ($name in @((Get-PropertyValue -Object $liveProductReport -Name "missing
         Add-UniqueName -Target $missingEnvNames -Value $name
     }
 }
+$ownerInputValidNames = @((Get-PropertyValue -Object $ownerInputsReport -Name "inputs" -Default @()) | Where-Object {
+        (Get-PropertyValue -Object $_ -Name "present" -Default $false) -eq $true `
+            -and (Get-PropertyValue -Object $_ -Name "valid" -Default $false) -eq $true
+    } | ForEach-Object {
+        [string](Get-PropertyValue -Object $_ -Name "name" -Default "")
+    } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+$filteredMissingEnvNames = New-Object System.Collections.ArrayList
+foreach ($name in @($missingEnvNames)) {
+    if ($name -notin $ownerInputValidNames) {
+        Add-UniqueName -Target $filteredMissingEnvNames -Value $name
+    }
+}
+$missingEnvNames = $filteredMissingEnvNames
 
 $serviceReady = $serviceExitCode -eq 0 `
     -and $null -ne $serviceReport `
