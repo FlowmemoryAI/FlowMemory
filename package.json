@@ -79,6 +79,7 @@
     "flowchain:control-plane:smoke": "npm run control-plane:smoke",
     "flowchain:dashboard:build": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-workbench.ps1 -BuildOnly",
     "flowchain:dashboard:verify": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-workbench.ps1 -BuildOnly",
+    "flowchain:crypto:live-l1:verify": "node infra/scripts/flowchain-live-l1-crypto-verify.mjs",
     "flowchain:export": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-export.ps1",
     "flowchain:import": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-import.ps1",
     "flowchain:restart:verify": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-node-smoke.ps1",
@@ -105,5 +106,9 @@
   "devDependencies": {
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1"
+  },
+  "dependencies": {
+    "@noble/hashes": "^2.2.0",
+    "@noble/secp256k1": "^3.1.0"
   }
 }

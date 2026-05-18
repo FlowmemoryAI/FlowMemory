@@ -97,6 +97,24 @@ export const TYPE_STRINGS = Object.freeze({
     "FlowChainLocalSignatureEnvelopeV0(bytes32 objectId,bytes32 objectTypeHash,bytes32 domainSeparator,bytes32 signerId,bytes32 signerKeyId,uint8 signerRole,uint64 sequence,uint64 issuedAtUnixMs,uint64 expiresAtUnixMs,bytes32 nonce)",
   localTransactionEnvelopeV0:
     "FlowChainLocalTransactionEnvelopeV0(uint256 chainId,bytes32 domainSeparator,bytes32 signerId,bytes32 signerKeyId,uint8 signerRole,uint64 nonce,bytes32 payloadHash,bytes32 objectId,bytes32 objectTypeHash,uint64 issuedAtUnixMs)",
+  localTransactionEnvelopeProductionL1V0:
+    "FlowChainLocalTransactionEnvelopeProductionL1V0(uint16 schemaVersion,uint256 chainId,bytes32 networkProfileHash,bytes32 domainSeparator,bytes32 signerId,bytes32 signerKeyId,uint8 signerRole,uint64 nonce,bytes32 payloadTypeHash,bytes32 payloadHash,bytes32 objectId,bytes32 objectTypeHash,uint64 issuedAtUnixMs,uint64 expiresAtUnixMs,bytes32 localExecutionCostHash,bytes32 feeHash,bytes32 signatureAlgorithmHash)",
+  flowchainTransactionIdV0:
+    "FlowChainTransactionIdV0(uint256 chainId,bytes32 networkProfileHash,bytes32 envelopeId,bytes32 payloadHash,bytes32 signatureHash)",
+  flowchainAccountIdV0:
+    "FlowChainAccountIdV0(bytes32 publicKeyHash,address flowchainAddress,bytes32 roleRoot)",
+  flowchainBridgeObservationV0:
+    "FlowChainBridgeObservationV0(uint256 sourceChainId,address lockbox,address token,address depositor,bytes32 recipient,uint256 amount,bytes32 txHash,uint32 logIndex,uint64 blockNumber,uint256 eventNonce)",
+  flowchainBridgeSourceEventReplayKeyV0:
+    "FlowChainBridgeSourceEventReplayKeyV0(uint256 sourceChainId,address lockbox,bytes32 txHash,uint32 logIndex)",
+  flowchainBridgeEvidenceHashV0:
+    "FlowChainBridgeEvidenceHashV0(bytes32 sourceEventReplayKey,bytes32 observationId,bytes32 creditId,bytes32 depositId,uint256 localChainId,bytes32 evidencePayloadHash)",
+  flowchainBridgeCreditV1:
+    "FlowChainBridgeCreditV1(bytes32 observationId,bytes32 localRecipient,uint256 localChainId,uint256 creditAmount)",
+  flowchainWithdrawalIntentV1:
+    "FlowChainWithdrawalIntentV1(uint256 localChainId,bytes32 accountId,bytes32 assetId,uint256 amount,uint64 nonce,bytes32 destinationHash)",
+  flowchainFinalityReceiptV1:
+    "FlowChainFinalityReceiptV1(uint256 chainId,uint64 blockNumber,bytes32 blockHash,bytes32 stateRoot,bytes32 validatorSetRoot,uint64 round,bytes32 voteRoot)",
   eip712Domain:
     "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)"
 });
@@ -142,7 +160,20 @@ export const DOMAIN_STRINGS = Object.freeze({
   hardwareSignalEnvelopeId: "flowchain.local-alpha.v0.hardware-signal-envelope.id",
   controlPlaneProvenanceResponseId: "flowchain.local-alpha.v0.control-plane-provenance-response.id",
   localSignatureEnvelope: "flowchain.local-alpha.v0.local-signature-envelope",
-  localTransactionEnvelope: "flowchain.local-alpha.v0.local-transaction-envelope"
+  localTransactionEnvelope: "flowchain.local-alpha.v0.local-transaction-envelope",
+  productionL1TransactionEnvelope: "flowchain.production-l1.v0.transaction-envelope",
+  productionLocalChain: "flowchain.production-l1.v0.local-chain",
+  productionPrivateLan: "flowchain.production-l1.v0.private-lan",
+  productionBase8453PilotBridge: "flowchain.production-l1.v0.base-8453-pilot-bridge",
+  productionObjectLifecycle: "flowchain.production-l1.v0.object-lifecycle",
+  productionTokenDex: "flowchain.production-l1.v0.token-dex",
+  productionValidatorFinality: "flowchain.production-l1.v0.validator-finality",
+  productionAccountIdentity: "flowchain.production-l1.v0.account-identity",
+  productionAddress: "flowchain.production-l1.v0.address",
+  productionBridgeObservation: "flowchain.production-l1.v0.bridge-observation",
+  productionBridgeCredit: "flowchain.production-l1.v0.bridge-credit",
+  productionWithdrawalIntent: "flowchain.production-l1.v0.withdrawal-intent",
+  productionFinalityReceipt: "flowchain.production-l1.v0.finality-receipt"
 });
 
 export const MERKLE_SCHEME_V0 = "FM-MERKLE-KECCAK256-BINARY-V0";
@@ -210,7 +241,40 @@ export const LOCAL_ALPHA_SIGNER_ROLES = Object.freeze({
   operator: 1,
   agent: 2,
   verifier: 3,
-  hardware: 4
+  hardware: 4,
+  user: 10,
+  validator: 11,
+  bridgeRelayer: 12,
+  bridgeReleaseAuthority: 13,
+  emergencyOperator: 14
+});
+
+export const FLOWCHAIN_ACCOUNT_ROLES = Object.freeze({
+  user: {
+    code: LOCAL_ALPHA_SIGNER_ROLES.user,
+    roleGated: false,
+    description: "Normal account authority for user-owned local/private transactions."
+  },
+  validator: {
+    code: LOCAL_ALPHA_SIGNER_ROLES.validator,
+    roleGated: true,
+    description: "Validator/finality authority for local/private finality objects."
+  },
+  bridgeRelayer: {
+    code: LOCAL_ALPHA_SIGNER_ROLES.bridgeRelayer,
+    roleGated: true,
+    description: "Bridge observation submitter for source-event facts."
+  },
+  bridgeReleaseAuthority: {
+    code: LOCAL_ALPHA_SIGNER_ROLES.bridgeReleaseAuthority,
+    roleGated: true,
+    description: "Bridge credit and release authority for local/private bridge accounting."
+  },
+  emergencyOperator: {
+    code: LOCAL_ALPHA_SIGNER_ROLES.emergencyOperator,
+    roleGated: true,
+    description: "Emergency operator for pause, revoke, and recovery controls."
+  }
 });
 
 export const LOCAL_ALPHA_BRIDGE_STATUSES = Object.freeze({

@@ -50,9 +50,13 @@ agent, verifier, and hardware signature envelope that wraps these object IDs.
 The schema is paired with the validator in `crypto/src/objects.js`; consumers
 should validate both JSON shape and recomputed cryptographic fields.
 
-`local-transaction-envelope.schema.json` describes the chain-bound local/private
-transaction envelope consumed by the private L1 package. It binds the chain id,
-domain separator, nonce, signer, payload hash, object ID, and signature.
+`local-transaction-envelope.schema.json` describes the one chain-bound
+local/private transaction envelope consumed by the private L1 package. Legacy
+V0 fixtures bind the chain id, domain separator, nonce, signer, payload hash,
+object ID, and signature. The production-L1-shaped envelope uses the same
+schema and adds schema version, network profile, payload type, expiration,
+local execution cost, fee policy, signature algorithm, and transaction ID.
+Runtime/API agents should require those completed fields.
 
 `wallet-signed-envelope.schema.json` describes the human-facing wallet output
 that wraps the local transaction envelope with the payload body, tx id, public

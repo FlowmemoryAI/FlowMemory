@@ -52,7 +52,19 @@
     "objectTypeHash": { "$ref": "#/$defs/hex32" },
     "domain": { "type": "string", "pattern": "^(flowchain\\.local-alpha\\.v0|flowmemory\\.v0)\\.[a-z0-9.-]+$" },
     "domainSeparator": { "$ref": "#/$defs/hex32" },
-    "signerRole": { "enum": ["operator", "agent", "verifier", "hardware"] },
+    "signerRole": {
+      "enum": [
+        "operator",
+        "agent",
+        "verifier",
+        "hardware",
+        "user",
+        "validator",
+        "bridgeRelayer",
+        "bridgeReleaseAuthority",
+        "emergencyOperator"
+      ]
+    },
     "signerRoleCode": { "type": "integer", "minimum": 1, "maximum": 255 },
     "signerId": { "$ref": "#/$defs/hex32" },
     "signerKeyId": { "$ref": "#/$defs/hex32" },

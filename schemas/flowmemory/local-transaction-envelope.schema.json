@@ -28,15 +28,35 @@
   "properties": {
     "schema": { "const": "flowchain.local_transaction_envelope.v0" },
     "envelopeId": { "$ref": "#/$defs/hex32" },
-    "domain": { "type": "string", "pattern": "^flowchain\\.local-alpha\\.v0\\.local-transaction-envelope:chain:[0-9]+$" },
+    "domain": {
+      "type": "string",
+      "pattern": "^(flowchain\\.local-alpha\\.v0\\.local-transaction-envelope:chain:[0-9]+|flowchain\\.production-l1\\.v0\\.transaction-envelope:profile:(local-chain|private-lan|base-8453-pilot-bridge):chain:[0-9]+)$"
+    },
     "domainSeparator": { "$ref": "#/$defs/hex32" },
     "chainId": { "$ref": "#/$defs/uintString" },
     "nonce": { "$ref": "#/$defs/uintString" },
     "signerId": { "$ref": "#/$defs/hex32" },
     "signerKeyId": { "$ref": "#/$defs/hex32" },
-    "signerRole": { "enum": ["operator", "agent", "verifier", "hardware"] },
+    "schemaVersion": { "type": "integer", "minimum": 1 },
+    "networkProfile": { "enum": ["local-chain", "private-lan", "base-8453-pilot-bridge"] },
+    "networkProfileHash": { "$ref": "#/$defs/hex32" },
+    "signerRole": {
+      "enum": [
+        "operator",
+        "agent",
+        "verifier",
+        "hardware",
+        "user",
+        "validator",
+        "bridgeRelayer",
+        "bridgeReleaseAuthority",
+        "emergencyOperator"
+      ]
+    },
     "signerRoleCode": { "type": "integer", "minimum": 1, "maximum": 255 },
     "publicKey": { "type": "string", "pattern": "^0x([0-9a-fA-F]{66}|[0-9a-fA-F]{130})$" },
+    "publicKeyEncoding": { "const": "secp256k1-compressed-hex" },
+    "signerAddress": { "$ref": "#/$defs/address" },
     "objectSchema": { "type": "string", "pattern": "^(flowchain|flowmemory)\\.[a-z_]+\\.v0$" },
     "objectType": {
       "enum": [
@@ -69,14 +89,25 @@
         "control_plane_provenance_response"
       ]
     },
+    "payloadType": { "type": "string", "pattern": "^[a-z0-9_\\-]+$" },
+    "payloadTypeHash": { "$ref": "#/$defs/hex32" },
     "objectTypeHash": { "$ref": "#/$defs/hex32" },
     "objectId": { "$ref": "#/$defs/hex32" },
     "payloadHash": { "$ref": "#/$defs/hex32" },
     "issuedAtUnixMs": { "$ref": "#/$defs/uintString" },
+    "expiresAtUnixMs": { "$ref": "#/$defs/uintString" },
+    "localExecutionCost": { "type": "object" },
+    "localExecutionCostHash": { "$ref": "#/$defs/hex32" },
+    "fee": { "type": "object" },
+    "feeHash": { "$ref": "#/$defs/hex32" },
+    "signatureAlgorithm": { "enum": ["secp256k1-keccak256-eip712-local-v0"] },
+    "signatureAlgorithmHash": { "$ref": "#/$defs/hex32" },
     "signingDigest": { "$ref": "#/$defs/hex32" },
-    "signature": { "type": "string", "pattern": "^0x[0-9a-fA-F]{128}$" }
+    "signature": { "type": "string", "pattern": "^0x[0-9a-fA-F]{128}$" },
+    "transactionId": { "$ref": "#/$defs/hex32" }
   },
   "$defs": {
+    "address": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
     "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
     "uintString": { "type": "string", "pattern": "^[0-9]+$" }
   }

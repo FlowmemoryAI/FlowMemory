@@ -21,7 +21,9 @@ import {
   signWalletDocumentWithVault,
   unlockEncryptedTestVault,
   validateLocalTransactionEnvelope,
+  flowchainPublicAccountMetadata,
   validateLocalWalletPublicMetadata,
+  verifyFlowchainEnvelope,
   verifyWalletSignedEnvelope
 } from "./index.js";
 
@@ -257,11 +259,22 @@ try {
       const envelope = readJson(required("envelope"));
       const document = args.document ? readJson(args.document) : undefined;
       const context = verificationContext(document);
-      const result = envelope.schema === "flowchain.wallet_signed_envelope.v0"
-        ? verifyWalletSignedEnvelope({ envelope, context })
-        : validateLocalTransactionEnvelope({ document, envelope, context });
+      const result = args.runtime || args["require-canonical"]
+        ? verifyFlowchainEnvelope({
+          document,
+          envelope,
+          context: {
+            ...context,
+            networkProfile: args["network-profile"],
+            nowUnixMs: args["now-unix-ms"],
+            requireCanonical: Boolean(args["require-canonical"])
+          }
+        })
+        : envelope.schema === "flowchain.wallet_signed_envelope.v0"
+          ? verifyWalletSignedEnvelope({ envelope, context })
+          : validateLocalTransactionEnvelope({ document, envelope, context });
       console.log(JSON.stringify(result, null, 2));
-      process.exitCode = result.valid ? 0 : 1;
+      process.exitCode = (result.valid ?? result.ok) ? 0 : 1;
     }
   } else if (command === "submit") {
     const envelope = readJson(required("envelope"));
@@ -272,6 +285,14 @@ try {
     const response = await queryControlPlane(required("method"), args.params ? parseJsonValue(args.params) : {});
     console.log(JSON.stringify(response, null, 2));
     process.exitCode = response.error ? 1 : 0;
+  } else if (command === "derive-metadata") {
+    const metadata = flowchainPublicAccountMetadata({
+      publicKey: required("public-key"),
+      role: args.role ?? "user",
+      label: args.label,
+      createdAtUnixMs: args["created-at-unix-ms"]
+    });
+    console.log(JSON.stringify(metadata, null, 2));
   } else {
     usage();
     process.exitCode = 1;
@@ -530,10 +551,12 @@ function usage() {
   node src/wallet-cli.js unlock --vault <ignored-vault>
   node src/wallet-cli.js lock --vault <ignored-vault>
   node src/wallet-cli.js list accounts --vault <ignored-vault> [--public]
+  node src/wallet-cli.js metadata --vault <ignored-vault>
   node src/wallet-cli.js export-metadata --vault <ignored-vault> --out <public-json>
   node src/wallet-cli.js verify-metadata --metadata <public-json> [--chain-id <id>]
   node src/wallet-cli.js add-account --vault <ignored-vault> --chain-id <id> [--role agent]
   node src/wallet-cli.js rotate --vault <ignored-vault> --signer-key-id <id>
+  node src/wallet-cli.js sign --vault <ignored-vault> --document <path> --chain-id <id> --nonce <n> [--signer-key-id <id>] [--out <path>]
   node src/wallet-cli.js sign-transfer --vault <ignored-vault> --from <account> --to <account> --amount <n> --nonce <n> --chain-id <id>
   node src/wallet-cli.js sign-token-launch --vault <ignored-vault> --owner <account> --symbol <SYM> --name <name> --supply <n> --nonce <n> --chain-id <id>
   node src/wallet-cli.js sign-token-transfer --vault <ignored-vault> --from <account> --to <account> --token-id <id> --amount <n> --nonce <n> --chain-id <id>
@@ -542,7 +565,8 @@ function usage() {
   node src/wallet-cli.js sign-remove-liquidity --vault <ignored-vault> --owner <account> --pool-id <id> --liquidity-tokens <n> --min-base-amount <n> --min-quote-amount <n> --deadline-block <n> --nonce <n> --chain-id <id>
   node src/wallet-cli.js sign-swap --vault <ignored-vault> --owner <account> --pool-id <id> --input-token-id <id> --output-token-id <id> --input-amount <n> --minimum-output <n> --deadline-block <n> --nonce <n> --chain-id <id>
   node src/wallet-cli.js sign-withdrawal-intent --vault <ignored-vault> --account <account> --base-address <0x...> --amount <n> --bridge-asset <0x...> --credit-id <id> --deposit-id <id> --nonce <n> --chain-id <id>
-  node src/wallet-cli.js verify --envelope <wallet-envelope> [--chain-id <id>] [--expected-nonce <n>]
+  node src/wallet-cli.js verify --envelope <wallet-envelope> [--document <path>] [--chain-id <id>] [--expected-nonce <n>] [--network-profile <profile>] [--require-canonical] [--runtime]
   node src/wallet-cli.js submit --envelope <wallet-envelope> [--intake-path <ignored-ndjson>]
-  node src/wallet-cli.js query --method <control-plane-method> [--params <json-or-file>]`);
+  node src/wallet-cli.js query --method <control-plane-method> [--params <json-or-file>]
+  node src/wallet-cli.js derive-metadata --public-key <compressed-or-uncompressed-public-key> [--role user] [--label <label>]`);
 }

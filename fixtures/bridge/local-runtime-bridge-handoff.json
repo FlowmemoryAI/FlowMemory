@@ -1,6 +1,6 @@
 {
   "schema": "flowmemory.bridge_runtime_handoff.v0",
-  "handoffId": "0x36fcd03ec701406d4af9a5c8702ecaa4fcb9ead45b72e3a7e11cf33649b36c93",
+  "handoffId": "0x279765b249cacfff787c0475a776ae7f0ef573b79cdd12cb12f2f2648f3f5b44",
   "generatedAt": "2026-05-13T00:00:00.000Z",
   "mode": "mock",
   "productionReady": false,
@@ -8,8 +8,8 @@
   "observations": [
     {
       "schema": "flowmemory.bridge_deposit_observation.v0",
-      "observationId": "0x0430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223c",
-      "replayKey": "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09",
+      "observationId": "0xcb73355c07ccfb69a065d32fb31bad09412bdd280ad629668393a9b0f6acfe61",
+      "replayKey": "0x09369f3f035589d3b8923878255ed053279ce160c31e28860fb2babee9e9ef62",
       "observedAt": "2026-05-13T00:00:00.000Z",
       "mode": "mock",
       "productionReady": false,
@@ -39,10 +39,10 @@
   "credits": [
     {
       "schema": "flowmemory.bridge_credit.v0",
-      "creditId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
-      "observationId": "0x0430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223c",
+      "creditId": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46",
+      "observationId": "0xcb73355c07ccfb69a065d32fb31bad09412bdd280ad629668393a9b0f6acfe61",
       "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
-      "replayKey": "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09",
+      "replayKey": "0x09369f3f035589d3b8923878255ed053279ce160c31e28860fb2babee9e9ef62",
       "source": {
         "chainId": 84532,
         "contract": "0x1111111111111111111111111111111111111111",
@@ -61,8 +61,8 @@
   "withdrawalIntents": [
     {
       "schema": "flowmemory.bridge_withdrawal_intent.v0",
-      "withdrawalIntentId": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
-      "creditId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+      "withdrawalIntentId": "0x9d081c875d81344f34de114ef90716717693bff006bc3dea770f52fa6005ffd6",
+      "creditId": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46",
       "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
       "sourceChainId": 84532,
       "destinationChainId": 84532,
@@ -81,10 +81,10 @@
   "runtimeApplications": [
     {
       "schema": "flowmemory.bridge_runtime_credit_application.v0",
-      "applicationId": "0xe4799e2732957923382111ffcf05ae5a28ad441d1a998417097c31165dc6ab32",
-      "creditId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+      "applicationId": "0x1680fe504f978faa413b9baac9bab57b1daa3419b30e90e9d31907592bab3a07",
+      "creditId": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46",
       "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
-      "replayKey": "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09",
+      "replayKey": "0x09369f3f035589d3b8923878255ed053279ce160c31e28860fb2babee9e9ef62",
       "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
       "amount": "20000000",
       "status": "applied",
@@ -98,10 +98,10 @@
   "releaseEvidences": [
     {
       "schema": "flowmemory.bridge_release_evidence.v0",
-      "releaseEvidenceId": "0x0ae60c9a0b75a071172ee7cf80959d9b35c6ea331af5ccca7bc94eda23b8b000",
+      "releaseEvidenceId": "0x0ec3a52fbb7d47b223b59ff4fbac9fb4ce7791c7df73089c5b9f5e4d3dfa128c",
       "generatedAt": "2026-05-13T00:00:00.000Z",
-      "withdrawalIntentId": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
-      "creditId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+      "withdrawalIntentId": "0x9d081c875d81344f34de114ef90716717693bff006bc3dea770f52fa6005ffd6",
+      "creditId": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46",
       "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
       "sourceChainId": 84532,
       "destinationChainId": 84532,
@@ -111,7 +111,7 @@
         "recipient": "0x4444444444444444444444444444444444444444",
         "token": "0x3333333333333333333333333333333333333333",
         "amount": "20000000",
-        "evidenceHash": "0x697d114347dc96921b6b6df9bd9b7b3dd436e4ebe51d6d9e5c1c06c682ae5b58",
+        "evidenceHash": "0x5eaa6d5475b239cc1409764a8cf5e9dcf79d0203da9008de7fd29eaa4e054982",
         "broadcast": false
       },
       "operatorNote": "Pilot release evidence only. Review before any separate release-authority transaction; this relayer does not broadcast.",
@@ -122,7 +122,7 @@
   "replayProtection": {
     "strategy": "source-chain-contract-tx-log-deposit",
     "replayKeys": [
-      "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09"
+      "0x09369f3f035589d3b8923878255ed053279ce160c31e28860fb2babee9e9ef62"
     ],
     "duplicateReplayKeys": []
   },
@@ -136,28 +136,28 @@
     {
       "phase": "deposit_observed",
       "status": "observed",
-      "objectId": "0x0430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223c",
+      "objectId": "0xcb73355c07ccfb69a065d32fb31bad09412bdd280ad629668393a9b0f6acfe61",
       "title": "Deposit observed",
       "summary": "Observed lockbox deposit 0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269 on chain 84532."
     },
     {
       "phase": "credit_pending",
       "status": "pending",
-      "objectId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+      "objectId": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46",
       "title": "Credit pending",
       "summary": "20000000 test units queued for 0x5555555555555555555555555555555555555555555555555555555555555555."
     },
     {
       "phase": "credit_applied",
       "status": "applied",
-      "objectId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+      "objectId": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46",
       "title": "Credit applied",
       "summary": "20000000 test units applied in local bridge smoke state."
     },
     {
       "phase": "withdrawal_requested",
       "status": "requested",
-      "objectId": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
+      "objectId": "0x9d081c875d81344f34de114ef90716717693bff006bc3dea770f52fa6005ffd6",
       "title": "Withdrawal requested",
       "summary": "Test-mode local-to-Base withdrawal intent recorded with no broadcast or real release."
     }
@@ -165,7 +165,7 @@
   "workbenchRecords": [
     {
       "sectionKey": "transactions",
-      "id": "0x0430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223c",
+      "id": "0xcb73355c07ccfb69a065d32fb31bad09412bdd280ad629668393a9b0f6acfe61",
       "kind": "Bridge deposit observation",
       "title": "0x2222222222222222222222222222222222222222222222222222222222222222",
       "summary": "Deposit 0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269 observed from mock.",
@@ -188,13 +188,13 @@
           "value": "20000000"
         }
       ],
-      "rawRef": "0x0430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223c"
+      "rawRef": "0xcb73355c07ccfb69a065d32fb31bad09412bdd280ad629668393a9b0f6acfe61"
     },
     {
       "sectionKey": "receipts",
-      "id": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+      "id": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46",
       "kind": "Bridge credit",
-      "title": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+      "title": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46",
       "summary": "Credit applied for deposit 0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269.",
       "status": "verified",
       "facts": [
@@ -212,16 +212,16 @@
         },
         {
           "label": "replay key",
-          "value": "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09"
+          "value": "0x09369f3f035589d3b8923878255ed053279ce160c31e28860fb2babee9e9ef62"
         }
       ],
-      "rawRef": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6"
+      "rawRef": "0x3597c9f97adbdc0bb33153aa58d143a95c7dc80bde84a5febe967e9787c58c46"
     },
     {
       "sectionKey": "transactions",
-      "id": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
+      "id": "0x9d081c875d81344f34de114ef90716717693bff006bc3dea770f52fa6005ffd6",
       "kind": "Bridge withdrawal intent",
-      "title": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
+      "title": "0x9d081c875d81344f34de114ef90716717693bff006bc3dea770f52fa6005ffd6",
       "summary": "Test-mode withdrawal intent recorded; no mainnet or real-funds release is broadcast.",
       "status": "pending",
       "facts": [
@@ -242,7 +242,7 @@
           "value": "test_record_only"
         }
       ],
-      "rawRef": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751"
+      "rawRef": "0x9d081c875d81344f34de114ef90716717693bff006bc3dea770f52fa6005ffd6"
     }
   ],
   "limitations": [
