@@ -1477,10 +1477,14 @@ $opsEscalationDryRun = $reports.opsEscalationDryRun
 $opsEscalationDryRunStatus = Get-ReportStatus -Report $opsEscalationDryRun
 $opsEscalationDryRunChecks = Get-AuditProp -Object $opsEscalationDryRun -Name "checks"
 $opsEscalationDryRunFailedChecks = @((Get-AuditProp -Object $opsEscalationDryRun -Name "failedChecks" -Default @()))
+$opsEscalationDryRunSecretFindings = @((Get-AuditProp -Object $opsEscalationDryRun -Name "secretMarkerFindings" -Default @()))
+$opsEscalationDryRunFailedCheckCount = $opsEscalationDryRunFailedChecks.Count
+$opsEscalationDryRunSecretFindingCount = $opsEscalationDryRunSecretFindings.Count
 $opsEscalationDryRunEventCount = [int](Get-AuditProp -Object $opsEscalationDryRun -Name "dryRunEventCount" -Default 0)
 $opsEscalationDryRunPassed = $opsEscalationDryRunExitCode -eq 0 `
     -and $opsEscalationDryRunStatus -eq "passed" `
-    -and $opsEscalationDryRunFailedChecks.Count -eq 0 `
+    -and $opsEscalationDryRunFailedCheckCount -eq 0 `
+    -and $opsEscalationDryRunSecretFindingCount -eq 0 `
     -and $opsEscalationDryRunEventCount -ge 1 `
     -and ((Get-AuditProp -Object $opsEscalationDryRunChecks -Name "notificationPlanNoNetworkDelivery" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsEscalationDryRunChecks -Name "notificationPlanStoresNoSecrets" -Default $false) -eq $true) `
@@ -1488,6 +1492,8 @@ $opsEscalationDryRunPassed = $opsEscalationDryRunExitCode -eq 0 `
     -and ((Get-AuditProp -Object $opsEscalationDryRunChecks -Name "everyCurrentFindingHasCommands" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsEscalationDryRunChecks -Name "dryRunEventsDoNotSend" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsEscalationDryRunChecks -Name "dryRunEventsStoreNoCredentials" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsEscalationDryRunChecks -Name "sourceReportsSecretMarkerFindingsEmpty" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsEscalationDryRunChecks -Name "secretMarkerFindingsEmpty" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsEscalationDryRun -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $opsEscalationDryRun -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsEscalationDryRun -Name "broadcasts" -Default $true) -eq $false)
@@ -1812,7 +1818,7 @@ Add-AuditItem -Items $items -Id "ops-alert-install-validation" `
 Add-AuditItem -Items $items -Id "ops-escalation-dry-run" `
     -Requirement "Ops escalation dry run maps every current finding to local operator commands and proves the repo-owned alert path does not send network delivery or store external delivery credentials." `
     -Status $(if ($opsEscalationDryRunPassed) { "passed" } else { "failed" }) `
-    -Evidence "dryRunStatus=$opsEscalationDryRunStatus, events=$opsEscalationDryRunEventCount, failedChecks=$($opsEscalationDryRunFailedChecks.Count), noNetworkDelivery=$(Get-AuditProp -Object $opsEscalationDryRunChecks -Name "notificationPlanNoNetworkDelivery"), storesNoSecrets=$(Get-AuditProp -Object $opsEscalationDryRunChecks -Name "notificationPlanStoresNoSecrets"), report=$($paths.opsEscalationDryRun)" `
+    -Evidence "dryRunStatus=$opsEscalationDryRunStatus, events=$opsEscalationDryRunEventCount, failedChecks=$opsEscalationDryRunFailedCheckCount, secretFindings=$opsEscalationDryRunSecretFindingCount, noNetworkDelivery=$(Get-AuditProp -Object $opsEscalationDryRunChecks -Name "notificationPlanNoNetworkDelivery"), storesNoSecrets=$(Get-AuditProp -Object $opsEscalationDryRunChecks -Name "notificationPlanStoresNoSecrets"), report=$($paths.opsEscalationDryRun)" `
     -Commands @("npm run flowchain:ops:escalation:dry-run -- -NoRefresh")
 
 Add-AuditItem -Items $items -Id "incident-drill" `

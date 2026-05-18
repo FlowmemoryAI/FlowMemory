@@ -1132,6 +1132,8 @@ $definitions = @(
             "dryRunEventsDoNotSend",
             "dryRunEventsStoreNoCredentials",
             "envValuesPrintedFalse",
+            "sourceReportsSecretMarkerFindingsEmpty",
+            "secretMarkerFindingsEmpty",
             "noSecrets",
             "broadcastsFalse"
         )
@@ -1142,7 +1144,8 @@ $definitions = @(
             "commandsWithInlineEnvAssignment",
             "commandsWithUrls",
             "findingsWithoutCommands",
-            "unmappedFindingCodes"
+            "unmappedFindingCodes",
+            "secretMarkerFindings"
         )
         requiredReportProperties = [ordered]@{
             "envValuesPrinted" = $false

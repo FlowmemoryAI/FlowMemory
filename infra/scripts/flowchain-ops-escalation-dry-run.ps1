@@ -46,6 +46,38 @@ function Add-UniqueEscalationValue {
     }
 }
 
+function Get-EscalationSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 function Test-EscalationPackageScript {
     param(
         [Parameter(Mandatory = $true)][AllowNull()][object] $PackageJson,
@@ -187,17 +219,16 @@ $checks = [ordered]@{
     dryRunEventsDoNotSend = @($dryRunEvents | Where-Object { (Get-EscalationProp -Object $_ -Name "wouldSendNetworkDelivery" -Default $true) -ne $false }).Count -eq 0
     dryRunEventsStoreNoCredentials = @($dryRunEvents | Where-Object { (Get-EscalationProp -Object $_ -Name "wouldStoreCredentials" -Default $true) -ne $false }).Count -eq 0
     envValuesPrintedFalse = $true
+    sourceReportsSecretMarkerFindingsEmpty = $true
+    secretMarkerFindingsEmpty = $true
     noSecrets = $true
     broadcastsFalse = $true
 }
 
-$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
-$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
-
 $report = [ordered]@{
     schema = "flowchain.ops_escalation_dry_run_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = $status
+    status = "pending"
     currentAlertState = [string](Get-EscalationProp -Object $opsAlertRules -Name "currentAlertState" -Default "missing")
     opsSnapshotStatus = [string](Get-EscalationProp -Object $opsSnapshot -Name "status" -Default "missing")
     opsAlertRulesStatus = [string](Get-EscalationProp -Object $opsAlertRules -Name "status" -Default "missing")
@@ -212,7 +243,8 @@ $report = [ordered]@{
     commandsWithInlineEnvAssignment = @($commandsWithInlineEnvAssignment)
     missingPackageScripts = @($missingPackageScripts)
     checks = $checks
-    failedChecks = @($failedChecks)
+    failedChecks = @()
+    secretMarkerFindings = @()
     opsRefresh = [ordered]@{
         performed = -not $NoRefresh.IsPresent
         exitCode = [int]$alertExitCode
@@ -235,6 +267,27 @@ $report = [ordered]@{
     noSecrets = $true
     broadcasts = $false
 }
+
+$sourceReportSecretMarkerFindings = @(
+    Get-EscalationSecretMarkerFindings -Text ($opsSnapshot | ConvertTo-Json -Depth 18) -Label "ops snapshot source report"
+    Get-EscalationSecretMarkerFindings -Text ($opsAlertRules | ConvertTo-Json -Depth 18) -Label "ops alert rules source report"
+)
+$preliminaryReportText = $report | ConvertTo-Json -Depth 18
+$dryRunReportSecretMarkerFindings = @(Get-EscalationSecretMarkerFindings -Text $preliminaryReportText -Label "ops escalation dry-run report")
+$secretMarkerFindings = @(
+    @($sourceReportSecretMarkerFindings)
+    @($dryRunReportSecretMarkerFindings)
+)
+$checks["sourceReportsSecretMarkerFindingsEmpty"] = $sourceReportSecretMarkerFindings.Count -eq 0
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 
 $reportText = $report | ConvertTo-Json -Depth 18
 Assert-FlowChainNoSecretText -Text $reportText -Label "ops escalation dry-run report"

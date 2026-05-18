@@ -1,6 +1,6 @@
 ﻿# FlowChain Ops Escalation Dry Run
 
-Generated: 2026-05-18T01:08:14.5013876Z
+Generated: 2026-05-18T05:06:37.6903138Z
 Status: passed
 Current alert state: blocked
 
@@ -26,6 +26,8 @@ This dry run maps current ops findings to local operator actions. It does not se
 - dryRunEventsDoNotSend: True
 - dryRunEventsStoreNoCredentials: True
 - envValuesPrintedFalse: True
+- sourceReportsSecretMarkerFindingsEmpty: True
+- secretMarkerFindingsEmpty: True
 - noSecrets: True
 - broadcastsFalse: True
 
