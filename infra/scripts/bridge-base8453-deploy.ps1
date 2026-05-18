@@ -199,6 +199,7 @@ if (-not (Get-Command forge -ErrorAction SilentlyContinue)) {
 }
 
 $mappedEnv = @{
+    FLOWCHAIN_BASE8453_PILOT_ACK = "true"
     FLOWCHAIN_BRIDGE_OWNER = $owner
     FLOWCHAIN_BRIDGE_RELEASE_AUTHORITY = $releaseAuthority
     FLOWCHAIN_SETTLEMENT_SUBMITTER = $settlementSubmitter

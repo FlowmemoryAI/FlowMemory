@@ -95,6 +95,16 @@ set.
 
 Do not commit these values.
 
+Before deploying or controlling the Base 8453 lockbox, run:
+
+```powershell
+npm run flowchain:bridge:deploy:control:validate
+```
+
+That gate is no-broadcast and verifies deploy, pause, resume, and emergency-stop
+commands fail closed until the owner intentionally provides the required local
+env and broadcast acknowledgement.
+
 ## Recommended Windows Host Shape
 
 Use a Windows machine or VM where the FlowChain control plane binds privately to `127.0.0.1:8787`. Put a TLS-terminating reverse proxy or tunnel in front of it. The public URL should point to the proxy, not directly to an unencrypted local process.

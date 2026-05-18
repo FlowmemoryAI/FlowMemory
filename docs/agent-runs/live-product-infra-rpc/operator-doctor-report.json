@@ -1,12 +1,12 @@
 {
     "schema":  "flowchain.doctor_report.v0",
-    "generatedAt":  "2026-05-18T02:27:31.1036400Z",
+    "generatedAt":  "2026-05-18T02:59:59.4736109Z",
     "status":  "blocked",
     "repoRoot":  "E:/FlowMemory/flowmemory-live-infra-rpc",
-    "diskFreeGiB":  218.93,
-    "stateFileLastWriteAgeSeconds":  0,
-    "latestHeight":  "64184",
-    "finalizedHeight":  "64184",
+    "diskFreeGiB":  216.27,
+    "stateFileLastWriteAgeSeconds":  2,
+    "latestHeight":  "64422",
+    "finalizedHeight":  "64422",
     "localUrls":  {
                       "controlPlaneHealth":  "http://127.0.0.1:8787/health",
                       "dashboard":  "http://127.0.0.1:5173/"
@@ -268,21 +268,21 @@
                        "name":  "disk-free:E",
                        "status":  "running",
                        "owner":  "storage",
-                       "detail":  "218.93 GiB free on E:",
+                       "detail":  "216.27 GiB free on E:",
                        "nextCommand":  "free disk space before public operation"
                    },
                    {
                        "name":  "state-file",
                        "status":  "running",
                        "owner":  "storage",
-                       "detail":  "devnet/local/state.json age seconds: 0",
+                       "detail":  "devnet/local/state.json age seconds: 2",
                        "nextCommand":  "npm run flowchain:service:start -- -LiveProfile"
                    },
                    {
                        "name":  "service-status-report",
                        "status":  "running",
                        "owner":  "service",
-                       "detail":  "latestHeight=64184 finalizedHeight=64184 stateAge=3",
+                       "detail":  "latestHeight=64422 finalizedHeight=64422 stateAge=5",
                        "nextCommand":  "npm run flowchain:service:status -- -AllowBlocked"
                    },
                    {
@@ -324,14 +324,14 @@
                        "name":  "port:8787",
                        "status":  "running",
                        "owner":  "control-plane",
-                       "detail":  "owned by PID(s): 9884",
+                       "detail":  "owned by PID(s): 15636",
                        "nextCommand":  "npm run control-plane:serve"
                    },
                    {
                        "name":  "port:5173",
                        "status":  "running",
                        "owner":  "dashboard",
-                       "detail":  "owned by PID(s): 39452, 0",
+                       "detail":  "owned by PID(s): 39452",
                        "nextCommand":  "npm run workbench:dev"
                    },
                    {

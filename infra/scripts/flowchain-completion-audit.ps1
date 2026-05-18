@@ -64,6 +64,7 @@ $paths = [ordered]@{
     backup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     bridgeLive = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
+    bridgeDeployControlValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json"
     bridgeRelayerGuardrailValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
     bridgePilotLocal = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "services/bridge-relayer/out/real-value-pilot-e2e/bridge-real-value-pilot-e2e-report.json"
@@ -371,6 +372,9 @@ $backupRestoreValidationExitCode = $backupRestoreValidationResult.exitCode
 $backupOwnerPathDryRunResult = Invoke-AuditChild -Path $paths.backupOwnerPathDryRun -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-owner-path-dry-run.ps1"))
 $backupOwnerPathDryRunOutput = @($backupOwnerPathDryRunResult.output)
 $backupOwnerPathDryRunExitCode = $backupOwnerPathDryRunResult.exitCode
+$bridgeDeployControlValidationResult = Invoke-AuditChild -Path $paths.bridgeDeployControlValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-deploy-control-validation.ps1"))
+$bridgeDeployControlValidationOutput = @($bridgeDeployControlValidationResult.output)
+$bridgeDeployControlValidationExitCode = $bridgeDeployControlValidationResult.exitCode
 $bridgeRelayerGuardrailValidationResult = Invoke-AuditChild -Path $paths.bridgeRelayerGuardrailValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-guardrail-validation.ps1"))
 $bridgeRelayerGuardrailValidationOutput = @($bridgeRelayerGuardrailValidationResult.output)
 $bridgeRelayerGuardrailValidationExitCode = $bridgeRelayerGuardrailValidationResult.exitCode
@@ -952,6 +956,67 @@ $backupOwnerPathDryRunPassed = $backupOwnerPathDryRunExitCode -eq 0 `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRun -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRun -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRun -Name "broadcasts" -Default $true) -eq $false)
+$bridgeDeployControlValidation = $reports.bridgeDeployControlValidation
+$bridgeDeployControlValidationStatus = Get-ReportStatus -Report $bridgeDeployControlValidation
+$bridgeDeployControlChecks = Get-AuditProp -Object $bridgeDeployControlValidation -Name "checks"
+$bridgeDeployControlFailedChecks = @((Get-AuditProp -Object $bridgeDeployControlValidation -Name "failedChecks" -Default @()))
+$bridgeDeployControlSecretMarkerFindings = @((Get-AuditProp -Object $bridgeDeployControlValidation -Name "secretMarkerFindings" -Default @()))
+$bridgeDeployControlRequiredChecks = @(
+    "packageScriptDeployPresent",
+    "packageScriptPausePresent",
+    "packageScriptResumePresent",
+    "packageScriptEmergencyStopPresent",
+    "packageScriptValidationPresent",
+    "deployScriptExists",
+    "controlScriptExists",
+    "foundryScriptExists",
+    "lockboxContractExists",
+    "deploymentRunbookExists",
+    "deployMissingEnvCommandFailedClosed",
+    "deployMissingEnvReportWritten",
+    "deployMissingEnvReportBlockedNoBroadcast",
+    "pauseMissingEnvCommandFailedClosed",
+    "pauseMissingEnvReportBlockedNoBroadcast",
+    "resumeMissingEnvCommandFailedClosed",
+    "resumeMissingEnvReportBlockedNoBroadcast",
+    "emergencyStopMissingEnvCommandFailedClosed",
+    "emergencyStopMissingEnvReportBlockedNoBroadcast",
+    "deployRequiresBase8453ChainId",
+    "deployRequiresPilotAck",
+    "deployRequiresBroadcastAck",
+    "deployRequiresAcknowledgeBroadcastSwitch",
+    "deployMapsFoundryPilotAck",
+    "deployMapsNativeAndErc20Caps",
+    "deployDryRunNoBroadcastStatus",
+    "deployBroadcastUsesForgeBroadcast",
+    "controlExecuteRequiresOwnerKeyAndBroadcastAck",
+    "controlNoExecuteReportsReadyNoBroadcast",
+    "controlSupportsPauseResumeEmergency",
+    "controlExecuteUsesCastSend",
+    "foundryScriptGatesBase8453",
+    "foundryScriptRequiresTotalCapOnBase",
+    "foundryScriptDeploysLockboxAndSpine",
+    "lockboxHasNonReentrantPauseEmergency",
+    "lockboxHasCapsAndReplayProtection",
+    "lockboxRejectsPlaceholderRecipient",
+    "lockboxHasReleaseAuthority",
+    "runbookHasDryRunBroadcastVerifyRollback",
+    "childProcessesDidNotTimeout",
+    "validationArtifactsInsideRepo",
+    "secretMarkerFindingsEmpty",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$bridgeDeployControlMissingChecks = @(Get-MissingAuditChecks -Checks $bridgeDeployControlChecks -Names $bridgeDeployControlRequiredChecks)
+$bridgeDeployControlValidationPassed = $bridgeDeployControlValidationExitCode -eq 0 `
+    -and $bridgeDeployControlValidationStatus -eq "passed" `
+    -and $bridgeDeployControlFailedChecks.Count -eq 0 `
+    -and $bridgeDeployControlSecretMarkerFindings.Count -eq 0 `
+    -and $bridgeDeployControlMissingChecks.Count -eq 0 `
+    -and ((Get-AuditProp -Object $bridgeDeployControlValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $bridgeDeployControlValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $bridgeDeployControlValidation -Name "broadcasts" -Default $true) -eq $false)
 $bridgeRelayerGuardrailValidation = $reports.bridgeRelayerGuardrailValidation
 $bridgeRelayerGuardrailValidationStatus = Get-ReportStatus -Report $bridgeRelayerGuardrailValidation
 $bridgeRelayerGuardrailChecks = Get-AuditProp -Object $bridgeRelayerGuardrailValidation -Name "checks"
@@ -1487,6 +1552,12 @@ Add-AuditItem -Items $items -Id "base-tx-diagnostic-fail-closed" `
     -Evidence "diagnosticStatus=$baseTxDiagnosticStatus, safeReason=$baseTxDiagnosticSafeReason, broadcasts=$baseTxDiagnosticBroadcasts, printsEnvValues=$baseTxDiagnosticPrintsEnvValues, noSecrets=$baseTxDiagnosticNoSecrets, report=$($paths.baseTxDiagnostic)" `
     -Commands @("npm run flowchain:bridge:diagnose:tx")
 
+Add-AuditItem -Items $items -Id "bridge-deploy-control-validation" `
+    -Requirement "Base 8453 bridge deploy/control validation proves deploy, pause, resume, and emergency-stop fail closed without owner env and remain no-broadcast without explicit owner execution." `
+    -Status $(if ($bridgeDeployControlValidationPassed) { "passed" } else { "failed" }) `
+    -Evidence "deployControlStatus=$bridgeDeployControlValidationStatus, failedChecks=$($bridgeDeployControlFailedChecks.Count), missingChecks=$($bridgeDeployControlMissingChecks.Count), secretMarkerFindings=$($bridgeDeployControlSecretMarkerFindings.Count), report=$($paths.bridgeDeployControlValidation)" `
+    -Commands @("npm run flowchain:bridge:deploy:control:validate")
+
 Add-AuditItem -Items $items -Id "bridge-relayer-guardrail-validation" `
     -Requirement "Bridge relayer missing-owner-input guardrail validation fails closed without mutating final cursor state, staging cursor state, queueing credits, printing env values, or broadcasting." `
     -Status $(if ($bridgeRelayerGuardrailValidationPassed) { "passed" } else { "failed" }) `
@@ -1573,6 +1644,8 @@ $report = [ordered]@{
     backupRestoreValidationOutputRedacted = @($backupRestoreValidationOutput | ForEach-Object { "$_" })
     backupOwnerPathDryRunExitCode = $backupOwnerPathDryRunExitCode
     backupOwnerPathDryRunOutputRedacted = @($backupOwnerPathDryRunOutput | ForEach-Object { "$_" })
+    bridgeDeployControlValidationExitCode = $bridgeDeployControlValidationExitCode
+    bridgeDeployControlValidationOutputRedacted = @($bridgeDeployControlValidationOutput | ForEach-Object { "$_" })
     bridgeRelayerGuardrailValidationExitCode = $bridgeRelayerGuardrailValidationExitCode
     bridgeRelayerGuardrailValidationOutputRedacted = @($bridgeRelayerGuardrailValidationOutput | ForEach-Object { "$_" })
     bridgeRelayerLoopValidationExitCode = $bridgeRelayerLoopValidationExitCode
@@ -1642,6 +1715,8 @@ $report = [ordered]@{
         serviceSupervisorValidationPassed = $serviceSupervisorValidationPassed
         serviceInstallValidationStatus = $serviceInstallValidationStatus
         serviceInstallValidationPassed = $serviceInstallValidationPassed
+        bridgeDeployControlValidationStatus = $bridgeDeployControlValidationStatus
+        bridgeDeployControlValidationPassed = $bridgeDeployControlValidationPassed
         bridgeRelayerGuardrailValidationStatus = $bridgeRelayerGuardrailValidationStatus
         bridgeRelayerGuardrailValidationPassed = $bridgeRelayerGuardrailValidationPassed
         bridgeRelayerLoopValidationStatus = $bridgeRelayerLoopValidationStatus

@@ -1,6 +1,6 @@
 # FlowChain Production Truth Table
 
-Generated: 2026-05-18T02:28:22.0921728+00:00
+Generated: 2026-05-18T03:03:10.9238045+00:00
 Status: blocked-owner-input
 Completion ready: False
 Blocked only on known owner inputs: True
@@ -9,7 +9,7 @@ Blocked only on known owner inputs: True
 
 | Classification | Count |
 | --- | ---: |
-| passed | 29 |
+| passed | 30 |
 | blocked-owner-input | 15 |
 | blocked-repo-work | 0 |
 | failed | 0 |
@@ -46,9 +46,9 @@ Blocked only on known owner inputs: True
 
 | Gate | Classification | Raw Status | Evidence | Command |
 | --- | --- | --- | --- | --- |
-| service-status | passed | passed | status=passed; latestHeight=64184; finalizedHeight=64184 | `npm run flowchain:service:status` |
-| service-monitor | passed | passed | status=passed; latestHeight=64184 | `npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30` |
-| operator-doctor | blocked-owner-input | blocked | status=blocked; latestHeight=64184; finalizedHeight=64184; blockedOnlyOnOwnerInputs=True; failedChecksCount=0 | `npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json` |
+| service-status | passed | passed | status=passed; latestHeight=64444; finalizedHeight=64444 | `npm run flowchain:service:status` |
+| service-monitor | passed | passed | status=passed; latestHeight=64422 | `npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30` |
+| operator-doctor | blocked-owner-input | blocked | status=blocked; latestHeight=64422; finalizedHeight=64422; blockedOnlyOnOwnerInputs=True; failedChecksCount=0 | `npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json` |
 | service-supervisor-validation | passed | passed | status=passed; restartAttempts=1 | `npm run flowchain:service:supervisor:validate` |
 | service-install-validation | passed | passed | status=passed; packageScriptsPresent=True; planDidNotMutate=True; statusDidNotMutate=True; planCommandPassed=True; schedulerCmdletsAvailable=True; actionUsesSupervisor=True; liveProfileDefault=True; bridgeRelayerOptInStartsLoop=True; failedChecksCount=0 | `npm run flowchain:service:install:validate` |
 | systemd-service-install-validation | passed | passed | status=passed; failedChecksCount=0 | `npm run flowchain:service:install:systemd:validate` |
@@ -67,14 +67,15 @@ Blocked only on known owner inputs: True
 | public-rpc-abuse-test | passed | passed | status=passed; failedChecksCount=0 | `npm run flowchain:public-rpc:abuse-test` |
 | public-rpc-deployment-bundle | passed | passed | status=passed; flowChainRpcIsRepoOwned=True; thirdPartyFlowChainRpcProviderNeeded=False | `npm run flowchain:public-rpc:deployment-bundle` |
 | public-rpc-deployment-automation | passed | passed | status=passed; flowChainRpcIsRepoOwned=True; thirdPartyFlowChainRpcProviderNeeded=False; failedChecksCount=0 | `npm run flowchain:public-rpc:deployment:automation` |
-| node-operator-package | passed | passed | status=passed; commandCount=39; runbookCount=22; evidenceReportCount=32; packageScriptsPresent=True; failedChecksCount=0 | `npm run flowchain:operator:package` |
-| node-operator-package-verify | passed | passed | status=passed; commandCount=39; expectedFileCount=49; ownerInputNameCount=17; failedChecksCount=0 | `npm run flowchain:operator:package:verify` |
+| node-operator-package | passed | passed | status=passed; commandCount=40; runbookCount=23; evidenceReportCount=33; packageScriptsPresent=True; failedChecksCount=0 | `npm run flowchain:operator:package` |
+| node-operator-package-verify | passed | passed | status=passed; commandCount=40; expectedFileCount=51; ownerInputNameCount=17; failedChecksCount=0 | `npm run flowchain:operator:package:verify` |
 | second-computer-readiness | passed | passed | status=passed; bundleCommandPassed=True; verifyCommandPassed=True; stageNoSecretScanPassed=True; manifestNextCommandsPresent=True; failedChecksCount=0; missingNextCommandsCount=0; failedVerifyChecksCount=0 | `npm run flowchain:second-computer:readiness` |
 | backup-readiness | blocked-owner-input | blocked | status=blocked; snapshotProofStatus=not-run; restoreProofStatus=not-run; blockers=FLOWCHAIN_RPC_STATE_BACKUP_PATH | `npm run flowchain:backup:check -- -AllowBlocked` |
 | backup-restore-validation | passed | passed | status=passed; backupRestoreHashRoundTrip=True; latestRestoreUsedLatestSnapshot=True; restoreTargetsLiveStateProtected=True; liveStateNonMutationProven=True; corruptedSnapshotDetected=True; manifestTamperDetected=True; missingStateArtifactDetected=True; missingSnapshotManifestDetected=True; latestPointerTamperDetected=True; wrongChainStateMismatchDetected=True | `npm run flowchain:backup:restore:validate` |
 | backup-owner-path-dry-run | passed | passed | status=passed; failedChecksCount=0 | `npm run flowchain:backup:owner-path:dry-run` |
 | bridge-live-readiness | blocked-owner-input | blocked | status=blocked; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS | `npm run flowchain:bridge:live:check -- -AllowBlocked` |
 | bridge-infra-readiness | blocked-owner-input | blocked | status=blocked; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS | `npm run flowchain:bridge:infra:check -- -AllowBlocked` |
+| bridge-deploy-control-validation | passed | passed | status=passed; failedChecksCount=0 | `npm run flowchain:bridge:deploy:control:validate` |
 | bridge-relayer-guardrail-validation | passed | passed | status=passed; failedChecksCount=0 | `npm run flowchain:bridge:relayer:guardrail:validate` |
 | bridge-relayer-loop-validation | passed | passed | status=passed; bridgePollSeconds=5; settleSeconds=5; statusRelayerReportHealthy=True; statusAfterStopNotRunning=True; relayerPidFileRemovedAfterStop=True; noValidationRelayerProcessAfterStop=True; failedChecksCount=0 | `npm run flowchain:bridge:relayer:loop:validate` |
 | external-tester-readiness | blocked-owner-input | blocked | status=blocked; latestHeight=60281; externalSharingReady=False; localTesterRehearsalReady=True; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_TESTER_WRITE_ENABLED,FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256,FLOWCHAIN_TESTER_MAX_SEND_UNITS,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS | `npm run flowchain:tester:readiness -- -AllowBlocked` |
@@ -88,7 +89,7 @@ Blocked only on known owner inputs: True
 | incident-drill | passed | passed | status=passed | `npm run flowchain:ops:incident-drill` |
 | public-deployment-contract | blocked-owner-input | blocked | status=blocked; deploymentReady=False; packetShareable=False; blockedOnlyOnKnownExternalOwnerInputs=True; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_TESTER_WRITE_ENABLED,FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256,FLOWCHAIN_TESTER_MAX_SEND_UNITS,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS | `npm run flowchain:public-deployment:contract -- -AllowBlocked` |
 | architecture-audit | blocked-owner-input | blocked | status=blocked; blockedOnlyOnKnownExternalOwnerInputs=True; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_TESTER_WRITE_ENABLED,FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256,FLOWCHAIN_TESTER_MAX_SEND_UNITS,FLOWCHAIN_BASE8453_CURSOR_STATE,FLOWCHAIN_BASE8453_TO_BLOCK | `npm run flowchain:architecture:audit -- -AllowBlocked` |
-| completion-audit | blocked-owner-input | blocked | status=blocked; latestHeight=64184; completionReady=False; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_TESTER_WRITE_ENABLED,FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256,FLOWCHAIN_TESTER_MAX_SEND_UNITS | `npm run flowchain:completion:audit -- -AllowBlocked` |
+| completion-audit | blocked-owner-input | blocked | status=blocked; latestHeight=64442; completionReady=False; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_TESTER_WRITE_ENABLED,FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256,FLOWCHAIN_TESTER_MAX_SEND_UNITS | `npm run flowchain:completion:audit -- -AllowBlocked` |
 | no-secret-scan | passed | passed | status=passed | `npm run flowchain:no-secret:scan` |
 
 ## Release Decision

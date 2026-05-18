@@ -583,6 +583,70 @@ $definitions = @(
         ownerInputGate = $true
     },
     [ordered]@{
+        id = "bridge-deploy-control-validation"
+        requirement = "Base 8453 bridge deploy, pause, resume, and emergency-stop paths fail closed without owner env, require explicit pilot and broadcast acknowledgements, map capped pilot deployment env into Foundry, and remain no-broadcast during validation."
+        path = "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json"
+        command = "npm run flowchain:bridge:deploy:control:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptDeployPresent",
+            "packageScriptPausePresent",
+            "packageScriptResumePresent",
+            "packageScriptEmergencyStopPresent",
+            "packageScriptValidationPresent",
+            "deployScriptExists",
+            "controlScriptExists",
+            "foundryScriptExists",
+            "lockboxContractExists",
+            "deploymentRunbookExists",
+            "deployMissingEnvCommandFailedClosed",
+            "deployMissingEnvReportWritten",
+            "deployMissingEnvReportBlockedNoBroadcast",
+            "pauseMissingEnvCommandFailedClosed",
+            "pauseMissingEnvReportBlockedNoBroadcast",
+            "resumeMissingEnvCommandFailedClosed",
+            "resumeMissingEnvReportBlockedNoBroadcast",
+            "emergencyStopMissingEnvCommandFailedClosed",
+            "emergencyStopMissingEnvReportBlockedNoBroadcast",
+            "deployRequiresBase8453ChainId",
+            "deployRequiresPilotAck",
+            "deployRequiresBroadcastAck",
+            "deployRequiresAcknowledgeBroadcastSwitch",
+            "deployMapsFoundryPilotAck",
+            "deployMapsNativeAndErc20Caps",
+            "deployDryRunNoBroadcastStatus",
+            "deployBroadcastUsesForgeBroadcast",
+            "controlExecuteRequiresOwnerKeyAndBroadcastAck",
+            "controlNoExecuteReportsReadyNoBroadcast",
+            "controlSupportsPauseResumeEmergency",
+            "controlExecuteUsesCastSend",
+            "foundryScriptGatesBase8453",
+            "foundryScriptRequiresTotalCapOnBase",
+            "foundryScriptDeploysLockboxAndSpine",
+            "lockboxHasNonReentrantPauseEmergency",
+            "lockboxHasCapsAndReplayProtection",
+            "lockboxRejectsPlaceholderRecipient",
+            "lockboxHasReleaseAuthority",
+            "runbookHasDryRunBroadcastVerifyRollback",
+            "childProcessesDidNotTimeout",
+            "validationArtifactsInsideRepo",
+            "secretMarkerFindingsEmpty",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "bridge-relayer-guardrail-validation"
         requirement = "Bridge relayer missing-owner-input runs fail closed without mutating final cursor state, staging cursor state, queueing credits, printing env values, or broadcasting."
         path = "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
@@ -893,7 +957,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"

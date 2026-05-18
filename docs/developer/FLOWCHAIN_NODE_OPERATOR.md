@@ -111,13 +111,16 @@ npm run flowchain:backup:install:windows -- -Action Uninstall
 ```powershell
 npm run flowchain:bridge:live:check -- -AllowBlocked
 npm run flowchain:bridge:infra:check -- -AllowBlocked
+npm run flowchain:bridge:deploy:control:validate
 npm run flowchain:bridge:relayer:once -- -AllowBlocked
 npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop
 ```
 
-The relayer once gate is no-broadcast. When owner Base 8453 inputs are missing it
-stays blocked. When they pass, it observes confirmed lockbox deposits, builds a
-runtime handoff, filters replayed credits, queues new credits into the running
+The deploy/control validation is no-broadcast and proves the Base 8453 deploy,
+pause, resume, and emergency-stop paths fail closed without owner env. The
+relayer once gate is also no-broadcast. When owner Base 8453 inputs are missing
+it stays blocked. When they pass, it observes confirmed lockbox deposits, builds
+a runtime handoff, filters replayed credits, queues new credits into the running
 L1, and waits for main-state credit evidence.
 
 ## Observability And Incidents

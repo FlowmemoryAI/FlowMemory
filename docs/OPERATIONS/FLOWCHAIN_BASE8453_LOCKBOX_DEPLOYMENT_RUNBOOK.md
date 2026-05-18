@@ -25,6 +25,25 @@ $env:FLOWCHAIN_BASE8453_SETTLEMENT_SUBMITTER_ADDRESS="<settlement submitter addr
 
 Never commit these values.
 
+## Step 0: Local Deploy And Control Gate
+
+Run this before a dry-run or any pause/resume/emergency-stop procedure:
+
+```powershell
+npm run flowchain:bridge:deploy:control:validate
+```
+
+Expected validation evidence:
+
+```text
+docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json
+```
+
+The validation must report `passed`. It proves missing owner env fails closed,
+the Base 8453 deploy path maps the capped pilot acknowledgement into the Foundry
+script, and deploy/control commands remain no-broadcast unless the owner uses the
+explicit broadcast or execute commands.
+
 ## Step 1: Dry-Run
 
 Run:

@@ -137,6 +137,7 @@
     "flowchain:bridge:observe:base8453": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base-mainnet-pilot-observe.ps1",
     "flowchain:bridge:relayer:once": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-relayer-once.ps1",
     "flowchain:bridge:relayer:guardrail:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-relayer-guardrail-validation.ps1",
+    "flowchain:bridge:deploy:control:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-deploy-control-validation.ps1",
     "flowchain:bridge:relayer:loop:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-relayer-loop-validation.ps1",
     "flowchain:bridge:pause": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base8453-control.ps1 -Action Pause",
     "flowchain:bridge:resume": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base8453-control.ps1 -Action Resume",

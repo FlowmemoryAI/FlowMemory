@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-18T02:27:31.6668424Z",
+    "generatedAt":  "2026-05-18T03:00:00.0893477Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -156,6 +156,11 @@
                          "phase":  "bridge",
                          "command":  "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
                          "purpose":  "Run the no-broadcast relayer gate; remains blocked until owner Base inputs exist."
+                     },
+                     {
+                         "phase":  "bridge",
+                         "command":  "npm run flowchain:bridge:deploy:control:validate",
+                         "purpose":  "Validate Base 8453 deploy, pause, resume, and emergency-stop gates fail closed without owner env and require broadcast acknowledgements."
                      },
                      {
                          "phase":  "bridge",

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-18T02:27:31.6668424Z",
+    "generatedAt":  "2026-05-18T03:00:00.0893477Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -63,6 +63,7 @@
                             "flowchain:ops:alerts:install:validate",
                             "flowchain:ops:incident-drill",
                             "flowchain:bridge:relayer:once",
+                            "flowchain:bridge:deploy:control:validate",
                             "flowchain:bridge:relayer:guardrail:validate",
                             "flowchain:bridge:relayer:loop:validate",
                             "flowchain:external-tester:packet",
@@ -230,6 +231,11 @@
                           },
                           {
                               "phase":  "bridge",
+                              "command":  "npm run flowchain:bridge:deploy:control:validate",
+                              "purpose":  "Validate Base 8453 deploy, pause, resume, and emergency-stop gates fail closed without owner env and require broadcast acknowledgements."
+                          },
+                          {
+                              "phase":  "bridge",
                               "command":  "npm run flowchain:bridge:relayer:guardrail:validate",
                               "purpose":  "Prove missing owner inputs cannot mutate cursor state or queue credits."
                           },
@@ -392,6 +398,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/OPS_METRICS_EXPORT.md",
                          "destination":  "runbooks/OPS_METRICS_EXPORT.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/BRIDGE_DEPLOY_CONTROL_VALIDATION.md",
+                         "destination":  "runbooks/BRIDGE_DEPLOY_CONTROL_VALIDATION.md",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"
@@ -590,6 +603,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json",
                          "destination":  "evidence/bridge-relayer-once-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json",
+                         "destination":  "evidence/bridge-deploy-control-validation-report.json",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"
