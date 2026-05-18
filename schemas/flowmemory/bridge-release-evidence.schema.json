@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowmemory.local/schemas/flowmemory/bridge-release-evidence.schema.json",
+  "title": "FlowChainBridgeReleaseEvidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "releaseEvidenceId",
+    "generatedAt",
+    "withdrawalIntentId",
+    "creditId",
+    "depositId",
+    "sourceChainId",
+    "destinationChainId",
+    "lockbox",
+    "releaseCall",
+    "operatorNote",
+    "productionReady",
+    "localOnly"
+  ],
+  "properties": {
+    "schema": { "const": "flowmemory.bridge_release_evidence.v0" },
+    "releaseEvidenceId": { "$ref": "#/$defs/hex32" },
+    "generatedAt": { "type": "string" },
+    "withdrawalIntentId": { "$ref": "#/$defs/hex32" },
+    "creditId": { "$ref": "#/$defs/hex32" },
+    "depositId": { "$ref": "#/$defs/hex32" },
+    "sourceChainId": { "type": "integer", "enum": [31337, 84532, 8453] },
+    "destinationChainId": { "type": "integer", "enum": [31337, 84532, 8453] },
+    "lockbox": { "$ref": "#/$defs/address" },
+    "releaseCall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "recipient", "token", "amount", "evidenceHash", "broadcast"],
+      "properties": {
+        "method": { "type": "string", "enum": ["releaseERC20", "releaseNative"] },
+        "recipient": { "$ref": "#/$defs/address" },
+        "token": { "$ref": "#/$defs/address" },
+        "amount": { "$ref": "#/$defs/uintString" },
+        "evidenceHash": { "$ref": "#/$defs/hex32" },
+        "broadcast": { "const": false }
+      }
+    },
+    "operatorNote": { "type": "string" },
+    "productionReady": { "const": false },
+    "localOnly": { "const": true }
+  },
+  "$defs": {
+    "address": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "uintString": { "type": "string", "pattern": "^[0-9]+$" }
+  }
+}

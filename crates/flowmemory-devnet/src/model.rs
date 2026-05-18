@@ -13,6 +13,7 @@ pub const ZERO_HASH: &str = "0x0000000000000000000000000000000000000000000000000
 pub const FLOWPULSE_TOPIC0: &str =
     "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43";
 pub const LOCAL_TEST_UNIT_ASSET_ID: &str = "asset:flowchain-local-test-unit";
+pub const BRIDGE_PILOT_ACCOUNT_OWNER: &str = "operator:bridge:pilot";
 
 #[derive(Debug, Error, PartialEq, Eq)]
 pub enum DevnetError {
@@ -78,6 +79,26 @@ pub enum DevnetError {
     SwapReceiptAlreadyExists(String),
     #[error("swap output is below minimum: {0}")]
     SwapSlippageExceeded(String),
+    #[error("bridge asset mapping already exists: {0}")]
+    BridgeAssetMappingAlreadyExists(String),
+    #[error("bridge asset mapping does not exist: {0}")]
+    BridgeAssetMappingMissing(String),
+    #[error("bridge account mapping already exists: {0}")]
+    BridgeAccountMappingAlreadyExists(String),
+    #[error("bridge account mapping does not exist: {0}")]
+    BridgeAccountMappingMissing(String),
+    #[error("bridge credit already exists: {0}")]
+    BridgeCreditAlreadyExists(String),
+    #[error("bridge credit amount must be greater than zero: {0}")]
+    BridgeCreditAmountMustBePositive(String),
+    #[error("bridge replay key is already consumed: {0}")]
+    BridgeCreditReplayAlreadyConsumed(String),
+    #[error("bridge event reference is already consumed: {0}")]
+    BridgeCreditEventReferenceAlreadyConsumed(String),
+    #[error("bridge credit receipt does not exist: {0}")]
+    BridgeCreditReceiptMissing(String),
+    #[error("bridge credit production-ready flag is not supported locally: {0}")]
+    BridgeCreditProductionReadyUnsupported(String),
     #[error("model passport already exists: {0}")]
     ModelPassportAlreadyExists(String),
     #[error("model passport does not exist: {0}")]
@@ -176,6 +197,18 @@ pub struct ChainState {
     pub liquidity_receipts: BTreeMap<String, LiquidityReceipt>,
     #[serde(default)]
     pub swap_receipts: BTreeMap<String, SwapReceipt>,
+    #[serde(default)]
+    pub bridge_asset_mappings: BTreeMap<String, BridgeAssetMapping>,
+    #[serde(default)]
+    pub bridge_account_mappings: BTreeMap<String, BridgeAccountMapping>,
+    #[serde(default)]
+    pub bridge_credits: BTreeMap<String, BridgeCredit>,
+    #[serde(default)]
+    pub bridge_credit_receipts: BTreeMap<String, BridgeCreditReceipt>,
+    #[serde(default)]
+    pub bridge_replay_index: BTreeMap<String, BridgeReplayRecord>,
+    #[serde(default)]
+    pub bridge_event_receipt_index: BTreeMap<String, String>,
     #[serde(default)]
     pub model_passports: BTreeMap<String, ModelPassport>,
     #[serde(default)]
@@ -394,6 +427,89 @@ pub struct SwapReceipt {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
+pub struct BridgeAssetMapping {
+    pub mapping_id: String,
+    pub source_chain_id: String,
+    pub source_token: String,
+    pub local_asset_id: String,
+    pub created_at_block: u64,
+    pub local_only: bool,
+    pub production_ready: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct BridgeAccountMapping {
+    pub mapping_id: String,
+    pub flowchain_recipient: String,
+    pub account_id: String,
+    pub owner: String,
+    pub created_at_block: u64,
+    pub local_only: bool,
+    pub production_ready: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct BridgeEventReference {
+    pub source_chain_id: String,
+    pub source_contract: String,
+    pub tx_hash: String,
+    pub log_index: u64,
+    pub deposit_id: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct BridgeCredit {
+    pub bridge_credit_id: String,
+    pub receipt_id: String,
+    pub account_id: String,
+    pub recipient: String,
+    pub flowchain_recipient: String,
+    pub asset_id: String,
+    pub source_token: String,
+    pub amount_units: u64,
+    pub event_ref: BridgeEventReference,
+    pub observation_id: String,
+    pub replay_key: String,
+    pub memo: String,
+    pub credited_at_block: u64,
+    pub status: String,
+    pub local_only: bool,
+    pub production_ready: bool,
+    pub no_value: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct BridgeCreditReceipt {
+    pub receipt_id: String,
+    pub bridge_credit_id: String,
+    pub account_id: String,
+    pub asset_id: String,
+    pub amount_units: u64,
+    pub event_ref: BridgeEventReference,
+    pub replay_key: String,
+    pub status: String,
+    pub included_at_block: u64,
+    pub evidence: String,
+    pub local_only: bool,
+    pub production_ready: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct BridgeReplayRecord {
+    pub replay_key: String,
+    pub bridge_credit_id: String,
+    pub receipt_id: String,
+    pub event_ref: BridgeEventReference,
+    pub consumed_at_block: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct ModelPassport {
     pub model_passport_id: String,
     pub issuer: String,
@@ -566,6 +682,18 @@ pub struct BaseAnchorPlaceholder {
     #[serde(default)]
     pub swap_receipt_root: String,
     #[serde(default)]
+    pub bridge_asset_mapping_root: String,
+    #[serde(default)]
+    pub bridge_account_mapping_root: String,
+    #[serde(default)]
+    pub bridge_credit_root: String,
+    #[serde(default)]
+    pub bridge_credit_receipt_root: String,
+    #[serde(default)]
+    pub bridge_replay_index_root: String,
+    #[serde(default)]
+    pub bridge_event_receipt_index_root: String,
+    #[serde(default)]
     pub model_passport_root: String,
     #[serde(default)]
     pub memory_cell_root: String,
@@ -662,6 +790,37 @@ pub enum Transaction {
         asset_in_id: String,
         amount_in_units: u64,
         min_amount_out_units: u64,
+    },
+    MapBridgeAsset {
+        mapping_id: String,
+        source_chain_id: String,
+        source_token: String,
+        local_asset_id: String,
+    },
+    MapBridgeAccount {
+        mapping_id: String,
+        flowchain_recipient: String,
+        account_id: String,
+        owner: String,
+    },
+    CreditBridgeFromBaseEvent {
+        bridge_credit_id: String,
+        receipt_id: String,
+        account_id: String,
+        flowchain_recipient: String,
+        asset_id: String,
+        source_token: String,
+        amount_units: u64,
+        source_chain_id: String,
+        source_contract: String,
+        tx_hash: String,
+        log_index: u64,
+        deposit_id: String,
+        observation_id: String,
+        replay_key: String,
+        memo: String,
+        local_only: bool,
+        production_ready: bool,
     },
     RegisterModelPassport {
         model_passport_id: String,
@@ -809,6 +968,12 @@ struct StateCommitmentView<'a> {
     lp_positions: &'a BTreeMap<String, LpPosition>,
     liquidity_receipts: &'a BTreeMap<String, LiquidityReceipt>,
     swap_receipts: &'a BTreeMap<String, SwapReceipt>,
+    bridge_asset_mappings: &'a BTreeMap<String, BridgeAssetMapping>,
+    bridge_account_mappings: &'a BTreeMap<String, BridgeAccountMapping>,
+    bridge_credits: &'a BTreeMap<String, BridgeCredit>,
+    bridge_credit_receipts: &'a BTreeMap<String, BridgeCreditReceipt>,
+    bridge_replay_index: &'a BTreeMap<String, BridgeReplayRecord>,
+    bridge_event_receipt_index: &'a BTreeMap<String, String>,
     model_passports: &'a BTreeMap<String, ModelPassport>,
     memory_cells: &'a BTreeMap<String, MemoryCell>,
     challenges: &'a BTreeMap<String, Challenge>,
@@ -846,6 +1011,12 @@ pub struct StateMapRoots {
     pub lp_position_root: String,
     pub liquidity_receipt_root: String,
     pub swap_receipt_root: String,
+    pub bridge_asset_mapping_root: String,
+    pub bridge_account_mapping_root: String,
+    pub bridge_credit_root: String,
+    pub bridge_credit_receipt_root: String,
+    pub bridge_replay_index_root: String,
+    pub bridge_event_receipt_index_root: String,
     pub model_passport_root: String,
     pub memory_cell_root: String,
     pub challenge_root: String,
@@ -922,6 +1093,12 @@ pub fn genesis_state() -> ChainState {
         lp_positions: BTreeMap::new(),
         liquidity_receipts: BTreeMap::new(),
         swap_receipts: BTreeMap::new(),
+        bridge_asset_mappings: BTreeMap::new(),
+        bridge_account_mappings: BTreeMap::new(),
+        bridge_credits: BTreeMap::new(),
+        bridge_credit_receipts: BTreeMap::new(),
+        bridge_replay_index: BTreeMap::new(),
+        bridge_event_receipt_index: BTreeMap::new(),
         model_passports: BTreeMap::new(),
         memory_cells: BTreeMap::new(),
         challenges: BTreeMap::new(),
@@ -1067,6 +1244,62 @@ pub fn deterministic_swap_id(
     )
 }
 
+pub fn deterministic_bridge_asset_mapping_id(
+    source_chain_id: &str,
+    source_token: &str,
+    local_asset_id: &str,
+) -> String {
+    hash_json(
+        "flowmemory.local_devnet.bridge_asset_mapping_id.v0",
+        &serde_json::json!({
+            "sourceChainId": source_chain_id,
+            "sourceToken": source_token,
+            "localAssetId": local_asset_id
+        }),
+    )
+}
+
+pub fn deterministic_bridge_account_mapping_id(
+    flowchain_recipient: &str,
+    account_id: &str,
+) -> String {
+    hash_json(
+        "flowmemory.local_devnet.bridge_account_mapping_id.v0",
+        &serde_json::json!({
+            "flowchainRecipient": flowchain_recipient,
+            "accountId": account_id
+        }),
+    )
+}
+
+pub fn deterministic_bridge_account_id(flowchain_recipient: &str) -> String {
+    format!(
+        "local-account:bridge:{}",
+        hash_json(
+            "flowmemory.local_devnet.bridge_account_id.v0",
+            &serde_json::json!({ "flowchainRecipient": flowchain_recipient }),
+        )
+        .trim_start_matches("0x")
+    )
+}
+
+pub fn bridge_event_reference_key(
+    source_chain_id: &str,
+    source_contract: &str,
+    tx_hash: &str,
+    log_index: u64,
+) -> String {
+    hash_json(
+        "flowmemory.local_devnet.bridge_event_reference_key.v0",
+        &serde_json::json!({
+            "sourceChainId": source_chain_id,
+            "sourceContract": source_contract,
+            "txHash": tx_hash,
+            "logIndex": log_index
+        }),
+    )
+}
+
 pub fn state_root(state: &ChainState) -> String {
     let view = StateCommitmentView {
         schema: STATE_SCHEMA,
@@ -1086,6 +1319,12 @@ pub fn state_root(state: &ChainState) -> String {
         lp_positions: &state.lp_positions,
         liquidity_receipts: &state.liquidity_receipts,
         swap_receipts: &state.swap_receipts,
+        bridge_asset_mappings: &state.bridge_asset_mappings,
+        bridge_account_mappings: &state.bridge_account_mappings,
+        bridge_credits: &state.bridge_credits,
+        bridge_credit_receipts: &state.bridge_credit_receipts,
+        bridge_replay_index: &state.bridge_replay_index,
+        bridge_event_receipt_index: &state.bridge_event_receipt_index,
         model_passports: &state.model_passports,
         memory_cells: &state.memory_cells,
         challenges: &state.challenges,
@@ -1156,6 +1395,30 @@ pub fn state_map_roots(state: &ChainState) -> StateMapRoots {
         swap_receipt_root: map_root(
             "flowmemory.local_devnet.swap_receipts.v0",
             &state.swap_receipts,
+        ),
+        bridge_asset_mapping_root: map_root(
+            "flowmemory.local_devnet.bridge_asset_mappings.v0",
+            &state.bridge_asset_mappings,
+        ),
+        bridge_account_mapping_root: map_root(
+            "flowmemory.local_devnet.bridge_account_mappings.v0",
+            &state.bridge_account_mappings,
+        ),
+        bridge_credit_root: map_root(
+            "flowmemory.local_devnet.bridge_credits.v0",
+            &state.bridge_credits,
+        ),
+        bridge_credit_receipt_root: map_root(
+            "flowmemory.local_devnet.bridge_credit_receipts.v0",
+            &state.bridge_credit_receipts,
+        ),
+        bridge_replay_index_root: map_root(
+            "flowmemory.local_devnet.bridge_replay_index.v0",
+            &state.bridge_replay_index,
+        ),
+        bridge_event_receipt_index_root: map_root(
+            "flowmemory.local_devnet.bridge_event_receipt_index.v0",
+            &state.bridge_event_receipt_index,
         ),
         model_passport_root: map_root(
             "flowmemory.local_devnet.model_passports.v0",
@@ -1935,6 +2198,216 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
                 },
             );
         }
+        Transaction::MapBridgeAsset {
+            mapping_id,
+            source_chain_id,
+            source_token,
+            local_asset_id,
+        } => {
+            ensure_expected_id(
+                "bridge asset mapping",
+                mapping_id,
+                &deterministic_bridge_asset_mapping_id(
+                    source_chain_id,
+                    source_token,
+                    local_asset_id,
+                ),
+            )?;
+            if state.bridge_asset_mappings.contains_key(mapping_id) {
+                return Err(DevnetError::BridgeAssetMappingAlreadyExists(
+                    mapping_id.clone(),
+                ));
+            }
+            if local_asset_id != LOCAL_TEST_UNIT_ASSET_ID {
+                ensure_asset_exists(state, local_asset_id)?;
+            }
+            state.bridge_asset_mappings.insert(
+                mapping_id.clone(),
+                BridgeAssetMapping {
+                    mapping_id: mapping_id.clone(),
+                    source_chain_id: source_chain_id.clone(),
+                    source_token: source_token.clone(),
+                    local_asset_id: local_asset_id.clone(),
+                    created_at_block: state.next_block_number,
+                    local_only: true,
+                    production_ready: false,
+                },
+            );
+        }
+        Transaction::MapBridgeAccount {
+            mapping_id,
+            flowchain_recipient,
+            account_id,
+            owner,
+        } => {
+            ensure_expected_id(
+                "bridge account mapping",
+                mapping_id,
+                &deterministic_bridge_account_mapping_id(flowchain_recipient, account_id),
+            )?;
+            if state.bridge_account_mappings.contains_key(mapping_id) {
+                return Err(DevnetError::BridgeAccountMappingAlreadyExists(
+                    mapping_id.clone(),
+                ));
+            }
+            state.bridge_account_mappings.insert(
+                mapping_id.clone(),
+                BridgeAccountMapping {
+                    mapping_id: mapping_id.clone(),
+                    flowchain_recipient: flowchain_recipient.clone(),
+                    account_id: account_id.clone(),
+                    owner: owner.clone(),
+                    created_at_block: state.next_block_number,
+                    local_only: true,
+                    production_ready: false,
+                },
+            );
+        }
+        Transaction::CreditBridgeFromBaseEvent {
+            bridge_credit_id,
+            receipt_id,
+            account_id,
+            flowchain_recipient,
+            asset_id,
+            source_token,
+            amount_units,
+            source_chain_id,
+            source_contract,
+            tx_hash,
+            log_index,
+            deposit_id,
+            observation_id,
+            replay_key,
+            memo,
+            local_only,
+            production_ready,
+        } => {
+            if *production_ready {
+                return Err(DevnetError::BridgeCreditProductionReadyUnsupported(
+                    bridge_credit_id.clone(),
+                ));
+            }
+            if !*local_only {
+                return Err(DevnetError::BridgeCreditProductionReadyUnsupported(
+                    bridge_credit_id.clone(),
+                ));
+            }
+            if *amount_units == 0 {
+                return Err(DevnetError::BridgeCreditAmountMustBePositive(
+                    bridge_credit_id.clone(),
+                ));
+            }
+            if state.bridge_replay_index.contains_key(replay_key) {
+                return Err(DevnetError::BridgeCreditReplayAlreadyConsumed(
+                    replay_key.clone(),
+                ));
+            }
+            if state.bridge_credits.contains_key(bridge_credit_id)
+                || state.bridge_credit_receipts.contains_key(receipt_id)
+            {
+                return Err(DevnetError::BridgeCreditAlreadyExists(
+                    bridge_credit_id.clone(),
+                ));
+            }
+            let event_ref_key =
+                bridge_event_reference_key(source_chain_id, source_contract, tx_hash, *log_index);
+            if state
+                .bridge_event_receipt_index
+                .contains_key(&event_ref_key)
+            {
+                return Err(DevnetError::BridgeCreditEventReferenceAlreadyConsumed(
+                    event_ref_key,
+                ));
+            }
+
+            let asset_mapping_id =
+                deterministic_bridge_asset_mapping_id(source_chain_id, source_token, asset_id);
+            let asset_mapping = state
+                .bridge_asset_mappings
+                .get(&asset_mapping_id)
+                .ok_or_else(|| DevnetError::BridgeAssetMappingMissing(asset_mapping_id.clone()))?;
+            if asset_mapping.local_asset_id != asset_id.as_str() {
+                return Err(DevnetError::BridgeAssetMappingMissing(asset_mapping_id));
+            }
+
+            let account_mapping_id =
+                deterministic_bridge_account_mapping_id(flowchain_recipient, account_id);
+            let account_mapping = state
+                .bridge_account_mappings
+                .get(&account_mapping_id)
+                .ok_or_else(|| {
+                    DevnetError::BridgeAccountMappingMissing(account_mapping_id.clone())
+                })?;
+            if account_mapping.account_id != account_id.as_str() {
+                return Err(DevnetError::BridgeAccountMappingMissing(account_mapping_id));
+            }
+            let mapped_owner = account_mapping.owner.clone();
+            if !state.local_test_unit_balances.contains_key(account_id) {
+                return Err(DevnetError::LocalTestUnitBalanceMissing(account_id.clone()));
+            }
+
+            credit_asset_units(state, account_id, asset_id, *amount_units)?;
+
+            let event_ref = BridgeEventReference {
+                source_chain_id: source_chain_id.clone(),
+                source_contract: source_contract.clone(),
+                tx_hash: tx_hash.clone(),
+                log_index: *log_index,
+                deposit_id: deposit_id.clone(),
+            };
+            state.bridge_credits.insert(
+                bridge_credit_id.clone(),
+                BridgeCredit {
+                    bridge_credit_id: bridge_credit_id.clone(),
+                    receipt_id: receipt_id.clone(),
+                    account_id: account_id.clone(),
+                    recipient: mapped_owner,
+                    flowchain_recipient: flowchain_recipient.clone(),
+                    asset_id: asset_id.clone(),
+                    source_token: source_token.clone(),
+                    amount_units: *amount_units,
+                    event_ref: event_ref.clone(),
+                    observation_id: observation_id.clone(),
+                    replay_key: replay_key.clone(),
+                    memo: memo.clone(),
+                    credited_at_block: state.next_block_number,
+                    status: "applied".to_string(),
+                    local_only: true,
+                    production_ready: false,
+                    no_value: true,
+                },
+            );
+            state.bridge_credit_receipts.insert(
+                receipt_id.clone(),
+                BridgeCreditReceipt {
+                    receipt_id: receipt_id.clone(),
+                    bridge_credit_id: bridge_credit_id.clone(),
+                    account_id: account_id.clone(),
+                    asset_id: asset_id.clone(),
+                    amount_units: *amount_units,
+                    event_ref: event_ref.clone(),
+                    replay_key: replay_key.clone(),
+                    status: "applied".to_string(),
+                    included_at_block: state.next_block_number,
+                    evidence: "base-event-reference-and-replay-key".to_string(),
+                    local_only: true,
+                    production_ready: false,
+                },
+            );
+            state.bridge_replay_index.insert(
+                replay_key.clone(),
+                BridgeReplayRecord {
+                    replay_key: replay_key.clone(),
+                    bridge_credit_id: bridge_credit_id.clone(),
+                    receipt_id: receipt_id.clone(),
+                    event_ref,
+                    consumed_at_block: state.next_block_number,
+                },
+            );
+            state
+                .bridge_event_receipt_index
+                .insert(event_ref_key, receipt_id.clone());
+        }
         Transaction::RegisterModelPassport {
             model_passport_id,
             issuer,
@@ -2584,6 +3057,12 @@ pub fn anchor_from_state(
         lp_position_root: &'a str,
         liquidity_receipt_root: &'a str,
         swap_receipt_root: &'a str,
+        bridge_asset_mapping_root: &'a str,
+        bridge_account_mapping_root: &'a str,
+        bridge_credit_root: &'a str,
+        bridge_credit_receipt_root: &'a str,
+        bridge_replay_index_root: &'a str,
+        bridge_event_receipt_index_root: &'a str,
         model_passport_root: &'a str,
         memory_cell_root: &'a str,
         challenge_root: &'a str,
@@ -2618,6 +3097,12 @@ pub fn anchor_from_state(
             lp_position_root: &roots.lp_position_root,
             liquidity_receipt_root: &roots.liquidity_receipt_root,
             swap_receipt_root: &roots.swap_receipt_root,
+            bridge_asset_mapping_root: &roots.bridge_asset_mapping_root,
+            bridge_account_mapping_root: &roots.bridge_account_mapping_root,
+            bridge_credit_root: &roots.bridge_credit_root,
+            bridge_credit_receipt_root: &roots.bridge_credit_receipt_root,
+            bridge_replay_index_root: &roots.bridge_replay_index_root,
+            bridge_event_receipt_index_root: &roots.bridge_event_receipt_index_root,
             model_passport_root: &roots.model_passport_root,
             memory_cell_root: &roots.memory_cell_root,
             challenge_root: &roots.challenge_root,
@@ -2651,6 +3136,12 @@ pub fn anchor_from_state(
         lp_position_root: roots.lp_position_root,
         liquidity_receipt_root: roots.liquidity_receipt_root,
         swap_receipt_root: roots.swap_receipt_root,
+        bridge_asset_mapping_root: roots.bridge_asset_mapping_root,
+        bridge_account_mapping_root: roots.bridge_account_mapping_root,
+        bridge_credit_root: roots.bridge_credit_root,
+        bridge_credit_receipt_root: roots.bridge_credit_receipt_root,
+        bridge_replay_index_root: roots.bridge_replay_index_root,
+        bridge_event_receipt_index_root: roots.bridge_event_receipt_index_root,
         model_passport_root: roots.model_passport_root,
         memory_cell_root: roots.memory_cell_root,
         challenge_root: roots.challenge_root,

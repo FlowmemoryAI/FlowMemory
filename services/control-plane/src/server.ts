@@ -84,13 +84,29 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
       return;
     }
 
+    const requestUrl = req.url === undefined ? null : new URL(req.url, "http://127.0.0.1");
+    if (req.method === "GET" && requestUrl?.pathname === "/explorer/search") {
+      const query = requestUrl.searchParams.get("q") ?? requestUrl.searchParams.get("query") ?? "";
+      const limit = requestUrl.searchParams.get("limit");
+      const response = dispatchJsonRpc({
+        jsonrpc: "2.0",
+        id: "explorer-search",
+        method: "explorer_search",
+        params: {
+          query,
+          ...(limit !== null ? { limit: Number(limit) } : {}),
+        },
+      }, { state });
+      writeJson(res, 200, jsonResult(response));
+      return;
+    }
+
     if (req.method === "GET" && req.url === "/product-flow/status") {
       const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "product-flow-status", method: "product_flow_status" }, { state });
       writeJson(res, 200, jsonResult(response));
       return;
     }
 
-    const requestUrl = req.url === undefined ? null : new URL(req.url, "http://127.0.0.1");
     const pilotRoutes: Record<string, { method: string; list: boolean }> = {
       "/pilot/status": { method: "pilot_status", list: false },
       "/pilot/deposits": { method: "pilot_deposit_observation_list", list: true },

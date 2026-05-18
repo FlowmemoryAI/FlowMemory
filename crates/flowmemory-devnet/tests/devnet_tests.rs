@@ -1,6 +1,8 @@
 use flowmemory_devnet::model::{
-    DevnetError, FLOWPULSE_TOPIC0, LOCAL_TEST_UNIT_ASSET_ID, Transaction, ZERO_HASH,
-    apply_transaction, build_block, demo_transactions, deterministic_liquidity_id,
+    BRIDGE_PILOT_ACCOUNT_OWNER, DevnetError, FLOWPULSE_TOPIC0, LOCAL_TEST_UNIT_ASSET_ID,
+    Transaction, ZERO_HASH, apply_transaction, bridge_event_reference_key, build_block,
+    demo_transactions, deterministic_bridge_account_id, deterministic_bridge_account_mapping_id,
+    deterministic_bridge_asset_mapping_id, deterministic_liquidity_id,
     deterministic_lp_position_id, deterministic_pool_id, deterministic_swap_id,
     deterministic_token_balance_id, deterministic_token_id, genesis_state,
     product_demo_transactions, queue_transaction, state_map_roots, state_root,
@@ -335,6 +337,91 @@ fn local_faucet_and_transfer_update_test_unit_ledger() {
         Err(DevnetError::LocalTestUnitBalanceInsufficient(
             "local-account:bob".to_string()
         ))
+    );
+}
+
+#[test]
+fn pilot_bridge_credit_maps_asset_account_and_rejects_replay() {
+    let mut state = genesis_state();
+    let txs = pilot_bridge_setup_and_credit_txs();
+    let credit_tx = txs.last().expect("credit tx").clone();
+
+    for tx in txs {
+        queue_transaction(&mut state, tx);
+    }
+    let first = build_block(&mut state);
+
+    assert_eq!(first.receipts.len(), 4);
+    assert!(
+        first
+            .receipts
+            .iter()
+            .all(|receipt| receipt.status == "applied")
+    );
+    assert_eq!(state.bridge_asset_mappings.len(), 1);
+    assert_eq!(state.bridge_account_mappings.len(), 1);
+    assert_eq!(state.bridge_credits.len(), 1);
+    assert_eq!(state.bridge_credit_receipts.len(), 1);
+    assert_eq!(state.bridge_replay_index.len(), 1);
+
+    let account_id = deterministic_bridge_account_id(PILOT_FLOWCHAIN_RECIPIENT);
+    assert_eq!(
+        state.local_test_unit_balances[&account_id].units,
+        PILOT_BRIDGE_AMOUNT
+    );
+    let receipt = state
+        .bridge_credit_receipts
+        .get(PILOT_BRIDGE_CREDIT_ID)
+        .expect("bridge credit receipt");
+    assert_eq!(receipt.bridge_credit_id, PILOT_BRIDGE_CREDIT_ID);
+    assert_eq!(receipt.event_ref.tx_hash, PILOT_BRIDGE_TX_HASH);
+    let event_key = bridge_event_reference_key(
+        PILOT_SOURCE_CHAIN_ID,
+        PILOT_SOURCE_CONTRACT,
+        PILOT_BRIDGE_TX_HASH,
+        PILOT_BRIDGE_LOG_INDEX,
+    );
+    assert_eq!(
+        state.bridge_event_receipt_index.get(&event_key),
+        Some(&PILOT_BRIDGE_CREDIT_ID.to_string())
+    );
+    assert!(state_map_roots(&state).bridge_credit_root.starts_with("0x"));
+    assert!(
+        state_map_roots(&state)
+            .bridge_credit_receipt_root
+            .starts_with("0x")
+    );
+
+    let applied_credit_tx_id = first
+        .receipts
+        .last()
+        .expect("applied bridge receipt")
+        .tx_id
+        .clone();
+    queue_transaction(&mut state, credit_tx);
+    let replay = build_block(&mut state);
+    assert_eq!(state.bridge_credits.len(), 1);
+    assert_eq!(
+        state.local_test_unit_balances[&account_id].units,
+        PILOT_BRIDGE_AMOUNT
+    );
+    assert_eq!(replay.receipts.len(), 1);
+    assert_eq!(replay.receipts[0].status, "rejected");
+    assert!(
+        replay.receipts[0]
+            .error
+            .as_ref()
+            .expect("replay error")
+            .contains("bridge replay key is already consumed")
+    );
+    assert_eq!(
+        state
+            .blocks
+            .iter()
+            .flat_map(|block| &block.receipts)
+            .filter(|receipt| receipt.tx_id == applied_credit_tx_id && receipt.status == "applied")
+            .count(),
+        1
     );
 }
 
@@ -1205,6 +1292,308 @@ fn cli_export_import_state_round_trip_is_deterministic() {
 }
 
 #[test]
+fn cli_pilot_bridge_handoff_receipts_survive_restart_and_export_import() {
+    let temp = temp_dir("pilot-bridge-restart-export");
+    let state = temp.join("state.json");
+    let imported = temp.join("imported-state.json");
+    let snapshot = temp.join("snapshot.json");
+    let handoff = repo_root().join("fixtures/bridge/local-runtime-bridge-handoff.json");
+
+    let product_status = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "product-smoke",
+            "--out-dir",
+            temp.join("product-handoff").to_str().expect("out path"),
+        ])
+        .status()
+        .expect("run product smoke");
+    assert!(product_status.success());
+
+    let bridge_status = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "bridge-handoff",
+            "--handoff",
+            handoff.to_str().expect("handoff path"),
+            "--direct",
+            "--authorized-by",
+            "operator:bridge:pilot",
+        ])
+        .status()
+        .expect("queue bridge handoff");
+    assert!(bridge_status.success());
+
+    let block_status = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args(["--state", state.to_str().expect("state path"), "run-block"])
+        .status()
+        .expect("include bridge handoff");
+    assert!(block_status.success());
+
+    let by_id = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "bridge-receipt",
+            "--receipt-id",
+            PILOT_BRIDGE_CREDIT_ID,
+        ])
+        .output()
+        .expect("receipt by id");
+    assert!(by_id.status.success());
+    let by_id_json: serde_json::Value =
+        serde_json::from_slice(&by_id.stdout).expect("receipt by id json");
+    assert_eq!(by_id_json["found"], true);
+    assert_eq!(by_id_json["receipt"]["receiptId"], PILOT_BRIDGE_CREDIT_ID);
+    assert_eq!(by_id_json["bridgeCredit"]["localOnly"], true);
+    assert_eq!(by_id_json["bridgeCredit"]["noValue"], true);
+    assert_eq!(by_id_json["bridgeCredit"]["productionReady"], false);
+    assert_eq!(by_id_json["receipt"]["localOnly"], true);
+    assert_eq!(by_id_json["receipt"]["productionReady"], false);
+
+    let by_wrong_id = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "bridge-receipt",
+            "--receipt-id",
+            "receipt:bridge:pilot:missing",
+        ])
+        .output()
+        .expect("receipt by wrong id");
+    assert!(by_wrong_id.status.success());
+    let by_wrong_id_json: serde_json::Value =
+        serde_json::from_slice(&by_wrong_id.stdout).expect("receipt by wrong id json");
+    assert_eq!(by_wrong_id_json["found"], false);
+
+    let log_index = PILOT_BRIDGE_LOG_INDEX.to_string();
+    let by_event = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "bridge-receipt",
+            "--source-chain-id",
+            PILOT_SOURCE_CHAIN_ID,
+            "--source-contract",
+            PILOT_SOURCE_CONTRACT,
+            "--tx-hash",
+            PILOT_BRIDGE_TX_HASH,
+            "--log-index",
+            &log_index,
+        ])
+        .output()
+        .expect("receipt by event");
+    assert!(by_event.status.success());
+    let by_event_json: serde_json::Value =
+        serde_json::from_slice(&by_event.stdout).expect("receipt by event json");
+    assert_eq!(by_event_json["found"], true);
+    assert_eq!(
+        by_event_json["receipt"]["receiptId"],
+        PILOT_BRIDGE_CREDIT_ID
+    );
+    let wrong_log_index = (PILOT_BRIDGE_LOG_INDEX + 1).to_string();
+    let by_wrong_event = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "bridge-receipt",
+            "--source-chain-id",
+            PILOT_SOURCE_CHAIN_ID,
+            "--source-contract",
+            PILOT_SOURCE_CONTRACT,
+            "--tx-hash",
+            PILOT_BRIDGE_TX_HASH,
+            "--log-index",
+            &wrong_log_index,
+        ])
+        .output()
+        .expect("receipt by wrong event");
+    assert!(by_wrong_event.status.success());
+    let by_wrong_event_json: serde_json::Value =
+        serde_json::from_slice(&by_wrong_event.stdout).expect("receipt by wrong event json");
+    assert_eq!(by_wrong_event_json["found"], false);
+
+    let restarted = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "start",
+            "--blocks",
+            "1",
+        ])
+        .status()
+        .expect("restart and produce empty block");
+    assert!(restarted.success());
+    let summary = inspect_state_summary(&state);
+    assert_eq!(summary["tokenDefinitions"], 1);
+    assert_eq!(summary["dexPools"], 1);
+    assert_eq!(summary["bridgeCredits"], 1);
+    assert_eq!(summary["bridgeCreditReceipts"], 1);
+    assert_eq!(summary["bridgeReplayKeys"], 1);
+    let original_state_root = summary["stateRoot"].clone();
+    let original_bridge_asset_root = summary["mapRoots"]["bridgeAssetMappingRoot"].clone();
+    let original_bridge_account_root = summary["mapRoots"]["bridgeAccountMappingRoot"].clone();
+    let original_bridge_credit_root = summary["mapRoots"]["bridgeCreditRoot"].clone();
+    let original_bridge_receipt_root = summary["mapRoots"]["bridgeCreditReceiptRoot"].clone();
+    let original_bridge_replay_root = summary["mapRoots"]["bridgeReplayIndexRoot"].clone();
+    let original_bridge_event_receipt_root =
+        summary["mapRoots"]["bridgeEventReceiptIndexRoot"].clone();
+    let bridge_event_key = bridge_event_reference_key(
+        PILOT_SOURCE_CHAIN_ID,
+        PILOT_SOURCE_CONTRACT,
+        PILOT_BRIDGE_TX_HASH,
+        PILOT_BRIDGE_LOG_INDEX,
+    );
+
+    let pilot_export_dir = temp.join("pilot-handoff");
+    let export_handoff_status = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "export-fixtures",
+            "--out-dir",
+            pilot_export_dir.to_str().expect("pilot handoff path"),
+        ])
+        .status()
+        .expect("export pilot handoff fixtures");
+    assert!(export_handoff_status.success());
+    let dashboard: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(pilot_export_dir.join("dashboard-state.json"))
+            .expect("dashboard handoff"),
+    )
+    .expect("dashboard handoff json");
+    assert_eq!(
+        dashboard["bridgeCredits"][PILOT_BRIDGE_CREDIT_ID]["receiptId"],
+        PILOT_BRIDGE_CREDIT_ID
+    );
+    assert_eq!(
+        dashboard["bridgeCreditReceipts"][PILOT_BRIDGE_CREDIT_ID]["bridgeCreditId"],
+        PILOT_BRIDGE_CREDIT_ID
+    );
+    assert_eq!(
+        dashboard["bridgeEventReceiptIndex"][bridge_event_key.as_str()],
+        PILOT_BRIDGE_CREDIT_ID
+    );
+    assert_eq!(
+        dashboard["mapRoots"]["bridgeCreditRoot"],
+        original_bridge_credit_root
+    );
+    let indexer: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(pilot_export_dir.join("indexer-handoff.json"))
+            .expect("indexer handoff"),
+    )
+    .expect("indexer handoff json");
+    assert_eq!(
+        indexer["bridgeCredits"][PILOT_BRIDGE_CREDIT_ID]["receiptId"],
+        PILOT_BRIDGE_CREDIT_ID
+    );
+    assert_eq!(
+        indexer["bridgeCreditReceipts"][PILOT_BRIDGE_CREDIT_ID]["replayKey"],
+        PILOT_REPLAY_KEY
+    );
+    assert_eq!(
+        indexer["bridgeEventReceiptIndex"][bridge_event_key.as_str()],
+        PILOT_BRIDGE_CREDIT_ID
+    );
+    assert_eq!(
+        indexer["mapRoots"]["bridgeReplayIndexRoot"],
+        summary["mapRoots"]["bridgeReplayIndexRoot"]
+    );
+    let verifier: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(pilot_export_dir.join("verifier-handoff.json"))
+            .expect("verifier handoff"),
+    )
+    .expect("verifier handoff json");
+    assert_eq!(
+        verifier["bridgeCredits"][PILOT_BRIDGE_CREDIT_ID]["receiptId"],
+        PILOT_BRIDGE_CREDIT_ID
+    );
+    assert_eq!(
+        verifier["bridgeCreditReceipts"][PILOT_BRIDGE_CREDIT_ID]["replayKey"],
+        PILOT_REPLAY_KEY
+    );
+    assert_eq!(
+        verifier["bridgeEventReceiptIndex"][bridge_event_key.as_str()],
+        PILOT_BRIDGE_CREDIT_ID
+    );
+    assert_eq!(
+        verifier["mapRoots"]["bridgeEventReceiptIndexRoot"],
+        summary["mapRoots"]["bridgeEventReceiptIndexRoot"]
+    );
+    let control_plane: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(pilot_export_dir.join("control-plane-handoff.json"))
+            .expect("control-plane handoff"),
+    )
+    .expect("control-plane handoff json");
+    assert_eq!(
+        control_plane["objects"]["bridgeCredits"][PILOT_BRIDGE_CREDIT_ID]["amountUnits"],
+        PILOT_BRIDGE_AMOUNT
+    );
+    assert_eq!(
+        control_plane["objects"]["bridgeCreditReceipts"][PILOT_BRIDGE_CREDIT_ID]["eventRef"]["txHash"],
+        PILOT_BRIDGE_TX_HASH
+    );
+    assert_eq!(
+        control_plane["objects"]["bridgeEventReceiptIndex"][bridge_event_key.as_str()],
+        PILOT_BRIDGE_CREDIT_ID
+    );
+
+    let export_status = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "export-state",
+            "--out",
+            snapshot.to_str().expect("snapshot path"),
+        ])
+        .status()
+        .expect("export pilot state");
+    assert!(export_status.success());
+
+    let import_status = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            imported.to_str().expect("imported state path"),
+            "import-state",
+            "--from",
+            snapshot.to_str().expect("snapshot path"),
+        ])
+        .status()
+        .expect("import pilot state");
+    assert!(import_status.success());
+    let imported_summary = inspect_state_summary(&imported);
+    assert_eq!(imported_summary["stateRoot"], original_state_root);
+    assert_eq!(
+        imported_summary["mapRoots"]["bridgeAssetMappingRoot"],
+        original_bridge_asset_root
+    );
+    assert_eq!(
+        imported_summary["mapRoots"]["bridgeAccountMappingRoot"],
+        original_bridge_account_root
+    );
+    assert_eq!(
+        imported_summary["mapRoots"]["bridgeCreditRoot"],
+        original_bridge_credit_root
+    );
+    assert_eq!(
+        imported_summary["mapRoots"]["bridgeCreditReceiptRoot"],
+        original_bridge_receipt_root
+    );
+    assert_eq!(
+        imported_summary["mapRoots"]["bridgeReplayIndexRoot"],
+        original_bridge_replay_root
+    );
+    assert_eq!(
+        imported_summary["mapRoots"]["bridgeEventReceiptIndexRoot"],
+        original_bridge_event_receipt_root
+    );
+
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
 fn cli_node_runs_ten_blocks_and_includes_authorized_inbox_tx() {
     let temp = temp_dir("cli-node");
     let state = temp.join("state.json");
@@ -1367,6 +1756,94 @@ fn cli_static_peer_sync_reconciles_two_local_node_states() {
 fn zero_hash_constant_is_hex_32_bytes() {
     assert_eq!(ZERO_HASH.len(), 66);
     assert!(ZERO_HASH.starts_with("0x"));
+}
+
+const PILOT_SOURCE_CHAIN_ID: &str = "84532";
+const PILOT_SOURCE_CONTRACT: &str = "0x1111111111111111111111111111111111111111";
+const PILOT_BRIDGE_TX_HASH: &str =
+    "0x2222222222222222222222222222222222222222222222222222222222222222";
+const PILOT_BRIDGE_LOG_INDEX: u64 = 0;
+const PILOT_SOURCE_TOKEN: &str = "0x3333333333333333333333333333333333333333";
+const PILOT_FLOWCHAIN_RECIPIENT: &str =
+    "0x5555555555555555555555555555555555555555555555555555555555555555";
+const PILOT_OBSERVATION_ID: &str =
+    "0x0430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223c";
+const PILOT_DEPOSIT_ID: &str = "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269";
+const PILOT_REPLAY_KEY: &str = "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09";
+const PILOT_BRIDGE_CREDIT_ID: &str =
+    "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6";
+const PILOT_BRIDGE_AMOUNT: u64 = 20_000_000;
+
+fn pilot_bridge_setup_and_credit_txs() -> Vec<Transaction> {
+    let account_id = deterministic_bridge_account_id(PILOT_FLOWCHAIN_RECIPIENT);
+    let asset_mapping_id = deterministic_bridge_asset_mapping_id(
+        PILOT_SOURCE_CHAIN_ID,
+        PILOT_SOURCE_TOKEN,
+        LOCAL_TEST_UNIT_ASSET_ID,
+    );
+    let account_mapping_id =
+        deterministic_bridge_account_mapping_id(PILOT_FLOWCHAIN_RECIPIENT, &account_id);
+
+    vec![
+        Transaction::MapBridgeAsset {
+            mapping_id: asset_mapping_id,
+            source_chain_id: PILOT_SOURCE_CHAIN_ID.to_string(),
+            source_token: PILOT_SOURCE_TOKEN.to_string(),
+            local_asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+        },
+        Transaction::MapBridgeAccount {
+            mapping_id: account_mapping_id,
+            flowchain_recipient: PILOT_FLOWCHAIN_RECIPIENT.to_string(),
+            account_id: account_id.clone(),
+            owner: BRIDGE_PILOT_ACCOUNT_OWNER.to_string(),
+        },
+        Transaction::CreateLocalTestUnitBalance {
+            account_id: account_id.clone(),
+            owner: BRIDGE_PILOT_ACCOUNT_OWNER.to_string(),
+        },
+        Transaction::CreditBridgeFromBaseEvent {
+            bridge_credit_id: PILOT_BRIDGE_CREDIT_ID.to_string(),
+            receipt_id: PILOT_BRIDGE_CREDIT_ID.to_string(),
+            account_id,
+            flowchain_recipient: PILOT_FLOWCHAIN_RECIPIENT.to_string(),
+            asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            source_token: PILOT_SOURCE_TOKEN.to_string(),
+            amount_units: PILOT_BRIDGE_AMOUNT,
+            source_chain_id: PILOT_SOURCE_CHAIN_ID.to_string(),
+            source_contract: PILOT_SOURCE_CONTRACT.to_string(),
+            tx_hash: PILOT_BRIDGE_TX_HASH.to_string(),
+            log_index: PILOT_BRIDGE_LOG_INDEX,
+            deposit_id: PILOT_DEPOSIT_ID.to_string(),
+            observation_id: PILOT_OBSERVATION_ID.to_string(),
+            replay_key: PILOT_REPLAY_KEY.to_string(),
+            memo: "unit-test pilot bridge handoff".to_string(),
+            local_only: true,
+            production_ready: false,
+        },
+    ]
+}
+
+fn repo_root() -> std::path::PathBuf {
+    std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .expect("crates dir")
+        .parent()
+        .expect("repo root")
+        .to_path_buf()
+}
+
+fn inspect_state_summary(state: &std::path::Path) -> serde_json::Value {
+    let output = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "inspect-state",
+            "--summary",
+        ])
+        .output()
+        .expect("inspect state summary");
+    assert!(output.status.success());
+    serde_json::from_slice(&output.stdout).expect("state summary json")
 }
 
 fn inspect_summary(state: &std::path::Path, node_dir: &std::path::Path) -> serde_json::Value {

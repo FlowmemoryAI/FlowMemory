@@ -17,7 +17,8 @@
         "batches",
         "rejectedLogs",
         "duplicates",
-        "dashboardFeed"
+        "dashboardFeed",
+        "explorer"
       ],
       "properties": {
         "schema": { "const": "flowmemory.indexer.state.v0" },
@@ -60,6 +61,40 @@
             "warningCodes": { "type": "array" },
             "hasIntegrityWarnings": { "type": "boolean" },
             "observations": { "type": "array" }
+          },
+          "additionalProperties": false
+        },
+        "explorer": {
+          "type": "object",
+          "required": [
+            "schema",
+            "source",
+            "provenance",
+            "counts",
+            "blocks",
+            "transactions",
+            "receipts",
+            "events",
+            "accounts",
+            "tokens",
+            "pools",
+            "bridgeEvents",
+            "searchKeys"
+          ],
+          "properties": {
+            "schema": { "const": "flowmemory.indexer.explorer_index.v0" },
+            "source": { "type": "string" },
+            "provenance": { "type": "object" },
+            "counts": { "type": "object" },
+            "blocks": { "type": "array" },
+            "transactions": { "type": "array" },
+            "receipts": { "type": "array" },
+            "events": { "type": "array" },
+            "accounts": { "type": "array" },
+            "tokens": { "type": "array" },
+            "pools": { "type": "array" },
+            "bridgeEvents": { "type": "array" },
+            "searchKeys": { "type": "object" }
           },
           "additionalProperties": false
         }

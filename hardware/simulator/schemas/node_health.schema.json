@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FlowRouter Node Health",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "packet_type",
+    "schema_version",
+    "device_id",
+    "sequence",
+    "emitted_at",
+    "health",
+    "uptime_seconds",
+    "cpu_temp_c",
+    "memory_used_mb",
+    "disk_free_mb",
+    "queue_depth",
+    "health_digest",
+    "payload_bytes_estimate",
+    "lora_eligible",
+    "chain_startup_blocking"
+  ],
+  "properties": {
+    "packet_type": { "type": "string", "enum": ["node_health"] },
+    "schema_version": { "type": "string" },
+    "device_id": { "type": "string", "maxLength": 32 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "emitted_at": { "type": "string" },
+    "health": { "type": "string", "enum": ["healthy", "warning", "critical", "unknown"] },
+    "uptime_seconds": { "type": "integer", "minimum": 0 },
+    "cpu_temp_c": { "type": "number", "minimum": -40, "maximum": 125 },
+    "memory_used_mb": { "type": "integer", "minimum": 0 },
+    "disk_free_mb": { "type": "integer", "minimum": 0 },
+    "queue_depth": { "type": "integer", "minimum": 0 },
+    "health_digest": { "type": "string", "maxLength": 64 },
+    "payload_bytes_estimate": { "type": "integer", "minimum": 0, "maximum": 200 },
+    "lora_eligible": { "type": "boolean" },
+    "chain_startup_blocking": { "type": "boolean", "enum": [false] }
+  }
+}

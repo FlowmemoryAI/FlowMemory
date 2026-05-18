@@ -38,6 +38,7 @@ export const DEFAULT_CONTROL_PLANE_PATHS: ControlPlanePaths = {
   devnetIndexerHandoffPath: "fixtures/launch-core/generated/devnet/indexer-handoff.json",
   devnetVerifierHandoffPath: "fixtures/launch-core/generated/devnet/verifier-handoff.json",
   devnetControlPlaneHandoffPath: "fixtures/launch-core/generated/devnet/control-plane-handoff.json",
+  explorerFallbackPath: "fixtures/dashboard/flowchain-l1-explorer-fallback.json",
   txFixturesPath: "fixtures/handoff/sample-txs.json",
   txIntakePath: "devnet/local/intake/transactions.ndjson",
   bridgeObservationPath: "services/bridge-relayer/out/bridge-observation.json",
@@ -186,7 +187,10 @@ function loadTxIntake(path: string, sources: Record<string, DataSourceRecord>): 
   return rows;
 }
 
-function loadBridgeObservations(paths: ControlPlanePaths, sources: Record<string, DataSourceRecord>): JsonObject[] {
+function loadBridgeObservations(
+  paths: ControlPlanePaths,
+  sources: Record<string, DataSourceRecord>,
+): JsonObject[] {
   const observations: JsonObject[] = [];
   const persisted = maybeReadJson(paths.bridgeObservationPath);
   if (persisted !== null) {
@@ -229,6 +233,7 @@ export function loadControlPlaneState(overrides: Partial<ControlPlanePaths> = {}
   const devnetIndexerHandoff = loadOptionalSource("devnetIndexerHandoff", paths.devnetIndexerHandoffPath, sources);
   const devnetVerifierHandoff = loadOptionalSource("devnetVerifierHandoff", paths.devnetVerifierHandoffPath, sources);
   const devnetControlPlaneHandoff = loadOptionalSource("devnetControlPlaneHandoff", paths.devnetControlPlaneHandoffPath, sources);
+  const explorerFallback = loadOptionalSource("explorerFallback", paths.explorerFallbackPath, sources);
   const txFixtures = loadOptionalSource("txFixtures", paths.txFixturesPath, sources);
   const txIntake = loadTxIntake(paths.txIntakePath, sources);
   const bridgeObservations = loadBridgeObservations(paths, sources);
@@ -244,6 +249,7 @@ export function loadControlPlaneState(overrides: Partial<ControlPlanePaths> = {}
     devnetIndexerHandoff,
     devnetVerifierHandoff,
     devnetControlPlaneHandoff,
+    explorerFallback,
     txFixtures,
     txIntake,
     bridgeObservations,
