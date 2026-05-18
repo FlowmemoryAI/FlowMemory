@@ -1,6 +1,6 @@
 ﻿# FlowChain Systemd Service Install Validation
 
-Generated: 2026-05-18T02:15:13.8250980Z
+Generated: 2026-05-18T05:14:07.5290463Z
 Status: passed
 
 This validation proves the owner Linux systemd install plan is present, no-secret, non-mutating, live-profile by default, and includes autorecovery through the FlowChain supervisor.
@@ -39,6 +39,7 @@ This validation proves the owner Linux systemd install plan is present, no-secre
 | uninstallCommandsPresent | True |
 | hostMutationPerformedFalse | True |
 | envValuesPrintedFalse | True |
+| secretMarkerFindingsEmpty | True |
 | noSecrets | True |
 | broadcastsFalse | True |
 

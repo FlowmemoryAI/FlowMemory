@@ -220,11 +220,13 @@ $definitions = @(
             "uninstallCommandsPresent",
             "hostMutationPerformedFalse",
             "envValuesPrintedFalse",
+            "secretMarkerFindingsEmpty",
             "noSecrets",
             "broadcastsFalse"
         )
         requiredEmptyArrays = @(
-            "failedChecks"
+            "failedChecks",
+            "secretMarkerFindings"
         )
         requiredReportProperties = [ordered]@{
             "hostMutationPerformed" = $false

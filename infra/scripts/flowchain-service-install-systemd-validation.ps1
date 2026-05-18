@@ -38,6 +38,38 @@ function Test-SystemdTextHasAll {
     return $true
 }
 
+function Get-SystemdSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 function Test-SystemdPackageScript {
     param([Parameter(Mandatory = $true)][string] $Name)
 
@@ -113,29 +145,40 @@ $checks = [ordered]@{
     uninstallCommandsPresent = $uninstallCommands.Count -ge 4
     hostMutationPerformedFalse = $true
     envValuesPrintedFalse = $true
+    secretMarkerFindingsEmpty = $true
     noSecrets = $true
     broadcastsFalse = $true
 }
 
-$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
-$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
-
 $report = [ordered]@{
     schema = "flowchain.systemd_service_install_validation_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = $status
+    status = "pending"
     bundleDir = $bundleFullDir
     paths = $paths
     installCommands = $installCommands
     statusCommands = $statusCommands
     uninstallCommands = $uninstallCommands
     checks = $checks
-    failedChecks = @($failedChecks)
+    failedChecks = @()
+    secretMarkerFindings = @()
     hostMutationPerformed = $false
     envValuesPrinted = $false
     noSecrets = $true
     broadcasts = $false
 }
+
+$preliminaryReportText = $report | ConvertTo-Json -Depth 18
+$secretMarkerFindings = @(Get-SystemdSecretMarkerFindings -Text $preliminaryReportText -Label "systemd service install validation report")
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 
 $reportText = $report | ConvertTo-Json -Depth 18
 Assert-FlowChainNoSecretText -Text $reportText -Label "systemd service install validation report"

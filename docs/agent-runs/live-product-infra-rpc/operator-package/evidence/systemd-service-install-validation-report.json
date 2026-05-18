@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.systemd_service_install_validation_report.v0",
-    "generatedAt":  "2026-05-18T02:15:13.8250980Z",
+    "generatedAt":  "2026-05-18T05:14:07.5290463Z",
     "status":  "passed",
     "bundleDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle",
     "paths":  {
@@ -61,12 +61,16 @@
                    "uninstallCommandsPresent":  true,
                    "hostMutationPerformedFalse":  true,
                    "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
                    "noSecrets":  true,
                    "broadcastsFalse":  true
                },
     "failedChecks":  [
 
                      ],
+    "secretMarkerFindings":  [
+
+                             ],
     "hostMutationPerformed":  false,
     "envValuesPrinted":  false,
     "noSecrets":  true,
