@@ -1,23 +1,23 @@
 {
     "schema":  "flowchain.completion_audit_report.v0",
-    "generatedAt":  "2026-05-18T05:34:01.7363711Z",
+    "generatedAt":  "2026-05-18T05:43:27.5296511Z",
     "status":  "blocked",
     "completionReady":  false,
     "refreshMode":  "no-refresh-existing-reports",
     "childRefreshPerformed":  false,
     "objective":  "FlowChain live infrastructure/public RPC/deployment readiness with wallets, RPC connectivity, bridge readiness, block production, fail-closed owner inputs, no secrets, and no live broadcasts.",
-    "latestHeight":  "66040",
+    "latestHeight":  "66227",
     "liveProductExitCode":  0,
     "liveProductOutputRedacted":  [
                                       "NoRefresh used existing report: path=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-product-e2e-report.json, status=blocked, generatedAt=2026-05-17T18:39:44.8939687Z"
                                   ],
     "serviceStatusExitCode":  0,
     "serviceStatusOutputRedacted":  [
-                                        "NoRefresh used existing report: path=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json, status=passed, generatedAt=2026-05-18T05:24:34.6423848Z"
+                                        "NoRefresh used existing report: path=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json, status=passed, generatedAt=2026-05-18T05:41:38.2658025Z"
                                     ],
     "operatorDoctorExitCode":  0,
     "operatorDoctorOutputRedacted":  [
-                                         "NoRefresh used existing report: path=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-doctor-report.json, status=blocked, generatedAt=2026-05-18T05:33:43.9606829Z"
+                                         "NoRefresh used existing report: path=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-doctor-report.json, status=blocked, generatedAt=2026-05-18T05:43:10.7239668Z"
                                      ],
     "serviceMonitorExitCode":  0,
     "serviceMonitorOutputRedacted":  [
@@ -33,7 +33,7 @@
                                                ],
     "liveWalletExitCode":  0,
     "liveWalletOutputRedacted":  [
-                                     "NoRefresh used existing report: path=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-wallet-e2e-report.json, status=passed, generatedAt=2026-05-18T03:04:38.1615702Z"
+                                     "NoRefresh used existing report: path=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-wallet-e2e-report.json, status=passed, generatedAt=2026-05-18T05:42:51.1406261Z"
                                  ],
     "testerNetworkExitCode":  0,
     "testerNetworkOutputRedacted":  [
@@ -61,7 +61,7 @@
                                           ],
     "publicRpcAbuseTestExitCode":  0,
     "publicRpcAbuseTestOutputRedacted":  [
-                                             "NoRefresh used existing report: path=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test-report.json, status=passed, generatedAt=2026-05-17T23:20:50.0829546Z"
+                                             "NoRefresh used existing report: path=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test-report.json, status=passed, generatedAt=2026-05-18T05:37:05.4067915Z"
                                          ],
     "publicTesterGatewayExitCode":  0,
     "publicTesterGatewayOutputRedacted":  [
@@ -129,11 +129,11 @@
                                                     ],
     "operatorPackageExitCode":  0,
     "operatorPackageOutputRedacted":  [
-                                          "NoRefresh used existing report: path=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-report.json, status=passed, generatedAt=2026-05-18T05:33:46.9074978Z"
+                                          "NoRefresh used existing report: path=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-report.json, status=passed, generatedAt=2026-05-18T05:43:13.1787604Z"
                                       ],
     "operatorPackageVerifyExitCode":  0,
     "operatorPackageVerifyOutputRedacted":  [
-                                                "NoRefresh used existing report: path=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-verify-report.json, status=passed, generatedAt=2026-05-18T05:33:53.3494304Z"
+                                                "NoRefresh used existing report: path=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-verify-report.json, status=passed, generatedAt=2026-05-18T05:43:18.8715557Z"
                                             ],
     "liveInfraExitCode":  0,
     "liveInfraOutputRedacted":  [
@@ -271,8 +271,8 @@
                                                          "-AllowBlocked"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.1820753Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.3460844Z",
+                                    "startedAt":  "2026-05-18T05:43:23.9918372Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.1830489Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -294,8 +294,8 @@
                                                          "-AllowBlocked"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.4000831Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.4060840Z",
+                                    "startedAt":  "2026-05-18T05:43:24.2480513Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.2550496Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -304,7 +304,7 @@
                                     "noRefresh":  true,
                                     "existingReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
                                     "existingReportStatus":  "passed",
-                                    "existingReportGeneratedAt":  "2026-05-18T05:24:34.6423848Z",
+                                    "existingReportGeneratedAt":  "2026-05-18T05:41:38.2658025Z",
                                     "existingReportHadStatusField":  true
                                 },
                                 {
@@ -318,8 +318,8 @@
                                                          "docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.4100862Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.4170849Z",
+                                    "startedAt":  "2026-05-18T05:43:24.2590486Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.2670559Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -328,7 +328,7 @@
                                     "noRefresh":  true,
                                     "existingReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-doctor-report.json",
                                     "existingReportStatus":  "blocked",
-                                    "existingReportGeneratedAt":  "2026-05-18T05:33:43.9606829Z",
+                                    "existingReportGeneratedAt":  "2026-05-18T05:43:10.7239668Z",
                                     "existingReportHadStatusField":  true
                                 },
                                 {
@@ -346,8 +346,8 @@
                                                          "90"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.4210838Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.4250836Z",
+                                    "startedAt":  "2026-05-18T05:43:24.2730493Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.2780503Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -368,8 +368,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-service-supervisor-validation.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.4322852Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.4362860Z",
+                                    "startedAt":  "2026-05-18T05:43:24.2860512Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.2900540Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -390,8 +390,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-service-install-validation.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.4412863Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.4462880Z",
+                                    "startedAt":  "2026-05-18T05:43:24.2960510Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.3010502Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -412,8 +412,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-live-service-wallet-e2e.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.4492895Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.4522859Z",
+                                    "startedAt":  "2026-05-18T05:43:24.3060519Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.3100505Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -422,7 +422,7 @@
                                     "noRefresh":  true,
                                     "existingReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-wallet-e2e-report.json",
                                     "existingReportStatus":  "passed",
-                                    "existingReportGeneratedAt":  "2026-05-18T03:04:38.1615702Z",
+                                    "existingReportGeneratedAt":  "2026-05-18T05:42:51.1406261Z",
                                     "existingReportHadStatusField":  true
                                 },
                                 {
@@ -434,8 +434,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-live-service-tester-network-e2e.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.4572906Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.4622877Z",
+                                    "startedAt":  "2026-05-18T05:43:24.3140520Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.3760544Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -456,8 +456,8 @@
                                                          "npm.cmd run flowchain:dev-pack:e2e"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.4662867Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.4692882Z",
+                                    "startedAt":  "2026-05-18T05:43:24.3820560Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.3860541Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -478,8 +478,8 @@
                                                          "npm.cmd run flowchain:real-value-pilot:bridge"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.4732873Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.4782874Z",
+                                    "startedAt":  "2026-05-18T05:43:24.3900535Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.3960545Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -500,8 +500,8 @@
                                                          "npm.cmd run flowchain:bridge:diagnose:tx"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.4822887Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.4852936Z",
+                                    "startedAt":  "2026-05-18T05:43:24.4010544Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.4040539Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -522,8 +522,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-owner-inputs-validation.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.4902928Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.4942907Z",
+                                    "startedAt":  "2026-05-18T05:43:24.4070523Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.4110570Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -544,8 +544,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-public-rpc-validation.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.4982878Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.5012898Z",
+                                    "startedAt":  "2026-05-18T05:43:24.4160531Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.4190539Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -566,8 +566,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-public-rpc-abuse-test.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.5052885Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.5122907Z",
+                                    "startedAt":  "2026-05-18T05:43:24.4230537Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.4290570Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -576,7 +576,7 @@
                                     "noRefresh":  true,
                                     "existingReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test-report.json",
                                     "existingReportStatus":  "passed",
-                                    "existingReportGeneratedAt":  "2026-05-17T23:20:50.0829546Z",
+                                    "existingReportGeneratedAt":  "2026-05-18T05:37:05.4067915Z",
                                     "existingReportHadStatusField":  true
                                 },
                                 {
@@ -588,8 +588,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-public-tester-gateway-e2e.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.5162899Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.5202913Z",
+                                    "startedAt":  "2026-05-18T05:43:24.4330580Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.4370561Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -610,8 +610,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-dashboard-ui-readiness.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.5242886Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.5282891Z",
+                                    "startedAt":  "2026-05-18T05:43:24.4410545Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.4470546Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -632,8 +632,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-backup-restore-validation.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.5312910Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.5352906Z",
+                                    "startedAt":  "2026-05-18T05:43:24.4530557Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.4580551Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -654,8 +654,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-backup-owner-path-dry-run.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.5432913Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.5472923Z",
+                                    "startedAt":  "2026-05-18T05:43:24.4710564Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.4750589Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -676,8 +676,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-deploy-control-validation.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.5522908Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.5582930Z",
+                                    "startedAt":  "2026-05-18T05:43:24.4810574Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.4860567Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -698,8 +698,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-relayer-guardrail-validation.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.5622899Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.5662916Z",
+                                    "startedAt":  "2026-05-18T05:43:24.4930616Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.4990576Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -720,8 +720,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-relayer-loop-validation.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.5702947Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.5772917Z",
+                                    "startedAt":  "2026-05-18T05:43:24.5050568Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.5090594Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -743,8 +743,8 @@
                                                          "-AllowBlocked"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.5802938Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.5852918Z",
+                                    "startedAt":  "2026-05-18T05:43:24.5160579Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.5211824Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -765,8 +765,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-owner-onboarding.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.5902945Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.5982932Z",
+                                    "startedAt":  "2026-05-18T05:43:24.5267258Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.5404593Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -787,8 +787,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-owner-signup-checklist.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.6032933Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.6092954Z",
+                                    "startedAt":  "2026-05-18T05:43:24.5483202Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.5539676Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -809,8 +809,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-owner-env-template.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.6142959Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.6182915Z",
+                                    "startedAt":  "2026-05-18T05:43:24.5584964Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.5624982Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -831,8 +831,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-owner-env-readiness-validation.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.6242934Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.6282969Z",
+                                    "startedAt":  "2026-05-18T05:43:24.5674961Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.5714992Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -854,8 +854,8 @@
                                                          "-AllowBlocked"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.6332956Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.6372948Z",
+                                    "startedAt":  "2026-05-18T05:43:24.5753884Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.5816332Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -876,8 +876,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-public-rpc-edge-template.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.6422945Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.6472935Z",
+                                    "startedAt":  "2026-05-18T05:43:24.5870737Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.5915498Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -898,8 +898,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-public-rpc-deployment-bundle.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.6522934Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.6992949Z",
+                                    "startedAt":  "2026-05-18T05:43:24.5963640Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.6003652Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -920,8 +920,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-public-rpc-deployment-automation.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.7032984Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.7082967Z",
+                                    "startedAt":  "2026-05-18T05:43:24.6053662Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.6096914Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -942,8 +942,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-operator-package.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.7122949Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.7152973Z",
+                                    "startedAt":  "2026-05-18T05:43:24.6153179Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.6185934Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -952,7 +952,7 @@
                                     "noRefresh":  true,
                                     "existingReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-report.json",
                                     "existingReportStatus":  "passed",
-                                    "existingReportGeneratedAt":  "2026-05-18T05:33:46.9074978Z",
+                                    "existingReportGeneratedAt":  "2026-05-18T05:43:13.1787604Z",
                                     "existingReportHadStatusField":  true
                                 },
                                 {
@@ -964,8 +964,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-operator-package-verify.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.7192964Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.7232991Z",
+                                    "startedAt":  "2026-05-18T05:43:24.6216070Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.6246072Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -974,7 +974,7 @@
                                     "noRefresh":  true,
                                     "existingReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-verify-report.json",
                                     "existingReportStatus":  "passed",
-                                    "existingReportGeneratedAt":  "2026-05-18T05:33:53.3494304Z",
+                                    "existingReportGeneratedAt":  "2026-05-18T05:43:18.8715557Z",
                                     "existingReportHadStatusField":  true
                                 },
                                 {
@@ -987,8 +987,8 @@
                                                          "-AllowBlocked"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.7282978Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.7322985Z",
+                                    "startedAt":  "2026-05-18T05:43:24.6296081Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.6336075Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -1010,8 +1010,8 @@
                                                          "-AllowBlocked"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.7362945Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.7413019Z",
+                                    "startedAt":  "2026-05-18T05:43:24.6386076Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.6446101Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -1032,8 +1032,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-external-tester-packet-validation.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.7462968Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.7503012Z",
+                                    "startedAt":  "2026-05-18T05:43:24.6536086Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.6606091Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -1054,8 +1054,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-incident-drill.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.7562981Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.7613002Z",
+                                    "startedAt":  "2026-05-18T05:43:24.6676087Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.6746087Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -1078,8 +1078,8 @@
                                                          "-NoRefresh"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.7652972Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.7692996Z",
+                                    "startedAt":  "2026-05-18T05:43:24.6806087Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.6866106Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -1102,8 +1102,8 @@
                                                          "-NoRefresh"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.7732993Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.7772998Z",
+                                    "startedAt":  "2026-05-18T05:43:24.6906098Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.6976131Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -1124,8 +1124,8 @@
                                                          "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-alert-install-validation.ps1"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.7813007Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.7852987Z",
+                                    "startedAt":  "2026-05-18T05:43:24.7026105Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.7076097Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -1147,8 +1147,8 @@
                                                          "-NoRefresh"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.7902985Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.7952991Z",
+                                    "startedAt":  "2026-05-18T05:43:24.7136097Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.7186113Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -1171,8 +1171,8 @@
                                                          "-NoRefresh"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.7992984Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.8073017Z",
+                                    "startedAt":  "2026-05-18T05:43:24.7236100Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.7336135Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -1194,8 +1194,8 @@
                                                          "-AllowBlocked"
                                                      ],
                                     "processId":  null,
-                                    "startedAt":  "2026-05-18T05:33:58.8112996Z",
-                                    "finishedAt":  "2026-05-18T05:33:58.8202978Z",
+                                    "startedAt":  "2026-05-18T05:43:24.7376110Z",
+                                    "finishedAt":  "2026-05-18T05:43:24.7476119Z",
                                     "durationSeconds":  0,
                                     "timedOut":  false,
                                     "timeoutSeconds":  10800,
@@ -1231,7 +1231,7 @@
                       "id":  "block-production",
                       "requirement":  "Chain is producing/finalizing blocks and state is fresh.",
                       "status":  "passed",
-                      "evidence":  "latestHeight=66040, stateFileLastWriteAgeSeconds=1, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
+                      "evidence":  "latestHeight=66227, stateFileLastWriteAgeSeconds=1, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -1304,7 +1304,7 @@
                       "id":  "wallet-transfer",
                       "requirement":  "Wallet-to-wallet transfers sent through the running service settle on produced blocks.",
                       "status":  "passed",
-                      "evidence":  "single-transfer blocks 64459-\u003e64472, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-wallet-e2e-report.json",
+                      "evidence":  "single-transfer blocks 66234-\u003e66247, failedChecks=0, secretFindings=0, missingChecks=0, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-wallet-e2e-report.json",
                       "commands":  [
                                        "npm run flowchain:wallet:live-service:e2e"
                                    ],
@@ -1564,7 +1564,7 @@
                       "id":  "public-rpc-abuse-test",
                       "requirement":  "Public RPC abuse harness proves CORS rejection, media-type rejection, parse-error handling, method/params failure envelopes, batch/body caps, notification 204 handling, rate limiting, and no-secret response summaries.",
                       "status":  "passed",
-                      "evidence":  "abuseStatus=passed, abuseReady=True, missingChecks=0, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test-report.json",
+                      "evidence":  "abuseStatus=passed, abuseReady=True, failedChecks=0, secretFindings=0, missingChecks=0, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test-report.json",
                       "commands":  [
                                        "npm run flowchain:public-rpc:abuse-test"
                                    ],

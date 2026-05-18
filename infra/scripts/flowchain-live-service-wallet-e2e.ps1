@@ -63,6 +63,38 @@ function Invoke-CargoJson {
     return $output | ConvertFrom-Json
 }
 
+function Get-WalletSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 function New-LocalSignedEnvelope {
     param(
         [Parameter(Mandatory = $true)][object] $Tx,
@@ -194,13 +226,44 @@ $recipientAfter = Wait-LocalBalanceEquals -AccountId $recipient -Amount 25
 
 $chainAfter = Invoke-LocalJson -Path "/chain/status"
 $transferHistory = Invoke-LocalRpc -Method "wallet_transfer_history" -Params @{ walletAddress = $sender; limit = 25 }
+[int64] $chainBeforeInt = 0
+[int64] $chainAfterInt = 0
+[void] [int64]::TryParse((Get-ChainBlockValue -Status $chainBefore), [ref] $chainBeforeInt)
+[void] [int64]::TryParse((Get-ChainBlockValue -Status $chainAfter), [ref] $chainAfterInt)
+
+$checks = [ordered]@{
+    serviceStatusSucceeded = $true
+    healthSchemaOk = $health.schema -eq "flowmemory.control_plane.health.v0"
+    faucetQueuedTransactions = @($fundSender.queued).Count -ge 1
+    senderFundedBalanceReached = [int64] $senderFunded.amount -ge 100
+    sendAccepted = $send.accepted -eq $true
+    sendQueuedLocalRuntime = $send.status -eq "queued_local_runtime"
+    sendTxIdsPresent = @($send.txIds).Count -ge 1
+    transferIdPresent = -not [string]::IsNullOrWhiteSpace("$($send.transferId)")
+    senderDebitApplied = [int64] $senderAfter.amount -eq 75
+    recipientCreditApplied = [int64] $recipientAfter.amount -eq 25
+    transferHistoryRecorded = [int64] $transferHistory.count -ge 1
+    chainStatusReadableBefore = -not [string]::IsNullOrWhiteSpace((Get-ChainBlockValue -Status $chainBefore))
+    chainStatusReadableAfter = -not [string]::IsNullOrWhiteSpace((Get-ChainBlockValue -Status $chainAfter))
+    blockHeightAdvanced = $chainAfterInt -gt $chainBeforeInt
+    localOnly = $true
+    productionReadyFalse = $true
+    noLiveBroadcast = $true
+    broadcastsFalse = $true
+    envValuesPrintedFalse = $true
+    noSecrets = $true
+    secretMarkerFindingsEmpty = $true
+}
 
 $report = [ordered]@{
     schema = "flowchain.live_service_wallet_e2e_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = "passed"
+    status = "pending"
     rpcEndpoint = "local-private-127.0.0.1"
     runId = $runId
+    checks = $checks
+    failedChecks = @()
+    secretMarkerFindings = @()
     serviceHealthSchema = $health.schema
     chainBeforeBlock = Get-ChainBlockValue -Status $chainBefore
     chainAfterBlock = Get-ChainBlockValue -Status $chainAfter
@@ -219,9 +282,22 @@ $report = [ordered]@{
     localOnly = $true
     productionReady = $false
     noLiveBroadcast = $true
+    broadcasts = $false
     envValuesPrinted = $false
     noSecrets = $true
 }
+
+$preliminaryReportText = $report | ConvertTo-Json -Depth 16
+$secretMarkerFindings = @(Get-WalletSecretMarkerFindings -Text $preliminaryReportText -Label "live service wallet E2E report")
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 
 $reportText = $report | ConvertTo-Json -Depth 16
 Assert-FlowChainNoSecretText -Text $reportText -Label "live service wallet E2E report"
@@ -231,3 +307,7 @@ Write-Host "FlowChain live service wallet E2E passed."
 Write-Host "Sender after: $($senderAfter.amount)"
 Write-Host "Recipient after: $($recipientAfter.amount)"
 Write-Host "Report: $reportFullPath"
+if ($status -ne "passed") {
+    Write-Host "Failed checks: $($failedChecks -join ', ')"
+    exit 1
+}

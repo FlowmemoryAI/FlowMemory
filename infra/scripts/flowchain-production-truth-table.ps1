@@ -323,6 +323,41 @@ $definitions = @(
         command = "npm run flowchain:wallet:live-service:e2e"
         productionGate = $true
         ownerInputGate = $false
+        requiredChecks = @(
+            "serviceStatusSucceeded",
+            "healthSchemaOk",
+            "faucetQueuedTransactions",
+            "senderFundedBalanceReached",
+            "sendAccepted",
+            "sendQueuedLocalRuntime",
+            "sendTxIdsPresent",
+            "transferIdPresent",
+            "senderDebitApplied",
+            "recipientCreditApplied",
+            "transferHistoryRecorded",
+            "chainStatusReadableBefore",
+            "chainStatusReadableAfter",
+            "blockHeightAdvanced",
+            "localOnly",
+            "productionReadyFalse",
+            "noLiveBroadcast",
+            "broadcastsFalse",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "localOnly" = $true
+            "productionReady" = $false
+            "noLiveBroadcast" = $true
+            "broadcasts" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+        }
     },
     [ordered]@{
         id = "tester-network-e2e"

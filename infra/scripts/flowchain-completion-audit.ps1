@@ -712,6 +712,49 @@ $liveWalletSenderAfter = [string](Get-AuditProp -Object $liveWalletBalances -Nam
 $liveWalletRecipientAfter = [string](Get-AuditProp -Object $liveWalletBalances -Name "recipientAfter")
 $liveWalletBefore = [string](Get-AuditProp -Object $liveWallet -Name "chainBeforeBlock")
 $liveWalletAfter = [string](Get-AuditProp -Object $liveWallet -Name "chainAfterBlock")
+$liveWalletChecks = Get-AuditProp -Object $liveWallet -Name "checks"
+$liveWalletFailedChecks = @((Get-AuditProp -Object $liveWallet -Name "failedChecks" -Default @()))
+$liveWalletSecretFindings = @((Get-AuditProp -Object $liveWallet -Name "secretMarkerFindings" -Default @()))
+$liveWalletRequiredChecks = @(
+    "serviceStatusSucceeded",
+    "healthSchemaOk",
+    "faucetQueuedTransactions",
+    "senderFundedBalanceReached",
+    "sendAccepted",
+    "sendQueuedLocalRuntime",
+    "sendTxIdsPresent",
+    "transferIdPresent",
+    "senderDebitApplied",
+    "recipientCreditApplied",
+    "transferHistoryRecorded",
+    "chainStatusReadableBefore",
+    "chainStatusReadableAfter",
+    "blockHeightAdvanced",
+    "localOnly",
+    "productionReadyFalse",
+    "noLiveBroadcast",
+    "broadcastsFalse",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "secretMarkerFindingsEmpty"
+)
+$liveWalletMissingChecks = Get-MissingAuditChecks -Checks $liveWalletChecks -Names $liveWalletRequiredChecks
+$liveWalletFailedCheckCount = @($liveWalletFailedChecks | Where-Object { $null -ne $_ }).Count
+$liveWalletSecretFindingCount = @($liveWalletSecretFindings | Where-Object { $null -ne $_ }).Count
+$liveWalletMissingCheckCount = @($liveWalletMissingChecks | Where-Object { $null -ne $_ }).Count
+$liveWalletPassed = $liveWalletExitCode -eq 0 `
+    -and (Get-ReportStatus -Report $liveWallet) -eq "passed" `
+    -and $liveWalletSenderAfter -eq "75" `
+    -and $liveWalletRecipientAfter -eq "25" `
+    -and $liveWalletFailedCheckCount -eq 0 `
+    -and $liveWalletSecretFindingCount -eq 0 `
+    -and $liveWalletMissingCheckCount -eq 0 `
+    -and ((Get-AuditProp -Object $liveWallet -Name "localOnly" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $liveWallet -Name "productionReady" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $liveWallet -Name "noLiveBroadcast" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $liveWallet -Name "broadcasts" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $liveWallet -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $liveWallet -Name "noSecrets" -Default $false) -eq $true)
 $devPackChecks = Get-AuditProp -Object $devPack -Name "checks"
 $devPackPassed = $devPackExitCode -eq 0 `
     -and (Get-ReportStatus -Report $devPack) -eq "passed" `
@@ -1737,8 +1780,8 @@ Add-AuditItem -Items $items -Id "wallet-create" `
 
 Add-AuditItem -Items $items -Id "wallet-transfer" `
     -Requirement "Wallet-to-wallet transfers sent through the running service settle on produced blocks." `
-    -Status $(if ($liveWalletExitCode -eq 0 -and (Get-ReportStatus -Report $liveWallet) -eq "passed" -and $liveWalletSenderAfter -eq "75" -and $liveWalletRecipientAfter -eq "25") { "passed" } else { "failed" }) `
-    -Evidence "single-transfer blocks $liveWalletBefore->$liveWalletAfter, report=$($paths.liveWallet)" `
+    -Status $(if ($liveWalletPassed) { "passed" } else { "failed" }) `
+    -Evidence "single-transfer blocks $liveWalletBefore->$liveWalletAfter, failedChecks=$liveWalletFailedCheckCount, secretFindings=$liveWalletSecretFindingCount, missingChecks=$liveWalletMissingCheckCount, report=$($paths.liveWallet)" `
     -Commands @("npm run flowchain:wallet:live-service:e2e")
 
 Add-AuditItem -Items $items -Id "tester-network-transfer" `
