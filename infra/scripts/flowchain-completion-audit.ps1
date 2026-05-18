@@ -1055,6 +1055,8 @@ $dashboardUiReadinessPassed = $dashboardUiReadinessExitCode -eq 0 `
 $backupRestoreValidation = $reports.backupRestoreValidation
 $backupRestoreValidationStatus = Get-ReportStatus -Report $backupRestoreValidation
 $backupRestoreValidationChecks = Get-AuditProp -Object $backupRestoreValidation -Name "checks"
+$backupRestoreValidationFailedChecks = @((Get-AuditProp -Object $backupRestoreValidation -Name "failedChecks" -Default @()))
+$backupRestoreValidationSecretFindings = @((Get-AuditProp -Object $backupRestoreValidation -Name "secretMarkerFindings" -Default @()))
 $backupRestoreValidationRequiredChecks = @(
     "backupCommandPassed",
     "restoreCommandPassed",
@@ -1070,16 +1072,28 @@ $backupRestoreValidationRequiredChecks = @(
     "missingStateArtifactDetected",
     "missingSnapshotManifestDetected",
     "latestPointerTamperDetected",
-    "wrongChainStateMismatchDetected"
+    "wrongChainStateMismatchDetected",
+    "valuesPrintedFalse",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "secretMarkerFindingsEmpty",
+    "broadcastsFalse"
 )
 $backupRestoreValidationMissingChecks = @($backupRestoreValidationRequiredChecks | Where-Object {
     (Get-AuditProp -Object $backupRestoreValidationChecks -Name $_ -Default $false) -ne $true
 })
+$backupRestoreValidationFailedCheckCount = @($backupRestoreValidationFailedChecks | Where-Object { $null -ne $_ }).Count
+$backupRestoreValidationSecretFindingCount = @($backupRestoreValidationSecretFindings | Where-Object { $null -ne $_ }).Count
+$backupRestoreValidationMissingCheckCount = @($backupRestoreValidationMissingChecks | Where-Object { $null -ne $_ }).Count
 $backupRestoreValidationPassed = $backupRestoreValidationExitCode -eq 0 `
     -and $backupRestoreValidationStatus -eq "passed" `
-    -and $backupRestoreValidationMissingChecks.Count -eq 0 `
+    -and $backupRestoreValidationFailedCheckCount -eq 0 `
+    -and $backupRestoreValidationSecretFindingCount -eq 0 `
+    -and $backupRestoreValidationMissingCheckCount -eq 0 `
+    -and ((Get-AuditProp -Object $backupRestoreValidation -Name "valuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $backupRestoreValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
-    -and ((Get-AuditProp -Object $backupRestoreValidation -Name "noSecrets" -Default $false) -eq $true)
+    -and ((Get-AuditProp -Object $backupRestoreValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $backupRestoreValidation -Name "broadcasts" -Default $true) -eq $false)
 $backupOwnerPathDryRun = $reports.backupOwnerPathDryRun
 $backupOwnerPathDryRunStatus = Get-ReportStatus -Report $backupOwnerPathDryRun
 $backupOwnerPathDryRunChecks = Get-AuditProp -Object $backupOwnerPathDryRun -Name "checks"
@@ -1699,7 +1713,7 @@ Add-AuditItem -Items $items -Id "dashboard-ui-readiness" `
 Add-AuditItem -Items $items -Id "backup-restore-validator-self-test" `
     -Requirement "Backup tooling creates manifest-backed live-state snapshots, verifies latest-snapshot restore rehearsal without targeting live state, and rejects corrupt, tampered, missing-artifact, stale-pointer, and wrong-chain cases." `
     -Status $(if ($backupRestoreValidationPassed) { "passed" } else { "failed" }) `
-    -Evidence "validationStatus=$backupRestoreValidationStatus, requiredChecks=$($backupRestoreValidationRequiredChecks.Count), missingChecks=$($backupRestoreValidationMissingChecks.Count), report=$($paths.backupRestoreValidation)" `
+    -Evidence "validationStatus=$backupRestoreValidationStatus, requiredChecks=$($backupRestoreValidationRequiredChecks.Count), failedChecks=$backupRestoreValidationFailedCheckCount, missingChecks=$backupRestoreValidationMissingCheckCount, secretFindings=$backupRestoreValidationSecretFindingCount, report=$($paths.backupRestoreValidation)" `
     -Commands @("npm run flowchain:backup:restore:validate")
 
 Add-AuditItem -Items $items -Id "backup-owner-path-dry-run" `

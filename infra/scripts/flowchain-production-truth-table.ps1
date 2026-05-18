@@ -634,8 +634,23 @@ $definitions = @(
             "missingStateArtifactDetected",
             "missingSnapshotManifestDetected",
             "latestPointerTamperDetected",
-            "wrongChainStateMismatchDetected"
+            "wrongChainStateMismatchDetected",
+            "valuesPrintedFalse",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "secretMarkerFindingsEmpty",
+            "broadcastsFalse"
         )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "valuesPrinted" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
     },
     [ordered]@{
         id = "backup-owner-path-dry-run"

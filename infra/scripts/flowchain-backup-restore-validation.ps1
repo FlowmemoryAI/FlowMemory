@@ -168,6 +168,38 @@ function Set-ValidationProp {
     }
 }
 
+function Get-ValidationSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 function Copy-ValidationBackupRoot {
     param([Parameter(Mandatory = $true)][string] $Destination)
 
@@ -368,31 +400,41 @@ if ($backupPassed -and $restorePassed) {
     $hashRoundTrip = "$($backupReport.snapshot.stateFileSha256)" -eq "$($restoreReport.restore.restoredStateFileSha256)"
 }
 
-$status = if ($backupPassed -and $restorePassed -and $hashRoundTrip -and $secondBackupPassed -and $latestManifestMatchesSecondSnapshot -and $latestRestorePassed -and $latestRestoreUsedLatestSnapshot -and $restoreTargetProtected -and $liveStateNonMutationProven -and $corruptionDetected -and $tamperedManifestDetected -and $missingStateArtifactDetected -and $missingSnapshotManifestDetected -and $latestPointerTamperDetected -and $wrongChainStateMismatchDetected) { "passed" } else { "failed" }
+$coreStatus = if ($backupPassed -and $restorePassed -and $hashRoundTrip -and $secondBackupPassed -and $latestManifestMatchesSecondSnapshot -and $latestRestorePassed -and $latestRestoreUsedLatestSnapshot -and $restoreTargetProtected -and $liveStateNonMutationProven -and $corruptionDetected -and $tamperedManifestDetected -and $missingStateArtifactDetected -and $missingSnapshotManifestDetected -and $latestPointerTamperDetected -and $wrongChainStateMismatchDetected) { "passed" } else { "failed" }
+$checks = [ordered]@{
+    backupCommandPassed = $backupPassed
+    restoreCommandPassed = $restorePassed
+    backupRestoreHashRoundTrip = $hashRoundTrip
+    secondBackupCommandPassed = $secondBackupPassed
+    latestManifestMatchesSecondSnapshot = $latestManifestMatchesSecondSnapshot
+    latestRestoreCommandPassed = $latestRestorePassed
+    latestRestoreUsedLatestSnapshot = $latestRestoreUsedLatestSnapshot
+    restoreTargetsLiveStateProtected = $restoreTargetProtected
+    liveStateNonMutationProven = $liveStateNonMutationProven
+    corruptedSnapshotDetected = $corruptionDetected
+    manifestTamperDetected = $tamperedManifestDetected
+    missingStateArtifactDetected = $missingStateArtifactDetected
+    missingSnapshotManifestDetected = $missingSnapshotManifestDetected
+    latestPointerTamperDetected = $latestPointerTamperDetected
+    wrongChainStateMismatchDetected = $wrongChainStateMismatchDetected
+    valuesPrintedFalse = $true
+    envValuesPrintedFalse = $true
+    noSecrets = $true
+    secretMarkerFindingsEmpty = $true
+    broadcastsFalse = $true
+}
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($coreStatus -eq "passed" -and $failedChecks.Count -eq 0) { "passed" } else { "failed" }
 
 $report = [ordered]@{
-    schema = "flowchain.backup_restore_validation_report.v1"
+    schema = "flowchain.backup_restore_validation_report.v2"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
     status = $status
     stateReadable = (Get-FlowChainStateFacts -StatePath $stateFullPath).readable
-    checks = [ordered]@{
-        backupCommandPassed = $backupPassed
-        restoreCommandPassed = $restorePassed
-        backupRestoreHashRoundTrip = $hashRoundTrip
-        secondBackupCommandPassed = $secondBackupPassed
-        latestManifestMatchesSecondSnapshot = $latestManifestMatchesSecondSnapshot
-        latestRestoreCommandPassed = $latestRestorePassed
-        latestRestoreUsedLatestSnapshot = $latestRestoreUsedLatestSnapshot
-        restoreTargetsLiveStateProtected = $restoreTargetProtected
-        liveStateNonMutationProven = $liveStateNonMutationProven
-        corruptedSnapshotDetected = $corruptionDetected
-        corruptRestoreExitCode = $corruptExitCode
-        manifestTamperDetected = $tamperedManifestDetected
-        missingStateArtifactDetected = $missingStateArtifactDetected
-        missingSnapshotManifestDetected = $missingSnapshotManifestDetected
-        latestPointerTamperDetected = $latestPointerTamperDetected
-        wrongChainStateMismatchDetected = $wrongChainStateMismatchDetected
-    }
+    corruptRestoreExitCode = $corruptExitCode
+    checks = $checks
+    failedChecks = @($failedChecks)
+    secretMarkerFindings = @()
     reports = [ordered]@{
         backup = $backupReportPath
         secondBackup = $secondBackupReportPath
@@ -411,10 +453,25 @@ $report = [ordered]@{
     )
     childTimeoutSeconds = $ChildTimeoutSeconds
     childProcessResults = @($script:ValidationChildResults)
+    valuesPrinted = $false
     broadcasts = $false
     envValuesPrinted = $false
     noSecrets = $true
 }
+
+$preliminaryReportText = $report | ConvertTo-Json -Depth 16
+$secretMarkerFindings = @(
+    Get-ValidationSecretMarkerFindings -Text $preliminaryReportText -Label "backup restore validation report"
+)
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($coreStatus -eq "passed" -and $failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 
 $reportText = $report | ConvertTo-Json -Depth 16
 Assert-FlowChainNoSecretText -Text $reportText -Label "backup restore validation report"
