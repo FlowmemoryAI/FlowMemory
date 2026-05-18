@@ -117,7 +117,7 @@ $backupReportPath = Join-Path $reportFullDir "backup-readiness-report.json"
 $bridgeLiveReportPath = Join-Path $reportFullDir "bridge-live-readiness-report.json"
 $bridgeInfraReportPath = Join-Path $reportFullDir "bridge-infra-readiness-report.json"
 $bridgeRelayerReportPath = Join-Path $reportFullDir "bridge-relayer-once-report.json"
-$noSecretReportPath = Join-Path $reportFullDir "no-secret-scan-report.json"
+$noSecretReportPath = Join-Path $reportFullDir "live-infra-no-secret-scan-report.json"
 
 Invoke-LiveInfraStep `
     -Name "Owner input contract" `
@@ -177,7 +177,7 @@ Invoke-LiveInfraStep `
 
 Invoke-LiveInfraStep `
     -Name "No-secret scan live infra reports" `
-    -Command "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-no-secret-scan.ps1 -Paths docs/agent-runs/live-product-infra-rpc devnet/local/bridge-live-readiness devnet/local/services" `
+    -Command "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-no-secret-scan.ps1 -Paths docs/agent-runs/live-product-infra-rpc devnet/local/bridge-live-readiness devnet/local/services -ReportPath docs/agent-runs/live-product-infra-rpc/live-infra-no-secret-scan-report.json" `
     -FilePath "powershell" `
     -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-no-secret-scan.ps1"), "-Paths", "docs/agent-runs/live-product-infra-rpc", "devnet/local/bridge-live-readiness", "devnet/local/services", "-ReportPath", $noSecretReportPath) `
     -ExpectedReportPath $noSecretReportPath `

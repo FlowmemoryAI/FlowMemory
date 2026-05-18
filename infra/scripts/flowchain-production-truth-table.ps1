@@ -192,6 +192,98 @@ $definitions = @(
         ownerInputGate = $true
     },
     [ordered]@{
+        id = "owner-onboarding"
+        requirement = "Owner onboarding explains exactly what must be set up, proves FlowChain RPC is repo-owned, and separates the external Base 8453 dependency from this chain's public RPC edge without printing owner values."
+        path = "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json"
+        command = "npm run flowchain:owner:onboarding"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredReportProperties = [ordered]@{
+            "flowChainRpcIsOurs" = $true
+            "thirdPartyFlowChainRpcProviderNeeded" = $false
+            "publicRpcRequiresOwnerPublicEdge" = $true
+            "base8453RpcIsExternalChainDependency" = $true
+            "localEnvFileSupported" = $true
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "owner-signup-checklist"
+        requirement = "Owner signup checklist covers every required public RPC, backup, tester-write, and bridge env input, states what to get, and states what not to send."
+        path = "docs/agent-runs/live-product-infra-rpc/owner-signup-checklist-report.json"
+        command = "npm run flowchain:owner:signup-checklist"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredEmptyArrays = @(
+            "missingChecklistCoverage"
+        )
+        requiredReportProperties = [ordered]@{
+            "flowChainRpcIsRepoOwned" = $true
+            "thirdPartyFlowChainRpcProviderNeeded" = $false
+            "localEnvFileSupported" = $true
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "owner-env-template"
+        requirement = "Owner env template creates or preserves an ignored local-only NAME=value scaffold for every required owner input without recording real values."
+        path = "docs/agent-runs/live-product-infra-rpc/owner-env-template-report.json"
+        command = "npm run flowchain:owner-env:template"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredMinimums = [ordered]@{
+            requiredEnvNameCount = 17
+        }
+        requiredReportProperties = [ordered]@{
+            "pathIsGitIgnored" = $true
+            "templateIncludesAllRequiredEnvNames" = $true
+            "valuesPrinted" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "owner-env-readiness-validation"
+        requirement = "Owner env readiness validation proves missing or unignored owner env files fail before child live gates run and before any owner values can leak."
+        path = "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-validation-report.json"
+        command = "npm run flowchain:owner-env:readiness:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "missingOwnerEnvFileFailsBeforeChildGates",
+            "unignoredOwnerEnvFileFailsBeforeChildGates"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "owner-env-readiness"
+        requirement = "Owner env readiness points live checks at the ignored local owner env file and stays blocked only on known owner inputs until real public deployment values exist."
+        path = "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-report.json"
+        command = "npm run flowchain:owner-env:readiness -- -AllowBlocked"
+        productionGate = $true
+        ownerInputGate = $true
+        requiredReportProperties = [ordered]@{
+            "ownerEnvFile.exists" = $true
+            "ownerEnvFile.isFile" = $true
+            "ownerEnvFile.gitIgnored" = $true
+            "readiness.ownerInputsReady" = $true
+            "readiness.liveInfraReady" = $true
+            "readiness.publicDeploymentContractReady" = $true
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "public-rpc-readiness"
         requirement = "Public FlowChain RPC has URL, TLS acknowledgement, CORS, rate limit, backup path, and response hygiene."
         path = "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
@@ -707,7 +799,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "backup-restore-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "ops-snapshot", "ops-alert-rules", "ops-alert-install-validation", "ops-escalation-dry-run", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "backup-restore-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "ops-snapshot", "ops-alert-rules", "ops-alert-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"
@@ -950,6 +1042,18 @@ function ConvertTo-TruthEvidence {
         "finalizedHeight",
         "publicRpcReady",
         "ownerInputReady",
+        "ownerInputsStatus",
+        "flowChainRpcIsOurs",
+        "flowChainRpcIsRepoOwned",
+        "thirdPartyFlowChainRpcProviderNeeded",
+        "publicRpcRequiresOwnerPublicEdge",
+        "base8453RpcIsExternalChainDependency",
+        "localEnvFileSupported",
+        "externalSignupCount",
+        "itemCount",
+        "requiredEnvNameCount",
+        "templateIncludesAllRequiredEnvNames",
+        "pathIsGitIgnored",
         "deploymentReady",
         "packetShareable",
         "externalSharingReady",
@@ -1050,6 +1154,7 @@ function ConvertTo-TruthEvidence {
 
     foreach ($arrayName in @(
         "failedChecks",
+        "missingChecklistCoverage",
         "missingNextCommands",
         "failedVerifyChecks",
         "unmappedCurrentFindingCodes",

@@ -1,11 +1,11 @@
 {
     "schema":  "flowchain.live_infra_check_report.v0",
-    "generatedAt":  "2026-05-17T21:22:39.5560846Z",
+    "generatedAt":  "2026-05-18T02:06:58.3647952Z",
     "status":  "blocked",
     "repoPath":  "E:/FlowMemory/flowmemory-live-infra-rpc",
     "git":  {
                 "branch":  "agent/live-product-infra-rpc",
-                "commit":  "b8d1428563685d001b2496fa569d44bc04e32af3"
+                "commit":  "e286bc73558368566b8517fb86a49e9f77b5512a"
             },
     "readiness":  {
                       "ownerInputsReady":  false,
@@ -67,7 +67,7 @@
                         "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-live-check.ps1 -AllowBlocked",
                         "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-live-env-bridge-readiness.ps1 -AllowBlocked",
                         "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-relayer-once.ps1 -AllowBlocked",
-                        "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-no-secret-scan.ps1 -Paths docs/agent-runs/live-product-infra-rpc devnet/local/bridge-live-readiness devnet/local/services"
+                        "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-no-secret-scan.ps1 -Paths docs/agent-runs/live-product-infra-rpc devnet/local/bridge-live-readiness devnet/local/services -ReportPath docs/agent-runs/live-product-infra-rpc/live-infra-no-secret-scan-report.json"
                     ],
     "steps":  [
                   {
@@ -135,11 +135,11 @@
                   },
                   {
                       "name":  "No-secret scan live infra reports",
-                      "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-no-secret-scan.ps1 -Paths docs/agent-runs/live-product-infra-rpc devnet/local/bridge-live-readiness devnet/local/services",
+                      "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-no-secret-scan.ps1 -Paths docs/agent-runs/live-product-infra-rpc devnet/local/bridge-live-readiness devnet/local/services -ReportPath docs/agent-runs/live-product-infra-rpc/live-infra-no-secret-scan-report.json",
                       "status":  "passed",
                       "exitCode":  0,
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\No-secret-scan-live-infra-reports.log",
-                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-infra-no-secret-scan-report.json",
                       "reason":  ""
                   }
               ],
@@ -151,7 +151,7 @@
                         "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
                         "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
                         "bridgeRelayer":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-once-report.json",
-                        "noSecretScan":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json",
+                        "noSecretScan":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-infra-no-secret-scan-report.json",
                         "logs":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs"
                     },
     "blockedUntil":  {

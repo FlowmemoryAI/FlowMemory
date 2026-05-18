@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-18T01:54:44.0679065Z",
+    "generatedAt":  "2026-05-18T02:09:01.8843384Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -56,6 +56,31 @@
                          "phase":  "handoff",
                          "command":  "npm run flowchain:second-computer:readiness",
                          "purpose":  "Create and verify the no-secret offline second-computer source bundle."
+                     },
+                     {
+                         "phase":  "owner-setup",
+                         "command":  "npm run flowchain:owner:onboarding",
+                         "purpose":  "Regenerate the owner setup map and clarify that FlowChain public RPC is repo-owned."
+                     },
+                     {
+                         "phase":  "owner-setup",
+                         "command":  "npm run flowchain:owner:signup-checklist",
+                         "purpose":  "List exactly what the owner must sign up for or create before public launch."
+                     },
+                     {
+                         "phase":  "owner-setup",
+                         "command":  "npm run flowchain:owner-env:template",
+                         "purpose":  "Create or preserve the ignored local owner env scaffold with empty values only."
+                     },
+                     {
+                         "phase":  "owner-setup",
+                         "command":  "npm run flowchain:owner-env:readiness:validate",
+                         "purpose":  "Prove unsafe owner env file paths fail before live gates run."
+                     },
+                     {
+                         "phase":  "owner-setup",
+                         "command":  "npm run flowchain:owner-env:readiness -- -AllowBlocked",
+                         "purpose":  "Run live gates through the ignored owner env file and report only names and statuses."
                      },
                      {
                          "phase":  "public-rpc",

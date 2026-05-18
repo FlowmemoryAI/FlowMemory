@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Command Matrix
 
-Generated: 2026-05-18T01:54:44.0679065Z
+Generated: 2026-05-18T02:09:01.8843384Z
 
 | Phase | Command | Purpose |
 | --- | --- | --- |
@@ -15,6 +15,11 @@ Generated: 2026-05-18T01:54:44.0679065Z
 | autorecovery | `npm run flowchain:service:install:windows -- -Action Plan` | Render the no-secret Windows Scheduled Task install plan. |
 | autorecovery | `npm run flowchain:service:install:validate` | Validate install/status/uninstall paths without mutating the owner host. |
 | handoff | `npm run flowchain:second-computer:readiness` | Create and verify the no-secret offline second-computer source bundle. |
+| owner-setup | `npm run flowchain:owner:onboarding` | Regenerate the owner setup map and clarify that FlowChain public RPC is repo-owned. |
+| owner-setup | `npm run flowchain:owner:signup-checklist` | List exactly what the owner must sign up for or create before public launch. |
+| owner-setup | `npm run flowchain:owner-env:template` | Create or preserve the ignored local owner env scaffold with empty values only. |
+| owner-setup | `npm run flowchain:owner-env:readiness:validate` | Prove unsafe owner env file paths fail before live gates run. |
+| owner-setup | `npm run flowchain:owner-env:readiness -- -AllowBlocked` | Run live gates through the ignored owner env file and report only names and statuses. |
 | public-rpc | `npm run flowchain:public-rpc:deployment-bundle` | Generate owner-host public RPC edge artifacts. |
 | public-rpc | `npm run flowchain:public-rpc:deployment:automation` | Validate render, preflight, verify, and rollback phases. |
 | public-rpc | `npm run flowchain:public-rpc:validate` | Run local public-profile RPC readiness validation. |
