@@ -339,6 +339,102 @@ $definitions = @(
         ownerInputGate = $true
     },
     [ordered]@{
+        id = "ops-alert-rules"
+        requirement = "Ops alert rules map every current ops finding to local operator commands with no unmapped findings and no external delivery credentials."
+        path = "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
+        command = "npm run flowchain:ops:alerts -- -AllowBlocked"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredMinimums = [ordered]@{
+            ruleCount = 10
+            criticalRuleCount = 5
+            blockedRuleCount = 5
+        }
+        requiredEmptyArrays = @(
+            "unmappedCurrentFindingCodes",
+            "rulesWithoutCommands"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+            "notificationPlan.storesSecrets" = $false
+            "notificationPlan.sendsNetworkNotifications" = $false
+        }
+    },
+    [ordered]@{
+        id = "ops-alert-install-validation"
+        requirement = "Scheduled alert refresh install validation proves plan/status/uninstall no-op behavior and no external delivery."
+        path = "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
+        command = "npm run flowchain:ops:alerts:install:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptsPresent",
+            "planDidNotMutate",
+            "statusDidNotMutate",
+            "statusTaskStatePreserved",
+            "uninstallAbsentCommandPassed",
+            "uninstallAbsentDidNotMutate",
+            "uninstallAbsentTaskAbsentAfter",
+            "scheduledTaskTriggerSupportsRepetition",
+            "actionUsesAlertsScript",
+            "hasAllowBlocked",
+            "scheduledCommandDoesNotDisableRefresh",
+            "noExternalDelivery"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "ops-escalation-dry-run"
+        requirement = "Ops escalation dry run maps current findings to local operator actions and proves no network delivery or credential storage."
+        path = "docs/agent-runs/live-product-infra-rpc/ops-escalation-dry-run-report.json"
+        command = "npm run flowchain:ops:escalation:dry-run -- -NoRefresh"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "opsSnapshotLoaded",
+            "opsAlertRulesLoaded",
+            "opsSnapshotStatusSafe",
+            "opsAlertRulesPassed",
+            "notificationPlanNoNetworkDelivery",
+            "notificationPlanStoresNoSecrets",
+            "notificationPlanOutOfRepo",
+            "activeRulesExistInManifest",
+            "activeRulesHaveCommands",
+            "everyCurrentFindingMapped",
+            "everyCurrentFindingHasCommands",
+            "noCommandUrls",
+            "noInlineEnvAssignments",
+            "dryRunEventsDoNotSend",
+            "dryRunEventsStoreNoCredentials",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "activeRuleIdsMissingFromManifest",
+            "activeRuleIdsWithoutCommands",
+            "commandsWithInlineEnvAssignment",
+            "commandsWithUrls",
+            "findingsWithoutCommands",
+            "unmappedFindingCodes"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "incident-drill"
         requirement = "Incident drills prove operational failures become critical incidents while owner-input blockers remain non-critical."
         path = "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json"
@@ -369,7 +465,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "backup-restore-validation", "ops-snapshot", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "backup-restore-validation", "ops-snapshot", "ops-alert-rules", "ops-alert-install-validation", "ops-escalation-dry-run", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"
@@ -403,6 +499,92 @@ function Get-TruthProp {
         }
     }
     return $Default
+}
+
+function Test-TruthPathExists {
+    param(
+        [AllowNull()][object] $Object,
+        [Parameter(Mandatory = $true)][string] $Path
+    )
+
+    $current = $Object
+    foreach ($part in @($Path -split "\.")) {
+        if ($null -eq $current) {
+            return $false
+        }
+        if ($current -is [System.Collections.IDictionary]) {
+            if (-not $current.Contains($part)) {
+                return $false
+            }
+            $current = $current[$part]
+            continue
+        }
+
+        $property = $current.PSObject.Properties[$part]
+        if ($null -eq $property) {
+            return $false
+        }
+        $current = $property.Value
+    }
+
+    return $true
+}
+
+function Get-TruthPathProp {
+    param(
+        [AllowNull()][object] $Object,
+        [Parameter(Mandatory = $true)][string] $Path,
+        [object] $Default = $null
+    )
+
+    if (-not (Test-TruthPathExists -Object $Object -Path $Path)) {
+        Write-Output -NoEnumerate $Default
+        return
+    }
+
+    $current = $Object
+    foreach ($part in @($Path -split "\.")) {
+        if ($current -is [System.Collections.IDictionary]) {
+            $current = $current[$part]
+            continue
+        }
+        $current = $current.PSObject.Properties[$part].Value
+    }
+
+    Write-Output -NoEnumerate $current
+}
+
+function Test-TruthExpectedValue {
+    param(
+        [AllowNull()][object] $Actual,
+        [AllowNull()][object] $Expected
+    )
+
+    if ($null -eq $Actual) {
+        return $false
+    }
+
+    if ($Expected -is [bool]) {
+        if ($Actual -is [bool]) {
+            return $Actual -eq $Expected
+        }
+        $actualText = "$Actual".Trim().ToLowerInvariant()
+        if ($Expected) {
+            return $actualText -eq "true"
+        }
+        return $actualText -eq "false"
+    }
+
+    if ($Expected -is [byte] -or $Expected -is [int16] -or $Expected -is [int] -or $Expected -is [long] -or $Expected -is [float] -or $Expected -is [double] -or $Expected -is [decimal]) {
+        try {
+            return ([double] $Actual) -eq ([double] $Expected)
+        }
+        catch {
+            return $false
+        }
+    }
+
+    return "$Actual" -eq "$Expected"
 }
 
 function Add-UniqueTruthValue {
@@ -535,6 +717,12 @@ function ConvertTo-TruthEvidence {
         "evidenceReportCount",
         "expectedFileCount",
         "ownerInputNameCount",
+        "ruleCount",
+        "criticalRuleCount",
+        "blockedRuleCount",
+        "dryRunEventCount",
+        "opsSnapshotStatus",
+        "opsAlertRulesStatus",
         "completionReady",
         "blockedOnlyOnKnownExternalOwnerInputs",
         "blockedOnlyOnOwnerInputs"
@@ -575,12 +763,41 @@ function ConvertTo-TruthEvidence {
             "missingStateArtifactDetected",
             "missingSnapshotManifestDetected",
             "latestPointerTamperDetected",
-            "wrongChainStateMismatchDetected"
+            "wrongChainStateMismatchDetected",
+            "packageScriptsPresent",
+            "planDidNotMutate",
+            "statusDidNotMutate",
+            "uninstallAbsentDidNotMutate",
+            "noExternalDelivery",
+            "opsSnapshotLoaded",
+            "opsAlertRulesLoaded",
+            "opsAlertRulesPassed",
+            "everyCurrentFindingMapped",
+            "everyCurrentFindingHasCommands",
+            "dryRunEventsDoNotSend",
+            "dryRunEventsStoreNoCredentials"
         )) {
             $value = Get-TruthProp -Object $checks -Name $name
             if ($null -ne $value -and -not [string]::IsNullOrWhiteSpace("$value")) {
                 Add-UniqueTruthValue -Target $facts -Value "$name=$value"
             }
+        }
+    }
+
+    foreach ($arrayName in @(
+        "failedChecks",
+        "unmappedCurrentFindingCodes",
+        "rulesWithoutCommands",
+        "activeRuleIdsMissingFromManifest",
+        "activeRuleIdsWithoutCommands",
+        "commandsWithInlineEnvAssignment",
+        "commandsWithUrls",
+        "findingsWithoutCommands",
+        "unmappedFindingCodes"
+    )) {
+        if (Test-TruthPathExists -Object $Report -Path $arrayName) {
+            $values = @((Get-TruthPathProp -Object $Report -Path $arrayName))
+            Add-UniqueTruthValue -Target $facts -Value "$($arrayName)Count=$($values.Count)"
         }
     }
 
@@ -614,6 +831,41 @@ function Get-TruthClassification {
                 }
             }
         }
+
+        $requiredMinimums = Get-TruthProp -Object $Definition -Name "requiredMinimums"
+        if ($null -ne $requiredMinimums -and $requiredMinimums -is [System.Collections.IDictionary]) {
+            foreach ($entry in $requiredMinimums.GetEnumerator()) {
+                $actual = Get-TruthPathProp -Object $Report -Path ([string] $entry.Key)
+                try {
+                    if (([double] $actual) -lt ([double] $entry.Value)) {
+                        return "failed"
+                    }
+                }
+                catch {
+                    return "failed"
+                }
+            }
+        }
+
+        foreach ($path in @((Get-TruthProp -Object $Definition -Name "requiredEmptyArrays" -Default @()))) {
+            if (-not (Test-TruthPathExists -Object $Report -Path ([string] $path))) {
+                return "failed"
+            }
+            if (@((Get-TruthPathProp -Object $Report -Path ([string] $path))).Count -ne 0) {
+                return "failed"
+            }
+        }
+
+        $requiredReportProperties = Get-TruthProp -Object $Definition -Name "requiredReportProperties"
+        if ($null -ne $requiredReportProperties -and $requiredReportProperties -is [System.Collections.IDictionary]) {
+            foreach ($entry in $requiredReportProperties.GetEnumerator()) {
+                $actual = Get-TruthPathProp -Object $Report -Path ([string] $entry.Key)
+                if (-not (Test-TruthExpectedValue -Actual $actual -Expected $entry.Value)) {
+                    return "failed"
+                }
+            }
+        }
+
         return "passed"
     }
     if ($rawStatus -in @("failed", "error", "invalid")) {

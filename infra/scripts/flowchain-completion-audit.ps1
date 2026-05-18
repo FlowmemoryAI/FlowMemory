@@ -47,6 +47,8 @@ $paths = [ordered]@{
     operatorPackageVerify = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-verify-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
+    opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
+    alertInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
     opsEscalationDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-escalation-dry-run-report.json"
     incidentDrill = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json"
     publicDeploymentContract = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
@@ -389,6 +391,12 @@ $incidentDrillExitCode = $incidentDrillResult.exitCode
 $opsSnapshotResult = Invoke-AuditChild -Path $paths.opsSnapshot -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-snapshot.ps1"), "-AllowBlocked", "-NoRefresh")
 $opsSnapshotOutput = @($opsSnapshotResult.output)
 $opsSnapshotExitCode = $opsSnapshotResult.exitCode
+$opsAlertRulesResult = Invoke-AuditChild -Path $paths.opsAlertRules -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-alerts.ps1"), "-AllowBlocked", "-NoRefresh")
+$opsAlertRulesOutput = @($opsAlertRulesResult.output)
+$opsAlertRulesExitCode = $opsAlertRulesResult.exitCode
+$alertInstallValidationResult = Invoke-AuditChild -Path $paths.alertInstallValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-alert-install-validation.ps1"))
+$alertInstallValidationOutput = @($alertInstallValidationResult.output)
+$alertInstallValidationExitCode = $alertInstallValidationResult.exitCode
 $opsEscalationDryRunResult = Invoke-AuditChild -Path $paths.opsEscalationDryRun -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-escalation-dry-run.ps1"), "-NoRefresh")
 $opsEscalationDryRunOutput = @($opsEscalationDryRunResult.output)
 $opsEscalationDryRunExitCode = $opsEscalationDryRunResult.exitCode
@@ -844,6 +852,37 @@ $opsSnapshotPassed = $opsSnapshotExitCode -eq 0 `
     -and $opsSnapshotCriticalCount -eq 0 `
     -and (-not [string]::IsNullOrWhiteSpace($opsSnapshotLatestHeight)) `
     -and (-not [string]::IsNullOrWhiteSpace($opsSnapshotFinalizedHeight))
+$opsAlertRules = $reports.opsAlertRules
+$opsAlertRulesStatus = Get-ReportStatus -Report $opsAlertRules
+$opsAlertRuleCount = [int](Get-AuditProp -Object $opsAlertRules -Name "ruleCount" -Default 0)
+$opsAlertCriticalRuleCount = [int](Get-AuditProp -Object $opsAlertRules -Name "criticalRuleCount" -Default 0)
+$opsAlertBlockedRuleCount = [int](Get-AuditProp -Object $opsAlertRules -Name "blockedRuleCount" -Default 0)
+$opsAlertUnmappedCodes = @((Get-AuditProp -Object $opsAlertRules -Name "unmappedCurrentFindingCodes" -Default @()))
+$opsAlertRulesWithoutCommands = @((Get-AuditProp -Object $opsAlertRules -Name "rulesWithoutCommands" -Default @()))
+$opsAlertRulesPassed = $opsAlertRulesExitCode -eq 0 `
+    -and $opsAlertRulesStatus -eq "passed" `
+    -and $opsAlertRuleCount -ge 10 `
+    -and $opsAlertCriticalRuleCount -ge 5 `
+    -and $opsAlertBlockedRuleCount -ge 5 `
+    -and $opsAlertUnmappedCodes.Count -eq 0 `
+    -and $opsAlertRulesWithoutCommands.Count -eq 0 `
+    -and ((Get-AuditProp -Object $opsAlertRules -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $opsAlertRules -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsAlertRules -Name "broadcasts" -Default $true) -eq $false)
+$alertInstallValidation = $reports.alertInstallValidation
+$alertInstallValidationStatus = Get-ReportStatus -Report $alertInstallValidation
+$alertInstallValidationChecks = Get-AuditProp -Object $alertInstallValidation -Name "checks"
+$alertInstallValidationFailedChecks = @((Get-AuditProp -Object $alertInstallValidation -Name "failedChecks" -Default @()))
+$alertInstallValidationPassed = $alertInstallValidationExitCode -eq 0 `
+    -and $alertInstallValidationStatus -eq "passed" `
+    -and $alertInstallValidationFailedChecks.Count -eq 0 `
+    -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "packageScriptsPresent" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "statusDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "uninstallAbsentDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $alertInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $alertInstallValidation -Name "noSecrets" -Default $false) -eq $true)
 $opsEscalationDryRun = $reports.opsEscalationDryRun
 $opsEscalationDryRunStatus = Get-ReportStatus -Report $opsEscalationDryRun
 $opsEscalationDryRunChecks = Get-AuditProp -Object $opsEscalationDryRun -Name "checks"
@@ -1144,6 +1183,18 @@ Add-AuditItem -Items $items -Id "ops-snapshot" `
     -Evidence "opsStatus=$opsSnapshotStatus, criticalCount=$opsSnapshotCriticalCount, blockedCount=$opsSnapshotBlockedCount, latestHeight=$opsSnapshotLatestHeight, finalizedHeight=$opsSnapshotFinalizedHeight, report=$($paths.opsSnapshot)" `
     -Commands @("npm run flowchain:ops:snapshot -- -AllowBlocked")
 
+Add-AuditItem -Items $items -Id "ops-alert-rules" `
+    -Requirement "Ops alert rules map every current ops finding to local operator commands with critical and blocked rule coverage, no unmapped current findings, and no external delivery credentials." `
+    -Status $(if ($opsAlertRulesPassed) { "passed" } else { "failed" }) `
+    -Evidence "alertRules=$opsAlertRulesStatus, rules=$opsAlertRuleCount, criticalRules=$opsAlertCriticalRuleCount, blockedRules=$opsAlertBlockedRuleCount, unmapped=$($opsAlertUnmappedCodes.Count), rulesWithoutCommands=$($opsAlertRulesWithoutCommands.Count), report=$($paths.opsAlertRules)" `
+    -Commands @("npm run flowchain:ops:alerts -- -AllowBlocked")
+
+Add-AuditItem -Items $items -Id "ops-alert-install-validation" `
+    -Requirement "Ops alert scheduled refresh install validation proves plan/status/uninstall no-op behavior and no external delivery for recurring local alert evidence." `
+    -Status $(if ($alertInstallValidationPassed) { "passed" } else { "failed" }) `
+    -Evidence "alertInstall=$alertInstallValidationStatus, failedChecks=$($alertInstallValidationFailedChecks.Count), planDidNotMutate=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "planDidNotMutate" -Default $false), statusDidNotMutate=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "statusDidNotMutate" -Default $false), noExternalDelivery=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "noExternalDelivery" -Default $false), report=$($paths.alertInstallValidation)" `
+    -Commands @("npm run flowchain:ops:alerts:install:validate")
+
 Add-AuditItem -Items $items -Id "ops-escalation-dry-run" `
     -Requirement "Ops escalation dry run maps every current finding to local operator commands and proves the repo-owned alert path does not send network delivery or store external delivery credentials." `
     -Status $(if ($opsEscalationDryRunPassed) { "passed" } else { "failed" }) `
@@ -1292,6 +1343,10 @@ $report = [ordered]@{
     incidentDrillOutputRedacted = @($incidentDrillOutput | ForEach-Object { "$_" })
     opsSnapshotExitCode = $opsSnapshotExitCode
     opsSnapshotOutputRedacted = @($opsSnapshotOutput | ForEach-Object { "$_" })
+    opsAlertRulesExitCode = $opsAlertRulesExitCode
+    opsAlertRulesOutputRedacted = @($opsAlertRulesOutput | ForEach-Object { "$_" })
+    alertInstallValidationExitCode = $alertInstallValidationExitCode
+    alertInstallValidationOutputRedacted = @($alertInstallValidationOutput | ForEach-Object { "$_" })
     opsEscalationDryRunExitCode = $opsEscalationDryRunExitCode
     opsEscalationDryRunOutputRedacted = @($opsEscalationDryRunOutput | ForEach-Object { "$_" })
     publicDeploymentContractExitCode = $publicDeploymentContractExitCode
@@ -1354,6 +1409,8 @@ $report = [ordered]@{
         "npm run flowchain:service:monitor",
         "npm run flowchain:dev-pack:e2e",
         "npm run flowchain:ops:snapshot",
+        "npm run flowchain:ops:alerts",
+        "npm run flowchain:ops:alerts:install:validate",
         "npm run flowchain:ops:escalation:dry-run",
         "npm run flowchain:ops:incident-drill",
         "npm run flowchain:live-infra:check",
