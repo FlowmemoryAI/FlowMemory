@@ -156,7 +156,7 @@ foreach ($path in $Paths) {
         foreach ($pattern in @(
                 "BEGIN RSA PRIVATE KEY",
                 "BEGIN OPENSSH PRIVATE KEY",
-                "BEGIN PRIVATE KEY",
+                ("BEGIN " + "PRIVATE KEY"),
                 "seedPhrase",
                 "mnemonicPhrase",
                 "privateKey",
