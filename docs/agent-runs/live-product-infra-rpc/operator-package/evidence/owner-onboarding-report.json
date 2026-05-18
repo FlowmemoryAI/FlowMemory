@@ -1,8 +1,29 @@
 {
     "schema":  "flowchain.owner_onboarding_report.v0",
-    "generatedAt":  "2026-05-18T02:01:44.9079875Z",
+    "generatedAt":  "2026-05-18T06:11:05.5539967Z",
     "status":  "passed",
     "ownerInputsStatus":  "blocked",
+    "checks":  {
+                   "flowChainRpcIsOurs":  true,
+                   "thirdPartyFlowChainRpcProviderNeededFalse":  true,
+                   "publicRpcRequiresOwnerPublicEdge":  true,
+                   "base8453RpcIsExternalChainDependency":  true,
+                   "localEnvFileSupported":  true,
+                   "onboardingGroupsPresent":  true,
+                   "localShellTemplatePresent":  true,
+                   "nextCommandsPresent":  true,
+                   "valuesPrintedFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true,
+                   "secretMarkerFindingsEmpty":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
     "flowChainRpcIsOurs":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
     "publicRpcRequiresOwnerPublicEdge":  true,

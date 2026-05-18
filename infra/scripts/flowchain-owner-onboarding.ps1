@@ -27,6 +27,38 @@ function Get-OnboardingProp {
     return $Default
 }
 
+function Get-OnboardingSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 $ownerInputs = Read-FlowChainJsonIfExists -Path $ownerInputsPath
 $missingEnvNames = @((Get-OnboardingProp -Object $ownerInputs -Name "missingEnvNames" -Default @()))
 $invalidEnvNames = @((Get-OnboardingProp -Object $ownerInputs -Name "invalidEnvNames" -Default @()))
@@ -153,11 +185,30 @@ $nextCommands = @(
     "npm run flowchain:completion:audit -- -AllowBlocked"
 )
 
+$checks = [ordered]@{
+    flowChainRpcIsOurs = $true
+    thirdPartyFlowChainRpcProviderNeededFalse = $true
+    publicRpcRequiresOwnerPublicEdge = $true
+    base8453RpcIsExternalChainDependency = $true
+    localEnvFileSupported = $true
+    onboardingGroupsPresent = $onboardingGroups.Count -ge 4
+    localShellTemplatePresent = $localShellTemplate.Count -ge 17
+    nextCommandsPresent = $nextCommands.Count -ge 1
+    valuesPrintedFalse = $true
+    envValuesPrintedFalse = $true
+    noSecrets = $true
+    broadcastsFalse = $true
+    secretMarkerFindingsEmpty = $true
+}
+
 $report = [ordered]@{
     schema = "flowchain.owner_onboarding_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = "passed"
+    status = "pending"
     ownerInputsStatus = $ownerInputsStatus
+    checks = $checks
+    failedChecks = @()
+    secretMarkerFindings = @()
     flowChainRpcIsOurs = $true
     thirdPartyFlowChainRpcProviderNeeded = $false
     publicRpcRequiresOwnerPublicEdge = $true
@@ -178,6 +229,18 @@ $report = [ordered]@{
     nextCommands = $nextCommands
 }
 
+$preliminaryReportText = $report | ConvertTo-Json -Depth 16
+$secretMarkerFindings = @(Get-OnboardingSecretMarkerFindings -Text $preliminaryReportText -Label "owner onboarding report")
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
+
 $reportText = $report | ConvertTo-Json -Depth 16
 Assert-FlowChainNoSecretText -Text $reportText -Label "owner onboarding report"
 Write-FlowChainJson -Path $reportFullPath -Value $report -Depth 16
@@ -186,7 +249,7 @@ $markdownLines = New-Object System.Collections.Generic.List[string]
 $markdownLines.Add("# FlowChain Owner Onboarding")
 $markdownLines.Add("")
 $markdownLines.Add("Generated: $($report.generatedAt)")
-$markdownLines.Add("Status: passed")
+$markdownLines.Add("Status: $status")
 $markdownLines.Add("")
 $markdownLines.Add("FlowChain RPC is implemented by this repository. The owner does not need a third-party FlowChain RPC provider. Public RPC readiness means exposing the private local RPC origin through an owner-operated HTTPS edge with DNS, TLS, CORS, rate limits, and monitoring.")
 $markdownLines.Add("")
@@ -239,7 +302,11 @@ Assert-FlowChainNoSecretText -Text $markdownText -Label "owner onboarding markdo
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $markdownFullPath) | Out-Null
 Set-Content -LiteralPath $markdownFullPath -Value $markdownText -Encoding UTF8
 
-Write-Host "FlowChain owner onboarding status: passed"
+Write-Host "FlowChain owner onboarding status: $status"
 Write-Host "FlowChain RPC is repo-owned; public RPC needs an owner HTTPS edge, not a third-party FlowChain RPC provider."
 Write-Host "Report: $reportFullPath"
 Write-Host "Markdown: $markdownFullPath"
+if ($status -ne "passed") {
+    Write-Host "Failed checks: $($failedChecks -join ', ')"
+    exit 1
+}

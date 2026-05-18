@@ -1,7 +1,25 @@
 {
     "schema":  "flowchain.owner_env_template_report.v0",
-    "generatedAt":  "2026-05-18T02:01:44.8259850Z",
+    "generatedAt":  "2026-05-18T06:11:09.8761869Z",
     "status":  "passed",
+    "checks":  {
+                   "pathIsGitIgnored":  true,
+                   "createdOrPreservedLocalFile":  true,
+                   "templateIncludesAllRequiredEnvNames":  true,
+                   "requiredEnvNameCountExpected":  true,
+                   "optionalEnvNameCountExpected":  true,
+                   "valuesPrintedFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true,
+                   "secretMarkerFindingsEmpty":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
     "templatePath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\owner-inputs\\flowchain-owner.local.env",
     "templateRelativePath":  "devnet/local/owner-inputs/flowchain-owner.local.env",
     "pathIsGitIgnored":  true,

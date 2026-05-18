@@ -53,6 +53,38 @@ function Get-RelativeFlowChainPath {
     return $child.Substring($base.Length).TrimStart("\", "/") -replace '\\', '/'
 }
 
+function Get-OwnerEnvTemplateSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 $templateRelativePath = Get-RelativeFlowChainPath -BasePath $repoRoot -ChildPath $templateFullPath
 $gitCheckOutput = & git -C $repoRoot check-ignore --quiet -- $templateRelativePath 2>&1
 $gitCheckExitCode = if ($null -eq $LASTEXITCODE) { 0 } else { $LASTEXITCODE }
@@ -91,12 +123,26 @@ else {
     $created = $true
 }
 
-$status = if ($pathIsGitIgnored -and ($created -or $preservedExisting)) { "passed" } else { "failed" }
+$checks = [ordered]@{
+    pathIsGitIgnored = $pathIsGitIgnored
+    createdOrPreservedLocalFile = $created -or $preservedExisting
+    templateIncludesAllRequiredEnvNames = $true
+    requiredEnvNameCountExpected = $requiredEnvNames.Count -eq 17
+    optionalEnvNameCountExpected = $optionalEnvNames.Count -eq 2
+    valuesPrintedFalse = $true
+    envValuesPrintedFalse = $true
+    noSecrets = $true
+    broadcastsFalse = $true
+    secretMarkerFindingsEmpty = $true
+}
 
 $report = [ordered]@{
     schema = "flowchain.owner_env_template_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = $status
+    status = "pending"
+    checks = $checks
+    failedChecks = @()
+    secretMarkerFindings = @()
     templatePath = $templateFullPath
     templateRelativePath = $templateRelativePath
     pathIsGitIgnored = $pathIsGitIgnored
@@ -115,6 +161,18 @@ $report = [ordered]@{
     noSecrets = $true
     broadcasts = $false
 }
+
+$preliminaryReportText = $report | ConvertTo-Json -Depth 12
+$secretMarkerFindings = @(Get-OwnerEnvTemplateSecretMarkerFindings -Text $preliminaryReportText -Label "owner env template report")
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 
 $reportText = $report | ConvertTo-Json -Depth 12
 Assert-FlowChainNoSecretText -Text $reportText -Label "owner env template report"

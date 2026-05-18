@@ -422,6 +422,25 @@ $definitions = @(
         command = "npm run flowchain:owner:onboarding"
         productionGate = $true
         ownerInputGate = $false
+        requiredChecks = @(
+            "flowChainRpcIsOurs",
+            "thirdPartyFlowChainRpcProviderNeededFalse",
+            "publicRpcRequiresOwnerPublicEdge",
+            "base8453RpcIsExternalChainDependency",
+            "localEnvFileSupported",
+            "onboardingGroupsPresent",
+            "localShellTemplatePresent",
+            "nextCommandsPresent",
+            "valuesPrintedFalse",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
         requiredReportProperties = [ordered]@{
             "flowChainRpcIsOurs" = $true
             "thirdPartyFlowChainRpcProviderNeeded" = $false
@@ -441,7 +460,23 @@ $definitions = @(
         productionGate = $true
         ownerInputGate = $false
         requiredEmptyArrays = @(
-            "missingChecklistCoverage"
+            "missingChecklistCoverage",
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredChecks = @(
+            "missingChecklistCoverageEmpty",
+            "flowChainRpcIsRepoOwned",
+            "thirdPartyFlowChainRpcProviderNeededFalse",
+            "localEnvFileSupported",
+            "itemCountMinimumMet",
+            "externalSignupCountMinimumMet",
+            "requiredOwnerEnvNamesPresent",
+            "valuesPrintedFalse",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse",
+            "secretMarkerFindingsEmpty"
         )
         requiredReportProperties = [ordered]@{
             "flowChainRpcIsRepoOwned" = $true
@@ -462,6 +497,22 @@ $definitions = @(
         requiredMinimums = [ordered]@{
             requiredEnvNameCount = 17
         }
+        requiredChecks = @(
+            "pathIsGitIgnored",
+            "createdOrPreservedLocalFile",
+            "templateIncludesAllRequiredEnvNames",
+            "requiredEnvNameCountExpected",
+            "optionalEnvNameCountExpected",
+            "valuesPrintedFalse",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
         requiredReportProperties = [ordered]@{
             "pathIsGitIgnored" = $true
             "templateIncludesAllRequiredEnvNames" = $true
@@ -480,7 +531,18 @@ $definitions = @(
         ownerInputGate = $false
         requiredChecks = @(
             "missingOwnerEnvFileFailsBeforeChildGates",
-            "unignoredOwnerEnvFileFailsBeforeChildGates"
+            "unignoredOwnerEnvFileFailsBeforeChildGates",
+            "scenarioCountExpected",
+            "allScenariosPassed",
+            "failedScenariosAbsent",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
         )
         requiredReportProperties = [ordered]@{
             "envValuesPrinted" = $false

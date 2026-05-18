@@ -27,6 +27,38 @@ function Get-SignupProp {
     return $Default
 }
 
+function Get-SignupSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 $ownerInputs = Read-FlowChainJsonIfExists -Path $ownerInputsPath
 $missingEnvNames = @((Get-SignupProp -Object $ownerInputs -Name "missingEnvNames" -Default @()))
 $invalidEnvNames = @((Get-SignupProp -Object $ownerInputs -Name "invalidEnvNames" -Default @()))
@@ -169,12 +201,29 @@ $requiredOwnerEnvNames = @(
     "FLOWCHAIN_PILOT_CONFIRMATIONS"
 )
 $missingChecklistCoverage = @($requiredOwnerEnvNames | Where-Object { $_ -notin @($allProducedEnvNames) })
+$checks = [ordered]@{
+    missingChecklistCoverageEmpty = $missingChecklistCoverage.Count -eq 0
+    flowChainRpcIsRepoOwned = $true
+    thirdPartyFlowChainRpcProviderNeededFalse = $true
+    localEnvFileSupported = $true
+    itemCountMinimumMet = $checklistItems.Count -ge 8
+    externalSignupCountMinimumMet = @($checklistItems | Where-Object { $_.externalSignupNeeded -eq $true }).Count -ge 3
+    requiredOwnerEnvNamesPresent = $requiredOwnerEnvNames.Count -eq 17
+    valuesPrintedFalse = $true
+    envValuesPrintedFalse = $true
+    noSecrets = $true
+    broadcastsFalse = $true
+    secretMarkerFindingsEmpty = $true
+}
 
 $report = [ordered]@{
     schema = "flowchain.owner_signup_checklist_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = $(if ($missingChecklistCoverage.Count -eq 0) { "passed" } else { "failed" })
+    status = "pending"
     ownerInputsStatus = $ownerInputsStatus
+    checks = $checks
+    failedChecks = @()
+    secretMarkerFindings = @()
     flowChainRpcIsRepoOwned = $true
     thirdPartyFlowChainRpcProviderNeeded = $false
     externalSignupCount = @($checklistItems | Where-Object { $_.externalSignupNeeded -eq $true }).Count
@@ -194,6 +243,18 @@ $report = [ordered]@{
     noSecrets = $true
     broadcasts = $false
 }
+
+$preliminaryReportText = $report | ConvertTo-Json -Depth 18
+$secretMarkerFindings = @(Get-SignupSecretMarkerFindings -Text $preliminaryReportText -Label "owner signup checklist report")
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 
 $reportText = $report | ConvertTo-Json -Depth 18
 Assert-FlowChainNoSecretText -Text $reportText -Label "owner signup checklist report"

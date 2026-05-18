@@ -34,6 +34,38 @@ function Get-OwnerEnvValidationProp {
     return $Default
 }
 
+function Get-OwnerEnvValidationSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 function Invoke-OwnerEnvReadinessValidationScenario {
     param(
         [Parameter(Mandatory = $true)][string] $Name,
@@ -122,21 +154,42 @@ finally {
 }
 
 $failedScenarios = @($scenarios | Where-Object { $_.passed -ne $true })
-$status = if ($failedScenarios.Count -eq 0) { "passed" } else { "failed" }
+$checks = [ordered]@{
+    missingOwnerEnvFileFailsBeforeChildGates = (@($scenarios | Where-Object { $_.name -eq "missing-owner-env-file" -and $_.passed -eq $true }).Count -eq 1)
+    unignoredOwnerEnvFileFailsBeforeChildGates = (@($scenarios | Where-Object { $_.name -eq "unignored-owner-env-file" -and $_.passed -eq $true }).Count -eq 1)
+    scenarioCountExpected = $scenarios.Count -eq 2
+    allScenariosPassed = $failedScenarios.Count -eq 0
+    failedScenariosAbsent = $failedScenarios.Count -eq 0
+    envValuesPrintedFalse = $true
+    noSecrets = $true
+    broadcastsFalse = $true
+    secretMarkerFindingsEmpty = $true
+}
 $report = [ordered]@{
     schema = "flowchain.owner_env_readiness_validation_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = $status
+    status = "pending"
     scenarioCount = $scenarios.Count
     scenarios = @($scenarios)
-    checks = [ordered]@{
-        missingOwnerEnvFileFailsBeforeChildGates = (@($scenarios | Where-Object { $_.name -eq "missing-owner-env-file" -and $_.passed -eq $true }).Count -eq 1)
-        unignoredOwnerEnvFileFailsBeforeChildGates = (@($scenarios | Where-Object { $_.name -eq "unignored-owner-env-file" -and $_.passed -eq $true }).Count -eq 1)
-    }
+    checks = $checks
+    failedChecks = @()
+    secretMarkerFindings = @()
     envValuesPrinted = $false
     noSecrets = $true
     broadcasts = $false
 }
+
+$preliminaryReportText = $report | ConvertTo-Json -Depth 18
+$secretMarkerFindings = @(Get-OwnerEnvValidationSecretMarkerFindings -Text $preliminaryReportText -Label "owner env readiness validation report")
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 
 $reportText = $report | ConvertTo-Json -Depth 18
 Assert-FlowChainNoSecretText -Text $reportText -Label "owner env readiness validation report"

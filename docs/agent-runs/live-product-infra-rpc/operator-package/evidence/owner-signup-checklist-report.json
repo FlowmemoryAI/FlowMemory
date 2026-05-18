@@ -1,8 +1,28 @@
 {
     "schema":  "flowchain.owner_signup_checklist_report.v0",
-    "generatedAt":  "2026-05-18T02:01:44.9439884Z",
+    "generatedAt":  "2026-05-18T06:11:07.8683826Z",
     "status":  "passed",
     "ownerInputsStatus":  "blocked",
+    "checks":  {
+                   "missingChecklistCoverageEmpty":  true,
+                   "flowChainRpcIsRepoOwned":  true,
+                   "thirdPartyFlowChainRpcProviderNeededFalse":  true,
+                   "localEnvFileSupported":  true,
+                   "itemCountMinimumMet":  true,
+                   "externalSignupCountMinimumMet":  true,
+                   "requiredOwnerEnvNamesPresent":  true,
+                   "valuesPrintedFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true,
+                   "secretMarkerFindingsEmpty":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
     "externalSignupCount":  3,

@@ -828,15 +828,41 @@ $ownerOnboardingThirdPartyFlowChainRpcProviderNeeded = Get-AuditProp -Object $ow
 $ownerOnboardingPublicEdgeRequired = Get-AuditProp -Object $ownerOnboarding -Name "publicRpcRequiresOwnerPublicEdge" -Default $false
 $ownerOnboardingBaseExternal = Get-AuditProp -Object $ownerOnboarding -Name "base8453RpcIsExternalChainDependency" -Default $false
 $ownerOnboardingLocalEnvFileSupported = Get-AuditProp -Object $ownerOnboarding -Name "localEnvFileSupported" -Default $false
+$ownerOnboardingChecks = Get-AuditProp -Object $ownerOnboarding -Name "checks"
+$ownerOnboardingFailedChecks = @((Get-AuditProp -Object $ownerOnboarding -Name "failedChecks" -Default @()))
+$ownerOnboardingSecretFindings = @((Get-AuditProp -Object $ownerOnboarding -Name "secretMarkerFindings" -Default @()))
+$ownerOnboardingRequiredChecks = @(
+    "flowChainRpcIsOurs",
+    "thirdPartyFlowChainRpcProviderNeededFalse",
+    "publicRpcRequiresOwnerPublicEdge",
+    "base8453RpcIsExternalChainDependency",
+    "localEnvFileSupported",
+    "onboardingGroupsPresent",
+    "localShellTemplatePresent",
+    "nextCommandsPresent",
+    "valuesPrintedFalse",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse",
+    "secretMarkerFindingsEmpty"
+)
+$ownerOnboardingMissingChecks = Get-MissingAuditChecks -Checks $ownerOnboardingChecks -Names $ownerOnboardingRequiredChecks
+$ownerOnboardingFailedCheckCount = @($ownerOnboardingFailedChecks | Where-Object { $null -ne $_ }).Count
+$ownerOnboardingSecretFindingCount = @($ownerOnboardingSecretFindings | Where-Object { $null -ne $_ }).Count
+$ownerOnboardingMissingCheckCount = @($ownerOnboardingMissingChecks | Where-Object { $null -ne $_ }).Count
 $ownerOnboardingPassed = $ownerOnboardingExitCode -eq 0 `
     -and $ownerOnboardingStatus -eq "passed" `
     -and $ownerOnboardingFlowChainRpcIsOurs -eq $true `
+    -and $ownerOnboardingFailedCheckCount -eq 0 `
+    -and $ownerOnboardingSecretFindingCount -eq 0 `
+    -and $ownerOnboardingMissingCheckCount -eq 0 `
     -and $ownerOnboardingThirdPartyFlowChainRpcProviderNeeded -eq $false `
     -and $ownerOnboardingPublicEdgeRequired -eq $true `
     -and $ownerOnboardingBaseExternal -eq $true `
     -and $ownerOnboardingLocalEnvFileSupported -eq $true `
     -and ((Get-AuditProp -Object $ownerOnboarding -Name "envValuesPrinted" -Default $true) -eq $false) `
-    -and ((Get-AuditProp -Object $ownerOnboarding -Name "noSecrets" -Default $false) -eq $true)
+    -and ((Get-AuditProp -Object $ownerOnboarding -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $ownerOnboarding -Name "broadcasts" -Default $true) -eq $false)
 $ownerSignupChecklistStatus = Get-ReportStatus -Report $ownerSignupChecklist
 $ownerSignupExternalCount = [int](Get-AuditProp -Object $ownerSignupChecklist -Name "externalSignupCount" -Default 0)
 $ownerSignupItemCount = [int](Get-AuditProp -Object $ownerSignupChecklist -Name "itemCount" -Default 0)
@@ -844,8 +870,32 @@ $ownerSignupMissingCoverageCount = @((Get-AuditProp -Object $ownerSignupChecklis
 $ownerSignupRepoOwned = Get-AuditProp -Object $ownerSignupChecklist -Name "flowChainRpcIsRepoOwned" -Default $false
 $ownerSignupThirdPartyFlowChainRpcNeeded = Get-AuditProp -Object $ownerSignupChecklist -Name "thirdPartyFlowChainRpcProviderNeeded" -Default $true
 $ownerSignupLocalEnvFileSupported = Get-AuditProp -Object $ownerSignupChecklist -Name "localEnvFileSupported" -Default $false
+$ownerSignupChecks = Get-AuditProp -Object $ownerSignupChecklist -Name "checks"
+$ownerSignupFailedChecks = @((Get-AuditProp -Object $ownerSignupChecklist -Name "failedChecks" -Default @()))
+$ownerSignupSecretFindings = @((Get-AuditProp -Object $ownerSignupChecklist -Name "secretMarkerFindings" -Default @()))
+$ownerSignupRequiredChecks = @(
+    "missingChecklistCoverageEmpty",
+    "flowChainRpcIsRepoOwned",
+    "thirdPartyFlowChainRpcProviderNeededFalse",
+    "localEnvFileSupported",
+    "itemCountMinimumMet",
+    "externalSignupCountMinimumMet",
+    "requiredOwnerEnvNamesPresent",
+    "valuesPrintedFalse",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse",
+    "secretMarkerFindingsEmpty"
+)
+$ownerSignupMissingChecks = Get-MissingAuditChecks -Checks $ownerSignupChecks -Names $ownerSignupRequiredChecks
+$ownerSignupFailedCheckCount = @($ownerSignupFailedChecks | Where-Object { $null -ne $_ }).Count
+$ownerSignupSecretFindingCount = @($ownerSignupSecretFindings | Where-Object { $null -ne $_ }).Count
+$ownerSignupMissingCheckCount = @($ownerSignupMissingChecks | Where-Object { $null -ne $_ }).Count
 $ownerSignupChecklistPassed = $ownerSignupChecklistExitCode -eq 0 `
     -and $ownerSignupChecklistStatus -eq "passed" `
+    -and $ownerSignupFailedCheckCount -eq 0 `
+    -and $ownerSignupSecretFindingCount -eq 0 `
+    -and $ownerSignupMissingCheckCount -eq 0 `
     -and $ownerSignupItemCount -ge 8 `
     -and $ownerSignupExternalCount -ge 3 `
     -and $ownerSignupMissingCoverageCount -eq 0 `
@@ -853,26 +903,70 @@ $ownerSignupChecklistPassed = $ownerSignupChecklistExitCode -eq 0 `
     -and $ownerSignupThirdPartyFlowChainRpcNeeded -eq $false `
     -and $ownerSignupLocalEnvFileSupported -eq $true `
     -and ((Get-AuditProp -Object $ownerSignupChecklist -Name "envValuesPrinted" -Default $true) -eq $false) `
-    -and ((Get-AuditProp -Object $ownerSignupChecklist -Name "noSecrets" -Default $false) -eq $true)
+    -and ((Get-AuditProp -Object $ownerSignupChecklist -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $ownerSignupChecklist -Name "broadcasts" -Default $true) -eq $false)
 $ownerEnvTemplateStatus = Get-ReportStatus -Report $ownerEnvTemplate
 $ownerEnvTemplateGitIgnored = Get-AuditProp -Object $ownerEnvTemplate -Name "pathIsGitIgnored" -Default $false
 $ownerEnvTemplateIncludesRequired = Get-AuditProp -Object $ownerEnvTemplate -Name "templateIncludesAllRequiredEnvNames" -Default $false
 $ownerEnvTemplateRequiredCount = [int](Get-AuditProp -Object $ownerEnvTemplate -Name "requiredEnvNameCount" -Default 0)
 $ownerEnvTemplateOptionalCount = @((Get-AuditProp -Object $ownerEnvTemplate -Name "optionalEnvNames" -Default @())).Count
+$ownerEnvTemplateChecks = Get-AuditProp -Object $ownerEnvTemplate -Name "checks"
+$ownerEnvTemplateFailedChecks = @((Get-AuditProp -Object $ownerEnvTemplate -Name "failedChecks" -Default @()))
+$ownerEnvTemplateSecretFindings = @((Get-AuditProp -Object $ownerEnvTemplate -Name "secretMarkerFindings" -Default @()))
+$ownerEnvTemplateRequiredChecks = @(
+    "pathIsGitIgnored",
+    "createdOrPreservedLocalFile",
+    "templateIncludesAllRequiredEnvNames",
+    "requiredEnvNameCountExpected",
+    "optionalEnvNameCountExpected",
+    "valuesPrintedFalse",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse",
+    "secretMarkerFindingsEmpty"
+)
+$ownerEnvTemplateMissingChecks = Get-MissingAuditChecks -Checks $ownerEnvTemplateChecks -Names $ownerEnvTemplateRequiredChecks
+$ownerEnvTemplateFailedCheckCount = @($ownerEnvTemplateFailedChecks | Where-Object { $null -ne $_ }).Count
+$ownerEnvTemplateSecretFindingCount = @($ownerEnvTemplateSecretFindings | Where-Object { $null -ne $_ }).Count
+$ownerEnvTemplateMissingCheckCount = @($ownerEnvTemplateMissingChecks | Where-Object { $null -ne $_ }).Count
 $ownerEnvTemplatePassed = $ownerEnvTemplateExitCode -eq 0 `
     -and $ownerEnvTemplateStatus -eq "passed" `
+    -and $ownerEnvTemplateFailedCheckCount -eq 0 `
+    -and $ownerEnvTemplateSecretFindingCount -eq 0 `
+    -and $ownerEnvTemplateMissingCheckCount -eq 0 `
     -and $ownerEnvTemplateGitIgnored -eq $true `
     -and $ownerEnvTemplateIncludesRequired -eq $true `
     -and $ownerEnvTemplateRequiredCount -eq 17 `
     -and $ownerEnvTemplateOptionalCount -eq 2 `
     -and ((Get-AuditProp -Object $ownerEnvTemplate -Name "envValuesPrinted" -Default $true) -eq $false) `
-    -and ((Get-AuditProp -Object $ownerEnvTemplate -Name "noSecrets" -Default $false) -eq $true)
+    -and ((Get-AuditProp -Object $ownerEnvTemplate -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $ownerEnvTemplate -Name "broadcasts" -Default $true) -eq $false)
 $ownerEnvReadinessValidationStatus = Get-ReportStatus -Report $ownerEnvReadinessValidation
 $ownerEnvReadinessValidationChecks = Get-AuditProp -Object $ownerEnvReadinessValidation -Name "checks"
 $ownerEnvReadinessValidationMissingFails = Get-AuditProp -Object $ownerEnvReadinessValidationChecks -Name "missingOwnerEnvFileFailsBeforeChildGates" -Default $false
 $ownerEnvReadinessValidationUnignoredFails = Get-AuditProp -Object $ownerEnvReadinessValidationChecks -Name "unignoredOwnerEnvFileFailsBeforeChildGates" -Default $false
+$ownerEnvReadinessValidationFailedChecks = @((Get-AuditProp -Object $ownerEnvReadinessValidation -Name "failedChecks" -Default @()))
+$ownerEnvReadinessValidationSecretFindings = @((Get-AuditProp -Object $ownerEnvReadinessValidation -Name "secretMarkerFindings" -Default @()))
+$ownerEnvReadinessValidationRequiredChecks = @(
+    "missingOwnerEnvFileFailsBeforeChildGates",
+    "unignoredOwnerEnvFileFailsBeforeChildGates",
+    "scenarioCountExpected",
+    "allScenariosPassed",
+    "failedScenariosAbsent",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse",
+    "secretMarkerFindingsEmpty"
+)
+$ownerEnvReadinessValidationMissingChecks = Get-MissingAuditChecks -Checks $ownerEnvReadinessValidationChecks -Names $ownerEnvReadinessValidationRequiredChecks
+$ownerEnvReadinessValidationFailedCheckCount = @($ownerEnvReadinessValidationFailedChecks | Where-Object { $null -ne $_ }).Count
+$ownerEnvReadinessValidationSecretFindingCount = @($ownerEnvReadinessValidationSecretFindings | Where-Object { $null -ne $_ }).Count
+$ownerEnvReadinessValidationMissingCheckCount = @($ownerEnvReadinessValidationMissingChecks | Where-Object { $null -ne $_ }).Count
 $ownerEnvReadinessValidationPassed = $ownerEnvReadinessValidationExitCode -eq 0 `
     -and $ownerEnvReadinessValidationStatus -eq "passed" `
+    -and $ownerEnvReadinessValidationFailedCheckCount -eq 0 `
+    -and $ownerEnvReadinessValidationSecretFindingCount -eq 0 `
+    -and $ownerEnvReadinessValidationMissingCheckCount -eq 0 `
     -and $ownerEnvReadinessValidationMissingFails -eq $true `
     -and $ownerEnvReadinessValidationUnignoredFails -eq $true `
     -and ((Get-AuditProp -Object $ownerEnvReadinessValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
@@ -1909,25 +2003,25 @@ Add-AuditItem -Items $items -Id "owner-input-contract" `
 Add-AuditItem -Items $items -Id "owner-onboarding-packet" `
     -Requirement "Owner onboarding distinguishes repo-owned FlowChain RPC from the external Base 8453 RPC dependency and gives no-values setup commands." `
     -Status $(if ($ownerOnboardingPassed) { "passed" } else { "failed" }) `
-    -Evidence "onboardingStatus=$ownerOnboardingStatus, flowChainRpcIsOurs=$ownerOnboardingFlowChainRpcIsOurs, thirdPartyFlowChainRpcProviderNeeded=$ownerOnboardingThirdPartyFlowChainRpcProviderNeeded, publicRpcRequiresOwnerPublicEdge=$ownerOnboardingPublicEdgeRequired, base8453RpcIsExternalChainDependency=$ownerOnboardingBaseExternal, localEnvFileSupported=$ownerOnboardingLocalEnvFileSupported, report=$($paths.ownerOnboarding)" `
+    -Evidence "onboardingStatus=$ownerOnboardingStatus, flowChainRpcIsOurs=$ownerOnboardingFlowChainRpcIsOurs, thirdPartyFlowChainRpcProviderNeeded=$ownerOnboardingThirdPartyFlowChainRpcProviderNeeded, publicRpcRequiresOwnerPublicEdge=$ownerOnboardingPublicEdgeRequired, base8453RpcIsExternalChainDependency=$ownerOnboardingBaseExternal, localEnvFileSupported=$ownerOnboardingLocalEnvFileSupported, failedChecks=$ownerOnboardingFailedCheckCount, secretFindings=$ownerOnboardingSecretFindingCount, missingChecks=$ownerOnboardingMissingCheckCount, report=$($paths.ownerOnboarding)" `
     -Commands @("npm run flowchain:owner:onboarding")
 
 Add-AuditItem -Items $items -Id "owner-signup-checklist" `
     -Requirement "Owner signup checklist maps public RPC edge, tester write token/cap, always-on host, backup storage, Base 8453 RPC, bridge details, and local env-file setup to exact owner actions without requesting secrets." `
     -Status $(if ($ownerSignupChecklistPassed) { "passed" } else { "failed" }) `
-    -Evidence "signupStatus=$ownerSignupChecklistStatus, itemCount=$ownerSignupItemCount, externalSignupCount=$ownerSignupExternalCount, missingCoverage=$ownerSignupMissingCoverageCount, repoOwned=$ownerSignupRepoOwned, localEnvFileSupported=$ownerSignupLocalEnvFileSupported, report=$($paths.ownerSignupChecklist)" `
+    -Evidence "signupStatus=$ownerSignupChecklistStatus, itemCount=$ownerSignupItemCount, externalSignupCount=$ownerSignupExternalCount, missingCoverage=$ownerSignupMissingCoverageCount, repoOwned=$ownerSignupRepoOwned, localEnvFileSupported=$ownerSignupLocalEnvFileSupported, failedChecks=$ownerSignupFailedCheckCount, secretFindings=$ownerSignupSecretFindingCount, missingChecks=$ownerSignupMissingCheckCount, report=$($paths.ownerSignupChecklist)" `
     -Commands @("npm run flowchain:owner:signup-checklist")
 
 Add-AuditItem -Items $items -Id "owner-env-template" `
     -Requirement "Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added." `
     -Status $(if ($ownerEnvTemplatePassed) { "passed" } else { "failed" }) `
-    -Evidence "templateStatus=$ownerEnvTemplateStatus, pathIsGitIgnored=$ownerEnvTemplateGitIgnored, requiredEnvNameCount=$ownerEnvTemplateRequiredCount, optionalEnvNameCount=$ownerEnvTemplateOptionalCount, includesAllRequired=$ownerEnvTemplateIncludesRequired, report=$($paths.ownerEnvTemplate)" `
+    -Evidence "templateStatus=$ownerEnvTemplateStatus, pathIsGitIgnored=$ownerEnvTemplateGitIgnored, requiredEnvNameCount=$ownerEnvTemplateRequiredCount, optionalEnvNameCount=$ownerEnvTemplateOptionalCount, includesAllRequired=$ownerEnvTemplateIncludesRequired, failedChecks=$ownerEnvTemplateFailedCheckCount, secretFindings=$ownerEnvTemplateSecretFindingCount, missingChecks=$ownerEnvTemplateMissingCheckCount, report=$($paths.ownerEnvTemplate)" `
     -Commands @("npm run flowchain:owner-env:template")
 
 Add-AuditItem -Items $items -Id "owner-env-readiness-validator-self-test" `
     -Requirement "Owner env readiness validator fails closed before child gates for missing owner env files and repo-local env files that are not git-ignored." `
     -Status $(if ($ownerEnvReadinessValidationPassed) { "passed" } else { "failed" }) `
-    -Evidence "validationStatus=$ownerEnvReadinessValidationStatus, missingFails=$ownerEnvReadinessValidationMissingFails, unignoredFails=$ownerEnvReadinessValidationUnignoredFails, report=$($paths.ownerEnvReadinessValidation)" `
+    -Evidence "validationStatus=$ownerEnvReadinessValidationStatus, missingFails=$ownerEnvReadinessValidationMissingFails, unignoredFails=$ownerEnvReadinessValidationUnignoredFails, failedChecks=$ownerEnvReadinessValidationFailedCheckCount, secretFindings=$ownerEnvReadinessValidationSecretFindingCount, missingChecks=$ownerEnvReadinessValidationMissingCheckCount, report=$($paths.ownerEnvReadinessValidation)" `
     -Commands @("npm run flowchain:owner-env:readiness:validate")
 
 Add-AuditItem -Items $items -Id "owner-env-readiness" `

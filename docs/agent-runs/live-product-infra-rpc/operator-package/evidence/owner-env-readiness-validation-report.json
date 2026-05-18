@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.owner_env_readiness_validation_report.v0",
-    "generatedAt":  "2026-05-18T02:01:48.0964748Z",
+    "generatedAt":  "2026-05-18T06:11:15.2030099Z",
     "status":  "passed",
     "scenarioCount":  2,
     "scenarios":  [
@@ -51,8 +51,21 @@
                   ],
     "checks":  {
                    "missingOwnerEnvFileFailsBeforeChildGates":  true,
-                   "unignoredOwnerEnvFileFailsBeforeChildGates":  true
+                   "unignoredOwnerEnvFileFailsBeforeChildGates":  true,
+                   "scenarioCountExpected":  true,
+                   "allScenariosPassed":  true,
+                   "failedScenariosAbsent":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true,
+                   "secretMarkerFindingsEmpty":  true
                },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
     "envValuesPrinted":  false,
     "noSecrets":  true,
     "broadcasts":  false
