@@ -161,6 +161,7 @@ type WalletApiResult<T> = {
 type ActionPanel = "home" | "wallet" | "send" | "receive" | "swap" | "activity" | "security" | "settings" | "staking" | "tester";
 
 const ACTION_PANELS: ActionPanel[] = ["home", "wallet", "send", "receive", "swap", "activity", "security", "settings", "staking", "tester"];
+const TESTER_WRITE_ENV_NAMES = ["FLOWCHAIN_TESTER_WRITE_ENABLED", "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256", "FLOWCHAIN_TESTER_MAX_SEND_UNITS"];
 
 function panelFromQuery(value: string | null): ActionPanel | null {
   if (value === null) return null;
@@ -382,14 +383,15 @@ export function WalletView({ workbench }: WalletViewProps) {
   const testerCreateReady = testerGatewayConfigured && testerTokenReady && testerPassphrase.length >= 8 && !loading;
   const testerFaucetReady = testerGatewayConfigured && testerTokenReady && Boolean(testerFundAccount.trim() || primaryWalletAddress) && Boolean(testerFundAmountUnits.trim()) && !loading;
   const testerSendReady = testerGatewayConfigured && testerTokenReady && Boolean(testerFrom.trim() || primaryWalletAddress) && Boolean(testerTo.trim()) && Boolean(testerAmountUnits.trim()) && !loading;
-  const testerReportBlockers =
-    externalTesterGate?.facts.find((fact) => fact.label === "blockers")?.value ??
-    testerGatewayGate?.facts.find((fact) => fact.label === "blockers")?.value ??
-    "FLOWCHAIN_TESTER_WRITE_ENABLED";
+  const testerReportBlockers = [
+    testerGatewayGate?.facts.find((fact) => fact.label === "blockers")?.value,
+    externalTesterGate?.facts.find((fact) => fact.label === "blockers")?.value,
+    ...(testerStatus ? [] : TESTER_WRITE_ENV_NAMES),
+  ].filter((value): value is string => Boolean(value));
   const testerBlockers = [
     ...(testerStatus?.missingEnvNames ?? []),
     ...(testerStatus?.invalidEnvNames ?? []),
-    ...(testerGatewayConfigured ? [] : [testerReportBlockers]),
+    ...(testerGatewayConfigured ? [] : testerReportBlockers),
   ].filter((value, index, values) => value && values.indexOf(value) === index);
   const visibleCredits = credits.filter((credit) =>
     credit.sourceChainId === 8453 || credit.accountId === primaryWalletAddress || credit.status === "applied",
