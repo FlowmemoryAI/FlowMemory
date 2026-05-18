@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-18T15:01:20.6996155Z",
+    "generatedAt":  "2026-05-18T15:16:07.2932969Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -16,13 +16,13 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  73106
+                        "value":  73289
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  73106
+                        "value":  73289
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
@@ -58,19 +58,19 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  16
+                        "value":  18
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  10
+                        "value":  11
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
                         "type":  "gauge",
                         "help":  "Configured owner-blocked ops alert rule count.",
-                        "value":  6
+                        "value":  7
                     },
                     {
                         "name":  "flowchain_ops_active_alert_rules",

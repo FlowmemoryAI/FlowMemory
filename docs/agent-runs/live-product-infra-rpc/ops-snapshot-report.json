@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-18T15:01:18.7797336Z",
+    "generatedAt":  "2026-05-18T15:16:05.4387092Z",
     "status":  "blocked",
     "refresh":  {
                     "performed":  true,
@@ -19,8 +19,8 @@
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "73106",
-                  "finalizedHeight":  "73106",
+                  "latestHeight":  "73289",
+                  "finalizedHeight":  "73289",
                   "stateFileLastWriteAgeSeconds":  0,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
@@ -48,6 +48,14 @@
                            "bridgeRelayerCursorCommitted":  false,
                            "bridgeRelayerCursorReason":  "not-run",
                            "externalTester":  "blocked",
+                           "externalTesterEvidence":  "passed",
+                           "externalTesterEvidenceFailedChecks":  0,
+                           "externalTesterEvidenceMissingFiles":  0,
+                           "externalTesterEvidenceInvalidJson":  0,
+                           "externalTesterEvidenceSecretFindings":  0,
+                           "externalTesterEvidenceCredentialUrls":  0,
+                           "externalTesterEvidenceEnvAssignments":  0,
+                           "externalTesterEvidenceTransferConsistent":  true,
                            "publicDeployment":  "blocked",
                            "deploymentRefreshAborted":  false,
                            "deploymentRefreshAbortStep":  "",
@@ -168,6 +176,7 @@
                         "bridgeRelayer":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-once-report.json",
                         "bridgeRelayerGuardrail":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-guardrail-validation-report.json",
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
+                        "externalTesterEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-evidence-validation-report.json",
                         "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
                         "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json"
                     },

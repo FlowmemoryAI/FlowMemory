@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-18T06:03:55.9016430Z",
+    "generatedAt":  "2026-05-18T15:12:42.9524877Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
@@ -10,9 +10,9 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input"
                 },
     "chain":  {
-                  "latestHeight":  "66326",
-                  "finalizedHeight":  "66326",
-                  "stateFileLastWriteAgeSeconds":  1,
+                  "latestHeight":  "73233",
+                  "finalizedHeight":  "73233",
+                  "stateFileLastWriteAgeSeconds":  4,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true
@@ -39,6 +39,14 @@
                            "bridgeRelayerCursorCommitted":  false,
                            "bridgeRelayerCursorReason":  "not-run",
                            "externalTester":  "blocked",
+                           "externalTesterEvidence":  "missing",
+                           "externalTesterEvidenceFailedChecks":  0,
+                           "externalTesterEvidenceMissingFiles":  0,
+                           "externalTesterEvidenceInvalidJson":  0,
+                           "externalTesterEvidenceSecretFindings":  0,
+                           "externalTesterEvidenceCredentialUrls":  0,
+                           "externalTesterEvidenceEnvAssignments":  0,
+                           "externalTesterEvidenceTransferConsistent":  false,
                            "publicDeployment":  "blocked",
                            "deploymentRefreshAborted":  false,
                            "deploymentRefreshAbortStep":  "",
@@ -116,6 +124,15 @@
                      },
                      {
                          "severity":  "blocked",
+                         "code":  "external-tester-evidence-invalid",
+                         "message":  "External tester returned evidence validation is not passed or transfer proof is inconsistent.",
+                         "commands":  [
+                                          "npm run flowchain:tester:evidence:validate",
+                                          "npm run flowchain:external-tester:packet -- -AllowBlocked"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
                          "code":  "deployment-contract-not-ready",
                          "message":  "Public deployment contract is not ready.",
                          "commands":  [
@@ -124,7 +141,7 @@
                      }
                  ],
     "criticalCount":  1,
-    "blockedCount":  6,
+    "blockedCount":  7,
     "incidentCommands":  {
                              "status":  [
                                             "npm run flowchain:ops:snapshot",
@@ -170,6 +187,7 @@
                         "bridgeRelayer":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\bridge-relayer-once-report.json",
                         "bridgeRelayerGuardrail":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\bridge-relayer-guardrail-validation-report.json",
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\external-tester-readiness-report.json",
+                        "externalTesterEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\external-tester-evidence-validation-report.json",
                         "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\public-deployment-contract-report.json",
                         "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\input\\no-secret-scan-report.json"
                     },

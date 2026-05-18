@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-18T15:04:06.6587535Z",
+    "generatedAt":  "2026-05-18T15:18:49.2356414Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -120,7 +120,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=73133, finalizedHeight=73133",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=73312, finalizedHeight=73312",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -185,7 +185,7 @@
                       "id":  "ops-alert-rules",
                       "requirement":  "Owner deployment has a no-secret alert rule manifest that maps every current ops finding to operator commands without committing delivery credentials.",
                       "status":  "passed",
-                      "evidence":  "alertRules=passed, criticalRules=10, blockedRules=6, unmappedCurrentFindingCodes=0",
+                      "evidence":  "alertRules=passed, criticalRules=11, blockedRules=7, unmappedCurrentFindingCodes=0",
                       "commands":  [
                                        "npm run flowchain:ops:alerts -- -AllowBlocked"
                                    ],

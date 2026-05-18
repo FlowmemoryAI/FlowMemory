@@ -1,9 +1,9 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-18T06:03:43.6090739Z
+Generated: 2026-05-18T15:12:31.7094854Z
 Status: failed
-Latest height: 66326
-Finalized height: 66326
+Latest height: 73233
+Finalized height: 73233
 
 ## Findings
 
@@ -12,6 +12,7 @@ Finalized height: 66326
 - blocked: bridge-not-ready - Base 8453 bridge readiness is not ready for external funded testing.
 - blocked: bridge-relayer-not-ready - Bridge relayer one-shot proof is not ready.
 - blocked: external-tester-not-shareable - External tester packet must remain not-shareable.
+- blocked: external-tester-evidence-invalid - External tester returned evidence validation is not passed or transfer proof is inconsistent.
 - critical: deployment-refresh-aborted - Public deployment dependency refresh aborted or skipped dependency gates.
 - blocked: deployment-contract-not-ready - Public deployment contract is not ready.
 

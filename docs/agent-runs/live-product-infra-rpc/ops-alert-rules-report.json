@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-18T15:01:20.1410137Z",
+    "generatedAt":  "2026-05-18T15:16:06.7011437Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,9 +10,9 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  16,
-    "criticalRuleCount":  10,
-    "blockedRuleCount":  6,
+    "ruleCount":  18,
+    "criticalRuleCount":  11,
+    "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
                           "backup-not-ready",
@@ -42,11 +42,13 @@
                                 "bridge-relayer-guardrail-failed",
                                 "bridge-relayer-loop-unhealthy",
                                 "deployment-refresh-aborted",
+                                "external-tester-evidence-unsafe",
                                 "public-rpc-not-ready",
                                 "backup-not-ready",
                                 "bridge-not-ready",
                                 "bridge-relayer-not-ready",
                                 "external-tester-not-shareable",
+                                "external-tester-evidence-invalid",
                                 "deployment-contract-not-ready"
                             ],
     "unmappedCurrentFindingCodes":  [
@@ -246,6 +248,20 @@
                                    ]
                   },
                   {
+                      "id":  "external-tester-evidence-unsafe",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "external-tester-evidence-unsafe"
+                                       ],
+                      "signal":  "External tester returned evidence contains a secret marker, credential URL, or env assignment.",
+                      "threshold":  "tester evidence validation reports any secretMarkerFindings, credentialUrlFindings, or envAssignmentFindings",
+                      "commands":  [
+                                       "npm run flowchain:tester:evidence:validate",
+                                       "npm run flowchain:no-secret:scan",
+                                       "npm run flowchain:emergency:export-evidence"
+                                   ]
+                  },
+                  {
                       "id":  "public-rpc-not-shareable",
                       "severity":  "blocked",
                       "findingCodes":  [
@@ -311,6 +327,19 @@
                       "commands":  [
                                        "npm run flowchain:tester:readiness",
                                        "npm run flowchain:external-tester:packet"
+                                   ]
+                  },
+                  {
+                      "id":  "external-tester-evidence-invalid",
+                      "severity":  "blocked",
+                      "findingCodes":  [
+                                           "external-tester-evidence-invalid"
+                                       ],
+                      "signal":  "External tester returned evidence is incomplete or transfer proof is inconsistent.",
+                      "threshold":  "tester evidence validation is not passed, required files are missing, JSON is invalid, or transfer proof checks fail",
+                      "commands":  [
+                                       "npm run flowchain:tester:evidence:validate",
+                                       "npm run flowchain:external-tester:packet -- -AllowBlocked"
                                    ]
                   },
                   {

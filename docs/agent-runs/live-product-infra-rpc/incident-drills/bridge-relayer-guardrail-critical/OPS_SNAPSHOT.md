@@ -1,9 +1,9 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-18T06:03:54.0582264Z
+Generated: 2026-05-18T15:12:41.2862716Z
 Status: failed
-Latest height: 66326
-Finalized height: 66326
+Latest height: 73233
+Finalized height: 73233
 
 ## Findings
 
@@ -13,6 +13,7 @@ Finalized height: 66326
 - blocked: bridge-relayer-not-ready - Bridge relayer one-shot proof is not ready.
 - critical: bridge-relayer-guardrail-failed - Bridge relayer fail-closed guardrail proof is not passed.
 - blocked: external-tester-not-shareable - External tester packet must remain not-shareable.
+- blocked: external-tester-evidence-invalid - External tester returned evidence validation is not passed or transfer proof is inconsistent.
 - blocked: deployment-contract-not-ready - Public deployment contract is not ready.
 
 ## Incident Commands

@@ -46,6 +46,7 @@ $paths = [ordered]@{
     bridgeRelayer = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     bridgeRelayerGuardrail = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     externalTester = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
+    externalTesterEvidence = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
     publicDeployment = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     noSecret = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
 }
@@ -202,6 +203,20 @@ $bridgeRelayerGuardrailReady = $bridgeRelayerGuardrailStatus -eq "passed" `
     -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "envValuesPrintedFalse" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "noSecrets" -Default $false) -eq $true)
 $externalTesterStatus = Get-OpsStatus -Report $reports.externalTester
+$externalTesterEvidenceStatus = Get-OpsStatus -Report $reports.externalTesterEvidence
+$externalTesterEvidenceChecks = Get-OpsProp -Object $reports.externalTesterEvidence -Name "checks"
+$externalTesterEvidenceFailedChecks = @((Get-OpsProp -Object $reports.externalTesterEvidence -Name "failedChecks" -Default @()))
+$externalTesterEvidenceMissingFiles = @((Get-OpsProp -Object $reports.externalTesterEvidence -Name "missingRequiredFiles" -Default @()))
+$externalTesterEvidenceInvalidJson = @((Get-OpsProp -Object $reports.externalTesterEvidence -Name "invalidJsonFiles" -Default @()))
+$externalTesterEvidenceSecretFindings = @((Get-OpsProp -Object $reports.externalTesterEvidence -Name "secretMarkerFindings" -Default @()))
+$externalTesterEvidenceCredentialUrls = @((Get-OpsProp -Object $reports.externalTesterEvidence -Name "credentialUrlFindings" -Default @()))
+$externalTesterEvidenceEnvAssignments = @((Get-OpsProp -Object $reports.externalTesterEvidence -Name "envAssignmentFindings" -Default @()))
+$externalTesterEvidenceTransferConsistent = (Get-OpsProp -Object $externalTesterEvidenceChecks -Name "transferFound" -Default $false) -eq $true `
+    -and (Get-OpsProp -Object $externalTesterEvidenceChecks -Name "transferMatchesAccounts" -Default $false) -eq $true `
+    -and (Get-OpsProp -Object $externalTesterEvidenceChecks -Name "transferAmountMatches" -Default $false) -eq $true `
+    -and (Get-OpsProp -Object $externalTesterEvidenceChecks -Name "transactionIdMatches" -Default $false) -eq $true `
+    -and (Get-OpsProp -Object $externalTesterEvidenceChecks -Name "senderDebited" -Default $false) -eq $true `
+    -and (Get-OpsProp -Object $externalTesterEvidenceChecks -Name "recipientCredited" -Default $false) -eq $true
 $deploymentStatus = Get-OpsStatus -Report $reports.publicDeployment
 $deploymentRefresh = Get-OpsProp -Object $reports.publicDeployment -Name "dependencyRefresh"
 $deploymentRefreshAborted = (Get-OpsProp -Object $deploymentRefresh -Name "aborted" -Default $false) -eq $true
@@ -239,6 +254,12 @@ if (-not $bridgeRelayerGuardrailReady) {
 }
 if ($externalTesterStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "external-tester-not-shareable" -Message "External tester packet must remain not-shareable." -Commands @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet")
+}
+if ($externalTesterEvidenceSecretFindings.Count -gt 0 -or $externalTesterEvidenceCredentialUrls.Count -gt 0 -or $externalTesterEvidenceEnvAssignments.Count -gt 0) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "external-tester-evidence-unsafe" -Message "External tester returned evidence contains a secret marker, credential URL, or env assignment." -Commands @("npm run flowchain:tester:evidence:validate", "npm run flowchain:no-secret:scan", "npm run flowchain:emergency:export-evidence")
+}
+elseif ($externalTesterEvidenceStatus -ne "passed" -or $externalTesterEvidenceFailedChecks.Count -gt 0 -or $externalTesterEvidenceMissingFiles.Count -gt 0 -or $externalTesterEvidenceInvalidJson.Count -gt 0 -or $externalTesterEvidenceTransferConsistent -ne $true) {
+    Add-OpsFinding -Findings $findings -Severity "blocked" -Code "external-tester-evidence-invalid" -Message "External tester returned evidence validation is not passed or transfer proof is inconsistent." -Commands @("npm run flowchain:tester:evidence:validate", "npm run flowchain:external-tester:packet -- -AllowBlocked")
 }
 if ($deploymentRefreshUnsafe) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "deployment-refresh-aborted" -Message "Public deployment dependency refresh aborted or skipped dependency gates." -Commands @("npm run flowchain:public-deployment:contract -- -AllowBlocked", "npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked", "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh")
@@ -329,6 +350,14 @@ $report = [ordered]@{
         bridgeRelayerCursorCommitted = $bridgeRelayerCursorCommitted
         bridgeRelayerCursorReason = $bridgeRelayerCursorReason
         externalTester = $externalTesterStatus
+        externalTesterEvidence = $externalTesterEvidenceStatus
+        externalTesterEvidenceFailedChecks = $externalTesterEvidenceFailedChecks.Count
+        externalTesterEvidenceMissingFiles = $externalTesterEvidenceMissingFiles.Count
+        externalTesterEvidenceInvalidJson = $externalTesterEvidenceInvalidJson.Count
+        externalTesterEvidenceSecretFindings = $externalTesterEvidenceSecretFindings.Count
+        externalTesterEvidenceCredentialUrls = $externalTesterEvidenceCredentialUrls.Count
+        externalTesterEvidenceEnvAssignments = $externalTesterEvidenceEnvAssignments.Count
+        externalTesterEvidenceTransferConsistent = $externalTesterEvidenceTransferConsistent
         publicDeployment = $deploymentStatus
         deploymentRefreshAborted = $deploymentRefreshAborted
         deploymentRefreshAbortStep = $deploymentRefreshAbortStep

@@ -178,6 +178,14 @@ $rules = @(
         commands = @("npm run flowchain:public-deployment:contract -- -AllowBlocked", "npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked", "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh")
     },
     [ordered]@{
+        id = "external-tester-evidence-unsafe"
+        severity = "critical"
+        findingCodes = @("external-tester-evidence-unsafe")
+        signal = "External tester returned evidence contains a secret marker, credential URL, or env assignment."
+        threshold = "tester evidence validation reports any secretMarkerFindings, credentialUrlFindings, or envAssignmentFindings"
+        commands = @("npm run flowchain:tester:evidence:validate", "npm run flowchain:no-secret:scan", "npm run flowchain:emergency:export-evidence")
+    },
+    [ordered]@{
         id = "public-rpc-not-shareable"
         severity = "blocked"
         findingCodes = @("public-rpc-not-ready")
@@ -216,6 +224,14 @@ $rules = @(
         signal = "External tester packet is not shareable."
         threshold = "tester readiness status is not passed"
         commands = @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet")
+    },
+    [ordered]@{
+        id = "external-tester-evidence-invalid"
+        severity = "blocked"
+        findingCodes = @("external-tester-evidence-invalid")
+        signal = "External tester returned evidence is incomplete or transfer proof is inconsistent."
+        threshold = "tester evidence validation is not passed, required files are missing, JSON is invalid, or transfer proof checks fail"
+        commands = @("npm run flowchain:tester:evidence:validate", "npm run flowchain:external-tester:packet -- -AllowBlocked")
     },
     [ordered]@{
         id = "deployment-contract-not-ready"
