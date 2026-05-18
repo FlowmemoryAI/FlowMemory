@@ -779,10 +779,12 @@ $definitions = @(
             "ownerEnvNotImported",
             "broadcastsFalse",
             "envValuesPrintedFalse",
-            "noSecrets"
+            "noSecrets",
+            "secretMarkerFindingsEmpty"
         )
         requiredEmptyArrays = @(
-            "failedChecks"
+            "failedChecks",
+            "secretMarkerFindings"
         )
         requiredReportProperties = [ordered]@{
             "envValuesPrinted" = $false

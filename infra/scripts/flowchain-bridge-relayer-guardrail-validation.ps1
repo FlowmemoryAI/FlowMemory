@@ -118,6 +118,38 @@ function Get-GuardrailIssueCodePresent {
     return $false
 }
 
+function Get-GuardrailSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 Reset-FlowChainDirectory -Path $validationFullDir | Out-Null
 New-Item -ItemType Directory -Force -Path $nodeDir, $runDir | Out-Null
 
@@ -193,12 +225,13 @@ $checks = [ordered]@{
     broadcastsFalse = (Get-GuardrailProp -Object $relayerReport -Name "broadcasts" -Default $true) -eq $false
     envValuesPrintedFalse = (Get-GuardrailProp -Object $relayerReport -Name "envValuesPrinted" -Default $true) -eq $false
     noSecrets = (Get-GuardrailProp -Object $relayerReport -Name "noSecrets" -Default $false) -eq $true
+    secretMarkerFindingsEmpty = $true
 }
 $failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
 $status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
 
 $report = [ordered]@{
-    schema = "flowchain.bridge_relayer_guardrail_validation_report.v0"
+    schema = "flowchain.bridge_relayer_guardrail_validation_report.v1"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
     status = $status
     validationDir = $ValidationDir
@@ -211,6 +244,7 @@ $report = [ordered]@{
     }
     checks = $checks
     failedChecks = @($failedChecks)
+    secretMarkerFindings = @()
     cursor = [ordered]@{
         finalCursorPath = $cursorPath
         stagedCursorPath = $stagedCursorPath
@@ -222,6 +256,20 @@ $report = [ordered]@{
     noSecrets = $true
     broadcasts = $false
 }
+
+$preliminaryReportText = $report | ConvertTo-Json -Depth 18
+$secretMarkerFindings = @(
+    Get-GuardrailSecretMarkerFindings -Text $preliminaryReportText -Label "bridge relayer guardrail validation report"
+)
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 
 $reportText = $report | ConvertTo-Json -Depth 18
 Assert-FlowChainNoSecretText -Text $reportText -Label "bridge relayer guardrail validation report"
