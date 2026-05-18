@@ -1,6 +1,6 @@
 {
-    "schema":  "flowchain.public_rpc_deployment_bundle_checks.v1",
-    "generatedAt":  "2026-05-18T00:04:08.0094704Z",
+    "schema":  "flowchain.public_rpc_deployment_bundle_checks.v2",
+    "generatedAt":  "2026-05-18T03:54:34.5747222Z",
     "status":  "passed",
     "requiredPlaceholders":  [
                                  "\u003cFLOWCHAIN_RPC_PUBLIC_HOST\u003e",
@@ -84,8 +84,15 @@
                    "valuesNotPrinted":  true,
                    "envValuesNotPrinted":  true,
                    "noSecrets":  true,
+                   "secretMarkerFindingsEmpty":  true,
                    "liveBroadcastsDisabled":  true
                },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
     "valuesPrinted":  false,
     "envValuesPrinted":  false,
     "noSecrets":  true,

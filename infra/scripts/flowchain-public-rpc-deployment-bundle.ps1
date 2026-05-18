@@ -53,6 +53,38 @@ function Test-TextContainsNoTokens {
     return $true
 }
 
+function Get-FlowChainSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 function Test-CheckMapPassed {
     param([Parameter(Mandatory = $true)][System.Collections.Specialized.OrderedDictionary] $Checks)
 
@@ -1182,11 +1214,12 @@ $checks = [ordered]@{
     valuesNotPrinted = $true
     envValuesNotPrinted = $true
     noSecrets = $true
+    secretMarkerFindingsEmpty = $false
     liveBroadcastsDisabled = $true
 }
 
 $bundleChecksPayload = [ordered]@{
-    schema = "flowchain.public_rpc_deployment_bundle_checks.v1"
+    schema = "flowchain.public_rpc_deployment_bundle_checks.v2"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
     status = "pending"
     requiredPlaceholders = $requiredPlaceholders
@@ -1194,6 +1227,8 @@ $bundleChecksPayload = [ordered]@{
     requiredEnvNames = $requiredEnvNames
     privateOrigin = "127.0.0.1:8787"
     checks = $checks
+    failedChecks = @()
+    secretMarkerFindings = @()
     valuesPrinted = $false
     envValuesPrinted = $false
     noSecrets = $true
@@ -1210,15 +1245,24 @@ Assert-FlowChainNoSecretText -Text $bundleChecksText -Label "public RPC deployme
 Write-FlowChainJson -Path $files.bundleChecks -Value $bundleChecksPayload -Depth 16
 $checks["bundleChecksJsonWritten"] = Test-Path -LiteralPath $files.bundleChecks
 
+$secretMarkerFindings = @(
+    Get-FlowChainSecretMarkerFindings -Text $allBundleText -Label "public RPC deployment bundle artifacts"
+)
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
 $passed = Test-CheckMapPassed -Checks $checks
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
 $bundleChecksPayload["status"] = if ($passed) { "passed" } else { "failed" }
 $bundleChecksPayload["checks"] = $checks
+$bundleChecksPayload["failedChecks"] = @($failedChecks)
+$bundleChecksPayload["secretMarkerFindings"] = @($secretMarkerFindings)
+$bundleChecksPayload["noSecrets"] = $secretMarkerFindings.Count -eq 0
 $bundleChecksText = $bundleChecksPayload | ConvertTo-Json -Depth 16
 Assert-FlowChainNoSecretText -Text $bundleChecksText -Label "public RPC deployment bundle checks"
 Write-FlowChainJson -Path $files.bundleChecks -Value $bundleChecksPayload -Depth 16
 
 $report = [ordered]@{
-    schema = "flowchain.public_rpc_deployment_bundle_report.v2"
+    schema = "flowchain.public_rpc_deployment_bundle_report.v3"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
     status = if ($passed) { "passed" } else { "failed" }
     bundleDir = $BundleDir
@@ -1249,9 +1293,11 @@ $report = [ordered]@{
         bundleChecks = "bundle-checks.json"
     }
     checks = $checks
+    failedChecks = @($failedChecks)
+    secretMarkerFindings = @($secretMarkerFindings)
     valuesPrinted = $false
     envValuesPrinted = $false
-    noSecrets = $true
+    noSecrets = $secretMarkerFindings.Count -eq 0
     broadcasts = $false
     liveBroadcasts = $false
 }

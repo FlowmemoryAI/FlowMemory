@@ -745,6 +745,62 @@ $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
 $publicRpcDeploymentBundleStatus = Get-ReportStatus -Report $publicRpcDeploymentBundle
 $publicRpcDeploymentBundleChecks = Get-AuditProp -Object $publicRpcDeploymentBundle -Name "checks"
 $publicRpcDeploymentBundleRepoOwned = Get-AuditProp -Object $publicRpcDeploymentBundle -Name "flowChainRpcIsRepoOwned" -Default $false
+$publicRpcDeploymentBundleFailedChecks = @((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "failedChecks" -Default @()))
+$publicRpcDeploymentBundleSecretFindings = @((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "secretMarkerFindings" -Default @()))
+$publicRpcDeploymentBundleRequiredChecks = @(
+    "edgeTemplatePassed",
+    "readmeWritten",
+    "nginxTemplateWritten",
+    "systemdServiceTemplateWritten",
+    "systemdSupervisorTemplateWritten",
+    "renderScriptWritten",
+    "nginxPreflightScriptWritten",
+    "nginxPreflightChecklistWritten",
+    "windowsNginxPreflightScriptWritten",
+    "windowsNginxPreflightChecklistWritten",
+    "ownerEnvExampleWritten",
+    "verifyRunbookWritten",
+    "rollbackRunbookWritten",
+    "bundleChecksJsonWritten",
+    "requiredPlaceholdersPresent",
+    "nginxRequiredTokensPresent",
+    "systemdLiveServiceTemplatePresent",
+    "systemdSupervisorTemplatePresent",
+    "renderScriptTokensPresent",
+    "nginxPreflightTokensPresent",
+    "windowsNginxPreflightTokensPresent",
+    "ownerRenderValidationPassed",
+    "ownerRenderCommandPassed",
+    "ownerRenderFilesHaveNoPlaceholders",
+    "ownerRenderWritesShellPreflight",
+    "ownerRenderWritesWindowsPreflight",
+    "ownerRenderDoesNotPrintTokenHash",
+    "ownerRenderFilesDoNotContainTokenHash",
+    "includesPrivateOrigin",
+    "includesRateLimitPlaceholder",
+    "includesTlsPlaceholders",
+    "includesCorsOriginForwarding",
+    "publicStateMirrorExcluded",
+    "devnetStatePublicRpcExcluded",
+    "includesNginxConfigTest",
+    "includesWindowsNginxConfigTest",
+    "includesTesterWritePreflight",
+    "includesVerificationCommands",
+    "includesRollbackCommands",
+    "envExampleHasAllRequiredNames",
+    "ownerEnvExampleValuesBlank",
+    "noLiveBroadcastCommands",
+    "noLiveBroadcastArtifacts",
+    "valuesNotPrinted",
+    "envValuesNotPrinted",
+    "noSecrets",
+    "secretMarkerFindingsEmpty",
+    "liveBroadcastsDisabled"
+)
+$publicRpcDeploymentBundleMissingChecks = Get-MissingAuditChecks -Checks $publicRpcDeploymentBundleChecks -Names $publicRpcDeploymentBundleRequiredChecks
+$publicRpcDeploymentBundleFailedCheckCount = @($publicRpcDeploymentBundleFailedChecks | Where-Object { $null -ne $_ }).Count
+$publicRpcDeploymentBundleSecretFindingCount = @($publicRpcDeploymentBundleSecretFindings | Where-Object { $null -ne $_ }).Count
+$publicRpcDeploymentBundleMissingCheckCount = @($publicRpcDeploymentBundleMissingChecks | Where-Object { $null -ne $_ }).Count
 $publicRpcDeploymentBundleNginxTemplate = Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "nginxTemplateWritten" -Default $false
 $publicRpcDeploymentBundleVerifyRunbook = Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "verifyRunbookWritten" -Default $false
 $publicRpcDeploymentBundleRollbackRunbook = Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "rollbackRunbookWritten" -Default $false
@@ -752,6 +808,9 @@ $publicRpcDeploymentBundleRenderValidation = Get-AuditProp -Object $publicRpcDep
 $publicRpcDeploymentBundleTesterWritePreflight = Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false
 $publicRpcDeploymentBundlePassed = $publicRpcDeploymentBundleExitCode -eq 0 `
     -and $publicRpcDeploymentBundleStatus -eq "passed" `
+    -and $publicRpcDeploymentBundleFailedCheckCount -eq 0 `
+    -and $publicRpcDeploymentBundleSecretFindingCount -eq 0 `
+    -and $publicRpcDeploymentBundleMissingCheckCount -eq 0 `
     -and ($publicRpcDeploymentBundleRepoOwned -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "thirdPartyFlowChainRpcProviderNeeded" -Default $true) -eq $false) `
     -and ($publicRpcDeploymentBundleNginxTemplate -eq $true) `
@@ -765,9 +824,12 @@ $publicRpcDeploymentBundlePassed = $publicRpcDeploymentBundleExitCode -eq 0 `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "ownerRenderFilesHaveNoPlaceholders" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "ownerRenderDoesNotPrintTokenHash" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "envExampleHasAllRequiredNames" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "secretMarkerFindingsEmpty" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "valuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "noSecrets" -Default $false) -eq $true) `
-    -and ((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "broadcasts" -Default $true) -eq $false)
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "broadcasts" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "liveBroadcasts" -Default $true) -eq $false)
 $publicRpcDeploymentAutomation = $reports.publicRpcDeploymentAutomation
 $publicRpcDeploymentAutomationStatus = Get-ReportStatus -Report $publicRpcDeploymentAutomation
 $publicRpcDeploymentAutomationAction = [string](Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "action" -Default "")
@@ -1545,7 +1607,7 @@ Add-AuditItem -Items $items -Id "public-rpc-edge-template" `
 Add-AuditItem -Items $items -Id "public-rpc-deployment-bundle" `
     -Requirement "Public RPC deployment bundle has no-secret Nginx, owner env, owner render validation, tester write preflight, verification, and rollback artifacts for exposing FlowChain's own RPC." `
     -Status $(if ($publicRpcDeploymentBundlePassed) { "passed" } else { "failed" }) `
-    -Evidence "bundleStatus=$publicRpcDeploymentBundleStatus, repoOwned=$publicRpcDeploymentBundleRepoOwned, nginxTemplate=$publicRpcDeploymentBundleNginxTemplate, renderValidation=$publicRpcDeploymentBundleRenderValidation, testerWritePreflight=$publicRpcDeploymentBundleTesterWritePreflight, verifyRunbook=$publicRpcDeploymentBundleVerifyRunbook, rollbackRunbook=$publicRpcDeploymentBundleRollbackRunbook, report=$($paths.publicRpcDeploymentBundle)" `
+    -Evidence "bundleStatus=$publicRpcDeploymentBundleStatus, repoOwned=$publicRpcDeploymentBundleRepoOwned, nginxTemplate=$publicRpcDeploymentBundleNginxTemplate, renderValidation=$publicRpcDeploymentBundleRenderValidation, testerWritePreflight=$publicRpcDeploymentBundleTesterWritePreflight, failedChecks=$publicRpcDeploymentBundleFailedCheckCount, missingChecks=$publicRpcDeploymentBundleMissingCheckCount, secretFindings=$publicRpcDeploymentBundleSecretFindingCount, verifyRunbook=$publicRpcDeploymentBundleVerifyRunbook, rollbackRunbook=$publicRpcDeploymentBundleRollbackRunbook, report=$($paths.publicRpcDeploymentBundle)" `
     -Commands @("npm run flowchain:public-rpc:deployment-bundle")
 
 Add-AuditItem -Items $items -Id "public-rpc-deployment-automation" `

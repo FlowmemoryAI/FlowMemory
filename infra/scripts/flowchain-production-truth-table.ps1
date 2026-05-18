@@ -393,19 +393,68 @@ $definitions = @(
         productionGate = $true
         ownerInputGate = $false
         requiredChecks = @(
+            "edgeTemplatePassed",
+            "readmeWritten",
             "nginxTemplateWritten",
+            "systemdServiceTemplateWritten",
+            "systemdSupervisorTemplateWritten",
+            "renderScriptWritten",
             "nginxPreflightScriptWritten",
+            "nginxPreflightChecklistWritten",
             "windowsNginxPreflightScriptWritten",
+            "windowsNginxPreflightChecklistWritten",
             "windowsNginxPreflightTokensPresent",
+            "requiredPlaceholdersPresent",
+            "nginxRequiredTokensPresent",
+            "systemdLiveServiceTemplatePresent",
+            "systemdSupervisorTemplatePresent",
+            "renderScriptTokensPresent",
+            "nginxPreflightTokensPresent",
             "includesWindowsNginxConfigTest",
             "includesTesterWritePreflight",
             "ownerRenderValidationPassed",
+            "ownerRenderCommandPassed",
             "ownerRenderFilesHaveNoPlaceholders",
+            "ownerRenderWritesShellPreflight",
+            "ownerRenderWritesWindowsPreflight",
             "ownerRenderDoesNotPrintTokenHash",
+            "ownerRenderFilesDoNotContainTokenHash",
+            "includesPrivateOrigin",
+            "includesRateLimitPlaceholder",
+            "includesTlsPlaceholders",
+            "includesCorsOriginForwarding",
+            "publicStateMirrorExcluded",
+            "devnetStatePublicRpcExcluded",
+            "includesNginxConfigTest",
+            "includesVerificationCommands",
+            "includesRollbackCommands",
+            "envExampleHasAllRequiredNames",
+            "ownerEnvExampleValuesBlank",
+            "noLiveBroadcastCommands",
+            "noLiveBroadcastArtifacts",
+            "valuesNotPrinted",
+            "envValuesNotPrinted",
+            "noSecrets",
+            "secretMarkerFindingsEmpty",
+            "liveBroadcastsDisabled",
             "ownerEnvExampleWritten",
             "verifyRunbookWritten",
             "rollbackRunbookWritten"
         )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "flowChainRpcIsRepoOwned" = $true
+            "thirdPartyFlowChainRpcProviderNeeded" = $false
+            "privateOrigin" = "127.0.0.1:8787"
+            "valuesPrinted" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+            "liveBroadcasts" = $false
+        }
     },
     [ordered]@{
         id = "public-rpc-deployment-automation"
