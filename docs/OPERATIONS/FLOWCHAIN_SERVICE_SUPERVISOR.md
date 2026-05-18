@@ -40,7 +40,7 @@ read-only status check, and an absent-task uninstall no-op check. It refuses to
 remove a pre-existing validation task.
 
 After the plan and validation pass, the owner host can register the supervisor
-as a Windows Scheduled Task at logon:
+as a Windows Scheduled Task at startup and logon:
 
 ```powershell
 npm run flowchain:service:install:windows -- -Action Install
@@ -53,9 +53,9 @@ Rollback removes only the scheduled task registration:
 npm run flowchain:service:install:windows -- -Action Uninstall
 ```
 
-The default task starts the live-profile supervisor and does not enable the
-bridge relayer loop. Add `-StartBridgeRelayerLoop` only after the bridge owner
-inputs and pilot guardrails pass.
+The default task uses `-TriggerMode Both`, starts the live-profile supervisor,
+and does not enable the bridge relayer loop. Add `-StartBridgeRelayerLoop` only
+after the bridge owner inputs and pilot guardrails pass.
 
 ## Reports
 

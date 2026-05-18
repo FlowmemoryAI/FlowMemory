@@ -12,6 +12,8 @@ param(
     [int] $IntervalSeconds = 30,
     [int] $MaxRestartAttempts = 3,
     [int] $MaxStateAgeSeconds = 90,
+    [ValidateSet("Logon", "Startup", "Both")]
+    [string] $TriggerMode = "Both",
     [switch] $StartBridgeRelayerLoop,
     [string] $ReportPath = "docs/agent-runs/live-product-infra-rpc/service-install-windows-report.json",
     [string] $MarkdownPath = "docs/agent-runs/live-product-infra-rpc/WINDOWS_SERVICE_INSTALL.md"
@@ -53,6 +55,19 @@ if ($MaxStateAgeSeconds -lt 1) {
 }
 if ($ControlPlanePort -lt 1 -or $ControlPlanePort -gt 65535) {
     throw "ControlPlanePort must be between 1 and 65535."
+}
+
+function Get-ServiceInstallTriggerNames {
+    param([Parameter(Mandatory = $true)][string] $Mode)
+
+    $names = New-Object System.Collections.ArrayList
+    if ($Mode -eq "Logon" -or $Mode -eq "Both") {
+        [void]$names.Add("AtLogOn")
+    }
+    if ($Mode -eq "Startup" -or $Mode -eq "Both") {
+        [void]$names.Add("AtStartup")
+    }
+    return @($names)
 }
 
 function Get-InstallCommandStatus {
@@ -162,6 +177,7 @@ $actionCommand = Get-Command "New-ScheduledTaskAction" -ErrorAction SilentlyCont
 $scheduledTaskActionSupportsWorkingDirectory = $null -ne $actionCommand -and $actionCommand.Parameters.Keys -contains "WorkingDirectory"
 $powershellCommand = Get-Command "powershell.exe" -ErrorAction SilentlyContinue
 $powershellExecutable = if ($null -ne $powershellCommand) { [string]$powershellCommand.Source } else { "powershell.exe" }
+$triggerNames = @(Get-ServiceInstallTriggerNames -Mode $TriggerMode)
 
 $supervisorArguments = @(
     "-NoProfile",
@@ -217,7 +233,13 @@ try {
                 throw "New-ScheduledTaskAction must support WorkingDirectory so the supervisor can resolve the repository root."
             }
             $taskAction = New-ScheduledTaskAction -Execute $powershellExecutable -Argument $scheduledTaskArguments -WorkingDirectory $repoRoot
-            $trigger = New-ScheduledTaskTrigger -AtLogOn
+            $triggers = @()
+            if ($triggerNames -contains "AtLogOn") {
+                $triggers += New-ScheduledTaskTrigger -AtLogOn
+            }
+            if ($triggerNames -contains "AtStartup") {
+                $triggers += New-ScheduledTaskTrigger -AtStartup
+            }
             $settings = New-ScheduledTaskSettingsSet `
                 -StartWhenAvailable `
                 -AllowStartIfOnBatteries `
@@ -230,9 +252,9 @@ try {
                 -TaskName $TaskName `
                 -TaskPath $TaskPath `
                 -Action $taskAction `
-                -Trigger $trigger `
+                -Trigger $triggers `
                 -Settings $settings `
-                -Description "FlowChain live L1 supervisor. Keeps the private node and control-plane RPC recovered after owner logon." `
+                -Description "FlowChain live L1 supervisor. Keeps the private node and control-plane RPC recovered after startup or owner logon." `
                 -Force | Out-Null
             $taskRegistered = $true
         }
@@ -264,6 +286,9 @@ $checks = [ordered]@{
     actionUsesRepoWorkingDirectory = $true
     liveProfileDefault = -not ($supervisorArguments -contains "-NonLiveProfile")
     noBridgeRelayerDefault = -not $StartBridgeRelayerLoop.IsPresent
+    triggerModeValid = $triggerNames.Count -gt 0
+    rebootPersistentTrigger = $triggerNames -contains "AtStartup"
+    logonRecoveryTrigger = $triggerNames -contains "AtLogOn"
     hasIntervalSeconds = $supervisorArguments -contains "-IntervalSeconds"
     hasMaxRestartAttempts = $supervisorArguments -contains "-MaxRestartAttempts"
     hasMaxStateAgeSeconds = $supervisorArguments -contains "-MaxStateAgeSeconds"
@@ -280,6 +305,8 @@ $baseReady = ($checks.supervisorScriptExists -eq $true) `
     -and ($checks.scheduledTaskActionSupportsWorkingDirectory -eq $true) `
     -and ($checks.actionUsesSupervisor -eq $true) `
     -and ($checks.liveProfileDefault -eq $true) `
+    -and ($checks.triggerModeValid -eq $true) `
+    -and ($checks.rebootPersistentTrigger -eq $true) `
     -and ($checks.hasIntervalSeconds -eq $true) `
     -and ($checks.hasMaxRestartAttempts -eq $true) `
     -and ($checks.hasMaxStateAgeSeconds -eq $true) `
@@ -321,7 +348,8 @@ $report = [ordered]@{
     taskAfter = $taskAfter
     schedulerCmdlets = $schedulerCmdlets
     scheduledTask = [ordered]@{
-        trigger = "AtLogOn"
+        triggerMode = $TriggerMode
+        triggers = $triggerNames
         execute = $powershellExecutable
         arguments = $scheduledTaskArguments
         workingDirectory = $repoRoot
@@ -360,7 +388,7 @@ $markdownLines.Add("Status: $status")
 $markdownLines.Add("Action: $Action")
 $markdownLines.Add("Task: $TaskPath$TaskName")
 $markdownLines.Add("")
-$markdownLines.Add("This runbook registers the live service supervisor as a Windows Scheduled Task at owner logon. It keeps the private node and control-plane RPC recovered after reboot or logon, while preserving the private local origin.")
+$markdownLines.Add("This runbook registers the live service supervisor as a Windows Scheduled Task at owner startup and logon by default. It keeps the private node and control-plane RPC recovered after reboot or logon, while preserving the private local origin.")
 $markdownLines.Add("")
 $markdownLines.Add("## Commands")
 $markdownLines.Add("")
@@ -375,6 +403,8 @@ $markdownLines.Add("")
 $markdownLines.Add("- Execute: ``$powershellExecutable``")
 $markdownLines.Add("- Working directory: ``$repoRoot``")
 $markdownLines.Add("- Supervisor: ``$supervisorScriptPath``")
+$markdownLines.Add("- Trigger mode: $TriggerMode")
+$markdownLines.Add("- Triggers: $($triggerNames -join ', ')")
 $markdownLines.Add("- Bridge relayer loop enabled: $($StartBridgeRelayerLoop.IsPresent)")
 $markdownLines.Add("- Live profile default: $($checks.liveProfileDefault)")
 $markdownLines.Add("")

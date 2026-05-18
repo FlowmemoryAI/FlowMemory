@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.service_install_windows_report.v0",
-    "generatedAt":  "2026-05-17T23:18:06.0998070Z",
+    "generatedAt":  "2026-05-17T23:59:17.9053006Z",
     "status":  "passed",
     "action":  "Status",
     "plannedOnly":  false,
@@ -62,7 +62,11 @@
                              }
                          ],
     "scheduledTask":  {
-                          "trigger":  "AtLogOn",
+                          "triggerMode":  "Both",
+                          "triggers":  [
+                                           "AtLogOn",
+                                           "AtStartup"
+                                       ],
                           "execute":  "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
                           "arguments":  "-NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-service-supervisor.ps1 -StatePath devnet/local/state.json -NodeDir devnet/local/node -ServicesDir devnet/local/services -ControlPlaneHost 127.0.0.1 -ControlPlanePort 8787 -BlockMs 1000 -IntervalSeconds 30 -MaxRestartAttempts 3 -MaxStateAgeSeconds 90",
                           "workingDirectory":  "E:/FlowMemory/flowmemory-live-infra-rpc",
@@ -96,6 +100,9 @@
                    "actionUsesRepoWorkingDirectory":  true,
                    "liveProfileDefault":  true,
                    "noBridgeRelayerDefault":  true,
+                   "triggerModeValid":  true,
+                   "rebootPersistentTrigger":  true,
+                   "logonRecoveryTrigger":  true,
                    "hasIntervalSeconds":  true,
                    "hasMaxRestartAttempts":  true,
                    "hasMaxStateAgeSeconds":  true,

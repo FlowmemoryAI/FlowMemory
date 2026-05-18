@@ -1,11 +1,11 @@
 ﻿# FlowChain Windows Service Install
 
-Generated: 2026-05-17T23:18:06.0998070Z
+Generated: 2026-05-17T23:59:17.9053006Z
 Status: passed
 Action: Status
 Task: \FlowChainLiveSupervisor
 
-This runbook registers the live service supervisor as a Windows Scheduled Task at owner logon. It keeps the private node and control-plane RPC recovered after reboot or logon, while preserving the private local origin.
+This runbook registers the live service supervisor as a Windows Scheduled Task at owner startup and logon by default. It keeps the private node and control-plane RPC recovered after reboot or logon, while preserving the private local origin.
 
 ## Commands
 
@@ -20,6 +20,8 @@ This runbook registers the live service supervisor as a Windows Scheduled Task a
 - Execute: `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`
 - Working directory: `E:/FlowMemory/flowmemory-live-infra-rpc`
 - Supervisor: `E:\FlowMemory\flowmemory-live-infra-rpc\infra\scripts\flowchain-service-supervisor.ps1`
+- Trigger mode: Both
+- Triggers: AtLogOn, AtStartup
 - Bridge relayer loop enabled: False
 - Live profile default: True
 
