@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Command Matrix
 
-Generated: 2026-05-18T02:15:28.6507559Z
+Generated: 2026-05-18T02:27:31.6668424Z
 
 | Phase | Command | Purpose |
 | --- | --- | --- |
@@ -31,6 +31,7 @@ Generated: 2026-05-18T02:15:28.6507559Z
 | backup | `npm run flowchain:backup:install:validate` | Validate backup task plan/status/uninstall behavior. |
 | ops | `npm run flowchain:ops:snapshot -- -AllowBlocked` | Classify critical incidents separately from owner-input blockers. |
 | ops | `npm run flowchain:ops:alerts -- -AllowBlocked` | Refresh local alert rules and finding coverage. |
+| ops | `npm run flowchain:ops:metrics:export` | Export no-secret JSON and Prometheus textfile metrics for owner collectors. |
 | ops | `npm run flowchain:ops:alerts:install:windows -- -Action Plan` | Render recurring alert refresh Scheduled Task plan. |
 | ops | `npm run flowchain:ops:incident-drill` | Rehearse node, RPC, stale-state, stalled-height, and no-secret incidents. |
 | bridge | `npm run flowchain:bridge:relayer:once -- -AllowBlocked` | Run the no-broadcast relayer gate; remains blocked until owner Base inputs exist. |

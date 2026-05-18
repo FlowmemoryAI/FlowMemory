@@ -748,6 +748,49 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "ops-metrics-export"
+        requirement = "Ops metrics export converts no-secret service, alert, public-readiness, bridge, tester, truth-table, and no-secret evidence into JSON plus Prometheus textfile metrics without network delivery or owner-value leakage."
+        path = "docs/agent-runs/live-product-infra-rpc/ops-metrics-export-report.json"
+        command = "npm run flowchain:ops:metrics:export"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptPresent",
+            "opsSnapshotLoaded",
+            "opsAlertRulesLoaded",
+            "serviceStatusLoaded",
+            "serviceMonitorLoaded",
+            "truthTableLoaded",
+            "noSecretLoaded",
+            "metricsJsonWritten",
+            "prometheusTextWritten",
+            "markdownWritten",
+            "metricCountSufficient",
+            "requiredMetricsPresent",
+            "prometheusHasHelpAndType",
+            "prometheusContainsNoUrls",
+            "prometheusContainsNoEnvAssignments",
+            "metricsJsonNoSecrets",
+            "metricsJsonEnvValuesPrintedFalse",
+            "metricsJsonBroadcastsFalse",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingMetricNames"
+        )
+        requiredMinimums = [ordered]@{
+            metricCount = 25
+        }
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "ops-alert-install-validation"
         requirement = "Scheduled alert refresh install validation proves plan/status/uninstall no-op behavior and no external delivery."
         path = "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
@@ -850,7 +893,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "backup-restore-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "ops-snapshot", "ops-alert-rules", "ops-alert-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"
@@ -1112,6 +1155,7 @@ function ConvertTo-TruthEvidence {
         "commandCount",
         "runbookCount",
         "evidenceReportCount",
+        "metricCount",
         "expectedFileCount",
         "ownerInputNameCount",
         "ruleCount",
@@ -1206,6 +1250,7 @@ function ConvertTo-TruthEvidence {
     foreach ($arrayName in @(
         "failedChecks",
         "missingChecklistCoverage",
+        "missingMetricNames",
         "missingNextCommands",
         "failedVerifyChecks",
         "unmappedCurrentFindingCodes",

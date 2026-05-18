@@ -1,12 +1,12 @@
 {
     "schema":  "flowchain.doctor_report.v0",
-    "generatedAt":  "2026-05-18T02:15:28.1521039Z",
+    "generatedAt":  "2026-05-18T02:27:31.1036400Z",
     "status":  "blocked",
     "repoRoot":  "E:/FlowMemory/flowmemory-live-infra-rpc",
-    "diskFreeGiB":  218.92,
-    "stateFileLastWriteAgeSeconds":  4,
-    "latestHeight":  "63944",
-    "finalizedHeight":  "63944",
+    "diskFreeGiB":  218.93,
+    "stateFileLastWriteAgeSeconds":  0,
+    "latestHeight":  "64184",
+    "finalizedHeight":  "64184",
     "localUrls":  {
                       "controlPlaneHealth":  "http://127.0.0.1:8787/health",
                       "dashboard":  "http://127.0.0.1:5173/"
@@ -268,21 +268,21 @@
                        "name":  "disk-free:E",
                        "status":  "running",
                        "owner":  "storage",
-                       "detail":  "218.92 GiB free on E:",
+                       "detail":  "218.93 GiB free on E:",
                        "nextCommand":  "free disk space before public operation"
                    },
                    {
                        "name":  "state-file",
                        "status":  "running",
                        "owner":  "storage",
-                       "detail":  "devnet/local/state.json age seconds: 4",
+                       "detail":  "devnet/local/state.json age seconds: 0",
                        "nextCommand":  "npm run flowchain:service:start -- -LiveProfile"
                    },
                    {
                        "name":  "service-status-report",
                        "status":  "running",
                        "owner":  "service",
-                       "detail":  "latestHeight=63944 finalizedHeight=63944 stateAge=1",
+                       "detail":  "latestHeight=64184 finalizedHeight=64184 stateAge=3",
                        "nextCommand":  "npm run flowchain:service:status -- -AllowBlocked"
                    },
                    {
@@ -331,7 +331,7 @@
                        "name":  "port:5173",
                        "status":  "running",
                        "owner":  "dashboard",
-                       "detail":  "owned by PID(s): 39452",
+                       "detail":  "owned by PID(s): 39452, 0",
                        "nextCommand":  "npm run workbench:dev"
                    },
                    {

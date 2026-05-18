@@ -125,6 +125,7 @@ L1, and waits for main-state credit evidence.
 ```powershell
 npm run flowchain:ops:snapshot -- -AllowBlocked
 npm run flowchain:ops:alerts -- -AllowBlocked
+npm run flowchain:ops:metrics:export
 npm run flowchain:ops:alerts:install:windows -- -Action Plan
 npm run flowchain:ops:alerts:install:validate
 npm run flowchain:ops:incident-drill -- -AllowBlocked

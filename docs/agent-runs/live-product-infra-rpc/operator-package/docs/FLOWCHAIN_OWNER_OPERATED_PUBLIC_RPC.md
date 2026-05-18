@@ -12,6 +12,7 @@ The repository now provides:
 - `npm run flowchain:service:install:systemd:validate` for a no-secret Linux systemd live-service and supervisor install plan check.
 - `npm run flowchain:ops:snapshot` for one no-secret operator report that classifies critical incidents, public-readiness blockers, and incident commands.
 - `npm run flowchain:ops:incident-drill` for a synthetic no-values incident drill that proves node-down, control-plane-down, stale-state, stalled-height, and no-secret failures are classified as critical while owner-input blockers stay non-critical.
+- `npm run flowchain:ops:metrics:export` for no-secret JSON and Prometheus textfile metrics that owner-operated collectors can scrape locally.
 - `npm run flowchain:ops:alerts:install:windows` and `npm run flowchain:ops:alerts:install:validate` for a no-secret Windows Scheduled Task install/status/uninstall path for recurring local alert refresh.
 - `npm run flowchain:service:stop` and `npm run flowchain:service:restart`, which preserve runtime state.
 - `npm run flowchain:public-rpc:check` for endpoint, TLS, CORS, rate-limit, health, discovery, readiness, state, and response-hygiene checks.
