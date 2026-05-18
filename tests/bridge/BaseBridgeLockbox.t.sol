@@ -117,8 +117,7 @@ contract BaseBridgeLockboxTest {
     bytes32 private constant BRIDGE_RELEASE_SIGNATURE =
         keccak256("BridgeRelease(bytes32,bytes32,address,address,uint256,bytes32)");
     bytes32 private constant RECIPIENT = keccak256("flowchain.recipient.alice");
-    bytes32 private constant PLACEHOLDER_RECIPIENT =
-        0x5555555555555555555555555555555555555555555555555555555555555555;
+    bytes32 private constant PLACEHOLDER_RECIPIENT = 0x5555555555555555555555555555555555555555555555555555555555555555;
     bytes32 private constant EVIDENCE_HASH = keccak256("flowchain.local.acceptance");
 
     BaseBridgeLockbox private lockbox;
@@ -377,9 +376,7 @@ contract BaseBridgeLockboxTest {
         _assertTrue(totalLocked == 0);
         _assertTrue(totalDeposited == 10 ether);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(BaseBridgeLockbox.ReleaseAmountExceeded.selector, depositId, 1 wei, 0)
-        );
+        vm.expectRevert(abi.encodeWithSelector(BaseBridgeLockbox.ReleaseAmountExceeded.selector, depositId, 1 wei, 0));
         lockbox.releaseERC20(depositId, address(caller), address(token), 1 wei, keccak256("flowchain.local.release.3"));
     }
 
@@ -391,6 +388,11 @@ contract BaseBridgeLockboxTest {
 
         vm.expectRevert(BaseBridgeLockbox.ZeroAmount.selector);
         lockbox.releaseERC20(depositId, address(caller), address(token), 0, EVIDENCE_HASH);
+
+        bytes32 nativeDepositId = caller.lockNative{value: 0.5 ether}(lockbox, RECIPIENT);
+
+        vm.expectRevert(BaseBridgeLockbox.ZeroRecipient.selector);
+        lockbox.releaseNative(nativeDepositId, payable(address(0)), 0.1 ether, EVIDENCE_HASH);
     }
 
     function testReleaseBlocksTokenMismatchOverReleaseAndZeroEvidence() public {

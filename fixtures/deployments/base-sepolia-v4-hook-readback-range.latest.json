@@ -1,0 +1,43 @@
+{
+  "schema": "flowmemory.base_sepolia.v4_hook_readback_range.v0",
+  "generatedAt": "2026-05-17T06:08:45.098Z",
+  "mode": "readback-range-plan",
+  "productionReady": false,
+  "planPath": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-proof-plan.json",
+  "hook": {
+    "contract": "FlowMemoryAfterSwapHook",
+    "create2Deployer": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+    "constructorArgs": {
+      "poolManager": "0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408"
+    },
+    "initCodeHash": "0x2734b4f6b4f6932249d4d98240147f02cf2ba548fe1ade4a7d63d9dd0a8b9fef",
+    "salt": "0x0000000000000000000000000000000000000000000000004915000000000000",
+    "hookAddress": "0xD24d7f807cb00D28DdF675E55879547d4F7B0040",
+    "miningMode": "mined-after-swap-suffix-0040",
+    "requiredLowBits": "0x0040",
+    "hasAfterSwapOnlyFlag": true,
+    "permissions": {
+      "afterSwap": true,
+      "beforeSwap": false,
+      "afterSwapReturnDelta": false,
+      "dynamicFeeOverride": false,
+      "custody": false
+    }
+  },
+  "range": {
+    "source": "operator-explicit",
+    "fromBlock": "41616089",
+    "toBlock": "41616089",
+    "finalizedBlock": null,
+    "proofArtifactPath": null
+  },
+  "command": "npm run hook:base-sepolia:readback -- --rpc-url $BASE_SEPOLIA_RPC_URL --from-block 41616089 --to-block 41616089 --json",
+  "autoReadbackCommand": "npm run hook:base-sepolia:readback:auto -- --json",
+  "boundaries": [
+    "Base Sepolia proof is public testnet evidence, not production mainnet readiness.",
+    "A deployed hook alone is not enough; the acceptance proof requires a PoolManager swap that emits FlowPulse.",
+    "txHash and logIndex are read by the indexer after receipts/logs exist; the hook never claims them.",
+    "No private keys, RPC credentials, or explorer API keys are written to this artifact.",
+    "Use tiny testnet-only currencies and liquidity for this proof."
+  ]
+}

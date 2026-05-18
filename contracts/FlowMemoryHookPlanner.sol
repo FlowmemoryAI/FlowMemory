@@ -40,7 +40,7 @@ library FlowMemoryHookFlags {
 /// operator runbook that records the exact inputs.
 contract FlowMemoryHookPlanner {
     uint256 public constant BASE_SEPOLIA_CHAIN_ID = 84532;
-    address public constant BASE_SEPOLIA_POOL_MANAGER = 0x9a13F98Cb987694C9F086b1F5eB990EeA8264Ec3;
+    address public constant BASE_SEPOLIA_POOL_MANAGER = 0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408;
     address public constant CREATE2_DEPLOYER = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
 
     uint160 public constant ALL_HOOK_MASK = FlowMemoryHookFlags.ALL_HOOK_MASK;

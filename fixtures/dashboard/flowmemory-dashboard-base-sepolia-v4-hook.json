@@ -1,0 +1,114 @@
+{
+  "metadata": {
+    "schema": "flowmemory.dashboard.fixture.v0",
+    "generatedAt": "2026-05-17T06:47:51.565Z",
+    "mode": "base-sepolia-v4-hook-proof",
+    "description": "Generated Base Sepolia v4 hook proof dashboard data from readback artifacts. It is public-testnet evidence and not production mainnet readiness.",
+    "fixturePath": "fixtures/dashboard/flowmemory-dashboard-base-sepolia-v4-hook.json",
+    "runtimeDataPath": "apps/dashboard/public/data/flowmemory-dashboard-base-sepolia-v4-hook.json",
+    "baseSepoliaHookProof": {
+      "liveProofComplete": false,
+      "stage": "dry-run-proof-ready",
+      "plannedHookAddress": "0xD24d7f807cb00D28DdF675E55879547d4F7B0040",
+      "readWindow": {
+        "fromBlock": "41616089",
+        "toBlock": "41616089",
+        "finalizedBlock": null
+      },
+      "counts": {
+        "observations": 0,
+        "canonicalObservations": 0,
+        "swapMemorySignals": 0,
+        "rejectedLogs": 0,
+        "duplicates": 0,
+        "memorySignals": 0,
+        "rootflowTransitions": 0
+      },
+      "missing": [
+        "deployed FlowMemoryAfterSwapHook code at the mined hook address",
+        "local env-check with funded Base Sepolia deployer",
+        "broadcast swap-proof artifact with receipts",
+        "non-empty Base Sepolia hook FlowPulse readback artifact"
+      ],
+      "nextSteps": [
+        "Run npm run hook:base-sepolia:env-check -- --json until broadcastReady is true.",
+        "Run npm run hook:base-sepolia:swap-proof:broadcast -- --json with the funded testnet key.",
+        "Run npm run hook:base-sepolia:readback-range -- --infer-readback-range --json to derive the readback window from broadcast receipts.",
+        "Run npm run hook:base-sepolia:readback:auto -- --json or npm run hook:base-sepolia:readback with an operator-reviewed range, and require proofComplete true.",
+        "Rerun npm run hook:base-sepolia:evidence -- --json."
+      ]
+    },
+    "futureGeneratedPaths": {
+      "indexer": "fixtures/deployments/base-sepolia-v4-hook-readback-state.latest.json",
+      "evidence": "fixtures/deployments/base-sepolia-v4-hook-evidence.latest.json",
+      "readback": "fixtures/deployments/base-sepolia-v4-hook-readback.latest.json"
+    }
+  },
+  "chain": {
+    "chainId": "84532",
+    "name": "Base Sepolia v4 hook proof",
+    "environment": "public-testnet",
+    "settlementContext": "Mined Uniswap v4 afterSwap hook proof path. Complete only after real PoolManager swap broadcast and non-empty readback.",
+    "currentBlock": 41616089,
+    "finalizedBlock": 41616089,
+    "source": "diagnostic-empty-readback",
+    "lastUpdated": "2026-05-17T06:47:51.565Z"
+  },
+  "flowPulseObservations": [],
+  "rootfields": [],
+  "workLanes": [
+    {
+      "id": "MEMORY_REFRESH",
+      "laneId": "MEMORY_REFRESH",
+      "name": "Swap memory proof",
+      "queueDepth": 1,
+      "inflight": 0,
+      "completed24h": 0,
+      "p95LatencyMs": null,
+      "operator": "base-sepolia-hook-proof",
+      "status": "unresolved",
+      "lastUpdated": "2026-05-17T06:47:51.565Z",
+      "provenance": {
+        "subsystem": "flowmemory",
+        "origin": "live-readback",
+        "chainContext": "base-sepolia-v4-hook-proof",
+        "fixturePath": "fixtures/deployments/base-sepolia-v4-hook-flowmemory.latest.json",
+        "capturedAt": "2026-05-17T06:47:51.565Z",
+        "localPathHint": "fixtures/deployments/base-sepolia-v4-hook-flowmemory.latest.json"
+      }
+    }
+  ],
+  "workReceipts": [],
+  "verifierReports": [],
+  "rootflowTransitions": [],
+  "memorySignals": [],
+  "memoryReceipts": [],
+  "rootfieldBundles": [],
+  "agentMemoryViews": [],
+  "devnetBlocks": [],
+  "hardwareNodes": [],
+  "alerts": [
+    {
+      "id": "0x341681f64a0aa8f62e2032dc31df3b096d3417da9795addb6f090a3ac7fa81ab",
+      "incidentId": "0x341681f64a0aa8f62e2032dc31df3b096d3417da9795addb6f090a3ac7fa81ab",
+      "severity": "warning",
+      "title": "Base Sepolia hook proof incomplete",
+      "summary": "Dry-run proof exists, but a funded Base Sepolia broadcast and non-empty hook readback are still required.",
+      "openedAt": "2026-05-17T06:47:51.565Z",
+      "linkedObjectIds": [
+        "0xD24d7f807cb00D28DdF675E55879547d4F7B0040"
+      ],
+      "recommendedAction": "Broadcast the swap proof with a funded testnet key, run readback over the receipt block range, then regenerate this dashboard.",
+      "status": "unresolved",
+      "lastUpdated": "2026-05-17T06:47:51.565Z",
+      "provenance": {
+        "subsystem": "alerts",
+        "origin": "live-readback",
+        "chainContext": "base-sepolia-v4-hook-proof",
+        "fixturePath": "fixtures/deployments/base-sepolia-v4-hook-flowmemory.latest.json",
+        "capturedAt": "2026-05-17T06:47:51.565Z",
+        "localPathHint": "fixtures/deployments/base-sepolia-v4-hook-evidence.latest.json"
+      }
+    }
+  ]
+}

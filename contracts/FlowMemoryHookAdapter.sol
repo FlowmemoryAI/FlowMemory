@@ -32,7 +32,16 @@ contract FlowMemoryHookAdapter is IFlowMemoryHookAdapter, IUniswapV4SwapHookLike
         if (rootfieldId == bytes32(0)) revert ZeroRootfieldId();
         if (commitment == bytes32(0)) revert ZeroCommitment();
 
-        _emitSwapMemorySignal(sender, poolId, rootfieldId, commitment, bytes32(0), hookData, msg.sender, "flowmemory://uniswap-v4/after-swap");
+        _emitSwapMemorySignal(
+            sender,
+            poolId,
+            rootfieldId,
+            commitment,
+            bytes32(0),
+            hookData,
+            msg.sender,
+            "flowmemory://uniswap-v4/after-swap"
+        );
         return AFTER_SWAP_SELECTOR;
     }
 
@@ -48,7 +57,8 @@ contract FlowMemoryHookAdapter is IFlowMemoryHookAdapter, IUniswapV4SwapHookLike
 
         FlowMemorySwapHookData memory decoded = abi.decode(hookData, (FlowMemorySwapHookData));
         bytes32 poolId = _poolIdFor(key);
-        bytes memory pulseContext = abi.encode(params.zeroForOne, params.amountSpecified, params.sqrtPriceLimitX96, swapDelta, hookData);
+        bytes memory pulseContext =
+            abi.encode(params.zeroForOne, params.amountSpecified, params.sqrtPriceLimitX96, swapDelta, hookData);
         _emitSwapMemorySignal(
             sender,
             poolId,
@@ -68,12 +78,11 @@ contract FlowMemoryHookAdapter is IFlowMemoryHookAdapter, IUniswapV4SwapHookLike
         pure
         returns (bytes memory hookData)
     {
-        return abi.encode(FlowMemorySwapHookData({
-            rootfieldId: rootfieldId,
-            commitment: commitment,
-            parentPulseId: parentPulseId,
-            uri: uri
-        }));
+        return abi.encode(
+            FlowMemorySwapHookData({
+                rootfieldId: rootfieldId, commitment: commitment, parentPulseId: parentPulseId, uri: uri
+            })
+        );
     }
 
     function _emitSwapMemorySignal(

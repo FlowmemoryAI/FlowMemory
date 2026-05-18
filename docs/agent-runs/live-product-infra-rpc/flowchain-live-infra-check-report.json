@@ -1,11 +1,11 @@
 {
     "schema":  "flowchain.live_infra_check_report.v0",
-    "generatedAt":  "2026-05-15T04:35:58.7833569Z",
-    "status":  "blocked",
-    "repoPath":  "E:/FlowMemory/flowmemory-live-infra-rpc",
+    "generatedAt":  "2026-05-15T04:57:56.6464781Z",
+    "status":  "failed",
+    "repoPath":  "E:/FlowMemory/flowmemory-prod-hq",
     "git":  {
-                "branch":  "agent/live-product-infra-rpc",
-                "commit":  "2cc0ae017b3cbd7dbf216e798a861ab444ceccf4"
+                "branch":  "agent/production-l1-hq",
+                "commit":  "d72b614066be594c79e8beaf9d130883d44b413b"
             },
     "readiness":  {
                       "publicRpcReady":  false,
@@ -15,7 +15,7 @@
                       "noSecretReady":  true
                   },
     "reportStatuses":  {
-                           "publicRpc":  "blocked",
+                           "publicRpc":  "failed",
                            "services":  "blocked",
                            "backup":  "blocked",
                            "bridgeLive":  "blocked",
@@ -40,18 +40,16 @@
                             "FLOWCHAIN_PILOT_CONFIRMATIONS"
                         ],
     "missingArtifactNames":  [
-
+                                 "devnet/local/state.json"
                              ],
     "blockedArtifactNames":  [
-
+                                 "devnet/local/state.json"
                              ],
     "missingProcessNames":  [
-                                "devnet/local/node/flowchain-node.pid",
-                                "devnet/local/services/control-plane.pid"
+                                "devnet/local/node/flowchain-node.pid"
                             ],
     "blockedProcessNames":  [
-                                "devnet/local/node/flowchain-node.pid",
-                                "devnet/local/services/control-plane.pid"
+                                "devnet/local/node/flowchain-node.pid"
                             ],
     "commandList":  [
                         "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-readiness.ps1 -AllowBlocked",
@@ -65,10 +63,10 @@
                   {
                       "name":  "Public RPC readiness",
                       "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-readiness.ps1 -AllowBlocked",
-                      "status":  "blocked",
+                      "status":  "failed",
                       "exitCode":  0,
-                      "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Public-RPC-readiness.log",
-                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
+                      "logPath":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Public-RPC-readiness.log",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
                       "reason":  ""
                   },
                   {
@@ -76,8 +74,8 @@
                       "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-status.ps1 -AllowBlocked",
                       "status":  "blocked",
                       "exitCode":  0,
-                      "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Service-process-status.log",
-                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
+                      "logPath":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Service-process-status.log",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
                       "reason":  ""
                   },
                   {
@@ -85,8 +83,8 @@
                       "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-backup-readiness.ps1 -AllowBlocked",
                       "status":  "blocked",
                       "exitCode":  0,
-                      "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Backup-readiness.log",
-                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
+                      "logPath":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Backup-readiness.log",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
                       "reason":  ""
                   },
                   {
@@ -94,8 +92,8 @@
                       "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-live-check.ps1 -AllowBlocked",
                       "status":  "blocked",
                       "exitCode":  0,
-                      "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Bridge-live-readiness.log",
-                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
+                      "logPath":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Bridge-live-readiness.log",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
                       "reason":  ""
                   },
                   {
@@ -103,8 +101,8 @@
                       "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-live-env-bridge-readiness.ps1 -AllowBlocked",
                       "status":  "blocked",
                       "exitCode":  0,
-                      "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Bridge-infra-readiness.log",
-                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
+                      "logPath":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\logs\\Bridge-infra-readiness.log",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
                       "reason":  ""
                   },
                   {
@@ -112,19 +110,19 @@
                       "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-no-secret-scan.ps1 -Paths docs/agent-runs/live-product-infra-rpc devnet/local/bridge-live-readiness devnet/local/services",
                       "status":  "passed",
                       "exitCode":  0,
-                      "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs\\No-secret-scan-live-infra-reports.log",
-                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json",
+                      "logPath":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\logs\\No-secret-scan-live-infra-reports.log",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json",
                       "reason":  ""
                   }
               ],
     "reportPaths":  {
-                        "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
-                        "services":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
-                        "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
-                        "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
-                        "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
-                        "noSecretScan":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json",
-                        "logs":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\logs"
+                        "publicRpc":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
+                        "services":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
+                        "backup":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
+                        "bridgeLive":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
+                        "bridgeInfra":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
+                        "noSecretScan":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json",
+                        "logs":  "E:\\FlowMemory\\flowmemory-prod-hq\\docs\\agent-runs\\live-product-infra-rpc\\logs"
                     },
     "blockedUntil":  {
                          "publicRpc":  "Configure FLOWCHAIN_RPC_* env names and run the control-plane behind TLS/rate-limit/CORS enforcement.",

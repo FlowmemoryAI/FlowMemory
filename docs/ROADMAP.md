@@ -99,6 +99,29 @@ Status: implemented as fixture-first services plus generated launch-core state; 
 - A separate dashboard canary mode exists for committed Base canary reader output and deployment artifacts.
 - Source verification automation exists for the canary contract set, and all current Base canary addresses are verified on BaseScan. Future redeploys still require a local `BASESCAN_API_KEY` for submission.
 - Base Sepolia plan/dry-run/broadcast/read commands and a rehearsal runbook exist for the current V0 public testnet contract set.
+- Base Sepolia Uniswap v4 hook proof commands now exist for planning,
+  non-secret local env readiness checking, consolidated evidence checking,
+  strict live-proof gating, live-code checking, hook deployment dry-run, full
+  PoolManager swap-proof dry-run, post-broadcast readback range planning, and
+  inferred readback from successful broadcast receipt blocks. The range planner
+  refuses dry-run artifacts as live evidence. A hook readback wrapper now exists
+  and fails by default if the selected Base Sepolia block range has zero hook
+  FlowPulse observations. A post-readback Flow Memory / Rootflow dashboard
+  evidence generator now exists and fails by default until the evidence
+  artifact reports `liveProofComplete: true`; `--allow-incomplete` is
+  diagnostic only. It also rejects readbacks with count mismatches,
+  non-FlowPulse topics, non-success receipts, or no unique successful
+  `SWAP_MEMORY_SIGNAL`. A final acceptance package gate now exists and exits
+  nonzero until env readiness, live code, broadcast receipts, selected
+  readback range, planned hook runtime-bytecode identity,
+  successful receipts for the PoolManager initialize/liquidity/swap actions,
+  range/readback artifact agreement, readback, generated Flow Memory objects,
+  FlowPulse observation integrity, successful `SWAP_MEMORY_SIGNAL` evidence,
+  Flow Memory signal linkage to successful broadcast receipt transactions, and
+  count agreement all pass. The current mined hook address is
+  `0xD24d7f807cb00D28DdF675E55879547d4F7B0040` with afterSwap-only low bits
+  `0x0040`. The real funded Base Sepolia broadcast plus indexer readback is
+  still the next proof gate.
 - A Base mainnet V0 canary deployment has been performed for testing only and is documented under `docs/DEPLOYMENTS/`.
 - Runtime schema validation and generated fixture drift checks exist for launch-core outputs.
 - Local devnet smoke-test gates exist as a no-value Rust prototype, without mainnet or production deployment.
@@ -198,8 +221,12 @@ Next merge preference:
 7. Contracts settlement-spine alignment without moving runtime into Solidity.
 8. Refresh packaging scripts and root command aliases whenever subsystem command semantics change.
 9. Canary ingestion and Base Sepolia follow-ups, still gated from production claims.
-10. Base Sepolia rehearsal execution against explicit testnet deployments.
-11. Actual source verification submission for Base canary contracts when `BASESCAN_API_KEY` is available.
-12. Static analysis follow-up findings triaged for any public testnet deployment.
-13. Operator ownership separation and multisig/recovery decision before further live deployments.
-14. Production-gated research only after V0 local acceptance stays green.
+10. Base Sepolia v4 hook env-check, proof broadcast, readback range planning,
+    evidence gate, readback, strict Flow Memory / Rootflow dashboard evidence
+    generation, and final acceptance package generation against the mined
+    afterSwap-only hook address, still gated from production claims.
+11. Base Sepolia rehearsal execution against explicit testnet deployments.
+12. Actual source verification submission for Base canary contracts when `BASESCAN_API_KEY` is available.
+13. Static analysis follow-up findings triaged for any public testnet deployment.
+14. Operator ownership separation and multisig/recovery decision before further live deployments.
+15. Production-gated research only after V0 local acceptance stays green.

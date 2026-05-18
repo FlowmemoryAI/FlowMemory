@@ -57,6 +57,20 @@ contract FlowMemoryAfterSwapHookTest {
         _assertTrue(!permissions.afterDonate);
     }
 
+    function testAfterSwapSelectorMatchesCanonicalUniswapV4AbiShape() public pure {
+        bytes4 canonicalSelector = bytes4(
+            keccak256("afterSwap(address,(address,address,uint24,int24,address),(bool,int256,uint160),int256,bytes)")
+        );
+
+        _assertTrue(IUniswapV4SwapHookLike.afterSwap.selector == canonicalSelector);
+    }
+
+    function testPlannerPinsCurrentBaseSepoliaPoolManager() public {
+        FlowMemoryHookPlanner planner = new FlowMemoryHookPlanner();
+
+        _assertTrue(planner.BASE_SEPOLIA_POOL_MANAGER() == 0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408);
+    }
+
     function testPlannerRejectsCustomAccountingAndExtraHookFlags() public {
         FlowMemoryHookPlanner planner = new FlowMemoryHookPlanner();
         address afterSwapOnly = address(uint160(planner.AFTER_SWAP_FLAG()));

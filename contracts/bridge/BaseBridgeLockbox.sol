@@ -34,8 +34,7 @@ contract BaseBridgeLockbox {
     bytes32 public constant BRIDGE_DEPOSIT_SCHEMA_ID = keccak256("flowmemory.bridge.deposit.v0");
     bytes32 public constant BRIDGE_RELEASE_SCHEMA_ID = keccak256("flowmemory.bridge.release.v0");
     bytes32 public constant PILOT_MODE_TAG = keccak256("flowchain.base8453.owner-pilot.v0");
-    bytes32 private constant PLACEHOLDER_RECIPIENT =
-        0x5555555555555555555555555555555555555555555555555555555555555555;
+    bytes32 private constant PLACEHOLDER_RECIPIENT = 0x5555555555555555555555555555555555555555555555555555555555555555;
 
     address public owner;
     address public releaseAuthority;
@@ -229,7 +228,13 @@ contract BaseBridgeLockbox {
         nonReentrant
         returns (bytes32 releaseId)
     {
+        if (recipient == address(0)) {
+            revert ZeroRecipient();
+        }
         releaseId = _recordRelease(depositId, recipient, NATIVE_TOKEN, amount, evidenceHash);
+        // Use call instead of transfer so legitimate smart-contract recipients are not limited by the 2300 gas stipend.
+        // State is updated before this call and the function is nonReentrant.
+        // slither-disable-next-line low-level-calls
         (bool ok,) = recipient.call{value: amount}("");
         if (!ok) {
             revert TransferFailed();

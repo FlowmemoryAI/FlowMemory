@@ -49,8 +49,9 @@ Launch risk to watch:
   or finality proof.
 - nonstandard ERC-20 behavior such as transfer fees, rebasing, or callbacks is
   outside the pilot safety claim.
-- native releases use Solidity `transfer`; gas-heavy smart-contract recipients
-  can fail and should not be used for pilot recovery without separate review.
+- native releases use an explicit low-level value transfer after checks/effects
+  and under `nonReentrant`; smart-contract recipients should still be reviewed
+  before pilot recovery.
 - a compromised owner or release authority can misuse the POC; emergency
   response is limited to pause, cap changes, allowlist disablement, authority
   rotation, and explicit release/recovery calls.

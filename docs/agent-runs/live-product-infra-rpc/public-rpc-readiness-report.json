@@ -1,7 +1,7 @@
 {
     "schema":  "flowchain.public_rpc_readiness_report.v0",
-    "generatedAt":  "2026-05-15T04:35:51.5585011Z",
-    "status":  "blocked",
+    "generatedAt":  "2026-05-15T04:57:40.4963643Z",
+    "status":  "failed",
     "publicRpcReady":  false,
     "publicMode":  false,
     "explicitLocalEndpoint":  false,
@@ -43,18 +43,18 @@
                         "latestHashMatches":  null,
                         "latestRootMatches":  null,
                         "finalizedHeightMatches":  null,
-                        "blockAgeWithinLimit":  true
+                        "blockAgeWithinLimit":  false
                     },
     "localState":  {
                        "statePath":  "devnet/local/state.json",
                        "chainId":  "flowmemory-local-devnet-v0",
-                       "latestHeight":  "232",
-                       "latestHash":  "0xa81de80ec355086968e527ab380377b0af0c4f3157ca8d97b106a74bf2ba7c0a",
+                       "latestHeight":  "18655",
+                       "latestHash":  "0xf1cc2bf74886ec78a997817c706f771d393d5bdf8077d16011564b7e513a4511",
                        "latestRoot":  "0x149b8017ed2be0fb192c295383d2a198798a24e8509978c678fe78205ca8ee58",
-                       "latestBlockAgeSeconds":  66,
-                       "stateFileLastWriteAgeSeconds":  66,
-                       "finalizedHeight":  "232",
-                       "finalizedHash":  "0xa81de80ec355086968e527ab380377b0af0c4f3157ca8d97b106a74bf2ba7c0a",
+                       "latestBlockAgeSeconds":  348,
+                       "stateFileLastWriteAgeSeconds":  348,
+                       "finalizedHeight":  "18655",
+                       "finalizedHash":  "0xf1cc2bf74886ec78a997817c706f771d393d5bdf8077d16011564b7e513a4511",
                        "mempoolDepth":  0,
                        "peerCount":  null
                    },
@@ -95,6 +95,12 @@
                          "category":  "env",
                          "kind":  "blocked",
                          "reason":  "missing required public RPC env value"
+                     },
+                     {
+                         "name":  "devnet/local/state.json",
+                         "category":  "artifact",
+                         "kind":  "failed",
+                         "reason":  "latest block age exceeds live RPC freshness limit"
                      }
                  ],
     "noSecrets":  true

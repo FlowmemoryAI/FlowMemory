@@ -1,9 +1,9 @@
 ﻿FlowChain service status: blocked
-Node: stopped PID=51980
-Control plane: stopped PID=51616 bind=127.0.0.1:8787
-Public readiness: blocked
-Latest height: 232
-Finalized height: 232
+Node: stopped PID=51408
+Control plane: running PID=3116 bind=127.0.0.1:8787
+Public readiness: failed
+Latest height: 18655
+Finalized height: 18655
 Backup path: not-configured
-Bridge readiness: live=blocked, infra=blocked
-Report: E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json
+Bridge readiness: live=passed, infra=blocked
+Report: E:\FlowMemory\flowmemory-prod-hq\docs\agent-runs\live-product-infra-rpc\service-status-report.json

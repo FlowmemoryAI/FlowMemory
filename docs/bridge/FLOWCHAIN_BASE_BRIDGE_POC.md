@@ -98,9 +98,9 @@ is the exact file for the runtime/control-plane to consume.
   locked amount, allowlist disablement, authority rotation, and explicit
   release/recovery calls. This is why the lockbox is only suitable for a tiny
   capped pilot.
-- Native release boundary: `releaseNative` uses Solidity `transfer`; use simple
-  EOA or plain `receive` recipients for pilot recovery unless a smart-contract
-  recipient has been separately reviewed.
+- Native release boundary: `releaseNative` uses an explicit native value call
+  after recording release state and under `nonReentrant`; use simple EOA or
+  reviewed smart-contract recipients for pilot recovery.
 - Token boundary: use plain ERC-20s for rehearsal and only explicitly approved
   assets for the Base `8453` pilot. Fee-on-transfer, rebasing, callback-heavy,
   or otherwise nonstandard assets are outside the pilot safety claim.

@@ -2,13 +2,19 @@ import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ArrowRightLeft,
+  Bell,
   ChevronDown,
+  ChevronRight,
   CircleDollarSign,
   Copy,
+  Download,
   ExternalLink,
+  Home,
   Info,
   Lock,
+  Send,
   ShieldCheck,
+  UserRound,
   Wallet,
   Zap,
 } from "lucide-react";
@@ -349,6 +355,8 @@ export function BridgePilotView({ workbench }: BridgePilotViewProps) {
   const usdEstimateLabel =
     usdEstimate ??
     (priceStatus === "loading" ? "Loading ETH/USD quote" : "USD quote unavailable");
+  const mobileAccountLabel = walletAddress ? shorten(walletAddress) : "0x4F...A7F3";
+  const mobileNetworkLabel = chainId && chainId !== BASE_CHAIN_ID_HEX ? chainLabel : "Mainnet";
 
   useEffect(() => {
     const controller = new AbortController();
@@ -440,6 +448,231 @@ export function BridgePilotView({ workbench }: BridgePilotViewProps) {
   return (
     <div className="flowchain-bridge-page">
       <div className="bridge-flow-ribbon" aria-hidden="true" />
+
+      <section className="flowchain-mobile-wallet" aria-label="Flowchain mobile wallet overview">
+        <div className="mobile-wallet-statusbar" aria-hidden="true">
+          <span>9:41</span>
+          <div>
+            <i className="mobile-signal-bars" />
+            <i className="mobile-wifi-mark" />
+            <i className="mobile-battery-mark" />
+          </div>
+        </div>
+
+        <header className="mobile-wallet-header">
+          <span aria-hidden="true" />
+          <a className="mobile-wallet-brand" href="/" aria-label="Back to FlowMemory workbench">
+            <span className="flowchain-brand-mark" aria-hidden="true">
+              <span />
+            </span>
+            <strong>Flowchain</strong>
+          </a>
+          <button className="mobile-bell-button" type="button" aria-label="Notifications">
+            <Bell size={25} aria-hidden="true" />
+            <i aria-hidden="true" />
+          </button>
+        </header>
+
+        <div className="mobile-wallet-pills" aria-label="Wallet connection">
+          <button type="button">
+            <span className="mobile-blue-dot" aria-hidden="true" />
+            {mobileNetworkLabel}
+            <ChevronDown size={14} aria-hidden="true" />
+          </button>
+          <i aria-hidden="true" />
+          <button type="button" onClick={connectWallet}>
+            <span className="mobile-wallet-orb" aria-hidden="true" />
+            {mobileAccountLabel}
+            <ChevronDown size={14} aria-hidden="true" />
+          </button>
+        </div>
+
+        <section className="mobile-portfolio-hero" aria-labelledby="mobile-portfolio-title">
+          <p id="mobile-portfolio-title">
+            Total portfolio value
+            <Info size={15} aria-hidden="true" />
+          </p>
+          <strong>$24,785.62</strong>
+          <span>
+            <b>▲ 8.42%</b>
+            +$1,927.31 (24H)
+          </span>
+        </section>
+
+        <div className="mobile-flow-smoke" aria-hidden="true" />
+
+        <section className="mobile-chart-card" aria-label="Portfolio chart">
+          <svg viewBox="0 0 320 118" role="img" aria-label="Portfolio value trending upward over one day">
+            <defs>
+              <linearGradient id="mobileChartGlow" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0%" stopColor="#1f6cf0" stopOpacity="0.55" />
+                <stop offset="100%" stopColor="#1557c8" stopOpacity="1" />
+              </linearGradient>
+            </defs>
+            <path className="mobile-chart-grid-line" d="M12 24H286" />
+            <path className="mobile-chart-grid-line" d="M12 58H286" />
+            <path className="mobile-chart-grid-line" d="M12 92H286" />
+            <path
+              className="mobile-chart-line"
+              d="M13 76 C27 63, 34 65, 42 47 S60 34, 70 57 S94 71, 109 63 S132 59, 145 43 S166 54, 176 42 S197 44, 207 30 S226 50, 240 36 S260 43, 272 29 S285 36, 296 24"
+            />
+            <circle cx="296" cy="24" r="5.5" />
+          </svg>
+          <div className="mobile-chart-scale" aria-hidden="true">
+            <span>$26K</span>
+            <span>$24K</span>
+            <span>$22K</span>
+          </div>
+          <div className="mobile-chart-tabs" aria-label="Chart range">
+            <button type="button" aria-current="true">1D</button>
+            <button type="button">1W</button>
+            <button type="button">1M</button>
+            <button type="button">3M</button>
+            <button type="button">1Y</button>
+            <button type="button">ALL</button>
+          </div>
+        </section>
+
+        <section className="mobile-action-card" aria-label="Wallet actions">
+          <button type="button">
+            <span aria-hidden="true"><Send size={25} /></span>
+            <strong>Send</strong>
+            <small>Transfer tokens</small>
+          </button>
+          <button type="button">
+            <span aria-hidden="true"><Download size={25} /></span>
+            <strong>Receive</strong>
+            <small>Deposit assets</small>
+          </button>
+          <button type="button">
+            <span aria-hidden="true"><ArrowRightLeft size={25} /></span>
+            <strong>Swap</strong>
+            <small>Trade tokens</small>
+          </button>
+          <button type="button" onClick={connectWallet}>
+            <span aria-hidden="true"><ShieldCheck size={25} /></span>
+            <strong>Bridge</strong>
+            <small>Move assets</small>
+          </button>
+        </section>
+
+        <section className="mobile-assets-card" aria-label="Assets">
+          <div className="mobile-section-header">
+            <span>Assets</span>
+            <span>Value</span>
+            <span>24h change</span>
+          </div>
+          <article className="mobile-asset-row">
+            <span className="mobile-asset-icon flow">F</span>
+            <div>
+              <strong>FLOW</strong>
+              <small>Flow Token</small>
+            </div>
+            <div>
+              <strong>$7,452.81</strong>
+              <small>2,450.12 FLOW</small>
+            </div>
+            <b className="is-up">▲ 4.13%</b>
+            <ChevronRight size={19} aria-hidden="true" />
+          </article>
+          <article className="mobile-asset-row">
+            <span className="mobile-asset-icon eth">E</span>
+            <div>
+              <strong>ETH</strong>
+              <small>Ethereum</small>
+            </div>
+            <div>
+              <strong>$10,917.02</strong>
+              <small>4.34 ETH</small>
+            </div>
+            <b className="is-up">▲ 2.31%</b>
+            <ChevronRight size={19} aria-hidden="true" />
+          </article>
+          <article className="mobile-asset-row">
+            <span className="mobile-asset-icon usdc"><CircleDollarSign size={25} /></span>
+            <div>
+              <strong>USDC</strong>
+              <small>USD Coin</small>
+            </div>
+            <div>
+              <strong>$2,850.00</strong>
+              <small>2,850.00 USDC</small>
+            </div>
+            <b className="is-down">▼ 0.02%</b>
+            <ChevronRight size={19} aria-hidden="true" />
+          </article>
+          <article className="mobile-asset-row">
+            <span className="mobile-asset-icon btc">B</span>
+            <div>
+              <strong>wBTC</strong>
+              <small>Wrapped Bitcoin</small>
+            </div>
+            <div>
+              <strong>$3,565.79</strong>
+              <small>0.0421 wBTC</small>
+            </div>
+            <b className="is-up">▲ 1.08%</b>
+            <ChevronRight size={19} aria-hidden="true" />
+          </article>
+          <button className="mobile-assets-link" type="button">
+            View all assets
+            <ChevronRight size={22} aria-hidden="true" />
+          </button>
+        </section>
+
+        <section className="mobile-activity-card" aria-label="Recent activity">
+          <div className="mobile-section-title">
+            <span>Recent activity</span>
+            <button type="button">View all</button>
+          </div>
+          <article className="mobile-activity-row">
+            <span className="mobile-activity-icon receive" aria-hidden="true"><Download size={23} /></span>
+            <div>
+              <strong>Received FLOW</strong>
+              <small>From 0xB8F1...1E2A</small>
+            </div>
+            <div>
+              <strong>+250.00 FLOW</strong>
+              <small>$405.90</small>
+            </div>
+          </article>
+          <article className="mobile-activity-row">
+            <span className="mobile-activity-icon swap" aria-hidden="true"><ArrowRightLeft size={23} /></span>
+            <div>
+              <strong>Swapped ETH to FLOW</strong>
+              <small>Via FlowSwap</small>
+            </div>
+            <div>
+              <strong>-2.5000 ETH</strong>
+              <small>+623.58 FLOW</small>
+            </div>
+          </article>
+        </section>
+
+        <nav className="mobile-bottom-nav" aria-label="Mobile wallet navigation">
+          <a href="/bridge" aria-current="page">
+            <Home size={24} aria-hidden="true" />
+            Home
+          </a>
+          <a href="/raw">
+            <CircleDollarSign size={24} aria-hidden="true" />
+            Assets
+          </a>
+          <a href="/bridge">
+            <ArrowRightLeft size={24} aria-hidden="true" />
+            Swap
+          </a>
+          <a href="/bridge">
+            <ShieldCheck size={24} aria-hidden="true" />
+            Bridge
+          </a>
+          <a href="/raw">
+            <UserRound size={24} aria-hidden="true" />
+            Profile
+          </a>
+        </nav>
+      </section>
+
       <header className="flowchain-bridge-nav">
         <a className="flowchain-brand" href="/" aria-label="Back to FlowMemory workbench">
           <span className="flowchain-brand-mark" aria-hidden="true">

@@ -19,8 +19,7 @@ contract FlowChainSettlementSpine {
 
     bytes32 public constant BRIDGE_DEPOSIT_OBJECT = keccak256("flowchain.object.bridge-deposit.v0");
     bytes32 public constant BRIDGE_CREDIT_OBJECT = keccak256("flowchain.object.bridge-credit.v0");
-    bytes32 public constant BRIDGE_WITHDRAWAL_INTENT_OBJECT =
-        keccak256("flowchain.object.bridge-withdrawal-intent.v0");
+    bytes32 public constant BRIDGE_WITHDRAWAL_INTENT_OBJECT = keccak256("flowchain.object.bridge-withdrawal-intent.v0");
     bytes32 public constant MEMORY_OBJECT = keccak256("flowchain.object.memory.v0");
     bytes32 public constant FINALITY_OBJECT = keccak256("flowchain.object.finality.v0");
 

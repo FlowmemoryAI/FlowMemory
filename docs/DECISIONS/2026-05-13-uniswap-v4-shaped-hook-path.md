@@ -67,7 +67,7 @@ to satisfy those hook address flags.
 Base Sepolia is the next allowed live-network path for this hook work:
 
 - chain id: `84532`;
-- PoolManager: `0x9a13F98Cb987694C9F086b1F5eB990EeA8264Ec3`;
+- PoolManager: `0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408`;
 - CREATE2 deployer: `0x4e59b44847b379578588920cA78FbF26c0B4956C`;
 - target hook address bits: exactly `0x40` under Uniswap v4's low-bit hook
   mask;

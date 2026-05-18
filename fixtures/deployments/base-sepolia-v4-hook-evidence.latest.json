@@ -1,0 +1,79 @@
+{
+  "schema": "flowmemory.base_sepolia.v4_hook_evidence.v0",
+  "generatedAt": "2026-05-17T06:08:45.098Z",
+  "mode": "evidence",
+  "productionReady": false,
+  "liveProofComplete": false,
+  "stage": "dry-run-proof-ready",
+  "planPath": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-proof-plan.json",
+  "inputs": {
+    "envArtifactPath": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-env-check.latest.json",
+    "proofArtifactPath": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-proof.latest.json",
+    "readbackArtifactPath": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-readback.latest.json"
+  },
+  "hook": {
+    "contract": "FlowMemoryAfterSwapHook",
+    "create2Deployer": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+    "constructorArgs": {
+      "poolManager": "0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408"
+    },
+    "initCodeHash": "0x2734b4f6b4f6932249d4d98240147f02cf2ba548fe1ade4a7d63d9dd0a8b9fef",
+    "expectedRuntime": {
+      "artifact": "out/FlowMemoryAfterSwapHook.sol/FlowMemoryAfterSwapHook.json",
+      "runtimeBytecodeHash": "0xa03b0f4ac8312b3790bd9282b156a5c1b2bad4f290d551c94806e79e3472db97",
+      "runtimeByteLength": 2903,
+      "immutableReferenceCount": 4,
+      "immutableConstructorArgs": {
+        "poolManager": "0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408"
+      }
+    },
+    "salt": "0x0000000000000000000000000000000000000000000000004915000000000000",
+    "hookAddress": "0xD24d7f807cb00D28DdF675E55879547d4F7B0040",
+    "miningMode": "mined-after-swap-suffix-0040",
+    "requiredLowBits": "0x0040",
+    "hasAfterSwapOnlyFlag": true,
+    "permissions": {
+      "afterSwap": true,
+      "beforeSwap": false,
+      "afterSwapReturnDelta": false,
+      "dynamicFeeOverride": false,
+      "custody": false
+    }
+  },
+  "evidence": {
+    "officialContractsCodePresent": true,
+    "plannedHookCodePresent": false,
+    "plannedHookRuntimeBytecodeMatches": false,
+    "plannedHookRuntimeCodeHash": null,
+    "expectedHookRuntimeCodeHash": "0xa03b0f4ac8312b3790bd9282b156a5c1b2bad4f290d551c94806e79e3472db97",
+    "envBroadcastReady": false,
+    "dryRunProofReady": true,
+    "broadcastProofReady": false,
+    "readbackProofReady": false,
+    "readbackObservationCount": 0,
+    "readbackProofComplete": false,
+    "dryRunTransactionCount": 12,
+    "broadcastReceiptCount": 0
+  },
+  "missing": [
+    "deployed FlowMemoryAfterSwapHook code at the mined hook address",
+    "local env-check with funded Base Sepolia deployer",
+    "broadcast swap-proof artifact with receipts",
+    "non-empty Base Sepolia hook FlowPulse readback artifact"
+  ],
+  "nextSteps": [
+    "Run npm run hook:base-sepolia:env-check -- --json until broadcastReady is true.",
+    "Run npm run hook:base-sepolia:swap-proof:broadcast -- --json with the funded testnet key.",
+    "Run npm run hook:base-sepolia:readback-range -- --infer-readback-range --json to derive the readback window from broadcast receipts.",
+    "Run npm run hook:base-sepolia:readback:auto -- --json or npm run hook:base-sepolia:readback with an operator-reviewed range, and require proofComplete true.",
+    "Rerun npm run hook:base-sepolia:evidence -- --json."
+  ],
+  "claimBoundary": "Do not claim the real Uniswap v4 PoolManager hook proof is live until liveProofComplete is true.",
+  "boundaries": [
+    "Base Sepolia proof is public testnet evidence, not production mainnet readiness.",
+    "A deployed hook alone is not enough; the acceptance proof requires a PoolManager swap that emits FlowPulse.",
+    "txHash and logIndex are read by the indexer after receipts/logs exist; the hook never claims them.",
+    "No private keys, RPC credentials, or explorer API keys are written to this artifact.",
+    "Use tiny testnet-only currencies and liquidity for this proof."
+  ]
+}
