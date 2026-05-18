@@ -54,6 +54,38 @@ function Add-MonitorIssue {
     })
 }
 
+function Get-MonitorSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 $startedAt = Get-Date
 $deadline = $startedAt.AddSeconds($DurationSeconds)
 $samples = New-Object System.Collections.ArrayList
@@ -140,11 +172,28 @@ if (-not $heightAdvanced) {
     Add-MonitorIssue -Issues $issues -Code "height-did-not-advance" -Reason "latest height did not advance during the monitor window"
 }
 
-$status = if ($issues.Count -eq 0) { "passed" } else { "failed" }
+$issueCodes = @($issues | ForEach-Object { [string](Get-MonitorProp -Object $_ -Name "code" -Default "") })
+$uniqueIssueCodes = @($issueCodes | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
+$checks = [ordered]@{
+    sampleCountSufficient = $samples.Count -ge 2
+    serviceStatusSamplesPassed = ($uniqueIssueCodes -notcontains "service-status-not-passed")
+    nodeRunningEverySample = ($uniqueIssueCodes -notcontains "node-not-running")
+    controlPlaneRunningEverySample = ($uniqueIssueCodes -notcontains "control-plane-not-running")
+    heightsReadable = ($uniqueIssueCodes -notcontains "height-unreadable")
+    heightNeverRegressed = ($uniqueIssueCodes -notcontains "height-regressed")
+    stateFreshEverySample = ($uniqueIssueCodes -notcontains "state-stale")
+    heightAdvanced = $heightAdvanced -eq $true
+    issuesEmpty = $issues.Count -eq 0
+    envValuesPrintedFalse = $true
+    secretMarkerFindingsEmpty = $true
+    noSecrets = $true
+    broadcastsFalse = $true
+}
+
 $report = [ordered]@{
     schema = "flowchain.service_monitor_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = $status
+    status = "pending"
     durationSeconds = $DurationSeconds
     pollSeconds = $PollSeconds
     maxStateAgeSeconds = $MaxStateAgeSeconds
@@ -154,6 +203,10 @@ $report = [ordered]@{
     heightAdvanced = $heightAdvanced
     samples = @($samples)
     issues = @($issues)
+    issueCodes = @($uniqueIssueCodes)
+    checks = $checks
+    failedChecks = @()
+    secretMarkerFindings = @()
     reportPaths = [ordered]@{
         serviceStatus = $serviceStatusReportPath
         serviceMonitor = $reportFullPath
@@ -162,6 +215,18 @@ $report = [ordered]@{
     noSecrets = $true
     broadcasts = $false
 }
+
+$preliminaryReportText = $report | ConvertTo-Json -Depth 16
+$secretMarkerFindings = @(Get-MonitorSecretMarkerFindings -Text $preliminaryReportText -Label "service monitor report")
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 
 $reportText = $report | ConvertTo-Json -Depth 16
 Assert-FlowChainNoSecretText -Text $reportText -Label "service monitor report"

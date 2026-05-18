@@ -53,6 +53,36 @@ $definitions = @(
         command = "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30"
         productionGate = $true
         ownerInputGate = $false
+        requiredChecks = @(
+            "sampleCountSufficient",
+            "serviceStatusSamplesPassed",
+            "nodeRunningEverySample",
+            "controlPlaneRunningEverySample",
+            "heightsReadable",
+            "heightNeverRegressed",
+            "stateFreshEverySample",
+            "heightAdvanced",
+            "issuesEmpty",
+            "envValuesPrintedFalse",
+            "secretMarkerFindingsEmpty",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "issues",
+            "issueCodes",
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredMinimums = [ordered]@{
+            sampleCount = 2
+        }
+        requiredReportProperties = [ordered]@{
+            "heightAdvanced" = $true
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
     },
     [ordered]@{
         id = "operator-doctor"

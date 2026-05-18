@@ -1,54 +1,54 @@
 {
     "schema":  "flowchain.service_monitor_report.v0",
-    "generatedAt":  "2026-05-18T04:59:47.3441283Z",
+    "generatedAt":  "2026-05-18T05:20:30.4149477Z",
     "status":  "passed",
     "durationSeconds":  20,
     "pollSeconds":  5,
     "maxStateAgeSeconds":  90,
     "sampleCount":  2,
-    "firstHeight":  "65752",
-    "latestHeight":  "65760",
+    "firstHeight":  "65987",
+    "latestHeight":  "65995",
     "heightAdvanced":  true,
     "samples":  [
                     {
-                        "sampledAt":  "2026-05-18T04:58:27.6835961Z",
+                        "sampledAt":  "2026-05-18T05:19:10.8264222Z",
                         "exitCode":  0,
                         "serviceStatus":  "passed",
                         "nodeStatus":  "running",
                         "controlPlaneStatus":  "running",
-                        "latestHeight":  "65752",
-                        "finalizedHeight":  "65752",
-                        "stateFileLastWriteAgeSeconds":  3,
+                        "latestHeight":  "65987",
+                        "finalizedHeight":  "65987",
+                        "stateFileLastWriteAgeSeconds":  5,
                         "outputRedacted":  [
                                                "FlowChain service status: passed",
                                                "Node: running PID=61828",
                                                "Control plane: running PID=8900 bind=127.0.0.1:8787",
                                                "Bridge relayer loop: stopped report=blocked healthy=False",
                                                "Public readiness: blocked",
-                                               "Latest height: 65752",
-                                               "Finalized height: 65752",
+                                               "Latest height: 65987",
+                                               "Finalized height: 65987",
                                                "Backup path: not-configured",
                                                "Bridge readiness: live=blocked, infra=blocked",
                                                "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json"
                                            ]
                     },
                     {
-                        "sampledAt":  "2026-05-18T04:59:08.1455530Z",
+                        "sampledAt":  "2026-05-18T05:19:52.7376094Z",
                         "exitCode":  0,
                         "serviceStatus":  "passed",
                         "nodeStatus":  "running",
                         "controlPlaneStatus":  "running",
-                        "latestHeight":  "65760",
-                        "finalizedHeight":  "65760",
-                        "stateFileLastWriteAgeSeconds":  0,
+                        "latestHeight":  "65995",
+                        "finalizedHeight":  "65995",
+                        "stateFileLastWriteAgeSeconds":  2,
                         "outputRedacted":  [
                                                "FlowChain service status: passed",
                                                "Node: running PID=61828",
                                                "Control plane: running PID=8900 bind=127.0.0.1:8787",
                                                "Bridge relayer loop: stopped report=blocked healthy=False",
                                                "Public readiness: blocked",
-                                               "Latest height: 65760",
-                                               "Finalized height: 65760",
+                                               "Latest height: 65995",
+                                               "Finalized height: 65995",
                                                "Backup path: not-configured",
                                                "Bridge readiness: live=blocked, infra=blocked",
                                                "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json"
@@ -58,6 +58,30 @@
     "issues":  [
 
                ],
+    "issueCodes":  [
+
+                   ],
+    "checks":  {
+                   "sampleCountSufficient":  true,
+                   "serviceStatusSamplesPassed":  true,
+                   "nodeRunningEverySample":  true,
+                   "controlPlaneRunningEverySample":  true,
+                   "heightsReadable":  true,
+                   "heightNeverRegressed":  true,
+                   "stateFreshEverySample":  true,
+                   "heightAdvanced":  true,
+                   "issuesEmpty":  true,
+                   "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
     "reportPaths":  {
                         "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
                         "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json"

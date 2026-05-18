@@ -490,12 +490,44 @@ $monitorHeightAdvanced = Get-AuditProp -Object $serviceMonitor -Name "heightAdva
 $monitorFirstHeight = [string](Get-AuditProp -Object $serviceMonitor -Name "firstHeight" -Default "")
 $monitorLatestHeight = [string](Get-AuditProp -Object $serviceMonitor -Name "latestHeight" -Default "")
 $monitorSampleCount = [int](Get-AuditProp -Object $serviceMonitor -Name "sampleCount" -Default 0)
+$monitorChecks = Get-AuditProp -Object $serviceMonitor -Name "checks"
+$monitorFailedChecks = @((Get-AuditProp -Object $serviceMonitor -Name "failedChecks" -Default @()))
+$monitorSecretFindings = @((Get-AuditProp -Object $serviceMonitor -Name "secretMarkerFindings" -Default @()))
+$monitorIssues = @((Get-AuditProp -Object $serviceMonitor -Name "issues" -Default @()))
+$monitorIssueCodes = @((Get-AuditProp -Object $serviceMonitor -Name "issueCodes" -Default @()))
+$monitorRequiredChecks = @(
+    "sampleCountSufficient",
+    "serviceStatusSamplesPassed",
+    "nodeRunningEverySample",
+    "controlPlaneRunningEverySample",
+    "heightsReadable",
+    "heightNeverRegressed",
+    "stateFreshEverySample",
+    "heightAdvanced",
+    "issuesEmpty",
+    "envValuesPrintedFalse",
+    "secretMarkerFindingsEmpty",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$monitorMissingChecks = @(Get-MissingAuditChecks -Checks $monitorChecks -Names $monitorRequiredChecks)
+$monitorFailedCheckCount = $monitorFailedChecks.Count
+$monitorSecretFindingCount = $monitorSecretFindings.Count
+$monitorMissingCheckCount = $monitorMissingChecks.Count
 $monitorPassed = $serviceMonitorExitCode -eq 0 `
     -and $monitorStatus -eq "passed" `
+    -and $monitorFailedCheckCount -eq 0 `
+    -and $monitorSecretFindingCount -eq 0 `
+    -and $monitorMissingCheckCount -eq 0 `
+    -and $monitorIssues.Count -eq 0 `
+    -and $monitorIssueCodes.Count -eq 0 `
     -and $monitorHeightAdvanced -eq $true `
     -and $monitorSampleCount -ge 2 `
     -and $monitorFirstHeight -match '^\d+$' `
-    -and $monitorLatestHeight -match '^\d+$'
+    -and $monitorLatestHeight -match '^\d+$' `
+    -and ((Get-AuditProp -Object $serviceMonitor -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $serviceMonitor -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $serviceMonitor -Name "broadcasts" -Default $true) -eq $false)
 $serviceSupervisorValidation = $reports.serviceSupervisorValidation
 $serviceSupervisorValidationStatus = Get-ReportStatus -Report $serviceSupervisorValidation
 $serviceSupervisorBefore = Get-AuditProp -Object $serviceSupervisorValidation -Name "before"
@@ -1619,7 +1651,7 @@ Add-AuditItem -Items $items -Id "operator-doctor" `
 Add-AuditItem -Items $items -Id "sustained-block-production" `
     -Requirement "Live service monitor observes running services and advancing block height over a sampling window." `
     -Status $(if ($monitorPassed) { "passed" } else { "failed" }) `
-    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSampleCount, heightAdvanced=$monitorHeightAdvanced, heights=$monitorFirstHeight->$monitorLatestHeight, report=$($paths.serviceMonitor)" `
+    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSampleCount, heightAdvanced=$monitorHeightAdvanced, heights=$monitorFirstHeight->$monitorLatestHeight, failedChecks=$monitorFailedCheckCount, missingChecks=$monitorMissingCheckCount, secretFindings=$monitorSecretFindingCount, issues=$($monitorIssues.Count), report=$($paths.serviceMonitor)" `
     -Commands @("npm run flowchain:service:monitor -- -DurationSeconds $MonitorDurationSeconds -PollSeconds $MonitorPollSeconds -MaxStateAgeSeconds $MonitorMaxStateAgeSeconds")
 
 Add-AuditItem -Items $items -Id "service-supervisor-autorecovery" `

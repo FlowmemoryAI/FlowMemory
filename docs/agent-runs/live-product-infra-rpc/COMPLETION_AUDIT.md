@@ -1,19 +1,19 @@
 ﻿# FlowChain Completion Audit
 
-Generated: 2026-05-18T05:14:43.0562737Z
+Generated: 2026-05-18T05:21:18.4977489Z
 Status: blocked
 Completion ready: False
 Refresh mode: no-refresh-existing-reports
-Latest observed height: 65760
+Latest observed height: 65995
 
 ## Prompt-To-Artifact Checklist
 
 | Requirement | Status | Evidence | Commands |
 | --- | --- | --- | --- |
 | Chain service is running in live profile and command lines match this worktree. | passed | service-status status=passed, node=running, controlPlane=running, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
-| Chain is producing/finalizing blocks and state is fresh. | passed | latestHeight=65760, stateFileLastWriteAgeSeconds=0, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
+| Chain is producing/finalizing blocks and state is fresh. | passed | latestHeight=65995, stateFileLastWriteAgeSeconds=2, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
 | Operator doctor checks host tools, package scripts, state path, disk, service evidence, ports, owner-input groups, and owner env-file status without printing owner values. | passed | doctorStatus=blocked, checks=52, failedChecks=0, blockedChecks=5, blockedOnlyOwner=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\operator-doctor-report.json | npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json |
-| Live service monitor observes running services and advancing block height over a sampling window. | passed | monitorStatus=passed, samples=2, heightAdvanced=True, heights=65752->65760, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-monitor-report.json | npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90 |
+| Live service monitor observes running services and advancing block height over a sampling window. | passed | monitorStatus=passed, samples=2, heightAdvanced=True, heights=65987->65995, failedChecks=0, missingChecks=0, secretFindings=0, issues=0, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-monitor-report.json | npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90 |
 | Live service supervisor can recover a crashed local control-plane under the live profile without deleting chain state. | passed | supervisorValidation=passed, restartAttempts=1, failedChecks=0, missingChecks=0, secretFindings=0, before=passed, afterCrash=blocked, afterRecovery=passed, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-supervisor-validation-report.json | npm run flowchain:service:supervisor:validate |
 | Owner-host Windows service install validation proves no-secret Scheduled Task plan/status/uninstall no-op behavior and a bridge-relayer opt-in plan for reboot-persistent live supervisor operation. | passed | serviceInstall=passed, failedChecks=0, missingChecks=0, secretFindings=0, missingScripts=0, planDidNotMutate=True, statusDidNotMutate=True, relayerOptIn=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-install-validation-report.json | npm run flowchain:service:install:validate; npm run flowchain:service:install:windows -- -Action Plan |
 | People can create wallets through the RPC service without receiving secret material. | passed | testerWalletCreates=4, secretMaterialReturned=false, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\live-service-tester-network-e2e-report.json | npm run flowchain:wallet:live-tester:e2e |
