@@ -40,6 +40,8 @@ export type ControlPlaneMethod =
   | "token_list"
   | "token_balance_get"
   | "token_balance_list"
+  | "token_transfer_get"
+  | "token_transfer_list"
   | "pool_get"
   | "pool_list"
   | "lp_position_get"
@@ -82,6 +84,7 @@ export type ControlPlaneMethod =
   | "bridge_credit_list"
   | "withdrawal_get"
   | "withdrawal_list"
+  | "explorer_search"
   | "provenance_get"
   | "raw_json_get";
 
@@ -96,6 +99,7 @@ export interface ControlPlanePaths {
   devnetIndexerHandoffPath: string;
   devnetVerifierHandoffPath: string;
   devnetControlPlaneHandoffPath: string;
+  explorerFallbackPath: string;
   txFixturesPath: string;
   txIntakePath: string;
   bridgeObservationPath: string;
@@ -121,6 +125,7 @@ export interface LoadedControlPlaneState {
   devnetIndexerHandoff: JsonObject | null;
   devnetVerifierHandoff: JsonObject | null;
   devnetControlPlaneHandoff: JsonObject | null;
+  explorerFallback: JsonObject | null;
   txFixtures: JsonObject | null;
   txIntake: JsonObject[];
   bridgeObservations: JsonObject[];

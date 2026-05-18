@@ -21,6 +21,10 @@ import {
   readLocalRpcFlowPulseLogs,
 } from "../src/rpc.ts";
 
+function loadExplorerFallback(): unknown {
+  return JSON.parse(readFileSync(join(process.cwd(), "..", "..", "fixtures", "dashboard", "flowchain-l1-explorer-fallback.json"), "utf8"));
+}
+
 test("indexes FlowPulse fixture logs into canonical observations", () => {
   const state = indexFlowPulseLogs(loadIndexerFixtureLogs());
   assert.equal(state.schema, "flowmemory.indexer.state.v0");
@@ -34,6 +38,12 @@ test("indexes FlowPulse fixture logs into canonical observations", () => {
   assert.equal(state.dashboardFeed.schema, "flowmemory.indexer.dashboard_feed.v0");
   assert.equal(state.dashboardFeed.dashboardCanonicalObservationCount, 1);
   assert.equal(state.dashboardFeed.hasIntegrityWarnings, false);
+  assert.equal(state.explorer.schema, "flowmemory.indexer.explorer_index.v0");
+  assert.equal(state.explorer.blocks.length, 1);
+  assert.equal(state.explorer.transactions.length, 1);
+  assert.equal(state.explorer.receipts.length, 1);
+  assert.equal(state.explorer.events.length, 1);
+  assert.deepEqual(state.explorer.searchKeys.transactionId, [state.observations[0].txHash]);
 });
 
 test("detects exact duplicate observations", () => {
@@ -59,6 +69,29 @@ test("ingests receipt fixtures and rejects reverted or malformed logs cleanly", 
   assert.deepEqual(state.rejectedLogs.map((log) => log.reasonCode), ["receipt.reverted", "log.malformed"]);
   assert.equal(state.duplicates.length, 1);
   assert.equal(state.duplicates[0].kind, "exactDuplicate");
+  assert.equal(state.explorer.counts.failedTransactions, 2);
+  assert.ok(state.explorer.searchKeys.receipt.length > 0);
+});
+
+test("indexes deterministic explorer fallback token, DEX, and bridge rows with provenance", () => {
+  const state = indexFlowPulseReceipts(loadIndexerFixtureReceipts(), {
+    finalizedBlockNumber: "123458",
+    explorerFallback: loadExplorerFallback(),
+  });
+
+  assert.equal(state.explorer.counts.tokens, 1);
+  assert.equal(state.explorer.counts.bridgeEvents, 2);
+  assert.equal(state.explorer.counts.duplicateOrReplayEvents, 2);
+  assert.equal(state.explorer.tokens[0].tokenId, "token:flowchain-pilot-ltu");
+  assert.deepEqual(state.explorer.tokens[0].transferHistory, ["0x3ac0b196a212a0e77d0a0c4b60e2283d2994b09993971b95427996700f5b92aa"]);
+  assert.equal(state.explorer.pools.some((pool) => pool.poolId === "pool:fclt-local-unit"), true);
+  assert.equal(state.explorer.bridgeEvents.some((event) => event.sourceChainId === "8453" && event.replayStatus === "duplicate"), true);
+  assert.ok(state.explorer.searchKeys.token.includes("token:flowchain-pilot-ltu"));
+  assert.ok(state.explorer.searchKeys.pool.includes("pool:fclt-local-unit"));
+  assert.ok(state.explorer.searchKeys.bridgeObservation.includes("0x0430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223c"));
+  assert.ok(state.explorer.searchKeys.bridgeCredit.includes("0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6"));
+  assert.ok(state.explorer.searchKeys.withdrawalIntent.includes("0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751"));
+  assert.ok(state.explorer.searchKeys.releaseEvidence.includes("0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb278"));
 });
 
 test("models finality threshold without claiming production reorg handling", () => {

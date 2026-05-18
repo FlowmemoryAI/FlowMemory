@@ -189,12 +189,15 @@ function devnetRootfields(state: LoadedControlPlaneState): Record<string, JsonVa
 
 function devnetMap(state: LoadedControlPlaneState, key: string): Record<string, JsonValue> {
   const controlPlaneObjects = asJsonObject(state.devnetControlPlaneHandoff?.objects);
+  const fallbackObjects = asJsonObject(state.explorerFallback?.objects);
   const candidates = [
     state.devnet?.[key],
     controlPlaneObjects?.[key],
     state.devnetControlPlaneHandoff?.[key],
     state.devnetVerifierHandoff?.[key],
     state.devnetIndexerHandoff?.[key],
+    fallbackObjects?.[key],
+    state.explorerFallback?.[key],
   ];
   const maps = candidates
     .map((value) => asJsonObject(value))
@@ -314,6 +317,12 @@ function productSource(sourceKey: string): string {
   return `local-devnet:${sourceKey}`;
 }
 
+function rowSource(object: JsonObject, sourceKey: string): string {
+  return stringValue(object.provenance) === "fixture-fallback"
+    ? `fixture-fallback:objects.${sourceKey}`
+    : productSource(sourceKey);
+}
+
 function devnetPeers(state: LoadedControlPlaneState): JsonObject[] {
   return asJsonArray(state.devnet?.peers)
     .map((entry) => asJsonObject(entry))
@@ -357,6 +366,19 @@ function bridgeObservationRows(state: LoadedControlPlaneState): JsonObject[] {
     byId.set(id, observation);
   }
   return [...byId.values()].sort((left, right) => String(left.observationId ?? "").localeCompare(String(right.observationId ?? "")));
+}
+
+function fallbackBridgeRows(state: LoadedControlPlaneState, key: string): JsonObject[] {
+  const fallbackBridge = asJsonObject(state.explorerFallback?.bridge);
+  return asJsonArray(fallbackBridge?.[key])
+    .map((entry) => asJsonObject(entry))
+    .filter((entry): entry is JsonObject => entry !== null);
+}
+
+function bridgeRowIsBaseMainnet(row: JsonObject): boolean {
+  const deposit = asJsonObject(row.deposit) ?? row;
+  const source = asJsonObject(row.source);
+  return String(deposit.sourceChainId ?? row.sourceChainId ?? source?.chainId ?? "") === "8453";
 }
 
 function nodeAccountRows(state: LoadedControlPlaneState): JsonObject[] {
@@ -454,7 +476,11 @@ function mempoolRows(state: LoadedControlPlaneState): JsonObject[] {
 }
 
 function bridgeDepositRows(state: LoadedControlPlaneState): JsonObject[] {
-  return bridgeObservationRows(state).map((observation) => {
+  const observations = bridgeObservationRows(state);
+  const rows = observations.some(bridgeRowIsBaseMainnet)
+    ? observations
+    : [...observations, ...fallbackBridgeRows(state, "observations")];
+  return rows.map((observation) => {
     const deposit = asJsonObject(observation.deposit) ?? observation;
     const depositId = stringValue(deposit.depositId) ?? stableId("flowmemory.control_plane.bridge_deposit.v0", deposit);
     return {
@@ -492,7 +518,24 @@ function bridgeCreditRows(state: LoadedControlPlaneState): JsonObject[] {
       token: credit.token ?? credit.tokenId ?? credit.assetId ?? null,
       status: stringValue(credit.status) ?? "local_credit",
       credit,
-      source: productSource(entry.sourceKey),
+      source: rowSource(credit, entry.sourceKey),
+      localOnly: true,
+    });
+  }
+
+  const fallbackBridge = asJsonObject(state.explorerFallback?.bridge);
+  for (const credit of asJsonArray(fallbackBridge?.credits).map((entry) => asJsonObject(entry)).filter((entry): entry is JsonObject => entry !== null)) {
+    const creditId = stringValue(credit.creditId) ?? stableId("flowmemory.control_plane.bridge_credit.fallback.v0", credit);
+    rows.set(creditId, {
+      schema: "flowmemory.control_plane.bridge_credit.v0",
+      creditId,
+      depositId: stringValue(credit.depositId) ?? null,
+      accountId: stringValue(credit.accountId) ?? stringValue(credit.recipient) ?? stringValue(credit.flowchainRecipient) ?? null,
+      amount: stringValue(credit.amount) ?? stringValue(credit.amountUnits) ?? stringValue(credit.units) ?? "0",
+      token: credit.token ?? credit.tokenId ?? credit.assetId ?? null,
+      status: stringValue(credit.status) ?? "local_credit",
+      credit,
+      source: "fixture-fallback:bridge.credits",
       localOnly: true,
     });
   }
@@ -519,14 +562,37 @@ function bridgeCreditRows(state: LoadedControlPlaneState): JsonObject[] {
 
 function withdrawalRows(state: LoadedControlPlaneState): JsonObject[] {
   const native = firstDevnetMap(state, ["withdrawals", "bridgeWithdrawals"]);
-  const rows = Object.entries(native).map(([withdrawalId, value]) => ({
-    schema: "flowmemory.control_plane.withdrawal.v0",
-    withdrawalId,
-    status: stringValue(asJsonObject(value)?.status) ?? "local",
-    withdrawal: asJsonObject(value) ?? {},
-    source: "local-devnet",
-    localOnly: true,
-  }));
+  const rows = Object.entries(native).map(([withdrawalId, value]) => {
+    const withdrawal = asJsonObject(value) ?? {};
+    return {
+      schema: "flowmemory.control_plane.withdrawal.v0",
+      withdrawalId,
+      status: stringValue(withdrawal.status) ?? "local",
+      withdrawal,
+      source: rowSource(withdrawal, "withdrawals"),
+      localOnly: true,
+    };
+  });
+  const fallbackBridge = asJsonObject(state.explorerFallback?.bridge);
+  for (const intent of asJsonArray(fallbackBridge?.withdrawalIntents).map((entry) => asJsonObject(entry)).filter((entry): entry is JsonObject => entry !== null)) {
+    const withdrawalId = stringValue(intent.withdrawalId)
+      ?? stringValue(intent.withdrawalIntentId)
+      ?? stableId("flowmemory.control_plane.withdrawal.fallback.v0", intent);
+    rows.push({
+      schema: "flowmemory.control_plane.withdrawal.v0",
+      withdrawalId,
+      withdrawalIntentId: stringValue(intent.withdrawalIntentId) ?? null,
+      creditId: stringValue(intent.creditId) ?? null,
+      depositId: stringValue(intent.depositId) ?? null,
+      accountId: stringValue(intent.flowchainAccount) ?? stringValue(intent.accountId) ?? null,
+      amount: stringValue(intent.amount) ?? "0",
+      token: intent.token ?? null,
+      status: stringValue(intent.status) ?? "requested",
+      withdrawal: intent,
+      source: "fixture-fallback:bridge.withdrawalIntents",
+      localOnly: true,
+    });
+  }
   if (rows.length > 0) {
     return rows;
   }
@@ -561,7 +627,7 @@ function tokenRows(state: LoadedControlPlaneState): JsonObject[] {
       owner: stringValue(token.owner) ?? stringValue(token.creator) ?? stringValue(token.issuer) ?? null,
       status: stringValue(token.status) ?? "local",
       token,
-      source: productSource(entry.sourceKey),
+      source: rowSource(token, entry.sourceKey),
       noValue: true,
       localOnly: true,
     };
@@ -615,7 +681,7 @@ function tokenBalanceRows(state: LoadedControlPlaneState): JsonObject[] {
       amount: stringValue(balance.amount) ?? stringValue(balance.units) ?? stringValue(balance.balance) ?? "0",
       status: stringValue(balance.status) ?? "local",
       balance,
-      source: productSource(entry.sourceKey),
+      source: rowSource(balance, entry.sourceKey),
       noValue: true,
       localOnly: true,
     };
@@ -642,6 +708,31 @@ function tokenBalanceRows(state: LoadedControlPlaneState): JsonObject[] {
   }).sort((left, right) => String(left.balanceId).localeCompare(String(right.balanceId)));
 }
 
+function tokenTransferRows(state: LoadedControlPlaneState): JsonObject[] {
+  return devnetProductEntries(
+    state,
+    ["tokenTransfers", "tokenTransferEvents", "balanceTransfers", "transfers"],
+    ["transferId", "tokenTransferId", "txId", "transactionId", "id"],
+  ).map((entry) => {
+    const transfer = entry.object;
+    return {
+      schema: "flowmemory.control_plane.token_transfer.v0",
+      transferId: entry.id,
+      txId: stringValue(transfer.txId) ?? stringValue(transfer.transactionId) ?? null,
+      tokenId: stringValue(transfer.tokenId) ?? stringValue(transfer.assetId) ?? stringValue(transfer.symbol) ?? null,
+      fromAccount: stringValue(transfer.fromAccount) ?? stringValue(transfer.from) ?? stringValue(transfer.sender) ?? null,
+      toAccount: stringValue(transfer.toAccount) ?? stringValue(transfer.to) ?? stringValue(transfer.recipient) ?? null,
+      amount: stringValue(transfer.amount) ?? stringValue(transfer.units) ?? "0",
+      status: stringValue(transfer.status) ?? "local",
+      blockNumber: stringValue(transfer.blockNumber) ?? stringValue(transfer.updatedAtBlock) ?? null,
+      transfer,
+      source: rowSource(transfer, entry.sourceKey),
+      noValue: true,
+      localOnly: true,
+    };
+  }).sort((left, right) => String(left.transferId).localeCompare(String(right.transferId)));
+}
+
 function poolRows(state: LoadedControlPlaneState): JsonObject[] {
   return devnetProductEntries(
     state,
@@ -659,7 +750,7 @@ function poolRows(state: LoadedControlPlaneState): JsonObject[] {
       lpSupply: stringValue(pool.lpSupply) ?? stringValue(pool.totalLiquidity) ?? null,
       status: stringValue(pool.status) ?? "local",
       pool,
-      source: productSource(entry.sourceKey),
+      source: rowSource(pool, entry.sourceKey),
       noValue: true,
       localOnly: true,
     };
@@ -681,7 +772,7 @@ function lpPositionRows(state: LoadedControlPlaneState): JsonObject[] {
       liquidity: stringValue(position.liquidity) ?? stringValue(position.lpTokens) ?? stringValue(position.amount) ?? "0",
       status: stringValue(position.status) ?? "local",
       position,
-      source: productSource(entry.sourceKey),
+      source: rowSource(position, entry.sourceKey),
       noValue: true,
       localOnly: true,
     };
@@ -707,7 +798,7 @@ function swapRows(state: LoadedControlPlaneState): JsonObject[] {
       amountOut: stringValue(swap.amountOut) ?? stringValue(swap.outputAmount) ?? "0",
       status: stringValue(swap.status) ?? "local",
       swap,
-      source: productSource(entry.sourceKey),
+      source: rowSource(swap, entry.sourceKey),
       noValue: true,
       localOnly: true,
     };
@@ -1230,6 +1321,7 @@ function health(_params: JsonValue | undefined, context: ControlPlaneContext): J
       txFixtures: state.sources.txFixtures.status,
       bridgeObservation: state.sources.bridgeObservation.status,
       bridgeRuntimeHandoff: state.sources.bridgeRuntimeHandoff.status,
+      explorerFallback: state.sources.explorerFallback.status,
     },
     counts: {
       observations: state.indexer.state.observations.length,
@@ -1243,6 +1335,7 @@ function health(_params: JsonValue | undefined, context: ControlPlaneContext): J
       pilotStatus: 1,
       tokens: tokenRows(state).length,
       tokenBalances: tokenBalanceRows(state).length,
+      tokenTransfers: tokenTransferRows(state).length,
       pools: poolRows(state).length,
       lpPositions: lpPositionRows(state).length,
       swaps: swapRows(state).length,
@@ -1291,6 +1384,7 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
       walletPublicMetadata: walletMetadataRows(state).length,
       tokens: tokenRows(state).length,
       tokenBalances: tokenBalanceRows(state).length,
+      tokenTransfers: tokenTransferRows(state).length,
       pools: poolRows(state).length,
       lpPositions: lpPositionRows(state).length,
       swaps: swapRows(state).length,
@@ -1315,6 +1409,7 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
       "wallet_public_metadata_reads",
       "token_reads",
       "token_balance_reads",
+      "token_transfer_reads",
       "dex_pool_reads",
       "lp_position_reads",
       "swap_reads",
@@ -1332,6 +1427,7 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
       "devnet_handoff_reads",
       "no_secret_response_checks",
       "raw_json_reads",
+      "explorer_search",
     ],
     limitations: [
       "No production RPC URLs, wallets, or hosted services are used.",
@@ -1372,12 +1468,14 @@ function devnetState(params: JsonValue | undefined, context: ControlPlaneContext
     finalityReceiptCount: Object.keys(devnetFinalityReceipts(state)).length,
     tokenCount: tokenRows(state).length,
     tokenBalanceCount: tokenBalanceRows(state).length,
+    tokenTransferCount: tokenTransferRows(state).length,
     poolCount: poolRows(state).length,
     lpPositionCount: lpPositionRows(state).length,
     swapCount: swapRows(state).length,
     nativeProductMapCounts: {
       tokens: devnetProductMapCount(state, ["tokens", "tokenDefinitions", "tokenLaunches", "localTokens", "launchedTokens"]),
       tokenBalances: devnetProductMapCount(state, ["tokenBalances", "localTokenBalances", "accountTokenBalances"]),
+      tokenTransfers: devnetProductMapCount(state, ["tokenTransfers", "tokenTransferEvents", "balanceTransfers", "transfers"]),
       pools: devnetProductMapCount(state, ["pools", "dexPools", "liquidityPools", "ammPools"]),
       lpPositions: devnetProductMapCount(state, ["lpPositions", "liquidityPositions", "poolPositions"]),
       swaps: devnetProductMapCount(state, ["swaps", "swapReceipts", "dexSwaps"]),
@@ -1724,6 +1822,42 @@ function tokenBalanceGet(params: JsonValue | undefined, context: ControlPlaneCon
   };
 }
 
+function tokenTransferList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "token_transfer_list");
+  const limit = pageLimit(objectParams);
+  const accountId = optionalString(objectParams, "accountId");
+  const tokenId = optionalString(objectParams, "tokenId");
+  const rows = tokenTransferRows(state)
+    .filter((transfer) =>
+      accountId === undefined || transfer.fromAccount === accountId || transfer.toAccount === accountId || transfer.accountId === accountId,
+    )
+    .filter((transfer) => tokenId === undefined || transfer.tokenId === tokenId)
+    .slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.token_transfer_list.v0",
+    count: rows.length,
+    nextCursor: null,
+    transfers: rows,
+    localOnly: true,
+  };
+}
+
+function tokenTransferGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "token_transfer_get");
+  const key = requiredString(objectParams, ["transferId", "tokenTransferId", "txId", "transactionId"], "token_transfer_get");
+  const transfer = tokenTransferRows(state).find((row) => row.transferId === key || row.txId === key);
+  if (transfer === undefined) {
+    throw objectNotFound(`token transfer not found: ${key}`, { id: key });
+  }
+  return {
+    schema: "flowmemory.control_plane.token_transfer_detail.v0",
+    transfer,
+    localOnly: true,
+  };
+}
+
 function poolList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
   const state = stateFor(context);
   const objectParams = asObjectParams(params, "pool_list");
@@ -1834,6 +1968,7 @@ function productFlowStatus(_params: JsonValue | undefined, context: ControlPlane
     tokens: tokenRows(state).length,
     nativeTokens: devnetProductMapCount(state, ["tokens", "tokenDefinitions", "tokenLaunches", "localTokens", "launchedTokens"]),
     tokenBalances: tokenBalanceRows(state).length,
+    tokenTransfers: tokenTransferRows(state).length,
     pools: poolRows(state).length,
     lpPositions: lpPositionRows(state).length,
     swaps: swapRows(state).length,
@@ -1845,7 +1980,7 @@ function productFlowStatus(_params: JsonValue | undefined, context: ControlPlane
   const stages = [
     { stage: "wallet", ready: counts.wallets > 0 || counts.accounts > 0 },
     { stage: "funding", ready: counts.localBalances > 0 || counts.bridgeCredits > 0 || counts.tokenBalances > 0 },
-    { stage: "transfer", ready: counts.balanceTransfers > 0 },
+    { stage: "transfer", ready: counts.balanceTransfers > 0 || counts.tokenTransfers > 0 },
     { stage: "token_launch", ready: counts.nativeTokens > 0 },
     { stage: "dex_pool", ready: counts.pools > 0 },
     { stage: "liquidity", ready: counts.lpPositions > 0 },
@@ -2690,6 +2825,132 @@ function withdrawalGet(params: JsonValue | undefined, context: ControlPlaneConte
   };
 }
 
+function searchIdFrom(object: JsonObject, fields: string[], fallbackSchema: string): string {
+  return fields
+    .map((field) => stringValue(object[field]))
+    .find((value): value is string => value !== null)
+    ?? stableId(fallbackSchema, object);
+}
+
+function explorerSearchCandidates(state: LoadedControlPlaneState): Array<{
+  objectType: string;
+  objectId: string;
+  route: JsonObject;
+  object: JsonObject;
+}> {
+  const context = { state };
+  const pilotDeposits = asJsonArray((pilotDepositObservationList({ limit: 100 }, context) as JsonObject).depositObservations)
+    .map((entry) => asJsonObject(entry))
+    .filter((entry): entry is JsonObject => entry !== null);
+  const pilotCredits = asJsonArray((pilotCreditList({ limit: 100 }, context) as JsonObject).credits)
+    .map((entry) => asJsonObject(entry))
+    .filter((entry): entry is JsonObject => entry !== null);
+  const pilotWithdrawals = asJsonArray((pilotWithdrawalIntentList({ limit: 100 }, context) as JsonObject).withdrawalIntents)
+    .map((entry) => asJsonObject(entry))
+    .filter((entry): entry is JsonObject => entry !== null);
+  const pilotReleases = asJsonArray((pilotReleaseEvidenceList({ limit: 100 }, context) as JsonObject).releaseEvidence)
+    .map((entry) => asJsonObject(entry))
+    .filter((entry): entry is JsonObject => entry !== null);
+
+  const candidates: Array<{
+    objectType: string;
+    objectId: string;
+    route: JsonObject;
+    object: JsonObject;
+  }> = [];
+  const addRows = (
+    objectType: string,
+    rows: JsonObject[],
+    idFields: string[],
+    method: string,
+    paramName: string,
+    fallbackSchema: string,
+  ) => {
+    for (const row of rows) {
+      const objectId = searchIdFrom(row, idFields, fallbackSchema);
+      candidates.push({
+        objectType,
+        objectId,
+        route: {
+          rpcMethod: method,
+          params: {
+            [paramName]: objectId,
+          },
+        },
+        object: row,
+      });
+    }
+  };
+
+  addRows("block", blockRows(state, true), ["blockHash", "blockNumber"], "block_get", "blockHash", "flowmemory.control_plane.search.block.v0");
+  addRows("transaction", transactionRows(state), ["transactionId", "txHash"], "transaction_get", "txId", "flowmemory.control_plane.search.transaction.v0");
+  addRows("account", nodeAccountRows(state), ["accountId", "keyReferenceId"], "account_get", "accountId", "flowmemory.control_plane.search.account.v0");
+  addRows("wallet_metadata", walletMetadataRows(state), ["walletId", "accountId"], "wallet_metadata_get", "walletId", "flowmemory.control_plane.search.wallet.v0");
+  addRows("token", tokenRows(state), ["tokenId", "symbol"], "token_get", "tokenId", "flowmemory.control_plane.search.token.v0");
+  addRows("token_balance", tokenBalanceRows(state), ["balanceId", "accountId"], "token_balance_get", "balanceId", "flowmemory.control_plane.search.token_balance.v0");
+  addRows("token_transfer", tokenTransferRows(state), ["transferId", "txId"], "token_transfer_get", "transferId", "flowmemory.control_plane.search.token_transfer.v0");
+  addRows("pool", poolRows(state), ["poolId"], "pool_get", "poolId", "flowmemory.control_plane.search.pool.v0");
+  addRows("lp_position", lpPositionRows(state), ["positionId", "accountId"], "lp_position_get", "positionId", "flowmemory.control_plane.search.lp_position.v0");
+  addRows("swap", swapRows(state), ["swapId", "txId"], "swap_get", "swapId", "flowmemory.control_plane.search.swap.v0");
+  addRows("receipt", state.launchCore.memoryReceipts as unknown as JsonObject[], ["receiptId", "observationId", "reportId"], "receipt_get", "receiptId", "flowmemory.control_plane.search.receipt.v0");
+  addRows("event", state.indexer.state.observations as unknown as JsonObject[], ["observationId", "pulseId", "txHash"], "provenance_get", "objectId", "flowmemory.control_plane.search.event.v0");
+  addRows("bridge_observation", bridgeObservationRows(state), ["observationId", "depositId"], "bridge_observation_get", "observationId", "flowmemory.control_plane.search.bridge_observation.v0");
+  addRows("bridge_deposit", bridgeDepositRows(state), ["depositId", "observationId", "txHash"], "bridge_deposit_get", "depositId", "flowmemory.control_plane.search.bridge_deposit.v0");
+  addRows("bridge_credit", bridgeCreditRows(state), ["creditId", "depositId", "accountId"], "bridge_credit_get", "creditId", "flowmemory.control_plane.search.bridge_credit.v0");
+  addRows("withdrawal", withdrawalRows(state), ["withdrawalIntentId", "withdrawalId", "creditId"], "withdrawal_get", "withdrawalId", "flowmemory.control_plane.search.withdrawal.v0");
+  addRows("pilot_deposit_observation", pilotDeposits, ["observationId", "depositId", "txHash"], "pilot_deposit_observation_list", "limit", "flowmemory.control_plane.search.pilot_deposit.v0");
+  addRows("pilot_credit", pilotCredits, ["creditId", "depositId", "accountId"], "pilot_credit_list", "limit", "flowmemory.control_plane.search.pilot_credit.v0");
+  addRows("pilot_withdrawal_intent", pilotWithdrawals, ["withdrawalIntentId", "creditId", "depositId"], "pilot_withdrawal_intent_list", "limit", "flowmemory.control_plane.search.pilot_withdrawal.v0");
+  addRows("pilot_release_evidence", pilotReleases, ["releaseEvidenceId", "withdrawalIntentId", "releaseTxHash"], "pilot_release_evidence_list", "limit", "flowmemory.control_plane.search.pilot_release.v0");
+
+  return candidates;
+}
+
+function objectMatchesQuery(object: JsonObject, query: string): boolean {
+  return JSON.stringify(object).toLowerCase().includes(query.toLowerCase());
+}
+
+function explorerSearch(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "explorer_search");
+  const query = requiredString(objectParams, ["query", "q", "id"], "explorer_search").trim();
+  const limit = pageLimit(objectParams);
+  const matches = explorerSearchCandidates(state)
+    .filter((candidate) => candidate.objectId.toLowerCase().includes(query.toLowerCase()) || objectMatchesQuery(candidate.object, query))
+    .slice(0, limit)
+    .map((candidate) => ({
+      schema: "flowmemory.control_plane.explorer_search_match.v0",
+      objectType: candidate.objectType,
+      objectId: candidate.objectId,
+      route: candidate.route,
+      provenance: provenanceForSearchObject(candidate.object),
+      object: candidate.object,
+    }));
+
+  return {
+    schema: "flowmemory.control_plane.explorer_search.v0",
+    query,
+    count: matches.length,
+    nextCursor: null,
+    matches,
+    localOnly: true,
+  };
+}
+
+function provenanceForSearchObject(object: JsonObject): JsonObject {
+  const source = stringValue(object.source) ?? stringValue(object.provenance) ?? "local-runtime-first";
+  if (source.includes("fixture-fallback")) {
+    return provenanceSource("dashboard", "fixtures/dashboard/flowchain-l1-explorer-fallback.json", "flowmemory.dashboard.explorer_fallback.v0", "Deterministic fallback row.");
+  }
+  if (source.includes("bridge")) {
+    return provenanceSource("bridge", "fixtures/bridge/local-runtime-bridge-handoff.json", "flowmemory.bridge_runtime_handoff.v0");
+  }
+  if (source.includes("flowpulse-indexer")) {
+    return provenanceSource("indexer", "services/indexer/out/indexer-state.json", "flowmemory.indexer.persistence.v0");
+  }
+  return provenanceSource("devnet", "devnet/local/state.json", "flowmemory.local_devnet.state.v0");
+}
+
 function findObject(state: LoadedControlPlaneState, key: string): { type: string; object: JsonObject } {
   const receipt = receiptByAnyId(state, key);
   if (receipt !== undefined) {
@@ -2759,6 +3020,10 @@ function findObject(state: LoadedControlPlaneState, key: string): { type: string
   if (tokenBalance !== undefined) {
     return { type: "token_balance", object: tokenBalance };
   }
+  const tokenTransfer = tokenTransferRows(state).find((candidate) => candidate.transferId === key || candidate.txId === key);
+  if (tokenTransfer !== undefined) {
+    return { type: "token_transfer", object: tokenTransfer };
+  }
   const pool = poolRows(state).find((candidate) => candidate.poolId === key);
   if (pool !== undefined) {
     return { type: "pool", object: pool };
@@ -2819,6 +3084,7 @@ function provenanceForObject(state: LoadedControlPlaneState, key: string): JsonO
   const artifactAvailability = artifactAvailabilityRows(state).find((candidate) => candidate.availabilityId === key || candidate.artifactId === key || candidate.uri === key || candidate.commitment === key);
   const token = tokenRows(state).find((candidate) => candidate.tokenId === key || candidate.symbol === key);
   const tokenBalance = tokenBalanceRows(state).find((candidate) => candidate.balanceId === key || candidate.accountId === key);
+  const tokenTransfer = tokenTransferRows(state).find((candidate) => candidate.transferId === key || candidate.txId === key);
   const pool = poolRows(state).find((candidate) => candidate.poolId === key);
   const lpPosition = lpPositionRows(state).find((candidate) => candidate.positionId === key || candidate.accountId === key);
   const swap = swapRows(state).find((candidate) => candidate.swapId === key || candidate.txId === key);
@@ -2856,8 +3122,12 @@ function provenanceForObject(state: LoadedControlPlaneState, key: string): JsonO
       ? provenanceSource("verifier", "services/verifier/fixtures/artifacts.json", "flowmemory.verifier.artifact_fixture.v0")
       : provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.artifact_commitment.v0"));
   }
-  if (token !== undefined || tokenBalance !== undefined || pool !== undefined || lpPosition !== undefined || swap !== undefined) {
-    sources.push(provenanceSource("devnet", "devnet/local/state.json", "flowmemory.local_devnet.product_objects.v0", "Product rows are read from devnet state or control-plane handoff maps."));
+  const productObject = token ?? tokenBalance ?? tokenTransfer ?? pool ?? lpPosition ?? swap;
+  if (productObject !== undefined) {
+    const source = stringValue(productObject.source) ?? "";
+    sources.push(source.includes("fixture-fallback")
+      ? provenanceSource("dashboard", "fixtures/dashboard/flowchain-l1-explorer-fallback.json", "flowmemory.dashboard.explorer_fallback.v0", "Deterministic product fallback row.")
+      : provenanceSource("devnet", "devnet/local/state.json", "flowmemory.local_devnet.product_objects.v0", "Product rows are read from devnet state or control-plane handoff maps."));
   }
 
   links.receiptId = selectedReceipt?.receiptId;
@@ -2872,8 +3142,9 @@ function provenanceForObject(state: LoadedControlPlaneState, key: string): JsonO
   links.modelId = model?.modelId;
   links.verifierModuleId = verifierModule?.moduleId;
   links.artifactAvailabilityId = artifactAvailability?.availabilityId;
-  links.tokenId = token?.tokenId ?? tokenBalance?.tokenId ?? pool?.token0 ?? swap?.tokenIn;
+  links.tokenId = token?.tokenId ?? tokenBalance?.tokenId ?? tokenTransfer?.tokenId ?? pool?.token0 ?? swap?.tokenIn;
   links.balanceId = tokenBalance?.balanceId;
+  links.transferId = tokenTransfer?.transferId;
   links.poolId = pool?.poolId ?? lpPosition?.poolId ?? swap?.poolId;
   links.lpPositionId = lpPosition?.positionId;
   links.swapId = swap?.swapId;
@@ -2891,6 +3162,7 @@ function provenanceForObject(state: LoadedControlPlaneState, key: string): JsonO
       ?? devnetFinalityReceipts(state)[key]
       ?? tokenRows(state).find((candidate) => candidate.tokenId === key || candidate.symbol === key)
       ?? tokenBalanceRows(state).find((candidate) => candidate.balanceId === key || candidate.accountId === key)
+      ?? tokenTransferRows(state).find((candidate) => candidate.transferId === key || candidate.txId === key)
       ?? poolRows(state).find((candidate) => candidate.poolId === key)
       ?? lpPositionRows(state).find((candidate) => candidate.positionId === key || candidate.accountId === key)
       ?? swapRows(state).find((candidate) => candidate.swapId === key || candidate.txId === key);
@@ -2953,6 +3225,7 @@ function rawJsonGet(params: JsonValue | undefined, context: ControlPlaneContext)
     devnetIndexerHandoff: state.devnetIndexerHandoff,
     devnetVerifierHandoff: state.devnetVerifierHandoff,
     devnetControlPlaneHandoff: state.devnetControlPlaneHandoff,
+    explorerFallback: state.explorerFallback,
     txFixtures: state.txFixtures,
     txIntake: txIntakeRows(state) as unknown as JsonValue,
     bridgeObservations: bridgeObservationRows(state) as unknown as JsonValue,
@@ -3007,6 +3280,8 @@ export const CONTROL_PLANE_METHODS: Record<ControlPlaneMethod, MethodHandler> = 
   token_list: tokenList,
   token_balance_get: tokenBalanceGet,
   token_balance_list: tokenBalanceList,
+  token_transfer_get: tokenTransferGet,
+  token_transfer_list: tokenTransferList,
   pool_get: poolGet,
   pool_list: poolList,
   lp_position_get: lpPositionGet,
@@ -3049,6 +3324,7 @@ export const CONTROL_PLANE_METHODS: Record<ControlPlaneMethod, MethodHandler> = 
   bridge_credit_list: bridgeCreditList,
   withdrawal_get: withdrawalGet,
   withdrawal_list: withdrawalList,
+  explorer_search: explorerSearch,
   provenance_get: provenanceGet,
   raw_json_get: rawJsonGet,
 };

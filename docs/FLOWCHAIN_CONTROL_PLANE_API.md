@@ -919,6 +919,23 @@ Expose local bridge-deposit test objects. These do not imply a production bridge
 
 Expose local bridge-credit test objects from runtime/control-plane handoff maps or bridge-deposit projections. These are no-value local accounting objects only.
 
+### `token_transfer_list`, `token_transfer_get`
+
+Expose browser-safe token transfer rows from runtime handoff maps or deterministic explorer fallback data. Rows include `transferId`, `txId`, `tokenId`, `fromAccount`, `toAccount`, `amount`, `status`, `blockNumber`, and provenance/source hints.
+
+### `explorer_search`
+
+Params:
+
+```json
+{
+  "query": "0x...",
+  "limit": 8
+}
+```
+
+Searches loaded block heights/hashes, transaction IDs, accounts, tokens, pools, Base tx hashes, bridge observations, bridge credits, credited accounts, transfer tx IDs, swap tx IDs, withdrawal intents, and release evidence. Returns `flowmemory.control_plane.explorer_search.v0` with `matches[]`, `objectType`, `objectId`, route hints, provenance, and the matched object.
+
 ### `withdrawal_list`, `withdrawal_get`
 
 Expose local bridge-withdrawal test objects. These do not release funds and do not imply bridge readiness.
@@ -973,6 +990,7 @@ Allowed `source` values:
 - `txIntake`
 - `bridgeObservations`
 - `bridgeRuntimeHandoff`
+- `explorerFallback`
 
 Returns the raw loaded local JSON object for dashboard/workbench debug views. It does not accept arbitrary filesystem paths.
 
@@ -988,9 +1006,10 @@ Dashboard agents should prefer:
 6. `receipt_get`, `work_receipt_get`, `verifier_report_get`, and `provenance_get` for detail drawers.
 7. `artifact_availability_list`, `memory_cell_list`, `agent_list`, and `model_list` for dashboard/workbench panels.
 8. `challenge_get`, `challenge_list`, `finality_get`, and `finality_list` for local challenge/finality labels.
-9. `token_list`, `token_balance_list`, `pool_list`, `lp_position_list`, `swap_list`, and `product_flow_status` for product-testnet token/DEX/explorer panels.
+9. `token_list`, `token_balance_list`, `token_transfer_list`, `pool_list`, `lp_position_list`, `swap_list`, and `product_flow_status` for product-testnet token/DEX/explorer panels.
 10. `pilot_status`, the four pilot list methods, and the four pilot status methods for capped owner-testing real-value pilot evidence.
 11. `bridge_observation_list`, `bridge_deposit_list`, `bridge_credit_list`, and `withdrawal_list` for local bridge-shaped test panels.
-12. `raw_json_get` for raw JSON inspection.
+12. `explorer_search` for global explorer lookup.
+13. `raw_json_get` for raw JSON inspection.
 
 The API is local-only for V0. The submit methods are local file intake, not public chain broadcast. Live indexing, production settlement, production wallet custody, and production bridge methods require separate scoped work.

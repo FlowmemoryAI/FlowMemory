@@ -1,0 +1,24 @@
+# FlowChain L1 Pilot Explorer Dashboard Checklist
+
+- [x] Inventory current implementation.
+- [x] Define explorer data contract.
+- [x] Index blocks by height/hash.
+- [x] Index transactions by ID, signer, payload type, account, token, pool, and bridge event.
+- [x] Index receipts, failed errors, and events/logs.
+- [x] Index account, token, DEX, LP, swap, and bridge history.
+- [x] Preserve provenance for runtime, fixture fallback, Base observation, and local import.
+- [x] Detect duplicate or replayed bridge events.
+- [x] Expose control-plane API/search surfaces through the existing API.
+- [x] Render overview health cards.
+- [x] Render blocks, transactions, receipts/events, accounts, tokens, DEX, bridge, finality/network, wallet/operator metadata, error recovery, and raw JSON views in the existing dashboard.
+- [x] Verify no secret-shaped browser state, fixtures, screenshots, or reports.
+- [x] Verify desktop and mobile layout evidence.
+- [x] Run `npm test --prefix services/control-plane`.
+- [x] Run `npm test --prefix apps/dashboard`.
+- [x] Run `npm run build --prefix apps/dashboard`.
+- [x] Run `npm run control-plane:smoke`.
+- [x] Run browser verification against `127.0.0.1:5173` if available.
+- [x] Run `npm run flowchain:l1-e2e`.
+- [x] Run `npm run flowchain:real-value-pilot:e2e`.
+- [x] Run `git diff --check`.
+- [x] Write proof artifacts and handoff.
