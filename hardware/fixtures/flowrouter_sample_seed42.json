@@ -48,14 +48,24 @@
         "pattern": "solid-cobalt",
         "state": "online"
       },
-      "generated_at": "2026-05-13T17:01:40Z",
+      "generated_at": "2026-05-13T17:01:55Z",
       "latest_receipt_digest": "fbe8a762b036d20581160b7e58a3adccf61f53c653713c439f85cc7bee5246fa",
       "network": {
         "gateway_id": "gw-82a524067b14",
         "lan": "reachable",
         "upstream": "reachable"
       },
+      "node_health": {
+        "chain_startup_blocking": false,
+        "health": "healthy",
+        "queue_depth": 2
+      },
       "packet_type": "dashboard_feed",
+      "peer": {
+        "link_state": "heard",
+        "peer_id": "peer-c24b3e338337",
+        "transport": "meshtastic-control-sim"
+      },
       "schema_version": "flowrouter.poc.v0",
       "sidecar": {
         "payload_budget_bytes": 160,
@@ -78,6 +88,8 @@
         "operator_metadata",
         "local_cache_status",
         "sidecar_status",
+        "node_health",
+        "peer_hint",
         "dashboard_feed"
       ],
       "device_id": "fr-e1e7878a2aa8",
@@ -187,6 +199,44 @@
       "pointer": "flowmemory://cache/4549dba629bc",
       "schema_version": "flowrouter.poc.v0",
       "trust_level": "untrusted-pointer"
+    },
+    "node_health": {
+      "chain_startup_blocking": false,
+      "cpu_temp_c": 43.5,
+      "device_id": "fr-e1e7878a2aa8",
+      "disk_free_mb": 238592,
+      "emitted_at": "2026-05-13T17:01:45Z",
+      "health": "healthy",
+      "health_digest": "7b66a2a36ba12251536a36ee9ebe2817aaf1737b15d3d34ac13ff6e55bcbe4e1",
+      "lora_eligible": true,
+      "memory_used_mb": 512,
+      "packet_type": "node_health",
+      "payload_bytes_estimate": 112,
+      "queue_depth": 2,
+      "schema_version": "flowrouter.poc.v0",
+      "sequence": 1051,
+      "uptime_seconds": 86442
+    },
+    "peer_hint": {
+      "advertised_roles": [
+        "hardware-observer",
+        "digest-relay"
+      ],
+      "device_id": "fr-e1e7878a2aa8",
+      "emitted_at": "2026-05-13T17:01:50Z",
+      "last_seen_at": "2026-05-13T17:01:48Z",
+      "link_state": "heard",
+      "lora_eligible": true,
+      "normal_network_required_for_sync": true,
+      "packet_type": "peer_hint",
+      "payload_bytes_estimate": 104,
+      "peer_id": "peer-c24b3e338337",
+      "peer_role": "observer",
+      "rssi_dbm": -88,
+      "schema_version": "flowrouter.poc.v0",
+      "sequence": 1052,
+      "snr_db": 6.5,
+      "transport": "meshtastic-control-sim"
     },
     "sidecar_status": {
       "device_id": "fr-e1e7878a2aa8",

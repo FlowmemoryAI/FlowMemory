@@ -1,11 +1,23 @@
 {
   "allCasesRejected": true,
-  "caseCount": 8,
+  "caseCount": 12,
   "cases": [
     {
       "actualFailure": "heartbeat: missing required key device_id",
       "case": "heartbeat_missing_device_id",
       "expectedFailure": "missing required key device_id",
+      "passed": true
+    },
+    {
+      "actualFailure": "heartbeat.device_id: malformed device_id",
+      "case": "heartbeat_malformed_device_id",
+      "expectedFailure": "malformed device_id",
+      "passed": true
+    },
+    {
+      "actualFailure": "heartbeat.emitted_at: stale timestamp rejected",
+      "case": "heartbeat_stale_timestamp",
+      "expectedFailure": "stale timestamp rejected",
       "passed": true
     },
     {
@@ -21,6 +33,12 @@
       "passed": true
     },
     {
+      "actualFailure": "nfc_memory_cartridge_metadata.pointer: secret-shaped payload rejected",
+      "case": "nfc_metadata_secret_shaped_pointer",
+      "expectedFailure": "secret-shaped payload",
+      "passed": true
+    },
+    {
       "actualFailure": "operator_signals: missing required key bridgeAlerts",
       "case": "operator_projection_missing_bridge_alerts",
       "expectedFailure": "missing required key bridgeAlerts",
@@ -30,6 +48,12 @@
       "actualFailure": "operator_signals.boundary.hardwareRequiredForPrivateTestnet: value True not in enum [False]",
       "case": "operator_projection_requires_hardware",
       "expectedFailure": "not in enum [False]",
+      "passed": true
+    },
+    {
+      "actualFailure": "operator_signals.signalEnvelopes[1]: duplicate signalId",
+      "case": "operator_projection_duplicate_signal_id",
+      "expectedFailure": "duplicate signalId",
       "passed": true
     },
     {

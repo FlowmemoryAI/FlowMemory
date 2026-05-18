@@ -1,6 +1,6 @@
 # FlowMemory Hardware
 
-Last updated: 2026-05-13
+Last updated: 2026-05-14
 
 This directory contains the FlowRouter V0 proof-of-concept hardware package. It is production-shaped but research-safe: the docs, schemas, simulator, and field-test plans are intended to help later dashboard, services, and hardware work consume consistent data without claiming finished hardware.
 
@@ -19,6 +19,8 @@ This directory contains the FlowRouter V0 proof-of-concept hardware package. It 
 FlowRouter V0 is a local FlowMemory gateway POC. It can model or test:
 
 - Local node status.
+- Compact node health hints.
+- Peer/topology hints for operator review.
 - Artifact cache status.
 - Compact receipt relay.
 - Heartbeat messages.
@@ -29,7 +31,7 @@ FlowRouter V0 is a local FlowMemory gateway POC. It can model or test:
 - FlowCore light-pipe status.
 - Enclosure measurement direction.
 - FlowChain local-alpha operator signals derived from hardware packets, including optional control-plane/workbench fixture collections.
-- Control-plane handoff JSON for optional hardware signals, including heartbeat, receipt relay, verifier digest relay, offline alert, bridge alert, NFC metadata, and operator metadata.
+- Control-plane handoff JSON for optional hardware signals, including heartbeat, node health, peer hint, receipt relay, verifier digest relay, offline alert, bridge alert, NFC metadata, and operator metadata.
 
 ## V0 Non-Goals
 
@@ -62,6 +64,6 @@ python hardware/simulator/flowrouter_sim.py --validate-handoff-file fixtures/har
 python hardware/simulator/flowrouter_sim.py --validate-negative-report-file fixtures/hardware/flowrouter_negative_validation_seed42.json
 ```
 
-The operator projection emits `flowmemory.hardware_operator_signals.local_alpha.v0`, with local-only `signalEnvelopes`, a direct `hardwareSignals` view, control-plane-style collections, and `workbenchRecords`. The handoff fixture emits `flowmemory.hardware_control_plane_handoff.local_alpha.v0` and is shaped for read-only optional control-plane ingestion. Hardware remains optional for the private/local testnet path.
+The operator projection emits `flowmemory.hardware_operator_signals.local_alpha.v0`, with local-only `signalEnvelopes`, a direct `hardwareSignals` view, control-plane-style collections, and `workbenchRecords`. The handoff fixture emits `flowmemory.hardware_control_plane_handoff.local_alpha.v0` and is shaped for read-only optional control-plane ingestion. Hardware remains optional for the private/local testnet path, and node-health or peer-hint problems cannot block local chain startup.
 
 The simulator uses only the Python standard library.

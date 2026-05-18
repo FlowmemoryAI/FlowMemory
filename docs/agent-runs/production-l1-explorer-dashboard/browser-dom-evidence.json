@@ -1,0 +1,129 @@
+{
+  "url": "http://127.0.0.1:5173",
+  "title": "FlowMemory Dashboard V0",
+  "generatedAt": "2026-05-14T05:16:13.799Z",
+  "consoleErrors": [],
+  "desktop": {
+    "viewportName": "desktop-1440x1100",
+    "required": {
+      "8453": true,
+      "Node and API status": true,
+      "Blocks": true,
+      "Transactions": true,
+      "Receipts / Events": true,
+      "Accounts": true,
+      "Balances": true,
+      "Token Launch": true,
+      "Token Balances": true,
+      "Token Transfers": true,
+      "DEX Pools": true,
+      "Liquidity": true,
+      "Swaps": true,
+      "Bridge Deposits": true,
+      "Bridge Credits": true,
+      "Bridge Withdrawals": true,
+      "Bridge Releases": true,
+      "Errors / Recovery": true,
+      "Raw JSON": true
+    },
+    "layout": {
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "document": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "scrollHeight": 3559
+      },
+      "tableScrollContainers": [],
+      "localStorageKeys": [],
+      "sessionStorageKeys": [],
+      "secretShapedInputs": [],
+      "overlaps": []
+    }
+  },
+  "mobile": {
+    "viewportName": "mobile-390x900",
+    "required": {
+      "8453": true,
+      "Node and API status": true,
+      "Blocks": true,
+      "Transactions": true,
+      "Receipts / Events": true,
+      "Accounts": true,
+      "Balances": true,
+      "Token Launch": true,
+      "Token Balances": true,
+      "Token Transfers": true,
+      "DEX Pools": true,
+      "Liquidity": true,
+      "Swaps": true,
+      "Bridge Deposits": true,
+      "Bridge Credits": true,
+      "Bridge Withdrawals": true,
+      "Bridge Releases": true,
+      "Errors / Recovery": true,
+      "Raw JSON": true
+    },
+    "layout": {
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "document": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "scrollHeight": 8748
+      },
+      "tableScrollContainers": [],
+      "localStorageKeys": [],
+      "sessionStorageKeys": [],
+      "secretShapedInputs": [],
+      "overlaps": []
+    }
+  },
+  "realValuePilotTextIncludesBaseReadiness": true,
+  "searches": {
+    "baseTxHash": {
+      "term": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "visible": true,
+      "resultCount": 30
+    },
+    "bridgeObservationId": {
+      "term": "0x0430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223c",
+      "visible": true,
+      "resultCount": 17
+    },
+    "bridgeCreditId": {
+      "term": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+      "visible": true,
+      "resultCount": 19
+    },
+    "creditedAccount": {
+      "term": "0x5555555555555555555555555555555555555555555555555555555555555555",
+      "visible": true,
+      "resultCount": 36
+    },
+    "localTransferTxId": {
+      "term": "0x3ac0b196a212a0e77d0a0c4b60e2283d2994b09993971b95427996700f5b92aa",
+      "visible": true,
+      "resultCount": 11
+    },
+    "swapTxId": {
+      "term": "0xa0729982b58cc701aba6af0bc29ca993190db4e8e1489af918dbe293c0c03bad",
+      "visible": true,
+      "resultCount": 11
+    },
+    "withdrawalIntentId": {
+      "term": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
+      "visible": true,
+      "resultCount": 16
+    },
+    "releaseEvidenceId": {
+      "term": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb278",
+      "visible": true,
+      "resultCount": 8
+    }
+  }
+}

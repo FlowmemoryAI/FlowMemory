@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -24,6 +25,8 @@ SCHEMA_FILES = {
     "nfc_memory_cartridge_metadata": "nfc_memory_cartridge_metadata.schema.json",
     "emergency_offline_signal": "emergency_offline_signal.schema.json",
     "bridge_alert": "bridge_alert.schema.json",
+    "node_health": "node_health.schema.json",
+    "peer_hint": "peer_hint.schema.json",
     "dashboard_feed": "dashboard_feed.schema.json",
 }
 
@@ -32,6 +35,30 @@ NEGATIVE_REPORT_SCHEMA_FILE = "negative_validation_report.schema.json"
 ZERO_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000"
 HARDWARE_ROOTFIELD_ID = "rootfield:hardware:flowrouter-local-alpha"
 HARDWARE_CHAIN_CONTEXT = "flowchain-private-local-testnet"
+FIXTURE_TIME_PREFIX = "2026-05-13T17:"
+SECRET_SHAPED_PATTERNS = [
+    "BEGIN PRIVATE " + "KEY",
+    "PRIVATE_" + "KEY=",
+    "MNEMONIC=",
+    "SEED_PHRASE=",
+    "RPC_URL=",
+    "API_KEY=",
+    "WEBHOOK_URL=",
+    "sk_live_",
+    "sk-proj-",
+    "https://hooks.slack.com/services/",
+]
+ID_PATTERNS = {
+    "device_id": re.compile(r"^fr-[0-9a-f]{12}$"),
+    "gateway_id": re.compile(r"^gw-[0-9a-f]{12}$"),
+    "cartridge_id": re.compile(r"^cart-[0-9a-f]{12}$"),
+    "peer_id": re.compile(r"^peer-[0-9a-f]{12}$"),
+    "report_id": re.compile(r"^vr-[0-9a-f]{12}$"),
+    "bridge_id": re.compile(r"^bridge-[0-9a-f]{12}$"),
+    "cache_id": re.compile(r"^cache-[0-9a-f]{12}$"),
+    "digest64": re.compile(r"^[0-9a-f]{64}$"),
+    "tx_hash_prefix": re.compile(r"^0x[0-9a-f]{16}$"),
+}
 
 
 def digest(seed: int, label: str, length: int = 64) -> str:
@@ -108,6 +135,8 @@ def build_packets(seed: int) -> dict[str, Any]:
             "operator_metadata",
             "local_cache_status",
             "sidecar_status",
+            "node_health",
+            "peer_hint",
             "dashboard_feed",
         ],
         "security": {
@@ -275,11 +304,48 @@ def build_packets(seed: int) -> dict[str, Any]:
         "operator_action": "review-bridge-observer-and-do-not-block-chain",
     }
 
+    node_health = {
+        "packet_type": "node_health",
+        "schema_version": "flowrouter.poc.v0",
+        "device_id": device_id,
+        "sequence": 1009 + seed,
+        "emitted_at": iso_tick(105),
+        "health": "healthy",
+        "uptime_seconds": heartbeat["uptime_seconds"],
+        "cpu_temp_c": 43.5,
+        "memory_used_mb": 512,
+        "disk_free_mb": 238592,
+        "queue_depth": 2,
+        "health_digest": digest(seed, "node-health"),
+        "payload_bytes_estimate": 112,
+        "lora_eligible": True,
+        "chain_startup_blocking": False,
+    }
+
+    peer_hint = {
+        "packet_type": "peer_hint",
+        "schema_version": "flowrouter.poc.v0",
+        "device_id": device_id,
+        "sequence": 1010 + seed,
+        "emitted_at": iso_tick(110),
+        "peer_id": f"peer-{short_id(seed, 'peer')}",
+        "peer_role": "observer",
+        "transport": "meshtastic-control-sim",
+        "link_state": "heard",
+        "last_seen_at": iso_tick(108),
+        "rssi_dbm": -88,
+        "snr_db": 6.5,
+        "advertised_roles": ["hardware-observer", "digest-relay"],
+        "payload_bytes_estimate": 104,
+        "lora_eligible": True,
+        "normal_network_required_for_sync": True,
+    }
+
     dashboard_feed = {
         "packet_type": "dashboard_feed",
         "schema_version": "flowrouter.poc.v0",
         "device_id": device_id,
-        "generated_at": iso_tick(100),
+        "generated_at": iso_tick(115),
         "network": {
             "lan": "reachable",
             "upstream": "reachable",
@@ -295,6 +361,16 @@ def build_packets(seed: int) -> dict[str, Any]:
             "state": "ready",
             "region": sidecar_status["region"],
             "payload_budget_bytes": sidecar_status["payload_budget_bytes"],
+        },
+        "peer": {
+            "peer_id": peer_hint["peer_id"],
+            "link_state": peer_hint["link_state"],
+            "transport": peer_hint["transport"],
+        },
+        "node_health": {
+            "health": node_health["health"],
+            "queue_depth": node_health["queue_depth"],
+            "chain_startup_blocking": node_health["chain_startup_blocking"],
         },
         "flowcore": {
             "state": "online",
@@ -316,6 +392,8 @@ def build_packets(seed: int) -> dict[str, Any]:
         "nfc_memory_cartridge_metadata": cartridge,
         "emergency_offline_signal": emergency,
         "bridge_alert": bridge_alert,
+        "node_health": node_health,
+        "peer_hint": peer_hint,
         "dashboard_feed": dashboard_feed,
     }
 
@@ -330,6 +408,8 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
     bridge = packet_set["bridge_alert"]
     cartridge = packet_set["nfc_memory_cartridge_metadata"]
     sidecar = packet_set["sidecar_status"]
+    node_health = packet_set["node_health"]
+    peer_hint = packet_set["peer_hint"]
     dashboard = packet_set["dashboard_feed"]
 
     device_id = heartbeat["device_id"]
@@ -350,6 +430,8 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
     artifact_id = f"artifact:hardware:{short_id(seed, 'cartridge-artifact-ref')}"
     memory_cell_id = f"memory:hardware:{short_id(seed, 'cartridge-memory-ref')}"
     finality_receipt_id = f"finality:hardware:{short_id(seed, 'receipt-finality')}"
+    node_health_id = f"node-health:hardware:{short_id(seed, 'node-health-ref')}"
+    peer_hint_id = f"peer-hint:hardware:{short_id(seed, 'peer-hint-ref')}"
 
     provenance = {
         "subsystem": "hardware",
@@ -378,6 +460,46 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
         "warnings": heartbeat["warnings"],
         "localOnly": True,
         "sourcePacketType": "heartbeat",
+        "provenance": provenance,
+    }
+
+    node_health_record = {
+        "nodeHealthId": node_health_id,
+        "nodeId": device_id,
+        "rootfieldId": HARDWARE_ROOTFIELD_ID,
+        "health": node_health["health"],
+        "observedAt": node_health["emitted_at"],
+        "uptimeSeconds": node_health["uptime_seconds"],
+        "cpuTempC": node_health["cpu_temp_c"],
+        "memoryUsedMb": node_health["memory_used_mb"],
+        "diskFreeMb": node_health["disk_free_mb"],
+        "queueDepth": node_health["queue_depth"],
+        "healthDigest": ensure_hex(node_health["health_digest"]),
+        "status": "observed",
+        "payloadBytesEstimate": node_health["payload_bytes_estimate"],
+        "loraEligible": node_health["lora_eligible"],
+        "chainStartupBlocking": node_health["chain_startup_blocking"],
+        "localOnly": True,
+        "sourcePacketType": "node_health",
+        "provenance": provenance,
+    }
+
+    peer_hint_record = {
+        "peerHintId": peer_hint_id,
+        "nodeId": device_id,
+        "peerId": peer_hint["peer_id"],
+        "peerRole": peer_hint["peer_role"],
+        "transport": peer_hint["transport"],
+        "linkState": peer_hint["link_state"],
+        "lastSeenAt": peer_hint["last_seen_at"],
+        "advertisedRoles": peer_hint["advertised_roles"],
+        "rssiDbm": peer_hint["rssi_dbm"],
+        "snrDb": peer_hint["snr_db"],
+        "payloadBytesEstimate": peer_hint["payload_bytes_estimate"],
+        "loraEligible": peer_hint["lora_eligible"],
+        "normalNetworkRequiredForSync": peer_hint["normal_network_required_for_sync"],
+        "localOnly": True,
+        "sourcePacketType": "peer_hint",
         "provenance": provenance,
     }
 
@@ -657,6 +779,20 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
             ],
             "observed",
         ),
+        signal_envelope(
+            "node-health",
+            "node_health",
+            node_health,
+            [{"collection": "nodeHealth", "objectId": node_health_id}],
+            "observed",
+        ),
+        signal_envelope(
+            "peer-hint",
+            "peer_hint",
+            peer_hint,
+            [{"collection": "peerHints", "objectId": peer_hint_id}],
+            "observed",
+        ),
     ]
 
     signal_summaries = {
@@ -667,6 +803,8 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
         "offline_alert_challenge_input": "Offline alert that can seed a local challenge candidate.",
         "bridge_alert": "Compact bridge observer alert that does not block local chain progress.",
         "nfc_memory_cartridge_metadata": "NFC metadata pointer projected into artifact and memory references.",
+        "node_health": "Compact node health digest that cannot block local chain startup.",
+        "peer_hint": "Low-bandwidth peer hint for operator-visible local topology only.",
     }
     hardware_signals = [
         {
@@ -716,6 +854,8 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
                 "NFC cartridge metadata is an untrusted pointer until checked against expected commitments.",
                 "Emergency offline signals are operator alerts or challenge inputs only; they do not execute remote actions.",
                 "Bridge alerts are operator review hints and must not block local chain progress.",
+                "Node health signals are observability hints and cannot block private/local chain startup.",
+                "Peer hints describe local topology candidates only and require normal network reconciliation for sync.",
             ],
         },
         "packetMappings": [
@@ -734,6 +874,22 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
                 "objectRef": device_id,
                 "localAlphaRole": "shows FlowRouter reachability and coarse device state",
                 "trustBoundary": "local advisory status, not hardware attestation",
+            },
+            {
+                "sourcePacketType": "node_health",
+                "flowchainSignal": "node_health",
+                "objectCollection": "nodeHealth",
+                "objectRef": node_health_id,
+                "localAlphaRole": "adds compact node health and queue-depth observability",
+                "trustBoundary": "observability only; it cannot block local chain startup",
+            },
+            {
+                "sourcePacketType": "peer_hint",
+                "flowchainSignal": "peer_hint",
+                "objectCollection": "peerHints",
+                "objectRef": peer_hint_id,
+                "localAlphaRole": "surfaces a local topology hint for operator review",
+                "trustBoundary": "peer hint only; not authentication, sync proof, or LAN discovery authority",
             },
             {
                 "sourcePacketType": "compact_receipt_relay",
@@ -780,6 +936,8 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
         "hardwareSignals": hardware_signals,
         "operatorMetadata": [operator_metadata],
         "hardwareNodes": [hardware_node],
+        "nodeHealth": [node_health_record],
+        "peerHints": [peer_hint_record],
         "workReceipts": [work_receipt],
         "verifierReports": [verifier_report],
         "bridgeAlerts": [bridge_alert],
@@ -803,6 +961,38 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
                         {"label": "payload budget", "value": str(operator_metadata["radioPayloadBudgetBytes"])},
                     ],
                     operator_metadata,
+                )
+            ],
+            "nodeHealth": [
+                workbench_record(
+                    node_health_id,
+                    "Hardware node health",
+                    node_health["health"],
+                    "Compact node health digest for local operator observability.",
+                    "observed",
+                    [
+                        {"label": "node", "value": device_id},
+                        {"label": "queue depth", "value": str(node_health["queue_depth"])},
+                        {"label": "health digest", "value": ensure_hex(node_health["health_digest"])},
+                        {"label": "blocks startup", "value": "false"},
+                    ],
+                    node_health_record,
+                )
+            ],
+            "peerHints": [
+                workbench_record(
+                    peer_hint_id,
+                    "Hardware peer hint",
+                    peer_hint["peer_id"],
+                    "Low-bandwidth peer hint for local topology review.",
+                    "observed",
+                    [
+                        {"label": "node", "value": device_id},
+                        {"label": "peer", "value": peer_hint["peer_id"]},
+                        {"label": "transport", "value": peer_hint["transport"]},
+                        {"label": "link state", "value": peer_hint["link_state"]},
+                    ],
+                    peer_hint_record,
                 )
             ],
             "receipts": [
@@ -946,6 +1136,8 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
                 "hardwareSignals",
                 "operatorMetadata",
                 "hardwareNodes",
+                "nodeHealth",
+                "peerHints",
                 "workReceipts",
                 "verifierReports",
                 "bridgeAlerts",
@@ -957,6 +1149,8 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
             ],
             "workbenchSectionKeys": [
                 "operatorMetadata",
+                "nodeHealth",
+                "peerHints",
                 "receipts",
                 "verifierReports",
                 "bridgeAlerts",
@@ -996,6 +1190,8 @@ def build_control_plane_handoff(seed: int, operator_signals: dict[str, Any] | No
                 "hardwareSignals": "signalId",
                 "operatorMetadata": "metadataId",
                 "hardwareNodes": "nodeId",
+                "nodeHealth": "nodeHealthId",
+                "peerHints": "peerHintId",
                 "workReceipts": "receiptId",
                 "verifierReports": "reportId",
                 "bridgeAlerts": "bridgeAlertId",
@@ -1078,6 +1274,99 @@ def validate_value(schema: dict[str, Any], value: Any, path: str) -> None:
             validate_value(schema["items"], item, f"{path}[{index}]")
 
 
+def iter_strings(value: Any, path: str) -> list[tuple[str, str]]:
+    if isinstance(value, str):
+        return [(path, value)]
+    if isinstance(value, dict):
+        strings: list[tuple[str, str]] = []
+        for key, child in value.items():
+            strings.extend(iter_strings(child, f"{path}.{key}"))
+        return strings
+    if isinstance(value, list):
+        strings = []
+        for index, child in enumerate(value):
+            strings.extend(iter_strings(child, f"{path}[{index}]"))
+        return strings
+    return []
+
+
+def validate_no_secret_shaped_payloads(value: Any, path: str) -> None:
+    for string_path, string_value in iter_strings(value, path):
+        upper_value = string_value.upper()
+        for pattern in SECRET_SHAPED_PATTERNS:
+            compare_value = upper_value if pattern == pattern.upper() else string_value
+            if pattern in compare_value:
+                raise ValidationError(f"{string_path}: secret-shaped payload rejected")
+
+
+def validate_fixture_timestamp(value: Any, path: str) -> None:
+    if not isinstance(value, str) or not value.startswith(FIXTURE_TIME_PREFIX) or not value.endswith("Z"):
+        raise ValidationError(f"{path}: stale timestamp rejected")
+
+
+def validate_pattern(field: str, value: Any, path: str) -> None:
+    pattern = ID_PATTERNS[field]
+    if not isinstance(value, str) or not pattern.fullmatch(value):
+        raise ValidationError(f"{path}: malformed {field}")
+
+
+def validate_packet_semantics(packet: dict[str, Any], path: str) -> None:
+    validate_no_secret_shaped_payloads(packet, path)
+
+    for key in ("emitted_at", "generated_at", "created_at", "last_seen_at"):
+        if key in packet:
+            validate_fixture_timestamp(packet[key], f"{path}.{key}")
+
+    if "device_id" in packet:
+        validate_pattern("device_id", packet["device_id"], f"{path}.device_id")
+    if "gateway_id" in packet:
+        validate_pattern("gateway_id", packet["gateway_id"], f"{path}.gateway_id")
+    if "cartridge_id" in packet:
+        validate_pattern("cartridge_id", packet["cartridge_id"], f"{path}.cartridge_id")
+    if "peer_id" in packet:
+        validate_pattern("peer_id", packet["peer_id"], f"{path}.peer_id")
+    if "report_id" in packet:
+        validate_pattern("report_id", packet["report_id"], f"{path}.report_id")
+    if "bridge_id" in packet:
+        validate_pattern("bridge_id", packet["bridge_id"], f"{path}.bridge_id")
+    if "cache_id" in packet:
+        validate_pattern("cache_id", packet["cache_id"], f"{path}.cache_id")
+    if "tx_hash_prefix" in packet:
+        validate_pattern("tx_hash_prefix", packet["tx_hash_prefix"], f"{path}.tx_hash_prefix")
+
+    for key in ("digest", "subject_digest", "report_digest", "receipt_digest", "cache_digest", "health_digest"):
+        if key in packet:
+            validate_pattern("digest64", packet[key], f"{path}.{key}")
+
+
+def assert_unique(items: list[Any], id_field: str, path: str) -> None:
+    seen: set[str] = set()
+    for index, item in enumerate(items):
+        if not isinstance(item, dict):
+            continue
+        value = item.get(id_field)
+        if not isinstance(value, str):
+            continue
+        if value in seen:
+            raise ValidationError(f"{path}[{index}]: duplicate {id_field}")
+        seen.add(value)
+
+
+def validate_operator_signal_semantics(operator_signals: dict[str, Any]) -> None:
+    validate_no_secret_shaped_payloads(operator_signals, "operator_signals")
+    assert_unique(operator_signals["signalEnvelopes"], "signalId", "operator_signals.signalEnvelopes")
+    assert_unique(operator_signals["signalEnvelopes"], "envelopeId", "operator_signals.signalEnvelopes")
+    assert_unique(operator_signals["hardwareSignals"], "signalId", "operator_signals.hardwareSignals")
+
+
+def validate_handoff_semantics(handoff: dict[str, Any]) -> None:
+    validate_no_secret_shaped_payloads(handoff, "control_plane_handoff")
+    id_fields = handoff["ingest"]["idFields"]
+    collections = handoff["collections"]
+    for collection, id_field in id_fields.items():
+        assert_unique(collections.get(collection, []), id_field, f"control_plane_handoff.collections.{collection}")
+
+
 def load_schema(schema_dir: Path, packet_type: str) -> dict[str, Any]:
     schema_file = SCHEMA_FILES.get(packet_type)
     if not schema_file:
@@ -1094,17 +1383,20 @@ def validate_packets(packets: dict[str, Any], schema_dir: Path) -> None:
             raise ValidationError(f"{name}: packet_type {packet_type!r} does not match key")
         schema = load_schema(schema_dir, packet_type)
         validate_value(schema, packet, name)
+        validate_packet_semantics(packet, name)
 
 
 def validate_operator_signals(operator_signals: dict[str, Any], schema_dir: Path) -> None:
     schema = json.loads((schema_dir / OPERATOR_SIGNALS_SCHEMA_FILE).read_text(encoding="utf-8"))
     validate_value(schema, operator_signals, "operator_signals")
+    validate_operator_signal_semantics(operator_signals)
 
 
 def validate_control_plane_handoff(handoff: dict[str, Any], repo_root: Path) -> None:
     schema_path = repo_root / "schemas" / "flowmemory" / "hardware-control-plane-handoff.schema.json"
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
     validate_value(schema, handoff, "control_plane_handoff")
+    validate_handoff_semantics(handoff)
 
 
 def validate_negative_report(report: dict[str, Any], schema_dir: Path) -> None:
@@ -1148,6 +1440,24 @@ def run_negative_cases(seed: int, schema_dir: Path, repo_root: Path) -> list[dic
         "missing required key device_id",
     )
 
+    malformed_heartbeat_device = clone_json(packets)
+    malformed_heartbeat_device["heartbeat"]["device_id"] = "flowrouter#42"
+    expect_rejected(
+        "heartbeat_malformed_device_id",
+        lambda value: validate_packets(value, schema_dir),
+        malformed_heartbeat_device,
+        "malformed device_id",
+    )
+
+    stale_heartbeat = clone_json(packets)
+    stale_heartbeat["heartbeat"]["emitted_at"] = "2026-05-12T17:00:10Z"
+    expect_rejected(
+        "heartbeat_stale_timestamp",
+        lambda value: validate_packets(value, schema_dir),
+        stale_heartbeat,
+        "stale timestamp rejected",
+    )
+
     oversized_receipt_relay = clone_json(packets)
     oversized_receipt_relay["compact_receipt_relay"]["payload_bytes_estimate"] = 512
     expect_rejected(
@@ -1166,6 +1476,15 @@ def run_negative_cases(seed: int, schema_dir: Path, repo_root: Path) -> list[dic
         "not in enum [False]",
     )
 
+    nfc_secret_pointer = clone_json(packets)
+    nfc_secret_pointer["nfc_memory_cartridge_metadata"]["pointer"] = "API_KEY=flowmemory-test-placeholder"
+    expect_rejected(
+        "nfc_metadata_secret_shaped_pointer",
+        lambda value: validate_packets(value, schema_dir),
+        nfc_secret_pointer,
+        "secret-shaped payload",
+    )
+
     missing_bridge_handoff = clone_json(operator_doc)
     del missing_bridge_handoff["bridgeAlerts"]
     expect_rejected(
@@ -1182,6 +1501,15 @@ def run_negative_cases(seed: int, schema_dir: Path, repo_root: Path) -> list[dic
         lambda value: validate_operator_signals(value, schema_dir),
         hardware_required,
         "not in enum [False]",
+    )
+
+    duplicate_signal = clone_json(operator_doc)
+    duplicate_signal["signalEnvelopes"][1]["signalId"] = duplicate_signal["signalEnvelopes"][0]["signalId"]
+    expect_rejected(
+        "operator_projection_duplicate_signal_id",
+        lambda value: validate_operator_signals(value, schema_dir),
+        duplicate_signal,
+        "duplicate signalId",
     )
 
     oversized_operator_envelope = clone_json(operator_doc)

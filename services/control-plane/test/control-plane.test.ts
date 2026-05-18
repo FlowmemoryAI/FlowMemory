@@ -128,7 +128,7 @@ test("keeps deterministic chain status response snapshots", () => {
   assert.equal(snapshot(first), snapshot(second));
   assert.equal(
     snapshot(first),
-    "{\"capabilities\":[\"health_reads\",\"node_status_reads\",\"peer_reads\",\"local_runtime_status_reads\",\"block_reads\",\"transaction_reads\",\"local_transaction_file_intake\",\"mempool_reads\",\"account_reads\",\"balance_reads\",\"faucet_event_reads\",\"wallet_public_metadata_reads\",\"token_reads\",\"token_balance_reads\",\"dex_pool_reads\",\"lp_position_reads\",\"swap_reads\",\"product_flow_status_reads\",\"receipt_lookup\",\"verifier_report_lookup\",\"memory_lineage_lookup\",\"artifact_fixture_lookup\",\"bridge_observation_file_intake\",\"bridge_deposit_reads\",\"bridge_credit_reads\",\"withdrawal_reads\",\"real_value_pilot_reads\",\"real_value_pilot_operator_steps\",\"devnet_handoff_reads\",\"no_secret_response_checks\",\"raw_json_reads\"],\"chainId\":\"flowmemory-local-devnet-v0\",\"counts\":{\"accounts\":2,\"agents\":2,\"artifactAvailability\":5,\"balances\":2,\"blocks\":11,\"bridgeCredits\":1,\"bridgeDeposits\":1,\"challenges\":1,\"devnetBlocks\":2,\"duplicates\":1,\"faucetEvents\":1,\"finalityRows\":9,\"lpPositions\":0,\"memoryCells\":1,\"memoryReceipts\":8,\"memorySignals\":8,\"mempool\":0,\"models\":2,\"observations\":8,\"pilotStatus\":1,\"pools\":0,\"rejectedLogs\":2,\"rootfields\":2,\"swaps\":0,\"tokenBalances\":1,\"tokens\":1,\"transactions\":25,\"verifierModules\":3,\"verifierReports\":8,\"walletPublicMetadata\":2,\"withdrawals\":1,\"workReceipts\":9},\"schema\":\"flowmemory.control_plane.chain_status.v0\"}",
+    "{\"capabilities\":[\"health_reads\",\"node_status_reads\",\"peer_reads\",\"local_runtime_status_reads\",\"block_reads\",\"transaction_reads\",\"local_transaction_file_intake\",\"mempool_reads\",\"account_reads\",\"balance_reads\",\"faucet_event_reads\",\"wallet_public_metadata_reads\",\"token_reads\",\"token_balance_reads\",\"token_transfer_reads\",\"dex_pool_reads\",\"lp_position_reads\",\"swap_reads\",\"product_flow_status_reads\",\"receipt_lookup\",\"verifier_report_lookup\",\"memory_lineage_lookup\",\"artifact_fixture_lookup\",\"bridge_observation_file_intake\",\"bridge_deposit_reads\",\"bridge_credit_reads\",\"withdrawal_reads\",\"real_value_pilot_reads\",\"real_value_pilot_operator_steps\",\"devnet_handoff_reads\",\"no_secret_response_checks\",\"raw_json_reads\",\"explorer_search\"],\"chainId\":\"flowmemory-local-devnet-v0\",\"counts\":{\"accounts\":2,\"agents\":2,\"artifactAvailability\":5,\"balances\":2,\"blocks\":11,\"bridgeCredits\":3,\"bridgeDeposits\":3,\"challenges\":1,\"devnetBlocks\":2,\"duplicates\":1,\"faucetEvents\":1,\"finalityRows\":9,\"lpPositions\":1,\"memoryCells\":1,\"memoryReceipts\":8,\"memorySignals\":8,\"mempool\":0,\"models\":2,\"observations\":8,\"pilotStatus\":1,\"pools\":1,\"rejectedLogs\":2,\"rootfields\":2,\"swaps\":1,\"tokenBalances\":1,\"tokenTransfers\":1,\"tokens\":1,\"transactions\":25,\"verifierModules\":3,\"verifierReports\":8,\"walletPublicMetadata\":2,\"withdrawals\":2,\"workReceipts\":9},\"schema\":\"flowmemory.control_plane.chain_status.v0\"}",
   );
   rmSync(dir, { recursive: true, force: true });
 });
@@ -782,8 +782,9 @@ test("smoke client queries the complete local lifecycle surface", () => {
 
   assert.equal(smoke.schema, "flowmemory.control_plane.smoke.v0");
   assert.equal(smoke.ok, true);
-  assert.equal(smoke.methodCount, 66);
+  assert.equal(smoke.methodCount, 79);
   assert.ok((smoke.responseSchemas as string[]).includes("flowmemory.control_plane.real_value_pilot_status.v0"));
+  assert.ok((smoke.responseSchemas as string[]).includes("flowmemory.control_plane.explorer_search.v0"));
   assert.ok((smoke.responseSchemas as string[]).includes("flowmemory.control_plane.raw_json.v0"));
   rmSync(dir, { recursive: true, force: true });
 });
