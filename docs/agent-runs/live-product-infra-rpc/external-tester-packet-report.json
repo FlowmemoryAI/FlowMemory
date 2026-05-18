@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.external_tester_packet_report.v0",
-    "generatedAt":  "2026-05-18T03:25:35.2353631Z",
+    "generatedAt":  "2026-05-18T07:39:14.7635105Z",
     "status":  "blocked",
     "packetShareable":  false,
     "packetPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\EXTERNAL_TESTER_PACKET.md",
@@ -19,8 +19,8 @@
                               "connectPackNoSecrets":  true,
                               "connectPackBroadcastsFalse":  true
                           },
-    "latestHeight":  "64687",
-    "finalizedHeight":  "64687",
+    "latestHeight":  "67611",
+    "finalizedHeight":  "67611",
     "chainId":  "flowmemory-local-devnet-v0",
     "readinessStatus":  "blocked",
     "ownerInputsStatus":  "blocked",
@@ -64,9 +64,6 @@
                             "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                             "FLOWCHAIN_RPC_TLS_TERMINATED",
                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
-                            "FLOWCHAIN_TESTER_WRITE_ENABLED",
-                            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
-                            "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
                             "FLOWCHAIN_PILOT_OPERATOR_ACK",
                             "FLOWCHAIN_BASE8453_RPC_URL",
                             "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -75,7 +72,10 @@
                             "FLOWCHAIN_BASE8453_FROM_BLOCK",
                             "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                             "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-                            "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                            "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                            "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                            "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
                         ],
     "reportPaths":  {
                         "readiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",

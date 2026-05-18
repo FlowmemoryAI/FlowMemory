@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Command Matrix
 
-Generated: 2026-05-18T07:12:27.1402408Z
+Generated: 2026-05-18T07:33:05.6605351Z
 
 | Phase | Command | Purpose |
 | --- | --- | --- |
@@ -43,6 +43,7 @@ Generated: 2026-05-18T07:12:27.1402408Z
 | testers | `npm run flowchain:external-tester:packet:validate` | Validate the packet and connect pack are no-secret, locally executable, and not externally shareable before owner inputs. |
 | testers | `npm run flowchain:tester:token:setup` | Create or preserve the raw tester bearer token in ignored local storage and write only its digest to the ignored owner env file. |
 | testers | `npm run flowchain:dashboard:ui:readiness` | Run desktop and mobile browser verification for tester wallet create, faucet, send, and Explorer inspection. |
+| cutover | `npm run flowchain:live:cutover:rehearsal -- -AllowBlocked` | Run owner-env, public deployment, tester packet, completion, truth table, and no-secret gates as one redacted rehearsal. |
 | release | `npm run flowchain:operator:package:verify` | Verify the generated operator package contents and no-secret boundary. |
 | release | `npm run flowchain:completion:audit -- -AllowBlocked` | Run the production readiness gate without false public-ready claims. |
 | release | `npm run flowchain:truth-table -- -AllowBlocked` | Classify every tracked gate as passed, owner-blocked, repo-blocked, failed, or stale. |

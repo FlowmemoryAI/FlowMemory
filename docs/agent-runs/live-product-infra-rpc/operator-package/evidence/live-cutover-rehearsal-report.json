@@ -1,0 +1,218 @@
+{
+    "schema":  "flowchain.live_cutover_rehearsal_report.v0",
+    "generatedAt":  "2026-05-18T07:32:31.8573031Z",
+    "status":  "blocked",
+    "ownerEnvFile":  {
+                         "path":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\owner-inputs\\flowchain-owner.local.env",
+                         "relativePath":  "devnet/local/owner-inputs/flowchain-owner.local.env",
+                         "exists":  true,
+                         "isFile":  true,
+                         "gitIgnored":  true,
+                         "problems":  [
+
+                                      ]
+                     },
+    "ready":  {
+                  "ownerEnvReady":  false,
+                  "publicDeploymentReady":  false,
+                  "testerPacketShareable":  false,
+                  "completionReady":  false,
+                  "truthTableCompleted":  true,
+                  "noSecretScanPassed":  true
+              },
+    "blockedOnlyOnKnownExternalOwnerInputs":  true,
+    "missingEnvNames":  [
+                            "FLOWCHAIN_RPC_PUBLIC_URL",
+                            "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                            "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                            "FLOWCHAIN_RPC_TLS_TERMINATED",
+                            "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                            "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                            "FLOWCHAIN_BASE8453_RPC_URL",
+                            "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                            "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                            "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                            "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                            "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                            "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                            "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                        ],
+    "invalidEnvNames":  [
+
+                        ],
+    "unknownMissingEnvNames":  [
+
+                               ],
+    "steps":  [
+                  {
+                      "name":  "Owner env readiness",
+                      "command":  "npm run flowchain:owner-env:readiness -- -AllowBlocked",
+                      "startedAt":  "2026-05-18T07:23:19.7907417Z",
+                      "finishedAt":  "2026-05-18T07:25:27.8501708Z",
+                      "exitCode":  0,
+                      "timedOut":  false,
+                      "status":  "blocked",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-report.json",
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\live-cutover-rehearsal\\20260518022319770-55780-557b3e99.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\live-cutover-rehearsal\\20260518022319770-55780-557b3e99.stderr.log",
+                      "outputRedactedTail":  [
+                                                 "",
+                                                 "== Owner input contract from local env file ==",
+                                                 "npm run flowchain:owner-inputs -- -AllowBlocked",
+                                                 "BLOCKED: Owner input contract from local env file",
+                                                 "",
+                                                 "== Live infrastructure with local env file ==",
+                                                 "npm run flowchain:live-infra:check -- -AllowBlocked",
+                                                 "BLOCKED: Live infrastructure with local env file",
+                                                 "",
+                                                 "== Public deployment contract with local env file ==",
+                                                 "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh",
+                                                 "BLOCKED: Public deployment contract with local env file",
+                                                 "",
+                                                 "FlowChain owner env readiness status: blocked",
+                                                 "Owner env file: E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\owner-inputs\\flowchain-owner.local.env",
+                                                 "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-report.json",
+                                                 "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\OWNER_ENV_READINESS.md",
+                                                 "Missing env names: FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                             ]
+                  },
+                  {
+                      "name":  "Public deployment contract",
+                      "command":  "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh",
+                      "startedAt":  "2026-05-18T07:25:27.8661713Z",
+                      "finishedAt":  "2026-05-18T07:25:30.9045119Z",
+                      "exitCode":  0,
+                      "timedOut":  false,
+                      "status":  "blocked",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\live-cutover-rehearsal\\20260518022527866-55780-f178030c.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\live-cutover-rehearsal\\20260518022527866-55780-f178030c.stderr.log",
+                      "outputRedactedTail":  [
+                                                 "FlowChain public deployment contract status: blocked",
+                                                 "Deployment ready: False",
+                                                 "Packet shareable: False",
+                                                 "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
+                                                 "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\PUBLIC_DEPLOYMENT_CONTRACT.md",
+                                                 "Missing env names: FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                             ]
+                  },
+                  {
+                      "name":  "External tester packet",
+                      "command":  "npm run flowchain:external-tester:packet -- -AllowBlocked",
+                      "startedAt":  "2026-05-18T07:25:30.9125130Z",
+                      "finishedAt":  "2026-05-18T07:32:01.8993341Z",
+                      "exitCode":  0,
+                      "timedOut":  false,
+                      "status":  "blocked",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-packet-report.json",
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\live-cutover-rehearsal\\20260518022530912-55780-27d74ddb.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\live-cutover-rehearsal\\20260518022530912-55780-27d74ddb.stderr.log",
+                      "outputRedactedTail":  [
+                                                 "FlowChain external tester packet status: blocked",
+                                                 "Shareable externally: False",
+                                                 "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-packet-report.json",
+                                                 "Packet: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\EXTERNAL_TESTER_PACKET.md",
+                                                 "Missing or invalid env names: FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS, FLOWCHAIN_TESTER_WRITE_ENABLED, FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256, FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+                                             ]
+                  },
+                  {
+                      "name":  "Completion audit",
+                      "command":  "npm run flowchain:completion:audit -- -NoRefresh -AllowBlocked",
+                      "startedAt":  "2026-05-18T07:32:01.9063346Z",
+                      "finishedAt":  "2026-05-18T07:32:07.1115713Z",
+                      "exitCode":  0,
+                      "timedOut":  false,
+                      "status":  "blocked",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-completion-audit-report.json",
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\live-cutover-rehearsal\\20260518023201905-55780-9865fc13.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\live-cutover-rehearsal\\20260518023201905-55780-9865fc13.stderr.log",
+                      "outputRedactedTail":  [
+                                                 "FlowChain completion audit status: blocked",
+                                                 "Completion ready: False",
+                                                 "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-completion-audit-report.json",
+                                                 "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\COMPLETION_AUDIT.md",
+                                                 "Missing env names: FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS, FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                             ]
+                  },
+                  {
+                      "name":  "Production truth table",
+                      "command":  "npm run flowchain:truth-table -- -AllowBlocked",
+                      "startedAt":  "2026-05-18T07:32:07.1185706Z",
+                      "finishedAt":  "2026-05-18T07:32:10.9787378Z",
+                      "exitCode":  0,
+                      "timedOut":  false,
+                      "status":  "passed",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\production-truth-table-report.json",
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\live-cutover-rehearsal\\20260518023207118-55780-4ac3ac39.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\live-cutover-rehearsal\\20260518023207118-55780-4ac3ac39.stderr.log",
+                      "outputRedactedTail":  [
+                                                 "Get-TruthReportAgeSeconds : Cannot process argument transformation on parameter \u0027GeneratedAt\u0027. Cannot convert null to ",
+                                                 "type \"System.DateTimeOffset\".",
+                                                 "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-production-truth-table.ps1:2108 char:58",
+                                                 "+     $ageSeconds = Get-TruthReportAgeSeconds -GeneratedAt $generatedAt",
+                                                 "+                                                          ~~~~~~~~~~~~",
+                                                 "    + CategoryInfo          : InvalidData: (:) [Get-TruthReportAgeSeconds], ParentContainsErrorRecordException",
+                                                 "    + FullyQualifiedErrorId : ParameterArgumentTransformationError,Get-TruthReportAgeSeconds",
+                                                 " "
+                                             ]
+                  },
+                  {
+                      "name":  "No-secret scan",
+                      "command":  "npm run flowchain:no-secret:scan",
+                      "startedAt":  "2026-05-18T07:32:10.9867392Z",
+                      "finishedAt":  "2026-05-18T07:32:31.5064480Z",
+                      "exitCode":  0,
+                      "timedOut":  false,
+                      "status":  "passed",
+                      "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json",
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\live-cutover-rehearsal\\20260518023210985-55780-3e343cfc.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\live-cutover-rehearsal\\20260518023210985-55780-3e343cfc.stderr.log",
+                      "outputRedactedTail":  [
+                                                 "FlowChain no-secret scan status: passed",
+                                                 "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json"
+                                             ]
+                  }
+              ],
+    "reportPaths":  {
+                        "ownerEnvReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-report.json",
+                        "publicDeploymentContract":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
+                        "externalTesterPacket":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-packet-report.json",
+                        "completionAudit":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-completion-audit-report.json",
+                        "truthTable":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\production-truth-table-report.json",
+                        "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json"
+                    },
+    "checks":  {
+                   "ownerEnvFilePathSafe":  true,
+                   "ownerEnvFileExists":  true,
+                   "ownerEnvFileIsFile":  true,
+                   "ownerEnvFileGitIgnored":  true,
+                   "stepsRan":  true,
+                   "stepCommandsSucceeded":  true,
+                   "noFailedSteps":  true,
+                   "missingEnvNamesEmpty":  false,
+                   "invalidEnvNamesEmpty":  true,
+                   "unknownMissingEnvNamesEmpty":  true,
+                   "blockedOnlyOnKnownOwnerInputs":  true,
+                   "ownerEnvReady":  false,
+                   "publicDeploymentReady":  false,
+                   "testerPacketShareable":  false,
+                   "completionReady":  false,
+                   "truthTableCompleted":  true,
+                   "noSecretScanPassed":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "nextCommands":  [
+                         "npm run flowchain:owner-env:readiness -- -AllowBlocked",
+                         "npm run flowchain:public-deployment:contract -- -AllowBlocked",
+                         "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
+                         "npm run flowchain:truth-table -- -AllowBlocked"
+                     ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.external_tester_connect_pack.v0",
-    "generatedAt":  "2026-05-18T03:25:35.2353631Z",
+    "generatedAt":  "2026-05-18T07:39:14.7635105Z",
     "status":  "blocked",
     "shareable":  false,
     "network":  {
@@ -16,9 +16,9 @@
                                        }
                 },
     "currentEvidence":  {
-                            "latestHeight":  "64687",
-                            "finalizedHeight":  "64687",
-                            "latestHash":  "0xcc315e297224403b38dfbcb169f4507e5f82d6fd8fdc9e94a4ac02416e2a5ff1",
+                            "latestHeight":  "67611",
+                            "finalizedHeight":  "67611",
+                            "latestHash":  "0x3b9089c7d3515f58f126cbeeda03b3556a7d1f987d4cd8712cf10fd1873a6f0d",
                             "localTesterRehearsalReady":  true,
                             "externalSharingReady":  false,
                             "packetExecutableSmokeValidated":  true,
@@ -63,9 +63,6 @@
                              "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                              "FLOWCHAIN_RPC_TLS_TERMINATED",
                              "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
-                             "FLOWCHAIN_TESTER_WRITE_ENABLED",
-                             "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
-                             "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
                              "FLOWCHAIN_PILOT_OPERATOR_ACK",
                              "FLOWCHAIN_BASE8453_RPC_URL",
                              "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -74,7 +71,10 @@
                              "FLOWCHAIN_BASE8453_FROM_BLOCK",
                              "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                              "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-                             "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                             "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                             "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                             "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                             "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
                          ],
     "broadcasts":  false,
     "envValuesPrinted":  false,

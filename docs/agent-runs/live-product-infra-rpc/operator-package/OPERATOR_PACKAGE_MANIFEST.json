@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-18T07:12:27.1402408Z",
+    "generatedAt":  "2026-05-18T07:33:05.6605351Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -71,6 +71,7 @@
                             "flowchain:external-tester:packet:validate",
                             "flowchain:tester:token:setup",
                             "flowchain:dashboard:ui:readiness",
+                            "flowchain:live:cutover:rehearsal",
                             "flowchain:operator:package:verify",
                             "flowchain:completion:audit",
                             "flowchain:truth-table",
@@ -273,6 +274,11 @@
                               "purpose":  "Run desktop and mobile browser verification for tester wallet create, faucet, send, and Explorer inspection."
                           },
                           {
+                              "phase":  "cutover",
+                              "command":  "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
+                              "purpose":  "Run owner-env, public deployment, tester packet, completion, truth table, and no-secret gates as one redacted rehearsal."
+                          },
+                          {
                               "phase":  "release",
                               "command":  "npm run flowchain:operator:package:verify",
                               "purpose":  "Verify the generated operator package contents and no-secret boundary."
@@ -458,6 +464,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET_VALIDATION.md",
                          "destination":  "runbooks/EXTERNAL_TESTER_PACKET_VALIDATION.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/LIVE_CUTOVER_REHEARSAL.md",
+                         "destination":  "runbooks/LIVE_CUTOVER_REHEARSAL.md",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"
@@ -684,6 +697,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json",
                          "destination":  "evidence/dashboard-ui-readiness-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json",
+                         "destination":  "evidence/live-cutover-rehearsal-report.json",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"

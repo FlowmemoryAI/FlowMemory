@@ -1546,6 +1546,47 @@ $definitions = @(
         ownerInputGate = $true
     },
     [ordered]@{
+        id = "live-cutover-rehearsal"
+        requirement = "Live cutover rehearsal runs owner-env, public deployment, tester packet, completion, truth table, and no-secret gates through one redacted command and blocks only on known owner inputs before external sharing."
+        path = "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json"
+        command = "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked"
+        productionGate = $true
+        ownerInputGate = $true
+        requiredChecks = @(
+            "ownerEnvFilePathSafe",
+            "ownerEnvFileExists",
+            "ownerEnvFileIsFile",
+            "ownerEnvFileGitIgnored",
+            "stepsRan",
+            "stepCommandsSucceeded",
+            "noFailedSteps",
+            "missingEnvNamesEmpty",
+            "invalidEnvNamesEmpty",
+            "unknownMissingEnvNamesEmpty",
+            "ownerEnvReady",
+            "publicDeploymentReady",
+            "testerPacketShareable",
+            "completionReady",
+            "truthTableCompleted",
+            "noSecretScanPassed",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "invalidEnvNames",
+            "unknownMissingEnvNames"
+        )
+        requiredReportProperties = [ordered]@{
+            "blockedOnlyOnKnownExternalOwnerInputs" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+        staleIfOlderThan = @("owner-env-readiness", "public-deployment-contract", "external-tester-packet", "completion-audit")
+    },
+    [ordered]@{
         id = "architecture-audit"
         requirement = "System architecture audit covers local runtime, public RPC, backup, bridge, tester, and no-secret gates."
         path = "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"

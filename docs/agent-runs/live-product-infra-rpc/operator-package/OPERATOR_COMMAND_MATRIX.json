@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-18T07:12:27.1402408Z",
+    "generatedAt":  "2026-05-18T07:33:05.6605351Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -196,6 +196,11 @@
                          "phase":  "testers",
                          "command":  "npm run flowchain:dashboard:ui:readiness",
                          "purpose":  "Run desktop and mobile browser verification for tester wallet create, faucet, send, and Explorer inspection."
+                     },
+                     {
+                         "phase":  "cutover",
+                         "command":  "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
+                         "purpose":  "Run owner-env, public deployment, tester packet, completion, truth table, and no-secret gates as one redacted rehearsal."
                      },
                      {
                          "phase":  "release",

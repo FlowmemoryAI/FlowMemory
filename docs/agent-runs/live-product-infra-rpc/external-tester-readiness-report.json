@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.external_tester_readiness_report.v0",
-    "generatedAt":  "2026-05-18T03:25:32.9749627Z",
+    "generatedAt":  "2026-05-18T07:39:12.4671164Z",
     "status":  "blocked",
     "localTesterRehearsalReady":  true,
     "externalSharingReady":  false,
@@ -15,14 +15,14 @@
                    "publicTesterGatewayFaucetRouteValidated":  true,
                    "liveInfraReady":  false
                },
-    "latestHeight":  "64687",
+    "latestHeight":  "67611",
     "stateFileLastWriteAgeSeconds":  4,
     "testerNetwork":  {
                           "status":  "passed",
-                          "generatedAt":  "2026-05-18T03:19:34.0973960Z",
+                          "generatedAt":  "2026-05-18T07:30:23.3484381Z",
                           "testerCount":  4,
-                          "chainBeforeBlock":  "64622",
-                          "chainAfterBlock":  "64639",
+                          "chainBeforeBlock":  "67506",
+                          "chainAfterBlock":  "67522",
                           "walletCreateCount":  4,
                           "transferCount":  4,
                           "packetExecutableSmokeValidated":  true,
@@ -50,7 +50,7 @@
                       },
     "publicTesterGateway":  {
                                 "status":  "passed",
-                                "generatedAt":  "2026-05-18T03:21:21.8125522Z",
+                                "generatedAt":  "2026-05-18T07:31:58.8517091Z",
                                 "fresh":  true,
                                 "ready":  true,
                                 "maxSendUnits":  "10",
@@ -75,9 +75,6 @@
                             "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                             "FLOWCHAIN_RPC_TLS_TERMINATED",
                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
-                            "FLOWCHAIN_TESTER_WRITE_ENABLED",
-                            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
-                            "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
                             "FLOWCHAIN_PILOT_OPERATOR_ACK",
                             "FLOWCHAIN_BASE8453_RPC_URL",
                             "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -86,7 +83,10 @@
                             "FLOWCHAIN_BASE8453_FROM_BLOCK",
                             "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                             "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-                            "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                            "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                            "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                            "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
                         ],
     "reportPaths":  {
                         "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
@@ -135,7 +135,7 @@
                                                         "",
                                                         "FlowChain live infra status: blocked",
                                                         "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-infra-check-report.json",
-                                                        "Missing env names: FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_TESTER_WRITE_ENABLED, FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256, FLOWCHAIN_TESTER_MAX_SEND_UNITS, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                                        "Missing env names: FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS"
                                                     ],
                     "testerNetworkRefreshPerformed":  false,
                     "testerNetworkFreshBeforeRefresh":  true,
