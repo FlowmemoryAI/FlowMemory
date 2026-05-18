@@ -176,6 +176,7 @@ function Test-RenderedDeployment {
         renderedWindowsPreflightWritten = Test-Path -LiteralPath $renderedWindowsPreflightPath
         renderedReportWritten = Test-Path -LiteralPath $renderedReportPath
         renderedReportPassed = $null -ne $renderReport -and [string](Get-DeployProp -Object $renderReport -Name "status" -Default "missing") -eq "passed"
+        renderedReportAllowedOriginCountPresent = $null -ne $renderReport -and [int](Get-DeployProp -Object $renderReport -Name "allowedOriginCount" -Default 0) -ge 1
         renderedFilesHaveNoPlaceholders = $renderedAllText -notmatch "<FLOWCHAIN_|<PATH_TO_"
         renderedFilesKeepPrivateOrigin = $renderedAllText.Contains("127.0.0.1:8787")
         renderedNginxHasTls = $renderedAllText.Contains("ssl_certificate ") -and $renderedAllText.Contains("ssl_certificate_key ")
@@ -263,7 +264,7 @@ function New-ValidationOwnerInputs {
     $tokenHash = "0000000000000000000000000000000000000000000000000000000000000000"
     Set-Content -LiteralPath $ownerEnvPath -Value (@(
         "FLOWCHAIN_RPC_PUBLIC_URL=https://rpc.flowchain.example",
-        "FLOWCHAIN_RPC_ALLOWED_ORIGINS=https://wallet.flowchain.example",
+        "FLOWCHAIN_RPC_ALLOWED_ORIGINS=https://wallet.flowchain.example,https://dashboard.flowchain.example",
         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE=60",
         "FLOWCHAIN_RPC_TLS_TERMINATED=true",
         "FLOWCHAIN_RPC_STATE_BACKUP_PATH=$backupDir",

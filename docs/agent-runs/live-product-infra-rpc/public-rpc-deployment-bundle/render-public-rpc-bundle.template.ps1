@@ -76,6 +76,38 @@ function Get-FlowChainEnvValue {
     throw "$Name is required in the owner env file or current process environment."
 }
 
+function Get-AllowedHttpsOrigins {
+    param([Parameter(Mandatory = $true)][string] $Value)
+
+    $origins = New-Object System.Collections.ArrayList
+    foreach ($rawOrigin in @($Value.Split(","))) {
+        $origin = $rawOrigin.Trim().TrimEnd("/")
+        if ([string]::IsNullOrWhiteSpace($origin)) {
+            continue
+        }
+        if ($origin -eq "*") {
+            throw "FLOWCHAIN_RPC_ALLOWED_ORIGINS must contain only exact https origins, never wildcard origins."
+        }
+        [System.Uri] $uri = $null
+        if (-not [System.Uri]::TryCreate($origin, [System.UriKind]::Absolute, [ref]$uri) `
+            -or $uri.Scheme -ne "https" `
+            -or [string]::IsNullOrWhiteSpace($uri.Host) `
+            -or -not [string]::IsNullOrWhiteSpace($uri.Query) `
+            -or -not [string]::IsNullOrWhiteSpace($uri.Fragment) `
+            -or -not [string]::IsNullOrWhiteSpace($uri.UserInfo) `
+            -or $uri.AbsolutePath -ne "/") {
+            throw "FLOWCHAIN_RPC_ALLOWED_ORIGINS must contain only exact https origins without paths, query strings, fragments, or credentials."
+        }
+        if (-not $origins.Contains($origin)) {
+            [void]$origins.Add($origin)
+        }
+    }
+    if ($origins.Count -lt 1) {
+        throw "FLOWCHAIN_RPC_ALLOWED_ORIGINS must contain at least one exact https origin."
+    }
+    return @($origins)
+}
+
 function Get-RequiredParameter {
     param(
         [Parameter(Mandatory = $true)][string] $Name,
@@ -137,10 +169,7 @@ if (-not $publicUrl.StartsWith("https://", [System.StringComparison]::OrdinalIgn
     throw "FLOWCHAIN_RPC_PUBLIC_URL must be https before rendering public RPC files."
 }
 $publicUri = [System.Uri] $publicUrl
-$allowedOrigins = @((Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_ALLOWED_ORIGINS").Split(",") | ForEach-Object { $_.Trim() } | Where-Object { $_.Length -gt 0 })
-if ($allowedOrigins.Count -lt 1 -or -not $allowedOrigins[0].StartsWith("https://", [System.StringComparison]::OrdinalIgnoreCase)) {
-    throw "FLOWCHAIN_RPC_ALLOWED_ORIGINS must contain at least one exact https origin."
-}
+$allowedOrigins = @(Get-AllowedHttpsOrigins -Value (Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_ALLOWED_ORIGINS"))
 $rateLimit = Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE"
 if ($rateLimit -notmatch '^[1-9][0-9]*$') {
     throw "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE must be a positive integer."
@@ -214,6 +243,7 @@ $report = [ordered]@{
         "nginx-preflight.ps1"
     )
     requiredEnvNames = $requiredEnvNames
+    allowedOriginCount = $allowedOrigins.Count
     renderDirInsideRepo = $false
     ownerEnvFileInsideRepo = $false
     envValuesPrinted = $false

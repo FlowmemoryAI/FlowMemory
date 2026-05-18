@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Automation
 
-Generated: 2026-05-17T23:18:42.5882507Z
+Generated: 2026-05-18T00:04:15.5277401Z
 Status: passed
 Action: Validate
 
@@ -28,6 +28,7 @@ This validator proves the owner-host public RPC deployment path can render concr
 - renderedWindowsPreflightWritten: True
 - renderedReportWritten: True
 - renderedReportPassed: True
+- renderedReportAllowedOriginCountPresent: True
 - renderedFilesHaveNoPlaceholders: True
 - renderedFilesKeepPrivateOrigin: True
 - renderedNginxHasTls: True

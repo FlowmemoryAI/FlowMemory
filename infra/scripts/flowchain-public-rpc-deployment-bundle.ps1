@@ -113,11 +113,14 @@ function Invoke-PublicRpcBundleRenderValidation {
         renderedSystemdUsesOwnerEnv = $false
         renderedPreflightsUsePublicUrl = $false
         renderedReportPassed = $false
+        renderedReportAllowedOriginCount = $false
         renderedReportKeepsOwnerPathsOutsideRepo = $false
         renderOutputDoesNotPrintTokenHash = $false
         renderedFilesDoNotContainTokenHash = $false
         renderedReportDoesNotContainTokenHash = $false
         renderedReportNoSecrets = $false
+        wildcardOriginRenderRejected = $false
+        wildcardOriginRenderOutputNoSecrets = $false
         cleanupAttempted = $false
         broadcastsFalse = $true
     }
@@ -129,7 +132,7 @@ function Invoke-PublicRpcBundleRenderValidation {
         Set-Content -LiteralPath $nginxExe -Value "dummy nginx path sentinel" -Encoding UTF8
         Set-Content -LiteralPath $ownerEnvFile -Value (@(
             "FLOWCHAIN_RPC_PUBLIC_URL=https://rpc.flowchain.example",
-            "FLOWCHAIN_RPC_ALLOWED_ORIGINS=https://wallet.flowchain.example",
+            "FLOWCHAIN_RPC_ALLOWED_ORIGINS=https://wallet.flowchain.example,https://dashboard.flowchain.example",
             "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE=60",
             "FLOWCHAIN_RPC_TLS_TERMINATED=true",
             "FLOWCHAIN_RPC_STATE_BACKUP_PATH=$backupDir",
@@ -200,11 +203,55 @@ function Invoke-PublicRpcBundleRenderValidation {
         if ($null -ne $renderReport) {
             $renderReportText = $renderReport | ConvertTo-Json -Depth 12
             $checks.renderedReportPassed = "$($renderReport.status)" -eq "passed"
+            $checks.renderedReportAllowedOriginCount = [int]$renderReport.allowedOriginCount -eq 2
             $checks.renderedReportKeepsOwnerPathsOutsideRepo = $renderReport.renderDirInsideRepo -eq $false -and $renderReport.ownerEnvFileInsideRepo -eq $false
             $checks.renderedReportDoesNotContainTokenHash = -not $renderReportText.Contains($safeTokenHash)
             Assert-FlowChainNoSecretText -Text $renderReportText -Label "public RPC owner render validation report"
             $checks.renderedReportNoSecrets = $true
         }
+
+        $wildcardOwnerEnvFile = Join-Path $tempRoot "owner-public-rpc-wildcard.env"
+        $wildcardRenderDir = Join-Path $tempRoot "wildcard-rendered"
+        New-Item -ItemType Directory -Force -Path $wildcardRenderDir | Out-Null
+        Set-Content -LiteralPath $wildcardOwnerEnvFile -Value (@(
+            "FLOWCHAIN_RPC_PUBLIC_URL=https://rpc.flowchain.example",
+            "FLOWCHAIN_RPC_ALLOWED_ORIGINS=https://wallet.flowchain.example,*",
+            "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE=60",
+            "FLOWCHAIN_RPC_TLS_TERMINATED=true",
+            "FLOWCHAIN_RPC_STATE_BACKUP_PATH=$backupDir",
+            "FLOWCHAIN_TESTER_WRITE_ENABLED=true",
+            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256=$safeTokenHash",
+            "FLOWCHAIN_TESTER_MAX_SEND_UNITS=10"
+        ) -join "`r`n") -Encoding UTF8
+        $previousErrorActionPreference = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+        try {
+            $wildcardRenderOutput = @(& powershell -NoProfile -ExecutionPolicy Bypass -File $renderScriptPath `
+                -BundleDir $BundleDir `
+                -RenderDir $wildcardRenderDir `
+                -OwnerEnvFile $wildcardOwnerEnvFile `
+                -RepoRoot $RepoRoot `
+                -ServiceUser "flowchain" `
+                -ServiceGroup "flowchain" `
+                -TlsCertificatePath $tlsCertPath `
+                -TlsCertificateKeyPath $tlsKeyPath `
+                -NginxExe $nginxExe 2>&1 | ForEach-Object { "$_" })
+            $wildcardRenderExitCode = $LASTEXITCODE
+            if ($null -eq $wildcardRenderExitCode) {
+                $wildcardRenderExitCode = 0
+            }
+        }
+        catch {
+            $wildcardRenderOutput = @($_.Exception.Message)
+            $wildcardRenderExitCode = 1
+        }
+        finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
+        $wildcardRenderOutputText = @($wildcardRenderOutput) -join "`n"
+        Assert-FlowChainNoSecretText -Text $wildcardRenderOutputText -Label "public RPC wildcard origin render output"
+        $checks.wildcardOriginRenderRejected = $wildcardRenderExitCode -ne 0
+        $checks.wildcardOriginRenderOutputNoSecrets = -not $wildcardRenderOutputText.Contains($safeTokenHash)
 
         Assert-FlowChainNoSecretText -Text $renderOutputText -Label "public RPC owner render output"
         Assert-FlowChainNoSecretText -Text $renderedAllText -Label "public RPC rendered owner files"
@@ -434,8 +481,10 @@ $renderScriptRequiredTokens = @(
     '[string] $RepoRoot = "<FLOWCHAIN_REPO_ABSOLUTE_PATH>"',
     'function Assert-NotInsideRepo',
     'function Get-FlowChainEnvValue',
+    'function Get-AllowedHttpsOrigins',
     'FLOWCHAIN_RPC_PUBLIC_URL',
     'FLOWCHAIN_RPC_ALLOWED_ORIGINS',
+    'FLOWCHAIN_RPC_ALLOWED_ORIGINS must contain only exact https origins',
     'FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE',
     'FLOWCHAIN_RPC_TLS_TERMINATED',
     'FLOWCHAIN_TESTER_WRITE_ENABLED',
@@ -447,6 +496,7 @@ $renderScriptRequiredTokens = @(
     'nginx-preflight.template.sh',
     'nginx-preflight.template.ps1',
     '<FLOWCHAIN_NGINX_WINDOWS_PREFLIGHT_SCRIPT>',
+    'allowedOriginCount = $allowedOrigins.Count',
     'envValuesPrinted = $false',
     'noSecrets = $true'
 )
@@ -777,6 +827,38 @@ function Get-FlowChainEnvValue {
     throw "$Name is required in the owner env file or current process environment."
 }
 
+function Get-AllowedHttpsOrigins {
+    param([Parameter(Mandatory = $true)][string] $Value)
+
+    $origins = New-Object System.Collections.ArrayList
+    foreach ($rawOrigin in @($Value.Split(","))) {
+        $origin = $rawOrigin.Trim().TrimEnd("/")
+        if ([string]::IsNullOrWhiteSpace($origin)) {
+            continue
+        }
+        if ($origin -eq "*") {
+            throw "FLOWCHAIN_RPC_ALLOWED_ORIGINS must contain only exact https origins, never wildcard origins."
+        }
+        [System.Uri] $uri = $null
+        if (-not [System.Uri]::TryCreate($origin, [System.UriKind]::Absolute, [ref]$uri) `
+            -or $uri.Scheme -ne "https" `
+            -or [string]::IsNullOrWhiteSpace($uri.Host) `
+            -or -not [string]::IsNullOrWhiteSpace($uri.Query) `
+            -or -not [string]::IsNullOrWhiteSpace($uri.Fragment) `
+            -or -not [string]::IsNullOrWhiteSpace($uri.UserInfo) `
+            -or $uri.AbsolutePath -ne "/") {
+            throw "FLOWCHAIN_RPC_ALLOWED_ORIGINS must contain only exact https origins without paths, query strings, fragments, or credentials."
+        }
+        if (-not $origins.Contains($origin)) {
+            [void]$origins.Add($origin)
+        }
+    }
+    if ($origins.Count -lt 1) {
+        throw "FLOWCHAIN_RPC_ALLOWED_ORIGINS must contain at least one exact https origin."
+    }
+    return @($origins)
+}
+
 function Get-RequiredParameter {
     param(
         [Parameter(Mandatory = $true)][string] $Name,
@@ -838,10 +920,7 @@ if (-not $publicUrl.StartsWith("https://", [System.StringComparison]::OrdinalIgn
     throw "FLOWCHAIN_RPC_PUBLIC_URL must be https before rendering public RPC files."
 }
 $publicUri = [System.Uri] $publicUrl
-$allowedOrigins = @((Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_ALLOWED_ORIGINS").Split(",") | ForEach-Object { $_.Trim() } | Where-Object { $_.Length -gt 0 })
-if ($allowedOrigins.Count -lt 1 -or -not $allowedOrigins[0].StartsWith("https://", [System.StringComparison]::OrdinalIgnoreCase)) {
-    throw "FLOWCHAIN_RPC_ALLOWED_ORIGINS must contain at least one exact https origin."
-}
+$allowedOrigins = @(Get-AllowedHttpsOrigins -Value (Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_ALLOWED_ORIGINS"))
 $rateLimit = Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE"
 if ($rateLimit -notmatch '^[1-9][0-9]*$') {
     throw "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE must be a positive integer."
@@ -915,6 +994,7 @@ $report = [ordered]@{
         "nginx-preflight.ps1"
     )
     requiredEnvNames = $requiredEnvNames
+    allowedOriginCount = $allowedOrigins.Count
     renderDirInsideRepo = $false
     ownerEnvFileInsideRepo = $false
     envValuesPrinted = $false
