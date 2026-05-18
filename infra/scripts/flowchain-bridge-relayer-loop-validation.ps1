@@ -123,6 +123,38 @@ function ConvertTo-RelayerLoopInt {
     return $Default
 }
 
+function Get-RelayerLoopSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 function Test-RelayerLoopValidationCommandLine {
     param([AllowNull()][string] $CommandLine)
 
@@ -335,6 +367,7 @@ try {
         noValidationRelayerProcessAfterStop = $validationRelayerProcessesAfterStop.Count -eq 0
         envValuesPrintedFalse = $true
         noSecrets = $true
+        secretMarkerFindingsEmpty = $true
         broadcastsFalse = $true
     }
     $failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
@@ -351,7 +384,7 @@ try {
     })
 
     $report = [ordered]@{
-        schema = "flowchain.bridge_relayer_loop_validation_report.v0"
+        schema = "flowchain.bridge_relayer_loop_validation_report.v1"
         generatedAt = (Get-Date).ToUniversalTime().ToString("o")
         status = $status
         statePath = $StatePath
@@ -365,6 +398,7 @@ try {
         settleSeconds = $SettleSeconds
         checks = $checks
         failedChecks = @($failedChecks)
+        secretMarkerFindings = @()
         reportPaths = [ordered]@{
             validation = $reportFullPath
             start = $startReportPath
@@ -398,6 +432,19 @@ try {
         noSecrets = $true
         broadcasts = $false
     }
+    $preliminaryReportText = $report | ConvertTo-Json -Depth 20
+    $secretMarkerFindings = @(
+        Get-RelayerLoopSecretMarkerFindings -Text $preliminaryReportText -Label "bridge relayer loop validation report"
+    )
+    $checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+    $checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+    $failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+    $status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+    $report["status"] = $status
+    $report["checks"] = $checks
+    $report["failedChecks"] = @($failedChecks)
+    $report["secretMarkerFindings"] = @($secretMarkerFindings)
+    $report["noSecrets"] = $secretMarkerFindings.Count -eq 0
     $reportText = $report | ConvertTo-Json -Depth 20
     Assert-FlowChainNoSecretText -Text $reportText -Label "bridge relayer loop validation report"
     Write-FlowChainJson -Path $reportFullPath -Value $report -Depth 20

@@ -1213,6 +1213,7 @@ $bridgeRelayerLoopValidation = $reports.bridgeRelayerLoopValidation
 $bridgeRelayerLoopValidationStatus = Get-ReportStatus -Report $bridgeRelayerLoopValidation
 $bridgeRelayerLoopChecks = Get-AuditProp -Object $bridgeRelayerLoopValidation -Name "checks"
 $bridgeRelayerLoopFailedChecks = @((Get-AuditProp -Object $bridgeRelayerLoopValidation -Name "failedChecks" -Default @()))
+$bridgeRelayerLoopSecretFindings = @((Get-AuditProp -Object $bridgeRelayerLoopValidation -Name "secretMarkerFindings" -Default @()))
 $bridgeRelayerLoopRequiredChecks = @(
     "startCommandPassed",
     "startReportWritten",
@@ -1242,13 +1243,19 @@ $bridgeRelayerLoopRequiredChecks = @(
     "noValidationRelayerProcessAfterStop",
     "envValuesPrintedFalse",
     "noSecrets",
+    "secretMarkerFindingsEmpty",
     "broadcastsFalse"
 )
 $bridgeRelayerLoopMissingChecks = @(Get-MissingAuditChecks -Checks $bridgeRelayerLoopChecks -Names $bridgeRelayerLoopRequiredChecks)
+$bridgeRelayerLoopFailedCheckCount = @($bridgeRelayerLoopFailedChecks | Where-Object { $null -ne $_ }).Count
+$bridgeRelayerLoopSecretFindingCount = @($bridgeRelayerLoopSecretFindings | Where-Object { $null -ne $_ }).Count
+$bridgeRelayerLoopMissingCheckCount = @($bridgeRelayerLoopMissingChecks | Where-Object { $null -ne $_ }).Count
 $bridgeRelayerLoopValidationPassed = $bridgeRelayerLoopValidationExitCode -eq 0 `
     -and $bridgeRelayerLoopValidationStatus -eq "passed" `
-    -and $bridgeRelayerLoopFailedChecks.Count -eq 0 `
-    -and $bridgeRelayerLoopMissingChecks.Count -eq 0 `
+    -and $bridgeRelayerLoopFailedCheckCount -eq 0 `
+    -and $bridgeRelayerLoopSecretFindingCount -eq 0 `
+    -and $bridgeRelayerLoopMissingCheckCount -eq 0 `
+    -and ((Get-AuditProp -Object $bridgeRelayerLoopChecks -Name "secretMarkerFindingsEmpty" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $bridgeRelayerLoopValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $bridgeRelayerLoopValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $bridgeRelayerLoopValidation -Name "broadcasts" -Default $true) -eq $false)
@@ -1831,7 +1838,7 @@ Add-AuditItem -Items $items -Id "bridge-relayer-guardrail-validation" `
 Add-AuditItem -Items $items -Id "bridge-relayer-loop-validation" `
     -Requirement "Bridge relayer loop validation proves isolated live-service loop start, fresh blocked-only-on-owner-input loop health, clean stop, PID-file cleanup, and no leftover validation relayer process." `
     -Status $(if ($bridgeRelayerLoopValidationPassed) { "passed" } else { "failed" }) `
-    -Evidence "loopStatus=$bridgeRelayerLoopValidationStatus, failedChecks=$($bridgeRelayerLoopFailedChecks.Count), missingChecks=$($bridgeRelayerLoopMissingChecks.Count), loopHealthy=$(Get-AuditProp -Object $bridgeRelayerLoopChecks -Name "statusRelayerReportHealthy" -Default $false), stopped=$(Get-AuditProp -Object $bridgeRelayerLoopChecks -Name "statusAfterStopNotRunning" -Default $false), report=$($paths.bridgeRelayerLoopValidation)" `
+    -Evidence "loopStatus=$bridgeRelayerLoopValidationStatus, failedChecks=$bridgeRelayerLoopFailedCheckCount, missingChecks=$bridgeRelayerLoopMissingCheckCount, secretFindings=$bridgeRelayerLoopSecretFindingCount, loopHealthy=$(Get-AuditProp -Object $bridgeRelayerLoopChecks -Name "statusRelayerReportHealthy" -Default $false), stopped=$(Get-AuditProp -Object $bridgeRelayerLoopChecks -Name "statusAfterStopNotRunning" -Default $false), report=$($paths.bridgeRelayerLoopValidation)" `
     -Commands @("npm run flowchain:bridge:relayer:loop:validate")
 
 Add-AuditItem -Items $items -Id "live-infra-aggregate-refresh" `

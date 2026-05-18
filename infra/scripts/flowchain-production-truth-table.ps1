@@ -828,10 +828,12 @@ $definitions = @(
             "noValidationRelayerProcessAfterStop",
             "envValuesPrintedFalse",
             "noSecrets",
+            "secretMarkerFindingsEmpty",
             "broadcastsFalse"
         )
         requiredEmptyArrays = @(
-            "failedChecks"
+            "failedChecks",
+            "secretMarkerFindings"
         )
         requiredReportProperties = [ordered]@{
             "envValuesPrinted" = $false
