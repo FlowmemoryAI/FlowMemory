@@ -63,6 +63,38 @@ function Get-AbuseProp {
     return $Default
 }
 
+function Get-AbuseSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 function ConvertTo-AbuseHeaderMap {
     param([AllowNull()][object] $Headers)
 
@@ -565,7 +597,6 @@ Add-AbuseCase -Id "response-hygiene" `
     -Evidence "findings=$(@($hygiene.findings).Count)"
 
 $failedCases = @($cases | Where-Object { $_.status -ne "passed" })
-$status = if ($failedCases.Count -eq 0 -and [string]::IsNullOrWhiteSpace($fatalError)) { "passed" } else { "failed" }
 $checks = [ordered]@{
     serverStarted = $serverStarted
     allowedOriginAccepted = @($cases | Where-Object { $_.id -eq "allowed-origin-health" -and $_.status -eq "passed" }).Count -eq 1
@@ -587,13 +618,20 @@ $checks = [ordered]@{
     notificationNoContent = @($cases | Where-Object { $_.id -eq "notification-no-content" -and $_.status -eq "passed" }).Count -eq 1
     rateLimitRejected = @($cases | Where-Object { $_.id -eq "rate-limit" -and $_.status -eq "passed" }).Count -eq 1
     responseHygienePassed = $hygiene.passed -eq $true
+    failedCasesAbsent = $failedCases.Count -eq 0
+    fatalErrorAbsent = [string]::IsNullOrWhiteSpace($fatalError)
+    secretMarkerFindingsEmpty = $true
+    envValuesPrintedFalse = $true
+    noSecrets = $hygiene.passed -eq $true
+    noLiveBroadcast = $true
+    broadcastsFalse = $true
 }
 
 $report = [ordered]@{
     schema = "flowchain.public_rpc_abuse_test_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = $status
-    abuseTestReady = $status -eq "passed"
+    status = "pending"
+    abuseTestReady = $false
     validationScope = "local-control-plane-public-rpc-abuse-harness"
     ownerValuesRequired = $false
     localOnly = $true
@@ -601,7 +639,8 @@ $report = [ordered]@{
     bodyLimitBytes = 262144
     batchLimit = 50
     checks = $checks
-    failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+    failedChecks = @()
+    secretMarkerFindings = @()
     caseCounts = [ordered]@{
         passed = @($cases | Where-Object { $_.status -eq "passed" }).Count
         failed = $failedCases.Count
@@ -618,9 +657,23 @@ $report = [ordered]@{
     fatalErrorCaptured = -not [string]::IsNullOrWhiteSpace($fatalError)
     fatalErrorMessage = if ([string]::IsNullOrWhiteSpace($fatalError)) { "" } else { $fatalError }
     noLiveBroadcast = $true
+    broadcasts = $false
     envValuesPrinted = $false
     noSecrets = $hygiene.passed -eq $true
 }
+
+$preliminaryReportText = $report | ConvertTo-Json -Depth 20
+$secretMarkerFindings = @(Get-AbuseSecretMarkerFindings -Text $preliminaryReportText -Label "public RPC abuse test report")
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = ($hygiene.passed -eq $true) -and ($secretMarkerFindings.Count -eq 0)
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["abuseTestReady"] = $status -eq "passed"
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = ($hygiene.passed -eq $true) -and ($secretMarkerFindings.Count -eq 0)
 
 $markdownLines = New-Object System.Collections.Generic.List[string]
 $markdownLines.Add("# FlowChain Public RPC Abuse Test")

@@ -487,6 +487,49 @@ $definitions = @(
         command = "npm run flowchain:public-rpc:abuse-test"
         productionGate = $true
         ownerInputGate = $false
+        requiredChecks = @(
+            "serverStarted",
+            "allowedOriginAccepted",
+            "disallowedOriginRejected",
+            "optionsPreflightPassed",
+            "unsupportedMediaTypeRejected",
+            "malformedJsonRejected",
+            "unknownMethodRejected",
+            "transactionSubmitRejected",
+            "bridgeObservationSubmitRejected",
+            "rawJsonGetRejected",
+            "devnetStateRejected",
+            "bridgeObservationPostAliasRejected",
+            "testerWriteGatewayFailsClosed",
+            "badParamsRejected",
+            "emptyBatchRejected",
+            "oversizedBatchRejected",
+            "oversizedBodyRejected",
+            "notificationNoContent",
+            "rateLimitRejected",
+            "responseHygienePassed",
+            "failedCasesAbsent",
+            "fatalErrorAbsent",
+            "secretMarkerFindingsEmpty",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "noLiveBroadcast",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "abuseTestReady" = $true
+            "ownerValuesRequired" = $false
+            "localOnly" = $true
+            "serverBoundToLocalhost" = $true
+            "noLiveBroadcast" = $true
+            "broadcasts" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+        }
     },
     [ordered]@{
         id = "public-rpc-deployment-bundle"

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_abuse_test_report.v0",
-    "generatedAt":  "2026-05-17T23:20:50.0829546Z",
+    "generatedAt":  "2026-05-18T05:37:05.4067915Z",
     "status":  "passed",
     "abuseTestReady":  true,
     "validationScope":  "local-control-plane-public-rpc-abuse-harness",
@@ -29,11 +29,21 @@
                    "oversizedBodyRejected":  true,
                    "notificationNoContent":  true,
                    "rateLimitRejected":  true,
-                   "responseHygienePassed":  true
+                   "responseHygienePassed":  true,
+                   "failedCasesAbsent":  true,
+                   "fatalErrorAbsent":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "noLiveBroadcast":  true,
+                   "broadcastsFalse":  true
                },
     "failedChecks":  [
 
                      ],
+    "secretMarkerFindings":  [
+
+                             ],
     "caseCounts":  {
                        "passed":  19,
                        "failed":  0,
@@ -398,6 +408,7 @@
     "fatalErrorCaptured":  false,
     "fatalErrorMessage":  "",
     "noLiveBroadcast":  true,
+    "broadcasts":  false,
     "envValuesPrinted":  false,
     "noSecrets":  true
 }

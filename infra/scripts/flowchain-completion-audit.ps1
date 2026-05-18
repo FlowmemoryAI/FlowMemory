@@ -1064,6 +1064,10 @@ $publicRpcValidationPassed = $publicRpcValidationExitCode -eq 0 `
 $publicRpcAbuseTestStatus = Get-ReportStatus -Report $publicRpcAbuseTest
 $publicRpcAbuseTestReady = Get-AuditProp -Object $publicRpcAbuseTest -Name "abuseTestReady" -Default $false
 $publicRpcAbuseTestChecks = Get-AuditProp -Object $publicRpcAbuseTest -Name "checks"
+$publicRpcAbuseFailedChecks = @((Get-AuditProp -Object $publicRpcAbuseTest -Name "failedChecks" -Default @()))
+$publicRpcAbuseSecretFindings = @((Get-AuditProp -Object $publicRpcAbuseTest -Name "secretMarkerFindings" -Default @()))
+$publicRpcAbuseFailedCheckCount = $publicRpcAbuseFailedChecks.Count
+$publicRpcAbuseSecretFindingCount = $publicRpcAbuseSecretFindings.Count
 $publicRpcAbuseRequiredChecks = @(
     "serverStarted",
     "allowedOriginAccepted",
@@ -1075,6 +1079,7 @@ $publicRpcAbuseRequiredChecks = @(
     "transactionSubmitRejected",
     "bridgeObservationSubmitRejected",
     "rawJsonGetRejected",
+    "devnetStateRejected",
     "bridgeObservationPostAliasRejected",
     "testerWriteGatewayFailsClosed",
     "badParamsRejected",
@@ -1083,15 +1088,25 @@ $publicRpcAbuseRequiredChecks = @(
     "oversizedBodyRejected",
     "notificationNoContent",
     "rateLimitRejected",
-    "responseHygienePassed"
+    "responseHygienePassed",
+    "failedCasesAbsent",
+    "fatalErrorAbsent",
+    "secretMarkerFindingsEmpty",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "noLiveBroadcast",
+    "broadcastsFalse"
 )
 $publicRpcAbuseMissingChecks = @($publicRpcAbuseRequiredChecks | Where-Object { (Get-AuditProp -Object $publicRpcAbuseTestChecks -Name $_ -Default $false) -ne $true })
 $publicRpcAbuseTestPassed = $publicRpcAbuseTestExitCode -eq 0 `
     -and $publicRpcAbuseTestStatus -eq "passed" `
     -and $publicRpcAbuseTestReady -eq $true `
+    -and $publicRpcAbuseFailedCheckCount -eq 0 `
+    -and $publicRpcAbuseSecretFindingCount -eq 0 `
     -and $publicRpcAbuseMissingChecks.Count -eq 0 `
     -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "ownerValuesRequired" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "noLiveBroadcast" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "broadcasts" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "noSecrets" -Default $false) -eq $true)
 $publicTesterGatewayStatus = Get-ReportStatus -Report $publicTesterGateway
@@ -1839,7 +1854,7 @@ Add-AuditItem -Items $items -Id "public-rpc-readiness-validator-self-test" `
 Add-AuditItem -Items $items -Id "public-rpc-abuse-test" `
     -Requirement "Public RPC abuse harness proves CORS rejection, media-type rejection, parse-error handling, method/params failure envelopes, batch/body caps, notification 204 handling, rate limiting, and no-secret response summaries." `
     -Status $(if ($publicRpcAbuseTestPassed) { "passed" } else { "failed" }) `
-    -Evidence "abuseStatus=$publicRpcAbuseTestStatus, abuseReady=$publicRpcAbuseTestReady, missingChecks=$($publicRpcAbuseMissingChecks.Count), report=$($paths.publicRpcAbuseTest)" `
+    -Evidence "abuseStatus=$publicRpcAbuseTestStatus, abuseReady=$publicRpcAbuseTestReady, failedChecks=$publicRpcAbuseFailedCheckCount, secretFindings=$publicRpcAbuseSecretFindingCount, missingChecks=$($publicRpcAbuseMissingChecks.Count), report=$($paths.publicRpcAbuseTest)" `
     -Commands @("npm run flowchain:public-rpc:abuse-test")
 
 Add-AuditItem -Items $items -Id "public-tester-gateway-e2e" `
