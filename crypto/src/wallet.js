@@ -20,16 +20,21 @@ import {
 const VAULT_SCHEMA = "flowmemory.crypto.local-test-vault.v0";
 const VAULT_SECRETS_SCHEMA = "flowmemory.crypto.local-test-vault-secrets.v0";
 const PUBLIC_EXPORT_SCHEMA = "flowmemory.crypto.local-test-vault-public-metadata.v0";
+export const LOCAL_WALLET_PUBLIC_METADATA_SCHEMA = "flowchain.local_wallet_public_metadata.v0";
+export const LOCAL_WALLET_KEY_SCHEME = "secp256k1";
+export const DEFAULT_LOCAL_WALLET_CHAIN_ID = "31337";
 
 export function createEncryptedTestVault({
   password,
   label = "local-operator",
   signerRole = "operator",
   createdAtUnixMs = Date.now().toString(),
-  privateKey
+  privateKey,
+  chainId = DEFAULT_LOCAL_WALLET_CHAIN_ID,
+  lastKnownNonce = "0"
 } = {}) {
   requirePassword(password);
-  const account = createVaultAccount({ label, signerRole, createdAtUnixMs, privateKey });
+  const account = createVaultAccount({ label, signerRole, createdAtUnixMs, privateKey, chainId, lastKnownNonce });
   return encryptVaultSecrets({
     password,
     publicAccounts: [publicAccount(account)],
@@ -67,6 +72,52 @@ export function exportVaultPublicMetadata(vaultOrSession) {
   };
 }
 
+export function exportLocalWalletPublicMetadata(vaultOrSession, {
+  updatedAtUnixMs = Date.now().toString()
+} = {}) {
+  return {
+    schema: LOCAL_WALLET_PUBLIC_METADATA_SCHEMA,
+    vaultId: vaultOrSession.vaultId,
+    createdAtUnixMs: vaultOrSession.createdAtUnixMs,
+    updatedAtUnixMs: String(updatedAtUnixMs),
+    accounts: listVaultPublicAccounts(vaultOrSession).map(localWalletPublicAccount),
+    boundary: "Public local wallet metadata only. Signing material, vault encryption payloads, credentials, and webhooks are excluded."
+  };
+}
+
+export function validateLocalWalletPublicMetadata(metadata, { expectedChainId } = {}) {
+  const errors = [];
+  if (!metadata || typeof metadata !== "object") {
+    return verificationResult({ errors: ["metadata-not-object"], metadata });
+  }
+  if (metadata.schema !== LOCAL_WALLET_PUBLIC_METADATA_SCHEMA) {
+    errors.push("wrong-schema");
+  }
+  if (containsSecretMaterial(metadata)) {
+    errors.push("secret-material");
+  }
+  if (!isHex32(metadata.vaultId)) {
+    errors.push("bad-vault-id");
+  }
+  if (!isUintString(metadata.createdAtUnixMs) || !isUintString(metadata.updatedAtUnixMs)) {
+    errors.push("bad-time");
+  }
+  if (!Array.isArray(metadata.accounts) || metadata.accounts.length === 0) {
+    errors.push("missing-accounts");
+  }
+
+  let chainIdMatch = true;
+  for (const account of metadata.accounts ?? []) {
+    const accountErrors = validateLocalWalletPublicAccount(account, { expectedChainId });
+    for (const error of accountErrors.errors) {
+      errors.push(error);
+    }
+    chainIdMatch = chainIdMatch && accountErrors.chainIdMatch;
+  }
+
+  return verificationResult({ errors, metadata, chainIdMatch });
+}
+
 export function addEncryptedTestVaultAccount({
   vault,
   password,
@@ -74,10 +125,20 @@ export function addEncryptedTestVaultAccount({
   signerRole = "agent",
   createdAtUnixMs = Date.now().toString(),
   privateKey,
-  signerId
+  signerId,
+  chainId = vault.publicAccounts?.[0]?.chainId ?? DEFAULT_LOCAL_WALLET_CHAIN_ID,
+  lastKnownNonce = "0"
 }) {
   const secrets = decryptVaultSecrets({ vault, password });
-  const account = createVaultAccount({ label, signerRole, createdAtUnixMs, privateKey, signerId });
+  const account = createVaultAccount({
+    label,
+    signerRole,
+    createdAtUnixMs,
+    privateKey,
+    signerId,
+    chainId,
+    lastKnownNonce
+  });
   const accounts = [...secrets.accounts, account];
   return encryptVaultSecrets({
     password,
@@ -97,7 +158,8 @@ export function rotateEncryptedTestVaultAccount({
   signerKeyId,
   label,
   createdAtUnixMs = Date.now().toString(),
-  privateKey
+  privateKey,
+  chainId
 }) {
   const secrets = decryptVaultSecrets({ vault, password });
   const index = secrets.accounts.findIndex((account) => account.signerKeyId === signerKeyId);
@@ -112,6 +174,8 @@ export function rotateEncryptedTestVaultAccount({
     createdAtUnixMs,
     privateKey,
     signerId: previous.signerId,
+    chainId: chainId ?? previous.chainId ?? DEFAULT_LOCAL_WALLET_CHAIN_ID,
+    lastKnownNonce: previous.lastKnownNonce ?? "0",
     rotatedFromSignerKeyId: previous.signerKeyId
   });
   const accounts = [...secrets.accounts.slice(0, index), previous, replacement, ...secrets.accounts.slice(index + 1)];
@@ -247,10 +311,18 @@ function createVaultAccount({
   createdAtUnixMs,
   privateKey = randomPrivateKey(),
   signerId,
-  rotatedFromSignerKeyId
+  rotatedFromSignerKeyId,
+  chainId = DEFAULT_LOCAL_WALLET_CHAIN_ID,
+  lastKnownNonce = "0"
 }) {
   if (LOCAL_ALPHA_SIGNER_ROLES[signerRole] === undefined) {
     throw new Error(`unsupported signer role: ${signerRole}`);
+  }
+  if (!isUintString(String(chainId))) {
+    throw new Error(`unsupported wallet chain id: ${chainId}`);
+  }
+  if (!isUintString(String(lastKnownNonce))) {
+    throw new Error(`invalid wallet last known nonce: ${lastKnownNonce}`);
   }
   const publicKey = publicKeyFromPrivateKey(privateKey);
   const productionRole = isFlowchainRole(signerRole) ? signerRole : "user";
@@ -260,20 +332,36 @@ function createVaultAccount({
     label,
     createdAtUnixMs
   });
+  const publicKeyHash = keccakUtf8(publicKey);
+  const derivedSignerId = keccakUtf8(`flowchain.local-alpha.signer:${publicKey}`);
+  const effectiveSignerId = signerId ?? derivedSignerId;
+  if (!isHex32(effectiveSignerId)) {
+    throw new Error(`invalid signer id: ${effectiveSignerId}`);
+  }
   const account = {
     label,
+    accountId: effectiveSignerId,
+    address: effectiveSignerId,
     signerRole,
     signerRoleCode: LOCAL_ALPHA_SIGNER_ROLES[signerRole],
-    signerId: signerId ?? (isFlowchainRole(signerRole) ? flowchainAccountId({ publicKey, role: signerRole }) : keccakUtf8(`flowchain.local-alpha.signer:${publicKey}`)),
-    signerKeyId: isFlowchainRole(signerRole) ? flowchainSignerKeyId({ publicKey }) : keccakUtf8(`flowchain.local-alpha.signer-key:${publicKey}`),
-    publicKey: publicMetadata.publicKey,
-    publicKeyHash: publicMetadata.publicKeyHash,
+    signerId: effectiveSignerId,
+    signerKeyId: keccakUtf8(`flowchain.local-alpha.signer-key:${publicKey}`),
+    publicKey,
+    publicKeyHash,
+    flowchainPublicKey: publicMetadata.publicKey,
+    flowchainPublicKeyHash: publicMetadata.publicKeyHash,
     publicKeyEncoding: publicMetadata.publicKeyEncoding,
-    address: flowchainAddressFromPublicKey(publicKey),
-    accountId: publicMetadata.accountId,
+    flowchainAddress: publicMetadata.address,
+    flowchainAccountId: publicMetadata.accountId,
+    flowchainSignerKeyId: publicMetadata.signerKeyId,
     accountRole: publicMetadata.role,
     accountRoleCode: publicMetadata.roleCode,
+    keyScheme: LOCAL_WALLET_KEY_SCHEME,
+    chainId: String(chainId),
+    lastKnownNonce: String(lastKnownNonce),
+    nextNonce: nextNonce(lastKnownNonce),
     createdAtUnixMs,
+    status: "active",
     active: true,
     privateKey
   };
@@ -289,6 +377,28 @@ function publicAccount(account) {
     ...metadata
   } = account;
   return metadata;
+}
+
+function localWalletPublicAccount(account) {
+  return {
+    accountId: account.accountId ?? account.signerId,
+    address: account.address ?? account.signerId,
+    signerId: account.signerId,
+    signerKeyId: account.signerKeyId,
+    signerRole: account.signerRole,
+    signerRoleCode: account.signerRoleCode,
+    publicKey: account.publicKey,
+    publicKeyHash: account.publicKeyHash,
+    keyScheme: account.keyScheme ?? LOCAL_WALLET_KEY_SCHEME,
+    label: account.label,
+    status: account.active === false ? "rotated" : (account.status ?? "active"),
+    active: account.active !== false,
+    createdAtUnixMs: account.createdAtUnixMs,
+    chainId: String(account.chainId ?? DEFAULT_LOCAL_WALLET_CHAIN_ID),
+    lastKnownNonce: String(account.lastKnownNonce ?? "0"),
+    nextNonce: String(account.nextNonce ?? nextNonce(account.lastKnownNonce ?? "0")),
+    rotatedFromSignerKeyId: account.rotatedFromSignerKeyId
+  };
 }
 
 function randomPrivateKey() {
@@ -311,4 +421,74 @@ function requirePassword(password) {
   if (typeof password !== "string" || password.length < 8) {
     throw new Error("local test vault password must be at least 8 characters");
   }
+}
+
+function validateLocalWalletPublicAccount(account, { expectedChainId } = {}) {
+  const errors = [];
+  let chainIdMatch = true;
+  if (!account || typeof account !== "object") {
+    return { errors: ["bad-account"], chainIdMatch: false };
+  }
+  if (!isHex32(account.accountId) || !isHex32(account.address) || !isHex32(account.signerId) || !isHex32(account.signerKeyId)) {
+    errors.push("bad-account-id");
+  }
+  if (account.accountId !== account.signerId || account.address !== account.signerId) {
+    errors.push("address-mismatch");
+  }
+  if (account.keyScheme !== LOCAL_WALLET_KEY_SCHEME) {
+    errors.push("bad-key-scheme");
+  }
+  if (LOCAL_ALPHA_SIGNER_ROLES[account.signerRole] !== account.signerRoleCode) {
+    errors.push("bad-signer-role");
+  }
+  if (!isPublicKey(account.publicKey)) {
+    errors.push("malformed-public-key");
+  } else {
+    const signerId = keccakUtf8(`flowchain.local-alpha.signer:${account.publicKey}`);
+    const signerKeyId = keccakUtf8(`flowchain.local-alpha.signer-key:${account.publicKey}`);
+    if (account.signerId !== signerId || account.signerKeyId !== signerKeyId) {
+      errors.push("public-key-mismatch");
+    }
+  }
+  if (!isUintString(account.createdAtUnixMs) || !isUintString(account.chainId) || !isUintString(account.lastKnownNonce) || !isUintString(account.nextNonce)) {
+    errors.push("bad-account-metadata");
+  }
+  if (expectedChainId !== undefined && String(account.chainId) !== String(expectedChainId)) {
+    chainIdMatch = false;
+    errors.push("wrong-chain-id");
+  }
+  return { errors, chainIdMatch };
+}
+
+function verificationResult({ errors, metadata, chainIdMatch = errors.length === 0 }) {
+  return {
+    schema: "flowchain.local_wallet_public_metadata_verification.v0",
+    valid: errors.length === 0,
+    secretFree: !containsSecretMaterial(metadata),
+    chainIdMatch,
+    accountCount: Array.isArray(metadata?.accounts) ? metadata.accounts.length : 0,
+    errors: [...new Set(errors)]
+  };
+}
+
+function containsSecretMaterial(value) {
+  const serialized = JSON.stringify(value);
+  return /"(privateKey|private_key|seedPhrase|mnemonic|ciphertext|authTag|password|rpcUrl|rpc_url|apiKey|api_key|webhookUrl|webhook_url)"\s*:/i.test(serialized) ||
+    /https:\/\/hooks\.slack\.com|https:\/\/discord\.com\/api\/webhooks|BEGIN RSA PRIVATE KEY|BEGIN OPENSSH PRIVATE KEY/i.test(serialized);
+}
+
+function isHex32(value) {
+  return typeof value === "string" && /^0x[0-9a-fA-F]{64}$/.test(value);
+}
+
+function isPublicKey(value) {
+  return typeof value === "string" && /^0x([0-9a-fA-F]{66}|[0-9a-fA-F]{130})$/.test(value);
+}
+
+function isUintString(value) {
+  return typeof value === "string" && /^[0-9]+$/.test(value);
+}
+
+function nextNonce(value) {
+  return (BigInt(value) + 1n).toString();
 }
