@@ -156,13 +156,7 @@ contract FlowChainSettlementSpineTest {
         spine.setSubmitterAuthorization(address(submitter), true);
 
         uint64 sequence = submitter.commitObject(
-            spine,
-            bridgeDepositObject,
-            objectId,
-            keccak256("rootfield.bridge"),
-            keccak256("commitment"),
-            bytes32(0),
-            ""
+            spine, bridgeDepositObject, objectId, keccak256("rootfield.bridge"), keccak256("commitment"), bytes32(0), ""
         );
         _assertTrue(sequence == 1);
 
@@ -209,12 +203,7 @@ contract FlowChainSettlementSpineTest {
 
         vm.expectRevert(FlowChainSettlementSpine.ZeroObjectId.selector);
         spine.commitObject(
-            bridgeDepositObject,
-            bytes32(0),
-            keccak256("rootfield.bridge"),
-            keccak256("commitment"),
-            bytes32(0),
-            ""
+            bridgeDepositObject, bytes32(0), keccak256("rootfield.bridge"), keccak256("commitment"), bytes32(0), ""
         );
 
         vm.expectRevert(FlowChainSettlementSpine.ZeroRootfieldId.selector);
@@ -239,22 +228,12 @@ contract FlowChainSettlementSpineTest {
 
         bytes32 objectId = keccak256("bridge.deposit.duplicate");
         spine.commitObject(
-            bridgeDepositObject,
-            objectId,
-            keccak256("rootfield.bridge"),
-            keccak256("commitment"),
-            bytes32(0),
-            ""
+            bridgeDepositObject, objectId, keccak256("rootfield.bridge"), keccak256("commitment"), bytes32(0), ""
         );
 
         vm.expectRevert(abi.encodeWithSelector(FlowChainSettlementSpine.ObjectAlreadyCommitted.selector, objectId));
         spine.commitObject(
-            bridgeDepositObject,
-            objectId,
-            keccak256("rootfield.bridge"),
-            keccak256("commitment.2"),
-            bytes32(0),
-            ""
+            bridgeDepositObject, objectId, keccak256("rootfield.bridge"), keccak256("commitment.2"), bytes32(0), ""
         );
     }
 

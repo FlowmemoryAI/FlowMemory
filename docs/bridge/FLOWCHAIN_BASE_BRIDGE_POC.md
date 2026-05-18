@@ -98,9 +98,9 @@ is the exact file for the runtime/control-plane to consume.
   locked amount, allowlist disablement, authority rotation, and explicit
   release/recovery calls. This is why the lockbox is only suitable for a tiny
   capped pilot.
-- Native release boundary: `releaseNative` uses Solidity `transfer`; use simple
-  EOA or plain `receive` recipients for pilot recovery unless a smart-contract
-  recipient has been separately reviewed.
+- Native release boundary: `releaseNative` uses an explicit native value call
+  after recording release state and under `nonReentrant`; use simple EOA or
+  reviewed smart-contract recipients for pilot recovery.
 - Token boundary: use plain ERC-20s for rehearsal and only explicitly approved
   assets for the Base `8453` pilot. Fee-on-transfer, rebasing, callback-heavy,
   or otherwise nonstandard assets are outside the pilot safety claim.
@@ -111,7 +111,7 @@ is the exact file for the runtime/control-plane to consume.
 npm install
 npm run bridge:mock
 npm run bridge:test
-npm run bridge:local-credit:smoke
+npm run flowchain:bridge:local-credit:smoke
 npm run flowchain:real-value-pilot:bridge
 ```
 
@@ -124,7 +124,7 @@ services/bridge-relayer/out/bridge-runtime-handoff.json
 fixtures/bridge/local-runtime-bridge-handoff.json
 ```
 
-The real-value pilot mock E2E uses Base chain ID `8453` fixture data without
+The real-value pilot deterministic fixture E2E uses Base chain ID `8453` fixture data without
 external RPC and writes:
 
 ```text
@@ -135,11 +135,14 @@ services/bridge-relayer/out/real-value-pilot-e2e/bridge-release-evidence.json
 services/bridge-relayer/out/real-value-pilot-e2e/bridge-runtime-handoff.json
 services/bridge-relayer/out/real-value-pilot-e2e/bridge-replay-handoff.json
 services/bridge-relayer/out/real-value-pilot-e2e/bridge-credit-application-state.json
+services/bridge-relayer/out/real-value-pilot-e2e/bridge-exact-value-report.json
 ```
 
 It proves deterministic IDs, wrong-chain rejection, unapproved-lockbox rejection,
 duplicate replay evidence, exactly-once local credit application, and
-test-record-only withdrawal/release evidence.
+withdrawal/release evidence. The exact-value report proves the same uint256
+decimal string appears in the event amount, observed deposit, credit,
+application, withdrawal intent, and release evidence.
 
 ## Base Sepolia Smoke
 
@@ -298,11 +301,13 @@ event BridgeDeposit(
     bytes32 indexed depositId,
     uint256 indexed sourceChainId,
     address indexed sender,
+    address lockbox,
     address token,
     uint256 amount,
     bytes32 flowchainRecipient,
     uint256 nonce,
-    bytes32 metadataHash
+    bytes32 metadataHash,
+    bytes32 pilotModeTag
 );
 ```
 
@@ -318,7 +323,8 @@ keccak256(abi.encode(
   amount,
   flowchainRecipient,
   nonce,
-  metadataHash
+  metadataHash,
+  PILOT_MODE_TAG
 ))
 ```
 
@@ -393,16 +399,23 @@ Required environment variables:
 FLOWCHAIN_BASE8453_RPC_URL
 FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS
 FLOWCHAIN_BASE8453_APPROVED_LOCKBOX_ADDRESS
+FLOWCHAIN_BASE8453_SUPPORTED_TOKEN
+FLOWCHAIN_BASE8453_ASSET_DECIMALS
 FLOWCHAIN_BASE8453_FROM_BLOCK
 FLOWCHAIN_BASE8453_TO_BLOCK
-FLOWCHAIN_BASE8453_CONFIRMATIONS
-FLOWCHAIN_PILOT_MAX_USD
+FLOWCHAIN_PILOT_CONFIRMATIONS
 FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI
 FLOWCHAIN_PILOT_TOTAL_CAP_WEI
-FLOWCHAIN_PILOT_OPERATOR_ACK=I_UNDERSTAND_THIS_IS_A_TINY_CAPPED_BASE8453_PILOT
+FLOWCHAIN_PILOT_OPERATOR_ACK=I_UNDERSTAND_THIS_IS_CAPPED_BASE8453_OWNER_PILOT
 ```
 
-Mock mode, no external RPC:
+Optional guardrail:
+
+```text
+FLOWCHAIN_PILOT_MAX_USD
+```
+
+Deterministic fixture mode, no external RPC:
 
 ```powershell
 npm run flowchain:real-value-pilot:bridge
@@ -411,34 +424,9 @@ npm run flowchain:real-value-pilot:bridge
 Live observer mode:
 
 ```powershell
-npm run bridge:base8453:pilot:observe -- -OperatorAck -ApplyCredit -WithdrawalIntent
-```
-
-Equivalent direct command:
-
-```powershell
-npm run bridge:observe -- `
-  --mode base-mainnet-pilot `
-  --rpc-url $env:FLOWCHAIN_BASE8453_RPC_URL `
-  --lockbox-address $env:FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS `
-  --approved-lockbox $env:FLOWCHAIN_BASE8453_APPROVED_LOCKBOX_ADDRESS `
-  --from-block $env:FLOWCHAIN_BASE8453_FROM_BLOCK `
-  --to-block $env:FLOWCHAIN_BASE8453_TO_BLOCK `
-  --confirmations $env:FLOWCHAIN_BASE8453_CONFIRMATIONS `
-  --acknowledge-pilot `
-  --acknowledge-real-funds `
-  --max-usd $env:FLOWCHAIN_PILOT_MAX_USD `
-  --max-deposit-amount $env:FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI `
-  --total-cap-amount $env:FLOWCHAIN_PILOT_TOTAL_CAP_WEI `
-  --apply-credit `
-  --withdrawal-intent `
-  --runtime-state services/bridge-relayer/out/base8453-pilot-credit-application-state.json `
-  --out services/bridge-relayer/out/base8453-pilot-bridge-observation.json `
-  --credit-out services/bridge-relayer/out/base8453-pilot-bridge-credit.json `
-  --handoff-out services/bridge-relayer/out/base8453-pilot-bridge-handoff.json `
-  --evidence-out services/bridge-relayer/out/base8453-pilot-evidence.json `
-  --withdrawal-out services/bridge-relayer/out/base8453-pilot-withdrawal-intent.json `
-  --release-evidence-out services/bridge-relayer/out/base8453-pilot-release-evidence.json
+npm run flowchain:bridge:observe:base8453
+npm run flowchain:bridge:withdraw:intent
+npm run flowchain:bridge:release:evidence
 ```
 
 Failure, retry, and replay behavior:
@@ -452,8 +440,8 @@ Failure, retry, and replay behavior:
   with `duplicate_replay_key` evidence.
 - Re-running the same deposit with the same runtime application state is
   idempotent: the credit is rejected with `already_applied_replay_key` and no
-  second local application is recorded.
-- Withdrawal/release evidence is written as a local operator record only. The
+  second credit application is recorded.
+- Withdrawal/release evidence preserves the exact uint256 decimal amount. The
   relayer does not sign or broadcast `releaseERC20` or `releaseNative`.
 - RPC URLs, keys, seed phrases, mnemonics, API keys, and webhooks must stay in
   local environment/config only and are not written to artifacts.
@@ -467,8 +455,11 @@ npm run flowchain:real-value-pilot:contracts
 npm run bridge:test
 npm run bridge:mock
 npm run bridge:sepolia:observe
-npm run bridge:local-credit:smoke
+npm run flowchain:bridge:local-credit:smoke
 npm run flowchain:real-value-pilot:bridge
+npm run flowchain:bridge:live:check
+npm run flowchain:bridge:command-matrix
+npm run flowchain:bridge:no-secret-audit
 npm run flowchain:full-smoke
 git diff --check
 ```

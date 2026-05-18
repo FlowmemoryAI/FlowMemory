@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowmemory.local/schemas/flowmemory/bridge-withdrawal-authorization.schema.json",
+  "title": "FlowMemory Bridge Withdrawal Authorization",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generatedAt",
+    "authorizationId",
+    "withdrawalIntentId",
+    "creditId",
+    "depositId",
+    "flowchainChainId",
+    "destinationChainId",
+    "token",
+    "amount",
+    "flowchainAccount",
+    "baseRecipient",
+    "withdrawalNonce",
+    "signedBy",
+    "signatureScheme",
+    "signedPayloadHash",
+    "signature",
+    "localOnly",
+    "noSecrets"
+  ],
+  "properties": {
+    "schema": {
+      "const": "flowmemory.bridge_withdrawal_authorization.v0"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "authorizationId": {
+      "$ref": "#/$defs/hex32"
+    },
+    "withdrawalIntentId": {
+      "$ref": "#/$defs/hex32"
+    },
+    "creditId": {
+      "$ref": "#/$defs/hex32"
+    },
+    "depositId": {
+      "$ref": "#/$defs/hex32"
+    },
+    "flowchainChainId": {
+      "const": "flowchain-local-pilot-v0"
+    },
+    "destinationChainId": {
+      "type": "integer",
+      "enum": [
+        8453
+      ]
+    },
+    "token": {
+      "$ref": "#/$defs/address"
+    },
+    "amount": {
+      "$ref": "#/$defs/uintString"
+    },
+    "flowchainAccount": {
+      "$ref": "#/$defs/hex32"
+    },
+    "baseRecipient": {
+      "$ref": "#/$defs/address"
+    },
+    "withdrawalNonce": {
+      "$ref": "#/$defs/uintString"
+    },
+    "signedBy": {
+      "$ref": "#/$defs/hex32"
+    },
+    "signatureScheme": {
+      "const": "flowchain-pilot-deterministic-test-signature-v0"
+    },
+    "signedPayloadHash": {
+      "$ref": "#/$defs/hex32"
+    },
+    "signature": {
+      "$ref": "#/$defs/hex32"
+    },
+    "localOnly": {
+      "const": true
+    },
+    "noSecrets": {
+      "const": true
+    }
+  },
+  "$defs": {
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "hex32": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$"
+    },
+    "uintString": {
+      "type": "string",
+      "pattern": "^[0-9]+$"
+    }
+  }
+}

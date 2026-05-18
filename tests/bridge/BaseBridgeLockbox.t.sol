@@ -67,6 +67,10 @@ contract BridgeCaller {
         lockbox.setPaused(paused);
     }
 
+    function setEmergencyStopped(BaseBridgeLockbox lockbox, bool stopped) external {
+        lockbox.setEmergencyStopped(stopped);
+    }
+
     function configureToken(
         BaseBridgeLockbox lockbox,
         address token,
@@ -109,10 +113,11 @@ contract BaseBridgeLockboxTest {
     BridgeVm private constant vm = BridgeVm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     bytes32 private constant BRIDGE_DEPOSIT_SIGNATURE =
-        keccak256("BridgeDeposit(bytes32,uint256,address,address,uint256,bytes32,uint256,bytes32)");
+        keccak256("BridgeDeposit(bytes32,uint256,address,address,address,uint256,bytes32,uint256,bytes32,bytes32)");
     bytes32 private constant BRIDGE_RELEASE_SIGNATURE =
         keccak256("BridgeRelease(bytes32,bytes32,address,address,uint256,bytes32)");
     bytes32 private constant RECIPIENT = keccak256("flowchain.recipient.alice");
+    bytes32 private constant PLACEHOLDER_RECIPIENT = 0x5555555555555555555555555555555555555555555555555555555555555555;
     bytes32 private constant EVIDENCE_HASH = keccak256("flowchain.local.acceptance");
 
     BaseBridgeLockbox private lockbox;
@@ -139,13 +144,14 @@ contract BaseBridgeLockboxTest {
     }
 
     function testOwnerCanConfigureAllowlistedTokenAndReleaseAuthority() public {
-        (bool allowed, uint256 perDepositCap, uint256 totalCap, uint256 totalLocked) =
+        (bool allowed, uint256 perDepositCap, uint256 totalCap, uint256 totalLocked, uint256 totalDeposited) =
             lockbox.tokenConfigs(address(token));
 
         _assertTrue(allowed);
         _assertTrue(perDepositCap == 25 ether);
         _assertTrue(totalCap == 100 ether);
         _assertTrue(totalLocked == 0);
+        _assertTrue(totalDeposited == 0);
 
         lockbox.setReleaseAuthority(address(caller));
         _assertTrue(lockbox.releaseAuthority() == address(caller));
@@ -154,6 +160,9 @@ contract BaseBridgeLockboxTest {
     function testNonOwnerCannotConfigurePauseOrSetReleaseAuthority() public {
         vm.expectRevert(abi.encodeWithSelector(BaseBridgeLockbox.NotOwner.selector, address(caller)));
         caller.setPaused(lockbox, true);
+
+        vm.expectRevert(abi.encodeWithSelector(BaseBridgeLockbox.NotOwner.selector, address(caller)));
+        caller.setEmergencyStopped(lockbox, true);
 
         vm.expectRevert(abi.encodeWithSelector(BaseBridgeLockbox.NotOwner.selector, address(caller)));
         caller.configureToken(lockbox, address(token), true, 1 ether, 1 ether);
@@ -177,7 +186,8 @@ contract BaseBridgeLockboxTest {
                 10 ether,
                 RECIPIENT,
                 uint256(1),
-                keccak256("metadata")
+                keccak256("metadata"),
+                lockbox.PILOT_MODE_TAG()
             )
         );
         _assertTrue(depositId == expectedDepositId);
@@ -195,8 +205,9 @@ contract BaseBridgeLockboxTest {
         _assertTrue(record.metadataHash == keccak256("metadata"));
         _assertTrue(record.exists);
 
-        (,,, uint256 totalLocked) = lockbox.tokenConfigs(address(token));
+        (,,, uint256 totalLocked, uint256 totalDeposited) = lockbox.tokenConfigs(address(token));
         _assertTrue(totalLocked == 10 ether);
+        _assertTrue(totalDeposited == 10 ether);
         _assertBridgeDepositLog(logs[logs.length - 1], depositId, address(token), 10 ether, 1);
     }
 
@@ -242,6 +253,9 @@ contract BaseBridgeLockboxTest {
         vm.expectRevert(BaseBridgeLockbox.ZeroRecipient.selector);
         caller.lockERC20(lockbox, address(token), 1 ether, bytes32(0));
 
+        vm.expectRevert(BaseBridgeLockbox.PlaceholderRecipient.selector);
+        caller.lockERC20(lockbox, address(token), 1 ether, PLACEHOLDER_RECIPIENT);
+
         (bool ok,) = address(lockbox).call{value: 1 wei}("");
         _assertTrue(!ok);
     }
@@ -263,8 +277,9 @@ contract BaseBridgeLockboxTest {
         caller.lockERC20(lockbox, address(token), 1 ether, RECIPIENT);
     }
 
-    function testCannotLowerTotalCapBelowCurrentlyLockedAmount() public {
-        caller.lockERC20(lockbox, address(token), 10 ether, RECIPIENT);
+    function testTotalCapIsCumulativeAndCannotBeLoweredBelowHistoricalDeposits() public {
+        bytes32 depositId = caller.lockERC20(lockbox, address(token), 10 ether, RECIPIENT);
+        lockbox.releaseERC20(depositId, address(caller), address(token), 10 ether, EVIDENCE_HASH);
 
         vm.expectRevert(
             abi.encodeWithSelector(BaseBridgeLockbox.TotalCapExceeded.selector, address(token), 10 ether, 9 ether)
@@ -279,6 +294,21 @@ contract BaseBridgeLockboxTest {
         vm.expectRevert(BaseBridgeLockbox.Paused.selector);
         caller.lockERC20(lockbox, address(token), 1 ether, RECIPIENT);
 
+        lockbox.releaseERC20(depositId, address(caller), address(token), 1 ether, EVIDENCE_HASH);
+        _assertTrue(lockbox.remainingDepositAmount(depositId) == 9 ether);
+    }
+
+    function testEmergencyStopBlocksDepositsAndReleasesUntilOwnerResumes() public {
+        bytes32 depositId = caller.lockERC20(lockbox, address(token), 10 ether, RECIPIENT);
+        lockbox.setEmergencyStopped(true);
+
+        vm.expectRevert(BaseBridgeLockbox.EmergencyStopped.selector);
+        caller.lockERC20(lockbox, address(token), 1 ether, RECIPIENT);
+
+        vm.expectRevert(BaseBridgeLockbox.EmergencyStopped.selector);
+        lockbox.releaseERC20(depositId, address(caller), address(token), 1 ether, EVIDENCE_HASH);
+
+        lockbox.setEmergencyStopped(false);
         lockbox.releaseERC20(depositId, address(caller), address(token), 1 ether, EVIDENCE_HASH);
         _assertTrue(lockbox.remainingDepositAmount(depositId) == 9 ether);
     }
@@ -342,12 +372,11 @@ contract BaseBridgeLockboxTest {
         _assertTrue(lockbox.remainingDepositAmount(depositId) == 0);
         _assertTrue(token.balanceOf(address(caller)) == 1_000 ether);
 
-        (,,, uint256 totalLocked) = lockbox.tokenConfigs(address(token));
+        (,,, uint256 totalLocked, uint256 totalDeposited) = lockbox.tokenConfigs(address(token));
         _assertTrue(totalLocked == 0);
+        _assertTrue(totalDeposited == 10 ether);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(BaseBridgeLockbox.ReleaseAmountExceeded.selector, depositId, 1 wei, 0)
-        );
+        vm.expectRevert(abi.encodeWithSelector(BaseBridgeLockbox.ReleaseAmountExceeded.selector, depositId, 1 wei, 0));
         lockbox.releaseERC20(depositId, address(caller), address(token), 1 wei, keccak256("flowchain.local.release.3"));
     }
 
@@ -359,6 +388,11 @@ contract BaseBridgeLockboxTest {
 
         vm.expectRevert(BaseBridgeLockbox.ZeroAmount.selector);
         lockbox.releaseERC20(depositId, address(caller), address(token), 0, EVIDENCE_HASH);
+
+        bytes32 nativeDepositId = caller.lockNative{value: 0.5 ether}(lockbox, RECIPIENT);
+
+        vm.expectRevert(BaseBridgeLockbox.ZeroRecipient.selector);
+        lockbox.releaseNative(nativeDepositId, payable(address(0)), 0.1 ether, EVIDENCE_HASH);
     }
 
     function testReleaseBlocksTokenMismatchOverReleaseAndZeroEvidence() public {
@@ -407,14 +441,23 @@ contract BaseBridgeLockboxTest {
         _assertTrue(uint256(log.topics[2]) == block.chainid);
         _assertTrue(address(uint160(uint256(log.topics[3]))) == address(caller));
 
-        (address eventToken, uint256 amount, bytes32 recipient, uint256 nonce, bytes32 metadataHash) =
-            abi.decode(log.data, (address, uint256, bytes32, uint256, bytes32));
+        (
+            address lockboxAddress,
+            address eventToken,
+            uint256 amount,
+            bytes32 recipient,
+            uint256 nonce,
+            bytes32 metadataHash,
+            bytes32 pilotModeTag
+        ) = abi.decode(log.data, (address, address, uint256, bytes32, uint256, bytes32, bytes32));
 
+        _assertTrue(lockboxAddress == address(lockbox));
         _assertTrue(eventToken == expectedToken);
         _assertTrue(amount == expectedAmount);
         _assertTrue(recipient == RECIPIENT);
         _assertTrue(nonce == expectedNonce);
         _assertTrue(metadataHash == keccak256("metadata"));
+        _assertTrue(pilotModeTag == lockbox.PILOT_MODE_TAG());
     }
 
     function _assertBridgeReleaseLog(

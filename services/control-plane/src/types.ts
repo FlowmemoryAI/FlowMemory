@@ -13,6 +13,8 @@ export type JsonValue =
 export type JsonObject = { [key: string]: JsonValue | undefined };
 
 export type ControlPlaneMethod =
+  | "rpc_discover"
+  | "rpc_readiness"
   | "health"
   | "node_status"
   | "peer_list"
@@ -26,6 +28,11 @@ export type ControlPlaneMethod =
   | "pilot_pause_status"
   | "pilot_retry_status"
   | "pilot_emergency_status"
+  | "bridge_live_readiness"
+  | "bridge_status"
+  | "pilot_lifecycle_record_list"
+  | "wallet_balance_list"
+  | "wallet_transfer_history"
   | "devnet_state"
   | "block_get"
   | "block_list"
@@ -80,6 +87,7 @@ export type ControlPlaneMethod =
   | "bridge_deposit_list"
   | "bridge_credit_get"
   | "bridge_credit_list"
+  | "bridge_credit_status"
   | "withdrawal_get"
   | "withdrawal_list"
   | "provenance_get"
@@ -101,13 +109,15 @@ export interface ControlPlanePaths {
   bridgeObservationPath: string;
   bridgeRuntimeHandoffPath: string;
   bridgeObservationIntakePath: string;
+  walletTransferProofPath: string;
+  walletPublicMetadataPath: string;
 }
 
 export interface DataSourceRecord {
   schema: "flowmemory.control_plane.data_source.v0";
   name: string;
   path: string;
-  status: "loaded" | "missing" | "recovered";
+  status: "loaded" | "missing" | "recovered" | "degraded";
   recovery?: string;
 }
 
@@ -125,6 +135,8 @@ export interface LoadedControlPlaneState {
   txIntake: JsonObject[];
   bridgeObservations: JsonObject[];
   bridgeRuntimeHandoff: JsonObject | null;
+  walletTransferProof: JsonObject | null;
+  walletPublicMetadata: JsonObject | null;
   paths: ControlPlanePaths;
   sources: Record<string, DataSourceRecord>;
 }

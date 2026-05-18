@@ -1,0 +1,73 @@
+{
+  "schema": "flowmemory.base_sepolia.v4_hook_flowmemory_evidence.v0",
+  "generatedAt": "2026-05-17T06:47:51.565Z",
+  "mode": "base-sepolia-v4-hook-proof",
+  "productionReady": false,
+  "liveProofComplete": false,
+  "stage": "dry-run-proof-ready",
+  "sourcePaths": {
+    "plan": "fixtures/deployments/base-sepolia-v4-hook-proof-plan.json",
+    "evidence": "fixtures/deployments/base-sepolia-v4-hook-evidence.latest.json",
+    "readbackArtifact": "fixtures/deployments/base-sepolia-v4-hook-readback.latest.json",
+    "indexer": "fixtures/deployments/base-sepolia-v4-hook-readback-state.latest.json",
+    "checkpoint": "fixtures/deployments/base-sepolia-v4-hook-readback-checkpoint.latest.json"
+  },
+  "hook": {
+    "contract": "FlowMemoryAfterSwapHook",
+    "create2Deployer": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+    "constructorArgs": {
+      "poolManager": "0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408"
+    },
+    "initCodeHash": "0x2734b4f6b4f6932249d4d98240147f02cf2ba548fe1ade4a7d63d9dd0a8b9fef",
+    "salt": "0x0000000000000000000000000000000000000000000000004915000000000000",
+    "hookAddress": "0xD24d7f807cb00D28DdF675E55879547d4F7B0040",
+    "miningMode": "mined-after-swap-suffix-0040",
+    "requiredLowBits": "0x0040",
+    "hasAfterSwapOnlyFlag": true,
+    "permissions": {
+      "afterSwap": true,
+      "beforeSwap": false,
+      "afterSwapReturnDelta": false,
+      "dynamicFeeOverride": false,
+      "custody": false
+    }
+  },
+  "checks": {
+    "planEvidenceHookMatch": true,
+    "planReadbackHookMatch": true,
+    "checkpointIncludesHookAddress": true,
+    "observationCount": 0,
+    "canonicalObservationCount": 0,
+    "swapMemorySignalObservationCount": 0,
+    "allObservationsFromHook": true,
+    "allObservationsBaseSepolia": true,
+    "allObservationsFlowPulse": true,
+    "allObservationsReceiptSuccess": true,
+    "liveProofComplete": false,
+    "allowIncomplete": true
+  },
+  "memorySignals": [],
+  "memoryReceipts": [],
+  "rootflowTransitions": [],
+  "rootfieldBundles": [],
+  "agentMemoryViews": [],
+  "acceptance": {
+    "network": "base-sepolia",
+    "chainId": "84532",
+    "livePoolManagerSwapObserved": false,
+    "flowPulseObservations": 0,
+    "memorySignals": 0,
+    "memoryReceipts": 0,
+    "rootflowTransitions": 0,
+    "dashboardFixtureGenerated": true,
+    "productionReady": false
+  },
+  "boundaries": [
+    "Base Sepolia proof is public testnet evidence, not production mainnet readiness.",
+    "A deployed hook alone is not enough; the acceptance proof requires a PoolManager swap that emits FlowPulse.",
+    "txHash and logIndex are read by the indexer after receipts/logs exist; the hook never claims them.",
+    "No private keys, RPC credentials, or explorer API keys are written to this artifact.",
+    "Use tiny testnet-only currencies and liquidity for this proof.",
+    "Flow Memory evidence is derived from receipt/log readback; the hook does not know txHash or logIndex during execution."
+  ]
+}

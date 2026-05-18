@@ -178,6 +178,72 @@ from `main`.
 | Control plane/dashboard | `flowchain:real-value-pilot:control-dashboard` merged on `main` through PR #142 and closed issue #137. | No control-dashboard blocker remains for the final pilot gate. |
 | Ops/installer | `flowchain:real-value-pilot:ops` merged on `main` through PR #144 and closed issue #135. | No ops/installer blocker remains for the final pilot gate. |
 
+## Operator UI/API Inspection Before Any Real Funds
+
+Do not send any real Base funds until the control-plane API and dashboard both
+show `READY_FOR_OPERATOR_LIVE_PILOT` and the lockbox address has been
+owner-verified outside the browser. A configured env name is not owner
+verification by itself.
+
+From the repo root, run the local runtime and control-plane surfaces:
+
+```powershell
+npm run flowchain:start
+npm run control-plane:serve
+npm run workbench:dev
+```
+
+In a separate terminal, inspect the live-readiness check without printing env
+values:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-live-check.ps1 -AllowBlocked
+```
+
+Before sending any real funds, inspect these API pages in the browser or with a
+local HTTP client:
+
+```text
+http://127.0.0.1:8787/chain/status
+http://127.0.0.1:8787/bridge/live-readiness
+http://127.0.0.1:8787/pilot/status
+http://127.0.0.1:8787/pilot/lifecycle
+http://127.0.0.1:8787/wallets/balances
+http://127.0.0.1:8787/wallets/transfers
+```
+
+The required pre-funds API state is:
+
+- `/chain/status` shows the node running, chain id/name, block height, latest
+  state root, and restart/export/import continuity status.
+- `/bridge/live-readiness` shows `baseChainId: 8453`,
+  `failClosedStatus: "READY_FOR_OPERATOR_LIVE_PILOT"`,
+  `envValuesPrinted: false`, no missing required env names, confirmation depth
+  inside policy, tiny cap env names configured, and lockbox configured.
+- `/pilot/lifecycle` shows no mock artifact presented as live. Existing
+  local/mock/Base Sepolia rows are acceptable as historical evidence only.
+- `/wallets/balances` and `/wallets/transfers` are reachable and return
+  machine-readable `localOnly: true`, `productionReady: false` rows or useful
+  empty states.
+
+Open the dashboard at the Vite URL printed by `npm run workbench:dev` and
+inspect the first screen:
+
+- `Node and API status` must show the local control-plane as available.
+- `Bridge live readiness` must show `READY_FOR_OPERATOR_LIVE_PILOT`.
+- `Real-value pilot` must remain labeled `capped owner testing`.
+- The `Real-Value Pilot` table must be searchable by Base tx hash, credit id,
+  wallet address, and status.
+
+After a pilot deposit is observed, do not rely on manual file inspection alone.
+Use the API and dashboard to confirm one lifecycle row keyed by Base tx hash and
+log index, with the expected credit id, recipient wallet, asset, amount in
+smallest units, evidence path/id, and exact equality across deposit amount,
+observed amount, credited amount, wallet delta, transferable amount, withdrawal
+amount, and release amount. Then confirm wallet balances and transfer history
+show the credited wallet can transfer the exact credited amount and the
+recipient balance updates exactly.
+
 ## Owner Go/No-Go Checklist
 
 The owner should mark the pilot `go` only when all rows are true:

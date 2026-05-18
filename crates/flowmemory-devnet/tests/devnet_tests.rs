@@ -1,8 +1,10 @@
 use flowmemory_devnet::model::{
-    BRIDGE_PILOT_ACCOUNT_OWNER, DevnetError, FLOWPULSE_TOPIC0, LOCAL_TEST_UNIT_ASSET_ID,
-    Transaction, ZERO_HASH, apply_transaction, bridge_event_reference_key, build_block,
-    demo_transactions, deterministic_bridge_account_id, deterministic_bridge_account_mapping_id,
-    deterministic_bridge_asset_mapping_id, deterministic_liquidity_id,
+    BASE_MAINNET_CHAIN_ID, BRIDGE_PILOT_ACCOUNT_OWNER, BRIDGE_RUNTIME_AMOUNT_STORAGE,
+    BridgeConfirmationProof, BridgePilotCapProof, DevnetError, FLOWPULSE_TOPIC0,
+    LOCAL_TEST_UNIT_ASSET_ID, Transaction, ZERO_HASH, apply_transaction,
+    bridge_event_reference_key, build_block, demo_transactions,
+    deterministic_bridge_account_mapping_id, deterministic_bridge_asset_mapping_id,
+    deterministic_bridge_credit_id, deterministic_bridge_replay_key, deterministic_liquidity_id,
     deterministic_lp_position_id, deterministic_pool_id, deterministic_swap_id,
     deterministic_token_balance_id, deterministic_token_id, genesis_state,
     product_demo_transactions, queue_transaction, state_map_roots, state_root,
@@ -364,7 +366,7 @@ fn pilot_bridge_credit_maps_asset_account_and_rejects_replay() {
     assert_eq!(state.bridge_credit_receipts.len(), 1);
     assert_eq!(state.bridge_replay_index.len(), 1);
 
-    let account_id = deterministic_bridge_account_id(PILOT_FLOWCHAIN_RECIPIENT);
+    let account_id = PILOT_FLOWCHAIN_RECIPIENT.to_string();
     assert_eq!(
         state.local_test_unit_balances[&account_id].units,
         PILOT_BRIDGE_AMOUNT
@@ -422,6 +424,405 @@ fn pilot_bridge_credit_maps_asset_account_and_rejects_replay() {
             .filter(|receipt| receipt.tx_id == applied_credit_tx_id && receipt.status == "applied")
             .count(),
         1
+    );
+}
+
+#[test]
+fn live_bridge_credit_applies_exact_amount_and_rejects_replay() {
+    let mut state = genesis_state();
+    let account_id =
+        setup_live_bridge_account(&mut state, BASE_MAINNET_CHAIN_ID, LIVE_SOURCE_TOKEN);
+    let before_root = state_root(&state);
+    let before_balance = state.local_test_unit_balances[&account_id].units;
+    let credit_tx = live_bridge_credit_tx(
+        0,
+        LIVE_BRIDGE_AMOUNT,
+        BASE_MAINNET_CHAIN_ID,
+        LIVE_SOURCE_TOKEN,
+        LIVE_BRIDGE_AMOUNT,
+        LIVE_BRIDGE_AMOUNT,
+        &[LIVE_SOURCE_TOKEN],
+        true,
+        None,
+    );
+    let Transaction::CreditBridgeFromBaseEvent {
+        bridge_credit_id,
+        replay_key,
+        ..
+    } = &credit_tx
+    else {
+        unreachable!("helper builds bridge credit")
+    };
+
+    apply_transaction(&mut state, &credit_tx).unwrap();
+
+    let balance = state
+        .local_test_unit_balances
+        .get(&account_id)
+        .expect("credited live balance");
+    assert_eq!(balance.units - before_balance, LIVE_BRIDGE_AMOUNT);
+    assert!(!balance.no_value);
+    let credit = state
+        .bridge_credits
+        .get(bridge_credit_id)
+        .expect("live bridge credit");
+    assert_eq!(credit.amount_units, LIVE_BRIDGE_AMOUNT);
+    assert_eq!(credit.account_id, account_id);
+    assert!(credit.production_ready);
+    assert!(!credit.local_only);
+    assert!(!credit.no_value);
+    assert!(credit.confirmation_proof.is_some());
+    assert!(credit.pilot_cap_proof.is_some());
+    assert_ne!(before_root, state_root(&state));
+
+    let replay_root_before = state_root(&state);
+    let replay = apply_transaction(&mut state, &credit_tx);
+    assert_eq!(
+        replay,
+        Err(DevnetError::BridgeCreditReplayAlreadyConsumed(
+            replay_key.clone()
+        ))
+    );
+    assert_eq!(replay_root_before, state_root(&state));
+    assert_eq!(
+        state.local_test_unit_balances[&account_id].units,
+        LIVE_BRIDGE_AMOUNT
+    );
+}
+
+#[test]
+fn same_base_tx_with_different_log_index_gets_distinct_live_credits() {
+    let mut state = genesis_state();
+    let account_id =
+        setup_live_bridge_account(&mut state, BASE_MAINNET_CHAIN_ID, LIVE_SOURCE_TOKEN);
+    let first = live_bridge_credit_tx(
+        0,
+        11,
+        BASE_MAINNET_CHAIN_ID,
+        LIVE_SOURCE_TOKEN,
+        LIVE_BRIDGE_AMOUNT,
+        LIVE_BRIDGE_AMOUNT,
+        &[LIVE_SOURCE_TOKEN],
+        true,
+        None,
+    );
+    let second = live_bridge_credit_tx(
+        1,
+        17,
+        BASE_MAINNET_CHAIN_ID,
+        LIVE_SOURCE_TOKEN,
+        LIVE_BRIDGE_AMOUNT,
+        LIVE_BRIDGE_AMOUNT,
+        &[LIVE_SOURCE_TOKEN],
+        true,
+        None,
+    );
+    let (first_credit_id, first_replay_key) = bridge_credit_id_and_replay_key(&first);
+    let (second_credit_id, second_replay_key) = bridge_credit_id_and_replay_key(&second);
+
+    apply_transaction(&mut state, &first).unwrap();
+    apply_transaction(&mut state, &second).unwrap();
+
+    assert_ne!(first_credit_id, second_credit_id);
+    assert_ne!(first_replay_key, second_replay_key);
+    assert_eq!(state.bridge_credits.len(), 2);
+    assert_eq!(state.bridge_event_receipt_index.len(), 2);
+    assert_eq!(state.local_test_unit_balances[&account_id].units, 28);
+}
+
+#[test]
+fn live_bridge_credit_rejects_wrong_chain_unsupported_asset_zero_and_bad_identity() {
+    let mut wrong_chain = genesis_state();
+    setup_live_bridge_account(&mut wrong_chain, "84532", LIVE_SOURCE_TOKEN);
+    let wrong_chain_tx = live_bridge_credit_tx(
+        2,
+        LIVE_BRIDGE_AMOUNT,
+        "84532",
+        LIVE_SOURCE_TOKEN,
+        LIVE_BRIDGE_AMOUNT,
+        LIVE_BRIDGE_AMOUNT,
+        &[LIVE_SOURCE_TOKEN],
+        true,
+        None,
+    );
+    assert_rejected_without_state_change(
+        &mut wrong_chain,
+        &wrong_chain_tx,
+        DevnetError::BridgeCreditWrongSourceChain("84532".to_string()),
+    );
+
+    let mut unsupported_asset = genesis_state();
+    setup_live_bridge_account(
+        &mut unsupported_asset,
+        BASE_MAINNET_CHAIN_ID,
+        UNSUPPORTED_LIVE_SOURCE_TOKEN,
+    );
+    let unsupported_asset_tx = live_bridge_credit_tx(
+        3,
+        LIVE_BRIDGE_AMOUNT,
+        BASE_MAINNET_CHAIN_ID,
+        UNSUPPORTED_LIVE_SOURCE_TOKEN,
+        LIVE_BRIDGE_AMOUNT,
+        LIVE_BRIDGE_AMOUNT,
+        &[LIVE_SOURCE_TOKEN],
+        true,
+        None,
+    );
+    assert_rejected_without_state_change(
+        &mut unsupported_asset,
+        &unsupported_asset_tx,
+        DevnetError::BridgeCreditUnsupportedAsset(UNSUPPORTED_LIVE_SOURCE_TOKEN.to_string()),
+    );
+
+    let mut zero_amount = genesis_state();
+    setup_live_bridge_account(&mut zero_amount, BASE_MAINNET_CHAIN_ID, LIVE_SOURCE_TOKEN);
+    let zero_amount_tx = live_bridge_credit_tx(
+        4,
+        0,
+        BASE_MAINNET_CHAIN_ID,
+        LIVE_SOURCE_TOKEN,
+        LIVE_BRIDGE_AMOUNT,
+        LIVE_BRIDGE_AMOUNT,
+        &[LIVE_SOURCE_TOKEN],
+        true,
+        None,
+    );
+    let (zero_credit_id, _) = bridge_credit_id_and_replay_key(&zero_amount_tx);
+    assert_rejected_without_state_change(
+        &mut zero_amount,
+        &zero_amount_tx,
+        DevnetError::BridgeCreditAmountMustBePositive(zero_credit_id),
+    );
+
+    let mut bad_identity = genesis_state();
+    setup_live_bridge_account(&mut bad_identity, BASE_MAINNET_CHAIN_ID, LIVE_SOURCE_TOKEN);
+    let bad_identity_tx = live_bridge_credit_tx(
+        5,
+        LIVE_BRIDGE_AMOUNT,
+        BASE_MAINNET_CHAIN_ID,
+        LIVE_SOURCE_TOKEN,
+        LIVE_BRIDGE_AMOUNT,
+        LIVE_BRIDGE_AMOUNT,
+        &[LIVE_SOURCE_TOKEN],
+        true,
+        Some(ZERO_HASH.to_string()),
+    );
+    assert!(matches!(
+        apply_transaction(&mut bad_identity, &bad_identity_tx),
+        Err(DevnetError::DeterministicIdMismatch { kind, .. }) if kind == "bridge credit"
+    ));
+    assert!(bad_identity.bridge_credits.is_empty());
+}
+
+#[test]
+fn live_bridge_credit_rejects_unsatisfied_confirmation_and_pilot_cap_excess() {
+    let mut unsatisfied = genesis_state();
+    setup_live_bridge_account(&mut unsatisfied, BASE_MAINNET_CHAIN_ID, LIVE_SOURCE_TOKEN);
+    let unsatisfied_tx = live_bridge_credit_tx(
+        6,
+        LIVE_BRIDGE_AMOUNT,
+        BASE_MAINNET_CHAIN_ID,
+        LIVE_SOURCE_TOKEN,
+        LIVE_BRIDGE_AMOUNT,
+        LIVE_BRIDGE_AMOUNT,
+        &[LIVE_SOURCE_TOKEN],
+        false,
+        None,
+    );
+    let (unsatisfied_credit_id, _) = bridge_credit_id_and_replay_key(&unsatisfied_tx);
+    assert_rejected_without_state_change(
+        &mut unsatisfied,
+        &unsatisfied_tx,
+        DevnetError::BridgeCreditConfirmationUnsatisfied(unsatisfied_credit_id),
+    );
+
+    let mut above_cap = genesis_state();
+    setup_live_bridge_account(&mut above_cap, BASE_MAINNET_CHAIN_ID, LIVE_SOURCE_TOKEN);
+    let above_cap_tx = live_bridge_credit_tx(
+        7,
+        LIVE_BRIDGE_AMOUNT + 1,
+        BASE_MAINNET_CHAIN_ID,
+        LIVE_SOURCE_TOKEN,
+        LIVE_BRIDGE_AMOUNT,
+        LIVE_BRIDGE_AMOUNT,
+        &[LIVE_SOURCE_TOKEN],
+        true,
+        None,
+    );
+    let (above_cap_credit_id, _) = bridge_credit_id_and_replay_key(&above_cap_tx);
+    assert_rejected_without_state_change(
+        &mut above_cap,
+        &above_cap_tx,
+        DevnetError::BridgeCreditAmountExceedsPilotCap(above_cap_credit_id),
+    );
+}
+
+#[test]
+fn live_bridge_credit_u64_max_boundary_is_explicit() {
+    assert_eq!(BRIDGE_RUNTIME_AMOUNT_STORAGE, "u64");
+    let mut state = genesis_state();
+    let account_id =
+        setup_live_bridge_account(&mut state, BASE_MAINNET_CHAIN_ID, LIVE_SOURCE_TOKEN);
+    let max_tx = live_bridge_credit_tx(
+        8,
+        u64::MAX,
+        BASE_MAINNET_CHAIN_ID,
+        LIVE_SOURCE_TOKEN,
+        u64::MAX,
+        u64::MAX,
+        &[LIVE_SOURCE_TOKEN],
+        true,
+        None,
+    );
+
+    apply_transaction(&mut state, &max_tx).unwrap();
+
+    assert_eq!(state.local_test_unit_balances[&account_id].units, u64::MAX);
+}
+
+#[test]
+fn live_bridge_credit_amount_above_u64_is_rejected_before_state_file_mutation() {
+    let temp = temp_dir("live-bridge-u64-overflow");
+    let state = temp.join("state.json");
+    let handoff = temp.join("overflow-handoff.json");
+    std::fs::write(
+        &handoff,
+        format!(
+            r#"{{
+  "schema": "flowmemory.bridge_runtime_handoff.v0",
+  "credits": [
+    {{
+      "schema": "flowmemory.bridge_credit.v0",
+      "creditId": "{}",
+      "observationId": "{}",
+      "depositId": "{}",
+      "replayKey": "{}",
+      "source": {{
+        "chainId": 8453,
+        "contract": "{}",
+        "txHash": "{}",
+        "logIndex": 9
+      }},
+      "token": "{}",
+      "amount": "18446744073709551616",
+      "flowchainRecipient": "{}",
+      "status": "applied",
+      "localOnly": false,
+      "productionReady": true
+    }}
+  ]
+}}"#,
+            live_credit_id(9, BASE_MAINNET_CHAIN_ID, LIVE_SOURCE_TOKEN),
+            live_observation_id(9, BASE_MAINNET_CHAIN_ID, LIVE_SOURCE_TOKEN),
+            live_deposit_id(9, BASE_MAINNET_CHAIN_ID, LIVE_SOURCE_TOKEN),
+            live_replay_key(9, BASE_MAINNET_CHAIN_ID, LIVE_SOURCE_TOKEN),
+            LIVE_SOURCE_CONTRACT,
+            LIVE_BRIDGE_TX_HASH,
+            LIVE_SOURCE_TOKEN,
+            LIVE_FLOWCHAIN_RECIPIENT
+        ),
+    )
+    .expect("write overflow handoff");
+
+    let status = Command::new(env!("CARGO_BIN_EXE_flowmemory-devnet"))
+        .args([
+            "--state",
+            state.to_str().expect("state path"),
+            "bridge-handoff",
+            "--handoff",
+            handoff.to_str().expect("handoff path"),
+            "--direct",
+        ])
+        .status()
+        .expect("run overflow handoff");
+
+    assert!(!status.success());
+    assert!(!state.exists());
+    std::fs::remove_dir_all(&temp).expect("cleanup temp dir");
+}
+
+#[test]
+fn live_bridge_credit_survives_export_import_restart_and_remains_transferable() {
+    let mut state = genesis_state();
+    let account_id =
+        setup_live_bridge_account(&mut state, BASE_MAINNET_CHAIN_ID, LIVE_SOURCE_TOKEN);
+    let credit_tx = live_bridge_credit_tx(
+        10,
+        LIVE_BRIDGE_AMOUNT,
+        BASE_MAINNET_CHAIN_ID,
+        LIVE_SOURCE_TOKEN,
+        LIVE_BRIDGE_AMOUNT,
+        LIVE_BRIDGE_AMOUNT,
+        &[LIVE_SOURCE_TOKEN],
+        true,
+        None,
+    );
+    let (credit_id, replay_key) = bridge_credit_id_and_replay_key(&credit_tx);
+    apply_transaction(&mut state, &credit_tx).unwrap();
+    apply_transaction(
+        &mut state,
+        &Transaction::CreateLocalTestUnitBalance {
+            account_id: LIVE_TRANSFER_RECIPIENT.to_string(),
+            owner: "operator:live-recipient".to_string(),
+        },
+    )
+    .unwrap();
+    apply_transaction(
+        &mut state,
+        &Transaction::TransferLocalTestUnits {
+            transfer_id: "transfer:live:001".to_string(),
+            from_account_id: account_id.clone(),
+            to_account_id: LIVE_TRANSFER_RECIPIENT.to_string(),
+            amount_units: LIVE_TRANSFER_AMOUNT,
+            memo: "live bridge credited balance transfer".to_string(),
+        },
+    )
+    .unwrap();
+    assert_eq!(
+        state.local_test_unit_balances[&account_id].units,
+        LIVE_BRIDGE_AMOUNT - LIVE_TRANSFER_AMOUNT
+    );
+    assert_eq!(
+        state.local_test_unit_balances[LIVE_TRANSFER_RECIPIENT].units,
+        LIVE_TRANSFER_AMOUNT
+    );
+    assert!(!state.local_test_unit_balances[&account_id].no_value);
+    assert!(!state.local_test_unit_balances[LIVE_TRANSFER_RECIPIENT].no_value);
+    assert!(!state.balance_transfers["transfer:live:001"].no_value);
+
+    let exported = serde_json::to_string(&state).expect("export state");
+    let mut imported: flowmemory_devnet::model::ChainState =
+        serde_json::from_str(&exported).expect("import state");
+    assert_eq!(state_root(&state), state_root(&imported));
+    build_block(&mut imported);
+    assert!(imported.bridge_credits.contains_key(&credit_id));
+    assert!(imported.bridge_replay_index.contains_key(&replay_key));
+    assert_eq!(
+        apply_transaction(&mut imported, &credit_tx),
+        Err(DevnetError::BridgeCreditReplayAlreadyConsumed(replay_key))
+    );
+    apply_transaction(
+        &mut imported,
+        &Transaction::CreateLocalTestUnitBalance {
+            account_id: "local-account:live-recipient-2".to_string(),
+            owner: "operator:live-recipient-2".to_string(),
+        },
+    )
+    .unwrap();
+    apply_transaction(
+        &mut imported,
+        &Transaction::TransferLocalTestUnits {
+            transfer_id: "transfer:live:post-import".to_string(),
+            from_account_id: account_id.clone(),
+            to_account_id: "local-account:live-recipient-2".to_string(),
+            amount_units: 1,
+            memo: "post-import transfer".to_string(),
+        },
+    )
+    .unwrap();
+    assert_eq!(
+        imported.local_test_unit_balances[&account_id].units,
+        LIVE_BRIDGE_AMOUNT - LIVE_TRANSFER_AMOUNT - 1
     );
 }
 
@@ -1765,7 +2166,7 @@ const PILOT_BRIDGE_TX_HASH: &str =
 const PILOT_BRIDGE_LOG_INDEX: u64 = 0;
 const PILOT_SOURCE_TOKEN: &str = "0x3333333333333333333333333333333333333333";
 const PILOT_FLOWCHAIN_RECIPIENT: &str =
-    "0x5555555555555555555555555555555555555555555555555555555555555555";
+    "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
 const PILOT_OBSERVATION_ID: &str =
     "0x0430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223c";
 const PILOT_DEPOSIT_ID: &str = "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269";
@@ -1773,9 +2174,19 @@ const PILOT_REPLAY_KEY: &str = "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980f
 const PILOT_BRIDGE_CREDIT_ID: &str =
     "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6";
 const PILOT_BRIDGE_AMOUNT: u64 = 20_000_000;
+const LIVE_SOURCE_CONTRACT: &str = "0x1111111111111111111111111111111111111111";
+const LIVE_BRIDGE_TX_HASH: &str =
+    "0x8453000000000000000000000000000000000000000000000000000000000002";
+const LIVE_SOURCE_TOKEN: &str = "0x3333333333333333333333333333333333333333";
+const UNSUPPORTED_LIVE_SOURCE_TOKEN: &str = "0x9999999999999999999999999999999999999999";
+const LIVE_FLOWCHAIN_RECIPIENT: &str =
+    "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
+const LIVE_BRIDGE_AMOUNT: u64 = 20_000_000;
+const LIVE_TRANSFER_AMOUNT: u64 = 7_500_000;
+const LIVE_TRANSFER_RECIPIENT: &str = "local-account:live-recipient";
 
 fn pilot_bridge_setup_and_credit_txs() -> Vec<Transaction> {
-    let account_id = deterministic_bridge_account_id(PILOT_FLOWCHAIN_RECIPIENT);
+    let account_id = PILOT_FLOWCHAIN_RECIPIENT.to_string();
     let asset_mapping_id = deterministic_bridge_asset_mapping_id(
         PILOT_SOURCE_CHAIN_ID,
         PILOT_SOURCE_TOKEN,
@@ -1790,12 +2201,16 @@ fn pilot_bridge_setup_and_credit_txs() -> Vec<Transaction> {
             source_chain_id: PILOT_SOURCE_CHAIN_ID.to_string(),
             source_token: PILOT_SOURCE_TOKEN.to_string(),
             local_asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            local_only: true,
+            production_ready: false,
         },
         Transaction::MapBridgeAccount {
             mapping_id: account_mapping_id,
             flowchain_recipient: PILOT_FLOWCHAIN_RECIPIENT.to_string(),
             account_id: account_id.clone(),
             owner: BRIDGE_PILOT_ACCOUNT_OWNER.to_string(),
+            local_only: true,
+            production_ready: false,
         },
         Transaction::CreateLocalTestUnitBalance {
             account_id: account_id.clone(),
@@ -1819,8 +2234,191 @@ fn pilot_bridge_setup_and_credit_txs() -> Vec<Transaction> {
             memo: "unit-test pilot bridge handoff".to_string(),
             local_only: true,
             production_ready: false,
+            confirmation_proof: None,
+            pilot_cap_proof: None,
         },
     ]
+}
+
+fn setup_live_bridge_account(
+    state: &mut flowmemory_devnet::model::ChainState,
+    source_chain_id: &str,
+    source_token: &str,
+) -> String {
+    let account_id = LIVE_FLOWCHAIN_RECIPIENT.to_string();
+    let asset_mapping_id = deterministic_bridge_asset_mapping_id(
+        source_chain_id,
+        source_token,
+        LOCAL_TEST_UNIT_ASSET_ID,
+    );
+    let account_mapping_id =
+        deterministic_bridge_account_mapping_id(LIVE_FLOWCHAIN_RECIPIENT, &account_id);
+    apply_transaction(
+        state,
+        &Transaction::MapBridgeAsset {
+            mapping_id: asset_mapping_id,
+            source_chain_id: source_chain_id.to_string(),
+            source_token: source_token.to_string(),
+            local_asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+            local_only: false,
+            production_ready: true,
+        },
+    )
+    .unwrap();
+    apply_transaction(
+        state,
+        &Transaction::MapBridgeAccount {
+            mapping_id: account_mapping_id,
+            flowchain_recipient: LIVE_FLOWCHAIN_RECIPIENT.to_string(),
+            account_id: account_id.clone(),
+            owner: BRIDGE_PILOT_ACCOUNT_OWNER.to_string(),
+            local_only: false,
+            production_ready: true,
+        },
+    )
+    .unwrap();
+    apply_transaction(
+        state,
+        &Transaction::CreateLocalTestUnitBalance {
+            account_id: account_id.clone(),
+            owner: BRIDGE_PILOT_ACCOUNT_OWNER.to_string(),
+        },
+    )
+    .unwrap();
+    account_id
+}
+
+fn live_bridge_credit_tx(
+    log_index: u64,
+    amount_units: u64,
+    source_chain_id: &str,
+    source_token: &str,
+    max_deposit_amount_units: u64,
+    total_cap_amount_units: u64,
+    supported_tokens: &[&str],
+    confirmation_satisfied: bool,
+    credit_id_override: Option<String>,
+) -> Transaction {
+    let account_id = LIVE_FLOWCHAIN_RECIPIENT.to_string();
+    let deposit_id = live_deposit_id(log_index, source_chain_id, source_token);
+    let observation_id = live_observation_id(log_index, source_chain_id, source_token);
+    let replay_key = deterministic_bridge_replay_key(
+        source_chain_id,
+        LIVE_SOURCE_CONTRACT,
+        LIVE_BRIDGE_TX_HASH,
+        log_index,
+        &deposit_id,
+    );
+    let credit_id = credit_id_override.unwrap_or_else(|| {
+        deterministic_bridge_credit_id(
+            &observation_id,
+            &deposit_id,
+            &replay_key,
+            source_chain_id,
+            LIVE_SOURCE_CONTRACT,
+            LIVE_BRIDGE_TX_HASH,
+            log_index,
+        )
+    });
+    Transaction::CreditBridgeFromBaseEvent {
+        bridge_credit_id: credit_id.clone(),
+        receipt_id: credit_id,
+        account_id,
+        flowchain_recipient: LIVE_FLOWCHAIN_RECIPIENT.to_string(),
+        asset_id: LOCAL_TEST_UNIT_ASSET_ID.to_string(),
+        source_token: source_token.to_string(),
+        amount_units,
+        source_chain_id: source_chain_id.to_string(),
+        source_contract: LIVE_SOURCE_CONTRACT.to_string(),
+        tx_hash: LIVE_BRIDGE_TX_HASH.to_string(),
+        log_index,
+        deposit_id,
+        observation_id,
+        replay_key,
+        memo: "live Base bridge credit".to_string(),
+        local_only: false,
+        production_ready: true,
+        confirmation_proof: Some(BridgeConfirmationProof {
+            depth: 5,
+            satisfied: confirmation_satisfied,
+            latest_block_number: Some("112".to_string()),
+            required_confirmed_block_number: Some("107".to_string()),
+            requested_to_block: Some("100".to_string()),
+        }),
+        pilot_cap_proof: Some(BridgePilotCapProof {
+            approved_lockbox: true,
+            operator_acknowledged: true,
+            no_secrets: true,
+            max_usd: Some("1".to_string()),
+            max_deposit_amount_units,
+            total_cap_amount_units,
+            pilot_mode_tag: Some(
+                "0x8edc10ba20d09d2f920c2135ea53baaa72ec90df339d57248f096ca150771a6e".to_string(),
+            ),
+            supported_tokens: supported_tokens
+                .iter()
+                .map(|token| token.to_ascii_lowercase())
+                .collect(),
+        }),
+    }
+}
+
+fn live_deposit_id(log_index: u64, source_chain_id: &str, source_token: &str) -> String {
+    keccak_hex(format!("live-deposit:{source_chain_id}:{source_token}:{log_index}").as_bytes())
+}
+
+fn live_observation_id(log_index: u64, source_chain_id: &str, source_token: &str) -> String {
+    keccak_hex(format!("live-observation:{source_chain_id}:{source_token}:{log_index}").as_bytes())
+}
+
+fn live_replay_key(log_index: u64, source_chain_id: &str, source_token: &str) -> String {
+    deterministic_bridge_replay_key(
+        source_chain_id,
+        LIVE_SOURCE_CONTRACT,
+        LIVE_BRIDGE_TX_HASH,
+        log_index,
+        &live_deposit_id(log_index, source_chain_id, source_token),
+    )
+}
+
+fn live_credit_id(log_index: u64, source_chain_id: &str, source_token: &str) -> String {
+    let observation_id = live_observation_id(log_index, source_chain_id, source_token);
+    let deposit_id = live_deposit_id(log_index, source_chain_id, source_token);
+    let replay_key = live_replay_key(log_index, source_chain_id, source_token);
+    deterministic_bridge_credit_id(
+        &observation_id,
+        &deposit_id,
+        &replay_key,
+        source_chain_id,
+        LIVE_SOURCE_CONTRACT,
+        LIVE_BRIDGE_TX_HASH,
+        log_index,
+    )
+}
+
+fn bridge_credit_id_and_replay_key(tx: &Transaction) -> (String, String) {
+    let Transaction::CreditBridgeFromBaseEvent {
+        bridge_credit_id,
+        replay_key,
+        ..
+    } = tx
+    else {
+        unreachable!("expected bridge credit transaction")
+    };
+    (bridge_credit_id.clone(), replay_key.clone())
+}
+
+fn assert_rejected_without_state_change(
+    state: &mut flowmemory_devnet::model::ChainState,
+    tx: &Transaction,
+    expected: DevnetError,
+) {
+    let before = state_root(state);
+    assert_eq!(apply_transaction(state, tx), Err(expected));
+    assert_eq!(state_root(state), before);
+    assert!(state.bridge_credits.is_empty());
+    assert!(state.bridge_credit_receipts.is_empty());
+    assert!(state.bridge_replay_index.is_empty());
 }
 
 fn repo_root() -> std::path::PathBuf {

@@ -1,0 +1,107 @@
+{
+    "schema":  "flowchain.public_rpc_readiness_report.v0",
+    "generatedAt":  "2026-05-15T04:57:40.4963643Z",
+    "status":  "failed",
+    "publicRpcReady":  false,
+    "publicMode":  false,
+    "explicitLocalEndpoint":  false,
+    "requiredEnvNames":  [
+                             "FLOWCHAIN_RPC_PUBLIC_URL",
+                             "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                             "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                             "FLOWCHAIN_RPC_TLS_TERMINATED",
+                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                         ],
+    "missingEnvNames":  [
+                            "FLOWCHAIN_RPC_PUBLIC_URL",
+                            "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                            "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                            "FLOWCHAIN_RPC_TLS_TERMINATED",
+                            "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                        ],
+    "endpointValuePrinted":  false,
+    "envValuesPrinted":  false,
+    "checks":  {
+                   "urlConfigured":  false,
+                   "httpsRequiredForPublicMode":  true,
+                   "tlsTerminatedAcknowledged":  false,
+                   "allowedOriginsConfigured":  false,
+                   "allowedOriginsWildcardRejected":  false,
+                   "numericRateLimit":  false,
+                   "backupPathConfigured":  false,
+                   "backupPathExists":  false,
+                   "backupPathWritable":  false,
+                   "stateFileReadable":  true,
+                   "responseHygienePassed":  true
+               },
+    "endpointChecks":  [
+
+                       ],
+    "chainChecks":  {
+                        "chainIdMatches":  null,
+                        "latestHeightMatches":  null,
+                        "latestHashMatches":  null,
+                        "latestRootMatches":  null,
+                        "finalizedHeightMatches":  null,
+                        "blockAgeWithinLimit":  false
+                    },
+    "localState":  {
+                       "statePath":  "devnet/local/state.json",
+                       "chainId":  "flowmemory-local-devnet-v0",
+                       "latestHeight":  "18655",
+                       "latestHash":  "0xf1cc2bf74886ec78a997817c706f771d393d5bdf8077d16011564b7e513a4511",
+                       "latestRoot":  "0x149b8017ed2be0fb192c295383d2a198798a24e8509978c678fe78205ca8ee58",
+                       "latestBlockAgeSeconds":  348,
+                       "stateFileLastWriteAgeSeconds":  348,
+                       "finalizedHeight":  "18655",
+                       "finalizedHash":  "0xf1cc2bf74886ec78a997817c706f771d393d5bdf8077d16011564b7e513a4511",
+                       "mempoolDepth":  0,
+                       "peerCount":  null
+                   },
+    "maxBlockAgeSeconds":  300,
+    "responseHygiene":  {
+                            "passed":  true,
+                            "findings":  [
+
+                                         ]
+                        },
+    "problems":  [
+                     {
+                         "name":  "FLOWCHAIN_RPC_PUBLIC_URL",
+                         "category":  "env",
+                         "kind":  "blocked",
+                         "reason":  "missing required public RPC env value"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                         "category":  "env",
+                         "kind":  "blocked",
+                         "reason":  "missing required public RPC env value"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                         "category":  "env",
+                         "kind":  "blocked",
+                         "reason":  "missing required public RPC env value"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_RPC_TLS_TERMINATED",
+                         "category":  "env",
+                         "kind":  "blocked",
+                         "reason":  "missing required public RPC env value"
+                     },
+                     {
+                         "name":  "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                         "category":  "env",
+                         "kind":  "blocked",
+                         "reason":  "missing required public RPC env value"
+                     },
+                     {
+                         "name":  "devnet/local/state.json",
+                         "category":  "artifact",
+                         "kind":  "failed",
+                         "reason":  "latest block age exceeds live RPC freshness limit"
+                     }
+                 ],
+    "noSecrets":  true
+}

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -7,7 +7,11 @@ import { fileURLToPath } from "node:url";
 
 import Ajv2020 from "ajv/dist/2020.js";
 
-import { canonicalJson } from "../../shared/src/index.ts";
+import { assertNoSecrets, canonicalJson } from "../../shared/src/index.ts";
+import {
+  LOCK_NATIVE_SELECTOR,
+  diagnoseBase8453Tx,
+} from "../src/diagnose-base8453-tx.ts";
 import {
   BASE_MAINNET_CHAIN_ID,
   BASE_SEPOLIA_CHAIN_ID,
@@ -20,6 +24,7 @@ import {
   parseBridgeDepositLog,
   parseBridgeArgs,
   runBridgePipeline,
+  validateReleaseEvidenceMatchesWithdrawal,
   validateDeposit,
 } from "../src/observe-base-lockbox.ts";
 
@@ -43,8 +48,10 @@ function bridgeAjv(): Ajv2020 {
     "bridge-runtime-credit-application-state.schema.json",
     "bridge-withdrawal-intent.schema.json",
     "bridge-withdrawal-intent-set.schema.json",
+    "bridge-withdrawal-authorization.schema.json",
     "bridge-pilot-evidence.schema.json",
     "bridge-release-evidence.schema.json",
+    "bridge-local-usage-proof.schema.json",
     "bridge-runtime-handoff.schema.json",
   ].forEach((name) => ajv.addSchema(readSchema(name), name));
   return ajv;
@@ -72,33 +79,78 @@ function dataWord(value: string | bigint): string {
   return value.slice(2).padStart(64, "0");
 }
 
-function sampleBridgeDepositLog(chainId = BASE_SEPOLIA_CHAIN_ID, address = "0x1111111111111111111111111111111111111111") {
+function sampleBridgeDepositLog(
+  chainId = BASE_SEPOLIA_CHAIN_ID,
+  address = "0x1111111111111111111111111111111111111111",
+  overrides: {
+    depositId?: `0x${string}`;
+    recipient?: `0x${string}`;
+    txHash?: `0x${string}`;
+    logIndex?: string;
+    amount?: bigint;
+  } = {},
+) {
   const sender = "0x4444444444444444444444444444444444444444";
   const token = "0x3333333333333333333333333333333333333333";
-  const recipient = "0x5555555555555555555555555555555555555555555555555555555555555555";
-  const metadataHash = "0x6666666666666666666666666666666666666666666666666666666666666666";
+  const recipient = overrides.recipient ?? "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
+  const metadataHash = "0x0000000000000000000000000000000000000000000000000000000000000000";
+  const pilotModeTag = "0x8edc10ba20d09d2f920c2135ea53baaa72ec90df339d57248f096ca150771a6e";
 
   return {
     address,
     topics: [
       BRIDGE_DEPOSIT_TOPIC0,
-      "0x7777777777777777777777777777777777777777777777777777777777777777",
+      overrides.depositId ?? "0x7777777777777777777777777777777777777777777777777777777777777777",
       topic(BigInt(chainId)),
       addressTopic(sender),
     ],
     data: `0x${[
+      dataWord(address),
       dataWord(token),
-      dataWord(20_000_000n),
+      dataWord(overrides.amount ?? 20_000_000n),
       dataWord(recipient),
       dataWord(7n),
       dataWord(metadataHash),
+      dataWord(pilotModeTag),
     ].join("")}`,
     blockNumber: "0x64",
     blockHash: "0x9999999999999999999999999999999999999999999999999999999999999999",
-    transactionHash: "0x2222222222222222222222222222222222222222222222222222222222222222",
+    transactionHash: overrides.txHash ?? "0x2222222222222222222222222222222222222222222222222222222222222222",
     transactionIndex: "0x2",
-    logIndex: "0x5",
+    logIndex: overrides.logIndex ?? "0x5",
   };
+}
+
+function pilotFixtureWithAmount(path: string, amount: string, overrides: Record<string, unknown> = {}): void {
+  const fixture = JSON.parse(readFileSync(pilotFixtureUrl, "utf8")) as Record<string, unknown>;
+  writeFileSync(path, `${JSON.stringify({ ...fixture, amount, ...overrides }, null, 2)}\n`);
+}
+
+function pilotArgs(fixturePath: string, extra: string[] = []): string[] {
+  return [
+    "--mode",
+    "mock-pilot",
+    "--fixture",
+    fixturePath,
+    "--approved-lockbox",
+    "0x1111111111111111111111111111111111111111",
+    "--confirmations",
+    "2",
+    "--acknowledge-pilot",
+    "--max-usd",
+    "1",
+    "--max-deposit-amount",
+    "20000000",
+    "--total-cap-amount",
+    "20000000",
+    "--supported-token",
+    "0x3333333333333333333333333333333333333333",
+    "--asset-decimals",
+    "6",
+    "--apply-credit",
+    "--withdrawal-intent",
+    ...extra,
+  ];
 }
 
 test("validates the committed mock bridge deposit fixture", () => {
@@ -172,6 +224,8 @@ test("mock pilot E2E path applies a Base 8453 credit exactly once across replay"
       fileURLToPath(pilotFixtureUrl),
       "--approved-lockbox",
       "0x1111111111111111111111111111111111111111",
+      "--confirmations",
+      "2",
       "--acknowledge-pilot",
       "--max-usd",
       "1",
@@ -179,6 +233,10 @@ test("mock pilot E2E path applies a Base 8453 credit exactly once across replay"
       "20000000",
       "--total-cap-amount",
       "20000000",
+      "--supported-token",
+      "0x3333333333333333333333333333333333333333",
+      "--asset-decimals",
+      "6",
       "--apply-credit",
       "--withdrawal-intent",
       "--runtime-state",
@@ -215,6 +273,8 @@ test("mock pilot duplicate deposits reject replay with explicit evidence", async
     fileURLToPath(pilotDuplicateFixtureUrl),
     "--approved-lockbox",
     "0x1111111111111111111111111111111111111111",
+    "--confirmations",
+    "2",
     "--acknowledge-pilot",
     "--max-usd",
     "1",
@@ -222,6 +282,10 @@ test("mock pilot duplicate deposits reject replay with explicit evidence", async
     "20000000",
     "--total-cap-amount",
     "40000000",
+    "--supported-token",
+    "0x3333333333333333333333333333333333333333",
+    "--asset-decimals",
+    "6",
     "--apply-credit",
     "--withdrawal-intent",
   ]));
@@ -235,15 +299,119 @@ test("mock pilot duplicate deposits reject replay with explicit evidence", async
   assert.equal(result.withdrawalIntents.length, 1);
 });
 
+test("mock pilot preserves exact tiny, small, u64 boundary, and above-u64 amounts as decimal strings", async () => {
+  const stateDir = mkdtempSync(join(tmpdir(), "flowmemory-bridge-amounts-"));
+  const cases = [
+    { name: "tiny", amount: "1", cap: "1" },
+    { name: "small", amount: "2500000", cap: "2500000" },
+    { name: "u64", amount: "18446744073709551615", cap: "18446744073709551615" },
+    { name: "above-u64", amount: "18446744073709551616", cap: "18446744073709551616" },
+  ];
+  try {
+    for (const entry of cases) {
+      const fixturePath = join(stateDir, `${entry.name}.json`);
+      pilotFixtureWithAmount(fixturePath, entry.amount);
+      const result = await runBridgePipeline(parseBridgeArgs(pilotArgs(fixturePath, [
+        "--max-deposit-amount",
+        entry.cap,
+        "--total-cap-amount",
+        entry.cap,
+        "--runtime-state",
+        join(stateDir, `${entry.name}-state.json`),
+      ])));
+      const observation = result.observations[0];
+      const credit = result.credits[0];
+      const application = result.runtimeApplications[0];
+      const withdrawal = result.withdrawalIntents[0];
+      const releaseEvidence = result.releaseEvidences[0];
+
+      assert.equal(observation?.deposit.amount, entry.amount);
+      assert.equal(credit?.amount, entry.amount);
+      assert.equal(application?.amount, entry.amount);
+      assert.equal(withdrawal?.amount, entry.amount);
+      assert.equal(releaseEvidence?.releaseCall.amount, entry.amount);
+      assert.equal(credit?.asset.decimals, 6);
+      assert.equal(credit?.asset.sourceToken, observation?.deposit.token);
+      assert.equal(withdrawal?.asset.destinationAssetId, credit?.asset.destinationAssetId);
+      assert.equal(releaseEvidence?.asset.destinationAssetId, credit?.asset.destinationAssetId);
+    }
+  } finally {
+    rmSync(stateDir, { recursive: true, force: true });
+  }
+});
+
+test("mock pilot rejects per-deposit and total pilot cap excess before credit application", async () => {
+  const stateDir = mkdtempSync(join(tmpdir(), "flowmemory-bridge-caps-"));
+  try {
+    const fixturePath = join(stateDir, "cap.json");
+    pilotFixtureWithAmount(fixturePath, "20000001");
+
+    const capResult = await runBridgePipeline(parseBridgeArgs(pilotArgs(fixturePath)));
+    assert.equal(capResult.credits[0]?.status, "rejected");
+    assert.equal(capResult.credits[0]?.rejectionReason, "deposit_amount_exceeds_pilot_cap");
+    assert.equal(capResult.runtimeApplications.filter((entry) => entry.status === "applied").length, 0);
+
+    const batchPath = join(stateDir, "batch.json");
+    const deposit = JSON.parse(readFileSync(pilotFixtureUrl, "utf8")) as Record<string, unknown>;
+    writeFileSync(batchPath, `${JSON.stringify({
+      schema: "flowmemory.bridge_deposit_batch.v0",
+      deposits: [
+        { ...deposit, depositId: "0x8453000000000000000000000000000000000000000000000000000000000101", txHash: "0x8453000000000000000000000000000000000000000000000000000000000102", logIndex: 1, amount: "15000000" },
+        { ...deposit, depositId: "0x8453000000000000000000000000000000000000000000000000000000000201", txHash: "0x8453000000000000000000000000000000000000000000000000000000000202", logIndex: 2, amount: "15000000" },
+      ],
+    }, null, 2)}\n`);
+
+    await assert.rejects(
+      () => runBridgePipeline(parseBridgeArgs(pilotArgs(batchPath, [
+        "--max-deposit-amount",
+        "20000000",
+        "--total-cap-amount",
+        "20000000",
+      ]))),
+      /pilot deposit batch exceeds --total-cap-amount/,
+    );
+  } finally {
+    rmSync(stateDir, { recursive: true, force: true });
+  }
+});
+
+test("release evidence amount mismatches are rejected explicitly", async () => {
+  const result = await runBridgePipeline(parseBridgeArgs(pilotArgs(fileURLToPath(pilotFixtureUrl))));
+  const withdrawal = result.withdrawalIntents[0];
+  const releaseEvidence = result.releaseEvidences[0];
+  assert.ok(withdrawal);
+  assert.ok(releaseEvidence);
+
+  validateReleaseEvidenceMatchesWithdrawal(withdrawal, releaseEvidence);
+  assert.throws(
+    () => validateReleaseEvidenceMatchesWithdrawal(withdrawal, {
+      ...releaseEvidence,
+      releaseCall: {
+        ...releaseEvidence.releaseCall,
+        amount: "1",
+      },
+    }),
+    /release evidence amount mismatch/,
+  );
+});
+
+test("bridge pipeline reports and artifacts do not contain secrets", async () => {
+  const result = await runBridgePipeline(parseBridgeArgs(pilotArgs(fileURLToPath(pilotFixtureUrl))));
+  assertNoSecrets(result.handoff);
+  assertNoSecrets(result.pilotEvidence[0]);
+  assertNoSecrets(result.releaseEvidences[0]);
+});
+
 test("mock pilot rejects wrong source chains and unapproved contracts", async () => {
-  await assert.rejects(
-    () => runBridgePipeline(parseBridgeArgs([
+  const wrongChain = await runBridgePipeline(parseBridgeArgs([
       "--mode",
       "mock-pilot",
       "--fixture",
       fileURLToPath(fixtureUrl),
       "--approved-lockbox",
       "0x1111111111111111111111111111111111111111",
+      "--confirmations",
+      "2",
       "--acknowledge-pilot",
       "--max-usd",
       "1",
@@ -251,19 +419,24 @@ test("mock pilot rejects wrong source chains and unapproved contracts", async ()
       "20000000",
       "--total-cap-amount",
       "20000000",
+      "--supported-token",
+      "0x3333333333333333333333333333333333333333",
+      "--asset-decimals",
+      "6",
       "--apply-credit",
-    ])),
-    /pilot deposit must be from Base chain 8453/,
-  );
+    ]));
+  assert.equal(wrongChain.credits[0]?.status, "rejected");
+  assert.equal(wrongChain.credits[0]?.rejectionReason, "wrong_source_chain");
 
-  await assert.rejects(
-    () => runBridgePipeline(parseBridgeArgs([
+  const unapproved = await runBridgePipeline(parseBridgeArgs([
       "--mode",
       "mock-pilot",
       "--fixture",
       fileURLToPath(pilotFixtureUrl),
       "--approved-lockbox",
       "0x9999999999999999999999999999999999999999",
+      "--confirmations",
+      "2",
       "--acknowledge-pilot",
       "--max-usd",
       "1",
@@ -271,10 +444,41 @@ test("mock pilot rejects wrong source chains and unapproved contracts", async ()
       "20000000",
       "--total-cap-amount",
       "20000000",
+      "--supported-token",
+      "0x3333333333333333333333333333333333333333",
+      "--asset-decimals",
+      "6",
       "--apply-credit",
-    ])),
-    /unapproved bridge lockbox address/,
-  );
+    ]));
+  assert.equal(unapproved.credits[0]?.status, "rejected");
+  assert.equal(unapproved.credits[0]?.rejectionReason, "unapproved_lockbox");
+});
+
+test("mock pilot rejects unsupported tokens", async () => {
+  const result = await runBridgePipeline(parseBridgeArgs([
+      "--mode",
+      "mock-pilot",
+      "--fixture",
+      fileURLToPath(pilotFixtureUrl),
+      "--approved-lockbox",
+      "0x1111111111111111111111111111111111111111",
+      "--confirmations",
+      "2",
+      "--acknowledge-pilot",
+      "--max-usd",
+      "1",
+      "--max-deposit-amount",
+      "20000000",
+      "--total-cap-amount",
+      "20000000",
+      "--supported-token",
+      "0x9999999999999999999999999999999999999999",
+      "--asset-decimals",
+      "6",
+      "--apply-credit",
+    ]));
+  assert.equal(result.credits[0]?.status, "rejected");
+  assert.equal(result.credits[0]?.rejectionReason, "unsupported_token");
 });
 
 test("decodes BaseBridgeLockbox BridgeDeposit logs from RPC log payloads", () => {
@@ -388,6 +592,10 @@ test("observes Base public-network pilot only after eth_chainId 0x2105 and confi
       "20000000",
       "--total-cap-amount",
       "20000000",
+      "--supported-token",
+      "0x3333333333333333333333333333333333333333",
+      "--asset-decimals",
+      "6",
       "--apply-credit",
       "--withdrawal-intent",
       "--runtime-state",
@@ -401,6 +609,98 @@ test("observes Base public-network pilot only after eth_chainId 0x2105 and confi
     assert.equal(result.observations[0]?.guardrails.confirmation?.satisfied, true);
     assert.equal(result.credits[0]?.status, "applied");
     assert.equal(result.pilotEvidence[0]?.source.chainIdHex, "0x2105");
+  } finally {
+    globalThis.fetch = originalFetch;
+    rmSync(stateDir, { recursive: true, force: true });
+  }
+});
+
+test("Base public-network pilot rejects placeholder recipients without blocking valid deposits", async () => {
+  const stateDir = mkdtempSync(join(tmpdir(), "flowmemory-bridge-placeholder-rpc-"));
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (_input, init) => {
+    const body = JSON.parse(String(init?.body ?? "{}")) as { method: string };
+    if (body.method === "eth_chainId") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x2105" }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_blockNumber") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x70" }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_getLogs") {
+      return new Response(JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        result: [
+          sampleBridgeDepositLog(BASE_MAINNET_CHAIN_ID, "0x1111111111111111111111111111111111111111", {
+            depositId: `0x${"a".repeat(64)}`,
+            recipient: `0x${"5".repeat(64)}`,
+            txHash: `0x${"a".repeat(64)}`,
+            logIndex: "0x1",
+          }),
+          sampleBridgeDepositLog(BASE_MAINNET_CHAIN_ID, "0x1111111111111111111111111111111111111111", {
+            depositId: `0x${"b".repeat(64)}`,
+            txHash: `0x${"b".repeat(64)}`,
+            logIndex: "0x2",
+          }),
+        ],
+      }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, error: { message: "unexpected method" } }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  };
+
+  try {
+    const result = await runBridgePipeline(parseBridgeArgs([
+      "--mode",
+      "base-mainnet-pilot",
+      "--rpc-url",
+      "https://example.invalid/base-mainnet",
+      "--lockbox-address",
+      "0x1111111111111111111111111111111111111111",
+      "--approved-lockbox",
+      "0x1111111111111111111111111111111111111111",
+      "--from-block",
+      "100",
+      "--to-block",
+      "100",
+      "--confirmations",
+      "5",
+      "--acknowledge-pilot",
+      "--acknowledge-real-funds",
+      "--max-usd",
+      "1",
+      "--max-deposit-amount",
+      "20000000",
+      "--total-cap-amount",
+      "40000000",
+      "--supported-token",
+      "0x3333333333333333333333333333333333333333",
+      "--asset-decimals",
+      "6",
+      "--apply-credit",
+      "--runtime-state",
+      join(stateDir, "credit-state.json"),
+    ]));
+
+    assert.equal(result.observations.length, 2);
+    assert.equal(result.credits.length, 2);
+    assert.equal(result.credits[0]?.status, "rejected");
+    assert.equal(result.credits[0]?.rejectionReason, "blocked_placeholder_flowchain_recipient");
+    assert.equal(result.credits[0]?.productionReady, false);
+    assert.equal(result.credits[0]?.localOnly, true);
+    assert.equal(result.credits[1]?.status, "applied");
+    assert.equal(result.credits[1]?.productionReady, true);
+    assert.equal(result.credits[1]?.localOnly, false);
+    assert.equal(result.runtimeApplications.filter((entry) => entry.status === "applied").length, 1);
+    assert.equal(result.handoff.productionReady, true);
   } finally {
     globalThis.fetch = originalFetch;
     rmSync(stateDir, { recursive: true, force: true });
@@ -429,6 +729,8 @@ test("Base public-network pilot rejects wrong chain IDs before log reads", async
         "0x1111111111111111111111111111111111111111",
         "--approved-lockbox",
         "0x1111111111111111111111111111111111111111",
+        "--confirmations",
+        "2",
         "--from-block",
         "100",
         "--to-block",
@@ -441,10 +743,210 @@ test("Base public-network pilot rejects wrong chain IDs before log reads", async
         "20000000",
         "--total-cap-amount",
         "20000000",
+        "--supported-token",
+        "0x3333333333333333333333333333333333333333",
+        "--asset-decimals",
+        "6",
       ])),
       /wrong chain id: expected 8453 \(0x2105\)/,
     );
     assert.deepEqual(calls, ["eth_chainId"]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("diagnoses a valid Base 8453 bridge deposit transaction by tx hash", async () => {
+  const calls: string[] = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (_input, init) => {
+    const body = JSON.parse(String(init?.body ?? "{}")) as { method: string; params: unknown[] };
+    calls.push(body.method);
+    if (body.method === "eth_chainId") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x2105" }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_getTransactionByHash") {
+      return new Response(JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        result: {
+          hash: body.params[0],
+          to: "0x1111111111111111111111111111111111111111",
+          input: `${LOCK_NATIVE_SELECTOR}${"0".repeat(128)}`,
+        },
+      }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_getTransactionReceipt") {
+      return new Response(JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        result: {
+          status: "0x1",
+          blockNumber: "0x64",
+          transactionHash: body.params[0],
+          logs: [sampleBridgeDepositLog(BASE_MAINNET_CHAIN_ID)],
+        },
+      }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_blockNumber") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x71" }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, error: { message: "unexpected method" } }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  };
+
+  try {
+    const report = await diagnoseBase8453Tx({
+      rpcUrl: "https://example.invalid/base",
+      txHash: "0x2222222222222222222222222222222222222222222222222222222222222222",
+      lockboxAddress: "0x1111111111111111111111111111111111111111",
+      supportedTokens: ["0x3333333333333333333333333333333333333333"],
+      maxDepositAmount: "20000000",
+      totalCapAmount: "20000000",
+      confirmations: 12,
+      outPath: "unused.json",
+    });
+
+    assert.deepEqual(calls, ["eth_chainId", "eth_getTransactionByHash", "eth_getTransactionReceipt", "eth_blockNumber"]);
+    assert.equal(report.status, "valid");
+    assert.equal(report.safeReasonCode, "valid");
+    assert.equal((report.checks as Record<string, unknown>).bridgeDepositLogParsed, true);
+    assert.equal(report.confirmationBlocksObserved, "13");
+    assert.equal(report.printsEnvValues, false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("diagnostic reports placeholder FlowChain recipients as invalid", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (_input, init) => {
+    const body = JSON.parse(String(init?.body ?? "{}")) as { method: string; params: unknown[] };
+    if (body.method === "eth_chainId") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x2105" }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_getTransactionByHash") {
+      return new Response(JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        result: {
+          hash: body.params[0],
+          to: "0x1111111111111111111111111111111111111111",
+          input: `${LOCK_NATIVE_SELECTOR}${"5".repeat(64)}${"0".repeat(64)}`,
+        },
+      }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_getTransactionReceipt") {
+      return new Response(JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        result: {
+          status: "0x1",
+          blockNumber: "0x64",
+          transactionHash: body.params[0],
+          logs: [sampleBridgeDepositLog(BASE_MAINNET_CHAIN_ID, "0x1111111111111111111111111111111111111111", {
+            recipient: `0x${"5".repeat(64)}`,
+          })],
+        },
+      }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x71" }), {
+      headers: { "content-type": "application/json" },
+    });
+  };
+
+  try {
+    const report = await diagnoseBase8453Tx({
+      rpcUrl: "https://example.invalid/base",
+      txHash: "0x2222222222222222222222222222222222222222222222222222222222222222",
+      lockboxAddress: "0x1111111111111111111111111111111111111111",
+      supportedTokens: ["0x3333333333333333333333333333333333333333"],
+      maxDepositAmount: "20000000",
+      totalCapAmount: "20000000",
+      confirmations: 12,
+      outPath: "unused.json",
+    });
+
+    assert.equal(report.status, "invalid");
+    assert.equal(report.safeReasonCode, "recipient-placeholder");
+    assert.equal((report.checks as Record<string, unknown>).flowchainRecipientNotPlaceholder, false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("diagnostic reports only a safe reason code for wrong selectors", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (_input, init) => {
+    const body = JSON.parse(String(init?.body ?? "{}")) as { method: string; params: unknown[] };
+    if (body.method === "eth_chainId") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x2105" }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_getTransactionByHash") {
+      return new Response(JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        result: {
+          hash: body.params[0],
+          to: "0x1111111111111111111111111111111111111111",
+          input: `0xdeadbeef${"0".repeat(128)}`,
+        },
+      }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_getTransactionReceipt") {
+      return new Response(JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        result: {
+          status: "0x1",
+          blockNumber: "0x64",
+          transactionHash: body.params[0],
+          logs: [sampleBridgeDepositLog(BASE_MAINNET_CHAIN_ID)],
+        },
+      }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x71" }), {
+      headers: { "content-type": "application/json" },
+    });
+  };
+
+  try {
+    const report = await diagnoseBase8453Tx({
+      rpcUrl: "https://example.invalid/base",
+      txHash: "0x2222222222222222222222222222222222222222222222222222222222222222",
+      lockboxAddress: "0x1111111111111111111111111111111111111111",
+      supportedTokens: ["0x3333333333333333333333333333333333333333"],
+      maxDepositAmount: "20000000",
+      totalCapAmount: "20000000",
+      confirmations: 12,
+      outPath: "unused.json",
+    });
+
+    assert.equal(report.status, "invalid");
+    assert.equal(report.safeReasonCode, "wrong-selector");
+    assert.equal(Object.prototype.hasOwnProperty.call(report, "rpcUrl"), false);
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -461,6 +963,8 @@ test("Base public-network pilot rejects unapproved lockbox and insufficient conf
       "0x1111111111111111111111111111111111111111",
       "--approved-lockbox",
       "0x9999999999999999999999999999999999999999",
+      "--confirmations",
+      "2",
       "--from-block",
       "100",
       "--to-block",
@@ -473,6 +977,10 @@ test("Base public-network pilot rejects unapproved lockbox and insufficient conf
       "20000000",
       "--total-cap-amount",
       "20000000",
+      "--supported-token",
+      "0x3333333333333333333333333333333333333333",
+      "--asset-decimals",
+      "6",
     ])),
     /unapproved bridge lockbox address/,
   );
@@ -517,6 +1025,10 @@ test("Base public-network pilot rejects unapproved lockbox and insufficient conf
         "20000000",
         "--total-cap-amount",
         "20000000",
+        "--supported-token",
+        "0x3333333333333333333333333333333333333333",
+        "--asset-decimals",
+        "6",
       ])),
       /insufficient confirmations/,
     );

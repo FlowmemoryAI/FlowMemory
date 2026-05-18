@@ -823,7 +823,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "verifier_report",
     idField: "reportId",
     domainName: "verifierReportDigest",
-    signerRoles: ["verifier"],
+    signerRoles: ["verifier", "validator"],
     nonzeroFields: [
       "reportId",
       "reportSchemaHash",
@@ -899,7 +899,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "finality_receipt",
     idField: "finalityReceiptId",
     domainName: "finalityReceiptId",
-    signerRoles: ["verifier"],
+    signerRoles: ["verifier", "validator"],
     nonzeroFields: ["finalityReceiptId", "receiptId", "reportId", "challengeRoot", "policyHash"],
     input: (document) => ({
       receiptId: document.receiptId,
@@ -927,7 +927,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "bridge_deposit",
     idField: "depositId",
     domainName: "bridgeDepositId",
-    signerRoles: ["operator"],
+    signerRoles: ["operator", "bridgeRelayer"],
     nonzeroFields: [
       "depositId",
       "txHash",
@@ -960,7 +960,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "bridge_credit",
     idField: "creditId",
     domainName: "bridgeCreditId",
-    signerRoles: ["operator"],
+    signerRoles: ["operator", "bridgeReleaseAuthority"],
     nonzeroFields: ["creditId", "depositId", "recipient", "assetId", "nonce"],
     input: (document) => ({
       depositId: document.depositId,
@@ -981,7 +981,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "bridge_withdrawal",
     idField: "withdrawalId",
     domainName: "bridgeWithdrawalId",
-    signerRoles: ["agent", "operator"],
+    signerRoles: ["agent", "operator", "user"],
     nonzeroFields: ["withdrawalId", "accountId", "metadataHash", "nonce"],
     input: (document) => ({
       accountId: document.accountId,
@@ -1005,7 +1005,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "local_balance_record",
     idField: "balanceRecordId",
     domainName: "localBalanceRecordId",
-    signerRoles: ["operator"],
+    signerRoles: ["operator", "emergencyOperator"],
     nonzeroFields: ["balanceRecordId", "accountId", "assetId", "stateRoot", "nonce"],
     input: (document) => ({
       accountId: document.accountId,
@@ -1027,7 +1027,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "product_transfer",
     idField: "transferId",
     domainName: "productTransferId",
-    signerRoles: ["agent"],
+    signerRoles: ["agent", "user"],
     nonzeroFields: ["transferId", "fromAccountId", "toAccountId", "assetId"],
     input: (document) => ({
       fromAccountId: document.fromAccountId,
@@ -1047,7 +1047,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "product_token_launch",
     idField: "tokenLaunchId",
     domainName: "productTokenLaunchId",
-    signerRoles: ["agent"],
+    signerRoles: ["agent", "user"],
     nonzeroFields: [
       "tokenLaunchId",
       "issuerAccountId",
@@ -1079,7 +1079,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "product_pool_create",
     idField: "poolCreateId",
     domainName: "productPoolCreateId",
-    signerRoles: ["agent"],
+    signerRoles: ["agent", "user"],
     nonzeroFields: ["poolCreateId", "creatorAccountId", "poolId", "baseAssetId", "quoteAssetId", "metadataHash"],
     input: (document) => ({
       creatorAccountId: document.creatorAccountId,
@@ -1107,7 +1107,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "product_add_liquidity",
     idField: "addLiquidityId",
     domainName: "productAddLiquidityId",
-    signerRoles: ["agent"],
+    signerRoles: ["agent", "user"],
     nonzeroFields: ["addLiquidityId", "providerAccountId", "poolId"],
     input: (document) => ({
       providerAccountId: document.providerAccountId,
@@ -1127,7 +1127,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "product_remove_liquidity",
     idField: "removeLiquidityId",
     domainName: "productRemoveLiquidityId",
-    signerRoles: ["agent"],
+    signerRoles: ["agent", "user"],
     nonzeroFields: ["removeLiquidityId", "providerAccountId", "poolId"],
     input: (document) => ({
       providerAccountId: document.providerAccountId,
@@ -1147,7 +1147,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "product_swap",
     idField: "swapId",
     domainName: "productSwapId",
-    signerRoles: ["agent"],
+    signerRoles: ["agent", "user"],
     nonzeroFields: ["swapId", "traderAccountId", "poolId", "assetInId", "assetOutId"],
     input: (document) => ({
       traderAccountId: document.traderAccountId,
@@ -1168,7 +1168,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "product_bridge_credit_ack",
     idField: "bridgeCreditAckId",
     domainName: "productBridgeCreditAckId",
-    signerRoles: ["agent"],
+    signerRoles: ["agent", "user"],
     nonzeroFields: ["bridgeCreditAckId", "creditId", "depositId", "accountId", "assetId"],
     input: (document) => ({
       creditId: document.creditId,
@@ -1188,7 +1188,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "bridge_withdrawal_intent",
     idField: "withdrawalIntentId",
     domainName: "bridgeWithdrawalIntentId",
-    signerRoles: ["agent"],
+    signerRoles: ["agent", "user"],
     nonzeroFields: ["withdrawalIntentId", "creditId", "depositId", "flowchainAccount"],
     input: (document) => ({
       creditId: document.creditId,
@@ -1222,7 +1222,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "pilot_bridge_credit_ack",
     idField: "pilotBridgeCreditAckId",
     domainName: "pilotBridgeCreditAckId",
-    signerRoles: ["operator"],
+    signerRoles: ["operator", "bridgeReleaseAuthority"],
     nonzeroFields: [
       "pilotBridgeCreditAckId",
       "operatorId",
@@ -1259,7 +1259,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "pilot_withdrawal_intent",
     idField: "pilotWithdrawalIntentId",
     domainName: "pilotWithdrawalIntentId",
-    signerRoles: ["operator"],
+    signerRoles: ["operator", "bridgeReleaseAuthority"],
     nonzeroFields: [
       "pilotWithdrawalIntentId",
       "operatorId",
@@ -1300,7 +1300,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "pilot_release_evidence",
     idField: "pilotReleaseEvidenceId",
     domainName: "pilotReleaseEvidenceId",
-    signerRoles: ["operator"],
+    signerRoles: ["operator", "bridgeReleaseAuthority"],
     nonzeroFields: [
       "pilotReleaseEvidenceId",
       "operatorId",
@@ -1340,7 +1340,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     objectType: "pilot_emergency_control",
     idField: "pilotEmergencyControlId",
     domainName: "pilotEmergencyControlId",
-    signerRoles: ["operator"],
+    signerRoles: ["operator", "emergencyOperator"],
     nonzeroFields: [
       "pilotEmergencyControlId",
       "operatorId",

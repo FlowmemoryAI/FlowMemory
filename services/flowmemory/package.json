@@ -5,7 +5,9 @@
   "scripts": {
     "generate": "node src/generate-launch-core.ts",
     "generate:canary-dashboard": "node src/generate-canary-dashboard.ts",
+    "generate:base-sepolia-hook-dashboard": "node src/generate-base-sepolia-hook-dashboard.ts",
     "launch:v0": "node src/launch-v0.ts",
+    "stress:swaps": "node src/swap-stress.ts",
     "validate": "node src/validate-launch-core.ts",
     "fixtures:check": "node src/check-fixture-drift.ts",
     "test": "node --test test/*.test.ts"

@@ -1,0 +1,315 @@
+{
+  "schema": "flowmemory.base_sepolia.v4_hook_acceptance.v0",
+  "generatedAt": "2026-05-17T06:08:45.098Z",
+  "mode": "acceptance-package",
+  "productionReady": false,
+  "liveProofAccepted": false,
+  "allowIncomplete": false,
+  "stage": "dry-run-proof-ready",
+  "planPath": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-proof-plan.json",
+  "sourcePaths": {
+    "envCheck": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-env-check.latest.json",
+    "evidence": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-evidence.latest.json",
+    "proof": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-proof.latest.json",
+    "readbackRange": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-readback-range.latest.json",
+    "readback": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-readback.latest.json",
+    "flowMemory": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-flowmemory.latest.json"
+  },
+  "hook": {
+    "contract": "FlowMemoryAfterSwapHook",
+    "create2Deployer": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+    "constructorArgs": {
+      "poolManager": "0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408"
+    },
+    "initCodeHash": "0x2734b4f6b4f6932249d4d98240147f02cf2ba548fe1ade4a7d63d9dd0a8b9fef",
+    "expectedRuntime": {
+      "artifact": "out/FlowMemoryAfterSwapHook.sol/FlowMemoryAfterSwapHook.json",
+      "runtimeBytecodeHash": "0xa03b0f4ac8312b3790bd9282b156a5c1b2bad4f290d551c94806e79e3472db97",
+      "runtimeByteLength": 2903,
+      "immutableReferenceCount": 4,
+      "immutableConstructorArgs": {
+        "poolManager": "0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408"
+      }
+    },
+    "salt": "0x0000000000000000000000000000000000000000000000004915000000000000",
+    "hookAddress": "0xD24d7f807cb00D28DdF675E55879547d4F7B0040",
+    "miningMode": "mined-after-swap-suffix-0040",
+    "requiredLowBits": "0x0040",
+    "hasAfterSwapOnlyFlag": true,
+    "permissions": {
+      "afterSwap": true,
+      "beforeSwap": false,
+      "afterSwapReturnDelta": false,
+      "dynamicFeeOverride": false,
+      "custody": false
+    }
+  },
+  "network": {
+    "name": "Base Sepolia",
+    "chainId": "84532",
+    "explorer": "https://sepolia.basescan.org"
+  },
+  "checks": [
+    {
+      "name": "env.broadcastReady",
+      "ok": false,
+      "evidence": {
+        "artifact": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-env-check.latest.json",
+        "broadcastReady": false,
+        "chainIdOk": true,
+        "keyPresent": false,
+        "appearsFundedForSwapProofEstimate": null
+      },
+      "remediation": "Run npm run hook:base-sepolia:env-check -- --json with a Base Sepolia RPC URL and funded testnet deployer key."
+    },
+    {
+      "name": "liveCode.officialUniswapContracts",
+      "ok": true,
+      "evidence": {
+        "artifact": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-proof-plan.json",
+        "officialContractsCodePresent": true
+      },
+      "remediation": "Run npm run hook:base-sepolia:check -- --json and verify the official Base Sepolia v4 addresses still have code."
+    },
+    {
+      "name": "liveCode.plannedHookDeployed",
+      "ok": false,
+      "evidence": {
+        "hookAddress": "0xD24d7f807cb00D28DdF675E55879547d4F7B0040",
+        "plannedHookCodePresent": false
+      },
+      "remediation": "Broadcast the hook/swap proof so FlowMemoryAfterSwapHook has code at the mined address."
+    },
+    {
+      "name": "liveCode.plannedHookRuntimeMatchesArtifact",
+      "ok": false,
+      "evidence": {
+        "hookAddress": "0xD24d7f807cb00D28DdF675E55879547d4F7B0040",
+        "runtimeCodeHash": null,
+        "expectedRuntimeCodeHash": "0xa03b0f4ac8312b3790bd9282b156a5c1b2bad4f290d551c94806e79e3472db97",
+        "expectedRuntimeArtifact": "out/FlowMemoryAfterSwapHook.sol/FlowMemoryAfterSwapHook.json",
+        "expectedRuntimeByteLength": 2903,
+        "immutableConstructorArgs": {
+          "poolManager": "0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408"
+        }
+      },
+      "remediation": "Verify the deployed mined hook runtime bytecode hash matches the locally compiled FlowMemoryAfterSwapHook artifact with the Base Sepolia PoolManager immutable."
+    },
+    {
+      "name": "broadcast.swapProofArtifact",
+      "ok": false,
+      "evidence": {
+        "artifact": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-proof.latest.json",
+        "mode": "swap-proof-dry-run",
+        "broadcast": false,
+        "forgeStatus": 0,
+        "receiptCount": 0,
+        "proofMatchesPlan": true
+      },
+      "remediation": "Run npm run hook:base-sepolia:swap-proof:broadcast -- --json with the funded testnet key."
+    },
+    {
+      "name": "broadcast.poolManagerSwapIncluded",
+      "ok": true,
+      "evidence": {
+        "hasInitialize": true,
+        "hasModifyLiquidity": true,
+        "hasSwap": true
+      },
+      "remediation": "Use the full swap-proof script so the proof includes pool initialization, liquidity, and a swap."
+    },
+    {
+      "name": "broadcast.poolManagerActionsSucceeded",
+      "ok": false,
+      "evidence": {
+        "initialize": {
+          "transactionHashes": [],
+          "successfulTransactionHashes": [],
+          "allTransactionsSucceeded": false
+        },
+        "modifyLiquidity": {
+          "transactionHashes": [],
+          "successfulTransactionHashes": [],
+          "allTransactionsSucceeded": false
+        },
+        "swap": {
+          "transactionHashes": [],
+          "successfulTransactionHashes": [],
+          "allTransactionsSucceeded": false
+        }
+      },
+      "remediation": "Regenerate the broadcast swap-proof artifact and confirm the initialize, modifyLiquidity, and swap transactions all have successful receipts."
+    },
+    {
+      "name": "readback.rangeSelected",
+      "ok": true,
+      "evidence": {
+        "artifact": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-readback-range.latest.json",
+        "mode": "readback-range-plan",
+        "source": "operator-explicit",
+        "fromBlock": "41616089",
+        "toBlock": "41616089",
+        "finalizedBlock": null
+      },
+      "remediation": "Run npm run hook:base-sepolia:readback-range -- --infer-readback-range --json or record an operator-reviewed explicit range."
+    },
+    {
+      "name": "readback.rangeMatchesReadbackArtifact",
+      "ok": false,
+      "evidence": {
+        "rangeArtifact": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-readback-range.latest.json",
+        "readbackArtifact": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-readback.latest.json",
+        "rangeMode": "readback-range-plan",
+        "readbackMode": "readback",
+        "rangeHookMatchesPlan": true,
+        "readbackHookMatchesPlan": true,
+        "rangeSource": "operator-explicit",
+        "readbackRangeSource": null,
+        "rangeFromBlock": "41616089",
+        "readbackFromBlock": "41616089",
+        "rangeToBlock": "41616089",
+        "readbackToBlock": "41616089",
+        "rangeFinalizedBlock": null,
+        "readbackFinalizedBlock": null
+      },
+      "remediation": "Regenerate readback from the selected range artifact so the accepted range and readback artifact describe the same block window."
+    },
+    {
+      "name": "readback.flowPulseObserved",
+      "ok": false,
+      "evidence": {
+        "artifact": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-readback.latest.json",
+        "mode": "readback",
+        "proofComplete": false,
+        "observationCount": 0,
+        "hasIntegrityWarnings": false,
+        "hookMatchesPlan": true
+      },
+      "remediation": "Run npm run hook:base-sepolia:readback:auto -- --json or read back the operator-reviewed block range."
+    },
+    {
+      "name": "evidence.liveProofComplete",
+      "ok": false,
+      "evidence": {
+        "artifact": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-evidence.latest.json",
+        "stage": "dry-run-proof-ready",
+        "liveProofComplete": false,
+        "missing": [
+          "deployed FlowMemoryAfterSwapHook code at the mined hook address",
+          "local env-check with funded Base Sepolia deployer",
+          "broadcast swap-proof artifact with receipts",
+          "non-empty Base Sepolia hook FlowPulse readback artifact"
+        ]
+      },
+      "remediation": "Rerun npm run hook:base-sepolia:evidence -- --json after broadcast and non-empty readback."
+    },
+    {
+      "name": "flowmemory.liveObjectsGenerated",
+      "ok": false,
+      "evidence": {
+        "artifact": "E:\\FlowMemory\\flowmemory-prod-hq\\fixtures\\deployments\\base-sepolia-v4-hook-flowmemory.latest.json",
+        "liveProofComplete": false,
+        "livePoolManagerSwapObserved": false,
+        "memorySignals": 0,
+        "memoryReceipts": 0,
+        "rootflowTransitions": 0,
+        "dashboardFixtureGenerated": true
+      },
+      "remediation": "Run npm run hook:base-sepolia:flowmemory without --allow-incomplete after live proof is complete."
+    },
+    {
+      "name": "flowmemory.observationIntegrity",
+      "ok": false,
+      "evidence": {
+        "observationCount": 0,
+        "planEvidenceHookMatch": true,
+        "planReadbackHookMatch": true,
+        "checkpointIncludesHookAddress": true,
+        "allObservationsFromHook": true,
+        "allObservationsBaseSepolia": true,
+        "allObservationsFlowPulse": true,
+        "allObservationsReceiptSuccess": true
+      },
+      "remediation": "Regenerate Flow Memory evidence from the live readback; every observation must be a successful FlowPulse from the planned Base Sepolia hook."
+    },
+    {
+      "name": "flowmemory.swapSignalEvidence",
+      "ok": false,
+      "evidence": {
+        "canonicalObservationCount": 0,
+        "swapMemorySignalObservationCount": 0,
+        "memorySignals": 0,
+        "memoryReceipts": 0,
+        "rootflowTransitions": 0
+      },
+      "remediation": "Run a real PoolManager swap that emits at least one unique successful SWAP_MEMORY_SIGNAL and regenerate Flow Memory evidence."
+    },
+    {
+      "name": "flowmemory.signalsLinkedToBroadcastReceipts",
+      "ok": false,
+      "evidence": {
+        "successfulBroadcastReceiptTxHashCount": 0,
+        "flowMemorySignalTxHashCount": 0,
+        "matchedFlowMemorySignalTxHashCount": 0,
+        "missingFlowMemorySignalTxHashes": []
+      },
+      "remediation": "Regenerate Flow Memory evidence from the same successful broadcast receipt transactions that produced the accepted readback."
+    },
+    {
+      "name": "flowmemory.countsAgree",
+      "ok": false,
+      "evidence": {
+        "readbackObservationCount": 0,
+        "flowMemoryObservationCount": 0,
+        "evidenceReadbackObservationCount": 0
+      },
+      "remediation": "Regenerate evidence, readback, and Flow Memory artifacts from the same live block range."
+    }
+  ],
+  "failedChecks": [
+    "env.broadcastReady",
+    "liveCode.plannedHookDeployed",
+    "liveCode.plannedHookRuntimeMatchesArtifact",
+    "broadcast.swapProofArtifact",
+    "broadcast.poolManagerActionsSucceeded",
+    "readback.rangeMatchesReadbackArtifact",
+    "readback.flowPulseObserved",
+    "evidence.liveProofComplete",
+    "flowmemory.liveObjectsGenerated",
+    "flowmemory.observationIntegrity",
+    "flowmemory.swapSignalEvidence",
+    "flowmemory.signalsLinkedToBroadcastReceipts",
+    "flowmemory.countsAgree"
+  ],
+  "counts": {
+    "readbackObservations": 0,
+    "flowMemoryObservations": 0,
+    "canonicalObservations": 0,
+    "swapMemorySignalObservations": 0,
+    "memorySignals": 0,
+    "memoryReceipts": 0,
+    "rootflowTransitions": 0,
+    "successfulBroadcastReceiptTxHashes": 0,
+    "flowMemorySignalTxHashes": 0
+  },
+  "launchLanguage": {
+    "allowed": "FlowMemory has local/test V0 coverage and a dry-run-ready Base Sepolia Uniswap v4 hook proof path.",
+    "blocked": "Do not claim the real Base Sepolia PoolManager hook proof is live until this acceptance package has liveProofAccepted: true."
+  },
+  "nextSteps": [
+    "Run npm run hook:base-sepolia:env-check -- --json until broadcastReady is true.",
+    "Run npm run hook:base-sepolia:swap-proof:broadcast -- --json.",
+    "Run npm run hook:base-sepolia:readback-range -- --infer-readback-range --json.",
+    "Run npm run hook:base-sepolia:readback:auto -- --json.",
+    "Run npm run hook:base-sepolia:flowmemory.",
+    "Rerun npm run hook:base-sepolia:acceptance -- --json."
+  ],
+  "boundaries": [
+    "Base Sepolia proof is public testnet evidence, not production mainnet readiness.",
+    "A deployed hook alone is not enough; the acceptance proof requires a PoolManager swap that emits FlowPulse.",
+    "txHash and logIndex are read by the indexer after receipts/logs exist; the hook never claims them.",
+    "No private keys, RPC credentials, or explorer API keys are written to this artifact.",
+    "Use tiny testnet-only currencies and liquidity for this proof.",
+    "Acceptance requires all source artifacts to agree; diagnostic artifacts generated with --allow-incomplete are not acceptance evidence."
+  ]
+}

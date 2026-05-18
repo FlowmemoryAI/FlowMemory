@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowchain.wallet_signed_envelope.v0",
+  "title": "FlowChain Wallet Signed Envelope V0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "txId",
+    "chainId",
+    "payloadType",
+    "payload",
+    "tx",
+    "signerAddress",
+    "signer",
+    "nonce",
+    "fee",
+    "validity",
+    "signature",
+    "localEnvelope",
+    "verification"
+  ],
+  "properties": {
+    "schema": { "const": "flowchain.wallet_signed_envelope.v0" },
+    "version": { "const": "0" },
+    "txId": { "$ref": "#/$defs/hex32" },
+    "chainId": { "$ref": "#/$defs/uintString" },
+    "payloadType": { "type": "string", "minLength": 1 },
+    "payload": { "type": "object" },
+    "tx": { "type": "object" },
+    "signerAddress": { "$ref": "#/$defs/hex32" },
+    "signer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["address", "signerId", "signerKeyId", "signerRole", "publicKey", "publicKeyReference", "keyScheme"],
+      "properties": {
+        "address": { "$ref": "#/$defs/hex32" },
+        "signerId": { "$ref": "#/$defs/hex32" },
+        "signerKeyId": { "$ref": "#/$defs/hex32" },
+        "signerRole": { "enum": ["operator", "agent", "verifier", "hardware"] },
+        "publicKey": { "type": "string", "pattern": "^0x([0-9a-fA-F]{66}|[0-9a-fA-F]{130})$" },
+        "publicKeyReference": { "$ref": "#/$defs/hex32" },
+        "keyScheme": { "const": "secp256k1" }
+      }
+    },
+    "nonce": { "$ref": "#/$defs/uintString" },
+    "fee": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["supported", "amount", "assetId"],
+      "properties": {
+        "supported": { "type": "boolean" },
+        "amount": { "$ref": "#/$defs/uintString" },
+        "assetId": { "$ref": "#/$defs/hex32" }
+      }
+    },
+    "validity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issuedAtUnixMs", "expiresAtUnixMs", "expirationSupported"],
+      "properties": {
+        "issuedAtUnixMs": { "$ref": "#/$defs/uintString" },
+        "expiresAtUnixMs": {
+          "anyOf": [
+            { "$ref": "#/$defs/uintString" },
+            { "type": "null" }
+          ]
+        },
+        "expirationSupported": { "type": "boolean" }
+      }
+    },
+    "signature": { "type": "string", "pattern": "^0x[0-9a-fA-F]{128}$" },
+    "localEnvelope": { "$ref": "local-transaction-envelope.schema.json" },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "valid",
+        "signatureValid",
+        "chainIdMatch",
+        "signerDerivedAddress",
+        "payloadHash",
+        "transactionId",
+        "replayKey",
+        "rejectionReason",
+        "errors"
+      ],
+      "properties": {
+        "schema": { "const": "flowchain.wallet_envelope_verification.v0" },
+        "valid": { "type": "boolean" },
+        "signatureValid": { "type": "boolean" },
+        "chainIdMatch": { "type": "boolean" },
+        "signerDerivedAddress": {
+          "anyOf": [
+            { "$ref": "#/$defs/hex32" },
+            { "type": "null" }
+          ]
+        },
+        "payloadHash": {
+          "anyOf": [
+            { "$ref": "#/$defs/hex32" },
+            { "type": "null" }
+          ]
+        },
+        "transactionId": {
+          "anyOf": [
+            { "$ref": "#/$defs/hex32" },
+            { "type": "null" }
+          ]
+        },
+        "replayKey": {
+          "anyOf": [
+            { "type": "string" },
+            { "type": "null" }
+          ]
+        },
+        "rejectionReason": {
+          "anyOf": [
+            { "type": "string" },
+            { "type": "null" }
+          ]
+        },
+        "errors": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "uintString": { "type": "string", "pattern": "^[0-9]+$" }
+  }
+}

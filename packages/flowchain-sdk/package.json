@@ -1,0 +1,13 @@
+{
+  "name": "@flowmemory/flowchain-sdk",
+  "private": true,
+  "version": "0.1.0-local",
+  "type": "module",
+  "description": "FlowChain-native JSON-RPC SDK for local/private FlowChain developer tooling.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.ts"
+  }
+}

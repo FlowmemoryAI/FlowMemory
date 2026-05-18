@@ -1,0 +1,81 @@
+{
+  "schema": "flowmemory.swap_memory_stress_report.v0",
+  "generatedAt": "2026-05-17T05:09:06.935Z",
+  "options": {
+    "swaps": 1024,
+    "duplicateEvery": 128,
+    "reorgEvery": 257,
+    "invalidEvery": 211,
+    "unresolvedEvery": 307,
+    "malformedLogs": 3,
+    "outPath": "fixtures/launch-core/swap-memory-stress-report.json"
+  },
+  "inputs": {
+    "generatedLogs": 1037,
+    "validSwapCandidates": 1017,
+    "exactDuplicateLogs": 7,
+    "reorgReplacementLogs": 3,
+    "intentionallyInvalidLogs": 4,
+    "intentionallyUnresolvedLogs": 3,
+    "malformedLogs": 3
+  },
+  "indexer": {
+    "observations": 1034,
+    "dashboardCanonicalObservations": 1024,
+    "cursors": 1027,
+    "rejectedLogs": 3,
+    "duplicates": 10,
+    "duplicateKindCounts": {
+      "exactDuplicate": 7,
+      "reorgReplacement": 3
+    },
+    "warningCodes": [
+      "duplicate.exactDuplicate",
+      "duplicate.reorgReplacement",
+      "rejected.log.malformed"
+    ]
+  },
+  "verifier": {
+    "reports": 1034,
+    "statuses": {
+      "valid": 1027,
+      "invalid": 4,
+      "unresolved": 3
+    },
+    "reasonCodeCounts": {
+      "subject.mismatch": 4,
+      "commitment.mismatch": 4,
+      "artifact.unavailable": 3
+    }
+  },
+  "flowMemory": {
+    "memorySignals": 1034,
+    "swapMemorySignals": 1034,
+    "memoryReceipts": 1034,
+    "rootflowTransitions": 1027,
+    "rootfieldBundles": 1,
+    "agentMemoryViews": 1,
+    "statuses": {
+      "verified": 1017,
+      "failed": 4,
+      "stale": 3,
+      "unresolved": 3
+    }
+  },
+  "invariants": {
+    "oneReportPerObservation": true,
+    "oneSignalPerObservation": true,
+    "allSignalsAreSwapMemorySignals": true,
+    "malformedLogsRejected": true,
+    "duplicateLogsDetected": true,
+    "hasValidSignals": true,
+    "hasFailedSignals": true,
+    "hasUnresolvedSignals": true
+  },
+  "boundaries": [
+    "This is deterministic synthetic FlowPulse data, not live Uniswap swap traffic.",
+    "The test exercises the FlowPulse/indexer/verifier/Flow Memory architecture at launch-like volume.",
+    "txHash, transactionIndex, and logIndex are modeled as receipt-derived fields, not hook-known fields.",
+    "Heavy memory artifacts stay out of the event payload; each swap carries compact commitments only."
+  ]
+}

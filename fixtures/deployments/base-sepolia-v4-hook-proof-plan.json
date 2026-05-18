@@ -1,0 +1,215 @@
+{
+  "schema": "flowmemory.base_sepolia.v4_hook_proof_plan.v0",
+  "generatedAt": "2026-05-17T06:08:45.098Z",
+  "mode": "deployment-note",
+  "productionReady": false,
+  "network": {
+    "name": "Base Sepolia",
+    "chainId": "84532",
+    "explorer": "https://sepolia.basescan.org"
+  },
+  "environment": {
+    "BASE_SEPOLIA_RPC_URL": "<missing>",
+    "BASE_SEPOLIA_PUBLIC_RPC_URL": "<default-public>",
+    "BASE_SEPOLIA_DEPLOYER_KEY_HEX": "<missing>",
+    "FLOWMEMORY_HOOK_DEPLOYER_KEY_HEX": "<missing>",
+    "FLOWMEMORY_HOOK_SALT": "<default-mined>",
+    "BASE_SEPOLIA_BASESCAN_API_KEY": "<missing>",
+    "BASESCAN_API_KEY": "<missing>",
+    "FLOWMEMORY_HOOK_PROOF_OPERATOR": "<missing>",
+    "FLOWMEMORY_HOOK_PROOF_TOKEN_MINT": "<default>",
+    "FLOWMEMORY_HOOK_PROOF_LIQUIDITY_DELTA": "<default>",
+    "FLOWMEMORY_HOOK_PROOF_SWAP_AMOUNT": "<default>"
+  },
+  "uniswapV4": {
+    "source": "https://developers.uniswap.org/docs/protocols/v4/deployments",
+    "baseSepolia": {
+      "poolManager": "0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408",
+      "universalRouter": "0x492e6456D9528771018DeB9E87ef7750Ef184104",
+      "positionManager": "0x4B2C77d209D3405F41a037Ec6c77F7F5b8e2ca80",
+      "stateView": "0x571291b572ed32ce6751A2Cb2486EbEe8DEfB9B4",
+      "quoter": "0x4A6513c898fe1B2d0E78d3b0e0A4a151589B1cBa",
+      "poolSwapTest": "0x8B5bcC363ddE2614281aD875bad385E0A785D3B9",
+      "poolModifyLiquidityTest": "0x37429cd17cb1454c34e7f50b09725202fd533039",
+      "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3"
+    }
+  },
+  "hook": {
+    "contract": "FlowMemoryAfterSwapHook",
+    "create2Deployer": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+    "constructorArgs": {
+      "poolManager": "0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408"
+    },
+    "initCodeHash": "0x2734b4f6b4f6932249d4d98240147f02cf2ba548fe1ade4a7d63d9dd0a8b9fef",
+    "expectedRuntime": {
+      "artifact": "out/FlowMemoryAfterSwapHook.sol/FlowMemoryAfterSwapHook.json",
+      "runtimeBytecodeHash": "0xa03b0f4ac8312b3790bd9282b156a5c1b2bad4f290d551c94806e79e3472db97",
+      "runtimeByteLength": 2903,
+      "immutableReferenceCount": 4,
+      "immutableConstructorArgs": {
+        "poolManager": "0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408"
+      }
+    },
+    "salt": "0x0000000000000000000000000000000000000000000000004915000000000000",
+    "hookAddress": "0xD24d7f807cb00D28DdF675E55879547d4F7B0040",
+    "miningMode": "mined-after-swap-suffix-0040",
+    "requiredLowBits": "0x0040",
+    "hasAfterSwapOnlyFlag": true,
+    "permissions": {
+      "afterSwap": true,
+      "beforeSwap": false,
+      "afterSwapReturnDelta": false,
+      "dynamicFeeOverride": false,
+      "custody": false
+    }
+  },
+  "commands": {
+    "plan": "npm run hook:base-sepolia:plan -- --json",
+    "envCheck": "npm run hook:base-sepolia:env-check -- --json",
+    "evidence": "npm run hook:base-sepolia:evidence -- --json",
+    "requireLiveProof": "npm run hook:base-sepolia:require-live-proof -- --json",
+    "acceptance": "npm run hook:base-sepolia:acceptance -- --json",
+    "acceptanceDiagnostic": "npm run hook:base-sepolia:acceptance -- --allow-incomplete --json",
+    "deploymentNote": "npm run hook:base-sepolia:deployment-note -- --json",
+    "deploymentNoteDiagnostic": "npm run hook:base-sepolia:deployment-note -- --allow-incomplete --json",
+    "liveCheck": "npm run hook:base-sepolia:check -- --json",
+    "dryRun": "npm run hook:base-sepolia:dry-run -- --json",
+    "broadcast": "npm run hook:base-sepolia:broadcast -- --json",
+    "swapProofDryRun": "npm run hook:base-sepolia:swap-proof:dry-run -- --json",
+    "swapProofBroadcast": "npm run hook:base-sepolia:swap-proof:broadcast -- --json",
+    "readback": "npm run hook:base-sepolia:readback -- --rpc-url $BASE_SEPOLIA_RPC_URL --from-block <deployBlock> --to-block <latestBlock> --finalized-block <safeFinalizedBlock> --json",
+    "readbackAuto": "npm run hook:base-sepolia:readback:auto -- --json",
+    "readbackRangePlan": "npm run hook:base-sepolia:readback-range -- --infer-readback-range --json",
+    "readFlowPulse": "npm run index:base-sepolia -- --rpc-url $BASE_SEPOLIA_RPC_URL --address <FlowMemoryAfterSwapHook> --from-block <deployBlock> --to-block <latestBlock> --finalized-block <safeFinalizedBlock>"
+  },
+  "proofSequence": [
+    "Confirm live Base Sepolia Uniswap v4 contract code exists.",
+    "Deploy FlowMemoryAfterSwapHook through the standard CREATE2 deployer with the mined salt.",
+    "Verify the deployed hook address has afterSwap-only low bits.",
+    "Verify the deployed hook runtime bytecode hash matches the compiled FlowMemoryAfterSwapHook artifact with the Base Sepolia PoolManager immutable.",
+    "Run the swap-proof script or manually initialize a Base Sepolia test pool whose PoolKey.hooks is the deployed FlowMemoryAfterSwapHook.",
+    "Add tiny test liquidity using throwaway testnet proof tokens or reviewed testnet currencies.",
+    "Execute one tiny swap through PoolSwapTest or a reviewed router path with FlowMemory hookData.",
+    "Read the emitted FlowPulse from the hook with the Base Sepolia indexer.",
+    "Generate Flow Memory / Rootflow state and dashboard evidence from the live observation."
+  ],
+  "swapProofScript": {
+    "script": "script/RunBaseSepoliaV4HookSwapProof.s.sol:RunBaseSepoliaV4HookSwapProof",
+    "operatorEnv": "FLOWMEMORY_HOOK_PROOF_OPERATOR",
+    "defaultTokenMint": "1000e18 per throwaway proof token",
+    "defaultLiquidityDelta": "1e18",
+    "defaultSwapAmount": "0.01e18 exact input",
+    "outputEvent": "FlowMemoryBaseSepoliaV4HookSwapProof",
+    "note": "This is a public-testnet proof script. It deploys throwaway proof tokens and performs a tiny v4 PoolManager swap that should emit FlowPulse from the hook."
+  },
+  "poolAndSwapTemplates": {
+    "initializePool": "cast send 0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408 \"initialize((address,address,uint24,int24,address),uint160)\" \"(<currency0>,<currency1>,3000,60,<FlowMemoryAfterSwapHook>)\" 79228162514264337593543950336 --rpc-url $BASE_SEPOLIA_RPC_URL --private-key $BASE_SEPOLIA_DEPLOYER_KEY_HEX",
+    "modifyLiquidity": "cast send 0x37429cd17cb1454c34e7f50b09725202fd533039 \"modifyLiquidity((address,address,uint24,int24,address),(int24,int24,int256,bytes32),bytes)\" \"(<currency0>,<currency1>,3000,60,<FlowMemoryAfterSwapHook>)\" \"(-600,600,<liquidityDelta>,0x00...)\" <hookData> --rpc-url $BASE_SEPOLIA_RPC_URL --private-key $BASE_SEPOLIA_DEPLOYER_KEY_HEX",
+    "swap": "cast send 0x8B5bcC363ddE2614281aD875bad385E0A785D3B9 \"swap((address,address,uint24,int24,address),(bool,int256,uint160),(bool,bool),bytes)\" \"(<currency0>,<currency1>,3000,60,<FlowMemoryAfterSwapHook>)\" \"(true,<negativeExactInput>,<sqrtPriceLimitX96>)\" \"(false,false)\" <FlowMemoryHookData> --rpc-url $BASE_SEPOLIA_RPC_URL --private-key $BASE_SEPOLIA_DEPLOYER_KEY_HEX"
+  },
+  "boundaries": [
+    "Base Sepolia proof is public testnet evidence, not production mainnet readiness.",
+    "A deployed hook alone is not enough; the acceptance proof requires a PoolManager swap that emits FlowPulse.",
+    "txHash and logIndex are read by the indexer after receipts/logs exist; the hook never claims them.",
+    "No private keys, RPC credentials, or explorer API keys are written to this artifact.",
+    "Use tiny testnet-only currencies and liquidity for this proof."
+  ],
+  "liveCheck": {
+    "rpc": "default-public-base-sepolia",
+    "chainId": "84532",
+    "chainIdOk": true,
+    "checks": [
+      {
+        "name": "create2Deployer",
+        "address": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+        "codePresent": true,
+        "byteLength": 69,
+        "codeHash": null,
+        "expectedRuntimeBytecodeHash": null,
+        "runtimeBytecodeHashMatches": null
+      },
+      {
+        "name": "poolManager",
+        "address": "0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408",
+        "codePresent": true,
+        "byteLength": 24009,
+        "codeHash": null,
+        "expectedRuntimeBytecodeHash": null,
+        "runtimeBytecodeHashMatches": null
+      },
+      {
+        "name": "universalRouter",
+        "address": "0x492e6456D9528771018DeB9E87ef7750Ef184104",
+        "codePresent": true,
+        "byteLength": 19540,
+        "codeHash": null,
+        "expectedRuntimeBytecodeHash": null,
+        "runtimeBytecodeHashMatches": null
+      },
+      {
+        "name": "positionManager",
+        "address": "0x4B2C77d209D3405F41a037Ec6c77F7F5b8e2ca80",
+        "codePresent": true,
+        "byteLength": 23877,
+        "codeHash": null,
+        "expectedRuntimeBytecodeHash": null,
+        "runtimeBytecodeHashMatches": null
+      },
+      {
+        "name": "stateView",
+        "address": "0x571291b572ed32ce6751A2Cb2486EbEe8DEfB9B4",
+        "codePresent": true,
+        "byteLength": 3531,
+        "codeHash": null,
+        "expectedRuntimeBytecodeHash": null,
+        "runtimeBytecodeHashMatches": null
+      },
+      {
+        "name": "quoter",
+        "address": "0x4A6513c898fe1B2d0E78d3b0e0A4a151589B1cBa",
+        "codePresent": true,
+        "byteLength": 5820,
+        "codeHash": null,
+        "expectedRuntimeBytecodeHash": null,
+        "runtimeBytecodeHashMatches": null
+      },
+      {
+        "name": "poolSwapTest",
+        "address": "0x8B5bcC363ddE2614281aD875bad385E0A785D3B9",
+        "codePresent": true,
+        "byteLength": 6950,
+        "codeHash": null,
+        "expectedRuntimeBytecodeHash": null,
+        "runtimeBytecodeHashMatches": null
+      },
+      {
+        "name": "poolModifyLiquidityTest",
+        "address": "0x37429cd17cb1454c34e7f50b09725202fd533039",
+        "codePresent": true,
+        "byteLength": 6050,
+        "codeHash": null,
+        "expectedRuntimeBytecodeHash": null,
+        "runtimeBytecodeHashMatches": null
+      },
+      {
+        "name": "permit2",
+        "address": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+        "codePresent": true,
+        "byteLength": 9152,
+        "codeHash": null,
+        "expectedRuntimeBytecodeHash": null,
+        "runtimeBytecodeHashMatches": null
+      },
+      {
+        "name": "plannedFlowMemoryAfterSwapHook",
+        "address": "0xD24d7f807cb00D28DdF675E55879547d4F7B0040",
+        "codePresent": false,
+        "byteLength": 0,
+        "codeHash": null,
+        "expectedRuntimeBytecodeHash": "0xa03b0f4ac8312b3790bd9282b156a5c1b2bad4f290d551c94806e79e3472db97",
+        "runtimeBytecodeHashMatches": false
+      }
+    ],
+    "errors": []
+  }
+}

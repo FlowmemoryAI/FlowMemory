@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-05-13
+Last updated: 2026-05-17
 
 This file is the beginner-friendly source of truth for what exists in FlowMemory right now. It should stay factual, dated, and conservative. GitHub issues, pull requests, and merged files remain the final project record.
 
@@ -75,7 +75,61 @@ Indexer/verifier local package:
 - `npm run verify:base-canary:sources` produces a dry-run source verification plan for all canary contracts and writes `fixtures/deployments/base-canary-source-verification-plan.json`; `npm run verify:base-canary:sources:submit` submits after `BASESCAN_API_KEY` is configured.
 - All 10 deployed Base canary contracts are verified on BaseScan. `FlowMemoryHookAdapter` was verified against deployment-source commit `11d562c` because `main` now contains the newer v4-shaped callback path.
 - `npm run deploy:base-sepolia:plan` writes a non-secret Base Sepolia rehearsal plan artifact. `npm run deploy:base-sepolia` and `npm run deploy:base-sepolia:broadcast` provide Foundry dry-run/broadcast commands for the current V0 Base Sepolia testnet contract set. They require local env values and do not commit credentials.
+- `npm run hook:base-sepolia:plan`, `npm run hook:base-sepolia:env-check`,
+  `npm run hook:base-sepolia:evidence`,
+  `npm run hook:base-sepolia:require-live-proof`,
+  `npm run hook:base-sepolia:acceptance`,
+  `npm run hook:base-sepolia:check`, `npm run hook:base-sepolia:dry-run`,
+  `npm run hook:base-sepolia:swap-proof:dry-run`,
+  `npm run hook:base-sepolia:readback-range`,
+  `npm run hook:base-sepolia:readback:auto`, and
+  `npm run hook:base-sepolia:flowmemory` now provide a Base Sepolia Uniswap v4
+  hook proof path for `FlowMemoryAfterSwapHook`.
+  `npm run hook:base-sepolia:env-check` writes a non-secret local readiness
+  artifact for RPC presence, Base Sepolia chain id, deployer key format,
+  deployer address, and test ETH balance before any public testnet broadcast.
+  `npm run hook:base-sepolia:readback-range` writes a non-secret post-broadcast
+  readback range plan from explicit operator block numbers or, after broadcast,
+  from successful receipt block numbers in the swap-proof artifact. It refuses
+  dry-run artifacts as live readback evidence. The auto-readback command runs
+  readback from that inferred broadcast receipt range. The manual readback
+  command wraps the Base Sepolia indexer for the hook address and fails by
+  default unless the selected block range contains at least one hook FlowPulse
+  observation. The current mined hook address is
+  `0xD24d7f807cb00D28DdF675E55879547d4F7B0040`, with afterSwap-only low bits
+  `0x0040`, salt
+  `0x0000000000000000000000000000000000000000000000004915000000000000`,
+  and PoolManager constructor arg
+  `0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408`. Live code checks against
+  Uniswap's Base Sepolia PoolManager, router, periphery, test helper, and
+  Permit2 addresses pass. A full PoolManager swap proof has passed dry-run
+  simulation. `npm run hook:base-sepolia:evidence` currently reports
+  `stage: dry-run-proof-ready` and `liveProofComplete: false`; the strict
+  `npm run hook:base-sepolia:require-live-proof -- --json` gate correctly fails
+  until the real funded Base Sepolia broadcast and non-empty indexer readback
+  are complete. `npm run hook:base-sepolia:flowmemory` now converts completed
+  readback/evidence artifacts into Flow Memory, Rootflow, and dashboard JSON;
+  it fails by default until live proof is complete, while
+  `npm run hook:base-sepolia:flowmemory -- --allow-incomplete` writes a
+  diagnostic, non-production dashboard artifact that shows the missing proof
+  pieces. The strict generator also rejects weak readbacks: counts must agree
+  across evidence, readback, checkpoint, and indexer state; observations must be
+  successful `IFlowPulse.FlowPulse` logs from the planned Base Sepolia hook; and
+  at least one non-duplicate, non-reorged observation must be pulse type `4`
+  (`SWAP_MEMORY_SIGNAL`). `npm run hook:base-sepolia:acceptance` writes the
+  final non-secret acceptance package and exits nonzero until env-check,
+  official live code, deployed hook code, broadcast receipts, PoolManager
+  initialize/liquidity/swap actions, successful receipts for those actions,
+  planned hook runtime-bytecode identity, readback range, range/readback
+  artifact agreement, non-empty readback, consolidated evidence, generated Flow
+  Memory objects, FlowPulse observation integrity, successful
+  `SWAP_MEMORY_SIGNAL` evidence, Flow Memory signal linkage to successful
+  broadcast receipt transactions, and count agreement all pass.
 - `docs/DEPLOYMENTS/BASE_SEPOLIA_REHEARSAL.md` defines the dry-run, optional broadcast, write smoke, readback, source-verification, and rollback rehearsal path.
+- `docs/DEPLOYMENTS/BASE_SEPOLIA_V4_HOOK_PROOF.md` defines the exact live
+  proof runbook for broadcasting the mined hook, initializing a v4 pool, adding
+  tiny test liquidity, executing a real Base Sepolia swap, reading FlowPulse
+  logs, and generating Flow Memory / Rootflow evidence.
 - A Base mainnet V0 canary deployment exists for testing only; deployed addresses and smoke transactions are recorded in `docs/DEPLOYMENTS/2026-05-13-base-canary-v0.md`.
 
 Dashboard V0:
@@ -141,7 +195,8 @@ FlowChain private/local testnet snapshot:
   Windows-first root wrapper commands for prerequisite checks, init, bounded
   start/stop, demo, smoke, full smoke, export/import, and workbench dev mode.
 - In flight: optional hardware operator signal fixtures, Base Sepolia live
-  rehearsal execution against a funded testnet deployer, and advanced L1
+  rehearsal execution against a funded testnet deployer, the real Base Sepolia
+  Uniswap v4 PoolManager hook swap proof and indexer readback, and advanced L1
   research gates.
 - Missing: long-running multi-process node behavior, LAN peer mode, encrypted
   local operator vault, and second-computer smoke evidence for the latest
@@ -157,6 +212,9 @@ FlowChain private/local testnet snapshot:
 - Production ownership, upgrade, governance, fee, token, or incentive mechanics.
 - Dynamic fees or tokenomics.
 - Production Uniswap v4 hook deployment.
+- Live deployed Uniswap v4 pool proof using the mined Base Sepolia hook address
+  and a real Base Sepolia PoolManager swap. The tooling and dry-run proof path
+  exist; the funded public-testnet broadcast/readback is still pending.
 - Production Rootflow runtime implementation.
 - Production Flow Memory runtime implementation.
 - Hosted launch-core services.
@@ -230,7 +288,18 @@ Before assigning agents, check for dirty worktrees and avoid overlapping folders
 3. Use `npm run flowchain:full-smoke` as the private/local package acceptance gate before claiming a branch is demo-ready.
 4. Keep improving the missing subsystem pieces behind the wrappers: long-running runtime behavior, LAN peer mode, encrypted local operator vault, workbench polish, and Base Sepolia hook deployment planning.
 5. Keep the guarded Base canary reader and dashboard canary artifacts fresh when canary smoke actions change.
-6. Exercise the Base Sepolia deploy/read path on explicit testnet contract addresses only.
+6. Complete the Base Sepolia v4 hook proof with a funded testnet key: broadcast
+   after `npm run hook:base-sepolia:env-check -- --json` reports
+   `broadcastReady: true`, then run
+   `npm run hook:base-sepolia:swap-proof:broadcast -- --json`, run
+   `npm run hook:base-sepolia:readback-range -- --infer-readback-range --json`,
+   run `npm run hook:base-sepolia:readback:auto -- --json` or the explicit
+   `npm run hook:base-sepolia:readback -- --rpc-url $env:BASE_SEPOLIA_RPC_URL --from-block <deployBlock> --to-block <latestBlock> --finalized-block <safeFinalizedBlock> --json`,
+   require `npm run hook:base-sepolia:require-live-proof -- --json` to pass, and
+   run `npm run hook:base-sepolia:flowmemory` to generate Flow Memory /
+   Rootflow dashboard evidence from the live observation, then require
+   `npm run hook:base-sepolia:acceptance -- --json` to pass before calling the
+   Base Sepolia hook proof accepted.
 7. Continue contracts hardening without production mainnet deployment or token mechanics.
 8. Keep dashboard work fixture-backed until a production API is explicitly scoped.
 9. Keep production mainnet, public validator, tokenomics, audited-cryptography, and production bridge claims out of scope.

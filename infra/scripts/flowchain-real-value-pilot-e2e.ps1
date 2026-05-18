@@ -1,6 +1,7 @@
 param(
     [switch] $AllowIncomplete,
-    [switch] $SkipBaseline
+    [switch] $SkipBaseline,
+    [string] $ReportDir = "devnet/local/real-value-pilot"
 )
 
 $ErrorActionPreference = "Stop"
@@ -9,7 +10,7 @@ Set-StrictMode -Version Latest
 . "$PSScriptRoot\flowchain-common.ps1"
 
 $repoRoot = Set-FlowChainRepoRoot
-$reportDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/real-value-pilot")
+$reportDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportDir)
 
 if (Test-Path -LiteralPath $reportDir) {
     Remove-Item -LiteralPath $reportDir -Recurse -Force

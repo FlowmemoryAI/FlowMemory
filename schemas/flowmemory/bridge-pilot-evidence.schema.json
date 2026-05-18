@@ -16,6 +16,7 @@
     "depositId",
     "replayKey",
     "source",
+    "asset",
     "guardrails",
     "creditApplication",
     "replay",
@@ -26,8 +27,8 @@
     "evidenceId": { "$ref": "#/$defs/hex32" },
     "generatedAt": { "type": "string" },
     "mode": { "type": "string", "enum": ["mock-pilot", "base-mainnet-pilot"] },
-    "productionReady": { "const": false },
-    "localOnly": { "const": true },
+    "productionReady": { "type": "boolean" },
+    "localOnly": { "type": "boolean" },
     "observationId": { "$ref": "#/$defs/hex32" },
     "creditId": { "$ref": "#/$defs/hex32" },
     "depositId": { "$ref": "#/$defs/hex32" },
@@ -45,6 +46,7 @@
         "blockNumber": { "$ref": "#/$defs/uintString" }
       }
     },
+    "asset": { "$ref": "#/$defs/assetIdentity" },
     "guardrails": {
       "type": "object",
       "additionalProperties": false,
@@ -63,9 +65,16 @@
             "satisfied": { "const": true }
           }
         },
-        "maxUsd": { "type": "number", "exclusiveMinimum": 0, "maximum": 25 },
+        "maxUsd": { "$ref": "#/$defs/uintString" },
         "maxDepositAmount": { "$ref": "#/$defs/uintString" },
         "totalCapAmount": { "$ref": "#/$defs/uintString" },
+        "pilotModeTag": { "$ref": "#/$defs/hex32" },
+        "supportedTokens": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/address" },
+          "uniqueItems": true
+        },
+        "assetDecimals": { "type": "integer", "minimum": 0, "maximum": 255 },
         "operatorAcknowledged": { "const": true },
         "noSecrets": { "const": true }
       }
@@ -102,6 +111,17 @@
   "$defs": {
     "address": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
     "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
-    "uintString": { "type": "string", "pattern": "^[0-9]+$" }
+    "uintString": { "type": "string", "pattern": "^[0-9]+$" },
+    "assetIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceChainId", "sourceToken", "destinationAssetId", "decimals"],
+      "properties": {
+        "sourceChainId": { "const": 8453 },
+        "sourceToken": { "$ref": "#/$defs/address" },
+        "destinationAssetId": { "$ref": "#/$defs/hex32" },
+        "decimals": { "type": "integer", "minimum": 0, "maximum": 255 }
+      }
+    }
   }
 }

@@ -44,6 +44,10 @@ export function runRealValuePilotE2e(): JsonObject {
     "pilot_pause_status",
     "pilot_retry_status",
     "pilot_emergency_status",
+    "bridge_live_readiness",
+    "pilot_lifecycle_record_list",
+    "wallet_balance_list",
+    "wallet_transfer_history",
   ];
   const responses = Object.fromEntries(methods.map((method) => [method, responseFor(method, method.endsWith("_list") ? { limit: 20 } : undefined).result])) as Record<string, JsonObject>;
   const status = responses.pilot_status;
@@ -63,6 +67,12 @@ export function runRealValuePilotE2e(): JsonObject {
   assert((responses.pilot_pause_status as JsonObject).schema === "flowmemory.control_plane.real_value_pilot_pause_status.v0", "pause status schema mismatch");
   assert((responses.pilot_retry_status as JsonObject).schema === "flowmemory.control_plane.real_value_pilot_retry_status.v0", "retry status schema mismatch");
   assert((responses.pilot_emergency_status as JsonObject).schema === "flowmemory.control_plane.real_value_pilot_emergency_status.v0", "emergency status schema mismatch");
+  assert((responses.bridge_live_readiness as JsonObject).schema === "flowmemory.control_plane.bridge_live_readiness.v0", "bridge readiness schema mismatch");
+  assert(["BLOCKED", "FAILED", "READY_FOR_OPERATOR_LIVE_PILOT"].includes(String((responses.bridge_live_readiness as JsonObject).failClosedStatus)), "bridge readiness must fail closed with a machine status");
+  assert((responses.bridge_live_readiness as JsonObject).envValuesPrinted === false, "bridge readiness must not print env values");
+  assert((responses.pilot_lifecycle_record_list as JsonObject).schema === "flowmemory.control_plane.bridge_lifecycle_record_list.v0", "lifecycle record schema mismatch");
+  assert((responses.wallet_balance_list as JsonObject).schema === "flowmemory.control_plane.wallet_balance_list.v0", "wallet balance schema mismatch");
+  assert((responses.wallet_transfer_history as JsonObject).schema === "flowmemory.control_plane.wallet_transfer_history.v0", "wallet transfer history schema mismatch");
 
   assertNoSecretPayload(responses, "pilot API responses");
 
@@ -70,8 +80,11 @@ export function runRealValuePilotE2e(): JsonObject {
   const workbenchView = readRepoText("apps/dashboard/src/views/WorkbenchView.tsx");
   assert(workbenchSource.includes("realValuePilot"), "dashboard workbench source must define the real-value pilot section");
   assert(workbenchSource.includes("/pilot/status"), "dashboard workbench source must probe /pilot/status");
+  assert(workbenchSource.includes("/bridge/live-readiness"), "dashboard workbench source must probe bridge live readiness");
+  assert(workbenchSource.includes("/pilot/lifecycle"), "dashboard workbench source must probe lifecycle records");
   assert(workbenchSource.includes("capped owner testing"), "dashboard workbench source must label capped owner testing");
   assert(workbenchView.includes("Real-value pilot"), "dashboard view must render a real-value pilot panel");
+  assert(workbenchView.includes("Bridge live readiness"), "dashboard view must render bridge live readiness");
   assert(workbenchView.includes("pilotNextCommand"), "dashboard view must render the next operator command");
   assert(workbenchView.includes("browser secrets"), "dashboard view must render browser secret boundary");
   assert(
