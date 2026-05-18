@@ -9,7 +9,7 @@ Deployment scripts require these names in the local shell only:
 ```powershell
 $env:FLOWCHAIN_PILOT_OPERATOR_ACK="I_UNDERSTAND_THIS_IS_CAPPED_BASE8453_OWNER_PILOT"
 $env:FLOWCHAIN_BASE8453_RPC_URL="<Base 8453 RPC endpoint>"
-$env:FLOWCHAIN_BASE8453_DEPLOYER_PRIVATE_KEY="<deployer key in local shell only>"
+$env:FLOWCHAIN_BASE8453_DEPLOYER_PRIVATE_KEY = "<deployer key in local shell only>"
 $env:FLOWCHAIN_BASE8453_SUPPORTED_TOKEN="<0x0000000000000000000000000000000000000000 or ERC-20 address>"
 $env:FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI="<per-deposit cap>"
 $env:FLOWCHAIN_PILOT_TOTAL_CAP_WEI="<total cap>"

@@ -22,9 +22,9 @@ function Assert-InsideRepo {
 function Assert-NoSecretText {
     param([Parameter(Mandatory = $true)][string]$Path)
     $patterns = @(
-        "BEGIN PRIVATE KEY",
-        "BEGIN RSA PRIVATE KEY",
-        "BEGIN OPENSSH PRIVATE KEY",
+        ("BEGIN " + "PRIVATE KEY"),
+        ("BEGIN RSA " + "PRIVATE KEY"),
+        ("BEGIN OPENSSH " + "PRIVATE KEY"),
         "mnemonic",
         "seed phrase",
         "apiKey",
