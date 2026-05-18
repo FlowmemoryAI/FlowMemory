@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FlowRouter Peer Hint",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "packet_type",
+    "schema_version",
+    "device_id",
+    "sequence",
+    "emitted_at",
+    "peer_id",
+    "peer_role",
+    "transport",
+    "link_state",
+    "last_seen_at",
+    "rssi_dbm",
+    "snr_db",
+    "advertised_roles",
+    "payload_bytes_estimate",
+    "lora_eligible",
+    "normal_network_required_for_sync"
+  ],
+  "properties": {
+    "packet_type": { "type": "string", "enum": ["peer_hint"] },
+    "schema_version": { "type": "string" },
+    "device_id": { "type": "string", "maxLength": 32 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "emitted_at": { "type": "string" },
+    "peer_id": { "type": "string", "maxLength": 32 },
+    "peer_role": { "type": "string", "enum": ["observer", "relay", "gateway", "field-kit"] },
+    "transport": { "type": "string", "enum": ["local-simulator", "meshtastic-control-sim", "lora-control-sim"] },
+    "link_state": { "type": "string", "enum": ["heard", "stale", "lost", "unknown"] },
+    "last_seen_at": { "type": "string" },
+    "rssi_dbm": { "type": "integer", "minimum": -200, "maximum": 0 },
+    "snr_db": { "type": "number", "minimum": -50, "maximum": 50 },
+    "advertised_roles": { "type": "array", "items": { "type": "string", "maxLength": 48 } },
+    "payload_bytes_estimate": { "type": "integer", "minimum": 0, "maximum": 200 },
+    "lora_eligible": { "type": "boolean" },
+    "normal_network_required_for_sync": { "type": "boolean", "enum": [true] }
+  }
+}
