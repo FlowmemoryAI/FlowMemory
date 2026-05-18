@@ -44,6 +44,38 @@ function Add-UniqueAlertValue {
     }
 }
 
+function Get-AlertSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 if (-not $NoRefresh.IsPresent) {
     $opsOutput = (& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "flowchain-ops-snapshot.ps1") -AllowBlocked -ReportPath $opsSnapshotFullPath 2>&1) | ForEach-Object { "$_" }
     $opsExitCode = if ($null -eq $LASTEXITCODE) { 0 } else { $LASTEXITCODE }
@@ -231,11 +263,10 @@ $checks = [ordered]@{
     notificationPlanStoresNoSecrets = $true
     notificationPlanNoNetworkDelivery = $true
     envValuesPrintedFalse = $true
+    secretMarkerFindingsEmpty = $true
     noSecrets = $true
     broadcastsFalse = $true
 }
-$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
-$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
 $currentAlertState = if (@($findings | Where-Object { [string](Get-AlertProp -Object $_ -Name "severity" -Default "") -eq "critical" }).Count -gt 0) {
     "critical"
 }
@@ -249,7 +280,7 @@ else {
 $report = [ordered]@{
     schema = "flowchain.ops_alert_rules_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = $status
+    status = "pending"
     currentAlertState = $currentAlertState
     opsSnapshotStatus = [string](Get-AlertProp -Object $opsSnapshot -Name "status" -Default "missing")
     opsSnapshotPath = $opsSnapshotFullPath
@@ -271,7 +302,7 @@ $report = [ordered]@{
     commandsWithUrls = @($commandsWithUrls)
     findingsWithoutCommands = @($findingsWithoutCommands)
     checks = $checks
-    failedChecks = @($failedChecks)
+    failedChecks = @()
     notificationPlan = [ordered]@{
         deliveryMode = "owner-configured-out-of-repo"
         committedDestinations = @("local report", "operator terminal", "ops snapshot markdown")
@@ -283,7 +314,20 @@ $report = [ordered]@{
     broadcasts = $false
     envValuesPrinted = $false
     noSecrets = $true
+    secretMarkerFindings = @()
 }
+
+$preliminaryReportText = $report | ConvertTo-Json -Depth 18
+$secretMarkerFindings = @(Get-AlertSecretMarkerFindings -Text $preliminaryReportText -Label "ops alert rules report")
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 
 $reportText = $report | ConvertTo-Json -Depth 18
 Assert-FlowChainNoSecretText -Text $reportText -Label "ops alert rules report"

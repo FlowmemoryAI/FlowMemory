@@ -1006,6 +1006,7 @@ $definitions = @(
             "notificationPlanStoresNoSecrets",
             "notificationPlanNoNetworkDelivery",
             "envValuesPrintedFalse",
+            "secretMarkerFindingsEmpty",
             "noSecrets",
             "broadcastsFalse"
         )
@@ -1016,7 +1017,8 @@ $definitions = @(
             "commandsWithInlineEnvAssignment",
             "commandsWithUrls",
             "findingsWithoutCommands",
-            "failedChecks"
+            "failedChecks",
+            "secretMarkerFindings"
         )
         requiredReportProperties = [ordered]@{
             "envValuesPrinted" = $false

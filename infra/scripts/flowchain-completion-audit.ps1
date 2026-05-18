@@ -1409,6 +1409,7 @@ $opsAlertCommandsWithInlineEnvAssignment = @((Get-AuditProp -Object $opsAlertRul
 $opsAlertCommandsWithUrls = @((Get-AuditProp -Object $opsAlertRules -Name "commandsWithUrls" -Default @()))
 $opsAlertFindingsWithoutCommands = @((Get-AuditProp -Object $opsAlertRules -Name "findingsWithoutCommands" -Default @()))
 $opsAlertFailedChecks = @((Get-AuditProp -Object $opsAlertRules -Name "failedChecks" -Default @()))
+$opsAlertSecretFindings = @((Get-AuditProp -Object $opsAlertRules -Name "secretMarkerFindings" -Default @()))
 $opsAlertChecks = Get-AuditProp -Object $opsAlertRules -Name "checks"
 $opsAlertRequiredChecks = @(
     "opsSnapshotLoaded",
@@ -1426,14 +1427,19 @@ $opsAlertRequiredChecks = @(
     "notificationPlanStoresNoSecrets",
     "notificationPlanNoNetworkDelivery",
     "envValuesPrintedFalse",
+    "secretMarkerFindingsEmpty",
     "noSecrets",
     "broadcastsFalse"
 )
 $opsAlertMissingChecks = @(Get-MissingAuditChecks -Checks $opsAlertChecks -Names $opsAlertRequiredChecks)
+$opsAlertFailedCheckCount = $opsAlertFailedChecks.Count
+$opsAlertSecretFindingCount = $opsAlertSecretFindings.Count
+$opsAlertMissingCheckCount = $opsAlertMissingChecks.Count
 $opsAlertRulesPassed = $opsAlertRulesExitCode -eq 0 `
     -and $opsAlertRulesStatus -eq "passed" `
-    -and $opsAlertFailedChecks.Count -eq 0 `
-    -and $opsAlertMissingChecks.Count -eq 0 `
+    -and $opsAlertFailedCheckCount -eq 0 `
+    -and $opsAlertMissingCheckCount -eq 0 `
+    -and $opsAlertSecretFindingCount -eq 0 `
     -and $opsAlertRuleCount -ge 10 `
     -and $opsAlertCriticalRuleCount -ge 5 `
     -and $opsAlertBlockedRuleCount -ge 5 `
@@ -1787,7 +1793,7 @@ Add-AuditItem -Items $items -Id "ops-snapshot" `
 Add-AuditItem -Items $items -Id "ops-alert-rules" `
     -Requirement "Ops alert rules map every current ops finding to local operator commands with critical and blocked rule coverage, no unmapped current findings, and no external delivery credentials." `
     -Status $(if ($opsAlertRulesPassed) { "passed" } else { "failed" }) `
-    -Evidence "alertRules=$opsAlertRulesStatus, rules=$opsAlertRuleCount, criticalRules=$opsAlertCriticalRuleCount, blockedRules=$opsAlertBlockedRuleCount, failedChecks=$($opsAlertFailedChecks.Count), missingChecks=$($opsAlertMissingChecks.Count), unmapped=$($opsAlertUnmappedCodes.Count), rulesWithoutCommands=$($opsAlertRulesWithoutCommands.Count), commandUrls=$($opsAlertCommandsWithUrls.Count), inlineEnvAssignments=$($opsAlertCommandsWithInlineEnvAssignment.Count), report=$($paths.opsAlertRules)" `
+    -Evidence "alertRules=$opsAlertRulesStatus, rules=$opsAlertRuleCount, criticalRules=$opsAlertCriticalRuleCount, blockedRules=$opsAlertBlockedRuleCount, failedChecks=$opsAlertFailedCheckCount, missingChecks=$opsAlertMissingCheckCount, secretFindings=$opsAlertSecretFindingCount, unmapped=$($opsAlertUnmappedCodes.Count), rulesWithoutCommands=$($opsAlertRulesWithoutCommands.Count), commandUrls=$($opsAlertCommandsWithUrls.Count), inlineEnvAssignments=$($opsAlertCommandsWithInlineEnvAssignment.Count), report=$($paths.opsAlertRules)" `
     -Commands @("npm run flowchain:ops:alerts -- -AllowBlocked")
 
 Add-AuditItem -Items $items -Id "ops-alert-install-validation" `

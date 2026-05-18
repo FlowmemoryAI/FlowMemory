@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-18T03:45:40.1467269Z",
+    "generatedAt":  "2026-05-18T04:50:44.2887185Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -83,6 +83,7 @@
                    "notificationPlanStoresNoSecrets":  true,
                    "notificationPlanNoNetworkDelivery":  true,
                    "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
                    "noSecrets":  true,
                    "broadcastsFalse":  true
                },
@@ -327,5 +328,8 @@
               ],
     "broadcasts":  false,
     "envValuesPrinted":  false,
-    "noSecrets":  true
+    "noSecrets":  true,
+    "secretMarkerFindings":  [
+
+                             ]
 }
