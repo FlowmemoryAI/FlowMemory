@@ -1,6 +1,6 @@
 # FlowRouter FlowChain Local Alpha Signals
 
-Last updated: 2026-05-13
+Last updated: 2026-05-14
 
 Status: local-alpha operator signal mapping for the FlowRouter V0 proof of concept.
 
@@ -39,8 +39,8 @@ The projection uses the local private-testnet fixture style where applicable:
 - top-level `schema`, `generatedAt`, `chainId`, `environment`, and `source`;
 - `signalEnvelopes` with stable local signal ids, source packet references, object references, status, provenance, and payload-size hints;
 - `hardwareSignals` as direct workbench/control-plane hardware signal rows for the same envelopes;
-- control-plane-friendly collections: `operatorMetadata`, `hardwareNodes`, `workReceipts`, `verifierReports`, `bridgeAlerts`, `artifactCommitments`, `memoryCells`, `challenges`, `finalityReceipts`, and `alerts`;
-- `workbenchRecords` grouped by `operatorMetadata`, `receipts`, `verifierReports`, `bridgeAlerts`, `artifacts`, `memoryCells`, `challenges`, `hardwareSignals`, and `provenance`;
+- control-plane-friendly collections: `operatorMetadata`, `hardwareNodes`, `nodeHealth`, `peerHints`, `workReceipts`, `verifierReports`, `bridgeAlerts`, `artifactCommitments`, `memoryCells`, `challenges`, `finalityReceipts`, and `alerts`;
+- `workbenchRecords` grouped by `operatorMetadata`, `nodeHealth`, `peerHints`, `receipts`, `verifierReports`, `bridgeAlerts`, `artifacts`, `memoryCells`, `challenges`, `hardwareSignals`, and `provenance`;
 - `boundary.hardwareRequiredForPrivateTestnet = false`.
 
 This is an optional fixture projection. It is not a devnet transaction source and it does not make hardware required for the private/local chain, indexer, verifier, control-plane, or workbench to run.
@@ -51,6 +51,8 @@ This is an optional fixture projection. It is not a devnet transaction source an
 | --- | --- | --- | --- |
 | `device_manifest` | `operatorMetadata` | Names the local optional hardware fixture issuer and radio/control-plane constraints. | Local metadata only; not a wallet, key, or production operator claim. |
 | `heartbeat` | `hardwareNodes` | Shows FlowRouter reachability, power, cache, sidecar, and FlowCore state to an operator. | Local advisory status only; not hardware attestation. |
+| `node_health` | `nodeHealth` | Adds compact health, queue-depth, and resource hints for local observability. | Advisory observability only; it cannot block local chain startup. |
+| `peer_hint` | `peerHints` | Shows a low-bandwidth local topology candidate heard by the simulated sidecar. | Peer hint only; not authentication, sync proof, or LAN discovery authority. |
 | `compact_receipt_relay` | `workReceipts` and `finalityReceipts` | Gives the workbench a compact WorkReceipt candidate using receipt digest plus block, tx-prefix, and log-index hints. | Requires normal network/indexer reconciliation before it can be trusted. |
 | `verifier_report_digest_relay` | `verifierReports` | Gives the workbench a VerifierReport candidate using report id, report digest, subject digest, and result. | Digest relay is not the full verifier report. |
 | `emergency_offline_signal` | `alerts` and `challenges` | Creates a local operator alert and optional challenge input when upstream or local conditions degrade. | Candidate input only; it does not execute remote commands or claim public emergency-service reliability. |
@@ -63,6 +65,7 @@ The fixture is intentionally shaped so another agent can add it to the local con
 
 - `compatibility.controlPlaneStateKeys` names the collections a local read API can expose or merge.
 - `fixtures/hardware/flowrouter_control_plane_handoff_seed42.json` mirrors those state keys under `collections` with stable id fields and read-only merge policy.
+- `nodeHealth` and `peerHints` are optional state keys for local observability and topology hints; neither key is a chain-startup prerequisite.
 - `workReceipts`, `verifierReports`, `artifactCommitments`, `memoryCells`, `challenges`, and `finalityReceipts` use the same object names the private/local workbench already scans for in fixture state.
 - `bridgeAlerts` is present as a compact operator alert stream for bridge observer issues; it does not submit, settle, or pause local chain activity.
 - `operatorMetadata` is local fixture metadata only and contains no secrets.
@@ -75,6 +78,7 @@ The receipt, report, memory cell, challenge, and finality objects are hints. The
 ## What Hardware Contributes
 
 - Operator-visible status for a FlowRouter-like node.
+- Compact node health and peer-hint rows for local operator review.
 - Compact receipt and verifier-report breadcrumbs during degraded connectivity.
 - Compact bridge observer alert breadcrumbs during local review.
 - A local alert signal that can seed dashboard/operator attention.
@@ -84,6 +88,7 @@ The receipt, report, memory cell, challenge, and finality objects are hints. The
 ## What Remains Local Only
 
 - Device status and packet timing.
+- Node health and peer topology hints until checked against a local runtime or operator observation.
 - Receipt and verifier digest relays until reconciled against normal receipt, indexer, and verifier data.
 - Bridge alert digests until reconciled by normal bridge observer and operator workflows.
 - NFC labels, pointers, and cartridge ids until checked against expected commitments.
@@ -135,12 +140,16 @@ python hardware/simulator/flowrouter_sim.py --validate-handoff-file fixtures/har
 python hardware/simulator/flowrouter_sim.py --validate-negative-report-file fixtures/hardware/flowrouter_negative_validation_seed42.json
 ```
 
+The negative report must include rejected cases for malformed IDs, oversized payloads, stale timestamps, duplicate signals, secret-shaped payloads, required-hardware claims, and missing required handoff collections.
+
 ## Integration Notes
 
 - A dashboard, workbench, or control-plane can read `packetMappings` to understand which packet produced each local-alpha object.
 - `hardwareSignals` can feed workbench hardware-signal tables directly.
 - `operatorMetadata` can seed local fixture issuer rows.
 - `hardwareNodes` can feed hardware node cards or operator status rows.
+- `nodeHealth` can feed local health rows or alerts, but it must not gate private/local chain startup.
+- `peerHints` can feed topology rows, but normal network paths still perform actual synchronization and reconciliation.
 - `workReceipts` and `verifierReports` are breadcrumbs for later reconciliation; they are not final evidence.
 - `bridgeAlerts` can seed local bridge observer alert rows without blocking the local chain.
 - `alerts` and `challenges` can seed local operator attention without blocking the rest of the local flow.

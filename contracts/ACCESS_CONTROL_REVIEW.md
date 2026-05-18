@@ -10,6 +10,83 @@ They also do not enforce cross-contract dependency existence. For example, a wor
 
 No current contract exposes bridge finality or a challenge lifecycle. `REORGED` is an allowed verifier-report status for local/test reconciliation, not a Solidity finality proof, production bridge state, or challenge-resolution mechanism.
 
+## BaseBridgeLockbox
+
+Owner model: one constructor `initialOwner` controls the lockbox configuration.
+
+Owner-gated functions:
+
+- `transferOwnership`
+- `setReleaseAuthority`
+- `setPaused`
+- `configureToken`
+
+Release-authority-gated functions:
+
+- `releaseNative`
+- `releaseERC20`
+
+Current protections:
+
+- zero owner and zero release authority rejected
+- only allowlisted tokens can be deposited
+- allowed tokens require a nonzero per-deposit cap
+- optional per-asset total cap prevents total locked accounting from exceeding
+  the configured pilot cap
+- total cap cannot be lowered below currently locked amount
+- pause blocks new deposits
+- releases require explicit release authority, a recorded deposit, matching
+  token, available amount, and nonzero evidence hash
+- release replay is blocked for identical deposit, recipient, token, amount, and
+  evidence hash
+- direct native transfers outside `lockNative` are rejected
+
+Launch risk to watch:
+
+- pause intentionally does not block releases, so pilot operators can unwind
+  deposits while deposits are stopped.
+- release authority is a trusted pilot role, not a decentralized validator set
+  or finality proof.
+- nonstandard ERC-20 behavior such as transfer fees, rebasing, or callbacks is
+  outside the pilot safety claim.
+- native releases use Solidity `transfer`; gas-heavy smart-contract recipients
+  can fail and should not be used for pilot recovery without separate review.
+- a compromised owner or release authority can misuse the POC; emergency
+  response is limited to pause, cap changes, allowlist disablement, authority
+  rotation, and explicit release/recovery calls.
+
+## FlowChainSettlementSpine
+
+Owner model: one constructor `initialOwner` controls submitter authorization.
+
+Owner-gated functions:
+
+- `transferOwnership`
+- `setSubmitterAuthorization`
+
+Submitter-gated functions:
+
+- `commitObject` requires an authorized submitter.
+
+Current protections:
+
+- zero owner rejected
+- zero submitter rejected for authorization changes
+- owner is authorized as the first submitter
+- unauthorized submitters cannot commit objects
+- zero object type, object id, rootfield id, and commitment rejected
+- duplicate object ids rejected
+- committed object records can be read by object id
+
+Launch risk to watch:
+
+- submitter authorization is a coordination control, not proof of object
+  correctness.
+- unknown object types are allowed so local experiments can proceed, but
+  downstream agents should treat unknown types as unsupported until documented.
+- events omit `txHash`, `logIndex`, receipt status, and finality status;
+  indexers derive locator fields after receipts and logs exist.
+
 ## RootfieldRegistry
 
 Owner model: each `rootfieldId` has one owner.

@@ -326,6 +326,41 @@ contract BaseBridgeLockboxTest {
         lockbox.releaseERC20(depositId, address(caller), address(token), 1 ether, EVIDENCE_HASH);
     }
 
+    function testReleaseERC20CanReleaseInPartsWithDistinctEvidenceUntilExhausted() public {
+        bytes32 depositId = caller.lockERC20(lockbox, address(token), 10 ether, RECIPIENT);
+        bytes32 firstEvidenceHash = keccak256("flowchain.local.release.1");
+        bytes32 secondEvidenceHash = keccak256("flowchain.local.release.2");
+
+        bytes32 firstRelease =
+            lockbox.releaseERC20(depositId, address(caller), address(token), 4 ether, firstEvidenceHash);
+        bytes32 secondRelease =
+            lockbox.releaseERC20(depositId, address(caller), address(token), 6 ether, secondEvidenceHash);
+
+        _assertTrue(firstRelease != secondRelease);
+        _assertTrue(lockbox.releases(firstRelease));
+        _assertTrue(lockbox.releases(secondRelease));
+        _assertTrue(lockbox.remainingDepositAmount(depositId) == 0);
+        _assertTrue(token.balanceOf(address(caller)) == 1_000 ether);
+
+        (,,, uint256 totalLocked) = lockbox.tokenConfigs(address(token));
+        _assertTrue(totalLocked == 0);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(BaseBridgeLockbox.ReleaseAmountExceeded.selector, depositId, 1 wei, 0)
+        );
+        lockbox.releaseERC20(depositId, address(caller), address(token), 1 wei, keccak256("flowchain.local.release.3"));
+    }
+
+    function testReleaseRejectsZeroRecipientAndZeroAmount() public {
+        bytes32 depositId = caller.lockERC20(lockbox, address(token), 10 ether, RECIPIENT);
+
+        vm.expectRevert(BaseBridgeLockbox.ZeroRecipient.selector);
+        lockbox.releaseERC20(depositId, address(0), address(token), 1 ether, EVIDENCE_HASH);
+
+        vm.expectRevert(BaseBridgeLockbox.ZeroAmount.selector);
+        lockbox.releaseERC20(depositId, address(caller), address(token), 0, EVIDENCE_HASH);
+    }
+
     function testReleaseBlocksTokenMismatchOverReleaseAndZeroEvidence() public {
         bytes32 depositId = caller.lockERC20(lockbox, address(token), 10 ether, RECIPIENT);
 

@@ -1,0 +1,24 @@
+# Real-Value Pilot Bridge Relayer Checklist
+
+- [x] Read required repo orientation docs.
+- [x] Inspect current `services/bridge-relayer`.
+- [x] Inspect `E:\FlowMemory\flowmemory-bridge-full` active bridge-testnet work.
+- [x] Inspect `E:\FlowMemory\flowmemory-live-contracts`.
+- [x] Inspect current bridge-credit handoff shape.
+- [x] Add Base `8453` pilot observer mode.
+- [x] Verify `eth_chainId == 0x2105` before Base pilot reads.
+- [x] Reject wrong chain IDs.
+- [x] Reject unapproved pilot lockbox addresses.
+- [x] Support confirmation-depth configuration.
+- [x] Write deterministic observation, credit, and pilot evidence files.
+- [x] Reject or idempotently record duplicate deposit replay with evidence.
+- [x] Apply local FlowChain bridge credit exactly once in pilot/mock E2E state.
+- [x] Add withdrawal intent and release evidence path for pilot mode.
+- [x] Ensure scripts print exact next operator command after each step.
+- [x] Keep committed fixtures, logs, exports, and payloads free of secrets.
+- [x] Add `flowchain:real-value-pilot:bridge` bridge proof path.
+- [x] Run `npm test --prefix services/bridge-relayer`.
+- [x] Run mock pilot E2E without external RPC.
+- [x] Run wrong-chain negative tests.
+- [x] Run `npm run bridge:local-credit:smoke`.
+- [x] Run `npm run flowchain:product-e2e` or assign breakage.

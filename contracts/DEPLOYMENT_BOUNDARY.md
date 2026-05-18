@@ -1,6 +1,6 @@
 # Contracts Deployment Boundary
 
-Status: V0 local and Base Sepolia readiness boundary.
+Status: V0 local, Base Sepolia, and capped Base public-network pilot boundary.
 
 The current contracts are a compact event and commitment spine. They store intentional roots, receipt/report commitments, registry metadata hashes, counters, and status fields only. Heavy artifacts, AI memory, media, model data, verifier evidence, and receipt reconstruction data remain off-chain.
 
@@ -15,6 +15,10 @@ For the private/local FlowChain testnet package, these Solidity contracts are op
   including CREATE2 salt mining for the exact hook flag target.
 - Base Sepolia reads from explicit RPC URLs.
 - Guarded Base mainnet canary reads and source-verification dry runs for the documented V0 canary addresses only.
+- Capped Base chain id `8453` bridge-pilot dry runs and explicit broadcasts for
+  `BaseBridgeLockbox` and `FlowChainSettlementSpine` only, with local env
+  acknowledgement, explicit owner/release authority, allowlisted assets, and
+  nonzero configured total caps.
 - Public docs that describe emitted events, roots, receipts, and off-chain verification paths.
 
 ## Not Allowed Yet
@@ -28,7 +32,7 @@ For the private/local FlowChain testnet package, these Solidity contracts are op
 - Broad Base mainnet scans outside the documented canary reader guardrails.
 - Token launch, rewards, slashing, or fee-market mechanics.
 - Dynamic Uniswap v4 fee hooks.
-- Custody of user tokens.
+- Uncapped or unreviewed custody of user tokens.
 - Claims that contracts can know `txHash` or `logIndex` during execution.
 - Claims that on-chain storage is free or that arbitrary AI data is stored on-chain.
 
@@ -140,6 +144,13 @@ outside Git.
 The detailed public testnet rehearsal runbook is
 `docs/DEPLOYMENTS/BASE_SEPOLIA_REHEARSAL.md`.
 
+`script/DeployBridgeSpine.s.sol` is a separate dry-run-by-default bridge-spine
+script for local Anvil `31337`, Base Sepolia `84532`, and the capped Base
+`8453` pilot. The `8453` path requires `FLOWCHAIN_BASE8453_PILOT_ACK=true` and
+nonzero total caps for every configured asset. The script deploys the existing
+lockbox and settlement spine only; it does not create a new bridge architecture
+or broad public bridge approval.
+
 `verify:base-canary:sources` reads `fixtures/deployments/base-canary-v0.json`
 and prints a dry-run verification plan by default. It also writes the same
 non-secret plan to
@@ -164,6 +175,11 @@ submission uses `npm run verify:base-canary:sources:submit` and requires
 - `ArtifactRegistry`: artifact commitment metadata.
 - `CursorRegistry`: off-chain cursor commitment metadata.
 - `WorkDebtScheduler`: work-state commitments without token debt.
+- `BaseBridgeLockbox`: capped bridge-pilot lockbox with owner configuration,
+  explicit release authority, pause, allowlisted assets, per-deposit caps,
+  per-asset total caps, deposit replay guards, and release replay guards.
+- `FlowChainSettlementSpine`: object commitment event spine for bridge,
+  control-plane, memory, and finality object references.
 
 ## Post-Deploy Checks
 

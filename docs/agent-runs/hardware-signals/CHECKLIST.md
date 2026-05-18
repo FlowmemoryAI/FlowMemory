@@ -1,0 +1,35 @@
+# Hardware Signals Checklist
+
+- [x] Create run tracking files before implementation edits.
+- [x] Confirm GitHub/local task state has no scope conflict beyond the recorded branch-label divergence.
+- [x] Inspect existing hardware simulator, schemas, fixtures, and root npm scripts.
+- [x] Keep edits inside allowed folders.
+- [x] Add or confirm deterministic positive fixtures:
+  - [x] heartbeat
+  - [x] alert/offline alert
+  - [x] receipt relay
+  - [x] verifier digest
+  - [x] bridge alert
+  - [x] NFC metadata
+  - [x] peer hint
+  - [x] node health
+- [x] Add or confirm negative fixture coverage:
+  - [x] malformed IDs
+  - [x] oversized payloads
+  - [x] stale timestamps
+  - [x] duplicate signals
+  - [x] secret-shaped payloads
+- [x] Document signal schemas.
+- [x] Document control-plane/dashboard handoff shape.
+- [x] Preserve Meshtastic/LoRa low-bandwidth control-only boundary.
+- [x] Preserve optional hardware startup boundary.
+- [x] Run changed-file scope check: `node docs/agent-runs/hardware-signals/SCOPE_CHECK.mjs`.
+- [x] Run AJV 2020 schema validation: `node docs/agent-runs/hardware-signals/AJV_2020_VALIDATION.mjs`.
+- [x] Run generated-fixture no-secret scan: `node docs/agent-runs/hardware-signals/NO_SECRET_FIXTURE_SCAN.mjs`.
+- [x] Run unsafe-claim scan: `node infra/scripts/check-unsafe-claims.mjs`.
+- [x] Run `npm run flowchain:hardware:smoke`.
+- [x] Run simulator/unit tests if separate commands exist.
+- [x] Run `git diff --check`.
+- [x] Run `npm run flowchain:product-e2e` with the unmodified current environment.
+  - Passed after rebasing onto `origin/main` at `14f378b`, which includes PR #132's default-vs-audit Slither policy fix.
+- [x] Check for `npm run flowchain:l1-e2e`; the script now exists after the rebase and passed when run last.

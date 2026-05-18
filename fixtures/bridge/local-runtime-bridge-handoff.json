@@ -1,6 +1,6 @@
 {
   "schema": "flowmemory.bridge_runtime_handoff.v0",
-  "handoffId": "0xb8f818f1c45a864a7134b298b993952edda161824a4120c7716ce950fe63a2ca",
+  "handoffId": "0x36fcd03ec701406d4af9a5c8702ecaa4fcb9ead45b72e3a7e11cf33649b36c93",
   "generatedAt": "2026-05-13T00:00:00.000Z",
   "mode": "mock",
   "productionReady": false,
@@ -76,6 +76,47 @@
       "broadcast": false,
       "releasePolicy": "test_record_only",
       "productionReady": false
+    }
+  ],
+  "runtimeApplications": [
+    {
+      "schema": "flowmemory.bridge_runtime_credit_application.v0",
+      "applicationId": "0xe4799e2732957923382111ffcf05ae5a28ad441d1a998417097c31165dc6ab32",
+      "creditId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+      "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
+      "replayKey": "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09",
+      "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+      "amount": "20000000",
+      "status": "applied",
+      "appliedAt": "2026-05-13T00:00:00.000Z",
+      "applyCount": 1,
+      "localOnly": true,
+      "productionReady": false
+    }
+  ],
+  "pilotEvidence": [],
+  "releaseEvidences": [
+    {
+      "schema": "flowmemory.bridge_release_evidence.v0",
+      "releaseEvidenceId": "0x0ae60c9a0b75a071172ee7cf80959d9b35c6ea331af5ccca7bc94eda23b8b000",
+      "generatedAt": "2026-05-13T00:00:00.000Z",
+      "withdrawalIntentId": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
+      "creditId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+      "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
+      "sourceChainId": 84532,
+      "destinationChainId": 84532,
+      "lockbox": "0x1111111111111111111111111111111111111111",
+      "releaseCall": {
+        "method": "releaseERC20",
+        "recipient": "0x4444444444444444444444444444444444444444",
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "20000000",
+        "evidenceHash": "0x697d114347dc96921b6b6df9bd9b7b3dd436e4ebe51d6d9e5c1c06c682ae5b58",
+        "broadcast": false
+      },
+      "operatorNote": "Pilot release evidence only. Review before any separate release-authority transaction; this relayer does not broadcast.",
+      "productionReady": false,
+      "localOnly": true
     }
   ],
   "replayProtection": {

@@ -58,6 +58,6 @@ V0 uses certified router/radio hardware and off-the-shelf compute. It does not i
 - A local operator can tell whether the node has upstream internet, LAN availability, cache health, power/thermal status, and sidecar status.
 - A second node can receive compact Meshtastic status or digest messages during degraded IP connectivity.
 - Cached state is clearly marked local-only until verified through normal network, indexer, or chain-derived paths.
-- Hardware packets can be projected into local-alpha `hardwareSignals`, `operatorMetadata`, `hardwareNodes`, `workReceipts`, `verifierReports`, `bridgeAlerts`, `alerts`, `challenges`, `artifactCommitments`, and `memoryCells` without blocking the main local chain flow.
+- Hardware packets can be projected into local-alpha `hardwareSignals`, `operatorMetadata`, `hardwareNodes`, `nodeHealth`, `peerHints`, `workReceipts`, `verifierReports`, `bridgeAlerts`, `alerts`, `challenges`, `artifactCommitments`, and `memoryCells` without blocking the main local chain flow.
 - The prototype can be measured for thermal, power, serviceability, and enclosure-fit constraints.
 - The docs make it difficult to overclaim bandwidth, production readiness, trustlessness, or regulatory status.

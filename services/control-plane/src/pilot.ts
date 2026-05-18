@@ -136,7 +136,17 @@ function listResult(schema: string, rowsKey: string, rows: JsonObject[], params:
 }
 
 function handoffRows(state: LoadedControlPlaneState, key: string): JsonObject[] {
-  return objectRows(state.bridgeRuntimeHandoff?.[key]);
+  const fallbackBridge = asObject(state.explorerFallback?.bridge);
+  const nativeRows = objectRows(state.bridgeRuntimeHandoff?.[key]);
+  const fallbackRows = objectRows(fallbackBridge?.[key]);
+  if (fallbackRows.length === 0) {
+    return nativeRows;
+  }
+  if (nativeRows.length === 0) {
+    return fallbackRows;
+  }
+  const hasBaseMainnet = nativeRows.some((row) => chainIdOf(row) === BASE_MAINNET_CHAIN_ID);
+  return hasBaseMainnet ? nativeRows : [...nativeRows, ...fallbackRows];
 }
 
 function devnetObjectRows(state: LoadedControlPlaneState, keys: string[]): JsonObject[] {
