@@ -834,9 +834,50 @@ $publicRpcDeploymentAutomation = $reports.publicRpcDeploymentAutomation
 $publicRpcDeploymentAutomationStatus = Get-ReportStatus -Report $publicRpcDeploymentAutomation
 $publicRpcDeploymentAutomationAction = [string](Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "action" -Default "")
 $publicRpcDeploymentAutomationChecks = Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "checks"
+$publicRpcDeploymentAutomationFailedChecks = @((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "failedChecks" -Default @()))
+$publicRpcDeploymentAutomationSecretFindings = @((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "secretMarkerFindings" -Default @()))
+$publicRpcDeploymentAutomationRequiredChecks = @(
+    "bundleReportPassed",
+    "renderScriptExists",
+    "packageScriptPresent",
+    "bundleHasOwnerRenderValidation",
+    "bundleHasShellPreflight",
+    "bundleHasWindowsPreflight",
+    "bundleHasRollbackRunbook",
+    "ownerPathsOutsideRepo",
+    "hostMutationPerformedFalse",
+    "valuesPrintedFalse",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "secretMarkerFindingsEmpty",
+    "broadcastsFalse",
+    "liveBroadcastsFalse",
+    "renderCommandPassed",
+    "renderedFilesHaveNoPlaceholders",
+    "renderedFilesKeepPrivateOrigin",
+    "renderedNginxHasTls",
+    "renderedNginxHasCorsForwarding",
+    "renderedNginxHasRateLimit",
+    "renderedSystemdUsesOwnerEnv",
+    "renderedPreflightHasReadinessProbe",
+    "renderedPreflightHasTesterUnauthProbe",
+    "renderedFilesDoNotContainTokenHash",
+    "renderedReportDoesNotContainTokenHash",
+    "renderedReportKeepsOwnerPathsOutsideRepo",
+    "renderedReportNoSecrets",
+    "renderedReportBroadcastsFalse",
+    "cleanupAttempted"
+)
+$publicRpcDeploymentAutomationMissingChecks = Get-MissingAuditChecks -Checks $publicRpcDeploymentAutomationChecks -Names $publicRpcDeploymentAutomationRequiredChecks
+$publicRpcDeploymentAutomationFailedCheckCount = @($publicRpcDeploymentAutomationFailedChecks | Where-Object { $null -ne $_ }).Count
+$publicRpcDeploymentAutomationSecretFindingCount = @($publicRpcDeploymentAutomationSecretFindings | Where-Object { $null -ne $_ }).Count
+$publicRpcDeploymentAutomationMissingCheckCount = @($publicRpcDeploymentAutomationMissingChecks | Where-Object { $null -ne $_ }).Count
 $publicRpcDeploymentAutomationPassed = $publicRpcDeploymentAutomationExitCode -eq 0 `
     -and $publicRpcDeploymentAutomationStatus -eq "passed" `
     -and ($publicRpcDeploymentAutomationAction -eq "Validate") `
+    -and $publicRpcDeploymentAutomationFailedCheckCount -eq 0 `
+    -and $publicRpcDeploymentAutomationSecretFindingCount -eq 0 `
+    -and $publicRpcDeploymentAutomationMissingCheckCount -eq 0 `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderCommandPassed" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedFilesKeepPrivateOrigin" -Default $false) -eq $true) `
@@ -847,9 +888,12 @@ $publicRpcDeploymentAutomationPassed = $publicRpcDeploymentAutomationExitCode -e
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasReadinessProbe" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "secretMarkerFindingsEmpty" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "valuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "noSecrets" -Default $false) -eq $true) `
-    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "broadcasts" -Default $true) -eq $false)
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "broadcasts" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "liveBroadcasts" -Default $true) -eq $false)
 $operatorPackage = $reports.operatorPackage
 $operatorPackageStatus = Get-ReportStatus -Report $operatorPackage
 $operatorPackageChecks = Get-AuditProp -Object $operatorPackage -Name "checks"
@@ -1613,7 +1657,7 @@ Add-AuditItem -Items $items -Id "public-rpc-deployment-bundle" `
 Add-AuditItem -Items $items -Id "public-rpc-deployment-automation" `
     -Requirement "Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, post-deploy verification, and rollback phases without host mutation or owner-value leakage." `
     -Status $(if ($publicRpcDeploymentAutomationPassed) { "passed" } else { "failed" }) `
-    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), testerUnauthProbe=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false), hostMutationFalse=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false), report=$($paths.publicRpcDeploymentAutomation)" `
+    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), testerUnauthProbe=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false), hostMutationFalse=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false), failedChecks=$publicRpcDeploymentAutomationFailedCheckCount, missingChecks=$publicRpcDeploymentAutomationMissingCheckCount, secretFindings=$publicRpcDeploymentAutomationSecretFindingCount, report=$($paths.publicRpcDeploymentAutomation)" `
     -Commands @("npm run flowchain:public-rpc:deployment:automation")
 
 Add-AuditItem -Items $items -Id "node-operator-package" `

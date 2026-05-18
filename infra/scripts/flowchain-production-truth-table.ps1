@@ -473,9 +473,12 @@ $definitions = @(
             "bundleHasRollbackRunbook",
             "ownerPathsOutsideRepo",
             "hostMutationPerformedFalse",
+            "valuesPrintedFalse",
             "envValuesPrintedFalse",
             "noSecrets",
+            "secretMarkerFindingsEmpty",
             "broadcastsFalse",
+            "liveBroadcastsFalse",
             "renderCommandPassed",
             "renderedFilesHaveNoPlaceholders",
             "renderedFilesKeepPrivateOrigin",
@@ -492,6 +495,21 @@ $definitions = @(
             "renderedReportBroadcastsFalse",
             "cleanupAttempted"
         )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "action" = "Validate"
+            "flowChainRpcIsRepoOwned" = $true
+            "thirdPartyFlowChainRpcProviderNeeded" = $false
+            "valuesPrinted" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+            "liveBroadcasts" = $false
+            "hostMutationPerformed" = $false
+        }
     },
     [ordered]@{
         id = "node-operator-package"

@@ -61,6 +61,38 @@ function ConvertTo-DeploymentSafeLine {
     return $text
 }
 
+function Get-DeploymentSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 function Get-DeploymentChecksPassed {
     param([Parameter(Mandatory = $true)][System.Collections.Specialized.OrderedDictionary] $Checks)
 
@@ -402,9 +434,12 @@ foreach ($entry in $baseChecks.GetEnumerator()) {
 }
 $checks.ownerPathsOutsideRepo = $ownerPathsOutsideRepo
 $checks.hostMutationPerformedFalse = $hostMutationPerformed -eq $false
+$checks.valuesPrintedFalse = $true
 $checks.envValuesPrintedFalse = $true
 $checks.noSecrets = $true
+$checks.secretMarkerFindingsEmpty = $true
 $checks.broadcastsFalse = $true
+$checks.liveBroadcastsFalse = $true
 if ($Action -eq "Validate" -or $Action -eq "Render") {
     $checks.renderCommandPassed = $scenario.performed -eq $true -and $scenario.exitCode -eq 0
     foreach ($entry in $rendered.checks.GetEnumerator()) {
@@ -418,19 +453,17 @@ if ($Action -eq "Validate" -or $Action -eq "Render") {
     }
 }
 
-$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
-$status = if ($failedChecks.Count -eq 0 -and [string]::IsNullOrWhiteSpace($problem)) { "passed" } else { "failed" }
-
 $report = [ordered]@{
-    schema = "flowchain.public_rpc_deployment_automation_report.v0"
+    schema = "flowchain.public_rpc_deployment_automation_report.v1"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = $status
+    status = "pending"
     action = $Action
     flowChainRpcIsRepoOwned = $true
     thirdPartyFlowChainRpcProviderNeeded = $false
     bundleReportStatus = $bundleStatus
     checks = $checks
-    failedChecks = @($failedChecks)
+    failedChecks = @()
+    secretMarkerFindings = @()
     problem = $problem
     scenario = $scenario
     rollbackDrill = $rollbackDrill
@@ -456,11 +489,27 @@ $report = [ordered]@{
         "rollback-or-emergency-stop"
     )
     commands = New-CommandPlan
+    valuesPrinted = $false
     envValuesPrinted = $false
     noSecrets = $true
     broadcasts = $false
+    liveBroadcasts = $false
     hostMutationPerformed = $hostMutationPerformed
 }
+
+$preliminaryReportText = $report | ConvertTo-Json -Depth 18
+$secretMarkerFindings = @(
+    Get-DeploymentSecretMarkerFindings -Text $preliminaryReportText -Label "public RPC deployment automation report"
+)
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0 -and [string]::IsNullOrWhiteSpace($problem)) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 
 $reportText = $report | ConvertTo-Json -Depth 18
 Assert-FlowChainNoSecretText -Text $reportText -Label "public RPC deployment automation report"

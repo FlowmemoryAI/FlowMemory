@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Automation
 
-Generated: 2026-05-18T03:54:52.2320362Z
+Generated: 2026-05-18T04:01:41.6197382Z
 Status: passed
 Action: Validate
 
@@ -17,9 +17,12 @@ This validator proves the owner-host public RPC deployment path can render concr
 - bundleHasRollbackRunbook: True
 - ownerPathsOutsideRepo: True
 - hostMutationPerformedFalse: True
+- valuesPrintedFalse: True
 - envValuesPrintedFalse: True
 - noSecrets: True
+- secretMarkerFindingsEmpty: True
 - broadcastsFalse: True
+- liveBroadcastsFalse: True
 - renderCommandPassed: True
 - renderedNginxWritten: True
 - renderedSystemdLiveWritten: True
