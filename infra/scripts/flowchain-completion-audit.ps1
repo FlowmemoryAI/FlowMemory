@@ -549,6 +549,7 @@ $serviceInstallValidation = $reports.serviceInstallValidation
 $serviceInstallValidationStatus = Get-ReportStatus -Report $serviceInstallValidation
 $serviceInstallChecks = Get-AuditProp -Object $serviceInstallValidation -Name "checks"
 $serviceInstallFailedChecks = @((Get-AuditProp -Object $serviceInstallValidation -Name "failedChecks" -Default @()))
+$serviceInstallSecretFindings = @((Get-AuditProp -Object $serviceInstallValidation -Name "secretMarkerFindings" -Default @()))
 $serviceInstallMissingPackageScripts = @((Get-AuditProp -Object $serviceInstallValidation -Name "missingPackageScripts" -Default @()))
 $serviceInstallRequiredChecks = @(
     "installScriptExists",
@@ -596,15 +597,22 @@ $serviceInstallRequiredChecks = @(
     "uninstallAbsentReportBroadcastsFalse",
     "commandsPresent",
     "envValuesPrintedFalse",
+    "childReportsNoSecrets",
+    "childReportsSecretMarkerFindingsEmpty",
+    "secretMarkerFindingsEmpty",
     "noSecrets",
     "broadcastsFalse"
 )
 $serviceInstallMissingChecks = @(Get-MissingAuditChecks -Checks $serviceInstallChecks -Names $serviceInstallRequiredChecks)
+$serviceInstallFailedCheckCount = $serviceInstallFailedChecks.Count
+$serviceInstallSecretFindingCount = $serviceInstallSecretFindings.Count
+$serviceInstallMissingCheckCount = $serviceInstallMissingChecks.Count
 $serviceInstallValidationPassed = $serviceInstallValidationExitCode -eq 0 `
     -and $serviceInstallValidationStatus -eq "passed" `
-    -and $serviceInstallFailedChecks.Count -eq 0 `
+    -and $serviceInstallFailedCheckCount -eq 0 `
+    -and $serviceInstallSecretFindingCount -eq 0 `
     -and $serviceInstallMissingPackageScripts.Count -eq 0 `
-    -and $serviceInstallMissingChecks.Count -eq 0 `
+    -and $serviceInstallMissingCheckCount -eq 0 `
     -and ((Get-AuditProp -Object $serviceInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $serviceInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $serviceInstallValidation -Name "broadcasts" -Default $true) -eq $false)
@@ -1623,7 +1631,7 @@ Add-AuditItem -Items $items -Id "service-supervisor-autorecovery" `
 Add-AuditItem -Items $items -Id "service-install-validation" `
     -Requirement "Owner-host Windows service install validation proves no-secret Scheduled Task plan/status/uninstall no-op behavior and a bridge-relayer opt-in plan for reboot-persistent live supervisor operation." `
     -Status $(if ($serviceInstallValidationPassed) { "passed" } else { "failed" }) `
-    -Evidence "serviceInstall=$serviceInstallValidationStatus, failedChecks=$($serviceInstallFailedChecks.Count), missingChecks=$($serviceInstallMissingChecks.Count), missingScripts=$($serviceInstallMissingPackageScripts.Count), planDidNotMutate=$(Get-AuditProp -Object $serviceInstallChecks -Name "planDidNotMutate" -Default $false), statusDidNotMutate=$(Get-AuditProp -Object $serviceInstallChecks -Name "statusDidNotMutate" -Default $false), relayerOptIn=$(Get-AuditProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInStartsLoop" -Default $false), report=$($paths.serviceInstallValidation)" `
+    -Evidence "serviceInstall=$serviceInstallValidationStatus, failedChecks=$serviceInstallFailedCheckCount, missingChecks=$serviceInstallMissingCheckCount, secretFindings=$serviceInstallSecretFindingCount, missingScripts=$($serviceInstallMissingPackageScripts.Count), planDidNotMutate=$(Get-AuditProp -Object $serviceInstallChecks -Name "planDidNotMutate" -Default $false), statusDidNotMutate=$(Get-AuditProp -Object $serviceInstallChecks -Name "statusDidNotMutate" -Default $false), relayerOptIn=$(Get-AuditProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInStartsLoop" -Default $false), report=$($paths.serviceInstallValidation)" `
     -Commands @("npm run flowchain:service:install:validate", "npm run flowchain:service:install:windows -- -Action Plan")
 
 Add-AuditItem -Items $items -Id "wallet-create" `

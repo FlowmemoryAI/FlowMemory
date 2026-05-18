@@ -165,12 +165,16 @@ $definitions = @(
             "uninstallAbsentReportBroadcastsFalse",
             "commandsPresent",
             "envValuesPrintedFalse",
+            "childReportsNoSecrets",
+            "childReportsSecretMarkerFindingsEmpty",
+            "secretMarkerFindingsEmpty",
             "noSecrets",
             "broadcastsFalse"
         )
         requiredEmptyArrays = @(
             "failedChecks",
-            "missingPackageScripts"
+            "missingPackageScripts",
+            "secretMarkerFindings"
         )
         requiredReportProperties = [ordered]@{
             "envValuesPrinted" = $false

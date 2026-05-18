@@ -99,6 +99,38 @@ function Get-ServiceInstallValidationProp {
     return $Default
 }
 
+function Get-ServiceInstallSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 function Test-PackageScript {
     param(
         [Parameter(Mandatory = $true)][AllowNull()][object] $PackageJson,
@@ -315,20 +347,24 @@ $checks = [ordered]@{
         -and -not [string]::IsNullOrWhiteSpace([string](Get-ServiceInstallValidationProp -Object $planCommands -Name "uninstall" -Default "")) `
         -and -not [string]::IsNullOrWhiteSpace([string](Get-ServiceInstallValidationProp -Object $planCommands -Name "validate" -Default ""))
     envValuesPrintedFalse = (Get-ServiceInstallValidationProp -Object $planReport -Name "envValuesPrinted" -Default $true) -eq $false
-    noSecrets = (Get-ServiceInstallValidationProp -Object $planReport -Name "noSecrets" -Default $false) -eq $true
+    childReportsNoSecrets = (Get-ServiceInstallValidationProp -Object $planReport -Name "noSecrets" -Default $false) -eq $true `
+        -and (Get-ServiceInstallValidationProp -Object $bridgeRelayerPlanReport -Name "noSecrets" -Default $false) -eq $true `
+        -and (Get-ServiceInstallValidationProp -Object $statusReport -Name "noSecrets" -Default $false) -eq $true `
+        -and (Get-ServiceInstallValidationProp -Object $uninstallAbsentReport -Name "noSecrets" -Default $false) -eq $true
+    childReportsSecretMarkerFindingsEmpty = $true
+    secretMarkerFindingsEmpty = $true
+    noSecrets = $true
     broadcastsFalse = (Get-ServiceInstallValidationProp -Object $planReport -Name "broadcasts" -Default $true) -eq $false
 }
-
-$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
-$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
 
 $report = [ordered]@{
     schema = "flowchain.service_install_validation_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = $status
+    status = "pending"
     taskName = $TaskName
     checks = $checks
-    failedChecks = @($failedChecks)
+    failedChecks = @()
+    secretMarkerFindings = @()
     missingPackageScripts = @($missingPackageScripts)
     planReportPath = $planReportFullPath
     planMarkdownPath = $planMarkdownFullPath
@@ -379,6 +415,37 @@ $report = [ordered]@{
     noSecrets = $true
     broadcasts = $false
 }
+
+$childReportSecretMarkerFindings = @(
+    if ($null -ne $planReport) {
+        Get-ServiceInstallSecretMarkerFindings -Text ($planReport | ConvertTo-Json -Depth 18) -Label "service install plan report"
+    }
+    if ($null -ne $bridgeRelayerPlanReport) {
+        Get-ServiceInstallSecretMarkerFindings -Text ($bridgeRelayerPlanReport | ConvertTo-Json -Depth 18) -Label "service install bridge relayer opt-in plan report"
+    }
+    if ($null -ne $statusReport) {
+        Get-ServiceInstallSecretMarkerFindings -Text ($statusReport | ConvertTo-Json -Depth 18) -Label "service install status report"
+    }
+    if ($null -ne $uninstallAbsentReport) {
+        Get-ServiceInstallSecretMarkerFindings -Text ($uninstallAbsentReport | ConvertTo-Json -Depth 18) -Label "service install uninstall absent report"
+    }
+)
+$preliminaryReportText = $report | ConvertTo-Json -Depth 18
+$validationReportSecretMarkerFindings = @(Get-ServiceInstallSecretMarkerFindings -Text $preliminaryReportText -Label "service install validation report")
+$secretMarkerFindings = @(
+    @($childReportSecretMarkerFindings)
+    @($validationReportSecretMarkerFindings)
+)
+$checks["childReportsSecretMarkerFindingsEmpty"] = $childReportSecretMarkerFindings.Count -eq 0
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $checks["childReportsNoSecrets"] -eq $true -and $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 
 $reportText = $report | ConvertTo-Json -Depth 18
 Assert-FlowChainNoSecretText -Text $reportText -Label "service install validation report"
