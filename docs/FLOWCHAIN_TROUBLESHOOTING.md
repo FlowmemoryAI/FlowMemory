@@ -38,6 +38,7 @@ From the repo root:
 
 ```powershell
 npm run flowchain:prereq
+npm run flowchain:doctor
 ```
 
 If that fails, fix the missing prerequisite before running init, demo, smoke,
@@ -64,6 +65,12 @@ or workbench commands.
 | Cargo cannot overwrite a Windows `.exe` under `target` | A running node, old test process, or stale shell is locking Cargo build output. | Run `npm run flowchain:node:stop`, close old PowerShell windows, and retry. If the lock remains, reboot before deleting ignored local build output. |
 | Existing state blocks init | `devnet/local/state.json` already exists. | Run `npm run flowchain:demo`, or force reset with `powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-init.ps1 -Force`. |
 | Import refuses to overwrite state | Import protects existing local state by default. | Run `npm run flowchain:import -- --BundlePath <zip> -Force`. |
+| Final wrapper says dashboard dependencies are missing | Dashboard package dependencies have not been installed. | Run `npm install --prefix apps/dashboard`. |
+| Final wrapper says crypto package dependencies are missing | Crypto package dependencies have not been installed. | Run `npm install --prefix crypto`. |
+| Final wrapper reports live readiness `blocked` | Live Base pilot env values are intentionally absent. | Run `npm run flowchain:bridge:live:check` after setting the required env names locally. |
+| Final wrapper reports missing strict live proof commands | Contracts, bridge, or runtime proof commands have not merged yet. | Read `devnet/local/production-l1-e2e/flowchain-production-l1-e2e-report.json` and the owner rows for issues #133, #138, and #134. |
+| Evidence export refuses a path | The export stage found an excluded or secret-shaped file. | Move env, vault, key, seed phrase, mnemonic, RPC credential, API key, or webhook files outside the evidence source and rerun `npm run flowchain:emergency:export-evidence`. |
+| Import root mismatch | Restored state does not match the exported root. | Rerun `npm run flowchain:export`, import to a fresh state path, and inspect `devnet/local/production-l1-e2e/export-import-root-compare.json`. |
 
 ## Clean Local Reset
 
@@ -185,6 +192,17 @@ npm run flowchain:real-value-pilot:ops
 | Replay or duplicate credit evidence appears | The same Base event was observed more than once. | Keep the generated `replayKey` evidence and do not manually credit twice. Rerun `npm run flowchain:real-value-pilot -- --Mode Live --Action Observe` to regenerate deterministic evidence. |
 | Pause or resume cannot broadcast | `cast` is missing, the owner key is missing, or the key is not the lockbox owner. | Install Foundry, verify `$env:FLOWCHAIN_BASE8453_DEPLOYER_PRIVATE_KEY` in the local shell, and rerun the action. |
 | Evidence export refuses a file | The evidence directory contains an env file, local vault, private-key file, build output, or secret-named path. | Move that file outside the evidence directory and rerun `npm run flowchain:real-value-pilot:export`. |
+
+Current ops readiness check:
+
+```powershell
+npm run flowchain:bridge:live:check
+```
+
+This command refuses missing acknowledgement, missing RPC URL, wrong Base chain
+ID, missing or malformed lockbox, missing token address when token mode requires
+one, missing or oversized caps, unsafe confirmation depth, and broad block
+ranges. It prints env names only.
 
 ## Smoke Evidence
 
