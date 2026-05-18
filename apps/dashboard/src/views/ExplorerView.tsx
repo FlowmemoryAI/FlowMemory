@@ -165,6 +165,10 @@ export function ExplorerView({ data, workbench }: { data: DashboardData; workben
   const testerPacketGate = liveReadinessGates.find((record) => record.id === "external-tester-sharing");
   const launchReady = factValue(liveReadinessSummary, ["deployment ready"], "false");
   const packetShareable = factValue(liveReadinessSummary, ["packet shareable"], "false");
+  const relayerChildTimeout = factValue(liveReadinessSummary, ["relayer child timeout"], "not recorded");
+  const relayerTimedOutSteps = factValue(liveReadinessSummary, ["relayer timed out steps"], "0");
+  const alertRules = factValue(liveReadinessSummary, ["alert rules"], "0");
+  const unmappedFindings = factValue(liveReadinessSummary, ["unmapped findings"], "0");
   const sourceStatus: DashboardStatus = workbench.source === "control-plane" ? "verified" : "stale";
   const testerTraceSteps: Array<{
     id: string;
@@ -261,10 +265,19 @@ export function ExplorerView({ data, workbench }: { data: DashboardData; workben
       id: "bridge-relayer",
       label: "Bridge relayer",
       detail: bridgeRelayerGate?.title ?? "Bridge relayer gate not loaded",
-      value: factValue(bridgeRelayerGate, ["gate status"], bridgeRelayerGate?.status ?? "pending"),
+      value: relayerChildTimeout === "not recorded" ? factValue(bridgeRelayerGate, ["gate status"], bridgeRelayerGate?.status ?? "pending") : `timeout ${relayerChildTimeout}s`,
       status: bridgeRelayerGate?.status ?? "pending",
       targetCategory: "bridge",
       Icon: ArrowRightLeft,
+    },
+    {
+      id: "alert-coverage",
+      label: "Alert coverage",
+      detail: `relayer timed out steps ${relayerTimedOutSteps}`,
+      value: `${alertRules} rules; unmapped ${unmappedFindings}`,
+      status: unmappedFindings === "0" ? "verified" : "pending",
+      targetCategory: "records",
+      Icon: ShieldCheck,
     },
   ];
 

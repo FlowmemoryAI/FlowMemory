@@ -106,6 +106,10 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
     groups.set(input.group, names);
     return groups;
   }, new Map());
+  const relayerTimeoutSeconds = text(metrics.bridgeRelayerChildTimeoutSeconds);
+  const relayerTimedOutStepCount = text(metrics.bridgeRelayerTimedOutStepCount, "0");
+  const alertRuleCount = text(metrics.opsRuleCount, text(metrics.opsActiveRuleCount, "0"));
+  const unmappedFindingCount = text(metrics.opsUnmappedCurrentFindingCount, "0");
 
   const readinessCards: Array<{
     id: string;
@@ -328,6 +332,16 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
           <span>Gateway proof</span>
           <strong>{text(testerLaunch.gatewayStatus, "not recorded")}</strong>
           <small>configured {boolText(testerLaunch.gatewayConfigured)}</small>
+        </div>
+        <div>
+          <span>Relayer timeout</span>
+          <strong>{relayerTimeoutSeconds}</strong>
+          <small>timed out steps {relayerTimedOutStepCount}</small>
+        </div>
+        <div>
+          <span>Alert rules</span>
+          <strong>{alertRuleCount}</strong>
+          <small>unmapped findings {unmappedFindingCount}</small>
         </div>
         <div>
           <span>Tester network</span>

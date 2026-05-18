@@ -179,6 +179,10 @@ function statusCounts(gates) {
   }, {});
 }
 
+function timedOutSteps(steps) {
+  return asArray(steps).filter((step) => step?.timedOut === true);
+}
+
 function writeLiveReadinessSummary() {
   const reports = Object.fromEntries(liveReadinessReportCopies.map((fileName) => [fileName, readJsonIfExists(fileName)]));
   const contract = reports["public-deployment-contract-report.json"];
@@ -219,6 +223,8 @@ function writeLiveReadinessSummary() {
     group: ownerInputGroup(name),
   }));
   const connectPackCheckValues = Object.values(externalTesterPacket?.connectPackChecks ?? {});
+  const bridgeRelayerSteps = asArray(bridgeRelayer?.steps);
+  const bridgeRelayerTimedOutSteps = timedOutSteps(bridgeRelayerSteps);
   const latestHeight = asText(serviceStatus?.chain?.latestHeight, "not recorded");
   const finalizedHeight = asText(serviceStatus?.chain?.finalizedHeight, "not recorded");
   const privateRpcUrl = serviceStatus?.bind
@@ -248,6 +254,10 @@ function writeLiveReadinessSummary() {
       monitorHeightAdvanced: monitor?.heightAdvanced === true,
       bridgeRelayerStatus: asText(bridgeRelayer?.status, "not recorded"),
       bridgeQueuedTransactions: asText(bridgeRelayer?.counts?.queuedTransactions, "0"),
+      bridgeRelayerChildTimeoutSeconds: asText(bridgeRelayer?.childTimeoutSeconds, "not recorded"),
+      bridgeRelayerStepCount: bridgeRelayerSteps.length,
+      bridgeRelayerTimedOutStepCount: bridgeRelayerTimedOutSteps.length,
+      bridgeRelayerNoChildTimeouts: bridgeRelayerSteps.length > 0 && bridgeRelayerTimedOutSteps.length === 0,
       bridgeRelayerGuardrailStatus: asText(bridgeRelayerGuardrail?.status, "not recorded"),
       bridgeRelayerLoopValidationStatus: asText(bridgeRelayerLoopValidation?.status, "not recorded"),
       backupOwnerPathDryRunStatus: asText(backupOwnerPathDryRun?.status, "not recorded"),
@@ -264,6 +274,10 @@ function writeLiveReadinessSummary() {
       opsCriticalCount: asText(opsSnapshot?.criticalCount, "0"),
       opsBlockedCount: asText(opsSnapshot?.blockedCount, "0"),
       opsActiveRuleCount: activeRuleIds.length,
+      opsRuleCount: asText(opsAlertRules?.ruleCount, String(alertRules.length)),
+      opsCriticalRuleCount: asText(opsAlertRules?.criticalRuleCount, "0"),
+      opsBlockedRuleCount: asText(opsAlertRules?.blockedRuleCount, "0"),
+      opsUnmappedCurrentFindingCount: asArray(opsAlertRules?.unmappedCurrentFindingCodes).length,
       incidentDrillStatus: asText(incidentDrill?.status, "not recorded"),
       alertInstallValidationStatus: asText(alertInstallValidation?.status, "not recorded"),
       opsEscalationDryRunStatus: asText(opsEscalationDryRun?.status, "not recorded"),
@@ -293,6 +307,7 @@ function writeLiveReadinessSummary() {
         commands: commandList(finding?.commands, 6),
       })),
       activeRuleIds,
+      coveredFindingCodes: asArray(opsAlertRules?.coveredFindingCodes).map((code) => sanitizeText(code)),
       activeRules: alertRules.filter((rule) => activeRuleIds.includes(rule.id)),
       ruleCount: asText(opsAlertRules?.ruleCount, String(alertRules.length)),
       criticalRuleCount: asText(opsAlertRules?.criticalRuleCount, "0"),

@@ -448,6 +448,8 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Shareable");
     expect(html).toContain("Packet smoke");
     expect(html).toContain("Gateway proof");
+    expect(html).toContain("Relayer timeout");
+    expect(html).toContain("Alert rules");
     expect(html).toContain("Tester workflow");
     expect(html).toContain("Connection profile");
     expect(html).toContain("Connect pack");
@@ -485,6 +487,8 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Private chain live");
     expect(html).toContain("Public RPC");
     expect(html).toContain("Tester sharing");
+    expect(html).toContain("Alert coverage");
+    expect(html).toContain("timeout 300s");
     expect(html).toContain("Open readiness");
     expect(html).toContain("Open tester tools");
     expect(html).toContain("Funding proofs");
