@@ -76,6 +76,7 @@
     "flowchain:owner-inputs": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-inputs.ps1",
     "flowchain:owner-inputs:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-inputs-validation.ps1",
     "flowchain:external-tester:packet": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-external-tester-packet.ps1",
+    "flowchain:external-tester:packet:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-external-tester-packet-validation.ps1",
     "flowchain:architecture:audit": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-architecture-audit.ps1",
     "flowchain:public-deployment:contract": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-deployment-contract.ps1",
     "flowchain:completion:audit": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-completion-audit.ps1",

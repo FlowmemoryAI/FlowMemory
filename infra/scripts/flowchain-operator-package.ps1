@@ -131,6 +131,7 @@ $requiredScripts = @(
     "flowchain:bridge:relayer:guardrail:validate",
     "flowchain:bridge:relayer:loop:validate",
     "flowchain:external-tester:packet",
+    "flowchain:external-tester:packet:validate",
     "flowchain:dashboard:ui:readiness",
     "flowchain:operator:package:verify",
     "flowchain:completion:audit",
@@ -174,6 +175,7 @@ $commandMatrix = @(
     [ordered]@{ phase = "bridge"; command = "npm run flowchain:bridge:relayer:guardrail:validate"; purpose = "Prove missing owner inputs cannot mutate cursor state or queue credits." },
     [ordered]@{ phase = "bridge"; command = "npm run flowchain:bridge:relayer:loop:validate"; purpose = "Validate relayer loop start, fresh health reporting, clean stop, PID cleanup, and no leftover validation relayer process." },
     [ordered]@{ phase = "testers"; command = "npm run flowchain:external-tester:packet -- -AllowBlocked"; purpose = "Regenerate the friends-and-family packet and fail closed until public gates pass." },
+    [ordered]@{ phase = "testers"; command = "npm run flowchain:external-tester:packet:validate"; purpose = "Validate the packet and connect pack are no-secret, locally executable, and not externally shareable before owner inputs." },
     [ordered]@{ phase = "testers"; command = "npm run flowchain:dashboard:ui:readiness"; purpose = "Run desktop and mobile browser verification for tester wallet create, faucet, send, and Explorer inspection." },
     [ordered]@{ phase = "release"; command = "npm run flowchain:operator:package:verify"; purpose = "Verify the generated operator package contents and no-secret boundary." },
     [ordered]@{ phase = "release"; command = "npm run flowchain:completion:audit -- -AllowBlocked"; purpose = "Run the production readiness gate without false public-ready claims." },
@@ -237,6 +239,7 @@ foreach ($file in @(
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/BRIDGE_RELAYER_LOOP_VALIDATION.md"; target = "runbooks/BRIDGE_RELAYER_LOOP_VALIDATION.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/SECOND_COMPUTER_READINESS.md"; target = "runbooks/SECOND_COMPUTER_READINESS.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md"; target = "runbooks/EXTERNAL_TESTER_PACKET.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET_VALIDATION.md"; target = "runbooks/EXTERNAL_TESTER_PACKET_VALIDATION.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/DASHBOARD_UI_READINESS.md"; target = "runbooks/DASHBOARD_UI_READINESS.md"; required = $true }
 )) {
     [void] $copiedRunbooks.Add((Copy-OperatorPackageFile -Source $file.source -Destination $file.target -Required:([bool] $file.required)))
@@ -272,6 +275,7 @@ foreach ($file in @(
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"; target = "evidence/bridge-relayer-guardrail-validation-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"; target = "evidence/bridge-relayer-loop-validation-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"; target = "evidence/external-tester-packet-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/external-tester-packet-validation-report.json"; target = "evidence/external-tester-packet-validation-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"; target = "evidence/dashboard-ui-readiness-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"; target = "evidence/flowchain-architecture-audit-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json"; target = "evidence/flowchain-completion-audit-report.json"; required = $true },

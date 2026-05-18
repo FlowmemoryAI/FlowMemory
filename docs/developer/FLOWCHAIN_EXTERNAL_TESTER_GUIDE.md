@@ -55,13 +55,16 @@ The owner should run these checks before inviting testers:
 npm run flowchain:tester:readiness -- -AllowBlocked
 npm run flowchain:tester:gateway:e2e
 npm run flowchain:external-tester:packet -- -AllowBlocked
+npm run flowchain:external-tester:packet:validate
 npm run flowchain:public-rpc:validate
 npm run flowchain:bridge:live:check
 npm run flowchain:no-secret:scan
 ```
 
 If these commands are blocked because owner inputs are missing, the tester packet
-must say exactly which parts are unavailable.
+must say exactly which parts are unavailable. The validation command must still
+pass before sharing because it proves the packet and connect pack are no-secret,
+locally executable, and not marked shareable before owner public inputs exist.
 
 ## What Testers Need Installed
 

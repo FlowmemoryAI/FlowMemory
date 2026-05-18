@@ -745,6 +745,74 @@ $definitions = @(
         ownerInputGate = $true
     },
     [ordered]@{
+        id = "external-tester-packet-validation"
+        requirement = "Friends-and-family tester packet validation proves the packet and connect pack are no-secret, executable through local tester smoke, and fail closed until owner public inputs exist."
+        path = "docs/agent-runs/live-product-infra-rpc/external-tester-packet-validation-report.json"
+        command = "npm run flowchain:external-tester:packet:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptPacketPresent",
+            "packageScriptValidationPresent",
+            "packetScriptExists",
+            "readinessScriptExists",
+            "testerNetworkReportExists",
+            "publicTesterGatewayReportExists",
+            "packetCommandAllowsBlocked",
+            "packetReportWritten",
+            "packetMarkdownWritten",
+            "connectPackWritten",
+            "packetStatusBlockedUntilOwnerInputs",
+            "packetShareableFalseWithoutOwnerInputs",
+            "connectPackShareableFalseWithoutOwnerInputs",
+            "externalSharingReadyFalse",
+            "localTesterRehearsalReady",
+            "packetExecutableSmokeValidated",
+            "testerNetworkReportPassed",
+            "publicTesterGatewayReportPassed",
+            "publicTesterGatewayRoutesCovered",
+            "publicTesterGatewayCapRejected",
+            "packetSmokeChecksAllTrue",
+            "packetSmokeRoutesCoverReadOnly",
+            "packetSmokeRoutesCoverTesterWrites",
+            "connectPackChecksAllTrue",
+            "connectPackSchemaValid",
+            "connectPackStatusMatchesReport",
+            "connectPackShareableMatchesReport",
+            "connectPackHasChainId",
+            "connectPackHasEndpointPlaceholders",
+            "connectPackHasNoConcreteUrl",
+            "connectPackReadOnlyRoutesCovered",
+            "connectPackTesterWriteRoutesCovered",
+            "packetMarkdownWarnsNotShareable",
+            "packetMarkdownHasConnectionProfile",
+            "packetMarkdownHasEndpointChecks",
+            "packetMarkdownHasWalletFlow",
+            "packetMarkdownListsOwnerCommands",
+            "requiredOwnerEnvNamesListed",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse",
+            "secretMarkerFindingsEmpty",
+            "packetReportInsideRepo",
+            "connectPackInsideRepo",
+            "packetMarkdownInsideRepo"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+            "packetShareable" = $false
+            "connectPackShareable" = $false
+            "externalSharingReady" = $false
+            "packetExecutableSmokeValidated" = $true
+        }
+    },
+    [ordered]@{
         id = "dashboard-ui-readiness"
         requirement = "Dashboard browser readiness proves desktop and mobile users can create a tester wallet, request faucet funds, send tester units, inspect the result in Explorer, and avoid token/secret leakage or horizontal overflow."
         path = "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
@@ -957,7 +1025,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "external-tester-packet-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"

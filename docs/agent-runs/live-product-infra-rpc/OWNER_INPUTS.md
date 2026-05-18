@@ -1,6 +1,6 @@
 ﻿# FlowChain Owner Inputs
 
-Generated: 2026-05-18T02:05:04.9119083Z
+Generated: 2026-05-18T03:25:34.3310270Z
 Status: blocked
 Owner input ready: False
 
@@ -28,9 +28,7 @@ This file intentionally records env names, validation checks, and pass/block/fai
 
 ## Owner Env File
 
-- FLOWCHAIN_OWNER_ENV_FILE configured: True
-- Imported known env names: 15
-- Ignored unknown env names: 0
+- FLOWCHAIN_OWNER_ENV_FILE configured: False
 
 ## Next Commands
 

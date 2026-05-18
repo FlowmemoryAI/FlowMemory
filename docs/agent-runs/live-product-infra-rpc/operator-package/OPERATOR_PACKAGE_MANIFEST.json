@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-18T03:00:00.0893477Z",
+    "generatedAt":  "2026-05-18T03:26:15.9595224Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -67,6 +67,7 @@
                             "flowchain:bridge:relayer:guardrail:validate",
                             "flowchain:bridge:relayer:loop:validate",
                             "flowchain:external-tester:packet",
+                            "flowchain:external-tester:packet:validate",
                             "flowchain:dashboard:ui:readiness",
                             "flowchain:operator:package:verify",
                             "flowchain:completion:audit",
@@ -251,6 +252,11 @@
                           },
                           {
                               "phase":  "testers",
+                              "command":  "npm run flowchain:external-tester:packet:validate",
+                              "purpose":  "Validate the packet and connect pack are no-secret, locally executable, and not externally shareable before owner inputs."
+                          },
+                          {
+                              "phase":  "testers",
                               "command":  "npm run flowchain:dashboard:ui:readiness",
                               "purpose":  "Run desktop and mobile browser verification for tester wallet create, faucet, send, and Explorer inspection."
                           },
@@ -426,6 +432,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md",
                          "destination":  "runbooks/EXTERNAL_TESTER_PACKET.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET_VALIDATION.md",
+                         "destination":  "runbooks/EXTERNAL_TESTER_PACKET_VALIDATION.md",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"
@@ -631,6 +644,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json",
                          "destination":  "evidence/external-tester-packet-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/external-tester-packet-validation-report.json",
+                         "destination":  "evidence/external-tester-packet-validation-report.json",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"

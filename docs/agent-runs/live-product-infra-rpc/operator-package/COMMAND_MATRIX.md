@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Command Matrix
 
-Generated: 2026-05-18T03:00:00.0893477Z
+Generated: 2026-05-18T03:26:15.9595224Z
 
 | Phase | Command | Purpose |
 | --- | --- | --- |
@@ -39,6 +39,7 @@ Generated: 2026-05-18T03:00:00.0893477Z
 | bridge | `npm run flowchain:bridge:relayer:guardrail:validate` | Prove missing owner inputs cannot mutate cursor state or queue credits. |
 | bridge | `npm run flowchain:bridge:relayer:loop:validate` | Validate relayer loop start, fresh health reporting, clean stop, PID cleanup, and no leftover validation relayer process. |
 | testers | `npm run flowchain:external-tester:packet -- -AllowBlocked` | Regenerate the friends-and-family packet and fail closed until public gates pass. |
+| testers | `npm run flowchain:external-tester:packet:validate` | Validate the packet and connect pack are no-secret, locally executable, and not externally shareable before owner inputs. |
 | testers | `npm run flowchain:dashboard:ui:readiness` | Run desktop and mobile browser verification for tester wallet create, faucet, send, and Explorer inspection. |
 | release | `npm run flowchain:operator:package:verify` | Verify the generated operator package contents and no-secret boundary. |
 | release | `npm run flowchain:completion:audit -- -AllowBlocked` | Run the production readiness gate without false public-ready claims. |

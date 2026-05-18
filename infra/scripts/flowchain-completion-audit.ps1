@@ -49,6 +49,7 @@ $paths = [ordered]@{
     operatorPackage = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-report.json"
     operatorPackageVerify = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-verify-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
+    externalTesterPacketValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-validation-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
     alertInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
@@ -420,6 +421,9 @@ $liveInfraExitCode = $liveInfraResult.exitCode
 $externalTesterPacketResult = Invoke-AuditChild -Path $paths.externalTesterPacket -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-packet.ps1"), "-AllowBlocked")
 $externalTesterPacketOutput = @($externalTesterPacketResult.output)
 $externalTesterPacketExitCode = $externalTesterPacketResult.exitCode
+$externalTesterPacketValidationResult = Invoke-AuditChild -Path $paths.externalTesterPacketValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-packet-validation.ps1"))
+$externalTesterPacketValidationOutput = @($externalTesterPacketValidationResult.output)
+$externalTesterPacketValidationExitCode = $externalTesterPacketValidationResult.exitCode
 $incidentDrillResult = Invoke-AuditChild -Path $paths.incidentDrill -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-incident-drill.ps1"))
 $incidentDrillOutput = @($incidentDrillResult.output)
 $incidentDrillExitCode = $incidentDrillResult.exitCode
@@ -1111,6 +1115,71 @@ $externalTesterConnectPackReady = ((Get-AuditProp -Object $externalTesterConnect
     -and ((Get-AuditProp -Object $externalTesterConnectPackChecks -Name "connectPackNoSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $externalTesterConnectPackChecks -Name "connectPackBroadcastsFalse" -Default $false) -eq $true) `
     -and ($externalTesterConnectPackShareable -eq $externalTesterPacketShareable)
+$externalTesterPacketValidation = $reports.externalTesterPacketValidation
+$externalTesterPacketValidationStatus = Get-ReportStatus -Report $externalTesterPacketValidation
+$externalTesterPacketValidationChecks = Get-AuditProp -Object $externalTesterPacketValidation -Name "checks"
+$externalTesterPacketValidationFailedChecks = @((Get-AuditProp -Object $externalTesterPacketValidation -Name "failedChecks" -Default @()))
+$externalTesterPacketValidationSecretFindings = @((Get-AuditProp -Object $externalTesterPacketValidation -Name "secretMarkerFindings" -Default @()))
+$externalTesterPacketValidationRequiredChecks = @(
+    "packageScriptPacketPresent",
+    "packageScriptValidationPresent",
+    "packetScriptExists",
+    "readinessScriptExists",
+    "testerNetworkReportExists",
+    "publicTesterGatewayReportExists",
+    "packetCommandAllowsBlocked",
+    "packetReportWritten",
+    "packetMarkdownWritten",
+    "connectPackWritten",
+    "packetStatusBlockedUntilOwnerInputs",
+    "packetShareableFalseWithoutOwnerInputs",
+    "connectPackShareableFalseWithoutOwnerInputs",
+    "externalSharingReadyFalse",
+    "localTesterRehearsalReady",
+    "packetExecutableSmokeValidated",
+    "testerNetworkReportPassed",
+    "publicTesterGatewayReportPassed",
+    "publicTesterGatewayRoutesCovered",
+    "publicTesterGatewayCapRejected",
+    "packetSmokeChecksAllTrue",
+    "packetSmokeRoutesCoverReadOnly",
+    "packetSmokeRoutesCoverTesterWrites",
+    "connectPackChecksAllTrue",
+    "connectPackSchemaValid",
+    "connectPackStatusMatchesReport",
+    "connectPackShareableMatchesReport",
+    "connectPackHasChainId",
+    "connectPackHasEndpointPlaceholders",
+    "connectPackHasNoConcreteUrl",
+    "connectPackReadOnlyRoutesCovered",
+    "connectPackTesterWriteRoutesCovered",
+    "packetMarkdownWarnsNotShareable",
+    "packetMarkdownHasConnectionProfile",
+    "packetMarkdownHasEndpointChecks",
+    "packetMarkdownHasWalletFlow",
+    "packetMarkdownListsOwnerCommands",
+    "requiredOwnerEnvNamesListed",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse",
+    "secretMarkerFindingsEmpty",
+    "packetReportInsideRepo",
+    "connectPackInsideRepo",
+    "packetMarkdownInsideRepo"
+)
+$externalTesterPacketValidationMissingChecks = @(Get-MissingAuditChecks -Checks $externalTesterPacketValidationChecks -Names $externalTesterPacketValidationRequiredChecks)
+$externalTesterPacketValidationPassed = $externalTesterPacketValidationExitCode -eq 0 `
+    -and $externalTesterPacketValidationStatus -eq "passed" `
+    -and $externalTesterPacketValidationFailedChecks.Count -eq 0 `
+    -and $externalTesterPacketValidationSecretFindings.Count -eq 0 `
+    -and $externalTesterPacketValidationMissingChecks.Count -eq 0 `
+    -and ((Get-AuditProp -Object $externalTesterPacketValidation -Name "packetShareable" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $externalTesterPacketValidation -Name "connectPackShareable" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $externalTesterPacketValidation -Name "externalSharingReady" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $externalTesterPacketValidation -Name "packetExecutableSmokeValidated" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $externalTesterPacketValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $externalTesterPacketValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $externalTesterPacketValidation -Name "broadcasts" -Default $true) -eq $false)
 $externalTesterStatus = Get-ReportStatus -Report $externalTester
 $externalSharingReady = Get-AuditProp -Object $externalTester -Name "externalSharingReady" -Default $false
 $externalTesterChecks = Get-AuditProp -Object $externalTester -Name "checks"
@@ -1477,6 +1546,12 @@ Add-AuditItem -Items $items -Id "external-tester-packet" `
     -Evidence "packetStatus=$externalTesterPacketStatus, shareable=$externalTesterPacketShareable, packetSmoke=$externalTesterPacketExecutableSmokeValidated, smokeRoutes=$($externalTesterPacketSmokeRoutes.Count), connectPackReady=$externalTesterConnectPackReady, packet=$externalTesterPacketPath" `
     -Commands @("npm run flowchain:external-tester:packet")
 
+Add-AuditItem -Items $items -Id "external-tester-packet-validation" `
+    -Requirement "External tester packet validation proves the packet and connect pack are no-secret, locally executable, and not externally shareable before owner public inputs exist." `
+    -Status $(if ($externalTesterPacketValidationPassed) { "passed" } else { "failed" }) `
+    -Evidence "validationStatus=$externalTesterPacketValidationStatus, failedChecks=$($externalTesterPacketValidationFailedChecks.Count), missingChecks=$($externalTesterPacketValidationMissingChecks.Count), secretFindings=$($externalTesterPacketValidationSecretFindings.Count), packetShareable=$(Get-AuditProp -Object $externalTesterPacketValidation -Name "packetShareable" -Default $true), report=$($paths.externalTesterPacketValidation)" `
+    -Commands @("npm run flowchain:external-tester:packet:validate")
+
 Add-AuditItem -Items $items -Id "friends-and-family-launch" `
     -Requirement "Friends-and-family tester launch requires fresh tester-wallet evidence, executable packet-route smoke, and a machine-readable connection pack, and remains blocked until public RPC, backup, and Base bridge gates pass." `
     -Status $(if ($externalTesterLaunchPassed) { "passed" } elseif ($externalTesterLaunchBlocked) { "blocked" } else { "failed" }) `
@@ -1676,6 +1751,8 @@ $report = [ordered]@{
     liveInfraOutputRedacted = @($liveInfraOutput | ForEach-Object { "$_" })
     externalTesterPacketExitCode = $externalTesterPacketExitCode
     externalTesterPacketOutputRedacted = @($externalTesterPacketOutput | ForEach-Object { "$_" })
+    externalTesterPacketValidationExitCode = $externalTesterPacketValidationExitCode
+    externalTesterPacketValidationOutputRedacted = @($externalTesterPacketValidationOutput | ForEach-Object { "$_" })
     incidentDrillExitCode = $incidentDrillExitCode
     incidentDrillOutputRedacted = @($incidentDrillOutput | ForEach-Object { "$_" })
     opsSnapshotExitCode = $opsSnapshotExitCode
@@ -1703,6 +1780,8 @@ $report = [ordered]@{
         connectPackShareable = $externalTesterConnectPackShareable
         connectPackReady = $externalTesterConnectPackReady
         connectPackChecks = $externalTesterConnectPackChecks
+        packetValidationStatus = $externalTesterPacketValidationStatus
+        packetValidationPassed = $externalTesterPacketValidationPassed
         packetPath = $externalTesterPacketPath
         readinessStatus = (Get-ReportStatus -Report $externalTester)
         publicTesterGatewayStatus = $publicTesterGatewayStatus
