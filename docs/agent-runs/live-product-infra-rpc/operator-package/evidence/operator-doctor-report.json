@@ -1,10 +1,10 @@
 {
     "schema":  "flowchain.doctor_report.v0",
-    "generatedAt":  "2026-05-18T06:15:04.2665308Z",
+    "generatedAt":  "2026-05-18T06:22:06.8740192Z",
     "status":  "blocked",
     "repoRoot":  "E:/FlowMemory/flowmemory-live-infra-rpc",
-    "diskFreeGiB":  213.45,
-    "stateFileLastWriteAgeSeconds":  4,
+    "diskFreeGiB":  211.97,
+    "stateFileLastWriteAgeSeconds":  5,
     "latestHeight":  "66326",
     "finalizedHeight":  "66326",
     "localUrls":  {
@@ -268,14 +268,14 @@
                        "name":  "disk-free:E",
                        "status":  "running",
                        "owner":  "storage",
-                       "detail":  "213.45 GiB free on E:",
+                       "detail":  "211.97 GiB free on E:",
                        "nextCommand":  "free disk space before public operation"
                    },
                    {
                        "name":  "state-file",
                        "status":  "running",
                        "owner":  "storage",
-                       "detail":  "devnet/local/state.json age seconds: 4",
+                       "detail":  "devnet/local/state.json age seconds: 5",
                        "nextCommand":  "npm run flowchain:service:start -- -LiveProfile"
                    },
                    {

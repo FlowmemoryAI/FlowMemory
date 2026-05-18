@@ -71,6 +71,33 @@ function Invoke-DashboardUiCommand {
     }
 }
 
+function Get-DashboardUiSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in @(
+            "privateKey",
+            "private_key",
+            "seedPhrase",
+            "seed phrase",
+            "mnemonic",
+            "rpcUrl",
+            "rpc-url",
+            "apiKey",
+            "webhook",
+            "BEGIN RSA PRIVATE KEY",
+            "BEGIN OPENSSH PRIVATE KEY"
+        )) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{ label = $Label; pattern = $pattern })
+        }
+    }
+    return @($findings)
+}
+
 $dashboardPackage = Read-JsonObject -Path $dashboardPackagePath
 $rootPackage = Read-JsonObject -Path $rootPackagePath
 $specText = if (Test-Path -LiteralPath $browserSpecPath) { Get-Content -Raw -LiteralPath $browserSpecPath } else { "" }
@@ -101,17 +128,19 @@ $checks = [ordered]@{
     dashboardBrowserE2ePassed = ($commands | Where-Object { $_.label -eq "dashboard browser wallet faucet explorer loop" } | Select-Object -First 1).exitCode -eq 0
     dashboardBuildPassed = ($commands | Where-Object { $_.label -eq "dashboard production build" } | Select-Object -First 1).exitCode -eq 0
     controlPlaneTesterGatewayTestsPassed = ($commands | Where-Object { $_.label -eq "control-plane tester gateway tests" } | Select-Object -First 1).exitCode -eq 0
+    secretMarkerFindingsEmpty = $true
+    envValuesPrintedFalse = $true
+    noSecrets = $true
+    broadcastsFalse = $true
 }
-
-$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
-$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
 
 $report = [ordered]@{
     schema = "flowchain.dashboard_ui_readiness_report.v0"
     generatedAt = [DateTimeOffset]::UtcNow.ToString("o")
-    status = $status
+    status = "pending"
     checks = $checks
-    failedChecks = @($failedChecks)
+    failedChecks = @()
+    secretMarkerFindings = @()
     commands = @($commands)
     browserProjects = @("chromium-desktop", "chromium-mobile")
     coveredRoutes = @("/wallet?panel=tester", "/tester/wallets/create", "/tester/faucet", "/tester/wallets/send", "/explorer")
@@ -119,6 +148,18 @@ $report = [ordered]@{
     noSecrets = $true
     broadcasts = $false
 }
+
+$preliminaryReportText = $report | ConvertTo-Json -Depth 12
+$secretMarkerFindings = @(Get-DashboardUiSecretMarkerFindings -Text $preliminaryReportText -Label "dashboard UI readiness report")
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 
 $reportText = $report | ConvertTo-Json -Depth 12
 Assert-FlowChainNoSecretText -Text $reportText -Label "dashboard UI readiness report"

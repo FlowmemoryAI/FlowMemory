@@ -882,6 +882,7 @@ $definitions = @(
             "excludesEnvFiles",
             "excludesSecretMarkerFiles",
             "verifyChecksPassed",
+            "secretMarkerFindingsEmpty",
             "envValuesPrintedFalse",
             "noSecrets",
             "broadcastsFalse"
@@ -889,7 +890,8 @@ $definitions = @(
         requiredEmptyArrays = @(
             "failedChecks",
             "missingNextCommands",
-            "failedVerifyChecks"
+            "failedVerifyChecks",
+            "secretMarkerFindings"
         )
         requiredReportProperties = [ordered]@{
             "envValuesPrinted" = $false
@@ -1252,10 +1254,15 @@ $definitions = @(
             "dashboardUnitTestsPassed",
             "dashboardBrowserE2ePassed",
             "dashboardBuildPassed",
-            "controlPlaneTesterGatewayTestsPassed"
+            "controlPlaneTesterGatewayTestsPassed",
+            "secretMarkerFindingsEmpty",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
         )
         requiredEmptyArrays = @(
-            "failedChecks"
+            "failedChecks",
+            "secretMarkerFindings"
         )
         requiredReportProperties = [ordered]@{
             "envValuesPrinted" = $false

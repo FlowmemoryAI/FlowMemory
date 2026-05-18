@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.dashboard_ui_readiness_report.v0",
-    "generatedAt":  "2026-05-18T01:33:13.2066924+00:00",
+    "generatedAt":  "2026-05-18T06:21:49.5496018+00:00",
     "status":  "passed",
     "checks":  {
                    "dashboardPackageScriptPresent":  true,
@@ -19,17 +19,24 @@
                    "dashboardUnitTestsPassed":  true,
                    "dashboardBrowserE2ePassed":  true,
                    "dashboardBuildPassed":  true,
-                   "controlPlaneTesterGatewayTestsPassed":  true
+                   "controlPlaneTesterGatewayTestsPassed":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
                },
     "failedChecks":  [
 
                      ],
+    "secretMarkerFindings":  [
+
+                             ],
     "commands":  [
                      {
                          "label":  "dashboard unit render tests",
                          "command":  "npm test --prefix apps/dashboard",
                          "exitCode":  0,
-                         "durationSeconds":  4,
+                         "durationSeconds":  5,
                          "stdoutLineCount":  7,
                          "stderrLineCount":  0
                      },
@@ -37,7 +44,7 @@
                          "label":  "dashboard browser wallet faucet explorer loop",
                          "command":  "npm run browser:e2e --prefix apps/dashboard",
                          "exitCode":  0,
-                         "durationSeconds":  14,
+                         "durationSeconds":  16,
                          "stdoutLineCount":  6,
                          "stderrLineCount":  8
                      },
@@ -53,7 +60,7 @@
                          "label":  "control-plane tester gateway tests",
                          "command":  "npm test --prefix services/control-plane",
                          "exitCode":  0,
-                         "durationSeconds":  57,
+                         "durationSeconds":  62,
                          "stdoutLineCount":  74,
                          "stderrLineCount":  0
                      }

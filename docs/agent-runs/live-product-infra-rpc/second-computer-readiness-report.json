@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.second_computer_readiness_report.v0",
-    "generatedAt":  "2026-05-18T01:53:30.4634677+00:00",
+    "generatedAt":  "2026-05-18T06:21:35.5840229+00:00",
     "status":  "passed",
     "checks":  {
                    "bundlePackageScriptPresent":  true,
@@ -24,6 +24,7 @@
                    "excludesEnvFiles":  true,
                    "excludesSecretMarkerFiles":  true,
                    "verifyChecksPassed":  true,
+                   "secretMarkerFindingsEmpty":  true,
                    "envValuesPrintedFalse":  true,
                    "noSecrets":  true,
                    "broadcastsFalse":  true
@@ -37,19 +38,22 @@
     "failedVerifyChecks":  [
 
                            ],
+    "secretMarkerFindings":  [
+
+                             ],
     "commandResults":  [
                            {
                                "label":  "second-computer source bundle",
                                "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-second-computer-bundle.ps1 -Force",
                                "exitCode":  0,
-                               "durationSeconds":  56,
+                               "durationSeconds":  69,
                                "outputLineCount":  5
                            },
                            {
                                "label":  "second-computer local verify",
                                "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-second-computer-verify.ps1 -ReportPath devnet/local/second-computer/flowchain-second-computer-verify-report.json",
                                "exitCode":  0,
-                               "durationSeconds":  1,
+                               "durationSeconds":  2,
                                "outputLineCount":  2
                            }
                        ],

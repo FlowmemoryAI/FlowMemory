@@ -44,6 +44,7 @@ $paths = [ordered]@{
     publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
     publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     dashboardUiReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
+    secondComputerReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/second-computer-readiness-report.json"
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     publicRpcDeploymentAutomation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
     operatorPackage = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-report.json"
@@ -367,6 +368,9 @@ $publicTesterGatewayExitCode = $publicTesterGatewayResult.exitCode
 $dashboardUiReadinessResult = Invoke-AuditChild -Path $paths.dashboardUiReadiness -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-dashboard-ui-readiness.ps1"))
 $dashboardUiReadinessOutput = @($dashboardUiReadinessResult.output)
 $dashboardUiReadinessExitCode = $dashboardUiReadinessResult.exitCode
+$secondComputerReadinessResult = Invoke-AuditChild -Path $paths.secondComputerReadiness -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-second-computer-readiness.ps1"))
+$secondComputerReadinessOutput = @($secondComputerReadinessResult.output)
+$secondComputerReadinessExitCode = $secondComputerReadinessResult.exitCode
 $backupRestoreValidationResult = Invoke-AuditChild -Path $paths.backupRestoreValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-restore-validation.ps1"))
 $backupRestoreValidationOutput = @($backupRestoreValidationResult.output)
 $backupRestoreValidationExitCode = $backupRestoreValidationResult.exitCode
@@ -1331,23 +1335,78 @@ $dashboardUiRequiredChecks = @(
     "dashboardUnitTestsPassed",
     "dashboardBrowserE2ePassed",
     "dashboardBuildPassed",
-    "controlPlaneTesterGatewayTestsPassed"
+    "controlPlaneTesterGatewayTestsPassed",
+    "secretMarkerFindingsEmpty",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse"
 )
 $dashboardUiMissingChecks = @($dashboardUiRequiredChecks | Where-Object {
     (Get-AuditProp -Object $dashboardUiReadinessChecks -Name $_ -Default $false) -ne $true
 })
 $dashboardUiFailedChecks = @((Get-AuditProp -Object $dashboardUiReadiness -Name "failedChecks" -Default @()))
+$dashboardUiSecretFindings = @((Get-AuditProp -Object $dashboardUiReadiness -Name "secretMarkerFindings" -Default @()))
+$dashboardUiSecretFindingCount = @($dashboardUiSecretFindings | Where-Object { $null -ne $_ }).Count
 $dashboardUiBrowserProjects = @((Get-AuditProp -Object $dashboardUiReadiness -Name "browserProjects" -Default @()))
 $dashboardUiCoveredRoutes = @((Get-AuditProp -Object $dashboardUiReadiness -Name "coveredRoutes" -Default @()))
 $dashboardUiReadinessPassed = $dashboardUiReadinessExitCode -eq 0 `
     -and $dashboardUiReadinessStatus -eq "passed" `
     -and $dashboardUiMissingChecks.Count -eq 0 `
     -and $dashboardUiFailedChecks.Count -eq 0 `
+    -and $dashboardUiSecretFindingCount -eq 0 `
     -and $dashboardUiBrowserProjects.Count -ge 2 `
     -and $dashboardUiCoveredRoutes.Count -ge 5 `
     -and ((Get-AuditProp -Object $dashboardUiReadiness -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $dashboardUiReadiness -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $dashboardUiReadiness -Name "broadcasts" -Default $true) -eq $false)
+$secondComputerReadiness = $reports.secondComputerReadiness
+$secondComputerReadinessStatus = Get-ReportStatus -Report $secondComputerReadiness
+$secondComputerReadinessChecks = Get-AuditProp -Object $secondComputerReadiness -Name "checks"
+$secondComputerRequiredChecks = @(
+    "bundlePackageScriptPresent",
+    "verifyPackageScriptPresent",
+    "readinessPackageScriptPresent",
+    "setupDocExists",
+    "setupDocMentionsBundle",
+    "setupDocMentionsVerify",
+    "bundleCommandPassed",
+    "verifyCommandPassed",
+    "bundleReportPassed",
+    "verifyReportPassed",
+    "stageNoSecretScanPassed",
+    "bundleZipCreated",
+    "bundleSha256Present",
+    "manifestWritten",
+    "manifestNextCommandsPresent",
+    "excludesGitMetadata",
+    "excludesNodeModules",
+    "excludesLocalRuntime",
+    "excludesEnvFiles",
+    "excludesSecretMarkerFiles",
+    "verifyChecksPassed",
+    "secretMarkerFindingsEmpty",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$secondComputerMissingChecks = @($secondComputerRequiredChecks | Where-Object {
+    (Get-AuditProp -Object $secondComputerReadinessChecks -Name $_ -Default $false) -ne $true
+})
+$secondComputerFailedChecks = @((Get-AuditProp -Object $secondComputerReadiness -Name "failedChecks" -Default @()))
+$secondComputerMissingNextCommands = @((Get-AuditProp -Object $secondComputerReadiness -Name "missingNextCommands" -Default @()))
+$secondComputerFailedVerifyChecks = @((Get-AuditProp -Object $secondComputerReadiness -Name "failedVerifyChecks" -Default @()))
+$secondComputerSecretFindings = @((Get-AuditProp -Object $secondComputerReadiness -Name "secretMarkerFindings" -Default @()))
+$secondComputerSecretFindingCount = @($secondComputerSecretFindings | Where-Object { $null -ne $_ }).Count
+$secondComputerReadinessPassed = $secondComputerReadinessExitCode -eq 0 `
+    -and $secondComputerReadinessStatus -eq "passed" `
+    -and $secondComputerMissingChecks.Count -eq 0 `
+    -and $secondComputerFailedChecks.Count -eq 0 `
+    -and $secondComputerMissingNextCommands.Count -eq 0 `
+    -and $secondComputerFailedVerifyChecks.Count -eq 0 `
+    -and $secondComputerSecretFindingCount -eq 0 `
+    -and ((Get-AuditProp -Object $secondComputerReadiness -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $secondComputerReadiness -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $secondComputerReadiness -Name "broadcasts" -Default $true) -eq $false)
 $backupRestoreValidation = $reports.backupRestoreValidation
 $backupRestoreValidationStatus = Get-ReportStatus -Report $backupRestoreValidation
 $backupRestoreValidationChecks = Get-AuditProp -Object $backupRestoreValidation -Name "checks"
@@ -2090,8 +2149,14 @@ Add-AuditItem -Items $items -Id "public-tester-gateway-e2e" `
 Add-AuditItem -Items $items -Id "dashboard-ui-readiness" `
     -Requirement "Dashboard browser readiness proves desktop and mobile users can create a tester wallet, request faucet funds, send tester units, inspect the result in Explorer, and avoid token/secret leakage or horizontal overflow." `
     -Status $(if ($dashboardUiReadinessPassed) { "passed" } else { "failed" }) `
-    -Evidence "dashboardUiStatus=$dashboardUiReadinessStatus, browserProjects=$($dashboardUiBrowserProjects.Count), coveredRoutes=$($dashboardUiCoveredRoutes.Count), failedChecks=$($dashboardUiFailedChecks.Count), missingChecks=$($dashboardUiMissingChecks.Count), report=$($paths.dashboardUiReadiness)" `
+    -Evidence "dashboardUiStatus=$dashboardUiReadinessStatus, browserProjects=$($dashboardUiBrowserProjects.Count), coveredRoutes=$($dashboardUiCoveredRoutes.Count), failedChecks=$($dashboardUiFailedChecks.Count), missingChecks=$($dashboardUiMissingChecks.Count), secretFindings=$dashboardUiSecretFindingCount, report=$($paths.dashboardUiReadiness)" `
     -Commands @("npm run flowchain:dashboard:ui:readiness", "npm run browser:e2e --prefix apps/dashboard")
+
+Add-AuditItem -Items $items -Id "second-computer-readiness" `
+    -Requirement "Second-computer readiness creates a no-secret offline source bundle, verifies local dependency prerequisites, documents the bundle/verify commands, and keeps the bundle under ignored local output." `
+    -Status $(if ($secondComputerReadinessPassed) { "passed" } else { "failed" }) `
+    -Evidence "secondComputerStatus=$secondComputerReadinessStatus, failedChecks=$($secondComputerFailedChecks.Count), missingChecks=$($secondComputerMissingChecks.Count), missingNextCommands=$($secondComputerMissingNextCommands.Count), failedVerifyChecks=$($secondComputerFailedVerifyChecks.Count), secretFindings=$secondComputerSecretFindingCount, report=$($paths.secondComputerReadiness)" `
+    -Commands @("npm run flowchain:second-computer:readiness")
 
 Add-AuditItem -Items $items -Id "backup-restore-validator-self-test" `
     -Requirement "Backup tooling creates manifest-backed live-state snapshots, verifies latest-snapshot restore rehearsal without targeting live state, and rejects corrupt, tampered, missing-artifact, stale-pointer, and wrong-chain cases." `
@@ -2299,6 +2364,8 @@ $report = [ordered]@{
     publicTesterGatewayOutputRedacted = @($publicTesterGatewayOutput | ForEach-Object { "$_" })
     dashboardUiReadinessExitCode = $dashboardUiReadinessExitCode
     dashboardUiReadinessOutputRedacted = @($dashboardUiReadinessOutput | ForEach-Object { "$_" })
+    secondComputerReadinessExitCode = $secondComputerReadinessExitCode
+    secondComputerReadinessOutputRedacted = @($secondComputerReadinessOutput | ForEach-Object { "$_" })
     backupRestoreValidationExitCode = $backupRestoreValidationExitCode
     backupRestoreValidationOutputRedacted = @($backupRestoreValidationOutput | ForEach-Object { "$_" })
     backupOwnerPathDryRunExitCode = $backupOwnerPathDryRunExitCode
@@ -2374,6 +2441,8 @@ $report = [ordered]@{
         dashboardUiReadinessPassed = $dashboardUiReadinessPassed
         dashboardUiBrowserProjects = @($dashboardUiBrowserProjects)
         dashboardUiCoveredRoutes = @($dashboardUiCoveredRoutes)
+        secondComputerReadinessStatus = $secondComputerReadinessStatus
+        secondComputerReadinessPassed = $secondComputerReadinessPassed
         serviceSupervisorValidationStatus = $serviceSupervisorValidationStatus
         serviceSupervisorValidationPassed = $serviceSupervisorValidationPassed
         serviceInstallValidationStatus = $serviceInstallValidationStatus
@@ -2416,6 +2485,7 @@ $report = [ordered]@{
         "npm run flowchain:public-rpc:abuse-test",
         "npm run flowchain:tester:gateway:e2e",
         "npm run flowchain:dashboard:ui:readiness",
+        "npm run flowchain:second-computer:readiness",
         "npm run flowchain:backup:restore:validate",
         "npm run flowchain:backup:owner-path:dry-run",
         "npm run flowchain:backup:create",

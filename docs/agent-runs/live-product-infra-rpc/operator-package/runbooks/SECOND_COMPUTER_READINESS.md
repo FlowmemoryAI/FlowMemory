@@ -1,6 +1,6 @@
 # FlowChain Second-Computer Readiness
 
-Generated: 2026-05-18T01:53:30.4634677+00:00
+Generated: 2026-05-18T06:21:35.5840229+00:00
 Status: passed
 
 ## Evidence
@@ -36,6 +36,7 @@ Status: passed
 | excludesEnvFiles | True |
 | excludesSecretMarkerFiles | True |
 | verifyChecksPassed | True |
+| secretMarkerFindingsEmpty | True |
 | envValuesPrintedFalse | True |
 | noSecrets | True |
 | broadcastsFalse | True |

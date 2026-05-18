@@ -83,6 +83,9 @@ $verifyChecks = @((Get-SecondComputerProp -Object $verifyReport -Name "checks" -
 $failedVerifyChecks = @($verifyChecks | Where-Object { [string](Get-SecondComputerProp -Object $_ -Name "status" -Default "failed") -ne "passed" })
 $manifestNextCommands = @((Get-SecondComputerProp -Object $manifest -Name "nextCommands" -Default @()))
 $manifestExcludes = @((Get-SecondComputerProp -Object $manifest -Name "excludes" -Default @()))
+$stageSecretMarkerFindings = @((Get-SecondComputerProp -Object $stageScan -Name "secretMarkerFindings" -Default @()) | Where-Object { $null -ne $_ })
+$stageFindings = @((Get-SecondComputerProp -Object $stageScan -Name "findings" -Default @()) | Where-Object { $null -ne $_ })
+$secretMarkerFindings = @($stageSecretMarkerFindings + $stageFindings | Where-Object { $null -ne $_ })
 $bundlePath = [string](Get-SecondComputerProp -Object $bundleReport -Name "bundlePath" -Default "")
 $bundlePathExists = -not [string]::IsNullOrWhiteSpace($bundlePath) -and (Test-Path -LiteralPath $bundlePath)
 
@@ -117,8 +120,9 @@ $checks = [ordered]@{
     excludesEnvFiles = "env files" -in $manifestExcludes
     excludesSecretMarkerFiles = "nonessential files with secret-marker field names" -in $manifestExcludes
     verifyChecksPassed = $failedVerifyChecks.Count -eq 0
+    secretMarkerFindingsEmpty = $secretMarkerFindings.Count -eq 0
     envValuesPrintedFalse = $true
-    noSecrets = $true
+    noSecrets = ([string](Get-SecondComputerProp -Object $stageScan -Name "status" -Default "missing") -eq "passed") -and ($secretMarkerFindings.Count -eq 0) -and ((Get-SecondComputerProp -Object $stageScan -Name "noSecrets" -Default $false) -eq $true)
     broadcastsFalse = $true
 }
 
@@ -133,6 +137,7 @@ $report = [ordered]@{
     failedChecks = @($failedChecks)
     missingNextCommands = @($missingNextCommands)
     failedVerifyChecks = @($failedVerifyChecks)
+    secretMarkerFindings = @($secretMarkerFindings)
     commandResults = @($commands)
     bundleReportPath = $bundleReportPath
     verifyReportPath = $verifyReportPath
@@ -140,7 +145,7 @@ $report = [ordered]@{
     bundleExists = $bundlePathExists
     bundleSha256Present = $checks.bundleSha256Present
     envValuesPrinted = $false
-    noSecrets = $true
+    noSecrets = $checks.noSecrets
     broadcasts = $false
 }
 
