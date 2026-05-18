@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.owner_activation_plan_report.v0",
-    "generatedAt":  "2026-05-18T06:32:02.7988038+00:00",
+    "generatedAt":  "2026-05-18T07:11:21.2778577+00:00",
     "status":  "passed",
     "activationReady":  false,
     "checks":  {
@@ -58,9 +58,6 @@
                             "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                             "FLOWCHAIN_RPC_TLS_TERMINATED",
                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
-                            "FLOWCHAIN_TESTER_WRITE_ENABLED",
-                            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
-                            "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
                             "FLOWCHAIN_PILOT_OPERATOR_ACK",
                             "FLOWCHAIN_BASE8453_RPC_URL",
                             "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -85,7 +82,7 @@
                         ],
     "stageCount":  8,
     "readyStageCount":  2,
-    "stagesNeedingOwnerInputCount":  6,
+    "stagesNeedingOwnerInputCount":  5,
     "stages":  [
                    {
                        "id":  "always-on-service-host",
@@ -265,7 +262,7 @@
                    {
                        "id":  "tester-write-gateway",
                        "title":  "Enable capped friends-and-family tester writes",
-                       "status":  "needs-owner-input",
+                       "status":  "needs-validation",
                        "ready":  false,
                        "requiredEnvNames":  [
                                                 "FLOWCHAIN_TESTER_WRITE_ENABLED",
@@ -276,9 +273,7 @@
 
                                             ],
                        "missingEnvNames":  [
-                                               "FLOWCHAIN_TESTER_WRITE_ENABLED",
-                                               "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
-                                               "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+
                                            ],
                        "invalidEnvNames":  [
 
@@ -287,7 +282,7 @@
                                                            "Owner password manager or secret store"
                                                        ],
                        "ownerMustDo":  [
-                                           "Generate a random bearer token outside the repo.",
+                                           "Run the tester token setup command to create or preserve the raw bearer token in ignored local storage.",
                                            "Store only its SHA-256 digest in the owner env file.",
                                            "Choose a small positive per-send test-unit cap."
                                        ],
@@ -296,6 +291,7 @@
                                                 "token hash together with the raw token"
                                             ],
                        "validationCommands":  [
+                                                  "npm run flowchain:tester:token:setup",
                                                   "npm run flowchain:tester:gateway:e2e",
                                                   "npm run flowchain:external-tester:packet -- -AllowBlocked",
                                                   "npm run flowchain:external-tester:packet:validate"
@@ -423,9 +419,6 @@
                                                "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                                                "FLOWCHAIN_RPC_TLS_TERMINATED",
                                                "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
-                                               "FLOWCHAIN_TESTER_WRITE_ENABLED",
-                                               "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
-                                               "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
                                                "FLOWCHAIN_PILOT_OPERATOR_ACK",
                                                "FLOWCHAIN_BASE8453_RPC_URL",
                                                "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -506,9 +499,6 @@
                                                "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                                                "FLOWCHAIN_RPC_TLS_TERMINATED",
                                                "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
-                                               "FLOWCHAIN_TESTER_WRITE_ENABLED",
-                                               "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
-                                               "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
                                                "FLOWCHAIN_PILOT_OPERATOR_ACK",
                                                "FLOWCHAIN_BASE8453_RPC_URL",
                                                "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",

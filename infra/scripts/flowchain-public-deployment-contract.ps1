@@ -441,6 +441,19 @@ foreach ($report in $reports.Values) {
 foreach ($name in @((Get-DeploymentProp -Object $reports.ownerInputs -Name "invalidEnvNames" -Default @()))) {
     Add-UniqueDeploymentName -Target $missingEnvNames -Value $name
 }
+$ownerInputValidNames = @((Get-DeploymentProp -Object $reports.ownerInputs -Name "inputs" -Default @()) | Where-Object {
+        (Get-DeploymentProp -Object $_ -Name "present" -Default $false) -eq $true `
+            -and (Get-DeploymentProp -Object $_ -Name "valid" -Default $false) -eq $true
+    } | ForEach-Object {
+        [string](Get-DeploymentProp -Object $_ -Name "name" -Default "")
+    } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+$filteredMissingEnvNames = New-Object System.Collections.ArrayList
+foreach ($name in @($missingEnvNames)) {
+    if ($name -notin $ownerInputValidNames) {
+        Add-UniqueDeploymentName -Target $filteredMissingEnvNames -Value $name
+    }
+}
+$missingEnvNames = $filteredMissingEnvNames
 $unknownMissingEnvNames = @($missingEnvNames | Where-Object { $_ -notin $knownOwnerInputs })
 
 $items = New-Object System.Collections.ArrayList

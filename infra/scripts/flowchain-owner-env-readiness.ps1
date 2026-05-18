@@ -263,6 +263,27 @@ foreach ($report in @($ownerInputsReport, $liveInfraReport, $deploymentContractR
     }
 }
 
+$ownerInputValidNames = @((Get-OwnerEnvReadinessProp -Object $ownerInputsReport -Name "inputs" -Default @()) | Where-Object {
+        (Get-OwnerEnvReadinessProp -Object $_ -Name "present" -Default $false) -eq $true `
+            -and (Get-OwnerEnvReadinessProp -Object $_ -Name "valid" -Default $false) -eq $true
+    } | ForEach-Object {
+        [string](Get-OwnerEnvReadinessProp -Object $_ -Name "name" -Default "")
+    } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+$filteredMissingEnvNames = New-Object System.Collections.ArrayList
+foreach ($name in @($missingEnvNames)) {
+    if ($name -notin $ownerInputValidNames) {
+        Add-UniqueOwnerEnvName -Target $filteredMissingEnvNames -Value $name
+    }
+}
+$filteredInvalidEnvNames = New-Object System.Collections.ArrayList
+foreach ($name in @($invalidEnvNames)) {
+    if ($name -notin $ownerInputValidNames) {
+        Add-UniqueOwnerEnvName -Target $filteredInvalidEnvNames -Value $name
+    }
+}
+$missingEnvNames = $filteredMissingEnvNames
+$invalidEnvNames = $filteredInvalidEnvNames
+
 $unknownMissingEnvNames = @($missingEnvNames | Where-Object { $_ -notin $knownOwnerInputs })
 $failedSteps = @($steps | Where-Object { "$($_.status)" -eq "failed" -or [int] $_.exitCode -ne 0 })
 $allReportsPassed = $reportStatuses.ownerInputs -eq "passed" -and $reportStatuses.liveInfra -eq "passed" -and $reportStatuses.publicDeploymentContract -eq "passed"

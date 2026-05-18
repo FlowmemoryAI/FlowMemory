@@ -1,6 +1,6 @@
 ﻿# FlowChain Owner Signup Checklist
 
-Generated: 2026-05-18T06:11:07.8683826Z
+Generated: 2026-05-18T06:51:08.8741093Z
 Status: passed
 
 FlowChain RPC is implemented by this repository. Do not sign up for a third-party FlowChain RPC provider. Public RPC means putting an owner-operated HTTPS edge in front of the private origin `127.0.0.1:8787`.
@@ -66,9 +66,9 @@ Put real values in a local service environment or an ignored `FLOWCHAIN_OWNER_EN
 - FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE: missing
 - FLOWCHAIN_RPC_TLS_TERMINATED: missing
 - FLOWCHAIN_RPC_STATE_BACKUP_PATH: missing
-- FLOWCHAIN_TESTER_WRITE_ENABLED: missing
-- FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256: missing
-- FLOWCHAIN_TESTER_MAX_SEND_UNITS: missing
+- FLOWCHAIN_TESTER_WRITE_ENABLED: not flagged by latest owner input report
+- FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256: not flagged by latest owner input report
+- FLOWCHAIN_TESTER_MAX_SEND_UNITS: not flagged by latest owner input report
 - FLOWCHAIN_PILOT_OPERATOR_ACK: missing
 - FLOWCHAIN_BASE8453_RPC_URL: missing
 - FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS: missing

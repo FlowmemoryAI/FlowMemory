@@ -470,6 +470,19 @@ foreach ($sourceName in @("liveProduct", "liveInfra", "externalTester", "ownerIn
 foreach ($name in @((Get-AuditProp -Object $reports.ownerInputs -Name "invalidEnvNames" -Default @()))) {
     Add-Unique -Target $missingEnv -Value $name
 }
+$ownerInputValidNames = @((Get-AuditProp -Object $reports.ownerInputs -Name "inputs" -Default @()) | Where-Object {
+        (Get-AuditProp -Object $_ -Name "present" -Default $false) -eq $true `
+            -and (Get-AuditProp -Object $_ -Name "valid" -Default $false) -eq $true
+    } | ForEach-Object {
+        [string](Get-AuditProp -Object $_ -Name "name" -Default "")
+    } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+$filteredMissingEnv = New-Object System.Collections.ArrayList
+foreach ($name in @($missingEnv)) {
+    if ($name -notin $ownerInputValidNames) {
+        Add-Unique -Target $filteredMissingEnv -Value $name
+    }
+}
+$missingEnv = $filteredMissingEnv
 
 $service = $reports.serviceStatus
 $serviceMonitor = $reports.serviceMonitor
@@ -589,7 +602,7 @@ $serviceSupervisorRequiredChecks = @(
     "beforeStatusPassed",
     "beforeControlPlanePidRecorded",
     "crashStatusCommandPassed",
-    "crashStatusBlocked",
+    "crashStatusDetected",
     "supervisorOnceRecoveryCommandPassed",
     "restartAttemptsExactlyOne",
     "afterStatusCommandPassed",
@@ -612,7 +625,8 @@ $serviceSupervisorValidationPassed = $serviceSupervisorValidationExitCode -eq 0 
     -and $serviceSupervisorSecretFindings.Count -eq 0 `
     -and $serviceSupervisorMissingChecks.Count -eq 0 `
     -and (Get-AuditProp -Object $serviceSupervisorBefore -Name "status" -Default "") -eq "passed" `
-    -and (Get-AuditProp -Object $serviceSupervisorAfterCrash -Name "status" -Default "") -eq "blocked" `
+    -and (@("blocked", "failed") -contains (Get-AuditProp -Object $serviceSupervisorAfterCrash -Name "status" -Default "")) `
+    -and (Get-AuditProp -Object $serviceSupervisorAfterCrash -Name "controlPlaneStatus" -Default "stopped") -ne "running" `
     -and (Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "status" -Default "") -eq "passed" `
     -and ((Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "nodeRunning" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "controlPlaneRunning" -Default $false) -eq $true) `

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.state_backup_report.v1",
-    "generatedAt":  "2026-05-18T04:19:35.5735190Z",
+    "generatedAt":  "2026-05-18T06:57:32.5539064Z",
     "status":  "passed",
     "requiredEnvNames":  [
                              "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
@@ -13,26 +13,26 @@
     "snapshot":  {
                      "attempted":  true,
                      "created":  true,
-                     "snapshotName":  "flowchain-state-snapshot-20260518T041821609Z",
+                     "snapshotName":  "flowchain-state-snapshot-20260518T065625121Z",
                      "stateArtifactName":  "state.json",
                      "manifestName":  "manifest.json",
                      "latestManifestName":  "latest-manifest.json",
-                     "stateFileSha256":  "791c1e4e299ce541e8d932eee835e3ee03b95eac971cfc82a2e3f3847090379b",
-                     "stateBytes":  30209696,
+                     "stateFileSha256":  "cdf76aa3311cfb701170d1114ae2d5752aa6fa5367040cd0e99958ed89e5f0c7",
+                     "stateBytes":  31015485,
                      "sourceStateReadable":  true,
                      "snapshotReadable":  true,
                      "manifestReadable":  true,
                      "writeVerified":  true,
-                     "snapshotManifestSha256":  "0c0ec91992e4bb6bd0465c18de101cf934d145f27717e6136839d4be177cb2ab",
-                     "latestManifestSha256":  "0c0ec91992e4bb6bd0465c18de101cf934d145f27717e6136839d4be177cb2ab",
+                     "snapshotManifestSha256":  "c69ec2c1e5f4c547b4050db90d125f657e0ad51b92dfa542f5a1e75514a0e505",
+                     "latestManifestSha256":  "c69ec2c1e5f4c547b4050db90d125f657e0ad51b92dfa542f5a1e75514a0e505",
                      "latestManifestReadable":  true,
                      "latestPointerWrittenAtomically":  true,
                      "latestPointerMatchesSnapshotManifest":  true,
                      "attempts":  1,
-                     "latestHeight":  "65295",
-                     "latestHash":  "0xb48c32e2ec4e9d28ebadbb2997d0e4256bf811f0d16586498d60a0e670701c40",
-                     "latestRoot":  "0xd90c3fc45ca18fd7e4e036f755ea98399570fb9328102ccfbef155f20c52d9d7",
-                     "finalizedHeight":  "65295"
+                     "latestHeight":  "67108",
+                     "latestHash":  "0x8c328e5823d9a415e7ba35983ec7117d9703a8c0b5524a4847df73f6a71e38b0",
+                     "latestRoot":  "0xada5bd6137e0fad456c9e610ec43e688701169b7a8ba98f5277d8f9f68e28445",
+                     "finalizedHeight":  "67108"
                  },
     "problems":  [
 

@@ -1,6 +1,6 @@
 ﻿# FlowChain Owner Onboarding
 
-Generated: 2026-05-18T06:11:05.5539967Z
+Generated: 2026-05-18T06:51:07.3682922Z
 Status: passed
 
 FlowChain RPC is implemented by this repository. The owner does not need a third-party FlowChain RPC provider. Public RPC readiness means exposing the private local RPC origin through an owner-operated HTTPS edge with DNS, TLS, CORS, rate limits, and monitoring.
@@ -54,9 +54,6 @@ $env:FLOWCHAIN_PILOT_CONFIRMATIONS="<2 through 256>"
 - Missing: FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE
 - Missing: FLOWCHAIN_RPC_TLS_TERMINATED
 - Missing: FLOWCHAIN_RPC_STATE_BACKUP_PATH
-- Missing: FLOWCHAIN_TESTER_WRITE_ENABLED
-- Missing: FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256
-- Missing: FLOWCHAIN_TESTER_MAX_SEND_UNITS
 - Missing: FLOWCHAIN_PILOT_OPERATOR_ACK
 - Missing: FLOWCHAIN_BASE8453_RPC_URL
 - Missing: FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS

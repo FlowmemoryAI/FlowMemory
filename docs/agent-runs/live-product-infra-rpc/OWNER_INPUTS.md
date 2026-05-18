@@ -1,6 +1,6 @@
 ﻿# FlowChain Owner Inputs
 
-Generated: 2026-05-18T03:25:34.3310270Z
+Generated: 2026-05-18T07:08:46.8031431Z
 Status: blocked
 Owner input ready: False
 
@@ -13,9 +13,9 @@ This file intentionally records env names, validation checks, and pass/block/fai
 | FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE | public-rpc | missing | required |
 | FLOWCHAIN_RPC_TLS_TERMINATED | public-rpc | missing | required |
 | FLOWCHAIN_RPC_STATE_BACKUP_PATH | backup | missing | required |
-| FLOWCHAIN_TESTER_WRITE_ENABLED | external-tester-write | missing | required |
-| FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256 | external-tester-write | missing | required |
-| FLOWCHAIN_TESTER_MAX_SEND_UNITS | external-tester-write | missing | required |
+| FLOWCHAIN_TESTER_WRITE_ENABLED | external-tester-write | present-valid | must equal true to expose the authenticated tester write gateway |
+| FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256 | external-tester-write | present-valid | 64-character SHA-256 hex digest of the out-of-band tester bearer token |
+| FLOWCHAIN_TESTER_MAX_SEND_UNITS | external-tester-write | present-valid | positive decimal integer test-unit cap per tester send |
 | FLOWCHAIN_PILOT_OPERATOR_ACK | base8453-bridge | missing | required |
 | FLOWCHAIN_BASE8453_RPC_URL | base8453-bridge | missing | required |
 | FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS | base8453-bridge | missing | required |
@@ -28,7 +28,9 @@ This file intentionally records env names, validation checks, and pass/block/fai
 
 ## Owner Env File
 
-- FLOWCHAIN_OWNER_ENV_FILE configured: False
+- FLOWCHAIN_OWNER_ENV_FILE configured: True
+- Imported known env names: 18
+- Ignored unknown env names: 0
 
 ## Next Commands
 

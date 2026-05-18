@@ -189,6 +189,26 @@ foreach ($report in $script:Reports.Values) {
         Add-ActivationUnique -Target $script:InvalidEnvNames -Value $name
     }
 }
+$ownerInputValidNames = @((Get-ActivationProp -Object $script:Reports.ownerInputs -Name "inputs" -Default @()) | Where-Object {
+        (Get-ActivationProp -Object $_ -Name "present" -Default $false) -eq $true `
+            -and (Get-ActivationProp -Object $_ -Name "valid" -Default $false) -eq $true
+    } | ForEach-Object {
+        [string](Get-ActivationProp -Object $_ -Name "name" -Default "")
+    } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+$filteredMissingEnvNames = New-Object System.Collections.ArrayList
+foreach ($name in @($script:MissingEnvNames)) {
+    if ($name -notin $ownerInputValidNames) {
+        Add-ActivationUnique -Target $filteredMissingEnvNames -Value $name
+    }
+}
+$filteredInvalidEnvNames = New-Object System.Collections.ArrayList
+foreach ($name in @($script:InvalidEnvNames)) {
+    if ($name -notin $ownerInputValidNames) {
+        Add-ActivationUnique -Target $filteredInvalidEnvNames -Value $name
+    }
+}
+$script:MissingEnvNames = $filteredMissingEnvNames
+$script:InvalidEnvNames = $filteredInvalidEnvNames
 
 $serviceReady = (Get-ActivationStatus -Report $script:Reports.serviceStatus) -eq "passed"
 $ownerEnvFile = Get-ActivationProp -Object $script:Reports.ownerEnvReadiness -Name "ownerEnvFile"
@@ -251,8 +271,8 @@ $stages = @(
         -Id "tester-write-gateway" `
         -Title "Enable capped friends-and-family tester writes" `
         -RequiredEnvNames @("FLOWCHAIN_TESTER_WRITE_ENABLED", "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256", "FLOWCHAIN_TESTER_MAX_SEND_UNITS") `
-        -ValidationCommands @("npm run flowchain:tester:gateway:e2e", "npm run flowchain:external-tester:packet -- -AllowBlocked", "npm run flowchain:external-tester:packet:validate") `
-        -OwnerMustDo @("Generate a random bearer token outside the repo.", "Store only its SHA-256 digest in the owner env file.", "Choose a small positive per-send test-unit cap.") `
+        -ValidationCommands @("npm run flowchain:tester:token:setup", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:external-tester:packet -- -AllowBlocked", "npm run flowchain:external-tester:packet:validate") `
+        -OwnerMustDo @("Run the tester token setup command to create or preserve the raw bearer token in ignored local storage.", "Store only its SHA-256 digest in the owner env file.", "Choose a small positive per-send test-unit cap.") `
         -OwnerMustNotSend @("Raw tester bearer token", "token hash together with the raw token") `
         -ExternalAccountsOrResources @("Owner password manager or secret store") `
         -SourceReports @("externalTester", "externalTesterPacket", "publicDeploymentContract") `

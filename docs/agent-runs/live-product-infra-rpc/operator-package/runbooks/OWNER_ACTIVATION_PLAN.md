@@ -1,6 +1,6 @@
 # FlowChain Owner Activation Plan
 
-Generated: 2026-05-18T06:32:02.7988038+00:00
+Generated: 2026-05-18T07:11:21.2778577+00:00
 Status: passed
 Activation ready: False
 
@@ -13,9 +13,6 @@ This plan is the current launch handoff. It records names, statuses, and command
 - `FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE`
 - `FLOWCHAIN_RPC_TLS_TERMINATED`
 - `FLOWCHAIN_RPC_STATE_BACKUP_PATH`
-- `FLOWCHAIN_TESTER_WRITE_ENABLED`
-- `FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256`
-- `FLOWCHAIN_TESTER_MAX_SEND_UNITS`
 - `FLOWCHAIN_PILOT_OPERATOR_ACK`
 - `FLOWCHAIN_BASE8453_RPC_URL`
 - `FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS`
@@ -34,10 +31,10 @@ This plan is the current launch handoff. It records names, statuses, and command
 | Fill the ignored local owner env file | ready | none | npm run flowchain:owner-env:template; npm run flowchain:owner-env:readiness:validate; npm run flowchain:owner-env:readiness -- -AllowBlocked |
 | Expose repo-owned FlowChain RPC through a public HTTPS edge | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED | npm run flowchain:public-rpc:check -- -AllowBlocked; npm run flowchain:public-rpc:validate; npm run flowchain:public-rpc:abuse-test |
 | Provision durable state backup storage | needs-owner-input | FLOWCHAIN_RPC_STATE_BACKUP_PATH | npm run flowchain:backup:check -- -AllowBlocked; npm run flowchain:backup:restore:validate; npm run flowchain:backup:owner-path:dry-run |
-| Enable capped friends-and-family tester writes | needs-owner-input | FLOWCHAIN_TESTER_WRITE_ENABLED, FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256, FLOWCHAIN_TESTER_MAX_SEND_UNITS | npm run flowchain:tester:gateway:e2e; npm run flowchain:external-tester:packet -- -AllowBlocked; npm run flowchain:external-tester:packet:validate |
+| Enable capped friends-and-family tester writes | needs-validation | none | npm run flowchain:tester:token:setup; npm run flowchain:tester:gateway:e2e; npm run flowchain:external-tester:packet -- -AllowBlocked; npm run flowchain:external-tester:packet:validate |
 | Configure capped Base 8453 bridge pilot observation | needs-owner-input | FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:bridge:live:check -- -AllowBlocked; npm run flowchain:bridge:infra:check -- -AllowBlocked; npm run flowchain:bridge:relayer:guardrail:validate; npm run flowchain:bridge:relayer:loop:validate |
-| Release the external tester packet only after public gates pass | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_TESTER_WRITE_ENABLED, FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256, FLOWCHAIN_TESTER_MAX_SEND_UNITS, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:external-tester:packet -- -AllowBlocked; npm run flowchain:external-tester:packet:validate; npm run flowchain:dashboard:ui:readiness |
-| Run final no-secret production audit before public use | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_TESTER_WRITE_ENABLED, FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256, FLOWCHAIN_TESTER_MAX_SEND_UNITS, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:completion:audit -- -AllowBlocked; npm run flowchain:truth-table -- -AllowBlocked; npm run flowchain:no-secret:scan |
+| Release the external tester packet only after public gates pass | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:external-tester:packet -- -AllowBlocked; npm run flowchain:external-tester:packet:validate; npm run flowchain:dashboard:ui:readiness |
+| Run final no-secret production audit before public use | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:completion:audit -- -AllowBlocked; npm run flowchain:truth-table -- -AllowBlocked; npm run flowchain:no-secret:scan |
 
 ## Owner Actions
 
@@ -57,7 +54,7 @@ This plan is the current launch handoff. It records names, statuses, and command
 - Keep the path local to the launch host or mounted as durable storage.
 - Resources: Persistent local disk, mounted volume, or owner-managed backup directory
 ### Enable capped friends-and-family tester writes
-- Generate a random bearer token outside the repo.
+- Run the tester token setup command to create or preserve the raw bearer token in ignored local storage.
 - Store only its SHA-256 digest in the owner env file.
 - Choose a small positive per-send test-unit cap.
 - Resources: Owner password manager or secret store

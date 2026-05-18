@@ -68,6 +68,7 @@
     "flowchain:wallet:live-tester:e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-live-service-tester-network-e2e.ps1",
     "flowchain:tester:readiness": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-external-tester-readiness.ps1",
     "flowchain:tester:gateway:e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-tester-gateway-e2e.ps1",
+    "flowchain:tester:token:setup": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-tester-write-token-setup.ps1",
     "flowchain:owner:onboarding": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-onboarding.ps1",
     "flowchain:owner:signup-checklist": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-signup-checklist.ps1",
     "flowchain:owner:activation-plan": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-activation-plan.ps1",

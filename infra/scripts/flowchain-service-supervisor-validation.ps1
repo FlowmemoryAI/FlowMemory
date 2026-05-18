@@ -225,6 +225,11 @@ try {
     $afterHeight = [string](Get-ValidationProp -Object $afterChain -Name "latestHeight" -Default "")
     $afterLiveProfile = [bool](Get-ValidationProp -Object $afterProfile -Name "liveProfile" -Default $false)
     $afterMaxBlocks = [int](Get-ValidationProp -Object $afterProfile -Name "maxBlocks" -Default -1)
+    $afterCrashReport = $afterCrash.report
+    $afterCrashStatus = [string](Get-ValidationProp -Object $afterCrashReport -Name "status" -Default "missing")
+    $afterCrashControlPlane = Get-ValidationProp -Object $afterCrashReport -Name "controlPlane"
+    $afterCrashControlPlaneStatus = [string](Get-ValidationProp -Object $afterCrashControlPlane -Name "status" -Default "missing")
+    $afterCrashDetected = (@("blocked", "failed") -contains $afterCrashStatus) -and $afterCrashControlPlaneStatus -ne "running"
     $supervisorReport = Read-FlowChainJsonIfExists -Path $supervisorReportPath
     $restartAttempts = [int](Get-ValidationProp -Object $supervisorReport -Name "restartAttempts" -Default 0)
 
@@ -276,7 +281,7 @@ try {
         beforeStatusPassed = [string](Get-ValidationProp -Object $beforeReport -Name "status" -Default "missing") -eq "passed"
         beforeControlPlanePidRecorded = $beforeControlPlanePid -gt 0
         crashStatusCommandPassed = [int]$afterCrash.exitCode -eq 0
-        crashStatusBlocked = [string](Get-ValidationProp -Object $afterCrash.report -Name "status" -Default "missing") -eq "blocked"
+        crashStatusDetected = $afterCrashDetected
         supervisorOnceRecoveryCommandPassed = $stepByName.ContainsKey("supervisor-once-recovery") -and [int]$stepByName["supervisor-once-recovery"].exitCode -eq 0
         restartAttemptsExactlyOne = $restartAttempts -eq 1
         afterStatusCommandPassed = [int]$after.exitCode -eq 0
@@ -312,7 +317,8 @@ try {
             status = [string](Get-ValidationProp -Object $beforeReport -Name "status" -Default "missing")
         }
         afterCrash = [ordered]@{
-            status = [string](Get-ValidationProp -Object $afterCrash.report -Name "status" -Default "missing")
+            status = $afterCrashStatus
+            controlPlaneStatus = $afterCrashControlPlaneStatus
         }
         afterRecovery = [ordered]@{
             status = $afterStatus

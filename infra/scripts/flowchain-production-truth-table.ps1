@@ -141,7 +141,7 @@ $definitions = @(
             "beforeStatusPassed",
             "beforeControlPlanePidRecorded",
             "crashStatusCommandPassed",
-            "crashStatusBlocked",
+            "crashStatusDetected",
             "supervisorOnceRecoveryCommandPassed",
             "restartAttemptsExactlyOne",
             "afterStatusCommandPassed",
@@ -166,7 +166,7 @@ $definitions = @(
         )
         requiredReportProperties = [ordered]@{
             "before.status" = "passed"
-            "afterCrash.status" = "blocked"
+            "afterCrash.controlPlaneStatus" = "stopped"
             "afterRecovery.status" = "passed"
             "afterRecovery.nodeRunning" = $true
             "afterRecovery.controlPlaneRunning" = $true
