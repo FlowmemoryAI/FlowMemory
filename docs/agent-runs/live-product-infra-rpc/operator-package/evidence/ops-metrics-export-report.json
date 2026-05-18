@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics_export_report.v0",
-    "generatedAt":  "2026-05-18T03:45:40.9787453Z",
+    "generatedAt":  "2026-05-18T04:59:50.4785306Z",
     "status":  "passed",
     "refresh":  {
                     "performed":  true,
@@ -75,15 +75,20 @@
                    "prometheusContainsNoUrls":  true,
                    "prometheusContainsNoEnvAssignments":  true,
                    "metricsJsonNoSecrets":  true,
+                   "metricsJsonSecretMarkerFindingsEmpty":  true,
                    "metricsJsonEnvValuesPrintedFalse":  true,
                    "metricsJsonBroadcastsFalse":  true,
                    "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
                    "noSecrets":  true,
                    "broadcastsFalse":  true
                },
     "failedChecks":  [
 
                      ],
+    "secretMarkerFindings":  [
+
+                             ],
     "envValuesPrinted":  false,
     "noSecrets":  true,
     "broadcasts":  false

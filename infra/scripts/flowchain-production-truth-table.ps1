@@ -1052,15 +1052,18 @@ $definitions = @(
             "prometheusContainsNoUrls",
             "prometheusContainsNoEnvAssignments",
             "metricsJsonNoSecrets",
+            "metricsJsonSecretMarkerFindingsEmpty",
             "metricsJsonEnvValuesPrintedFalse",
             "metricsJsonBroadcastsFalse",
             "envValuesPrintedFalse",
+            "secretMarkerFindingsEmpty",
             "noSecrets",
             "broadcastsFalse"
         )
         requiredEmptyArrays = @(
             "failedChecks",
-            "missingMetricNames"
+            "missingMetricNames",
+            "secretMarkerFindings"
         )
         requiredMinimums = [ordered]@{
             metricCount = 25

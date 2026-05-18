@@ -1,6 +1,6 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-18T03:45:40.9787453Z
+Generated: 2026-05-18T04:59:50.4785306Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
@@ -50,8 +50,10 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | prometheusContainsNoUrls | True |
 | prometheusContainsNoEnvAssignments | True |
 | metricsJsonNoSecrets | True |
+| metricsJsonSecretMarkerFindingsEmpty | True |
 | metricsJsonEnvValuesPrintedFalse | True |
 | metricsJsonBroadcastsFalse | True |
 | envValuesPrintedFalse | True |
+| secretMarkerFindingsEmpty | True |
 | noSecrets | True |
 | broadcastsFalse | True |

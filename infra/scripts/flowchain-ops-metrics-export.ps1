@@ -140,6 +140,38 @@ function ConvertTo-PrometheusText {
     return ($lines -join "`n")
 }
 
+function Get-OpsMetricsSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 function Test-OpsMetricsPackageScript {
     param([Parameter(Mandatory = $true)][string] $Name)
     $packageJson = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "package.json") | ConvertFrom-Json
@@ -211,6 +243,7 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_truth_gates_failed" -Help "Fa
 Add-MetricGauge -Metrics $metrics -Name "flowchain_truth_gates_stale" -Help "Stale production truth table gates." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $truthCounts -Name "stale"))
 
 $prometheusText = ConvertTo-PrometheusText -Metrics @($metrics)
+$prometheusSecretMarkerFindings = @(Get-OpsMetricsSecretMarkerFindings -Text $prometheusText -Label "ops metrics Prometheus text export")
 Assert-FlowChainNoSecretText -Text $prometheusText -Label "ops Prometheus metrics export"
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $prometheusTextFullPath) | Out-Null
 Set-Content -LiteralPath $prometheusTextFullPath -Value $prometheusText -Encoding UTF8
@@ -231,8 +264,13 @@ $metricsJson = [ordered]@{
     prometheusTextPath = $PrometheusTextPath
     envValuesPrinted = $false
     noSecrets = $true
+    secretMarkerFindings = @()
     broadcasts = $false
 }
+$metricsJsonText = $metricsJson | ConvertTo-Json -Depth 12
+$metricsJsonSecretMarkerFindings = @(Get-OpsMetricsSecretMarkerFindings -Text $metricsJsonText -Label "ops metrics JSON export")
+$metricsJson["secretMarkerFindings"] = @($metricsJsonSecretMarkerFindings)
+$metricsJson["noSecrets"] = $metricsJsonSecretMarkerFindings.Count -eq 0
 $metricsJsonText = $metricsJson | ConvertTo-Json -Depth 12
 Assert-FlowChainNoSecretText -Text $metricsJsonText -Label "ops metrics JSON export"
 Write-FlowChainJson -Path $metricsJsonFullPath -Value $metricsJson -Depth 12
@@ -279,19 +317,19 @@ $checks = [ordered]@{
     prometheusContainsNoUrls = $prometheusTextFromFile -notmatch 'https?://'
     prometheusContainsNoEnvAssignments = $prometheusTextFromFile -notmatch 'FLOWCHAIN_[A-Z0-9_]+\s*='
     metricsJsonNoSecrets = (Get-MetricsProp -Object $metricsJsonFromFile -Name "noSecrets" -Default $false) -eq $true
+    metricsJsonSecretMarkerFindingsEmpty = @((Get-MetricsProp -Object $metricsJsonFromFile -Name "secretMarkerFindings" -Default @())).Count -eq 0
     metricsJsonEnvValuesPrintedFalse = (Get-MetricsProp -Object $metricsJsonFromFile -Name "envValuesPrinted" -Default $true) -eq $false
     metricsJsonBroadcastsFalse = (Get-MetricsProp -Object $metricsJsonFromFile -Name "broadcasts" -Default $true) -eq $false
     envValuesPrintedFalse = $true
+    secretMarkerFindingsEmpty = $true
     noSecrets = $true
     broadcastsFalse = $true
 }
-$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
-$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
 
 $report = [ordered]@{
     schema = "flowchain.ops_metrics_export_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = $status
+    status = "pending"
     refresh = [ordered]@{
         performed = -not $NoRefresh.IsPresent
         steps = @($refreshSteps)
@@ -303,11 +341,29 @@ $report = [ordered]@{
     requiredMetricNames = $requiredMetricNames
     missingMetricNames = @($missingMetricNames)
     checks = $checks
-    failedChecks = @($failedChecks)
+    failedChecks = @()
+    secretMarkerFindings = @()
     envValuesPrinted = $false
     noSecrets = $true
     broadcasts = $false
 }
+$preliminaryReportText = $report | ConvertTo-Json -Depth 18
+$reportSecretMarkerFindings = @(Get-OpsMetricsSecretMarkerFindings -Text $preliminaryReportText -Label "ops metrics export report")
+$secretMarkerFindings = @(
+    @($prometheusSecretMarkerFindings)
+    @($metricsJsonSecretMarkerFindings)
+    @($reportSecretMarkerFindings)
+)
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
+
 $reportText = $report | ConvertTo-Json -Depth 18
 Assert-FlowChainNoSecretText -Text $reportText -Label "ops metrics export report"
 Write-FlowChainJson -Path $reportFullPath -Value $report -Depth 18
