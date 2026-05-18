@@ -707,6 +707,54 @@ $testerTransferCount = @((Get-AuditProp -Object $testerNetwork -Name "transferRe
 $testerCount = [int](Get-AuditProp -Object $testerNetwork -Name "testerCount" -Default 0)
 $testerNetworkBefore = [string](Get-AuditProp -Object $testerNetwork -Name "chainBeforeBlock")
 $testerNetworkAfter = [string](Get-AuditProp -Object $testerNetwork -Name "chainAfterBlock")
+$testerNetworkChecks = Get-AuditProp -Object $testerNetwork -Name "checks"
+$testerNetworkFailedChecks = @((Get-AuditProp -Object $testerNetwork -Name "failedChecks" -Default @()))
+$testerNetworkSecretFindings = @((Get-AuditProp -Object $testerNetwork -Name "secretMarkerFindings" -Default @()))
+$testerNetworkRequiredChecks = @(
+    "serviceStatusSucceeded",
+    "healthSchemaOk",
+    "rpcDiscoverSchemaOk",
+    "rpcReadinessSchemaOk",
+    "testerCountAtLeastFour",
+    "walletCreatesPublicOnly",
+    "walletAccountsUnique",
+    "fundingTxIdsPresent",
+    "transferCountMatches",
+    "allTransfersQueued",
+    "allTransferIdsPresent",
+    "allTransferTxIdsPresent",
+    "balancesMatchExpected",
+    "historyCountsAtLeastTwo",
+    "chainStatusReadableBefore",
+    "chainStatusReadableAfter",
+    "blockHeightAdvanced",
+    "packetExecutableSmokeValidated",
+    "packetSmokeChecksAllPassed",
+    "localOnly",
+    "productionReadyFalse",
+    "noLiveBroadcast",
+    "broadcastsFalse",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "secretMarkerFindingsEmpty"
+)
+$testerNetworkMissingChecks = Get-MissingAuditChecks -Checks $testerNetworkChecks -Names $testerNetworkRequiredChecks
+$testerNetworkFailedCheckCount = @($testerNetworkFailedChecks | Where-Object { $null -ne $_ }).Count
+$testerNetworkSecretFindingCount = @($testerNetworkSecretFindings | Where-Object { $null -ne $_ }).Count
+$testerNetworkMissingCheckCount = @($testerNetworkMissingChecks | Where-Object { $null -ne $_ }).Count
+$testerNetworkPassed = $testerNetworkExitCode -eq 0 `
+    -and (Get-ReportStatus -Report $testerNetwork) -eq "passed" `
+    -and $testerCount -ge 4 `
+    -and $testerTransferCount -ge 4 `
+    -and $testerNetworkFailedCheckCount -eq 0 `
+    -and $testerNetworkSecretFindingCount -eq 0 `
+    -and $testerNetworkMissingCheckCount -eq 0 `
+    -and ((Get-AuditProp -Object $testerNetwork -Name "localOnly" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $testerNetwork -Name "productionReady" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $testerNetwork -Name "noLiveBroadcast" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $testerNetwork -Name "broadcasts" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $testerNetwork -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $testerNetwork -Name "noSecrets" -Default $false) -eq $true)
 $liveWalletBalances = Get-AuditProp -Object $liveWallet -Name "balances"
 $liveWalletSenderAfter = [string](Get-AuditProp -Object $liveWalletBalances -Name "senderAfter")
 $liveWalletRecipientAfter = [string](Get-AuditProp -Object $liveWalletBalances -Name "recipientAfter")
@@ -1774,8 +1822,8 @@ Add-AuditItem -Items $items -Id "service-install-validation" `
 
 Add-AuditItem -Items $items -Id "wallet-create" `
     -Requirement "People can create wallets through the RPC service without receiving secret material." `
-    -Status $(if ($testerNetworkExitCode -eq 0 -and (Get-ReportStatus -Report $testerNetwork) -eq "passed" -and $testerCount -ge 4) { "passed" } else { "failed" }) `
-    -Evidence "testerWalletCreates=$testerWalletCreatesCount, secretMaterialReturned=false, report=$($paths.testerNetwork)" `
+    -Status $(if ($testerNetworkPassed -and $testerWalletCreatesCount -ge 4) { "passed" } else { "failed" }) `
+    -Evidence "testerWalletCreates=$testerWalletCreatesCount, failedChecks=$testerNetworkFailedCheckCount, secretFindings=$testerNetworkSecretFindingCount, missingChecks=$testerNetworkMissingCheckCount, secretMaterialReturned=false, report=$($paths.testerNetwork)" `
     -Commands @("npm run flowchain:wallet:live-tester:e2e")
 
 Add-AuditItem -Items $items -Id "wallet-transfer" `
@@ -1786,8 +1834,8 @@ Add-AuditItem -Items $items -Id "wallet-transfer" `
 
 Add-AuditItem -Items $items -Id "tester-network-transfer" `
     -Requirement "A small tester group can create wallets, receive funds, and send funds to each other through the running service." `
-    -Status $(if ($testerNetworkExitCode -eq 0 -and (Get-ReportStatus -Report $testerNetwork) -eq "passed" -and $testerCount -ge 4 -and $testerTransferCount -ge 4) { "passed" } else { "failed" }) `
-    -Evidence "testerCount=$testerCount, transfers=$testerTransferCount, blocks=$testerNetworkBefore->$testerNetworkAfter, report=$($paths.testerNetwork)" `
+    -Status $(if ($testerNetworkPassed) { "passed" } else { "failed" }) `
+    -Evidence "testerCount=$testerCount, transfers=$testerTransferCount, blocks=$testerNetworkBefore->$testerNetworkAfter, failedChecks=$testerNetworkFailedCheckCount, secretFindings=$testerNetworkSecretFindingCount, missingChecks=$testerNetworkMissingCheckCount, report=$($paths.testerNetwork)" `
     -Commands @("npm run flowchain:wallet:live-tester:e2e")
 
 Add-AuditItem -Items $items -Id "rpc-connect-local" `

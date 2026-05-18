@@ -63,6 +63,38 @@ function Invoke-CargoJson {
     return $output | ConvertFrom-Json
 }
 
+function Get-TesterNetworkSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 function Wait-LocalBalanceEquals {
     param(
         [Parameter(Mandatory = $true)][string] $AccountId,
@@ -273,12 +305,58 @@ if (-not $packetExecutableSmokeValidated) {
     throw "External tester packet smoke did not validate: $($failedChecks -join ', ')"
 }
 
+$balanceMismatches = @()
+foreach ($account in $accounts) {
+    if ([int64] $balancesAfter[$account] -ne [int64] $expectedBalances[$account]) {
+        $balanceMismatches += $account
+    }
+}
+
+$historyShortfalls = @()
+foreach ($account in $accounts) {
+    if ([int64] $historyCounts[$account] -lt 2) {
+        $historyShortfalls += $account
+    }
+}
+
+$checks = [ordered]@{
+    serviceStatusSucceeded = $true
+    healthSchemaOk = $health.schema -eq "flowmemory.control_plane.health.v0"
+    rpcDiscoverSchemaOk = $discover.schema -eq "flowchain.rpc.discovery.v0"
+    rpcReadinessSchemaOk = $readiness.schema -eq "flowchain.rpc.readiness.v0"
+    testerCountAtLeastFour = $accounts.Count -ge 4
+    walletCreatesPublicOnly = @($walletCreates | Where-Object { $_.schema -eq "flowmemory.control_plane.local_wallet_create_result.v0" -and $_.secretMaterialReturned -eq $false }).Count -eq $walletCreates.Count
+    walletAccountsUnique = @($accounts | Select-Object -Unique).Count -eq $accounts.Count
+    fundingTxIdsPresent = $fundingTxIds.Count -ge $accounts.Count
+    transferCountMatches = $sendResults.Count -eq $transfers.Count
+    allTransfersQueued = @($sendResults | Where-Object { $_.status -eq "queued_local_runtime" }).Count -eq $transfers.Count
+    allTransferIdsPresent = @($sendResults | Where-Object { -not [string]::IsNullOrWhiteSpace("$($_.transferId)") }).Count -eq $transfers.Count
+    allTransferTxIdsPresent = @($sendResults | Where-Object { @($_.txIds).Count -ge 1 }).Count -eq $transfers.Count
+    balancesMatchExpected = $balanceMismatches.Count -eq 0
+    historyCountsAtLeastTwo = $historyShortfalls.Count -eq 0
+    chainStatusReadableBefore = -not [string]::IsNullOrWhiteSpace($chainBeforeBlock)
+    chainStatusReadableAfter = -not [string]::IsNullOrWhiteSpace($chainAfterBlock)
+    blockHeightAdvanced = $chainBeforeBlock -match '^\d+$' -and $chainAfterBlock -match '^\d+$' -and ([int64] $chainAfterBlock) -gt ([int64] $chainBeforeBlock)
+    packetExecutableSmokeValidated = $packetExecutableSmokeValidated
+    packetSmokeChecksAllPassed = @($packetSmokeChecks.GetEnumerator() | Where-Object { $_.Value -ne $true }).Count -eq 0
+    localOnly = $true
+    productionReadyFalse = $true
+    noLiveBroadcast = $true
+    broadcastsFalse = $true
+    envValuesPrintedFalse = $true
+    noSecrets = $true
+    secretMarkerFindingsEmpty = $true
+}
+
 $report = [ordered]@{
     schema = "flowchain.live_service_tester_network_e2e_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = "passed"
+    status = "pending"
     rpcEndpoint = "local-private-127.0.0.1"
     runId = $runId
+    checks = $checks
+    failedChecks = @()
+    secretMarkerFindings = @()
     serviceHealthSchema = $health.schema
     rpcDiscoverSchema = $discover.schema
     rpcReadinessSchema = $readiness.schema
@@ -298,9 +376,22 @@ $report = [ordered]@{
     localOnly = $true
     productionReady = $false
     noLiveBroadcast = $true
+    broadcasts = $false
     envValuesPrinted = $false
     noSecrets = $true
 }
+
+$preliminaryReportText = $report | ConvertTo-Json -Depth 20
+$secretMarkerFindings = @(Get-TesterNetworkSecretMarkerFindings -Text $preliminaryReportText -Label "live service tester network E2E report")
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 
 $reportText = $report | ConvertTo-Json -Depth 20
 Assert-FlowChainNoSecretText -Text $reportText -Label "live service tester network E2E report"
@@ -310,3 +401,7 @@ Write-Host "FlowChain live service tester network E2E passed."
 Write-Host "Tester accounts: $($accounts.Count)"
 Write-Host "Chain blocks: $chainBeforeBlock -> $chainAfterBlock"
 Write-Host "Report: $reportFullPath"
+if ($status -ne "passed") {
+    Write-Host "Failed checks: $($failedChecks -join ', ')"
+    exit 1
+}

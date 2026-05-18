@@ -366,6 +366,46 @@ $definitions = @(
         command = "npm run flowchain:wallet:live-tester:e2e"
         productionGate = $true
         ownerInputGate = $false
+        requiredChecks = @(
+            "serviceStatusSucceeded",
+            "healthSchemaOk",
+            "rpcDiscoverSchemaOk",
+            "rpcReadinessSchemaOk",
+            "testerCountAtLeastFour",
+            "walletCreatesPublicOnly",
+            "walletAccountsUnique",
+            "fundingTxIdsPresent",
+            "transferCountMatches",
+            "allTransfersQueued",
+            "allTransferIdsPresent",
+            "allTransferTxIdsPresent",
+            "balancesMatchExpected",
+            "historyCountsAtLeastTwo",
+            "chainStatusReadableBefore",
+            "chainStatusReadableAfter",
+            "blockHeightAdvanced",
+            "packetExecutableSmokeValidated",
+            "packetSmokeChecksAllPassed",
+            "localOnly",
+            "productionReadyFalse",
+            "noLiveBroadcast",
+            "broadcastsFalse",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "localOnly" = $true
+            "productionReady" = $false
+            "noLiveBroadcast" = $true
+            "broadcasts" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+        }
     },
     [ordered]@{
         id = "owner-inputs"
