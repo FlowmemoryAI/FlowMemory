@@ -4758,6 +4758,8 @@ code {
   .workbench-switcher {
     position: static;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: none;
+    overflow: visible;
   }
 
   .explorer-side-panel {

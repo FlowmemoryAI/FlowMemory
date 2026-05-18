@@ -13,6 +13,13 @@ import {
   normalizeAddress,
   normalizeBytes32,
 } from "../../shared/src/index.ts";
+import {
+  bridgeSourceEventReplayKey,
+  flowchainBridgeCreditId,
+  flowchainBridgeEvidenceHash,
+  flowchainBridgeObservationId,
+} from "../../../crypto/src/production-l1.js";
+import { canonicalJsonHash } from "../../../crypto/src/hashes.js";
 
 export const BASE_MAINNET_CHAIN_ID = 8453;
 export const BASE_MAINNET_CHAIN_ID_HEX = "0x2105";
@@ -33,6 +40,7 @@ export const BRIDGE_DEPOSIT_TOPIC0 = keccak256Utf8(BRIDGE_DEPOSIT_EVENT_SIGNATUR
 export const BRIDGE_DEPOSIT_LEGACY_TOPIC0 = keccak256Utf8(BRIDGE_DEPOSIT_LEGACY_EVENT_SIGNATURE_TEXT);
 export const PILOT_MODE_TAG = keccak256Utf8("flowchain.base8453.owner-pilot.v0");
 export const FIXED_TEST_OBSERVED_AT = "2026-05-13T00:00:00.000Z";
+export const FLOWCHAIN_LOCAL_RUNTIME_CHAIN_ID = "31337";
 const APPLICATION_STATE_LOCK_TIMEOUT_MS = 10_000;
 const APPLICATION_STATE_LOCK_RETRY_MS = 25;
 
@@ -825,13 +833,36 @@ function fixtureDeposits(fixture: unknown): BridgeDeposit[] {
 }
 
 export function bridgeReplayKey(deposit: BridgeDeposit): `0x${string}` {
-  return stableId("flowmemory.bridge_replay_key.v0", {
+  return bridgeSourceEventReplayKey({
     sourceChainId: deposit.sourceChainId,
-    sourceContract: deposit.sourceContract,
+    lockbox: deposit.sourceContract,
     txHash: deposit.txHash,
     logIndex: deposit.logIndex,
-    depositId: deposit.depositId,
-  });
+  }) as `0x${string}`;
+}
+
+function bridgeObservationId(deposit: BridgeDeposit): `0x${string}` {
+  return flowchainBridgeObservationId({
+    sourceChainId: deposit.sourceChainId,
+    lockbox: deposit.sourceContract,
+    token: deposit.token,
+    depositor: deposit.sender,
+    recipient: deposit.flowchainRecipient,
+    amount: deposit.amount,
+    txHash: deposit.txHash,
+    logIndex: deposit.logIndex,
+    blockNumber: deposit.sourceBlockNumber ?? "0",
+    eventNonce: deposit.nonce,
+  }) as `0x${string}`;
+}
+
+function bridgeCreditId(observation: BridgeObservation): `0x${string}` {
+  return flowchainBridgeCreditId({
+    observationId: observation.observationId,
+    localRecipient: observation.deposit.flowchainRecipient,
+    localChainId: FLOWCHAIN_LOCAL_RUNTIME_CHAIN_ID,
+    creditAmount: observation.deposit.amount,
+  }) as `0x${string}`;
 }
 
 interface BridgeGuardrailOptions {
@@ -899,11 +930,7 @@ export function makeObservation(
     && guardrails.approvedContract !== false;
   return {
     schema: "flowmemory.bridge_deposit_observation.v0",
-    observationId: stableId("flowmemory.bridge_observation.v0", {
-      mode,
-      replayKey,
-      depositId: deposit.depositId,
-    }),
+    observationId: bridgeObservationId(deposit),
     replayKey,
     observedAt: FIXED_TEST_OBSERVED_AT,
     mode,
@@ -950,15 +977,7 @@ export function makeBridgeCredit(
   const livePilot = isLivePilotMode(observation.mode);
   return {
     schema: "flowmemory.bridge_credit.v0",
-    creditId: stableId("flowmemory.bridge_credit.v0", {
-      observationId: observation.observationId,
-      depositId: deposit.depositId,
-      replayKey: observation.replayKey,
-      sourceChainId: deposit.sourceChainId,
-      sourceContract: deposit.sourceContract,
-      txHash: deposit.txHash,
-      logIndex: deposit.logIndex,
-    }),
+    creditId: bridgeCreditId(observation),
     observationId: observation.observationId,
     depositId: deposit.depositId,
     replayKey: observation.replayKey,
@@ -1688,13 +1707,19 @@ function makePilotEvidence(
 }
 
 function makeReleaseEvidence(intent: BridgeWithdrawalIntent, deposit: BridgeDeposit): BridgeReleaseEvidence {
-  const evidenceHash = stableId("flowmemory.bridge_release_evidence_hash.v0", {
+  const evidencePayload = {
     withdrawalIntentId: intent.withdrawalIntentId,
-    creditId: intent.creditId,
-    depositId: intent.depositId,
     amount: intent.amount,
     baseRecipient: intent.baseRecipient,
-  });
+  };
+  const evidenceHash = flowchainBridgeEvidenceHash({
+    sourceEventReplayKey: bridgeReplayKey(deposit),
+    observationId: bridgeObservationId(deposit),
+    creditId: intent.creditId,
+    depositId: intent.depositId,
+    localChainId: FLOWCHAIN_LOCAL_RUNTIME_CHAIN_ID,
+    evidencePayloadHash: canonicalJsonHash(evidencePayload),
+  }) as `0x${string}`;
   const productionReady = intent.sourceChainId === BASE_MAINNET_CHAIN_ID && intent.destinationChainId === BASE_MAINNET_CHAIN_ID;
   return {
     schema: "flowmemory.bridge_release_evidence.v0",

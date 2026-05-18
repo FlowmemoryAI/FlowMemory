@@ -55,10 +55,31 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
   const [actionResult, setActionResult] = useState<string | null>(null);
   const activeDefinition = WORKBENCH_SECTIONS.find((section) => section.key === activeSection) ?? WORKBENCH_SECTIONS[0];
   const activeRecords = workbench.sections[activeSection] ?? [];
-  const filteredRecords = useMemo(
-    () => activeRecords.filter((record) => recordMatches(record, query)),
-    [activeRecords, query],
+  const allSearchRecords = useMemo(
+    () =>
+      WORKBENCH_SECTIONS.flatMap((section) =>
+        (workbench.sections[section.key] ?? []).map((record) => ({
+          ...record,
+          id: `${section.key}:${record.id}`,
+          kind: `${section.label} / ${record.kind}`,
+        })),
+      ),
+    [workbench.sections],
   );
+  const searchActive = query.trim().length > 0;
+  const filteredRecords = useMemo(
+    () => (searchActive ? allSearchRecords : activeRecords).filter((record) => recordMatches(record, query)),
+    [activeRecords, allSearchRecords, query, searchActive],
+  );
+  const displayDefinition = searchActive
+    ? {
+        ...activeDefinition,
+        label: "Search Results",
+        detail:
+          "Global loaded explorer search across blocks, transactions, receipts, accounts, tokens, pools, bridge observations, credits, withdrawal intents, and release evidence.",
+        expectedEndpoint: "POST /rpc explorer_search + loaded workbench index",
+      }
+    : activeDefinition;
   const sourceStatus: DashboardStatus = workbench.source === "control-plane" ? "verified" : "stale";
   const bridgeRecordCount =
     workbench.sections.bridgeDeposits.length + workbench.sections.bridgeCredits.length + workbench.sections.bridgeWithdrawals.length;
@@ -74,6 +95,10 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
   const backupDryRunGate = liveReadinessGates.find((record) => record.id === "state-backup-owner-path-dry-run");
   const bridgeRelayerGate = liveReadinessGates.find((record) => record.id === "base8453-bridge-relayer-queue");
   const testerPacketGate = liveReadinessGates.find((record) => record.id === "external-tester-sharing");
+    workbench.sections.bridgeDeposits.length +
+    workbench.sections.bridgeCredits.length +
+    workbench.sections.bridgeWithdrawals.length +
+    workbench.sections.bridgeReleases.length;
   const pilotRecords = workbench.sections.realValuePilot;
   const pilotOverview = pilotRecords.find((record) => record.kind === "Pilot status") ?? pilotRecords[0];
   const bridgeReadiness = pilotRecords.find((record) => record.kind === "Bridge live readiness");
@@ -181,7 +206,7 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
       label: "Token launch",
       detail: "Local/testnet token definitions and launch receipts.",
       command: "npm run flowchain:product-e2e",
-      count: workbench.sections.tokenLaunches.length + workbench.sections.tokenBalances.length,
+      count: workbench.sections.tokenLaunches.length + workbench.sections.tokenBalances.length + workbench.sections.tokenTransfers.length,
       Icon: ListChecks,
     },
     {
@@ -224,6 +249,14 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
       count: bridgeRecordCount,
       Icon: ShieldAlert,
     },
+    {
+      key: "errorsRecovery",
+      label: "Errors and recovery",
+      detail: "Offline, degraded, chain, lockbox, replay, and build recovery references.",
+      command: "npm run control-plane:smoke",
+      count: workbench.sections.errorsRecovery.length,
+      Icon: Terminal,
+    },
   ];
   const releaseGateTiles: Array<{
     label: string;
@@ -262,7 +295,7 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
           <div className="workbench-header-actions">
             <label className="search-box">
               <Search size={16} aria-hidden="true" />
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search current workbench view" />
+              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search blocks, txs, accounts, tokens, pools, bridge evidence" />
             </label>
             {onRefresh ? (
               <button className="button" type="button" onClick={onRefresh} title="Refresh local workbench data">
@@ -583,6 +616,7 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
           <strong>
             {workbench.sections.tokenLaunches.length +
               workbench.sections.tokenBalances.length +
+              workbench.sections.tokenTransfers.length +
               workbench.sections.dexPools.length +
               workbench.sections.liquidityPositions.length +
               workbench.sections.swaps.length}
@@ -592,6 +626,7 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
               status={statusForCount(
                 workbench.sections.tokenLaunches.length +
                   workbench.sections.tokenBalances.length +
+                  workbench.sections.tokenTransfers.length +
                   workbench.sections.dexPools.length +
                   workbench.sections.liquidityPositions.length +
                   workbench.sections.swaps.length,
@@ -630,16 +665,16 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
           <div className="panel-heading">
             <div>
               {activeSection === "provenance" ? <Database size={18} aria-hidden="true" /> : <Network size={18} aria-hidden="true" />}
-              <h2>{activeDefinition.label}</h2>
+              <h2>{displayDefinition.label}</h2>
             </div>
-            <span>{activeDefinition.expectedEndpoint}</span>
+            <span>{displayDefinition.expectedEndpoint}</span>
           </div>
-          <p className="workbench-section-detail">{activeDefinition.detail}</p>
+          <p className="workbench-section-detail">{displayDefinition.detail}</p>
 
           {filteredRecords.length > 0 ? (
             <div className="workbench-record-grid">
-              {filteredRecords.map((record) => (
-                <article className="workbench-record" key={`${activeSection}:${record.id}:${record.kind}`}>
+              {filteredRecords.map((record, recordIndex) => (
+                <article className="workbench-record" key={`${activeSection}:${record.id}:${record.kind}:${recordIndex}`}>
                   <div className="tile-heading">
                     <StatusBadge status={record.status} compact />
                     <span>{record.kind}</span>
@@ -647,8 +682,8 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
                   <h3>{displayValue(record.title)}</h3>
                   <p>{record.summary}</p>
                   <dl className="definition-grid">
-                    {record.facts.slice(0, 6).map((fact) => (
-                      <div key={`${record.id}:${fact.label}`}>
+                    {record.facts.slice(0, 6).map((fact, factIndex) => (
+                      <div key={`${record.id}:${fact.label}:${factIndex}`}>
                         <dt>{fact.label}</dt>
                         <dd>{displayValue(fact.value)}</dd>
                       </div>
@@ -660,8 +695,8 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
             </div>
           ) : (
             <EmptyState
-              title={`No ${activeDefinition.label.toLowerCase()} in the current source`}
-              detail={missingStateDetail(activeDefinition)}
+              title={`No ${displayDefinition.label.toLowerCase()} in the current source`}
+              detail={searchActive ? "No loaded explorer object matches the current search query." : missingStateDetail(activeDefinition)}
             />
           )}
         </article>

@@ -35,10 +35,13 @@ Second-computer readiness check:
 
 ```powershell
 npm run flowchain:prereq
+npm run flowchain:doctor
 npm run flowchain:init
-npm run flowchain:start
+npm run flowchain:node:start -- -MaxBlocks 3 -Wait
+npm run flowchain:node:status
 npm run flowchain:demo
 npm run flowchain:export
+npm run flowchain:production-l1:e2e
 ```
 
 Run `npm run flowchain:full-smoke` when the machine has the full prerequisite set,
@@ -48,6 +51,7 @@ Capped owner pilot preflight:
 
 ```powershell
 npm run flowchain:real-value-pilot:ops
+npm run flowchain:bridge:live:check
 ```
 
 Do not run live pilot actions until the owner has reviewed
@@ -164,6 +168,7 @@ Run before handoff when dependencies are installed:
 ```powershell
 npm run flowchain:smoke
 npm run flowchain:full-smoke
+npm run flowchain:production-l1:e2e
 git diff --check
 ```
 

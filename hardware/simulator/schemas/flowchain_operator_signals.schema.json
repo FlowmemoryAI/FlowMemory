@@ -16,6 +16,8 @@
     "hardwareSignals",
     "operatorMetadata",
     "hardwareNodes",
+    "nodeHealth",
+    "peerHints",
     "workReceipts",
     "verifierReports",
     "bridgeAlerts",
@@ -100,6 +102,8 @@
             "enum": [
               "device_manifest",
               "heartbeat",
+              "node_health",
+              "peer_hint",
               "compact_receipt_relay",
               "verifier_report_digest_relay",
               "emergency_offline_signal",
@@ -112,6 +116,8 @@
             "enum": [
               "operator_metadata",
               "hardware_node_status",
+              "node_health",
+              "peer_hint",
               "work_receipt_reference",
               "verifier_report_reference",
               "alert_challenge_input",
@@ -124,6 +130,8 @@
             "enum": [
               "operatorMetadata",
               "hardwareNodes",
+              "nodeHealth",
+              "peerHints",
               "workReceipts",
               "verifierReports",
               "challenges",
@@ -169,6 +177,8 @@
             "enum": [
               "operator_metadata",
               "heartbeat",
+              "node_health",
+              "peer_hint",
               "receipt_relay",
               "verifier_digest_relay",
               "offline_alert_challenge_input",
@@ -231,6 +241,8 @@
             "enum": [
               "operator_metadata",
               "heartbeat",
+              "node_health",
+              "peer_hint",
               "receipt_relay",
               "verifier_digest_relay",
               "offline_alert_challenge_input",
@@ -303,6 +315,48 @@
           "status": { "type": "string", "enum": ["verified", "stale", "offline", "observed"] },
           "localOnly": { "type": "boolean", "enum": [true] },
           "sourcePacketType": { "type": "string", "enum": ["heartbeat"] }
+        }
+      }
+    },
+    "nodeHealth": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["nodeHealthId", "nodeId", "rootfieldId", "health", "observedAt", "healthDigest", "status", "payloadBytesEstimate", "loraEligible", "chainStartupBlocking", "localOnly", "sourcePacketType"],
+        "properties": {
+          "nodeHealthId": { "type": "string", "maxLength": 96 },
+          "nodeId": { "type": "string", "maxLength": 64 },
+          "rootfieldId": { "type": "string", "maxLength": 96 },
+          "health": { "type": "string", "enum": ["healthy", "warning", "critical", "unknown"] },
+          "observedAt": { "type": "string" },
+          "healthDigest": { "type": "string", "maxLength": 66 },
+          "status": { "type": "string", "enum": ["observed", "stale", "offline"] },
+          "payloadBytesEstimate": { "type": "integer", "minimum": 0, "maximum": 200 },
+          "loraEligible": { "type": "boolean" },
+          "chainStartupBlocking": { "type": "boolean", "enum": [false] },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "sourcePacketType": { "type": "string", "enum": ["node_health"] }
+        }
+      }
+    },
+    "peerHints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["peerHintId", "nodeId", "peerId", "peerRole", "transport", "linkState", "lastSeenAt", "payloadBytesEstimate", "loraEligible", "normalNetworkRequiredForSync", "localOnly", "sourcePacketType"],
+        "properties": {
+          "peerHintId": { "type": "string", "maxLength": 96 },
+          "nodeId": { "type": "string", "maxLength": 64 },
+          "peerId": { "type": "string", "maxLength": 64 },
+          "peerRole": { "type": "string", "enum": ["observer", "relay", "gateway", "field-kit"] },
+          "transport": { "type": "string", "enum": ["local-simulator", "meshtastic-control-sim", "lora-control-sim"] },
+          "linkState": { "type": "string", "enum": ["heard", "stale", "lost", "unknown"] },
+          "lastSeenAt": { "type": "string" },
+          "payloadBytesEstimate": { "type": "integer", "minimum": 0, "maximum": 200 },
+          "loraEligible": { "type": "boolean" },
+          "normalNetworkRequiredForSync": { "type": "boolean", "enum": [true] },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "sourcePacketType": { "type": "string", "enum": ["peer_hint"] }
         }
       }
     },
@@ -517,6 +571,8 @@
       "additionalProperties": false,
       "required": [
         "operatorMetadata",
+        "nodeHealth",
+        "peerHints",
         "receipts",
         "verifierReports",
         "bridgeAlerts",
@@ -528,6 +584,8 @@
       ],
       "properties": {
         "operatorMetadata": { "type": "array", "items": { "type": "object" } },
+        "nodeHealth": { "type": "array", "items": { "type": "object" } },
+        "peerHints": { "type": "array", "items": { "type": "object" } },
         "receipts": { "type": "array", "items": { "type": "object" } },
         "verifierReports": { "type": "array", "items": { "type": "object" } },
         "bridgeAlerts": { "type": "array", "items": { "type": "object" } },

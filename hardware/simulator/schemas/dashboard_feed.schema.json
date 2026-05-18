@@ -3,7 +3,7 @@
   "title": "Dashboard Feed",
   "type": "object",
   "additionalProperties": false,
-  "required": ["packet_type", "schema_version", "device_id", "generated_at", "network", "cache", "sidecar", "flowcore", "latest_receipt_digest", "trust_labels"],
+  "required": ["packet_type", "schema_version", "device_id", "generated_at", "network", "cache", "sidecar", "peer", "node_health", "flowcore", "latest_receipt_digest", "trust_labels"],
   "properties": {
     "packet_type": { "type": "string", "enum": ["dashboard_feed"] },
     "schema_version": { "type": "string" },
@@ -12,6 +12,8 @@
     "network": { "type": "object" },
     "cache": { "type": "object" },
     "sidecar": { "type": "object" },
+    "peer": { "type": "object" },
+    "node_health": { "type": "object" },
     "flowcore": { "type": "object" },
     "latest_receipt_digest": { "type": "string", "maxLength": 64 },
     "trust_labels": { "type": "array", "items": { "type": "string" } }

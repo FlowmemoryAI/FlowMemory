@@ -17,6 +17,7 @@ pub const LOCAL_TEST_UNIT_ASSET_ID: &str = "asset:flowchain-local-test-unit";
 pub const BRIDGE_PILOT_ACCOUNT_OWNER: &str = "operator:bridge:pilot";
 pub const BASE_MAINNET_CHAIN_ID: &str = "8453";
 pub const BRIDGE_RUNTIME_AMOUNT_STORAGE: &str = "u64";
+pub const FLOWCHAIN_LOCAL_RUNTIME_CHAIN_ID: u64 = 31337;
 
 #[derive(Debug, Error, PartialEq, Eq)]
 pub enum DevnetError {
@@ -1421,6 +1422,72 @@ pub fn deterministic_bridge_credit_id(
     )
 }
 
+fn flowchain_bridge_source_event_replay_key(
+    source_chain_id: &str,
+    lockbox: &str,
+    tx_hash: &str,
+    log_index: u64,
+) -> Option<String> {
+    flowchain_typed_hash(
+        "FlowChainBridgeSourceEventReplayKeyV0(uint256 sourceChainId,address lockbox,bytes32 txHash,uint32 logIndex)",
+        &[
+            abi_uint_word_from_str(source_chain_id)?,
+            abi_hex_word(lockbox, 20)?,
+            abi_hex_word(tx_hash, 32)?,
+            abi_uint_word(log_index as u128),
+        ],
+    )
+}
+
+fn flowchain_bridge_credit_id(
+    observation_id: &str,
+    local_recipient: &str,
+    local_chain_id: u64,
+    credit_amount: u64,
+) -> Option<String> {
+    flowchain_typed_hash(
+        "FlowChainBridgeCreditV1(bytes32 observationId,bytes32 localRecipient,uint256 localChainId,uint256 creditAmount)",
+        &[
+            abi_hex_word(observation_id, 32)?,
+            abi_hex_word(local_recipient, 32)?,
+            abi_uint_word(local_chain_id as u128),
+            abi_uint_word(credit_amount as u128),
+        ],
+    )
+}
+
+fn flowchain_typed_hash(type_string: &str, words: &[[u8; 32]]) -> Option<String> {
+    let type_hash = keccak_hex(type_string.as_bytes());
+    let mut bytes = hex::decode(type_hash.trim_start_matches("0x")).ok()?;
+    for word in words {
+        bytes.extend_from_slice(word);
+    }
+    Some(keccak_hex(&bytes))
+}
+
+fn abi_uint_word(value: u128) -> [u8; 32] {
+    let mut word = [0u8; 32];
+    word[16..].copy_from_slice(&value.to_be_bytes());
+    word
+}
+
+fn abi_uint_word_from_str(value: &str) -> Option<[u8; 32]> {
+    value.parse::<u128>().ok().map(abi_uint_word)
+}
+
+fn abi_hex_word(value: &str, byte_len: usize) -> Option<[u8; 32]> {
+    let hex_value = value
+        .strip_prefix("0x")
+        .or_else(|| value.strip_prefix("0X"))?;
+    let bytes = hex::decode(hex_value).ok()?;
+    if bytes.len() != byte_len || byte_len > 32 {
+        return None;
+    }
+    let mut word = [0u8; 32];
+    word[32 - byte_len..].copy_from_slice(&bytes);
+    Some(word)
+}
+
 fn external_stable_id<T: Serialize>(schema: &str, value: &T) -> String {
     let envelope = serde_json::json!({
         "schema": schema,
@@ -2462,30 +2529,40 @@ pub fn apply_transaction(state: &mut ChainState, tx: &Transaction) -> Result<(),
         } => {
             ensure_valid_bridge_runtime_mode(*local_only, *production_ready, bridge_credit_id)?;
             let live_credit = is_live_bridge_credit(*local_only, *production_ready);
-            ensure_expected_id(
-                "bridge replay key",
+            let mut expected_replay_keys = vec![deterministic_bridge_replay_key(
+                source_chain_id,
+                source_contract,
+                tx_hash,
+                *log_index,
+                deposit_id,
+            )];
+            if let Some(production_replay_key) = flowchain_bridge_source_event_replay_key(
+                source_chain_id,
+                source_contract,
+                tx_hash,
+                *log_index,
+            ) {
+                expected_replay_keys.push(production_replay_key);
+            }
+            ensure_expected_id_one_of("bridge replay key", replay_key, &expected_replay_keys)?;
+            let mut expected_credit_ids = vec![deterministic_bridge_credit_id(
+                observation_id,
+                deposit_id,
                 replay_key,
-                &deterministic_bridge_replay_key(
-                    source_chain_id,
-                    source_contract,
-                    tx_hash,
-                    *log_index,
-                    deposit_id,
-                ),
-            )?;
-            ensure_expected_id(
-                "bridge credit",
-                bridge_credit_id,
-                &deterministic_bridge_credit_id(
-                    observation_id,
-                    deposit_id,
-                    replay_key,
-                    source_chain_id,
-                    source_contract,
-                    tx_hash,
-                    *log_index,
-                ),
-            )?;
+                source_chain_id,
+                source_contract,
+                tx_hash,
+                *log_index,
+            )];
+            if let Some(production_credit_id) = flowchain_bridge_credit_id(
+                observation_id,
+                flowchain_recipient,
+                FLOWCHAIN_LOCAL_RUNTIME_CHAIN_ID,
+                *amount_units,
+            ) {
+                expected_credit_ids.push(production_credit_id);
+            }
+            ensure_expected_id_one_of("bridge credit", bridge_credit_id, &expected_credit_ids)?;
             ensure_expected_id("bridge credit receipt", receipt_id, bridge_credit_id)?;
             if *amount_units == 0 {
                 return Err(DevnetError::BridgeCreditAmountMustBePositive(
@@ -3026,6 +3103,21 @@ fn ensure_expected_id(kind: &str, actual: &str, expected: &str) -> Result<(), De
         });
     }
     Ok(())
+}
+
+fn ensure_expected_id_one_of(
+    kind: &str,
+    actual: &str,
+    expected: &[String],
+) -> Result<(), DevnetError> {
+    if expected.iter().any(|candidate| candidate == actual) {
+        return Ok(());
+    }
+    Err(DevnetError::DeterministicIdMismatch {
+        kind: kind.to_string(),
+        expected: expected.join(" or "),
+        actual: actual.to_string(),
+    })
 }
 
 fn ensure_valid_bridge_runtime_mode(

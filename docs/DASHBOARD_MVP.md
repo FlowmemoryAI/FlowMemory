@@ -110,6 +110,26 @@ delta, transferable, withdrawal, and release amounts, wallet balances from
 `/wallets/balances`, and transfer history from `/wallets/transfers`. The global
 search field can filter visible records by Base tx hash, credit id, wallet
 address, and status.
+## L1 Pilot Explorer Workbench
+
+The existing workbench now includes owner-facing explorer sections for:
+
+- blocks by height/hash
+- transactions, receipts, failed errors, and events
+- accounts, balances, and public wallet/operator metadata
+- token launches, token balances, and token transfers
+- DEX pools, reserves, liquidity/LP positions, and swaps
+- bridge observations, credits, withdrawal intents, release evidence, and replay rejection
+- finality/network state, degraded-state recovery references, and raw JSON
+
+Offline or incomplete API data is filled only from
+`fixtures/dashboard/flowchain-l1-explorer-fallback.json`, copied into
+`apps/dashboard/public/data/flowchain-l1-explorer-fallback.json`. Rows sourced
+from that file must display fixture fallback provenance and must not be labeled
+as live runtime data.
+
+Browser verification artifacts are recorded under
+`docs/agent-runs/production-l1-explorer-dashboard/`.
 
 ## Non-Goals
 

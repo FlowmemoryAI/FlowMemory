@@ -1,12 +1,16 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { once } from "node:events";
-import { mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
 import { canonicalJson } from "../../shared/src/index.ts";
+import {
+  bridgeSourceEventReplayKey,
+  flowchainBridgeObservationId,
+} from "../../../crypto/src/production-l1.js";
 import {
   dispatchJsonRpc,
   loadControlPlaneState,
@@ -36,6 +40,7 @@ const EXPECTED_CHAIN_CAPABILITIES = [
   "wallet_public_metadata_reads",
   "token_reads",
   "token_balance_reads",
+  "token_transfer_reads",
   "dex_pool_reads",
   "lp_position_reads",
   "swap_reads",
@@ -57,7 +62,55 @@ const EXPECTED_CHAIN_CAPABILITIES = [
   "devnet_handoff_reads",
   "no_secret_response_checks",
   "raw_json_reads",
+  "explorer_search",
 ] as const;
+const productionL1Vectors = JSON.parse(
+  readFileSync(new URL("../../../crypto/fixtures/production-l1-vectors.json", import.meta.url), "utf8"),
+) as JsonObject;
+
+function productionSignedEnvelope(name = "wallet-transfer"): JsonObject {
+  const positive = (productionL1Vectors.positive as JsonObject[]).find((entry) => entry.name === name);
+  assert.ok(positive, `missing production-L1 vector: ${name}`);
+  return {
+    document: positive.document,
+    envelope: positive.envelope,
+  };
+}
+
+function bridgeObservationFromDeposit(deposit: JsonObject, mode = "base-mainnet-pilot"): JsonObject {
+  return {
+    schema: "flowmemory.bridge_deposit_observation.v0",
+    observationId: flowchainBridgeObservationId({
+      sourceChainId: deposit.sourceChainId,
+      lockbox: deposit.sourceContract,
+      token: deposit.token,
+      depositor: deposit.sender,
+      recipient: deposit.flowchainRecipient,
+      amount: deposit.amount,
+      txHash: deposit.txHash,
+      logIndex: deposit.logIndex,
+      blockNumber: deposit.sourceBlockNumber ?? "0",
+      eventNonce: deposit.nonce ?? "0",
+    }),
+    replayKey: bridgeSourceEventReplayKey({
+      sourceChainId: deposit.sourceChainId,
+      lockbox: deposit.sourceContract,
+      txHash: deposit.txHash,
+      logIndex: deposit.logIndex,
+    }),
+    observedAt: "2026-05-13T00:00:00.000Z",
+    mode,
+    productionReady: false,
+    deposit,
+    guardrails: {
+      explicitChainId: true,
+      explicitContract: true,
+      explicitBlockRange: true,
+      noSecrets: true,
+      approvedContract: true,
+    },
+  };
+}
 
 test("dispatches JSON-RPC methods against local fixture state", () => {
   const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "status", method: "chain_status" }) as RpcSuccessResponse;
@@ -421,14 +474,7 @@ test("submits local transactions to the file-backed runtime intake path", () => 
         id: 1,
         method: "transaction_submit",
         params: {
-          signedEnvelope: {
-            schema: "flowmemory.test_signed_envelope.v0",
-            tx: {
-              schema: "flowmemory.test_transaction.v0",
-              action: "test",
-            },
-            signature: "0xtest-signature",
-          },
+          signedEnvelope: productionSignedEnvelope("wallet-transfer"),
         },
       },
       { state },
@@ -436,9 +482,117 @@ test("submits local transactions to the file-backed runtime intake path", () => 
     const mempool = dispatchJsonRpc({ jsonrpc: "2.0", id: 2, method: "mempool_list" }, { state }) as RpcSuccessResponse;
 
     assert.equal(response.result.accepted, true);
+    assert.equal(response.result.status, "accepted_crypto_verified");
+    assert.equal((response.result.crypto as JsonObject).ok, true);
     assert.equal(mempool.result.count, 1);
     assert.equal(mempool.result.transactions[0].source, "local-file-intake");
-    assert.equal(mempool.result.transactions[0].transaction.action, "test");
+    assert.equal(mempool.result.transactions[0].transaction.schema, "flowchain.product_transfer.v0");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("rejects replayed crypto transaction envelopes before runtime intake", () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-crypto-replay-"));
+  try {
+    const state = loadControlPlaneState({ txIntakePath: join(dir, "transactions.ndjson") });
+    const signedEnvelope = productionSignedEnvelope("wallet-transfer");
+    const first = dispatchJsonRpc(
+      { jsonrpc: "2.0", id: 1, method: "transaction_submit", params: { signedEnvelope } },
+      { state },
+    ) as RpcSuccessResponse;
+    const replay = dispatchJsonRpc(
+      { jsonrpc: "2.0", id: 2, method: "transaction_submit", params: { signedEnvelope } },
+      { state },
+    ) as RpcErrorResponse;
+
+    assert.equal(first.result.accepted, true);
+    assert.equal(replay.error.data.reasonCode, "crypto.rejected");
+    assert.ok(((replay.error.data.details as JsonObject).failureCodes as string[]).includes("duplicate-nonce"));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("rejects invalid live-L1 crypto transaction envelopes before runtime intake", () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-crypto-negative-"));
+  try {
+    const state = loadControlPlaneState({ txIntakePath: join(dir, "transactions.ndjson") });
+    const cases: Array<{ name: string; signedEnvelope: JsonObject; failureCode: string }> = [
+      {
+        name: "wrong-chain-id",
+        signedEnvelope: {
+          ...productionSignedEnvelope("wallet-transfer"),
+          envelope: {
+            ...(productionSignedEnvelope("wallet-transfer").envelope as JsonObject),
+            chainId: "1",
+          },
+        },
+        failureCode: "wrong-chain-id",
+      },
+      {
+        name: "wrong-signer-role",
+        signedEnvelope: {
+          ...productionSignedEnvelope("validator-finality"),
+          envelope: {
+            ...(productionSignedEnvelope("validator-finality").envelope as JsonObject),
+            signerRole: "user",
+            signerRoleCode: 10,
+          },
+        },
+        failureCode: "wrong-signer",
+      },
+      {
+        name: "wrong-domain",
+        signedEnvelope: {
+          ...productionSignedEnvelope("wallet-transfer"),
+          envelope: {
+            ...(productionSignedEnvelope("wallet-transfer").envelope as JsonObject),
+            domain: "flowchain.production-l1.v0.transaction-envelope:profile:private-lan:chain:31337",
+          },
+        },
+        failureCode: "wrong-domain",
+      },
+      {
+        name: "mutated-payload",
+        signedEnvelope: {
+          ...productionSignedEnvelope("wallet-transfer"),
+          document: {
+            ...(productionSignedEnvelope("wallet-transfer").document as JsonObject),
+            amount: "1",
+          },
+        },
+        failureCode: "bad-payload-hash",
+      },
+      {
+        name: "malformed-public-key",
+        signedEnvelope: {
+          ...productionSignedEnvelope("wallet-transfer"),
+          envelope: {
+            ...(productionSignedEnvelope("wallet-transfer").envelope as JsonObject),
+            publicKey: "0x1234",
+          },
+        },
+        failureCode: "malformed-public-key",
+      },
+    ];
+
+    for (const testCase of cases) {
+      const response = dispatchJsonRpc(
+        {
+          jsonrpc: "2.0",
+          id: testCase.name,
+          method: "transaction_submit",
+          params: { signedEnvelope: testCase.signedEnvelope },
+        },
+        { state },
+      ) as RpcErrorResponse;
+      assert.equal(response.error.data.reasonCode, "crypto.rejected", testCase.name);
+      assert.ok(
+        ((response.error.data.details as JsonObject).failureCodes as string[]).includes(testCase.failureCode),
+        testCase.name,
+      );
+    }
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -457,14 +611,11 @@ test("can forward runtime submissions to the live node inbox", () => {
         id: 1,
         method: "transaction_submit",
         params: {
-          signedEnvelope: {
-            schema: "flowmemory.test_signed_envelope.v0",
-            tx: {
-              type: "CreateLocalTestUnitBalance",
-              accountId: "local-account:test:node-inbox",
-              owner: "operator:test",
-            },
-            signature: "0xtest-signature",
+          signedEnvelope: productionSignedEnvelope("wallet-transfer"),
+          runtimeTransaction: {
+            type: "CreateLocalTestUnitBalance",
+            accountId: "local-account:test:node-inbox",
+            owner: "operator:test",
           },
           submittedBy: "operator:test",
           runtimeSubmitMode: "node-inbox",
@@ -696,12 +847,7 @@ test("rejects secret-shaped intake and responses before returning them", () => {
         method: "transaction_submit",
         params: {
           signedEnvelope: {
-            schema: "flowmemory.test_signed_envelope.v0",
-            tx: {
-              schema: "flowmemory.test_transaction.v0",
-              action: "test",
-            },
-            signature: "0xtest-signature",
+            ...productionSignedEnvelope("wallet-transfer"),
             privateKey: `0x${"1".repeat(64)}`,
           },
         },
@@ -1123,6 +1269,44 @@ test("exact-value fixture reports equality across bridge lifecycle and wallet tr
   }
 });
 
+test("bridge observation intake enforces crypto replay keys and duplicates", () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-bridge-crypto-"));
+  try {
+    const deposit = JSON.parse(
+      readFileSync(new URL("../../../fixtures/bridge/base8453-pilot-mock-deposit.json", import.meta.url), "utf8"),
+    ) as JsonObject;
+    const observation = bridgeObservationFromDeposit(deposit);
+    const state = loadControlPlaneState({
+      bridgeObservationPath: join(dir, "missing-observation.json"),
+      bridgeRuntimeHandoffPath: join(dir, "missing-handoff.json"),
+      bridgeObservationIntakePath: join(dir, "bridge-observations.ndjson"),
+    });
+    const first = dispatchJsonRpc(
+      { jsonrpc: "2.0", id: 1, method: "bridge_observation_submit", params: { observation } },
+      { state },
+    ) as RpcSuccessResponse;
+    const duplicate = dispatchJsonRpc(
+      { jsonrpc: "2.0", id: 2, method: "bridge_observation_submit", params: { observation } },
+      { state },
+    ) as RpcErrorResponse;
+    const mutated = structuredClone(observation);
+    (mutated.deposit as JsonObject).amount = "1";
+    const badPayload = dispatchJsonRpc(
+      { jsonrpc: "2.0", id: 3, method: "bridge_observation_submit", params: { observation: mutated } },
+      { state },
+    ) as RpcErrorResponse;
+
+    assert.equal(first.result.accepted, true);
+    assert.equal((first.result.crypto as JsonObject).ok, true);
+    assert.equal(duplicate.error.data.reasonCode, "crypto.rejected");
+    assert.ok(((duplicate.error.data.details as JsonObject).failureCodes as string[]).includes("duplicate-bridge-replay-key"));
+    assert.equal(badPayload.error.data.reasonCode, "crypto.rejected");
+    assert.ok(((badPayload.error.data.details as JsonObject).failureCodes as string[]).includes("wrong-bridge-observation-id"));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("rejects secret-shaped bridge and pilot-adjacent intake material", () => {
   const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-pilot-secrets-"));
   try {
@@ -1192,6 +1376,10 @@ test("smoke client queries the complete local lifecycle surface", () => {
   ]) {
     assert.ok(responseSchemas.includes(expectedSchema), `smoke response should include ${expectedSchema}`);
   }
+  assert.equal(smoke.methodCount, responseSchemas.length);
+  assert.ok((smoke.responseSchemas as string[]).includes("flowmemory.control_plane.real_value_pilot_status.v0"));
+  assert.ok((smoke.responseSchemas as string[]).includes("flowmemory.control_plane.explorer_search.v0"));
+  assert.ok((smoke.responseSchemas as string[]).includes("flowmemory.control_plane.raw_json.v0"));
   rmSync(dir, { recursive: true, force: true });
 });
 

@@ -105,6 +105,10 @@ export const TYPE_STRINGS = Object.freeze({
     "FlowChainAccountIdV0(bytes32 publicKeyHash,address flowchainAddress,bytes32 roleRoot)",
   flowchainBridgeObservationV0:
     "FlowChainBridgeObservationV0(uint256 sourceChainId,address lockbox,address token,address depositor,bytes32 recipient,uint256 amount,bytes32 txHash,uint32 logIndex,uint64 blockNumber,uint256 eventNonce)",
+  flowchainBridgeSourceEventReplayKeyV0:
+    "FlowChainBridgeSourceEventReplayKeyV0(uint256 sourceChainId,address lockbox,bytes32 txHash,uint32 logIndex)",
+  flowchainBridgeEvidenceHashV0:
+    "FlowChainBridgeEvidenceHashV0(bytes32 sourceEventReplayKey,bytes32 observationId,bytes32 creditId,bytes32 depositId,uint256 localChainId,bytes32 evidencePayloadHash)",
   flowchainBridgeCreditV1:
     "FlowChainBridgeCreditV1(bytes32 observationId,bytes32 localRecipient,uint256 localChainId,uint256 creditAmount)",
   flowchainWithdrawalIntentV1:

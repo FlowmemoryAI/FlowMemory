@@ -556,6 +556,19 @@ export interface LocalAlphaEnvelopeValidationResult {
   errors: string[];
 }
 
+export interface WalletEnvelopeVerificationResult {
+  schema: "flowchain.wallet_envelope_verification.v0";
+  valid: boolean;
+  signatureValid: boolean;
+  chainIdMatch: boolean;
+  signerDerivedAddress: Bytes32 | null;
+  payloadHash: Bytes32 | null;
+  transactionId: Bytes32 | null;
+  replayKey: string | null;
+  rejectionReason: string | null;
+  errors: string[];
+}
+
 export const ZERO_BYTES32: Bytes32;
 export const FLOWPULSE_SCHEMA_ID_PREIMAGE: string;
 export const FLOWPULSE_EVENT_SIGNATURE: string;
@@ -570,6 +583,16 @@ export const LOCAL_ALPHA_FINALITY_STATES: Readonly<Record<string, number>>;
 export const LOCAL_ALPHA_HARDWARE_TRANSPORTS: Readonly<Record<string, number>>;
 export const LOCAL_ALPHA_SIGNER_ROLES: Readonly<Record<string, number>>;
 export const LOCAL_ALPHA_BRIDGE_STATUSES: Readonly<Record<string, number>>;
+export const FLOWCHAIN_ACCOUNT_ROLES: Readonly<Record<string, { code: number; roleGated: boolean; description: string }>>;
+export const FLOWCHAIN_PUBLIC_KEY_ENCODING: string;
+export const FLOWCHAIN_NETWORK_PROFILES: Readonly<Record<string, string>>;
+export const FLOWCHAIN_DOMAIN_SEPARATORS: Readonly<Record<string, string>>;
+export const LOCAL_WALLET_PUBLIC_METADATA_SCHEMA: string;
+export const LOCAL_WALLET_KEY_SCHEME: string;
+export const DEFAULT_LOCAL_WALLET_CHAIN_ID: string;
+export const LOCAL_TEST_UNIT_ASSET_ID: Bytes32;
+export const WALLET_SIGNED_ENVELOPE_SCHEMA: string;
+export const WALLET_ENVELOPE_VERIFICATION_SCHEMA: string;
 
 export function strip0x(value: string): string;
 export function bytesToHex(bytes: Uint8Array): Hex;
@@ -592,6 +615,22 @@ export function typeHash(typeString: string): Bytes32;
 export function typedHash(typeString: string, fields: Array<[string, unknown]>): Bytes32;
 export function domainSeparatedHash(domain: string, payloadBytes: Uint8Array): Bytes32;
 export function domainSeparator(domainName: string): Bytes32;
+export function normalizeFlowchainPublicKey(publicKey: Hex | string): Hex;
+export function flowchainPublicKeyHash(publicKey: Hex | string): Bytes32;
+export function flowchainAddressFromPublicKey(publicKey: Hex | string): Address;
+export function flowchainRoleMetadata(role: string): Record<string, unknown>;
+export function flowchainRoleRoot(role: string): Bytes32;
+export function flowchainAccountId(input: { publicKey: Hex | string; role?: string }): Bytes32;
+export function flowchainSignerKeyId(input: { publicKey: Hex | string }): Bytes32;
+export function flowchainPublicAccountMetadata(input: {
+  publicKey: Hex | string;
+  role?: string;
+  label?: string;
+  createdAtUnixMs?: number | bigint | string;
+  active?: boolean;
+}): Record<string, unknown>;
+export function assertFlowchainPublicMetadataContainsNoSecrets(value: unknown): void;
+export function isFlowchainRole(role: string): boolean;
 
 export function flowPulseSchemaId(): Bytes32;
 export function flowPulseEventSignature(): Bytes32;
@@ -666,6 +705,28 @@ export function productRemoveLiquidityId(input: ProductRemoveLiquidityInput): By
 export function productSwapId(input: ProductSwapInput): Bytes32;
 export function productBridgeCreditAckId(input: ProductBridgeCreditAckInput): Bytes32;
 export function bridgeWithdrawalIntentId(input: BridgeWithdrawalIntentInput): Bytes32;
+export function flowchainNetworkProfileHash(networkProfile: string): Bytes32;
+export function flowchainProductionDomain(input: { chainId: number | bigint | string; networkProfile: string }): string;
+export function flowchainProductionDomainSeparator(input: { chainId: number | bigint | string; networkProfile: string }): Bytes32;
+export function flowchainTransactionId(envelope: Record<string, unknown>): Bytes32;
+export function flowchainTxRoot(transactions: unknown[]): Bytes32;
+export function flowchainReceiptRoot(receipts: unknown[]): Bytes32;
+export function flowchainEventRoot(events: unknown[]): Bytes32;
+export function flowchainAccountStateRoot(accounts: unknown[]): Bytes32;
+export function flowchainTokenStateRoot(tokens: unknown[]): Bytes32;
+export function flowchainDexStateRoot(pools: unknown[]): Bytes32;
+export function flowchainBlockHash(input: Record<string, unknown>): Bytes32;
+export function flowchainBridgeObservationId(input: Record<string, unknown>): Bytes32;
+export function flowchainBridgeSourceEventReplayKey(input: Record<string, unknown>): Bytes32;
+export function flowchainBridgeEvidenceHash(input: Record<string, unknown>): Bytes32;
+export function flowchainBridgeCreditId(input: Record<string, unknown>): Bytes32;
+export function flowchainWithdrawalIntentId(input: Record<string, unknown>): Bytes32;
+export function flowchainFinalityReceiptId(input: Record<string, unknown>): Bytes32;
+export function accountNonceReplayKey(input: Record<string, unknown>): Bytes32;
+export function roleScopedNonceReplayKey(input: Record<string, unknown>): Bytes32;
+export function bridgeSourceEventReplayKey(input: Record<string, unknown>): Bytes32;
+export function withdrawalIntentReplayKey(input: Record<string, unknown>): Bytes32;
+export function finalityVoteReplayKey(input: Record<string, unknown>): Bytes32;
 export function pilotCapHash(input: PilotCapInput): Bytes32;
 export function pilotBridgeCreditAckId(input: PilotBridgeCreditAckInput): Bytes32;
 export function pilotWithdrawalIntentId(input: PilotWithdrawalIntentInput): Bytes32;
@@ -721,6 +782,8 @@ export function createEncryptedTestVault(input?: {
   signerRole?: string;
   createdAtUnixMs?: number | bigint | string;
   privateKey?: Hex;
+  chainId?: number | bigint | string;
+  lastKnownNonce?: number | bigint | string;
 }): Record<string, unknown>;
 export function unlockEncryptedTestVault(input: {
   vault: Record<string, unknown>;
@@ -728,6 +791,21 @@ export function unlockEncryptedTestVault(input: {
 }): Record<string, unknown>;
 export function listVaultPublicAccounts(vaultOrSession: Record<string, unknown>): Array<Record<string, unknown>>;
 export function exportVaultPublicMetadata(vaultOrSession: Record<string, unknown>): Record<string, unknown>;
+export function exportLocalWalletPublicMetadata(
+  vaultOrSession: Record<string, unknown>,
+  input?: { updatedAtUnixMs?: number | bigint | string }
+): Record<string, unknown>;
+export function validateLocalWalletPublicMetadata(
+  metadata: Record<string, unknown>,
+  context?: { expectedChainId?: number | bigint | string }
+): {
+  schema: string;
+  valid: boolean;
+  secretFree: boolean;
+  chainIdMatch: boolean;
+  accountCount: number;
+  errors: string[];
+};
 export function addEncryptedTestVaultAccount(input: {
   vault: Record<string, unknown>;
   password: string;
@@ -736,6 +814,8 @@ export function addEncryptedTestVaultAccount(input: {
   createdAtUnixMs?: number | bigint | string;
   privateKey?: Hex;
   signerId?: Bytes32;
+  chainId?: number | bigint | string;
+  lastKnownNonce?: number | bigint | string;
 }): Record<string, unknown>;
 export function rotateEncryptedTestVaultAccount(input: {
   vault: Record<string, unknown>;
@@ -744,6 +824,7 @@ export function rotateEncryptedTestVaultAccount(input: {
   label?: string;
   createdAtUnixMs?: number | bigint | string;
   privateKey?: Hex;
+  chainId?: number | bigint | string;
 }): Record<string, unknown>;
 export function signLocalTransactionWithVault(input: {
   vault: Record<string, unknown>;
@@ -759,6 +840,43 @@ export function verifyLocalTransactionSignature(input: {
   envelope: Record<string, unknown>;
   context?: Record<string, unknown>;
 }): LocalAlphaEnvelopeValidationResult;
+export function verifyFlowchainEnvelope(input: {
+  document: Record<string, unknown>;
+  envelope: Record<string, unknown>;
+  context?: Record<string, unknown>;
+}): Record<string, unknown>;
+
+export function buildProductTransferDocument(input: Record<string, unknown>): Record<string, unknown>;
+export function buildProductTokenLaunchDocument(input: Record<string, unknown>): Record<string, unknown>;
+export function buildProductPoolCreateDocument(input: Record<string, unknown>): Record<string, unknown>;
+export function buildProductAddLiquidityDocument(input: Record<string, unknown>): Record<string, unknown>;
+export function buildProductRemoveLiquidityDocument(input: Record<string, unknown>): Record<string, unknown>;
+export function buildProductSwapDocument(input: Record<string, unknown>): Record<string, unknown>;
+export function buildBridgeWithdrawalIntentDocument(input: Record<string, unknown>): Record<string, unknown>;
+export function buildFinalityActionDocument(input: Record<string, unknown>): Record<string, unknown>;
+export function signWalletDocumentWithVault(input: {
+  vault: Record<string, unknown>;
+  password: string;
+  signerKeyId: Bytes32;
+  document: Record<string, unknown>;
+  chainId: number | bigint | string;
+  nonce: number | bigint | string;
+  issuedAtUnixMs?: number | bigint | string;
+  fee?: Record<string, unknown> | null;
+  expiresAtUnixMs?: number | bigint | string | null;
+}): Promise<Record<string, unknown>>;
+export function verifyWalletSignedEnvelope(input: {
+  envelope: Record<string, unknown>;
+  context?: {
+    document?: Record<string, unknown>;
+    chainId?: number | bigint | string;
+    expectedNonce?: number | bigint | string;
+    expectedSignerId?: Bytes32;
+    expectedSignerAddress?: Bytes32;
+    expectedPayloadType?: string;
+    seenNonces?: Set<string>;
+  };
+}): WalletEnvelopeVerificationResult;
 
 export const PILOT_MESSAGE_SCHEMAS: readonly string[];
 export function validatePilotOperatorEnvelope(input: {

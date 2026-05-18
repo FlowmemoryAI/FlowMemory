@@ -6,9 +6,44 @@ export const WORKBENCH_DEVNET_STATE_PATH = "/data/flowchain-local-devnet-state.j
 export const WORKBENCH_DEVNET_DASHBOARD_STATE_PATH = "/data/flowchain-local-devnet-dashboard-state.json";
 export const WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH = "/data/flowchain-bridge-test-deposit.json";
 export const WORKBENCH_LIVE_READINESS_REPORT_PATH = "/data/flowchain-live-readiness-report.json";
+export const WORKBENCH_EXPLORER_FALLBACK_PATH = "/data/flowchain-l1-explorer-fallback.json";
 
 const FIXTURE_CHAIN_CONTEXT = "flowchain-private-local-testnet";
 const CONTROL_PLANE_TIMEOUT_MS = 900;
+
+const CONTROL_PLANE_RPC_REQUESTS = [
+  { id: "chain_status", method: "chain_status" },
+  { id: "node_status", method: "node_status" },
+  { id: "peer_list", method: "peer_list", params: { limit: 50 } },
+  { id: "block_list", method: "block_list", params: { limit: 50, includeTransactions: true } },
+  { id: "transaction_list", method: "transaction_list", params: { limit: 50 } },
+  { id: "mempool_list", method: "mempool_list", params: { limit: 50 } },
+  { id: "account_list", method: "account_list", params: { limit: 50 } },
+  { id: "wallet_metadata_list", method: "wallet_metadata_list", params: { limit: 50 } },
+  { id: "token_list", method: "token_list", params: { limit: 50 } },
+  { id: "token_balance_list", method: "token_balance_list", params: { limit: 50 } },
+  { id: "token_transfer_list", method: "token_transfer_list", params: { limit: 50 } },
+  { id: "pool_list", method: "pool_list", params: { limit: 50 } },
+  { id: "lp_position_list", method: "lp_position_list", params: { limit: 50 } },
+  { id: "swap_list", method: "swap_list", params: { limit: 50 } },
+  { id: "receipt_list", method: "receipt_list", params: { limit: 50 } },
+  { id: "work_receipt_list", method: "work_receipt_list", params: { limit: 50 } },
+  { id: "finality_list", method: "finality_list", params: { limit: 50 } },
+  { id: "bridge_observation_list", method: "bridge_observation_list", params: { limit: 50 } },
+  { id: "bridge_deposit_list", method: "bridge_deposit_list", params: { limit: 50 } },
+  { id: "bridge_credit_list", method: "bridge_credit_list", params: { limit: 50 } },
+  { id: "withdrawal_list", method: "withdrawal_list", params: { limit: 50 } },
+  { id: "pilot_deposit_observation_list", method: "pilot_deposit_observation_list", params: { limit: 50 } },
+  { id: "pilot_credit_list", method: "pilot_credit_list", params: { limit: 50 } },
+  { id: "pilot_withdrawal_intent_list", method: "pilot_withdrawal_intent_list", params: { limit: 50 } },
+  { id: "pilot_release_evidence_list", method: "pilot_release_evidence_list", params: { limit: 50 } },
+  { id: "pilot_cap_status", method: "pilot_cap_status" },
+  { id: "pilot_pause_status", method: "pilot_pause_status" },
+  { id: "pilot_retry_status", method: "pilot_retry_status" },
+  { id: "pilot_emergency_status", method: "pilot_emergency_status" },
+  { id: "product_flow_status", method: "product_flow_status" },
+  { id: "raw_json_explorer_fallback", method: "raw_json_get", params: { source: "explorerFallback" } },
+] as const;
 
 export type WorkbenchSource = "control-plane" | "fixture-fallback";
 export type WorkbenchSectionKey =
@@ -23,9 +58,11 @@ export type WorkbenchSectionKey =
   | "walletMetadata"
   | "tokenLaunches"
   | "tokenBalances"
+  | "tokenTransfers"
   | "dexPools"
   | "liquidityPositions"
   | "swaps"
+  | "receiptEvents"
   | "explorerRecords"
   | "realValuePilot"
   | "liveReadiness"
@@ -42,6 +79,8 @@ export type WorkbenchSectionKey =
   | "bridgeDeposits"
   | "bridgeCredits"
   | "bridgeWithdrawals"
+  | "bridgeReleases"
+  | "errorsRecovery"
   | "provenance"
   | "hardwareSignals"
   | "rawJson";
@@ -84,6 +123,7 @@ export interface ControlPlaneProbe {
   pilotLifecycle?: unknown;
   walletBalances?: unknown;
   walletTransfers?: unknown;
+  rpc?: Record<string, unknown>;
 }
 
 export interface WorkbenchNodeStatus {
@@ -122,6 +162,7 @@ export interface WorkbenchSnapshot {
     devnetDashboardState: unknown | null;
     bridgeTestDeposit: unknown | null;
     liveReadinessReport: unknown | null;
+    explorerFallback: unknown | null;
     controlPlanePilotStatus: unknown | null;
     controlPlaneBridgeReadiness: unknown | null;
     controlPlanePilotLifecycle: unknown | null;
@@ -129,6 +170,7 @@ export interface WorkbenchSnapshot {
     controlPlaneWalletTransfers: unknown | null;
     controlPlaneHealth: unknown | null;
     controlPlaneState: unknown | null;
+    controlPlaneRpc: Record<string, unknown> | null;
   };
 }
 
@@ -224,6 +266,14 @@ export const WORKBENCH_SECTIONS: WorkbenchSectionDefinition[] = [
     missingService: "FlowChain token balance view /token-balances",
   },
   {
+    key: "tokenTransfers",
+    label: "Token Transfers",
+    detail: "Local/testnet token transfer records by account, token, and transaction id.",
+    expectedEndpoint: "POST /rpc token_transfer_list",
+    missingCommand: "npm run flowchain:product-e2e",
+    missingService: "FlowChain token transfer view token_transfer_list",
+  },
+  {
     key: "dexPools",
     label: "DEX Pools",
     detail: "Local/testnet pool definitions, reserve state, quote metadata, and status for the product-testnet DEX path.",
@@ -304,6 +354,14 @@ export const WORKBENCH_SECTIONS: WorkbenchSectionDefinition[] = [
     missingService: "FlowChain receipt view /receipts",
   },
   {
+    key: "receiptEvents",
+    label: "Receipts / Events",
+    detail: "Transaction receipts, FlowPulse events, rejected logs, and failed transaction errors indexed by block and transaction.",
+    expectedEndpoint: "POST /rpc receipt_list + transaction_list",
+    missingCommand: "npm run control-plane:smoke",
+    missingService: "FlowChain receipt/event explorer methods",
+  },
+  {
     key: "memoryCells",
     label: "Memory Cells",
     detail: "Native MemoryCell records or rootfield-bundle projections while the API is pending.",
@@ -374,6 +432,22 @@ export const WORKBENCH_SECTIONS: WorkbenchSectionDefinition[] = [
     expectedEndpoint: "GET /bridge/withdrawals",
     missingCommand: "npm run flowchain:smoke",
     missingService: "FlowChain bridge withdrawal view /bridge/withdrawals",
+  },
+  {
+    key: "bridgeReleases",
+    label: "Bridge Releases",
+    detail: "Release evidence for withdrawal intents, including pending or recorded operator evidence rows.",
+    expectedEndpoint: "POST /rpc pilot_release_evidence_list",
+    missingCommand: "npm run flowchain:real-value-pilot:e2e",
+    missingService: "FlowChain pilot release evidence list",
+  },
+  {
+    key: "errorsRecovery",
+    label: "Errors / Recovery",
+    detail: "Runtime, API, storage, bridge, chain-id, lockbox, broad-scan, duplicate-event, and build recovery references.",
+    expectedEndpoint: "GET /health + fallback errors",
+    missingCommand: "npm run control-plane:smoke",
+    missingService: "FlowChain error and recovery state",
   },
   {
     key: "provenance",
@@ -522,17 +596,31 @@ function statusFrom(value: unknown, fallback: DashboardStatus = "observed"): Das
     normalized === "ok" ||
     normalized === "passed" ||
     normalized === "ready_for_operator_live_pilot" ||
-    normalized === "ready"
+    normalized === "ready" ||
+    normalized === "recorded"
   ) {
     return "verified";
   }
   if (normalized === "finalized") {
     return "finalized";
   }
-  if (normalized === "failed" || normalized === "invalid" || normalized === "reverted" || normalized === "failure") {
+  if (
+    normalized === "failed" ||
+    normalized === "invalid" ||
+    normalized === "reverted" ||
+    normalized === "failure" ||
+    normalized === "rejected" ||
+    normalized.includes("rejected")
+  ) {
     return "failed";
   }
-  if (normalized === "pending" || normalized === "local-placeholder" || normalized === "degraded" || normalized === "blocked") {
+  if (
+    normalized === "pending" ||
+    normalized === "requested" ||
+    normalized === "local-placeholder" ||
+    normalized === "degraded" ||
+    normalized === "blocked"
+  ) {
     return "pending";
   }
   if (normalized === "error") {
@@ -547,7 +635,7 @@ function statusFrom(value: unknown, fallback: DashboardStatus = "observed"): Das
   if (normalized === "reorged") {
     return "reorged";
   }
-  if (normalized === "unresolved") {
+  if (normalized === "unresolved" || normalized === "blocked") {
     return "unresolved";
   }
   if (normalized === "offline") {
@@ -698,12 +786,12 @@ function getControlPlaneUrl(): string {
   return configured && configured.length > 0 ? configured.replace(/\/+$/, "") : DEFAULT_CONTROL_PLANE_URL;
 }
 
-async function fetchJsonWithTimeout(url: string, timeoutMs: number): Promise<unknown> {
+async function fetchJsonWithTimeout(url: string, timeoutMs: number, init: RequestInit = {}): Promise<unknown> {
   const controller = new AbortController();
   const timeout = globalThis.setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const response = await fetch(url, { cache: "no-store", signal: controller.signal });
+    const response = await fetch(url, { ...init, cache: "no-store", signal: controller.signal });
     if (!response.ok) {
       throw new Error(`${response.status} ${response.statusText}`.trim());
     }
@@ -711,6 +799,31 @@ async function fetchJsonWithTimeout(url: string, timeoutMs: number): Promise<unk
   } finally {
     globalThis.clearTimeout(timeout);
   }
+}
+
+async function fetchControlPlaneRpc(url: string): Promise<Record<string, unknown>> {
+  const payload = CONTROL_PLANE_RPC_REQUESTS.map((request) => ({
+    jsonrpc: "2.0",
+    ...request,
+  }));
+  const response = await fetchJsonWithTimeout(`${url}/rpc`, CONTROL_PLANE_TIMEOUT_MS, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!Array.isArray(response)) {
+    throw new Error("control-plane /rpc batch did not return an array");
+  }
+
+  return Object.fromEntries(
+    response
+      .filter(isRecord)
+      .map((entry) => [text(entry.id), isRecord(entry.error) ? { error: entry.error } : entry.result ?? null]),
+  );
 }
 
 async function fetchOptionalJson(path: string): Promise<{ value: unknown | null; error?: string }> {
@@ -745,6 +858,7 @@ async function probeControlPlane(): Promise<ControlPlaneProbe> {
     let pilotLifecycle: unknown | undefined;
     let walletBalances: unknown | undefined;
     let walletTransfers: unknown | undefined;
+    let rpc: Record<string, unknown> | undefined;
 
     try {
       pilotStatus = await fetchJsonWithTimeout(`${url}/pilot/status`, CONTROL_PLANE_TIMEOUT_MS);
@@ -778,12 +892,17 @@ async function probeControlPlane(): Promise<ControlPlaneProbe> {
 
     try {
       state = await fetchJsonWithTimeout(`${url}/state`, CONTROL_PLANE_TIMEOUT_MS);
+      try {
+        rpc = await fetchControlPlaneRpc(url);
+      } catch {
+        rpc = undefined;
+      }
     } catch (error) {
       return {
         url,
         status: "available",
         checkedAt,
-        endpoints: uniqueEndpoints(defaultEndpoints, collectEndpointHints(health)),
+        endpoints: uniqueEndpoints(defaultEndpoints, ["POST /rpc"], collectEndpointHints(health)),
         health,
         pilotStatus,
         bridgeLiveReadiness,
@@ -800,7 +919,7 @@ async function probeControlPlane(): Promise<ControlPlaneProbe> {
       url,
       status: "available",
       checkedAt,
-      endpoints: uniqueEndpoints(defaultEndpoints, collectEndpointHints(health), collectEndpointHints(state)),
+      endpoints: uniqueEndpoints(defaultEndpoints, ["POST /rpc", "GET /explorer/search"], collectEndpointHints(health), collectEndpointHints(state)),
       health,
       state,
       pilotStatus,
@@ -808,6 +927,7 @@ async function probeControlPlane(): Promise<ControlPlaneProbe> {
       pilotLifecycle,
       walletBalances,
       walletTransfers,
+      rpc,
     };
   } catch (error) {
     return {
@@ -1058,6 +1178,28 @@ function buildTokenBalanceRecords(devnetState: unknown): WorkbenchRecord[] {
         { label: "updated", value: text(balance.updatedAt ?? balance.updatedAtBlock ?? balance.blockNumber) },
       ],
       raw: balance,
+    });
+  });
+}
+
+function buildTokenTransferRecords(devnetState: unknown): WorkbenchRecord[] {
+  return collectionFrom(devnetState, ["tokenTransfers", "tokenTransferEvents", "balanceTransfers", "transfers"]).map((transfer, index) => {
+    const id = text(transfer.transferId ?? transfer.tokenTransferId ?? transfer.txId ?? transfer.id, `token-transfer:${index + 1}`);
+    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      id,
+      kind: "Token transfer",
+      title: id,
+      summary: text(transfer.summary, "Local/testnet token transfer exported by runtime, API, or deterministic fallback."),
+      status: statusFrom(transfer.status, "observed"),
+      facts: [
+        { label: "tx", value: text(transfer.txId ?? transfer.transactionId) },
+        { label: "token", value: text(transfer.tokenId ?? transfer.symbol) },
+        { label: "from", value: text(transfer.fromAccount ?? transfer.from ?? transfer.sender) },
+        { label: "to", value: text(transfer.toAccount ?? transfer.to ?? transfer.recipient) },
+        { label: "amount", value: text(transfer.amount ?? transfer.units) },
+        { label: "block", value: text(transfer.blockNumber ?? transfer.updatedAtBlock) },
+      ],
+      raw: transfer,
     });
   });
 }
@@ -1534,6 +1676,570 @@ function buildPilotRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
   });
 
   return records;
+}
+
+function rpcPayload(controlPlane: ControlPlaneProbe, method: string): UnknownRecord | null {
+  const value = controlPlane.rpc?.[method];
+  return isRecord(value) ? value : null;
+}
+
+function rpcRows(controlPlane: ControlPlaneProbe, method: string, keys: string[]): UnknownRecord[] {
+  const payload = rpcPayload(controlPlane, method);
+  if (keys.length === 1 && keys[0] === "") {
+    return payload ? [payload] : [];
+  }
+  return collectionFrom(payload, keys);
+}
+
+function makeRpcRecord(
+  controlPlane: ControlPlaneProbe,
+  method: string,
+  subsystem: SourceSubsystem,
+  record: Omit<WorkbenchRecord, "provenance">,
+): WorkbenchRecord {
+  return makeLocalRecord(subsystem, `${controlPlane.url}/rpc:${method}`, record, controlPlane.checkedAt);
+}
+
+function buildRpcBlockRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
+  return rpcRows(controlPlane, "block_list", ["blocks"]).map((block, index) =>
+    makeRpcRecord(controlPlane, "block_list", "devnet", {
+      id: text(block.blockHash ?? block.hash, `api-block:${index + 1}`),
+      kind: "Block",
+      title: `Block ${text(block.blockNumber ?? block.height)}`,
+      summary: `${text(block.txIds && Array.isArray(block.txIds) ? block.txIds.length : block.transactionCount, "0")} transactions, ${text(block.observationCount ?? block.eventCount ?? block.receiptCount, "0")} indexed events or receipts.`,
+      status: block.finalized === true ? "finalized" : statusFrom(block.status, "observed"),
+      facts: [
+        { label: "height", value: text(block.blockNumber ?? block.height) },
+        { label: "hash", value: text(block.blockHash ?? block.hash) },
+        { label: "parent", value: text(block.parentHash) },
+        { label: "state root", value: text(block.stateRoot) },
+        { label: "source", value: text(block.source) },
+        { label: "provenance", value: text(block.provenance ?? block.source) },
+      ],
+      raw: block,
+    }),
+  );
+}
+
+function buildRpcTransactionRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
+  return rpcRows(controlPlane, "transaction_list", ["transactions"]).map((tx, index) =>
+    makeRpcRecord(controlPlane, "transaction_list", "indexer", {
+      id: text(tx.transactionId ?? tx.txHash ?? tx.txId, `api-tx:${index + 1}`),
+      kind: "Transaction",
+      title: text(tx.transactionId ?? tx.txHash ?? tx.txId, `api-tx:${index + 1}`),
+      summary: `${text(tx.type ?? tx.payloadType, "transaction")} is ${text(tx.status)} in block ${text(tx.blockNumber)}.`,
+      status: statusFrom(tx.status, "observed"),
+      facts: [
+        { label: "block", value: text(tx.blockNumber) },
+        { label: "signer", value: text(tx.signer ?? tx.accountId) },
+        { label: "payload", value: text(tx.type ?? tx.payloadType) },
+        { label: "receipt", value: text(tx.receiptId ?? tx.txHash) },
+        { label: "error", value: text(tx.errorCode ?? tx.rejectedLogs, "none") },
+        { label: "source", value: text(tx.source) },
+      ],
+      raw: tx,
+    }),
+  );
+}
+
+function buildRpcTokenTransferRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
+  return rpcRows(controlPlane, "token_transfer_list", ["transfers"]).map((transfer, index) =>
+    makeRpcRecord(controlPlane, "token_transfer_list", "devnet", {
+      id: text(transfer.transferId ?? transfer.txId, `api-token-transfer:${index + 1}`),
+      kind: "Token transfer",
+      title: text(transfer.transferId ?? transfer.txId, `api-token-transfer:${index + 1}`),
+      summary: `${text(transfer.amount)} ${text(transfer.tokenId)} moved from ${text(transfer.fromAccount)} to ${text(transfer.toAccount)}.`,
+      status: statusFrom(transfer.status, "observed"),
+      facts: [
+        { label: "tx", value: text(transfer.txId) },
+        { label: "token", value: text(transfer.tokenId) },
+        { label: "from", value: text(transfer.fromAccount) },
+        { label: "to", value: text(transfer.toAccount) },
+        { label: "amount", value: text(transfer.amount) },
+        { label: "source", value: text(transfer.source) },
+      ],
+      raw: transfer,
+    }),
+  );
+}
+
+function buildRpcRecords(
+  controlPlane: ControlPlaneProbe,
+  method: string,
+  keys: string[],
+  subsystem: SourceSubsystem,
+  kind: string,
+  idFields: string[],
+  factBuilder: (row: UnknownRecord) => WorkbenchFact[],
+): WorkbenchRecord[] {
+  return rpcRows(controlPlane, method, keys).map((row, index) => {
+    const id = idFields.map((field) => text(row[field], "")).find((value) => value.length > 0 && value !== "not recorded")
+      ?? `${method}:${index + 1}`;
+    return makeRpcRecord(controlPlane, method, subsystem, {
+      id,
+      kind,
+      title: id,
+      summary: text(row.summary, `${kind} loaded from ${method}.`),
+      status: statusFrom(row.status ?? row.state, "observed"),
+      facts: factBuilder(row),
+      raw: row,
+    });
+  });
+}
+
+function buildRpcReceiptEventRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
+  const receipts = buildRpcRecords(controlPlane, "receipt_list", ["receipts"], "indexer", "Receipt", ["receiptId", "observationId"], (receipt) => [
+    { label: "receipt", value: text(receipt.receiptId) },
+    { label: "observation", value: text(receipt.observationId) },
+    { label: "rootfield", value: text(receipt.rootfieldId) },
+    { label: "verifier", value: text(receipt.verifierStatus) },
+    { label: "flow memory", value: text(receipt.flowMemoryStatus) },
+    { label: "report", value: text(receipt.reportId) },
+  ]);
+  const txErrors = rpcRows(controlPlane, "transaction_list", ["transactions"])
+    .filter((tx) => text(tx.status).toLowerCase().includes("reject") || text(tx.status).toLowerCase().includes("fail") || text(tx.errorCode, "").length > 0)
+    .map((tx, index) =>
+      makeRpcRecord(controlPlane, "transaction_list", "indexer", {
+        id: text(tx.transactionId ?? tx.txHash, `api-tx-error:${index + 1}`),
+        kind: "Failed transaction",
+        title: text(tx.transactionId ?? tx.txHash, `api-tx-error:${index + 1}`),
+        summary: `Failure ${text(tx.errorCode ?? tx.status)} is visible from indexed transaction data.`,
+        status: "failed",
+        facts: [
+          { label: "block", value: text(tx.blockNumber) },
+          { label: "hash", value: text(tx.txHash ?? tx.transactionId) },
+          { label: "error", value: text(tx.errorCode ?? tx.rejectedLogs) },
+          { label: "source", value: text(tx.source) },
+        ],
+        raw: tx,
+      }),
+    );
+  return [...receipts, ...txErrors];
+}
+
+function buildRpcPilotListRecords(
+  controlPlane: ControlPlaneProbe,
+  method: string,
+  key: string,
+  kind: string,
+  idFields: string[],
+): WorkbenchRecord[] {
+  return buildRpcRecords(controlPlane, method, [key], "devnet", kind, idFields, (row) => [
+    { label: "chain", value: text(row.sourceChainId ?? row.destinationChainId, "8453") },
+    { label: "tx", value: text(row.txHash ?? row.releaseTxHash) },
+    { label: "account", value: text(row.accountId ?? row.flowchainRecipient ?? row.flowchainAccount) },
+    { label: "amount", value: text(row.amount) },
+    { label: "replay", value: text(row.replayStatus ?? row.rejectionReason, "accepted") },
+    { label: "production ready", value: text(row.productionReady, "false") },
+  ]);
+}
+
+function buildRpcErrorRecoveryRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
+  const fallbackRaw = rpcPayload(controlPlane, "raw_json_explorer_fallback");
+  const fallbackData = isRecord(fallbackRaw?.raw) ? fallbackRaw.raw : null;
+  const errors = collectionFrom(fallbackData, ["errors"]).map((error) =>
+    makeRpcRecord(controlPlane, "raw_json_get:explorerFallback", "alerts", {
+      id: text(error.errorId),
+      kind: "Recovery reference",
+      title: text(error.errorId),
+      summary: text(error.summary),
+      status: statusFrom(error.state, "pending"),
+      facts: [
+        { label: "subsystem", value: text(error.subsystem) },
+        { label: "state", value: text(error.state) },
+        { label: "command", value: text(error.recoveryCommand) },
+      ],
+      raw: error,
+    }),
+  );
+  const health = rpcPayload(controlPlane, "health") ?? (isRecord(controlPlane.health) ? controlPlane.health : null);
+  if (health) {
+    errors.unshift(
+      makeRpcRecord(controlPlane, "health", "alerts", {
+        id: "control-plane-health",
+        kind: "Health",
+        title: text(health.status, "health"),
+        summary: controlPlane.error ? `Health loaded with issue: ${controlPlane.error}` : "Control-plane health response is visible.",
+        status: statusFrom(health.status, controlPlane.status === "available" ? "verified" : "offline"),
+        facts: [
+          { label: "status", value: text(health.status) },
+          { label: "missing", value: text(health.missingOptionalSources) },
+          { label: "api", value: controlPlane.status },
+        ],
+        raw: health,
+      }),
+    );
+  }
+  if (errors.length === 0) {
+    errors.push(
+      makeLocalRecord("alerts", controlPlane.url, {
+        id: "api-offline",
+        kind: "Recovery reference",
+        title: "API offline",
+        summary: "Control-plane API is not detected; deterministic fallback remains visible.",
+        status: "offline",
+        facts: [
+          { label: "command", value: "npm run control-plane:serve" },
+          { label: "url", value: controlPlane.url },
+        ],
+        raw: controlPlane,
+      }, controlPlane.checkedAt),
+    );
+  }
+  return errors;
+}
+
+function buildControlPlaneRpcSections(
+  controlPlane: ControlPlaneProbe,
+): Partial<Record<WorkbenchSectionKey, WorkbenchRecord[]>> {
+  if (!controlPlane.rpc) {
+    return {
+      errorsRecovery: buildRpcErrorRecoveryRecords(controlPlane),
+    };
+  }
+
+  return {
+    nodeStatus: buildRpcRecords(controlPlane, "node_status", [""], "devnet", "Node status", ["nodeId"], (node) => [
+      { label: "status", value: text(node.status) },
+      { label: "latest height", value: text(node.latestBlockNumber) },
+      { label: "latest hash", value: text(node.latestBlockHash) },
+      { label: "peers", value: text(node.peerCount) },
+      { label: "mempool", value: text(node.mempoolSize) },
+      { label: "source", value: text(node.runtimeStateSource) },
+    ]),
+    peers: buildRpcRecords(controlPlane, "peer_list", ["peers"], "devnet", "Peer", ["peerId", "address"], (peer) => [
+      { label: "address", value: text(peer.address) },
+      { label: "status", value: text(peer.status) },
+      { label: "height", value: text(peer.height ?? peer.blockHeight) },
+      { label: "role", value: text(peer.role) },
+    ]),
+    blocks: buildRpcBlockRecords(controlPlane),
+    transactions: buildRpcTransactionRecords(controlPlane),
+    mempool: buildRpcRecords(controlPlane, "mempool_list", ["transactions"], "devnet", "Pending transaction", ["transactionId", "txId"], (tx) => [
+      { label: "status", value: text(tx.status) },
+      { label: "source", value: text(tx.source) },
+      { label: "mode", value: text(tx.intakeMode) },
+    ]),
+    accounts: buildRpcRecords(controlPlane, "account_list", ["accounts"], "devnet", "Account", ["accountId"], (account) => [
+      { label: "type", value: text(account.accountType) },
+      { label: "controller", value: text(account.controller) },
+      { label: "balance", value: text(account.balance) },
+      { label: "source", value: text(account.source) },
+    ]),
+    walletMetadata: buildRpcRecords(controlPlane, "wallet_metadata_list", ["wallets"], "devnet", "Wallet public metadata", ["walletId", "accountId"], (wallet) => [
+      { label: "account", value: text(wallet.accountId) },
+      { label: "type", value: text(wallet.accountType) },
+      { label: "public only", value: text(wallet.publicOnly, "true") },
+    ]),
+    tokenLaunches: buildRpcRecords(controlPlane, "token_list", ["tokens"], "devnet", "Token", ["tokenId", "symbol"], (token) => [
+      { label: "symbol", value: text(token.symbol) },
+      { label: "name", value: text(token.name) },
+      { label: "supply", value: text(token.totalSupply) },
+      { label: "owner", value: text(token.owner) },
+      { label: "source", value: text(token.source) },
+    ]),
+    tokenBalances: buildRpcRecords(controlPlane, "token_balance_list", ["balances"], "devnet", "Token balance", ["balanceId", "accountId"], (balance) => [
+      { label: "account", value: text(balance.accountId) },
+      { label: "token", value: text(balance.tokenId) },
+      { label: "amount", value: text(balance.amount) },
+      { label: "source", value: text(balance.source) },
+    ]),
+    tokenTransfers: buildRpcTokenTransferRecords(controlPlane),
+    dexPools: buildRpcRecords(controlPlane, "pool_list", ["pools"], "devnet", "DEX pool", ["poolId"], (pool) => [
+      { label: "token 0", value: text(pool.token0) },
+      { label: "token 1", value: text(pool.token1) },
+      { label: "reserve 0", value: text(pool.reserve0) },
+      { label: "reserve 1", value: text(pool.reserve1) },
+      { label: "lp supply", value: text(pool.lpSupply) },
+      { label: "source", value: text(pool.source) },
+    ]),
+    liquidityPositions: buildRpcRecords(controlPlane, "lp_position_list", ["positions"], "devnet", "LP position", ["positionId", "accountId"], (position) => [
+      { label: "account", value: text(position.accountId) },
+      { label: "pool", value: text(position.poolId) },
+      { label: "liquidity", value: text(position.liquidity) },
+      { label: "source", value: text(position.source) },
+    ]),
+    swaps: buildRpcRecords(controlPlane, "swap_list", ["swaps"], "devnet", "Swap", ["swapId", "txId"], (swap) => [
+      { label: "tx", value: text(swap.txId) },
+      { label: "pool", value: text(swap.poolId) },
+      { label: "token in", value: text(swap.tokenIn) },
+      { label: "amount in", value: text(swap.amountIn) },
+      { label: "token out", value: text(swap.tokenOut) },
+      { label: "amount out", value: text(swap.amountOut) },
+    ]),
+    receipts: [
+      ...buildRpcRecords(controlPlane, "work_receipt_list", ["workReceipts"], "worker", "WorkReceipt", ["workReceiptId", "receiptId"], (receipt) => [
+        { label: "receipt", value: text(receipt.receiptId) },
+        { label: "rootfield", value: text(receipt.rootfieldId) },
+        { label: "status", value: text(receipt.status) },
+        { label: "source", value: text(receipt.source) },
+      ]),
+      ...buildRpcRecords(controlPlane, "receipt_list", ["receipts"], "worker", "MemoryReceipt", ["receiptId"], (receipt) => [
+        { label: "observation", value: text(receipt.observationId) },
+        { label: "rootfield", value: text(receipt.rootfieldId) },
+        { label: "status", value: text(receipt.flowMemoryStatus) },
+        { label: "report", value: text(receipt.reportId) },
+      ]),
+    ],
+    receiptEvents: buildRpcReceiptEventRecords(controlPlane),
+    finality: buildRpcRecords(controlPlane, "finality_list", ["finality"], "devnet", "Finality", ["finalityId", "objectId", "receiptId"], (finality) => [
+      { label: "object", value: text(finality.objectId) },
+      { label: "rootfield", value: text(finality.rootfieldId) },
+      { label: "status", value: text(finality.status) },
+      { label: "source", value: text(finality.source) },
+    ]),
+    bridgeDeposits: [
+      ...buildRpcRecords(controlPlane, "bridge_observation_list", ["observations"], "devnet", "Bridge observation", ["observationId"], (row) => [
+        { label: "deposit", value: text(row.depositId ?? (isRecord(row.deposit) ? row.deposit.depositId : undefined)) },
+        { label: "tx", value: text(row.txHash ?? (isRecord(row.deposit) ? row.deposit.txHash : undefined)) },
+        { label: "chain", value: text(row.sourceChainId ?? (isRecord(row.deposit) ? row.deposit.sourceChainId : undefined)) },
+        { label: "replay", value: text(row.replayStatus, "accepted") },
+      ]),
+      ...buildRpcPilotListRecords(controlPlane, "pilot_deposit_observation_list", "depositObservations", "Pilot deposit observation", ["observationId", "depositId"]),
+    ],
+    bridgeCredits: [
+      ...buildRpcRecords(controlPlane, "bridge_credit_list", ["credits"], "devnet", "Bridge credit", ["creditId"], (credit) => [
+        { label: "deposit", value: text(credit.depositId) },
+        { label: "account", value: text(credit.accountId) },
+        { label: "amount", value: text(credit.amount) },
+        { label: "token", value: text(credit.token) },
+        { label: "source", value: text(credit.source) },
+      ]),
+      ...buildRpcPilotListRecords(controlPlane, "pilot_credit_list", "credits", "Pilot credit", ["creditId"]),
+    ],
+    bridgeWithdrawals: [
+      ...buildRpcRecords(controlPlane, "withdrawal_list", ["withdrawals"], "devnet", "Withdrawal", ["withdrawalIntentId", "withdrawalId"], (withdrawal) => [
+        { label: "credit", value: text(withdrawal.creditId) },
+        { label: "deposit", value: text(withdrawal.depositId) },
+        { label: "account", value: text(withdrawal.accountId) },
+        { label: "amount", value: text(withdrawal.amount) },
+      ]),
+      ...buildRpcPilotListRecords(controlPlane, "pilot_withdrawal_intent_list", "withdrawalIntents", "Pilot withdrawal intent", ["withdrawalIntentId"]),
+    ],
+    bridgeReleases: buildRpcPilotListRecords(controlPlane, "pilot_release_evidence_list", "releaseEvidence", "Release evidence", ["releaseEvidenceId", "withdrawalIntentId"]),
+    errorsRecovery: buildRpcErrorRecoveryRecords(controlPlane),
+  };
+}
+
+function explorerFallbackObjects(explorerFallback: unknown, key: string): UnknownRecord[] {
+  if (!isRecord(explorerFallback) || !isRecord(explorerFallback.objects)) {
+    return [];
+  }
+
+  return recordValues(explorerFallback.objects[key]);
+}
+
+function explorerFallbackBridgeRows(explorerFallback: unknown, key: string): UnknownRecord[] {
+  if (!isRecord(explorerFallback) || !isRecord(explorerFallback.bridge)) {
+    return [];
+  }
+
+  return recordValues(explorerFallback.bridge[key]);
+}
+
+function firstRecordText(record: UnknownRecord, keys: string[], fallback: string): string {
+  for (const key of keys) {
+    const value = text(record[key], "");
+    if (value.length > 0) {
+      return value;
+    }
+  }
+
+  return fallback;
+}
+
+function makeExplorerFallbackRecord(
+  kind: string,
+  row: UnknownRecord,
+  index: number,
+  idKeys: string[],
+  facts: WorkbenchFact[],
+  summary: string,
+): WorkbenchRecord {
+  const id = firstRecordText(row, idKeys, `${kind.toLowerCase().replace(/\s+/g, "-")}:${index + 1}`);
+  return makeRecord("devnet", WORKBENCH_EXPLORER_FALLBACK_PATH, {
+    id,
+    kind,
+    title: `${kind} ${id}`,
+    summary,
+    status: statusFrom(row.status ?? row.state),
+    facts: [
+      ...facts,
+      { label: "provenance", value: "fixture-fallback" },
+    ],
+    raw: row,
+  });
+}
+
+function buildExplorerFallbackSections(explorerFallback: unknown): Partial<Record<WorkbenchSectionKey, WorkbenchRecord[]>> {
+  if (!isRecord(explorerFallback)) {
+    return {};
+  }
+
+  const pilotReadiness = isRecord(explorerFallback.pilotReadiness) ? explorerFallback.pilotReadiness : null;
+  const replayProtection = isRecord(explorerFallback.bridge) && isRecord(explorerFallback.bridge.replayProtection)
+    ? explorerFallback.bridge.replayProtection
+    : null;
+  const observationRange = isRecord(pilotReadiness?.latestObservationBlockRange)
+    ? pilotReadiness.latestObservationBlockRange
+    : null;
+  const realValuePilot = pilotReadiness
+    ? [
+        makeRecord("devnet", WORKBENCH_EXPLORER_FALLBACK_PATH, {
+          id: "explorer-fallback-base-pilot-readiness",
+          kind: "Base pilot readiness",
+          title: `Base pilot ${text(pilotReadiness.state, "degraded")}`,
+          summary: "Base 8453 pilot readiness, lockbox, cap, pause, emergency, observation range, and replay posture from deterministic fallback.",
+          status: statusFrom(pilotReadiness.state, "pending"),
+          facts: [
+            { label: "source chain ID", value: text(pilotReadiness.baseChainId) },
+            { label: "lockbox", value: text(pilotReadiness.lockboxAddress) },
+            { label: "per deposit cap", value: text(pilotReadiness.perDepositCapUsd) },
+            { label: "total cap", value: text(pilotReadiness.totalPilotCapUsd) },
+            { label: "pause", value: text(pilotReadiness.pauseStatus) },
+            { label: "emergency", value: text(pilotReadiness.emergencyStatus) },
+            { label: "observation range", value: `${text(observationRange?.fromBlock)}-${text(observationRange?.toBlock)}` },
+            { label: "confirmations", value: text(pilotReadiness.confirmationDepth) },
+            { label: "duplicate replay keys", value: stringArray(replayProtection?.duplicateReplayKeys).length.toString() },
+          ],
+          raw: { pilotReadiness, replayProtection },
+        }),
+      ]
+    : [];
+
+  const tokenLaunches = explorerFallbackObjects(explorerFallback, "tokens").map((token, index) =>
+    makeExplorerFallbackRecord("Token", token, index, ["tokenId", "symbol"], [
+      { label: "symbol", value: text(token.symbol) },
+      { label: "name", value: text(token.name) },
+      { label: "supply", value: text(token.totalSupply) },
+      { label: "issuer", value: text(token.issuer ?? token.owner) },
+      { label: "launch tx", value: text(token.launchTxId) },
+    ], "Token launch record from deterministic explorer fallback."),
+  );
+  const tokenBalances = explorerFallbackObjects(explorerFallback, "tokenBalances").map((balance, index) =>
+    makeExplorerFallbackRecord("Token balance", balance, index, ["balanceId", "accountId"], [
+      { label: "account", value: text(balance.accountId) },
+      { label: "token", value: text(balance.tokenId) },
+      { label: "amount", value: text(balance.amount) },
+      { label: "updated block", value: text(balance.updatedAtBlock) },
+    ], "Token balance record from deterministic explorer fallback."),
+  );
+  const tokenTransfers = explorerFallbackObjects(explorerFallback, "tokenTransfers").map((transfer, index) =>
+    makeExplorerFallbackRecord("Token transfer", transfer, index, ["transferId", "txId"], [
+      { label: "tx", value: text(transfer.txId) },
+      { label: "token", value: text(transfer.tokenId) },
+      { label: "from", value: text(transfer.fromAccount) },
+      { label: "to", value: text(transfer.toAccount) },
+      { label: "amount", value: text(transfer.amount) },
+    ], "Token transfer record from deterministic explorer fallback."),
+  );
+  const dexPools = explorerFallbackObjects(explorerFallback, "pools").map((pool, index) =>
+    makeExplorerFallbackRecord("DEX pool", pool, index, ["poolId"], [
+      { label: "token 0", value: text(pool.token0) },
+      { label: "token 1", value: text(pool.token1) },
+      { label: "reserve 0", value: text(pool.reserve0) },
+      { label: "reserve 1", value: text(pool.reserve1) },
+      { label: "lp supply", value: text(pool.lpSupply) },
+    ], "DEX pool record from deterministic explorer fallback."),
+  );
+  const lpPositions = explorerFallbackObjects(explorerFallback, "lpPositions").map((position, index) =>
+    makeExplorerFallbackRecord("LP position", position, index, ["positionId", "accountId"], [
+      { label: "account", value: text(position.accountId) },
+      { label: "pool", value: text(position.poolId) },
+      { label: "liquidity", value: text(position.liquidity) },
+      { label: "amount 0", value: text(position.amount0) },
+      { label: "amount 1", value: text(position.amount1) },
+    ], "LP position record from deterministic explorer fallback."),
+  );
+  const liquidityEvents = explorerFallbackObjects(explorerFallback, "liquidityEvents").map((event, index) =>
+    makeExplorerFallbackRecord("Liquidity event", event, index, ["liquidityEventId", "txId"], [
+      { label: "tx", value: text(event.txId) },
+      { label: "account", value: text(event.accountId) },
+      { label: "pool", value: text(event.poolId) },
+      { label: "action", value: text(event.action) },
+    ], "Liquidity action record from deterministic explorer fallback."),
+  );
+  const swaps = explorerFallbackObjects(explorerFallback, "swaps").map((swap, index) =>
+    makeExplorerFallbackRecord("Swap", swap, index, ["swapId", "txId"], [
+      { label: "tx", value: text(swap.txId) },
+      { label: "account", value: text(swap.accountId) },
+      { label: "pool", value: text(swap.poolId) },
+      { label: "amount in", value: `${text(swap.amountIn)} ${text(swap.tokenIn)}` },
+      { label: "amount out", value: `${text(swap.amountOut)} ${text(swap.tokenOut)}` },
+    ], "Swap record from deterministic explorer fallback."),
+  );
+  const bridgeDeposits = explorerFallbackBridgeRows(explorerFallback, "observations").map((observation, index) => {
+    const deposit: UnknownRecord = isRecord(observation.deposit) ? observation.deposit : {};
+    return makeExplorerFallbackRecord("Bridge observation", observation, index, ["observationId"], [
+      { label: "Base tx", value: text(deposit.txHash) },
+      { label: "source chain", value: text(deposit.sourceChainId) },
+      { label: "log index", value: text(deposit.logIndex) },
+      { label: "lockbox", value: text(deposit.lockboxAddress ?? deposit.sourceContract) },
+      { label: "recipient", value: text(deposit.flowchainRecipient) },
+      { label: "replay status", value: text(deposit.status) },
+    ], "Bridge deposit observation from deterministic explorer fallback.");
+  });
+  const bridgeCredits = explorerFallbackBridgeRows(explorerFallback, "credits").map((credit, index) =>
+    makeExplorerFallbackRecord("Bridge credit", credit, index, ["creditId"], [
+      { label: "observation", value: text(credit.observationId) },
+      { label: "deposit", value: text(credit.depositId) },
+      { label: "recipient", value: text(credit.flowchainRecipient) },
+      { label: "amount", value: text(credit.amount) },
+      { label: "status", value: text(credit.status) },
+    ], "Bridge credit record from deterministic explorer fallback."),
+  );
+  const bridgeWithdrawals = [
+    ...explorerFallbackBridgeRows(explorerFallback, "withdrawalIntents").map((withdrawal, index) =>
+      makeExplorerFallbackRecord("Withdrawal intent", withdrawal, index, ["withdrawalIntentId"], [
+        { label: "credit", value: text(withdrawal.creditId) },
+        { label: "deposit", value: text(withdrawal.depositId) },
+        { label: "account", value: text(withdrawal.flowchainAccount) },
+        { label: "Base recipient", value: text(withdrawal.baseRecipient) },
+        { label: "amount", value: text(withdrawal.amount) },
+      ], "Bridge withdrawal intent from deterministic explorer fallback."),
+    ),
+    ...explorerFallbackObjects(explorerFallback, "withdrawals").map((withdrawal, index) =>
+      makeExplorerFallbackRecord("Withdrawal", withdrawal, index, ["withdrawalIntentId", "withdrawalId"], [
+        { label: "credit", value: text(withdrawal.creditId) },
+        { label: "deposit", value: text(withdrawal.depositId) },
+        { label: "account", value: text(withdrawal.accountId) },
+        { label: "amount", value: text(withdrawal.amount) },
+      ], "Local withdrawal record from deterministic explorer fallback."),
+    ),
+  ];
+  const bridgeReleases = explorerFallbackBridgeRows(explorerFallback, "releaseEvidence").map((release, index) =>
+    makeExplorerFallbackRecord("Release evidence", release, index, ["releaseEvidenceId"], [
+      { label: "withdrawal", value: text(release.withdrawalIntentId) },
+      { label: "credit", value: text(release.creditId) },
+      { label: "deposit", value: text(release.depositId) },
+      { label: "release tx", value: text(release.releaseTxHash) },
+      { label: "status", value: text(release.status) },
+    ], "Bridge release evidence from deterministic explorer fallback."),
+  );
+  const errorsRecovery = isRecord(explorerFallback.errors)
+    ? recordValues(explorerFallback.errors).map((error, index) =>
+        makeExplorerFallbackRecord("Recovery reference", error, index, ["errorId"], [
+          { label: "subsystem", value: text(error.subsystem) },
+          { label: "state", value: text(error.state) },
+          { label: "command", value: text(error.recoveryCommand) },
+        ], "Degraded-state recovery reference from deterministic explorer fallback."),
+      )
+    : [];
+
+  return {
+    tokenLaunches,
+    tokenBalances,
+    tokenTransfers,
+    dexPools,
+    liquidityPositions: [...lpPositions, ...liquidityEvents],
+    swaps,
+    bridgeDeposits,
+    bridgeCredits,
+    bridgeWithdrawals,
+    bridgeReleases,
+    realValuePilot,
+    errorsRecovery,
+  };
 }
 
 function buildBlockRecords(data: DashboardData, devnetState: unknown): WorkbenchRecord[] {
@@ -2263,6 +2969,7 @@ function buildRawJsonRecords(
   devnetDashboardState: unknown | null,
   bridgeTestDeposit: unknown | null,
   liveReadinessReport: unknown | null,
+  explorerFallback: unknown | null,
 ): WorkbenchRecord[] {
   return [
     makeRecord("indexer", data.metadata.fixturePath, {
@@ -2332,6 +3039,20 @@ function buildRawJsonRecords(
       ],
       raw: liveReadinessReport,
     }),
+    makeRecord("devnet", WORKBENCH_EXPLORER_FALLBACK_PATH, {
+      id: "raw-explorer-fallback",
+      kind: "Raw JSON",
+      title: WORKBENCH_EXPLORER_FALLBACK_PATH,
+      summary: explorerFallback
+        ? "FlowChain L1 explorer fallback loaded for offline block, token, DEX, bridge, and recovery inspection."
+        : "FlowChain L1 explorer fallback was not loaded.",
+      status: explorerFallback ? "verified" : "unresolved",
+      facts: [
+        { label: "schema", value: isRecord(explorerFallback) ? text(explorerFallback.schema) : "missing" },
+        { label: "keys", value: topLevelKeys(explorerFallback) },
+      ],
+      raw: explorerFallback,
+    }),
     makeLocalRecord(
       "indexer",
       controlPlane.url,
@@ -2348,6 +3069,7 @@ function buildRawJsonRecords(
           { label: "status", value: controlPlane.status },
           { label: "health keys", value: topLevelKeys(controlPlane.health) },
           { label: "state keys", value: topLevelKeys(controlPlane.state) },
+          { label: "rpc keys", value: topLevelKeys(controlPlane.rpc) },
           { label: "error", value: text(controlPlane.error, "none") },
         ],
         raw: {
@@ -2357,6 +3079,7 @@ function buildRawJsonRecords(
           pilotLifecycle: controlPlane.pilotLifecycle ?? null,
           walletBalances: controlPlane.walletBalances ?? null,
           walletTransfers: controlPlane.walletTransfers ?? null,
+          rpc: controlPlane.rpc ?? null,
           error: controlPlane.error ?? null,
         },
       },
@@ -2372,6 +3095,7 @@ function buildProvenanceRecords(
   devnetDashboardState: unknown | null,
   bridgeTestDeposit: unknown | null,
   liveReadinessReport: unknown | null,
+  explorerFallback: unknown | null,
 ): WorkbenchRecord[] {
   return [
     makeLocalRecord(
@@ -2463,6 +3187,20 @@ function buildProvenanceRecords(
       ],
       raw: liveReadinessReport,
     }),
+    makeRecord("devnet", WORKBENCH_EXPLORER_FALLBACK_PATH, {
+      id: "flowchain-l1-explorer-fallback",
+      kind: "Explorer fixture",
+      title: WORKBENCH_EXPLORER_FALLBACK_PATH,
+      summary: explorerFallback
+        ? "FlowChain L1 explorer fallback is loaded with explicit fixture provenance."
+        : "FlowChain L1 explorer fallback was not loaded.",
+      status: explorerFallback ? "verified" : "unresolved",
+      facts: [
+        { label: "schema", value: isRecord(explorerFallback) ? text(explorerFallback.schema) : "missing" },
+        { label: "source", value: "fixtures/dashboard/flowchain-l1-explorer-fallback.json" },
+      ],
+      raw: explorerFallback,
+    }),
   ];
 }
 
@@ -2540,6 +3278,7 @@ export function buildWorkbenchSnapshot(
     devnetDashboardState?: unknown | null;
     bridgeTestDeposit?: unknown | null;
     liveReadinessReport?: unknown | null;
+    explorerFallback?: unknown | null;
     loadIssues?: string[];
   } = {},
 ): WorkbenchSnapshot {
@@ -2556,6 +3295,8 @@ export function buildWorkbenchSnapshot(
   const activeDevnetState = controlPlaneState ?? options.devnetState ?? null;
   const bridgeTestDeposit = options.bridgeTestDeposit ?? null;
   const liveReadinessReport = options.liveReadinessReport ?? null;
+  const rawExplorerFallback = rpcPayload(controlPlane, "raw_json_explorer_fallback");
+  const explorerFallback = options.explorerFallback ?? (isRecord(rawExplorerFallback?.raw) ? rawExplorerFallback.raw : null);
   const source: WorkbenchSource = controlPlane.status === "available" && controlPlaneState ? "control-plane" : "fixture-fallback";
 
   const sections: Record<WorkbenchSectionKey, WorkbenchRecord[]> = {
@@ -2570,6 +3311,7 @@ export function buildWorkbenchSnapshot(
     walletMetadata: buildWalletMetadataRecords(activeDevnetState),
     tokenLaunches: buildTokenLaunchRecords(activeDevnetState),
     tokenBalances: buildTokenBalanceRecords(activeDevnetState),
+    tokenTransfers: buildTokenTransferRecords(activeDevnetState),
     dexPools: buildDexPoolRecords(activeDevnetState),
     liquidityPositions: buildLiquidityPositionRecords(activeDevnetState),
     swaps: buildSwapRecords(activeDevnetState),
@@ -2578,6 +3320,7 @@ export function buildWorkbenchSnapshot(
     agents: buildAgentRecords(data, activeDevnetState),
     models: buildModelRecords(activeDevnetState),
     receipts: buildReceiptRecords(data, activeDevnetState),
+    receiptEvents: [],
     memoryCells: buildMemoryCellRecords(data, activeDevnetState),
     artifacts: buildArtifactRecords(data, activeDevnetState),
     verifierModules: buildVerifierModuleRecords(data, activeDevnetState),
@@ -2587,12 +3330,69 @@ export function buildWorkbenchSnapshot(
     bridgeDeposits: buildBridgeRecords(activeDevnetState, "deposits", bridgeTestDeposit),
     bridgeCredits: buildBridgeRecords(activeDevnetState, "credits", bridgeTestDeposit),
     bridgeWithdrawals: buildBridgeRecords(activeDevnetState, "withdrawals", bridgeTestDeposit),
+    bridgeReleases: [],
     realValuePilot: buildPilotRecords(controlPlane),
     liveReadiness: buildLiveReadinessRecords(liveReadinessReport),
+    errorsRecovery: [],
     provenance: [],
     hardwareSignals: buildHardwareSignalRecords(data, activeDevnetState),
     rawJson: [],
   };
+
+  const rpcSections = buildControlPlaneRpcSections(controlPlane);
+  for (const [key, records] of Object.entries(rpcSections) as Array<[WorkbenchSectionKey, WorkbenchRecord[] | undefined]>) {
+    if (records !== undefined && records.length > 0) {
+      sections[key] = records;
+    }
+  }
+  const explorerFallbackSections = buildExplorerFallbackSections(explorerFallback);
+  const supplementExplorerFallback = new Set<WorkbenchSectionKey>([
+    "bridgeDeposits",
+    "bridgeCredits",
+    "bridgeWithdrawals",
+    "bridgeReleases",
+    "realValuePilot",
+    "errorsRecovery",
+  ]);
+  for (const [key, records] of Object.entries(explorerFallbackSections) as Array<[WorkbenchSectionKey, WorkbenchRecord[] | undefined]>) {
+    if (records === undefined || records.length === 0) {
+      continue;
+    }
+
+    if (sections[key].length === 0) {
+      sections[key] = records;
+    } else if (source !== "control-plane" && supplementExplorerFallback.has(key)) {
+      sections[key] = [...records, ...sections[key]];
+    }
+  }
+  sections.receiptEvents = sections.receiptEvents.length > 0
+    ? sections.receiptEvents
+    : buildReceiptRecords(data, activeDevnetState).slice(0, 8);
+  sections.bridgeReleases = sections.bridgeReleases.length > 0
+    ? sections.bridgeReleases
+    : buildPilotRecords(controlPlane).filter((record) => record.kind.toLowerCase().includes("release"));
+  sections.errorsRecovery = sections.errorsRecovery.length > 0
+    ? sections.errorsRecovery
+    : buildRpcErrorRecoveryRecords(controlPlane);
+  sections.explorerRecords = [
+    ...sections.blocks.slice(0, 4),
+    ...sections.transactions.slice(0, 8),
+    ...sections.receiptEvents.slice(0, 6),
+    ...sections.tokenLaunches.slice(0, 4),
+    ...sections.tokenTransfers.slice(0, 4),
+    ...sections.dexPools.slice(0, 4),
+    ...sections.liquidityPositions.slice(0, 4),
+    ...sections.swaps.slice(0, 4),
+    ...sections.bridgeDeposits.slice(0, 4),
+    ...sections.bridgeCredits.slice(0, 4),
+    ...sections.bridgeWithdrawals.slice(0, 4),
+    ...sections.bridgeReleases.slice(0, 4),
+  ].map((record) => ({
+    ...record,
+    id: record.id.startsWith("explorer:") ? record.id : `explorer:${record.kind}:${record.id}`,
+    kind: record.kind.startsWith("Explorer ") ? record.kind : `Explorer ${record.kind}`,
+    summary: record.summary.startsWith("Explorer index projection:") ? record.summary : `Explorer index projection: ${record.summary}`,
+  }));
 
   sections.provenance = buildProvenanceRecords(
     data,
@@ -2601,6 +3401,7 @@ export function buildWorkbenchSnapshot(
     options.devnetDashboardState ?? null,
     bridgeTestDeposit,
     liveReadinessReport,
+    explorerFallback,
   );
   sections.rawJson = buildRawJsonRecords(
     data,
@@ -2609,6 +3410,7 @@ export function buildWorkbenchSnapshot(
     options.devnetDashboardState ?? null,
     bridgeTestDeposit,
     liveReadinessReport,
+    explorerFallback,
   );
   const displayedSections = source === "control-plane" ? relabelDevnetRecordsAsControlPlane(sections, controlPlane) : sections;
 
@@ -2627,6 +3429,7 @@ export function buildWorkbenchSnapshot(
       devnetDashboardState: options.devnetDashboardState ?? null,
       bridgeTestDeposit,
       liveReadinessReport,
+      explorerFallback,
       controlPlanePilotStatus: controlPlane.pilotStatus ?? null,
       controlPlaneBridgeReadiness: controlPlane.bridgeLiveReadiness ?? null,
       controlPlanePilotLifecycle: controlPlane.pilotLifecycle ?? null,
@@ -2634,23 +3437,33 @@ export function buildWorkbenchSnapshot(
       controlPlaneWalletTransfers: controlPlane.walletTransfers ?? null,
       controlPlaneHealth: controlPlane.health ?? null,
       controlPlaneState: controlPlane.state ?? null,
+      controlPlaneRpc: controlPlane.rpc ?? null,
     },
   };
 }
 
 export async function fetchWorkbenchSnapshot(data: DashboardData): Promise<WorkbenchSnapshot> {
-  const [controlPlane, devnetStateResult, devnetDashboardStateResult, bridgeTestDepositResult, liveReadinessResult] = await Promise.all([
+  const [
+    controlPlane,
+    devnetStateResult,
+    devnetDashboardStateResult,
+    bridgeTestDepositResult,
+    liveReadinessResult,
+    explorerFallbackResult,
+  ] = await Promise.all([
     probeControlPlane(),
     fetchOptionalJson(WORKBENCH_DEVNET_STATE_PATH),
     fetchOptionalJson(WORKBENCH_DEVNET_DASHBOARD_STATE_PATH),
     fetchOptionalJson(WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH),
     fetchOptionalJson(WORKBENCH_LIVE_READINESS_REPORT_PATH),
+    fetchOptionalJson(WORKBENCH_EXPLORER_FALLBACK_PATH),
   ]);
   const loadIssues = [
     devnetStateResult.error,
     devnetDashboardStateResult.error,
     bridgeTestDepositResult.error,
     liveReadinessResult.error,
+    explorerFallbackResult.error,
   ].filter((issue): issue is string => typeof issue === "string" && issue.length > 0);
 
   return buildWorkbenchSnapshot(data, {
@@ -2659,6 +3472,7 @@ export async function fetchWorkbenchSnapshot(data: DashboardData): Promise<Workb
     devnetDashboardState: devnetDashboardStateResult.value,
     bridgeTestDeposit: bridgeTestDepositResult.value,
     liveReadinessReport: liveReadinessResult.value,
+    explorerFallback: explorerFallbackResult.value,
     loadIssues,
   });
 }

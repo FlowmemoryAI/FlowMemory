@@ -1,6 +1,6 @@
 # Hardware Fixtures
 
-Last updated: 2026-05-13
+Last updated: 2026-05-14
 
 This folder contains local-alpha hardware projections that can be consumed by dashboard, workbench, or control-plane code without depending on live FlowRouter hardware.
 
@@ -14,10 +14,10 @@ This folder contains local-alpha hardware projections that can be consumed by da
 
 The fixture is a `flowmemory.hardware_operator_signals.local_alpha.v0` document. It includes:
 
-- `signalEnvelopes`: envelopes for operator metadata, heartbeat, receipt relay, verifier digest relay, offline alert/challenge input, bridge alert, and NFC memory cartridge metadata.
+- `signalEnvelopes`: envelopes for operator metadata, heartbeat, node health, peer hint, receipt relay, verifier digest relay, offline alert/challenge input, bridge alert, and NFC memory cartridge metadata.
 - `hardwareSignals`: direct workbench/control-plane signal records for the same envelopes.
-- `operatorMetadata`, `hardwareNodes`, `workReceipts`, `verifierReports`, `bridgeAlerts`, `artifactCommitments`, `memoryCells`, `challenges`, `finalityReceipts`, and `alerts`: control-plane-friendly local fixture collections.
-- `workbenchRecords`: ready-to-render records grouped by workbench section keys, including `hardwareSignals`.
+- `operatorMetadata`, `hardwareNodes`, `nodeHealth`, `peerHints`, `workReceipts`, `verifierReports`, `bridgeAlerts`, `artifactCommitments`, `memoryCells`, `challenges`, `finalityReceipts`, and `alerts`: control-plane-friendly local fixture collections.
+- `workbenchRecords`: ready-to-render records grouped by workbench section keys, including `nodeHealth`, `peerHints`, and `hardwareSignals`.
 - `boundary`: explicit local-only, advisory, optional-hardware limitations.
 
 The handoff fixture is a `flowmemory.hardware_control_plane_handoff.local_alpha.v0` document. It mirrors the stable control-plane state keys under `collections`, declares read-only merge id fields, and carries an optional full-smoke row:
@@ -36,3 +36,5 @@ python hardware/simulator/flowrouter_sim.py --validate-negative-report-file fixt
 ```
 
 These fixtures are local-only and advisory. They do not prove hardware trustlessness, production field deployment, or receipt/verifier finality.
+
+The negative validation report proves rejection of malformed IDs, oversized control payloads, stale timestamps, duplicate signal IDs, secret-shaped payload strings, required-hardware claims, and missing required handoff collections.

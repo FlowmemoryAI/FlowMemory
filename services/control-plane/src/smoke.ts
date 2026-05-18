@@ -1,4 +1,7 @@
 import { fileURLToPath } from "node:url";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
 
 import { dispatchJsonRpc } from "./json-rpc.ts";
 import { loadControlPlaneState } from "./fixture-state.ts";
@@ -30,6 +33,20 @@ function stringField(value: unknown, name: string): string {
   return String(value);
 }
 
+function smokeSignedEnvelope(): JsonObject {
+  const vectors = JSON.parse(
+    readFileSync(new URL("../../../crypto/fixtures/production-l1-vectors.json", import.meta.url), "utf8"),
+  ) as JsonObject;
+  const walletTransfer = (vectors.positive as JsonObject[]).find((entry) => entry.name === "wallet-transfer");
+  if (walletTransfer === undefined) {
+    throw new Error("control-plane smoke missing production-L1 wallet-transfer vector");
+  }
+  return {
+    document: walletTransfer.document,
+    envelope: walletTransfer.envelope,
+  };
+}
+
 export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> = {}): JsonObject {
   const state = loadControlPlaneState(pathOverrides);
   const rootfieldId = state.launchCore.rootfieldBundles[0]?.rootfieldId;
@@ -57,6 +74,18 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
   const tokenBalances = dispatchJsonRpc({ jsonrpc: "2.0", id: "token-balances-prefetch", method: "token_balance_list" }, { state }) as RpcSuccessResponse;
   const tokenBalance = ((tokenBalances.result as JsonObject).balances as JsonObject[])[0];
   const tokenBalanceId = stringField(tokenBalance.balanceId, "tokenBalanceId");
+  const tokenTransfers = dispatchJsonRpc({ jsonrpc: "2.0", id: "token-transfers-prefetch", method: "token_transfer_list" }, { state }) as RpcSuccessResponse;
+  const tokenTransfer = ((tokenTransfers.result as JsonObject).transfers as JsonObject[])[0];
+  const tokenTransferId = stringField(tokenTransfer.transferId, "tokenTransferId");
+  const pools = dispatchJsonRpc({ jsonrpc: "2.0", id: "pools-prefetch", method: "pool_list" }, { state }) as RpcSuccessResponse;
+  const pool = ((pools.result as JsonObject).pools as JsonObject[])[0];
+  const poolId = stringField(pool.poolId, "poolId");
+  const lpPositions = dispatchJsonRpc({ jsonrpc: "2.0", id: "lp-positions-prefetch", method: "lp_position_list" }, { state }) as RpcSuccessResponse;
+  const lpPosition = ((lpPositions.result as JsonObject).positions as JsonObject[])[0];
+  const lpPositionId = stringField(lpPosition.positionId, "lpPositionId");
+  const swaps = dispatchJsonRpc({ jsonrpc: "2.0", id: "swaps-prefetch", method: "swap_list" }, { state }) as RpcSuccessResponse;
+  const swap = ((swaps.result as JsonObject).swaps as JsonObject[])[0];
+  const swapId = stringField(swap.swapId, "swapId");
 
   if (rootfieldId === undefined || receipt === undefined || reportId === undefined || artifactUri === undefined) {
     throw new Error("control-plane smoke requires launch-core rootfield, receipt, report, and artifact fixture data");
@@ -90,15 +119,7 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
       id: "transactionSubmit",
       method: "transaction_submit",
       params: {
-        signedEnvelope: {
-          schema: "flowmemory.control_plane.smoke_signed_envelope.v0",
-          tx: {
-            schema: "flowmemory.control_plane.smoke_transaction.v0",
-            action: "local-smoke",
-            nonce: "0",
-          },
-          signature: "0xlocal-smoke-signature",
-        },
+        signedEnvelope: smokeSignedEnvelope(),
         submittedBy: "control-plane-smoke",
       },
     },
@@ -110,9 +131,14 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
     { jsonrpc: "2.0", id: "token", method: "token_get", params: { tokenId } },
     { jsonrpc: "2.0", id: "tokenBalances", method: "token_balance_list", params: { limit: 10 } },
     { jsonrpc: "2.0", id: "tokenBalance", method: "token_balance_get", params: { balanceId: tokenBalanceId } },
+    { jsonrpc: "2.0", id: "tokenTransfers", method: "token_transfer_list", params: { limit: 10 } },
+    { jsonrpc: "2.0", id: "tokenTransfer", method: "token_transfer_get", params: { transferId: tokenTransferId } },
     { jsonrpc: "2.0", id: "pools", method: "pool_list", params: { limit: 10 } },
+    { jsonrpc: "2.0", id: "pool", method: "pool_get", params: { poolId } },
     { jsonrpc: "2.0", id: "lpPositions", method: "lp_position_list", params: { limit: 10 } },
+    { jsonrpc: "2.0", id: "lpPosition", method: "lp_position_get", params: { positionId: lpPositionId } },
     { jsonrpc: "2.0", id: "swaps", method: "swap_list", params: { limit: 10 } },
+    { jsonrpc: "2.0", id: "swap", method: "swap_get", params: { swapId } },
     { jsonrpc: "2.0", id: "productFlowStatus", method: "product_flow_status" },
     { jsonrpc: "2.0", id: "faucet", method: "faucet_event_list", params: { limit: 10 } },
     { jsonrpc: "2.0", id: "wallets", method: "wallet_metadata_list", params: { limit: 10 } },
@@ -149,8 +175,16 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
     { jsonrpc: "2.0", id: "bridgeCredit", method: "bridge_credit_get", params: { creditId } },
     { jsonrpc: "2.0", id: "withdrawals", method: "withdrawal_list", params: { limit: 10 } },
     { jsonrpc: "2.0", id: "withdrawal", method: "withdrawal_get", params: { withdrawalId } },
+    { jsonrpc: "2.0", id: "explorerSearchBlock", method: "explorer_search", params: { query: stringField(block.blockNumber, "blockNumber"), limit: 10 } },
+    { jsonrpc: "2.0", id: "explorerSearchTx", method: "explorer_search", params: { query: txId, limit: 10 } },
+    { jsonrpc: "2.0", id: "explorerSearchAccount", method: "explorer_search", params: { query: accountId, limit: 10 } },
+    { jsonrpc: "2.0", id: "explorerSearchToken", method: "explorer_search", params: { query: tokenId, limit: 10 } },
+    { jsonrpc: "2.0", id: "explorerSearchPool", method: "explorer_search", params: { query: poolId, limit: 10 } },
+    { jsonrpc: "2.0", id: "explorerSearchBridgeCredit", method: "explorer_search", params: { query: creditId, limit: 10 } },
+    { jsonrpc: "2.0", id: "explorerSearchWithdrawal", method: "explorer_search", params: { query: withdrawalId, limit: 10 } },
     { jsonrpc: "2.0", id: "provenance", method: "provenance_get", params: { receiptId: receipt.receiptId } },
     { jsonrpc: "2.0", id: "raw", method: "raw_json_get", params: { source: "launchCore" } },
+    { jsonrpc: "2.0", id: "rawExplorerFallback", method: "raw_json_get", params: { source: "explorerFallback" } },
   ] as const;
 
   const response = dispatchJsonRpc([...requests], { state });
@@ -179,11 +213,22 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
       accountId,
       depositId,
       tokenId,
+      tokenTransferId,
+      poolId,
+      swapId,
     },
     localOnly: true,
   };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  console.log(JSON.stringify(runControlPlaneSmoke(), null, 2));
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-smoke-"));
+  try {
+    console.log(JSON.stringify(runControlPlaneSmoke({
+      txIntakePath: join(dir, "transactions.ndjson"),
+      bridgeObservationIntakePath: join(dir, "bridge-observations.ndjson"),
+    }), null, 2));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 }

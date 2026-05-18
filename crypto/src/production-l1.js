@@ -123,6 +123,33 @@ export function flowchainBridgeCreditId({ observationId, localRecipient, localCh
   ]);
 }
 
+export function flowchainBridgeSourceEventReplayKey({ sourceChainId, lockbox, txHash, logIndex }) {
+  return typedHash(TYPE_STRINGS.flowchainBridgeSourceEventReplayKeyV0, [
+    ["uint256", sourceChainId],
+    ["address", lockbox],
+    ["bytes32", txHash],
+    ["uint32", logIndex]
+  ]);
+}
+
+export function flowchainBridgeEvidenceHash({
+  sourceEventReplayKey,
+  observationId,
+  creditId,
+  depositId,
+  localChainId,
+  evidencePayloadHash
+}) {
+  return typedHash(TYPE_STRINGS.flowchainBridgeEvidenceHashV0, [
+    ["bytes32", sourceEventReplayKey],
+    ["bytes32", observationId],
+    ["bytes32", creditId],
+    ["bytes32", depositId],
+    ["uint256", localChainId],
+    ["bytes32", evidencePayloadHash]
+  ]);
+}
+
 export function flowchainWithdrawalIntentId({ localChainId, accountId, assetId, amount, nonce, destination }) {
   return typedHash(TYPE_STRINGS.flowchainWithdrawalIntentV1, [
     ["uint256", localChainId],
@@ -176,7 +203,7 @@ export function roleScopedNonceReplayKey({ chainId, networkProfile, accountId, s
 }
 
 export function bridgeSourceEventReplayKey(input) {
-  return flowchainBridgeObservationId(input);
+  return flowchainBridgeSourceEventReplayKey(input);
 }
 
 export function withdrawalIntentReplayKey(input) {

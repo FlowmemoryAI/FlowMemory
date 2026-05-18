@@ -1,6 +1,6 @@
 # Meshtastic/LoRa Control Message Inventory
 
-Last updated: 2026-05-13
+Last updated: 2026-05-14
 
 This inventory addresses issue #12. It defines candidate control messages for FlowRouter v0 and explicitly rules out high-bandwidth payloads.
 
@@ -25,7 +25,9 @@ Common fields:
 | Message | Purpose group | Approximate payload shape | Why it fits low bandwidth | Risks and requirements |
 | --- | --- | --- | --- | --- |
 | Node heartbeat | Status ping | `v,type,node,seq,uptime,bat/temp,flags,auth` | Tiny status tuple; no artifact data. | Spoofing and replay risk; needs auth and sequence tracking. |
+| Node health digest | Status ping | `v,type,node,seq,health,queue,temp,free,health_hash,auth` | Compact health and queue fields only; no logs or receipts. | Advisory only; must not block local chain startup. |
 | Gateway availability | Status ping | `v,type,node,seq,wan,lan,cache,sidecar,flags,auth` | Bitfields describe availability instead of carrying logs. | Overclaiming connectivity; receiver must treat as advisory. |
+| Peer hint | Topology hint | `v,type,node,seq,peer,role,link,rssi,snr,auth` | Short peer and link-state hint only; no sync payload. | Spoofing/replay risk; normal network path performs actual sync and reconciliation. |
 | FlowPulse digest | Compact digest | `v,type,node,seq,chain,from,to,digest32,count,flags,auth` | Sends a hash over a FlowPulse range, not events. | Digest cannot be trusted until verified by indexer/receipts. |
 | Artifact availability digest | Compact digest | `v,type,node,seq,namespace,digest32,count,bytes_class,ttl,auth` | Announces cache hints only; no artifacts. | May leak inventory metadata; needs privacy review. |
 | Compact receipt reference | Compact receipt reference | `v,type,node,seq,chain,block_hint,tx_hash_prefix/log_hint,receipt_hash,auth` | Carries short pointer and hash, not receipt body. | Prefix collisions and stale hints; full verification requires normal network path. |
@@ -40,9 +42,17 @@ Common fields:
 
 Use for "this node is alive" and coarse device state. Keep it periodic but infrequent to avoid channel congestion.
 
+### Node Health Digest
+
+Use for compact local health and queue-depth hints. A warning or stale node-health message can inform an operator, but V0 hardware health never gates private/local chain startup.
+
 ### Gateway Availability
 
 Use for advisory state about upstream internet, LAN reachability, local cache, and sidecar status. It does not prove connectivity to the global internet.
+
+### Peer Hint
+
+Use for local topology hints such as "this peer was heard recently." It is not authentication, sync proof, or a replacement for normal network discovery.
 
 ### FlowPulse Digest
 

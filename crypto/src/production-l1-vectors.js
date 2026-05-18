@@ -26,6 +26,7 @@ import {
   flowchainAccountStateRoot,
   flowchainBlockHash,
   flowchainBridgeCreditId,
+  flowchainBridgeEvidenceHash,
   flowchainBridgeObservationId,
   flowchainDexStateRoot,
   flowchainEventRoot,
@@ -185,6 +186,12 @@ export async function buildProductionL1Vectors() {
       sourceChainId: Number(CHAIN_ID),
       destinationChainId: 8453,
       token: bridgeSourceEvent.token,
+      asset: {
+        sourceChainId: Number(CHAIN_ID),
+        sourceToken: bridgeSourceEvent.token,
+        destinationAssetId: assets.token,
+        decimals: 18
+      },
       amount: "10000000",
       flowchainAccount: accounts.user.accountId,
       baseRecipient: "0x4444444444444444444444444444444444444444",
@@ -366,6 +373,19 @@ function buildHashHelperVectors({
     round: "1",
     voteRoot: flowchainReceiptRoot([accounts.validator.accountId, blockHash])
   };
+  const bridgeSourceEventKey = bridgeSourceEventReplayKey(bridgeSourceEvent);
+  const bridgeEvidenceHash = flowchainBridgeEvidenceHash({
+    sourceEventReplayKey: bridgeSourceEventKey,
+    observationId: bridgeObservationId,
+    creditId: canonicalBridgeCreditId,
+    depositId: keccakUtf8("bridge-deposit:base-8453:demo"),
+    localChainId: CHAIN_ID,
+    evidencePayloadHash: canonicalJsonHash({
+      source: bridgeSourceEvent,
+      localRecipient: accounts.user.accountId,
+      creditAmount: bridgeSourceEvent.amount
+    })
+  });
   return {
     transactionId: positives[0].envelope.transactionId,
     blockHash,
@@ -377,6 +397,7 @@ function buildHashHelperVectors({
     dexStateRoot,
     bridgeObservationId,
     bridgeCreditId: canonicalBridgeCreditId,
+    bridgeEvidenceHash,
     withdrawalIntentId: flowchainWithdrawalIntentId(withdrawalIntentInput),
     finalityReceiptId: flowchainFinalityReceiptId(finalityInput),
     replayKeys: {
@@ -393,7 +414,7 @@ function buildHashHelperVectors({
         signerRole: "validator",
         nonce: "11"
       }),
-      bridgeSourceEvent: bridgeSourceEventReplayKey(bridgeSourceEvent),
+      bridgeSourceEvent: bridgeSourceEventKey,
       withdrawalIntent: withdrawalIntentReplayKey(withdrawalIntentInput),
       finalityVote: finalityVoteReplayKey({
         chainId: CHAIN_ID,
