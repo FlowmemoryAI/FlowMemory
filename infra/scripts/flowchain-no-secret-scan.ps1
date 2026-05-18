@@ -61,9 +61,9 @@ foreach ($path in $Paths) {
         [void] $scanned.Add($file.FullName)
         $text = Get-Content -Raw -LiteralPath $file.FullName
         foreach ($pattern in @(
-                "BEGIN RSA PRIVATE KEY",
-                "BEGIN OPENSSH PRIVATE KEY",
-                "BEGIN PRIVATE KEY",
+                ("BEGIN RSA " + "PRIVATE KEY"),
+                ("BEGIN OPENSSH " + "PRIVATE KEY"),
+                ("BEGIN " + "PRIVATE KEY"),
                 "seedPhrase",
                 "mnemonicPhrase",
                 "privateKey",
