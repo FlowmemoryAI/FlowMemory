@@ -1456,14 +1456,21 @@ $alertInstallValidation = $reports.alertInstallValidation
 $alertInstallValidationStatus = Get-ReportStatus -Report $alertInstallValidation
 $alertInstallValidationChecks = Get-AuditProp -Object $alertInstallValidation -Name "checks"
 $alertInstallValidationFailedChecks = @((Get-AuditProp -Object $alertInstallValidation -Name "failedChecks" -Default @()))
+$alertInstallValidationSecretFindings = @((Get-AuditProp -Object $alertInstallValidation -Name "secretMarkerFindings" -Default @()))
+$alertInstallValidationFailedCheckCount = $alertInstallValidationFailedChecks.Count
+$alertInstallValidationSecretFindingCount = $alertInstallValidationSecretFindings.Count
 $alertInstallValidationPassed = $alertInstallValidationExitCode -eq 0 `
     -and $alertInstallValidationStatus -eq "passed" `
-    -and $alertInstallValidationFailedChecks.Count -eq 0 `
+    -and $alertInstallValidationFailedCheckCount -eq 0 `
+    -and $alertInstallValidationSecretFindingCount -eq 0 `
     -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "packageScriptsPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "statusDidNotMutate" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "uninstallAbsentDidNotMutate" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "childReportsNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "childReportsSecretMarkerFindingsEmpty" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "secretMarkerFindingsEmpty" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $alertInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $alertInstallValidation -Name "noSecrets" -Default $false) -eq $true)
 $opsEscalationDryRun = $reports.opsEscalationDryRun
@@ -1799,7 +1806,7 @@ Add-AuditItem -Items $items -Id "ops-alert-rules" `
 Add-AuditItem -Items $items -Id "ops-alert-install-validation" `
     -Requirement "Ops alert scheduled refresh install validation proves plan/status/uninstall no-op behavior and no external delivery for recurring local alert evidence." `
     -Status $(if ($alertInstallValidationPassed) { "passed" } else { "failed" }) `
-    -Evidence "alertInstall=$alertInstallValidationStatus, failedChecks=$($alertInstallValidationFailedChecks.Count), planDidNotMutate=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "planDidNotMutate" -Default $false), statusDidNotMutate=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "statusDidNotMutate" -Default $false), noExternalDelivery=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "noExternalDelivery" -Default $false), report=$($paths.alertInstallValidation)" `
+    -Evidence "alertInstall=$alertInstallValidationStatus, failedChecks=$alertInstallValidationFailedCheckCount, secretFindings=$alertInstallValidationSecretFindingCount, planDidNotMutate=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "planDidNotMutate" -Default $false), statusDidNotMutate=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "statusDidNotMutate" -Default $false), noExternalDelivery=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "noExternalDelivery" -Default $false), report=$($paths.alertInstallValidation)" `
     -Commands @("npm run flowchain:ops:alerts:install:validate")
 
 Add-AuditItem -Items $items -Id "ops-escalation-dry-run" `

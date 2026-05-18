@@ -1093,10 +1093,14 @@ $definitions = @(
             "actionUsesAlertsScript",
             "hasAllowBlocked",
             "scheduledCommandDoesNotDisableRefresh",
-            "noExternalDelivery"
+            "noExternalDelivery",
+            "childReportsNoSecrets",
+            "childReportsSecretMarkerFindingsEmpty",
+            "secretMarkerFindingsEmpty"
         )
         requiredEmptyArrays = @(
-            "failedChecks"
+            "failedChecks",
+            "secretMarkerFindings"
         )
         requiredReportProperties = [ordered]@{
             "envValuesPrinted" = $false

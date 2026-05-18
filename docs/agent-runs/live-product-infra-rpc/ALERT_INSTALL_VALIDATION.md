@@ -1,6 +1,6 @@
 ﻿# FlowChain Alert Install Validation
 
-Generated: 2026-05-18T01:08:08.9259306Z
+Generated: 2026-05-18T05:03:33.2485138Z
 Status: passed
 
 This validation proves the scheduled alert refresh path is planned, status-checkable, absent-uninstall safe, no-secret, non-mutating in read-only/no-op modes, and refreshes local alert evidence without external delivery.
@@ -33,6 +33,9 @@ This validation proves the scheduled alert refresh path is planned, status-check
 - scheduledCommandKeepsBlockedAlertsVisible: True
 - scheduledCommandDoesNotDisableRefresh: True
 - envValuesPrintedFalse: True
+- childReportsNoSecrets: True
+- childReportsSecretMarkerFindingsEmpty: True
+- secretMarkerFindingsEmpty: True
 - noSecrets: True
 - broadcastsFalse: True
 
