@@ -201,6 +201,32 @@ $definitions = @(
         )
     },
     [ordered]@{
+        id = "node-operator-package-verify"
+        requirement = "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, forbidden local files, and no-secret scan."
+        path = "docs/agent-runs/live-product-infra-rpc/operator-package-verify-report.json"
+        command = "npm run flowchain:operator:package:verify"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageReportExists",
+            "packageReportPassed",
+            "packageDirExists",
+            "manifestExists",
+            "manifestSchemaValid",
+            "commandMatrixExists",
+            "commandMatrixCountMatches",
+            "expectedFilesPresent",
+            "reportRunbookCountEnough",
+            "reportEvidenceCountEnough",
+            "ownerInputNamesOnly",
+            "noForbiddenLocalFiles",
+            "noSecretScanPassed",
+            "envValuesPrintedFalse",
+            "broadcastsFalse",
+            "noSecrets"
+        )
+    },
+    [ordered]@{
         id = "backup-readiness"
         requirement = "Configured production backup path can create and restore manifest-backed state snapshots."
         path = "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
@@ -335,7 +361,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("backup-restore-validation", "ops-snapshot", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "node-operator-package", "public-deployment-contract")
+        staleIfOlderThan = @("backup-restore-validation", "ops-snapshot", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"
@@ -499,6 +525,8 @@ function ConvertTo-TruthEvidence {
         "commandCount",
         "runbookCount",
         "evidenceReportCount",
+        "expectedFileCount",
+        "ownerInputNameCount",
         "completionReady",
         "blockedOnlyOnKnownExternalOwnerInputs"
     )) {

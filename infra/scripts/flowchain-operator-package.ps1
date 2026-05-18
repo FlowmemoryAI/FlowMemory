@@ -117,6 +117,7 @@ $requiredScripts = @(
     "flowchain:bridge:relayer:once",
     "flowchain:bridge:relayer:guardrail:validate",
     "flowchain:external-tester:packet",
+    "flowchain:operator:package:verify",
     "flowchain:completion:audit",
     "flowchain:truth-table",
     "flowchain:no-secret:scan"
@@ -148,6 +149,7 @@ $commandMatrix = @(
     [ordered]@{ phase = "bridge"; command = "npm run flowchain:bridge:relayer:once -- -AllowBlocked"; purpose = "Run the no-broadcast relayer gate; remains blocked until owner Base inputs exist." },
     [ordered]@{ phase = "bridge"; command = "npm run flowchain:bridge:relayer:guardrail:validate"; purpose = "Prove missing owner inputs cannot mutate cursor state or queue credits." },
     [ordered]@{ phase = "testers"; command = "npm run flowchain:external-tester:packet -- -AllowBlocked"; purpose = "Regenerate the friends-and-family packet and fail closed until public gates pass." },
+    [ordered]@{ phase = "release"; command = "npm run flowchain:operator:package:verify"; purpose = "Verify the generated operator package contents and no-secret boundary." },
     [ordered]@{ phase = "release"; command = "npm run flowchain:completion:audit -- -AllowBlocked"; purpose = "Run the production readiness gate without false public-ready claims." },
     [ordered]@{ phase = "release"; command = "npm run flowchain:truth-table -- -AllowBlocked"; purpose = "Classify every tracked gate as passed, owner-blocked, repo-blocked, failed, or stale." },
     [ordered]@{ phase = "release"; command = "npm run flowchain:no-secret:scan"; purpose = "Verify generated reports and packets contain no secret markers." }

@@ -6,6 +6,7 @@ Status: local/private operator guide with public deployment boundaries.
 
 ```powershell
 npm run flowchain:operator:package
+npm run flowchain:operator:package:verify
 npm run flowchain:service:start -- -LiveProfile
 npm run flowchain:service:status -- -AllowBlocked
 npm run flowchain:service:monitor -- -AllowBlocked
@@ -19,6 +20,8 @@ fresh state file writes, and advancing height.
 `flowchain:operator:package` generates a no-secret operator package under
 `docs/agent-runs/live-product-infra-rpc/operator-package/` with copied runbooks,
 the command matrix, owner-input names, and current readiness evidence.
+`flowchain:operator:package:verify` independently validates that package after
+it exists.
 
 ## Service Supervisor
 

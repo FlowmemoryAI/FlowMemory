@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-18T00:38:05.3564569Z",
+    "generatedAt":  "2026-05-18T00:44:42.5039157Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -53,6 +53,7 @@
                             "flowchain:bridge:relayer:once",
                             "flowchain:bridge:relayer:guardrail:validate",
                             "flowchain:external-tester:packet",
+                            "flowchain:operator:package:verify",
                             "flowchain:completion:audit",
                             "flowchain:truth-table",
                             "flowchain:no-secret:scan"
@@ -182,6 +183,11 @@
                               "phase":  "testers",
                               "command":  "npm run flowchain:external-tester:packet -- -AllowBlocked",
                               "purpose":  "Regenerate the friends-and-family packet and fail closed until public gates pass."
+                          },
+                          {
+                              "phase":  "release",
+                              "command":  "npm run flowchain:operator:package:verify",
+                              "purpose":  "Verify the generated operator package contents and no-secret boundary."
                           },
                           {
                               "phase":  "release",

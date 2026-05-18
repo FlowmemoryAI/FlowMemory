@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-18T00:38:25.6538625Z",
+    "generatedAt":  "2026-05-18T00:44:57.6433354Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -17,10 +17,10 @@
                                   "Every missing production edge fails closed on exact owner input names, with no secrets, env values, or live broadcasts."
                               ],
     "itemCounts":  {
-                       "passed":  16,
+                       "passed":  17,
                        "blocked":  7,
                        "failed":  0,
-                       "total":  23
+                       "total":  24
                    },
     "items":  [
                   {
@@ -106,13 +106,30 @@
                       "layer":  "Operations",
                       "requirement":  "Node operator packaging collects no-secret runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates.",
                       "status":  "passed",
-                      "evidence":  "operatorPackage=passed, commands=28, runbooks=12, evidenceReports=19, failedChecks=0, noSecretScan=True",
+                      "evidence":  "operatorPackage=passed, commands=29, runbooks=12, evidenceReports=19, failedChecks=0, noSecretScan=True",
                       "files":  [
                                     "infra/scripts/flowchain-operator-package.ps1",
                                     "docs/developer/FLOWCHAIN_NODE_OPERATOR.md"
                                 ],
                       "commands":  [
                                        "npm run flowchain:operator:package"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "node-operator-package-verify-boundary",
+                      "layer":  "Operations",
+                      "requirement":  "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, forbidden local files, and no-secret scan.",
+                      "status":  "passed",
+                      "evidence":  "operatorPackageVerify=passed, expectedFiles=26, commands=29, failedChecks=0, noSecretScan=True",
+                      "files":  [
+                                    "infra/scripts/flowchain-operator-package-verify.ps1",
+                                    "docs/agent-runs/live-product-infra-rpc/OPERATOR_PACKAGE_VERIFY.md"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:operator:package:verify"
                                    ],
                       "blockers":  [
 
@@ -567,13 +584,14 @@
                       "layer":  "Verification",
                       "requirement":  "Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, node-operator package, developer dev-pack, and completion evidence into one auditable path.",
                       "status":  "passed",
-                      "evidence":  "liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, packetSmoke=True, connectPackReady=True, publicTesterGateway=passed, operatorPackage=passed, devPack=passed",
+                      "evidence":  "liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, packetSmoke=True, connectPackReady=True, publicTesterGateway=passed, operatorPackage=passed, operatorPackageVerify=passed, devPack=passed",
                       "files":  [
                                     "infra/scripts/flowchain-live-infra-check.ps1",
                                     "infra/scripts/flowchain-live-product-e2e.ps1",
                                     "infra/scripts/flowchain-completion-audit.ps1",
                                     "infra/scripts/flowchain-public-deployment-contract.ps1",
                                     "infra/scripts/flowchain-operator-package.ps1",
+                                    "infra/scripts/flowchain-operator-package-verify.ps1",
                                     "infra/scripts/flowchain-external-tester-readiness.ps1",
                                     "infra/scripts/flowchain-external-tester-packet.ps1",
                                     "infra/scripts/flowchain-public-tester-gateway-e2e.ps1"
@@ -585,6 +603,7 @@
                                        "npm run flowchain:external-tester:packet",
                                        "npm run flowchain:tester:gateway:e2e",
                                        "npm run flowchain:operator:package",
+                                       "npm run flowchain:operator:package:verify",
                                        "npm run flowchain:dev-pack:e2e"
                                    ],
                       "blockers":  [
@@ -626,9 +645,10 @@
                                        "command matrix",
                                        "owner-input names",
                                        "latest evidence reports",
+                                       "independent verifier",
                                        "no-secret scan"
                                    ],
-                          "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-report.json"
+                          "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-verify-report.json"
                       },
                       {
                           "name":  "public-tester-gateway",
@@ -806,6 +826,7 @@
                         "serviceSupervisorValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-report.json",
                         "serviceInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-validation-report.json",
                         "operatorPackage":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-report.json",
+                        "operatorPackageVerify":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-verify-report.json",
                         "opsSnapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
                         "opsAlertRules":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-alert-rules-report.json",
                         "alertInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\alert-install-validation-report.json",

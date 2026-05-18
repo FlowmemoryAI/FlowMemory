@@ -1,0 +1,46 @@
+{
+    "schema":  "flowchain.operator_package_verify_report.v0",
+    "generatedAt":  "2026-05-18T00:44:50.6289017Z",
+    "status":  "passed",
+    "packageReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-report.json",
+    "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
+    "packageStatus":  "passed",
+    "expectedFileCount":  26,
+    "missingFiles":  [
+
+                     ],
+    "forbiddenFiles":  [
+
+                       ],
+    "commandCount":  29,
+    "ownerInputNameCount":  17,
+    "badOwnerInputNames":  [
+
+                           ],
+    "noSecretScanReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-verify-no-secret-scan-report.json",
+    "checks":  {
+                   "packageReportExists":  true,
+                   "packageReportPassed":  true,
+                   "packageDirExists":  true,
+                   "manifestExists":  true,
+                   "manifestSchemaValid":  true,
+                   "commandMatrixExists":  true,
+                   "commandMatrixCountMatches":  true,
+                   "expectedFilesPresent":  true,
+                   "reportRunbookCountEnough":  true,
+                   "reportEvidenceCountEnough":  true,
+                   "ownerInputNamesOnly":  true,
+                   "noForbiddenLocalFiles":  true,
+                   "noSecretScanPassed":  true,
+                   "envValuesPrintedFalse":  true,
+                   "broadcastsFalse":  true,
+                   "noSecrets":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "noLiveBroadcast":  true,
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

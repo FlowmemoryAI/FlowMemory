@@ -42,6 +42,7 @@ $reportPaths = [ordered]@{
     serviceSupervisorValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
     serviceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
     operatorPackage = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-report.json"
+    operatorPackageVerify = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-verify-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
     alertInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
@@ -408,6 +409,25 @@ $operatorPackageReady = (Test-PackageScript -PackageJson $packageJson -Name "flo
     -and ((Get-ArchitectureProp -Object $operatorPackage -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $operatorPackage -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $operatorPackage -Name "broadcasts" -Default $true) -eq $false)
+$operatorPackageVerify = $reports.operatorPackageVerify
+$operatorPackageVerifyStatus = Get-ArchitectureStatus -Report $operatorPackageVerify
+$operatorPackageVerifyChecks = Get-ArchitectureProp -Object $operatorPackageVerify -Name "checks"
+$operatorPackageVerifyFailedChecks = @((Get-ArchitectureProp -Object $operatorPackageVerify -Name "failedChecks" -Default @()))
+$operatorPackageVerifyExpectedFileCount = [int](Get-ArchitectureProp -Object $operatorPackageVerify -Name "expectedFileCount" -Default 0)
+$operatorPackageVerifyCommandCount = [int](Get-ArchitectureProp -Object $operatorPackageVerify -Name "commandCount" -Default 0)
+$operatorPackageVerifyReady = (Test-PackageScript -PackageJson $packageJson -Name "flowchain:operator:package:verify") `
+    -and ($operatorPackageVerifyStatus -eq "passed") `
+    -and ($operatorPackageVerifyFailedChecks.Count -eq 0) `
+    -and ($operatorPackageVerifyExpectedFileCount -ge 20) `
+    -and ($operatorPackageVerifyCommandCount -ge 20) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "packageReportPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "expectedFilesPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "ownerInputNamesOnly" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "noForbiddenLocalFiles" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "noSecretScanPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageVerify -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageVerify -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageVerify -Name "broadcasts" -Default $true) -eq $false)
 Add-ArchitectureItem -Items $items -Id "service-install-boundary" -Layer "Operations" `
     -Requirement "Owner-host service lifecycle includes a no-secret Windows Scheduled Task install, read-only status, and safe absent-task uninstall no-op path for reboot-persistent live supervisor autorecovery." `
     -Status $(if ($serviceInstallReady) { "passed" } else { "failed" }) `
@@ -421,6 +441,13 @@ Add-ArchitectureItem -Items $items -Id "node-operator-package-boundary" -Layer "
     -Evidence "operatorPackage=$operatorPackageStatus, commands=$operatorPackageCommandCount, runbooks=$operatorPackageRunbookCount, evidenceReports=$operatorPackageEvidenceReportCount, failedChecks=$($operatorPackageFailedChecks.Count), noSecretScan=$(Get-ArchitectureProp -Object $operatorPackageChecks -Name "noSecretScanPassed" -Default $false)" `
     -Files @("infra/scripts/flowchain-operator-package.ps1", "docs/developer/FLOWCHAIN_NODE_OPERATOR.md") `
     -Commands @("npm run flowchain:operator:package")
+
+Add-ArchitectureItem -Items $items -Id "node-operator-package-verify-boundary" -Layer "Operations" `
+    -Requirement "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, forbidden local files, and no-secret scan." `
+    -Status $(if ($operatorPackageVerifyReady) { "passed" } else { "failed" }) `
+    -Evidence "operatorPackageVerify=$operatorPackageVerifyStatus, expectedFiles=$operatorPackageVerifyExpectedFileCount, commands=$operatorPackageVerifyCommandCount, failedChecks=$($operatorPackageVerifyFailedChecks.Count), noSecretScan=$(Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "noSecretScanPassed" -Default $false)" `
+    -Files @("infra/scripts/flowchain-operator-package-verify.ps1", "docs/agent-runs/live-product-infra-rpc/OPERATOR_PACKAGE_VERIFY.md") `
+    -Commands @("npm run flowchain:operator:package:verify")
 
 $publicRpcValidation = $reports.publicRpcValidation
 $publicRpcAbuseTest = $reports.publicRpcAbuseTest
@@ -997,6 +1024,7 @@ $productGateFiles = @(
     "infra/scripts/flowchain-completion-audit.ps1",
     "infra/scripts/flowchain-public-deployment-contract.ps1",
     "infra/scripts/flowchain-operator-package.ps1",
+    "infra/scripts/flowchain-operator-package-verify.ps1",
     "infra/scripts/flowchain-external-tester-readiness.ps1",
     "infra/scripts/flowchain-external-tester-packet.ps1",
     "infra/scripts/flowchain-public-tester-gateway-e2e.ps1"
@@ -1064,6 +1092,7 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-deployment:contract") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:completion:audit") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:operator:package") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:operator:package:verify") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:dev-pack:e2e") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:tester:gateway:e2e") `
     -and ($liveInfraGateStatus -in @("passed", "blocked")) `
@@ -1075,13 +1104,14 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and ($externalTesterConnectPackReady -eq $true) `
     -and ($publicTesterGatewayReady -eq $true) `
     -and ($operatorPackageReady -eq $true) `
+    -and ($operatorPackageVerifyReady -eq $true) `
     -and ($devPackReady -eq $true)
 Add-ArchitectureItem -Items $items -Id "aggregate-verification-boundary" -Layer "Verification" `
     -Requirement "Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, node-operator package, developer dev-pack, and completion evidence into one auditable path." `
     -Status $(if ($productGateReady) { "passed" } else { "failed" }) `
-    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus, packetSmoke=$externalTesterPacketExecutableSmokeValidated, connectPackReady=$externalTesterConnectPackReady, publicTesterGateway=$publicTesterGatewayStatus, operatorPackage=$operatorPackageStatus, devPack=$devPackStatus" `
+    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus, packetSmoke=$externalTesterPacketExecutableSmokeValidated, connectPackReady=$externalTesterConnectPackReady, publicTesterGateway=$publicTesterGatewayStatus, operatorPackage=$operatorPackageStatus, operatorPackageVerify=$operatorPackageVerifyStatus, devPack=$devPackStatus" `
     -Files $productGateFiles `
-    -Commands @("npm run flowchain:live-infra:check", "npm run flowchain:live-product:e2e", "npm run flowchain:completion:audit", "npm run flowchain:external-tester:packet", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:operator:package", "npm run flowchain:dev-pack:e2e")
+    -Commands @("npm run flowchain:live-infra:check", "npm run flowchain:live-product:e2e", "npm run flowchain:completion:audit", "npm run flowchain:external-tester:packet", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:operator:package", "npm run flowchain:operator:package:verify", "npm run flowchain:dev-pack:e2e")
 
 $failedItems = @($items | Where-Object { $_.status -eq "failed" })
 $blockedItems = @($items | Where-Object { $_.status -eq "blocked" })
@@ -1109,8 +1139,8 @@ $dataFlows = @(
     },
     [ordered]@{
         name = "node-operator-package"
-        path = @("operator package command", "copied runbooks", "command matrix", "owner-input names", "latest evidence reports", "no-secret scan")
-        latestEvidence = $reportPaths.operatorPackage
+        path = @("operator package command", "copied runbooks", "command matrix", "owner-input names", "latest evidence reports", "independent verifier", "no-secret scan")
+        latestEvidence = $reportPaths.operatorPackageVerify
     },
     [ordered]@{
         name = "public-tester-gateway"

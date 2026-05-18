@@ -43,6 +43,7 @@ $paths = [ordered]@{
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     publicRpcDeploymentAutomation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
     operatorPackage = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-report.json"
+    operatorPackageVerify = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-verify-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     opsEscalationDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-escalation-dry-run-report.json"
@@ -369,6 +370,9 @@ $publicRpcDeploymentAutomationExitCode = $publicRpcDeploymentAutomationResult.ex
 $operatorPackageResult = Invoke-AuditChild -Path $paths.operatorPackage -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-operator-package.ps1"))
 $operatorPackageOutput = @($operatorPackageResult.output)
 $operatorPackageExitCode = $operatorPackageResult.exitCode
+$operatorPackageVerifyResult = Invoke-AuditChild -Path $paths.operatorPackageVerify -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-operator-package-verify.ps1"))
+$operatorPackageVerifyOutput = @($operatorPackageVerifyResult.output)
+$operatorPackageVerifyExitCode = $operatorPackageVerifyResult.exitCode
 $liveInfraResult = Invoke-AuditChild -Path $paths.liveInfra -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-infra-check.ps1"), "-AllowBlocked")
 $liveInfraOutput = @($liveInfraResult.output)
 $liveInfraExitCode = $liveInfraResult.exitCode
@@ -635,6 +639,25 @@ $operatorPackagePassed = $operatorPackageExitCode -eq 0 `
     -and ((Get-AuditProp -Object $operatorPackage -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $operatorPackage -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $operatorPackage -Name "broadcasts" -Default $true) -eq $false)
+$operatorPackageVerify = $reports.operatorPackageVerify
+$operatorPackageVerifyStatus = Get-ReportStatus -Report $operatorPackageVerify
+$operatorPackageVerifyChecks = Get-AuditProp -Object $operatorPackageVerify -Name "checks"
+$operatorPackageVerifyFailedChecks = @((Get-AuditProp -Object $operatorPackageVerify -Name "failedChecks" -Default @()))
+$operatorPackageVerifyExpectedFileCount = [int](Get-AuditProp -Object $operatorPackageVerify -Name "expectedFileCount" -Default 0)
+$operatorPackageVerifyCommandCount = [int](Get-AuditProp -Object $operatorPackageVerify -Name "commandCount" -Default 0)
+$operatorPackageVerifyPassed = $operatorPackageVerifyExitCode -eq 0 `
+    -and $operatorPackageVerifyStatus -eq "passed" `
+    -and $operatorPackageVerifyFailedChecks.Count -eq 0 `
+    -and $operatorPackageVerifyExpectedFileCount -ge 20 `
+    -and $operatorPackageVerifyCommandCount -ge 20 `
+    -and ((Get-AuditProp -Object $operatorPackageVerifyChecks -Name "packageReportPassed" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackageVerifyChecks -Name "expectedFilesPresent" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackageVerifyChecks -Name "ownerInputNamesOnly" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackageVerifyChecks -Name "noForbiddenLocalFiles" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackageVerifyChecks -Name "noSecretScanPassed" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackageVerify -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $operatorPackageVerify -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackageVerify -Name "broadcasts" -Default $true) -eq $false)
 $ownerInputsValidationStatus = Get-ReportStatus -Report $ownerInputsValidation
 $ownerInputsValidationChecks = Get-AuditProp -Object $ownerInputsValidation -Name "checks"
 $ownerInputsValidationMissingBlocks = Get-AuditProp -Object $ownerInputsValidationChecks -Name "missingScenarioBlocks" -Default $false
@@ -1046,6 +1069,12 @@ Add-AuditItem -Items $items -Id "node-operator-package" `
     -Evidence "operatorPackageStatus=$operatorPackageStatus, commands=$operatorPackageCommandCount, runbooks=$operatorPackageRunbookCount, evidenceReports=$operatorPackageEvidenceReportCount, failedChecks=$($operatorPackageFailedChecks.Count), report=$($paths.operatorPackage)" `
     -Commands @("npm run flowchain:operator:package")
 
+Add-AuditItem -Items $items -Id "node-operator-package-verify" `
+    -Requirement "Node operator package verifier independently checks the generated package manifest, expected files, command matrix, owner-input names, forbidden local files, and no-secret scan." `
+    -Status $(if ($operatorPackageVerifyPassed) { "passed" } else { "failed" }) `
+    -Evidence "verifyStatus=$operatorPackageVerifyStatus, expectedFiles=$operatorPackageVerifyExpectedFileCount, commands=$operatorPackageVerifyCommandCount, failedChecks=$($operatorPackageVerifyFailedChecks.Count), report=$($paths.operatorPackageVerify)" `
+    -Commands @("npm run flowchain:operator:package:verify")
+
 Add-AuditItem -Items $items -Id "public-rpc-readiness-validator-self-test" `
     -Requirement "Public RPC readiness validator proves endpoint checks, CORS allowed-origin acceptance, disallowed-origin rejection, bounded rate-limit rejection, retry-after evidence, and response hygiene against a temporary local control plane." `
     -Status $(if ($publicRpcValidationPassed) { "passed" } else { "failed" }) `
@@ -1231,6 +1260,8 @@ $report = [ordered]@{
     publicRpcDeploymentAutomationOutputRedacted = @($publicRpcDeploymentAutomationOutput | ForEach-Object { "$_" })
     operatorPackageExitCode = $operatorPackageExitCode
     operatorPackageOutputRedacted = @($operatorPackageOutput | ForEach-Object { "$_" })
+    operatorPackageVerifyExitCode = $operatorPackageVerifyExitCode
+    operatorPackageVerifyOutputRedacted = @($operatorPackageVerifyOutput | ForEach-Object { "$_" })
     liveInfraExitCode = $liveInfraExitCode
     liveInfraOutputRedacted = @($liveInfraOutput | ForEach-Object { "$_" })
     externalTesterPacketExitCode = $externalTesterPacketExitCode
@@ -1288,6 +1319,7 @@ $report = [ordered]@{
         "npm run flowchain:public-rpc:deployment-bundle",
         "npm run flowchain:public-rpc:deployment:automation",
         "npm run flowchain:operator:package",
+        "npm run flowchain:operator:package:verify",
         "npm run flowchain:public-rpc:validate",
         "npm run flowchain:public-rpc:abuse-test",
         "npm run flowchain:tester:gateway:e2e",
