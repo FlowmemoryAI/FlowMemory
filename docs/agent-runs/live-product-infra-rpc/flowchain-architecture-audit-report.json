@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-17T23:13:06.4426182Z",
+    "generatedAt":  "2026-05-18T00:25:33.7004792Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -9,7 +9,7 @@
                                   "Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding.",
                                   "Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.",
                                   "Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.",
-                                  "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven, stages the Base scan cursor until L1 credit proof, can queue new relayer handoffs into the L1, and remains live-blocked until owner guardrails are configured.",
+                                  "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven, bounds relayer child processes, stages the Base scan cursor until L1 credit proof, can queue new relayer handoffs into the L1, and remains live-blocked until owner guardrails are configured.",
                                   "State backup, monitoring, reboot-persistent service install, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
                                   "Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.",
                                   "Owner signup checklist maps the external services and local setup values needed for public operation without requesting secrets.",
@@ -28,7 +28,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=61726, finalizedHeight=61726",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=62010, finalizedHeight=62010",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -50,7 +50,7 @@
                       "layer":  "Operations",
                       "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertInstall=passed, alertInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=9, blockedRules=6, unmappedAlerts=0, incidentDrill=passed, incidentCases=10, incidentFailed=0",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=16, alertCoveredFindings=18, alertInstall=passed, alertInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=10, blockedRules=6, unmappedAlerts=0, incidentDrill=passed, incidentCases=11, incidentFailed=0",
                       "files":  [
                                     "infra/scripts/flowchain-service-monitor.ps1",
                                     "infra/scripts/flowchain-service-supervisor.ps1",
@@ -255,9 +255,9 @@
                   {
                       "id":  "bridge-relayer-runtime-queue",
                       "layer":  "Bridge",
-                      "requirement":  "The live bridge relayer path checks owner guardrails, validates the isolated relayer loop start/stop path plus fresh no-secret/no-broadcast loop health, observes Base 8453 deposits with a staged cursor, builds runtime handoff, filters already-seen replay keys, queues new credits into the running L1, waits for main-state credit evidence, commits the Base cursor only after safe proof without broadcasts, and proves missing-owner-input runs leave cursor state untouched.",
+                      "requirement":  "The live bridge relayer path checks owner guardrails, bounds child process execution, validates the isolated relayer loop start/stop path plus fresh no-secret/no-broadcast loop health, observes Base 8453 deposits with a staged cursor, builds runtime handoff, filters already-seen replay keys, queues new credits into the running L1, waits for main-state credit evidence, commits the Base cursor only after safe proof without broadcasts, and proves missing-owner-input runs leave cursor state untouched.",
                       "status":  "blocked",
-                      "evidence":  "relayer=blocked, guardrail=passed, loopValidation=passed, loopFailedChecks=0, loopReportHealthy=True, observed=0, new=0, queued=0, applied=0, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run",
+                      "evidence":  "relayer=blocked, childTimeoutSeconds=300, timedOutSteps=0, guardrail=passed, guardrailChildTimeoutRecorded=True, guardrailNoChildTimeouts=True, loopValidation=passed, loopFailedChecks=0, loopReportHealthy=True, observed=0, new=0, queued=0, applied=0, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run",
                       "files":  [
                                     "infra/scripts/flowchain-bridge-live-check.ps1",
                                     "infra/scripts/flowchain-live-env-bridge-readiness.ps1",
@@ -855,6 +855,24 @@
                                          "publicTesterGatewayReady":  true,
                                          "publicDeploymentContractPacketSmoke":  true
                                      },
+    "opsAlertCoverage":  {
+                             "status":  "passed",
+                             "ruleCount":  16,
+                             "criticalRuleCount":  10,
+                             "blockedRuleCount":  6,
+                             "coveredFindingCount":  18,
+                             "unmappedCurrentFindingCount":  0
+                         },
+    "bridgeRelayerSafetyEvidence":  {
+                                        "status":  "blocked",
+                                        "childTimeoutSeconds":  300,
+                                        "stepCount":  1,
+                                        "timedOutStepCount":  0,
+                                        "guardrailChildTimeoutRecorded":  true,
+                                        "guardrailNoChildTimeouts":  true,
+                                        "loopValidationStatus":  "passed",
+                                        "loopReportHealthy":  true
+                                    },
     "architectureMarkdownPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ARCHITECTURE_AUDIT.md",
     "noLiveBroadcast":  true,
     "envValuesPrinted":  false,

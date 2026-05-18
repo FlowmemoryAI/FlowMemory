@@ -259,8 +259,10 @@ $opsSnapshotStatus = Get-ArchitectureStatus -Report $opsSnapshot
 $opsCriticalCount = [int](Get-ArchitectureProp -Object $opsSnapshot -Name "criticalCount" -Default 999)
 $opsAlertRules = $reports.opsAlertRules
 $opsAlertRulesStatus = Get-ArchitectureStatus -Report $opsAlertRules
+$opsAlertRuleCount = [int](Get-ArchitectureProp -Object $opsAlertRules -Name "ruleCount" -Default 0)
 $opsAlertCriticalRules = [int](Get-ArchitectureProp -Object $opsAlertRules -Name "criticalRuleCount" -Default 0)
 $opsAlertBlockedRules = [int](Get-ArchitectureProp -Object $opsAlertRules -Name "blockedRuleCount" -Default 0)
+$opsAlertCoveredFindingCodes = @((Get-ArchitectureProp -Object $opsAlertRules -Name "coveredFindingCodes" -Default @()))
 $opsAlertUnmappedCodes = @((Get-ArchitectureProp -Object $opsAlertRules -Name "unmappedCurrentFindingCodes" -Default @()))
 $alertInstallValidation = $reports.alertInstallValidation
 $alertInstallValidationStatus = Get-ArchitectureStatus -Report $alertInstallValidation
@@ -308,8 +310,10 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ($opsSnapshotStatus -in @("passed", "blocked")) `
     -and ($opsCriticalCount -eq 0) `
     -and ($opsAlertRulesStatus -eq "passed") `
+    -and ($opsAlertRuleCount -ge ($opsAlertCriticalRules + $opsAlertBlockedRules)) `
     -and ($opsAlertCriticalRules -ge 5) `
     -and ($opsAlertBlockedRules -ge 5) `
+    -and ($opsAlertCoveredFindingCodes.Count -ge 10) `
     -and ($opsAlertUnmappedCodes.Count -eq 0) `
     -and ($alertInstallValidationStatus -eq "passed") `
     -and ($alertInstallFailedChecks.Count -eq 0) `
@@ -334,7 +338,7 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
 Add-ArchitectureItem -Items $items -Id "ops-observability-boundary" -Layer "Operations" `
     -Requirement "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers." `
     -Status $(if ($observabilityReady) { "passed" } else { "failed" }) `
-    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertInstall=$alertInstallValidationStatus, alertInstallFailedChecks=$($alertInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
+    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), alertInstall=$alertInstallValidationStatus, alertInstallFailedChecks=$($alertInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
     -Files $observabilityFiles `
     -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
 
@@ -629,6 +633,8 @@ $bridgeRelayerGuardrailReady = $bridgeRelayerGuardrailStatus -eq "passed" `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name "finalCursorUnchanged" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name "stagedCursorNotWritten" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name "noCreditsQueued" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name "relayerChildTimeoutRecorded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name "relayerNoChildTimeouts" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name "broadcastsFalse" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name "envValuesPrintedFalse" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name "noSecrets" -Default $false) -eq $true)
@@ -658,6 +664,10 @@ $bridgeRelayerLoopReady = ($bridgeRelayerLoopStatus -eq "passed") `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopValidation -Name "broadcasts" -Default $true) -eq $false)
 $bridgeRelayerCounts = Get-ArchitectureProp -Object $bridgeRelayer -Name "counts"
 $bridgeRelayerCursorCommit = Get-ArchitectureProp -Object $bridgeRelayer -Name "cursorCommit"
+$bridgeRelayerSteps = @((Get-ArchitectureProp -Object $bridgeRelayer -Name "steps" -Default @()))
+$bridgeRelayerTimedOutSteps = @($bridgeRelayerSteps | Where-Object { (Get-ArchitectureProp -Object $_ -Name "timedOut" -Default $false) -eq $true })
+$bridgeRelayerChildTimeoutSeconds = [int](Get-ArchitectureProp -Object $bridgeRelayer -Name "childTimeoutSeconds" -Default 0)
+$bridgeRelayerChildTimeoutReady = ($bridgeRelayerChildTimeoutSeconds -ge 1) -and ($bridgeRelayerTimedOutSteps.Count -eq 0)
 $bridgeRelayerNewCount = [int](Get-ArchitectureProp -Object $bridgeRelayerCounts -Name "newCredits" -Default 0)
 $bridgeRelayerQueuedCount = [int](Get-ArchitectureProp -Object $bridgeRelayerCounts -Name "queuedTransactions" -Default 0)
 $bridgeRelayerAppliedCount = [int](Get-ArchitectureProp -Object $bridgeRelayerCounts -Name "appliedCredits" -Default 0)
@@ -674,16 +684,17 @@ $bridgeRelayerReady = (Test-AllRepoFilesExist -Paths $bridgeLiveFiles) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayer -Name "broadcasts" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayer -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayer -Name "noSecrets" -Default $false) -eq $true) `
+    -and $bridgeRelayerChildTimeoutReady `
     -and $bridgeRelayerQueueReady `
     -and $bridgeRelayerCursorReady `
     -and $bridgeRelayerGuardrailReady `
     -and $bridgeRelayerLoopReady `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:loop:validate")
-$bridgeRelayerBlockedSafely = ($bridgeRelayerStatus -eq "blocked") -and $bridgeRelayerGuardrailReady -and $bridgeRelayerLoopReady
+$bridgeRelayerBlockedSafely = ($bridgeRelayerStatus -eq "blocked") -and $bridgeRelayerGuardrailReady -and $bridgeRelayerLoopReady -and $bridgeRelayerChildTimeoutReady
 Add-ArchitectureItem -Items $items -Id "bridge-relayer-runtime-queue" -Layer "Bridge" `
-    -Requirement "The live bridge relayer path checks owner guardrails, validates the isolated relayer loop start/stop path plus fresh no-secret/no-broadcast loop health, observes Base 8453 deposits with a staged cursor, builds runtime handoff, filters already-seen replay keys, queues new credits into the running L1, waits for main-state credit evidence, commits the Base cursor only after safe proof without broadcasts, and proves missing-owner-input runs leave cursor state untouched." `
+    -Requirement "The live bridge relayer path checks owner guardrails, bounds child process execution, validates the isolated relayer loop start/stop path plus fresh no-secret/no-broadcast loop health, observes Base 8453 deposits with a staged cursor, builds runtime handoff, filters already-seen replay keys, queues new credits into the running L1, waits for main-state credit evidence, commits the Base cursor only after safe proof without broadcasts, and proves missing-owner-input runs leave cursor state untouched." `
     -Status $(if ($bridgeRelayerReady) { "passed" } elseif ($bridgeRelayerBlockedSafely) { "blocked" } else { "failed" }) `
-    -Evidence "relayer=$bridgeRelayerStatus, guardrail=$bridgeRelayerGuardrailStatus, loopValidation=$bridgeRelayerLoopStatus, loopFailedChecks=$($bridgeRelayerLoopFailedChecks.Count), loopReportHealthy=$(Get-ArchitectureProp -Object $bridgeRelayerLoopChecks -Name 'statusRelayerReportHealthy' -Default $false), observed=$(Get-ArchitectureProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$bridgeRelayerNewCount, queued=$bridgeRelayerQueuedCount, applied=$bridgeRelayerAppliedCount, cursorCommitRequired=$bridgeRelayerCursorCommitRequired, cursorCommitted=$bridgeRelayerCursorCommitted, cursorReason=$bridgeRelayerCursorReason" `
+    -Evidence "relayer=$bridgeRelayerStatus, childTimeoutSeconds=$bridgeRelayerChildTimeoutSeconds, timedOutSteps=$($bridgeRelayerTimedOutSteps.Count), guardrail=$bridgeRelayerGuardrailStatus, guardrailChildTimeoutRecorded=$(Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name 'relayerChildTimeoutRecorded' -Default $false), guardrailNoChildTimeouts=$(Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name 'relayerNoChildTimeouts' -Default $false), loopValidation=$bridgeRelayerLoopStatus, loopFailedChecks=$($bridgeRelayerLoopFailedChecks.Count), loopReportHealthy=$(Get-ArchitectureProp -Object $bridgeRelayerLoopChecks -Name 'statusRelayerReportHealthy' -Default $false), observed=$(Get-ArchitectureProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$bridgeRelayerNewCount, queued=$bridgeRelayerQueuedCount, applied=$bridgeRelayerAppliedCount, cursorCommitRequired=$bridgeRelayerCursorCommitRequired, cursorCommitted=$bridgeRelayerCursorCommitted, cursorReason=$bridgeRelayerCursorReason" `
     -Files $bridgeLiveFiles `
     -Commands @("npm run flowchain:bridge:relayer:once", "npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:loop:validate", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop") `
     -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
@@ -1112,7 +1123,7 @@ $objectiveDeliverables = @(
     "Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding.",
     "Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.",
     "Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.",
-    "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven, stages the Base scan cursor until L1 credit proof, can queue new relayer handoffs into the L1, and remains live-blocked until owner guardrails are configured.",
+    "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven, bounds relayer child processes, stages the Base scan cursor until L1 credit proof, can queue new relayer handoffs into the L1, and remains live-blocked until owner guardrails are configured.",
     "State backup, monitoring, reboot-persistent service install, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
     "Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.",
     "Owner signup checklist maps the external services and local setup values needed for public operation without requesting secrets.",
@@ -1154,6 +1165,24 @@ $report = [ordered]@{
         publicTesterGatewayStatus = $publicTesterGatewayStatus
         publicTesterGatewayReady = $publicTesterGatewayReady
         publicDeploymentContractPacketSmoke = $deploymentContractPacketSmoke
+    }
+    opsAlertCoverage = [ordered]@{
+        status = $opsAlertRulesStatus
+        ruleCount = $opsAlertRuleCount
+        criticalRuleCount = $opsAlertCriticalRules
+        blockedRuleCount = $opsAlertBlockedRules
+        coveredFindingCount = $opsAlertCoveredFindingCodes.Count
+        unmappedCurrentFindingCount = $opsAlertUnmappedCodes.Count
+    }
+    bridgeRelayerSafetyEvidence = [ordered]@{
+        status = $bridgeRelayerStatus
+        childTimeoutSeconds = $bridgeRelayerChildTimeoutSeconds
+        stepCount = $bridgeRelayerSteps.Count
+        timedOutStepCount = $bridgeRelayerTimedOutSteps.Count
+        guardrailChildTimeoutRecorded = (Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name "relayerChildTimeoutRecorded" -Default $false)
+        guardrailNoChildTimeouts = (Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name "relayerNoChildTimeouts" -Default $false)
+        loopValidationStatus = $bridgeRelayerLoopStatus
+        loopReportHealthy = (Get-ArchitectureProp -Object $bridgeRelayerLoopChecks -Name "statusRelayerReportHealthy" -Default $false)
     }
     architectureMarkdownPath = $markdownFullPath
     noLiveBroadcast = $true
