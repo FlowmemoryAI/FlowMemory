@@ -1381,6 +1381,41 @@ $definitions = @(
         command = "npm run flowchain:ops:incident-drill"
         productionGate = $true
         ownerInputGate = $false
+        requiredChecks = @(
+            "incidentDrillReady",
+            "ownerValuesRequiredFalse",
+            "mutatesLiveStateFalse",
+            "syntheticIncidentInputs",
+            "allRequiredScenariosCovered",
+            "allCasesPassed",
+            "failedCasesAbsent",
+            "minimumCaseCountMet",
+            "recoveryCommandPrinted",
+            "postDrillLiveStatusPassed",
+            "liveStateBeforeReadable",
+            "liveStateAfterReadable",
+            "liveBlockHeightAdvancedOrEqual",
+            "noLiveBroadcast",
+            "broadcastsFalse",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings",
+            "missingRequiredScenarios"
+        )
+        requiredReportProperties = [ordered]@{
+            "incidentDrillReady" = $true
+            "ownerValuesRequired" = $false
+            "mutatesLiveState" = $false
+            "syntheticIncidentInputs" = $true
+            "noLiveBroadcast" = $true
+            "broadcasts" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+        }
     },
     [ordered]@{
         id = "public-deployment-contract"

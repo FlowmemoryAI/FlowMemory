@@ -221,6 +221,38 @@ function Get-DrillFindingCodes {
     return @($codes)
 }
 
+function Get-DrillSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 $cases = New-Object System.Collections.ArrayList
 
 function Add-DrillResult {
@@ -509,34 +541,62 @@ Add-DrillResult -Id "post-drill-live-status" `
 
 $liveStateAfter = Get-FlowChainStateFacts -StatePath (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/state.json")
 $failedCases = @($cases | Where-Object { $_.status -ne "passed" })
-$status = if ($failedCases.Count -eq 0) { "passed" } else { "failed" }
+$requiredScenarios = @(
+    "baseline-owner-blockers-only",
+    "deployment-refresh-aborted-critical",
+    "node-down-critical",
+    "control-plane-down-critical",
+    "stale-state-critical",
+    "height-not-advancing-critical",
+    "no-secret-scan-critical",
+    "bridge-relayer-guardrail-critical",
+    "bridge-relayer-loop-unhealthy-critical",
+    "recovery-command-print",
+    "post-drill-live-status"
+)
+$caseIds = @($cases | ForEach-Object { $_.id })
+$missingRequiredScenarios = @($requiredScenarios | Where-Object { $_ -notin $caseIds })
+$liveBlockBefore = [int64](Get-DrillProp -Object $liveStateBefore -Name "blockCount" -Default 0)
+$liveBlockAfter = [int64](Get-DrillProp -Object $liveStateAfter -Name "blockCount" -Default 0)
+$checks = [ordered]@{
+    incidentDrillReady = $false
+    ownerValuesRequiredFalse = $true
+    mutatesLiveStateFalse = $true
+    syntheticIncidentInputs = $true
+    allRequiredScenariosCovered = $missingRequiredScenarios.Count -eq 0
+    allCasesPassed = $failedCases.Count -eq 0
+    failedCasesAbsent = $failedCases.Count -eq 0
+    minimumCaseCountMet = $cases.Count -ge 11
+    recoveryCommandPrinted = $recoveryPassed
+    postDrillLiveStatusPassed = $postStatusPassed
+    liveStateBeforeReadable = (Get-DrillProp -Object $liveStateBefore -Name "readable" -Default $false) -eq $true
+    liveStateAfterReadable = (Get-DrillProp -Object $liveStateAfter -Name "readable" -Default $false) -eq $true
+    liveBlockHeightAdvancedOrEqual = $liveBlockAfter -ge $liveBlockBefore
+    noLiveBroadcast = $true
+    broadcastsFalse = $true
+    envValuesPrintedFalse = $true
+    noSecrets = $true
+    secretMarkerFindingsEmpty = $true
+}
 $report = [ordered]@{
     schema = "flowchain.incident_drill_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = $status
-    incidentDrillReady = $status -eq "passed"
+    status = "pending"
+    incidentDrillReady = $false
     validationScope = "synthetic-ops-snapshot-incidents-plus-live-postcheck"
     ownerValuesRequired = $false
     mutatesLiveState = $false
     syntheticIncidentInputs = $true
+    checks = $checks
+    failedChecks = @()
+    secretMarkerFindings = @()
     caseCounts = [ordered]@{
         passed = @($cases | Where-Object { $_.status -eq "passed" }).Count
         failed = $failedCases.Count
         total = $cases.Count
     }
-    requiredScenarios = @(
-        "baseline-owner-blockers-only",
-        "deployment-refresh-aborted-critical",
-        "node-down-critical",
-        "control-plane-down-critical",
-        "stale-state-critical",
-        "height-not-advancing-critical",
-        "no-secret-scan-critical",
-        "bridge-relayer-guardrail-critical",
-        "bridge-relayer-loop-unhealthy-critical",
-        "recovery-command-print",
-        "post-drill-live-status"
-    )
+    requiredScenarios = @($requiredScenarios)
+    missingRequiredScenarios = @($missingRequiredScenarios)
     cases = @($cases)
     liveStateBefore = $liveStateBefore
     liveStateAfter = $liveStateAfter
@@ -548,9 +608,25 @@ $report = [ordered]@{
         postDrillServiceStatus = $postStatusReportPath
     }
     noLiveBroadcast = $true
+    broadcasts = $false
     envValuesPrinted = $false
     noSecrets = $true
 }
+
+$preliminaryReportText = $report | ConvertTo-Json -Depth 24
+$secretMarkerFindings = @(Get-DrillSecretMarkerFindings -Text $preliminaryReportText -Label "incident drill report")
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$preReadyFailedChecks = @($checks.GetEnumerator() | Where-Object { $_.Key -ne "incidentDrillReady" -and $_.Value -ne $true } | ForEach-Object { $_.Key })
+$checks["incidentDrillReady"] = $preReadyFailedChecks.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["incidentDrillReady"] = $status -eq "passed"
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 
 $reportText = $report | ConvertTo-Json -Depth 24
 Assert-FlowChainNoSecretText -Text $reportText -Label "incident drill report"

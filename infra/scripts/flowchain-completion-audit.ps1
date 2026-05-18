@@ -1697,13 +1697,44 @@ $incidentDrillReady = Get-AuditProp -Object $incidentDrill -Name "incidentDrillR
 $incidentCaseCounts = Get-AuditProp -Object $incidentDrill -Name "caseCounts"
 $incidentFailedCases = [int](Get-AuditProp -Object $incidentCaseCounts -Name "failed" -Default 999999)
 $incidentTotalCases = [int](Get-AuditProp -Object $incidentCaseCounts -Name "total" -Default 0)
+$incidentDrillChecks = Get-AuditProp -Object $incidentDrill -Name "checks"
+$incidentDrillFailedChecks = @((Get-AuditProp -Object $incidentDrill -Name "failedChecks" -Default @()))
+$incidentDrillSecretFindings = @((Get-AuditProp -Object $incidentDrill -Name "secretMarkerFindings" -Default @()))
+$incidentDrillRequiredChecks = @(
+    "incidentDrillReady",
+    "ownerValuesRequiredFalse",
+    "mutatesLiveStateFalse",
+    "syntheticIncidentInputs",
+    "allRequiredScenariosCovered",
+    "allCasesPassed",
+    "failedCasesAbsent",
+    "minimumCaseCountMet",
+    "recoveryCommandPrinted",
+    "postDrillLiveStatusPassed",
+    "liveStateBeforeReadable",
+    "liveStateAfterReadable",
+    "liveBlockHeightAdvancedOrEqual",
+    "noLiveBroadcast",
+    "broadcastsFalse",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "secretMarkerFindingsEmpty"
+)
+$incidentDrillMissingChecks = Get-MissingAuditChecks -Checks $incidentDrillChecks -Names $incidentDrillRequiredChecks
+$incidentDrillFailedCheckCount = @($incidentDrillFailedChecks | Where-Object { $null -ne $_ }).Count
+$incidentDrillSecretFindingCount = @($incidentDrillSecretFindings | Where-Object { $null -ne $_ }).Count
+$incidentDrillMissingCheckCount = @($incidentDrillMissingChecks | Where-Object { $null -ne $_ }).Count
 $incidentDrillPassed = $incidentDrillExitCode -eq 0 `
     -and $incidentDrillStatus -eq "passed" `
     -and $incidentDrillReady -eq $true `
+    -and $incidentDrillFailedCheckCount -eq 0 `
+    -and $incidentDrillSecretFindingCount -eq 0 `
+    -and $incidentDrillMissingCheckCount -eq 0 `
     -and $incidentFailedCases -eq 0 `
     -and $incidentTotalCases -ge 8 `
     -and ((Get-AuditProp -Object $incidentDrill -Name "mutatesLiveState" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $incidentDrill -Name "noLiveBroadcast" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $incidentDrill -Name "broadcasts" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $incidentDrill -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $incidentDrill -Name "noSecrets" -Default $false) -eq $true)
 $productionLocalAggregateStatus = [string](Get-AuditProp -Object $liveProduct -Name "productionLocalAggregateStatus")
@@ -2018,7 +2049,7 @@ Add-AuditItem -Items $items -Id "ops-escalation-dry-run" `
 Add-AuditItem -Items $items -Id "incident-drill" `
     -Requirement "Incident drills prove node-down, control-plane-down, stale-state, stalled-height, and no-secret failures classify as critical while owner-input blockers stay non-critical." `
     -Status $(if ($incidentDrillPassed) { "passed" } else { "failed" }) `
-    -Evidence "incidentStatus=$incidentDrillStatus, ready=$incidentDrillReady, cases=$incidentTotalCases, failedCases=$incidentFailedCases, report=$($paths.incidentDrill)" `
+    -Evidence "incidentStatus=$incidentDrillStatus, ready=$incidentDrillReady, cases=$incidentTotalCases, failedCases=$incidentFailedCases, failedChecks=$incidentDrillFailedCheckCount, secretFindings=$incidentDrillSecretFindingCount, missingChecks=$incidentDrillMissingCheckCount, report=$($paths.incidentDrill)" `
     -Commands @("npm run flowchain:ops:incident-drill")
 
 Add-AuditItem -Items $items -Id "public-rpc-external-sharing" `

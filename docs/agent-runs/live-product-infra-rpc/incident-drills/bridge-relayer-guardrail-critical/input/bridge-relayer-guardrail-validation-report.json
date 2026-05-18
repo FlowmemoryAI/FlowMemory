@@ -1,19 +1,21 @@
 {
-    "schema":  "flowchain.bridge_relayer_guardrail_validation_report.v0",
-    "generatedAt":  "2026-05-17T16:10:10.2458673Z",
+    "schema":  "flowchain.bridge_relayer_guardrail_validation_report.v1",
+    "generatedAt":  "2026-05-18T04:31:12.2070538Z",
     "status":  "failed",
     "validationDir":  "devnet/local/bridge-relayer-guardrail-validation",
     "relayerReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\bridge-relayer-once-report.json",
     "childProcess":  {
                          "exitCode":  0,
                          "timedOut":  false,
-                         "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260517111007021-51932-a96b4e39.stdout.log",
-                         "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260517111007021-51932-a96b4e39.stderr.log"
+                         "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260517233108423-52232-71492868.stdout.log",
+                         "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260517233108423-52232-71492868.stderr.log"
                      },
     "checks":  {
                    "relayerCommandExitedZeroWithAllowBlocked":  true,
                    "relayerReportWritten":  true,
                    "relayerStatusBlocked":  true,
+                   "relayerChildTimeoutRecorded":  true,
+                   "relayerNoChildTimeouts":  true,
                    "blockedBeforeLiveReadiness":  true,
                    "externalOwnerIssueRecorded":  true,
                    "finalCursorUnchanged":  false,
@@ -25,11 +27,15 @@
                    "ownerEnvNotImported":  false,
                    "broadcastsFalse":  false,
                    "envValuesPrintedFalse":  false,
-                   "noSecrets":  false
+                   "noSecrets":  false,
+                   "secretMarkerFindingsEmpty":  true
                },
     "failedChecks":  [
 
                      ],
+    "secretMarkerFindings":  [
+
+                             ],
     "cursor":  {
                    "finalCursorPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\final-cursor.json",
                    "stagedCursorPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\staged-cursor.json",
