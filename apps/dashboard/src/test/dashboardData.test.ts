@@ -28,6 +28,7 @@ import { WalletView } from "../views/WalletView";
 import { ExternalTesterLaunchView } from "../views/ExternalTesterLaunchView";
 import { ExplorerView } from "../views/ExplorerView";
 import { OpsView } from "../views/OpsView";
+import { UniswapHooksView } from "../views/UniswapHooksView";
 import { WorkbenchView } from "../views/WorkbenchView";
 
 describe("dashboard fixture", () => {
@@ -586,6 +587,19 @@ describe("dashboard fixture", () => {
     expect(html).toContain("env values printed");
     expect(html).toContain("false");
     expect(html).not.toContain(configuredButHidden);
+  });
+
+  it("renders the public Uniswap V4 hooks surface from canary evidence without secrets", () => {
+    const html = renderToStaticMarkup(createElement(UniswapHooksView, { data: canaryData }));
+
+    expect(html).toContain("Uniswap V4 afterSwap hooks for FlowMemory");
+    expect(html).toContain("afterSwap signals");
+    expect(html).toContain("FlowMemoryHookAdapter");
+    expect(html).toContain("flowmemory://uniswap-v4/after-swap");
+    expect(html).toContain("https://basescan.org/tx/");
+    expect(html).toContain("Not a production Uniswap v4 hook deployment.");
+    expect(html).toContain("Base Sepolia hook broadcast");
+    expect(html).not.toContain("BASESCAN_API_KEY");
   });
 
   it("renders the critical workbench view labels from fixture fallback", () => {
