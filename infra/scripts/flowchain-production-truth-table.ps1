@@ -69,9 +69,36 @@ $definitions = @(
         command = "npm run flowchain:service:supervisor:validate"
         productionGate = $true
         ownerInputGate = $false
+        requiredChecks = @(
+            "preCleanStopCommandPassed",
+            "startIsolatedLiveServiceCommandPassed",
+            "beforeStatusCommandPassed",
+            "beforeStatusPassed",
+            "beforeControlPlanePidRecorded",
+            "crashStatusCommandPassed",
+            "crashStatusBlocked",
+            "supervisorOnceRecoveryCommandPassed",
+            "restartAttemptsExactlyOne",
+            "afterStatusCommandPassed",
+            "afterRecoveryStatusPassed",
+            "afterRecoveryNodeRunning",
+            "afterRecoveryControlPlaneRunning",
+            "afterRecoveryHeightNumeric",
+            "afterRecoveryLiveProfile",
+            "afterRecoveryMaxBlocksUnbounded",
+            "childLogPathsInsideRepo",
+            "secretMarkerFindingsEmpty",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
         requiredMinimums = [ordered]@{
             restartAttempts = 1
         }
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
         requiredReportProperties = [ordered]@{
             "before.status" = "passed"
             "afterCrash.status" = "blocked"

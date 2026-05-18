@@ -502,8 +502,38 @@ $serviceSupervisorBefore = Get-AuditProp -Object $serviceSupervisorValidation -N
 $serviceSupervisorAfterCrash = Get-AuditProp -Object $serviceSupervisorValidation -Name "afterCrash"
 $serviceSupervisorAfterRecovery = Get-AuditProp -Object $serviceSupervisorValidation -Name "afterRecovery"
 $serviceSupervisorRestartAttempts = [int](Get-AuditProp -Object $serviceSupervisorValidation -Name "restartAttempts" -Default 0)
+$serviceSupervisorChecks = Get-AuditProp -Object $serviceSupervisorValidation -Name "checks"
+$serviceSupervisorFailedChecks = @((Get-AuditProp -Object $serviceSupervisorValidation -Name "failedChecks" -Default @()))
+$serviceSupervisorSecretFindings = @((Get-AuditProp -Object $serviceSupervisorValidation -Name "secretMarkerFindings" -Default @()))
+$serviceSupervisorRequiredChecks = @(
+    "preCleanStopCommandPassed",
+    "startIsolatedLiveServiceCommandPassed",
+    "beforeStatusCommandPassed",
+    "beforeStatusPassed",
+    "beforeControlPlanePidRecorded",
+    "crashStatusCommandPassed",
+    "crashStatusBlocked",
+    "supervisorOnceRecoveryCommandPassed",
+    "restartAttemptsExactlyOne",
+    "afterStatusCommandPassed",
+    "afterRecoveryStatusPassed",
+    "afterRecoveryNodeRunning",
+    "afterRecoveryControlPlaneRunning",
+    "afterRecoveryHeightNumeric",
+    "afterRecoveryLiveProfile",
+    "afterRecoveryMaxBlocksUnbounded",
+    "childLogPathsInsideRepo",
+    "secretMarkerFindingsEmpty",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$serviceSupervisorMissingChecks = @(Get-MissingAuditChecks -Checks $serviceSupervisorChecks -Names $serviceSupervisorRequiredChecks)
 $serviceSupervisorValidationPassed = $serviceSupervisorValidationExitCode -eq 0 `
     -and $serviceSupervisorValidationStatus -eq "passed" `
+    -and $serviceSupervisorFailedChecks.Count -eq 0 `
+    -and $serviceSupervisorSecretFindings.Count -eq 0 `
+    -and $serviceSupervisorMissingChecks.Count -eq 0 `
     -and (Get-AuditProp -Object $serviceSupervisorBefore -Name "status" -Default "") -eq "passed" `
     -and (Get-AuditProp -Object $serviceSupervisorAfterCrash -Name "status" -Default "") -eq "blocked" `
     -and (Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "status" -Default "") -eq "passed" `
@@ -1379,7 +1409,7 @@ Add-AuditItem -Items $items -Id "sustained-block-production" `
 Add-AuditItem -Items $items -Id "service-supervisor-autorecovery" `
     -Requirement "Live service supervisor can recover a crashed local control-plane under the live profile without deleting chain state." `
     -Status $(if ($serviceSupervisorValidationPassed) { "passed" } else { "failed" }) `
-    -Evidence "supervisorValidation=$serviceSupervisorValidationStatus, restartAttempts=$serviceSupervisorRestartAttempts, before=$(Get-AuditProp -Object $serviceSupervisorBefore -Name "status" -Default "missing"), afterCrash=$(Get-AuditProp -Object $serviceSupervisorAfterCrash -Name "status" -Default "missing"), afterRecovery=$(Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "status" -Default "missing"), report=$($paths.serviceSupervisorValidation)" `
+    -Evidence "supervisorValidation=$serviceSupervisorValidationStatus, restartAttempts=$serviceSupervisorRestartAttempts, failedChecks=$($serviceSupervisorFailedChecks.Count), missingChecks=$($serviceSupervisorMissingChecks.Count), secretFindings=$($serviceSupervisorSecretFindings.Count), before=$(Get-AuditProp -Object $serviceSupervisorBefore -Name "status" -Default "missing"), afterCrash=$(Get-AuditProp -Object $serviceSupervisorAfterCrash -Name "status" -Default "missing"), afterRecovery=$(Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "status" -Default "missing"), report=$($paths.serviceSupervisorValidation)" `
     -Commands @("npm run flowchain:service:supervisor:validate")
 
 Add-AuditItem -Items $items -Id "service-install-validation" `

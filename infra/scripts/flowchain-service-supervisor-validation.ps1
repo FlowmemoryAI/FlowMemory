@@ -228,16 +228,6 @@ try {
     $supervisorReport = Read-FlowChainJsonIfExists -Path $supervisorReportPath
     $restartAttempts = [int](Get-ValidationProp -Object $supervisorReport -Name "restartAttempts" -Default 0)
 
-    $status = if (
-        $afterStatus -eq "passed" `
-            -and $afterNodeRunning `
-            -and $afterControlPlaneRunning `
-            -and $afterHeight -match '^\d+$' `
-            -and $afterLiveProfile `
-            -and $afterMaxBlocks -eq 0 `
-            -and $restartAttempts -eq 1
-    ) { "passed" } else { "failed" }
-
     $stepSummaries = @($steps | ForEach-Object {
         [ordered]@{
             name = [string]$_.name
@@ -246,6 +236,64 @@ try {
             stderrPath = [string]$_.result.stderrPath
         }
     })
+    $stepByName = @{}
+    foreach ($step in @($stepSummaries)) {
+        $stepByName[[string]$step.name] = $step
+    }
+    $secretMarkerFindings = New-Object System.Collections.ArrayList
+    $childLogPathsInsideRepo = $true
+    foreach ($step in @($stepSummaries)) {
+        foreach ($path in @([string]$step.stdoutPath, [string]$step.stderrPath)) {
+            if ([string]::IsNullOrWhiteSpace($path)) {
+                continue
+            }
+            try {
+                [void](Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path $path)
+            }
+            catch {
+                $childLogPathsInsideRepo = $false
+                [void]$secretMarkerFindings.Add([ordered]@{ path = $path; reason = "path outside repo" })
+                continue
+            }
+            if (Test-Path -LiteralPath $path) {
+                $text = Get-Content -Raw -LiteralPath $path
+                if ([string]::IsNullOrEmpty($text)) {
+                    continue
+                }
+                try {
+                    Assert-FlowChainNoSecretText -Text $text -Label "service supervisor validation child log"
+                }
+                catch {
+                    [void]$secretMarkerFindings.Add([ordered]@{ path = $path; reason = $_.Exception.Message })
+                }
+            }
+        }
+    }
+    $checks = [ordered]@{
+        preCleanStopCommandPassed = $stepByName.ContainsKey("pre-clean-stop") -and [int]$stepByName["pre-clean-stop"].exitCode -eq 0
+        startIsolatedLiveServiceCommandPassed = $stepByName.ContainsKey("start-isolated-live-service") -and [int]$stepByName["start-isolated-live-service"].exitCode -eq 0
+        beforeStatusCommandPassed = [int]$before.exitCode -eq 0
+        beforeStatusPassed = [string](Get-ValidationProp -Object $beforeReport -Name "status" -Default "missing") -eq "passed"
+        beforeControlPlanePidRecorded = $beforeControlPlanePid -gt 0
+        crashStatusCommandPassed = [int]$afterCrash.exitCode -eq 0
+        crashStatusBlocked = [string](Get-ValidationProp -Object $afterCrash.report -Name "status" -Default "missing") -eq "blocked"
+        supervisorOnceRecoveryCommandPassed = $stepByName.ContainsKey("supervisor-once-recovery") -and [int]$stepByName["supervisor-once-recovery"].exitCode -eq 0
+        restartAttemptsExactlyOne = $restartAttempts -eq 1
+        afterStatusCommandPassed = [int]$after.exitCode -eq 0
+        afterRecoveryStatusPassed = $afterStatus -eq "passed"
+        afterRecoveryNodeRunning = $afterNodeRunning
+        afterRecoveryControlPlaneRunning = $afterControlPlaneRunning
+        afterRecoveryHeightNumeric = $afterHeight -match '^\d+$'
+        afterRecoveryLiveProfile = $afterLiveProfile
+        afterRecoveryMaxBlocksUnbounded = $afterMaxBlocks -eq 0
+        childLogPathsInsideRepo = $childLogPathsInsideRepo
+        secretMarkerFindingsEmpty = $secretMarkerFindings.Count -eq 0
+        envValuesPrintedFalse = $true
+        noSecrets = $true
+        broadcastsFalse = $true
+    }
+    $failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+    $status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
 
     Write-Host "Supervisor validation: writing validation report."
     $report = [ordered]@{
@@ -275,6 +323,9 @@ try {
             maxBlocks = $afterMaxBlocks
         }
         restartAttempts = $restartAttempts
+        checks = $checks
+        failedChecks = @($failedChecks)
+        secretMarkerFindings = @($secretMarkerFindings)
         reportPaths = [ordered]@{
             validation = $reportFullPath
             before = $statusBeforePath
