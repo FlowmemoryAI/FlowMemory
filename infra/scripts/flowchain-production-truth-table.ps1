@@ -488,6 +488,47 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "owner-activation-plan"
+        requirement = "Owner activation plan turns the remaining public launch inputs into ordered stages with exact validation commands, resource boundaries, and no-secret handoff instructions."
+        path = "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json"
+        command = "npm run flowchain:owner:activation-plan"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings",
+            "missingCoverage",
+            "unknownMissingEnvNames",
+            "unknownInvalidEnvNames",
+            "invalidEnvNames"
+        )
+        requiredChecks = @(
+            "stageCountMinimumMet",
+            "requiredEnvCoverageComplete",
+            "knownMissingEnvNamesOnly",
+            "invalidEnvNamesEmpty",
+            "knownInvalidEnvNamesOnly",
+            "validationCommandsPresent",
+            "ownerMustNotSendPresent",
+            "externalResourceMappingPresent",
+            "serviceStagePresent",
+            "publicRpcStagePresent",
+            "backupStagePresent",
+            "testerStagePresent",
+            "bridgeStagePresent",
+            "finalAuditStagePresent",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "owner-env-template"
         requirement = "Owner env template creates or preserves an ignored local-only NAME=value scaffold for every required owner input without recording real values."
         path = "docs/agent-runs/live-product-infra-rpc/owner-env-template-report.json"
@@ -1519,7 +1560,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "external-tester-packet-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "external-tester-packet-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"

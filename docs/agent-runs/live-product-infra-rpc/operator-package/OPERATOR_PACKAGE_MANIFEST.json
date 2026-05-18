@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-18T06:22:07.5212477Z",
+    "generatedAt":  "2026-05-18T06:32:20.3471547Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -41,6 +41,7 @@
                             "flowchain:second-computer:readiness",
                             "flowchain:owner:onboarding",
                             "flowchain:owner:signup-checklist",
+                            "flowchain:owner:activation-plan",
                             "flowchain:owner-env:template",
                             "flowchain:owner-env:readiness",
                             "flowchain:owner-env:readiness:validate",
@@ -144,6 +145,11 @@
                               "phase":  "owner-setup",
                               "command":  "npm run flowchain:owner:signup-checklist",
                               "purpose":  "List exactly what the owner must sign up for or create before public launch."
+                          },
+                          {
+                              "phase":  "owner-setup",
+                              "command":  "npm run flowchain:owner:activation-plan",
+                              "purpose":  "Generate the current ordered launch activation plan and exact validation commands."
                           },
                           {
                               "phase":  "owner-setup",
@@ -353,6 +359,13 @@
                          "reason":  "copied"
                      },
                      {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/OWNER_ACTIVATION_PLAN.md",
+                         "destination":  "runbooks/OWNER_ACTIVATION_PLAN.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
                          "source":  "docs/agent-runs/live-product-infra-rpc/OWNER_ENV_TEMPLATE.md",
                          "destination":  "runbooks/OWNER_ENV_TEMPLATE.md",
                          "copied":  true,
@@ -511,6 +524,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/owner-signup-checklist-report.json",
                          "destination":  "evidence/owner-signup-checklist-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json",
+                         "destination":  "evidence/owner-activation-plan-report.json",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"

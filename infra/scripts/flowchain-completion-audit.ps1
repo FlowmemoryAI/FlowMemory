@@ -35,6 +35,7 @@ $paths = [ordered]@{
     ownerInputs = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-report.json"
     ownerOnboarding = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json"
     ownerSignupChecklist = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-signup-checklist-report.json"
+    ownerActivationPlan = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json"
     ownerEnvTemplate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-template-report.json"
     ownerEnvReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-report.json"
     ownerEnvReadinessValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-validation-report.json"
@@ -446,6 +447,9 @@ $opsEscalationDryRunExitCode = $opsEscalationDryRunResult.exitCode
 $publicDeploymentContractResult = Invoke-AuditChild -Path $paths.publicDeploymentContract -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-deployment-contract.ps1"), "-AllowBlocked", "-NoRefresh")
 $publicDeploymentContractOutput = @($publicDeploymentContractResult.output)
 $publicDeploymentContractExitCode = $publicDeploymentContractResult.exitCode
+$ownerActivationPlanResult = Invoke-AuditChild -Path $paths.ownerActivationPlan -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-activation-plan.ps1"))
+$ownerActivationPlanOutput = @($ownerActivationPlanResult.output)
+$ownerActivationPlanExitCode = $ownerActivationPlanResult.exitCode
 $architectureAuditResult = Invoke-AuditChild -Path $paths.architectureAudit -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-architecture-audit.ps1"), "-AllowBlocked")
 $architectureAuditOutput = @($architectureAuditResult.output)
 $architectureAuditExitCode = $architectureAuditResult.exitCode
@@ -456,7 +460,7 @@ foreach ($entry in $paths.GetEnumerator()) {
 }
 
 $missingEnv = New-Object System.Collections.ArrayList
-foreach ($sourceName in @("liveProduct", "liveInfra", "externalTester", "ownerInputs", "ownerEnvReadiness", "externalTesterPacket", "publicRpc", "bridgeLive", "bridgeInfra")) {
+foreach ($sourceName in @("liveProduct", "liveInfra", "externalTester", "ownerInputs", "ownerEnvReadiness", "ownerActivationPlan", "externalTesterPacket", "publicRpc", "bridgeLive", "bridgeInfra")) {
     foreach ($name in @((Get-AuditProp -Object $reports[$sourceName] -Name "missingEnvNames" -Default @()))) {
         if ($name -notin $optionalMissingEnvNames) {
             Add-Unique -Target $missingEnv -Value $name
@@ -909,6 +913,55 @@ $ownerSignupChecklistPassed = $ownerSignupChecklistExitCode -eq 0 `
     -and ((Get-AuditProp -Object $ownerSignupChecklist -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $ownerSignupChecklist -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $ownerSignupChecklist -Name "broadcasts" -Default $true) -eq $false)
+$ownerActivationPlan = $reports.ownerActivationPlan
+$ownerActivationPlanStatus = Get-ReportStatus -Report $ownerActivationPlan
+$ownerActivationPlanChecks = Get-AuditProp -Object $ownerActivationPlan -Name "checks"
+$ownerActivationPlanRequiredChecks = @(
+    "stageCountMinimumMet",
+    "requiredEnvCoverageComplete",
+    "knownMissingEnvNamesOnly",
+    "invalidEnvNamesEmpty",
+    "knownInvalidEnvNamesOnly",
+    "validationCommandsPresent",
+    "ownerMustNotSendPresent",
+    "externalResourceMappingPresent",
+    "serviceStagePresent",
+    "publicRpcStagePresent",
+    "backupStagePresent",
+    "testerStagePresent",
+    "bridgeStagePresent",
+    "finalAuditStagePresent",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse",
+    "secretMarkerFindingsEmpty"
+)
+$ownerActivationPlanMissingChecks = Get-MissingAuditChecks -Checks $ownerActivationPlanChecks -Names $ownerActivationPlanRequiredChecks
+$ownerActivationPlanFailedChecks = @((Get-AuditProp -Object $ownerActivationPlan -Name "failedChecks" -Default @()))
+$ownerActivationPlanSecretFindings = @((Get-AuditProp -Object $ownerActivationPlan -Name "secretMarkerFindings" -Default @()))
+$ownerActivationPlanMissingCoverage = @((Get-AuditProp -Object $ownerActivationPlan -Name "missingCoverage" -Default @()))
+$ownerActivationPlanUnknownMissing = @((Get-AuditProp -Object $ownerActivationPlan -Name "unknownMissingEnvNames" -Default @()))
+$ownerActivationPlanUnknownInvalid = @((Get-AuditProp -Object $ownerActivationPlan -Name "unknownInvalidEnvNames" -Default @()))
+$ownerActivationPlanInvalid = @((Get-AuditProp -Object $ownerActivationPlan -Name "invalidEnvNames" -Default @()))
+$ownerActivationPlanStageCount = [int](Get-AuditProp -Object $ownerActivationPlan -Name "stageCount" -Default 0)
+$ownerActivationPlanReadyStageCount = [int](Get-AuditProp -Object $ownerActivationPlan -Name "readyStageCount" -Default 0)
+$ownerActivationPlanActivationReady = (Get-AuditProp -Object $ownerActivationPlan -Name "activationReady" -Default $false) -eq $true
+$ownerActivationPlanFailedCheckCount = @($ownerActivationPlanFailedChecks | Where-Object { $null -ne $_ }).Count
+$ownerActivationPlanSecretFindingCount = @($ownerActivationPlanSecretFindings | Where-Object { $null -ne $_ }).Count
+$ownerActivationPlanMissingCheckCount = @($ownerActivationPlanMissingChecks | Where-Object { $null -ne $_ }).Count
+$ownerActivationPlanPassed = $ownerActivationPlanExitCode -eq 0 `
+    -and $ownerActivationPlanStatus -eq "passed" `
+    -and $ownerActivationPlanMissingCheckCount -eq 0 `
+    -and $ownerActivationPlanFailedCheckCount -eq 0 `
+    -and $ownerActivationPlanSecretFindingCount -eq 0 `
+    -and $ownerActivationPlanMissingCoverage.Count -eq 0 `
+    -and $ownerActivationPlanUnknownMissing.Count -eq 0 `
+    -and $ownerActivationPlanUnknownInvalid.Count -eq 0 `
+    -and $ownerActivationPlanInvalid.Count -eq 0 `
+    -and $ownerActivationPlanStageCount -ge 8 `
+    -and ((Get-AuditProp -Object $ownerActivationPlan -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $ownerActivationPlan -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $ownerActivationPlan -Name "broadcasts" -Default $true) -eq $false)
 $ownerEnvTemplateStatus = Get-ReportStatus -Report $ownerEnvTemplate
 $ownerEnvTemplateGitIgnored = Get-AuditProp -Object $ownerEnvTemplate -Name "pathIsGitIgnored" -Default $false
 $ownerEnvTemplateIncludesRequired = Get-AuditProp -Object $ownerEnvTemplate -Name "templateIncludesAllRequiredEnvNames" -Default $false
@@ -2079,6 +2132,12 @@ Add-AuditItem -Items $items -Id "owner-signup-checklist" `
     -Evidence "signupStatus=$ownerSignupChecklistStatus, itemCount=$ownerSignupItemCount, externalSignupCount=$ownerSignupExternalCount, missingCoverage=$ownerSignupMissingCoverageCount, repoOwned=$ownerSignupRepoOwned, localEnvFileSupported=$ownerSignupLocalEnvFileSupported, failedChecks=$ownerSignupFailedCheckCount, secretFindings=$ownerSignupSecretFindingCount, missingChecks=$ownerSignupMissingCheckCount, report=$($paths.ownerSignupChecklist)" `
     -Commands @("npm run flowchain:owner:signup-checklist")
 
+Add-AuditItem -Items $items -Id "owner-activation-plan" `
+    -Requirement "Owner activation plan turns remaining public launch inputs into ordered stages with exact validation commands, resource boundaries, and no-secret handoff instructions." `
+    -Status $(if ($ownerActivationPlanPassed) { "passed" } else { "failed" }) `
+    -Evidence "activationPlanStatus=$ownerActivationPlanStatus, activationReady=$ownerActivationPlanActivationReady, stages=$ownerActivationPlanStageCount, readyStages=$ownerActivationPlanReadyStageCount, failedChecks=$ownerActivationPlanFailedCheckCount, secretFindings=$ownerActivationPlanSecretFindingCount, missingChecks=$ownerActivationPlanMissingCheckCount, report=$($paths.ownerActivationPlan)" `
+    -Commands @("npm run flowchain:owner:activation-plan")
+
 Add-AuditItem -Items $items -Id "owner-env-template" `
     -Requirement "Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added." `
     -Status $(if ($ownerEnvTemplatePassed) { "passed" } else { "failed" }) `
@@ -2382,6 +2441,8 @@ $report = [ordered]@{
     ownerOnboardingOutputRedacted = @($ownerOnboardingOutput | ForEach-Object { "$_" })
     ownerSignupChecklistExitCode = $ownerSignupChecklistExitCode
     ownerSignupChecklistOutputRedacted = @($ownerSignupChecklistOutput | ForEach-Object { "$_" })
+    ownerActivationPlanExitCode = $ownerActivationPlanExitCode
+    ownerActivationPlanOutputRedacted = @($ownerActivationPlanOutput | ForEach-Object { "$_" })
     ownerEnvTemplateExitCode = $ownerEnvTemplateExitCode
     ownerEnvTemplateOutputRedacted = @($ownerEnvTemplateOutput | ForEach-Object { "$_" })
     ownerEnvReadinessValidationExitCode = $ownerEnvReadinessValidationExitCode
@@ -2435,6 +2496,9 @@ $report = [ordered]@{
         packetValidationPassed = $externalTesterPacketValidationPassed
         packetPath = $externalTesterPacketPath
         readinessStatus = (Get-ReportStatus -Report $externalTester)
+        ownerActivationPlanStatus = $ownerActivationPlanStatus
+        ownerActivationPlanPassed = $ownerActivationPlanPassed
+        ownerActivationPlanActivationReady = $ownerActivationPlanActivationReady
         publicTesterGatewayStatus = $publicTesterGatewayStatus
         publicTesterGatewayPassed = $publicTesterGatewayPassed
         dashboardUiReadinessStatus = $dashboardUiReadinessStatus
@@ -2471,6 +2535,7 @@ $report = [ordered]@{
         "npm run flowchain:owner-inputs:validate",
         "npm run flowchain:owner:onboarding",
         "npm run flowchain:owner:signup-checklist",
+        "npm run flowchain:owner:activation-plan",
         "npm run flowchain:owner-env:template",
         "npm run flowchain:owner-env:readiness:validate",
         "npm run flowchain:owner-env:readiness -- -AllowBlocked",
