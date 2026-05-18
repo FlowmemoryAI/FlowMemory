@@ -42,6 +42,7 @@
     "flowchain:operator:package:verify": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-operator-package-verify.ps1",
     "flowchain:second-computer:bundle": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-second-computer-bundle.ps1",
     "flowchain:second-computer:verify": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-second-computer-verify.ps1",
+    "flowchain:second-computer:readiness": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-second-computer-readiness.ps1",
     "flowchain:start": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-start.ps1",
     "flowchain:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-stop.ps1",
     "flowchain:node": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-node.ps1",

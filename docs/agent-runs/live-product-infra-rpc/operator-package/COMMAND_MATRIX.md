@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Command Matrix
 
-Generated: 2026-05-18T01:41:15.0564113Z
+Generated: 2026-05-18T01:54:44.0679065Z
 
 | Phase | Command | Purpose |
 | --- | --- | --- |
@@ -14,6 +14,7 @@ Generated: 2026-05-18T01:41:15.0564113Z
 | autorecovery | `npm run flowchain:service:supervisor:validate` | Prove the supervisor can recover a failed local control plane. |
 | autorecovery | `npm run flowchain:service:install:windows -- -Action Plan` | Render the no-secret Windows Scheduled Task install plan. |
 | autorecovery | `npm run flowchain:service:install:validate` | Validate install/status/uninstall paths without mutating the owner host. |
+| handoff | `npm run flowchain:second-computer:readiness` | Create and verify the no-secret offline second-computer source bundle. |
 | public-rpc | `npm run flowchain:public-rpc:deployment-bundle` | Generate owner-host public RPC edge artifacts. |
 | public-rpc | `npm run flowchain:public-rpc:deployment:automation` | Validate render, preflight, verify, and rollback phases. |
 | public-rpc | `npm run flowchain:public-rpc:validate` | Run local public-profile RPC readiness validation. |

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-18T01:41:15.0564113Z",
+    "generatedAt":  "2026-05-18T01:54:44.0679065Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -51,6 +51,11 @@
                          "phase":  "autorecovery",
                          "command":  "npm run flowchain:service:install:validate",
                          "purpose":  "Validate install/status/uninstall paths without mutating the owner host."
+                     },
+                     {
+                         "phase":  "handoff",
+                         "command":  "npm run flowchain:second-computer:readiness",
+                         "purpose":  "Create and verify the no-secret offline second-computer source bundle."
                      },
                      {
                          "phase":  "public-rpc",

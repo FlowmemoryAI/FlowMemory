@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-18T01:41:15.0564113Z",
+    "generatedAt":  "2026-05-18T01:54:44.0679065Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -35,6 +35,9 @@
                             "flowchain:service:supervisor:validate",
                             "flowchain:service:install:windows",
                             "flowchain:service:install:validate",
+                            "flowchain:second-computer:bundle",
+                            "flowchain:second-computer:verify",
+                            "flowchain:second-computer:readiness",
                             "flowchain:public-rpc:deployment-bundle",
                             "flowchain:public-rpc:deployment:automation",
                             "flowchain:public-rpc:validate",
@@ -110,6 +113,11 @@
                               "phase":  "autorecovery",
                               "command":  "npm run flowchain:service:install:validate",
                               "purpose":  "Validate install/status/uninstall paths without mutating the owner host."
+                          },
+                          {
+                              "phase":  "handoff",
+                              "command":  "npm run flowchain:second-computer:readiness",
+                              "purpose":  "Create and verify the no-secret offline second-computer source bundle."
                           },
                           {
                               "phase":  "public-rpc",
@@ -247,6 +255,13 @@
                          "reason":  "copied"
                      },
                      {
+                         "source":  "docs/FLOWCHAIN_SECOND_COMPUTER_SETUP.md",
+                         "destination":  "docs/FLOWCHAIN_SECOND_COMPUTER_SETUP.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
                          "source":  "docs/OPERATIONS/FLOWCHAIN_SERVICE_SUPERVISOR.md",
                          "destination":  "docs/FLOWCHAIN_SERVICE_SUPERVISOR.md",
                          "copied":  true,
@@ -303,6 +318,13 @@
                          "reason":  "copied"
                      },
                      {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/SECOND_COMPUTER_READINESS.md",
+                         "destination":  "runbooks/SECOND_COMPUTER_READINESS.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
                          "source":  "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md",
                          "destination":  "runbooks/EXTERNAL_TESTER_PACKET.md",
                          "copied":  true,
@@ -349,6 +371,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json",
                          "destination":  "evidence/service-install-validation-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/second-computer-readiness-report.json",
+                         "destination":  "evidence/second-computer-readiness-report.json",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"

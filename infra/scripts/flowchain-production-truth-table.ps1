@@ -324,6 +324,50 @@ $definitions = @(
         )
     },
     [ordered]@{
+        id = "second-computer-readiness"
+        requirement = "Second-computer readiness creates a no-secret offline source bundle, verifies local dependency prerequisites, documents the bundle/verify commands, and keeps the bundle under ignored local output."
+        path = "docs/agent-runs/live-product-infra-rpc/second-computer-readiness-report.json"
+        command = "npm run flowchain:second-computer:readiness"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "bundlePackageScriptPresent",
+            "verifyPackageScriptPresent",
+            "readinessPackageScriptPresent",
+            "setupDocExists",
+            "setupDocMentionsBundle",
+            "setupDocMentionsVerify",
+            "bundleCommandPassed",
+            "verifyCommandPassed",
+            "bundleReportPassed",
+            "verifyReportPassed",
+            "stageNoSecretScanPassed",
+            "bundleZipCreated",
+            "bundleSha256Present",
+            "manifestWritten",
+            "manifestNextCommandsPresent",
+            "excludesGitMetadata",
+            "excludesNodeModules",
+            "excludesLocalRuntime",
+            "excludesEnvFiles",
+            "excludesSecretMarkerFiles",
+            "verifyChecksPassed",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingNextCommands",
+            "failedVerifyChecks"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "backup-readiness"
         requirement = "Configured production backup path can create and restore manifest-backed state snapshots."
         path = "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
@@ -976,6 +1020,10 @@ function ConvertTo-TruthEvidence {
             "actionUsesSupervisor",
             "liveProfileDefault",
             "bridgeRelayerOptInStartsLoop",
+            "bundleCommandPassed",
+            "verifyCommandPassed",
+            "stageNoSecretScanPassed",
+            "manifestNextCommandsPresent",
             "statusRelayerReportHealthy",
             "statusAfterStopNotRunning",
             "relayerPidFileRemovedAfterStop",
@@ -1002,6 +1050,8 @@ function ConvertTo-TruthEvidence {
 
     foreach ($arrayName in @(
         "failedChecks",
+        "missingNextCommands",
+        "failedVerifyChecks",
         "unmappedCurrentFindingCodes",
         "rulesWithoutCommands",
         "activeRuleIdsMissingFromManifest",

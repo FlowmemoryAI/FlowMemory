@@ -19,6 +19,12 @@ function Get-BundleExclusionReason {
         if ($lowerName -like "*vault*") { return "local vault directory" }
         return ""
     }
+    if ($lower -in @(
+        "crypto/attestations.md",
+        "fixtures/deployments/base-canary-indexer-checkpoint.json"
+    )) {
+        return "nonessential source-bundle file with secret-marker field names"
+    }
     if ($lower -match '(^|/)(\.git|node_modules|target|dist|cache|out|broadcast)(/|$)') { return "metadata, dependency, or build output path" }
     if ($lower -eq "devnet/local" -or $lower.StartsWith("devnet/local/")) { return "ignored local runtime output" }
     if ($lowerName -eq ".env" -or ($lowerName.StartsWith(".env.") -and $lowerName -ne ".env.example")) { return "local env file" }
@@ -73,7 +79,7 @@ $manifest = [ordered]@{
     schema = "flowchain.second_computer.source_bundle_manifest.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
     sourceRepo = $repoRoot
-    excludes = @(".git", "node_modules", "devnet/local", "target", "dist/cache/out/broadcast", "env files", "vaults", "private keys")
+    excludes = @(".git", "node_modules", "devnet/local", "target", "dist/cache/out/broadcast", "env files", "vaults", "private keys", "nonessential files with secret-marker field names")
     excludedCount = $excluded.Count
     nextCommands = @(
         "npm install",
