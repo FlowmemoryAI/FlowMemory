@@ -1,23 +1,23 @@
 ﻿# FlowChain Completion Audit
 
-Generated: 2026-05-18T03:02:33.1685383Z
+Generated: 2026-05-18T03:06:01.2928496Z
 Status: blocked
 Completion ready: False
 Refresh mode: no-refresh-existing-reports
-Latest observed height: 64442
+Latest observed height: 64473
 
 ## Prompt-To-Artifact Checklist
 
 | Requirement | Status | Evidence | Commands |
 | --- | --- | --- | --- |
 | Chain service is running in live profile and command lines match this worktree. | passed | service-status status=passed, node=running, controlPlane=running, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
-| Chain is producing/finalizing blocks and state is fresh. | passed | latestHeight=64442, stateFileLastWriteAgeSeconds=2, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
+| Chain is producing/finalizing blocks and state is fresh. | passed | latestHeight=64473, stateFileLastWriteAgeSeconds=3, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
 | Operator doctor checks host tools, package scripts, state path, disk, service evidence, ports, owner-input groups, and owner env-file status without printing owner values. | passed | doctorStatus=blocked, checks=52, failedChecks=0, blockedChecks=5, blockedOnlyOwner=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\operator-doctor-report.json | npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json |
 | Live service monitor observes running services and advancing block height over a sampling window. | passed | monitorStatus=passed, samples=2, heightAdvanced=True, heights=64416->64422, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-monitor-report.json | npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90 |
 | Live service supervisor can recover a crashed local control-plane under the live profile without deleting chain state. | passed | supervisorValidation=passed, restartAttempts=1, before=passed, afterCrash=blocked, afterRecovery=passed, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-supervisor-validation-report.json | npm run flowchain:service:supervisor:validate |
 | Owner-host Windows service install validation proves no-secret Scheduled Task plan/status/uninstall no-op behavior and a bridge-relayer opt-in plan for reboot-persistent live supervisor operation. | passed | serviceInstall=passed, failedChecks=0, missingChecks=0, missingScripts=0, planDidNotMutate=True, statusDidNotMutate=True, relayerOptIn=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-install-validation-report.json | npm run flowchain:service:install:validate; npm run flowchain:service:install:windows -- -Action Plan |
 | People can create wallets through the RPC service without receiving secret material. | passed | testerWalletCreates=4, secretMaterialReturned=false, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\live-service-tester-network-e2e-report.json | npm run flowchain:wallet:live-tester:e2e |
-| Wallet-to-wallet transfers sent through the running service settle on produced blocks. | passed | single-transfer blocks 58268->58281, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\live-service-wallet-e2e-report.json | npm run flowchain:wallet:live-service:e2e |
+| Wallet-to-wallet transfers sent through the running service settle on produced blocks. | passed | single-transfer blocks 64459->64472, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\live-service-wallet-e2e-report.json | npm run flowchain:wallet:live-service:e2e |
 | A small tester group can create wallets, receive funds, and send funds to each other through the running service. | passed | testerCount=4, transfers=4, blocks=60061->60077, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\live-service-tester-network-e2e-report.json | npm run flowchain:wallet:live-tester:e2e |
 | Clients can connect to the private RPC service for health, discovery, readiness, chain, and wallet methods. | passed | localTesterRehearsalReady=True, latestHeight=60281, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\external-tester-readiness-report.json | npm run flowchain:tester:readiness -- -AllowBlocked |
 | Developer SDK/devkit proof connects to the real RPC, checks readiness/discovery, reads wallet data, submits a runtime-backed local wallet send, and keeps public readiness fail-closed. | passed | devPackStatus=passed, heights=61637->61638, methodCount=79, publicReadyMethodCount=0, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-dev-pack\dev-pack-e2e-report.json | npm run flowchain:dev-pack:e2e |
