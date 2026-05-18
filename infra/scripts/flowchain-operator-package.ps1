@@ -117,6 +117,7 @@ $requiredScripts = @(
     "flowchain:bridge:relayer:once",
     "flowchain:bridge:relayer:guardrail:validate",
     "flowchain:external-tester:packet",
+    "flowchain:dashboard:ui:readiness",
     "flowchain:operator:package:verify",
     "flowchain:completion:audit",
     "flowchain:truth-table",
@@ -149,6 +150,7 @@ $commandMatrix = @(
     [ordered]@{ phase = "bridge"; command = "npm run flowchain:bridge:relayer:once -- -AllowBlocked"; purpose = "Run the no-broadcast relayer gate; remains blocked until owner Base inputs exist." },
     [ordered]@{ phase = "bridge"; command = "npm run flowchain:bridge:relayer:guardrail:validate"; purpose = "Prove missing owner inputs cannot mutate cursor state or queue credits." },
     [ordered]@{ phase = "testers"; command = "npm run flowchain:external-tester:packet -- -AllowBlocked"; purpose = "Regenerate the friends-and-family packet and fail closed until public gates pass." },
+    [ordered]@{ phase = "testers"; command = "npm run flowchain:dashboard:ui:readiness"; purpose = "Run desktop and mobile browser verification for tester wallet create, faucet, send, and Explorer inspection." },
     [ordered]@{ phase = "release"; command = "npm run flowchain:operator:package:verify"; purpose = "Verify the generated operator package contents and no-secret boundary." },
     [ordered]@{ phase = "release"; command = "npm run flowchain:completion:audit -- -AllowBlocked"; purpose = "Run the production readiness gate without false public-ready claims." },
     [ordered]@{ phase = "release"; command = "npm run flowchain:truth-table -- -AllowBlocked"; purpose = "Classify every tracked gate as passed, owner-blocked, repo-blocked, failed, or stale." },
@@ -200,7 +202,8 @@ foreach ($file in @(
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/WINDOWS_SERVICE_INSTALL.md"; target = "runbooks/WINDOWS_SERVICE_INSTALL.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/WINDOWS_BACKUP_INSTALL.md"; target = "runbooks/WINDOWS_BACKUP_INSTALL.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/WINDOWS_ALERT_INSTALL.md"; target = "runbooks/WINDOWS_ALERT_INSTALL.md"; required = $true },
-    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md"; target = "runbooks/EXTERNAL_TESTER_PACKET.md"; required = $true }
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md"; target = "runbooks/EXTERNAL_TESTER_PACKET.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/DASHBOARD_UI_READINESS.md"; target = "runbooks/DASHBOARD_UI_READINESS.md"; required = $true }
 )) {
     [void] $copiedRunbooks.Add((Copy-OperatorPackageFile -Source $file.source -Destination $file.target -Required:([bool] $file.required)))
 }
@@ -223,6 +226,7 @@ foreach ($file in @(
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"; target = "evidence/bridge-relayer-once-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"; target = "evidence/bridge-relayer-guardrail-validation-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"; target = "evidence/external-tester-packet-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"; target = "evidence/dashboard-ui-readiness-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"; target = "evidence/flowchain-architecture-audit-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json"; target = "evidence/flowchain-completion-audit-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"; target = "evidence/production-truth-table-report.json"; required = $true },

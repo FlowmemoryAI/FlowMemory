@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-18T00:59:23.0038836Z",
+    "generatedAt":  "2026-05-18T01:33:21.6981487Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -8,6 +8,7 @@
                                   "RPC clients can connect through a private service now and through a public owner-operated edge only after TLS/CORS/rate-limit checks pass.",
                                   "Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding.",
                                   "Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.",
+                                  "The dashboard has a browser-level desktop/mobile proof for tester wallet create, faucet, send, and Explorer inspection without leaking tester tokens or causing horizontal overflow.",
                                   "Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.",
                                   "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven, bounds relayer child processes, stages the Base scan cursor until L1 credit proof, can queue new relayer handoffs into the L1, and remains live-blocked until owner guardrails are configured.",
                                   "State backup, monitoring, reboot-persistent service install, operator doctor diagnostics, node-operator packaging, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
@@ -17,10 +18,10 @@
                                   "Every missing production edge fails closed on exact owner input names, with no secrets, env values, or live broadcasts."
                               ],
     "itemCounts":  {
-                       "passed":  18,
+                       "passed":  19,
                        "blocked":  7,
                        "failed":  0,
-                       "total":  25
+                       "total":  26
                    },
     "items":  [
                   {
@@ -596,11 +597,32 @@
                                    ]
                   },
                   {
+                      "id":  "dashboard-ui-browser-boundary",
+                      "layer":  "Explorer and wallet UI",
+                      "requirement":  "Dashboard browser verification covers the tester wallet panel, authenticated tester create/faucet/send operations, Explorer inspection, desktop and mobile viewports, no token/secret leakage, and no horizontal overflow.",
+                      "status":  "passed",
+                      "evidence":  "dashboardUiStatus=passed, browserProjects=2, coveredRoutes=5, failedChecks=0, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
+                      "files":  [
+                                    "apps/dashboard/playwright.config.ts",
+                                    "apps/dashboard/e2e/flowchain-ui-readiness.spec.ts",
+                                    "apps/dashboard/src/views/WalletView.tsx",
+                                    "apps/dashboard/src/views/ExplorerView.tsx",
+                                    "infra/scripts/flowchain-dashboard-ui-readiness.ps1"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:dashboard:ui:readiness",
+                                       "npm run browser:e2e --prefix apps/dashboard"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "aggregate-verification-boundary",
                       "layer":  "Verification",
                       "requirement":  "Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, operator doctor, node-operator package, developer dev-pack, and completion evidence into one auditable path.",
                       "status":  "passed",
-                      "evidence":  "liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, packetSmoke=True, connectPackReady=True, publicTesterGateway=passed, operatorDoctor=blocked, operatorPackage=passed, operatorPackageVerify=passed, devPack=passed",
+                      "evidence":  "liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, packetSmoke=True, connectPackReady=True, publicTesterGateway=passed, dashboardUi=passed, operatorDoctor=blocked, operatorPackage=passed, operatorPackageVerify=passed, devPack=passed",
                       "files":  [
                                     "infra/scripts/flowchain-live-infra-check.ps1",
                                     "infra/scripts/flowchain-live-product-e2e.ps1",
@@ -611,7 +633,10 @@
                                     "infra/scripts/flowchain-operator-package-verify.ps1",
                                     "infra/scripts/flowchain-external-tester-readiness.ps1",
                                     "infra/scripts/flowchain-external-tester-packet.ps1",
-                                    "infra/scripts/flowchain-public-tester-gateway-e2e.ps1"
+                                    "infra/scripts/flowchain-public-tester-gateway-e2e.ps1",
+                                    "infra/scripts/flowchain-dashboard-ui-readiness.ps1",
+                                    "apps/dashboard/playwright.config.ts",
+                                    "apps/dashboard/e2e/flowchain-ui-readiness.spec.ts"
                                 ],
                       "commands":  [
                                        "npm run flowchain:live-infra:check",
@@ -619,6 +644,7 @@
                                        "npm run flowchain:completion:audit",
                                        "npm run flowchain:external-tester:packet",
                                        "npm run flowchain:tester:gateway:e2e",
+                                       "npm run flowchain:dashboard:ui:readiness",
                                        "npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json",
                                        "npm run flowchain:operator:package",
                                        "npm run flowchain:operator:package:verify",
@@ -681,6 +707,19 @@
                                        "balance proof"
                                    ],
                           "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json"
+                      },
+                      {
+                          "name":  "dashboard-wallet-explorer",
+                          "path":  [
+                                       "browser /wallet tester panel",
+                                       "tester token kept out of page/storage output",
+                                       "tester wallet create",
+                                       "tester faucet",
+                                       "tester send",
+                                       "browser /explorer inspection",
+                                       "desktop/mobile viewport checks"
+                                   ],
+                          "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json"
                       },
                       {
                           "name":  "developer-dev-pack",
@@ -882,6 +921,7 @@
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
                         "externalTesterPacket":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-packet-report.json",
                         "publicTesterGateway":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json",
+                        "dashboardUiReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
                         "devPack":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\dev-pack-e2e-report.json",
                         "publicDeploymentContract":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
                         "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json"
@@ -926,6 +966,19 @@
                                          "testerNetworkFresh":  true,
                                          "publicTesterGatewayStatus":  "passed",
                                          "publicTesterGatewayReady":  true,
+                                         "dashboardUiStatus":  "passed",
+                                         "dashboardUiReady":  true,
+                                         "dashboardUiBrowserProjects":  [
+                                                                            "chromium-desktop",
+                                                                            "chromium-mobile"
+                                                                        ],
+                                         "dashboardUiCoveredRoutes":  [
+                                                                          "/wallet?panel=tester",
+                                                                          "/tester/wallets/create",
+                                                                          "/tester/faucet",
+                                                                          "/tester/wallets/send",
+                                                                          "/explorer"
+                                                                      ],
                                          "publicDeploymentContractPacketSmoke":  true
                                      },
     "opsAlertCoverage":  {

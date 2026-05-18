@@ -148,6 +148,7 @@
     "flowchain:rpc:e2e": "npm run rpc:e2e --prefix services/control-plane",
     "flowchain:dashboard:build": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-workbench.ps1 -BuildOnly",
     "flowchain:dashboard:verify": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-workbench.ps1 -BuildOnly",
+    "flowchain:dashboard:ui:readiness": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-dashboard-ui-readiness.ps1",
     "flowchain:export": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-export.ps1",
     "flowchain:import": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-import.ps1",
     "flowchain:restart:verify": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-node-smoke.ps1",

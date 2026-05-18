@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-18T00:59:08.7143432Z",
+    "generatedAt":  "2026-05-18T01:33:30.8488503Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -53,6 +53,7 @@
                             "flowchain:bridge:relayer:once",
                             "flowchain:bridge:relayer:guardrail:validate",
                             "flowchain:external-tester:packet",
+                            "flowchain:dashboard:ui:readiness",
                             "flowchain:operator:package:verify",
                             "flowchain:completion:audit",
                             "flowchain:truth-table",
@@ -185,6 +186,11 @@
                               "purpose":  "Regenerate the friends-and-family packet and fail closed until public gates pass."
                           },
                           {
+                              "phase":  "testers",
+                              "command":  "npm run flowchain:dashboard:ui:readiness",
+                              "purpose":  "Run desktop and mobile browser verification for tester wallet create, faucet, send, and Explorer inspection."
+                          },
+                          {
                               "phase":  "release",
                               "command":  "npm run flowchain:operator:package:verify",
                               "purpose":  "Verify the generated operator package contents and no-secret boundary."
@@ -286,6 +292,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md",
                          "destination":  "runbooks/EXTERNAL_TESTER_PACKET.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/DASHBOARD_UI_READINESS.md",
+                         "destination":  "runbooks/DASHBOARD_UI_READINESS.md",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"
@@ -400,6 +413,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json",
                          "destination":  "evidence/external-tester-packet-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json",
+                         "destination":  "evidence/dashboard-ui-readiness-report.json",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"

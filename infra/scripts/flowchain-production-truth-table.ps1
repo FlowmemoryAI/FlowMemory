@@ -331,6 +331,41 @@ $definitions = @(
         ownerInputGate = $true
     },
     [ordered]@{
+        id = "dashboard-ui-readiness"
+        requirement = "Dashboard browser readiness proves desktop and mobile users can create a tester wallet, request faucet funds, send tester units, inspect the result in Explorer, and avoid token/secret leakage or horizontal overflow."
+        path = "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
+        command = "npm run flowchain:dashboard:ui:readiness"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "dashboardPackageScriptPresent",
+            "rootPackageScriptPresent",
+            "playwrightConfigExists",
+            "browserSpecExists",
+            "desktopProjectConfigured",
+            "mobileProjectConfigured",
+            "walletTesterRouteCovered",
+            "testerWalletCreateCovered",
+            "testerFaucetCovered",
+            "testerSendCovered",
+            "explorerRouteCovered",
+            "noSecretLeakageAsserted",
+            "noHorizontalOverflowAsserted",
+            "dashboardUnitTestsPassed",
+            "dashboardBrowserE2ePassed",
+            "dashboardBuildPassed",
+            "controlPlaneTesterGatewayTestsPassed"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "ops-snapshot"
         requirement = "Ops snapshot distinguishes critical incidents from expected owner-input blockers and gives incident commands."
         path = "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
@@ -465,7 +500,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "backup-restore-validation", "ops-snapshot", "ops-alert-rules", "ops-alert-install-validation", "ops-escalation-dry-run", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "backup-restore-validation", "ops-snapshot", "ops-alert-rules", "ops-alert-install-validation", "ops-escalation-dry-run", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"
@@ -775,7 +810,12 @@ function ConvertTo-TruthEvidence {
             "everyCurrentFindingMapped",
             "everyCurrentFindingHasCommands",
             "dryRunEventsDoNotSend",
-            "dryRunEventsStoreNoCredentials"
+            "dryRunEventsStoreNoCredentials",
+            "desktopProjectConfigured",
+            "mobileProjectConfigured",
+            "dashboardBrowserE2ePassed",
+            "noSecretLeakageAsserted",
+            "noHorizontalOverflowAsserted"
         )) {
             $value = Get-TruthProp -Object $checks -Name $name
             if ($null -ne $value -and -not [string]::IsNullOrWhiteSpace("$value")) {
@@ -793,7 +833,9 @@ function ConvertTo-TruthEvidence {
         "commandsWithInlineEnvAssignment",
         "commandsWithUrls",
         "findingsWithoutCommands",
-        "unmappedFindingCodes"
+        "unmappedFindingCodes",
+        "browserProjects",
+        "coveredRoutes"
     )) {
         if (Test-TruthPathExists -Object $Report -Path $arrayName) {
             $values = @((Get-TruthPathProp -Object $Report -Path $arrayName))

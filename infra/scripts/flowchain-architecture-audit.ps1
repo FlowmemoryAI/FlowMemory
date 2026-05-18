@@ -79,6 +79,7 @@ $reportPaths = [ordered]@{
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
+    dashboardUiReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
     devPack = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"
     publicDeploymentContract = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     noSecret = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
@@ -1018,6 +1019,7 @@ $liveInfra = $reports.liveInfra
 $externalTester = $reports.externalTester
 $externalTesterPacket = $reports.externalTesterPacket
 $publicTesterGateway = $reports.publicTesterGateway
+$dashboardUiReadiness = $reports.dashboardUiReadiness
 $devPackStatus = Get-ArchitectureStatus -Report $devPack
 $devPackChecks = Get-ArchitectureProp -Object $devPack -Name "checks"
 $devPackReady = (Test-RepoFile -Path "services/flowchain-sdk/src/client.ts") `
@@ -1047,7 +1049,10 @@ $productGateFiles = @(
     "infra/scripts/flowchain-operator-package-verify.ps1",
     "infra/scripts/flowchain-external-tester-readiness.ps1",
     "infra/scripts/flowchain-external-tester-packet.ps1",
-    "infra/scripts/flowchain-public-tester-gateway-e2e.ps1"
+    "infra/scripts/flowchain-public-tester-gateway-e2e.ps1",
+    "infra/scripts/flowchain-dashboard-ui-readiness.ps1",
+    "apps/dashboard/playwright.config.ts",
+    "apps/dashboard/e2e/flowchain-ui-readiness.spec.ts"
 )
 $liveInfraGateStatus = Get-ArchitectureStatus -Report $liveInfra
 $liveProductGateStatus = Get-ArchitectureStatus -Report $liveProduct
@@ -1059,6 +1064,25 @@ $publicTesterGatewayReady = ($publicTesterGatewayStatus -eq "passed") `
     -and ((Get-ArchitectureProp -Object $publicTesterGateway -Name "transferAccepted" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $publicTesterGateway -Name "capRejected" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $publicTesterGateway -Name "noSecrets" -Default $false) -eq $true)
+$dashboardUiStatus = Get-ArchitectureStatus -Report $dashboardUiReadiness
+$dashboardUiChecks = Get-ArchitectureProp -Object $dashboardUiReadiness -Name "checks"
+$dashboardUiFailedChecks = @((Get-ArchitectureProp -Object $dashboardUiReadiness -Name "failedChecks" -Default @()))
+$dashboardUiBrowserProjects = @((Get-ArchitectureProp -Object $dashboardUiReadiness -Name "browserProjects" -Default @()))
+$dashboardUiCoveredRoutes = @((Get-ArchitectureProp -Object $dashboardUiReadiness -Name "coveredRoutes" -Default @()))
+$dashboardUiReady = ($dashboardUiStatus -eq "passed") `
+    -and ($dashboardUiFailedChecks.Count -eq 0) `
+    -and ($dashboardUiBrowserProjects.Count -ge 2) `
+    -and ($dashboardUiCoveredRoutes.Count -ge 5) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "desktopProjectConfigured" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "mobileProjectConfigured" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "dashboardBrowserE2ePassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "dashboardBuildPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "controlPlaneTesterGatewayTestsPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "noSecretLeakageAsserted" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "noHorizontalOverflowAsserted" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiReadiness -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiReadiness -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiReadiness -Name "broadcasts" -Default $true) -eq $false)
 $externalTesterChecks = Get-ArchitectureProp -Object $externalTester -Name "checks"
 $externalTesterNetworkFresh = Get-ArchitectureProp -Object $externalTesterChecks -Name "testerWalletNetworkFresh" -Default $false
 $externalSharingReady = Get-ArchitectureProp -Object $externalTester -Name "externalSharingReady" -Default $false
@@ -1106,6 +1130,12 @@ Add-ArchitectureItem -Items $items -Id "public-tester-gateway-boundary" -Layer "
     -Evidence "gatewayStatus=$publicTesterGatewayStatus, configured=$(Get-ArchitectureProp -Object $publicTesterGateway -Name "testerGatewayConfigured"), transferAccepted=$(Get-ArchitectureProp -Object $publicTesterGateway -Name "transferAccepted"), capRejected=$(Get-ArchitectureProp -Object $publicTesterGateway -Name "capRejected"), report=$($reportPaths.publicTesterGateway)" `
     -Files @("services/control-plane/src/server.ts", "infra/scripts/flowchain-public-tester-gateway-e2e.ps1") `
     -Commands @("npm run flowchain:tester:gateway:e2e")
+Add-ArchitectureItem -Items $items -Id "dashboard-ui-browser-boundary" -Layer "Explorer and wallet UI" `
+    -Requirement "Dashboard browser verification covers the tester wallet panel, authenticated tester create/faucet/send operations, Explorer inspection, desktop and mobile viewports, no token/secret leakage, and no horizontal overflow." `
+    -Status $(if ($dashboardUiReady) { "passed" } else { "failed" }) `
+    -Evidence "dashboardUiStatus=$dashboardUiStatus, browserProjects=$($dashboardUiBrowserProjects.Count), coveredRoutes=$($dashboardUiCoveredRoutes.Count), failedChecks=$($dashboardUiFailedChecks.Count), report=$($reportPaths.dashboardUiReadiness)" `
+    -Files @("apps/dashboard/playwright.config.ts", "apps/dashboard/e2e/flowchain-ui-readiness.spec.ts", "apps/dashboard/src/views/WalletView.tsx", "apps/dashboard/src/views/ExplorerView.tsx", "infra/scripts/flowchain-dashboard-ui-readiness.ps1") `
+    -Commands @("npm run flowchain:dashboard:ui:readiness", "npm run browser:e2e --prefix apps/dashboard")
 $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:live-infra:check") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:live-product:e2e") `
@@ -1116,6 +1146,7 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:operator:package:verify") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:dev-pack:e2e") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:tester:gateway:e2e") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:dashboard:ui:readiness") `
     -and ($liveInfraGateStatus -in @("passed", "blocked")) `
     -and ($liveProductGateStatus -in @("passed", "blocked")) `
     -and ($externalTesterStatus -in @("passed", "blocked")) `
@@ -1124,6 +1155,7 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and ($externalTesterPacketExecutableSmokeValidated -eq $true) `
     -and ($externalTesterConnectPackReady -eq $true) `
     -and ($publicTesterGatewayReady -eq $true) `
+    -and ($dashboardUiReady -eq $true) `
     -and ($operatorDoctorReady -eq $true) `
     -and ($operatorPackageReady -eq $true) `
     -and ($operatorPackageVerifyReady -eq $true) `
@@ -1131,9 +1163,9 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
 Add-ArchitectureItem -Items $items -Id "aggregate-verification-boundary" -Layer "Verification" `
     -Requirement "Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, operator doctor, node-operator package, developer dev-pack, and completion evidence into one auditable path." `
     -Status $(if ($productGateReady) { "passed" } else { "failed" }) `
-    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus, packetSmoke=$externalTesterPacketExecutableSmokeValidated, connectPackReady=$externalTesterConnectPackReady, publicTesterGateway=$publicTesterGatewayStatus, operatorDoctor=$operatorDoctorStatus, operatorPackage=$operatorPackageStatus, operatorPackageVerify=$operatorPackageVerifyStatus, devPack=$devPackStatus" `
+    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus, packetSmoke=$externalTesterPacketExecutableSmokeValidated, connectPackReady=$externalTesterConnectPackReady, publicTesterGateway=$publicTesterGatewayStatus, dashboardUi=$dashboardUiStatus, operatorDoctor=$operatorDoctorStatus, operatorPackage=$operatorPackageStatus, operatorPackageVerify=$operatorPackageVerifyStatus, devPack=$devPackStatus" `
     -Files $productGateFiles `
-    -Commands @("npm run flowchain:live-infra:check", "npm run flowchain:live-product:e2e", "npm run flowchain:completion:audit", "npm run flowchain:external-tester:packet", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json", "npm run flowchain:operator:package", "npm run flowchain:operator:package:verify", "npm run flowchain:dev-pack:e2e")
+    -Commands @("npm run flowchain:live-infra:check", "npm run flowchain:live-product:e2e", "npm run flowchain:completion:audit", "npm run flowchain:external-tester:packet", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:dashboard:ui:readiness", "npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json", "npm run flowchain:operator:package", "npm run flowchain:operator:package:verify", "npm run flowchain:dev-pack:e2e")
 
 $failedItems = @($items | Where-Object { $_.status -eq "failed" })
 $blockedItems = @($items | Where-Object { $_.status -eq "blocked" })
@@ -1168,6 +1200,11 @@ $dataFlows = @(
         name = "public-tester-gateway"
         path = @("tester bearer token", "public edge /tester/wallets/create", "public-only wallet metadata", "public edge /tester/wallets/send", "cap enforcement", "runtime block", "balance proof")
         latestEvidence = $reportPaths.publicTesterGateway
+    },
+    [ordered]@{
+        name = "dashboard-wallet-explorer"
+        path = @("browser /wallet tester panel", "tester token kept out of page/storage output", "tester wallet create", "tester faucet", "tester send", "browser /explorer inspection", "desktop/mobile viewport checks")
+        latestEvidence = $reportPaths.dashboardUiReadiness
     },
     [ordered]@{
         name = "developer-dev-pack"
@@ -1214,6 +1251,7 @@ $objectiveDeliverables = @(
     "RPC clients can connect through a private service now and through a public owner-operated edge only after TLS/CORS/rate-limit checks pass.",
     "Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding.",
     "Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.",
+    "The dashboard has a browser-level desktop/mobile proof for tester wallet create, faucet, send, and Explorer inspection without leaking tester tokens or causing horizontal overflow.",
     "Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.",
     "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven, bounds relayer child processes, stages the Base scan cursor until L1 credit proof, can queue new relayer handoffs into the L1, and remains live-blocked until owner guardrails are configured.",
     "State backup, monitoring, reboot-persistent service install, operator doctor diagnostics, node-operator packaging, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
@@ -1256,6 +1294,10 @@ $report = [ordered]@{
         testerNetworkFresh = $externalTesterNetworkFresh
         publicTesterGatewayStatus = $publicTesterGatewayStatus
         publicTesterGatewayReady = $publicTesterGatewayReady
+        dashboardUiStatus = $dashboardUiStatus
+        dashboardUiReady = $dashboardUiReady
+        dashboardUiBrowserProjects = @($dashboardUiBrowserProjects)
+        dashboardUiCoveredRoutes = @($dashboardUiCoveredRoutes)
         publicDeploymentContractPacketSmoke = $deploymentContractPacketSmoke
     }
     opsAlertCoverage = [ordered]@{

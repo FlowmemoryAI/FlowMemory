@@ -56,6 +56,7 @@ $expectedFiles = @(
     "runbooks/WINDOWS_BACKUP_INSTALL.md",
     "runbooks/WINDOWS_ALERT_INSTALL.md",
     "runbooks/EXTERNAL_TESTER_PACKET.md",
+    "runbooks/DASHBOARD_UI_READINESS.md",
     "evidence/operator-doctor-report.json",
     "evidence/service-status-report.json",
     "evidence/service-monitor-report.json",
@@ -67,6 +68,7 @@ $expectedFiles = @(
     "evidence/incident-drill-report.json",
     "evidence/bridge-relayer-once-report.json",
     "evidence/external-tester-packet-report.json",
+    "evidence/dashboard-ui-readiness-report.json",
     "evidence/flowchain-architecture-audit-report.json",
     "evidence/flowchain-completion-audit-report.json",
     "evidence/production-truth-table-report.json"

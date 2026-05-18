@@ -18,6 +18,7 @@
     "mobile:android:sync": "npm run build && cap sync android",
     "mobile:android:debug": "npm run mobile:android:sync && cd android && gradlew.bat assembleDebug",
     "test": "vitest run",
+    "browser:e2e": "playwright test",
     "typecheck": "tsc -b",
     "sync:fixtures": "node scripts/sync-fixtures.mjs"
   },
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.3.4",
+    "@playwright/test": "^1.60.0",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^6.0.1",

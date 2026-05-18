@@ -41,6 +41,7 @@ $paths = [ordered]@{
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
     publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
     publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
+    dashboardUiReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     publicRpcDeploymentAutomation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
     operatorPackage = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-report.json"
@@ -340,6 +341,9 @@ $publicRpcAbuseTestExitCode = $publicRpcAbuseTestResult.exitCode
 $publicTesterGatewayResult = Invoke-AuditChild -Path $paths.publicTesterGateway -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-tester-gateway-e2e.ps1"))
 $publicTesterGatewayOutput = @($publicTesterGatewayResult.output)
 $publicTesterGatewayExitCode = $publicTesterGatewayResult.exitCode
+$dashboardUiReadinessResult = Invoke-AuditChild -Path $paths.dashboardUiReadiness -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-dashboard-ui-readiness.ps1"))
+$dashboardUiReadinessOutput = @($dashboardUiReadinessResult.output)
+$dashboardUiReadinessExitCode = $dashboardUiReadinessResult.exitCode
 $backupRestoreValidationResult = Invoke-AuditChild -Path $paths.backupRestoreValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-restore-validation.ps1"))
 $backupRestoreValidationOutput = @($backupRestoreValidationResult.output)
 $backupRestoreValidationExitCode = $backupRestoreValidationResult.exitCode
@@ -758,6 +762,43 @@ $publicTesterGatewayPassed = $publicTesterGatewayExitCode -eq 0 `
     -and ((Get-AuditProp -Object $publicTesterGateway -Name "capRejected" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicTesterGateway -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicTesterGateway -Name "noSecrets" -Default $false) -eq $true)
+$dashboardUiReadiness = $reports.dashboardUiReadiness
+$dashboardUiReadinessStatus = Get-ReportStatus -Report $dashboardUiReadiness
+$dashboardUiReadinessChecks = Get-AuditProp -Object $dashboardUiReadiness -Name "checks"
+$dashboardUiRequiredChecks = @(
+    "dashboardPackageScriptPresent",
+    "rootPackageScriptPresent",
+    "playwrightConfigExists",
+    "browserSpecExists",
+    "desktopProjectConfigured",
+    "mobileProjectConfigured",
+    "walletTesterRouteCovered",
+    "testerWalletCreateCovered",
+    "testerFaucetCovered",
+    "testerSendCovered",
+    "explorerRouteCovered",
+    "noSecretLeakageAsserted",
+    "noHorizontalOverflowAsserted",
+    "dashboardUnitTestsPassed",
+    "dashboardBrowserE2ePassed",
+    "dashboardBuildPassed",
+    "controlPlaneTesterGatewayTestsPassed"
+)
+$dashboardUiMissingChecks = @($dashboardUiRequiredChecks | Where-Object {
+    (Get-AuditProp -Object $dashboardUiReadinessChecks -Name $_ -Default $false) -ne $true
+})
+$dashboardUiFailedChecks = @((Get-AuditProp -Object $dashboardUiReadiness -Name "failedChecks" -Default @()))
+$dashboardUiBrowserProjects = @((Get-AuditProp -Object $dashboardUiReadiness -Name "browserProjects" -Default @()))
+$dashboardUiCoveredRoutes = @((Get-AuditProp -Object $dashboardUiReadiness -Name "coveredRoutes" -Default @()))
+$dashboardUiReadinessPassed = $dashboardUiReadinessExitCode -eq 0 `
+    -and $dashboardUiReadinessStatus -eq "passed" `
+    -and $dashboardUiMissingChecks.Count -eq 0 `
+    -and $dashboardUiFailedChecks.Count -eq 0 `
+    -and $dashboardUiBrowserProjects.Count -ge 2 `
+    -and $dashboardUiCoveredRoutes.Count -ge 5 `
+    -and ((Get-AuditProp -Object $dashboardUiReadiness -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $dashboardUiReadiness -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $dashboardUiReadiness -Name "broadcasts" -Default $true) -eq $false)
 $backupRestoreValidation = $reports.backupRestoreValidation
 $backupRestoreValidationStatus = Get-ReportStatus -Report $backupRestoreValidation
 $backupRestoreValidationChecks = Get-AuditProp -Object $backupRestoreValidation -Name "checks"
@@ -1152,6 +1193,12 @@ Add-AuditItem -Items $items -Id "public-tester-gateway-e2e" `
     -Evidence "gatewayStatus=$publicTesterGatewayStatus, configured=$(Get-AuditProp -Object $publicTesterGateway -Name "testerGatewayConfigured"), transferAccepted=$(Get-AuditProp -Object $publicTesterGateway -Name "transferAccepted"), capRejected=$(Get-AuditProp -Object $publicTesterGateway -Name "capRejected"), report=$($paths.publicTesterGateway)" `
     -Commands @("npm run flowchain:tester:gateway:e2e")
 
+Add-AuditItem -Items $items -Id "dashboard-ui-readiness" `
+    -Requirement "Dashboard browser readiness proves desktop and mobile users can create a tester wallet, request faucet funds, send tester units, inspect the result in Explorer, and avoid token/secret leakage or horizontal overflow." `
+    -Status $(if ($dashboardUiReadinessPassed) { "passed" } else { "failed" }) `
+    -Evidence "dashboardUiStatus=$dashboardUiReadinessStatus, browserProjects=$($dashboardUiBrowserProjects.Count), coveredRoutes=$($dashboardUiCoveredRoutes.Count), failedChecks=$($dashboardUiFailedChecks.Count), missingChecks=$($dashboardUiMissingChecks.Count), report=$($paths.dashboardUiReadiness)" `
+    -Commands @("npm run flowchain:dashboard:ui:readiness", "npm run browser:e2e --prefix apps/dashboard")
+
 Add-AuditItem -Items $items -Id "backup-restore-validator-self-test" `
     -Requirement "Backup tooling creates manifest-backed live-state snapshots, verifies latest-snapshot restore rehearsal without targeting live state, and rejects corrupt, tampered, missing-artifact, stale-pointer, and wrong-chain cases." `
     -Status $(if ($backupRestoreValidationPassed) { "passed" } else { "failed" }) `
@@ -1309,6 +1356,8 @@ $report = [ordered]@{
     publicRpcAbuseTestOutputRedacted = @($publicRpcAbuseTestOutput | ForEach-Object { "$_" })
     publicTesterGatewayExitCode = $publicTesterGatewayExitCode
     publicTesterGatewayOutputRedacted = @($publicTesterGatewayOutput | ForEach-Object { "$_" })
+    dashboardUiReadinessExitCode = $dashboardUiReadinessExitCode
+    dashboardUiReadinessOutputRedacted = @($dashboardUiReadinessOutput | ForEach-Object { "$_" })
     backupRestoreValidationExitCode = $backupRestoreValidationExitCode
     backupRestoreValidationOutputRedacted = @($backupRestoreValidationOutput | ForEach-Object { "$_" })
     backupOwnerPathDryRunExitCode = $backupOwnerPathDryRunExitCode
@@ -1370,6 +1419,10 @@ $report = [ordered]@{
         readinessStatus = (Get-ReportStatus -Report $externalTester)
         publicTesterGatewayStatus = $publicTesterGatewayStatus
         publicTesterGatewayPassed = $publicTesterGatewayPassed
+        dashboardUiReadinessStatus = $dashboardUiReadinessStatus
+        dashboardUiReadinessPassed = $dashboardUiReadinessPassed
+        dashboardUiBrowserProjects = @($dashboardUiBrowserProjects)
+        dashboardUiCoveredRoutes = @($dashboardUiCoveredRoutes)
         publicDeploymentContractPacketSmoke = $publicDeploymentContractPacketSmoke
     }
     childProcessTimeoutSeconds = $ChildTimeoutSeconds
@@ -1401,6 +1454,7 @@ $report = [ordered]@{
         "npm run flowchain:public-rpc:validate",
         "npm run flowchain:public-rpc:abuse-test",
         "npm run flowchain:tester:gateway:e2e",
+        "npm run flowchain:dashboard:ui:readiness",
         "npm run flowchain:backup:restore:validate",
         "npm run flowchain:backup:owner-path:dry-run",
         "npm run flowchain:backup:create",

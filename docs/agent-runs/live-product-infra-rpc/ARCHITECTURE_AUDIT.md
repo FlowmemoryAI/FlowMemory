@@ -1,6 +1,6 @@
 ﻿# FlowChain Architecture Audit
 
-Generated: 2026-05-18T00:59:23.0038836Z
+Generated: 2026-05-18T01:33:21.6981487Z
 Status: blocked
 Blocked only on known external owner inputs: True
 
@@ -10,6 +10,7 @@ Blocked only on known external owner inputs: True
 - RPC clients can connect through a private service now and through a public owner-operated edge only after TLS/CORS/rate-limit checks pass.
 - Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding.
 - Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.
+- The dashboard has a browser-level desktop/mobile proof for tester wallet create, faucet, send, and Explorer inspection without leaking tester tokens or causing horizontal overflow.
 - Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.
 - Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven, bounds relayer child processes, stages the Base scan cursor until L1 credit proof, can queue new relayer handoffs into the L1, and remains live-blocked until owner guardrails are configured.
 - State backup, monitoring, reboot-persistent service install, operator doctor diagnostics, node-operator packaging, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.
@@ -46,7 +47,8 @@ Blocked only on known external owner inputs: True
 | Developer ecosystem | Developer SDK/devkit and docs connect to the real FlowChain RPC, generate a live RPC reference, read wallet data, submit a runtime-backed local wallet send, and fail closed for public readiness. | passed | devPackStatus=passed, methodCount=79, heights=61637->61638, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-dev-pack\dev-pack-e2e-report.json |
 | External tester launch | Friends-and-family tester sharing requires fresh tester-wallet evidence, executable packet-route smoke, and a machine-readable connection pack, and remains blocked until public RPC, backup, and Base bridge gates pass. | blocked | externalTester=blocked, testerNetworkFresh=True, packet=blocked, packetShareable=False, packetSmoke=True, smokeRoutes=13, connectPackReady=True, externalSharingReady=False |
 | External tester launch | Public tester write gateway has a local production-shaped E2E proof for bearer auth, public-only wallet creation, capped wallet sends, balance settlement, and over-cap rejection. | passed | gatewayStatus=passed, configured=True, transferAccepted=True, capRejected=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\public-tester-gateway-e2e-report.json |
-| Verification | Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, operator doctor, node-operator package, developer dev-pack, and completion evidence into one auditable path. | passed | liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, packetSmoke=True, connectPackReady=True, publicTesterGateway=passed, operatorDoctor=blocked, operatorPackage=passed, operatorPackageVerify=passed, devPack=passed |
+| Explorer and wallet UI | Dashboard browser verification covers the tester wallet panel, authenticated tester create/faucet/send operations, Explorer inspection, desktop and mobile viewports, no token/secret leakage, and no horizontal overflow. | passed | dashboardUiStatus=passed, browserProjects=2, coveredRoutes=5, failedChecks=0, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\dashboard-ui-readiness-report.json |
+| Verification | Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, operator doctor, node-operator package, developer dev-pack, and completion evidence into one auditable path. | passed | liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, packetSmoke=True, connectPackReady=True, publicTesterGateway=passed, dashboardUi=passed, operatorDoctor=blocked, operatorPackage=passed, operatorPackageVerify=passed, devPack=passed |
 
 ## Data Flows
 
@@ -54,6 +56,7 @@ Blocked only on known external owner inputs: True
 - owner-host-service-lifecycle: Windows Scheduled Task -> repo working directory -> live service supervisor -> service status check -> restart with live profile -> private node/control-plane recovery
 - node-operator-package: operator doctor -> operator package command -> copied runbooks -> command matrix -> owner-input names -> latest evidence reports -> independent verifier -> no-secret scan
 - public-tester-gateway: tester bearer token -> public edge /tester/wallets/create -> public-only wallet metadata -> public edge /tester/wallets/send -> cap enforcement -> runtime block -> balance proof
+- dashboard-wallet-explorer: browser /wallet tester panel -> tester token kept out of page/storage output -> tester wallet create -> tester faucet -> tester send -> browser /explorer inspection -> desktop/mobile viewport checks
 - developer-dev-pack: developer CLI/SDK -> control-plane /rpc -> rpc_discover -> wallet balance/history reads -> control-plane /wallets/send -> runtime block -> generated RPC reference
 - public-rpc-exposure: owner TLS endpoint -> allowed-origin/rate-limit gate -> control-plane HTTP server -> JSON-RPC/REST methods -> runtime state reads
 - public-rpc-edge-template: placeholder edge config -> owner DNS/TLS -> rate-limited reverse proxy -> private FlowChain RPC origin -> readiness gates

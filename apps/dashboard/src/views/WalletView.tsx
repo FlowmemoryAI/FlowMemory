@@ -989,8 +989,8 @@ export function WalletView({ workbench }: WalletViewProps) {
               <span>Amount</span>
               <span>Status</span>
             </div>
-            {activityRows.slice(0, 4).map((row) => (
-              <div key={row.id} role="row">
+            {activityRows.slice(0, 4).map((row, index) => (
+              <div key={`${row.type}:${row.id}:${index}`} role="row">
                 <span>{timestampLabel()}</span>
                 <span>{row.type}</span>
                 <span>{row.asset}</span>
@@ -1281,8 +1281,8 @@ export function WalletView({ workbench }: WalletViewProps) {
           {activePanel === "activity" ? (
             <div className="wallet-panel-list">
               {activityRows.length === 0 ? <p>No wallet activity yet.</p> : null}
-              {activityRows.map((row) => (
-                <article key={row.id}>
+              {activityRows.map((row, index) => (
+                <article key={`${row.type}:${row.id}:${index}`}>
                   <span>{row.type}</span>
                   <strong>{row.amount}</strong>
                   <small>{row.route}</small>

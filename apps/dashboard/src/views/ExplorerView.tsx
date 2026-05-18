@@ -400,8 +400,8 @@ export function ExplorerView({ data, workbench }: { data: DashboardData; workben
       <section className="explorer-layout">
         <div className="explorer-stream" aria-label="Explorer records">
           {filteredRows.length > 0 ? (
-            filteredRows.slice(0, 80).map((row) => (
-              <article key={row.id} className={`explorer-row explorer-row-${row.category}`}>
+            filteredRows.slice(0, 80).map((row, index) => (
+              <article key={`${row.id}:${index}`} className={`explorer-row explorer-row-${row.category}`}>
                 <div className="explorer-row-icon" aria-hidden="true">
                   {row.category === "blocks" ? <Boxes size={18} /> : null}
                   {row.category === "transactions" || row.category === "records" ? <ArrowRightLeft size={18} /> : null}

@@ -1,0 +1,75 @@
+{
+    "schema":  "flowchain.dashboard_ui_readiness_report.v0",
+    "generatedAt":  "2026-05-18T01:33:13.2066924+00:00",
+    "status":  "passed",
+    "checks":  {
+                   "dashboardPackageScriptPresent":  true,
+                   "rootPackageScriptPresent":  true,
+                   "playwrightConfigExists":  true,
+                   "browserSpecExists":  true,
+                   "desktopProjectConfigured":  true,
+                   "mobileProjectConfigured":  true,
+                   "walletTesterRouteCovered":  true,
+                   "testerWalletCreateCovered":  true,
+                   "testerFaucetCovered":  true,
+                   "testerSendCovered":  true,
+                   "explorerRouteCovered":  true,
+                   "noSecretLeakageAsserted":  true,
+                   "noHorizontalOverflowAsserted":  true,
+                   "dashboardUnitTestsPassed":  true,
+                   "dashboardBrowserE2ePassed":  true,
+                   "dashboardBuildPassed":  true,
+                   "controlPlaneTesterGatewayTestsPassed":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "commands":  [
+                     {
+                         "label":  "dashboard unit render tests",
+                         "command":  "npm test --prefix apps/dashboard",
+                         "exitCode":  0,
+                         "durationSeconds":  4,
+                         "stdoutLineCount":  7,
+                         "stderrLineCount":  0
+                     },
+                     {
+                         "label":  "dashboard browser wallet faucet explorer loop",
+                         "command":  "npm run browser:e2e --prefix apps/dashboard",
+                         "exitCode":  0,
+                         "durationSeconds":  14,
+                         "stdoutLineCount":  6,
+                         "stderrLineCount":  8
+                     },
+                     {
+                         "label":  "dashboard production build",
+                         "command":  "npm run build --prefix apps/dashboard",
+                         "exitCode":  0,
+                         "durationSeconds":  4,
+                         "stdoutLineCount":  18,
+                         "stderrLineCount":  0
+                     },
+                     {
+                         "label":  "control-plane tester gateway tests",
+                         "command":  "npm test --prefix services/control-plane",
+                         "exitCode":  0,
+                         "durationSeconds":  57,
+                         "stdoutLineCount":  74,
+                         "stderrLineCount":  0
+                     }
+                 ],
+    "browserProjects":  [
+                            "chromium-desktop",
+                            "chromium-mobile"
+                        ],
+    "coveredRoutes":  [
+                          "/wallet?panel=tester",
+                          "/tester/wallets/create",
+                          "/tester/faucet",
+                          "/tester/wallets/send",
+                          "/explorer"
+                      ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}
