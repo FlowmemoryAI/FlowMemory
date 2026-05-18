@@ -1,6 +1,6 @@
 {
-    "schema":  "flowchain.backup_owner_path_dry_run_report.v0",
-    "generatedAt":  "2026-05-17T20:22:22.7898628Z",
+    "schema":  "flowchain.backup_owner_path_dry_run_report.v1",
+    "generatedAt":  "2026-05-18T04:44:23.9884243Z",
     "status":  "passed",
     "dryRunScope":  "ignored-local-owner-path-rehearsal",
     "dryRunRoot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\backup-owner-path-dry-run",
@@ -10,6 +10,9 @@
     "failedChecks":  [
 
                      ],
+    "secretMarkerFindings":  [
+
+                             ],
     "checks":  {
                    "dryRunRootInsideIgnoredLocalState":  true,
                    "ownerBackupEnvRestored":  true,
@@ -35,6 +38,7 @@
                    "liveStateStillReadable":  true,
                    "envValuesPrintedFalse":  true,
                    "noSecrets":  true,
+                   "secretMarkerFindingsEmpty":  true,
                    "broadcastsFalse":  true
                },
     "proofReports":  {
@@ -46,8 +50,8 @@
                                 "FlowChain backup readiness status: passed",
                                 "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-owner-path-dry-run\\backup-readiness-report.json"
                             ],
-    "liveStateSha256Before":  "89edd6caf471e7128287b81bbed160c9d3dc91e8e2881f1834ad6dc81f53ade7",
-    "liveStateSha256After":  "f4284c7c25c7974e96a0c024161c3b081916c1b3cb18f193df216d223fa9ea51",
+    "liveStateSha256Before":  "6a495d8b9c3f6c28999c131b6629d13ba8ea84b7a20757d735d03d91aa258048",
+    "liveStateSha256After":  "80da5128baa18cc944fbd6ef367840c08433a6a44a7b5457bf5c429eba184105",
     "requiredOwnerInput":  "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
     "envValuesPrinted":  false,
     "noSecrets":  true,

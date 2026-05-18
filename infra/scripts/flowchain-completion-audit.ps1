@@ -1098,15 +1098,38 @@ $backupOwnerPathDryRun = $reports.backupOwnerPathDryRun
 $backupOwnerPathDryRunStatus = Get-ReportStatus -Report $backupOwnerPathDryRun
 $backupOwnerPathDryRunChecks = Get-AuditProp -Object $backupOwnerPathDryRun -Name "checks"
 $backupOwnerPathDryRunFailedChecks = @((Get-AuditProp -Object $backupOwnerPathDryRun -Name "failedChecks" -Default @()))
+$backupOwnerPathDryRunSecretFindings = @((Get-AuditProp -Object $backupOwnerPathDryRun -Name "secretMarkerFindings" -Default @()))
+$backupOwnerPathDryRunMissingChecks = Get-MissingAuditChecks -Checks $backupOwnerPathDryRunChecks -Names @(
+    "childReadinessCommandPassed",
+    "readinessStatusPassed",
+    "snapshotProofPassed",
+    "restoreProofPassed",
+    "writeVerified",
+    "latestPointerVerified",
+    "latestPointerWrittenAtomically",
+    "restoreLiveStateProtected",
+    "restoreDidNotMutateLiveState",
+    "ownerBackupEnvRestored",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "secretMarkerFindingsEmpty",
+    "broadcastsFalse"
+)
+$backupOwnerPathDryRunFailedCheckCount = @($backupOwnerPathDryRunFailedChecks | Where-Object { $null -ne $_ }).Count
+$backupOwnerPathDryRunSecretFindingCount = @($backupOwnerPathDryRunSecretFindings | Where-Object { $null -ne $_ }).Count
+$backupOwnerPathDryRunMissingCheckCount = @($backupOwnerPathDryRunMissingChecks | Where-Object { $null -ne $_ }).Count
 $backupOwnerPathDryRunPassed = $backupOwnerPathDryRunExitCode -eq 0 `
     -and $backupOwnerPathDryRunStatus -eq "passed" `
-    -and $backupOwnerPathDryRunFailedChecks.Count -eq 0 `
+    -and $backupOwnerPathDryRunFailedCheckCount -eq 0 `
+    -and $backupOwnerPathDryRunSecretFindingCount -eq 0 `
+    -and $backupOwnerPathDryRunMissingCheckCount -eq 0 `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "readinessStatusPassed" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "snapshotProofPassed" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "restoreProofPassed" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "restoreLiveStateProtected" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "restoreDidNotMutateLiveState" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "ownerBackupEnvRestored" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "secretMarkerFindingsEmpty" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRun -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRun -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRun -Name "broadcasts" -Default $true) -eq $false)
@@ -1733,7 +1756,7 @@ Add-AuditItem -Items $items -Id "backup-restore-validator-self-test" `
 Add-AuditItem -Items $items -Id "backup-owner-path-dry-run" `
     -Requirement "Backup owner-path dry run injects an ignored local backup path into the production backup readiness gate and proves snapshot plus restore evidence without using the owner's real directory." `
     -Status $(if ($backupOwnerPathDryRunPassed) { "passed" } else { "failed" }) `
-    -Evidence "dryRunStatus=$backupOwnerPathDryRunStatus, failedChecks=$($backupOwnerPathDryRunFailedChecks.Count), readiness=$(Get-AuditProp -Object $backupOwnerPathDryRun -Name "childReadinessStatus"), snapshotProof=$(Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "snapshotProofPassed"), restoreProof=$(Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "restoreProofPassed"), report=$($paths.backupOwnerPathDryRun)" `
+    -Evidence "dryRunStatus=$backupOwnerPathDryRunStatus, failedChecks=$backupOwnerPathDryRunFailedCheckCount, missingChecks=$backupOwnerPathDryRunMissingCheckCount, secretFindings=$backupOwnerPathDryRunSecretFindingCount, readiness=$(Get-AuditProp -Object $backupOwnerPathDryRun -Name "childReadinessStatus"), snapshotProof=$(Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "snapshotProofPassed"), restoreProof=$(Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "restoreProofPassed"), report=$($paths.backupOwnerPathDryRun)" `
     -Commands @("npm run flowchain:backup:owner-path:dry-run")
 
 Add-AuditItem -Items $items -Id "external-tester-packet" `

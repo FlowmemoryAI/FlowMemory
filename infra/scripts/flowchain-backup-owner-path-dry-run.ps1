@@ -43,6 +43,38 @@ function ConvertTo-BackupDryRunSafeLine {
     return $text
 }
 
+function Get-BackupDryRunSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 function Get-BackupDryRunFileSha256 {
     param([Parameter(Mandatory = $true)][string] $Path)
 
@@ -137,6 +169,7 @@ $checks = [ordered]@{
     noSecrets = (Get-BackupDryRunProp -Object $readinessReport -Name "noSecrets" -Default $false) -eq $true `
         -and (Get-BackupDryRunProp -Object $backupReport -Name "noSecrets" -Default $false) -eq $true `
         -and (Get-BackupDryRunProp -Object $restoreReport -Name "noSecrets" -Default $false) -eq $true
+    secretMarkerFindingsEmpty = $true
     broadcastsFalse = (Get-BackupDryRunProp -Object $backupReport -Name "broadcasts" -Default $false) -eq $false `
         -and (Get-BackupDryRunProp -Object $restoreReport -Name "broadcasts" -Default $false) -eq $false
 }
@@ -145,7 +178,7 @@ $failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } 
 $status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
 
 $report = [ordered]@{
-    schema = "flowchain.backup_owner_path_dry_run_report.v0"
+    schema = "flowchain.backup_owner_path_dry_run_report.v1"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
     status = $status
     dryRunScope = "ignored-local-owner-path-rehearsal"
@@ -154,6 +187,7 @@ $report = [ordered]@{
     childReadinessStatus = [string](Get-BackupDryRunProp -Object $readinessReport -Name "status" -Default "missing")
     childReadinessExitCode = [int]$childExitCode
     failedChecks = @($failedChecks)
+    secretMarkerFindings = @()
     checks = $checks
     proofReports = [ordered]@{
         readiness = $childReadinessReportPath
@@ -168,6 +202,20 @@ $report = [ordered]@{
     noSecrets = $true
     broadcasts = $false
 }
+
+$preliminaryReportText = $report | ConvertTo-Json -Depth 18
+$secretMarkerFindings = @(
+    Get-BackupDryRunSecretMarkerFindings -Text $preliminaryReportText -Label "backup owner path dry-run report"
+)
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
+$report["status"] = $status
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["checks"] = $checks
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 
 $reportText = $report | ConvertTo-Json -Depth 18
 Assert-FlowChainNoSecretText -Text $reportText -Label "backup owner path dry-run report"

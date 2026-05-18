@@ -672,8 +672,18 @@ $definitions = @(
             "ownerBackupEnvRestored",
             "envValuesPrintedFalse",
             "noSecrets",
+            "secretMarkerFindingsEmpty",
             "broadcastsFalse"
         )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
     },
     [ordered]@{
         id = "bridge-live-readiness"
