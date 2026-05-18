@@ -467,10 +467,47 @@ $service = $reports.serviceStatus
 $serviceMonitor = $reports.serviceMonitor
 $nodeStatus = [string](Get-AuditProp -Object (Get-AuditProp -Object $service -Name "node") -Name "status")
 $controlPlaneStatus = [string](Get-AuditProp -Object (Get-AuditProp -Object $service -Name "controlPlane") -Name "status")
+$serviceChecks = Get-AuditProp -Object $service -Name "checks"
+$serviceProblems = @((Get-AuditProp -Object $service -Name "problems" -Default @()))
+$serviceFailedChecks = @((Get-AuditProp -Object $service -Name "failedChecks" -Default @()))
+$serviceSecretFindings = @((Get-AuditProp -Object $service -Name "secretMarkerFindings" -Default @()))
+$serviceRequiredChecks = @(
+    "nodeRunning",
+    "nodeCommandLineMatched",
+    "controlPlaneRunning",
+    "controlPlaneCommandLineMatched",
+    "controlPlanePortPrivate",
+    "stateFileReadable",
+    "latestHeightNumeric",
+    "finalizedHeightNumeric",
+    "latestHeightPositive",
+    "stateFileFresh",
+    "serviceProfileLive",
+    "serviceProfileUnbounded",
+    "boundedLiveModeRejectedFalse",
+    "relayerLoopStoppedOrHealthy",
+    "problemsEmpty",
+    "failedProblemsEmpty",
+    "envValuesPrintedFalse",
+    "secretMarkerFindingsEmpty",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$serviceMissingChecks = @(Get-MissingAuditChecks -Checks $serviceChecks -Names $serviceRequiredChecks)
+$serviceFailedCheckCount = $serviceFailedChecks.Count
+$serviceSecretFindingCount = $serviceSecretFindings.Count
+$serviceMissingCheckCount = $serviceMissingChecks.Count
 $serviceReady = $serviceStatusExitCode -eq 0 `
     -and (Get-ReportStatus -Report $service) -eq "passed" `
+    -and $serviceFailedCheckCount -eq 0 `
+    -and $serviceSecretFindingCount -eq 0 `
+    -and $serviceMissingCheckCount -eq 0 `
+    -and $serviceProblems.Count -eq 0 `
     -and $nodeStatus -eq "running" `
-    -and $controlPlaneStatus -eq "running"
+    -and $controlPlaneStatus -eq "running" `
+    -and ((Get-AuditProp -Object $service -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $service -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $service -Name "broadcasts" -Default $true) -eq $false)
 $chain = Get-AuditProp -Object $service -Name "chain"
 $latestHeight = [string](Get-AuditProp -Object $chain -Name "latestHeight" -Default "0")
 $stateAge = [int] (Get-AuditProp -Object $chain -Name "stateFileLastWriteAgeSeconds" -Default 999999)
@@ -1633,7 +1670,7 @@ $items = New-Object System.Collections.ArrayList
 Add-AuditItem -Items $items -Id "service-live-profile" `
     -Requirement "Chain service is running in live profile and command lines match this worktree." `
     -Status $(if ($serviceReady) { "passed" } else { "failed" }) `
-    -Evidence "service-status status=$(Get-ReportStatus -Report $service), node=$nodeStatus, controlPlane=$controlPlaneStatus, report=$($paths.serviceStatus)" `
+    -Evidence "service-status status=$(Get-ReportStatus -Report $service), node=$nodeStatus, controlPlane=$controlPlaneStatus, failedChecks=$serviceFailedCheckCount, missingChecks=$serviceMissingCheckCount, secretFindings=$serviceSecretFindingCount, problems=$($serviceProblems.Count), report=$($paths.serviceStatus)" `
     -Commands @("npm run flowchain:service:status")
 
 Add-AuditItem -Items $items -Id "block-production" `

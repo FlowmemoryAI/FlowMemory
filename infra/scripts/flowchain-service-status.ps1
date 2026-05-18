@@ -108,6 +108,38 @@ function Get-ServiceStatusFileAgeSeconds {
     return [math]::Round(((Get-Date).ToUniversalTime() - (Get-Item -LiteralPath $Path).LastWriteTimeUtc).TotalSeconds, 3)
 }
 
+function Get-ServiceStatusSecretMarkerFindings {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Label
+    )
+
+    $patterns = @(
+        "privateKey",
+        "private_key",
+        "seedPhrase",
+        "seed phrase",
+        "mnemonic",
+        "rpcUrl",
+        "rpc-url",
+        "apiKey",
+        "webhook",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN OPENSSH PRIVATE KEY"
+    )
+
+    $findings = New-Object System.Collections.ArrayList
+    foreach ($pattern in $patterns) {
+        if ($Text.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            [void] $findings.Add([ordered]@{
+                label = $Label
+                marker = $pattern
+            })
+        }
+    }
+    return @($findings)
+}
+
 if ($RelayerReportMaxAgeSeconds -lt 5) {
     throw "RelayerReportMaxAgeSeconds must be at least 5."
 }
@@ -178,11 +210,33 @@ if ($liveProfile -and $maxBlocks -gt 0) {
 
 $failed = @($problems | Where-Object { $_.kind -eq "failed" })
 $status = if ($failed.Count -gt 0) { "failed" } elseif ($problems.Count -gt 0) { "blocked" } else { "passed" }
+$checks = [ordered]@{
+    nodeRunning = $nodeStatus.running -eq $true
+    nodeCommandLineMatched = $nodeStatus.commandLineMatched -eq $true
+    controlPlaneRunning = $controlPlaneReady -eq $true
+    controlPlaneCommandLineMatched = $controlPlaneReady -eq $true
+    controlPlanePortPrivate = $ControlPlaneHost -eq "127.0.0.1"
+    stateFileReadable = $stateFacts.readable -eq $true
+    latestHeightNumeric = "$($stateFacts.latestHeight)" -match '^\d+$'
+    finalizedHeightNumeric = "$($stateFacts.finalizedHeight)" -match '^\d+$'
+    latestHeightPositive = "$($stateFacts.latestHeight)" -match '^\d+$' -and [int64]$stateFacts.latestHeight -gt 0
+    stateFileFresh = [double]$stateFacts.stateFileLastWriteAgeSeconds -le 90
+    serviceProfileLive = $liveProfile -eq $true
+    serviceProfileUnbounded = $maxBlocks -eq 0
+    boundedLiveModeRejectedFalse = -not ($liveProfile -and $maxBlocks -gt 0)
+    relayerLoopStoppedOrHealthy = (-not $relayerStatus.running) -or $relayerLoopReportHealthy
+    problemsEmpty = $problems.Count -eq 0
+    failedProblemsEmpty = $failed.Count -eq 0
+    envValuesPrintedFalse = $true
+    secretMarkerFindingsEmpty = $true
+    noSecrets = $true
+    broadcastsFalse = $true
+}
 
 $report = [ordered]@{
     schema = "flowchain.service_status_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-    status = $status
+    status = "pending"
     bind = [ordered]@{
         host = $ControlPlaneHost
         port = $ControlPlanePort
@@ -246,9 +300,25 @@ $report = [ordered]@{
     stopCommand = "npm run flowchain:service:stop"
     restartCommand = "npm run flowchain:service:restart"
     problems = @($problems)
+    checks = $checks
+    failedChecks = @()
+    secretMarkerFindings = @()
     envValuesPrinted = $false
     noSecrets = $true
+    broadcasts = $false
 }
+
+$preliminaryReportText = $report | ConvertTo-Json -Depth 16
+$secretMarkerFindings = @(Get-ServiceStatusSecretMarkerFindings -Text $preliminaryReportText -Label "service status report")
+$checks["secretMarkerFindingsEmpty"] = $secretMarkerFindings.Count -eq 0
+$checks["noSecrets"] = $secretMarkerFindings.Count -eq 0
+$failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+$status = if ($failedChecks.Count -gt 0) { "failed" } elseif ($problems.Count -gt 0) { "blocked" } else { "passed" }
+$report["status"] = $status
+$report["checks"] = $checks
+$report["failedChecks"] = @($failedChecks)
+$report["secretMarkerFindings"] = @($secretMarkerFindings)
+$report["noSecrets"] = $secretMarkerFindings.Count -eq 0
 
 Write-FlowChainJson -Path $reportFullPath -Value $report -Depth 16
 

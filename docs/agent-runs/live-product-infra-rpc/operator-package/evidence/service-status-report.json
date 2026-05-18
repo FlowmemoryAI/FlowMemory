@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.service_status_report.v0",
-    "generatedAt":  "2026-05-18T05:20:29.9800878Z",
+    "generatedAt":  "2026-05-18T05:24:34.6423848Z",
     "status":  "passed",
     "bind":  {
                  "host":  "127.0.0.1",
@@ -29,7 +29,7 @@
                               "report":  {
                                              "path":  "devnet/local/bridge-live-readiness/bridge-relayer-loop-report.json",
                                              "status":  "blocked",
-                                             "ageSeconds":  2659.048,
+                                             "ageSeconds":  2903.669,
                                              "maxAgeSeconds":  180,
                                              "fresh":  false,
                                              "acceptableStatus":  true,
@@ -53,12 +53,12 @@
                               },
     "chain":  {
                   "stateFileReadable":  true,
-                  "latestHeight":  "65995",
-                  "latestHash":  "0xee9fade0e38248097a4408091ab896dac9893625eaf117f06dcf95aa442aedb3",
+                  "latestHeight":  "66040",
+                  "latestHash":  "0x263ea763824b265e1b60c0cac4faa44d3002e06010ca4de88bed55489bfdcd16",
                   "latestRoot":  "0xd90c3fc45ca18fd7e4e036f755ea98399570fb9328102ccfbef155f20c52d9d7",
-                  "stateFileLastWriteAgeSeconds":  2,
-                  "finalizedHeight":  "65995",
-                  "finalizedHash":  "0xee9fade0e38248097a4408091ab896dac9893625eaf117f06dcf95aa442aedb3",
+                  "stateFileLastWriteAgeSeconds":  1,
+                  "finalizedHeight":  "66040",
+                  "finalizedHash":  "0x263ea763824b265e1b60c0cac4faa44d3002e06010ca4de88bed55489bfdcd16",
                   "mempoolDepth":  0,
                   "peerCount":  null
               },
@@ -67,6 +67,35 @@
     "problems":  [
 
                  ],
+    "checks":  {
+                   "nodeRunning":  true,
+                   "nodeCommandLineMatched":  true,
+                   "controlPlaneRunning":  true,
+                   "controlPlaneCommandLineMatched":  true,
+                   "controlPlanePortPrivate":  true,
+                   "stateFileReadable":  true,
+                   "latestHeightNumeric":  true,
+                   "finalizedHeightNumeric":  true,
+                   "latestHeightPositive":  true,
+                   "stateFileFresh":  true,
+                   "serviceProfileLive":  true,
+                   "serviceProfileUnbounded":  true,
+                   "boundedLiveModeRejectedFalse":  true,
+                   "relayerLoopStoppedOrHealthy":  true,
+                   "problemsEmpty":  true,
+                   "failedProblemsEmpty":  true,
+                   "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
     "envValuesPrinted":  false,
-    "noSecrets":  true
+    "noSecrets":  true,
+    "broadcasts":  false
 }

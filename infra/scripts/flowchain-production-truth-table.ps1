@@ -45,6 +45,41 @@ $definitions = @(
         command = "npm run flowchain:service:status"
         productionGate = $true
         ownerInputGate = $false
+        requiredChecks = @(
+            "nodeRunning",
+            "nodeCommandLineMatched",
+            "controlPlaneRunning",
+            "controlPlaneCommandLineMatched",
+            "controlPlanePortPrivate",
+            "stateFileReadable",
+            "latestHeightNumeric",
+            "finalizedHeightNumeric",
+            "latestHeightPositive",
+            "stateFileFresh",
+            "serviceProfileLive",
+            "serviceProfileUnbounded",
+            "boundedLiveModeRejectedFalse",
+            "relayerLoopStoppedOrHealthy",
+            "problemsEmpty",
+            "failedProblemsEmpty",
+            "envValuesPrintedFalse",
+            "secretMarkerFindingsEmpty",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "problems",
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "bind.localDefaultPrivate" = $true
+            "serviceProfile.liveProfile" = $true
+            "serviceProfile.maxBlocks" = 0
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
     },
     [ordered]@{
         id = "service-monitor"

@@ -1,17 +1,17 @@
 ﻿# FlowChain Completion Audit
 
-Generated: 2026-05-18T05:21:18.4977489Z
+Generated: 2026-05-18T05:25:24.0748256Z
 Status: blocked
 Completion ready: False
 Refresh mode: no-refresh-existing-reports
-Latest observed height: 65995
+Latest observed height: 66040
 
 ## Prompt-To-Artifact Checklist
 
 | Requirement | Status | Evidence | Commands |
 | --- | --- | --- | --- |
-| Chain service is running in live profile and command lines match this worktree. | passed | service-status status=passed, node=running, controlPlane=running, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
-| Chain is producing/finalizing blocks and state is fresh. | passed | latestHeight=65995, stateFileLastWriteAgeSeconds=2, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
+| Chain service is running in live profile and command lines match this worktree. | passed | service-status status=passed, node=running, controlPlane=running, failedChecks=0, missingChecks=0, secretFindings=0, problems=0, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
+| Chain is producing/finalizing blocks and state is fresh. | passed | latestHeight=66040, stateFileLastWriteAgeSeconds=1, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-status-report.json | npm run flowchain:service:status |
 | Operator doctor checks host tools, package scripts, state path, disk, service evidence, ports, owner-input groups, and owner env-file status without printing owner values. | passed | doctorStatus=blocked, checks=52, failedChecks=0, blockedChecks=5, blockedOnlyOwner=True, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\operator-doctor-report.json | npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json |
 | Live service monitor observes running services and advancing block height over a sampling window. | passed | monitorStatus=passed, samples=2, heightAdvanced=True, heights=65987->65995, failedChecks=0, missingChecks=0, secretFindings=0, issues=0, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-monitor-report.json | npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90 |
 | Live service supervisor can recover a crashed local control-plane under the live profile without deleting chain state. | passed | supervisorValidation=passed, restartAttempts=1, failedChecks=0, missingChecks=0, secretFindings=0, before=passed, afterCrash=blocked, afterRecovery=passed, report=E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\service-supervisor-validation-report.json | npm run flowchain:service:supervisor:validate |
