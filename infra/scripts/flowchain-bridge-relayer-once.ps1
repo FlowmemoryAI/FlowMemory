@@ -15,6 +15,7 @@ param(
     [string] $CursorStagingPath = "",
     [string] $AuthorizedBy = "operator:bridge-relayer-once",
     [int] $WaitSeconds = 60,
+    [int] $ChildTimeoutSeconds = 300,
     [switch] $NoQueue,
     [switch] $AllowBlocked
 )
@@ -58,6 +59,9 @@ $cursorStagingFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Pat
 
 if ($WaitSeconds -lt 0) {
     throw "WaitSeconds must be at least 0."
+}
+if ($ChildTimeoutSeconds -lt 1) {
+    throw "ChildTimeoutSeconds must be at least 1."
 }
 
 New-Item -ItemType Directory -Force -Path $runFullDir | Out-Null
@@ -129,12 +133,18 @@ function Add-RelayerStep {
         [Parameter(Mandatory = $true)][string] $Status,
         [string] $LogPath = "",
         [string] $ReportPath = "",
-        [string] $Reason = ""
+        [string] $Reason = "",
+        [AllowNull()][object] $ExitCode = $null,
+        [bool] $TimedOut = $false,
+        [AllowNull()][object] $DurationSeconds = $null
     )
 
     [void] $steps.Add([ordered]@{
         name = $Name
         status = $Status
+        exitCode = $ExitCode
+        timedOut = $TimedOut
+        durationSeconds = $DurationSeconds
         logPath = $LogPath
         reportPath = $ReportPath
         reason = $Reason
@@ -191,6 +201,21 @@ function Get-RelayerUtcNow {
     return (Get-Date).ToUniversalTime().ToString("o")
 }
 
+function Stop-RelayerProcessTree {
+    param([Parameter(Mandatory = $true)][int] $ProcessId)
+
+    try {
+        $children = @(Get-CimInstance Win32_Process -Filter "ParentProcessId=$ProcessId" -ErrorAction SilentlyContinue)
+        foreach ($child in $children) {
+            Stop-RelayerProcessTree -ProcessId ([int]$child.ProcessId)
+        }
+    }
+    catch {
+    }
+
+    Stop-Process -Id $ProcessId -Force -ErrorAction SilentlyContinue
+}
+
 function Set-RelayerTiming {
     param(
         [Parameter(Mandatory = $true)][string] $Name,
@@ -245,34 +270,67 @@ function Invoke-RelayerExternal {
         [Parameter(Mandatory = $true)][string] $Name,
         [Parameter(Mandatory = $true)][string] $FilePath,
         [string[]] $ArgumentList = @(),
-        [string] $ExpectedReportPath = ""
+        [string] $ExpectedReportPath = "",
+        [int] $TimeoutSeconds = $ChildTimeoutSeconds
     )
 
     $safeName = (($Name -replace '[^A-Za-z0-9_.-]', '-') -replace '-+', '-').Trim("-")
     $logPath = Join-Path (Join-Path $runFullDir "logs") "$safeName.log"
-    $previousErrorActionPreference = $ErrorActionPreference
-    $script:ErrorActionPreference = "Continue"
+    $stdoutPath = Join-Path (Join-Path $runFullDir "logs") "$safeName.stdout.log"
+    $stderrPath = Join-Path (Join-Path $runFullDir "logs") "$safeName.stderr.log"
+    $startedAt = Get-Date
+    $timedOut = $false
+    $exitCode = 1
+    $output = @()
     try {
-        $output = (& $FilePath @ArgumentList 2>&1) | ForEach-Object { ConvertTo-RelayerSafeLine -Line $_ }
-        $exitCode = $LASTEXITCODE
+        $process = Start-Process -FilePath $FilePath `
+            -ArgumentList (Join-FlowChainProcessArguments -ArgumentList $ArgumentList) `
+            -WorkingDirectory $repoRoot `
+            -PassThru `
+            -WindowStyle Hidden `
+            -RedirectStandardOutput $stdoutPath `
+            -RedirectStandardError $stderrPath
+        $timedOut = -not $process.WaitForExit($TimeoutSeconds * 1000)
+        if ($timedOut) {
+            Stop-RelayerProcessTree -ProcessId $process.Id
+            $exitCode = 124
+        }
+        else {
+            $process.Refresh()
+            $exitCode = [int]$process.ExitCode
+        }
     }
     catch {
-        $output = @(ConvertTo-RelayerSafeLine -Line $_.Exception.Message)
+        $output += $_.Exception.Message
         $exitCode = 1
     }
-    finally {
-        $script:ErrorActionPreference = $previousErrorActionPreference
+
+    if (Test-Path -LiteralPath $stdoutPath) {
+        $output += @(Get-Content -LiteralPath $stdoutPath)
     }
+    if (Test-Path -LiteralPath $stderrPath) {
+        $output += @(Get-Content -LiteralPath $stderrPath)
+    }
+    if ($timedOut) {
+        $output = @("Timed out after $TimeoutSeconds seconds; child process tree was stopped.") + $output
+    }
+    $output = @($output | ForEach-Object { ConvertTo-RelayerSafeLine -Line $_ })
 
     $output | Set-Content -LiteralPath $logPath -Encoding utf8
     $status = if ($exitCode -eq 0) { "passed" } else { "failed" }
     $reason = if ($status -eq "passed") { "" } else { (@($output) | Select-Object -Last 6) -join [Environment]::NewLine }
-    Add-RelayerStep -Name $Name -Status $status -LogPath $logPath -ReportPath $ExpectedReportPath -Reason $reason
+    $durationSeconds = [math]::Round(((Get-Date) - $startedAt).TotalSeconds, 3)
+    Add-RelayerStep -Name $Name -Status $status -LogPath $logPath -ReportPath $ExpectedReportPath -Reason $reason -ExitCode $exitCode -TimedOut $timedOut -DurationSeconds $durationSeconds
 
     return [ordered]@{
         status = $status
         exitCode = [int]$exitCode
+        timedOut = $timedOut
+        timeoutSeconds = $TimeoutSeconds
+        durationSeconds = $durationSeconds
         logPath = $logPath
+        stdoutPath = $stdoutPath
+        stderrPath = $stderrPath
         output = @($output)
         reportPath = $ExpectedReportPath
     }
@@ -497,6 +555,7 @@ function Complete-RelayerRun {
         mode = "base8453-pilot"
         queueDisabled = [bool]$NoQueue
         waitSeconds = $WaitSeconds
+        childTimeoutSeconds = $ChildTimeoutSeconds
         readiness = $readiness
         counts = $counts
         timing = $timing

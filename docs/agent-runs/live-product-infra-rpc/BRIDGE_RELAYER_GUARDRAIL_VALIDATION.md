@@ -1,6 +1,6 @@
 ﻿# FlowChain Bridge Relayer Guardrail Validation
 
-Generated: 2026-05-17T16:10:10.2458673Z
+Generated: 2026-05-18T00:08:22.9766326Z
 Status: passed
 
 This validation proves a relayer run with missing owner Base 8453 inputs exits as an allowed blocked state without mutating the final Base scan cursor, staging a cursor, queueing credits, printing env values, or broadcasting.
@@ -10,6 +10,8 @@ This validation proves a relayer run with missing owner Base 8453 inputs exits a
 - relayerCommandExitedZeroWithAllowBlocked: True
 - relayerReportWritten: True
 - relayerStatusBlocked: True
+- relayerChildTimeoutRecorded: True
+- relayerNoChildTimeouts: True
 - blockedBeforeLiveReadiness: True
 - externalOwnerIssueRecorded: True
 - finalCursorUnchanged: True

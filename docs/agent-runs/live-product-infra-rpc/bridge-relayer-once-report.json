@@ -1,10 +1,11 @@
 {
     "schema":  "flowchain.bridge_relayer_once_report.v0",
-    "generatedAt":  "2026-05-17T21:22:37.6163884Z",
+    "generatedAt":  "2026-05-18T00:08:30.7999036Z",
     "status":  "blocked",
     "mode":  "base8453-pilot",
     "queueDisabled":  false,
     "waitSeconds":  60,
+    "childTimeoutSeconds":  300,
     "readiness":  {
                       "infra":  "blocked",
                       "live":  "not-run"
@@ -16,16 +17,16 @@
                    "appliedCredits":  0
                },
     "timing":  {
-                   "runStartedAt":  "2026-05-17T21:22:36.0409180Z",
-                   "infraCheckedAt":  "2026-05-17T21:22:37.5463822Z",
+                   "runStartedAt":  "2026-05-18T00:08:28.8610366Z",
+                   "infraCheckedAt":  "2026-05-18T00:08:30.7329019Z",
                    "liveCheckedAt":  null,
                    "baseObservedAt":  null,
                    "handoffWrittenAt":  null,
                    "nodeIngestedAt":  null,
                    "creditAppliedAt":  null,
                    "firstSpendableAt":  null,
-                   "completedAt":  "2026-05-17T21:22:37.5673858Z",
-                   "totalSeconds":  1.526,
+                   "completedAt":  "2026-05-18T00:08:30.7529036Z",
+                   "totalSeconds":  1.892,
                    "handoffToSpendableSeconds":  null,
                    "codePathWithin60Seconds":  null,
                    "latencyGate":  "not-run"
@@ -70,10 +71,13 @@
                   {
                       "name":  "bridge-infra-readiness",
                       "status":  "passed",
+                      "exitCode":  0,
+                      "timedOut":  false,
+                      "durationSeconds":  1.605,
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-once\\logs\\bridge-infra-readiness.log",
                       "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-once\\bridge-infra-readiness-report.json",
                       "reason":  "",
-                      "at":  "2026-05-17T21:22:37.3973775Z"
+                      "at":  "2026-05-18T00:08:30.5642478Z"
                   }
               ],
     "issues":  [

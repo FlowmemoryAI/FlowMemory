@@ -172,11 +172,15 @@ $cursorCommit = Get-GuardrailProp -Object $relayerReport -Name "cursorCommit"
 $counts = Get-GuardrailProp -Object $relayerReport -Name "counts"
 $ownerEnvFile = Get-GuardrailProp -Object $relayerReport -Name "ownerEnvFile"
 $issues = @(Get-GuardrailProp -Object $relayerReport -Name "issues" -Default @())
+$relayerSteps = @(Get-GuardrailProp -Object $relayerReport -Name "steps" -Default @())
+$relayerTimedOutSteps = @($relayerSteps | Where-Object { (Get-GuardrailProp -Object $_ -Name "timedOut" -Default $false) -eq $true })
 
 $checks = [ordered]@{
     relayerCommandExitedZeroWithAllowBlocked = ([int]$child.exitCode -eq 0)
     relayerReportWritten = Test-Path -LiteralPath $relayerReportPath
     relayerStatusBlocked = "$(Get-GuardrailProp -Object $relayerReport -Name "status")" -eq "blocked"
+    relayerChildTimeoutRecorded = [int](Get-GuardrailProp -Object $relayerReport -Name "childTimeoutSeconds" -Default 0) -ge 1
+    relayerNoChildTimeouts = $relayerTimedOutSteps.Count -eq 0
     blockedBeforeLiveReadiness = "$(Get-GuardrailProp -Object $readiness -Name "infra")" -eq "blocked" -and "$(Get-GuardrailProp -Object $readiness -Name "live")" -eq "not-run"
     externalOwnerIssueRecorded = Get-GuardrailIssueCodePresent -Issues $issues -Code "bridge-infra-not-passed" -Kind "external"
     finalCursorUnchanged = $cursorHashBefore -eq $cursorHashAfter

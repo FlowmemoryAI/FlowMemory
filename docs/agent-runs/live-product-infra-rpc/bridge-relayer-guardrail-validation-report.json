@@ -1,19 +1,21 @@
 {
     "schema":  "flowchain.bridge_relayer_guardrail_validation_report.v0",
-    "generatedAt":  "2026-05-17T16:10:10.2458673Z",
+    "generatedAt":  "2026-05-18T00:08:22.9766326Z",
     "status":  "passed",
     "validationDir":  "devnet/local/bridge-relayer-guardrail-validation",
     "relayerReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\bridge-relayer-once-report.json",
     "childProcess":  {
                          "exitCode":  0,
                          "timedOut":  false,
-                         "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260517111007021-51932-a96b4e39.stdout.log",
-                         "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260517111007021-51932-a96b4e39.stderr.log"
+                         "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260517190819056-6212-1e3031a6.stdout.log",
+                         "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260517190819056-6212-1e3031a6.stderr.log"
                      },
     "checks":  {
                    "relayerCommandExitedZeroWithAllowBlocked":  true,
                    "relayerReportWritten":  true,
                    "relayerStatusBlocked":  true,
+                   "relayerChildTimeoutRecorded":  true,
+                   "relayerNoChildTimeouts":  true,
                    "blockedBeforeLiveReadiness":  true,
                    "externalOwnerIssueRecorded":  true,
                    "finalCursorUnchanged":  true,
