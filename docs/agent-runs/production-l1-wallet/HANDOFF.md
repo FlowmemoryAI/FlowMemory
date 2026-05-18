@@ -1,4 +1,4 @@
-# Production L1 Wallet Handoff
+# Owner-Gated L1 Wallet Handoff
 
 What changed:
 
@@ -56,4 +56,3 @@ Risks and follow-ups:
 - Fee and expiry fields are support flags until the protocol binds them into the transaction hash.
 - The product pool create schema does not store initial reserves directly; the command hashes the requested reserve plan into metadata and signs add-liquidity separately.
 - Bridge and runtime strict pilot gates still depend on their owning subsystem proof commands.
-

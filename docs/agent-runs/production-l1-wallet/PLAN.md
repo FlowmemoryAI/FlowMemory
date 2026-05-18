@@ -1,4 +1,4 @@
-# Production L1 Wallet Plan
+# Owner-Gated L1 Wallet Plan
 
 ## Scope
 
@@ -22,4 +22,3 @@
 - This task makes a local/private pilot wallet and signing operator usable. It must not claim production deployment, audited cryptography, public validators, or production bridge readiness.
 - Signed envelopes must carry enough metadata for runtime/API intake without exposing private material.
 - Live Base pilot commands must validate environment presence and chain ID without logging RPC URLs or keys.
-

@@ -28,7 +28,7 @@ Safe create output contains public fields only:
 Import from explicit local input:
 
 ```powershell
-$env:FLOWCHAIN_WALLET_IMPORT_PRIVATE_KEY="<local-only-hex-key>"
+$env:FLOWCHAIN_WALLET_IMPORT_PRIVATE_KEY = "<local-only-hex-key>"
 npm run wallet:import --prefix crypto -- --vault devnet/local/wallet/imported.vault.local.json --private-key-env FLOWCHAIN_WALLET_IMPORT_PRIVATE_KEY --chain-id 31337 --label imported-a
 ```
 

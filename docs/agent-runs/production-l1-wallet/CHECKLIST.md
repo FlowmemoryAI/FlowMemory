@@ -1,4 +1,4 @@
-# Production L1 Wallet Checklist
+# Owner-Gated L1 Wallet Checklist
 
 ## Tracking
 

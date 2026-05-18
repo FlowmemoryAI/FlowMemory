@@ -1,6 +1,6 @@
-# Production L1 Wallet Completion Audit
+# Owner-Gated L1 Wallet Completion Audit
 
-Objective: make the FlowChain production L1 wallet/operator tool usable for local human wallet creation, signing, transfer E2E, bridge pilot preparation, safety checks, proof artifacts, and required tests.
+Objective: make the FlowChain owner-gated L1 wallet/operator tool usable for local human wallet creation, signing, transfer E2E, bridge pilot preparation, safety checks, proof artifacts, and required tests.
 
 ## Prompt-To-Artifact Checklist
 

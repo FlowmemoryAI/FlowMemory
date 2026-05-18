@@ -1,4 +1,4 @@
-# Production L1 Wallet Notes
+# Owner-Gated L1 Wallet Notes
 
 ## Starting Context
 
@@ -10,4 +10,3 @@
 
 - `infra/scripts/status-report.ps1` reported current GitHub PRs and issues. No direct conflict was found with this assigned wallet worktree.
 - Sibling worktrees have unrelated dirty changes; this task will not edit those folders or generated outputs.
-
