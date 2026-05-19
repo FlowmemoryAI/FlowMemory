@@ -77,6 +77,8 @@ foreach ($scriptName in @(
         "flowchain:public-rpc:deployment:automation",
         "flowchain:backup:restore:validate",
         "flowchain:backup:install:validate",
+        "flowchain:backup:install:systemd",
+        "flowchain:backup:install:systemd:validate",
         "flowchain:ops:incident-drill",
         "flowchain:external-tester:packet",
         "flowchain:completion:audit",

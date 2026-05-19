@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Command Matrix
 
-Generated: 2026-05-19T10:29:12.7314664Z
+Generated: 2026-05-19T12:40:20.0424787Z
 
 | Phase | Command | Purpose |
 | --- | --- | --- |
@@ -30,7 +30,9 @@ Generated: 2026-05-19T10:29:12.7314664Z
 | backup | `npm run flowchain:backup:restore:validate` | Prove restore safety and tamper rejection locally. |
 | backup | `npm run flowchain:backup:owner-path:dry-run` | Exercise backup readiness with an ignored local owner-path stand-in. |
 | backup | `npm run flowchain:backup:install:windows -- -Action Plan` | Render the daily snapshot Scheduled Task plan. |
-| backup | `npm run flowchain:backup:install:validate` | Validate backup task plan/status/uninstall behavior. |
+| backup | `npm run flowchain:backup:install:systemd -- -Action Plan` | Render the daily snapshot Linux systemd timer plan. |
+| backup | `npm run flowchain:backup:install:systemd:validate` | Validate Linux systemd backup and restore-drill timer plans without mutating the owner host. |
+| backup | `npm run flowchain:backup:install:validate` | Validate Windows and Linux backup scheduler plan/status/uninstall behavior. |
 | ops | `npm run flowchain:ops:snapshot -- -AllowBlocked` | Classify critical incidents separately from owner-input blockers. |
 | ops | `npm run flowchain:ops:alerts -- -AllowBlocked` | Refresh local alert rules and finding coverage. |
 | ops | `npm run flowchain:ops:metrics:export` | Export no-secret JSON and Prometheus textfile metrics for owner collectors. |

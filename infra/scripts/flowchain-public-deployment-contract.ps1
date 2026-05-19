@@ -971,15 +971,27 @@ $backupInstallReady = ($backupInstallValidationStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "restoreDrillOwnerBackupEnvRequired" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "commandOmitsAllowBlocked" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "commandsPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdBackupServiceUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdBackupTimerUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdRestoreServiceUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdRestoreTimerUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdCommandOmitsAllowBlocked" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdOwnerBackupEnvRequired" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdBackupRootWritePathConfigurable" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdChildReportNoSecrets" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $backupInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:backup:install:windows") `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:backup:install:systemd") `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:backup:install:systemd:validate") `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:backup:install:validate")
 Add-DeploymentItem -Items $items -Id "state-backup-schedule-automation" `
-    -Requirement "The owner host has a no-secret Windows install, status, and uninstall path for recurring manifest-backed state backups, retention rotation, and restore drills that fail closed without the owner backup path." `
+    -Requirement "The owner host has no-secret Windows Scheduled Task and Linux systemd install, status, and uninstall paths for recurring manifest-backed state backups, retention rotation, and restore drills that fail closed without the owner backup path." `
     -Status $(if ($backupInstallReady) { "passed" } else { "failed" }) `
-    -Evidence "backupInstallValidation=$backupInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $backupInstallChecks -Name "planDidNotMutate"), retention=$(Get-DeploymentProp -Object $backupInstallChecks -Name "actionUsesRetentionCount"), restoreDrill=$(Get-DeploymentProp -Object $backupInstallChecks -Name "restoreDrillUsesRestoreScript"), ownerBackupEnvRequired=$(Get-DeploymentProp -Object $backupInstallChecks -Name "ownerBackupEnvRequired"), commandOmitsAllowBlocked=$(Get-DeploymentProp -Object $backupInstallChecks -Name "commandOmitsAllowBlocked")" `
-    -Commands @("npm run flowchain:backup:install:validate", "npm run flowchain:backup:install:windows -- -Action Plan", "npm run flowchain:backup:install:windows -- -Action Install", "npm run flowchain:backup:install:windows -- -Action Status", "npm run flowchain:backup:install:windows -- -Action Uninstall")
+    -Evidence "backupInstallValidation=$backupInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $backupInstallChecks -Name "planDidNotMutate"), retention=$(Get-DeploymentProp -Object $backupInstallChecks -Name "actionUsesRetentionCount"), restoreDrill=$(Get-DeploymentProp -Object $backupInstallChecks -Name "restoreDrillUsesRestoreScript"), ownerBackupEnvRequired=$(Get-DeploymentProp -Object $backupInstallChecks -Name "ownerBackupEnvRequired"), commandOmitsAllowBlocked=$(Get-DeploymentProp -Object $backupInstallChecks -Name "commandOmitsAllowBlocked"), systemdValidation=$(Get-DeploymentProp -Object $backupInstallChecks -Name "systemdValidationPassed"), systemdTimer=$(Get-DeploymentProp -Object $backupInstallChecks -Name "systemdBackupTimerUnitPlanned")" `
+    -Commands @("npm run flowchain:backup:install:validate", "npm run flowchain:backup:install:windows -- -Action Plan", "npm run flowchain:backup:install:windows -- -Action Install", "npm run flowchain:backup:install:windows -- -Action Status", "npm run flowchain:backup:install:windows -- -Action Uninstall", "npm run flowchain:backup:install:systemd -- -Action Plan", "npm run flowchain:backup:install:systemd -- -Action Install", "npm run flowchain:backup:install:systemd -- -Action Status", "npm run flowchain:backup:install:systemd -- -Action Uninstall", "npm run flowchain:backup:install:systemd:validate")
 
 Add-DeploymentItem -Items $items -Id "state-backup" `
     -Requirement "The public deployment must prove the configured state backup directory can create a manifest-backed snapshot and restore it in rehearsal." `
@@ -1190,6 +1202,8 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:backup:restore:validate",
         "npm run flowchain:backup:install:validate",
         "npm run flowchain:backup:install:windows -- -Action Plan",
+        "npm run flowchain:backup:install:systemd -- -Action Plan",
+        "npm run flowchain:backup:install:systemd:validate",
         "npm run flowchain:backup:owner-path:dry-run",
         "npm run flowchain:backup:create",
         "npm run flowchain:backup:restore:verify",
@@ -1209,6 +1223,8 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:service:install:systemd -- -Action Uninstall",
         "npm run flowchain:backup:install:windows -- -Action Status",
         "npm run flowchain:backup:install:windows -- -Action Uninstall",
+        "npm run flowchain:backup:install:systemd -- -Action Status",
+        "npm run flowchain:backup:install:systemd -- -Action Uninstall",
         "npm run flowchain:ops:alerts:install:windows -- -Action Status",
         "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall",
         "npm run flowchain:ops:alerts:install:systemd -- -Action Status",

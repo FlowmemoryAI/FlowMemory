@@ -903,8 +903,20 @@ $backupInstallReady = ($backupInstallValidationStatus -eq "passed") `
     -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "ownerBackupEnvRequired" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "restoreDrillOwnerBackupEnvRequired" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "commandOmitsAllowBlocked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdBackupServiceUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdBackupTimerUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdRestoreServiceUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdRestoreTimerUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdCommandOmitsAllowBlocked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdOwnerBackupEnvRequired" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdBackupRootWritePathConfigurable" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdChildReportNoSecrets" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
-    -and ((Get-ArchitectureProp -Object $backupInstallValidation -Name "noSecrets" -Default $false) -eq $true)
+    -and ((Get-ArchitectureProp -Object $backupInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:backup:install:systemd") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:backup:install:systemd:validate")
 $backupFiles = @(
     "infra/scripts/flowchain-public-rpc-backup-readiness.ps1",
     "infra/scripts/flowchain-state-backup.ps1",
@@ -912,16 +924,20 @@ $backupFiles = @(
     "infra/scripts/flowchain-backup-restore-validation.ps1",
     "infra/scripts/flowchain-backup-owner-path-dry-run.ps1",
     "infra/scripts/flowchain-backup-install-windows.ps1",
+    "infra/scripts/flowchain-backup-install-systemd.ps1",
+    "infra/scripts/flowchain-backup-install-systemd-validation.ps1",
     "infra/scripts/flowchain-backup-install-validation.ps1",
     "docs/agent-runs/live-product-infra-rpc/WINDOWS_BACKUP_INSTALL.md",
+    "docs/agent-runs/live-product-infra-rpc/SYSTEMD_BACKUP_INSTALL.md",
+    "docs/agent-runs/live-product-infra-rpc/SYSTEMD_BACKUP_INSTALL_VALIDATION.md",
     "docs/agent-runs/live-product-infra-rpc/BACKUP_INSTALL_VALIDATION.md"
 )
 Add-ArchitectureItem -Items $items -Id "state-backup-boundary" -Layer "Storage/recovery" `
-    -Requirement "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, owner-path dry-run proof, scheduled backup and restore-drill install proof, retention rotation, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation." `
+    -Requirement "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, owner-path dry-run proof, Windows and Linux scheduled backup plus restore-drill install proof, retention rotation, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation." `
     -Status $(if ($backupStatus -eq "passed" -and $backupValidationPassed -and $backupOwnerPathDryRunReady -and $backupInstallReady) { "passed" } elseif ($backupStatus -eq "blocked" -and $backupValidationPassed -and $backupOwnerPathDryRunReady -and $backupInstallReady) { "blocked" } else { "failed" }) `
-    -Evidence "backupStatus=$backupStatus, validationStatus=$backupValidationStatus, ownerPathDryRun=$backupOwnerPathDryRunStatus, ownerPathFailedChecks=$($backupOwnerPathDryRunFailedChecks.Count), installValidation=$backupInstallValidationStatus, installFailedChecks=$($backupInstallFailedChecks.Count), snapshotProof=$backupSnapshotProof, restoreProof=$backupRestoreProof, requiredChecks=$($backupValidationRequiredChecks.Count), missingChecks=$($backupValidationMissingChecks.Count)" `
+    -Evidence "backupStatus=$backupStatus, validationStatus=$backupValidationStatus, ownerPathDryRun=$backupOwnerPathDryRunStatus, ownerPathFailedChecks=$($backupOwnerPathDryRunFailedChecks.Count), installValidation=$backupInstallValidationStatus, installFailedChecks=$($backupInstallFailedChecks.Count), systemdValidation=$(Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdValidationPassed"), systemdTimer=$(Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdBackupTimerUnitPlanned"), snapshotProof=$backupSnapshotProof, restoreProof=$backupRestoreProof, requiredChecks=$($backupValidationRequiredChecks.Count), missingChecks=$($backupValidationMissingChecks.Count)" `
     -Files $backupFiles `
-    -Commands @("npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify", "npm run flowchain:backup:restore:validate", "npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:install:validate", "npm run flowchain:backup:install:windows -- -Action Plan", "npm run flowchain:backup:check") `
+    -Commands @("npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify", "npm run flowchain:backup:restore:validate", "npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:install:validate", "npm run flowchain:backup:install:windows -- -Action Plan", "npm run flowchain:backup:install:systemd -- -Action Plan", "npm run flowchain:backup:install:systemd:validate", "npm run flowchain:backup:check") `
     -Blockers @("FLOWCHAIN_RPC_STATE_BACKUP_PATH")
 
 $deploymentContract = $reports.publicDeploymentContract

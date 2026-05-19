@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-19T10:29:12.7314664Z",
+    "generatedAt":  "2026-05-19T12:40:20.0424787Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -57,6 +57,8 @@
                             "flowchain:backup:restore:validate",
                             "flowchain:backup:owner-path:dry-run",
                             "flowchain:backup:install:windows",
+                            "flowchain:backup:install:systemd",
+                            "flowchain:backup:install:systemd:validate",
                             "flowchain:backup:install:validate",
                             "flowchain:ops:snapshot",
                             "flowchain:ops:alerts",
@@ -214,8 +216,18 @@
                           },
                           {
                               "phase":  "backup",
+                              "command":  "npm run flowchain:backup:install:systemd -- -Action Plan",
+                              "purpose":  "Render the daily snapshot Linux systemd timer plan."
+                          },
+                          {
+                              "phase":  "backup",
+                              "command":  "npm run flowchain:backup:install:systemd:validate",
+                              "purpose":  "Validate Linux systemd backup and restore-drill timer plans without mutating the owner host."
+                          },
+                          {
+                              "phase":  "backup",
                               "command":  "npm run flowchain:backup:install:validate",
-                              "purpose":  "Validate backup task plan/status/uninstall behavior."
+                              "purpose":  "Validate Windows and Linux backup scheduler plan/status/uninstall behavior."
                           },
                           {
                               "phase":  "ops",
@@ -444,6 +456,20 @@
                          "reason":  "copied"
                      },
                      {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/SYSTEMD_BACKUP_INSTALL.md",
+                         "destination":  "runbooks/SYSTEMD_BACKUP_INSTALL.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/SYSTEMD_BACKUP_INSTALL_VALIDATION.md",
+                         "destination":  "runbooks/SYSTEMD_BACKUP_INSTALL_VALIDATION.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
                          "source":  "docs/agent-runs/live-product-infra-rpc/WINDOWS_ALERT_INSTALL.md",
                          "destination":  "runbooks/WINDOWS_ALERT_INSTALL.md",
                          "copied":  true,
@@ -651,6 +677,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/backup-install-validation-report.json",
                          "destination":  "evidence/backup-install-validation-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/backup-install-systemd-validation-report.json",
+                         "destination":  "evidence/backup-install-systemd-validation-report.json",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-19T10:31:34.2286210Z",
+    "generatedAt":  "2026-05-19T12:43:25.8829828Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -121,7 +121,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=86643, finalizedHeight=86643",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=88040, finalizedHeight=88040",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -322,15 +322,20 @@
                   },
                   {
                       "id":  "state-backup-schedule-automation",
-                      "requirement":  "The owner host has a no-secret Windows install, status, and uninstall path for recurring manifest-backed state backups, retention rotation, and restore drills that fail closed without the owner backup path.",
+                      "requirement":  "The owner host has no-secret Windows Scheduled Task and Linux systemd install, status, and uninstall paths for recurring manifest-backed state backups, retention rotation, and restore drills that fail closed without the owner backup path.",
                       "status":  "passed",
-                      "evidence":  "backupInstallValidation=passed, planDidNotMutate=True, retention=True, restoreDrill=True, ownerBackupEnvRequired=True, commandOmitsAllowBlocked=True",
+                      "evidence":  "backupInstallValidation=passed, planDidNotMutate=True, retention=True, restoreDrill=True, ownerBackupEnvRequired=True, commandOmitsAllowBlocked=True, systemdValidation=True, systemdTimer=True",
                       "commands":  [
                                        "npm run flowchain:backup:install:validate",
                                        "npm run flowchain:backup:install:windows -- -Action Plan",
                                        "npm run flowchain:backup:install:windows -- -Action Install",
                                        "npm run flowchain:backup:install:windows -- -Action Status",
-                                       "npm run flowchain:backup:install:windows -- -Action Uninstall"
+                                       "npm run flowchain:backup:install:windows -- -Action Uninstall",
+                                       "npm run flowchain:backup:install:systemd -- -Action Plan",
+                                       "npm run flowchain:backup:install:systemd -- -Action Install",
+                                       "npm run flowchain:backup:install:systemd -- -Action Status",
+                                       "npm run flowchain:backup:install:systemd -- -Action Uninstall",
+                                       "npm run flowchain:backup:install:systemd:validate"
                                    ],
                       "blockers":  [
 
@@ -589,6 +594,8 @@
                                                  "npm run flowchain:backup:restore:validate",
                                                  "npm run flowchain:backup:install:validate",
                                                  "npm run flowchain:backup:install:windows -- -Action Plan",
+                                                 "npm run flowchain:backup:install:systemd -- -Action Plan",
+                                                 "npm run flowchain:backup:install:systemd:validate",
                                                  "npm run flowchain:backup:owner-path:dry-run",
                                                  "npm run flowchain:backup:create",
                                                  "npm run flowchain:backup:restore:verify",
@@ -608,6 +615,8 @@
                                               "npm run flowchain:service:install:systemd -- -Action Uninstall",
                                               "npm run flowchain:backup:install:windows -- -Action Status",
                                               "npm run flowchain:backup:install:windows -- -Action Uninstall",
+                                              "npm run flowchain:backup:install:systemd -- -Action Status",
+                                              "npm run flowchain:backup:install:systemd -- -Action Uninstall",
                                               "npm run flowchain:ops:alerts:install:windows -- -Action Status",
                                               "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall",
                                               "npm run flowchain:ops:alerts:install:systemd -- -Action Status",

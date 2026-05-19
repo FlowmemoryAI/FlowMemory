@@ -63,6 +63,7 @@ $paths = [ordered]@{
     architectureAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"
     backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
     backupOwnerPathDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-owner-path-dry-run-report.json"
+    backupInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-install-validation-report.json"
     liveWallet = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json"
     testerNetwork = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
     publicRpc = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
@@ -383,6 +384,9 @@ $backupRestoreValidationExitCode = $backupRestoreValidationResult.exitCode
 $backupOwnerPathDryRunResult = Invoke-AuditChild -Path $paths.backupOwnerPathDryRun -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-owner-path-dry-run.ps1"))
 $backupOwnerPathDryRunOutput = @($backupOwnerPathDryRunResult.output)
 $backupOwnerPathDryRunExitCode = $backupOwnerPathDryRunResult.exitCode
+$backupInstallValidationResult = Invoke-AuditChild -Path $paths.backupInstallValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-install-validation.ps1"))
+$backupInstallValidationOutput = @($backupInstallValidationResult.output)
+$backupInstallValidationExitCode = $backupInstallValidationResult.exitCode
 $bridgeDeployControlValidationResult = Invoke-AuditChild -Path $paths.bridgeDeployControlValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-deploy-control-validation.ps1"))
 $bridgeDeployControlValidationOutput = @($bridgeDeployControlValidationResult.output)
 $bridgeDeployControlValidationExitCode = $bridgeDeployControlValidationResult.exitCode
@@ -1611,6 +1615,64 @@ $backupOwnerPathDryRunPassed = $backupOwnerPathDryRunExitCode -eq 0 `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRun -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRun -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $backupOwnerPathDryRun -Name "broadcasts" -Default $true) -eq $false)
+$backupInstallValidation = $reports.backupInstallValidation
+$backupInstallValidationStatus = Get-ReportStatus -Report $backupInstallValidation
+$backupInstallValidationChecks = Get-AuditProp -Object $backupInstallValidation -Name "checks"
+$backupInstallValidationFailedChecks = @((Get-AuditProp -Object $backupInstallValidation -Name "failedChecks" -Default @()))
+$backupInstallValidationMissingPackageScripts = @((Get-AuditProp -Object $backupInstallValidation -Name "missingPackageScripts" -Default @()))
+$backupInstallValidationRequiredChecks = @(
+    "installScriptExists",
+    "systemdInstallScriptExists",
+    "systemdValidationScriptExists",
+    "backupScriptExists",
+    "restoreDrillScriptExists",
+    "packageScriptsPresent",
+    "planCommandPassed",
+    "planDidNotMutate",
+    "schedulerCmdletsAvailable",
+    "scheduledTaskActionSupportsWorkingDirectory",
+    "taskNamesDistinct",
+    "retentionCountValid",
+    "actionUsesBackupScript",
+    "actionUsesRetentionCount",
+    "restoreDrillUsesRestoreScript",
+    "restoreDrillHasRestoreRoot",
+    "restoreDrillHasStatePath",
+    "restoreDrillHasReportPath",
+    "ownerBackupEnvRequired",
+    "restoreDrillOwnerBackupEnvRequired",
+    "commandOmitsAllowBlocked",
+    "commandsPresent",
+    "systemdValidationCommandPassed",
+    "systemdValidationPassed",
+    "systemdFailedChecksEmpty",
+    "systemdPlanDidNotMutate",
+    "systemdBackupServiceUnitPlanned",
+    "systemdBackupTimerUnitPlanned",
+    "systemdRestoreServiceUnitPlanned",
+    "systemdRestoreTimerUnitPlanned",
+    "systemdCommandOmitsAllowBlocked",
+    "systemdOwnerBackupEnvRequired",
+    "systemdOwnerEnvInjectable",
+    "systemdServicesHardeningPresent",
+    "systemdBackupRootWritePathConfigurable",
+    "systemdChildReportNoSecrets",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$backupInstallValidationMissingChecks = @(Get-MissingAuditChecks -Checks $backupInstallValidationChecks -Names $backupInstallValidationRequiredChecks)
+$backupInstallValidationFailedCheckCount = @($backupInstallValidationFailedChecks | Where-Object { $null -ne $_ }).Count
+$backupInstallValidationMissingPackageScriptCount = @($backupInstallValidationMissingPackageScripts | Where-Object { $null -ne $_ }).Count
+$backupInstallValidationMissingCheckCount = @($backupInstallValidationMissingChecks | Where-Object { $null -ne $_ }).Count
+$backupInstallValidationPassed = $backupInstallValidationExitCode -eq 0 `
+    -and $backupInstallValidationStatus -eq "passed" `
+    -and $backupInstallValidationFailedCheckCount -eq 0 `
+    -and $backupInstallValidationMissingPackageScriptCount -eq 0 `
+    -and $backupInstallValidationMissingCheckCount -eq 0 `
+    -and ((Get-AuditProp -Object $backupInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $backupInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $backupInstallValidation -Name "broadcasts" -Default $true) -eq $false)
 $bridgeDeployControlValidation = $reports.bridgeDeployControlValidation
 $bridgeDeployControlValidationStatus = Get-ReportStatus -Report $bridgeDeployControlValidation
 $bridgeDeployControlChecks = Get-AuditProp -Object $bridgeDeployControlValidation -Name "checks"
@@ -2370,6 +2432,12 @@ Add-AuditItem -Items $items -Id "backup-owner-path-dry-run" `
     -Evidence "dryRunStatus=$backupOwnerPathDryRunStatus, failedChecks=$backupOwnerPathDryRunFailedCheckCount, missingChecks=$backupOwnerPathDryRunMissingCheckCount, secretFindings=$backupOwnerPathDryRunSecretFindingCount, readiness=$(Get-AuditProp -Object $backupOwnerPathDryRun -Name "childReadinessStatus"), snapshotProof=$(Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "snapshotProofPassed"), restoreProof=$(Get-AuditProp -Object $backupOwnerPathDryRunChecks -Name "restoreProofPassed"), report=$($paths.backupOwnerPathDryRun)" `
     -Commands @("npm run flowchain:backup:owner-path:dry-run")
 
+Add-AuditItem -Items $items -Id "backup-install-validation" `
+    -Requirement "Backup scheduler install validation proves Windows Scheduled Task and Linux systemd timer plans for recurring state backup and restore drills are no-secret, fail closed without owner backup path env, and do not mutate the host in plan mode." `
+    -Status $(if ($backupInstallValidationPassed) { "passed" } else { "failed" }) `
+    -Evidence "installStatus=$backupInstallValidationStatus, failedChecks=$backupInstallValidationFailedCheckCount, missingChecks=$backupInstallValidationMissingCheckCount, missingPackageScripts=$backupInstallValidationMissingPackageScriptCount, systemdValidation=$(Get-AuditProp -Object $backupInstallValidationChecks -Name "systemdValidationPassed"), systemdTimer=$(Get-AuditProp -Object $backupInstallValidationChecks -Name "systemdBackupTimerUnitPlanned"), report=$($paths.backupInstallValidation)" `
+    -Commands @("npm run flowchain:backup:install:validate", "npm run flowchain:backup:install:windows -- -Action Plan", "npm run flowchain:backup:install:systemd -- -Action Plan", "npm run flowchain:backup:install:systemd:validate")
+
 Add-AuditItem -Items $items -Id "external-tester-packet" `
     -Requirement "External tester handoff packet and machine-readable connection pack are generated, executable packet-route smoke is validated, and sharing fails closed until public gates pass." `
     -Status $(if (($externalTesterPacketStatus -eq "passed" -and $externalTesterPacketShareable -eq $true -and $externalTesterPacketExecutableSmokeValidated -eq $true -and $externalTesterConnectPackReady -eq $true) -or ($externalTesterPacketStatus -eq "blocked" -and $externalTesterPacketShareable -eq $false -and $externalTesterPacketExecutableSmokeValidated -eq $true -and $externalTesterConnectPackReady -eq $true)) { "passed" } else { "failed" }) `
@@ -2438,10 +2506,10 @@ $backupSnapshotProofStatus = Get-AuditProp -Object $backupReadinessDetails -Name
 $backupRestoreProofStatus = Get-AuditProp -Object $backupReadinessDetails -Name "restoreProofStatus" -Default "not-run"
 $backupRestoreVerified = Get-AuditProp -Object $backupReadinessDetails -Name "restoreVerified" -Default $false
 Add-AuditItem -Items $items -Id "state-backup" `
-    -Requirement "State backup path is configured and can create a manifest-backed snapshot that is verified through a restore rehearsal for live RPC operations." `
-    -Status $(if ($backupReadinessStatus -eq "passed" -and $backupRestoreValidationPassed -and $backupOwnerPathDryRunPassed) { "passed" } elseif ($backupReadinessStatus -eq "blocked" -and $backupRestoreValidationPassed -and $backupOwnerPathDryRunPassed) { "blocked" } else { "failed" }) `
-    -Evidence "backupStatus=$backupReadinessStatus, snapshotProof=$backupSnapshotProofStatus, restoreProof=$backupRestoreProofStatus, restoreVerified=$backupRestoreVerified, validationStatus=$backupRestoreValidationStatus, ownerPathDryRun=$backupOwnerPathDryRunStatus, report=$($paths.backup)" `
-    -Commands @("npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify", "npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:check") `
+    -Requirement "State backup path is configured, can create a manifest-backed snapshot, verifies restore rehearsal, and has Windows plus Linux recurring scheduler install proof for live RPC operations." `
+    -Status $(if ($backupReadinessStatus -eq "passed" -and $backupRestoreValidationPassed -and $backupOwnerPathDryRunPassed -and $backupInstallValidationPassed) { "passed" } elseif ($backupReadinessStatus -eq "blocked" -and $backupRestoreValidationPassed -and $backupOwnerPathDryRunPassed -and $backupInstallValidationPassed) { "blocked" } else { "failed" }) `
+    -Evidence "backupStatus=$backupReadinessStatus, snapshotProof=$backupSnapshotProofStatus, restoreProof=$backupRestoreProofStatus, restoreVerified=$backupRestoreVerified, validationStatus=$backupRestoreValidationStatus, ownerPathDryRun=$backupOwnerPathDryRunStatus, installValidation=$backupInstallValidationStatus, systemdValidation=$(Get-AuditProp -Object $backupInstallValidationChecks -Name "systemdValidationPassed"), report=$($paths.backup)" `
+    -Commands @("npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify", "npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:install:validate", "npm run flowchain:backup:install:systemd:validate", "npm run flowchain:backup:check") `
     -Blockers @("FLOWCHAIN_RPC_STATE_BACKUP_PATH")
 
 Add-AuditItem -Items $items -Id "bridge-funds" `
@@ -2578,6 +2646,8 @@ $report = [ordered]@{
     backupRestoreValidationOutputRedacted = @($backupRestoreValidationOutput | ForEach-Object { "$_" })
     backupOwnerPathDryRunExitCode = $backupOwnerPathDryRunExitCode
     backupOwnerPathDryRunOutputRedacted = @($backupOwnerPathDryRunOutput | ForEach-Object { "$_" })
+    backupInstallValidationExitCode = $backupInstallValidationExitCode
+    backupInstallValidationOutputRedacted = @($backupInstallValidationOutput | ForEach-Object { "$_" })
     bridgeDeployControlValidationExitCode = $bridgeDeployControlValidationExitCode
     bridgeDeployControlValidationOutputRedacted = @($bridgeDeployControlValidationOutput | ForEach-Object { "$_" })
     bridgeRelayerGuardrailValidationExitCode = $bridgeRelayerGuardrailValidationExitCode

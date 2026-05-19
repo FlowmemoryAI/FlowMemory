@@ -89,6 +89,8 @@ npm run flowchain:backup:restore:verify
 npm run flowchain:backup:restore:validate
 npm run flowchain:backup:check -- -AllowBlocked
 npm run flowchain:backup:install:windows -- -Action Plan
+npm run flowchain:backup:install:systemd -- -Action Plan
+npm run flowchain:backup:install:systemd:validate
 npm run flowchain:backup:install:validate
 ```
 
@@ -107,6 +109,9 @@ restore drills:
 npm run flowchain:backup:install:windows -- -Action Install
 npm run flowchain:backup:install:windows -- -Action Status
 npm run flowchain:backup:install:windows -- -Action Uninstall
+npm run flowchain:backup:install:systemd -- -Action Install
+npm run flowchain:backup:install:systemd -- -Action Status
+npm run flowchain:backup:install:systemd -- -Action Uninstall
 ```
 
 ## Bridge Relayer

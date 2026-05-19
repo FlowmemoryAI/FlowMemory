@@ -1031,6 +1031,64 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "backup-install-validation"
+        requirement = "Backup scheduler validation proves no-secret Windows Scheduled Task and Linux systemd timer plan paths for recurring state snapshots and restore drills without host mutation."
+        path = "docs/agent-runs/live-product-infra-rpc/backup-install-validation-report.json"
+        command = "npm run flowchain:backup:install:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "installScriptExists",
+            "systemdInstallScriptExists",
+            "systemdValidationScriptExists",
+            "backupScriptExists",
+            "restoreDrillScriptExists",
+            "packageScriptsPresent",
+            "planCommandPassed",
+            "planDidNotMutate",
+            "schedulerCmdletsAvailable",
+            "scheduledTaskActionSupportsWorkingDirectory",
+            "taskNamesDistinct",
+            "retentionCountValid",
+            "actionUsesBackupScript",
+            "actionUsesRetentionCount",
+            "restoreDrillUsesRestoreScript",
+            "restoreDrillHasRestoreRoot",
+            "restoreDrillHasStatePath",
+            "restoreDrillHasReportPath",
+            "ownerBackupEnvRequired",
+            "restoreDrillOwnerBackupEnvRequired",
+            "commandOmitsAllowBlocked",
+            "commandsPresent",
+            "systemdValidationCommandPassed",
+            "systemdValidationPassed",
+            "systemdFailedChecksEmpty",
+            "systemdPlanDidNotMutate",
+            "systemdBackupServiceUnitPlanned",
+            "systemdBackupTimerUnitPlanned",
+            "systemdRestoreServiceUnitPlanned",
+            "systemdRestoreTimerUnitPlanned",
+            "systemdCommandOmitsAllowBlocked",
+            "systemdOwnerBackupEnvRequired",
+            "systemdOwnerEnvInjectable",
+            "systemdServicesHardeningPresent",
+            "systemdBackupRootWritePathConfigurable",
+            "systemdChildReportNoSecrets",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingPackageScripts"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "bridge-live-readiness"
         requirement = "Base 8453 live bridge pilot has required owner inputs, caps, confirmations, and operator acknowledgement."
         path = "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
@@ -1679,7 +1737,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"

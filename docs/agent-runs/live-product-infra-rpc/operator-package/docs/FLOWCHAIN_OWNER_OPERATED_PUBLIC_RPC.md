@@ -23,7 +23,7 @@ The repository now provides:
 - `npm run flowchain:backup:restore:verify` for restore rehearsal from the latest snapshot without mutating live state.
 - `npm run flowchain:backup:restore:validate` for a local self-test that proves snapshot/restore round-trip integrity and detects corrupted snapshots.
 - `npm run flowchain:backup:check` for owner backup path readiness, including snapshot and restore proof.
-- `npm run flowchain:backup:install:windows` and `npm run flowchain:backup:install:validate` for a no-secret Windows Scheduled Task install/status/uninstall path for recurring state snapshots.
+- `npm run flowchain:backup:install:windows`, `npm run flowchain:backup:install:systemd`, and `npm run flowchain:backup:install:validate` for no-secret Windows Scheduled Task and Linux systemd install/status/uninstall paths for recurring state snapshots.
 - `npm run flowchain:bridge:infra:check` for Base 8453 deployment input checks.
 - `npm run flowchain:bridge:relayer:once` for the no-broadcast Base 8453 observer-to-L1 queue path.
 - `npm run flowchain:bridge:diagnose:tx` for read-only diagnosis of an owner-supplied Base 8453 transaction hash.

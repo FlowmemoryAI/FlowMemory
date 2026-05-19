@@ -1,13 +1,15 @@
 ﻿# FlowChain Backup Install Validation
 
-Generated: 2026-05-19T02:17:17.4258914Z
+Generated: 2026-05-19T12:39:49.7336021Z
 Status: passed
 
-This validation proves the scheduled backup install path is planned, no-secret, non-mutating in plan mode, rotates snapshots by retention count, schedules a recurring restore drill, and fails closed unless the owner backup path env is configured for actual backup and restore runs.
+This validation proves the Windows Scheduled Task and Linux systemd timer install paths are planned, no-secret, non-mutating in plan mode, rotate snapshots by retention count, schedule recurring restore drills, and fail closed unless the owner backup path env is configured for actual backup and restore runs.
 
 ## Checks
 
 - installScriptExists: True
+- systemdInstallScriptExists: True
+- systemdValidationScriptExists: True
 - backupScriptExists: True
 - restoreDrillScriptExists: True
 - packageScriptsPresent: True
@@ -34,11 +36,30 @@ This validation proves the scheduled backup install path is planned, no-secret, 
 - envValuesPrintedFalse: True
 - noSecrets: True
 - broadcastsFalse: True
+- systemdValidationCommandPassed: True
+- systemdValidationPassed: True
+- systemdFailedChecksEmpty: True
+- systemdPlanDidNotMutate: True
+- systemdBackupServiceUnitPlanned: True
+- systemdBackupTimerUnitPlanned: True
+- systemdRestoreServiceUnitPlanned: True
+- systemdRestoreTimerUnitPlanned: True
+- systemdCommandOmitsAllowBlocked: True
+- systemdOwnerBackupEnvRequired: True
+- systemdOwnerEnvInjectable: True
+- systemdServicesHardeningPresent: True
+- systemdBackupRootWritePathConfigurable: True
+- systemdChildReportNoSecrets: True
 
 ## Commands
 
 - plan: npm run flowchain:backup:install:windows -- -Action Plan
+- systemdPlan: npm run flowchain:backup:install:systemd -- -Action Plan
 - install: npm run flowchain:backup:install:windows -- -Action Install
+- systemdInstall: npm run flowchain:backup:install:systemd -- -Action Install
 - status: npm run flowchain:backup:install:windows -- -Action Status
+- systemdStatus: npm run flowchain:backup:install:systemd -- -Action Status
 - uninstall: npm run flowchain:backup:install:windows -- -Action Uninstall
+- systemdUninstall: npm run flowchain:backup:install:systemd -- -Action Uninstall
+- systemdValidate: npm run flowchain:backup:install:systemd:validate
 - validate: npm run flowchain:backup:install:validate

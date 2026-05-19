@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-19T10:14:53.5413754Z",
+    "generatedAt":  "2026-05-19T12:40:09.7606621Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -29,7 +29,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=86267, finalizedHeight=86267",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=87939, finalizedHeight=87939",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -51,7 +51,7 @@
                       "layer":  "Operations",
                       "requirement":  "Operator doctor covers host tools, package scripts, state path, disk, service evidence, ports, owner-input groups, and owner env-file status without printing owner values.",
                       "status":  "passed",
-                      "evidence":  "doctorStatus=blocked, checks=52, failedChecks=0, blockedChecks=5, blockedOnlyOwner=True",
+                      "evidence":  "doctorStatus=blocked, checks=54, failedChecks=0, blockedChecks=5, blockedOnlyOwner=True",
                       "files":  [
                                     "infra/scripts/flowchain-doctor.ps1"
                                 ],
@@ -149,7 +149,7 @@
                       "layer":  "Operations",
                       "requirement":  "Node operator packaging collects no-secret runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates.",
                       "status":  "passed",
-                      "evidence":  "operatorPackage=passed, commands=46, runbooks=27, evidenceReports=37, failedChecks=0, noSecretScan=True",
+                      "evidence":  "operatorPackage=passed, commands=50, runbooks=31, evidenceReports=38, failedChecks=0, noSecretScan=True",
                       "files":  [
                                     "infra/scripts/flowchain-operator-package.ps1",
                                     "docs/developer/FLOWCHAIN_NODE_OPERATOR.md"
@@ -166,7 +166,7 @@
                       "layer":  "Operations",
                       "requirement":  "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, forbidden local files, and no-secret scan.",
                       "status":  "passed",
-                      "evidence":  "operatorPackageVerify=passed, expectedFiles=55, commands=46, failedChecks=0, noSecretScan=True",
+                      "evidence":  "operatorPackageVerify=passed, expectedFiles=62, commands=50, failedChecks=0, noSecretScan=True",
                       "files":  [
                                     "infra/scripts/flowchain-operator-package-verify.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/OPERATOR_PACKAGE_VERIFY.md"
@@ -367,9 +367,9 @@
                   {
                       "id":  "state-backup-boundary",
                       "layer":  "Storage/recovery",
-                      "requirement":  "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, owner-path dry-run proof, scheduled backup and restore-drill install proof, retention rotation, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation.",
+                      "requirement":  "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, owner-path dry-run proof, Windows and Linux scheduled backup plus restore-drill install proof, retention rotation, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation.",
                       "status":  "blocked",
-                      "evidence":  "backupStatus=blocked, validationStatus=passed, ownerPathDryRun=passed, ownerPathFailedChecks=0, installValidation=passed, installFailedChecks=0, snapshotProof=not-run, restoreProof=not-run, requiredChecks=23, missingChecks=0",
+                      "evidence":  "backupStatus=blocked, validationStatus=passed, ownerPathDryRun=passed, ownerPathFailedChecks=0, installValidation=passed, installFailedChecks=0, systemdValidation=True, systemdTimer=True, snapshotProof=not-run, restoreProof=not-run, requiredChecks=23, missingChecks=0",
                       "files":  [
                                     "infra/scripts/flowchain-public-rpc-backup-readiness.ps1",
                                     "infra/scripts/flowchain-state-backup.ps1",
@@ -377,8 +377,12 @@
                                     "infra/scripts/flowchain-backup-restore-validation.ps1",
                                     "infra/scripts/flowchain-backup-owner-path-dry-run.ps1",
                                     "infra/scripts/flowchain-backup-install-windows.ps1",
+                                    "infra/scripts/flowchain-backup-install-systemd.ps1",
+                                    "infra/scripts/flowchain-backup-install-systemd-validation.ps1",
                                     "infra/scripts/flowchain-backup-install-validation.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/WINDOWS_BACKUP_INSTALL.md",
+                                    "docs/agent-runs/live-product-infra-rpc/SYSTEMD_BACKUP_INSTALL.md",
+                                    "docs/agent-runs/live-product-infra-rpc/SYSTEMD_BACKUP_INSTALL_VALIDATION.md",
                                     "docs/agent-runs/live-product-infra-rpc/BACKUP_INSTALL_VALIDATION.md"
                                 ],
                       "commands":  [
@@ -388,6 +392,8 @@
                                        "npm run flowchain:backup:owner-path:dry-run",
                                        "npm run flowchain:backup:install:validate",
                                        "npm run flowchain:backup:install:windows -- -Action Plan",
+                                       "npm run flowchain:backup:install:systemd -- -Action Plan",
+                                       "npm run flowchain:backup:install:systemd:validate",
                                        "npm run flowchain:backup:check"
                                    ],
                       "blockers":  [

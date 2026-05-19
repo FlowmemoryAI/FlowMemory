@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-19T10:29:12.7314664Z",
+    "generatedAt":  "2026-05-19T12:40:20.0424787Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -134,8 +134,18 @@
                      },
                      {
                          "phase":  "backup",
+                         "command":  "npm run flowchain:backup:install:systemd -- -Action Plan",
+                         "purpose":  "Render the daily snapshot Linux systemd timer plan."
+                     },
+                     {
+                         "phase":  "backup",
+                         "command":  "npm run flowchain:backup:install:systemd:validate",
+                         "purpose":  "Validate Linux systemd backup and restore-drill timer plans without mutating the owner host."
+                     },
+                     {
+                         "phase":  "backup",
                          "command":  "npm run flowchain:backup:install:validate",
-                         "purpose":  "Validate backup task plan/status/uninstall behavior."
+                         "purpose":  "Validate Windows and Linux backup scheduler plan/status/uninstall behavior."
                      },
                      {
                          "phase":  "ops",
