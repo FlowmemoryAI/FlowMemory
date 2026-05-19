@@ -2304,18 +2304,40 @@ $liveInfraNoSecretReady = Get-AuditProp -Object $liveInfraReadiness -Name "noSec
 $bridgePilotLocal = $reports.bridgePilotLocal
 $bridgePilotExactValue = Get-AuditProp -Object $bridgePilotLocal -Name "exactValueConservation"
 $bridgePilotNegative = Get-AuditProp -Object $bridgePilotLocal -Name "negativeCoverage"
+$bridgePilotChecks = Get-AuditProp -Object $bridgePilotLocal -Name "checks"
+$bridgePilotFailedChecks = @((Get-AuditProp -Object $bridgePilotLocal -Name "failedChecks" -Default @()) | Where-Object { $null -ne $_ })
+$bridgePilotStatus = Get-ReportStatus -Report $bridgePilotLocal
 $bridgePilotBroadcast = Get-AuditProp -Object $bridgePilotLocal -Name "broadcast"
 $bridgePilotNoSecrets = Get-AuditProp -Object $bridgePilotLocal -Name "noSecrets"
 $bridgePilotAllAmountsEqual = Get-AuditProp -Object $bridgePilotExactValue -Name "allAmountsEqual"
 $bridgePilotWrongChainRejected = Get-AuditProp -Object $bridgePilotNegative -Name "wrongChainRejected"
 $bridgePilotUnapprovedContractRejected = Get-AuditProp -Object $bridgePilotNegative -Name "unapprovedContractRejected"
+$bridgePilotRequiredCheckNames = @(
+    "sourceChainIsBase8453",
+    "firstCreditApplied",
+    "firstApplicationAppliedOnce",
+    "replayCreditRejected",
+    "replayApplicationIdempotent",
+    "duplicateReplayRejected",
+    "exactValueConserved",
+    "wrongChainRejected",
+    "unapprovedContractRejected",
+    "withdrawalIntentCreated",
+    "releaseEvidenceNoBroadcast",
+    "noLiveBroadcast",
+    "noSecrets"
+)
+$bridgePilotMissingChecks = @(Get-MissingAuditChecks -Checks $bridgePilotChecks -Names $bridgePilotRequiredCheckNames)
 $bridgePilotLocalPassed = $bridgePilotLocalExitCode -eq 0 `
     -and $null -ne $bridgePilotLocal `
+    -and $bridgePilotStatus -eq "passed" `
     -and $bridgePilotBroadcast -eq $false `
     -and $bridgePilotNoSecrets -eq $true `
     -and $bridgePilotAllAmountsEqual -eq $true `
     -and $bridgePilotWrongChainRejected -eq $true `
-    -and $bridgePilotUnapprovedContractRejected -eq $true
+    -and $bridgePilotUnapprovedContractRejected -eq $true `
+    -and $bridgePilotFailedChecks.Count -eq 0 `
+    -and $bridgePilotMissingChecks.Count -eq 0
 $baseTxDiagnostic = $reports.baseTxDiagnostic
 $baseTxDiagnosticStatus = Get-ReportStatus -Report $baseTxDiagnostic
 $baseTxDiagnosticSafeReason = [string](Get-AuditProp -Object $baseTxDiagnostic -Name "safeReasonCode")
@@ -2675,7 +2697,7 @@ Add-AuditItem -Items $items -Id "bridge-funds" `
 Add-AuditItem -Items $items -Id "bridge-local-pilot-proof" `
     -Requirement "Local/mock bridge pilot proof preserves exact value, rejects replay/wrong-chain/unapproved-lockbox cases, and performs no broadcast." `
     -Status $(if ($bridgePilotLocalPassed) { "passed" } else { "failed" }) `
-    -Evidence "broadcast=$bridgePilotBroadcast, allAmountsEqual=$bridgePilotAllAmountsEqual, wrongChainRejected=$bridgePilotWrongChainRejected, unapprovedContractRejected=$bridgePilotUnapprovedContractRejected, report=$($paths.bridgePilotLocal)" `
+    -Evidence "status=$bridgePilotStatus, broadcast=$bridgePilotBroadcast, allAmountsEqual=$bridgePilotAllAmountsEqual, wrongChainRejected=$bridgePilotWrongChainRejected, unapprovedContractRejected=$bridgePilotUnapprovedContractRejected, failedChecks=$($bridgePilotFailedChecks.Count), missingChecks=$($bridgePilotMissingChecks.Count), report=$($paths.bridgePilotLocal)" `
     -Commands @("npm run flowchain:real-value-pilot:bridge")
 
 Add-AuditItem -Items $items -Id "base-tx-diagnostic-fail-closed" `

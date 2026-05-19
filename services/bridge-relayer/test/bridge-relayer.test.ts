@@ -208,9 +208,9 @@ function baseMainnetPilotRpcArgs(extra: string[] = []): string[] {
   ];
 }
 
-function runBridgeCli(args: string[], env: Record<string, string> = {}): Promise<{ stdout: string; stderr: string }> {
+function runBridgeNodeScript(script: string, args: string[], env: Record<string, string> = {}): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolveRun, rejectRun) => {
-    const child = spawn(process.execPath, ["src/observe-base-lockbox.ts", ...args], {
+    const child = spawn(process.execPath, [script, ...args], {
       cwd: fileURLToPath(new URL("..", import.meta.url)),
       env: { ...process.env, ...env },
       stdio: ["ignore", "pipe", "pipe"],
@@ -234,6 +234,10 @@ function runBridgeCli(args: string[], env: Record<string, string> = {}): Promise
       rejectRun(new Error(`bridge CLI exited ${code}\nstdout:\n${stdout}\nstderr:\n${stderr}`));
     });
   });
+}
+
+function runBridgeCli(args: string[], env: Record<string, string> = {}): Promise<{ stdout: string; stderr: string }> {
+  return runBridgeNodeScript("src/observe-base-lockbox.ts", args, env);
 }
 
 test("validates the committed mock bridge deposit fixture", () => {
@@ -345,6 +349,55 @@ test("mock pilot E2E path applies a Base 8453 credit exactly once across replay"
     validateSchema("bridge-release-evidence.schema.json", firstRun.releaseEvidences[0]);
   } finally {
     rmSync(stateDir, { recursive: true, force: true });
+  }
+});
+
+test("mock pilot E2E report exposes explicit status and checks", async () => {
+  const outDir = mkdtempSync(join(tmpdir(), "flowmemory-bridge-pilot-report-"));
+  try {
+    const { stdout } = await runBridgeNodeScript("src/bridge-pilot-e2e.ts", [
+      "--mode",
+      "mock-pilot",
+      "--fixture",
+      fileURLToPath(pilotFixtureUrl),
+      "--duplicate-fixture",
+      fileURLToPath(pilotDuplicateFixtureUrl),
+      "--out-dir",
+      outDir,
+    ]);
+    assert.match(stdout, /Bridge pilot E2E report:/);
+
+    const report = JSON.parse(readFileSync(join(outDir, "bridge-real-value-pilot-e2e-report.json"), "utf8")) as {
+      schema?: string;
+      status?: string;
+      checks?: Record<string, boolean>;
+      failedChecks?: string[];
+      broadcast?: boolean;
+      noSecrets?: boolean;
+    };
+    assert.equal(report.schema, "flowmemory.bridge_real_value_pilot_e2e_report.v0");
+    assert.equal(report.status, "passed");
+    assert.equal(report.broadcast, false);
+    assert.equal(report.noSecrets, true);
+    assert.deepEqual(report.failedChecks, []);
+    [
+      "sourceChainIsBase8453",
+      "firstCreditApplied",
+      "firstApplicationAppliedOnce",
+      "replayCreditRejected",
+      "replayApplicationIdempotent",
+      "duplicateReplayRejected",
+      "exactValueConserved",
+      "wrongChainRejected",
+      "unapprovedContractRejected",
+      "withdrawalIntentCreated",
+      "releaseEvidenceNoBroadcast",
+      "noLiveBroadcast",
+      "noSecrets",
+    ].forEach((name) => assert.equal(report.checks?.[name], true, name));
+    assertNoSecrets(report);
+  } finally {
+    rmSync(outDir, { recursive: true, force: true });
   }
 });
 
