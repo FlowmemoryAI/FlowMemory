@@ -214,9 +214,13 @@ function Test-RenderedDeployment {
         renderedNginxHasTls = $renderedAllText.Contains("ssl_certificate ") -and $renderedAllText.Contains("ssl_certificate_key ")
         renderedNginxHasCorsForwarding = $renderedAllText.Contains('proxy_set_header Origin $http_origin;')
         renderedNginxHasRateLimit = $renderedAllText.Contains("limit_req_zone") -and $renderedAllText.Contains("limit_req zone=flowchain_rpc_per_ip")
+        renderedNginxAuthorizationForwardingScoped = ([regex]::Matches($renderedAllText, 'proxy_set_header\s+Authorization\s+\$http_authorization;')).Count -eq 1
         renderedSystemdUsesOwnerEnv = $renderedAllText.Contains("EnvironmentFile=$TargetOwnerEnvFile") -and $renderedAllText.Contains("FLOWCHAIN_OWNER_ENV_FILE=$TargetOwnerEnvFile")
         renderedPreflightHasReadinessProbe = $renderedAllText.Contains("/rpc/readiness") -and $renderedAllText.Contains("rpc_readiness")
         renderedPreflightHasTesterUnauthProbe = $renderedAllText.Contains("/tester/status") -and $renderedAllText.Contains("/tester/wallets/create") -and $renderedAllText.Contains("flowmemory.control_plane.tester_write_auth_required.v0")
+        renderedPreflightHasDisallowedOriginProbe = $renderedAllText.Contains("blocked-origin.flowchain.example") -and $renderedAllText.Contains("403")
+        renderedPreflightBlocksBroadStatePath = $renderedAllText.Contains("/devnet/local/state.json") -and $renderedAllText.Contains("404")
+        renderedPreflightBlocksPrivateWalletCreate = $renderedAllText.Contains("/wallets/create") -and $renderedAllText.Contains("404")
         renderedFilesDoNotContainTokenHash = -not $renderedAllText.Contains($TokenHashSentinel)
         renderedReportDoesNotContainTokenHash = -not $renderReportText.Contains($TokenHashSentinel)
         renderedReportKeepsOwnerPathsOutsideRepo = $null -ne $renderReport -and $renderReport.renderDirInsideRepo -eq $false -and $renderReport.ownerEnvFileInsideRepo -eq $false

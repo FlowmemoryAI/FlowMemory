@@ -2,7 +2,8 @@
     [string] $RenderedConfig = "<FLOWCHAIN_RPC_NGINX_RENDERED_CONF>",
     [string] $NginxExe = "<FLOWCHAIN_NGINX_EXE>",
     [string] $PublicUrl = "<FLOWCHAIN_RPC_PUBLIC_URL>",
-    [string] $AllowedOrigin = "<FLOWCHAIN_RPC_ALLOWED_ORIGIN>"
+    [string] $AllowedOrigin = "<FLOWCHAIN_RPC_ALLOWED_ORIGIN>",
+    [string] $DisallowedOrigin = "<FLOWCHAIN_RPC_DISALLOWED_ORIGIN>"
 )
 
 $ErrorActionPreference = "Stop"
@@ -12,6 +13,7 @@ if (-not (Test-Path -LiteralPath $RenderedConfig)) { throw "Rendered Nginx confi
 if (-not (Test-Path -LiteralPath $NginxExe)) { throw "nginx.exe was not found." }
 if (-not $PublicUrl.StartsWith("https://", [System.StringComparison]::OrdinalIgnoreCase)) { throw "FLOWCHAIN_RPC_PUBLIC_URL must be https." }
 if ([string]::IsNullOrWhiteSpace($AllowedOrigin) -or -not $AllowedOrigin.StartsWith("https://", [System.StringComparison]::OrdinalIgnoreCase)) { throw "FLOWCHAIN_RPC_ALLOWED_ORIGIN must be an exact https origin." }
+if ([string]::IsNullOrWhiteSpace($DisallowedOrigin) -or -not $DisallowedOrigin.StartsWith("https://", [System.StringComparison]::OrdinalIgnoreCase)) { throw "FLOWCHAIN_RPC_DISALLOWED_ORIGIN must be an exact https origin." }
 
 $rendered = Get-Content -Raw -LiteralPath $RenderedConfig
 $placeholderPattern = [regex]::Escape("<") + "(FLOWCHAIN_|PATH_TO_TLS_|FLOWCHAIN_NGINX_)"
@@ -39,6 +41,31 @@ Invoke-WebRequest -Uri "$publicBase/health" -Method Get -Headers $headers -Timeo
 Invoke-WebRequest -Uri "$publicBase/rpc/readiness" -Method Get -Headers $headers -TimeoutSec 10 | Out-Null
 $body = '{"jsonrpc":"2.0","id":1,"method":"rpc_readiness","params":{}}'
 Invoke-WebRequest -Uri "$publicBase/rpc" -Method Post -ContentType "application/json" -Headers $headers -Body $body -TimeoutSec 10 | Out-Null
+$disallowedStatusCode = 0
+try {
+    Invoke-WebRequest -Uri "$publicBase/rpc/readiness" -Method Get -Headers @{ Origin = $DisallowedOrigin } -TimeoutSec 10 | Out-Null
+    $disallowedStatusCode = 200
+}
+catch {
+    if ($_.Exception.PSObject.Properties.Name -contains "Response" -and $null -ne $_.Exception.Response) {
+        $disallowedStatusCode = [int]$_.Exception.Response.StatusCode
+    } else { throw }
+}
+if ($disallowedStatusCode -ne 403) { throw "Disallowed origin public preflight did not return HTTP 403." }
+$blockedPathStatusCodes = @{}
+foreach ($blockedPath in @("/devnet/local/state.json", "/wallets/create")) {
+    try {
+        Invoke-WebRequest -Uri "$publicBase$blockedPath" -Method Post -ContentType "application/json" -Headers $headers -Body "{}" -TimeoutSec 10 | Out-Null
+        $blockedPathStatusCodes[$blockedPath] = 200
+    }
+    catch {
+        if ($_.Exception.PSObject.Properties.Name -contains "Response" -and $null -ne $_.Exception.Response) {
+            $blockedPathStatusCodes[$blockedPath] = [int]$_.Exception.Response.StatusCode
+        } else { throw }
+    }
+}
+if ($blockedPathStatusCodes["/devnet/local/state.json"] -ne 404) { throw "Broad local state path public preflight did not return HTTP 404." }
+if ($blockedPathStatusCodes["/wallets/create"] -ne 404) { throw "Private wallet create path public preflight did not return HTTP 404." }
 $testerStatus = Invoke-WebRequest -Uri "$publicBase/tester/status" -Method Get -Headers $headers -TimeoutSec 10
 if ([int]$testerStatus.StatusCode -ne 200) { throw "Tester status preflight did not return HTTP 200." }
 $testerUnauthStatusCode = 0

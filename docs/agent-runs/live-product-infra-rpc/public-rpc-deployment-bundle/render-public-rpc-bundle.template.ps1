@@ -214,6 +214,7 @@ $replacements = @{
     "<FLOWCHAIN_RPC_PUBLIC_HOST>" = $publicUri.Host
     "<FLOWCHAIN_RPC_PUBLIC_URL>" = $publicUrl.TrimEnd("/")
     "<FLOWCHAIN_RPC_ALLOWED_ORIGIN>" = $allowedOrigins[0]
+    "<FLOWCHAIN_RPC_DISALLOWED_ORIGIN>" = "https://blocked-origin.flowchain.example"
     "<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>" = $rateLimit
     "<PATH_TO_TLS_CERTIFICATE>" = (Get-RequiredParameter -Name "TlsCertificatePath" -Value $TlsCertificatePath)
     "<PATH_TO_TLS_CERTIFICATE_KEY>" = (Get-RequiredParameter -Name "TlsCertificateKeyPath" -Value $TlsCertificateKeyPath)

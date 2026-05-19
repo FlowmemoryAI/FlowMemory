@@ -1228,6 +1228,10 @@ $publicRpcDeploymentBundleRequiredChecks = @(
     "includesNginxConfigTest",
     "includesWindowsNginxConfigTest",
     "includesTesterWritePreflight",
+    "includesDisallowedOriginPreflight",
+    "includesBroadStateBlockedPreflight",
+    "includesPrivateWalletCreateBlockedPreflight",
+    "authorizationForwardingScopedToTesterWrite",
     "includesVerificationCommands",
     "includesRollbackCommands",
     "envExampleHasAllRequiredNames",
@@ -1304,6 +1308,10 @@ $publicRpcDeploymentAutomationRequiredChecks = @(
     "renderedSystemdUsesOwnerEnv",
     "renderedPreflightHasReadinessProbe",
     "renderedPreflightHasTesterUnauthProbe",
+    "renderedPreflightHasDisallowedOriginProbe",
+    "renderedPreflightBlocksBroadStatePath",
+    "renderedPreflightBlocksPrivateWalletCreate",
+    "renderedNginxAuthorizationForwardingScoped",
     "renderedFilesDoNotContainTokenHash",
     "renderedReportDoesNotContainTokenHash",
     "renderedReportKeepsOwnerPathsOutsideRepo",
@@ -2489,15 +2497,15 @@ Add-AuditItem -Items $items -Id "public-rpc-edge-template" `
     -Commands @("npm run flowchain:public-rpc:edge-template")
 
 Add-AuditItem -Items $items -Id "public-rpc-deployment-bundle" `
-    -Requirement "Public RPC deployment bundle has no-secret Nginx, owner env, owner render validation, tester write preflight, verification, and rollback artifacts for exposing FlowChain's own RPC." `
+    -Requirement "Public RPC deployment bundle has no-secret Nginx, owner env, owner render validation, tester write preflight, disallowed-origin and blocked-private-path probes, verification, and rollback artifacts for exposing FlowChain's own RPC." `
     -Status $(if ($publicRpcDeploymentBundlePassed) { "passed" } else { "failed" }) `
-    -Evidence "bundleStatus=$publicRpcDeploymentBundleStatus, repoOwned=$publicRpcDeploymentBundleRepoOwned, nginxTemplate=$publicRpcDeploymentBundleNginxTemplate, renderValidation=$publicRpcDeploymentBundleRenderValidation, testerWritePreflight=$publicRpcDeploymentBundleTesterWritePreflight, failedChecks=$publicRpcDeploymentBundleFailedCheckCount, missingChecks=$publicRpcDeploymentBundleMissingCheckCount, secretFindings=$publicRpcDeploymentBundleSecretFindingCount, verifyRunbook=$publicRpcDeploymentBundleVerifyRunbook, rollbackRunbook=$publicRpcDeploymentBundleRollbackRunbook, report=$($paths.publicRpcDeploymentBundle)" `
+    -Evidence "bundleStatus=$publicRpcDeploymentBundleStatus, repoOwned=$publicRpcDeploymentBundleRepoOwned, nginxTemplate=$publicRpcDeploymentBundleNginxTemplate, renderValidation=$publicRpcDeploymentBundleRenderValidation, testerWritePreflight=$publicRpcDeploymentBundleTesterWritePreflight, disallowedOriginPreflight=$(Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "includesDisallowedOriginPreflight" -Default $false), blockedStatePreflight=$(Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "includesBroadStateBlockedPreflight" -Default $false), privateWalletCreateBlocked=$(Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "includesPrivateWalletCreateBlockedPreflight" -Default $false), authForwardingScoped=$(Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "authorizationForwardingScopedToTesterWrite" -Default $false), failedChecks=$publicRpcDeploymentBundleFailedCheckCount, missingChecks=$publicRpcDeploymentBundleMissingCheckCount, secretFindings=$publicRpcDeploymentBundleSecretFindingCount, verifyRunbook=$publicRpcDeploymentBundleVerifyRunbook, rollbackRunbook=$publicRpcDeploymentBundleRollbackRunbook, report=$($paths.publicRpcDeploymentBundle)" `
     -Commands @("npm run flowchain:public-rpc:deployment-bundle")
 
 Add-AuditItem -Items $items -Id "public-rpc-deployment-automation" `
-    -Requirement "Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, post-deploy verification, and rollback phases without host mutation or owner-value leakage." `
+    -Requirement "Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, disallowed-origin and blocked-private-path probes, post-deploy verification, and rollback phases without host mutation or owner-value leakage." `
     -Status $(if ($publicRpcDeploymentAutomationPassed) { "passed" } else { "failed" }) `
-    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), testerUnauthProbe=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false), hostMutationFalse=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false), failedChecks=$publicRpcDeploymentAutomationFailedCheckCount, missingChecks=$publicRpcDeploymentAutomationMissingCheckCount, secretFindings=$publicRpcDeploymentAutomationSecretFindingCount, report=$($paths.publicRpcDeploymentAutomation)" `
+    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), testerUnauthProbe=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false), disallowedOriginProbe=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasDisallowedOriginProbe" -Default $false), blockedStateProbe=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightBlocksBroadStatePath" -Default $false), privateWalletCreateBlocked=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightBlocksPrivateWalletCreate" -Default $false), authForwardingScoped=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxAuthorizationForwardingScoped" -Default $false), hostMutationFalse=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false), failedChecks=$publicRpcDeploymentAutomationFailedCheckCount, missingChecks=$publicRpcDeploymentAutomationMissingCheckCount, secretFindings=$publicRpcDeploymentAutomationSecretFindingCount, report=$($paths.publicRpcDeploymentAutomation)" `
     -Commands @("npm run flowchain:public-rpc:deployment:automation")
 
 Add-AuditItem -Items $items -Id "node-operator-package" `
