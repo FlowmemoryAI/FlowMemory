@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-18T15:16:05.4387092Z",
+    "generatedAt":  "2026-05-19T03:04:10.9314982Z",
     "status":  "blocked",
     "refresh":  {
                     "performed":  true,
@@ -19,9 +19,9 @@
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "73289",
-                  "finalizedHeight":  "73289",
-                  "stateFileLastWriteAgeSeconds":  0,
+                  "latestHeight":  "80945",
+                  "finalizedHeight":  "80945",
+                  "stateFileLastWriteAgeSeconds":  4,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true
@@ -38,6 +38,10 @@
                            "bridgeRelayerLoopBlockedOnlyOnOwnerInputs":  true,
                            "publicRpc":  "blocked",
                            "backup":  "blocked",
+                           "backupRetentionCount":  null,
+                           "backupRetentionCandidateCount":  null,
+                           "backupRetentionCurrentSnapshotProtected":  false,
+                           "backupRetentionPruneErrorCount":  0,
                            "bridgeLive":  "blocked",
                            "bridgeInfra":  "blocked",
                            "bridgeRelayer":  "blocked",

@@ -176,6 +176,11 @@ if ($bridgeRelayerLoopStatus -eq "running" -and $bridgeRelayerLoopReportHealthy 
 
 $publicRpcStatus = Get-OpsStatus -Report $reports.publicRpc
 $backupStatus = Get-OpsStatus -Report $reports.backup
+$backupDetails = Get-OpsProp -Object $reports.backup -Name "backup"
+$backupRetentionCount = Get-OpsProp -Object $backupDetails -Name "retentionCount" -Default $null
+$backupRetentionCandidateCount = Get-OpsProp -Object $backupDetails -Name "retentionCandidateCount" -Default $null
+$backupRetentionCurrentSnapshotProtected = Get-OpsProp -Object $backupDetails -Name "retentionCurrentSnapshotProtected" -Default $false
+$backupRetentionPruneErrorCount = [int](Get-OpsProp -Object $backupDetails -Name "retentionPruneErrorCount" -Default 0)
 $bridgeLiveStatus = Get-OpsStatus -Report $reports.bridgeLive
 $bridgeInfraStatus = Get-OpsStatus -Report $reports.bridgeInfra
 $bridgeRelayerStatus = Get-OpsStatus -Report $reports.bridgeRelayer
@@ -236,6 +241,9 @@ if ($publicRpcStatus -ne "passed") {
 }
 if ($backupStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "backup-not-ready" -Message "State backup is not ready for public operation." -Commands @("npm run flowchain:backup:restore:validate", "npm run flowchain:backup:check")
+}
+if ($backupStatus -eq "failed" -and $null -ne $backupRetentionCount -and ($backupRetentionCurrentSnapshotProtected -ne $true -or $backupRetentionPruneErrorCount -gt 0)) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "backup-retention-unsafe" -Message "State backup retention failed to protect the latest snapshot or reported prune errors." -Commands @("npm run flowchain:backup:restore:validate", "npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:check")
 }
 if ($bridgeLiveStatus -ne "passed" -or $bridgeInfraStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "bridge-not-ready" -Message "Base 8453 bridge readiness is not ready for external funded testing." -Commands @("npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check", "npm run flowchain:bridge:emergency-stop")
@@ -340,6 +348,10 @@ $report = [ordered]@{
         bridgeRelayerLoopBlockedOnlyOnOwnerInputs = $bridgeRelayerLoopReportBlockedOnlyOnOwnerInputs
         publicRpc = $publicRpcStatus
         backup = $backupStatus
+        backupRetentionCount = $backupRetentionCount
+        backupRetentionCandidateCount = $backupRetentionCandidateCount
+        backupRetentionCurrentSnapshotProtected = $backupRetentionCurrentSnapshotProtected
+        backupRetentionPruneErrorCount = $backupRetentionPruneErrorCount
         bridgeLive = $bridgeLiveStatus
         bridgeInfra = $bridgeInfraStatus
         bridgeRelayer = $bridgeRelayerStatus

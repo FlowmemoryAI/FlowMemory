@@ -138,6 +138,14 @@ $rules = @(
         commands = @("npm run flowchain:no-secret:scan", "npm run flowchain:emergency:export-evidence")
     },
     [ordered]@{
+        id = "backup-retention-unsafe"
+        severity = "critical"
+        findingCodes = @("backup-retention-unsafe")
+        signal = "Backup retention failed to protect the latest snapshot or reported prune errors."
+        threshold = "backup readiness status failed with retentionCurrentSnapshotProtected false or retentionPruneErrorCount greater than zero"
+        commands = @("npm run flowchain:backup:restore:validate", "npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:check")
+    },
+    [ordered]@{
         id = "bridge-relayer-latency-failed"
         severity = "critical"
         findingCodes = @("bridge-relayer-latency-failed")

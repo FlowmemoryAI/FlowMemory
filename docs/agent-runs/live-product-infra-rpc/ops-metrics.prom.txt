@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 73289
+flowchain_latest_height 80945
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 73289
+flowchain_finalized_height 80945
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 0
+flowchain_state_file_age_seconds 4
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -21,10 +21,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 18
+flowchain_ops_alert_rules_total 19
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 11
+flowchain_ops_alert_rules_critical 12
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -43,6 +43,18 @@ flowchain_public_rpc_ready 0
 # HELP flowchain_backup_ready One when backup readiness is passed.
 # TYPE flowchain_backup_ready gauge
 flowchain_backup_ready 0
+# HELP flowchain_backup_retention_count Configured state backup retention count from backup readiness.
+# TYPE flowchain_backup_retention_count gauge
+flowchain_backup_retention_count 0
+# HELP flowchain_backup_retention_candidates Number of eligible state backup snapshots seen by retention.
+# TYPE flowchain_backup_retention_candidates gauge
+flowchain_backup_retention_candidates 0
+# HELP flowchain_backup_retention_snapshot_protected One when retention protected the latest state backup snapshot.
+# TYPE flowchain_backup_retention_snapshot_protected gauge
+flowchain_backup_retention_snapshot_protected 0
+# HELP flowchain_backup_retention_prune_errors State backup retention prune error count.
+# TYPE flowchain_backup_retention_prune_errors gauge
+flowchain_backup_retention_prune_errors 0
 # HELP flowchain_bridge_live_ready One when bridge live readiness is passed.
 # TYPE flowchain_bridge_live_ready gauge
 flowchain_bridge_live_ready 0

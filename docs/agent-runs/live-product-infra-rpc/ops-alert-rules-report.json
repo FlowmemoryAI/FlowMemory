@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-18T15:16:06.7011437Z",
+    "generatedAt":  "2026-05-19T03:04:12.0587866Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  18,
-    "criticalRuleCount":  11,
+    "ruleCount":  19,
+    "criticalRuleCount":  12,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -37,6 +37,7 @@
                                 "height-not-advancing",
                                 "state-stale",
                                 "no-secret-scan-not-passed",
+                                "backup-retention-unsafe",
                                 "bridge-relayer-latency-failed",
                                 "bridge-relayer-cursor-unsafe",
                                 "bridge-relayer-guardrail-failed",
@@ -174,6 +175,20 @@
                       "commands":  [
                                        "npm run flowchain:no-secret:scan",
                                        "npm run flowchain:emergency:export-evidence"
+                                   ]
+                  },
+                  {
+                      "id":  "backup-retention-unsafe",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "backup-retention-unsafe"
+                                       ],
+                      "signal":  "Backup retention failed to protect the latest snapshot or reported prune errors.",
+                      "threshold":  "backup readiness status failed with retentionCurrentSnapshotProtected false or retentionPruneErrorCount greater than zero",
+                      "commands":  [
+                                       "npm run flowchain:backup:restore:validate",
+                                       "npm run flowchain:backup:owner-path:dry-run",
+                                       "npm run flowchain:backup:check"
                                    ]
                   },
                   {

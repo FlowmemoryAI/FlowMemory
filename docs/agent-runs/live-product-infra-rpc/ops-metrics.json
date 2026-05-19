@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-18T15:16:07.2932969Z",
+    "generatedAt":  "2026-05-19T03:04:12.5447905Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -16,19 +16,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  73289
+                        "value":  80945
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  73289
+                        "value":  80945
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  0
+                        "value":  4
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -58,13 +58,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  18
+                        "value":  19
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  11
+                        "value":  12
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -100,6 +100,30 @@
                         "name":  "flowchain_backup_ready",
                         "type":  "gauge",
                         "help":  "One when backup readiness is passed.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_backup_retention_count",
+                        "type":  "gauge",
+                        "help":  "Configured state backup retention count from backup readiness.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_backup_retention_candidates",
+                        "type":  "gauge",
+                        "help":  "Number of eligible state backup snapshots seen by retention.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_backup_retention_snapshot_protected",
+                        "type":  "gauge",
+                        "help":  "One when retention protected the latest state backup snapshot.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_backup_retention_prune_errors",
+                        "type":  "gauge",
+                        "help":  "State backup retention prune error count.",
                         "value":  0
                     },
                     {
@@ -235,7 +259,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  37,
+    "metricCount":  41,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,
