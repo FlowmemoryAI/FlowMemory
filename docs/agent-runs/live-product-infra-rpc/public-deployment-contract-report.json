@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-19T09:57:40.4810313Z",
+    "generatedAt":  "2026-05-19T10:31:34.2286210Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -121,7 +121,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=86217, finalizedHeight=86217",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=86643, finalizedHeight=86643",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -212,15 +212,19 @@
                   },
                   {
                       "id":  "ops-alert-schedule-automation",
-                      "requirement":  "The owner host has a no-secret Windows install, status, and uninstall path for recurring ops snapshot and alert-rule refresh without committed external delivery credentials.",
+                      "requirement":  "The owner host has no-secret Windows Scheduled Task and Linux systemd timer install paths for recurring ops snapshot and alert-rule refresh without committed external delivery credentials.",
                       "status":  "passed",
-                      "evidence":  "alertInstallValidation=passed, planDidNotMutate=True, statusDidNotMutate=True, uninstallAbsentDidNotMutate=True, hasAllowBlocked=True, noExternalDelivery=True",
+                      "evidence":  "alertInstallValidation=passed, planDidNotMutate=True, statusDidNotMutate=True, systemdValidation=True, systemdTimer=True, hasAllowBlocked=True, noExternalDelivery=True",
                       "commands":  [
                                        "npm run flowchain:ops:alerts:install:validate",
                                        "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
+                                       "npm run flowchain:ops:alerts:install:systemd -- -Action Plan",
+                                       "npm run flowchain:ops:alerts:install:systemd:validate",
                                        "npm run flowchain:ops:alerts:install:windows -- -Action Install",
                                        "npm run flowchain:ops:alerts:install:windows -- -Action Status",
-                                       "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall"
+                                       "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall",
+                                       "npm run flowchain:ops:alerts:install:systemd -- -Action Status",
+                                       "npm run flowchain:ops:alerts:install:systemd -- -Action Uninstall"
                                    ],
                       "blockers":  [
 
@@ -572,6 +576,7 @@
                                                  "npm run flowchain:ops:alerts:install:validate",
                                                  "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked",
                                                  "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
+                                                 "npm run flowchain:ops:alerts:install:systemd -- -Action Plan",
                                                  "npm run flowchain:owner:onboarding",
                                                  "npm run flowchain:owner-env:template",
                                                  "npm run flowchain:owner-inputs",
@@ -605,6 +610,8 @@
                                               "npm run flowchain:backup:install:windows -- -Action Uninstall",
                                               "npm run flowchain:ops:alerts:install:windows -- -Action Status",
                                               "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall",
+                                              "npm run flowchain:ops:alerts:install:systemd -- -Action Status",
+                                              "npm run flowchain:ops:alerts:install:systemd -- -Action Uninstall",
                                               "npm run flowchain:service:stop",
                                               "npm run flowchain:service:restart -- -LiveProfile",
                                               "npm run flowchain:emergency:stop-local"

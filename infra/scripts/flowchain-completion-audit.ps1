@@ -2005,6 +2005,11 @@ $alertInstallValidationPassed = $alertInstallValidationExitCode -eq 0 `
     -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "statusDidNotMutate" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "uninstallAbsentDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "systemdValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "systemdPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "systemdServiceUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "systemdTimerUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "systemdNoExternalDelivery" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "childReportsNoSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "childReportsSecretMarkerFindingsEmpty" -Default $false) -eq $true) `
@@ -2403,9 +2408,9 @@ Add-AuditItem -Items $items -Id "ops-alert-rules" `
     -Commands @("npm run flowchain:ops:alerts -- -AllowBlocked")
 
 Add-AuditItem -Items $items -Id "ops-alert-install-validation" `
-    -Requirement "Ops alert scheduled refresh install validation proves plan/status/uninstall no-op behavior and no external delivery for recurring local alert evidence." `
+    -Requirement "Ops alert scheduled refresh install validation proves Windows Scheduled Task and Linux systemd timer plan/status/uninstall boundaries and no external delivery for recurring local alert evidence." `
     -Status $(if ($alertInstallValidationPassed) { "passed" } else { "failed" }) `
-    -Evidence "alertInstall=$alertInstallValidationStatus, failedChecks=$alertInstallValidationFailedCheckCount, secretFindings=$alertInstallValidationSecretFindingCount, planDidNotMutate=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "planDidNotMutate" -Default $false), statusDidNotMutate=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "statusDidNotMutate" -Default $false), noExternalDelivery=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "noExternalDelivery" -Default $false), report=$($paths.alertInstallValidation)" `
+    -Evidence "alertInstall=$alertInstallValidationStatus, failedChecks=$alertInstallValidationFailedCheckCount, secretFindings=$alertInstallValidationSecretFindingCount, planDidNotMutate=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "planDidNotMutate" -Default $false), statusDidNotMutate=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "statusDidNotMutate" -Default $false), systemdValidation=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "systemdValidationPassed" -Default $false), systemdTimer=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "systemdTimerUnitPlanned" -Default $false), noExternalDelivery=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "noExternalDelivery" -Default $false), report=$($paths.alertInstallValidation)" `
     -Commands @("npm run flowchain:ops:alerts:install:validate")
 
 Add-AuditItem -Items $items -Id "ops-escalation-dry-run" `
@@ -2714,6 +2719,7 @@ $report = [ordered]@{
         "npm run flowchain:bridge:relayer:loop:validate",
         "npm run flowchain:ops:snapshot",
         "npm run flowchain:ops:alerts",
+        "npm run flowchain:ops:alerts:install:systemd:validate",
         "npm run flowchain:ops:alerts:install:validate",
         "npm run flowchain:ops:escalation:dry-run",
         "npm run flowchain:ops:incident-drill",

@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Package Verify
 
-Generated: 2026-05-19T10:05:09.0037899Z
+Generated: 2026-05-19T10:29:21.1385618Z
 Status: passed
 
 ## Checks
@@ -35,5 +35,5 @@ Status: passed
 - Expected files: 55
 - Missing files: 0
 - Forbidden local files: 0
-- Command count: 46
+- Command count: 48
 - Owner-input names: 17

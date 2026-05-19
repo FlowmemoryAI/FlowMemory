@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-19T10:04:58.2356041Z",
+    "generatedAt":  "2026-05-19T10:29:12.7314664Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -62,6 +62,8 @@
                             "flowchain:ops:alerts",
                             "flowchain:ops:metrics:export",
                             "flowchain:ops:alerts:install:windows",
+                            "flowchain:ops:alerts:install:systemd",
+                            "flowchain:ops:alerts:install:systemd:validate",
                             "flowchain:ops:alerts:install:validate",
                             "flowchain:ops:incident-drill",
                             "flowchain:bridge:relayer:once",
@@ -234,6 +236,16 @@
                               "phase":  "ops",
                               "command":  "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
                               "purpose":  "Render recurring alert refresh Scheduled Task plan."
+                          },
+                          {
+                              "phase":  "ops",
+                              "command":  "npm run flowchain:ops:alerts:install:systemd -- -Action Plan",
+                              "purpose":  "Render recurring alert refresh Linux systemd timer plan."
+                          },
+                          {
+                              "phase":  "ops",
+                              "command":  "npm run flowchain:ops:alerts:install:systemd:validate",
+                              "purpose":  "Validate Linux systemd timer alert refresh plan without mutating the owner host."
                           },
                           {
                               "phase":  "ops",
@@ -434,6 +446,20 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/WINDOWS_ALERT_INSTALL.md",
                          "destination":  "runbooks/WINDOWS_ALERT_INSTALL.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/SYSTEMD_ALERT_INSTALL.md",
+                         "destination":  "runbooks/SYSTEMD_ALERT_INSTALL.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/SYSTEMD_ALERT_INSTALL_VALIDATION.md",
+                         "destination":  "runbooks/SYSTEMD_ALERT_INSTALL_VALIDATION.md",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"

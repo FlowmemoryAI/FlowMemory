@@ -313,6 +313,8 @@ $observabilityFiles = @(
     "infra/scripts/flowchain-ops-snapshot.ps1",
     "infra/scripts/flowchain-ops-alerts.ps1",
     "infra/scripts/flowchain-alert-install-windows.ps1",
+    "infra/scripts/flowchain-alert-install-systemd.ps1",
+    "infra/scripts/flowchain-alert-install-systemd-validation.ps1",
     "infra/scripts/flowchain-alert-install-validation.ps1",
     "infra/scripts/flowchain-ops-escalation-dry-run.ps1",
     "infra/scripts/flowchain-incident-drill.ps1",
@@ -326,6 +328,8 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:snapshot") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:windows") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:systemd") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:systemd:validate") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:validate") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:escalation:dry-run") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:incident-drill") `
@@ -352,6 +356,11 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "uninstallAbsentDidNotMutate" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "uninstallAbsentTaskAbsentAfter" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "scheduledTaskTriggerSupportsRepetition" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdServiceUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdTimerUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdNoExternalDelivery" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
     -and ($opsEscalationDryRunStatus -eq "passed") `
     -and ($opsEscalationFailedChecks.Count -eq 0) `
@@ -366,9 +375,9 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
 Add-ArchitectureItem -Items $items -Id "ops-observability-boundary" -Layer "Operations" `
     -Requirement "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers." `
     -Status $(if ($observabilityReady) { "passed" } else { "failed" }) `
-    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), alertInstall=$alertInstallValidationStatus, alertInstallFailedChecks=$($alertInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
+    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), alertInstall=$alertInstallValidationStatus, systemdAlert=$(Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false), alertInstallFailedChecks=$($alertInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
     -Files $observabilityFiles `
-    -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
+    -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:alerts:install:systemd:validate", "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
 
 $serviceInstallFiles = @(
     "infra/scripts/flowchain-service-install-windows.ps1",

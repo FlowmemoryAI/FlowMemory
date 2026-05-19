@@ -767,16 +767,24 @@ $alertInstallReady = ($alertInstallValidationStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "actionUsesAlertsScript" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "hasAllowBlocked" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "scheduledCommandDoesNotDisableRefresh" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "systemdPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "systemdServiceUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "systemdTimerUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "systemdTimerIntervalConfigured" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "systemdNoExternalDelivery" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $alertInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $alertInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:windows") `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:systemd") `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:systemd:validate") `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:validate")
 Add-DeploymentItem -Items $items -Id "ops-alert-schedule-automation" `
-    -Requirement "The owner host has a no-secret Windows install, status, and uninstall path for recurring ops snapshot and alert-rule refresh without committed external delivery credentials." `
+    -Requirement "The owner host has no-secret Windows Scheduled Task and Linux systemd timer install paths for recurring ops snapshot and alert-rule refresh without committed external delivery credentials." `
     -Status $(if ($alertInstallReady) { "passed" } else { "failed" }) `
-    -Evidence "alertInstallValidation=$alertInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $alertInstallChecks -Name "planDidNotMutate"), statusDidNotMutate=$(Get-DeploymentProp -Object $alertInstallChecks -Name "statusDidNotMutate"), uninstallAbsentDidNotMutate=$(Get-DeploymentProp -Object $alertInstallChecks -Name "uninstallAbsentDidNotMutate"), hasAllowBlocked=$(Get-DeploymentProp -Object $alertInstallChecks -Name "hasAllowBlocked"), noExternalDelivery=$(Get-DeploymentProp -Object $alertInstallChecks -Name "noExternalDelivery")" `
-    -Commands @("npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:alerts:install:windows -- -Action Plan", "npm run flowchain:ops:alerts:install:windows -- -Action Install", "npm run flowchain:ops:alerts:install:windows -- -Action Status", "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall")
+    -Evidence "alertInstallValidation=$alertInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $alertInstallChecks -Name "planDidNotMutate"), statusDidNotMutate=$(Get-DeploymentProp -Object $alertInstallChecks -Name "statusDidNotMutate"), systemdValidation=$(Get-DeploymentProp -Object $alertInstallChecks -Name "systemdValidationPassed"), systemdTimer=$(Get-DeploymentProp -Object $alertInstallChecks -Name "systemdTimerUnitPlanned"), hasAllowBlocked=$(Get-DeploymentProp -Object $alertInstallChecks -Name "hasAllowBlocked"), noExternalDelivery=$(Get-DeploymentProp -Object $alertInstallChecks -Name "noExternalDelivery")" `
+    -Commands @("npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:alerts:install:windows -- -Action Plan", "npm run flowchain:ops:alerts:install:systemd -- -Action Plan", "npm run flowchain:ops:alerts:install:systemd:validate", "npm run flowchain:ops:alerts:install:windows -- -Action Install", "npm run flowchain:ops:alerts:install:windows -- -Action Status", "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall", "npm run flowchain:ops:alerts:install:systemd -- -Action Status", "npm run flowchain:ops:alerts:install:systemd -- -Action Uninstall")
 
 $opsEscalationDryRun = $reports.opsEscalationDryRun
 $opsEscalationDryRunStatus = Get-DeploymentStatus -Report $opsEscalationDryRun
@@ -1169,6 +1177,7 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:ops:alerts:install:validate",
         "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked",
         "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
+        "npm run flowchain:ops:alerts:install:systemd -- -Action Plan",
         "npm run flowchain:owner:onboarding",
         "npm run flowchain:owner-env:template",
         "npm run flowchain:owner-inputs",
@@ -1202,6 +1211,8 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:backup:install:windows -- -Action Uninstall",
         "npm run flowchain:ops:alerts:install:windows -- -Action Status",
         "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall",
+        "npm run flowchain:ops:alerts:install:systemd -- -Action Status",
+        "npm run flowchain:ops:alerts:install:systemd -- -Action Uninstall",
         "npm run flowchain:service:stop",
         "npm run flowchain:service:restart -- -LiveProfile",
         "npm run flowchain:emergency:stop-local"

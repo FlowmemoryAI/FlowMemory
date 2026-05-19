@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Command Matrix
 
-Generated: 2026-05-19T10:04:58.2356041Z
+Generated: 2026-05-19T10:29:12.7314664Z
 
 | Phase | Command | Purpose |
 | --- | --- | --- |
@@ -35,6 +35,8 @@ Generated: 2026-05-19T10:04:58.2356041Z
 | ops | `npm run flowchain:ops:alerts -- -AllowBlocked` | Refresh local alert rules and finding coverage. |
 | ops | `npm run flowchain:ops:metrics:export` | Export no-secret JSON and Prometheus textfile metrics for owner collectors. |
 | ops | `npm run flowchain:ops:alerts:install:windows -- -Action Plan` | Render recurring alert refresh Scheduled Task plan. |
+| ops | `npm run flowchain:ops:alerts:install:systemd -- -Action Plan` | Render recurring alert refresh Linux systemd timer plan. |
+| ops | `npm run flowchain:ops:alerts:install:systemd:validate` | Validate Linux systemd timer alert refresh plan without mutating the owner host. |
 | ops | `npm run flowchain:ops:incident-drill` | Rehearse node, RPC, stale-state, stalled-height, and no-secret incidents. |
 | bridge | `npm run flowchain:bridge:relayer:once -- -AllowBlocked` | Run the no-broadcast relayer gate; remains blocked until owner Base inputs exist. |
 | bridge | `npm run flowchain:bridge:deploy:control:validate` | Validate Base 8453 deploy, pause, resume, and emergency-stop gates fail closed without owner env and require broadcast acknowledgements. |

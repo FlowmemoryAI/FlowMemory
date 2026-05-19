@@ -1,9 +1,9 @@
 ﻿# FlowChain External Tester Packet
 
-Generated: 2026-05-19T10:03:41.5165100Z
+Generated: 2026-05-19T10:27:17.1362249Z
 Status: blocked
 Shareable externally: False
-Latest observed height: 86267
+Latest observed height: 86589
 
 Do not share this network externally yet. Local wallet rehearsal is available, but external sharing remains blocked until the listed owner input names and live infrastructure gates pass.
 

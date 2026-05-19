@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-19T09:55:25.1452910Z",
+    "generatedAt":  "2026-05-19T10:14:53.5413754Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -29,7 +29,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=81006, finalizedHeight=81006",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=86267, finalizedHeight=86267",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -67,7 +67,7 @@
                       "layer":  "Operations",
                       "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=19, alertCoveredFindings=21, alertInstall=passed, alertInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=12, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=11, incidentFailed=0",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=19, alertCoveredFindings=21, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=12, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=11, incidentFailed=0",
                       "files":  [
                                     "infra/scripts/flowchain-service-monitor.ps1",
                                     "infra/scripts/flowchain-service-supervisor.ps1",
@@ -75,6 +75,8 @@
                                     "infra/scripts/flowchain-ops-snapshot.ps1",
                                     "infra/scripts/flowchain-ops-alerts.ps1",
                                     "infra/scripts/flowchain-alert-install-windows.ps1",
+                                    "infra/scripts/flowchain-alert-install-systemd.ps1",
+                                    "infra/scripts/flowchain-alert-install-systemd-validation.ps1",
                                     "infra/scripts/flowchain-alert-install-validation.ps1",
                                     "infra/scripts/flowchain-ops-escalation-dry-run.ps1",
                                     "infra/scripts/flowchain-incident-drill.ps1",
@@ -87,6 +89,7 @@
                                        "npm run flowchain:ops:snapshot -- -AllowBlocked",
                                        "npm run flowchain:ops:alerts -- -AllowBlocked",
                                        "npm run flowchain:ops:alerts:install:validate",
+                                       "npm run flowchain:ops:alerts:install:systemd:validate",
                                        "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked",
                                        "npm run flowchain:ops:incident-drill",
                                        "npm run flowchain:emergency:stop-local"
@@ -163,7 +166,7 @@
                       "layer":  "Operations",
                       "requirement":  "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, forbidden local files, and no-secret scan.",
                       "status":  "passed",
-                      "evidence":  "operatorPackageVerify=passed, expectedFiles=55, commands=45, failedChecks=0, noSecretScan=True",
+                      "evidence":  "operatorPackageVerify=passed, expectedFiles=55, commands=46, failedChecks=0, noSecretScan=True",
                       "files":  [
                                     "infra/scripts/flowchain-operator-package-verify.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/OPERATOR_PACKAGE_VERIFY.md"

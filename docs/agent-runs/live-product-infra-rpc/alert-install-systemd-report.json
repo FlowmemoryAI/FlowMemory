@@ -1,0 +1,130 @@
+{
+    "schema":  "flowchain.alert_install_systemd_report.v0",
+    "generatedAt":  "2026-05-19T10:29:02.4976431Z",
+    "status":  "passed",
+    "action":  "Plan",
+    "serviceName":  "flowchain-ops-alerts.service",
+    "timerName":  "flowchain-ops-alerts.timer",
+    "intervalMinutes":  15,
+    "systemdUnitDir":  "/etc/systemd/system",
+    "targetPaths":  {
+                        "service":  "/etc/systemd/system/flowchain-ops-alerts.service",
+                        "timer":  "/etc/systemd/system/flowchain-ops-alerts.timer"
+                    },
+    "scheduledAlert":  {
+                           "alertsScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-ops-alerts.ps1",
+                           "reportPath":  "docs/agent-runs/live-product-infra-rpc/scheduled-ops-alert-rules-report.json",
+                           "markdownPath":  "docs/agent-runs/live-product-infra-rpc/SCHEDULED_OPS_ALERT_RULES.md",
+                           "opsSnapshotPath":  "docs/agent-runs/live-product-infra-rpc/scheduled-ops-snapshot-report.json",
+                           "ownerEnvFileConfigured":  true,
+                           "sendsExternalNotifications":  false
+                       },
+    "host":  {
+                 "isWindows":  true,
+                 "canQuerySystemd":  false,
+                 "systemctl":  {
+                                   "name":  "systemctl",
+                                   "available":  false,
+                                   "source":  ""
+                               },
+                 "journalctl":  {
+                                    "name":  "journalctl",
+                                    "available":  false,
+                                    "source":  ""
+                                }
+             },
+    "before":  {
+                   "service":  {
+                                   "name":  "flowchain-ops-alerts.service",
+                                   "canQuery":  false,
+                                   "active":  "",
+                                   "enabled":  "",
+                                   "exists":  false,
+                                   "queryError":  "systemctl is not available on this host."
+                               },
+                   "timer":  {
+                                 "name":  "flowchain-ops-alerts.timer",
+                                 "canQuery":  false,
+                                 "active":  "",
+                                 "enabled":  "",
+                                 "exists":  false,
+                                 "queryError":  "systemctl is not available on this host."
+                             }
+               },
+    "after":  {
+                  "service":  {
+                                  "name":  "flowchain-ops-alerts.service",
+                                  "canQuery":  false,
+                                  "active":  "",
+                                  "enabled":  "",
+                                  "exists":  false,
+                                  "queryError":  "systemctl is not available on this host."
+                              },
+                  "timer":  {
+                                "name":  "flowchain-ops-alerts.timer",
+                                "canQuery":  false,
+                                "active":  "",
+                                "enabled":  "",
+                                "exists":  false,
+                                "queryError":  "systemctl is not available on this host."
+                            }
+              },
+    "commands":  {
+                     "plan":  "npm run flowchain:ops:alerts:install:systemd -- -Action Plan",
+                     "validate":  "npm run flowchain:ops:alerts:install:systemd:validate",
+                     "install":  "npm run flowchain:ops:alerts:install:systemd -- -Action Install",
+                     "status":  "npm run flowchain:ops:alerts:install:systemd -- -Action Status",
+                     "uninstall":  "npm run flowchain:ops:alerts:install:systemd -- -Action Uninstall",
+                     "alerts":  "npm run flowchain:ops:alerts -- -AllowBlocked",
+                     "journal":  "journalctl -u flowchain-ops-alerts.service -u flowchain-ops-alerts.timer --since -1h --no-pager"
+                 },
+    "mutationCommands":  [
+
+                         ],
+    "unitPreview":  {
+                        "service":  "[Unit]\nDescription=FlowChain ops alert refresh\nWants=flowchain-live.service flowchain-supervisor.service\nAfter=network-online.target flowchain-live.service flowchain-supervisor.service\n\n[Service]\nType=oneshot\nWorkingDirectory=E:/FlowMemory/flowmemory-live-infra-rpc\nEnvironmentFile=-E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-systemd-install-validation\\owner-env-path-only.env\nEnvironment=FLOWCHAIN_OWNER_ENV_FILE=E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-systemd-install-validation\\owner-env-path-only.env\nExecStart=/usr/bin/env pwsh -NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-ops-alerts.ps1 -AllowBlocked -ReportPath docs/agent-runs/live-product-infra-rpc/scheduled-ops-alert-rules-report.json -MarkdownPath docs/agent-runs/live-product-infra-rpc/SCHEDULED_OPS_ALERT_RULES.md -OpsSnapshotPath docs/agent-runs/live-product-infra-rpc/scheduled-ops-snapshot-report.json\nNoNewPrivileges=true\nPrivateTmp=true\nProtectSystem=full\nProtectHome=read-only\nReadWritePaths=E:/FlowMemory/flowmemory-live-infra-rpc/devnet E:/FlowMemory/flowmemory-live-infra-rpc/docs/agent-runs E:/FlowMemory/flowmemory-live-infra-rpc/services/bridge-relayer/out\n\n[Install]\nWantedBy=multi-user.target",
+                        "timer":  "[Unit]\nDescription=Run FlowChain ops alert refresh every 15 minutes\n\n[Timer]\nOnBootSec=2min\nOnUnitActiveSec=15min\nAccuracySec=30s\nPersistent=true\nUnit=flowchain-ops-alerts.service\n\n[Install]\nWantedBy=timers.target"
+                    },
+    "checks":  {
+                   "unitNamesValid":  true,
+                   "alertsScriptExists":  true,
+                   "intervalMinutesValid":  true,
+                   "serviceUnitIncludesAlertsScript":  true,
+                   "serviceUnitUsesOneshot":  true,
+                   "serviceUnitUsesRepoWorkingDirectory":  true,
+                   "serviceUnitHasAllowBlocked":  true,
+                   "serviceUnitHasReportPath":  true,
+                   "serviceUnitHasMarkdownPath":  true,
+                   "serviceUnitHasOpsSnapshotPath":  true,
+                   "serviceUnitHasNoExternalDelivery":  true,
+                   "serviceUnitOwnerEnvFileInjectable":  true,
+                   "serviceUnitHardeningPresent":  true,
+                   "serviceUnitWritePathsScoped":  true,
+                   "timerUnitTargetsService":  true,
+                   "timerUnitPersistent":  true,
+                   "timerUnitIntervalConfigured":  true,
+                   "timerUnitInstallTarget":  true,
+                   "commandPlanPresent":  true,
+                   "planActionReadOnly":  true,
+                   "statusActionReadOnly":  true,
+                   "installRequiresSystemdHost":  true,
+                   "uninstallRequiresSystemdHost":  true,
+                   "systemctlAvailable":  null,
+                   "journalctlAvailable":  null,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true,
+                   "secretMarkerFindingsEmpty":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "actionErrorRedacted":  "",
+    "hostMutationPerformed":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false,
+    "secretMarkerFindings":  [
+
+                             ]
+}

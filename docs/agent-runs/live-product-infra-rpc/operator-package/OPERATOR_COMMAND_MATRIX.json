@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-19T10:04:58.2356041Z",
+    "generatedAt":  "2026-05-19T10:29:12.7314664Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -156,6 +156,16 @@
                          "phase":  "ops",
                          "command":  "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
                          "purpose":  "Render recurring alert refresh Scheduled Task plan."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:alerts:install:systemd -- -Action Plan",
+                         "purpose":  "Render recurring alert refresh Linux systemd timer plan."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:alerts:install:systemd:validate",
+                         "purpose":  "Validate Linux systemd timer alert refresh plan without mutating the owner host."
                      },
                      {
                          "phase":  "ops",
