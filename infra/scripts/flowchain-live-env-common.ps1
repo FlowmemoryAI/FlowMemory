@@ -292,6 +292,51 @@ function Get-FlowChainJsonString {
     return $Fallback
 }
 
+function Get-FlowChainJsonTextScalar {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string[]] $Names,
+        [switch] $Last
+    )
+
+    foreach ($name in $Names) {
+        $escapedName = [System.Text.RegularExpressions.Regex]::Escape($name)
+        $pattern = '"' + $escapedName + '"\s*:\s*(?:"(?<quoted>(?:\\.|[^"\\])*)"|(?<plain>-?[0-9]+|true|false|null))'
+        $matches = [System.Text.RegularExpressions.Regex]::Matches($Text, $pattern)
+        if ($matches.Count -eq 0) {
+            continue
+        }
+        $match = if ($Last) { $matches[$matches.Count - 1] } else { $matches[0] }
+        $quoted = $match.Groups["quoted"].Value
+        if ($match.Groups["quoted"].Success) {
+            return $quoted
+        }
+        $plain = $match.Groups["plain"].Value
+        if (-not [string]::IsNullOrWhiteSpace($plain) -and $plain -ne "null") {
+            return $plain
+        }
+    }
+    return $null
+}
+
+function Get-FlowChainJsonArrayItemCountFromText {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Name
+    )
+
+    $escapedName = [System.Text.RegularExpressions.Regex]::Escape($Name)
+    $match = [System.Text.RegularExpressions.Regex]::Match($Text, '"' + $escapedName + '"\s*:\s*\[(?<body>.*?)\]', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    if (-not $match.Success) {
+        return $null
+    }
+    $body = $match.Groups["body"].Value.Trim()
+    if ($body.Length -eq 0) {
+        return 0
+    }
+    return [System.Text.RegularExpressions.Regex]::Matches($body, '\{').Count
+}
+
 function Get-FlowChainStateFacts {
     param([Parameter(Mandatory = $true)][string] $StatePath)
 
@@ -316,6 +361,7 @@ function Get-FlowChainStateFacts {
         return $facts
     }
 
+    $stateItem = $null
     try {
         $stateItem = Get-Item -LiteralPath $StatePath
         $facts.stateFileLastWriteAgeSeconds = [Math]::Max(0, [int64](([DateTimeOffset]::UtcNow - $stateItem.LastWriteTimeUtc).TotalSeconds))
@@ -324,8 +370,66 @@ function Get-FlowChainStateFacts {
         $facts.stateFileLastWriteAgeSeconds = $null
     }
 
+    $stateText = ""
     try {
-        $state = Get-Content -Raw -LiteralPath $StatePath | ConvertFrom-Json
+        $stateText = Get-Content -Raw -LiteralPath $StatePath
+    }
+    catch {
+        return $facts
+    }
+
+    if ($null -ne $stateItem -and $stateItem.Length -gt 5242880) {
+        $facts.readable = $stateText.TrimStart().StartsWith("{") -and $stateText.TrimEnd().EndsWith("}")
+        if (-not $facts.readable) {
+            return $facts
+        }
+
+        $facts.chainId = Get-FlowChainJsonTextScalar -Text $stateText -Names @("chainId")
+        $facts.blockCount = [System.Text.RegularExpressions.Regex]::Matches($stateText, '"blockNumber"\s*:').Count
+        $facts.latestHeight = Get-FlowChainJsonTextScalar -Text $stateText -Names @("blockNumber", "height", "number") -Last
+        $facts.latestHash = Get-FlowChainJsonTextScalar -Text $stateText -Names @("blockHash", "hash") -Last
+        $facts.latestRoot = Get-FlowChainJsonTextScalar -Text $stateText -Names @("stateRoot", "root") -Last
+        $timestamp = Get-FlowChainJsonTextScalar -Text $stateText -Names @("logicalTime", "timestamp", "createdAt", "producedAt") -Last
+        $facts.latestBlockTimestamp = $timestamp
+        if ($timestamp -match '^[0-9]+$') {
+            $nowUnix = [int64]([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())
+            $facts.latestBlockAgeSeconds = [Math]::Max(0, $nowUnix - [int64]$timestamp)
+        }
+        elseif (-not [string]::IsNullOrWhiteSpace($timestamp)) {
+            try {
+                $parsed = [DateTimeOffset]::Parse($timestamp, [System.Globalization.CultureInfo]::InvariantCulture)
+                $facts.latestBlockAgeSeconds = [Math]::Max(0, [int64](([DateTimeOffset]::UtcNow - $parsed).TotalSeconds))
+            }
+            catch {
+                $facts.latestBlockAgeSeconds = $null
+            }
+        }
+        if ($null -ne $facts.stateFileLastWriteAgeSeconds) {
+            if ($null -eq $facts.latestBlockAgeSeconds) {
+                $facts.latestBlockAgeSeconds = $facts.stateFileLastWriteAgeSeconds
+            }
+            else {
+                $facts.latestBlockAgeSeconds = [Math]::Min([int64]$facts.latestBlockAgeSeconds, [int64]$facts.stateFileLastWriteAgeSeconds)
+            }
+        }
+        if ([string]::IsNullOrWhiteSpace($facts.latestRoot)) {
+            $facts.latestRoot = Get-FlowChainJsonTextScalar -Text $stateText -Names @("stateRoot", "root", "parentHash") -Last
+        }
+
+        $facts.finalizedHeight = Get-FlowChainJsonTextScalar -Text $stateText -Names @("finalizedHeight", "finalizedBlock")
+        if ([string]::IsNullOrWhiteSpace($facts.finalizedHeight)) {
+            $facts.finalizedHeight = $facts.latestHeight
+        }
+        if ($facts.finalizedHeight -eq $facts.latestHeight) {
+            $facts.finalizedHash = $facts.latestHash
+        }
+        $facts.mempoolDepth = Get-FlowChainJsonArrayItemCountFromText -Text $stateText -Name "pendingTxs"
+        $facts.peerCount = Get-FlowChainJsonArrayItemCountFromText -Text $stateText -Name "peers"
+        return $facts
+    }
+
+    try {
+        $state = $stateText | ConvertFrom-Json
     }
     catch {
         return $facts

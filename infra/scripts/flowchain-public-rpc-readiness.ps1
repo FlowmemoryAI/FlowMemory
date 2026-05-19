@@ -74,6 +74,27 @@ function Get-FlowChainJsonPropertyValue {
     return $null
 }
 
+function New-FlowChainSkippedStateFacts {
+    param([Parameter(Mandatory = $true)][string] $Reason)
+
+    return [ordered]@{
+        readable = $null
+        skipped = $true
+        skipReason = $Reason
+        statePathConfigured = $true
+        chainId = $null
+        latestHeight = $null
+        latestHash = $null
+        latestRoot = $null
+        latestBlockAgeSeconds = $null
+        stateFileLastWriteAgeSeconds = $null
+        finalizedHeight = $null
+        finalizedHash = $null
+        mempoolDepth = $null
+        peerCount = $null
+    }
+}
+
 foreach ($name in $requiredEnv) {
     if ([string]::IsNullOrWhiteSpace((Get-FlowChainEnvValue -Name $name))) {
         [void] $missingEnv.Add($name)
@@ -167,8 +188,14 @@ if (-not [string]::IsNullOrWhiteSpace($backupPathRaw)) {
     }
 }
 
-$stateFacts = Get-FlowChainStateFacts -StatePath $stateFullPath
-if (-not $stateFacts.readable) {
+$stateFactsShouldLoad = $null -ne $publicUri
+$stateFacts = if ($stateFactsShouldLoad) {
+    Get-FlowChainStateFacts -StatePath $stateFullPath
+}
+else {
+    New-FlowChainSkippedStateFacts -Reason "Public RPC URL is not configured or valid, so endpoint-to-state comparison is not actionable."
+}
+if ($stateFactsShouldLoad -and -not $stateFacts.readable) {
     Add-FlowChainReadinessProblem -Problems $problems -Name "devnet/local/state.json" -Reason "local node state file is missing or unreadable" -Category "artifact"
 }
 
@@ -507,6 +534,8 @@ $report = [ordered]@{
         backupPathConfigured = $backupCheck.configured
         backupPathExists = $backupCheck.exists
         backupPathWritable = $backupCheck.writable
+        stateFactsLoaded = $stateFactsShouldLoad
+        stateFactsSkippedUntilPublicUrlConfigured = -not $stateFactsShouldLoad
         stateFileReadable = $stateFacts.readable
         responseHygienePassed = $hygiene.passed
         readinessDeploymentFlagsConsistent = $deploymentChecks.readinessStatusReady -ne $true -or (
@@ -528,6 +557,8 @@ $report = [ordered]@{
     chainChecks = $chainChecks
     localState = [ordered]@{
         statePath = $StatePath
+        skipped = (Get-FlowChainJsonPropertyValue -Object $stateFacts -Name "skipped")
+        skipReason = (Get-FlowChainJsonPropertyValue -Object $stateFacts -Name "skipReason")
         chainId = $stateFacts.chainId
         latestHeight = $stateFacts.latestHeight
         latestHash = $stateFacts.latestHash

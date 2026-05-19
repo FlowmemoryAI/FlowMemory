@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.backup_readiness_report.v1",
-    "generatedAt":  "2026-05-19T02:38:03.4068801Z",
+    "generatedAt":  "2026-05-19T14:24:31.2107374Z",
     "status":  "passed",
     "requiredEnvNames":  [
                              "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
@@ -11,9 +11,9 @@
     "state":  {
                   "statePath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\state.json",
                   "readable":  true,
-                  "latestHeight":  "80573",
-                  "latestHash":  "0x58da0f26c16fbb8e7990aa89bf3e1b02ccfcb6d34b8af665d29e0aee4ea94568",
-                  "latestRoot":  "0x59c784d887ea14d2d0727eca2baeef0bdfd6f292a36879f5df3bb0bc99b233d1"
+                  "latestHeight":  "89174",
+                  "latestHash":  "0x474acbe92bb32ac2de72e27feebb315dd3b839bfa65d85b573c55fdd1d6d9875",
+                  "latestRoot":  "0x92426130b66c6f0afcd7a93fa42eb8ad6f360b97e2f74eca18d2abb0c5904767"
               },
     "backup":  {
                    "configured":  true,
@@ -22,16 +22,16 @@
                    "directory":  true,
                    "snapshotProofStatus":  "passed",
                    "restoreProofStatus":  "passed",
-                   "latestBackupTimestamp":  "2026-05-19T02:37:29.7306937Z",
-                   "latestBackupArtifactName":  "flowchain-state-snapshot-20260519T023627704Z",
+                   "latestBackupTimestamp":  "2026-05-19T14:24:27.1055353Z",
+                   "latestBackupArtifactName":  "flowchain-state-snapshot-20260519T142422114Z",
                    "stateRootCompared":  true,
                    "stateRootMatch":  true,
                    "stateFileHashMatch":  true,
                    "writeVerified":  true,
                    "latestPointerVerified":  true,
                    "latestPointerWrittenAtomically":  true,
-                   "snapshotManifestHash":  "a0d8575cb8ff7d002fe0738e6b9719d7ec207eba3942de4abb1e0fa56d710634",
-                   "latestManifestHash":  "a0d8575cb8ff7d002fe0738e6b9719d7ec207eba3942de4abb1e0fa56d710634",
+                   "snapshotManifestHash":  "34f38dca2c8f4a44ebcc700cb062f78b21e199aab92e401a84d04aff078bd1db",
+                   "latestManifestHash":  "34f38dca2c8f4a44ebcc700cb062f78b21e199aab92e401a84d04aff078bd1db",
                    "retentionCount":  14,
                    "retentionCandidateCount":  1,
                    "retentionCurrentSnapshotProtected":  true,

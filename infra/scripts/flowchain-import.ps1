@@ -4,7 +4,8 @@ param(
 
     [string] $StatePath = "devnet/local/state.json",
     [string] $ImportDir = "devnet/local/imported",
-    [switch] $Force
+    [switch] $Force,
+    [switch] $SkipInspect
 )
 
 $ErrorActionPreference = "Stop"
@@ -48,18 +49,23 @@ if (Test-Path -LiteralPath $tempStatePath) {
 Copy-Item -LiteralPath $importedState -Destination $tempStatePath -Force
 Move-Item -LiteralPath $tempStatePath -Destination $stateFullPath -Force
 
-Invoke-FlowChainCommand -Label "Inspect imported devnet state" -FilePath "cargo" -ArgumentList @(
-    "run",
-    "--manifest-path",
-    "crates/flowmemory-devnet/Cargo.toml",
-    "--",
-    "--state",
-    $stateFullPath,
-    "inspect-state",
-    "--summary"
-)
+if (-not $SkipInspect.IsPresent) {
+    Invoke-FlowChainCommand -Label "Inspect imported devnet state" -FilePath "cargo" -ArgumentList @(
+        "run",
+        "--manifest-path",
+        "crates/flowmemory-devnet/Cargo.toml",
+        "--",
+        "--state",
+        $stateFullPath,
+        "inspect-state",
+        "--summary"
+    )
+}
 
 Write-Host ""
 Write-Host "FlowChain local state import complete."
 Write-Host "State: $stateFullPath"
+if ($SkipInspect.IsPresent) {
+    Write-Host "Inspect skipped: true"
+}
 Write-Host "Next command: npm run flowchain:start"

@@ -390,11 +390,6 @@ if (-not $NoRefresh.IsPresent) {
         "Bypass",
         "-File",
         (Join-Path $PSScriptRoot "flowchain-no-secret-scan.ps1"),
-        "-Paths",
-        "docs/agent-runs/live-product-infra-rpc",
-        "docs/OPERATIONS",
-        "services/bridge-relayer/out/real-value-pilot-e2e",
-        "devnet/local/live-l1-bridge-e2e",
         "-ReportPath",
         $paths.noSecret
     )
