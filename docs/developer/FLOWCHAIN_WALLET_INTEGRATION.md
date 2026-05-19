@@ -57,6 +57,7 @@ After a send, wait for block inclusion and read transfer history:
 
 ```powershell
 npm run flowchain:devkit -- watch-height --json --seconds 30
+npm run flowchain:devkit -- wait-transaction --json --tx <tx-id-or-hash> --seconds 30
 npm run flowchain:devkit -- wallet-transfers --json --limit 20
 ```
 
@@ -98,5 +99,9 @@ const send = await client.walletSend({
   amountUnits: "1",
   memo: "local-wallet-test",
   applyBlock: true
+});
+const included = await client.waitForTransaction({
+  txId: send.transferId,
+  timeoutMs: 30000
 });
 ```

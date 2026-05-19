@@ -1962,8 +1962,9 @@ test("HTTP tester write gateway requires bearer auth, caps sends, and returns pu
         reason: "control-plane-tester-gateway-test",
       }),
     });
-    assert.equal(faucet.status, 200);
-    const faucetBody = await faucet.json() as JsonObject;
+    const faucetText = await faucet.text();
+    assert.equal(faucet.status, 200, faucetText);
+    const faucetBody = JSON.parse(faucetText) as JsonObject;
     assert.equal(faucetBody.schema, "flowmemory.control_plane.tester_faucet_result.v0");
     assert.equal(faucetBody.accepted, true);
     assert.equal(faucetBody.noSecrets, true);
@@ -1985,6 +1986,27 @@ test("HTTP tester write gateway requires bearer auth, caps sends, and returns pu
     assert.equal(sendBody.schema, "flowmemory.control_plane.tester_wallet_send_result.v0");
     assert.equal(sendBody.accepted, true);
     assert.equal(sendBody.noSecrets, true);
+    const sendTxId = String(sendBody.transferId);
+    assert.match(sendTxId, /^0x[0-9a-f]{64}$/);
+
+    const transactionLookup = await fetch(`${baseUrl}/rpc`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: "tester-send-transaction",
+        method: "transaction_get",
+        params: { txId: sendTxId },
+      }),
+    });
+    assert.equal(transactionLookup.status, 200);
+    const transactionLookupBody = await transactionLookup.json() as JsonObject;
+    const transactionResult = transactionLookupBody.result as JsonObject;
+    const transaction = transactionResult.transaction as JsonObject;
+    assert.equal(transactionResult.schema, "flowmemory.control_plane.transaction_detail.v0");
+    assert.equal(transaction.transactionId, sendTxId);
+    assert.equal(transaction.status, "applied");
+    assert.equal(transaction.type, "WalletTransfer");
 
     const overCap = await fetch(`${baseUrl}/tester/wallets/send`, {
       method: "POST",

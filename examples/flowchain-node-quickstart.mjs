@@ -35,6 +35,7 @@ async function main() {
   const balanceRows = asArray(balances.balances).map(asRecord);
 
   let walletSend = null;
+  let walletSendWait = null;
   if (shouldSend) {
     const sender = balanceRows.find((row) => accountIdFromBalance(row) !== null && amountFromBalance(row) > 1n);
     const recipient = balanceRows.find((row) => accountIdFromBalance(row) !== null && accountIdFromBalance(row) !== accountIdFromBalance(sender ?? {}));
@@ -49,6 +50,10 @@ async function main() {
       applyBlock: true,
       createRecipient: true,
     });
+    const txId = asRecord(walletSend).transferId ?? asArray(asRecord(walletSend).txIds)[0];
+    if (typeof txId === "string") {
+      walletSendWait = await client.waitForTransaction({ txId, timeoutMs: 15000, pollMs: 500 });
+    }
   }
 
   const after = asRecord(await client.chainStatus());
@@ -64,6 +69,7 @@ async function main() {
     transactionCount: transactions.count ?? 0,
     balanceRows: balances.count ?? 0,
     walletSendSchema: asRecord(walletSend).schema ?? null,
+    walletSendWaitStatus: asRecord(walletSendWait).status ?? null,
     localOnly: readiness.localOnly !== false,
     noLiveBroadcast: true,
     noSecrets: true,

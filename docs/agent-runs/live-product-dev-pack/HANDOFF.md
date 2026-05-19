@@ -8,6 +8,7 @@ Implemented in this slice:
 - Typed JSON-RPC client over the real FlowChain `/rpc` surface.
 - CLI commands for discovery, readiness, status, wallet balances, wallet transfers, bridge readiness, bridge status, and diagnostics.
 - CLI commands for blocks, transactions, mempool, accounts, balances, wallet metadata, faucet events, finality, bridge deposits, bridge credits, and withdrawals.
+- SDK and CLI transaction-inclusion wait helpers backed by `transaction_get` polling.
 - Node.js SDK example under `examples/flowchain-node-quickstart.mjs` and browser readiness example under `examples/flowchain-browser-readiness/`.
 - Developer guides for wallet integration, bridge integration, node operations, app building, explorer/indexer use, faucet/tester funds, release compatibility, and troubleshooting.
 - Generated RPC reference from live `rpc_discover`.

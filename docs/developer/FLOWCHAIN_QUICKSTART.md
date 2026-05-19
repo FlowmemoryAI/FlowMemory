@@ -98,6 +98,13 @@ npm run flowchain:devkit -- wallet-send --json --from <account-id> --to <account
 This uses the local control-plane wallet send path. It is for local no-value
 testing only and is not a live bridge or public endpoint action.
 
+Copy the `transferId` returned by `wallet-send`, then wait for the real wallet
+activity row to appear in the Explorer/RPC transaction index:
+
+```powershell
+npm run flowchain:devkit -- wait-transaction --json --tx <tx-id> --seconds 30
+```
+
 ## Read Bridge Readiness
 
 ```powershell

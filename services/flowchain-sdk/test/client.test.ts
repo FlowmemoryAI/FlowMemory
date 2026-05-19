@@ -70,6 +70,39 @@ test("submits wallet send through control-plane HTTP path", async () => {
   ]);
 });
 
+test("waits for transaction inclusion through transaction_get", async () => {
+  const calls: unknown[] = [];
+  let attempts = 0;
+  const client = new FlowChainClient({
+    fetchImpl: (async (_url, init) => {
+      attempts += 1;
+      const body = JSON.parse(String(init?.body));
+      calls.push(body);
+      if (attempts === 1) {
+        return new Response(JSON.stringify({
+          jsonrpc: "2.0",
+          id: "wait",
+          error: { code: -32004, message: "transaction not found: tx:wait" },
+        }), { status: 200 });
+      }
+      return new Response(JSON.stringify({
+        jsonrpc: "2.0",
+        id: "wait",
+        result: {
+          schema: "flowmemory.control_plane.transaction_detail.v0",
+          transaction: { transactionId: "tx:wait", status: "applied" },
+        },
+      }), { status: 200 });
+    }) as typeof fetch,
+  });
+
+  const result = await client.waitForTransaction({ txId: "tx:wait", timeoutMs: 1000, pollMs: 1 }) as Record<string, unknown>;
+  assert.equal(result.schema, "flowchain.sdk.wait_transaction.v0");
+  assert.equal(result.status, "included");
+  assert.equal(result.attempts, 2);
+  assert.deepEqual(calls.map((call) => (call as { method?: string }).method), ["transaction_get", "transaction_get"]);
+});
+
 test("wraps explorer, wallet, finality, and bridge read methods", async () => {
   const calls: { method: string; params: unknown }[] = [];
   const client = new FlowChainClient({

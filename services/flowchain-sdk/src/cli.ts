@@ -25,6 +25,7 @@ interface CliOptions {
   toAccountId?: string;
   amountUnits?: string;
   memo?: string;
+  pollMs: number;
 }
 
 const COMMANDS = new Set([
@@ -60,6 +61,7 @@ const COMMANDS = new Set([
   "withdrawals",
   "withdrawal",
   "wallet-send",
+  "wait-transaction",
   "diagnostics",
   "help",
 ]);
@@ -71,6 +73,7 @@ function parseArgs(argv: string[]): CliOptions {
   let json = false;
   let limit = 10;
   let seconds = 20;
+  let pollMs = 1000;
   const options: Partial<CliOptions> = {};
   while (args.length > 0) {
     const arg = args.shift();
@@ -82,6 +85,8 @@ function parseArgs(argv: string[]): CliOptions {
       limit = Number.parseInt(args.shift() ?? "10", 10);
     } else if (arg === "--seconds") {
       seconds = Number.parseInt(args.shift() ?? "20", 10);
+    } else if (arg === "--poll-ms") {
+      pollMs = Number.parseInt(args.shift() ?? "1000", 10);
     } else if (arg === "--id") {
       options.id = args.shift();
     } else if (arg === "--account") {
@@ -127,7 +132,7 @@ function parseArgs(argv: string[]): CliOptions {
     }
   }
   if (!COMMANDS.has(command)) throw new Error(`unknown command: ${command}`);
-  return { command, rpcUrl, json, limit, seconds, ...options };
+  return { command, rpcUrl, json, limit, seconds, pollMs, ...options };
 }
 
 function printHelp() {
@@ -160,6 +165,7 @@ Commands:
   finality          List finality rows
   finality-get      Get finality by --object or --id
   wallet-send       Submit a local wallet send through the real control-plane wallet path
+  wait-transaction  Wait for transaction/activity inclusion by --tx, --tx-id, --tx-hash, or --id
   bridge-readiness  Print bridge live readiness
   bridge-status     Print bridge status
   bridge-deposits   List bridge deposits
@@ -358,6 +364,18 @@ async function run(argv = process.argv.slice(2)) {
           applyBlock: true,
           createRecipient: true,
         });
+      case "wait-transaction": {
+        const waited = await client.waitForTransaction({
+          ...(transactionParams(options) as Record<string, string>),
+          timeoutMs: options.seconds * 1000,
+          pollMs: options.pollMs,
+        });
+        const waitedRecord = waited as Record<string, JsonValue>;
+        if (waitedRecord.status !== "included") {
+          process.exitCode = 1;
+        }
+        return waited;
+      }
       case "diagnostics":
         return {
           schema: "flowchain.sdk.diagnostics.v0",

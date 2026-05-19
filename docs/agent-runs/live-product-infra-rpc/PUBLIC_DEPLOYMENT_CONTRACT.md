@@ -1,6 +1,6 @@
 ﻿# FlowChain Public Deployment Contract
 
-Generated: 2026-05-19T22:46:07.5438506Z
+Generated: 2026-05-19T23:30:21.9434684Z
 Status: blocked
 Deployment ready: False
 Packet shareable: False
@@ -32,7 +32,7 @@ This file records deployment gates, commands, and env names only. It must not co
 | Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added. | passed | templateStatus=passed, pathIsGitIgnored=True, requiredEnvNameCount=17, optionalEnvNameCount=2, includesAllRequired=True |
 | Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, disallowed-origin and blocked-private-path probes, verification, rollback, and no broad local state mirror. | passed | edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, testerWritePreflight=True, disallowedOriginPreflight=True, blockedStatePreflight=True, privateWalletCreateBlocked=True, authForwardingScoped=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True, publicStateMirrorExcluded=True, devnetStatePublicRpcExcluded=True |
 | Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, disallowed-origin and blocked-private-path probes, verification, and rollback drill phases without host mutation or owner-value leakage. | passed | automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, testerUnauthProbe=True, disallowedOriginProbe=True, blockedStateProbe=True, privateWalletCreateBlocked=True, authForwardingScoped=True, rollbackDrill=True, hostMutationFalse=True |
-| The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable. | passed | serviceStatus=passed, privateBind=True, latestHeight=94402, finalizedHeight=94402 |
+| The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable. | passed | serviceStatus=passed, privateBind=True, latestHeight=94784, finalizedHeight=94784 |
 | The deployment has recent service-monitor evidence that block height advances over multiple samples. | passed | monitorStatus=passed, samples=2, heightAdvanced=True |
 | The owner service has an autorecovery supervisor and an isolated recovery drill proving control-plane restart without touching live state. | passed | supervisorValidation=passed, restartAttempts=1 |
 | The owner host has a no-secret Windows install, read-only status, and safe absent-task uninstall no-op path for registering the live supervisor as a reboot-persistent scheduled task. | passed | serviceInstallValidation=passed, planDidNotMutate=True, statusCommand=True, statusDidNotMutate=True, uninstallNoop=True, liveProfileDefault=True, relayerDefaultOff=True, relayerOptIn=True, commandsPresent=True |

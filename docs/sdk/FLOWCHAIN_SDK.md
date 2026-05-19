@@ -29,6 +29,11 @@ const send = await client.walletSend({
   amountUnits: "1",
   memo: "sdk-local-test"
 });
+const included = await client.waitForTransaction({
+  txId: send.transferId,
+  timeoutMs: 30000,
+  pollMs: 1000
+});
 ```
 
 ## CLI Examples
@@ -47,6 +52,7 @@ npm run flowchain:devkit -- mempool --json --limit 5
 npm run flowchain:devkit -- wallet-balances --json --limit 5
 npm run flowchain:devkit -- wallet-transfers --json --limit 5
 npm run flowchain:devkit -- wallet-send --json --from <account-id> --to <account-id> --amount-units 1
+npm run flowchain:devkit -- wait-transaction --json --tx <tx-id> --seconds 30
 npm run flowchain:devkit -- wallet-metadata --json --limit 5
 npm run flowchain:devkit -- faucet-events --json --limit 5
 npm run flowchain:devkit -- finality --json --limit 5

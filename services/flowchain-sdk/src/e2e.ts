@@ -158,7 +158,7 @@ async function main() {
   mkdirSync(runDir, { recursive: true });
   mkdirSync(sdkDocsDir, { recursive: true });
 
-  const client = new FlowChainClient({ rpcUrl, timeoutMs: 15000 });
+  const client = new FlowChainClient({ rpcUrl, timeoutMs: 60000 });
   const discovery = asRecord(await client.rpcDiscover());
   const readiness = asRecord(await client.rpcReadiness());
   const health = asRecord(await client.health());
@@ -200,6 +200,10 @@ async function main() {
     applyBlock: true,
     createRecipient: true,
   }));
+  const walletSendTxId = stringValue(walletSend.transferId) ?? stringValue(asArray(walletSend.txIds)[0] ?? null);
+  const waitedTransaction = walletSendTxId === null
+    ? {}
+    : asRecord(await client.waitForTransaction({ txId: walletSendTxId, timeoutMs: 15000, pollMs: 500 }));
 
   const cliPath = resolve(root, "services", "flowchain-sdk", "src", "cli.ts");
   const cliStatusText = execFileSync(process.execPath, [cliPath, "status", "--json", "--rpc", rpcUrl], {
@@ -214,6 +218,13 @@ async function main() {
     windowsHide: true,
   });
   const cliBlocks = JSON.parse(cliBlocksText) as JsonValue;
+  const cliWaitTransaction = walletSendTxId === null
+    ? {}
+    : JSON.parse(execFileSync(process.execPath, [cliPath, "wait-transaction", "--json", "--tx", walletSendTxId, "--seconds", "15", "--poll-ms", "500", "--rpc", rpcUrl], {
+        cwd: root,
+        encoding: "utf8",
+        windowsHide: true,
+      })) as JsonValue;
   const nodeExamplePath = resolve(root, "examples", "flowchain-node-quickstart.mjs");
   const nodeExampleText = execFileSync(process.execPath, [nodeExamplePath, "--send"], {
     cwd: root,
@@ -273,8 +284,10 @@ async function main() {
       && String(bridgeCredits.schema ?? "") === "flowmemory.control_plane.bridge_credit_list.v0"
       && String(withdrawals.schema ?? "") === "flowmemory.control_plane.withdrawal_list.v0",
     walletSendRuntimeBacked: String(walletSend.schema ?? "") === "flowmemory.control_plane.wallet_send_result.v0",
+    waitTransactionSdkIncluded: walletSendTxId !== null && waitedTransaction.status === "included",
     cliJsonStatus: String(asRecord(cliStatus).schema ?? "") === "flowmemory.control_plane.chain_status.v0",
     cliJsonBlocks: String(asRecord(cliBlocks).schema ?? "") === "flowmemory.control_plane.block_list.v0",
+    cliJsonWaitTransaction: String(asRecord(cliWaitTransaction).schema ?? "") === "flowchain.sdk.wait_transaction.v0" && asRecord(cliWaitTransaction).status === "included",
     nodeExamplePassed: String(asRecord(nodeExample).schema ?? "") === "flowchain.example.node_quickstart.v0" && asRecord(nodeExample).status === "passed",
     browserExamplePresent: browserExampleText.includes("/rpc/discover") && browserExampleText.includes("/rpc/readiness"),
     developerGuidesPresent: missingDocs.length === 0,
@@ -321,6 +334,7 @@ async function main() {
       "- Typed JSON-RPC client over the real FlowChain `/rpc` surface.",
       "- CLI commands for discovery, readiness, status, wallet balances, wallet transfers, bridge readiness, bridge status, and diagnostics.",
       "- CLI commands for blocks, transactions, mempool, accounts, balances, wallet metadata, faucet events, finality, bridge deposits, bridge credits, and withdrawals.",
+      "- SDK and CLI transaction-inclusion wait helpers backed by `transaction_get` polling.",
       "- Node.js SDK example under `examples/flowchain-node-quickstart.mjs` and browser readiness example under `examples/flowchain-browser-readiness/`.",
       "- Developer guides for wallet integration, bridge integration, node operations, app building, explorer/indexer use, faucet/tester funds, release compatibility, and troubleshooting.",
       "- Generated RPC reference from live `rpc_discover`.",
