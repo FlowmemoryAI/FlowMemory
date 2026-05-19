@@ -611,7 +611,11 @@ $serviceSupervisorValidationStatus = Get-ReportStatus -Report $serviceSupervisor
 $serviceSupervisorBefore = Get-AuditProp -Object $serviceSupervisorValidation -Name "before"
 $serviceSupervisorAfterCrash = Get-AuditProp -Object $serviceSupervisorValidation -Name "afterCrash"
 $serviceSupervisorAfterRecovery = Get-AuditProp -Object $serviceSupervisorValidation -Name "afterRecovery"
+$serviceSupervisorRelayerRecovery = Get-AuditProp -Object $serviceSupervisorValidation -Name "relayerLoopRecovery"
+$serviceSupervisorRelayerAfterCrash = Get-AuditProp -Object $serviceSupervisorRelayerRecovery -Name "afterCrash"
+$serviceSupervisorRelayerAfterRecovery = Get-AuditProp -Object $serviceSupervisorRelayerRecovery -Name "afterRecovery"
 $serviceSupervisorRestartAttempts = [int](Get-AuditProp -Object $serviceSupervisorValidation -Name "restartAttempts" -Default 0)
+$serviceSupervisorRelayerRestartAttempts = [int](Get-AuditProp -Object $serviceSupervisorRelayerRecovery -Name "restartAttempts" -Default 0)
 $serviceSupervisorChecks = Get-AuditProp -Object $serviceSupervisorValidation -Name "checks"
 $serviceSupervisorFailedChecks = @((Get-AuditProp -Object $serviceSupervisorValidation -Name "failedChecks" -Default @()))
 $serviceSupervisorSecretFindings = @((Get-AuditProp -Object $serviceSupervisorValidation -Name "secretMarkerFindings" -Default @()))
@@ -632,6 +636,27 @@ $serviceSupervisorRequiredChecks = @(
     "afterRecoveryHeightNumeric",
     "afterRecoveryLiveProfile",
     "afterRecoveryMaxBlocksUnbounded",
+    "restartWithRelayerLoopCommandPassed",
+    "beforeRelayerCrashStatusCommandPassed",
+    "beforeRelayerCrashStatusPassed",
+    "beforeRelayerCrashPidRecorded",
+    "beforeRelayerCrashRunning",
+    "beforeRelayerCrashCommandLineMatched",
+    "beforeRelayerCrashReportHealthy",
+    "relayerCrashStatusCommandPassed",
+    "relayerCrashDetected",
+    "supervisorRelayerRecoveryCommandPassed",
+    "relayerRestartAttemptsExactlyOne",
+    "afterRelayerRecoveryStatusCommandPassed",
+    "afterRelayerRecoveryStatusPassed",
+    "afterRelayerRecoveryNodeRunning",
+    "afterRelayerRecoveryControlPlaneRunning",
+    "afterRelayerRecoveryLiveProfile",
+    "afterRelayerRecoveryMaxBlocksUnbounded",
+    "afterRelayerRecoveryLoopRunning",
+    "afterRelayerRecoveryLoopPidRecorded",
+    "afterRelayerRecoveryLoopCommandLineMatched",
+    "afterRelayerRecoveryLoopReportHealthy",
     "childLogPathsInsideRepo",
     "secretMarkerFindingsEmpty",
     "envValuesPrintedFalse",
@@ -653,6 +678,12 @@ $serviceSupervisorValidationPassed = $serviceSupervisorValidationExitCode -eq 0 
     -and ((Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "liveProfile" -Default $false) -eq $true) `
     -and ([int](Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "maxBlocks" -Default -1) -eq 0) `
     -and ($serviceSupervisorRestartAttempts -ge 1) `
+    -and ((Get-AuditProp -Object $serviceSupervisorRelayerAfterCrash -Name "detected" -Default $false) -eq $true) `
+    -and (Get-AuditProp -Object $serviceSupervisorRelayerAfterRecovery -Name "status" -Default "") -eq "passed" `
+    -and (Get-AuditProp -Object $serviceSupervisorRelayerAfterRecovery -Name "loopStatus" -Default "") -eq "running" `
+    -and ((Get-AuditProp -Object $serviceSupervisorRelayerAfterRecovery -Name "loopCommandLineMatched" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $serviceSupervisorRelayerAfterRecovery -Name "reportHealthy" -Default $false) -eq $true) `
+    -and ($serviceSupervisorRelayerRestartAttempts -ge 1) `
     -and ((Get-AuditProp -Object $serviceSupervisorValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $serviceSupervisorValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $serviceSupervisorValidation -Name "broadcasts" -Default $true) -eq $false)
@@ -2327,9 +2358,9 @@ Add-AuditItem -Items $items -Id "sustained-block-production" `
     -Commands @("npm run flowchain:service:monitor -- -DurationSeconds $MonitorDurationSeconds -PollSeconds $MonitorPollSeconds -MaxStateAgeSeconds $MonitorMaxStateAgeSeconds")
 
 Add-AuditItem -Items $items -Id "service-supervisor-autorecovery" `
-    -Requirement "Live service supervisor can recover a crashed local control-plane under the live profile without deleting chain state." `
+    -Requirement "Live service supervisor can recover crashed local control-plane and bridge-relayer-loop processes under the live profile without deleting chain state." `
     -Status $(if ($serviceSupervisorValidationPassed) { "passed" } else { "failed" }) `
-    -Evidence "supervisorValidation=$serviceSupervisorValidationStatus, restartAttempts=$serviceSupervisorRestartAttempts, failedChecks=$($serviceSupervisorFailedChecks.Count), missingChecks=$($serviceSupervisorMissingChecks.Count), secretFindings=$($serviceSupervisorSecretFindings.Count), before=$(Get-AuditProp -Object $serviceSupervisorBefore -Name "status" -Default "missing"), afterCrash=$(Get-AuditProp -Object $serviceSupervisorAfterCrash -Name "status" -Default "missing"), afterRecovery=$(Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "status" -Default "missing"), report=$($paths.serviceSupervisorValidation)" `
+    -Evidence "supervisorValidation=$serviceSupervisorValidationStatus, restartAttempts=$serviceSupervisorRestartAttempts, relayerRestartAttempts=$serviceSupervisorRelayerRestartAttempts, failedChecks=$($serviceSupervisorFailedChecks.Count), missingChecks=$($serviceSupervisorMissingChecks.Count), secretFindings=$($serviceSupervisorSecretFindings.Count), before=$(Get-AuditProp -Object $serviceSupervisorBefore -Name "status" -Default "missing"), afterCrash=$(Get-AuditProp -Object $serviceSupervisorAfterCrash -Name "status" -Default "missing"), afterRecovery=$(Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "status" -Default "missing"), relayerAfterCrash=$(Get-AuditProp -Object $serviceSupervisorRelayerAfterCrash -Name "loopStatus" -Default "missing"), relayerAfterRecovery=$(Get-AuditProp -Object $serviceSupervisorRelayerAfterRecovery -Name "loopStatus" -Default "missing"), report=$($paths.serviceSupervisorValidation)" `
     -Commands @("npm run flowchain:service:supervisor:validate")
 
 Add-AuditItem -Items $items -Id "service-install-validation" `

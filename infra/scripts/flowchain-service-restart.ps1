@@ -8,6 +8,7 @@ param(
     [int] $MaxBlocks = 0,
     [switch] $LiveProfile,
     [switch] $StartBridgeRelayerLoop,
+    [int] $BridgePollSeconds = 30,
     [string] $ReportPath = "docs/agent-runs/live-product-infra-rpc/service-restart-report.json",
     [string] $StopReportPath = ""
 )
@@ -65,6 +66,7 @@ $startArgs = @(
 )
 if ($LiveProfile) { $startArgs += "-LiveProfile" }
 if ($StartBridgeRelayerLoop) { $startArgs += "-StartBridgeRelayerLoop" }
+if ($StartBridgeRelayerLoop) { $startArgs += @("-BridgePollSeconds", "$BridgePollSeconds") }
 
 & powershell @startArgs
 if ($LASTEXITCODE -ne 0) {

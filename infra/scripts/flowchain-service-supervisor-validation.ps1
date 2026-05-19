@@ -18,9 +18,18 @@ $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Reso
 $statusBeforePath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-status-before.json"
 $statusAfterCrashPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-status-after-crash.json"
 $statusAfterPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-status-after.json"
+$statusBeforeRelayerCrashPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-relayer-status-before-crash.json"
+$statusAfterRelayerCrashPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-relayer-status-after-crash.json"
+$statusDuringRelayerRecoveryPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-relayer-status-during-recovery.json"
+$statusAfterRelayerRecoveryPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-relayer-status-after-recovery.json"
 $supervisorReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-supervisor-report.json"
 $restartReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-restart-report.json"
 $stopReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-stop-report.json"
+$relayerStartRestartReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-relayer-start-restart-report.json"
+$relayerStartStopReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-relayer-start-stop-report.json"
+$relayerSupervisorReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-relayer-supervisor-report.json"
+$relayerSupervisorRestartReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-relayer-restart-report.json"
+$relayerSupervisorStopReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-relayer-stop-report.json"
 $finalStopReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-final-stop-report.json"
 $validationTmpDir = Join-Path $repoRoot "devnet/local/tmp/service-supervisor-validation"
 New-Item -ItemType Directory -Force -Path $validationTmpDir | Out-Null
@@ -233,6 +242,130 @@ try {
     $supervisorReport = Read-FlowChainJsonIfExists -Path $supervisorReportPath
     $restartAttempts = [int](Get-ValidationProp -Object $supervisorReport -Name "restartAttempts" -Default 0)
 
+    Write-Host "Supervisor validation: restarting isolated service with bridge relayer loop enabled."
+    [void]$steps.Add([ordered]@{
+        name = "restart-with-relayer-loop"
+        result = Invoke-ValidationChild -ArgumentList @(
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            (Join-Path $PSScriptRoot "flowchain-service-restart.ps1"),
+            "-StatePath",
+            $StatePath,
+            "-NodeDir",
+            $NodeDir,
+            "-ServicesDir",
+            $ServicesDir,
+            "-ControlPlaneHost",
+            $ControlPlaneHost,
+            "-ControlPlanePort",
+            "$ControlPlanePort",
+            "-BlockMs",
+            "1000",
+            "-MaxBlocks",
+            "0",
+            "-LiveProfile",
+            "-StartBridgeRelayerLoop",
+            "-BridgePollSeconds",
+            "5",
+            "-ReportPath",
+            $relayerStartRestartReportPath,
+            "-StopReportPath",
+            $relayerStartStopReportPath
+        )
+    })
+
+    Start-Sleep -Seconds 5
+    Write-Host "Supervisor validation: reading relayer loop status before crash."
+    $beforeRelayerCrash = Invoke-ValidationStatus -Path $statusBeforeRelayerCrashPath
+    $beforeRelayerCrashReport = $beforeRelayerCrash.report
+    $beforeRelayerCrashStatus = [string](Get-ValidationProp -Object $beforeRelayerCrashReport -Name "status" -Default "missing")
+    $beforeRelayerLoop = Get-ValidationProp -Object $beforeRelayerCrashReport -Name "bridgeRelayerLoop"
+    $beforeRelayerLoopReport = Get-ValidationProp -Object $beforeRelayerLoop -Name "report"
+    $beforeRelayerLoopStatus = [string](Get-ValidationProp -Object $beforeRelayerLoop -Name "status" -Default "missing")
+    $beforeRelayerLoopPid = [int](Get-ValidationProp -Object $beforeRelayerLoop -Name "pid" -Default 0)
+    $beforeRelayerLoopCommandLineMatched = [bool](Get-ValidationProp -Object $beforeRelayerLoop -Name "commandLineMatched" -Default $false)
+    $beforeRelayerLoopReportStatus = [string](Get-ValidationProp -Object $beforeRelayerLoopReport -Name "status" -Default "missing")
+    $beforeRelayerLoopReportHealthy = [bool](Get-ValidationProp -Object $beforeRelayerLoopReport -Name "healthy" -Default $false)
+    if ($beforeRelayerLoopPid -le 0) {
+        throw "Validation could not read isolated bridge relayer loop PID."
+    }
+
+    Write-Host "Supervisor validation: killing isolated bridge relayer loop PID $beforeRelayerLoopPid."
+    Stop-Process -Id $beforeRelayerLoopPid -Force -ErrorAction Stop
+    Start-Sleep -Seconds 2
+    Write-Host "Supervisor validation: confirming relayer loop crash state."
+    $afterRelayerCrash = Invoke-ValidationStatus -Path $statusAfterRelayerCrashPath
+    $afterRelayerCrashReport = $afterRelayerCrash.report
+    $afterRelayerCrashStatus = [string](Get-ValidationProp -Object $afterRelayerCrashReport -Name "status" -Default "missing")
+    $afterRelayerCrashLoop = Get-ValidationProp -Object $afterRelayerCrashReport -Name "bridgeRelayerLoop"
+    $afterRelayerCrashLoopStatus = [string](Get-ValidationProp -Object $afterRelayerCrashLoop -Name "status" -Default "missing")
+    $afterRelayerCrashDetected = $afterRelayerCrashLoopStatus -ne "running"
+
+    Write-Host "Supervisor validation: running supervisor once for relayer loop recovery."
+    [void]$steps.Add([ordered]@{
+        name = "supervisor-once-relayer-loop-recovery"
+        result = Invoke-ValidationChild -ArgumentList @(
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            (Join-Path $PSScriptRoot "flowchain-service-supervisor.ps1"),
+            "-StatePath",
+            $StatePath,
+            "-NodeDir",
+            $NodeDir,
+            "-ServicesDir",
+            $ServicesDir,
+            "-ControlPlaneHost",
+            $ControlPlaneHost,
+            "-ControlPlanePort",
+            "$ControlPlanePort",
+            "-Once",
+            "-IntervalSeconds",
+            "1",
+            "-MaxRestartAttempts",
+            "1",
+            "-BridgePollSeconds",
+            "5",
+            "-PostRestartSettleSeconds",
+            "30",
+            "-PostRestartPollSeconds",
+            "1",
+            "-StartBridgeRelayerLoop",
+            "-ReportPath",
+            $relayerSupervisorReportPath,
+            "-StatusReportPath",
+            $statusDuringRelayerRecoveryPath,
+            "-RestartReportPath",
+            $relayerSupervisorRestartReportPath,
+            "-StopReportPath",
+            $relayerSupervisorStopReportPath
+        )
+    })
+
+    Write-Host "Supervisor validation: verifying relayer loop recovered."
+    $afterRelayerRecovery = Invoke-ValidationStatus -Path $statusAfterRelayerRecoveryPath
+    $afterRelayerRecoveryReport = $afterRelayerRecovery.report
+    $afterRelayerRecoveryStatus = [string](Get-ValidationProp -Object $afterRelayerRecoveryReport -Name "status" -Default "missing")
+    $afterRelayerRecoveryNode = Get-ValidationProp -Object $afterRelayerRecoveryReport -Name "node"
+    $afterRelayerRecoveryControlPlane = Get-ValidationProp -Object $afterRelayerRecoveryReport -Name "controlPlane"
+    $afterRelayerRecoveryProfile = Get-ValidationProp -Object $afterRelayerRecoveryReport -Name "serviceProfile"
+    $afterRelayerRecoveryLoop = Get-ValidationProp -Object $afterRelayerRecoveryReport -Name "bridgeRelayerLoop"
+    $afterRelayerRecoveryLoopReport = Get-ValidationProp -Object $afterRelayerRecoveryLoop -Name "report"
+    $afterRelayerRecoveryNodeRunning = [string](Get-ValidationProp -Object $afterRelayerRecoveryNode -Name "status" -Default "") -eq "running"
+    $afterRelayerRecoveryControlPlaneRunning = [string](Get-ValidationProp -Object $afterRelayerRecoveryControlPlane -Name "status" -Default "") -eq "running"
+    $afterRelayerRecoveryLiveProfile = [bool](Get-ValidationProp -Object $afterRelayerRecoveryProfile -Name "liveProfile" -Default $false)
+    $afterRelayerRecoveryMaxBlocks = [int](Get-ValidationProp -Object $afterRelayerRecoveryProfile -Name "maxBlocks" -Default -1)
+    $afterRelayerRecoveryLoopStatus = [string](Get-ValidationProp -Object $afterRelayerRecoveryLoop -Name "status" -Default "missing")
+    $afterRelayerRecoveryLoopPid = [int](Get-ValidationProp -Object $afterRelayerRecoveryLoop -Name "pid" -Default 0)
+    $afterRelayerRecoveryLoopCommandLineMatched = [bool](Get-ValidationProp -Object $afterRelayerRecoveryLoop -Name "commandLineMatched" -Default $false)
+    $afterRelayerRecoveryLoopReportStatus = [string](Get-ValidationProp -Object $afterRelayerRecoveryLoopReport -Name "status" -Default "missing")
+    $afterRelayerRecoveryLoopReportHealthy = [bool](Get-ValidationProp -Object $afterRelayerRecoveryLoopReport -Name "healthy" -Default $false)
+    $relayerSupervisorReport = Read-FlowChainJsonIfExists -Path $relayerSupervisorReportPath
+    $relayerRestartAttempts = [int](Get-ValidationProp -Object $relayerSupervisorReport -Name "restartAttempts" -Default 0)
+
     $stepSummaries = @($steps | ForEach-Object {
         [ordered]@{
             name = [string]$_.name
@@ -291,6 +424,27 @@ try {
         afterRecoveryHeightNumeric = $afterHeight -match '^\d+$'
         afterRecoveryLiveProfile = $afterLiveProfile
         afterRecoveryMaxBlocksUnbounded = $afterMaxBlocks -eq 0
+        restartWithRelayerLoopCommandPassed = $stepByName.ContainsKey("restart-with-relayer-loop") -and [int]$stepByName["restart-with-relayer-loop"].exitCode -eq 0
+        beforeRelayerCrashStatusCommandPassed = [int]$beforeRelayerCrash.exitCode -eq 0
+        beforeRelayerCrashStatusPassed = $beforeRelayerCrashStatus -eq "passed"
+        beforeRelayerCrashPidRecorded = $beforeRelayerLoopPid -gt 0
+        beforeRelayerCrashRunning = $beforeRelayerLoopStatus -eq "running"
+        beforeRelayerCrashCommandLineMatched = $beforeRelayerLoopCommandLineMatched
+        beforeRelayerCrashReportHealthy = $beforeRelayerLoopReportHealthy
+        relayerCrashStatusCommandPassed = [int]$afterRelayerCrash.exitCode -eq 0
+        relayerCrashDetected = $afterRelayerCrashDetected
+        supervisorRelayerRecoveryCommandPassed = $stepByName.ContainsKey("supervisor-once-relayer-loop-recovery") -and [int]$stepByName["supervisor-once-relayer-loop-recovery"].exitCode -eq 0
+        relayerRestartAttemptsExactlyOne = $relayerRestartAttempts -eq 1
+        afterRelayerRecoveryStatusCommandPassed = [int]$afterRelayerRecovery.exitCode -eq 0
+        afterRelayerRecoveryStatusPassed = $afterRelayerRecoveryStatus -eq "passed"
+        afterRelayerRecoveryNodeRunning = $afterRelayerRecoveryNodeRunning
+        afterRelayerRecoveryControlPlaneRunning = $afterRelayerRecoveryControlPlaneRunning
+        afterRelayerRecoveryLiveProfile = $afterRelayerRecoveryLiveProfile
+        afterRelayerRecoveryMaxBlocksUnbounded = $afterRelayerRecoveryMaxBlocks -eq 0
+        afterRelayerRecoveryLoopRunning = $afterRelayerRecoveryLoopStatus -eq "running"
+        afterRelayerRecoveryLoopPidRecorded = $afterRelayerRecoveryLoopPid -gt 0
+        afterRelayerRecoveryLoopCommandLineMatched = $afterRelayerRecoveryLoopCommandLineMatched
+        afterRelayerRecoveryLoopReportHealthy = $afterRelayerRecoveryLoopReportHealthy
         childLogPathsInsideRepo = $childLogPathsInsideRepo
         secretMarkerFindingsEmpty = $secretMarkerFindings.Count -eq 0
         envValuesPrintedFalse = $true
@@ -329,6 +483,34 @@ try {
             maxBlocks = $afterMaxBlocks
         }
         restartAttempts = $restartAttempts
+        relayerLoopRecovery = [ordered]@{
+            beforeCrash = [ordered]@{
+                status = $beforeRelayerCrashStatus
+                loopStatus = $beforeRelayerLoopStatus
+                pid = $beforeRelayerLoopPid
+                commandLineMatched = $beforeRelayerLoopCommandLineMatched
+                reportStatus = $beforeRelayerLoopReportStatus
+                reportHealthy = $beforeRelayerLoopReportHealthy
+            }
+            afterCrash = [ordered]@{
+                status = $afterRelayerCrashStatus
+                loopStatus = $afterRelayerCrashLoopStatus
+                detected = $afterRelayerCrashDetected
+            }
+            afterRecovery = [ordered]@{
+                status = $afterRelayerRecoveryStatus
+                nodeRunning = $afterRelayerRecoveryNodeRunning
+                controlPlaneRunning = $afterRelayerRecoveryControlPlaneRunning
+                liveProfile = $afterRelayerRecoveryLiveProfile
+                maxBlocks = $afterRelayerRecoveryMaxBlocks
+                loopStatus = $afterRelayerRecoveryLoopStatus
+                loopPid = $afterRelayerRecoveryLoopPid
+                loopCommandLineMatched = $afterRelayerRecoveryLoopCommandLineMatched
+                reportStatus = $afterRelayerRecoveryLoopReportStatus
+                reportHealthy = $afterRelayerRecoveryLoopReportHealthy
+            }
+            restartAttempts = $relayerRestartAttempts
+        }
         checks = $checks
         failedChecks = @($failedChecks)
         secretMarkerFindings = @($secretMarkerFindings)
@@ -340,6 +522,15 @@ try {
             restart = $restartReportPath
             stop = $stopReportPath
             after = $statusAfterPath
+            relayerBeforeCrash = $statusBeforeRelayerCrashPath
+            relayerAfterCrash = $statusAfterRelayerCrashPath
+            relayerDuringRecovery = $statusDuringRelayerRecoveryPath
+            relayerAfterRecovery = $statusAfterRelayerRecoveryPath
+            relayerStartRestart = $relayerStartRestartReportPath
+            relayerStartStop = $relayerStartStopReportPath
+            relayerSupervisor = $relayerSupervisorReportPath
+            relayerRestart = $relayerSupervisorRestartReportPath
+            relayerStop = $relayerSupervisorStopReportPath
         }
         steps = @($stepSummaries)
         envValuesPrinted = $false

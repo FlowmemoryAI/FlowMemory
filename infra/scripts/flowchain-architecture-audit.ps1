@@ -276,6 +276,9 @@ $monitorSamples = [int](Get-ArchitectureProp -Object $monitor -Name "sampleCount
 $supervisorValidation = $reports.serviceSupervisorValidation
 $supervisorValidationStatus = Get-ArchitectureStatus -Report $supervisorValidation
 $supervisorRestartAttempts = [int](Get-ArchitectureProp -Object $supervisorValidation -Name "restartAttempts" -Default 0)
+$supervisorChecks = Get-ArchitectureProp -Object $supervisorValidation -Name "checks"
+$supervisorRelayerRecovery = Get-ArchitectureProp -Object $supervisorValidation -Name "relayerLoopRecovery"
+$supervisorRelayerRestartAttempts = [int](Get-ArchitectureProp -Object $supervisorRelayerRecovery -Name "restartAttempts" -Default 0)
 $serviceInstallValidation = $reports.serviceInstallValidation
 $serviceInstallValidationStatus = Get-ArchitectureStatus -Report $serviceInstallValidation
 $serviceInstallChecks = Get-ArchitectureProp -Object $serviceInstallValidation -Name "checks"
@@ -362,6 +365,11 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ($monitorSamples -ge 2) `
     -and ($supervisorValidationStatus -eq "passed") `
     -and ($supervisorRestartAttempts -ge 1) `
+    -and ($supervisorRelayerRestartAttempts -ge 1) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "relayerCrashDetected" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopCommandLineMatched" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopReportHealthy" -Default $false) -eq $true) `
     -and ($opsSnapshotStatus -in @("passed", "blocked")) `
     -and ($opsCriticalCount -eq 0) `
     -and ($opsAlertRulesStatus -eq "passed") `
@@ -417,7 +425,7 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
 Add-ArchitectureItem -Items $items -Id "ops-observability-boundary" -Layer "Operations" `
     -Requirement "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers." `
     -Status $(if ($observabilityReady) { "passed" } else { "failed" }) `
-    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), alertInstall=$alertInstallValidationStatus, systemdAlert=$(Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false), alertInstallFailedChecks=$($alertInstallFailedChecks.Count), metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, metricsInstall=$metricsInstallValidationStatus, systemdMetrics=$(Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdValidationPassed" -Default $false), metricsInstallFailedChecks=$($metricsInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
+    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, supervisorRelayerRestartAttempts=$supervisorRelayerRestartAttempts, supervisorRelayerRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false), opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), alertInstall=$alertInstallValidationStatus, systemdAlert=$(Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false), alertInstallFailedChecks=$($alertInstallFailedChecks.Count), metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, metricsInstall=$metricsInstallValidationStatus, systemdMetrics=$(Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdValidationPassed" -Default $false), metricsInstallFailedChecks=$($metricsInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
     -Files $observabilityFiles `
     -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:alerts:install:systemd:validate", "npm run flowchain:ops:metrics:export -- -AllowBlocked", "npm run flowchain:ops:metrics:install:validate", "npm run flowchain:ops:metrics:install:systemd:validate", "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
 

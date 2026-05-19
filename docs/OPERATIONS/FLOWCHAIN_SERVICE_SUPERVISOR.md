@@ -1,9 +1,9 @@
 # FlowChain Service Supervisor
 
 The service supervisor is the owner-host autorecovery loop for the local/private
-FlowChain L1 runtime. It watches the block-producing node and control-plane RPC
-service, then restarts both with state preserved when process or freshness gates
-fail.
+FlowChain L1 runtime. It watches the block-producing node, control-plane RPC
+service, and, when explicitly enabled, the bridge relayer loop, then restarts
+the live service with state preserved when process or freshness gates fail.
 
 ## Run
 
@@ -14,6 +14,9 @@ npm run flowchain:service:supervisor -- -IntervalSeconds 30 -MaxRestartAttempts 
 By default the supervisor restarts with `-LiveProfile`, `MaxBlocks=0`, the
 private control-plane bind `127.0.0.1:8787`, and no bridge relayer loop. Use
 `-StartBridgeRelayerLoop` only after the owner bridge inputs are configured.
+When that switch is present, a stopped, mismatched, or unhealthy relayer loop is
+treated as a restart reason and the supervisor waits briefly after restart for a
+fresh no-secret/no-broadcast relayer health report.
 
 ## Validate
 
@@ -23,8 +26,9 @@ npm run flowchain:service:supervisor:validate
 
 The validation command starts an isolated service instance under
 `devnet/local/service-supervisor-validation/`, kills only that instance's
-control-plane process, runs the supervisor once, verifies recovery, and stops
-the isolated instance. It does not stop the live owner service.
+control-plane process, runs the supervisor once, verifies recovery, then repeats
+the proof with `-StartBridgeRelayerLoop` by killing only that isolated relayer
+loop and proving supervisor recovery. It does not stop the live owner service.
 
 ## Install On Windows Owner Host
 

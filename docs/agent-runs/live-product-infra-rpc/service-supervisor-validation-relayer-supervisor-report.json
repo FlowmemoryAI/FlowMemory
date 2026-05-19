@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.service_supervisor_report.v0",
-    "generatedAt":  "2026-05-19T18:45:44.2937797Z",
+    "generatedAt":  "2026-05-19T18:48:05.1710655Z",
     "status":  "passed",
     "once":  true,
     "dryRun":  false,
@@ -10,9 +10,9 @@
     "restartAttempts":  1,
     "maxStateAgeSeconds":  90,
     "bridgeRelayerLoop":  {
-                              "requested":  false,
-                              "pollSeconds":  30,
-                              "postRestartSettleSeconds":  20,
+                              "requested":  true,
+                              "pollSeconds":  5,
+                              "postRestartSettleSeconds":  30,
                               "postRestartPollSeconds":  1
                           },
     "statePath":  "devnet/local/service-supervisor-validation/state.json",
@@ -23,54 +23,53 @@
                          "port":  8797
                      },
     "reportPaths":  {
-                        "supervisor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-supervisor-report.json",
-                        "status":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-status-after-crash.json",
-                        "restart":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-restart-report.json",
-                        "stop":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-stop-report.json"
+                        "supervisor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-relayer-supervisor-report.json",
+                        "status":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-relayer-status-during-recovery.json",
+                        "restart":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-relayer-restart-report.json",
+                        "stop":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-relayer-stop-report.json"
                     },
     "iterations":  [
                        {
-                           "sampledAt":  "2026-05-19T18:44:41.0135777Z",
+                           "sampledAt":  "2026-05-19T18:47:02.3043951Z",
                            "restartReasons":  [
-                                                  "service-status-not-passed",
-                                                  "control-plane-not-running"
+                                                  "bridge-relayer-loop-not-running"
                                               ],
                            "restartNeeded":  true,
                            "restartPerformed":  true,
                            "before":  {
                                           "exitCode":  0,
-                                          "reportStatus":  "failed",
+                                          "reportStatus":  "passed",
                                           "nodeStatus":  "running",
-                                          "controlPlaneStatus":  "stopped",
-                                          "latestHeight":  "15008",
-                                          "finalizedHeight":  "15008",
+                                          "controlPlaneStatus":  "running",
+                                          "latestHeight":  "15037",
+                                          "finalizedHeight":  "15037",
                                           "stateFileLastWriteAgeSeconds":  1,
                                           "liveProfile":  true,
                                           "maxBlocks":  0,
                                           "bridgeRelayerLoopStatus":  "stopped",
-                                          "bridgeRelayerLoopPid":  0,
+                                          "bridgeRelayerLoopPid":  53660,
                                           "bridgeRelayerLoopCommandLineMatched":  false,
                                           "bridgeRelayerLoopReportStatus":  "blocked",
                                           "bridgeRelayerLoopReportHealthy":  true
                                       },
                            "restart":  {
                                            "exitCode":  0,
-                                           "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260519134445954-5904-6d41de13.stdout.log",
-                                           "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260519134445954-5904-6d41de13.stderr.log"
+                                           "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260519134706631-69084-8daf7378.stdout.log",
+                                           "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260519134706631-69084-8daf7378.stderr.log"
                                        },
                            "after":  {
                                          "exitCode":  0,
                                          "reportStatus":  "passed",
                                          "nodeStatus":  "running",
                                          "controlPlaneStatus":  "running",
-                                         "latestHeight":  "15016",
-                                         "finalizedHeight":  "15016",
+                                         "latestHeight":  "15046",
+                                         "finalizedHeight":  "15046",
                                          "stateFileLastWriteAgeSeconds":  1,
                                          "liveProfile":  true,
                                          "maxBlocks":  0,
-                                         "bridgeRelayerLoopStatus":  "stopped",
-                                         "bridgeRelayerLoopPid":  0,
-                                         "bridgeRelayerLoopCommandLineMatched":  false,
+                                         "bridgeRelayerLoopStatus":  "running",
+                                         "bridgeRelayerLoopPid":  8512,
+                                         "bridgeRelayerLoopCommandLineMatched":  true,
                                          "bridgeRelayerLoopReportStatus":  "blocked",
                                          "bridgeRelayerLoopReportHealthy":  true
                                      }

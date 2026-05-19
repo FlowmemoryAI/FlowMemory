@@ -12,6 +12,9 @@ param(
     [switch] $DryRun,
     [switch] $NonLiveProfile,
     [switch] $StartBridgeRelayerLoop,
+    [int] $BridgePollSeconds = 30,
+    [int] $PostRestartSettleSeconds = 20,
+    [int] $PostRestartPollSeconds = 1,
     [string] $ReportPath = "docs/agent-runs/live-product-infra-rpc/service-supervisor-report.json",
     [string] $StatusReportPath = "docs/agent-runs/live-product-infra-rpc/service-supervisor-status-report.json",
     [string] $RestartReportPath = "docs/agent-runs/live-product-infra-rpc/service-supervisor-restart-report.json",
@@ -40,6 +43,15 @@ if ($MaxRestartAttempts -lt 0) {
 }
 if ($MaxStateAgeSeconds -lt 1) {
     throw "MaxStateAgeSeconds must be at least 1."
+}
+if ($BridgePollSeconds -lt 5) {
+    throw "BridgePollSeconds must be at least 5."
+}
+if ($PostRestartSettleSeconds -lt 0) {
+    throw "PostRestartSettleSeconds must not be negative."
+}
+if ($PostRestartPollSeconds -lt 1) {
+    throw "PostRestartPollSeconds must be at least 1."
 }
 
 function Invoke-SupervisorChild {
@@ -129,6 +141,8 @@ function Invoke-SupervisorStatus {
     $node = Get-SupervisorProp -Object $statusReport -Name "node"
     $controlPlane = Get-SupervisorProp -Object $statusReport -Name "controlPlane"
     $serviceProfile = Get-SupervisorProp -Object $statusReport -Name "serviceProfile"
+    $bridgeRelayerLoop = Get-SupervisorProp -Object $statusReport -Name "bridgeRelayerLoop"
+    $bridgeRelayerLoopReport = Get-SupervisorProp -Object $bridgeRelayerLoop -Name "report"
 
     return [ordered]@{
         exitCode = [int]$statusResult.exitCode
@@ -141,6 +155,11 @@ function Invoke-SupervisorStatus {
         stateFileLastWriteAgeSeconds = [int](Get-SupervisorProp -Object $chain -Name "stateFileLastWriteAgeSeconds" -Default 999999)
         liveProfile = [bool](Get-SupervisorProp -Object $serviceProfile -Name "liveProfile" -Default $false)
         maxBlocks = [int](Get-SupervisorProp -Object $serviceProfile -Name "maxBlocks" -Default -1)
+        bridgeRelayerLoopStatus = [string](Get-SupervisorProp -Object $bridgeRelayerLoop -Name "status" -Default "missing")
+        bridgeRelayerLoopPid = [int](Get-SupervisorProp -Object $bridgeRelayerLoop -Name "pid" -Default 0)
+        bridgeRelayerLoopCommandLineMatched = [bool](Get-SupervisorProp -Object $bridgeRelayerLoop -Name "commandLineMatched" -Default $false)
+        bridgeRelayerLoopReportStatus = [string](Get-SupervisorProp -Object $bridgeRelayerLoopReport -Name "status" -Default "missing")
+        bridgeRelayerLoopReportHealthy = [bool](Get-SupervisorProp -Object $bridgeRelayerLoopReport -Name "healthy" -Default $false)
     }
 }
 
@@ -166,7 +185,36 @@ function Get-RestartReasons {
     if (-not $NonLiveProfile.IsPresent -and ([bool]$Facts.liveProfile -ne $true -or [int]$Facts.maxBlocks -ne 0)) {
         [void]$reasons.Add("not-live-profile")
     }
+    if ($StartBridgeRelayerLoop.IsPresent) {
+        if ([string]$Facts.bridgeRelayerLoopStatus -ne "running") {
+            [void]$reasons.Add("bridge-relayer-loop-not-running")
+        }
+        elseif ([bool]$Facts.bridgeRelayerLoopCommandLineMatched -ne $true) {
+            [void]$reasons.Add("bridge-relayer-loop-command-mismatch")
+        }
+        elseif ([bool]$Facts.bridgeRelayerLoopReportHealthy -ne $true) {
+            [void]$reasons.Add("bridge-relayer-loop-report-unhealthy")
+        }
+    }
     return @($reasons)
+}
+
+function Wait-SupervisorRecoveryStatus {
+    $latest = Invoke-SupervisorStatus
+    if (@(Get-RestartReasons -Facts $latest).Count -eq 0 -or $PostRestartSettleSeconds -eq 0) {
+        return $latest
+    }
+
+    $deadline = (Get-Date).AddSeconds($PostRestartSettleSeconds)
+    while ((Get-Date) -lt $deadline) {
+        Start-Sleep -Seconds $PostRestartPollSeconds
+        $latest = Invoke-SupervisorStatus
+        if (@(Get-RestartReasons -Facts $latest).Count -eq 0) {
+            return $latest
+        }
+    }
+
+    return $latest
 }
 
 function Write-SupervisorReport {
@@ -187,6 +235,12 @@ function Write-SupervisorReport {
         maxRestartAttempts = $MaxRestartAttempts
         restartAttempts = $RestartAttempts
         maxStateAgeSeconds = $MaxStateAgeSeconds
+        bridgeRelayerLoop = [ordered]@{
+            requested = [bool]$StartBridgeRelayerLoop
+            pollSeconds = $BridgePollSeconds
+            postRestartSettleSeconds = $PostRestartSettleSeconds
+            postRestartPollSeconds = $PostRestartPollSeconds
+        }
         statePath = $StatePath
         nodeDir = $NodeDir
         servicesDir = $ServicesDir
@@ -251,6 +305,8 @@ while ($true) {
                 "$BlockMs",
                 "-MaxBlocks",
                 "0",
+                "-BridgePollSeconds",
+                "$BridgePollSeconds",
                 "-ReportPath",
                 $restartReportFullPath,
                 "-StopReportPath",
@@ -264,7 +320,7 @@ while ($true) {
             }
             $restartResult = Invoke-SupervisorChild -ArgumentList $restartArgs
             $restartPerformed = ([int]$restartResult.exitCode -eq 0)
-            $after = Invoke-SupervisorStatus
+            $after = Wait-SupervisorRecoveryStatus
             $afterReasons = @(Get-RestartReasons -Facts $after)
             $finalStatus = if ($restartPerformed -and $afterReasons.Count -eq 0) { "passed" } else { "failed" }
         }
@@ -298,6 +354,11 @@ while ($true) {
             stateFileLastWriteAgeSeconds = [int]$before.stateFileLastWriteAgeSeconds
             liveProfile = [bool]$before.liveProfile
             maxBlocks = [int]$before.maxBlocks
+            bridgeRelayerLoopStatus = [string]$before.bridgeRelayerLoopStatus
+            bridgeRelayerLoopPid = [int]$before.bridgeRelayerLoopPid
+            bridgeRelayerLoopCommandLineMatched = [bool]$before.bridgeRelayerLoopCommandLineMatched
+            bridgeRelayerLoopReportStatus = [string]$before.bridgeRelayerLoopReportStatus
+            bridgeRelayerLoopReportHealthy = [bool]$before.bridgeRelayerLoopReportHealthy
         }
         restart = $restartSummary
         after = [ordered]@{
@@ -310,6 +371,11 @@ while ($true) {
             stateFileLastWriteAgeSeconds = [int]$after.stateFileLastWriteAgeSeconds
             liveProfile = [bool]$after.liveProfile
             maxBlocks = [int]$after.maxBlocks
+            bridgeRelayerLoopStatus = [string]$after.bridgeRelayerLoopStatus
+            bridgeRelayerLoopPid = [int]$after.bridgeRelayerLoopPid
+            bridgeRelayerLoopCommandLineMatched = [bool]$after.bridgeRelayerLoopCommandLineMatched
+            bridgeRelayerLoopReportStatus = [string]$after.bridgeRelayerLoopReportStatus
+            bridgeRelayerLoopReportHealthy = [bool]$after.bridgeRelayerLoopReportHealthy
         }
     })
     Write-SupervisorReport -Status $finalStatus -Iterations @($iterations) -RestartAttempts $restartAttempts
