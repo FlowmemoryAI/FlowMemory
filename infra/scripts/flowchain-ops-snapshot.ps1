@@ -213,6 +213,17 @@ $bridgeRelayerCursorCommitted = Get-OpsProp -Object $bridgeRelayerCursorCommit -
 $bridgeRelayerCursorReason = [string](Get-OpsProp -Object $bridgeRelayerCursorCommit -Name "reason" -Default "missing")
 $bridgeRelayerGuardrailStatus = Get-OpsStatus -Report $reports.bridgeRelayerGuardrail
 $bridgeRelayerGuardrailChecks = Get-OpsProp -Object $reports.bridgeRelayerGuardrail -Name "checks"
+$bridgeRelayerDirectObserveGuardrailReady = $bridgeRelayerGuardrailStatus -eq "passed" `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveFailedClosed" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveReportWritten" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveStatusBlocked" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveUsesStagedCursorByDefault" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveCursorNotFinal" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveFinalCursorUnchanged" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveStagedCursorNotWritten" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveBroadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveEnvValuesPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveNoSecrets" -Default $false) -eq $true)
 $bridgeRelayerGuardrailReady = $bridgeRelayerGuardrailStatus -eq "passed" `
     -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "finalCursorUnchanged" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "stagedCursorNotWritten" -Default $false) -eq $true) `
@@ -222,7 +233,8 @@ $bridgeRelayerGuardrailReady = $bridgeRelayerGuardrailStatus -eq "passed" `
     -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "ownerEnvNotImported" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "broadcastsFalse" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "envValuesPrintedFalse" -Default $false) -eq $true) `
-    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "noSecrets" -Default $false) -eq $true)
+    -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "noSecrets" -Default $false) -eq $true) `
+    -and $bridgeRelayerDirectObserveGuardrailReady
 $externalTesterStatus = Get-OpsStatus -Report $reports.externalTester
 $externalTesterEvidenceStatus = Get-OpsStatus -Report $reports.externalTesterEvidence
 $externalTesterEvidenceChecks = Get-OpsProp -Object $reports.externalTesterEvidence -Name "checks"
@@ -275,6 +287,9 @@ elseif ($bridgeRelayerStatus -ne "passed") {
 }
 if (-not $bridgeRelayerGuardrailReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-relayer-guardrail-failed" -Message "Bridge relayer fail-closed guardrail proof is not passed." -Commands @("npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop")
+}
+if (-not $bridgeRelayerDirectObserveGuardrailReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-direct-observe-cursor-unsafe" -Message "Standalone Base 8453 observer cursor guardrail is missing, failed, or could touch the final relayer cursor without explicit owner opt-in." -Commands @("npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop")
 }
 if ($externalTesterStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "external-tester-not-shareable" -Message "External tester packet must remain not-shareable." -Commands @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet")
@@ -381,6 +396,11 @@ $report = [ordered]@{
         bridgeRelayer = $bridgeRelayerStatus
         bridgeRelayerGuardrail = $bridgeRelayerGuardrailStatus
         bridgeRelayerGuardrailReady = $bridgeRelayerGuardrailReady
+        bridgeRelayerDirectObserveGuardrailReady = $bridgeRelayerDirectObserveGuardrailReady
+        bridgeDirectObserveUsesStagedCursorByDefault = Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveUsesStagedCursorByDefault" -Default $false
+        bridgeDirectObserveCursorNotFinal = Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveCursorNotFinal" -Default $false
+        bridgeDirectObserveFinalCursorUnchanged = Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveFinalCursorUnchanged" -Default $false
+        bridgeDirectObserveStagedCursorNotWritten = Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveStagedCursorNotWritten" -Default $false
         bridgeRelayerLatencyGate = $bridgeRelayerLatencyGate
         bridgeRelayerCursorCommitRequired = $bridgeRelayerCursorCommitRequired
         bridgeRelayerCursorCommitted = $bridgeRelayerCursorCommitted

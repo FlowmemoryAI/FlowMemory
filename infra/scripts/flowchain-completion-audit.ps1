@@ -1804,20 +1804,33 @@ $bridgeRelayerGuardrailRequiredChecks = @(
     "noCreditsQueued",
     "noCreditsApplied",
     "ownerEnvNotImported",
+    "directObserveFailedClosed",
+    "directObserveReportWritten",
+    "directObserveStatusBlocked",
+    "directObserveUsesStagedCursorByDefault",
+    "directObserveCursorNotFinal",
+    "directObserveFinalCursorUnchanged",
+    "directObserveStagedCursorNotWritten",
+    "directObserveBroadcastsFalse",
+    "directObserveEnvValuesPrintedFalse",
+    "directObserveNoSecrets",
     "broadcastsFalse",
     "envValuesPrintedFalse",
     "noSecrets",
     "secretMarkerFindingsEmpty"
 )
 $bridgeRelayerGuardrailMissingChecks = @(Get-MissingAuditChecks -Checks $bridgeRelayerGuardrailChecks -Names $bridgeRelayerGuardrailRequiredChecks)
+$bridgeRelayerGuardrailFalseRequiredChecks = @($bridgeRelayerGuardrailRequiredChecks | Where-Object { (Get-AuditProp -Object $bridgeRelayerGuardrailChecks -Name $_ -Default $false) -ne $true })
 $bridgeRelayerGuardrailFailedCheckCount = @($bridgeRelayerGuardrailFailedChecks | Where-Object { $null -ne $_ }).Count
 $bridgeRelayerGuardrailSecretFindingCount = @($bridgeRelayerGuardrailSecretFindings | Where-Object { $null -ne $_ }).Count
 $bridgeRelayerGuardrailMissingCheckCount = @($bridgeRelayerGuardrailMissingChecks | Where-Object { $null -ne $_ }).Count
+$bridgeRelayerGuardrailFalseRequiredCheckCount = @($bridgeRelayerGuardrailFalseRequiredChecks | Where-Object { $null -ne $_ }).Count
 $bridgeRelayerGuardrailValidationPassed = $bridgeRelayerGuardrailValidationExitCode -eq 0 `
     -and $bridgeRelayerGuardrailValidationStatus -eq "passed" `
     -and $bridgeRelayerGuardrailFailedCheckCount -eq 0 `
     -and $bridgeRelayerGuardrailSecretFindingCount -eq 0 `
     -and $bridgeRelayerGuardrailMissingCheckCount -eq 0 `
+    -and $bridgeRelayerGuardrailFalseRequiredCheckCount -eq 0 `
     -and ((Get-AuditProp -Object $bridgeRelayerGuardrailChecks -Name "secretMarkerFindingsEmpty" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $bridgeRelayerGuardrailValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $bridgeRelayerGuardrailValidation -Name "noSecrets" -Default $false) -eq $true) `
@@ -2659,9 +2672,9 @@ Add-AuditItem -Items $items -Id "bridge-deploy-control-validation" `
     -Commands @("npm run flowchain:bridge:deploy:control:validate")
 
 Add-AuditItem -Items $items -Id "bridge-relayer-guardrail-validation" `
-    -Requirement "Bridge relayer missing-owner-input guardrail validation fails closed without mutating final cursor state, staging cursor state, queueing credits, printing env values, or broadcasting." `
+    -Requirement "Bridge relayer missing-owner-input guardrail validation fails closed without mutating final cursor state, staging cursor state, queueing credits, printing env values, broadcasting, or letting standalone Base observation use the final relayer cursor by default." `
     -Status $(if ($bridgeRelayerGuardrailValidationPassed) { "passed" } else { "failed" }) `
-    -Evidence "guardrailStatus=$bridgeRelayerGuardrailValidationStatus, failedChecks=$bridgeRelayerGuardrailFailedCheckCount, missingChecks=$bridgeRelayerGuardrailMissingCheckCount, secretFindings=$bridgeRelayerGuardrailSecretFindingCount, finalCursorUnchanged=$(Get-AuditProp -Object $bridgeRelayerGuardrailChecks -Name "finalCursorUnchanged" -Default $false), noCreditsQueued=$(Get-AuditProp -Object $bridgeRelayerGuardrailChecks -Name "noCreditsQueued" -Default $false), report=$($paths.bridgeRelayerGuardrailValidation)" `
+    -Evidence "guardrailStatus=$bridgeRelayerGuardrailValidationStatus, failedChecks=$bridgeRelayerGuardrailFailedCheckCount, missingChecks=$bridgeRelayerGuardrailMissingCheckCount, falseRequiredChecks=$bridgeRelayerGuardrailFalseRequiredCheckCount, secretFindings=$bridgeRelayerGuardrailSecretFindingCount, finalCursorUnchanged=$(Get-AuditProp -Object $bridgeRelayerGuardrailChecks -Name "finalCursorUnchanged" -Default $false), directObserveStagedDefault=$(Get-AuditProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveUsesStagedCursorByDefault" -Default $false), directObserveCursorNotFinal=$(Get-AuditProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveCursorNotFinal" -Default $false), report=$($paths.bridgeRelayerGuardrailValidation)" `
     -Commands @("npm run flowchain:bridge:relayer:guardrail:validate")
 
 Add-AuditItem -Items $items -Id "bridge-relayer-loop-validation" `

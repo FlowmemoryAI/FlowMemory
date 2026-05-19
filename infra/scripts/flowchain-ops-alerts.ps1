@@ -170,6 +170,14 @@ $rules = @(
         commands = @("npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop")
     },
     [ordered]@{
+        id = "bridge-direct-observe-cursor-unsafe"
+        severity = "critical"
+        findingCodes = @("bridge-direct-observe-cursor-unsafe")
+        signal = "Standalone Base 8453 observer could use or mutate the final relayer cursor without explicit owner opt-in."
+        threshold = "direct observer guardrail is missing, not blocked, not staged by default, points at the final cursor, changes final cursor state, writes staged cursor state, prints env values, broadcasts, or reports secrets"
+        commands = @("npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
         id = "bridge-relayer-loop-unhealthy"
         severity = "critical"
         findingCodes = @("bridge-relayer-loop-unhealthy")

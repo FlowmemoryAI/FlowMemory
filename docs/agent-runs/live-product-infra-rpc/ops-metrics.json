@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-19T19:35:07.3458084Z",
+    "generatedAt":  "2026-05-19T19:49:05.1386649Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -16,19 +16,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  92516
+                        "value":  92593
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  92516
+                        "value":  92593
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  5
+                        "value":  4
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -58,13 +58,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  20
+                        "value":  21
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  13
+                        "value":  14
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -142,6 +142,36 @@
                         "name":  "flowchain_bridge_relayer_guardrail_ready",
                         "type":  "gauge",
                         "help":  "One when bridge relayer fail-closed guardrail is ready.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_direct_observe_guardrail_ready",
+                        "type":  "gauge",
+                        "help":  "One when standalone Base observer cursor guardrail is ready.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_direct_observe_staged_cursor_default",
+                        "type":  "gauge",
+                        "help":  "One when standalone Base observer defaults to staged cursor state.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_direct_observe_cursor_not_final",
+                        "type":  "gauge",
+                        "help":  "One when standalone Base observer cursor state is not the final relayer cursor.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_direct_observe_final_cursor_unchanged",
+                        "type":  "gauge",
+                        "help":  "One when standalone Base observer leaves final relayer cursor unchanged.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_direct_observe_staged_cursor_not_written",
+                        "type":  "gauge",
+                        "help":  "One when missing-input standalone Base observer leaves staged cursor state unwritten.",
                         "value":  1
                     },
                     {
@@ -271,7 +301,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  43,
+    "metricCount":  48,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

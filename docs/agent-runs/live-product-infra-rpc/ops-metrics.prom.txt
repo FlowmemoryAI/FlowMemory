@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 92516
+flowchain_latest_height 92593
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 92516
+flowchain_finalized_height 92593
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 5
+flowchain_state_file_age_seconds 4
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 3
@@ -21,10 +21,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 20
+flowchain_ops_alert_rules_total 21
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 13
+flowchain_ops_alert_rules_critical 14
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -64,6 +64,21 @@ flowchain_bridge_infra_ready 0
 # HELP flowchain_bridge_relayer_guardrail_ready One when bridge relayer fail-closed guardrail is ready.
 # TYPE flowchain_bridge_relayer_guardrail_ready gauge
 flowchain_bridge_relayer_guardrail_ready 1
+# HELP flowchain_bridge_direct_observe_guardrail_ready One when standalone Base observer cursor guardrail is ready.
+# TYPE flowchain_bridge_direct_observe_guardrail_ready gauge
+flowchain_bridge_direct_observe_guardrail_ready 1
+# HELP flowchain_bridge_direct_observe_staged_cursor_default One when standalone Base observer defaults to staged cursor state.
+# TYPE flowchain_bridge_direct_observe_staged_cursor_default gauge
+flowchain_bridge_direct_observe_staged_cursor_default 1
+# HELP flowchain_bridge_direct_observe_cursor_not_final One when standalone Base observer cursor state is not the final relayer cursor.
+# TYPE flowchain_bridge_direct_observe_cursor_not_final gauge
+flowchain_bridge_direct_observe_cursor_not_final 1
+# HELP flowchain_bridge_direct_observe_final_cursor_unchanged One when standalone Base observer leaves final relayer cursor unchanged.
+# TYPE flowchain_bridge_direct_observe_final_cursor_unchanged gauge
+flowchain_bridge_direct_observe_final_cursor_unchanged 1
+# HELP flowchain_bridge_direct_observe_staged_cursor_not_written One when missing-input standalone Base observer leaves staged cursor state unwritten.
+# TYPE flowchain_bridge_direct_observe_staged_cursor_not_written gauge
+flowchain_bridge_direct_observe_staged_cursor_not_written 1
 # HELP flowchain_bridge_relayer_loop_healthy One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence.
 # TYPE flowchain_bridge_relayer_loop_healthy gauge
 flowchain_bridge_relayer_loop_healthy 1

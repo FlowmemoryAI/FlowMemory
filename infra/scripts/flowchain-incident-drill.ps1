@@ -132,6 +132,16 @@ function New-DrillFallbackReport {
                     noCreditsQueued = $false
                     noCreditsApplied = $false
                     ownerEnvNotImported = $false
+                    directObserveFailedClosed = $false
+                    directObserveReportWritten = $false
+                    directObserveStatusBlocked = $false
+                    directObserveUsesStagedCursorByDefault = $false
+                    directObserveCursorNotFinal = $false
+                    directObserveFinalCursorUnchanged = $false
+                    directObserveStagedCursorNotWritten = $false
+                    directObserveBroadcastsFalse = $false
+                    directObserveEnvValuesPrintedFalse = $false
+                    directObserveNoSecrets = $false
                     broadcastsFalse = $false
                     envValuesPrintedFalse = $false
                     noSecrets = $false
@@ -478,6 +488,52 @@ Invoke-SyntheticOpsCase -Id "bridge-relayer-guardrail-critical" `
         }
     }
 
+Invoke-SyntheticOpsCase -Id "bridge-direct-observe-cursor-critical" `
+    -Requirement "A standalone Base observer that does not default to staged cursor state is classified as a critical incident." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("bridge-direct-observe-cursor-unsafe") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "bridge-relayer-guardrail-validation-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "passed"
+            $checks = Get-DrillProp -Object $report -Name "checks"
+            if ($null -eq $checks) {
+                $checks = [ordered]@{}
+                Set-DrillProp -Object $report -Name "checks" -Value $checks
+            }
+            foreach ($name in @("finalCursorUnchanged", "stagedCursorNotWritten", "finalCursorNotCommitted", "noCreditsQueued", "noCreditsApplied", "ownerEnvNotImported", "broadcastsFalse", "envValuesPrintedFalse", "noSecrets", "secretMarkerFindingsEmpty")) {
+                Set-DrillProp -Object $checks -Name $name -Value $true
+            }
+            foreach ($name in @("directObserveFailedClosed", "directObserveReportWritten", "directObserveStatusBlocked", "directObserveBroadcastsFalse", "directObserveEnvValuesPrintedFalse", "directObserveNoSecrets")) {
+                Set-DrillProp -Object $checks -Name $name -Value $true
+            }
+            foreach ($name in @("directObserveUsesStagedCursorByDefault", "directObserveCursorNotFinal", "directObserveFinalCursorUnchanged", "directObserveStagedCursorNotWritten")) {
+                Set-DrillProp -Object $checks -Name $name -Value $false
+            }
+            $directObserve = Get-DrillProp -Object $report -Name "directObserve"
+            if ($null -eq $directObserve) {
+                $directObserve = [ordered]@{}
+                Set-DrillProp -Object $report -Name "directObserve" -Value $directObserve
+            }
+            Set-DrillProp -Object $directObserve -Name "finalCursorAfterSha256" -Value "synthetic-final-cursor-changed"
+            $cursor = Get-DrillProp -Object $directObserve -Name "cursor"
+            if ($null -eq $cursor) {
+                $cursor = [ordered]@{}
+                Set-DrillProp -Object $directObserve -Name "cursor" -Value $cursor
+            }
+            Set-DrillProp -Object $cursor -Name "mode" -Value "unsafe-final-cursor"
+            Set-DrillProp -Object $cursor -Name "cursorStateIsFinalCursor" -Value $true
+            Set-DrillProp -Object $cursor -Name "directObserveUsesStagedCursorByDefault" -Value $false
+            Set-DrillProp -Object $cursor -Name "ownerFinalCursorRequested" -Value $false
+            Set-DrillProp -Object $report -Name "failedChecks" -Value @()
+            Set-DrillProp -Object $report -Name "secretMarkerFindings" -Value @()
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
+        }
+    }
+
 Invoke-SyntheticOpsCase -Id "bridge-relayer-loop-unhealthy-critical" `
     -Requirement "A running bridge relayer loop without fresh no-secret/no-broadcast health evidence is classified as a critical incident." `
     -ExpectedStatus "failed" `
@@ -615,6 +671,7 @@ $requiredScenarios = @(
     "height-not-advancing-critical",
     "no-secret-scan-critical",
     "bridge-relayer-guardrail-critical",
+    "bridge-direct-observe-cursor-critical",
     "bridge-relayer-loop-unhealthy-critical",
     "supervisor-relayer-recovery-failed-critical",
     "recovery-command-print",
@@ -632,7 +689,7 @@ $checks = [ordered]@{
     allRequiredScenariosCovered = $missingRequiredScenarios.Count -eq 0
     allCasesPassed = $failedCases.Count -eq 0
     failedCasesAbsent = $failedCases.Count -eq 0
-    minimumCaseCountMet = $cases.Count -ge 12
+    minimumCaseCountMet = $cases.Count -ge 13
     recoveryCommandPrinted = $recoveryPassed
     postDrillLiveStatusPassed = $postStatusPassed
     liveStateBeforeReadable = (Get-DrillProp -Object $liveStateBefore -Name "readable" -Default $false) -eq $true

@@ -1,6 +1,6 @@
 ﻿# FlowChain Ops Alert Rules
 
-Generated: 2026-05-19T19:35:05.8265290Z
+Generated: 2026-05-19T19:49:00.0095226Z
 Status: passed
 Current alert state: blocked
 
@@ -17,6 +17,7 @@ This report maps local ops snapshot findings to operator actions. It does not se
 | bridge-relayer-latency-failed | critical | Bridge relayer failed or exceeded the handoff-to-spendable latency gate. | `npm run flowchain:bridge:relayer:once -- -AllowBlocked; npm run flowchain:service:status; npm run flowchain:bridge:emergency-stop` |
 | bridge-relayer-cursor-unsafe | critical | Bridge relayer passed without safe staged cursor commit evidence. | `npm run flowchain:bridge:relayer:once -- -AllowBlocked; npm run flowchain:bridge:emergency-stop; npm run flowchain:service:status` |
 | bridge-relayer-guardrail-failed | critical | Bridge relayer fail-closed guardrail proof is missing or failed. | `npm run flowchain:bridge:relayer:guardrail:validate; npm run flowchain:bridge:relayer:once -- -AllowBlocked; npm run flowchain:bridge:emergency-stop` |
+| bridge-direct-observe-cursor-unsafe | critical | Standalone Base 8453 observer could use or mutate the final relayer cursor without explicit owner opt-in. | `npm run flowchain:bridge:relayer:guardrail:validate; npm run flowchain:bridge:relayer:once -- -AllowBlocked; npm run flowchain:bridge:emergency-stop` |
 | bridge-relayer-loop-unhealthy | critical | Bridge relayer loop is running without fresh no-secret/no-broadcast health evidence. | `npm run flowchain:service:status; npm run flowchain:bridge:relayer:loop:validate; npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop; npm run flowchain:bridge:emergency-stop` |
 | supervisor-relayer-recovery-failed | critical | Service supervisor requested the bridge relayer loop but latest recovery evidence does not show a healthy relayer loop. | `npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop; npm run flowchain:service:supervisor:validate; npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop; npm run flowchain:bridge:emergency-stop` |
 | deployment-refresh-aborted | critical | Public deployment dependency refresh aborted or skipped child gates. | `npm run flowchain:public-deployment:contract -- -AllowBlocked; npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked; npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh` |
@@ -29,4 +30,4 @@ This report maps local ops snapshot findings to operator actions. It does not se
 | external-tester-evidence-invalid | blocked | External tester returned evidence is incomplete or transfer proof is inconsistent. | `npm run flowchain:tester:evidence:validate; npm run flowchain:external-tester:packet -- -AllowBlocked` |
 | deployment-contract-not-ready | blocked | Public deployment contract is not passed. | `npm run flowchain:public-deployment:contract -- -AllowBlocked` |
 
-Covered finding codes: `node-not-running, control-plane-not-running, service-status-not-passed, chain-height-unreadable, height-not-advancing, state-stale, no-secret-scan-not-passed, backup-retention-unsafe, bridge-relayer-latency-failed, bridge-relayer-cursor-unsafe, bridge-relayer-guardrail-failed, bridge-relayer-loop-unhealthy, supervisor-relayer-recovery-failed, deployment-refresh-aborted, external-tester-evidence-unsafe, public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, external-tester-evidence-invalid, deployment-contract-not-ready`
+Covered finding codes: `node-not-running, control-plane-not-running, service-status-not-passed, chain-height-unreadable, height-not-advancing, state-stale, no-secret-scan-not-passed, backup-retention-unsafe, bridge-relayer-latency-failed, bridge-relayer-cursor-unsafe, bridge-relayer-guardrail-failed, bridge-direct-observe-cursor-unsafe, bridge-relayer-loop-unhealthy, supervisor-relayer-recovery-failed, deployment-refresh-aborted, external-tester-evidence-unsafe, public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, external-tester-evidence-invalid, deployment-contract-not-ready`

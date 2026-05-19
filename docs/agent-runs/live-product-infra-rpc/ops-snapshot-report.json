@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-19T19:35:04.5081576Z",
+    "generatedAt":  "2026-05-19T19:48:54.9615017Z",
     "status":  "blocked",
     "refresh":  {
                     "performed":  false,
@@ -10,9 +10,9 @@
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "92516",
-                  "finalizedHeight":  "92516",
-                  "stateFileLastWriteAgeSeconds":  5,
+                  "latestHeight":  "92593",
+                  "finalizedHeight":  "92593",
+                  "stateFileLastWriteAgeSeconds":  4,
                   "monitorStatus":  "passed",
                   "monitorSamples":  3,
                   "monitorHeightAdvanced":  true
@@ -47,6 +47,11 @@
                            "bridgeRelayer":  "blocked",
                            "bridgeRelayerGuardrail":  "passed",
                            "bridgeRelayerGuardrailReady":  true,
+                           "bridgeRelayerDirectObserveGuardrailReady":  true,
+                           "bridgeDirectObserveUsesStagedCursorByDefault":  true,
+                           "bridgeDirectObserveCursorNotFinal":  true,
+                           "bridgeDirectObserveFinalCursorUnchanged":  true,
+                           "bridgeDirectObserveStagedCursorNotWritten":  true,
                            "bridgeRelayerLatencyGate":  "not-run",
                            "bridgeRelayerCursorCommitRequired":  true,
                            "bridgeRelayerCursorCommitted":  false,

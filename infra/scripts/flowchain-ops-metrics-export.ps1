@@ -246,6 +246,11 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_retention_prune_errors
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_live_ready" -Help "One when bridge live readiness is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeLive"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_infra_ready" -Help "One when bridge infrastructure readiness is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeInfra"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_guardrail_ready" -Help "One when bridge relayer fail-closed guardrail is ready." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRelayerGuardrailReady"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_direct_observe_guardrail_ready" -Help "One when standalone Base observer cursor guardrail is ready." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRelayerDirectObserveGuardrailReady"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_direct_observe_staged_cursor_default" -Help "One when standalone Base observer defaults to staged cursor state." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDirectObserveUsesStagedCursorByDefault"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_direct_observe_cursor_not_final" -Help "One when standalone Base observer cursor state is not the final relayer cursor." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDirectObserveCursorNotFinal"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_direct_observe_final_cursor_unchanged" -Help "One when standalone Base observer leaves final relayer cursor unchanged." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDirectObserveFinalCursorUnchanged"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_direct_observe_staged_cursor_not_written" -Help "One when missing-input standalone Base observer leaves staged cursor state unwritten." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDirectObserveStagedCursorNotWritten"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_loop_healthy" -Help "One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRelayerLoopReportHealthy"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_bridge_relayer_requested" -Help "One when the latest service supervisor report requested bridge relayer loop supervision." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorBridgeRelayerRequested"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_bridge_relayer_recovery_healthy" -Help "One when supervisor relayer-loop recovery evidence is healthy, or relayer supervision was not requested." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorBridgeRelayerRecoveryHealthy"))
@@ -322,6 +327,11 @@ $requiredMetricNames = @(
     "flowchain_backup_retention_prune_errors",
     "flowchain_bridge_live_ready",
     "flowchain_bridge_relayer_guardrail_ready",
+    "flowchain_bridge_direct_observe_guardrail_ready",
+    "flowchain_bridge_direct_observe_staged_cursor_default",
+    "flowchain_bridge_direct_observe_cursor_not_final",
+    "flowchain_bridge_direct_observe_final_cursor_unchanged",
+    "flowchain_bridge_direct_observe_staged_cursor_not_written",
     "flowchain_bridge_relayer_loop_healthy",
     "flowchain_supervisor_bridge_relayer_requested",
     "flowchain_supervisor_bridge_relayer_recovery_healthy",
@@ -366,6 +376,13 @@ $checks = [ordered]@{
         "flowchain_external_tester_evidence_secret_findings",
         "flowchain_external_tester_evidence_height_advanced",
         "flowchain_external_tester_evidence_transfer_consistent"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    bridgeDirectObserveMetricsPresent = @(
+        "flowchain_bridge_direct_observe_guardrail_ready",
+        "flowchain_bridge_direct_observe_staged_cursor_default",
+        "flowchain_bridge_direct_observe_cursor_not_final",
+        "flowchain_bridge_direct_observe_final_cursor_unchanged",
+        "flowchain_bridge_direct_observe_staged_cursor_not_written"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     prometheusHasHelpAndType = $prometheusTextFromFile.Contains("# HELP flowchain_latest_height") -and $prometheusTextFromFile.Contains("# TYPE flowchain_latest_height gauge")
     prometheusContainsNoUrls = $prometheusTextFromFile -notmatch 'https?://'

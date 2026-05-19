@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-19T19:04:32.0114911Z",
+    "generatedAt":  "2026-05-19T19:49:30.1935439Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
@@ -10,9 +10,9 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\supervisor-relayer-recovery-failed-critical\\input"
                 },
     "chain":  {
-                  "latestHeight":  "92227",
-                  "finalizedHeight":  "92227",
-                  "stateFileLastWriteAgeSeconds":  3,
+                  "latestHeight":  "92593",
+                  "finalizedHeight":  "92593",
+                  "stateFileLastWriteAgeSeconds":  4,
                   "monitorStatus":  "passed",
                   "monitorSamples":  3,
                   "monitorHeightAdvanced":  true
@@ -23,8 +23,8 @@
                            "serviceMonitor":  "passed",
                            "bridgeRelayerLoop":  "stopped",
                            "bridgeRelayerLoopReport":  "blocked",
-                           "bridgeRelayerLoopReportFresh":  false,
-                           "bridgeRelayerLoopReportHealthy":  false,
+                           "bridgeRelayerLoopReportFresh":  true,
+                           "bridgeRelayerLoopReportHealthy":  true,
                            "bridgeRelayerLoopReportNoSecrets":  true,
                            "bridgeRelayerLoopReportNoBroadcasts":  true,
                            "bridgeRelayerLoopBlockedOnlyOnOwnerInputs":  true,
@@ -47,6 +47,11 @@
                            "bridgeRelayer":  "blocked",
                            "bridgeRelayerGuardrail":  "passed",
                            "bridgeRelayerGuardrailReady":  true,
+                           "bridgeRelayerDirectObserveGuardrailReady":  true,
+                           "bridgeDirectObserveUsesStagedCursorByDefault":  true,
+                           "bridgeDirectObserveCursorNotFinal":  true,
+                           "bridgeDirectObserveFinalCursorUnchanged":  true,
+                           "bridgeDirectObserveStagedCursorNotWritten":  true,
                            "bridgeRelayerLatencyGate":  "not-run",
                            "bridgeRelayerCursorCommitRequired":  true,
                            "bridgeRelayerCursorCommitted":  false,

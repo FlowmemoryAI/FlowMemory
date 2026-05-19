@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics_export_report.v0",
-    "generatedAt":  "2026-05-19T19:35:07.4594756Z",
+    "generatedAt":  "2026-05-19T19:49:05.2936710Z",
     "status":  "passed",
     "refresh":  {
                     "performed":  false,
@@ -27,7 +27,7 @@
                     },
     "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.json",
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
-    "metricCount":  43,
+    "metricCount":  48,
     "requiredMetricNames":  [
                                 "flowchain_latest_height",
                                 "flowchain_finalized_height",
@@ -46,6 +46,11 @@
                                 "flowchain_backup_retention_prune_errors",
                                 "flowchain_bridge_live_ready",
                                 "flowchain_bridge_relayer_guardrail_ready",
+                                "flowchain_bridge_direct_observe_guardrail_ready",
+                                "flowchain_bridge_direct_observe_staged_cursor_default",
+                                "flowchain_bridge_direct_observe_cursor_not_final",
+                                "flowchain_bridge_direct_observe_final_cursor_unchanged",
+                                "flowchain_bridge_direct_observe_staged_cursor_not_written",
                                 "flowchain_bridge_relayer_loop_healthy",
                                 "flowchain_supervisor_bridge_relayer_requested",
                                 "flowchain_supervisor_bridge_relayer_recovery_healthy",
@@ -83,6 +88,7 @@
                    "metricCountSufficient":  true,
                    "requiredMetricsPresent":  true,
                    "externalTesterEvidenceMetricsPresent":  true,
+                   "bridgeDirectObserveMetricsPresent":  true,
                    "prometheusHasHelpAndType":  true,
                    "prometheusContainsNoUrls":  true,
                    "prometheusContainsNoEnvAssignments":  true,
