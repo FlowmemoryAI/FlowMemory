@@ -436,7 +436,8 @@ export function WalletView({ workbench }: WalletViewProps) {
     }
   }
 
-  async function loadStatus() {
+  async function loadStatus(options: { clearMessage?: boolean } = {}) {
+    const clearMessage = options.clearMessage ?? true;
     try {
       const [walletResult, balanceResult, transferResult, creditResult, bridgeResult] = await Promise.all([
         fetchWalletApi<WalletStatus>(apiCandidates, "/wallets/operator"),
@@ -453,11 +454,13 @@ export function WalletView({ workbench }: WalletViewProps) {
       setBridgeStatus(bridgeResult.payload);
       const testerResult = await fetchWalletApi<TesterStatus>(apiCandidates, "/tester/status").catch(() => null);
       setTesterStatus(testerResult?.payload ?? null);
-      setMessage(null);
+      if (clearMessage) {
+        setMessage(null);
+      }
     } catch (error) {
       const apiMessage = error instanceof Error ? error.message : "wallet data unavailable";
       const loadedLocalWallet = await loadDesktopWalletFallback(apiMessage);
-      if (!loadedLocalWallet) {
+      if (!loadedLocalWallet && clearMessage) {
         setMessage(apiMessage);
       }
     }
@@ -532,8 +535,8 @@ export function WalletView({ workbench }: WalletViewProps) {
       setStatus(payload);
       setPassphrase("");
       setActivePanel("receive");
+      await loadStatus({ clearMessage: false });
       setMessage(payload.alreadyExists ? safeText(payload.note, "Existing wallet loaded.") : "Wallet created.");
-      await loadStatus();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "wallet creation failed");
     } finally {
@@ -574,8 +577,8 @@ export function WalletView({ workbench }: WalletViewProps) {
       setSendTo("");
       setSendAmount("");
       setActivePanel("activity");
+      await loadStatus({ clearMessage: false });
       setMessage(payload.applied ? "Send applied on Flowchain runtime." : "Send queued for Flowchain runtime.");
-      await loadStatus();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "wallet send failed");
     } finally {
@@ -612,8 +615,8 @@ export function WalletView({ workbench }: WalletViewProps) {
       setStatus(payload);
       setTesterPassphrase("");
       setActivePanel("receive");
+      await loadStatus({ clearMessage: false });
       setMessage("Tester wallet created. Token stayed in this browser session only.");
-      await loadStatus();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "tester wallet creation failed");
     } finally {
@@ -661,8 +664,8 @@ export function WalletView({ workbench }: WalletViewProps) {
       setTesterFrom(accountId);
       setTesterFundAmountUnits("1");
       setActivePanel("activity");
+      await loadStatus({ clearMessage: false });
       setMessage("Tester faucet accepted by the capped gateway.");
-      await loadStatus();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "tester faucet failed");
     } finally {
@@ -711,8 +714,8 @@ export function WalletView({ workbench }: WalletViewProps) {
       setTesterTo("");
       setTesterAmountUnits("1");
       setActivePanel("activity");
+      await loadStatus({ clearMessage: false });
       setMessage("Tester send accepted by the capped gateway.");
-      await loadStatus();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "tester wallet send failed");
     } finally {

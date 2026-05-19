@@ -1146,6 +1146,7 @@ input {
   box-shadow: 0 18px 42px rgba(50, 37, 18, 0.12);
   transform: translateX(-50%);
   backdrop-filter: blur(18px);
+  pointer-events: none;
 }
 
 @media (max-width: 1220px) {
