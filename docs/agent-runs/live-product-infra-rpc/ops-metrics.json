@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-19T19:04:06.9185129Z",
+    "generatedAt":  "2026-05-19T19:35:07.3458084Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -16,19 +16,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  92227
+                        "value":  92516
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  92227
+                        "value":  92516
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  3
+                        "value":  5
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -148,7 +148,7 @@
                         "name":  "flowchain_bridge_relayer_loop_healthy",
                         "type":  "gauge",
                         "help":  "One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence.",
-                        "value":  0
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_supervisor_bridge_relayer_requested",

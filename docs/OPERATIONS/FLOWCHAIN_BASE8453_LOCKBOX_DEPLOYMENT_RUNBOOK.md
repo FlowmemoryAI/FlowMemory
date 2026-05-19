@@ -122,6 +122,11 @@ npm run flowchain:bridge:observe:base8453
 npm run flowchain:bridge:relayer:once
 ```
 
+`flowchain:bridge:observe:base8453` writes to a staged direct-observe cursor by
+default so an inspection run cannot advance the production relayer cursor before
+credits are queued. `flowchain:bridge:relayer:once` is the production queue gate
+and is the command that advances the final cursor after safe L1 credit proof.
+
 Evidence paths:
 
 ```text
@@ -133,9 +138,9 @@ devnet/local/bridge-live-readiness/bridge-observe-base8453-report.json
 docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json
 ```
 
-`flowchain:bridge:relayer:once` is the production queue gate. It observes,
-filters replayed credits, queues new bridge handoffs into the running L1, waits
-for main-state credit evidence, and remains no-broadcast.
+`flowchain:bridge:relayer:once` observes, filters replayed credits, queues new
+bridge handoffs into the running L1, waits for main-state credit evidence, and
+remains no-broadcast.
 
 ## Emergency Commands
 

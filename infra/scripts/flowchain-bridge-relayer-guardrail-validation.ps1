@@ -21,6 +21,10 @@ $nodeDir = Join-Path $validationFullDir "node"
 $cursorPath = Join-Path $validationFullDir "final-cursor.json"
 $stagedCursorPath = Join-Path $validationFullDir "staged-cursor.json"
 $relayerReportPath = Join-Path $validationFullDir "bridge-relayer-once-report.json"
+$directObserveReportRelPath = Join-Path $ValidationDir "direct-observe-report.json"
+$directObserveReportPath = Join-Path $validationFullDir "direct-observe-report.json"
+$directObserveFinalCursorPath = Join-Path $validationFullDir "direct-observe-final-cursor.json"
+$directObserveStagedCursorPath = Join-Path $validationFullDir "direct-observe-staged-cursor.json"
 
 $requiredEnvNames = @(
     "FLOWCHAIN_OWNER_ENV_FILE",
@@ -32,6 +36,7 @@ $requiredEnvNames = @(
     "FLOWCHAIN_BASE8453_FROM_BLOCK",
     "FLOWCHAIN_BASE8453_CURSOR_STATE",
     "FLOWCHAIN_BASE8453_TO_BLOCK",
+    "FLOWCHAIN_BASE8453_OBSERVE_CURSOR_STATE",
     "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
     "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
     "FLOWCHAIN_PILOT_CONFIRMATIONS",
@@ -52,7 +57,7 @@ function Invoke-GuardrailChild {
     $exitCode = 1
 
     try {
-        $process = Start-Process -FilePath "powershell" `
+        $process = Start-Process -FilePath "powershell.exe" `
             -ArgumentList (Join-FlowChainProcessArguments -ArgumentList $ArgumentList) `
             -WorkingDirectory $repoRoot `
             -PassThru `
@@ -82,13 +87,13 @@ function Invoke-GuardrailChild {
         $output += @(Get-Content -LiteralPath $stderrPath -Tail 40)
     }
 
-    return [ordered]@{
+    return [pscustomobject]([ordered]@{
         exitCode = [int]$exitCode
         timedOut = $timedOut
         stdoutPath = $stdoutPath
         stderrPath = $stderrPath
         outputRedacted = @($output | ForEach-Object { "$_" })
-    }
+    })
 }
 
 function Get-GuardrailProp {
@@ -162,6 +167,8 @@ $cursorSeed = [ordered]@{
 }
 Write-FlowChainJson -Path $cursorPath -Value $cursorSeed -Depth 8
 $cursorHashBefore = (Get-FileHash -Algorithm SHA256 -LiteralPath $cursorPath).Hash
+Write-FlowChainJson -Path $directObserveFinalCursorPath -Value $cursorSeed -Depth 8
+$directObserveFinalCursorHashBefore = (Get-FileHash -Algorithm SHA256 -LiteralPath $directObserveFinalCursorPath).Hash
 
 $savedEnv = @{}
 foreach ($name in $requiredEnvNames) {
@@ -209,6 +216,40 @@ $issues = @(Get-GuardrailProp -Object $relayerReport -Name "issues" -Default @()
 $relayerSteps = @(Get-GuardrailProp -Object $relayerReport -Name "steps" -Default @())
 $relayerTimedOutSteps = @($relayerSteps | Where-Object { (Get-GuardrailProp -Object $_ -Name "timedOut" -Default $false) -eq $true })
 
+$directObserveSavedEnv = @{}
+$directObserveEnvNames = @($requiredEnvNames + @("FLOWCHAIN_BASE8453_CURSOR_STATE") | Select-Object -Unique)
+foreach ($name in $directObserveEnvNames) {
+    $directObserveSavedEnv[$name] = [Environment]::GetEnvironmentVariable($name, "Process")
+    [Environment]::SetEnvironmentVariable($name, $null, "Process")
+}
+[Environment]::SetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_DEFAULT_IMPORT_DISABLED", "1", "Process")
+[Environment]::SetEnvironmentVariable("FLOWCHAIN_BASE8453_CURSOR_STATE", $directObserveFinalCursorPath, "Process")
+[Environment]::SetEnvironmentVariable("FLOWCHAIN_BASE8453_OBSERVE_CURSOR_STATE", $directObserveStagedCursorPath, "Process")
+$directObserveChild = $null
+try {
+    $directObserveChild = Invoke-GuardrailChild -ArgumentList @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        (Join-Path $PSScriptRoot "bridge-base-mainnet-pilot-observe.ps1"),
+        "-ReportPath",
+        $directObserveReportRelPath
+    )
+}
+finally {
+    foreach ($name in $directObserveEnvNames) {
+        [Environment]::SetEnvironmentVariable($name, $directObserveSavedEnv[$name], "Process")
+    }
+}
+$directObserveReport = Read-FlowChainJsonIfExists -Path $directObserveReportPath
+$directObserveCursor = Get-GuardrailProp -Object $directObserveReport -Name "cursor"
+$directObserveFinalCursorHashAfter = if (Test-Path -LiteralPath $directObserveFinalCursorPath) { (Get-FileHash -Algorithm SHA256 -LiteralPath $directObserveFinalCursorPath).Hash } else { "" }
+$directObserveOutputText = @($directObserveChild.outputRedacted) -join "`n"
+if (-not [string]::IsNullOrWhiteSpace($directObserveOutputText)) {
+    Assert-FlowChainNoSecretText -Text $directObserveOutputText -Label "bridge direct observe guardrail output"
+}
+
 $checks = [ordered]@{
     relayerCommandExitedZeroWithAllowBlocked = ([int]$child.exitCode -eq 0)
     relayerReportWritten = Test-Path -LiteralPath $relayerReportPath
@@ -224,6 +265,16 @@ $checks = [ordered]@{
     noCreditsQueued = [int](Get-GuardrailProp -Object $counts -Name "queuedTransactions" -Default -1) -eq 0
     noCreditsApplied = [int](Get-GuardrailProp -Object $counts -Name "appliedCredits" -Default -1) -eq 0
     ownerEnvNotImported = (Get-GuardrailProp -Object $ownerEnvFile -Name "imported" -Default $true) -eq $false
+    directObserveFailedClosed = "$(Get-GuardrailProp -Object $directObserveReport -Name "status")" -eq "blocked"
+    directObserveReportWritten = Test-Path -LiteralPath $directObserveReportPath
+    directObserveStatusBlocked = "$(Get-GuardrailProp -Object $directObserveReport -Name "status")" -eq "blocked"
+    directObserveUsesStagedCursorByDefault = (Get-GuardrailProp -Object $directObserveCursor -Name "directObserveUsesStagedCursorByDefault" -Default $false) -eq $true
+    directObserveCursorNotFinal = (Get-GuardrailProp -Object $directObserveCursor -Name "cursorStateIsFinalCursor" -Default $true) -eq $false
+    directObserveFinalCursorUnchanged = $directObserveFinalCursorHashBefore -eq $directObserveFinalCursorHashAfter
+    directObserveStagedCursorNotWritten = -not (Test-Path -LiteralPath $directObserveStagedCursorPath)
+    directObserveBroadcastsFalse = (Get-GuardrailProp -Object $directObserveReport -Name "broadcasts" -Default $true) -eq $false
+    directObserveEnvValuesPrintedFalse = (Get-GuardrailProp -Object $directObserveReport -Name "envValuesPrinted" -Default $true) -eq $false
+    directObserveNoSecrets = (Get-GuardrailProp -Object $directObserveReport -Name "noSecrets" -Default $false) -eq $true
     broadcastsFalse = (Get-GuardrailProp -Object $relayerReport -Name "broadcasts" -Default $true) -eq $false
     envValuesPrintedFalse = (Get-GuardrailProp -Object $relayerReport -Name "envValuesPrinted" -Default $true) -eq $false
     noSecrets = (Get-GuardrailProp -Object $relayerReport -Name "noSecrets" -Default $false) -eq $true
@@ -252,6 +303,18 @@ $report = [ordered]@{
         stagedCursorPath = $stagedCursorPath
         beforeSha256 = $cursorHashBefore
         afterSha256 = $cursorHashAfter
+    }
+    directObserve = [ordered]@{
+        reportPath = $directObserveReportPath
+        finalCursorPath = $directObserveFinalCursorPath
+        stagedCursorPath = $directObserveStagedCursorPath
+        finalCursorBeforeSha256 = $directObserveFinalCursorHashBefore
+        finalCursorAfterSha256 = $directObserveFinalCursorHashAfter
+        childProcess = [ordered]@{
+            exitCode = [int]$directObserveChild.exitCode
+            timedOut = [bool]$directObserveChild.timedOut
+        }
+        cursor = $directObserveCursor
     }
     requiredEnvNamesClearedForScenario = @($requiredEnvNames)
     envValuesPrinted = $false

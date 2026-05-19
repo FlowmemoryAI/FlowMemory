@@ -1,6 +1,6 @@
 ﻿# FlowChain Bridge Relayer Guardrail Validation
 
-Generated: 2026-05-19T14:24:55.0662910Z
+Generated: 2026-05-19T19:27:19.6016266Z
 Status: passed
 
 This validation proves a relayer run with missing owner Base 8453 inputs exits as an allowed blocked state without mutating the final Base scan cursor, staging a cursor, queueing credits, printing env values, or broadcasting.
@@ -21,6 +21,16 @@ This validation proves a relayer run with missing owner Base 8453 inputs exits a
 - noCreditsQueued: True
 - noCreditsApplied: True
 - ownerEnvNotImported: True
+- directObserveFailedClosed: True
+- directObserveReportWritten: True
+- directObserveStatusBlocked: True
+- directObserveUsesStagedCursorByDefault: True
+- directObserveCursorNotFinal: True
+- directObserveFinalCursorUnchanged: True
+- directObserveStagedCursorNotWritten: True
+- directObserveBroadcastsFalse: True
+- directObserveEnvValuesPrintedFalse: True
+- directObserveNoSecrets: True
 - broadcastsFalse: True
 - envValuesPrintedFalse: True
 - noSecrets: True

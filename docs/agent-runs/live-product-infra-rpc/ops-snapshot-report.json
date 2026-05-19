@@ -1,27 +1,18 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-19T19:03:53.3319556Z",
+    "generatedAt":  "2026-05-19T19:35:04.5081576Z",
     "status":  "blocked",
     "refresh":  {
-                    "performed":  true,
+                    "performed":  false,
                     "steps":  [
-                                  {
-                                      "name":  "service-status",
-                                      "exitCode":  0,
-                                      "outputLineCount":  10
-                                  },
-                                  {
-                                      "name":  "service-monitor",
-                                      "exitCode":  0,
-                                      "outputLineCount":  4
-                                  }
+
                               ],
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "92227",
-                  "finalizedHeight":  "92227",
-                  "stateFileLastWriteAgeSeconds":  3,
+                  "latestHeight":  "92516",
+                  "finalizedHeight":  "92516",
+                  "stateFileLastWriteAgeSeconds":  5,
                   "monitorStatus":  "passed",
                   "monitorSamples":  3,
                   "monitorHeightAdvanced":  true
@@ -32,8 +23,8 @@
                            "serviceMonitor":  "passed",
                            "bridgeRelayerLoop":  "stopped",
                            "bridgeRelayerLoopReport":  "blocked",
-                           "bridgeRelayerLoopReportFresh":  false,
-                           "bridgeRelayerLoopReportHealthy":  false,
+                           "bridgeRelayerLoopReportFresh":  true,
+                           "bridgeRelayerLoopReportHealthy":  true,
                            "bridgeRelayerLoopReportNoSecrets":  true,
                            "bridgeRelayerLoopReportNoBroadcasts":  true,
                            "bridgeRelayerLoopBlockedOnlyOnOwnerInputs":  true,
