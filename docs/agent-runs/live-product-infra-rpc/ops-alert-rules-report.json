@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-19T21:51:58.8297960Z",
+    "generatedAt":  "2026-05-19T22:01:44.1100695Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -88,6 +88,7 @@
                    "commandsAvoidInlineEnvAssignment":  true,
                    "commandsAvoidUrls":  true,
                    "findingsWithoutCommandsEmpty":  true,
+                   "publicRpcEdgeHardeningRuleCoversSecurityHeaders":  true,
                    "notificationPlanStoresNoSecrets":  true,
                    "notificationPlanNoNetworkDelivery":  true,
                    "envValuesPrintedFalse":  true,
@@ -345,7 +346,7 @@
                                            "public-rpc-edge-hardening-failed"
                                        ],
                       "signal":  "Public RPC edge deployment hardening evidence is missing or failed.",
-                      "threshold":  "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, or scoped authorization forwarding proof",
+                      "threshold":  "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, or defensive response-header proof",
                       "commands":  [
                                        "npm run flowchain:public-rpc:deployment-bundle",
                                        "npm run flowchain:public-rpc:deployment:automation",

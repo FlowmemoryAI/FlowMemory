@@ -230,7 +230,7 @@ $rules = @(
         severity = "critical"
         findingCodes = @("public-rpc-edge-hardening-failed")
         signal = "Public RPC edge deployment hardening evidence is missing or failed."
-        threshold = "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, or scoped authorization forwarding proof"
+        threshold = "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, or defensive response-header proof"
         commands = @("npm run flowchain:public-rpc:deployment-bundle", "npm run flowchain:public-rpc:deployment:automation", "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh")
     },
     [ordered]@{
@@ -307,6 +307,9 @@ $criticalRules = @($rules | Where-Object { $_.severity -eq "critical" })
 $blockedRules = @($rules | Where-Object { $_.severity -eq "blocked" })
 $rulesWithoutCommands = @($rules | Where-Object { @($_.commands).Count -eq 0 })
 $activeRuleIdsWithoutCommands = @($rules | Where-Object { $activeRules.Contains($_.id) -and @($_.commands).Count -eq 0 } | ForEach-Object { $_.id })
+$publicRpcEdgeHardeningRule = @($rules | Where-Object { $_.id -eq "public-rpc-edge-hardening-failed" } | Select-Object -First 1)
+$publicRpcEdgeHardeningRuleCoversSecurityHeaders = $publicRpcEdgeHardeningRule.Count -eq 1 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("response-header", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
 $allCommands = @($rules | ForEach-Object { @($_.commands) })
 $commandsWithInlineEnvAssignment = @($allCommands | Where-Object { "$_" -match '(^|\s)(\$env:)?[A-Z][A-Z0-9_]+\s*=' })
 $commandsWithUrls = @($allCommands | Where-Object { "$_" -match 'https?://' })
@@ -324,6 +327,7 @@ $checks = [ordered]@{
     commandsAvoidInlineEnvAssignment = $commandsWithInlineEnvAssignment.Count -eq 0
     commandsAvoidUrls = $commandsWithUrls.Count -eq 0
     findingsWithoutCommandsEmpty = $findingsWithoutCommands.Count -eq 0
+    publicRpcEdgeHardeningRuleCoversSecurityHeaders = $publicRpcEdgeHardeningRuleCoversSecurityHeaders
     notificationPlanStoresNoSecrets = $true
     notificationPlanNoNetworkDelivery = $true
     envValuesPrintedFalse = $true

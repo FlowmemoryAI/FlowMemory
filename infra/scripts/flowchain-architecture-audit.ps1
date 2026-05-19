@@ -305,6 +305,15 @@ $opsMetricsExport = $reports.opsMetricsExport
 $opsMetricsExportStatus = Get-ArchitectureStatus -Report $opsMetricsExport
 $opsMetricsExportChecks = Get-ArchitectureProp -Object $opsMetricsExport -Name "checks"
 $opsMetricsExportMetricCount = [int](Get-ArchitectureProp -Object $opsMetricsExport -Name "metricCount" -Default 0)
+$opsMetricsExportRequiredMetricNames = @((Get-ArchitectureProp -Object $opsMetricsExport -Name "requiredMetricNames" -Default @()))
+$publicRpcSecurityHeaderMetricNames = @(
+    "flowchain_public_rpc_security_headers",
+    "flowchain_public_rpc_security_header_preflight",
+    "flowchain_public_rpc_rendered_security_headers",
+    "flowchain_public_rpc_rendered_security_header_preflight"
+)
+$missingPublicRpcSecurityHeaderMetricNames = @($publicRpcSecurityHeaderMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasPublicRpcSecurityHeaderMetrics = $missingPublicRpcSecurityHeaderMetricNames.Count -eq 0
 $opsMetricsExportFailedChecks = @((Get-ArchitectureProp -Object $opsMetricsExport -Name "failedChecks" -Default @()))
 $opsMetricsExportSecretFindings = @((Get-ArchitectureProp -Object $opsMetricsExport -Name "secretMarkerFindings" -Default @()))
 $metricsInstallValidation = $reports.metricsInstallValidation
@@ -401,6 +410,7 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "prometheusTextWritten" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "requiredMetricsPresent" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasPublicRpcSecurityHeaderMetrics -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "prometheusHasHelpAndType" -Default $false) -eq $true) `
     -and ($metricsInstallValidationStatus -eq "passed") `
     -and ($metricsInstallFailedChecks.Count -eq 0) `
@@ -426,7 +436,7 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
 Add-ArchitectureItem -Items $items -Id "ops-observability-boundary" -Layer "Operations" `
     -Requirement "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers." `
     -Status $(if ($observabilityReady) { "passed" } else { "failed" }) `
-    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, supervisorRelayerRestartAttempts=$supervisorRelayerRestartAttempts, supervisorRelayerRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false), opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), alertInstall=$alertInstallValidationStatus, systemdAlert=$(Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false), alertInstallFailedChecks=$($alertInstallFailedChecks.Count), metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, publicRpcEdgeMetrics=$(Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), metricsInstall=$metricsInstallValidationStatus, systemdMetrics=$(Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdValidationPassed" -Default $false), metricsInstallFailedChecks=$($metricsInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
+    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, supervisorRelayerRestartAttempts=$supervisorRelayerRestartAttempts, supervisorRelayerRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false), opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), alertInstall=$alertInstallValidationStatus, systemdAlert=$(Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false), alertInstallFailedChecks=$($alertInstallFailedChecks.Count), metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, publicRpcEdgeMetrics=$(Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), publicRpcSecurityHeaderMetrics=$opsMetricsHasPublicRpcSecurityHeaderMetrics, metricsInstall=$metricsInstallValidationStatus, systemdMetrics=$(Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdValidationPassed" -Default $false), metricsInstallFailedChecks=$($metricsInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
     -Files $observabilityFiles `
     -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:alerts:install:systemd:validate", "npm run flowchain:ops:metrics:export -- -AllowBlocked", "npm run flowchain:ops:metrics:install:validate", "npm run flowchain:ops:metrics:install:systemd:validate", "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
 
@@ -662,6 +672,12 @@ $edgeTemplateRequiresRateLimit = Get-ArchitectureProp -Object $publicRpcEdgeTemp
 $edgeTemplateForwardsOrigin = Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "forwardsOriginForCors" -Default $false
 $edgeTemplateStateExcluded = Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "publicStateMirrorExcluded" -Default $false
 $edgeTemplateDevnetStateExcluded = Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "devnetStatePublicRpcExcluded" -Default $false
+$edgeTemplateSecurityHeaders = @((Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "securityHeaders" -Default @()))
+$edgeTemplateDefensiveHeaderRequirementPassed = @((Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "edgeRequirements" -Default @()) | Where-Object {
+        [string](Get-ArchitectureProp -Object $_ -Name "id" -Default "") -eq "defensive-response-headers" `
+            -and [string](Get-ArchitectureProp -Object $_ -Name "status" -Default "") -eq "passed"
+    }).Count -gt 0
+$edgeTemplateHasSecurityHeaders = $edgeTemplateSecurityHeaders.Count -ge 6
 $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
 $publicRpcDeploymentBundleStatus = Get-ArchitectureStatus -Report $publicRpcDeploymentBundle
 $deploymentBundleChecks = Get-ArchitectureProp -Object $publicRpcDeploymentBundle -Name "checks"
@@ -677,6 +693,9 @@ $deploymentBundleReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesBroadStateBlockedPreflight" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesPrivateWalletCreateBlockedPreflight" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "authorizationForwardingScopedToTesterWrite" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "preflightsCheckSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderIncludesSecurityHeaders" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "publicStateMirrorExcluded" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "devnetStatePublicRpcExcluded" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false) -eq $true) `
@@ -701,6 +720,10 @@ $deploymentAutomationReady = $publicRpcDeploymentAutomationStatus -eq "passed" `
     -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedNginxHasTls" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedNginxHasCorsForwarding" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedNginxHasRateLimit" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "bundleHasSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "bundlePreflightsCheckSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedNginxHasSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightChecksSecurityHeaders" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedSystemdUsesOwnerEnv" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasReadinessProbe" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false) -eq $true) `
@@ -727,19 +750,21 @@ $publicRpcEdgeTemplateReady = (Test-RepoFile -Path "infra/scripts/flowchain-publ
     -and ($edgeTemplateForwardsOrigin -eq $true) `
     -and ($edgeTemplateStateExcluded -eq $true) `
     -and ($edgeTemplateDevnetStateExcluded -eq $true) `
+    -and ($edgeTemplateHasSecurityHeaders -eq $true) `
+    -and ($edgeTemplateDefensiveHeaderRequirementPassed -eq $true) `
     -and ((Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "noSecrets" -Default $false) -eq $true)
 Add-ArchitectureItem -Items $items -Id "public-rpc-edge-template-boundary" -Layer "Public edge" `
-    -Requirement "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, disallowed-origin and blocked-private-path probes, verification, rollback, and no broad local state mirror." `
+    -Requirement "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, defensive response headers, tester write preflight, disallowed-origin and blocked-private-path probes, verification, rollback, and no broad local state mirror." `
     -Status $(if ($publicRpcEdgeTemplateReady -and $deploymentBundleReady) { "passed" } else { "failed" }) `
-    -Evidence "edgeTemplateStatus=$publicRpcEdgeTemplateStatus, bundleStatus=$publicRpcDeploymentBundleStatus, renderValidation=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false)), testerWritePreflight=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false)), repoOwned=$edgeTemplateRepoOwned, requiresTls=$edgeTemplateRequiresTls, requiresRateLimit=$edgeTemplateRequiresRateLimit, forwardsOrigin=$edgeTemplateForwardsOrigin, publicStateMirrorExcluded=$edgeTemplateStateExcluded, devnetStatePublicRpcExcluded=$edgeTemplateDevnetStateExcluded" `
+    -Evidence "edgeTemplateStatus=$publicRpcEdgeTemplateStatus, bundleStatus=$publicRpcDeploymentBundleStatus, renderValidation=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false)), testerWritePreflight=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false)), securityHeaders=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesSecurityHeaders" -Default $false)), securityHeaderPreflight=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "preflightsCheckSecurityHeaders" -Default $false)), ownerRenderSecurityHeaders=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderIncludesSecurityHeaders" -Default $false)), repoOwned=$edgeTemplateRepoOwned, requiresTls=$edgeTemplateRequiresTls, requiresRateLimit=$edgeTemplateRequiresRateLimit, forwardsOrigin=$edgeTemplateForwardsOrigin, publicStateMirrorExcluded=$edgeTemplateStateExcluded, devnetStatePublicRpcExcluded=$edgeTemplateDevnetStateExcluded" `
     -Files @("infra/scripts/flowchain-public-rpc-edge-template.ps1", "infra/scripts/flowchain-public-rpc-deployment-bundle.ps1", "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_EDGE_TEMPLATE.md", "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_BUNDLE.md", "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle/WINDOWS_NGINX_PREFLIGHT.md") `
     -Commands @("npm run flowchain:public-rpc:edge-template", "npm run flowchain:public-rpc:deployment-bundle")
 
 Add-ArchitectureItem -Items $items -Id "public-rpc-deployment-automation-boundary" -Layer "Public edge" `
-    -Requirement "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, post-deploy verification, and rollback drill phases without host mutation or owner-value leakage." `
+    -Requirement "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, defensive response-header probes, tester write unauthenticated rejection probe, post-deploy verification, and rollback drill phases without host mutation or owner-value leakage." `
     -Status $(if ($deploymentAutomationReady) { "passed" } else { "failed" }) `
-    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), testerUnauthProbe=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false), rollbackDrill=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false), hostMutationFalse=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false)" `
+    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), securityHeaders=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedNginxHasSecurityHeaders" -Default $false), securityHeaderPreflight=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightChecksSecurityHeaders" -Default $false), testerUnauthProbe=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false), rollbackDrill=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false), hostMutationFalse=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false)" `
     -Files @("infra/scripts/flowchain-public-rpc-deployment-automation.ps1", "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_AUTOMATION.md", "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json") `
     -Commands @("npm run flowchain:public-rpc:deployment:automation")
 
@@ -1380,7 +1405,7 @@ $dataFlows = @(
     },
     [ordered]@{
         name = "public-rpc-edge-template"
-        path = @("placeholder edge config", "owner DNS/TLS", "rate-limited reverse proxy", "private FlowChain RPC origin", "readiness gates")
+        path = @("placeholder edge config", "owner DNS/TLS", "rate-limited reverse proxy", "defensive response headers", "private FlowChain RPC origin", "readiness gates")
         latestEvidence = $reportPaths.publicRpcEdgeTemplate
     },
     [ordered]@{
@@ -1410,7 +1435,7 @@ $dataFlows = @(
 $objectiveDeliverables = @(
     "A live-profile L1 node produces and finalizes blocks.",
     "RPC clients can connect through a private service now and through a public owner-operated edge only after TLS/CORS/rate-limit checks pass.",
-    "Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding.",
+    "Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, CORS-origin forwarding, and defensive response headers.",
     "Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.",
     "The dashboard has a browser-level desktop/mobile proof for tester wallet create, faucet, send, and Explorer inspection without leaking tester tokens or causing horizontal overflow.",
     "Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.",
@@ -1479,6 +1504,8 @@ $report = [ordered]@{
         prometheusTextWritten = (Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "prometheusTextWritten" -Default $false)
         requiredMetricsPresent = (Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "requiredMetricsPresent" -Default $false)
         publicRpcEdgeMetricsPresent = (Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false)
+        publicRpcSecurityHeaderMetricsPresent = $opsMetricsHasPublicRpcSecurityHeaderMetrics
+        missingPublicRpcSecurityHeaderMetricNames = @($missingPublicRpcSecurityHeaderMetricNames)
         systemdTimerUnitPlanned = (Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdTimerUnitPlanned" -Default $false)
         noExternalDelivery = (Get-ArchitectureProp -Object $metricsInstallChecks -Name "noExternalDelivery" -Default $false)
     }
