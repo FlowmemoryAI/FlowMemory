@@ -997,6 +997,97 @@ test("Base public-network pilot rejects tampered cursor state before log scannin
   }
 });
 
+test("Base public-network pilot rejects internally inconsistent cursor ranges before log scanning", async () => {
+  const scenarios = [
+    {
+      name: "from-after-to",
+      lastScannedBlock: "107",
+      lastConfirmedHead: "107",
+      lastFromBlock: "108",
+      lastToBlock: "107",
+      lastLogCount: 1,
+      expected: /cursor.lastFromBlock exceeds cursor.lastToBlock/,
+    },
+    {
+      name: "to-not-scanned",
+      lastScannedBlock: "107",
+      lastConfirmedHead: "107",
+      lastFromBlock: "100",
+      lastToBlock: "106",
+      lastLogCount: 1,
+      expected: /cursor.lastToBlock must match cursor.lastScannedBlock/,
+    },
+    {
+      name: "scanned-after-confirmed",
+      lastScannedBlock: "108",
+      lastConfirmedHead: "107",
+      lastFromBlock: "100",
+      lastToBlock: "108",
+      lastLogCount: 1,
+      expected: /cursor.lastScannedBlock exceeds cursor.lastConfirmedHead/,
+    },
+    {
+      name: "negative-log-count",
+      lastScannedBlock: "107",
+      lastConfirmedHead: "107",
+      lastFromBlock: "100",
+      lastToBlock: "107",
+      lastLogCount: -1,
+      expected: /cursor.lastLogCount must be a non-negative integer/,
+    },
+  ];
+
+  for (const scenario of scenarios) {
+    const stateDir = mkdtempSync(join(tmpdir(), `flowmemory-bridge-cursor-${scenario.name}-`));
+    const cursorPath = join(stateDir, "cursor-state.json");
+    writeFileSync(cursorPath, `${JSON.stringify({
+      schema: "flowmemory.bridge_lockbox_cursor_state.v0",
+      stateId: testCursorStateId(scenario.lastScannedBlock, scenario.lastConfirmedHead),
+      updatedAt: FIXED_TEST_OBSERVED_AT,
+      mode: "base-mainnet-pilot",
+      sourceChainId: BASE_MAINNET_CHAIN_ID,
+      lockboxAddress: "0x1111111111111111111111111111111111111111",
+      lastScannedBlock: scenario.lastScannedBlock,
+      lastConfirmedHead: scenario.lastConfirmedHead,
+      lastFromBlock: scenario.lastFromBlock,
+      lastToBlock: scenario.lastToBlock,
+      lastLogCount: scenario.lastLogCount,
+      localOnly: false,
+      productionReady: true,
+    }, null, 2)}\n`);
+
+    const calls: string[] = [];
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async (_input, init) => {
+      const body = JSON.parse(String(init?.body ?? "{}")) as { method: string };
+      calls.push(body.method);
+      if (body.method === "eth_chainId") {
+        return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x2105" }), {
+          headers: { "content-type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, error: { message: `unexpected method for ${scenario.name}` } }), {
+        status: 400,
+        headers: { "content-type": "application/json" },
+      });
+    };
+
+    try {
+      await assert.rejects(
+        () => runBridgePipeline(parseBridgeArgs(baseMainnetPilotRpcArgs([
+          "--cursor-state",
+          cursorPath,
+        ]))),
+        scenario.expected,
+      );
+      assert.deepEqual(calls, ["eth_chainId"]);
+    } finally {
+      globalThis.fetch = originalFetch;
+      rmSync(stateDir, { recursive: true, force: true });
+    }
+  }
+});
+
 test("Base public-network pilot rejects placeholder recipients without blocking valid deposits", async () => {
   const stateDir = mkdtempSync(join(tmpdir(), "flowmemory-bridge-placeholder-rpc-"));
   const depositLogs = [

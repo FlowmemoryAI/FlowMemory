@@ -1,6 +1,6 @@
 ﻿# FlowChain Architecture Audit
 
-Generated: 2026-05-19T20:20:07.7682000Z
+Generated: 2026-05-19T20:27:09.0948431Z
 Status: blocked
 Blocked only on known external owner inputs: True
 
@@ -23,7 +23,7 @@ Blocked only on known external owner inputs: True
 
 | Layer | Requirement | Status | Evidence |
 | --- | --- | --- | --- |
-| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=92951, finalizedHeight=92951 |
+| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=93054, finalizedHeight=93054 |
 | Operations | Operator doctor covers host tools, package scripts, state path, disk, service evidence, ports, owner-input groups, and owner env-file status without printing owner values. | passed | doctorStatus=blocked, checks=54, failedChecks=0, blockedChecks=5, blockedOnlyOwner=True |
 | Operations | Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers. | passed | monitorStatus=passed, samples=3, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=22, alertCoveredFindings=24, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=58, publicRpcEdgeMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=15, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=14, incidentFailed=0 |
 | Operations | Owner-host service lifecycle includes a no-secret Windows Scheduled Task install, read-only status, and safe absent-task uninstall no-op path for reboot-persistent live supervisor autorecovery. | passed | installValidation=passed, failedChecks=0, planDidNotMutate=True, statusCommand=True, statusDidNotMutate=True, uninstallNoop=True, liveProfileDefault=True, relayerDefaultOff=True, relayerOptIn=True, schedulerCmdlets=True |
