@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Bundle
 
-Generated: 2026-05-18T06:51:17.2713954Z
+Generated: 2026-05-19T09:40:25.5874742Z
 Status: passed
 
 This bundle packages placeholder-only files for an owner-operated HTTPS edge in front of the repo-owned private RPC origin `127.0.0.1:8787`.
@@ -59,6 +59,7 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - npm run flowchain:service:restart -- -LiveProfile
 - npm run flowchain:service:supervisor -- -Once
 - npm run flowchain:service:supervisor:validate
+- npm run flowchain:service:install:systemd:validate
 - npm run flowchain:service:status
 - npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30
 - npm run flowchain:ops:snapshot -- -AllowBlocked
@@ -75,6 +76,7 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 
 ## Owner-Host Preflight Commands
 
+- npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>
 - systemd-analyze verify <FLOWCHAIN_SYSTEMD_RENDERED_UNIT>
 - systemd-analyze verify <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>
 - nginx -t

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-19T03:04:50.4070885Z",
+    "generatedAt":  "2026-05-19T10:04:58.2356041Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -35,6 +35,7 @@
                             "flowchain:service:supervisor:validate",
                             "flowchain:service:install:windows",
                             "flowchain:service:install:validate",
+                            "flowchain:service:install:systemd",
                             "flowchain:service:install:systemd:validate",
                             "flowchain:second-computer:bundle",
                             "flowchain:second-computer:verify",
@@ -128,6 +129,11 @@
                               "phase":  "autorecovery",
                               "command":  "npm run flowchain:service:install:validate",
                               "purpose":  "Validate install/status/uninstall paths without mutating the owner host."
+                          },
+                          {
+                              "phase":  "autorecovery",
+                              "command":  "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                              "purpose":  "Render the no-secret Linux systemd install plan from owner-rendered units."
                           },
                           {
                               "phase":  "autorecovery",

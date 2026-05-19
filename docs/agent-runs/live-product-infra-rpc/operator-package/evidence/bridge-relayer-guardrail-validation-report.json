@@ -1,14 +1,14 @@
 {
     "schema":  "flowchain.bridge_relayer_guardrail_validation_report.v1",
-    "generatedAt":  "2026-05-18T04:31:12.2070538Z",
+    "generatedAt":  "2026-05-19T09:55:11.3505741Z",
     "status":  "passed",
     "validationDir":  "devnet/local/bridge-relayer-guardrail-validation",
     "relayerReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\bridge-relayer-once-report.json",
     "childProcess":  {
                          "exitCode":  0,
                          "timedOut":  false,
-                         "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260517233108423-52232-71492868.stdout.log",
-                         "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260517233108423-52232-71492868.stderr.log"
+                         "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260519045508574-70256-34457029.stdout.log",
+                         "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260519045508574-70256-34457029.stderr.log"
                      },
     "checks":  {
                    "relayerCommandExitedZeroWithAllowBlocked":  true,
@@ -54,7 +54,8 @@
                                                "FLOWCHAIN_BASE8453_TO_BLOCK",
                                                "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                                                "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-                                               "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                               "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                               "FLOWCHAIN_OWNER_ENV_DEFAULT_IMPORT_DISABLED"
                                            ],
     "envValuesPrinted":  false,
     "noSecrets":  true,

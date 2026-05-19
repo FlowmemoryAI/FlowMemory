@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-19T03:07:09.8260244Z",
+    "generatedAt":  "2026-05-19T09:57:40.4810313Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -9,10 +9,10 @@
     "connectPackReady":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
-                       "passed":  21,
+                       "passed":  22,
                        "blocked":  6,
                        "failed":  0,
-                       "total":  27
+                       "total":  28
                    },
     "items":  [
                   {
@@ -25,6 +25,7 @@
                                        "npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90",
                                        "npm run flowchain:service:supervisor:validate",
                                        "npm run flowchain:service:install:validate",
+                                       "npm run flowchain:service:install:systemd:validate",
                                        "npm run flowchain:ops:snapshot -- -AllowBlocked",
                                        "npm run flowchain:ops:alerts -- -AllowBlocked",
                                        "npm run flowchain:ops:alerts:install:validate",
@@ -120,7 +121,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=80975, finalizedHeight=80975",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=86217, finalizedHeight=86217",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -164,6 +165,22 @@
                                        "npm run flowchain:service:install:windows -- -Action Install",
                                        "npm run flowchain:service:install:windows -- -Action Status",
                                        "npm run flowchain:service:install:windows -- -Action Uninstall"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "systemd-service-install-automation",
+                      "requirement":  "The owner Linux/VPS host has a real no-secret systemd plan/install/status/uninstall path for rendered live-service and supervisor units, validated through a read-only rendered-unit plan drill.",
+                      "status":  "passed",
+                      "evidence":  "systemdInstallValidation=passed, installScript=True, plan=True, planDidNotMutate=True, renderedUnits=True, liveProfile=True, supervisor=True, hardening=True",
+                      "commands":  [
+                                       "npm run flowchain:service:install:systemd:validate",
+                                       "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                                       "npm run flowchain:service:install:systemd -- -Action Install -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                                       "npm run flowchain:service:install:systemd -- -Action Status",
+                                       "npm run flowchain:service:install:systemd -- -Action Uninstall"
                                    ],
                       "blockers":  [
 
@@ -512,6 +529,7 @@
                         "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json",
                         "serviceSupervisorValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-report.json",
                         "serviceInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-validation-report.json",
+                        "systemdServiceInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\systemd-service-install-validation-report.json",
                         "opsSnapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
                         "opsAlertRules":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-alert-rules-report.json",
                         "alertInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\alert-install-validation-report.json",
@@ -547,6 +565,8 @@
                                                  "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
                                                  "npm run flowchain:service:install:validate",
                                                  "npm run flowchain:service:install:windows -- -Action Plan",
+                                                 "npm run flowchain:service:install:systemd:validate",
+                                                 "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
                                                  "npm run flowchain:ops:snapshot -- -AllowBlocked",
                                                  "npm run flowchain:ops:alerts -- -AllowBlocked",
                                                  "npm run flowchain:ops:alerts:install:validate",
@@ -579,6 +599,8 @@
                                               "npm run flowchain:service:status",
                                               "npm run flowchain:service:install:windows -- -Action Status",
                                               "npm run flowchain:service:install:windows -- -Action Uninstall",
+                                              "npm run flowchain:service:install:systemd -- -Action Status",
+                                              "npm run flowchain:service:install:systemd -- -Action Uninstall",
                                               "npm run flowchain:backup:install:windows -- -Action Status",
                                               "npm run flowchain:backup:install:windows -- -Action Uninstall",
                                               "npm run flowchain:ops:alerts:install:windows -- -Action Status",

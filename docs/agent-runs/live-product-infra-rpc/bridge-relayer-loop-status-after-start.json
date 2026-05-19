@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.service_status_report.v0",
-    "generatedAt":  "2026-05-18T04:36:12.4331902Z",
+    "generatedAt":  "2026-05-19T09:54:04.6791277Z",
     "status":  "passed",
     "bind":  {
                  "host":  "127.0.0.1",
@@ -9,27 +9,27 @@
              },
     "node":  {
                  "status":  "running",
-                 "pid":  60216,
+                 "pid":  64948,
                  "pidPath":  "devnet\\local\\bridge-relayer-loop-validation\\node\\flowchain-node.pid",
                  "pidSource":  "pid-file",
                  "commandLineMatched":  true
              },
     "controlPlane":  {
                          "status":  "running",
-                         "pid":  54192,
+                         "pid":  19480,
                          "pidPath":  "devnet\\local\\bridge-relayer-loop-validation\\services\\control-plane.pid",
                          "commandLineMatched":  true
                      },
     "controlPlanePortProcess":  null,
     "bridgeRelayerLoop":  {
                               "status":  "running",
-                              "pid":  47792,
+                              "pid":  27740,
                               "pidPath":  "devnet\\local\\bridge-relayer-loop-validation\\services\\bridge-relayer-loop.pid",
                               "commandLineMatched":  true,
                               "report":  {
                                              "path":  "devnet/local/bridge-live-readiness/bridge-relayer-loop-report.json",
                                              "status":  "blocked",
-                                             "ageSeconds":  1.477,
+                                             "ageSeconds":  1.572,
                                              "maxAgeSeconds":  180,
                                              "fresh":  true,
                                              "acceptableStatus":  true,
@@ -53,12 +53,12 @@
                               },
     "chain":  {
                   "stateFileReadable":  true,
-                  "latestHeight":  "148",
-                  "latestHash":  "0xefcc630e698f404f838ec41a855b2764641810cbab890b7b7e76b6ec9c504eff",
+                  "latestHeight":  "170",
+                  "latestHash":  "0xf13dfcd5b075ff90c7ad8d80af38559619defee5a3a6922e0cd34a352383f0c4",
                   "latestRoot":  "0x149b8017ed2be0fb192c295383d2a198798a24e8509978c678fe78205ca8ee58",
                   "stateFileLastWriteAgeSeconds":  1,
-                  "finalizedHeight":  "148",
-                  "finalizedHash":  "0xefcc630e698f404f838ec41a855b2764641810cbab890b7b7e76b6ec9c504eff",
+                  "finalizedHeight":  "170",
+                  "finalizedHash":  "0xf13dfcd5b075ff90c7ad8d80af38559619defee5a3a6922e0cd34a352383f0c4",
                   "mempoolDepth":  0,
                   "peerCount":  null
               },
@@ -67,6 +67,35 @@
     "problems":  [
 
                  ],
+    "checks":  {
+                   "nodeRunning":  true,
+                   "nodeCommandLineMatched":  true,
+                   "controlPlaneRunning":  true,
+                   "controlPlaneCommandLineMatched":  true,
+                   "controlPlanePortPrivate":  true,
+                   "stateFileReadable":  true,
+                   "latestHeightNumeric":  true,
+                   "finalizedHeightNumeric":  true,
+                   "latestHeightPositive":  true,
+                   "stateFileFresh":  true,
+                   "serviceProfileLive":  true,
+                   "serviceProfileUnbounded":  true,
+                   "boundedLiveModeRejectedFalse":  true,
+                   "relayerLoopStoppedOrHealthy":  true,
+                   "problemsEmpty":  true,
+                   "failedProblemsEmpty":  true,
+                   "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
     "envValuesPrinted":  false,
-    "noSecrets":  true
+    "noSecrets":  true,
+    "broadcasts":  false
 }

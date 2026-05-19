@@ -70,6 +70,127 @@ function Get-SystemdSecretMarkerFindings {
     return @($findings)
 }
 
+function Invoke-SystemdInstallPlanValidation {
+    param(
+        [Parameter(Mandatory = $true)][string] $RepoRoot,
+        [Parameter(Mandatory = $true)][string] $BundleDir,
+        [Parameter(Mandatory = $true)][string] $RenderScriptPath,
+        [Parameter(Mandatory = $true)][string] $InstallScriptPath
+    )
+
+    $safeTokenHash = "0000000000000000000000000000000000000000000000000000000000000000"
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "flowchain-systemd-install-validation-$PID-$([Guid]::NewGuid().ToString("N"))"
+    $reportTempRoot = Join-Path $RepoRoot "devnet/local/systemd-install-validation-report-$PID-$([Guid]::NewGuid().ToString("N"))"
+    $ownerEnvFile = Join-Path $tempRoot "owner-public-rpc.env"
+    $renderDir = Join-Path $tempRoot "rendered"
+    $backupDir = Join-Path $tempRoot "backups"
+    $tlsCertPath = Join-Path $tempRoot "tls-cert.pem"
+    $tlsKeyPath = Join-Path $tempRoot "tls-key.pem"
+    $nginxExe = Join-Path $tempRoot "nginx.exe"
+    $planReportPath = Join-Path $reportTempRoot "systemd-plan-report.json"
+    $planMarkdownPath = Join-Path $reportTempRoot "SYSTEMD_PLAN.md"
+    $renderOutput = @()
+    $planOutput = @()
+    $renderExitCode = 1
+    $planExitCode = 1
+    $problem = ""
+    $cleanupAttempted = $false
+    $planReport = $null
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRoot, $renderDir, $backupDir, $reportTempRoot | Out-Null
+        Set-Content -LiteralPath $tlsCertPath -Value "dummy certificate validation sentinel" -Encoding UTF8
+        Set-Content -LiteralPath $tlsKeyPath -Value "dummy key validation sentinel" -Encoding UTF8
+        Set-Content -LiteralPath $nginxExe -Value "dummy nginx validation sentinel" -Encoding UTF8
+        Set-Content -LiteralPath $ownerEnvFile -Value (@(
+            "FLOWCHAIN_RPC_PUBLIC_URL=https://rpc.flowchain.example",
+            "FLOWCHAIN_RPC_ALLOWED_ORIGINS=https://wallet.flowchain.example,https://dashboard.flowchain.example",
+            "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE=60",
+            "FLOWCHAIN_RPC_TLS_TERMINATED=true",
+            "FLOWCHAIN_RPC_STATE_BACKUP_PATH=$backupDir",
+            "FLOWCHAIN_TESTER_WRITE_ENABLED=true",
+            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256=$safeTokenHash",
+            "FLOWCHAIN_TESTER_MAX_SEND_UNITS=10"
+        ) -join "`r`n") -Encoding UTF8
+
+        $renderOutput = @(& powershell -NoProfile -ExecutionPolicy Bypass -File $RenderScriptPath `
+            -BundleDir $BundleDir `
+            -RenderDir $renderDir `
+            -OwnerEnvFile $ownerEnvFile `
+            -RepoRoot $RepoRoot `
+            -ServiceUser "flowchain" `
+            -ServiceGroup "flowchain" `
+            -TlsCertificatePath $tlsCertPath `
+            -TlsCertificateKeyPath $tlsKeyPath `
+            -NginxExe $nginxExe 2>&1 | ForEach-Object { "$_" })
+        $renderExitCode = $LASTEXITCODE
+        if ($null -eq $renderExitCode) {
+            $renderExitCode = 0
+        }
+
+        $planOutput = @(& powershell -NoProfile -ExecutionPolicy Bypass -File $InstallScriptPath `
+            -Action Plan `
+            -RenderDir $renderDir `
+            -ReportPath $planReportPath `
+            -MarkdownPath $planMarkdownPath 2>&1 | ForEach-Object { "$_" })
+        $planExitCode = $LASTEXITCODE
+        if ($null -eq $planExitCode) {
+            $planExitCode = 0
+        }
+
+        $renderOutputText = @($renderOutput) -join "`n"
+        $planOutputText = @($planOutput) -join "`n"
+        Assert-FlowChainNoSecretText -Text $renderOutputText -Label "systemd install validation render output"
+        Assert-FlowChainNoSecretText -Text $planOutputText -Label "systemd install validation plan output"
+        $planReport = Read-FlowChainJsonIfExists -Path $planReportPath
+    }
+    catch {
+        $problem = $_.Exception.Message
+    }
+    finally {
+        $tempBase = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
+        $tempFull = [System.IO.Path]::GetFullPath($tempRoot)
+        $tempLeaf = Split-Path -Leaf $tempFull
+        if ($tempFull.StartsWith($tempBase, [System.StringComparison]::OrdinalIgnoreCase) -and $tempLeaf.StartsWith("flowchain-systemd-install-validation-", [System.StringComparison]::Ordinal)) {
+            $cleanupAttempted = $true
+            Remove-Item -LiteralPath $tempFull -Recurse -Force -ErrorAction SilentlyContinue
+        }
+        $reportTempBase = [System.IO.Path]::GetFullPath((Join-Path $RepoRoot "devnet/local"))
+        $reportTempFull = [System.IO.Path]::GetFullPath($reportTempRoot)
+        $reportTempLeaf = Split-Path -Leaf $reportTempFull
+        if ($reportTempFull.StartsWith($reportTempBase, [System.StringComparison]::OrdinalIgnoreCase) -and $reportTempLeaf.StartsWith("systemd-install-validation-report-", [System.StringComparison]::Ordinal)) {
+            Remove-Item -LiteralPath $reportTempFull -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    $planChecks = if ($null -ne $planReport) { $planReport.checks } else { $null }
+    return [ordered]@{
+        schema = "flowchain.systemd_install_plan_validation.v0"
+        status = if (($renderExitCode -eq 0) -and ($planExitCode -eq 0) -and $null -ne $planReport -and "$($planReport.status)" -eq "passed") { "passed" } else { "failed" }
+        renderExitCode = [int]$renderExitCode
+        planExitCode = [int]$planExitCode
+        planReportStatus = if ($null -ne $planReport) { "$($planReport.status)" } else { "missing" }
+        problem = $problem
+        checks = [ordered]@{
+            renderCommandPassed = $renderExitCode -eq 0
+            planCommandPassed = $planExitCode -eq 0
+            planReportPassed = $null -ne $planReport -and "$($planReport.status)" -eq "passed"
+            planUsesRenderedUnits = $null -ne $planReport -and "$($planReport.sourceMode)" -eq "rendered"
+            planRenderDirProvided = $null -ne $planChecks -and $planChecks.renderDirProvided -eq $true
+            planDidNotMutate = $null -ne $planReport -and $planReport.hostMutationPerformed -eq $false
+            planActionReadOnly = $null -ne $planChecks -and $planChecks.planActionReadOnly -eq $true
+            planCommandPlanPresent = $null -ne $planChecks -and $planChecks.commandPlanPresent -eq $true
+            planNoSecrets = $null -ne $planReport -and $planReport.noSecrets -eq $true
+            planEnvValuesPrintedFalse = $null -ne $planReport -and $planReport.envValuesPrinted -eq $false
+            planBroadcastsFalse = $null -ne $planReport -and $planReport.broadcasts -eq $false
+            cleanupAttempted = $cleanupAttempted
+        }
+        envValuesPrinted = $false
+        noSecrets = $true
+        broadcasts = $false
+    }
+}
+
 function Test-SystemdPackageScript {
     param([Parameter(Mandatory = $true)][string] $Name)
 
@@ -79,6 +200,7 @@ function Test-SystemdPackageScript {
 }
 
 $paths = [ordered]@{
+    installScript = Join-Path $PSScriptRoot "flowchain-service-install-systemd.ps1"
     liveServiceTemplate = Join-Path $bundleFullDir "flowchain-live.service.template"
     supervisorTemplate = Join-Path $bundleFullDir "flowchain-supervisor.service.template"
     renderScript = Join-Path $bundleFullDir "render-public-rpc-bundle.template.ps1"
@@ -92,6 +214,7 @@ $renderScriptText = Get-SystemdValidationText -Path $paths.renderScript
 $verifyText = Get-SystemdValidationText -Path $paths.verifyRunbook
 $rollbackText = Get-SystemdValidationText -Path $paths.rollbackRunbook
 $combinedUnitText = "$liveServiceText`n$supervisorText"
+$installPlanValidation = Invoke-SystemdInstallPlanValidation -RepoRoot $repoRoot -BundleDir $bundleFullDir -RenderScriptPath $paths.renderScript -InstallScriptPath $paths.installScript
 
 $installCommands = @(
     "sudo install -o root -g root -m 0644 <FLOWCHAIN_RENDER_DIR>/flowchain-live.service /etc/systemd/system/flowchain-live.service",
@@ -115,6 +238,8 @@ $uninstallCommands = @(
 )
 
 $checks = [ordered]@{
+    installScriptExists = Test-Path -LiteralPath $paths.installScript
+    installPackageScriptPresent = Test-SystemdPackageScript -Name "flowchain:service:install:systemd"
     validationPackageScriptPresent = Test-SystemdPackageScript -Name "flowchain:service:install:systemd:validate"
     publicRpcBundleExists = Test-Path -LiteralPath $bundleFullDir
     liveServiceTemplateExists = Test-Path -LiteralPath $paths.liveServiceTemplate
@@ -140,6 +265,13 @@ $checks = [ordered]@{
     renderScriptRendersSystemdUnits = Test-SystemdTextHasAll -Text $renderScriptText -Tokens @("flowchain-live.service", "flowchain-supervisor.service")
     verifyRunbookMentionsSystemdVerify = Test-SystemdTextHasAll -Text $verifyText -Tokens @("systemd-analyze verify <FLOWCHAIN_SYSTEMD_RENDERED_UNIT>", "systemd-analyze verify <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>")
     rollbackRunbookMentionsSystemctl = $rollbackText.Contains("systemctl")
+    installPlanValidationPassed = "$($installPlanValidation.status)" -eq "passed"
+    installPlanCommandPassed = (Get-SystemdValidationText -Path $paths.installScript).Contains("ValidateSet(`"Plan`", `"Install`", `"Status`", `"Uninstall`")") -and $installPlanValidation.checks.planCommandPassed -eq $true
+    installPlanDidNotMutate = $installPlanValidation.checks.planDidNotMutate -eq $true
+    installPlanUsesRenderedUnits = $installPlanValidation.checks.planUsesRenderedUnits -eq $true
+    installPlanReportNoSecrets = $installPlanValidation.checks.planNoSecrets -eq $true
+    installPlanReportEnvValuesPrintedFalse = $installPlanValidation.checks.planEnvValuesPrintedFalse -eq $true
+    installPlanReportBroadcastsFalse = $installPlanValidation.checks.planBroadcastsFalse -eq $true
     installCommandsPresent = $installCommands.Count -ge 5
     statusCommandsPresent = $statusCommands.Count -ge 5
     uninstallCommandsPresent = $uninstallCommands.Count -ge 4
@@ -156,6 +288,7 @@ $report = [ordered]@{
     status = "pending"
     bundleDir = $bundleFullDir
     paths = $paths
+    installPlanValidation = $installPlanValidation
     installCommands = $installCommands
     statusCommands = $statusCommands
     uninstallCommands = $uninstallCommands
@@ -191,6 +324,7 @@ $markdownLines.Add("Generated: $($report.generatedAt)")
 $markdownLines.Add("Status: $status")
 $markdownLines.Add("")
 $markdownLines.Add("This validation proves the owner Linux systemd install plan is present, no-secret, non-mutating, live-profile by default, and includes autorecovery through the FlowChain supervisor.")
+$markdownLines.Add("It also executes the real Plan action against rendered units in a temporary directory and verifies that no host mutation occurs.")
 $markdownLines.Add("")
 $markdownLines.Add("## Checks")
 $markdownLines.Add("")

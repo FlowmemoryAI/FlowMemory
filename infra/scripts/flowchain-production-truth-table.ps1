@@ -255,6 +255,8 @@ $definitions = @(
         productionGate = $true
         ownerInputGate = $false
         requiredChecks = @(
+            "installScriptExists",
+            "installPackageScriptPresent",
             "validationPackageScriptPresent",
             "publicRpcBundleExists",
             "liveServiceTemplateExists",
@@ -280,6 +282,13 @@ $definitions = @(
             "renderScriptRendersSystemdUnits",
             "verifyRunbookMentionsSystemdVerify",
             "rollbackRunbookMentionsSystemctl",
+            "installPlanValidationPassed",
+            "installPlanCommandPassed",
+            "installPlanDidNotMutate",
+            "installPlanUsesRenderedUnits",
+            "installPlanReportNoSecrets",
+            "installPlanReportEnvValuesPrintedFalse",
+            "installPlanReportBroadcastsFalse",
             "installCommandsPresent",
             "statusCommandsPresent",
             "uninstallCommandsPresent",

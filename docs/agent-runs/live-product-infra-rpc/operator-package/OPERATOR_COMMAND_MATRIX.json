@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-19T03:04:50.4070885Z",
+    "generatedAt":  "2026-05-19T10:04:58.2356041Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -51,6 +51,11 @@
                          "phase":  "autorecovery",
                          "command":  "npm run flowchain:service:install:validate",
                          "purpose":  "Validate install/status/uninstall paths without mutating the owner host."
+                     },
+                     {
+                         "phase":  "autorecovery",
+                         "command":  "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                         "purpose":  "Render the no-secret Linux systemd install plan from owner-rendered units."
                      },
                      {
                          "phase":  "autorecovery",

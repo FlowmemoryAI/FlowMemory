@@ -8,6 +8,7 @@ type BrowserState = {
   created: boolean;
   funded: boolean;
   sent: boolean;
+  unhandledRequests: string[];
 };
 
 async function fulfillJson(route: Route, payload: unknown, status = 200) {
@@ -44,6 +45,17 @@ async function installControlPlaneMocks(page: Page, state: BrowserState) {
           "POST /tester/wallets/send",
         ],
       });
+      return;
+    }
+
+    if (pathname === "/rpc" && method === "POST") {
+      const payload = request.postDataJSON() as Array<{ id?: string | number }> | { id?: string | number };
+      const requests = Array.isArray(payload) ? payload : [payload];
+      await fulfillJson(route, requests.map((entry) => ({
+        jsonrpc: "2.0",
+        id: entry.id ?? null,
+        result: null,
+      })));
       return;
     }
 
@@ -234,7 +246,8 @@ async function installControlPlaneMocks(page: Page, state: BrowserState) {
       return;
     }
 
-    await fulfillJson(route, { schema: "flowmemory.control_plane.not_found.v0", noSecrets: true }, 404);
+    state.unhandledRequests.push(`${method} ${pathname}`);
+    await fulfillJson(route, { schema: "flowmemory.control_plane.unhandled_mock.v0", noSecrets: true });
   });
 }
 
@@ -261,7 +274,7 @@ async function expectNoHorizontalOverflow(page: Page) {
 test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => {
   test("completes the tester wallet funding loop and keeps the explorer inspectable", async ({ page }) => {
     const consoleErrors: string[] = [];
-    const state: BrowserState = { created: false, funded: false, sent: false };
+    const state: BrowserState = { created: false, funded: false, sent: false, unhandledRequests: [] };
 
     page.on("console", (message) => {
       if (message.type() === "error") {
@@ -313,6 +326,7 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
 
     await expectNoUiLeakage(page);
     await expectNoHorizontalOverflow(page);
+    expect(state.unhandledRequests).toEqual([]);
     expect(consoleErrors).toEqual([]);
   });
 });

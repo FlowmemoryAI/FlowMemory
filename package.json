@@ -111,6 +111,7 @@
     "flowchain:service:supervisor:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-supervisor-validation.ps1",
     "flowchain:service:install:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-install-windows.ps1",
     "flowchain:service:install:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-install-validation.ps1",
+    "flowchain:service:install:systemd": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-install-systemd.ps1",
     "flowchain:service:install:systemd:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-install-systemd-validation.ps1",
     "flowchain:ops:snapshot": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-ops-snapshot.ps1",
     "flowchain:ops:alerts": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-ops-alerts.ps1",

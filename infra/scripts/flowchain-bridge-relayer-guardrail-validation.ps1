@@ -34,7 +34,8 @@ $requiredEnvNames = @(
     "FLOWCHAIN_BASE8453_TO_BLOCK",
     "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
     "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-    "FLOWCHAIN_PILOT_CONFIRMATIONS"
+    "FLOWCHAIN_PILOT_CONFIRMATIONS",
+    "FLOWCHAIN_OWNER_ENV_DEFAULT_IMPORT_DISABLED"
 )
 
 function Invoke-GuardrailChild {
@@ -167,6 +168,7 @@ foreach ($name in $requiredEnvNames) {
     $savedEnv[$name] = [Environment]::GetEnvironmentVariable($name, "Process")
     [Environment]::SetEnvironmentVariable($name, $null, "Process")
 }
+[Environment]::SetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_DEFAULT_IMPORT_DISABLED", "1", "Process")
 
 $child = $null
 try {

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-19T03:04:40.3170601Z",
+    "generatedAt":  "2026-05-19T09:55:25.1452910Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -18,10 +18,10 @@
                                   "Every missing production edge fails closed on exact owner input names, with no secrets, env values, or live broadcasts."
                               ],
     "itemCounts":  {
-                       "passed":  19,
+                       "passed":  20,
                        "blocked":  7,
                        "failed":  0,
-                       "total":  26
+                       "total":  27
                    },
     "items":  [
                   {
@@ -29,7 +29,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=80945, finalizedHeight=80945",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=81006, finalizedHeight=81006",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -119,11 +119,34 @@
                                    ]
                   },
                   {
+                      "id":  "systemd-service-install-boundary",
+                      "layer":  "Operations",
+                      "requirement":  "Owner-host Linux/VPS service lifecycle includes a real no-secret systemd plan/install/status/uninstall path for reboot-persistent live supervisor autorecovery from rendered units.",
+                      "status":  "passed",
+                      "evidence":  "systemdInstallValidation=passed, failedChecks=0, installScript=True, plan=True, planDidNotMutate=True, renderedUnits=True, supervisor=True, hardening=True",
+                      "files":  [
+                                    "infra/scripts/flowchain-service-install-systemd.ps1",
+                                    "infra/scripts/flowchain-service-install-systemd-validation.ps1",
+                                    "docs/agent-runs/live-product-infra-rpc/SYSTEMD_SERVICE_INSTALL.md",
+                                    "docs/agent-runs/live-product-infra-rpc/SYSTEMD_SERVICE_INSTALL_VALIDATION.md"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:service:install:systemd:validate",
+                                       "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                                       "npm run flowchain:service:install:systemd -- -Action Install -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                                       "npm run flowchain:service:install:systemd -- -Action Status",
+                                       "npm run flowchain:service:install:systemd -- -Action Uninstall"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "node-operator-package-boundary",
                       "layer":  "Operations",
                       "requirement":  "Node operator packaging collects no-secret runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates.",
                       "status":  "passed",
-                      "evidence":  "operatorPackage=passed, commands=45, runbooks=27, evidenceReports=37, failedChecks=0, noSecretScan=True",
+                      "evidence":  "operatorPackage=passed, commands=46, runbooks=27, evidenceReports=37, failedChecks=0, noSecretScan=True",
                       "files":  [
                                     "infra/scripts/flowchain-operator-package.ps1",
                                     "docs/developer/FLOWCHAIN_NODE_OPERATOR.md"
@@ -869,6 +892,7 @@
                         "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json",
                         "serviceSupervisorValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-report.json",
                         "serviceInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-validation-report.json",
+                        "systemdServiceInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\systemd-service-install-validation-report.json",
                         "operatorPackage":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-report.json",
                         "operatorPackageVerify":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-verify-report.json",
                         "opsSnapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",

@@ -1,14 +1,17 @@
 ﻿# FlowChain Systemd Service Install Validation
 
-Generated: 2026-05-18T05:14:07.5290463Z
+Generated: 2026-05-19T09:40:25.5134722Z
 Status: passed
 
 This validation proves the owner Linux systemd install plan is present, no-secret, non-mutating, live-profile by default, and includes autorecovery through the FlowChain supervisor.
+It also executes the real Plan action against rendered units in a temporary directory and verifies that no host mutation occurs.
 
 ## Checks
 
 | Check | Result |
 | --- | --- |
+| installScriptExists | True |
+| installPackageScriptPresent | True |
 | validationPackageScriptPresent | True |
 | publicRpcBundleExists | True |
 | liveServiceTemplateExists | True |
@@ -34,6 +37,13 @@ This validation proves the owner Linux systemd install plan is present, no-secre
 | renderScriptRendersSystemdUnits | True |
 | verifyRunbookMentionsSystemdVerify | True |
 | rollbackRunbookMentionsSystemctl | True |
+| installPlanValidationPassed | True |
+| installPlanCommandPassed | True |
+| installPlanDidNotMutate | True |
+| installPlanUsesRenderedUnits | True |
+| installPlanReportNoSecrets | True |
+| installPlanReportEnvValuesPrintedFalse | True |
+| installPlanReportBroadcastsFalse | True |
 | installCommandsPresent | True |
 | statusCommandsPresent | True |
 | uninstallCommandsPresent | True |

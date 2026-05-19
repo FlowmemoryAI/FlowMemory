@@ -42,6 +42,7 @@ $reportPaths = [ordered]@{
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     serviceSupervisorValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
     serviceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
+    systemdServiceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"
     operatorPackage = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-report.json"
     operatorPackageVerify = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-verify-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
@@ -277,6 +278,10 @@ $serviceInstallValidation = $reports.serviceInstallValidation
 $serviceInstallValidationStatus = Get-ArchitectureStatus -Report $serviceInstallValidation
 $serviceInstallChecks = Get-ArchitectureProp -Object $serviceInstallValidation -Name "checks"
 $serviceInstallFailedChecks = @((Get-ArchitectureProp -Object $serviceInstallValidation -Name "failedChecks" -Default @()))
+$systemdServiceInstallValidation = $reports.systemdServiceInstallValidation
+$systemdServiceInstallValidationStatus = Get-ArchitectureStatus -Report $systemdServiceInstallValidation
+$systemdServiceInstallChecks = Get-ArchitectureProp -Object $systemdServiceInstallValidation -Name "checks"
+$systemdServiceInstallFailedChecks = @((Get-ArchitectureProp -Object $systemdServiceInstallValidation -Name "failedChecks" -Default @()))
 $opsSnapshot = $reports.opsSnapshot
 $opsSnapshotStatus = Get-ArchitectureStatus -Report $opsSnapshot
 $opsCriticalCount = [int](Get-ArchitectureProp -Object $opsSnapshot -Name "criticalCount" -Default 999)
@@ -371,6 +376,12 @@ $serviceInstallFiles = @(
     "docs/agent-runs/live-product-infra-rpc/WINDOWS_SERVICE_INSTALL.md",
     "docs/agent-runs/live-product-infra-rpc/SERVICE_INSTALL_VALIDATION.md"
 )
+$systemdServiceInstallFiles = @(
+    "infra/scripts/flowchain-service-install-systemd.ps1",
+    "infra/scripts/flowchain-service-install-systemd-validation.ps1",
+    "docs/agent-runs/live-product-infra-rpc/SYSTEMD_SERVICE_INSTALL.md",
+    "docs/agent-runs/live-product-infra-rpc/SYSTEMD_SERVICE_INSTALL_VALIDATION.md"
+)
 $serviceInstallReady = (Test-AllRepoFilesExist -Paths $serviceInstallFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:service:install:windows") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:service:install:validate") `
@@ -406,6 +417,23 @@ $serviceInstallReady = (Test-AllRepoFilesExist -Paths $serviceInstallFiles) `
     -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "uninstallAbsentReportBroadcastsFalse" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $serviceInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $serviceInstallValidation -Name "noSecrets" -Default $false) -eq $true)
+$systemdServiceInstallReady = (Test-AllRepoFilesExist -Paths $systemdServiceInstallFiles) `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:service:install:systemd") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:service:install:systemd:validate") `
+    -and ($systemdServiceInstallValidationStatus -eq "passed") `
+    -and ($systemdServiceInstallFailedChecks.Count -eq 0) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installScriptExists" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installPackageScriptPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installPlanValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installPlanCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installPlanUsesRenderedUnits" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "liveServiceUsesLiveProfile" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "supervisorUsesAutorecoveryLoop" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "leastPrivilegeHardeningPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallValidation -Name "hostMutationPerformed" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallValidation -Name "noSecrets" -Default $false) -eq $true)
 $operatorPackage = $reports.operatorPackage
 $operatorPackageStatus = Get-ArchitectureStatus -Report $operatorPackage
 $operatorPackageChecks = Get-ArchitectureProp -Object $operatorPackage -Name "checks"
@@ -455,6 +483,13 @@ Add-ArchitectureItem -Items $items -Id "service-install-boundary" -Layer "Operat
     -Evidence "installValidation=$serviceInstallValidationStatus, failedChecks=$($serviceInstallFailedChecks.Count), planDidNotMutate=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "planDidNotMutate"), statusCommand=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "statusCommandPassed"), statusDidNotMutate=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "statusDidNotMutate"), uninstallNoop=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "uninstallAbsentDidNotCreateTask"), liveProfileDefault=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "liveProfileDefault"), relayerDefaultOff=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "noBridgeRelayerDefault"), relayerOptIn=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInStartsLoop"), schedulerCmdlets=$(Get-ArchitectureProp -Object $serviceInstallChecks -Name "schedulerCmdletsAvailable")" `
     -Files $serviceInstallFiles `
     -Commands @("npm run flowchain:service:install:validate", "npm run flowchain:service:install:windows -- -Action Plan", "npm run flowchain:service:install:windows -- -Action Install", "npm run flowchain:service:install:windows -- -Action Status", "npm run flowchain:service:install:windows -- -Action Uninstall")
+
+Add-ArchitectureItem -Items $items -Id "systemd-service-install-boundary" -Layer "Operations" `
+    -Requirement "Owner-host Linux/VPS service lifecycle includes a real no-secret systemd plan/install/status/uninstall path for reboot-persistent live supervisor autorecovery from rendered units." `
+    -Status $(if ($systemdServiceInstallReady) { "passed" } else { "failed" }) `
+    -Evidence "systemdInstallValidation=$systemdServiceInstallValidationStatus, failedChecks=$($systemdServiceInstallFailedChecks.Count), installScript=$(Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installScriptExists"), plan=$(Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installPlanValidationPassed"), planDidNotMutate=$(Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installPlanDidNotMutate"), renderedUnits=$(Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installPlanUsesRenderedUnits"), supervisor=$(Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "supervisorUsesAutorecoveryLoop"), hardening=$(Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "leastPrivilegeHardeningPresent")" `
+    -Files $systemdServiceInstallFiles `
+    -Commands @("npm run flowchain:service:install:systemd:validate", "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>", "npm run flowchain:service:install:systemd -- -Action Install -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>", "npm run flowchain:service:install:systemd -- -Action Status", "npm run flowchain:service:install:systemd -- -Action Uninstall")
 
 Add-ArchitectureItem -Items $items -Id "node-operator-package-boundary" -Layer "Operations" `
     -Requirement "Node operator packaging collects no-secret runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates." `

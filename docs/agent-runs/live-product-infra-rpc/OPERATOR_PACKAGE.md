@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Package
 
-Generated: 2026-05-19T03:04:52.3568036Z
+Generated: 2026-05-19T10:05:00.1350372Z
 Status: passed
 
 ## Package
@@ -62,5 +62,5 @@ Status: passed
 - `npm run flowchain:service:supervisor:validate`
 - `npm run flowchain:service:install:windows -- -Action Plan`
 - `npm run flowchain:service:install:validate`
+- `npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>`
 - `npm run flowchain:service:install:systemd:validate`
-- `npm run flowchain:second-computer:readiness`

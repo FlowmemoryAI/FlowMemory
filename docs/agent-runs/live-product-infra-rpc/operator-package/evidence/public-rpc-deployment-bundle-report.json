@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_bundle_report.v3",
-    "generatedAt":  "2026-05-18T06:51:17.2713954Z",
+    "generatedAt":  "2026-05-19T09:40:25.5874742Z",
     "status":  "passed",
     "bundleDir":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle",
     "flowChainRpcIsRepoOwned":  true,
@@ -44,6 +44,7 @@
                              "npm run flowchain:service:restart -- -LiveProfile",
                              "npm run flowchain:service:supervisor -- -Once",
                              "npm run flowchain:service:supervisor:validate",
+                             "npm run flowchain:service:install:systemd:validate",
                              "npm run flowchain:service:status",
                              "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
                              "npm run flowchain:ops:snapshot -- -AllowBlocked",
@@ -58,6 +59,7 @@
                                 "powershell -NoProfile -ExecutionPolicy Bypass -File render-public-rpc-bundle.template.ps1 -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -OwnerEnvFile \u003cFLOWCHAIN_OWNER_ENV_FILE\u003e -RepoRoot \u003cFLOWCHAIN_REPO_ABSOLUTE_PATH\u003e -ServiceUser \u003cFLOWCHAIN_SERVICE_USER\u003e -ServiceGroup \u003cFLOWCHAIN_SERVICE_GROUP\u003e -TlsCertificatePath \u003cPATH_TO_TLS_CERTIFICATE\u003e -TlsCertificateKeyPath \u003cPATH_TO_TLS_CERTIFICATE_KEY\u003e -NginxExe \u003cFLOWCHAIN_NGINX_EXE\u003e"
                             ],
     "ownerPreflightCommands":  [
+                                   "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
                                    "systemd-analyze verify \u003cFLOWCHAIN_SYSTEMD_RENDERED_UNIT\u003e",
                                    "systemd-analyze verify \u003cFLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT\u003e",
                                    "nginx -t",

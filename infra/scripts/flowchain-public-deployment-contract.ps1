@@ -47,6 +47,7 @@ $paths = [ordered]@{
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     serviceSupervisorValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
     serviceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
+    systemdServiceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
     alertInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
@@ -324,6 +325,7 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90",
     "npm run flowchain:service:supervisor:validate",
     "npm run flowchain:service:install:validate",
+    "npm run flowchain:service:install:systemd:validate",
     "npm run flowchain:ops:snapshot -- -AllowBlocked",
     "npm run flowchain:ops:alerts -- -AllowBlocked",
     "npm run flowchain:ops:alerts:install:validate",
@@ -356,6 +358,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-monitor" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-monitor.ps1"), "-DurationSeconds", "20", "-PollSeconds", "5", "-MaxStateAgeSeconds", "90", "-ReportPath", $paths.serviceMonitor)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-supervisor-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-supervisor-validation.ps1"), "-ReportPath", $paths.serviceSupervisorValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-install-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-install-validation.ps1"), "-ReportPath", $paths.serviceInstallValidation)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "systemd-service-install-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-install-systemd-validation.ps1"), "-ReportPath", $paths.systemdServiceInstallValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "ops-snapshot" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-snapshot.ps1"), "-AllowBlocked", "-NoRefresh", "-ReportPath", $paths.opsSnapshot)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "ops-alert-rules" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-alerts.ps1"), "-AllowBlocked", "-NoRefresh", "-ReportPath", $paths.opsAlertRules)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "alert-install-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-alert-install-validation.ps1"), "-ReportPath", $paths.alertInstallValidation)
@@ -689,6 +692,40 @@ Add-DeploymentItem -Items $items -Id "service-install-automation" `
     -Status $(if ($serviceInstallReady) { "passed" } else { "failed" }) `
     -Evidence "serviceInstallValidation=$serviceInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "planDidNotMutate"), statusCommand=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "statusCommandPassed"), statusDidNotMutate=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "statusDidNotMutate"), uninstallNoop=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "uninstallAbsentDidNotCreateTask"), liveProfileDefault=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "liveProfileDefault"), relayerDefaultOff=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "noBridgeRelayerDefault"), relayerOptIn=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInStartsLoop"), commandsPresent=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "commandsPresent")" `
     -Commands @("npm run flowchain:service:install:validate", "npm run flowchain:service:install:windows -- -Action Plan", "npm run flowchain:service:install:windows -- -Action Install", "npm run flowchain:service:install:windows -- -Action Status", "npm run flowchain:service:install:windows -- -Action Uninstall")
+
+$systemdInstallValidation = $reports.systemdServiceInstallValidation
+$systemdInstallValidationStatus = Get-DeploymentStatus -Report $systemdInstallValidation
+$systemdInstallChecks = Get-DeploymentProp -Object $systemdInstallValidation -Name "checks"
+$systemdInstallReady = ($systemdInstallValidationStatus -eq "passed") `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installScriptExists" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPackageScriptPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "validationPackageScriptPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanUsesRenderedUnits" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "liveServiceUsesLiveProfile" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "liveServiceStopPreservesState" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "liveServiceRestartOnFailure" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "supervisorUsesAutorecoveryLoop" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "supervisorRestartAlways" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerDefaultOff" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "ownerEnvFileUsed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "leastPrivilegeHardeningPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "writePathsScoped" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanReportNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanReportEnvValuesPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanReportBroadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $systemdInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:service:install:systemd") `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:service:install:systemd:validate")
+Add-DeploymentItem -Items $items -Id "systemd-service-install-automation" `
+    -Requirement "The owner Linux/VPS host has a real no-secret systemd plan/install/status/uninstall path for rendered live-service and supervisor units, validated through a read-only rendered-unit plan drill." `
+    -Status $(if ($systemdInstallReady) { "passed" } else { "failed" }) `
+    -Evidence "systemdInstallValidation=$systemdInstallValidationStatus, installScript=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "installScriptExists"), plan=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanValidationPassed"), planDidNotMutate=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanDidNotMutate"), renderedUnits=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanUsesRenderedUnits"), liveProfile=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "liveServiceUsesLiveProfile"), supervisor=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "supervisorUsesAutorecoveryLoop"), hardening=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "leastPrivilegeHardeningPresent")" `
+    -Commands @("npm run flowchain:service:install:systemd:validate", "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>", "npm run flowchain:service:install:systemd -- -Action Install -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>", "npm run flowchain:service:install:systemd -- -Action Status", "npm run flowchain:service:install:systemd -- -Action Uninstall")
 
 $opsSnapshot = $reports.opsSnapshot
 $opsSnapshotStatus = Get-DeploymentStatus -Report $opsSnapshot
@@ -1125,6 +1162,8 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
         "npm run flowchain:service:install:validate",
         "npm run flowchain:service:install:windows -- -Action Plan",
+        "npm run flowchain:service:install:systemd:validate",
+        "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>",
         "npm run flowchain:ops:snapshot -- -AllowBlocked",
         "npm run flowchain:ops:alerts -- -AllowBlocked",
         "npm run flowchain:ops:alerts:install:validate",
@@ -1157,6 +1196,8 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:service:status",
         "npm run flowchain:service:install:windows -- -Action Status",
         "npm run flowchain:service:install:windows -- -Action Uninstall",
+        "npm run flowchain:service:install:systemd -- -Action Status",
+        "npm run flowchain:service:install:systemd -- -Action Uninstall",
         "npm run flowchain:backup:install:windows -- -Action Status",
         "npm run flowchain:backup:install:windows -- -Action Uninstall",
         "npm run flowchain:ops:alerts:install:windows -- -Action Status",

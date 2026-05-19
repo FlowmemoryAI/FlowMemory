@@ -1,15 +1,41 @@
 {
     "schema":  "flowchain.systemd_service_install_validation_report.v0",
-    "generatedAt":  "2026-05-18T05:14:07.5290463Z",
+    "generatedAt":  "2026-05-19T09:40:25.5134722Z",
     "status":  "passed",
     "bundleDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle",
     "paths":  {
+                  "installScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-service-install-systemd.ps1",
                   "liveServiceTemplate":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle\\flowchain-live.service.template",
                   "supervisorTemplate":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle\\flowchain-supervisor.service.template",
                   "renderScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle\\render-public-rpc-bundle.template.ps1",
                   "verifyRunbook":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle\\VERIFY.md",
                   "rollbackRunbook":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle\\ROLLBACK.md"
               },
+    "installPlanValidation":  {
+                                  "schema":  "flowchain.systemd_install_plan_validation.v0",
+                                  "status":  "passed",
+                                  "renderExitCode":  0,
+                                  "planExitCode":  0,
+                                  "planReportStatus":  "passed",
+                                  "problem":  "",
+                                  "checks":  {
+                                                 "renderCommandPassed":  true,
+                                                 "planCommandPassed":  true,
+                                                 "planReportPassed":  true,
+                                                 "planUsesRenderedUnits":  true,
+                                                 "planRenderDirProvided":  true,
+                                                 "planDidNotMutate":  true,
+                                                 "planActionReadOnly":  true,
+                                                 "planCommandPlanPresent":  true,
+                                                 "planNoSecrets":  true,
+                                                 "planEnvValuesPrintedFalse":  true,
+                                                 "planBroadcastsFalse":  true,
+                                                 "cleanupAttempted":  true
+                                             },
+                                  "envValuesPrinted":  false,
+                                  "noSecrets":  true,
+                                  "broadcasts":  false
+                              },
     "installCommands":  [
                             "sudo install -o root -g root -m 0644 \u003cFLOWCHAIN_RENDER_DIR\u003e/flowchain-live.service /etc/systemd/system/flowchain-live.service",
                             "sudo install -o root -g root -m 0644 \u003cFLOWCHAIN_RENDER_DIR\u003e/flowchain-supervisor.service /etc/systemd/system/flowchain-supervisor.service",
@@ -31,6 +57,8 @@
                               "sudo systemctl daemon-reload"
                           ],
     "checks":  {
+                   "installScriptExists":  true,
+                   "installPackageScriptPresent":  true,
                    "validationPackageScriptPresent":  true,
                    "publicRpcBundleExists":  true,
                    "liveServiceTemplateExists":  true,
@@ -56,6 +84,13 @@
                    "renderScriptRendersSystemdUnits":  true,
                    "verifyRunbookMentionsSystemdVerify":  true,
                    "rollbackRunbookMentionsSystemctl":  true,
+                   "installPlanValidationPassed":  true,
+                   "installPlanCommandPassed":  true,
+                   "installPlanDidNotMutate":  true,
+                   "installPlanUsesRenderedUnits":  true,
+                   "installPlanReportNoSecrets":  true,
+                   "installPlanReportEnvValuesPrintedFalse":  true,
+                   "installPlanReportBroadcastsFalse":  true,
                    "installCommandsPresent":  true,
                    "statusCommandsPresent":  true,
                    "uninstallCommandsPresent":  true,

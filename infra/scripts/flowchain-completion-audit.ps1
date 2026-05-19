@@ -29,6 +29,7 @@ $paths = [ordered]@{
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     serviceSupervisorValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
     serviceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
+    systemdServiceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"
     liveProduct = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json"
     liveInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-infra-check-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
@@ -340,6 +341,9 @@ $serviceSupervisorValidationExitCode = $serviceSupervisorValidationResult.exitCo
 $serviceInstallValidationResult = Invoke-AuditChild -Path $paths.serviceInstallValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-install-validation.ps1"))
 $serviceInstallValidationOutput = @($serviceInstallValidationResult.output)
 $serviceInstallValidationExitCode = $serviceInstallValidationResult.exitCode
+$systemdServiceInstallValidationResult = Invoke-AuditChild -Path $paths.systemdServiceInstallValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-install-systemd-validation.ps1"))
+$systemdServiceInstallValidationOutput = @($systemdServiceInstallValidationResult.output)
+$systemdServiceInstallValidationExitCode = $systemdServiceInstallValidationResult.exitCode
 $liveWalletResult = Invoke-AuditChild -Path $paths.liveWallet -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-service-wallet-e2e.ps1"))
 $liveWalletOutput = @($liveWalletResult.output)
 $liveWalletExitCode = $liveWalletResult.exitCode
@@ -711,6 +715,54 @@ $serviceInstallValidationPassed = $serviceInstallValidationExitCode -eq 0 `
     -and ((Get-AuditProp -Object $serviceInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $serviceInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $serviceInstallValidation -Name "broadcasts" -Default $true) -eq $false)
+$systemdServiceInstallValidation = $reports.systemdServiceInstallValidation
+$systemdServiceInstallValidationStatus = Get-ReportStatus -Report $systemdServiceInstallValidation
+$systemdServiceInstallChecks = Get-AuditProp -Object $systemdServiceInstallValidation -Name "checks"
+$systemdServiceInstallFailedChecks = @((Get-AuditProp -Object $systemdServiceInstallValidation -Name "failedChecks" -Default @()))
+$systemdServiceInstallSecretFindings = @((Get-AuditProp -Object $systemdServiceInstallValidation -Name "secretMarkerFindings" -Default @()))
+$systemdServiceInstallRequiredChecks = @(
+    "installScriptExists",
+    "installPackageScriptPresent",
+    "validationPackageScriptPresent",
+    "publicRpcBundleExists",
+    "liveServiceTemplateExists",
+    "supervisorTemplateExists",
+    "renderScriptExists",
+    "liveServiceUsesLiveProfile",
+    "liveServiceStopPreservesState",
+    "liveServiceRestartOnFailure",
+    "supervisorUsesAutorecoveryLoop",
+    "supervisorRestartAlways",
+    "bridgeRelayerDefaultOff",
+    "ownerEnvFileUsed",
+    "leastPrivilegeHardeningPresent",
+    "writePathsScoped",
+    "installPlanValidationPassed",
+    "installPlanCommandPassed",
+    "installPlanDidNotMutate",
+    "installPlanUsesRenderedUnits",
+    "installPlanReportNoSecrets",
+    "installPlanReportEnvValuesPrintedFalse",
+    "installPlanReportBroadcastsFalse",
+    "hostMutationPerformedFalse",
+    "envValuesPrintedFalse",
+    "secretMarkerFindingsEmpty",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$systemdServiceInstallMissingChecks = @(Get-MissingAuditChecks -Checks $systemdServiceInstallChecks -Names $systemdServiceInstallRequiredChecks)
+$systemdServiceInstallFailedCheckCount = $systemdServiceInstallFailedChecks.Count
+$systemdServiceInstallSecretFindingCount = $systemdServiceInstallSecretFindings.Count
+$systemdServiceInstallMissingCheckCount = $systemdServiceInstallMissingChecks.Count
+$systemdServiceInstallValidationPassed = $systemdServiceInstallValidationExitCode -eq 0 `
+    -and $systemdServiceInstallValidationStatus -eq "passed" `
+    -and $systemdServiceInstallFailedCheckCount -eq 0 `
+    -and $systemdServiceInstallSecretFindingCount -eq 0 `
+    -and $systemdServiceInstallMissingCheckCount -eq 0 `
+    -and ((Get-AuditProp -Object $systemdServiceInstallValidation -Name "hostMutationPerformed" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $systemdServiceInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $systemdServiceInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $systemdServiceInstallValidation -Name "broadcasts" -Default $true) -eq $false)
 $liveProduct = $reports.liveProduct
 $externalTester = $reports.externalTester
 $testerNetwork = $reports.testerNetwork
@@ -2143,6 +2195,12 @@ Add-AuditItem -Items $items -Id "service-install-validation" `
     -Evidence "serviceInstall=$serviceInstallValidationStatus, failedChecks=$serviceInstallFailedCheckCount, missingChecks=$serviceInstallMissingCheckCount, secretFindings=$serviceInstallSecretFindingCount, missingScripts=$($serviceInstallMissingPackageScripts.Count), planDidNotMutate=$(Get-AuditProp -Object $serviceInstallChecks -Name "planDidNotMutate" -Default $false), statusDidNotMutate=$(Get-AuditProp -Object $serviceInstallChecks -Name "statusDidNotMutate" -Default $false), relayerOptIn=$(Get-AuditProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInStartsLoop" -Default $false), report=$($paths.serviceInstallValidation)" `
     -Commands @("npm run flowchain:service:install:validate", "npm run flowchain:service:install:windows -- -Action Plan")
 
+Add-AuditItem -Items $items -Id "systemd-service-install-validation" `
+    -Requirement "Owner-host Linux/VPS service install validation proves a real no-secret systemd plan/install/status/uninstall script can plan from rendered live-service and supervisor units without mutating the host." `
+    -Status $(if ($systemdServiceInstallValidationPassed) { "passed" } else { "failed" }) `
+    -Evidence "systemdInstall=$systemdServiceInstallValidationStatus, failedChecks=$systemdServiceInstallFailedCheckCount, missingChecks=$systemdServiceInstallMissingCheckCount, secretFindings=$systemdServiceInstallSecretFindingCount, installScript=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "installScriptExists" -Default $false), plan=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "installPlanValidationPassed" -Default $false), planDidNotMutate=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "installPlanDidNotMutate" -Default $false), renderedUnits=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "installPlanUsesRenderedUnits" -Default $false), report=$($paths.systemdServiceInstallValidation)" `
+    -Commands @("npm run flowchain:service:install:systemd:validate", "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>")
+
 Add-AuditItem -Items $items -Id "wallet-create" `
     -Requirement "People can create wallets through the RPC service without receiving secret material." `
     -Status $(if ($testerNetworkPassed -and $testerWalletCreatesCount -ge 4) { "passed" } else { "failed" }) `
@@ -2487,6 +2545,8 @@ $report = [ordered]@{
     serviceSupervisorValidationOutputRedacted = @($serviceSupervisorValidationOutput | ForEach-Object { "$_" })
     serviceInstallValidationExitCode = $serviceInstallValidationExitCode
     serviceInstallValidationOutputRedacted = @($serviceInstallValidationOutput | ForEach-Object { "$_" })
+    systemdServiceInstallValidationExitCode = $systemdServiceInstallValidationExitCode
+    systemdServiceInstallValidationOutputRedacted = @($systemdServiceInstallValidationOutput | ForEach-Object { "$_" })
     liveWalletExitCode = $liveWalletExitCode
     liveWalletOutputRedacted = @($liveWalletOutput | ForEach-Object { "$_" })
     testerNetworkExitCode = $testerNetworkExitCode
@@ -2599,6 +2659,8 @@ $report = [ordered]@{
         serviceSupervisorValidationPassed = $serviceSupervisorValidationPassed
         serviceInstallValidationStatus = $serviceInstallValidationStatus
         serviceInstallValidationPassed = $serviceInstallValidationPassed
+        systemdServiceInstallValidationStatus = $systemdServiceInstallValidationStatus
+        systemdServiceInstallValidationPassed = $systemdServiceInstallValidationPassed
         bridgeDeployControlValidationStatus = $bridgeDeployControlValidationStatus
         bridgeDeployControlValidationPassed = $bridgeDeployControlValidationPassed
         bridgeRelayerGuardrailValidationStatus = $bridgeRelayerGuardrailValidationStatus

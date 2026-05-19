@@ -11,6 +11,7 @@ Run these on the owner host after DNS, TLS, allowed origins, rate limit, and bac
 - npm run flowchain:service:restart -- -LiveProfile
 - npm run flowchain:service:supervisor -- -Once
 - npm run flowchain:service:supervisor:validate
+- npm run flowchain:service:install:systemd:validate
 - npm run flowchain:service:status
 - npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30
 - npm run flowchain:ops:snapshot -- -AllowBlocked
@@ -23,6 +24,7 @@ Run these on the owner host after DNS, TLS, allowed origins, rate limit, and bac
 
 ## Owner-Host Preflight Checks
 
+- npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>
 - systemd-analyze verify <FLOWCHAIN_SYSTEMD_RENDERED_UNIT>
 - systemd-analyze verify <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>
 - nginx -t
