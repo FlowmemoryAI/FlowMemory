@@ -2,6 +2,7 @@ param(
     [string] $StatePath = "devnet/local/state.json",
     [string] $BackupRoot = "",
     [string] $ReportPath = "docs/agent-runs/live-product-infra-rpc/state-backup-report.json",
+    [int] $RetentionCount = 14,
     [int] $MaxAttempts = 5,
     [switch] $CreateBackupRoot,
     [switch] $AllowBlocked
@@ -24,6 +25,137 @@ function Get-StateBackupFileSha256 {
         return $null
     }
     return ((Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash).ToLowerInvariant()
+}
+
+function Test-StateBackupPathInside {
+    param(
+        [Parameter(Mandatory = $true)][string] $Root,
+        [Parameter(Mandatory = $true)][string] $Path
+    )
+
+    $fullRoot = [System.IO.Path]::GetFullPath($Root).TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+    $fullPath = [System.IO.Path]::GetFullPath($Path)
+    $prefix = $fullRoot + [System.IO.Path]::DirectorySeparatorChar
+    return $fullPath -eq $fullRoot -or $fullPath.StartsWith($prefix, [System.StringComparison]::OrdinalIgnoreCase)
+}
+
+function Get-StateBackupSortTicks {
+    param(
+        [AllowNull()][object] $Manifest,
+        [AllowNull()][string] $SnapshotName
+    )
+
+    $generatedAt = Get-FlowChainJsonString -Object $Manifest -Names @("generatedAt")
+    if (-not [string]::IsNullOrWhiteSpace($generatedAt)) {
+        try {
+            return ([DateTimeOffset]::Parse($generatedAt, [System.Globalization.CultureInfo]::InvariantCulture)).UtcTicks
+        }
+        catch {
+        }
+    }
+
+    if ($SnapshotName -match '^flowchain-state-snapshot-(\d{8}T\d{9}Z)$') {
+        try {
+            return ([DateTimeOffset]::ParseExact($Matches[1], "yyyyMMddTHHmmssfffZ", [System.Globalization.CultureInfo]::InvariantCulture, [System.Globalization.DateTimeStyles]::AssumeUniversal)).UtcTicks
+        }
+        catch {
+        }
+    }
+
+    return 0
+}
+
+function Get-StateBackupSnapshotInfos {
+    param([Parameter(Mandatory = $true)][string] $BackupFullRoot)
+
+    $infos = New-Object System.Collections.ArrayList
+    foreach ($directory in @(Get-ChildItem -LiteralPath $BackupFullRoot -Directory -ErrorAction SilentlyContinue)) {
+        if ($directory.Name -notmatch '^flowchain-state-snapshot-\d{8}T\d{9}Z$') {
+            continue
+        }
+
+        $manifestPath = Join-Path $directory.FullName "manifest.json"
+        $manifest = Read-FlowChainJsonIfExists -Path $manifestPath
+        $snapshotName = Get-FlowChainJsonString -Object $manifest -Names @("snapshotName")
+        $schema = Get-FlowChainJsonString -Object $manifest -Names @("schema")
+        if ($null -eq $manifest -or $schema -ne "flowchain.state_backup_manifest.v1" -or $snapshotName -ne $directory.Name) {
+            continue
+        }
+
+        [void] $infos.Add([ordered]@{
+            snapshotName = $snapshotName
+            path = $directory.FullName
+            manifestPath = $manifestPath
+            sortTicks = Get-StateBackupSortTicks -Manifest $manifest -SnapshotName $snapshotName
+        })
+    }
+
+    return @($infos | Sort-Object @{ Expression = { $_.sortTicks }; Descending = $true }, @{ Expression = { $_.snapshotName }; Descending = $true })
+}
+
+function Invoke-StateBackupRetention {
+    param(
+        [Parameter(Mandatory = $true)][string] $BackupFullRoot,
+        [Parameter(Mandatory = $true)][int] $RetentionCount,
+        [AllowNull()][string] $CurrentSnapshotName
+    )
+
+    $result = [ordered]@{
+        enabled = $RetentionCount -gt 0
+        retentionCount = $RetentionCount
+        candidateCount = 0
+        retainedSnapshotNames = @()
+        prunedSnapshotNames = @()
+        pruneErrors = @()
+        currentSnapshotProtected = $false
+        latestManifestPreserved = Test-Path -LiteralPath (Join-Path $BackupFullRoot "latest-manifest.json")
+    }
+
+    if ($RetentionCount -lt 1) {
+        return $result
+    }
+
+    $snapshotInfos = @(Get-StateBackupSnapshotInfos -BackupFullRoot $BackupFullRoot)
+    $result.candidateCount = $snapshotInfos.Count
+    $retainedInfos = @($snapshotInfos | Select-Object -First $RetentionCount)
+    $pruneInfos = @($snapshotInfos | Select-Object -Skip $RetentionCount)
+    $result.retainedSnapshotNames = @($retainedInfos | ForEach-Object { $_.snapshotName })
+    $result.currentSnapshotProtected = -not [string]::IsNullOrWhiteSpace($CurrentSnapshotName) -and @($retainedInfos | Where-Object { $_.snapshotName -eq $CurrentSnapshotName }).Count -gt 0
+
+    $pruned = New-Object System.Collections.ArrayList
+    $errors = New-Object System.Collections.ArrayList
+    foreach ($info in $pruneInfos) {
+        if (-not (Test-StateBackupPathInside -Root $BackupFullRoot -Path $info.path)) {
+            [void] $errors.Add([ordered]@{
+                snapshotName = $info.snapshotName
+                reason = "snapshot path resolved outside backup root"
+            })
+            continue
+        }
+        if ($info.snapshotName -eq $CurrentSnapshotName) {
+            [void] $errors.Add([ordered]@{
+                snapshotName = $info.snapshotName
+                reason = "current snapshot was selected for pruning"
+            })
+            continue
+        }
+
+        try {
+            Remove-Item -LiteralPath $info.path -Recurse -Force -ErrorAction Stop
+            [void] $pruned.Add($info.snapshotName)
+        }
+        catch {
+            [void] $errors.Add([ordered]@{
+                snapshotName = $info.snapshotName
+                reason = "snapshot prune failed"
+            })
+        }
+    }
+
+    $result.prunedSnapshotNames = @($pruned)
+    $result.pruneErrors = @($errors)
+    $result.latestManifestPreserved = Test-Path -LiteralPath (Join-Path $BackupFullRoot "latest-manifest.json")
+    return $result
 }
 
 function Convert-StateBackupManifestCanonical {
@@ -74,6 +206,9 @@ if ([string]::IsNullOrWhiteSpace($BackupRoot)) {
 
 $problems = New-Object System.Collections.ArrayList
 $missingEnv = New-Object System.Collections.ArrayList
+if ($RetentionCount -lt 1) {
+    Add-FlowChainReadinessProblem -Problems $problems -Name "RetentionCount" -Reason "backup retention count must be at least 1" -Kind "failed" -Category "config"
+}
 if ([string]::IsNullOrWhiteSpace($BackupRoot)) {
     [void] $missingEnv.Add("FLOWCHAIN_RPC_STATE_BACKUP_PATH")
     Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_STATE_BACKUP_PATH" -Reason "missing required backup root for state snapshot"
@@ -102,6 +237,16 @@ $snapshot = [ordered]@{
     latestHash = $null
     latestRoot = $null
     finalizedHeight = $null
+}
+$retention = [ordered]@{
+    enabled = $RetentionCount -gt 0
+    retentionCount = $RetentionCount
+    candidateCount = 0
+    retainedSnapshotNames = @()
+    prunedSnapshotNames = @()
+    pruneErrors = @()
+    currentSnapshotProtected = $false
+    latestManifestPreserved = $false
 }
 
 if ($problems.Count -eq 0) {
@@ -229,6 +374,19 @@ if ($problems.Count -eq 0) {
             elseif (-not $snapshot.latestPointerMatchesSnapshotManifest) {
                 Add-FlowChainReadinessProblem -Problems $problems -Name "latest-manifest.json" -Reason "latest backup pointer does not match the snapshot manifest" -Kind "failed" -Category "artifact"
             }
+
+            if ($snapshot.created) {
+                $retention = Invoke-StateBackupRetention -BackupFullRoot $backupFullRoot -RetentionCount $RetentionCount -CurrentSnapshotName ([string] $snapshot.snapshotName)
+                if (@($retention.pruneErrors).Count -gt 0) {
+                    Add-FlowChainReadinessProblem -Problems $problems -Name "state-backup-retention" -Reason "backup retention prune failed" -Kind "failed" -Category "artifact"
+                }
+                if (-not $retention.currentSnapshotProtected) {
+                    Add-FlowChainReadinessProblem -Problems $problems -Name "state-backup-retention" -Reason "backup retention did not protect the newly created snapshot" -Kind "failed" -Category "artifact"
+                }
+                if (-not $retention.latestManifestPreserved) {
+                    Add-FlowChainReadinessProblem -Problems $problems -Name "latest-manifest.json" -Reason "backup retention removed the latest manifest pointer" -Kind "failed" -Category "artifact"
+                }
+            }
         }
     }
     catch {
@@ -248,6 +406,7 @@ $report = [ordered]@{
     backupRootConfigured = -not [string]::IsNullOrWhiteSpace($BackupRoot)
     backupRootValuePrinted = $false
     snapshot = $snapshot
+    retention = $retention
     problems = @($problems)
     broadcasts = $false
     envValuesPrinted = $false

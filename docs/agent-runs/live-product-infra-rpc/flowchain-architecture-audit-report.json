@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-18T14:35:32.2472381Z",
+    "generatedAt":  "2026-05-19T02:39:01.1703227Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -29,7 +29,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=72709, finalizedHeight=72709",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=75369, finalizedHeight=75369",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -67,7 +67,7 @@
                       "layer":  "Operations",
                       "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=16, alertCoveredFindings=18, alertInstall=passed, alertInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=10, blockedRules=6, unmappedAlerts=0, incidentDrill=passed, incidentCases=11, incidentFailed=0",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=18, alertCoveredFindings=20, alertInstall=passed, alertInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=11, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=11, incidentFailed=0",
                       "files":  [
                                     "infra/scripts/flowchain-service-monitor.ps1",
                                     "infra/scripts/flowchain-service-supervisor.ps1",
@@ -341,9 +341,9 @@
                   {
                       "id":  "state-backup-boundary",
                       "layer":  "Storage/recovery",
-                      "requirement":  "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, owner-path dry-run proof, scheduled backup install proof, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation.",
+                      "requirement":  "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, owner-path dry-run proof, scheduled backup and restore-drill install proof, retention rotation, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation.",
                       "status":  "blocked",
-                      "evidence":  "backupStatus=blocked, validationStatus=passed, ownerPathDryRun=passed, ownerPathFailedChecks=0, installValidation=passed, installFailedChecks=0, snapshotProof=not-run, restoreProof=not-run, requiredChecks=15, missingChecks=0",
+                      "evidence":  "backupStatus=blocked, validationStatus=passed, ownerPathDryRun=passed, ownerPathFailedChecks=0, installValidation=passed, installFailedChecks=0, snapshotProof=not-run, restoreProof=not-run, requiredChecks=23, missingChecks=0",
                       "files":  [
                                     "infra/scripts/flowchain-public-rpc-backup-readiness.ps1",
                                     "infra/scripts/flowchain-state-backup.ps1",
@@ -969,10 +969,10 @@
                                      },
     "opsAlertCoverage":  {
                              "status":  "passed",
-                             "ruleCount":  16,
-                             "criticalRuleCount":  10,
-                             "blockedRuleCount":  6,
-                             "coveredFindingCount":  18,
+                             "ruleCount":  18,
+                             "criticalRuleCount":  11,
+                             "blockedRuleCount":  7,
+                             "coveredFindingCount":  20,
                              "unmappedCurrentFindingCount":  0
                          },
     "bridgeRelayerSafetyEvidence":  {

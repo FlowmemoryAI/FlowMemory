@@ -856,7 +856,15 @@ $backupRestoreValidationRequiredChecks = @(
     "missingStateArtifactDetected",
     "missingSnapshotManifestDetected",
     "latestPointerTamperDetected",
-    "wrongChainStateMismatchDetected"
+    "wrongChainStateMismatchDetected",
+    "retentionBackupCommandPassed",
+    "retentionPrunedOldestSnapshot",
+    "retentionRetainedNewestSnapshots",
+    "retentionLatestManifestMatchesNewest",
+    "retentionReportShowsPrunedSnapshot",
+    "retentionReportProtectsCurrentSnapshot",
+    "retentionRestoreCommandPassed",
+    "retentionRestoreUsedNewestSnapshot"
 )
 $backupRestoreValidationMissingChecks = @($backupRestoreValidationRequiredChecks | Where-Object {
     (Get-DeploymentProp -Object $backupRestoreValidationChecks -Name $_ -Default $false) -ne $true
@@ -866,7 +874,7 @@ $backupRestoreValidationPassed = $backupRestoreValidationStatus -eq "passed" `
     -and ((Get-DeploymentProp -Object $backupRestoreValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $backupRestoreValidation -Name "noSecrets" -Default $false) -eq $true)
 Add-DeploymentItem -Items $items -Id "state-backup-restore-validation" `
-    -Requirement "Backup tooling must create manifest-backed state snapshots, restore the latest snapshot safely, reject tampered/missing/stale/wrong-chain backup evidence, and avoid owner secrets." `
+    -Requirement "Backup tooling must create manifest-backed state snapshots, rotate retained snapshots safely, restore the latest retained snapshot, reject tampered/missing/stale/wrong-chain backup evidence, and avoid owner secrets." `
     -Status $(if ($backupRestoreValidationPassed) { "passed" } else { "failed" }) `
     -Evidence "validationStatus=$backupRestoreValidationStatus, requiredChecks=$($backupRestoreValidationRequiredChecks.Count), missingChecks=$($backupRestoreValidationMissingChecks.Count)" `
     -Commands @("npm run flowchain:backup:restore:validate")
@@ -881,6 +889,9 @@ $backupOwnerPathDryRunReady = ($backupOwnerPathDryRunStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "readinessStatusPassed" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "snapshotProofPassed" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "restoreProofPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "retentionCurrentSnapshotProtected" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "retentionPruneErrorsEmpty" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "backupRetentionProtectedSnapshot" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "restoreLiveStateProtected" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "restoreDidNotMutateLiveState" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "ownerBackupEnvRestored" -Default $false) -eq $true) `
@@ -889,9 +900,9 @@ $backupOwnerPathDryRunReady = ($backupOwnerPathDryRunStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $backupOwnerPathDryRun -Name "broadcasts" -Default $true) -eq $false) `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:backup:owner-path:dry-run")
 Add-DeploymentItem -Items $items -Id "state-backup-owner-path-dry-run" `
-    -Requirement "Backup readiness has an owner-path dry run that injects an ignored local backup path into the production backup gate and proves snapshot plus restore evidence without using the owner's real directory." `
+    -Requirement "Backup readiness has an owner-path dry run that injects an ignored local backup path into the production backup gate and proves snapshot, retention, and restore evidence without using the owner's real directory." `
     -Status $(if ($backupOwnerPathDryRunReady) { "passed" } else { "failed" }) `
-    -Evidence "dryRun=$backupOwnerPathDryRunStatus, failedChecks=$($backupOwnerPathDryRunFailedChecks.Count), readiness=$(Get-DeploymentProp -Object $backupOwnerPathDryRun -Name "childReadinessStatus"), snapshotProof=$(Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "snapshotProofPassed"), restoreProof=$(Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "restoreProofPassed")" `
+    -Evidence "dryRun=$backupOwnerPathDryRunStatus, failedChecks=$($backupOwnerPathDryRunFailedChecks.Count), readiness=$(Get-DeploymentProp -Object $backupOwnerPathDryRun -Name "childReadinessStatus"), snapshotProof=$(Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "snapshotProofPassed"), retention=$(Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "retentionCurrentSnapshotProtected"), restoreProof=$(Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "restoreProofPassed")" `
     -Commands @("npm run flowchain:backup:owner-path:dry-run")
 
 $backupInstallValidation = $reports.backupInstallValidation
@@ -903,8 +914,16 @@ $backupInstallReady = ($backupInstallValidationStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "schedulerCmdletsAvailable" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "scheduledTaskActionSupportsWorkingDirectory" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "taskNamesDistinct" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "retentionCountValid" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "actionUsesBackupScript" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "actionUsesRetentionCount" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "restoreDrillUsesRestoreScript" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "restoreDrillHasRestoreRoot" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "restoreDrillHasStatePath" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "restoreDrillHasReportPath" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "ownerBackupEnvRequired" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "restoreDrillOwnerBackupEnvRequired" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "commandOmitsAllowBlocked" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "commandsPresent" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
@@ -912,9 +931,9 @@ $backupInstallReady = ($backupInstallValidationStatus -eq "passed") `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:backup:install:windows") `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:backup:install:validate")
 Add-DeploymentItem -Items $items -Id "state-backup-schedule-automation" `
-    -Requirement "The owner host has a no-secret Windows install, status, and uninstall path for recurring manifest-backed state backups that fail closed without the owner backup path." `
+    -Requirement "The owner host has a no-secret Windows install, status, and uninstall path for recurring manifest-backed state backups, retention rotation, and restore drills that fail closed without the owner backup path." `
     -Status $(if ($backupInstallReady) { "passed" } else { "failed" }) `
-    -Evidence "backupInstallValidation=$backupInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $backupInstallChecks -Name "planDidNotMutate"), ownerBackupEnvRequired=$(Get-DeploymentProp -Object $backupInstallChecks -Name "ownerBackupEnvRequired"), commandOmitsAllowBlocked=$(Get-DeploymentProp -Object $backupInstallChecks -Name "commandOmitsAllowBlocked")" `
+    -Evidence "backupInstallValidation=$backupInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $backupInstallChecks -Name "planDidNotMutate"), retention=$(Get-DeploymentProp -Object $backupInstallChecks -Name "actionUsesRetentionCount"), restoreDrill=$(Get-DeploymentProp -Object $backupInstallChecks -Name "restoreDrillUsesRestoreScript"), ownerBackupEnvRequired=$(Get-DeploymentProp -Object $backupInstallChecks -Name "ownerBackupEnvRequired"), commandOmitsAllowBlocked=$(Get-DeploymentProp -Object $backupInstallChecks -Name "commandOmitsAllowBlocked")" `
     -Commands @("npm run flowchain:backup:install:validate", "npm run flowchain:backup:install:windows -- -Action Plan", "npm run flowchain:backup:install:windows -- -Action Install", "npm run flowchain:backup:install:windows -- -Action Status", "npm run flowchain:backup:install:windows -- -Action Uninstall")
 
 Add-DeploymentItem -Items $items -Id "state-backup" `

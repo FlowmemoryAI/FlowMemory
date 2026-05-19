@@ -93,12 +93,15 @@ npm run flowchain:backup:install:validate
 ```
 
 Backups must write readable snapshots, readable manifests, an atomically written
-latest pointer, and matching manifest hashes. Restore validation must prove
-missing artifact, tampered manifest, corrupt restore, wrong-chain restore, and
-latest-pointer tamper failures.
+latest pointer, matching manifest hashes, and a retention policy that protects
+the newest snapshot while pruning older eligible snapshots. Restore validation
+must prove missing artifact, tampered manifest, corrupt restore, wrong-chain
+restore, latest-pointer tamper failures, retention rotation, and restore of the
+newest retained snapshot.
 
 On a Windows owner host, the backup install command can register, inspect, and
-remove a daily Scheduled Task for manifest-backed state snapshots:
+remove daily Scheduled Tasks for manifest-backed state snapshots and recurring
+restore drills:
 
 ```powershell
 npm run flowchain:backup:install:windows -- -Action Install

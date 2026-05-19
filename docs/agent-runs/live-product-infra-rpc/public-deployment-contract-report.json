@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-18T19:55:36.8505385Z",
+    "generatedAt":  "2026-05-19T02:56:26.8549570Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -120,7 +120,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=75319, finalizedHeight=75319",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=80836, finalizedHeight=80836",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -277,9 +277,9 @@
                   },
                   {
                       "id":  "state-backup-restore-validation",
-                      "requirement":  "Backup tooling must create manifest-backed state snapshots, restore the latest snapshot safely, reject tampered/missing/stale/wrong-chain backup evidence, and avoid owner secrets.",
+                      "requirement":  "Backup tooling must create manifest-backed state snapshots, rotate retained snapshots safely, restore the latest retained snapshot, reject tampered/missing/stale/wrong-chain backup evidence, and avoid owner secrets.",
                       "status":  "passed",
-                      "evidence":  "validationStatus=passed, requiredChecks=15, missingChecks=0",
+                      "evidence":  "validationStatus=passed, requiredChecks=23, missingChecks=0",
                       "commands":  [
                                        "npm run flowchain:backup:restore:validate"
                                    ],
@@ -289,9 +289,9 @@
                   },
                   {
                       "id":  "state-backup-owner-path-dry-run",
-                      "requirement":  "Backup readiness has an owner-path dry run that injects an ignored local backup path into the production backup gate and proves snapshot plus restore evidence without using the owner\u0027s real directory.",
+                      "requirement":  "Backup readiness has an owner-path dry run that injects an ignored local backup path into the production backup gate and proves snapshot, retention, and restore evidence without using the owner\u0027s real directory.",
                       "status":  "passed",
-                      "evidence":  "dryRun=passed, failedChecks=0, readiness=passed, snapshotProof=True, restoreProof=True",
+                      "evidence":  "dryRun=passed, failedChecks=0, readiness=passed, snapshotProof=True, retention=True, restoreProof=True",
                       "commands":  [
                                        "npm run flowchain:backup:owner-path:dry-run"
                                    ],
@@ -301,9 +301,9 @@
                   },
                   {
                       "id":  "state-backup-schedule-automation",
-                      "requirement":  "The owner host has a no-secret Windows install, status, and uninstall path for recurring manifest-backed state backups that fail closed without the owner backup path.",
+                      "requirement":  "The owner host has a no-secret Windows install, status, and uninstall path for recurring manifest-backed state backups, retention rotation, and restore drills that fail closed without the owner backup path.",
                       "status":  "passed",
-                      "evidence":  "backupInstallValidation=passed, planDidNotMutate=True, ownerBackupEnvRequired=True, commandOmitsAllowBlocked=True",
+                      "evidence":  "backupInstallValidation=passed, planDidNotMutate=True, retention=True, restoreDrill=True, ownerBackupEnvRequired=True, commandOmitsAllowBlocked=True",
                       "commands":  [
                                        "npm run flowchain:backup:install:validate",
                                        "npm run flowchain:backup:install:windows -- -Action Plan",

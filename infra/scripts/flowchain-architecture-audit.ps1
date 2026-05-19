@@ -798,7 +798,15 @@ $backupValidationRequiredChecks = @(
     "missingStateArtifactDetected",
     "missingSnapshotManifestDetected",
     "latestPointerTamperDetected",
-    "wrongChainStateMismatchDetected"
+    "wrongChainStateMismatchDetected",
+    "retentionBackupCommandPassed",
+    "retentionPrunedOldestSnapshot",
+    "retentionRetainedNewestSnapshots",
+    "retentionLatestManifestMatchesNewest",
+    "retentionReportShowsPrunedSnapshot",
+    "retentionReportProtectsCurrentSnapshot",
+    "retentionRestoreCommandPassed",
+    "retentionRestoreUsedNewestSnapshot"
 )
 $backupValidationMissingChecks = @($backupValidationRequiredChecks | Where-Object {
     (Get-ArchitectureProp -Object $backupValidationChecks -Name $_ -Default $false) -ne $true
@@ -816,6 +824,9 @@ $backupOwnerPathDryRunReady = ($backupOwnerPathDryRunStatus -eq "passed") `
     -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "readinessStatusPassed" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "snapshotProofPassed" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "restoreProofPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "retentionCurrentSnapshotProtected" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "retentionPruneErrorsEmpty" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "backupRetentionProtectedSnapshot" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "restoreLiveStateProtected" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "restoreDidNotMutateLiveState" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "ownerBackupEnvRestored" -Default $false) -eq $true) `
@@ -837,8 +848,16 @@ $backupInstallReady = ($backupInstallValidationStatus -eq "passed") `
     -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "schedulerCmdletsAvailable" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "scheduledTaskActionSupportsWorkingDirectory" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "taskNamesDistinct" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "retentionCountValid" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "actionUsesBackupScript" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "actionUsesRetentionCount" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "restoreDrillUsesRestoreScript" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "restoreDrillHasRestoreRoot" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "restoreDrillHasStatePath" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "restoreDrillHasReportPath" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "ownerBackupEnvRequired" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "restoreDrillOwnerBackupEnvRequired" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "commandOmitsAllowBlocked" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $backupInstallValidation -Name "noSecrets" -Default $false) -eq $true)
@@ -854,7 +873,7 @@ $backupFiles = @(
     "docs/agent-runs/live-product-infra-rpc/BACKUP_INSTALL_VALIDATION.md"
 )
 Add-ArchitectureItem -Items $items -Id "state-backup-boundary" -Layer "Storage/recovery" `
-    -Requirement "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, owner-path dry-run proof, scheduled backup install proof, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation." `
+    -Requirement "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, owner-path dry-run proof, scheduled backup and restore-drill install proof, retention rotation, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation." `
     -Status $(if ($backupStatus -eq "passed" -and $backupValidationPassed -and $backupOwnerPathDryRunReady -and $backupInstallReady) { "passed" } elseif ($backupStatus -eq "blocked" -and $backupValidationPassed -and $backupOwnerPathDryRunReady -and $backupInstallReady) { "blocked" } else { "failed" }) `
     -Evidence "backupStatus=$backupStatus, validationStatus=$backupValidationStatus, ownerPathDryRun=$backupOwnerPathDryRunStatus, ownerPathFailedChecks=$($backupOwnerPathDryRunFailedChecks.Count), installValidation=$backupInstallValidationStatus, installFailedChecks=$($backupInstallFailedChecks.Count), snapshotProof=$backupSnapshotProof, restoreProof=$backupRestoreProof, requiredChecks=$($backupValidationRequiredChecks.Count), missingChecks=$($backupValidationMissingChecks.Count)" `
     -Files $backupFiles `

@@ -1,15 +1,19 @@
 {
     "schema":  "flowchain.backup_install_windows_report.v0",
-    "generatedAt":  "2026-05-17T16:34:53.0537102Z",
+    "generatedAt":  "2026-05-19T02:17:17.0336758Z",
     "status":  "passed",
     "action":  "Plan",
     "plannedOnly":  true,
     "taskMutationPerformed":  false,
     "taskRegistered":  false,
+    "restoreDrillTaskRegistered":  false,
     "taskRemoved":  false,
+    "restoreDrillTaskRemoved":  false,
     "taskName":  "FlowChainStateBackup",
+    "restoreDrillTaskName":  "FlowChainStateRestoreDrill",
     "taskPath":  "\\",
     "dailyAt":  "03:00",
+    "restoreDrillDailyAt":  "03:15",
     "taskBefore":  {
                        "exists":  false,
                        "schedulerAvailable":  true,
@@ -21,6 +25,17 @@
                        "lastTaskResult":  "",
                        "queryError":  ""
                    },
+    "restoreDrillTaskBefore":  {
+                                   "exists":  false,
+                                   "schedulerAvailable":  true,
+                                   "taskName":  "FlowChainStateRestoreDrill",
+                                   "taskPath":  "\\",
+                                   "state":  "",
+                                   "lastRunTime":  "",
+                                   "nextRunTime":  "",
+                                   "lastTaskResult":  "",
+                                   "queryError":  ""
+                               },
     "taskAfter":  {
                       "exists":  false,
                       "schedulerAvailable":  true,
@@ -32,6 +47,17 @@
                       "lastTaskResult":  "",
                       "queryError":  ""
                   },
+    "restoreDrillTaskAfter":  {
+                                  "exists":  false,
+                                  "schedulerAvailable":  true,
+                                  "taskName":  "FlowChainStateRestoreDrill",
+                                  "taskPath":  "\\",
+                                  "state":  "",
+                                  "lastRunTime":  "",
+                                  "nextRunTime":  "",
+                                  "lastTaskResult":  "",
+                                  "queryError":  ""
+                              },
     "schedulerCmdlets":  [
                              {
                                  "name":  "Get-ScheduledTask",
@@ -66,18 +92,35 @@
                           "trigger":  "Daily",
                           "dailyAt":  "03:00",
                           "execute":  "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
-                          "arguments":  "-NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-state-backup.ps1 -StatePath devnet/local/state.json -ReportPath docs/agent-runs/live-product-infra-rpc/scheduled-state-backup-report.json",
+                          "arguments":  "-NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-state-backup.ps1 -StatePath devnet/local/state.json -ReportPath docs/agent-runs/live-product-infra-rpc/scheduled-state-backup-report.json -RetentionCount 14",
                           "workingDirectory":  "E:/FlowMemory/flowmemory-live-infra-rpc",
                           "backupScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-state-backup.ps1",
                           "ownerEnvFileConfigured":  false
                       },
+    "restoreDrillScheduledTask":  {
+                                      "trigger":  "Daily",
+                                      "dailyAt":  "03:15",
+                                      "execute":  "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                                      "arguments":  "-NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-state-restore-verify.ps1 -ReportPath docs/agent-runs/live-product-infra-rpc/scheduled-state-restore-verify-report.json -RestoreRoot devnet/local/restore-rehearsal/scheduled -StatePath devnet/local/state.json",
+                                      "workingDirectory":  "E:/FlowMemory/flowmemory-live-infra-rpc",
+                                      "restoreScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-state-restore-verify.ps1",
+                                      "ownerEnvFileConfigured":  false
+                                  },
     "backup":  {
                    "statePath":  "devnet/local/state.json",
                    "reportPath":  "docs/agent-runs/live-product-infra-rpc/scheduled-state-backup-report.json",
+                   "retentionCount":  14,
                    "requiredEnvNames":  [
                                             "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
                                         ]
                },
+    "restoreDrill":  {
+                         "restoreRoot":  "devnet/local/restore-rehearsal/scheduled",
+                         "reportPath":  "docs/agent-runs/live-product-infra-rpc/scheduled-state-restore-verify-report.json",
+                         "requiredEnvNames":  [
+                                                  "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                              ]
+                     },
     "commands":  {
                      "plan":  "npm run flowchain:backup:install:windows -- -Action Plan",
                      "validate":  "npm run flowchain:backup:install:validate",
@@ -88,13 +131,23 @@
                  },
     "checks":  {
                    "backupScriptExists":  true,
+                   "restoreDrillScriptExists":  true,
                    "schedulerCmdletsAvailable":  true,
                    "scheduledTaskActionSupportsWorkingDirectory":  true,
+                   "taskNamesDistinct":  true,
+                   "retentionCountValid":  true,
                    "actionUsesBackupScript":  true,
+                   "actionUsesRetentionCount":  true,
                    "actionUsesRepoWorkingDirectory":  true,
                    "hasStatePath":  true,
                    "hasReportPath":  true,
+                   "restoreDrillUsesRestoreScript":  true,
+                   "restoreDrillUsesRepoWorkingDirectory":  true,
+                   "restoreDrillHasRestoreRoot":  true,
+                   "restoreDrillHasStatePath":  true,
+                   "restoreDrillHasReportPath":  true,
                    "reliesOnOwnerBackupEnv":  true,
+                   "restoreDrillReliesOnOwnerBackupEnv":  true,
                    "ownerEnvFileCanBeInjected":  true,
                    "installStatusUninstallCommandsPresent":  true,
                    "planDoesNotMutate":  true,

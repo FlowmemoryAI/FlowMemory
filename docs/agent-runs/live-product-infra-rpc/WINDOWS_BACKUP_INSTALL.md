@@ -1,11 +1,12 @@
 ﻿# FlowChain Windows Backup Install
 
-Generated: 2026-05-17T16:34:53.0537102Z
+Generated: 2026-05-19T02:17:17.0336758Z
 Status: passed
 Action: Plan
-Task: \FlowChainStateBackup
+Backup task: \FlowChainStateBackup
+Restore drill task: \FlowChainStateRestoreDrill
 
-This runbook registers a Windows Scheduled Task that runs the manifest-backed state backup command every day. The task requires FLOWCHAIN_RPC_STATE_BACKUP_PATH from the owner process environment or from FLOWCHAIN_OWNER_ENV_FILE.
+This runbook registers Windows Scheduled Tasks that run the manifest-backed state backup command every day, rotate old snapshots by retention count, and run a recurring restore drill against the latest snapshot. The tasks require FLOWCHAIN_RPC_STATE_BACKUP_PATH from the owner process environment or from FLOWCHAIN_OWNER_ENV_FILE.
 
 ## Commands
 
@@ -22,11 +23,16 @@ This runbook registers a Windows Scheduled Task that runs the manifest-backed st
 - Working directory: `E:/FlowMemory/flowmemory-live-infra-rpc`
 - Backup script: `E:\FlowMemory\flowmemory-live-infra-rpc\infra\scripts\flowchain-state-backup.ps1`
 - Daily time: 03:00
+- Retention count: 14
+- Restore drill script: `E:\FlowMemory\flowmemory-live-infra-rpc\infra\scripts\flowchain-state-restore-verify.ps1`
+- Restore drill daily time: 03:15
 - Owner env file injected: False
 
 ## Status
 
 - Task existed before: False
 - Task exists after: False
+- Restore drill task existed before: False
+- Restore drill task exists after: False
 - Scheduler cmdlets available: True
 - WorkingDirectory supported: True

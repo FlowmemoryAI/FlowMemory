@@ -74,6 +74,10 @@ $backup = [ordered]@{
     latestPointerWrittenAtomically = $false
     snapshotManifestHash = $null
     latestManifestHash = $null
+    retentionCount = $null
+    retentionCandidateCount = $null
+    retentionCurrentSnapshotProtected = $false
+    retentionPruneErrorCount = $null
     restoreVerified = $false
 }
 
@@ -123,11 +127,21 @@ if (-not [string]::IsNullOrWhiteSpace($backupPathRaw)) {
                 $backup.latestManifestHash = [string] $snapshot.latestManifestSha256
                 $backup.latestBackupArtifactName = [string] $snapshot.snapshotName
                 $backup.latestBackupTimestamp = [string] $backupProof.generatedAt
+                $backup.retentionCount = $backupProof.retention.retentionCount
+                $backup.retentionCandidateCount = $backupProof.retention.candidateCount
+                $backup.retentionCurrentSnapshotProtected = $backupProof.retention.currentSnapshotProtected -eq $true
+                $backup.retentionPruneErrorCount = @($backupProof.retention.pruneErrors).Count
                 $backup.stateFileHashMatch = $snapshot.created -eq $true
                 $backup.stateRootCompared = -not [string]::IsNullOrWhiteSpace([string] $snapshot.latestRoot)
                 $backup.stateRootMatch = $backup.stateRootCompared
                 if (-not $backup.latestPointerVerified) {
                     Add-FlowChainReadinessProblem -Problems $problems -Name "latest-manifest.json" -Reason "latest manifest pointer did not match snapshot manifest" -Kind "failed" -Category "artifact"
+                }
+                if (-not $backup.retentionCurrentSnapshotProtected) {
+                    Add-FlowChainReadinessProblem -Problems $problems -Name "state-backup-retention" -Reason "backup retention did not protect the latest snapshot" -Kind "failed" -Category "artifact"
+                }
+                if ($backup.retentionPruneErrorCount -gt 0) {
+                    Add-FlowChainReadinessProblem -Problems $problems -Name "state-backup-retention" -Reason "backup retention reported prune errors" -Kind "failed" -Category "artifact"
                 }
 
                 $restoreChild = Invoke-BackupReadinessChild -ArgumentList @(
