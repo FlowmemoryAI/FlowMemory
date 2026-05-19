@@ -207,12 +207,16 @@ $publicRpcEdgeHardeningReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ((Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesBroadStateBlockedPreflight" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesPrivateWalletCreateBlockedPreflight" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "authorizationForwardingScopedToTesterWrite" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "preflightsCheckSecurityHeaders" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentBundle -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentBundle -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasDisallowedOriginProbe" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightBlocksBroadStatePath" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightBlocksPrivateWalletCreate" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxAuthorizationForwardingScoped" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightChecksSecurityHeaders" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "broadcasts" -Default $true) -eq $false)
@@ -463,10 +467,14 @@ $report = [ordered]@{
         publicRpcBroadStateBlockedPreflight = Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesBroadStateBlockedPreflight" -Default $false
         publicRpcPrivateWalletCreateBlockedPreflight = Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesPrivateWalletCreateBlockedPreflight" -Default $false
         publicRpcAuthorizationForwardingScoped = Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "authorizationForwardingScopedToTesterWrite" -Default $false
+        publicRpcSecurityHeaders = Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesSecurityHeaders" -Default $false
+        publicRpcSecurityHeaderPreflight = Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "preflightsCheckSecurityHeaders" -Default $false
         publicRpcRenderedDisallowedOriginProbe = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasDisallowedOriginProbe" -Default $false
         publicRpcRenderedBroadStateBlockedProbe = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightBlocksBroadStatePath" -Default $false
         publicRpcRenderedPrivateWalletCreateBlockedProbe = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightBlocksPrivateWalletCreate" -Default $false
         publicRpcRenderedAuthorizationForwardingScoped = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxAuthorizationForwardingScoped" -Default $false
+        publicRpcRenderedSecurityHeaders = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasSecurityHeaders" -Default $false
+        publicRpcRenderedSecurityHeaderPreflight = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightChecksSecurityHeaders" -Default $false
         backup = $backupStatus
         backupRetentionCount = $backupRetentionCount
         backupRetentionCandidateCount = $backupRetentionCandidateCount

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_automation_report.v1",
-    "generatedAt":  "2026-05-19T20:00:20.7782069Z",
+    "generatedAt":  "2026-05-19T21:50:52.1079394Z",
     "status":  "passed",
     "action":  "Validate",
     "flowChainRpcIsRepoOwned":  true,
@@ -14,6 +14,8 @@
                    "bundleHasShellPreflight":  true,
                    "bundleHasWindowsPreflight":  true,
                    "bundleHasRollbackRunbook":  true,
+                   "bundleHasSecurityHeaders":  true,
+                   "bundlePreflightsCheckSecurityHeaders":  true,
                    "ownerPathsOutsideRepo":  true,
                    "hostMutationPerformedFalse":  true,
                    "valuesPrintedFalse":  true,
@@ -36,11 +38,13 @@
                    "renderedNginxHasTls":  true,
                    "renderedNginxHasCorsForwarding":  true,
                    "renderedNginxHasRateLimit":  true,
+                   "renderedNginxHasSecurityHeaders":  true,
                    "renderedNginxAuthorizationForwardingScoped":  true,
                    "renderedSystemdUsesOwnerEnv":  true,
                    "renderedPreflightHasReadinessProbe":  true,
                    "renderedPreflightHasTesterUnauthProbe":  true,
                    "renderedPreflightHasDisallowedOriginProbe":  true,
+                   "renderedPreflightChecksSecurityHeaders":  true,
                    "renderedPreflightBlocksBroadStatePath":  true,
                    "renderedPreflightBlocksPrivateWalletCreate":  true,
                    "renderedFilesDoNotContainTokenHash":  true,
@@ -69,7 +73,7 @@
                      "performed":  true,
                      "exitCode":  0,
                      "outputRedacted":  [
-                                            "FlowChain public RPC bundle rendered. Report: C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-68276-b054a29bb14948589cfa0472980ef9e5\\rendered\\public-rpc-render-report.json"
+                                            "FlowChain public RPC bundle rendered. Report: C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-28904-19a349ddbcc34bd08765c818876037f6\\rendered\\public-rpc-render-report.json"
                                         ],
                      "failedChecks":  [
 
@@ -87,8 +91,8 @@
                                          "rollbackDrillBroadcastsFalse":  true
                                      },
                           "artifacts":  [
-                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-68276-b054a29bb14948589cfa0472980ef9e5\\rendered\\previous-nginx-flowchain-rpc.conf",
-                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-68276-b054a29bb14948589cfa0472980ef9e5\\rendered\\rollback-drill-current-before.conf"
+                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-28904-19a349ddbcc34bd08765c818876037f6\\rendered\\previous-nginx-flowchain-rpc.conf",
+                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-28904-19a349ddbcc34bd08765c818876037f6\\rendered\\rollback-drill-current-before.conf"
                                         ]
                       },
     "renderedFileNames":  [

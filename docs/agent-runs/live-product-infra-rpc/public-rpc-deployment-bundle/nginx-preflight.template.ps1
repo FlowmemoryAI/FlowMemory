@@ -24,6 +24,13 @@ if ($rendered -match $placeholderPattern) { throw "Rendered Nginx config still c
     "limit_req zone=flowchain_rpc_per_ip",
     "ssl_certificate ",
     "ssl_certificate_key ",
+    "server_tokens off;",
+    "add_header Strict-Transport-Security ",
+    "add_header X-Content-Type-Options ",
+    "add_header Cache-Control ",
+    "add_header Referrer-Policy ",
+    "add_header X-Frame-Options ",
+    "add_header Content-Security-Policy ",
     'proxy_set_header Origin $http_origin;',
     'proxy_set_header X-Forwarded-Proto https;',
     'proxy_set_header X-Forwarded-For $remote_addr;'

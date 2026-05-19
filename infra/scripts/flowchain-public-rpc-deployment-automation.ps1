@@ -104,6 +104,30 @@ function Get-DeploymentChecksPassed {
     return $true
 }
 
+$publicRpcSecurityHeaderTokens = @(
+    "server_tokens off;",
+    'add_header Strict-Transport-Security "max-age=31536000" always;',
+    'add_header X-Content-Type-Options "nosniff" always;',
+    'add_header Cache-Control "no-store" always;',
+    'add_header Referrer-Policy "no-referrer" always;',
+    'add_header X-Frame-Options "DENY" always;',
+    "add_header Content-Security-Policy `"default-src 'none'; frame-ancestors 'none'; base-uri 'none'`" always;"
+)
+
+function Test-DeploymentTextContainsAllTokens {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string[]] $Tokens
+    )
+
+    foreach ($token in $Tokens) {
+        if ($Text.IndexOf($token, [System.StringComparison]::Ordinal) -lt 0) {
+            return $false
+        }
+    }
+    return $true
+}
+
 function Ensure-PublicRpcDeploymentBundle {
     $bundleReport = Read-FlowChainJsonIfExists -Path $bundleReportPath
     if ($null -eq $bundleReport -or [string](Get-DeployProp -Object $bundleReport -Name "status" -Default "missing") -ne "passed") {
@@ -214,11 +238,13 @@ function Test-RenderedDeployment {
         renderedNginxHasTls = $renderedAllText.Contains("ssl_certificate ") -and $renderedAllText.Contains("ssl_certificate_key ")
         renderedNginxHasCorsForwarding = $renderedAllText.Contains('proxy_set_header Origin $http_origin;')
         renderedNginxHasRateLimit = $renderedAllText.Contains("limit_req_zone") -and $renderedAllText.Contains("limit_req zone=flowchain_rpc_per_ip")
+        renderedNginxHasSecurityHeaders = Test-DeploymentTextContainsAllTokens -Text $renderedAllText -Tokens $publicRpcSecurityHeaderTokens
         renderedNginxAuthorizationForwardingScoped = ([regex]::Matches($renderedAllText, 'proxy_set_header\s+Authorization\s+\$http_authorization;')).Count -eq 1
         renderedSystemdUsesOwnerEnv = $renderedAllText.Contains("EnvironmentFile=$TargetOwnerEnvFile") -and $renderedAllText.Contains("FLOWCHAIN_OWNER_ENV_FILE=$TargetOwnerEnvFile")
         renderedPreflightHasReadinessProbe = $renderedAllText.Contains("/rpc/readiness") -and $renderedAllText.Contains("rpc_readiness")
         renderedPreflightHasTesterUnauthProbe = $renderedAllText.Contains("/tester/status") -and $renderedAllText.Contains("/tester/wallets/create") -and $renderedAllText.Contains("flowmemory.control_plane.tester_write_auth_required.v0")
         renderedPreflightHasDisallowedOriginProbe = $renderedAllText.Contains("blocked-origin.flowchain.example") -and $renderedAllText.Contains("403")
+        renderedPreflightChecksSecurityHeaders = $renderedAllText.Contains("add_header Strict-Transport-Security") -and $renderedAllText.Contains("add_header Content-Security-Policy")
         renderedPreflightBlocksBroadStatePath = $renderedAllText.Contains("/devnet/local/state.json") -and $renderedAllText.Contains("404")
         renderedPreflightBlocksPrivateWalletCreate = $renderedAllText.Contains("/wallets/create") -and $renderedAllText.Contains("404")
         renderedFilesDoNotContainTokenHash = -not $renderedAllText.Contains($TokenHashSentinel)
@@ -351,6 +377,8 @@ $baseChecks = [ordered]@{
     bundleHasShellPreflight = (Get-DeployProp -Object $bundleChecks -Name "nginxPreflightScriptWritten" -Default $false) -eq $true
     bundleHasWindowsPreflight = (Get-DeployProp -Object $bundleChecks -Name "windowsNginxPreflightScriptWritten" -Default $false) -eq $true
     bundleHasRollbackRunbook = (Get-DeployProp -Object $bundleChecks -Name "rollbackRunbookWritten" -Default $false) -eq $true
+    bundleHasSecurityHeaders = (Get-DeployProp -Object $bundleChecks -Name "includesSecurityHeaders" -Default $false) -eq $true
+    bundlePreflightsCheckSecurityHeaders = (Get-DeployProp -Object $bundleChecks -Name "preflightsCheckSecurityHeaders" -Default $false) -eq $true
 }
 
 $scenario = [ordered]@{

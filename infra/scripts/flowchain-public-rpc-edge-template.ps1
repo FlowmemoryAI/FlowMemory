@@ -190,6 +190,12 @@ $edgeRequirements = @(
         evidence = "template sets client_max_body_size 256k and origin enforces 262144-byte JSON body cap"
     },
     [ordered]@{
+        id = "defensive-response-headers"
+        requirement = "Public edge responses include baseline browser and cache hardening headers."
+        status = "passed"
+        evidence = "template sets HSTS, no-sniff, no-store, frame denial, referrer policy, and a default-deny CSP"
+    },
+    [ordered]@{
         id = "no-values"
         requirement = "Template stores placeholders and env names only."
         status = "passed"
@@ -217,6 +223,13 @@ $nginxTemplate = @(
     "",
     "    access_log off;",
     "    client_max_body_size 256k;",
+    "    server_tokens off;",
+    "    add_header Strict-Transport-Security `"max-age=31536000`" always;",
+    "    add_header X-Content-Type-Options `"nosniff`" always;",
+    "    add_header Cache-Control `"no-store`" always;",
+    "    add_header Referrer-Policy `"no-referrer`" always;",
+    "    add_header X-Frame-Options `"DENY`" always;",
+    "    add_header Content-Security-Policy `"default-src 'none'; frame-ancestors 'none'; base-uri 'none'`" always;",
     "",
     "    location = /rpc {",
     "        if (`$request_method !~ ^(POST|OPTIONS)$) { return 405; }",
@@ -306,6 +319,14 @@ $report = [ordered]@{
     requiresTlsTermination = $true
     requiresRateLimit = $true
     bodyLimitBytes = 262144
+    securityHeaders = @(
+        "Strict-Transport-Security",
+        "X-Content-Type-Options",
+        "Cache-Control",
+        "Referrer-Policy",
+        "X-Frame-Options",
+        "Content-Security-Policy"
+    )
     batchLimit = 50
     forwardsOriginForCors = $true
     publicSafeJsonRpcMethods = $publicSafeJsonRpcMethods

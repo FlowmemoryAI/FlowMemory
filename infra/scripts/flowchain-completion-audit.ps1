@@ -1217,11 +1217,14 @@ $publicRpcDeploymentBundleRequiredChecks = @(
     "ownerRenderWritesWindowsPreflight",
     "ownerRenderDoesNotPrintTokenHash",
     "ownerRenderFilesDoNotContainTokenHash",
+    "ownerRenderIncludesSecurityHeaders",
     "ownerRenderRejectsPublicUrlPath",
     "ownerRenderPublicUrlPathRejectOutputNoSecrets",
     "includesPrivateOrigin",
     "includesRateLimitPlaceholder",
     "includesTlsPlaceholders",
+    "includesSecurityHeaders",
+    "preflightsCheckSecurityHeaders",
     "includesCorsOriginForwarding",
     "publicStateMirrorExcluded",
     "devnetStatePublicRpcExcluded",
@@ -1270,6 +1273,9 @@ $publicRpcDeploymentBundlePassed = $publicRpcDeploymentBundleExitCode -eq 0 `
     -and ($publicRpcDeploymentBundleTesterWritePreflight -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "ownerRenderFilesHaveNoPlaceholders" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "ownerRenderDoesNotPrintTokenHash" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "includesSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "ownerRenderIncludesSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "preflightsCheckSecurityHeaders" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "envExampleHasAllRequiredNames" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "secretMarkerFindingsEmpty" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "valuesPrinted" -Default $true) -eq $false) `
@@ -1305,10 +1311,12 @@ $publicRpcDeploymentAutomationRequiredChecks = @(
     "renderedNginxHasTls",
     "renderedNginxHasCorsForwarding",
     "renderedNginxHasRateLimit",
+    "renderedNginxHasSecurityHeaders",
     "renderedSystemdUsesOwnerEnv",
     "renderedPreflightHasReadinessProbe",
     "renderedPreflightHasTesterUnauthProbe",
     "renderedPreflightHasDisallowedOriginProbe",
+    "renderedPreflightChecksSecurityHeaders",
     "renderedPreflightBlocksBroadStatePath",
     "renderedPreflightBlocksPrivateWalletCreate",
     "renderedNginxAuthorizationForwardingScoped",
@@ -1335,9 +1343,11 @@ $publicRpcDeploymentAutomationPassed = $publicRpcDeploymentAutomationExitCode -e
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasTls" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasCorsForwarding" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasRateLimit" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasSecurityHeaders" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedSystemdUsesOwnerEnv" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasReadinessProbe" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightChecksSecurityHeaders" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "secretMarkerFindingsEmpty" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "valuesPrinted" -Default $true) -eq $false) `

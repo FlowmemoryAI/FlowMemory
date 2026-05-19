@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Edge Template
 
-Generated: 2026-05-19T14:20:30.6565963Z
+Generated: 2026-05-19T21:50:37.6085606Z
 Status: passed
 
 FlowChain RPC is served by this repository on the private origin 127.0.0.1:8787. Public RPC means placing an owner-operated HTTPS edge in front of that origin.
@@ -19,6 +19,7 @@ This file contains placeholders only. Replace placeholders only on the owner hos
 | The public edge does not proxy private write or admin routes; tester writes use the authenticated tester gateway only. | passed | template exposes /rpc, explicit read mirrors excluding /state, /tester/faucet, and /tester/wallets/create/send; fallback location returns 404 |
 | Friends-and-family wallet creation, faucet funding, and sends have a dedicated bearer-authenticated gateway with a unit cap. | passed | origin requires FLOWCHAIN_TESTER_WRITE_* env names and bearer auth before /tester/faucet, /tester/wallets/create, or /tester/wallets/send executes |
 | Oversized public request bodies are rejected before they reach the private origin. | passed | template sets client_max_body_size 256k and origin enforces 262144-byte JSON body cap |
+| Public edge responses include baseline browser and cache hardening headers. | passed | template sets HSTS, no-sniff, no-store, frame denial, referrer policy, and a default-deny CSP |
 | Template stores placeholders and env names only. | passed | valuesPrinted=false |
 
 ## Nginx Template
@@ -43,6 +44,13 @@ server {
 
     access_log off;
     client_max_body_size 256k;
+    server_tokens off;
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Cache-Control "no-store" always;
+    add_header Referrer-Policy "no-referrer" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Content-Security-Policy "default-src 'none'; frame-ancestors 'none'; base-uri 'none'" always;
 
     location = /rpc {
         if ($request_method !~ ^(POST|OPTIONS)$) { return 405; }

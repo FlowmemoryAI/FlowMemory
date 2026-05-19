@@ -1,14 +1,14 @@
 {
     "schema":  "flowchain.bridge_relayer_guardrail_validation_report.v1",
-    "generatedAt":  "2026-05-19T20:25:31.8076530Z",
+    "generatedAt":  "2026-05-19T21:39:16.1917714Z",
     "status":  "passed",
     "validationDir":  "devnet/local/bridge-relayer-guardrail-validation",
     "relayerReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\bridge-relayer-once-report.json",
     "childProcess":  {
                          "exitCode":  0,
                          "timedOut":  false,
-                         "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260519152527492-69428-04515112.stdout.log",
-                         "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260519152527492-69428-04515112.stderr.log"
+                         "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260519163907928-65844-6903944e.stdout.log",
+                         "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260519163907928-65844-6903944e.stderr.log"
                      },
     "checks":  {
                    "relayerCommandExitedZeroWithAllowBlocked":  true,
@@ -35,6 +35,10 @@
                    "directObserveBroadcastsFalse":  true,
                    "directObserveEnvValuesPrintedFalse":  true,
                    "directObserveNoSecrets":  true,
+                   "bridgeRelayerTestsPassed":  true,
+                   "bridgeRelayerConcurrencyTestCovered":  true,
+                   "bridgeCursorAsyncLockImplemented":  true,
+                   "bridgeCursorLockUsesAsyncRetry":  true,
                    "broadcastsFalse":  true,
                    "envValuesPrintedFalse":  true,
                    "noSecrets":  true,
@@ -73,6 +77,12 @@
                                          "finalCursorCommitAllowed":  false
                                      }
                       },
+    "bridgeRelayerTests":  {
+                               "exitCode":  0,
+                               "timedOut":  false,
+                               "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260519163911681-65844-4fe62c3e.stdout.log",
+                               "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260519163911681-65844-4fe62c3e.stderr.log"
+                           },
     "requiredEnvNamesClearedForScenario":  [
                                                "FLOWCHAIN_OWNER_ENV_FILE",
                                                "FLOWCHAIN_PILOT_OPERATOR_ACK",

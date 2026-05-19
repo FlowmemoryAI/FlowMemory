@@ -200,6 +200,8 @@ function New-DrillFallbackReport {
                     includesBroadStateBlockedPreflight = $true
                     includesPrivateWalletCreateBlockedPreflight = $true
                     authorizationForwardingScopedToTesterWrite = $true
+                    includesSecurityHeaders = $true
+                    preflightsCheckSecurityHeaders = $true
                 }
                 envValuesPrinted = $false
                 noSecrets = $true
@@ -216,6 +218,8 @@ function New-DrillFallbackReport {
                     renderedPreflightBlocksBroadStatePath = $true
                     renderedPreflightBlocksPrivateWalletCreate = $true
                     renderedNginxAuthorizationForwardingScoped = $true
+                    renderedNginxHasSecurityHeaders = $true
+                    renderedPreflightChecksSecurityHeaders = $true
                 }
                 envValuesPrinted = $false
                 noSecrets = $true
@@ -618,7 +622,7 @@ Invoke-SyntheticOpsCase -Id "owner-inputs-validation-critical" `
     }
 
 Invoke-SyntheticOpsCase -Id "public-rpc-edge-hardening-critical" `
-    -Requirement "A public RPC edge bundle missing deny-origin, blocked-private-path, or scoped authorization proof is classified as a critical incident." `
+    -Requirement "A public RPC edge bundle missing deny-origin, blocked-private-path, scoped authorization, or defensive response-header proof is classified as a critical incident." `
     -ExpectedStatus "failed" `
     -ExpectedCodes @("public-rpc-edge-hardening-failed") `
     -Mutate {
@@ -635,6 +639,8 @@ Invoke-SyntheticOpsCase -Id "public-rpc-edge-hardening-critical" `
             Set-DrillProp -Object $checks -Name "includesBroadStateBlockedPreflight" -Value $false
             Set-DrillProp -Object $checks -Name "includesPrivateWalletCreateBlockedPreflight" -Value $false
             Set-DrillProp -Object $checks -Name "authorizationForwardingScopedToTesterWrite" -Value $false
+            Set-DrillProp -Object $checks -Name "includesSecurityHeaders" -Value $false
+            Set-DrillProp -Object $checks -Name "preflightsCheckSecurityHeaders" -Value $false
             Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
             Set-DrillProp -Object $report -Name "noSecrets" -Value $true
             Set-DrillProp -Object $report -Name "broadcasts" -Value $false

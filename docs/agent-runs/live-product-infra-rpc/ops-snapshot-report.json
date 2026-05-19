@@ -1,27 +1,18 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-19T21:25:31.4197430Z",
+    "generatedAt":  "2026-05-19T21:51:14.6742651Z",
     "status":  "blocked",
     "refresh":  {
-                    "performed":  true,
+                    "performed":  false,
                     "steps":  [
-                                  {
-                                      "name":  "service-status",
-                                      "exitCode":  0,
-                                      "outputLineCount":  10
-                                  },
-                                  {
-                                      "name":  "service-monitor",
-                                      "exitCode":  0,
-                                      "outputLineCount":  4
-                                  }
+
                               ],
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "93581",
-                  "finalizedHeight":  "93581",
-                  "stateFileLastWriteAgeSeconds":  3,
+                  "latestHeight":  "93741",
+                  "finalizedHeight":  "93741",
+                  "stateFileLastWriteAgeSeconds":  1,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true
@@ -53,10 +44,14 @@
                            "publicRpcBroadStateBlockedPreflight":  true,
                            "publicRpcPrivateWalletCreateBlockedPreflight":  true,
                            "publicRpcAuthorizationForwardingScoped":  true,
+                           "publicRpcSecurityHeaders":  true,
+                           "publicRpcSecurityHeaderPreflight":  true,
                            "publicRpcRenderedDisallowedOriginProbe":  true,
                            "publicRpcRenderedBroadStateBlockedProbe":  true,
                            "publicRpcRenderedPrivateWalletCreateBlockedProbe":  true,
                            "publicRpcRenderedAuthorizationForwardingScoped":  true,
+                           "publicRpcRenderedSecurityHeaders":  true,
+                           "publicRpcRenderedSecurityHeaderPreflight":  true,
                            "backup":  "blocked",
                            "backupRetentionCount":  null,
                            "backupRetentionCandidateCount":  null,

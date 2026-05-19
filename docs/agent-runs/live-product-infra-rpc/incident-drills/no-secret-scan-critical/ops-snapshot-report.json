@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-19T21:24:30.7555193Z",
+    "generatedAt":  "2026-05-19T21:51:30.1441238Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
@@ -10,11 +10,11 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\input"
                 },
     "chain":  {
-                  "latestHeight":  "93450",
-                  "finalizedHeight":  "93450",
-                  "stateFileLastWriteAgeSeconds":  2,
+                  "latestHeight":  "93741",
+                  "finalizedHeight":  "93741",
+                  "stateFileLastWriteAgeSeconds":  1,
                   "monitorStatus":  "passed",
-                  "monitorSamples":  3,
+                  "monitorSamples":  2,
                   "monitorHeightAdvanced":  true
               },
     "reportStatuses":  {
@@ -44,10 +44,14 @@
                            "publicRpcBroadStateBlockedPreflight":  true,
                            "publicRpcPrivateWalletCreateBlockedPreflight":  true,
                            "publicRpcAuthorizationForwardingScoped":  true,
+                           "publicRpcSecurityHeaders":  true,
+                           "publicRpcSecurityHeaderPreflight":  true,
                            "publicRpcRenderedDisallowedOriginProbe":  true,
                            "publicRpcRenderedBroadStateBlockedProbe":  true,
                            "publicRpcRenderedPrivateWalletCreateBlockedProbe":  true,
                            "publicRpcRenderedAuthorizationForwardingScoped":  true,
+                           "publicRpcRenderedSecurityHeaders":  true,
+                           "publicRpcRenderedSecurityHeaderPreflight":  true,
                            "backup":  "blocked",
                            "backupRetentionCount":  null,
                            "backupRetentionCandidateCount":  null,

@@ -58,6 +58,12 @@ flowchain_public_rpc_private_wallet_create_blocked_preflight 1
 # HELP flowchain_public_rpc_auth_forwarding_scoped One when public RPC authorization forwarding is scoped to tester writes.
 # TYPE flowchain_public_rpc_auth_forwarding_scoped gauge
 flowchain_public_rpc_auth_forwarding_scoped 1
+# HELP flowchain_public_rpc_security_headers One when the public RPC bundle includes defensive response headers.
+# TYPE flowchain_public_rpc_security_headers gauge
+flowchain_public_rpc_security_headers 1
+# HELP flowchain_public_rpc_security_header_preflight One when public RPC preflights check defensive response headers.
+# TYPE flowchain_public_rpc_security_header_preflight gauge
+flowchain_public_rpc_security_header_preflight 1
 # HELP flowchain_public_rpc_rendered_disallowed_origin_probe One when rendered public RPC preflight has the disallowed origin probe.
 # TYPE flowchain_public_rpc_rendered_disallowed_origin_probe gauge
 flowchain_public_rpc_rendered_disallowed_origin_probe 1
@@ -70,6 +76,12 @@ flowchain_public_rpc_rendered_private_wallet_create_blocked_probe 1
 # HELP flowchain_public_rpc_rendered_auth_forwarding_scoped One when rendered public RPC authorization forwarding is scoped to tester writes.
 # TYPE flowchain_public_rpc_rendered_auth_forwarding_scoped gauge
 flowchain_public_rpc_rendered_auth_forwarding_scoped 1
+# HELP flowchain_public_rpc_rendered_security_headers One when rendered public RPC Nginx config includes defensive response headers.
+# TYPE flowchain_public_rpc_rendered_security_headers gauge
+flowchain_public_rpc_rendered_security_headers 1
+# HELP flowchain_public_rpc_rendered_security_header_preflight One when rendered public RPC preflights check defensive response headers.
+# TYPE flowchain_public_rpc_rendered_security_header_preflight gauge
+flowchain_public_rpc_rendered_security_header_preflight 1
 # HELP flowchain_backup_ready One when backup readiness is passed.
 # TYPE flowchain_backup_ready gauge
 flowchain_backup_ready 0

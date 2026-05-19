@@ -228,6 +228,7 @@ function Invoke-PublicRpcBundleRenderValidation {
         $checks.renderedFilesHaveNoPlaceholders = $renderedAllText -notmatch "<FLOWCHAIN_|<PATH_TO_"
         $checks.renderedNginxHasHttpsHost = $renderedAllText.Contains("server_name rpc.flowchain.example;") -and $renderedAllText.Contains("https://rpc.flowchain.example")
         $checks.renderedNginxHasRateLimit = $renderedAllText.Contains("rate=60r/m") -and $renderedAllText.Contains("limit_req zone=flowchain_rpc_per_ip")
+        $checks.renderedNginxHasSecurityHeaders = Test-TextContainsAllTokens -Text $renderedAllText -Tokens $publicRpcSecurityHeaderTokens
         $checks.renderedSystemdUsesOwnerEnv = $renderedAllText.Contains("EnvironmentFile=$ownerEnvFile") -and $renderedAllText.Contains("FLOWCHAIN_OWNER_ENV_FILE=$ownerEnvFile")
         $checks.renderedPreflightsUsePublicUrl = $renderedAllText.Contains("https://rpc.flowchain.example") -and $renderedAllText.Contains("https://wallet.flowchain.example")
         $checks.renderOutputDoesNotPrintTokenHash = -not $renderOutputText.Contains($safeTokenHash)
@@ -476,6 +477,16 @@ $ownerRollbackCommands = @(
 
 $rollbackCommands = @($localRollbackCommands + $ownerRollbackCommands)
 
+$publicRpcSecurityHeaderTokens = @(
+    "server_tokens off;",
+    'add_header Strict-Transport-Security "max-age=31536000" always;',
+    'add_header X-Content-Type-Options "nosniff" always;',
+    'add_header Cache-Control "no-store" always;',
+    'add_header Referrer-Policy "no-referrer" always;',
+    'add_header X-Frame-Options "DENY" always;',
+    "add_header Content-Security-Policy `"default-src 'none'; frame-ancestors 'none'; base-uri 'none'`" always;"
+)
+
 $nginxRequiredTokens = @(
     "server_name <FLOWCHAIN_RPC_PUBLIC_HOST>;",
     "ssl_certificate <PATH_TO_TLS_CERTIFICATE>;",
@@ -489,7 +500,7 @@ $nginxRequiredTokens = @(
     'proxy_set_header X-Forwarded-Proto https;',
     'proxy_set_header X-Forwarded-For $remote_addr;',
     '/tester/(faucet|wallets/(create|send))'
-)
+) + $publicRpcSecurityHeaderTokens
 
 $systemdRequiredTokens = @(
     "[Unit]",
@@ -735,6 +746,13 @@ $nginxPreflightScriptLines = @(
     'grep -Fq "limit_req zone=flowchain_rpc_per_ip" "${rendered_conf}"',
     'grep -Fq "ssl_certificate " "${rendered_conf}"',
     'grep -Fq "ssl_certificate_key " "${rendered_conf}"',
+    'grep -Fq "server_tokens off;" "${rendered_conf}"',
+    'grep -Fq "add_header Strict-Transport-Security " "${rendered_conf}"',
+    'grep -Fq "add_header X-Content-Type-Options " "${rendered_conf}"',
+    'grep -Fq "add_header Cache-Control " "${rendered_conf}"',
+    'grep -Fq "add_header Referrer-Policy " "${rendered_conf}"',
+    'grep -Fq "add_header X-Frame-Options " "${rendered_conf}"',
+    'grep -Fq "add_header Content-Security-Policy " "${rendered_conf}"',
     'grep -Fq ''proxy_set_header Origin $http_origin;'' "${rendered_conf}"',
     'grep -Fq ''proxy_set_header X-Forwarded-Proto https;'' "${rendered_conf}"',
     'grep -Fq ''proxy_set_header X-Forwarded-For $remote_addr;'' "${rendered_conf}"',
@@ -773,7 +791,7 @@ $nginxPreflightChecklistLines = @(
     '- Render the Nginx template to `<FLOWCHAIN_RPC_NGINX_RENDERED_CONF>`.',
     '- Replace `<FLOWCHAIN_RPC_PUBLIC_HOST>`, `<PATH_TO_TLS_CERTIFICATE>`, `<PATH_TO_TLS_CERTIFICATE_KEY>`, and `<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>` only on the owner host.',
     '- Confirm the private origin remains `127.0.0.1:8787`.',
-    "- Confirm TLS, rate limiting, Origin forwarding, and X-Forwarded headers are present.",
+    "- Confirm TLS, rate limiting, Origin forwarding, X-Forwarded headers, and defensive response headers are present.",
     '- Run `nginx -t` before every reload.',
     '- Run `bash <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>` after installing the rendered config.',
     "",
@@ -807,6 +825,13 @@ $windowsNginxPreflightScriptLines = @(
     '    "limit_req zone=flowchain_rpc_per_ip",',
     '    "ssl_certificate ",',
     '    "ssl_certificate_key ",',
+    '    "server_tokens off;",',
+    '    "add_header Strict-Transport-Security ",',
+    '    "add_header X-Content-Type-Options ",',
+    '    "add_header Cache-Control ",',
+    '    "add_header Referrer-Policy ",',
+    '    "add_header X-Frame-Options ",',
+    '    "add_header Content-Security-Policy ",',
     '    ''proxy_set_header Origin $http_origin;'',',
     '    ''proxy_set_header X-Forwarded-Proto https;'',',
     '    ''proxy_set_header X-Forwarded-For $remote_addr;''',
@@ -884,6 +909,7 @@ $windowsNginxPreflightChecklistLines = @(
     '- Replace `<FLOWCHAIN_RPC_PUBLIC_HOST>`, `<PATH_TO_TLS_CERTIFICATE>`, `<PATH_TO_TLS_CERTIFICATE_KEY>`, and `<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>` only on the owner host.',
     '- Set `<FLOWCHAIN_NGINX_EXE>` to the local `nginx.exe` path.',
     '- Confirm the private origin remains `127.0.0.1:8787`.',
+    '- Confirm TLS, rate limiting, Origin forwarding, X-Forwarded headers, and defensive response headers are present.',
     '- Run `powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>` after installing the rendered config.',
     "",
     "The PowerShell preflight uses local health and public read/readiness requests only. It does not send live transactions."
@@ -1313,11 +1339,14 @@ $checks = [ordered]@{
     ownerRenderWritesWindowsPreflight = ($renderValidation.checks.renderedWindowsPreflightWritten -eq $true)
     ownerRenderDoesNotPrintTokenHash = ($renderValidation.checks.renderOutputDoesNotPrintTokenHash -eq $true)
     ownerRenderFilesDoNotContainTokenHash = ($renderValidation.checks.renderedFilesDoNotContainTokenHash -eq $true)
+    ownerRenderIncludesSecurityHeaders = ($renderValidation.checks.renderedNginxHasSecurityHeaders -eq $true)
     ownerRenderRejectsPublicUrlPath = ($renderValidation.checks.publicUrlPathRenderRejected -eq $true)
     ownerRenderPublicUrlPathRejectOutputNoSecrets = ($renderValidation.checks.publicUrlPathRenderOutputNoSecrets -eq $true)
     includesPrivateOrigin = ($nginxText.Contains("127.0.0.1:8787") -and $nginxPreflightScriptText.Contains("127.0.0.1:8787") -and $windowsNginxPreflightScriptText.Contains("127.0.0.1:8787"))
     includesRateLimitPlaceholder = $nginxText.Contains("<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>")
     includesTlsPlaceholders = ($nginxText.Contains("<PATH_TO_TLS_CERTIFICATE>") -and $nginxText.Contains("<PATH_TO_TLS_CERTIFICATE_KEY>"))
+    includesSecurityHeaders = Test-TextContainsAllTokens -Text $nginxText -Tokens $publicRpcSecurityHeaderTokens
+    preflightsCheckSecurityHeaders = ($nginxPreflightScriptText.Contains("add_header Strict-Transport-Security") -and $nginxPreflightScriptText.Contains("add_header Content-Security-Policy") -and $windowsNginxPreflightScriptText.Contains("add_header Strict-Transport-Security") -and $windowsNginxPreflightScriptText.Contains("add_header Content-Security-Policy"))
     includesCorsOriginForwarding = ($nginxText.Contains('proxy_set_header Origin $http_origin;') -and $nginxPreflightScriptText.Contains('Origin: ${allowed_origin}'))
     publicStateMirrorExcluded = (-not $nginxText.Contains("|state|")) -and (-not $nginxText.Contains("/state")) -and (-not @($edgeTemplateReport.publicReadMirrorPaths).Contains("/state"))
     devnetStatePublicRpcExcluded = (-not @($edgeTemplateReport.publicSafeJsonRpcMethods).Contains("devnet_state"))

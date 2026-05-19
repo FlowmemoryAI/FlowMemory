@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Automation
 
-Generated: 2026-05-19T20:00:20.7782069Z
+Generated: 2026-05-19T21:50:52.1079394Z
 Status: passed
 Action: Validate
 
@@ -15,6 +15,8 @@ This validator proves the owner-host public RPC deployment path can render concr
 - bundleHasShellPreflight: True
 - bundleHasWindowsPreflight: True
 - bundleHasRollbackRunbook: True
+- bundleHasSecurityHeaders: True
+- bundlePreflightsCheckSecurityHeaders: True
 - ownerPathsOutsideRepo: True
 - hostMutationPerformedFalse: True
 - valuesPrintedFalse: True
@@ -37,11 +39,13 @@ This validator proves the owner-host public RPC deployment path can render concr
 - renderedNginxHasTls: True
 - renderedNginxHasCorsForwarding: True
 - renderedNginxHasRateLimit: True
+- renderedNginxHasSecurityHeaders: True
 - renderedNginxAuthorizationForwardingScoped: True
 - renderedSystemdUsesOwnerEnv: True
 - renderedPreflightHasReadinessProbe: True
 - renderedPreflightHasTesterUnauthProbe: True
 - renderedPreflightHasDisallowedOriginProbe: True
+- renderedPreflightChecksSecurityHeaders: True
 - renderedPreflightBlocksBroadStatePath: True
 - renderedPreflightBlocksPrivateWalletCreate: True
 - renderedFilesDoNotContainTokenHash: True
