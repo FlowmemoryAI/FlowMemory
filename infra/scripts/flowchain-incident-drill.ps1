@@ -20,6 +20,8 @@ $baseReportPaths = [ordered]@{
     "service-supervisor-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-report.json"
     "service-monitor-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     "public-rpc-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
+    "public-rpc-deployment-bundle-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
+    "public-rpc-deployment-automation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
     "backup-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     "bridge-live-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     "bridge-infra-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
@@ -118,6 +120,38 @@ function New-DrillFallbackReport {
                 status = "passed"
                 noSecrets = $true
                 envValuesPrinted = $false
+            }
+        }
+        "public-rpc-deployment-bundle-report.json" {
+            return [ordered]@{
+                schema = "flowchain.public_rpc_deployment_bundle_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "passed"
+                checks = [ordered]@{
+                    includesDisallowedOriginPreflight = $true
+                    includesBroadStateBlockedPreflight = $true
+                    includesPrivateWalletCreateBlockedPreflight = $true
+                    authorizationForwardingScopedToTesterWrite = $true
+                }
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
+            }
+        }
+        "public-rpc-deployment-automation-report.json" {
+            return [ordered]@{
+                schema = "flowchain.public_rpc_deployment_automation_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "passed"
+                checks = [ordered]@{
+                    renderedPreflightHasDisallowedOriginProbe = $true
+                    renderedPreflightBlocksBroadStatePath = $true
+                    renderedPreflightBlocksPrivateWalletCreate = $true
+                    renderedNginxAuthorizationForwardingScoped = $true
+                }
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
             }
         }
         "bridge-relayer-guardrail-validation-report.json" {
@@ -469,6 +503,30 @@ Invoke-SyntheticOpsCase -Id "no-secret-scan-critical" `
         }
     }
 
+Invoke-SyntheticOpsCase -Id "public-rpc-edge-hardening-critical" `
+    -Requirement "A public RPC edge bundle missing deny-origin, blocked-private-path, or scoped authorization proof is classified as a critical incident." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("public-rpc-edge-hardening-failed") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "public-rpc-deployment-bundle-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "failed"
+            $checks = Get-DrillProp -Object $report -Name "checks"
+            if ($null -eq $checks) {
+                $checks = [ordered]@{}
+                Set-DrillProp -Object $report -Name "checks" -Value $checks
+            }
+            Set-DrillProp -Object $checks -Name "includesDisallowedOriginPreflight" -Value $false
+            Set-DrillProp -Object $checks -Name "includesBroadStateBlockedPreflight" -Value $false
+            Set-DrillProp -Object $checks -Name "includesPrivateWalletCreateBlockedPreflight" -Value $false
+            Set-DrillProp -Object $checks -Name "authorizationForwardingScopedToTesterWrite" -Value $false
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
+        }
+    }
+
 Invoke-SyntheticOpsCase -Id "bridge-relayer-guardrail-critical" `
     -Requirement "A failed bridge relayer guardrail proof is classified as a critical incident before any relayer loop can be trusted." `
     -ExpectedStatus "failed" `
@@ -670,6 +728,7 @@ $requiredScenarios = @(
     "stale-state-critical",
     "height-not-advancing-critical",
     "no-secret-scan-critical",
+    "public-rpc-edge-hardening-critical",
     "bridge-relayer-guardrail-critical",
     "bridge-direct-observe-cursor-critical",
     "bridge-relayer-loop-unhealthy-critical",
@@ -689,7 +748,7 @@ $checks = [ordered]@{
     allRequiredScenariosCovered = $missingRequiredScenarios.Count -eq 0
     allCasesPassed = $failedCases.Count -eq 0
     failedCasesAbsent = $failedCases.Count -eq 0
-    minimumCaseCountMet = $cases.Count -ge 13
+    minimumCaseCountMet = $cases.Count -ge 14
     recoveryCommandPrinted = $recoveryPassed
     postDrillLiveStatusPassed = $postStatusPassed
     liveStateBeforeReadable = (Get-DrillProp -Object $liveStateBefore -Name "readable" -Default $false) -eq $true

@@ -210,6 +210,14 @@ $rules = @(
         commands = @("npm run flowchain:tester:evidence:validate", "npm run flowchain:no-secret:scan", "npm run flowchain:emergency:export-evidence")
     },
     [ordered]@{
+        id = "public-rpc-edge-hardening-failed"
+        severity = "critical"
+        findingCodes = @("public-rpc-edge-hardening-failed")
+        signal = "Public RPC edge deployment hardening evidence is missing or failed."
+        threshold = "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, or scoped authorization forwarding proof"
+        commands = @("npm run flowchain:public-rpc:deployment-bundle", "npm run flowchain:public-rpc:deployment:automation", "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh")
+    },
+    [ordered]@{
         id = "public-rpc-not-shareable"
         severity = "blocked"
         findingCodes = @("public-rpc-not-ready")

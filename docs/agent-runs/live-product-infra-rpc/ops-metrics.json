@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-19T20:08:07.0266195Z",
+    "generatedAt":  "2026-05-19T20:20:01.2988230Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -18,19 +18,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  92593
+                        "value":  92951
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  92593
+                        "value":  92951
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  4
+                        "value":  3
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -60,13 +60,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  21
+                        "value":  22
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  14
+                        "value":  15
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -240,7 +240,7 @@
                         "name":  "flowchain_bridge_relayer_loop_healthy",
                         "type":  "gauge",
                         "help":  "One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence.",
-                        "value":  1
+                        "value":  0
                     },
                     {
                         "name":  "flowchain_supervisor_bridge_relayer_requested",

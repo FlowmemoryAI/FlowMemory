@@ -1,9 +1,9 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-19T19:49:30.1935439Z
+Generated: 2026-05-19T20:19:43.1629339Z
 Status: failed
-Latest height: 92593
-Finalized height: 92593
+Latest height: 92951
+Finalized height: 92951
 
 ## Findings
 
@@ -35,6 +35,8 @@ Finalized height: 92593
 ### publicExposure
 - npm run flowchain:public-rpc:check
 - npm run flowchain:public-rpc:abuse-test
+- npm run flowchain:public-rpc:deployment-bundle
+- npm run flowchain:public-rpc:deployment:automation
 - npm run flowchain:external-tester:packet
 
 ### drills

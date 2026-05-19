@@ -41,6 +41,8 @@ $paths = [ordered]@{
     serviceSupervisor = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-report.json"
     serviceMonitor = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     publicRpc = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
+    publicRpcDeploymentBundle = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
+    publicRpcDeploymentAutomation = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
     backup = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     bridgeLive = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
@@ -191,6 +193,27 @@ if ($supervisorBridgeRelayerRequested -eq $true -and $supervisorRelayerRecoveryH
 }
 
 $publicRpcStatus = Get-OpsStatus -Report $reports.publicRpc
+$publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
+$publicRpcDeploymentAutomation = $reports.publicRpcDeploymentAutomation
+$publicRpcDeploymentBundleStatus = Get-OpsStatus -Report $publicRpcDeploymentBundle
+$publicRpcDeploymentAutomationStatus = Get-OpsStatus -Report $publicRpcDeploymentAutomation
+$publicRpcDeploymentBundleChecks = Get-OpsProp -Object $publicRpcDeploymentBundle -Name "checks"
+$publicRpcDeploymentAutomationChecks = Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "checks"
+$publicRpcEdgeHardeningReady = $publicRpcDeploymentBundleStatus -eq "passed" `
+    -and $publicRpcDeploymentAutomationStatus -eq "passed" `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesDisallowedOriginPreflight" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesBroadStateBlockedPreflight" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesPrivateWalletCreateBlockedPreflight" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "authorizationForwardingScopedToTesterWrite" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentBundle -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentBundle -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasDisallowedOriginProbe" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightBlocksBroadStatePath" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightBlocksPrivateWalletCreate" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxAuthorizationForwardingScoped" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "broadcasts" -Default $true) -eq $false)
 $backupStatus = Get-OpsStatus -Report $reports.backup
 $backupDetails = Get-OpsProp -Object $reports.backup -Name "backup"
 $backupRetentionCount = Get-OpsProp -Object $backupDetails -Name "retentionCount" -Default $null
@@ -267,6 +290,9 @@ $noSecretStatus = Get-OpsStatus -Report $reports.noSecret
 if ($publicRpcStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "public-rpc-not-ready" -Message "Public RPC is not ready to share." -Commands @("npm run flowchain:public-rpc:check", "npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:abuse-test")
 }
+if (-not $publicRpcEdgeHardeningReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "public-rpc-edge-hardening-failed" -Message "Public RPC edge deployment hardening evidence is missing or failed." -Commands @("npm run flowchain:public-rpc:deployment-bundle", "npm run flowchain:public-rpc:deployment:automation", "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh")
+}
 if ($backupStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "backup-not-ready" -Message "State backup is not ready for public operation." -Commands @("npm run flowchain:backup:restore:validate", "npm run flowchain:backup:check")
 }
@@ -332,6 +358,8 @@ $incidentCommands = [ordered]@{
     publicExposure = @(
         "npm run flowchain:public-rpc:check",
         "npm run flowchain:public-rpc:abuse-test",
+        "npm run flowchain:public-rpc:deployment-bundle",
+        "npm run flowchain:public-rpc:deployment:automation",
         "npm run flowchain:external-tester:packet"
     )
     drills = @(
@@ -386,6 +414,17 @@ $report = [ordered]@{
         supervisorBridgeRelayerAfterReportHealthy = $supervisorRelayerAfterReportHealthy
         supervisorLatestRestartReasons = @($supervisorLatestRestartReasons)
         publicRpc = $publicRpcStatus
+        publicRpcDeploymentBundle = $publicRpcDeploymentBundleStatus
+        publicRpcDeploymentAutomation = $publicRpcDeploymentAutomationStatus
+        publicRpcEdgeHardeningReady = $publicRpcEdgeHardeningReady
+        publicRpcDisallowedOriginPreflight = Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesDisallowedOriginPreflight" -Default $false
+        publicRpcBroadStateBlockedPreflight = Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesBroadStateBlockedPreflight" -Default $false
+        publicRpcPrivateWalletCreateBlockedPreflight = Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesPrivateWalletCreateBlockedPreflight" -Default $false
+        publicRpcAuthorizationForwardingScoped = Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "authorizationForwardingScopedToTesterWrite" -Default $false
+        publicRpcRenderedDisallowedOriginProbe = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasDisallowedOriginProbe" -Default $false
+        publicRpcRenderedBroadStateBlockedProbe = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightBlocksBroadStatePath" -Default $false
+        publicRpcRenderedPrivateWalletCreateBlockedProbe = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightBlocksPrivateWalletCreate" -Default $false
+        publicRpcRenderedAuthorizationForwardingScoped = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxAuthorizationForwardingScoped" -Default $false
         backup = $backupStatus
         backupRetentionCount = $backupRetentionCount
         backupRetentionCandidateCount = $backupRetentionCandidateCount

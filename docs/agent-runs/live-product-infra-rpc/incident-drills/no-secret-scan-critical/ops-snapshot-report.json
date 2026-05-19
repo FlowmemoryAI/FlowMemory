@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-19T19:49:24.1473941Z",
+    "generatedAt":  "2026-05-19T20:19:34.1180374Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
@@ -10,9 +10,9 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\input"
                 },
     "chain":  {
-                  "latestHeight":  "92593",
-                  "finalizedHeight":  "92593",
-                  "stateFileLastWriteAgeSeconds":  4,
+                  "latestHeight":  "92951",
+                  "finalizedHeight":  "92951",
+                  "stateFileLastWriteAgeSeconds":  3,
                   "monitorStatus":  "passed",
                   "monitorSamples":  3,
                   "monitorHeightAdvanced":  true
@@ -23,8 +23,8 @@
                            "serviceMonitor":  "passed",
                            "bridgeRelayerLoop":  "stopped",
                            "bridgeRelayerLoopReport":  "blocked",
-                           "bridgeRelayerLoopReportFresh":  true,
-                           "bridgeRelayerLoopReportHealthy":  true,
+                           "bridgeRelayerLoopReportFresh":  false,
+                           "bridgeRelayerLoopReportHealthy":  false,
                            "bridgeRelayerLoopReportNoSecrets":  true,
                            "bridgeRelayerLoopReportNoBroadcasts":  true,
                            "bridgeRelayerLoopBlockedOnlyOnOwnerInputs":  true,
@@ -37,6 +37,17 @@
 
                                                               ],
                            "publicRpc":  "blocked",
+                           "publicRpcDeploymentBundle":  "passed",
+                           "publicRpcDeploymentAutomation":  "passed",
+                           "publicRpcEdgeHardeningReady":  true,
+                           "publicRpcDisallowedOriginPreflight":  true,
+                           "publicRpcBroadStateBlockedPreflight":  true,
+                           "publicRpcPrivateWalletCreateBlockedPreflight":  true,
+                           "publicRpcAuthorizationForwardingScoped":  true,
+                           "publicRpcRenderedDisallowedOriginProbe":  true,
+                           "publicRpcRenderedBroadStateBlockedProbe":  true,
+                           "publicRpcRenderedPrivateWalletCreateBlockedProbe":  true,
+                           "publicRpcRenderedAuthorizationForwardingScoped":  true,
                            "backup":  "blocked",
                            "backupRetentionCount":  null,
                            "backupRetentionCandidateCount":  null,
@@ -175,6 +186,8 @@
                              "publicExposure":  [
                                                     "npm run flowchain:public-rpc:check",
                                                     "npm run flowchain:public-rpc:abuse-test",
+                                                    "npm run flowchain:public-rpc:deployment-bundle",
+                                                    "npm run flowchain:public-rpc:deployment:automation",
                                                     "npm run flowchain:external-tester:packet"
                                                 ],
                              "drills":  [
@@ -198,6 +211,8 @@
                         "serviceSupervisor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\input\\service-supervisor-report.json",
                         "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\input\\service-monitor-report.json",
                         "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\input\\public-rpc-readiness-report.json",
+                        "publicRpcDeploymentBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\input\\public-rpc-deployment-bundle-report.json",
+                        "publicRpcDeploymentAutomation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\input\\public-rpc-deployment-automation-report.json",
                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\input\\backup-readiness-report.json",
                         "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\input\\bridge-live-readiness-report.json",
                         "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\input\\bridge-infra-readiness-report.json",
