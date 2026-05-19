@@ -48,6 +48,8 @@ $reportPaths = [ordered]@{
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
     alertInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
+    opsMetricsExport = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-metrics-export-report.json"
+    metricsInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/metrics-install-validation-report.json"
     opsEscalationDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-escalation-dry-run-report.json"
     incidentDrill = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json"
     liveWallet = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json"
@@ -296,6 +298,17 @@ $alertInstallValidation = $reports.alertInstallValidation
 $alertInstallValidationStatus = Get-ArchitectureStatus -Report $alertInstallValidation
 $alertInstallChecks = Get-ArchitectureProp -Object $alertInstallValidation -Name "checks"
 $alertInstallFailedChecks = @((Get-ArchitectureProp -Object $alertInstallValidation -Name "failedChecks" -Default @()))
+$opsMetricsExport = $reports.opsMetricsExport
+$opsMetricsExportStatus = Get-ArchitectureStatus -Report $opsMetricsExport
+$opsMetricsExportChecks = Get-ArchitectureProp -Object $opsMetricsExport -Name "checks"
+$opsMetricsExportMetricCount = [int](Get-ArchitectureProp -Object $opsMetricsExport -Name "metricCount" -Default 0)
+$opsMetricsExportFailedChecks = @((Get-ArchitectureProp -Object $opsMetricsExport -Name "failedChecks" -Default @()))
+$opsMetricsExportSecretFindings = @((Get-ArchitectureProp -Object $opsMetricsExport -Name "secretMarkerFindings" -Default @()))
+$metricsInstallValidation = $reports.metricsInstallValidation
+$metricsInstallValidationStatus = Get-ArchitectureStatus -Report $metricsInstallValidation
+$metricsInstallChecks = Get-ArchitectureProp -Object $metricsInstallValidation -Name "checks"
+$metricsInstallFailedChecks = @((Get-ArchitectureProp -Object $metricsInstallValidation -Name "failedChecks" -Default @()))
+$metricsInstallSecretFindings = @((Get-ArchitectureProp -Object $metricsInstallValidation -Name "secretMarkerFindings" -Default @()))
 $opsEscalationDryRun = $reports.opsEscalationDryRun
 $opsEscalationDryRunStatus = Get-ArchitectureStatus -Report $opsEscalationDryRun
 $opsEscalationChecks = Get-ArchitectureProp -Object $opsEscalationDryRun -Name "checks"
@@ -316,6 +329,11 @@ $observabilityFiles = @(
     "infra/scripts/flowchain-alert-install-systemd.ps1",
     "infra/scripts/flowchain-alert-install-systemd-validation.ps1",
     "infra/scripts/flowchain-alert-install-validation.ps1",
+    "infra/scripts/flowchain-ops-metrics-export.ps1",
+    "infra/scripts/flowchain-metrics-install-windows.ps1",
+    "infra/scripts/flowchain-metrics-install-systemd.ps1",
+    "infra/scripts/flowchain-metrics-install-systemd-validation.ps1",
+    "infra/scripts/flowchain-metrics-install-validation.ps1",
     "infra/scripts/flowchain-ops-escalation-dry-run.ps1",
     "infra/scripts/flowchain-incident-drill.ps1",
     "infra/scripts/flowchain-emergency-stop-local.ps1",
@@ -331,6 +349,11 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:systemd") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:systemd:validate") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:validate") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:metrics:export") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:metrics:install:windows") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:metrics:install:systemd") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:metrics:install:systemd:validate") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:metrics:install:validate") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:escalation:dry-run") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:incident-drill") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:emergency:stop-local") `
@@ -362,6 +385,25 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdTimerUnitPlanned" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdNoExternalDelivery" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
+    -and ($opsMetricsExportStatus -eq "passed") `
+    -and ($opsMetricsExportMetricCount -ge 10) `
+    -and ($opsMetricsExportFailedChecks.Count -eq 0) `
+    -and ($opsMetricsExportSecretFindings.Count -eq 0) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "metricsJsonWritten" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "prometheusTextWritten" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "requiredMetricsPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "prometheusHasHelpAndType" -Default $false) -eq $true) `
+    -and ($metricsInstallValidationStatus -eq "passed") `
+    -and ($metricsInstallFailedChecks.Count -eq 0) `
+    -and ($metricsInstallSecretFindings.Count -eq 0) `
+    -and ((Get-ArchitectureProp -Object $metricsInstallChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $metricsInstallChecks -Name "statusDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $metricsInstallChecks -Name "uninstallAbsentDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdTimerUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $metricsInstallChecks -Name "hasMetricsJsonPath" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $metricsInstallChecks -Name "hasPrometheusTextPath" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $metricsInstallChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
     -and ($opsEscalationDryRunStatus -eq "passed") `
     -and ($opsEscalationFailedChecks.Count -eq 0) `
     -and ((Get-ArchitectureProp -Object $opsEscalationChecks -Name "notificationPlanNoNetworkDelivery" -Default $false) -eq $true) `
@@ -373,11 +415,11 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ($incidentFailedCases -eq 0) `
     -and ($incidentTotalCases -ge 8)
 Add-ArchitectureItem -Items $items -Id "ops-observability-boundary" -Layer "Operations" `
-    -Requirement "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers." `
+    -Requirement "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers." `
     -Status $(if ($observabilityReady) { "passed" } else { "failed" }) `
-    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), alertInstall=$alertInstallValidationStatus, systemdAlert=$(Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false), alertInstallFailedChecks=$($alertInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
+    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), alertInstall=$alertInstallValidationStatus, systemdAlert=$(Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false), alertInstallFailedChecks=$($alertInstallFailedChecks.Count), metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, metricsInstall=$metricsInstallValidationStatus, systemdMetrics=$(Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdValidationPassed" -Default $false), metricsInstallFailedChecks=$($metricsInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
     -Files $observabilityFiles `
-    -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:alerts:install:systemd:validate", "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
+    -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:alerts:install:systemd:validate", "npm run flowchain:ops:metrics:export -- -AllowBlocked", "npm run flowchain:ops:metrics:install:validate", "npm run flowchain:ops:metrics:install:systemd:validate", "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
 
 $serviceInstallFiles = @(
     "infra/scripts/flowchain-service-install-windows.ps1",
@@ -1409,6 +1451,17 @@ $report = [ordered]@{
         blockedRuleCount = $opsAlertBlockedRules
         coveredFindingCount = $opsAlertCoveredFindingCodes.Count
         unmappedCurrentFindingCount = $opsAlertUnmappedCodes.Count
+    }
+    opsMetricsCoverage = [ordered]@{
+        exportStatus = $opsMetricsExportStatus
+        metricCount = $opsMetricsExportMetricCount
+        exportFailedCheckCount = $opsMetricsExportFailedChecks.Count
+        installStatus = $metricsInstallValidationStatus
+        installFailedCheckCount = $metricsInstallFailedChecks.Count
+        metricsJsonWritten = (Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "metricsJsonWritten" -Default $false)
+        prometheusTextWritten = (Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "prometheusTextWritten" -Default $false)
+        systemdTimerUnitPlanned = (Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdTimerUnitPlanned" -Default $false)
+        noExternalDelivery = (Get-ArchitectureProp -Object $metricsInstallChecks -Name "noExternalDelivery" -Default $false)
     }
     bridgeRelayerSafetyEvidence = [ordered]@{
         status = $bridgeRelayerStatus

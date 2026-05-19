@@ -1,0 +1,107 @@
+{
+    "schema":  "flowchain.metrics_install_validation_report.v0",
+    "generatedAt":  "2026-05-19T18:01:48.4079811Z",
+    "status":  "passed",
+    "taskName":  "FlowChainOpsMetrics",
+    "checks":  {
+                   "installScriptExists":  true,
+                   "systemdInstallScriptExists":  true,
+                   "systemdValidationScriptExists":  true,
+                   "metricsScriptExists":  true,
+                   "packageScriptsPresent":  true,
+                   "planCommandPassed":  true,
+                   "planDidNotMutate":  true,
+                   "statusCommandPassed":  true,
+                   "statusDidNotMutate":  true,
+                   "statusTaskStatePreserved":  true,
+                   "uninstallAbsentCommandPassed":  true,
+                   "uninstallAbsentDidNotMutate":  true,
+                   "uninstallAbsentTaskAbsentBefore":  true,
+                   "uninstallAbsentTaskAbsentAfter":  true,
+                   "schedulerCmdletsAvailable":  true,
+                   "scheduledTaskActionSupportsWorkingDirectory":  true,
+                   "scheduledTaskTriggerSupportsRepetition":  true,
+                   "actionUsesMetricsScript":  true,
+                   "actionUsesRepoWorkingDirectory":  true,
+                   "hasAllowBlocked":  true,
+                   "hasReportPath":  true,
+                   "hasMarkdownPath":  true,
+                   "hasMetricsJsonPath":  true,
+                   "hasPrometheusTextPath":  true,
+                   "noExternalDelivery":  true,
+                   "commandsPresent":  true,
+                   "scheduledCommandKeepsBlockedMetricsVisible":  true,
+                   "scheduledCommandDoesNotDisableRefresh":  true,
+                   "systemdValidationCommandPassed":  true,
+                   "systemdValidationPassed":  true,
+                   "systemdPlanDidNotMutate":  true,
+                   "systemdServiceUnitPlanned":  true,
+                   "systemdTimerUnitPlanned":  true,
+                   "systemdTimerIntervalConfigured":  true,
+                   "systemdOwnerEnvFileInjectable":  true,
+                   "systemdNoExternalDelivery":  true,
+                   "systemdChildReportNoSecrets":  true,
+                   "envValuesPrintedFalse":  true,
+                   "childReportsNoSecrets":  true,
+                   "childReportsSecretMarkerFindingsEmpty":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "missingPackageScripts":  [
+
+                              ],
+    "planReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\metrics-install-windows-report.json",
+    "planMarkdownPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\WINDOWS_METRICS_INSTALL.md",
+    "statusReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\metrics-install-status-report.json",
+    "uninstallAbsentReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\metrics-install-uninstall-absent-report.json",
+    "absentValidationTaskName":  "FlowChainOpsMetrics-ValidationAbsent",
+    "childProcessResults":  [
+                                {
+                                    "name":  "metrics-install-plan",
+                                    "exitCode":  0,
+                                    "timedOut":  false,
+                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\metrics-install-validation\\20260519130134383-47824-c09f48bf.stdout.log",
+                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\metrics-install-validation\\20260519130134383-47824-c09f48bf.stderr.log"
+                                },
+                                {
+                                    "name":  "metrics-install-status",
+                                    "exitCode":  0,
+                                    "timedOut":  false,
+                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\metrics-install-validation\\20260519130139379-47824-60685544.stdout.log",
+                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\metrics-install-validation\\20260519130139379-47824-60685544.stderr.log"
+                                },
+                                {
+                                    "name":  "metrics-install-uninstall-absent",
+                                    "exitCode":  0,
+                                    "timedOut":  false,
+                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\metrics-install-validation\\20260519130142377-47824-e74c9c4d.stdout.log",
+                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\metrics-install-validation\\20260519130142377-47824-e74c9c4d.stderr.log"
+                                },
+                                {
+                                    "name":  "metrics-install-systemd-validation",
+                                    "exitCode":  0,
+                                    "timedOut":  false,
+                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\metrics-install-validation\\20260519130145648-47824-af8c6572.stdout.log",
+                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\metrics-install-validation\\20260519130145648-47824-af8c6572.stderr.log"
+                                }
+                            ],
+    "commands":  {
+                     "plan":  "npm run flowchain:ops:metrics:install:windows -- -Action Plan",
+                     "systemdPlan":  "npm run flowchain:ops:metrics:install:systemd -- -Action Plan",
+                     "systemdValidate":  "npm run flowchain:ops:metrics:install:systemd:validate",
+                     "install":  "npm run flowchain:ops:metrics:install:windows -- -Action Install",
+                     "status":  "npm run flowchain:ops:metrics:install:windows -- -Action Status",
+                     "uninstall":  "npm run flowchain:ops:metrics:install:windows -- -Action Uninstall",
+                     "validate":  "npm run flowchain:ops:metrics:install:validate"
+                 },
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

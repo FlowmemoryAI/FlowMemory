@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Command Matrix
 
-Generated: 2026-05-19T14:26:59.0130431Z
+Generated: 2026-05-19T18:09:15.6085633Z
 
 | Phase | Command | Purpose |
 | --- | --- | --- |
@@ -37,6 +37,10 @@ Generated: 2026-05-19T14:26:59.0130431Z
 | ops | `npm run flowchain:ops:snapshot -- -AllowBlocked` | Classify critical incidents separately from owner-input blockers. |
 | ops | `npm run flowchain:ops:alerts -- -AllowBlocked` | Refresh local alert rules and finding coverage. |
 | ops | `npm run flowchain:ops:metrics:export` | Export no-secret JSON and Prometheus textfile metrics for owner collectors. |
+| ops | `npm run flowchain:ops:metrics:install:windows -- -Action Plan` | Render recurring metrics export Scheduled Task plan. |
+| ops | `npm run flowchain:ops:metrics:install:systemd -- -Action Plan` | Render recurring metrics export Linux systemd timer plan. |
+| ops | `npm run flowchain:ops:metrics:install:systemd:validate` | Validate Linux systemd timer metrics export plan without mutating the owner host. |
+| ops | `npm run flowchain:ops:metrics:install:validate` | Validate Windows and Linux recurring metrics export scheduler plan/status/uninstall behavior. |
 | ops | `npm run flowchain:ops:alerts:install:windows -- -Action Plan` | Render recurring alert refresh Scheduled Task plan. |
 | ops | `npm run flowchain:ops:alerts:install:systemd -- -Action Plan` | Render recurring alert refresh Linux systemd timer plan. |
 | ops | `npm run flowchain:ops:alerts:install:systemd:validate` | Validate Linux systemd timer alert refresh plan without mutating the owner host. |

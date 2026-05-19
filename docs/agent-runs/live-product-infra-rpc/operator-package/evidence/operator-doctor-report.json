@@ -1,12 +1,12 @@
 {
     "schema":  "flowchain.doctor_report.v0",
-    "generatedAt":  "2026-05-19T14:26:58.4623264Z",
+    "generatedAt":  "2026-05-19T18:09:15.0135459Z",
     "status":  "blocked",
     "repoRoot":  "E:/FlowMemory/flowmemory-live-infra-rpc",
-    "diskFreeGiB":  120.29,
+    "diskFreeGiB":  114.28,
     "stateFileLastWriteAgeSeconds":  0,
-    "latestHeight":  "89197",
-    "finalizedHeight":  "89197",
+    "latestHeight":  "91598",
+    "finalizedHeight":  "91598",
     "localUrls":  {
                       "controlPlaneHealth":  "http://127.0.0.1:8787/health",
                       "dashboard":  "http://127.0.0.1:5173/"
@@ -282,7 +282,7 @@
                        "name":  "disk-free:E",
                        "status":  "running",
                        "owner":  "storage",
-                       "detail":  "120.29 GiB free on E:",
+                       "detail":  "114.28 GiB free on E:",
                        "nextCommand":  "free disk space before public operation"
                    },
                    {
@@ -296,7 +296,7 @@
                        "name":  "service-status-report",
                        "status":  "running",
                        "owner":  "service",
-                       "detail":  "latestHeight=89197 finalizedHeight=89197 stateAge=2",
+                       "detail":  "latestHeight=91598 finalizedHeight=91598 stateAge=0",
                        "nextCommand":  "npm run flowchain:service:status -- -AllowBlocked"
                    },
                    {
@@ -338,7 +338,7 @@
                        "name":  "port:8787",
                        "status":  "running",
                        "owner":  "control-plane",
-                       "detail":  "owned by PID(s): 66064",
+                       "detail":  "owned by PID(s): 31788",
                        "nextCommand":  "npm run control-plane:serve"
                    },
                    {

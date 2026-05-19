@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-19T14:26:59.0130431Z",
+    "generatedAt":  "2026-05-19T18:09:15.6085633Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -166,6 +166,26 @@
                          "phase":  "ops",
                          "command":  "npm run flowchain:ops:metrics:export",
                          "purpose":  "Export no-secret JSON and Prometheus textfile metrics for owner collectors."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:metrics:install:windows -- -Action Plan",
+                         "purpose":  "Render recurring metrics export Scheduled Task plan."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:metrics:install:systemd -- -Action Plan",
+                         "purpose":  "Render recurring metrics export Linux systemd timer plan."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:metrics:install:systemd:validate",
+                         "purpose":  "Validate Linux systemd timer metrics export plan without mutating the owner host."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:metrics:install:validate",
+                         "purpose":  "Validate Windows and Linux recurring metrics export scheduler plan/status/uninstall behavior."
                      },
                      {
                          "phase":  "ops",

@@ -1552,6 +1552,52 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "ops-metrics-install-validation"
+        requirement = "Scheduled metrics export install validation proves Windows Scheduled Task and Linux systemd timer plan/status/uninstall boundaries and no external delivery for recurring JSON and Prometheus textfile metrics."
+        path = "docs/agent-runs/live-product-infra-rpc/metrics-install-validation-report.json"
+        command = "npm run flowchain:ops:metrics:install:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptsPresent",
+            "planDidNotMutate",
+            "statusDidNotMutate",
+            "statusTaskStatePreserved",
+            "uninstallAbsentCommandPassed",
+            "uninstallAbsentDidNotMutate",
+            "uninstallAbsentTaskAbsentAfter",
+            "scheduledTaskTriggerSupportsRepetition",
+            "actionUsesMetricsScript",
+            "hasAllowBlocked",
+            "hasMetricsJsonPath",
+            "hasPrometheusTextPath",
+            "scheduledCommandDoesNotDisableRefresh",
+            "systemdValidationCommandPassed",
+            "systemdValidationPassed",
+            "systemdPlanDidNotMutate",
+            "systemdServiceUnitPlanned",
+            "systemdTimerUnitPlanned",
+            "systemdTimerIntervalConfigured",
+            "systemdOwnerEnvFileInjectable",
+            "systemdNoExternalDelivery",
+            "systemdChildReportNoSecrets",
+            "noExternalDelivery",
+            "childReportsNoSecrets",
+            "childReportsSecretMarkerFindingsEmpty",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingPackageScripts",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "ops-alert-install-validation"
         requirement = "Scheduled alert refresh install validation proves plan/status/uninstall no-op behavior and no external delivery."
         path = "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
@@ -1746,7 +1792,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"

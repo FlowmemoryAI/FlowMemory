@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-18T15:12:33.2108245Z",
+    "generatedAt":  "2026-05-19T18:03:54.6738947Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
@@ -10,11 +10,11 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\node-down-critical\\input"
                 },
     "chain":  {
-                  "latestHeight":  "73233",
-                  "finalizedHeight":  "73233",
-                  "stateFileLastWriteAgeSeconds":  4,
+                  "latestHeight":  "89332",
+                  "finalizedHeight":  "89332",
+                  "stateFileLastWriteAgeSeconds":  1,
                   "monitorStatus":  "passed",
-                  "monitorSamples":  2,
+                  "monitorSamples":  3,
                   "monitorHeightAdvanced":  true
               },
     "reportStatuses":  {
@@ -29,6 +29,10 @@
                            "bridgeRelayerLoopBlockedOnlyOnOwnerInputs":  true,
                            "publicRpc":  "blocked",
                            "backup":  "blocked",
+                           "backupRetentionCount":  null,
+                           "backupRetentionCandidateCount":  null,
+                           "backupRetentionCurrentSnapshotProtected":  false,
+                           "backupRetentionPruneErrorCount":  0,
                            "bridgeLive":  "blocked",
                            "bridgeInfra":  "blocked",
                            "bridgeRelayer":  "blocked",

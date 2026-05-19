@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.service_status_report.v0",
-    "generatedAt":  "2026-05-18T15:13:22.8448563Z",
+    "generatedAt":  "2026-05-19T18:04:08.7553134Z",
     "status":  "passed",
     "bind":  {
                  "host":  "127.0.0.1",
@@ -9,14 +9,14 @@
              },
     "node":  {
                  "status":  "running",
-                 "pid":  26992,
+                 "pid":  66828,
                  "pidPath":  "devnet\\local\\node\\flowchain-node.pid",
                  "pidSource":  "pid-file",
                  "commandLineMatched":  true
              },
     "controlPlane":  {
                          "status":  "running",
-                         "pid":  62452,
+                         "pid":  31788,
                          "pidPath":  "devnet\\local\\services\\control-plane.pid",
                          "commandLineMatched":  true
                      },
@@ -29,7 +29,7 @@
                               "report":  {
                                              "path":  "devnet/local/bridge-live-readiness/bridge-relayer-loop-report.json",
                                              "status":  "blocked",
-                                             "ageSeconds":  38231.9,
+                                             "ageSeconds":  13100.504,
                                              "maxAgeSeconds":  180,
                                              "fresh":  false,
                                              "acceptableStatus":  true,
@@ -53,12 +53,12 @@
                               },
     "chain":  {
                   "stateFileReadable":  true,
-                  "latestHeight":  "73257",
-                  "latestHash":  "0x66283228c90b2b53327ac5dfc54888ad392eab4f1f77c5d1a4207c91f9c157c1",
-                  "latestRoot":  "0xf32d9dfe092f6f869f27a932a863b152f2564f17bb36ac9db68983a061b5afff",
-                  "stateFileLastWriteAgeSeconds":  2,
-                  "finalizedHeight":  "73257",
-                  "finalizedHash":  "0x66283228c90b2b53327ac5dfc54888ad392eab4f1f77c5d1a4207c91f9c157c1",
+                  "latestHeight":  "91585",
+                  "latestHash":  "0x6699446e514e4d532bbbb45a6ada17a4d20006faa976ed09ba9f4c798da2fdec",
+                  "latestRoot":  "0xfb3848cda6dc9afe052c4ebe6be0225d65ca076190c2a5e45e43c24cbc9898ce",
+                  "stateFileLastWriteAgeSeconds":  0,
+                  "finalizedHeight":  "91585",
+                  "finalizedHash":  "0x6699446e514e4d532bbbb45a6ada17a4d20006faa976ed09ba9f4c798da2fdec",
                   "mempoolDepth":  0,
                   "peerCount":  null
               },

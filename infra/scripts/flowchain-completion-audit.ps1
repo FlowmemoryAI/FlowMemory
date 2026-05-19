@@ -57,6 +57,8 @@ $paths = [ordered]@{
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
     alertInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
+    opsMetricsExport = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-metrics-export-report.json"
+    metricsInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/metrics-install-validation-report.json"
     opsEscalationDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-escalation-dry-run-report.json"
     incidentDrill = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json"
     publicDeploymentContract = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
@@ -453,6 +455,12 @@ $opsAlertRulesExitCode = $opsAlertRulesResult.exitCode
 $alertInstallValidationResult = Invoke-AuditChild -Path $paths.alertInstallValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-alert-install-validation.ps1"))
 $alertInstallValidationOutput = @($alertInstallValidationResult.output)
 $alertInstallValidationExitCode = $alertInstallValidationResult.exitCode
+$opsMetricsExportResult = Invoke-AuditChild -Path $paths.opsMetricsExport -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-metrics-export.ps1"), "-AllowBlocked", "-NoRefresh")
+$opsMetricsExportOutput = @($opsMetricsExportResult.output)
+$opsMetricsExportExitCode = $opsMetricsExportResult.exitCode
+$metricsInstallValidationResult = Invoke-AuditChild -Path $paths.metricsInstallValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-metrics-install-validation.ps1"))
+$metricsInstallValidationOutput = @($metricsInstallValidationResult.output)
+$metricsInstallValidationExitCode = $metricsInstallValidationResult.exitCode
 $opsEscalationDryRunResult = Invoke-AuditChild -Path $paths.opsEscalationDryRun -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-escalation-dry-run.ps1"), "-NoRefresh")
 $opsEscalationDryRunOutput = @($opsEscalationDryRunResult.output)
 $opsEscalationDryRunExitCode = $opsEscalationDryRunResult.exitCode
@@ -2087,6 +2095,65 @@ $alertInstallValidationPassed = $alertInstallValidationExitCode -eq 0 `
     -and ((Get-AuditProp -Object $alertInstallValidationChecks -Name "secretMarkerFindingsEmpty" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $alertInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $alertInstallValidation -Name "noSecrets" -Default $false) -eq $true)
+$opsMetricsExport = $reports.opsMetricsExport
+$opsMetricsExportStatus = Get-ReportStatus -Report $opsMetricsExport
+$opsMetricsExportChecks = Get-AuditProp -Object $opsMetricsExport -Name "checks"
+$opsMetricsExportFailedChecks = @((Get-AuditProp -Object $opsMetricsExport -Name "failedChecks" -Default @()))
+$opsMetricsExportSecretFindings = @((Get-AuditProp -Object $opsMetricsExport -Name "secretMarkerFindings" -Default @()))
+$opsMetricsExportMetricCount = [int](Get-AuditProp -Object $opsMetricsExport -Name "metricCount" -Default 0)
+$opsMetricsExportPassed = $opsMetricsExportExitCode -eq 0 `
+    -and $opsMetricsExportStatus -in @("passed", "blocked") `
+    -and $opsMetricsExportFailedChecks.Count -eq 0 `
+    -and $opsMetricsExportSecretFindings.Count -eq 0 `
+    -and $opsMetricsExportMetricCount -ge 1 `
+    -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "opsSnapshotLoaded" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "prometheusTextWritten" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "metricsJsonWritten" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "requiredMetricsPresent" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "prometheusHasHelpAndType" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "envValuesPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "secretMarkerFindingsEmpty" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "broadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsMetricsExport -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $opsMetricsExport -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsMetricsExport -Name "broadcasts" -Default $true) -eq $false)
+$metricsInstallValidation = $reports.metricsInstallValidation
+$metricsInstallValidationStatus = Get-ReportStatus -Report $metricsInstallValidation
+$metricsInstallValidationChecks = Get-AuditProp -Object $metricsInstallValidation -Name "checks"
+$metricsInstallValidationFailedChecks = @((Get-AuditProp -Object $metricsInstallValidation -Name "failedChecks" -Default @()))
+$metricsInstallValidationSecretFindings = @((Get-AuditProp -Object $metricsInstallValidation -Name "secretMarkerFindings" -Default @()))
+$metricsInstallValidationMissingPackageScripts = @((Get-AuditProp -Object $metricsInstallValidation -Name "missingPackageScripts" -Default @()))
+$metricsInstallValidationFailedCheckCount = $metricsInstallValidationFailedChecks.Count
+$metricsInstallValidationSecretFindingCount = $metricsInstallValidationSecretFindings.Count
+$metricsInstallValidationMissingPackageScriptCount = $metricsInstallValidationMissingPackageScripts.Count
+$metricsInstallValidationPassed = $metricsInstallValidationExitCode -eq 0 `
+    -and $metricsInstallValidationStatus -eq "passed" `
+    -and $metricsInstallValidationFailedCheckCount -eq 0 `
+    -and $metricsInstallValidationSecretFindingCount -eq 0 `
+    -and $metricsInstallValidationMissingPackageScriptCount -eq 0 `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "packageScriptsPresent" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "statusDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "uninstallAbsentDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "actionUsesMetricsScript" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "hasAllowBlocked" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "hasMetricsJsonPath" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "hasPrometheusTextPath" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "scheduledCommandDoesNotDisableRefresh" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "systemdValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "systemdPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "systemdServiceUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "systemdTimerUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "systemdTimerIntervalConfigured" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "systemdNoExternalDelivery" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "childReportsNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "childReportsSecretMarkerFindingsEmpty" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidationChecks -Name "secretMarkerFindingsEmpty" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $metricsInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $metricsInstallValidation -Name "broadcasts" -Default $true) -eq $false)
 $opsEscalationDryRun = $reports.opsEscalationDryRun
 $opsEscalationDryRunStatus = Get-ReportStatus -Report $opsEscalationDryRun
 $opsEscalationDryRunChecks = Get-AuditProp -Object $opsEscalationDryRun -Name "checks"
@@ -2490,6 +2557,18 @@ Add-AuditItem -Items $items -Id "ops-alert-install-validation" `
     -Evidence "alertInstall=$alertInstallValidationStatus, failedChecks=$alertInstallValidationFailedCheckCount, secretFindings=$alertInstallValidationSecretFindingCount, planDidNotMutate=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "planDidNotMutate" -Default $false), statusDidNotMutate=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "statusDidNotMutate" -Default $false), systemdValidation=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "systemdValidationPassed" -Default $false), systemdTimer=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "systemdTimerUnitPlanned" -Default $false), noExternalDelivery=$(Get-AuditProp -Object $alertInstallValidationChecks -Name "noExternalDelivery" -Default $false), report=$($paths.alertInstallValidation)" `
     -Commands @("npm run flowchain:ops:alerts:install:validate")
 
+Add-AuditItem -Items $items -Id "ops-metrics-export" `
+    -Requirement "Ops metrics export writes no-secret JSON and Prometheus textfile metrics from current L1 operations evidence without hiding owner-input blockers." `
+    -Status $(if ($opsMetricsExportPassed) { "passed" } else { "failed" }) `
+    -Evidence "metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, failedChecks=$($opsMetricsExportFailedChecks.Count), secretFindings=$($opsMetricsExportSecretFindings.Count), metricsJsonWritten=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "metricsJsonWritten" -Default $false), prometheusTextWritten=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "prometheusTextWritten" -Default $false), requiredMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "requiredMetricsPresent" -Default $false), report=$($paths.opsMetricsExport)" `
+    -Commands @("npm run flowchain:ops:metrics:export -- -AllowBlocked")
+
+Add-AuditItem -Items $items -Id "ops-metrics-install-validation" `
+    -Requirement "Ops metrics scheduled export install validation proves Windows Scheduled Task and Linux systemd timer plan/status/uninstall boundaries and no external delivery for recurring JSON and Prometheus textfile metrics." `
+    -Status $(if ($metricsInstallValidationPassed) { "passed" } else { "failed" }) `
+    -Evidence "metricsInstall=$metricsInstallValidationStatus, failedChecks=$metricsInstallValidationFailedCheckCount, missingPackageScripts=$metricsInstallValidationMissingPackageScriptCount, secretFindings=$metricsInstallValidationSecretFindingCount, planDidNotMutate=$(Get-AuditProp -Object $metricsInstallValidationChecks -Name "planDidNotMutate" -Default $false), statusDidNotMutate=$(Get-AuditProp -Object $metricsInstallValidationChecks -Name "statusDidNotMutate" -Default $false), systemdValidation=$(Get-AuditProp -Object $metricsInstallValidationChecks -Name "systemdValidationPassed" -Default $false), systemdTimer=$(Get-AuditProp -Object $metricsInstallValidationChecks -Name "systemdTimerUnitPlanned" -Default $false), metricsJsonPath=$(Get-AuditProp -Object $metricsInstallValidationChecks -Name "hasMetricsJsonPath" -Default $false), prometheusTextPath=$(Get-AuditProp -Object $metricsInstallValidationChecks -Name "hasPrometheusTextPath" -Default $false), noExternalDelivery=$(Get-AuditProp -Object $metricsInstallValidationChecks -Name "noExternalDelivery" -Default $false), report=$($paths.metricsInstallValidation)" `
+    -Commands @("npm run flowchain:ops:metrics:install:validate", "npm run flowchain:ops:metrics:install:windows -- -Action Plan", "npm run flowchain:ops:metrics:install:systemd -- -Action Plan")
+
 Add-AuditItem -Items $items -Id "ops-escalation-dry-run" `
     -Requirement "Ops escalation dry run maps every current finding to local operator commands and proves the repo-owned alert path does not send network delivery or store external delivery credentials." `
     -Status $(if ($opsEscalationDryRunPassed) { "passed" } else { "failed" }) `
@@ -2703,6 +2782,10 @@ $report = [ordered]@{
     opsAlertRulesOutputRedacted = @($opsAlertRulesOutput | ForEach-Object { "$_" })
     alertInstallValidationExitCode = $alertInstallValidationExitCode
     alertInstallValidationOutputRedacted = @($alertInstallValidationOutput | ForEach-Object { "$_" })
+    opsMetricsExportExitCode = $opsMetricsExportExitCode
+    opsMetricsExportOutputRedacted = @($opsMetricsExportOutput | ForEach-Object { "$_" })
+    metricsInstallValidationExitCode = $metricsInstallValidationExitCode
+    metricsInstallValidationOutputRedacted = @($metricsInstallValidationOutput | ForEach-Object { "$_" })
     opsEscalationDryRunExitCode = $opsEscalationDryRunExitCode
     opsEscalationDryRunOutputRedacted = @($opsEscalationDryRunOutput | ForEach-Object { "$_" })
     publicDeploymentContractExitCode = $publicDeploymentContractExitCode
@@ -2800,6 +2883,9 @@ $report = [ordered]@{
         "npm run flowchain:ops:alerts",
         "npm run flowchain:ops:alerts:install:systemd:validate",
         "npm run flowchain:ops:alerts:install:validate",
+        "npm run flowchain:ops:metrics:export",
+        "npm run flowchain:ops:metrics:install:systemd:validate",
+        "npm run flowchain:ops:metrics:install:validate",
         "npm run flowchain:ops:escalation:dry-run",
         "npm run flowchain:ops:incident-drill",
         "npm run flowchain:live-infra:check",

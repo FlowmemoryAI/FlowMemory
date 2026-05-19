@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-18T15:04:06.6587535Z",
+    "generatedAt":  "2026-05-19T18:03:20.1473366Z",
     "status":  "failed",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -9,10 +9,10 @@
     "connectPackReady":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
-                       "passed":  21,
+                       "passed":  23,
                        "blocked":  6,
                        "failed":  0,
-                       "total":  27
+                       "total":  29
                    },
     "items":  [
                   {
@@ -25,9 +25,12 @@
                                        "npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90",
                                        "npm run flowchain:service:supervisor:validate",
                                        "npm run flowchain:service:install:validate",
+                                       "npm run flowchain:service:install:systemd:validate",
                                        "npm run flowchain:ops:snapshot -- -AllowBlocked",
                                        "npm run flowchain:ops:alerts -- -AllowBlocked",
+                                       "npm run flowchain:ops:metrics:export -- -AllowBlocked",
                                        "npm run flowchain:ops:alerts:install:validate",
+                                       "npm run flowchain:ops:metrics:install:validate",
                                        "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked",
                                        "npm run flowchain:owner:onboarding",
                                        "npm run flowchain:owner:signup-checklist",
@@ -120,7 +123,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=73133, finalizedHeight=73133",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=89332, finalizedHeight=89332",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -132,7 +135,7 @@
                       "id":  "pre-share-monitoring",
                       "requirement":  "The deployment has recent service-monitor evidence that block height advances over multiple samples.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True",
+                      "evidence":  "monitorStatus=passed, samples=3, heightAdvanced=True",
                       "commands":  [
                                        "npm run flowchain:service:monitor"
                                    ],
@@ -170,6 +173,23 @@
                                    ]
                   },
                   {
+                      "id":  "systemd-service-install-automation",
+                      "requirement":  "The owner Linux/VPS host has a real no-secret systemd plan/install/status/uninstall path plus bridge-relayer opt-in plan for rendered live-service and supervisor units, validated through read-only rendered-unit plan drills.",
+                      "status":  "passed",
+                      "evidence":  "systemdInstallValidation=passed, installScript=True, plan=True, planDidNotMutate=True, renderedUnits=True, relayerDefaultOff=True, relayerOptIn=True, liveProfile=True, supervisor=True, hardening=True",
+                      "commands":  [
+                                       "npm run flowchain:service:install:systemd:validate",
+                                       "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                                       "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -StartBridgeRelayerLoop",
+                                       "npm run flowchain:service:install:systemd -- -Action Install -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                                       "npm run flowchain:service:install:systemd -- -Action Status",
+                                       "npm run flowchain:service:install:systemd -- -Action Uninstall"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "ops-snapshot",
                       "requirement":  "Owner deployment has a no-secret ops snapshot that separates critical incidents from expected owner-input blockers and lists incident commands.",
                       "status":  "passed",
@@ -185,7 +205,7 @@
                       "id":  "ops-alert-rules",
                       "requirement":  "Owner deployment has a no-secret alert rule manifest that maps every current ops finding to operator commands without committing delivery credentials.",
                       "status":  "passed",
-                      "evidence":  "alertRules=passed, criticalRules=10, blockedRules=6, unmappedCurrentFindingCodes=0",
+                      "evidence":  "alertRules=passed, criticalRules=12, blockedRules=7, unmappedCurrentFindingCodes=0",
                       "commands":  [
                                        "npm run flowchain:ops:alerts -- -AllowBlocked"
                                    ],
@@ -195,15 +215,39 @@
                   },
                   {
                       "id":  "ops-alert-schedule-automation",
-                      "requirement":  "The owner host has a no-secret Windows install, status, and uninstall path for recurring ops snapshot and alert-rule refresh without committed external delivery credentials.",
+                      "requirement":  "The owner host has no-secret Windows Scheduled Task and Linux systemd timer install paths for recurring ops snapshot and alert-rule refresh without committed external delivery credentials.",
                       "status":  "passed",
-                      "evidence":  "alertInstallValidation=passed, planDidNotMutate=True, statusDidNotMutate=True, uninstallAbsentDidNotMutate=True, hasAllowBlocked=True, noExternalDelivery=True",
+                      "evidence":  "alertInstallValidation=passed, planDidNotMutate=True, statusDidNotMutate=True, systemdValidation=True, systemdTimer=True, hasAllowBlocked=True, noExternalDelivery=True",
                       "commands":  [
                                        "npm run flowchain:ops:alerts:install:validate",
                                        "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
+                                       "npm run flowchain:ops:alerts:install:systemd -- -Action Plan",
+                                       "npm run flowchain:ops:alerts:install:systemd:validate",
                                        "npm run flowchain:ops:alerts:install:windows -- -Action Install",
                                        "npm run flowchain:ops:alerts:install:windows -- -Action Status",
-                                       "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall"
+                                       "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall",
+                                       "npm run flowchain:ops:alerts:install:systemd -- -Action Status",
+                                       "npm run flowchain:ops:alerts:install:systemd -- -Action Uninstall"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "ops-metrics-schedule-automation",
+                      "requirement":  "The owner host has no-secret Windows Scheduled Task and Linux systemd timer install paths for recurring ops metrics JSON and Prometheus textfile refresh without committed external delivery credentials.",
+                      "status":  "passed",
+                      "evidence":  "metricsInstallValidation=passed, planDidNotMutate=True, statusDidNotMutate=True, systemdValidation=True, systemdTimer=True, hasMetricsJsonPath=True, hasPrometheusTextPath=True, noExternalDelivery=True",
+                      "commands":  [
+                                       "npm run flowchain:ops:metrics:install:validate",
+                                       "npm run flowchain:ops:metrics:install:windows -- -Action Plan",
+                                       "npm run flowchain:ops:metrics:install:systemd -- -Action Plan",
+                                       "npm run flowchain:ops:metrics:install:systemd:validate",
+                                       "npm run flowchain:ops:metrics:install:windows -- -Action Install",
+                                       "npm run flowchain:ops:metrics:install:windows -- -Action Status",
+                                       "npm run flowchain:ops:metrics:install:windows -- -Action Uninstall",
+                                       "npm run flowchain:ops:metrics:install:systemd -- -Action Status",
+                                       "npm run flowchain:ops:metrics:install:systemd -- -Action Uninstall"
                                    ],
                       "blockers":  [
 
@@ -277,9 +321,9 @@
                   },
                   {
                       "id":  "state-backup-restore-validation",
-                      "requirement":  "Backup tooling must create manifest-backed state snapshots, restore the latest snapshot safely, reject tampered/missing/stale/wrong-chain backup evidence, and avoid owner secrets.",
+                      "requirement":  "Backup tooling must create manifest-backed state snapshots, rotate retained snapshots safely, restore the latest retained snapshot, reject tampered/missing/stale/wrong-chain backup evidence, and avoid owner secrets.",
                       "status":  "passed",
-                      "evidence":  "validationStatus=passed, requiredChecks=15, missingChecks=0",
+                      "evidence":  "validationStatus=passed, requiredChecks=23, missingChecks=0",
                       "commands":  [
                                        "npm run flowchain:backup:restore:validate"
                                    ],
@@ -289,9 +333,9 @@
                   },
                   {
                       "id":  "state-backup-owner-path-dry-run",
-                      "requirement":  "Backup readiness has an owner-path dry run that injects an ignored local backup path into the production backup gate and proves snapshot plus restore evidence without using the owner\u0027s real directory.",
+                      "requirement":  "Backup readiness has an owner-path dry run that injects an ignored local backup path into the production backup gate and proves snapshot, retention, and restore evidence without using the owner\u0027s real directory.",
                       "status":  "passed",
-                      "evidence":  "dryRun=passed, failedChecks=0, readiness=passed, snapshotProof=True, restoreProof=True",
+                      "evidence":  "dryRun=passed, failedChecks=0, readiness=passed, snapshotProof=True, retention=True, restoreProof=True",
                       "commands":  [
                                        "npm run flowchain:backup:owner-path:dry-run"
                                    ],
@@ -301,15 +345,20 @@
                   },
                   {
                       "id":  "state-backup-schedule-automation",
-                      "requirement":  "The owner host has a no-secret Windows install, status, and uninstall path for recurring manifest-backed state backups that fail closed without the owner backup path.",
+                      "requirement":  "The owner host has no-secret Windows Scheduled Task and Linux systemd install, status, and uninstall paths for recurring manifest-backed state backups, retention rotation, and restore drills that fail closed without the owner backup path.",
                       "status":  "passed",
-                      "evidence":  "backupInstallValidation=passed, planDidNotMutate=True, ownerBackupEnvRequired=True, commandOmitsAllowBlocked=True",
+                      "evidence":  "backupInstallValidation=passed, planDidNotMutate=True, retention=True, restoreDrill=True, ownerBackupEnvRequired=True, commandOmitsAllowBlocked=True, systemdValidation=True, systemdTimer=True",
                       "commands":  [
                                        "npm run flowchain:backup:install:validate",
                                        "npm run flowchain:backup:install:windows -- -Action Plan",
                                        "npm run flowchain:backup:install:windows -- -Action Install",
                                        "npm run flowchain:backup:install:windows -- -Action Status",
-                                       "npm run flowchain:backup:install:windows -- -Action Uninstall"
+                                       "npm run flowchain:backup:install:windows -- -Action Uninstall",
+                                       "npm run flowchain:backup:install:systemd -- -Action Plan",
+                                       "npm run flowchain:backup:install:systemd -- -Action Install",
+                                       "npm run flowchain:backup:install:systemd -- -Action Status",
+                                       "npm run flowchain:backup:install:systemd -- -Action Uninstall",
+                                       "npm run flowchain:backup:install:systemd:validate"
                                    ],
                       "blockers":  [
 
@@ -512,9 +561,12 @@
                         "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json",
                         "serviceSupervisorValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-report.json",
                         "serviceInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-validation-report.json",
+                        "systemdServiceInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\systemd-service-install-validation-report.json",
                         "opsSnapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
                         "opsAlertRules":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-alert-rules-report.json",
+                        "opsMetricsExport":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-metrics-export-report.json",
                         "alertInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\alert-install-validation-report.json",
+                        "metricsInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\metrics-install-validation-report.json",
                         "opsEscalationDryRun":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-escalation-dry-run-report.json",
                         "ownerOnboarding":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-onboarding-report.json",
                         "ownerSignupChecklist":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-signup-checklist-report.json",
@@ -547,11 +599,19 @@
                                                  "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
                                                  "npm run flowchain:service:install:validate",
                                                  "npm run flowchain:service:install:windows -- -Action Plan",
+                                                 "npm run flowchain:service:install:systemd:validate",
+                                                 "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                                                 "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -StartBridgeRelayerLoop",
                                                  "npm run flowchain:ops:snapshot -- -AllowBlocked",
                                                  "npm run flowchain:ops:alerts -- -AllowBlocked",
+                                                 "npm run flowchain:ops:metrics:export -- -AllowBlocked",
                                                  "npm run flowchain:ops:alerts:install:validate",
+                                                 "npm run flowchain:ops:metrics:install:validate",
                                                  "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked",
                                                  "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
+                                                 "npm run flowchain:ops:alerts:install:systemd -- -Action Plan",
+                                                 "npm run flowchain:ops:metrics:install:windows -- -Action Plan",
+                                                 "npm run flowchain:ops:metrics:install:systemd -- -Action Plan",
                                                  "npm run flowchain:owner:onboarding",
                                                  "npm run flowchain:owner-env:template",
                                                  "npm run flowchain:owner-inputs",
@@ -564,6 +624,8 @@
                                                  "npm run flowchain:backup:restore:validate",
                                                  "npm run flowchain:backup:install:validate",
                                                  "npm run flowchain:backup:install:windows -- -Action Plan",
+                                                 "npm run flowchain:backup:install:systemd -- -Action Plan",
+                                                 "npm run flowchain:backup:install:systemd:validate",
                                                  "npm run flowchain:backup:owner-path:dry-run",
                                                  "npm run flowchain:backup:create",
                                                  "npm run flowchain:backup:restore:verify",
@@ -579,10 +641,20 @@
                                               "npm run flowchain:service:status",
                                               "npm run flowchain:service:install:windows -- -Action Status",
                                               "npm run flowchain:service:install:windows -- -Action Uninstall",
+                                              "npm run flowchain:service:install:systemd -- -Action Status",
+                                              "npm run flowchain:service:install:systemd -- -Action Uninstall",
                                               "npm run flowchain:backup:install:windows -- -Action Status",
                                               "npm run flowchain:backup:install:windows -- -Action Uninstall",
+                                              "npm run flowchain:backup:install:systemd -- -Action Status",
+                                              "npm run flowchain:backup:install:systemd -- -Action Uninstall",
                                               "npm run flowchain:ops:alerts:install:windows -- -Action Status",
                                               "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall",
+                                              "npm run flowchain:ops:alerts:install:systemd -- -Action Status",
+                                              "npm run flowchain:ops:alerts:install:systemd -- -Action Uninstall",
+                                              "npm run flowchain:ops:metrics:install:windows -- -Action Status",
+                                              "npm run flowchain:ops:metrics:install:windows -- -Action Uninstall",
+                                              "npm run flowchain:ops:metrics:install:systemd -- -Action Status",
+                                              "npm run flowchain:ops:metrics:install:systemd -- -Action Uninstall",
                                               "npm run flowchain:service:stop",
                                               "npm run flowchain:service:restart -- -LiveProfile",
                                               "npm run flowchain:emergency:stop-local"
