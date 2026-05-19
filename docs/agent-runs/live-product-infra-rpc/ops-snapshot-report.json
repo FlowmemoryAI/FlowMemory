@@ -1,24 +1,34 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-19T14:20:08.7554472Z",
+    "generatedAt":  "2026-05-19T19:03:53.3319556Z",
     "status":  "blocked",
     "refresh":  {
-                    "performed":  false,
+                    "performed":  true,
                     "steps":  [
-
+                                  {
+                                      "name":  "service-status",
+                                      "exitCode":  0,
+                                      "outputLineCount":  10
+                                  },
+                                  {
+                                      "name":  "service-monitor",
+                                      "exitCode":  0,
+                                      "outputLineCount":  4
+                                  }
                               ],
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "89099",
-                  "finalizedHeight":  "89099",
-                  "stateFileLastWriteAgeSeconds":  1,
+                  "latestHeight":  "92227",
+                  "finalizedHeight":  "92227",
+                  "stateFileLastWriteAgeSeconds":  3,
                   "monitorStatus":  "passed",
                   "monitorSamples":  3,
                   "monitorHeightAdvanced":  true
               },
     "reportStatuses":  {
                            "serviceStatus":  "passed",
+                           "serviceSupervisor":  "passed",
                            "serviceMonitor":  "passed",
                            "bridgeRelayerLoop":  "stopped",
                            "bridgeRelayerLoopReport":  "blocked",
@@ -27,6 +37,14 @@
                            "bridgeRelayerLoopReportNoSecrets":  true,
                            "bridgeRelayerLoopReportNoBroadcasts":  true,
                            "bridgeRelayerLoopBlockedOnlyOnOwnerInputs":  true,
+                           "supervisorBridgeRelayerRequested":  false,
+                           "supervisorBridgeRelayerRecoveryHealthy":  true,
+                           "supervisorBridgeRelayerAfterStatus":  "missing",
+                           "supervisorBridgeRelayerAfterCommandLineMatched":  false,
+                           "supervisorBridgeRelayerAfterReportHealthy":  false,
+                           "supervisorLatestRestartReasons":  [
+
+                                                              ],
                            "publicRpc":  "blocked",
                            "backup":  "blocked",
                            "backupRetentionCount":  null,
@@ -157,12 +175,14 @@
                                            ],
                              "bridgeRelayerLoop":  [
                                                        "npm run flowchain:service:status",
+                                                       "npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop",
                                                        "npm run flowchain:bridge:relayer:loop:validate",
                                                        "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop"
                                                    ]
                          },
     "reportPaths":  {
                         "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
+                        "serviceSupervisor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-report.json",
                         "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json",
                         "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",

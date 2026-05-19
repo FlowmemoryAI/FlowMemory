@@ -1,6 +1,6 @@
 ﻿# FlowChain Incident Drill
 
-Generated: 2026-05-19T18:04:11.4745827Z
+Generated: 2026-05-19T19:04:42.2474358Z
 Status: passed
 Incident drill ready: True
 
@@ -19,5 +19,6 @@ This drill uses synthetic ops input reports for incident conditions, then checks
 | no-secret-scan-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | bridge-relayer-guardrail-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | bridge-relayer-loop-unhealthy-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
+| supervisor-relayer-recovery-failed-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | recovery-command-print | passed | exitCode=0, recoverySteps=8, emergencyCommands=4 |
 | post-drill-live-status | passed | exitCode=0, status=passed, node=running, controlPlane=running |

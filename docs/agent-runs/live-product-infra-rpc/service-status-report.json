@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.service_status_report.v0",
-    "generatedAt":  "2026-05-19T18:51:53.3610849Z",
+    "generatedAt":  "2026-05-19T19:06:29.2370396Z",
     "status":  "passed",
     "bind":  {
                  "host":  "127.0.0.1",
@@ -29,15 +29,15 @@
                               "report":  {
                                              "path":  "devnet/local/bridge-live-readiness/bridge-relayer-loop-report.json",
                                              "status":  "blocked",
-                                             "ageSeconds":  121.086,
+                                             "ageSeconds":  996.968,
                                              "maxAgeSeconds":  180,
-                                             "fresh":  true,
+                                             "fresh":  false,
                                              "acceptableStatus":  true,
                                              "blockedOnlyOnOwnerInputs":  true,
                                              "codeIssueCount":  0,
                                              "noSecrets":  true,
                                              "noBroadcasts":  true,
-                                             "healthy":  true
+                                             "healthy":  false
                                          }
                           },
     "serviceProfile":  {
@@ -53,12 +53,12 @@
                               },
     "chain":  {
                   "stateFileReadable":  true,
-                  "latestHeight":  "92097",
-                  "latestHash":  "0x1caeba401dead37f1597531c9a4ab9e0519005659c7f67536c184bda32801a2a",
-                  "latestRoot":  "0x337a66a4178e5043ac17832970b6ed95b089e882f73a5500da82e80afa7064e2",
-                  "stateFileLastWriteAgeSeconds":  1,
-                  "finalizedHeight":  "92097",
-                  "finalizedHash":  "0x1caeba401dead37f1597531c9a4ab9e0519005659c7f67536c184bda32801a2a",
+                  "latestHeight":  "92256",
+                  "latestHash":  "0xd2311db6c30f654536f432f8c989e8b83c81cafb43b0f7eb86f1d2a0e101fe05",
+                  "latestRoot":  "0xe22637ec19c88eeeec6a7b83b5e8094cb47e63c169083a0dc9258d3d48ba6a00",
+                  "stateFileLastWriteAgeSeconds":  3,
+                  "finalizedHeight":  "92256",
+                  "finalizedHash":  "0xd2311db6c30f654536f432f8c989e8b83c81cafb43b0f7eb86f1d2a0e101fe05",
                   "mempoolDepth":  0,
                   "peerCount":  null
               },

@@ -1,6 +1,6 @@
 ﻿# FlowChain Ops Alert Rules
 
-Generated: 2026-05-19T14:20:10.2514417Z
+Generated: 2026-05-19T19:04:00.9602584Z
 Status: passed
 Current alert state: blocked
 
@@ -18,6 +18,7 @@ This report maps local ops snapshot findings to operator actions. It does not se
 | bridge-relayer-cursor-unsafe | critical | Bridge relayer passed without safe staged cursor commit evidence. | `npm run flowchain:bridge:relayer:once -- -AllowBlocked; npm run flowchain:bridge:emergency-stop; npm run flowchain:service:status` |
 | bridge-relayer-guardrail-failed | critical | Bridge relayer fail-closed guardrail proof is missing or failed. | `npm run flowchain:bridge:relayer:guardrail:validate; npm run flowchain:bridge:relayer:once -- -AllowBlocked; npm run flowchain:bridge:emergency-stop` |
 | bridge-relayer-loop-unhealthy | critical | Bridge relayer loop is running without fresh no-secret/no-broadcast health evidence. | `npm run flowchain:service:status; npm run flowchain:bridge:relayer:loop:validate; npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop; npm run flowchain:bridge:emergency-stop` |
+| supervisor-relayer-recovery-failed | critical | Service supervisor requested the bridge relayer loop but latest recovery evidence does not show a healthy relayer loop. | `npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop; npm run flowchain:service:supervisor:validate; npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop; npm run flowchain:bridge:emergency-stop` |
 | deployment-refresh-aborted | critical | Public deployment dependency refresh aborted or skipped child gates. | `npm run flowchain:public-deployment:contract -- -AllowBlocked; npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked; npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh` |
 | external-tester-evidence-unsafe | critical | External tester returned evidence contains a secret marker, credential URL, or env assignment. | `npm run flowchain:tester:evidence:validate; npm run flowchain:no-secret:scan; npm run flowchain:emergency:export-evidence` |
 | public-rpc-not-shareable | blocked | Public RPC readiness gate is not passed. | `npm run flowchain:public-rpc:check; npm run flowchain:public-rpc:validate; npm run flowchain:public-rpc:abuse-test` |
@@ -28,4 +29,4 @@ This report maps local ops snapshot findings to operator actions. It does not se
 | external-tester-evidence-invalid | blocked | External tester returned evidence is incomplete or transfer proof is inconsistent. | `npm run flowchain:tester:evidence:validate; npm run flowchain:external-tester:packet -- -AllowBlocked` |
 | deployment-contract-not-ready | blocked | Public deployment contract is not passed. | `npm run flowchain:public-deployment:contract -- -AllowBlocked` |
 
-Covered finding codes: `node-not-running, control-plane-not-running, service-status-not-passed, chain-height-unreadable, height-not-advancing, state-stale, no-secret-scan-not-passed, backup-retention-unsafe, bridge-relayer-latency-failed, bridge-relayer-cursor-unsafe, bridge-relayer-guardrail-failed, bridge-relayer-loop-unhealthy, deployment-refresh-aborted, external-tester-evidence-unsafe, public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, external-tester-evidence-invalid, deployment-contract-not-ready`
+Covered finding codes: `node-not-running, control-plane-not-running, service-status-not-passed, chain-height-unreadable, height-not-advancing, state-stale, no-secret-scan-not-passed, backup-retention-unsafe, bridge-relayer-latency-failed, bridge-relayer-cursor-unsafe, bridge-relayer-guardrail-failed, bridge-relayer-loop-unhealthy, supervisor-relayer-recovery-failed, deployment-refresh-aborted, external-tester-evidence-unsafe, public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, external-tester-evidence-invalid, deployment-contract-not-ready`

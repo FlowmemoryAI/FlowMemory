@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-19T18:03:57.1883394Z",
+    "generatedAt":  "2026-05-19T19:04:24.0703649Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
@@ -10,8 +10,8 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input"
                 },
     "chain":  {
-                  "latestHeight":  "89332",
-                  "finalizedHeight":  "89332",
+                  "latestHeight":  "92227",
+                  "finalizedHeight":  "92227",
                   "stateFileLastWriteAgeSeconds":  999999,
                   "monitorStatus":  "passed",
                   "monitorSamples":  3,
@@ -19,6 +19,7 @@
               },
     "reportStatuses":  {
                            "serviceStatus":  "passed",
+                           "serviceSupervisor":  "passed",
                            "serviceMonitor":  "passed",
                            "bridgeRelayerLoop":  "stopped",
                            "bridgeRelayerLoopReport":  "blocked",
@@ -27,6 +28,14 @@
                            "bridgeRelayerLoopReportNoSecrets":  true,
                            "bridgeRelayerLoopReportNoBroadcasts":  true,
                            "bridgeRelayerLoopBlockedOnlyOnOwnerInputs":  true,
+                           "supervisorBridgeRelayerRequested":  false,
+                           "supervisorBridgeRelayerRecoveryHealthy":  true,
+                           "supervisorBridgeRelayerAfterStatus":  "missing",
+                           "supervisorBridgeRelayerAfterCommandLineMatched":  false,
+                           "supervisorBridgeRelayerAfterReportHealthy":  false,
+                           "supervisorLatestRestartReasons":  [
+
+                                                              ],
                            "publicRpc":  "blocked",
                            "backup":  "blocked",
                            "backupRetentionCount":  null,
@@ -174,12 +183,14 @@
                                            ],
                              "bridgeRelayerLoop":  [
                                                        "npm run flowchain:service:status",
+                                                       "npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop",
                                                        "npm run flowchain:bridge:relayer:loop:validate",
                                                        "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop"
                                                    ]
                          },
     "reportPaths":  {
                         "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\service-status-report.json",
+                        "serviceSupervisor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\service-supervisor-report.json",
                         "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\service-monitor-report.json",
                         "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\public-rpc-readiness-report.json",
                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\backup-readiness-report.json",

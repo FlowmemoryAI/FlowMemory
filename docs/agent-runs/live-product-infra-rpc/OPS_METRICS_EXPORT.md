@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-19T18:01:34.8313925Z
+Generated: 2026-05-19T19:04:07.1405183Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 41
+- Metric count: 43
 
 ## Required Metrics
 
@@ -28,6 +28,9 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_backup_retention_prune_errors: present
 - flowchain_bridge_live_ready: present
 - flowchain_bridge_relayer_guardrail_ready: present
+- flowchain_bridge_relayer_loop_healthy: present
+- flowchain_supervisor_bridge_relayer_requested: present
+- flowchain_supervisor_bridge_relayer_recovery_healthy: present
 - flowchain_external_tester_evidence_ready: present
 - flowchain_external_tester_evidence_failed_checks: present
 - flowchain_external_tester_evidence_missing_files: present

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-19T14:20:10.2514417Z",
+    "generatedAt":  "2026-05-19T19:04:00.9602584Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  19,
-    "criticalRuleCount":  12,
+    "ruleCount":  20,
+    "criticalRuleCount":  13,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -42,6 +42,7 @@
                                 "bridge-relayer-cursor-unsafe",
                                 "bridge-relayer-guardrail-failed",
                                 "bridge-relayer-loop-unhealthy",
+                                "supervisor-relayer-recovery-failed",
                                 "deployment-refresh-aborted",
                                 "external-tester-evidence-unsafe",
                                 "public-rpc-not-ready",
@@ -244,6 +245,21 @@
                       "commands":  [
                                        "npm run flowchain:service:status",
                                        "npm run flowchain:bridge:relayer:loop:validate",
+                                       "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop",
+                                       "npm run flowchain:bridge:emergency-stop"
+                                   ]
+                  },
+                  {
+                      "id":  "supervisor-relayer-recovery-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "supervisor-relayer-recovery-failed"
+                                       ],
+                      "signal":  "Service supervisor requested the bridge relayer loop but latest recovery evidence does not show a healthy relayer loop.",
+                      "threshold":  "service-supervisor report has bridgeRelayerLoop.requested true and latest after.bridgeRelayerLoopStatus is not running, command line is not matched, report is unhealthy, or supervisor status failed",
+                      "commands":  [
+                                       "npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop",
+                                       "npm run flowchain:service:supervisor:validate",
                                        "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop",
                                        "npm run flowchain:bridge:emergency-stop"
                                    ]

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-19T18:01:34.6313859Z",
+    "generatedAt":  "2026-05-19T19:04:06.9185129Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -16,19 +16,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  89099
+                        "value":  92227
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  89099
+                        "value":  92227
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  1
+                        "value":  3
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -58,13 +58,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  19
+                        "value":  20
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  12
+                        "value":  13
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -151,6 +151,18 @@
                         "value":  0
                     },
                     {
+                        "name":  "flowchain_supervisor_bridge_relayer_requested",
+                        "type":  "gauge",
+                        "help":  "One when the latest service supervisor report requested bridge relayer loop supervision.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_supervisor_bridge_relayer_recovery_healthy",
+                        "type":  "gauge",
+                        "help":  "One when supervisor relayer-loop recovery evidence is healthy, or relayer supervision was not requested.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_external_tester_ready",
                         "type":  "gauge",
                         "help":  "One when external tester readiness is passed.",
@@ -226,13 +238,13 @@
                         "name":  "flowchain_truth_gates_total",
                         "type":  "gauge",
                         "help":  "Total production truth table gates.",
-                        "value":  50
+                        "value":  51
                     },
                     {
                         "name":  "flowchain_truth_gates_passed",
                         "type":  "gauge",
                         "help":  "Passed production truth table gates.",
-                        "value":  34
+                        "value":  35
                     },
                     {
                         "name":  "flowchain_truth_gates_owner_blocked",
@@ -259,7 +271,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  41,
+    "metricCount":  43,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

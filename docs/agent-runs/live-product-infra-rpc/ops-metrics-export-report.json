@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics_export_report.v0",
-    "generatedAt":  "2026-05-19T18:01:34.8313925Z",
+    "generatedAt":  "2026-05-19T19:04:07.1405183Z",
     "status":  "passed",
     "refresh":  {
                     "performed":  false,
@@ -27,7 +27,7 @@
                     },
     "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.json",
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
-    "metricCount":  41,
+    "metricCount":  43,
     "requiredMetricNames":  [
                                 "flowchain_latest_height",
                                 "flowchain_finalized_height",
@@ -46,6 +46,9 @@
                                 "flowchain_backup_retention_prune_errors",
                                 "flowchain_bridge_live_ready",
                                 "flowchain_bridge_relayer_guardrail_ready",
+                                "flowchain_bridge_relayer_loop_healthy",
+                                "flowchain_supervisor_bridge_relayer_requested",
+                                "flowchain_supervisor_bridge_relayer_recovery_healthy",
                                 "flowchain_external_tester_evidence_ready",
                                 "flowchain_external_tester_evidence_failed_checks",
                                 "flowchain_external_tester_evidence_missing_files",

@@ -178,6 +178,14 @@ $rules = @(
         commands = @("npm run flowchain:service:status", "npm run flowchain:bridge:relayer:loop:validate", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop", "npm run flowchain:bridge:emergency-stop")
     },
     [ordered]@{
+        id = "supervisor-relayer-recovery-failed"
+        severity = "critical"
+        findingCodes = @("supervisor-relayer-recovery-failed")
+        signal = "Service supervisor requested the bridge relayer loop but latest recovery evidence does not show a healthy relayer loop."
+        threshold = "service-supervisor report has bridgeRelayerLoop.requested true and latest after.bridgeRelayerLoopStatus is not running, command line is not matched, report is unhealthy, or supervisor status failed"
+        commands = @("npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop", "npm run flowchain:service:supervisor:validate", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
         id = "deployment-refresh-aborted"
         severity = "critical"
         findingCodes = @("deployment-refresh-aborted")

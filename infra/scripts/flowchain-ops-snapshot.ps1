@@ -38,6 +38,7 @@ function Resolve-OpsInputReportPath {
 
 $paths = [ordered]@{
     serviceStatus = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
+    serviceSupervisor = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-report.json"
     serviceMonitor = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     publicRpc = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
     backup = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
@@ -129,6 +130,7 @@ foreach ($entry in $paths.GetEnumerator()) {
 
 $findings = New-Object System.Collections.ArrayList
 $service = $reports.serviceStatus
+$serviceSupervisor = $reports.serviceSupervisor
 $monitor = $reports.serviceMonitor
 $serviceStatus = Get-OpsStatus -Report $service
 $monitorStatus = Get-OpsStatus -Report $monitor
@@ -146,6 +148,17 @@ $bridgeRelayerLoopReportHealthy = Get-OpsProp -Object $bridgeRelayerLoopReport -
 $bridgeRelayerLoopReportNoSecrets = Get-OpsProp -Object $bridgeRelayerLoopReport -Name "noSecrets" -Default $false
 $bridgeRelayerLoopReportNoBroadcasts = Get-OpsProp -Object $bridgeRelayerLoopReport -Name "noBroadcasts" -Default $false
 $bridgeRelayerLoopReportBlockedOnlyOnOwnerInputs = Get-OpsProp -Object $bridgeRelayerLoopReport -Name "blockedOnlyOnOwnerInputs" -Default $false
+$supervisorStatus = Get-OpsStatus -Report $serviceSupervisor
+$supervisorBridgeRelayerLoop = Get-OpsProp -Object $serviceSupervisor -Name "bridgeRelayerLoop"
+$supervisorBridgeRelayerRequested = Get-OpsProp -Object $supervisorBridgeRelayerLoop -Name "requested" -Default $false
+$supervisorIterations = @((Get-OpsProp -Object $serviceSupervisor -Name "iterations" -Default @()))
+$supervisorLatestIteration = if ($supervisorIterations.Count -gt 0) { $supervisorIterations[$supervisorIterations.Count - 1] } else { $null }
+$supervisorLatestAfter = Get-OpsProp -Object $supervisorLatestIteration -Name "after"
+$supervisorLatestRestartReasons = @((Get-OpsProp -Object $supervisorLatestIteration -Name "restartReasons" -Default @()))
+$supervisorRelayerAfterStatus = [string](Get-OpsProp -Object $supervisorLatestAfter -Name "bridgeRelayerLoopStatus" -Default "missing")
+$supervisorRelayerAfterCommandLineMatched = Get-OpsProp -Object $supervisorLatestAfter -Name "bridgeRelayerLoopCommandLineMatched" -Default $false
+$supervisorRelayerAfterReportHealthy = Get-OpsProp -Object $supervisorLatestAfter -Name "bridgeRelayerLoopReportHealthy" -Default $false
+$supervisorRelayerRecoveryHealthy = (-not ($supervisorBridgeRelayerRequested -eq $true)) -or ($supervisorStatus -in @("passed", "watching") -and $supervisorRelayerAfterStatus -eq "running" -and $supervisorRelayerAfterCommandLineMatched -eq $true -and $supervisorRelayerAfterReportHealthy -eq $true)
 $latestHeight = [string](Get-OpsProp -Object $chain -Name "latestHeight" -Default "")
 $finalizedHeight = [string](Get-OpsProp -Object $chain -Name "finalizedHeight" -Default "")
 $stateAge = [int](Get-OpsProp -Object $chain -Name "stateFileLastWriteAgeSeconds" -Default 999999)
@@ -172,6 +185,9 @@ if ($monitorStatus -ne "passed" -or $monitorHeightAdvanced -ne $true -or $monito
 }
 if ($bridgeRelayerLoopStatus -eq "running" -and $bridgeRelayerLoopReportHealthy -ne $true) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-relayer-loop-unhealthy" -Message "Bridge relayer loop is running without fresh no-secret/no-broadcast health evidence." -Commands @("npm run flowchain:service:status", "npm run flowchain:bridge:relayer:loop:validate", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop", "npm run flowchain:bridge:emergency-stop")
+}
+if ($supervisorBridgeRelayerRequested -eq $true -and $supervisorRelayerRecoveryHealthy -ne $true) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "supervisor-relayer-recovery-failed" -Message "Service supervisor requested the bridge relayer loop but latest recovery evidence does not show a healthy relayer loop." -Commands @("npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop", "npm run flowchain:service:supervisor:validate", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop", "npm run flowchain:bridge:emergency-stop")
 }
 
 $publicRpcStatus = Get-OpsStatus -Report $reports.publicRpc
@@ -314,6 +330,7 @@ $incidentCommands = [ordered]@{
     )
     bridgeRelayerLoop = @(
         "npm run flowchain:service:status",
+        "npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop",
         "npm run flowchain:bridge:relayer:loop:validate",
         "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop"
     )
@@ -338,6 +355,7 @@ $report = [ordered]@{
     }
     reportStatuses = [ordered]@{
         serviceStatus = $serviceStatus
+        serviceSupervisor = $supervisorStatus
         serviceMonitor = $monitorStatus
         bridgeRelayerLoop = $bridgeRelayerLoopStatus
         bridgeRelayerLoopReport = $bridgeRelayerLoopReportStatus
@@ -346,6 +364,12 @@ $report = [ordered]@{
         bridgeRelayerLoopReportNoSecrets = $bridgeRelayerLoopReportNoSecrets
         bridgeRelayerLoopReportNoBroadcasts = $bridgeRelayerLoopReportNoBroadcasts
         bridgeRelayerLoopBlockedOnlyOnOwnerInputs = $bridgeRelayerLoopReportBlockedOnlyOnOwnerInputs
+        supervisorBridgeRelayerRequested = $supervisorBridgeRelayerRequested
+        supervisorBridgeRelayerRecoveryHealthy = $supervisorRelayerRecoveryHealthy
+        supervisorBridgeRelayerAfterStatus = $supervisorRelayerAfterStatus
+        supervisorBridgeRelayerAfterCommandLineMatched = $supervisorRelayerAfterCommandLineMatched
+        supervisorBridgeRelayerAfterReportHealthy = $supervisorRelayerAfterReportHealthy
+        supervisorLatestRestartReasons = @($supervisorLatestRestartReasons)
         publicRpc = $publicRpcStatus
         backup = $backupStatus
         backupRetentionCount = $backupRetentionCount

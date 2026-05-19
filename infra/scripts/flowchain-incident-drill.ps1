@@ -17,6 +17,7 @@ New-Item -ItemType Directory -Force -Path $runDir | Out-Null
 
 $baseReportPaths = [ordered]@{
     "service-status-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
+    "service-supervisor-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-report.json"
     "service-monitor-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     "public-rpc-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
     "backup-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
@@ -87,6 +88,24 @@ function New-DrillFallbackReport {
                 latestHeight = ""
                 heightAdvanced = $false
                 issues = @([ordered]@{ code = "missing-monitor-report"; reason = "fallback report created by incident drill" })
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
+            }
+        }
+        "service-supervisor-report.json" {
+            return [ordered]@{
+                schema = "flowchain.service_supervisor_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "passed"
+                restartAttempts = 0
+                bridgeRelayerLoop = [ordered]@{
+                    requested = $false
+                    pollSeconds = 30
+                    postRestartSettleSeconds = 20
+                    postRestartPollSeconds = 1
+                }
+                iterations = @()
                 envValuesPrinted = $false
                 noSecrets = $true
                 broadcasts = $false
@@ -491,6 +510,52 @@ Invoke-SyntheticOpsCase -Id "bridge-relayer-loop-unhealthy-critical" `
         }
     }
 
+Invoke-SyntheticOpsCase -Id "supervisor-relayer-recovery-failed-critical" `
+    -Requirement "A supervisor configured for bridge relayer loop recovery that still reports an unhealthy relayer after restart is classified as a critical incident." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("supervisor-relayer-recovery-failed") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "service-supervisor-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "failed"
+            Set-DrillProp -Object $report -Name "restartAttempts" -Value 1
+            Set-DrillProp -Object $report -Name "bridgeRelayerLoop" -Value ([ordered]@{
+                requested = $true
+                pollSeconds = 5
+                postRestartSettleSeconds = 30
+                postRestartPollSeconds = 1
+            })
+            Set-DrillProp -Object $report -Name "iterations" -Value @(
+                [ordered]@{
+                    sampledAt = (Get-Date).ToUniversalTime().ToString("o")
+                    restartReasons = @("bridge-relayer-loop-not-running")
+                    restartNeeded = $true
+                    restartPerformed = $true
+                    after = [ordered]@{
+                        exitCode = 0
+                        reportStatus = "passed"
+                        nodeStatus = "running"
+                        controlPlaneStatus = "running"
+                        latestHeight = "100"
+                        finalizedHeight = "100"
+                        stateFileLastWriteAgeSeconds = 1
+                        liveProfile = $true
+                        maxBlocks = 0
+                        bridgeRelayerLoopStatus = "stopped"
+                        bridgeRelayerLoopPid = 0
+                        bridgeRelayerLoopCommandLineMatched = $false
+                        bridgeRelayerLoopReportStatus = "missing"
+                        bridgeRelayerLoopReportHealthy = $false
+                    }
+                }
+            )
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
+        }
+    }
+
 $recoveryReportPath = Join-Path $runDir "recovery-commands-report.json"
 $recoveryChild = Invoke-DrillChild -Name "recovery-command-print" -ArgumentList @(
     "-NoProfile",
@@ -551,6 +616,7 @@ $requiredScenarios = @(
     "no-secret-scan-critical",
     "bridge-relayer-guardrail-critical",
     "bridge-relayer-loop-unhealthy-critical",
+    "supervisor-relayer-recovery-failed-critical",
     "recovery-command-print",
     "post-drill-live-status"
 )
@@ -566,7 +632,7 @@ $checks = [ordered]@{
     allRequiredScenariosCovered = $missingRequiredScenarios.Count -eq 0
     allCasesPassed = $failedCases.Count -eq 0
     failedCasesAbsent = $failedCases.Count -eq 0
-    minimumCaseCountMet = $cases.Count -ge 11
+    minimumCaseCountMet = $cases.Count -ge 12
     recoveryCommandPrinted = $recoveryPassed
     postDrillLiveStatusPassed = $postStatusPassed
     liveStateBeforeReadable = (Get-DrillProp -Object $liveStateBefore -Name "readable" -Default $false) -eq $true
