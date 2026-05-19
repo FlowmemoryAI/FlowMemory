@@ -1,15 +1,15 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 93054
+flowchain_latest_height 93581
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 93054
+flowchain_finalized_height 93581
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
 flowchain_state_file_age_seconds 3
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
-flowchain_monitor_samples_total 3
+flowchain_monitor_samples_total 2
 # HELP flowchain_height_advanced One when service monitor proved advancing block height.
 # TYPE flowchain_height_advanced gauge
 flowchain_height_advanced 1
@@ -21,10 +21,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 22
+flowchain_ops_alert_rules_total 24
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 15
+flowchain_ops_alert_rules_critical 17
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -139,6 +139,30 @@ flowchain_external_tester_evidence_height_advanced 1
 # HELP flowchain_external_tester_evidence_transfer_consistent One when returned tester evidence has matching transfer, transaction, amount, and balance deltas.
 # TYPE flowchain_external_tester_evidence_transfer_consistent gauge
 flowchain_external_tester_evidence_transfer_consistent 1
+# HELP flowchain_dashboard_ui_ready One when dashboard UI readiness is passed.
+# TYPE flowchain_dashboard_ui_ready gauge
+flowchain_dashboard_ui_ready 1
+# HELP flowchain_dashboard_ui_browser_e2e_ready One when dashboard browser E2E proof passed.
+# TYPE flowchain_dashboard_ui_browser_e2e_ready gauge
+flowchain_dashboard_ui_browser_e2e_ready 1
+# HELP flowchain_dashboard_ui_build_ready One when dashboard production build proof passed.
+# TYPE flowchain_dashboard_ui_build_ready gauge
+flowchain_dashboard_ui_build_ready 1
+# HELP flowchain_dashboard_ui_tester_flow_covered One when create, faucet, send, and explorer routes are covered by dashboard UI readiness.
+# TYPE flowchain_dashboard_ui_tester_flow_covered gauge
+flowchain_dashboard_ui_tester_flow_covered 1
+# HELP flowchain_owner_inputs_validation_ready One when owner input validation scenarios are passed.
+# TYPE flowchain_owner_inputs_validation_ready gauge
+flowchain_owner_inputs_validation_ready 1
+# HELP flowchain_owner_inputs_validation_scenarios_total Owner input validation scenario count.
+# TYPE flowchain_owner_inputs_validation_scenarios_total gauge
+flowchain_owner_inputs_validation_scenarios_total 6
+# HELP flowchain_owner_inputs_validation_scenarios_failed Owner input validation scenario failures.
+# TYPE flowchain_owner_inputs_validation_scenarios_failed gauge
+flowchain_owner_inputs_validation_scenarios_failed 0
+# HELP flowchain_owner_inputs_required_env_total Required owner input env names tracked by validation.
+# TYPE flowchain_owner_inputs_required_env_total gauge
+flowchain_owner_inputs_required_env_total 17
 # HELP flowchain_public_deployment_ready One when public deployment contract is passed.
 # TYPE flowchain_public_deployment_ready gauge
 flowchain_public_deployment_ready 0

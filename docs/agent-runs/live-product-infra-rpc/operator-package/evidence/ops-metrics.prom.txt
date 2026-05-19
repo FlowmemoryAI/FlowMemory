@@ -1,15 +1,15 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 89099
+flowchain_latest_height 93581
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 89099
+flowchain_finalized_height 93581
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 1
+flowchain_state_file_age_seconds 3
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
-flowchain_monitor_samples_total 3
+flowchain_monitor_samples_total 2
 # HELP flowchain_height_advanced One when service monitor proved advancing block height.
 # TYPE flowchain_height_advanced gauge
 flowchain_height_advanced 1
@@ -21,10 +21,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 19
+flowchain_ops_alert_rules_total 24
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 12
+flowchain_ops_alert_rules_critical 17
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -40,6 +40,36 @@ flowchain_service_monitor_ready 1
 # HELP flowchain_public_rpc_ready One when public RPC readiness is passed.
 # TYPE flowchain_public_rpc_ready gauge
 flowchain_public_rpc_ready 0
+# HELP flowchain_public_rpc_deployment_bundle_ready One when the public RPC deployment bundle is passed.
+# TYPE flowchain_public_rpc_deployment_bundle_ready gauge
+flowchain_public_rpc_deployment_bundle_ready 1
+# HELP flowchain_public_rpc_deployment_automation_ready One when public RPC deployment automation validation is passed.
+# TYPE flowchain_public_rpc_deployment_automation_ready gauge
+flowchain_public_rpc_deployment_automation_ready 1
+# HELP flowchain_public_rpc_disallowed_origin_preflight One when the public RPC bundle includes a disallowed origin preflight.
+# TYPE flowchain_public_rpc_disallowed_origin_preflight gauge
+flowchain_public_rpc_disallowed_origin_preflight 1
+# HELP flowchain_public_rpc_broad_state_blocked_preflight One when the public RPC bundle blocks broad state paths in preflight.
+# TYPE flowchain_public_rpc_broad_state_blocked_preflight gauge
+flowchain_public_rpc_broad_state_blocked_preflight 1
+# HELP flowchain_public_rpc_private_wallet_create_blocked_preflight One when the public RPC bundle blocks private wallet creation paths in preflight.
+# TYPE flowchain_public_rpc_private_wallet_create_blocked_preflight gauge
+flowchain_public_rpc_private_wallet_create_blocked_preflight 1
+# HELP flowchain_public_rpc_auth_forwarding_scoped One when public RPC authorization forwarding is scoped to tester writes.
+# TYPE flowchain_public_rpc_auth_forwarding_scoped gauge
+flowchain_public_rpc_auth_forwarding_scoped 1
+# HELP flowchain_public_rpc_rendered_disallowed_origin_probe One when rendered public RPC preflight has the disallowed origin probe.
+# TYPE flowchain_public_rpc_rendered_disallowed_origin_probe gauge
+flowchain_public_rpc_rendered_disallowed_origin_probe 1
+# HELP flowchain_public_rpc_rendered_broad_state_blocked_probe One when rendered public RPC preflight blocks broad state paths.
+# TYPE flowchain_public_rpc_rendered_broad_state_blocked_probe gauge
+flowchain_public_rpc_rendered_broad_state_blocked_probe 1
+# HELP flowchain_public_rpc_rendered_private_wallet_create_blocked_probe One when rendered public RPC preflight blocks private wallet creation paths.
+# TYPE flowchain_public_rpc_rendered_private_wallet_create_blocked_probe gauge
+flowchain_public_rpc_rendered_private_wallet_create_blocked_probe 1
+# HELP flowchain_public_rpc_rendered_auth_forwarding_scoped One when rendered public RPC authorization forwarding is scoped to tester writes.
+# TYPE flowchain_public_rpc_rendered_auth_forwarding_scoped gauge
+flowchain_public_rpc_rendered_auth_forwarding_scoped 1
 # HELP flowchain_backup_ready One when backup readiness is passed.
 # TYPE flowchain_backup_ready gauge
 flowchain_backup_ready 0
@@ -64,9 +94,30 @@ flowchain_bridge_infra_ready 0
 # HELP flowchain_bridge_relayer_guardrail_ready One when bridge relayer fail-closed guardrail is ready.
 # TYPE flowchain_bridge_relayer_guardrail_ready gauge
 flowchain_bridge_relayer_guardrail_ready 1
+# HELP flowchain_bridge_direct_observe_guardrail_ready One when standalone Base observer cursor guardrail is ready.
+# TYPE flowchain_bridge_direct_observe_guardrail_ready gauge
+flowchain_bridge_direct_observe_guardrail_ready 1
+# HELP flowchain_bridge_direct_observe_staged_cursor_default One when standalone Base observer defaults to staged cursor state.
+# TYPE flowchain_bridge_direct_observe_staged_cursor_default gauge
+flowchain_bridge_direct_observe_staged_cursor_default 1
+# HELP flowchain_bridge_direct_observe_cursor_not_final One when standalone Base observer cursor state is not the final relayer cursor.
+# TYPE flowchain_bridge_direct_observe_cursor_not_final gauge
+flowchain_bridge_direct_observe_cursor_not_final 1
+# HELP flowchain_bridge_direct_observe_final_cursor_unchanged One when standalone Base observer leaves final relayer cursor unchanged.
+# TYPE flowchain_bridge_direct_observe_final_cursor_unchanged gauge
+flowchain_bridge_direct_observe_final_cursor_unchanged 1
+# HELP flowchain_bridge_direct_observe_staged_cursor_not_written One when missing-input standalone Base observer leaves staged cursor state unwritten.
+# TYPE flowchain_bridge_direct_observe_staged_cursor_not_written gauge
+flowchain_bridge_direct_observe_staged_cursor_not_written 1
 # HELP flowchain_bridge_relayer_loop_healthy One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence.
 # TYPE flowchain_bridge_relayer_loop_healthy gauge
 flowchain_bridge_relayer_loop_healthy 0
+# HELP flowchain_supervisor_bridge_relayer_requested One when the latest service supervisor report requested bridge relayer loop supervision.
+# TYPE flowchain_supervisor_bridge_relayer_requested gauge
+flowchain_supervisor_bridge_relayer_requested 0
+# HELP flowchain_supervisor_bridge_relayer_recovery_healthy One when supervisor relayer-loop recovery evidence is healthy, or relayer supervision was not requested.
+# TYPE flowchain_supervisor_bridge_relayer_recovery_healthy gauge
+flowchain_supervisor_bridge_relayer_recovery_healthy 1
 # HELP flowchain_external_tester_ready One when external tester readiness is passed.
 # TYPE flowchain_external_tester_ready gauge
 flowchain_external_tester_ready 0
@@ -88,6 +139,30 @@ flowchain_external_tester_evidence_height_advanced 1
 # HELP flowchain_external_tester_evidence_transfer_consistent One when returned tester evidence has matching transfer, transaction, amount, and balance deltas.
 # TYPE flowchain_external_tester_evidence_transfer_consistent gauge
 flowchain_external_tester_evidence_transfer_consistent 1
+# HELP flowchain_dashboard_ui_ready One when dashboard UI readiness is passed.
+# TYPE flowchain_dashboard_ui_ready gauge
+flowchain_dashboard_ui_ready 1
+# HELP flowchain_dashboard_ui_browser_e2e_ready One when dashboard browser E2E proof passed.
+# TYPE flowchain_dashboard_ui_browser_e2e_ready gauge
+flowchain_dashboard_ui_browser_e2e_ready 1
+# HELP flowchain_dashboard_ui_build_ready One when dashboard production build proof passed.
+# TYPE flowchain_dashboard_ui_build_ready gauge
+flowchain_dashboard_ui_build_ready 1
+# HELP flowchain_dashboard_ui_tester_flow_covered One when create, faucet, send, and explorer routes are covered by dashboard UI readiness.
+# TYPE flowchain_dashboard_ui_tester_flow_covered gauge
+flowchain_dashboard_ui_tester_flow_covered 1
+# HELP flowchain_owner_inputs_validation_ready One when owner input validation scenarios are passed.
+# TYPE flowchain_owner_inputs_validation_ready gauge
+flowchain_owner_inputs_validation_ready 1
+# HELP flowchain_owner_inputs_validation_scenarios_total Owner input validation scenario count.
+# TYPE flowchain_owner_inputs_validation_scenarios_total gauge
+flowchain_owner_inputs_validation_scenarios_total 6
+# HELP flowchain_owner_inputs_validation_scenarios_failed Owner input validation scenario failures.
+# TYPE flowchain_owner_inputs_validation_scenarios_failed gauge
+flowchain_owner_inputs_validation_scenarios_failed 0
+# HELP flowchain_owner_inputs_required_env_total Required owner input env names tracked by validation.
+# TYPE flowchain_owner_inputs_required_env_total gauge
+flowchain_owner_inputs_required_env_total 17
 # HELP flowchain_public_deployment_ready One when public deployment contract is passed.
 # TYPE flowchain_public_deployment_ready gauge
 flowchain_public_deployment_ready 0
@@ -105,10 +180,10 @@ flowchain_live_cutover_missing_owner_inputs 14
 flowchain_no_secret_ready 1
 # HELP flowchain_truth_gates_total Total production truth table gates.
 # TYPE flowchain_truth_gates_total gauge
-flowchain_truth_gates_total 50
+flowchain_truth_gates_total 51
 # HELP flowchain_truth_gates_passed Passed production truth table gates.
 # TYPE flowchain_truth_gates_passed gauge
-flowchain_truth_gates_passed 34
+flowchain_truth_gates_passed 35
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
 flowchain_truth_gates_owner_blocked 16

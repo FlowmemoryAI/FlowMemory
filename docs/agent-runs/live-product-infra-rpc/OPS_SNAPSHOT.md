@@ -1,9 +1,9 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-19T20:26:54.3561385Z
+Generated: 2026-05-19T21:25:31.4197430Z
 Status: blocked
-Latest height: 93054
-Finalized height: 93054
+Latest height: 93581
+Finalized height: 93581
 
 ## Findings
 
@@ -36,6 +36,16 @@ Finalized height: 93054
 - npm run flowchain:public-rpc:deployment-bundle
 - npm run flowchain:public-rpc:deployment:automation
 - npm run flowchain:external-tester:packet
+
+### productSurface
+- npm run flowchain:dashboard:ui:readiness
+- npm run flowchain:tester:evidence:validate
+- npm run flowchain:external-tester:packet
+
+### ownerInputs
+- npm run flowchain:owner-inputs:validate
+- npm run flowchain:owner-inputs
+- npm run flowchain:owner-env:readiness
 
 ### drills
 - npm run flowchain:ops:incident-drill

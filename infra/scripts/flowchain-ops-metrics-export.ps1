@@ -33,6 +33,8 @@ $paths = [ordered]@{
     bridgeRelayerGuardrail = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     externalTesterEvidence = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
+    dashboardUi = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
+    ownerInputsValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     publicDeployment = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     liveCutover = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json"
     truthTable = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
@@ -210,6 +212,8 @@ $opsAlerts = $reports.opsAlerts
 $serviceStatus = $reports.serviceStatus
 $serviceMonitor = $reports.serviceMonitor
 $externalTesterEvidence = $reports.externalTesterEvidence
+$dashboardUi = $reports.dashboardUi
+$ownerInputsValidation = $reports.ownerInputsValidation
 $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
 $publicRpcDeploymentAutomation = $reports.publicRpcDeploymentAutomation
 $liveCutover = $reports.liveCutover
@@ -221,6 +225,10 @@ $chain = Get-MetricsProp -Object $opsSnapshot -Name "chain"
 $reportStatuses = Get-MetricsProp -Object $opsSnapshot -Name "reportStatuses"
 $truthCounts = Get-MetricsProp -Object $truthTable -Name "classificationCounts"
 $externalTesterEvidenceChecks = Get-MetricsProp -Object $externalTesterEvidence -Name "checks"
+$dashboardUiChecks = Get-MetricsProp -Object $dashboardUi -Name "checks"
+$ownerInputsValidationScenarios = @((Get-MetricsProp -Object $ownerInputsValidation -Name "scenarios" -Default @()))
+$ownerInputsValidationFailedScenarios = @($ownerInputsValidationScenarios | Where-Object { (Get-MetricsProp -Object $_ -Name "passed" -Default $false) -ne $true })
+$ownerInputsValidationRequiredEnvNames = @((Get-MetricsProp -Object $ownerInputsValidation -Name "requiredEnvNames" -Default @()))
 $publicRpcDeploymentBundleChecks = Get-MetricsProp -Object $publicRpcDeploymentBundle -Name "checks"
 $publicRpcDeploymentAutomationChecks = Get-MetricsProp -Object $publicRpcDeploymentAutomation -Name "checks"
 $externalTesterEvidenceTransferConsistent = (Get-MetricsProp -Object $externalTesterEvidenceChecks -Name "transferFound" -Default $false) -eq $true `
@@ -277,6 +285,14 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_miss
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_secret_findings" -Help "Secret marker findings in external tester returned evidence." -Value (@((Get-MetricsProp -Object $externalTesterEvidence -Name "secretMarkerFindings" -Default @())).Count)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_height_advanced" -Help "One when returned tester evidence shows block height advanced." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $externalTesterEvidenceChecks -Name "blockHeightAdvanced"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_transfer_consistent" -Help "One when returned tester evidence has matching transfer, transaction, amount, and balance deltas." -Value (ConvertTo-MetricBool -Value $externalTesterEvidenceTransferConsistent)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_ready" -Help "One when dashboard UI readiness is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $dashboardUi))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_browser_e2e_ready" -Help "One when dashboard browser E2E proof passed." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $dashboardUiChecks -Name "dashboardBrowserE2ePassed" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_build_ready" -Help "One when dashboard production build proof passed." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $dashboardUiChecks -Name "dashboardBuildPassed" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_tester_flow_covered" -Help "One when create, faucet, send, and explorer routes are covered by dashboard UI readiness." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $dashboardUiChecks -Name "testerWalletCreateCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "testerFaucetCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "testerSendCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "explorerRouteCovered" -Default $false) -eq $true)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_inputs_validation_ready" -Help "One when owner input validation scenarios are passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $ownerInputsValidation))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_inputs_validation_scenarios_total" -Help "Owner input validation scenario count." -Value (ConvertTo-MetricNumber -Value $ownerInputsValidationScenarios.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_inputs_validation_scenarios_failed" -Help "Owner input validation scenario failures." -Value (ConvertTo-MetricNumber -Value $ownerInputsValidationFailedScenarios.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_inputs_required_env_total" -Help "Required owner input env names tracked by validation." -Value (ConvertTo-MetricNumber -Value $ownerInputsValidationRequiredEnvNames.Count)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_deployment_ready" -Help "One when public deployment contract is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "publicDeployment"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_ready" -Help "One when the live cutover rehearsal is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $liveCutover))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_owner_blocked" -Help "One when live cutover is blocked only on known owner inputs." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $liveCutover -Name "blockedOnlyOnKnownExternalOwnerInputs"))
@@ -306,6 +322,8 @@ $metricsJson = [ordered]@{
         publicRpcDeploymentBundleStatus = Get-MetricsStatus -Report $publicRpcDeploymentBundle
         publicRpcDeploymentAutomationStatus = Get-MetricsStatus -Report $publicRpcDeploymentAutomation
         externalTesterEvidenceStatus = Get-MetricsStatus -Report $externalTesterEvidence
+        dashboardUiStatus = Get-MetricsStatus -Report $dashboardUi
+        ownerInputsValidationStatus = Get-MetricsStatus -Report $ownerInputsValidation
         liveCutoverStatus = Get-MetricsStatus -Report $liveCutover
         truthTableStatus = Get-MetricsStatus -Report $truthTable
         noSecretStatus = Get-MetricsStatus -Report $noSecret
@@ -365,6 +383,14 @@ $requiredMetricNames = @(
     "flowchain_external_tester_evidence_secret_findings",
     "flowchain_external_tester_evidence_height_advanced",
     "flowchain_external_tester_evidence_transfer_consistent",
+    "flowchain_dashboard_ui_ready",
+    "flowchain_dashboard_ui_browser_e2e_ready",
+    "flowchain_dashboard_ui_build_ready",
+    "flowchain_dashboard_ui_tester_flow_covered",
+    "flowchain_owner_inputs_validation_ready",
+    "flowchain_owner_inputs_validation_scenarios_total",
+    "flowchain_owner_inputs_validation_scenarios_failed",
+    "flowchain_owner_inputs_required_env_total",
     "flowchain_public_deployment_ready",
     "flowchain_live_cutover_ready",
     "flowchain_live_cutover_owner_blocked",
@@ -385,6 +411,8 @@ $checks = [ordered]@{
     serviceStatusLoaded = $null -ne $serviceStatus
     serviceMonitorLoaded = $null -ne $serviceMonitor
     externalTesterEvidenceLoaded = $null -ne $externalTesterEvidence
+    dashboardUiLoaded = $null -ne $dashboardUi
+    ownerInputsValidationLoaded = $null -ne $ownerInputsValidation
     liveCutoverLoaded = $null -ne $liveCutover
     truthTableLoaded = $null -ne $truthTable
     noSecretLoaded = $null -ne $noSecret
@@ -419,6 +447,18 @@ $checks = [ordered]@{
         "flowchain_public_rpc_rendered_broad_state_blocked_probe",
         "flowchain_public_rpc_rendered_private_wallet_create_blocked_probe",
         "flowchain_public_rpc_rendered_auth_forwarding_scoped"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    dashboardUiMetricsPresent = @(
+        "flowchain_dashboard_ui_ready",
+        "flowchain_dashboard_ui_browser_e2e_ready",
+        "flowchain_dashboard_ui_build_ready",
+        "flowchain_dashboard_ui_tester_flow_covered"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    ownerInputsValidationMetricsPresent = @(
+        "flowchain_owner_inputs_validation_ready",
+        "flowchain_owner_inputs_validation_scenarios_total",
+        "flowchain_owner_inputs_validation_scenarios_failed",
+        "flowchain_owner_inputs_required_env_total"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     prometheusHasHelpAndType = $prometheusTextFromFile.Contains("# HELP flowchain_latest_height") -and $prometheusTextFromFile.Contains("# TYPE flowchain_latest_height gauge")
     prometheusContainsNoUrls = $prometheusTextFromFile -notmatch 'https?://'

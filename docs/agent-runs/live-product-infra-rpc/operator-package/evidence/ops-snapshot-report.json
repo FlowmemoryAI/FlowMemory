@@ -1,24 +1,34 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-19T14:20:08.7554472Z",
+    "generatedAt":  "2026-05-19T21:25:31.4197430Z",
     "status":  "blocked",
     "refresh":  {
-                    "performed":  false,
+                    "performed":  true,
                     "steps":  [
-
+                                  {
+                                      "name":  "service-status",
+                                      "exitCode":  0,
+                                      "outputLineCount":  10
+                                  },
+                                  {
+                                      "name":  "service-monitor",
+                                      "exitCode":  0,
+                                      "outputLineCount":  4
+                                  }
                               ],
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "89099",
-                  "finalizedHeight":  "89099",
-                  "stateFileLastWriteAgeSeconds":  1,
+                  "latestHeight":  "93581",
+                  "finalizedHeight":  "93581",
+                  "stateFileLastWriteAgeSeconds":  3,
                   "monitorStatus":  "passed",
-                  "monitorSamples":  3,
+                  "monitorSamples":  2,
                   "monitorHeightAdvanced":  true
               },
     "reportStatuses":  {
                            "serviceStatus":  "passed",
+                           "serviceSupervisor":  "passed",
                            "serviceMonitor":  "passed",
                            "bridgeRelayerLoop":  "stopped",
                            "bridgeRelayerLoopReport":  "blocked",
@@ -27,7 +37,26 @@
                            "bridgeRelayerLoopReportNoSecrets":  true,
                            "bridgeRelayerLoopReportNoBroadcasts":  true,
                            "bridgeRelayerLoopBlockedOnlyOnOwnerInputs":  true,
+                           "supervisorBridgeRelayerRequested":  false,
+                           "supervisorBridgeRelayerRecoveryHealthy":  true,
+                           "supervisorBridgeRelayerAfterStatus":  "missing",
+                           "supervisorBridgeRelayerAfterCommandLineMatched":  false,
+                           "supervisorBridgeRelayerAfterReportHealthy":  false,
+                           "supervisorLatestRestartReasons":  [
+
+                                                              ],
                            "publicRpc":  "blocked",
+                           "publicRpcDeploymentBundle":  "passed",
+                           "publicRpcDeploymentAutomation":  "passed",
+                           "publicRpcEdgeHardeningReady":  true,
+                           "publicRpcDisallowedOriginPreflight":  true,
+                           "publicRpcBroadStateBlockedPreflight":  true,
+                           "publicRpcPrivateWalletCreateBlockedPreflight":  true,
+                           "publicRpcAuthorizationForwardingScoped":  true,
+                           "publicRpcRenderedDisallowedOriginProbe":  true,
+                           "publicRpcRenderedBroadStateBlockedProbe":  true,
+                           "publicRpcRenderedPrivateWalletCreateBlockedProbe":  true,
+                           "publicRpcRenderedAuthorizationForwardingScoped":  true,
                            "backup":  "blocked",
                            "backupRetentionCount":  null,
                            "backupRetentionCandidateCount":  null,
@@ -38,6 +67,11 @@
                            "bridgeRelayer":  "blocked",
                            "bridgeRelayerGuardrail":  "passed",
                            "bridgeRelayerGuardrailReady":  true,
+                           "bridgeRelayerDirectObserveGuardrailReady":  true,
+                           "bridgeDirectObserveUsesStagedCursorByDefault":  true,
+                           "bridgeDirectObserveCursorNotFinal":  true,
+                           "bridgeDirectObserveFinalCursorUnchanged":  true,
+                           "bridgeDirectObserveStagedCursorNotWritten":  true,
                            "bridgeRelayerLatencyGate":  "not-run",
                            "bridgeRelayerCursorCommitRequired":  true,
                            "bridgeRelayerCursorCommitted":  false,
@@ -51,6 +85,19 @@
                            "externalTesterEvidenceCredentialUrls":  0,
                            "externalTesterEvidenceEnvAssignments":  0,
                            "externalTesterEvidenceTransferConsistent":  true,
+                           "dashboardUi":  "passed",
+                           "dashboardUiReady":  true,
+                           "dashboardUiBrowserE2e":  true,
+                           "dashboardUiBuild":  true,
+                           "dashboardUiTesterWalletCreateCovered":  true,
+                           "dashboardUiTesterFaucetCovered":  true,
+                           "dashboardUiTesterSendCovered":  true,
+                           "dashboardUiExplorerRouteCovered":  true,
+                           "ownerInputsValidation":  "passed",
+                           "ownerInputsValidationReady":  true,
+                           "ownerInputsValidationScenarioCount":  6,
+                           "ownerInputsValidationFailedScenarios":  0,
+                           "ownerInputsValidationRequiredEnvCount":  17,
                            "publicDeployment":  "blocked",
                            "deploymentRefreshAborted":  false,
                            "deploymentRefreshAbortStep":  "",
@@ -144,8 +191,20 @@
                              "publicExposure":  [
                                                     "npm run flowchain:public-rpc:check",
                                                     "npm run flowchain:public-rpc:abuse-test",
+                                                    "npm run flowchain:public-rpc:deployment-bundle",
+                                                    "npm run flowchain:public-rpc:deployment:automation",
                                                     "npm run flowchain:external-tester:packet"
                                                 ],
+                             "productSurface":  [
+                                                    "npm run flowchain:dashboard:ui:readiness",
+                                                    "npm run flowchain:tester:evidence:validate",
+                                                    "npm run flowchain:external-tester:packet"
+                                                ],
+                             "ownerInputs":  [
+                                                 "npm run flowchain:owner-inputs:validate",
+                                                 "npm run flowchain:owner-inputs",
+                                                 "npm run flowchain:owner-env:readiness"
+                                             ],
                              "drills":  [
                                             "npm run flowchain:ops:incident-drill",
                                             "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh"
@@ -157,14 +216,18 @@
                                            ],
                              "bridgeRelayerLoop":  [
                                                        "npm run flowchain:service:status",
+                                                       "npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop",
                                                        "npm run flowchain:bridge:relayer:loop:validate",
                                                        "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop"
                                                    ]
                          },
     "reportPaths":  {
                         "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
+                        "serviceSupervisor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-report.json",
                         "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json",
                         "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
+                        "publicRpcDeploymentBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle-report.json",
+                        "publicRpcDeploymentAutomation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-automation-report.json",
                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
                         "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
                         "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
@@ -172,6 +235,8 @@
                         "bridgeRelayerGuardrail":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-guardrail-validation-report.json",
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
                         "externalTesterEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-evidence-validation-report.json",
+                        "dashboardUi":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
+                        "ownerInputsValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-validation-report.json",
                         "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
                         "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json"
                     },

@@ -28,6 +28,9 @@ $baseReportPaths = [ordered]@{
     "bridge-relayer-once-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     "bridge-relayer-guardrail-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     "external-tester-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
+    "external-tester-evidence-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
+    "dashboard-ui-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
+    "owner-inputs-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     "public-deployment-contract-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     "no-secret-scan-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
 }
@@ -120,6 +123,71 @@ function New-DrillFallbackReport {
                 status = "passed"
                 noSecrets = $true
                 envValuesPrinted = $false
+            }
+        }
+        "external-tester-evidence-validation-report.json" {
+            return [ordered]@{
+                schema = "flowchain.external_tester_evidence_validation_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "passed"
+                checks = [ordered]@{
+                    transferFound = $true
+                    transferMatchesAccounts = $true
+                    transferAmountMatches = $true
+                    transactionIdMatches = $true
+                    senderDebited = $true
+                    recipientCredited = $true
+                    blockHeightAdvanced = $true
+                }
+                failedChecks = @()
+                missingRequiredFiles = @()
+                invalidJsonFiles = @()
+                secretMarkerFindings = @()
+                credentialUrlFindings = @()
+                envAssignmentFindings = @()
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
+            }
+        }
+        "dashboard-ui-readiness-report.json" {
+            return [ordered]@{
+                schema = "flowchain.dashboard_ui_readiness_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "passed"
+                checks = [ordered]@{
+                    testerWalletCreateCovered = $true
+                    testerFaucetCovered = $true
+                    testerSendCovered = $true
+                    explorerRouteCovered = $true
+                    noSecretLeakageAsserted = $true
+                    dashboardBrowserE2ePassed = $true
+                    dashboardBuildPassed = $true
+                }
+                failedChecks = @()
+                secretMarkerFindings = @()
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
+            }
+        }
+        "owner-inputs-validation-report.json" {
+            return [ordered]@{
+                schema = "flowchain.owner_inputs_validation_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "passed"
+                requiredEnvNames = @("FLOWCHAIN_RPC_PUBLIC_URL", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_RPC_STATE_BACKUP_PATH")
+                scenarios = @(
+                    [ordered]@{ name = "missing"; passed = $true },
+                    [ordered]@{ name = "invalid"; passed = $true },
+                    [ordered]@{ name = "valid-structure"; passed = $true },
+                    [ordered]@{ name = "valid-owner-env-file"; passed = $true },
+                    [ordered]@{ name = "missing-owner-env-file"; passed = $true },
+                    [ordered]@{ name = "malformed-owner-env-file"; passed = $true }
+                )
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
             }
         }
         "public-rpc-deployment-bundle-report.json" {
@@ -262,7 +330,7 @@ function Test-DrillCommandGroups {
     param([AllowNull()][object] $Report)
 
     $commands = Get-DrillProp -Object $Report -Name "incidentCommands"
-    foreach ($name in @("status", "restart", "backupRecovery", "publicExposure", "emergency")) {
+    foreach ($name in @("status", "restart", "backupRecovery", "publicExposure", "productSurface", "ownerInputs", "emergency")) {
         $group = Get-DrillProp -Object $commands -Name $name -Default @()
         if (@($group).Count -eq 0) {
             return $false
@@ -503,6 +571,52 @@ Invoke-SyntheticOpsCase -Id "no-secret-scan-critical" `
         }
     }
 
+Invoke-SyntheticOpsCase -Id "dashboard-ui-readiness-critical" `
+    -Requirement "A failed dashboard wallet/faucet/send/explorer readiness proof is classified as a critical incident before tester launch." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("dashboard-ui-readiness-failed") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "dashboard-ui-readiness-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "failed"
+            $checks = Get-DrillProp -Object $report -Name "checks"
+            if ($null -eq $checks) {
+                $checks = [ordered]@{}
+                Set-DrillProp -Object $report -Name "checks" -Value $checks
+            }
+            Set-DrillProp -Object $checks -Name "testerWalletCreateCovered" -Value $false
+            Set-DrillProp -Object $checks -Name "testerFaucetCovered" -Value $false
+            Set-DrillProp -Object $checks -Name "testerSendCovered" -Value $false
+            Set-DrillProp -Object $checks -Name "dashboardBrowserE2ePassed" -Value $false
+            Set-DrillProp -Object $report -Name "failedChecks" -Value @("testerWalletCreateCovered", "testerFaucetCovered", "testerSendCovered", "dashboardBrowserE2ePassed")
+            Set-DrillProp -Object $report -Name "secretMarkerFindings" -Value @()
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
+        }
+    }
+
+Invoke-SyntheticOpsCase -Id "owner-inputs-validation-critical" `
+    -Requirement "A broken owner-input validator is classified as a critical incident before live cutover instructions are trusted." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("owner-inputs-validation-failed") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "owner-inputs-validation-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "failed"
+            Set-DrillProp -Object $report -Name "requiredEnvNames" -Value @()
+            Set-DrillProp -Object $report -Name "scenarios" -Value @(
+                [ordered]@{ name = "missing"; passed = $true },
+                [ordered]@{ name = "invalid"; passed = $false }
+            )
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
+        }
+    }
+
 Invoke-SyntheticOpsCase -Id "public-rpc-edge-hardening-critical" `
     -Requirement "A public RPC edge bundle missing deny-origin, blocked-private-path, or scoped authorization proof is classified as a critical incident." `
     -ExpectedStatus "failed" `
@@ -728,6 +842,8 @@ $requiredScenarios = @(
     "stale-state-critical",
     "height-not-advancing-critical",
     "no-secret-scan-critical",
+    "dashboard-ui-readiness-critical",
+    "owner-inputs-validation-critical",
     "public-rpc-edge-hardening-critical",
     "bridge-relayer-guardrail-critical",
     "bridge-direct-observe-cursor-critical",
@@ -748,7 +864,7 @@ $checks = [ordered]@{
     allRequiredScenariosCovered = $missingRequiredScenarios.Count -eq 0
     allCasesPassed = $failedCases.Count -eq 0
     failedCasesAbsent = $failedCases.Count -eq 0
-    minimumCaseCountMet = $cases.Count -ge 14
+    minimumCaseCountMet = $cases.Count -ge 16
     recoveryCommandPrinted = $recoveryPassed
     postDrillLiveStatusPassed = $postStatusPassed
     liveStateBeforeReadable = (Get-DrillProp -Object $liveStateBefore -Name "readable" -Default $false) -eq $true

@@ -50,6 +50,8 @@ $paths = [ordered]@{
     bridgeRelayerGuardrail = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     externalTester = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     externalTesterEvidence = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
+    dashboardUi = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
+    ownerInputsValidation = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     publicDeployment = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     noSecret = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
 }
@@ -273,6 +275,30 @@ $externalTesterEvidenceTransferConsistent = (Get-OpsProp -Object $externalTester
     -and (Get-OpsProp -Object $externalTesterEvidenceChecks -Name "transactionIdMatches" -Default $false) -eq $true `
     -and (Get-OpsProp -Object $externalTesterEvidenceChecks -Name "senderDebited" -Default $false) -eq $true `
     -and (Get-OpsProp -Object $externalTesterEvidenceChecks -Name "recipientCredited" -Default $false) -eq $true
+$dashboardUiStatus = Get-OpsStatus -Report $reports.dashboardUi
+$dashboardUiChecks = Get-OpsProp -Object $reports.dashboardUi -Name "checks"
+$dashboardUiReady = $dashboardUiStatus -eq "passed" `
+    -and ((Get-OpsProp -Object $dashboardUiChecks -Name "testerWalletCreateCovered" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $dashboardUiChecks -Name "testerFaucetCovered" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $dashboardUiChecks -Name "testerSendCovered" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $dashboardUiChecks -Name "explorerRouteCovered" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $dashboardUiChecks -Name "noSecretLeakageAsserted" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $dashboardUiChecks -Name "dashboardBrowserE2ePassed" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $dashboardUiChecks -Name "dashboardBuildPassed" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.dashboardUi -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.dashboardUi -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.dashboardUi -Name "broadcasts" -Default $true) -eq $false)
+$ownerInputsValidationStatus = Get-OpsStatus -Report $reports.ownerInputsValidation
+$ownerInputsValidationScenarios = @((Get-OpsProp -Object $reports.ownerInputsValidation -Name "scenarios" -Default @()))
+$ownerInputsValidationFailedScenarios = @($ownerInputsValidationScenarios | Where-Object { (Get-OpsProp -Object $_ -Name "passed" -Default $false) -ne $true })
+$ownerInputsValidationRequiredEnvNames = @((Get-OpsProp -Object $reports.ownerInputsValidation -Name "requiredEnvNames" -Default @()))
+$ownerInputsValidationReady = $ownerInputsValidationStatus -eq "passed" `
+    -and $ownerInputsValidationScenarios.Count -ge 6 `
+    -and $ownerInputsValidationFailedScenarios.Count -eq 0 `
+    -and $ownerInputsValidationRequiredEnvNames.Count -gt 0 `
+    -and ((Get-OpsProp -Object $reports.ownerInputsValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.ownerInputsValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.ownerInputsValidation -Name "broadcasts" -Default $true) -eq $false)
 $deploymentStatus = Get-OpsStatus -Report $reports.publicDeployment
 $deploymentRefresh = Get-OpsProp -Object $reports.publicDeployment -Name "dependencyRefresh"
 $deploymentRefreshAborted = (Get-OpsProp -Object $deploymentRefresh -Name "aborted" -Default $false) -eq $true
@@ -326,6 +352,12 @@ if ($externalTesterEvidenceSecretFindings.Count -gt 0 -or $externalTesterEvidenc
 elseif ($externalTesterEvidenceStatus -ne "passed" -or $externalTesterEvidenceFailedChecks.Count -gt 0 -or $externalTesterEvidenceMissingFiles.Count -gt 0 -or $externalTesterEvidenceInvalidJson.Count -gt 0 -or $externalTesterEvidenceTransferConsistent -ne $true) {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "external-tester-evidence-invalid" -Message "External tester returned evidence validation is not passed or transfer proof is inconsistent." -Commands @("npm run flowchain:tester:evidence:validate", "npm run flowchain:external-tester:packet -- -AllowBlocked")
 }
+if (-not $dashboardUiReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "dashboard-ui-readiness-failed" -Message "Dashboard wallet, faucet, send, explorer, or no-secret UI readiness proof is missing or failed." -Commands @("npm run flowchain:dashboard:ui:readiness", "npm run flowchain:dashboard:build", "npm test --prefix apps/dashboard")
+}
+if (-not $ownerInputsValidationReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "owner-inputs-validation-failed" -Message "Owner input validation scenarios are missing, failed, or unsafe to use for live cutover." -Commands @("npm run flowchain:owner-inputs:validate", "npm run flowchain:owner-inputs", "npm run flowchain:owner-env:readiness")
+}
 if ($deploymentRefreshUnsafe) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "deployment-refresh-aborted" -Message "Public deployment dependency refresh aborted or skipped dependency gates." -Commands @("npm run flowchain:public-deployment:contract -- -AllowBlocked", "npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked", "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh")
 }
@@ -361,6 +393,16 @@ $incidentCommands = [ordered]@{
         "npm run flowchain:public-rpc:deployment-bundle",
         "npm run flowchain:public-rpc:deployment:automation",
         "npm run flowchain:external-tester:packet"
+    )
+    productSurface = @(
+        "npm run flowchain:dashboard:ui:readiness",
+        "npm run flowchain:tester:evidence:validate",
+        "npm run flowchain:external-tester:packet"
+    )
+    ownerInputs = @(
+        "npm run flowchain:owner-inputs:validate",
+        "npm run flowchain:owner-inputs",
+        "npm run flowchain:owner-env:readiness"
     )
     drills = @(
         "npm run flowchain:ops:incident-drill",
@@ -453,6 +495,19 @@ $report = [ordered]@{
         externalTesterEvidenceCredentialUrls = $externalTesterEvidenceCredentialUrls.Count
         externalTesterEvidenceEnvAssignments = $externalTesterEvidenceEnvAssignments.Count
         externalTesterEvidenceTransferConsistent = $externalTesterEvidenceTransferConsistent
+        dashboardUi = $dashboardUiStatus
+        dashboardUiReady = $dashboardUiReady
+        dashboardUiBrowserE2e = Get-OpsProp -Object $dashboardUiChecks -Name "dashboardBrowserE2ePassed" -Default $false
+        dashboardUiBuild = Get-OpsProp -Object $dashboardUiChecks -Name "dashboardBuildPassed" -Default $false
+        dashboardUiTesterWalletCreateCovered = Get-OpsProp -Object $dashboardUiChecks -Name "testerWalletCreateCovered" -Default $false
+        dashboardUiTesterFaucetCovered = Get-OpsProp -Object $dashboardUiChecks -Name "testerFaucetCovered" -Default $false
+        dashboardUiTesterSendCovered = Get-OpsProp -Object $dashboardUiChecks -Name "testerSendCovered" -Default $false
+        dashboardUiExplorerRouteCovered = Get-OpsProp -Object $dashboardUiChecks -Name "explorerRouteCovered" -Default $false
+        ownerInputsValidation = $ownerInputsValidationStatus
+        ownerInputsValidationReady = $ownerInputsValidationReady
+        ownerInputsValidationScenarioCount = $ownerInputsValidationScenarios.Count
+        ownerInputsValidationFailedScenarios = $ownerInputsValidationFailedScenarios.Count
+        ownerInputsValidationRequiredEnvCount = $ownerInputsValidationRequiredEnvNames.Count
         publicDeployment = $deploymentStatus
         deploymentRefreshAborted = $deploymentRefreshAborted
         deploymentRefreshAbortStep = $deploymentRefreshAbortStep

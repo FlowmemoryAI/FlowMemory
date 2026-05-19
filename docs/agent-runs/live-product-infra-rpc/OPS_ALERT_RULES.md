@@ -1,6 +1,6 @@
 ﻿# FlowChain Ops Alert Rules
 
-Generated: 2026-05-19T20:26:56.3085229Z
+Generated: 2026-05-19T21:25:36.4093872Z
 Status: passed
 Current alert state: blocked
 
@@ -22,6 +22,8 @@ This report maps local ops snapshot findings to operator actions. It does not se
 | supervisor-relayer-recovery-failed | critical | Service supervisor requested the bridge relayer loop but latest recovery evidence does not show a healthy relayer loop. | `npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop; npm run flowchain:service:supervisor:validate; npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop; npm run flowchain:bridge:emergency-stop` |
 | deployment-refresh-aborted | critical | Public deployment dependency refresh aborted or skipped child gates. | `npm run flowchain:public-deployment:contract -- -AllowBlocked; npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked; npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh` |
 | external-tester-evidence-unsafe | critical | External tester returned evidence contains a secret marker, credential URL, or env assignment. | `npm run flowchain:tester:evidence:validate; npm run flowchain:no-secret:scan; npm run flowchain:emergency:export-evidence` |
+| dashboard-ui-readiness-failed | critical | Dashboard wallet, faucet, send, explorer, or no-secret UI readiness proof is missing or failed. | `npm run flowchain:dashboard:ui:readiness; npm run flowchain:dashboard:build; npm test --prefix apps/dashboard` |
+| owner-inputs-validation-failed | critical | Owner input validation scenarios are missing, failed, or unsafe to use for live cutover. | `npm run flowchain:owner-inputs:validate; npm run flowchain:owner-inputs; npm run flowchain:owner-env:readiness` |
 | public-rpc-edge-hardening-failed | critical | Public RPC edge deployment hardening evidence is missing or failed. | `npm run flowchain:public-rpc:deployment-bundle; npm run flowchain:public-rpc:deployment:automation; npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh` |
 | public-rpc-not-shareable | blocked | Public RPC readiness gate is not passed. | `npm run flowchain:public-rpc:check; npm run flowchain:public-rpc:validate; npm run flowchain:public-rpc:abuse-test` |
 | backup-not-ready | blocked | State backup readiness is not passed. | `npm run flowchain:backup:restore:validate; npm run flowchain:backup:check` |
@@ -31,4 +33,4 @@ This report maps local ops snapshot findings to operator actions. It does not se
 | external-tester-evidence-invalid | blocked | External tester returned evidence is incomplete or transfer proof is inconsistent. | `npm run flowchain:tester:evidence:validate; npm run flowchain:external-tester:packet -- -AllowBlocked` |
 | deployment-contract-not-ready | blocked | Public deployment contract is not passed. | `npm run flowchain:public-deployment:contract -- -AllowBlocked` |
 
-Covered finding codes: `node-not-running, control-plane-not-running, service-status-not-passed, chain-height-unreadable, height-not-advancing, state-stale, no-secret-scan-not-passed, backup-retention-unsafe, bridge-relayer-latency-failed, bridge-relayer-cursor-unsafe, bridge-relayer-guardrail-failed, bridge-direct-observe-cursor-unsafe, bridge-relayer-loop-unhealthy, supervisor-relayer-recovery-failed, deployment-refresh-aborted, external-tester-evidence-unsafe, public-rpc-edge-hardening-failed, public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, external-tester-evidence-invalid, deployment-contract-not-ready`
+Covered finding codes: `node-not-running, control-plane-not-running, service-status-not-passed, chain-height-unreadable, height-not-advancing, state-stale, no-secret-scan-not-passed, backup-retention-unsafe, bridge-relayer-latency-failed, bridge-relayer-cursor-unsafe, bridge-relayer-guardrail-failed, bridge-direct-observe-cursor-unsafe, bridge-relayer-loop-unhealthy, supervisor-relayer-recovery-failed, deployment-refresh-aborted, external-tester-evidence-unsafe, dashboard-ui-readiness-failed, owner-inputs-validation-failed, public-rpc-edge-hardening-failed, public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, external-tester-evidence-invalid, deployment-contract-not-ready`

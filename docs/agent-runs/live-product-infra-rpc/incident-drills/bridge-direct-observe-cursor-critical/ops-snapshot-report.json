@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-19T20:19:39.6733489Z",
+    "generatedAt":  "2026-05-19T21:24:39.8367010Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
@@ -10,9 +10,9 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-direct-observe-cursor-critical\\input"
                 },
     "chain":  {
-                  "latestHeight":  "92951",
-                  "finalizedHeight":  "92951",
-                  "stateFileLastWriteAgeSeconds":  3,
+                  "latestHeight":  "93450",
+                  "finalizedHeight":  "93450",
+                  "stateFileLastWriteAgeSeconds":  2,
                   "monitorStatus":  "passed",
                   "monitorSamples":  3,
                   "monitorHeightAdvanced":  true
@@ -68,14 +68,27 @@
                            "bridgeRelayerCursorCommitted":  false,
                            "bridgeRelayerCursorReason":  "not-run",
                            "externalTester":  "blocked",
-                           "externalTesterEvidence":  "missing",
+                           "externalTesterEvidence":  "passed",
                            "externalTesterEvidenceFailedChecks":  0,
                            "externalTesterEvidenceMissingFiles":  0,
                            "externalTesterEvidenceInvalidJson":  0,
                            "externalTesterEvidenceSecretFindings":  0,
                            "externalTesterEvidenceCredentialUrls":  0,
                            "externalTesterEvidenceEnvAssignments":  0,
-                           "externalTesterEvidenceTransferConsistent":  false,
+                           "externalTesterEvidenceTransferConsistent":  true,
+                           "dashboardUi":  "passed",
+                           "dashboardUiReady":  true,
+                           "dashboardUiBrowserE2e":  true,
+                           "dashboardUiBuild":  true,
+                           "dashboardUiTesterWalletCreateCovered":  true,
+                           "dashboardUiTesterFaucetCovered":  true,
+                           "dashboardUiTesterSendCovered":  true,
+                           "dashboardUiExplorerRouteCovered":  true,
+                           "ownerInputsValidation":  "passed",
+                           "ownerInputsValidationReady":  true,
+                           "ownerInputsValidationScenarioCount":  6,
+                           "ownerInputsValidationFailedScenarios":  0,
+                           "ownerInputsValidationRequiredEnvCount":  17,
                            "publicDeployment":  "blocked",
                            "deploymentRefreshAborted":  false,
                            "deploymentRefreshAbortStep":  "",
@@ -162,15 +175,6 @@
                      },
                      {
                          "severity":  "blocked",
-                         "code":  "external-tester-evidence-invalid",
-                         "message":  "External tester returned evidence validation is not passed or transfer proof is inconsistent.",
-                         "commands":  [
-                                          "npm run flowchain:tester:evidence:validate",
-                                          "npm run flowchain:external-tester:packet -- -AllowBlocked"
-                                      ]
-                     },
-                     {
-                         "severity":  "blocked",
                          "code":  "deployment-contract-not-ready",
                          "message":  "Public deployment contract is not ready.",
                          "commands":  [
@@ -179,7 +183,7 @@
                      }
                  ],
     "criticalCount":  2,
-    "blockedCount":  7,
+    "blockedCount":  6,
     "incidentCommands":  {
                              "status":  [
                                             "npm run flowchain:ops:snapshot",
@@ -202,6 +206,16 @@
                                                     "npm run flowchain:public-rpc:deployment:automation",
                                                     "npm run flowchain:external-tester:packet"
                                                 ],
+                             "productSurface":  [
+                                                    "npm run flowchain:dashboard:ui:readiness",
+                                                    "npm run flowchain:tester:evidence:validate",
+                                                    "npm run flowchain:external-tester:packet"
+                                                ],
+                             "ownerInputs":  [
+                                                 "npm run flowchain:owner-inputs:validate",
+                                                 "npm run flowchain:owner-inputs",
+                                                 "npm run flowchain:owner-env:readiness"
+                                             ],
                              "drills":  [
                                             "npm run flowchain:ops:incident-drill",
                                             "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh"
@@ -232,6 +246,8 @@
                         "bridgeRelayerGuardrail":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-direct-observe-cursor-critical\\input\\bridge-relayer-guardrail-validation-report.json",
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-direct-observe-cursor-critical\\input\\external-tester-readiness-report.json",
                         "externalTesterEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-direct-observe-cursor-critical\\input\\external-tester-evidence-validation-report.json",
+                        "dashboardUi":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-direct-observe-cursor-critical\\input\\dashboard-ui-readiness-report.json",
+                        "ownerInputsValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-direct-observe-cursor-critical\\input\\owner-inputs-validation-report.json",
                         "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-direct-observe-cursor-critical\\input\\public-deployment-contract-report.json",
                         "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-direct-observe-cursor-critical\\input\\no-secret-scan-report.json"
                     },

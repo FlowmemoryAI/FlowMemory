@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-19T20:26:58.3575439Z",
+    "generatedAt":  "2026-05-19T21:25:41.5179517Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -9,6 +9,8 @@
                           "publicRpcDeploymentBundleStatus":  "passed",
                           "publicRpcDeploymentAutomationStatus":  "passed",
                           "externalTesterEvidenceStatus":  "passed",
+                          "dashboardUiStatus":  "passed",
+                          "ownerInputsValidationStatus":  "passed",
                           "liveCutoverStatus":  "blocked",
                           "truthTableStatus":  "blocked-owner-input",
                           "noSecretStatus":  "passed"
@@ -18,13 +20,13 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  93054
+                        "value":  93581
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  93054
+                        "value":  93581
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
@@ -36,7 +38,7 @@
                         "name":  "flowchain_monitor_samples_total",
                         "type":  "gauge",
                         "help":  "Service monitor samples recorded in the current ops snapshot.",
-                        "value":  3
+                        "value":  2
                     },
                     {
                         "name":  "flowchain_height_advanced",
@@ -60,13 +62,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  22
+                        "value":  24
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  15
+                        "value":  17
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -297,6 +299,54 @@
                         "value":  1
                     },
                     {
+                        "name":  "flowchain_dashboard_ui_ready",
+                        "type":  "gauge",
+                        "help":  "One when dashboard UI readiness is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_dashboard_ui_browser_e2e_ready",
+                        "type":  "gauge",
+                        "help":  "One when dashboard browser E2E proof passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_dashboard_ui_build_ready",
+                        "type":  "gauge",
+                        "help":  "One when dashboard production build proof passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_dashboard_ui_tester_flow_covered",
+                        "type":  "gauge",
+                        "help":  "One when create, faucet, send, and explorer routes are covered by dashboard UI readiness.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_owner_inputs_validation_ready",
+                        "type":  "gauge",
+                        "help":  "One when owner input validation scenarios are passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_owner_inputs_validation_scenarios_total",
+                        "type":  "gauge",
+                        "help":  "Owner input validation scenario count.",
+                        "value":  6
+                    },
+                    {
+                        "name":  "flowchain_owner_inputs_validation_scenarios_failed",
+                        "type":  "gauge",
+                        "help":  "Owner input validation scenario failures.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_owner_inputs_required_env_total",
+                        "type":  "gauge",
+                        "help":  "Required owner input env names tracked by validation.",
+                        "value":  17
+                    },
+                    {
                         "name":  "flowchain_public_deployment_ready",
                         "type":  "gauge",
                         "help":  "One when public deployment contract is passed.",
@@ -363,7 +413,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  58,
+    "metricCount":  66,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

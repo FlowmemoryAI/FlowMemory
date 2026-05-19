@@ -210,6 +210,22 @@ $rules = @(
         commands = @("npm run flowchain:tester:evidence:validate", "npm run flowchain:no-secret:scan", "npm run flowchain:emergency:export-evidence")
     },
     [ordered]@{
+        id = "dashboard-ui-readiness-failed"
+        severity = "critical"
+        findingCodes = @("dashboard-ui-readiness-failed")
+        signal = "Dashboard wallet, faucet, send, explorer, or no-secret UI readiness proof is missing or failed."
+        threshold = "dashboard UI readiness status is not passed, required tester flow coverage is false, browser E2E/build proof is false, or no-secret flags are unsafe"
+        commands = @("npm run flowchain:dashboard:ui:readiness", "npm run flowchain:dashboard:build", "npm test --prefix apps/dashboard")
+    },
+    [ordered]@{
+        id = "owner-inputs-validation-failed"
+        severity = "critical"
+        findingCodes = @("owner-inputs-validation-failed")
+        signal = "Owner input validation scenarios are missing, failed, or unsafe to use for live cutover."
+        threshold = "owner input validation status is not passed, fewer than six validation scenarios are present, any scenario failed, required env names are absent, or no-secret flags are unsafe"
+        commands = @("npm run flowchain:owner-inputs:validate", "npm run flowchain:owner-inputs", "npm run flowchain:owner-env:readiness")
+    },
+    [ordered]@{
         id = "public-rpc-edge-hardening-failed"
         severity = "critical"
         findingCodes = @("public-rpc-edge-hardening-failed")

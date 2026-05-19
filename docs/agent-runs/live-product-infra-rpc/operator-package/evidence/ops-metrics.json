@@ -1,12 +1,16 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-19T18:01:34.6313859Z",
+    "generatedAt":  "2026-05-19T21:25:41.5179517Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
                           "serviceStatusStatus":  "passed",
                           "serviceMonitorStatus":  "passed",
+                          "publicRpcDeploymentBundleStatus":  "passed",
+                          "publicRpcDeploymentAutomationStatus":  "passed",
                           "externalTesterEvidenceStatus":  "passed",
+                          "dashboardUiStatus":  "passed",
+                          "ownerInputsValidationStatus":  "passed",
                           "liveCutoverStatus":  "blocked",
                           "truthTableStatus":  "blocked-owner-input",
                           "noSecretStatus":  "passed"
@@ -16,25 +20,25 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  89099
+                        "value":  93581
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  89099
+                        "value":  93581
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  1
+                        "value":  3
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
                         "type":  "gauge",
                         "help":  "Service monitor samples recorded in the current ops snapshot.",
-                        "value":  3
+                        "value":  2
                     },
                     {
                         "name":  "flowchain_height_advanced",
@@ -58,13 +62,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  19
+                        "value":  24
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  12
+                        "value":  17
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -95,6 +99,66 @@
                         "type":  "gauge",
                         "help":  "One when public RPC readiness is passed.",
                         "value":  0
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_deployment_bundle_ready",
+                        "type":  "gauge",
+                        "help":  "One when the public RPC deployment bundle is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_deployment_automation_ready",
+                        "type":  "gauge",
+                        "help":  "One when public RPC deployment automation validation is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_disallowed_origin_preflight",
+                        "type":  "gauge",
+                        "help":  "One when the public RPC bundle includes a disallowed origin preflight.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_broad_state_blocked_preflight",
+                        "type":  "gauge",
+                        "help":  "One when the public RPC bundle blocks broad state paths in preflight.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_private_wallet_create_blocked_preflight",
+                        "type":  "gauge",
+                        "help":  "One when the public RPC bundle blocks private wallet creation paths in preflight.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_auth_forwarding_scoped",
+                        "type":  "gauge",
+                        "help":  "One when public RPC authorization forwarding is scoped to tester writes.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rendered_disallowed_origin_probe",
+                        "type":  "gauge",
+                        "help":  "One when rendered public RPC preflight has the disallowed origin probe.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rendered_broad_state_blocked_probe",
+                        "type":  "gauge",
+                        "help":  "One when rendered public RPC preflight blocks broad state paths.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rendered_private_wallet_create_blocked_probe",
+                        "type":  "gauge",
+                        "help":  "One when rendered public RPC preflight blocks private wallet creation paths.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rendered_auth_forwarding_scoped",
+                        "type":  "gauge",
+                        "help":  "One when rendered public RPC authorization forwarding is scoped to tester writes.",
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_backup_ready",
@@ -145,10 +209,52 @@
                         "value":  1
                     },
                     {
+                        "name":  "flowchain_bridge_direct_observe_guardrail_ready",
+                        "type":  "gauge",
+                        "help":  "One when standalone Base observer cursor guardrail is ready.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_direct_observe_staged_cursor_default",
+                        "type":  "gauge",
+                        "help":  "One when standalone Base observer defaults to staged cursor state.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_direct_observe_cursor_not_final",
+                        "type":  "gauge",
+                        "help":  "One when standalone Base observer cursor state is not the final relayer cursor.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_direct_observe_final_cursor_unchanged",
+                        "type":  "gauge",
+                        "help":  "One when standalone Base observer leaves final relayer cursor unchanged.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_direct_observe_staged_cursor_not_written",
+                        "type":  "gauge",
+                        "help":  "One when missing-input standalone Base observer leaves staged cursor state unwritten.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_bridge_relayer_loop_healthy",
                         "type":  "gauge",
                         "help":  "One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence.",
                         "value":  0
+                    },
+                    {
+                        "name":  "flowchain_supervisor_bridge_relayer_requested",
+                        "type":  "gauge",
+                        "help":  "One when the latest service supervisor report requested bridge relayer loop supervision.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_supervisor_bridge_relayer_recovery_healthy",
+                        "type":  "gauge",
+                        "help":  "One when supervisor relayer-loop recovery evidence is healthy, or relayer supervision was not requested.",
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_external_tester_ready",
@@ -193,6 +299,54 @@
                         "value":  1
                     },
                     {
+                        "name":  "flowchain_dashboard_ui_ready",
+                        "type":  "gauge",
+                        "help":  "One when dashboard UI readiness is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_dashboard_ui_browser_e2e_ready",
+                        "type":  "gauge",
+                        "help":  "One when dashboard browser E2E proof passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_dashboard_ui_build_ready",
+                        "type":  "gauge",
+                        "help":  "One when dashboard production build proof passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_dashboard_ui_tester_flow_covered",
+                        "type":  "gauge",
+                        "help":  "One when create, faucet, send, and explorer routes are covered by dashboard UI readiness.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_owner_inputs_validation_ready",
+                        "type":  "gauge",
+                        "help":  "One when owner input validation scenarios are passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_owner_inputs_validation_scenarios_total",
+                        "type":  "gauge",
+                        "help":  "Owner input validation scenario count.",
+                        "value":  6
+                    },
+                    {
+                        "name":  "flowchain_owner_inputs_validation_scenarios_failed",
+                        "type":  "gauge",
+                        "help":  "Owner input validation scenario failures.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_owner_inputs_required_env_total",
+                        "type":  "gauge",
+                        "help":  "Required owner input env names tracked by validation.",
+                        "value":  17
+                    },
+                    {
                         "name":  "flowchain_public_deployment_ready",
                         "type":  "gauge",
                         "help":  "One when public deployment contract is passed.",
@@ -226,13 +380,13 @@
                         "name":  "flowchain_truth_gates_total",
                         "type":  "gauge",
                         "help":  "Total production truth table gates.",
-                        "value":  50
+                        "value":  51
                     },
                     {
                         "name":  "flowchain_truth_gates_passed",
                         "type":  "gauge",
                         "help":  "Passed production truth table gates.",
-                        "value":  34
+                        "value":  35
                     },
                     {
                         "name":  "flowchain_truth_gates_owner_blocked",
@@ -259,7 +413,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  41,
+    "metricCount":  66,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

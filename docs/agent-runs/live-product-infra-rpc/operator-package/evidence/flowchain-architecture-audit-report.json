@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-19T18:03:14.0752145Z",
+    "generatedAt":  "2026-05-19T20:27:09.0948431Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -29,7 +29,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=89332, finalizedHeight=89332",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=93054, finalizedHeight=93054",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -67,7 +67,7 @@
                       "layer":  "Operations",
                       "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=3, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=19, alertCoveredFindings=21, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=41, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=12, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=11, incidentFailed=0",
+                      "evidence":  "monitorStatus=passed, samples=3, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=22, alertCoveredFindings=24, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=58, publicRpcEdgeMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=15, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=14, incidentFailed=0",
                       "files":  [
                                     "infra/scripts/flowchain-service-monitor.ps1",
                                     "infra/scripts/flowchain-service-supervisor.ps1",
@@ -158,7 +158,7 @@
                       "layer":  "Operations",
                       "requirement":  "Node operator packaging collects no-secret runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates.",
                       "status":  "passed",
-                      "evidence":  "operatorPackage=passed, commands=51, runbooks=31, evidenceReports=38, failedChecks=0, noSecretScan=True",
+                      "evidence":  "operatorPackage=passed, commands=55, runbooks=35, evidenceReports=40, failedChecks=0, noSecretScan=True",
                       "files":  [
                                     "infra/scripts/flowchain-operator-package.ps1",
                                     "docs/developer/FLOWCHAIN_NODE_OPERATOR.md"
@@ -175,7 +175,7 @@
                       "layer":  "Operations",
                       "requirement":  "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, forbidden local files, and no-secret scan.",
                       "status":  "passed",
-                      "evidence":  "operatorPackageVerify=passed, expectedFiles=62, commands=51, failedChecks=0, noSecretScan=True",
+                      "evidence":  "operatorPackageVerify=passed, expectedFiles=68, commands=55, failedChecks=0, noSecretScan=True",
                       "files":  [
                                     "infra/scripts/flowchain-operator-package-verify.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/OPERATOR_PACKAGE_VERIFY.md"
@@ -231,7 +231,7 @@
                   {
                       "id":  "public-rpc-edge-template-boundary",
                       "layer":  "Public edge",
-                      "requirement":  "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, verification, rollback, and no broad local state mirror.",
+                      "requirement":  "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, disallowed-origin and blocked-private-path probes, verification, rollback, and no broad local state mirror.",
                       "status":  "passed",
                       "evidence":  "edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, testerWritePreflight=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True, publicStateMirrorExcluded=True, devnetStatePublicRpcExcluded=True",
                       "files":  [
@@ -1013,20 +1013,22 @@
                                      },
     "opsAlertCoverage":  {
                              "status":  "passed",
-                             "ruleCount":  19,
-                             "criticalRuleCount":  12,
+                             "ruleCount":  22,
+                             "criticalRuleCount":  15,
                              "blockedRuleCount":  7,
-                             "coveredFindingCount":  21,
+                             "coveredFindingCount":  24,
                              "unmappedCurrentFindingCount":  0
                          },
     "opsMetricsCoverage":  {
                                "exportStatus":  "passed",
-                               "metricCount":  41,
+                               "metricCount":  58,
                                "exportFailedCheckCount":  0,
                                "installStatus":  "passed",
                                "installFailedCheckCount":  0,
                                "metricsJsonWritten":  true,
                                "prometheusTextWritten":  true,
+                               "requiredMetricsPresent":  true,
+                               "publicRpcEdgeMetricsPresent":  true,
                                "systemdTimerUnitPlanned":  true,
                                "noExternalDelivery":  true
                            },

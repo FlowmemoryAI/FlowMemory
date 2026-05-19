@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-19T14:20:10.2514417Z",
+    "generatedAt":  "2026-05-19T21:25:36.4093872Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  19,
-    "criticalRuleCount":  12,
+    "ruleCount":  24,
+    "criticalRuleCount":  17,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -41,9 +41,14 @@
                                 "bridge-relayer-latency-failed",
                                 "bridge-relayer-cursor-unsafe",
                                 "bridge-relayer-guardrail-failed",
+                                "bridge-direct-observe-cursor-unsafe",
                                 "bridge-relayer-loop-unhealthy",
+                                "supervisor-relayer-recovery-failed",
                                 "deployment-refresh-aborted",
                                 "external-tester-evidence-unsafe",
+                                "dashboard-ui-readiness-failed",
+                                "owner-inputs-validation-failed",
+                                "public-rpc-edge-hardening-failed",
                                 "public-rpc-not-ready",
                                 "backup-not-ready",
                                 "bridge-not-ready",
@@ -234,6 +239,20 @@
                                    ]
                   },
                   {
+                      "id":  "bridge-direct-observe-cursor-unsafe",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "bridge-direct-observe-cursor-unsafe"
+                                       ],
+                      "signal":  "Standalone Base 8453 observer could use or mutate the final relayer cursor without explicit owner opt-in.",
+                      "threshold":  "direct observer guardrail is missing, not blocked, not staged by default, points at the final cursor, changes final cursor state, writes staged cursor state, prints env values, broadcasts, or reports secrets",
+                      "commands":  [
+                                       "npm run flowchain:bridge:relayer:guardrail:validate",
+                                       "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                                       "npm run flowchain:bridge:emergency-stop"
+                                   ]
+                  },
+                  {
                       "id":  "bridge-relayer-loop-unhealthy",
                       "severity":  "critical",
                       "findingCodes":  [
@@ -244,6 +263,21 @@
                       "commands":  [
                                        "npm run flowchain:service:status",
                                        "npm run flowchain:bridge:relayer:loop:validate",
+                                       "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop",
+                                       "npm run flowchain:bridge:emergency-stop"
+                                   ]
+                  },
+                  {
+                      "id":  "supervisor-relayer-recovery-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "supervisor-relayer-recovery-failed"
+                                       ],
+                      "signal":  "Service supervisor requested the bridge relayer loop but latest recovery evidence does not show a healthy relayer loop.",
+                      "threshold":  "service-supervisor report has bridgeRelayerLoop.requested true and latest after.bridgeRelayerLoopStatus is not running, command line is not matched, report is unhealthy, or supervisor status failed",
+                      "commands":  [
+                                       "npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop",
+                                       "npm run flowchain:service:supervisor:validate",
                                        "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop",
                                        "npm run flowchain:bridge:emergency-stop"
                                    ]
@@ -274,6 +308,48 @@
                                        "npm run flowchain:tester:evidence:validate",
                                        "npm run flowchain:no-secret:scan",
                                        "npm run flowchain:emergency:export-evidence"
+                                   ]
+                  },
+                  {
+                      "id":  "dashboard-ui-readiness-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "dashboard-ui-readiness-failed"
+                                       ],
+                      "signal":  "Dashboard wallet, faucet, send, explorer, or no-secret UI readiness proof is missing or failed.",
+                      "threshold":  "dashboard UI readiness status is not passed, required tester flow coverage is false, browser E2E/build proof is false, or no-secret flags are unsafe",
+                      "commands":  [
+                                       "npm run flowchain:dashboard:ui:readiness",
+                                       "npm run flowchain:dashboard:build",
+                                       "npm test --prefix apps/dashboard"
+                                   ]
+                  },
+                  {
+                      "id":  "owner-inputs-validation-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "owner-inputs-validation-failed"
+                                       ],
+                      "signal":  "Owner input validation scenarios are missing, failed, or unsafe to use for live cutover.",
+                      "threshold":  "owner input validation status is not passed, fewer than six validation scenarios are present, any scenario failed, required env names are absent, or no-secret flags are unsafe",
+                      "commands":  [
+                                       "npm run flowchain:owner-inputs:validate",
+                                       "npm run flowchain:owner-inputs",
+                                       "npm run flowchain:owner-env:readiness"
+                                   ]
+                  },
+                  {
+                      "id":  "public-rpc-edge-hardening-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "public-rpc-edge-hardening-failed"
+                                       ],
+                      "signal":  "Public RPC edge deployment hardening evidence is missing or failed.",
+                      "threshold":  "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, or scoped authorization forwarding proof",
+                      "commands":  [
+                                       "npm run flowchain:public-rpc:deployment-bundle",
+                                       "npm run flowchain:public-rpc:deployment:automation",
+                                       "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh"
                                    ]
                   },
                   {

@@ -1,9 +1,9 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-19T20:19:24.9204275Z
+Generated: 2026-05-19T21:24:22.1439045Z
 Status: failed
-Latest height: 92951
-Finalized height: 92951
+Latest height: 93450
+Finalized height: 93450
 
 ## Findings
 
@@ -12,7 +12,6 @@ Finalized height: 92951
 - blocked: bridge-not-ready - Base 8453 bridge readiness is not ready for external funded testing.
 - blocked: bridge-relayer-not-ready - Bridge relayer one-shot proof is not ready.
 - blocked: external-tester-not-shareable - External tester packet must remain not-shareable.
-- blocked: external-tester-evidence-invalid - External tester returned evidence validation is not passed or transfer proof is inconsistent.
 - critical: deployment-refresh-aborted - Public deployment dependency refresh aborted or skipped dependency gates.
 - blocked: deployment-contract-not-ready - Public deployment contract is not ready.
 
@@ -38,6 +37,16 @@ Finalized height: 92951
 - npm run flowchain:public-rpc:deployment-bundle
 - npm run flowchain:public-rpc:deployment:automation
 - npm run flowchain:external-tester:packet
+
+### productSurface
+- npm run flowchain:dashboard:ui:readiness
+- npm run flowchain:tester:evidence:validate
+- npm run flowchain:external-tester:packet
+
+### ownerInputs
+- npm run flowchain:owner-inputs:validate
+- npm run flowchain:owner-inputs
+- npm run flowchain:owner-env:readiness
 
 ### drills
 - npm run flowchain:ops:incident-drill

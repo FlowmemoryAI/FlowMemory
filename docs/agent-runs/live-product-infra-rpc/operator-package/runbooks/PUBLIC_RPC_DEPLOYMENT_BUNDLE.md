@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Bundle
 
-Generated: 2026-05-19T14:20:33.5491681Z
+Generated: 2026-05-19T20:00:14.0441636Z
 Status: passed
 
 This bundle packages placeholder-only files for an owner-operated HTTPS edge in front of the repo-owned private RPC origin `127.0.0.1:8787`.
@@ -26,6 +26,7 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - <FLOWCHAIN_RPC_PUBLIC_HOST>
 - <FLOWCHAIN_RPC_PUBLIC_URL>
 - <FLOWCHAIN_RPC_ALLOWED_ORIGIN>
+- <FLOWCHAIN_RPC_DISALLOWED_ORIGIN>
 - <FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>
 - <PATH_TO_TLS_CERTIFICATE>
 - <PATH_TO_TLS_CERTIFICATE_KEY>
@@ -129,6 +130,8 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - ownerRenderWritesWindowsPreflight: True
 - ownerRenderDoesNotPrintTokenHash: True
 - ownerRenderFilesDoNotContainTokenHash: True
+- ownerRenderRejectsPublicUrlPath: True
+- ownerRenderPublicUrlPathRejectOutputNoSecrets: True
 - includesPrivateOrigin: True
 - includesRateLimitPlaceholder: True
 - includesTlsPlaceholders: True
@@ -138,6 +141,10 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - includesNginxConfigTest: True
 - includesWindowsNginxConfigTest: True
 - includesTesterWritePreflight: True
+- includesDisallowedOriginPreflight: True
+- includesBroadStateBlockedPreflight: True
+- includesPrivateWalletCreateBlockedPreflight: True
+- authorizationForwardingScopedToTesterWrite: True
 - includesVerificationCommands: True
 - includesRollbackCommands: True
 - envExampleHasAllRequiredNames: True

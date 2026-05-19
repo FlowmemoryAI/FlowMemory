@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-19T20:26:58.4965440Z
+Generated: 2026-05-19T21:25:41.7019570Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 58
+- Metric count: 66
 
 ## Required Metrics
 
@@ -48,6 +48,14 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_external_tester_evidence_secret_findings: present
 - flowchain_external_tester_evidence_height_advanced: present
 - flowchain_external_tester_evidence_transfer_consistent: present
+- flowchain_dashboard_ui_ready: present
+- flowchain_dashboard_ui_browser_e2e_ready: present
+- flowchain_dashboard_ui_build_ready: present
+- flowchain_dashboard_ui_tester_flow_covered: present
+- flowchain_owner_inputs_validation_ready: present
+- flowchain_owner_inputs_validation_scenarios_total: present
+- flowchain_owner_inputs_validation_scenarios_failed: present
+- flowchain_owner_inputs_required_env_total: present
 - flowchain_public_deployment_ready: present
 - flowchain_live_cutover_ready: present
 - flowchain_live_cutover_owner_blocked: present
@@ -67,6 +75,8 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | serviceStatusLoaded | True |
 | serviceMonitorLoaded | True |
 | externalTesterEvidenceLoaded | True |
+| dashboardUiLoaded | True |
+| ownerInputsValidationLoaded | True |
 | liveCutoverLoaded | True |
 | truthTableLoaded | True |
 | noSecretLoaded | True |
@@ -78,6 +88,8 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | externalTesterEvidenceMetricsPresent | True |
 | bridgeDirectObserveMetricsPresent | True |
 | publicRpcEdgeMetricsPresent | True |
+| dashboardUiMetricsPresent | True |
+| ownerInputsValidationMetricsPresent | True |
 | prometheusHasHelpAndType | True |
 | prometheusContainsNoUrls | True |
 | prometheusContainsNoEnvAssignments | True |

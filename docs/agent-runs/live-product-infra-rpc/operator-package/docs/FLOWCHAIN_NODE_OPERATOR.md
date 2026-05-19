@@ -38,7 +38,9 @@ npm run flowchain:service:install:systemd:validate
 
 The supervisor checks `flowchain:service:status`, requires live profile by
 default, restarts with `flowchain:service:restart -- -LiveProfile`, and writes
-redacted reports under `docs/agent-runs/live-product-infra-rpc/`.
+redacted reports under `docs/agent-runs/live-product-infra-rpc/`. With
+`-StartBridgeRelayerLoop`, it also treats a stopped, mismatched, or unhealthy
+bridge relayer loop as an autorecovery restart reason.
 
 On a Windows owner host, `flowchain:service:install:windows` can register,
 inspect, and remove a Scheduled Task that starts the live supervisor at logon:
