@@ -1,6 +1,6 @@
 ﻿# FlowChain Incident Drill
 
-Generated: 2026-05-19T21:51:53.0410798Z
+Generated: 2026-05-19T23:47:01.2715397Z
 Status: passed
 Incident drill ready: True
 
@@ -12,6 +12,7 @@ This drill uses synthetic ops input reports for incident conditions, then checks
 | --- | --- | --- |
 | baseline-owner-blockers-only | passed | expectedStatus=blocked, actualStatus=blocked, exitCode=0, missingCodes=0, commandsPresent=True, safeFlags=True |
 | deployment-refresh-aborted-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
+| truth-table-stale-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | node-down-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | control-plane-down-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | stale-state-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |

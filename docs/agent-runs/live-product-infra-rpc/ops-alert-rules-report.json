@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-19T22:01:44.1100695Z",
+    "generatedAt":  "2026-05-19T23:49:57.5556648Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  24,
-    "criticalRuleCount":  17,
+    "ruleCount":  25,
+    "criticalRuleCount":  18,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -45,6 +45,7 @@
                                 "bridge-relayer-loop-unhealthy",
                                 "supervisor-relayer-recovery-failed",
                                 "deployment-refresh-aborted",
+                                "truth-table-stale-or-failed",
                                 "external-tester-evidence-unsafe",
                                 "dashboard-ui-readiness-failed",
                                 "owner-inputs-validation-failed",
@@ -295,6 +296,20 @@
                                        "npm run flowchain:public-deployment:contract -- -AllowBlocked",
                                        "npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked",
                                        "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh"
+                                   ]
+                  },
+                  {
+                      "id":  "truth-table-stale-or-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "truth-table-stale-or-failed"
+                                       ],
+                      "signal":  "Production truth table is stale, failed, missing, or reports repo-owned blockers.",
+                      "threshold":  "production truth table status is failed/stale/missing or failed, stale, or blocked-repo-work gate count is greater than zero",
+                      "commands":  [
+                                       "npm run flowchain:truth-table -- -AllowBlocked",
+                                       "npm run flowchain:completion:audit -- -AllowBlocked",
+                                       "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked"
                                    ]
                   },
                   {

@@ -32,6 +32,7 @@ $baseReportPaths = [ordered]@{
     "dashboard-ui-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
     "owner-inputs-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     "public-deployment-contract-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
+    "production-truth-table-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
     "no-secret-scan-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
 }
 
@@ -123,6 +124,26 @@ function New-DrillFallbackReport {
                 status = "passed"
                 noSecrets = $true
                 envValuesPrinted = $false
+            }
+        }
+        "production-truth-table-report.json" {
+            return [ordered]@{
+                schema = "flowchain.production_truth_table_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "blocked-owner-input"
+                completionReady = $false
+                blockedOnlyOnKnownOwnerInputs = $true
+                classificationCounts = [ordered]@{
+                    passed = 1
+                    "blocked-owner-input" = 1
+                    "blocked-repo-work" = 0
+                    failed = 0
+                    stale = 0
+                }
+                productionGateCount = 2
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
             }
         }
         "external-tester-evidence-validation-report.json" {
@@ -503,6 +524,32 @@ Invoke-SyntheticOpsCase -Id "deployment-refresh-aborted-critical" `
         }
     }
 
+Invoke-SyntheticOpsCase -Id "truth-table-stale-critical" `
+    -Requirement "A stale or failed production truth table is classified as a critical incident before release readiness is trusted." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("truth-table-stale-or-failed") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "production-truth-table-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "stale"
+            $counts = Get-DrillProp -Object $report -Name "classificationCounts"
+            if ($null -eq $counts) {
+                $counts = [ordered]@{}
+                Set-DrillProp -Object $report -Name "classificationCounts" -Value $counts
+            }
+            Set-DrillProp -Object $counts -Name "passed" -Value 1
+            Set-DrillProp -Object $counts -Name "blocked-owner-input" -Value 1
+            Set-DrillProp -Object $counts -Name "blocked-repo-work" -Value 0
+            Set-DrillProp -Object $counts -Name "failed" -Value 0
+            Set-DrillProp -Object $counts -Name "stale" -Value 1
+            Set-DrillProp -Object $report -Name "blockedOnlyOnKnownOwnerInputs" -Value $false
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
+        }
+    }
+
 Invoke-SyntheticOpsCase -Id "node-down-critical" `
     -Requirement "A stopped block-producing node is classified as a critical incident with restart commands." `
     -ExpectedStatus "failed" `
@@ -843,6 +890,7 @@ $failedCases = @($cases | Where-Object { $_.status -ne "passed" })
 $requiredScenarios = @(
     "baseline-owner-blockers-only",
     "deployment-refresh-aborted-critical",
+    "truth-table-stale-critical",
     "node-down-critical",
     "control-plane-down-critical",
     "stale-state-critical",
@@ -870,7 +918,7 @@ $checks = [ordered]@{
     allRequiredScenariosCovered = $missingRequiredScenarios.Count -eq 0
     allCasesPassed = $failedCases.Count -eq 0
     failedCasesAbsent = $failedCases.Count -eq 0
-    minimumCaseCountMet = $cases.Count -ge 16
+    minimumCaseCountMet = $cases.Count -ge 17
     recoveryCommandPrinted = $recoveryPassed
     postDrillLiveStatusPassed = $postStatusPassed
     liveStateBeforeReadable = (Get-DrillProp -Object $liveStateBefore -Name "readable" -Default $false) -eq $true

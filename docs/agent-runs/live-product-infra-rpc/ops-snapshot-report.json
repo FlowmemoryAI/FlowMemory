@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-19T21:51:14.6742651Z",
+    "generatedAt":  "2026-05-19T23:49:50.2781048Z",
     "status":  "blocked",
     "refresh":  {
                     "performed":  false,
@@ -10,9 +10,9 @@
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "93741",
-                  "finalizedHeight":  "93741",
-                  "stateFileLastWriteAgeSeconds":  1,
+                  "latestHeight":  "94966",
+                  "finalizedHeight":  "94966",
+                  "stateFileLastWriteAgeSeconds":  3,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true
@@ -106,6 +106,10 @@
                            "deploymentRefreshSkippedSteps":  [
 
                                                              ],
+                           "truthTable":  "blocked-owner-input",
+                           "truthTableFailedGates":  0,
+                           "truthTableStaleGates":  0,
+                           "truthTableRepoBlockedGates":  0,
                            "noSecret":  "passed"
                        },
     "findings":  [
@@ -233,6 +237,7 @@
                         "dashboardUi":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
                         "ownerInputsValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-validation-report.json",
                         "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
+                        "truthTable":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\production-truth-table-report.json",
                         "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json"
                     },
     "broadcasts":  false,

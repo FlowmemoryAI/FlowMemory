@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.owner_env_readiness_report.v0",
-    "generatedAt":  "2026-05-19T23:39:55.4610202Z",
+    "generatedAt":  "2026-05-19T23:47:56.4737065Z",
     "status":  "blocked",
     "repoPath":  "E:/FlowMemory/flowmemory-live-infra-rpc",
     "ownerEnvFile":  {
@@ -77,8 +77,8 @@
                   {
                       "name":  "Owner input contract from local env file",
                       "command":  "npm run flowchain:owner-inputs -- -AllowBlocked",
-                      "startedAt":  "2026-05-19T23:39:29.1048919Z",
-                      "finishedAt":  "2026-05-19T23:39:30.7023738Z",
+                      "startedAt":  "2026-05-19T23:47:28.5675929Z",
+                      "finishedAt":  "2026-05-19T23:47:30.3761796Z",
                       "exitCode":  0,
                       "status":  "blocked",
                       "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-report.json",
@@ -93,8 +93,8 @@
                   {
                       "name":  "Live infrastructure with local env file",
                       "command":  "npm run flowchain:live-infra:check -- -AllowBlocked",
-                      "startedAt":  "2026-05-19T23:39:30.7323752Z",
-                      "finishedAt":  "2026-05-19T23:39:52.3023107Z",
+                      "startedAt":  "2026-05-19T23:47:30.4051837Z",
+                      "finishedAt":  "2026-05-19T23:47:53.4638627Z",
                       "exitCode":  0,
                       "status":  "blocked",
                       "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-infra-check-report.json",
@@ -141,8 +141,8 @@
                   {
                       "name":  "Public deployment contract with local env file",
                       "command":  "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh",
-                      "startedAt":  "2026-05-19T23:39:52.3223125Z",
-                      "finishedAt":  "2026-05-19T23:39:55.3560196Z",
+                      "startedAt":  "2026-05-19T23:47:53.4838618Z",
+                      "finishedAt":  "2026-05-19T23:47:56.3097024Z",
                       "exitCode":  0,
                       "status":  "blocked",
                       "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",

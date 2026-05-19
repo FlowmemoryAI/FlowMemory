@@ -53,6 +53,7 @@ $paths = [ordered]@{
     dashboardUi = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
     ownerInputsValidation = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     publicDeployment = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
+    truthTable = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
     noSecret = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
 }
 
@@ -315,6 +316,15 @@ $deploymentRefreshUnsafe = $deploymentRefreshAborted `
     -or $deploymentRefreshFailedSteps.Count -gt 0 `
     -or $deploymentRefreshTimedOutSteps.Count -gt 0 `
     -or $deploymentRefreshSkippedSteps.Count -gt 0
+$truthTableStatus = Get-OpsStatus -Report $reports.truthTable
+$truthTableCounts = Get-OpsProp -Object $reports.truthTable -Name "classificationCounts"
+$truthTableFailedCount = [int](Get-OpsProp -Object $truthTableCounts -Name "failed" -Default 0)
+$truthTableStaleCount = [int](Get-OpsProp -Object $truthTableCounts -Name "stale" -Default 0)
+$truthTableRepoBlockedCount = [int](Get-OpsProp -Object $truthTableCounts -Name "blocked-repo-work" -Default 0)
+$truthTableUnsafe = $truthTableStatus -in @("missing", "failed", "stale") `
+    -or $truthTableFailedCount -gt 0 `
+    -or $truthTableStaleCount -gt 0 `
+    -or $truthTableRepoBlockedCount -gt 0
 $noSecretStatus = Get-OpsStatus -Report $reports.noSecret
 
 if ($publicRpcStatus -ne "passed") {
@@ -367,6 +377,9 @@ if ($deploymentRefreshUnsafe) {
 }
 if ($deploymentStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "deployment-contract-not-ready" -Message "Public deployment contract is not ready." -Commands @("npm run flowchain:public-deployment:contract -- -AllowBlocked")
+}
+if ($truthTableUnsafe) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "truth-table-stale-or-failed" -Message "Production truth table is stale, failed, missing, or reports repo-owned blockers." -Commands @("npm run flowchain:truth-table -- -AllowBlocked", "npm run flowchain:completion:audit -- -AllowBlocked", "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked")
 }
 if ($noSecretStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "no-secret-scan-not-passed" -Message "No-secret scan is not passed." -Commands @("npm run flowchain:no-secret:scan")
@@ -523,6 +536,10 @@ $report = [ordered]@{
         deploymentRefreshFailedSteps = $deploymentRefreshFailedSteps
         deploymentRefreshTimedOutSteps = $deploymentRefreshTimedOutSteps
         deploymentRefreshSkippedSteps = $deploymentRefreshSkippedSteps
+        truthTable = $truthTableStatus
+        truthTableFailedGates = $truthTableFailedCount
+        truthTableStaleGates = $truthTableStaleCount
+        truthTableRepoBlockedGates = $truthTableRepoBlockedCount
         noSecret = $noSecretStatus
     }
     findings = @($findings)

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-19T21:51:26.8683260Z",
+    "generatedAt":  "2026-05-19T23:46:32.7044187Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
@@ -10,8 +10,8 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input"
                 },
     "chain":  {
-                  "latestHeight":  "93741",
-                  "finalizedHeight":  "93741",
+                  "latestHeight":  "94881",
+                  "finalizedHeight":  "94881",
                   "stateFileLastWriteAgeSeconds":  999999,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
@@ -106,6 +106,10 @@
                            "deploymentRefreshSkippedSteps":  [
 
                                                              ],
+                           "truthTable":  "blocked-owner-input",
+                           "truthTableFailedGates":  0,
+                           "truthTableStaleGates":  0,
+                           "truthTableRepoBlockedGates":  0,
                            "noSecret":  "passed"
                        },
     "findings":  [
@@ -241,6 +245,7 @@
                         "dashboardUi":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\dashboard-ui-readiness-report.json",
                         "ownerInputsValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\owner-inputs-validation-report.json",
                         "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\public-deployment-contract-report.json",
+                        "truthTable":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\production-truth-table-report.json",
                         "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\input\\no-secret-scan-report.json"
                     },
     "broadcasts":  false,

@@ -202,6 +202,14 @@ $rules = @(
         commands = @("npm run flowchain:public-deployment:contract -- -AllowBlocked", "npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked", "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh")
     },
     [ordered]@{
+        id = "truth-table-stale-or-failed"
+        severity = "critical"
+        findingCodes = @("truth-table-stale-or-failed")
+        signal = "Production truth table is stale, failed, missing, or reports repo-owned blockers."
+        threshold = "production truth table status is failed/stale/missing or failed, stale, or blocked-repo-work gate count is greater than zero"
+        commands = @("npm run flowchain:truth-table -- -AllowBlocked", "npm run flowchain:completion:audit -- -AllowBlocked", "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked")
+    },
+    [ordered]@{
         id = "external-tester-evidence-unsafe"
         severity = "critical"
         findingCodes = @("external-tester-evidence-unsafe")
