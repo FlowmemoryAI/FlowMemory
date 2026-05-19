@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_bundle_report.v3",
-    "generatedAt":  "2026-05-19T09:40:25.5874742Z",
+    "generatedAt":  "2026-05-19T13:16:04.4008723Z",
     "status":  "passed",
     "bundleDir":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle",
     "flowChainRpcIsRepoOwned":  true,
@@ -60,6 +60,7 @@
                             ],
     "ownerPreflightCommands":  [
                                    "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                                   "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -StartBridgeRelayerLoop",
                                    "systemd-analyze verify \u003cFLOWCHAIN_SYSTEMD_RENDERED_UNIT\u003e",
                                    "systemd-analyze verify \u003cFLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT\u003e",
                                    "nginx -t",

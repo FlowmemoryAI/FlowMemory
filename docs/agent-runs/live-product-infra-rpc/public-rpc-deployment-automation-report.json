@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_automation_report.v1",
-    "generatedAt":  "2026-05-19T09:40:36.5376370Z",
+    "generatedAt":  "2026-05-19T13:16:06.9104437Z",
     "status":  "passed",
     "action":  "Validate",
     "flowChainRpcIsRepoOwned":  true,
@@ -65,7 +65,7 @@
                      "performed":  true,
                      "exitCode":  0,
                      "outputRedacted":  [
-                                            "FlowChain public RPC bundle rendered. Report: C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-66884-f820fd27fc6049089da89b92f68b644e\\rendered\\public-rpc-render-report.json"
+                                            "FlowChain public RPC bundle rendered. Report: C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-63532-7223b5dd7a0b451ebc11c67b6bb53dee\\rendered\\public-rpc-render-report.json"
                                         ],
                      "failedChecks":  [
 
@@ -83,8 +83,8 @@
                                          "rollbackDrillBroadcastsFalse":  true
                                      },
                           "artifacts":  [
-                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-66884-f820fd27fc6049089da89b92f68b644e\\rendered\\previous-nginx-flowchain-rpc.conf",
-                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-66884-f820fd27fc6049089da89b92f68b644e\\rendered\\rollback-drill-current-before.conf"
+                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-63532-7223b5dd7a0b451ebc11c67b6bb53dee\\rendered\\previous-nginx-flowchain-rpc.conf",
+                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-63532-7223b5dd7a0b451ebc11c67b6bb53dee\\rendered\\rollback-drill-current-before.conf"
                                         ]
                       },
     "renderedFileNames":  [
@@ -120,6 +120,7 @@
                      "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-automation.ps1 -Action Render -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -OwnerEnvFile \u003cFLOWCHAIN_OWNER_ENV_FILE\u003e -TlsCertificatePath \u003cPATH_TO_TLS_CERTIFICATE\u003e -TlsCertificateKeyPath \u003cPATH_TO_TLS_CERTIFICATE_KEY\u003e -NginxExe \u003cFLOWCHAIN_NGINX_EXE\u003e",
                      "npm run flowchain:service:install:systemd:validate",
                      "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                     "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -StartBridgeRelayerLoop",
                      "systemd-analyze verify \u003cFLOWCHAIN_SYSTEMD_RENDERED_UNIT\u003e",
                      "systemd-analyze verify \u003cFLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT\u003e",
                      "nginx -t",

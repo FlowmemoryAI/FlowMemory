@@ -390,6 +390,7 @@ $requiredCommands = @(
 
 $ownerPreflightCommands = @(
     "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>",
+    "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop",
     "systemd-analyze verify <FLOWCHAIN_SYSTEMD_RENDERED_UNIT>",
     "systemd-analyze verify <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>",
     "nginx -t",

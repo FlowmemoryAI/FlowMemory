@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-19T12:40:20.0424787Z",
+    "generatedAt":  "2026-05-19T13:21:34.1901381Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -56,6 +56,11 @@
                          "phase":  "autorecovery",
                          "command":  "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
                          "purpose":  "Render the no-secret Linux systemd install plan from owner-rendered units."
+                     },
+                     {
+                         "phase":  "autorecovery",
+                         "command":  "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -StartBridgeRelayerLoop",
+                         "purpose":  "Render the explicit Linux bridge-relayer opt-in systemd supervisor plan without mutating the owner host."
                      },
                      {
                          "phase":  "autorecovery",

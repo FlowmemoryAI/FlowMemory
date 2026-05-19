@@ -1,10 +1,10 @@
 ﻿# FlowChain Systemd Service Install Validation
 
-Generated: 2026-05-19T09:40:25.5134722Z
+Generated: 2026-05-19T13:15:30.5739292Z
 Status: passed
 
 This validation proves the owner Linux systemd install plan is present, no-secret, non-mutating, live-profile by default, and includes autorecovery through the FlowChain supervisor.
-It also executes the real Plan action against rendered units in a temporary directory and verifies that no host mutation occurs.
+It also executes the real default Plan and bridge-relayer opt-in Plan actions against rendered units in a temporary directory and verifies that no host mutation occurs.
 
 ## Checks
 
@@ -28,6 +28,15 @@ It also executes the real Plan action against rendered units in a temporary dire
 | supervisorUsesAutorecoveryLoop | True |
 | supervisorRestartAlways | True |
 | bridgeRelayerDefaultOff | True |
+| bridgeRelayerOptInPlanCommandPassed | True |
+| bridgeRelayerOptInPlanReportPassed | True |
+| bridgeRelayerOptInPlanDidNotMutate | True |
+| bridgeRelayerOptInPlanUsesRenderedUnits | True |
+| bridgeRelayerOptInStartsLoop | True |
+| bridgeRelayerOptInUsesSupervisor | True |
+| bridgeRelayerOptInPlanNoSecrets | True |
+| bridgeRelayerOptInPlanEnvValuesPrintedFalse | True |
+| bridgeRelayerOptInPlanBroadcastsFalse | True |
 | ownerEnvFileUsed | True |
 | repoWorkingDirectoryUsed | True |
 | cargoTargetDirIsExternalized | True |

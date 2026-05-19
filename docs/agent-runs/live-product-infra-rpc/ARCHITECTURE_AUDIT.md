@@ -1,6 +1,6 @@
 ﻿# FlowChain Architecture Audit
 
-Generated: 2026-05-19T12:40:09.7606621Z
+Generated: 2026-05-19T13:21:24.7820695Z
 Status: blocked
 Blocked only on known external owner inputs: True
 
@@ -23,11 +23,11 @@ Blocked only on known external owner inputs: True
 
 | Layer | Requirement | Status | Evidence |
 | --- | --- | --- | --- |
-| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=87939, finalizedHeight=87939 |
+| L1 runtime | The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence. | passed | serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=88360, finalizedHeight=88360 |
 | Operations | Operator doctor covers host tools, package scripts, state path, disk, service evidence, ports, owner-input groups, and owner env-file status without printing owner values. | passed | doctorStatus=blocked, checks=54, failedChecks=0, blockedChecks=5, blockedOnlyOwner=True |
 | Operations | Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers. | passed | monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=19, alertCoveredFindings=21, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=12, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=11, incidentFailed=0 |
 | Operations | Owner-host service lifecycle includes a no-secret Windows Scheduled Task install, read-only status, and safe absent-task uninstall no-op path for reboot-persistent live supervisor autorecovery. | passed | installValidation=passed, failedChecks=0, planDidNotMutate=True, statusCommand=True, statusDidNotMutate=True, uninstallNoop=True, liveProfileDefault=True, relayerDefaultOff=True, relayerOptIn=True, schedulerCmdlets=True |
-| Operations | Owner-host Linux/VPS service lifecycle includes a real no-secret systemd plan/install/status/uninstall path for reboot-persistent live supervisor autorecovery from rendered units. | passed | systemdInstallValidation=passed, failedChecks=0, installScript=True, plan=True, planDidNotMutate=True, renderedUnits=True, supervisor=True, hardening=True |
+| Operations | Owner-host Linux/VPS service lifecycle includes a real no-secret systemd plan/install/status/uninstall path plus bridge-relayer opt-in plan for reboot-persistent live supervisor autorecovery from rendered units. | passed | systemdInstallValidation=passed, failedChecks=0, installScript=True, plan=True, planDidNotMutate=True, renderedUnits=True, relayerDefaultOff=True, relayerOptIn=True, supervisor=True, hardening=True |
 | Operations | Node operator packaging collects no-secret runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates. | passed | operatorPackage=passed, commands=50, runbooks=31, evidenceReports=38, failedChecks=0, noSecretScan=True |
 | Operations | Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, forbidden local files, and no-secret scan. | passed | operatorPackageVerify=passed, expectedFiles=62, commands=50, failedChecks=0, noSecretScan=True |
 | RPC/API | The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation, narrow public reads, and abuse rejection before it can be exposed publicly. | passed | validationStatus=passed, corsAllowed=True, corsRejected=True, endpointChecks=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True, abuseStatus=passed, abusePassed=True, abuseMissingChecks=0 |

@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Package
 
-Generated: 2026-05-19T12:40:22.9066346Z
+Generated: 2026-05-19T13:21:36.9579309Z
 Status: passed
 
 ## Package
@@ -63,4 +63,4 @@ Status: passed
 - `npm run flowchain:service:install:windows -- -Action Plan`
 - `npm run flowchain:service:install:validate`
 - `npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>`
-- `npm run flowchain:service:install:systemd:validate`
+- `npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop`

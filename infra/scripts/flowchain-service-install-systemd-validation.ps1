@@ -89,13 +89,18 @@ function Invoke-SystemdInstallPlanValidation {
     $nginxExe = Join-Path $tempRoot "nginx.exe"
     $planReportPath = Join-Path $reportTempRoot "systemd-plan-report.json"
     $planMarkdownPath = Join-Path $reportTempRoot "SYSTEMD_PLAN.md"
+    $bridgePlanReportPath = Join-Path $reportTempRoot "systemd-bridge-relayer-plan-report.json"
+    $bridgePlanMarkdownPath = Join-Path $reportTempRoot "SYSTEMD_BRIDGE_RELAYER_PLAN.md"
     $renderOutput = @()
     $planOutput = @()
+    $bridgePlanOutput = @()
     $renderExitCode = 1
     $planExitCode = 1
+    $bridgePlanExitCode = 1
     $problem = ""
     $cleanupAttempted = $false
     $planReport = $null
+    $bridgePlanReport = $null
 
     try {
         New-Item -ItemType Directory -Force -Path $tempRoot, $renderDir, $backupDir, $reportTempRoot | Out-Null
@@ -138,11 +143,25 @@ function Invoke-SystemdInstallPlanValidation {
             $planExitCode = 0
         }
 
+        $bridgePlanOutput = @(& powershell -NoProfile -ExecutionPolicy Bypass -File $InstallScriptPath `
+            -Action Plan `
+            -RenderDir $renderDir `
+            -StartBridgeRelayerLoop `
+            -ReportPath $bridgePlanReportPath `
+            -MarkdownPath $bridgePlanMarkdownPath 2>&1 | ForEach-Object { "$_" })
+        $bridgePlanExitCode = $LASTEXITCODE
+        if ($null -eq $bridgePlanExitCode) {
+            $bridgePlanExitCode = 0
+        }
+
         $renderOutputText = @($renderOutput) -join "`n"
         $planOutputText = @($planOutput) -join "`n"
+        $bridgePlanOutputText = @($bridgePlanOutput) -join "`n"
         Assert-FlowChainNoSecretText -Text $renderOutputText -Label "systemd install validation render output"
         Assert-FlowChainNoSecretText -Text $planOutputText -Label "systemd install validation plan output"
+        Assert-FlowChainNoSecretText -Text $bridgePlanOutputText -Label "systemd bridge relayer opt-in plan output"
         $planReport = Read-FlowChainJsonIfExists -Path $planReportPath
+        $bridgePlanReport = Read-FlowChainJsonIfExists -Path $bridgePlanReportPath
     }
     catch {
         $problem = $_.Exception.Message
@@ -164,12 +183,17 @@ function Invoke-SystemdInstallPlanValidation {
     }
 
     $planChecks = if ($null -ne $planReport) { $planReport.checks } else { $null }
+    $bridgePlanChecks = if ($null -ne $bridgePlanReport) { $bridgePlanReport.checks } else { $null }
+    $bridgePlanUnitPreview = if ($null -ne $bridgePlanReport) { $bridgePlanReport.unitCommandPreview } else { $null }
+    $bridgePlanSupervisorUnit = if ($null -ne $bridgePlanUnitPreview) { @($bridgePlanUnitPreview.supervisor) -join "`n" } else { "" }
     return [ordered]@{
         schema = "flowchain.systemd_install_plan_validation.v0"
-        status = if (($renderExitCode -eq 0) -and ($planExitCode -eq 0) -and $null -ne $planReport -and "$($planReport.status)" -eq "passed") { "passed" } else { "failed" }
+        status = if (($renderExitCode -eq 0) -and ($planExitCode -eq 0) -and ($bridgePlanExitCode -eq 0) -and $null -ne $planReport -and "$($planReport.status)" -eq "passed" -and $null -ne $bridgePlanReport -and "$($bridgePlanReport.status)" -eq "passed") { "passed" } else { "failed" }
         renderExitCode = [int]$renderExitCode
         planExitCode = [int]$planExitCode
+        bridgePlanExitCode = [int]$bridgePlanExitCode
         planReportStatus = if ($null -ne $planReport) { "$($planReport.status)" } else { "missing" }
+        bridgePlanReportStatus = if ($null -ne $bridgePlanReport) { "$($bridgePlanReport.status)" } else { "missing" }
         problem = $problem
         checks = [ordered]@{
             renderCommandPassed = $renderExitCode -eq 0
@@ -183,6 +207,15 @@ function Invoke-SystemdInstallPlanValidation {
             planNoSecrets = $null -ne $planReport -and $planReport.noSecrets -eq $true
             planEnvValuesPrintedFalse = $null -ne $planReport -and $planReport.envValuesPrinted -eq $false
             planBroadcastsFalse = $null -ne $planReport -and $planReport.broadcasts -eq $false
+            bridgeRelayerOptInPlanCommandPassed = $bridgePlanExitCode -eq 0
+            bridgeRelayerOptInPlanReportPassed = $null -ne $bridgePlanReport -and "$($bridgePlanReport.status)" -eq "passed"
+            bridgeRelayerOptInPlanUsesRenderedUnits = $null -ne $bridgePlanReport -and "$($bridgePlanReport.sourceMode)" -eq "rendered"
+            bridgeRelayerOptInPlanDidNotMutate = $null -ne $bridgePlanReport -and $bridgePlanReport.hostMutationPerformed -eq $false
+            bridgeRelayerOptInStartsLoop = $null -ne $bridgePlanChecks -and $bridgePlanChecks.bridgeRelayerOptInStartsLoop -eq $true -and $bridgePlanSupervisorUnit.Contains("-StartBridgeRelayerLoop")
+            bridgeRelayerOptInUsesSupervisor = $null -ne $bridgePlanChecks -and $bridgePlanChecks.bridgeRelayerOptInUsesSupervisor -eq $true
+            bridgeRelayerOptInPlanNoSecrets = $null -ne $bridgePlanReport -and $bridgePlanReport.noSecrets -eq $true
+            bridgeRelayerOptInPlanEnvValuesPrintedFalse = $null -ne $bridgePlanReport -and $bridgePlanReport.envValuesPrinted -eq $false
+            bridgeRelayerOptInPlanBroadcastsFalse = $null -ne $bridgePlanReport -and $bridgePlanReport.broadcasts -eq $false
             cleanupAttempted = $cleanupAttempted
         }
         envValuesPrinted = $false
@@ -256,6 +289,15 @@ $checks = [ordered]@{
     supervisorUsesAutorecoveryLoop = $supervisorText.Contains("npm run flowchain:service:supervisor")
     supervisorRestartAlways = $supervisorText.Contains("Restart=always")
     bridgeRelayerDefaultOff = -not $supervisorText.Contains("StartBridgeRelayerLoop")
+    bridgeRelayerOptInPlanCommandPassed = $installPlanValidation.checks.bridgeRelayerOptInPlanCommandPassed -eq $true
+    bridgeRelayerOptInPlanReportPassed = $installPlanValidation.checks.bridgeRelayerOptInPlanReportPassed -eq $true
+    bridgeRelayerOptInPlanDidNotMutate = $installPlanValidation.checks.bridgeRelayerOptInPlanDidNotMutate -eq $true
+    bridgeRelayerOptInPlanUsesRenderedUnits = $installPlanValidation.checks.bridgeRelayerOptInPlanUsesRenderedUnits -eq $true
+    bridgeRelayerOptInStartsLoop = $installPlanValidation.checks.bridgeRelayerOptInStartsLoop -eq $true
+    bridgeRelayerOptInUsesSupervisor = $installPlanValidation.checks.bridgeRelayerOptInUsesSupervisor -eq $true
+    bridgeRelayerOptInPlanNoSecrets = $installPlanValidation.checks.bridgeRelayerOptInPlanNoSecrets -eq $true
+    bridgeRelayerOptInPlanEnvValuesPrintedFalse = $installPlanValidation.checks.bridgeRelayerOptInPlanEnvValuesPrintedFalse -eq $true
+    bridgeRelayerOptInPlanBroadcastsFalse = $installPlanValidation.checks.bridgeRelayerOptInPlanBroadcastsFalse -eq $true
     ownerEnvFileUsed = Test-SystemdTextHasAll -Text $combinedUnitText -Tokens @("EnvironmentFile=<FLOWCHAIN_OWNER_ENV_FILE>", "Environment=FLOWCHAIN_OWNER_ENV_FILE=<FLOWCHAIN_OWNER_ENV_FILE>")
     repoWorkingDirectoryUsed = Test-SystemdTextHasAll -Text $combinedUnitText -Tokens @("WorkingDirectory=<FLOWCHAIN_REPO_ABSOLUTE_PATH>")
     cargoTargetDirIsExternalized = $combinedUnitText.Contains("FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR=<FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR>")
@@ -324,7 +366,7 @@ $markdownLines.Add("Generated: $($report.generatedAt)")
 $markdownLines.Add("Status: $status")
 $markdownLines.Add("")
 $markdownLines.Add("This validation proves the owner Linux systemd install plan is present, no-secret, non-mutating, live-profile by default, and includes autorecovery through the FlowChain supervisor.")
-$markdownLines.Add("It also executes the real Plan action against rendered units in a temporary directory and verifies that no host mutation occurs.")
+$markdownLines.Add("It also executes the real default Plan and bridge-relayer opt-in Plan actions against rendered units in a temporary directory and verifies that no host mutation occurs.")
 $markdownLines.Add("")
 $markdownLines.Add("## Checks")
 $markdownLines.Add("")

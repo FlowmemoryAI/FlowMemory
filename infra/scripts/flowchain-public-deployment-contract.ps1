@@ -704,6 +704,15 @@ $systemdInstallReady = ($systemdInstallValidationStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanCommandPassed" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanDidNotMutate" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanUsesRenderedUnits" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInPlanCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInPlanReportPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInPlanUsesRenderedUnits" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInStartsLoop" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInUsesSupervisor" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInPlanNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInPlanEnvValuesPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInPlanBroadcastsFalse" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "liveServiceUsesLiveProfile" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "liveServiceStopPreservesState" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "liveServiceRestartOnFailure" -Default $false) -eq $true) `
@@ -722,10 +731,10 @@ $systemdInstallReady = ($systemdInstallValidationStatus -eq "passed") `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:service:install:systemd") `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:service:install:systemd:validate")
 Add-DeploymentItem -Items $items -Id "systemd-service-install-automation" `
-    -Requirement "The owner Linux/VPS host has a real no-secret systemd plan/install/status/uninstall path for rendered live-service and supervisor units, validated through a read-only rendered-unit plan drill." `
+    -Requirement "The owner Linux/VPS host has a real no-secret systemd plan/install/status/uninstall path plus bridge-relayer opt-in plan for rendered live-service and supervisor units, validated through read-only rendered-unit plan drills." `
     -Status $(if ($systemdInstallReady) { "passed" } else { "failed" }) `
-    -Evidence "systemdInstallValidation=$systemdInstallValidationStatus, installScript=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "installScriptExists"), plan=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanValidationPassed"), planDidNotMutate=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanDidNotMutate"), renderedUnits=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanUsesRenderedUnits"), liveProfile=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "liveServiceUsesLiveProfile"), supervisor=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "supervisorUsesAutorecoveryLoop"), hardening=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "leastPrivilegeHardeningPresent")" `
-    -Commands @("npm run flowchain:service:install:systemd:validate", "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>", "npm run flowchain:service:install:systemd -- -Action Install -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>", "npm run flowchain:service:install:systemd -- -Action Status", "npm run flowchain:service:install:systemd -- -Action Uninstall")
+    -Evidence "systemdInstallValidation=$systemdInstallValidationStatus, installScript=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "installScriptExists"), plan=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanValidationPassed"), planDidNotMutate=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanDidNotMutate"), renderedUnits=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanUsesRenderedUnits"), relayerDefaultOff=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerDefaultOff"), relayerOptIn=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInStartsLoop"), liveProfile=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "liveServiceUsesLiveProfile"), supervisor=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "supervisorUsesAutorecoveryLoop"), hardening=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "leastPrivilegeHardeningPresent")" `
+    -Commands @("npm run flowchain:service:install:systemd:validate", "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>", "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop", "npm run flowchain:service:install:systemd -- -Action Install -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>", "npm run flowchain:service:install:systemd -- -Action Status", "npm run flowchain:service:install:systemd -- -Action Uninstall")
 
 $opsSnapshot = $reports.opsSnapshot
 $opsSnapshotStatus = Get-DeploymentStatus -Report $opsSnapshot
@@ -1184,6 +1193,7 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:service:install:windows -- -Action Plan",
         "npm run flowchain:service:install:systemd:validate",
         "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>",
+        "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop",
         "npm run flowchain:ops:snapshot -- -AllowBlocked",
         "npm run flowchain:ops:alerts -- -AllowBlocked",
         "npm run flowchain:ops:alerts:install:validate",

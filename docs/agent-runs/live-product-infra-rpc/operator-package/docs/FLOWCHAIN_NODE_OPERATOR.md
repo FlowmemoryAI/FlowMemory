@@ -51,8 +51,13 @@ npm run flowchain:service:install:windows -- -Action Uninstall
 
 On a Linux VPS, `flowchain:service:install:systemd:validate` checks the rendered
 systemd live-service and supervisor templates, install/status/uninstall command
-plans, owner env-file wiring, scoped write paths, and autorecovery defaults
-without mutating the host.
+plans, owner env-file wiring, scoped write paths, autorecovery defaults, and the
+explicit bridge-relayer opt-in supervisor plan without mutating the host.
+
+```powershell
+npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>
+npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop
+```
 
 ## Public RPC Boundary
 

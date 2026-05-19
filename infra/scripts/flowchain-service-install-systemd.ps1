@@ -6,6 +6,7 @@ param(
     [string] $SystemdUnitDir = "/etc/systemd/system",
     [string] $LiveServiceName = "flowchain-live.service",
     [string] $SupervisorServiceName = "flowchain-supervisor.service",
+    [switch] $StartBridgeRelayerLoop,
     [string] $ReportPath = "docs/agent-runs/live-product-infra-rpc/systemd-service-install-report.json",
     [string] $MarkdownPath = "docs/agent-runs/live-product-infra-rpc/SYSTEMD_SERVICE_INSTALL.md"
 )
@@ -152,6 +153,41 @@ function Test-SystemdTextHasAll {
     return $true
 }
 
+function Get-SystemdCommandPreview {
+    param([Parameter(Mandatory = $true)][string] $Text)
+
+    return @($Text -split "`r?`n" | Where-Object {
+        $_.StartsWith("ExecStart=", [System.StringComparison]::Ordinal) -or
+        $_.StartsWith("ExecStartPost=", [System.StringComparison]::Ordinal) -or
+        $_.StartsWith("ExecReload=", [System.StringComparison]::Ordinal) -or
+        $_.StartsWith("ExecStop=", [System.StringComparison]::Ordinal)
+    })
+}
+
+function Enable-SystemdBridgeRelayerLoop {
+    param([Parameter(Mandatory = $true)][string] $Text)
+
+    if ($Text.Contains("-StartBridgeRelayerLoop")) {
+        return $Text
+    }
+
+    $lines = New-Object System.Collections.Generic.List[string]
+    $updated = $false
+    foreach ($line in @($Text -split "`r?`n")) {
+        if (-not $updated -and $line.StartsWith("ExecStart=", [System.StringComparison]::Ordinal) -and $line.Contains("npm run flowchain:service:supervisor")) {
+            $lines.Add("$line -StartBridgeRelayerLoop")
+            $updated = $true
+        }
+        else {
+            $lines.Add($line)
+        }
+    }
+    if (-not $updated) {
+        throw "Supervisor unit must contain an ExecStart for npm run flowchain:service:supervisor before bridge relayer opt-in can be applied."
+    }
+    return ($lines -join "`n")
+}
+
 if (-not (Test-SystemdUnitName -Name $LiveServiceName)) {
     throw "LiveServiceName must be a systemd .service unit name."
 }
@@ -172,6 +208,9 @@ $liveSourceExists = Test-Path -LiteralPath $liveSourcePath
 $supervisorSourceExists = Test-Path -LiteralPath $supervisorSourcePath
 $liveUnitText = if ($liveSourceExists) { Get-Content -Raw -LiteralPath $liveSourcePath } else { "" }
 $supervisorUnitText = if ($supervisorSourceExists) { Get-Content -Raw -LiteralPath $supervisorSourcePath } else { "" }
+if ($StartBridgeRelayerLoop.IsPresent -and $supervisorSourceExists) {
+    $supervisorUnitText = Enable-SystemdBridgeRelayerLoop -Text $supervisorUnitText
+}
 $combinedUnitText = "$liveUnitText`n$supervisorUnitText"
 $isWindowsHost = Test-SystemdWindowsHost
 $systemctl = Get-SystemdTool -Name "systemctl"
@@ -192,6 +231,7 @@ $commands = [ordered]@{
     uninstall = "npm run flowchain:service:install:systemd -- -Action Uninstall"
     serviceStatus = "npm run flowchain:service:status"
     serviceMonitor = "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30"
+    bridgeRelayerOptInPlan = "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop"
 }
 
 $before = [ordered]@{
@@ -209,8 +249,8 @@ try {
                 throw "Install requires rendered $LiveServiceName and $SupervisorServiceName files in RenderDir."
             }
 
-            Copy-Item -LiteralPath $liveSourcePath -Destination $liveTargetPath -Force
-            Copy-Item -LiteralPath $supervisorSourcePath -Destination $supervisorTargetPath -Force
+            Set-Content -LiteralPath $liveTargetPath -Value $liveUnitText -Encoding UTF8
+            Set-Content -LiteralPath $supervisorTargetPath -Value $supervisorUnitText -Encoding UTF8
             $hostMutationPerformed = $true
             [void]$mutationCommands.Add("copy-rendered-units")
             foreach ($arguments in @(
@@ -274,7 +314,10 @@ $checks = [ordered]@{
     liveServiceRestartOnFailure = $liveUnitText.Contains("Restart=on-failure")
     supervisorUsesAutorecoveryLoop = $supervisorUnitText.Contains("npm run flowchain:service:supervisor")
     supervisorRestartAlways = $supervisorUnitText.Contains("Restart=always")
-    bridgeRelayerDefaultOff = -not $supervisorUnitText.Contains("StartBridgeRelayerLoop")
+    bridgeRelayerDefaultOff = if ($StartBridgeRelayerLoop.IsPresent) { $true } else { -not $supervisorUnitText.Contains("StartBridgeRelayerLoop") }
+    bridgeRelayerOptInRequested = $StartBridgeRelayerLoop.IsPresent
+    bridgeRelayerOptInStartsLoop = if ($StartBridgeRelayerLoop.IsPresent) { $supervisorUnitText.Contains("-StartBridgeRelayerLoop") } else { $true }
+    bridgeRelayerOptInUsesSupervisor = if ($StartBridgeRelayerLoop.IsPresent) { $supervisorUnitText.Contains("npm run flowchain:service:supervisor") } else { $true }
     ownerEnvFileUsed = Test-SystemdTextHasAll -Text $combinedUnitText -Tokens @("EnvironmentFile=", "FLOWCHAIN_OWNER_ENV_FILE=")
     repoWorkingDirectoryUsed = $combinedUnitText.Contains("WorkingDirectory=")
     leastPrivilegeHardeningPresent = Test-SystemdTextHasAll -Text $combinedUnitText -Tokens @("NoNewPrivileges=true", "PrivateTmp=true", "ProtectSystem=full")
@@ -306,6 +349,8 @@ $requiredForPlan = @(
     "supervisorUsesAutorecoveryLoop",
     "supervisorRestartAlways",
     "bridgeRelayerDefaultOff",
+    "bridgeRelayerOptInStartsLoop",
+    "bridgeRelayerOptInUsesSupervisor",
     "ownerEnvFileUsed",
     "repoWorkingDirectoryUsed",
     "leastPrivilegeHardeningPresent",
@@ -361,6 +406,7 @@ $report = [ordered]@{
     systemdUnitDir = $SystemdUnitDir
     liveServiceName = $LiveServiceName
     supervisorServiceName = $SupervisorServiceName
+    startBridgeRelayerLoop = $StartBridgeRelayerLoop.IsPresent
     sourcePaths = [ordered]@{
         live = $liveSourcePath
         supervisor = $supervisorSourcePath
@@ -380,6 +426,10 @@ $report = [ordered]@{
     after = $after
     commands = $commands
     mutationCommands = @($mutationCommands)
+    unitCommandPreview = [ordered]@{
+        live = @(Get-SystemdCommandPreview -Text $liveUnitText)
+        supervisor = @(Get-SystemdCommandPreview -Text $supervisorUnitText)
+    }
     checks = $checks
     failedChecks = @($failedChecks)
     actionErrorRedacted = $actionError
@@ -414,6 +464,7 @@ $markdownLines.Add("Status: $status")
 $markdownLines.Add("Action: $Action")
 $markdownLines.Add("")
 $markdownLines.Add("This script installs, checks, or removes the rendered FlowChain live-service and supervisor systemd units on a Linux owner host. Plan mode is read-only and is the validation path used by this repository.")
+$markdownLines.Add("Bridge relayer loop startup is opt-in through `-StartBridgeRelayerLoop`; the default unit remains relayer-off.")
 $markdownLines.Add("")
 $markdownLines.Add("## Commands")
 $markdownLines.Add("")

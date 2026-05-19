@@ -160,6 +160,7 @@ $commandMatrix = @(
     [ordered]@{ phase = "autorecovery"; command = "npm run flowchain:service:install:windows -- -Action Plan"; purpose = "Render the no-secret Windows Scheduled Task install plan." },
     [ordered]@{ phase = "autorecovery"; command = "npm run flowchain:service:install:validate"; purpose = "Validate install/status/uninstall paths without mutating the owner host." },
     [ordered]@{ phase = "autorecovery"; command = "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>"; purpose = "Render the no-secret Linux systemd install plan from owner-rendered units." },
+    [ordered]@{ phase = "autorecovery"; command = "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop"; purpose = "Render the explicit Linux bridge-relayer opt-in systemd supervisor plan without mutating the owner host." },
     [ordered]@{ phase = "autorecovery"; command = "npm run flowchain:service:install:systemd:validate"; purpose = "Validate Linux systemd live-service and supervisor install plans without mutating the owner host." },
     [ordered]@{ phase = "handoff"; command = "npm run flowchain:second-computer:readiness"; purpose = "Create and verify the no-secret offline second-computer source bundle." },
     [ordered]@{ phase = "owner-setup"; command = "npm run flowchain:owner:onboarding"; purpose = "Regenerate the owner setup map and clarify that FlowChain public RPC is repo-owned." },

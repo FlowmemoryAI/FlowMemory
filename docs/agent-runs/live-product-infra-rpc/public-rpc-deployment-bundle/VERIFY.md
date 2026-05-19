@@ -25,6 +25,7 @@ Run these on the owner host after DNS, TLS, allowed origins, rate limit, and bac
 ## Owner-Host Preflight Checks
 
 - npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>
+- npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop
 - systemd-analyze verify <FLOWCHAIN_SYSTEMD_RENDERED_UNIT>
 - systemd-analyze verify <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>
 - nginx -t

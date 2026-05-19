@@ -738,6 +738,15 @@ $systemdServiceInstallRequiredChecks = @(
     "supervisorUsesAutorecoveryLoop",
     "supervisorRestartAlways",
     "bridgeRelayerDefaultOff",
+    "bridgeRelayerOptInPlanCommandPassed",
+    "bridgeRelayerOptInPlanReportPassed",
+    "bridgeRelayerOptInPlanDidNotMutate",
+    "bridgeRelayerOptInPlanUsesRenderedUnits",
+    "bridgeRelayerOptInStartsLoop",
+    "bridgeRelayerOptInUsesSupervisor",
+    "bridgeRelayerOptInPlanNoSecrets",
+    "bridgeRelayerOptInPlanEnvValuesPrintedFalse",
+    "bridgeRelayerOptInPlanBroadcastsFalse",
     "ownerEnvFileUsed",
     "leastPrivilegeHardeningPresent",
     "writePathsScoped",
@@ -2263,10 +2272,10 @@ Add-AuditItem -Items $items -Id "service-install-validation" `
     -Commands @("npm run flowchain:service:install:validate", "npm run flowchain:service:install:windows -- -Action Plan")
 
 Add-AuditItem -Items $items -Id "systemd-service-install-validation" `
-    -Requirement "Owner-host Linux/VPS service install validation proves a real no-secret systemd plan/install/status/uninstall script can plan from rendered live-service and supervisor units without mutating the host." `
+    -Requirement "Owner-host Linux/VPS service install validation proves a real no-secret systemd plan/install/status/uninstall script plus bridge-relayer opt-in plan can plan from rendered live-service and supervisor units without mutating the host." `
     -Status $(if ($systemdServiceInstallValidationPassed) { "passed" } else { "failed" }) `
-    -Evidence "systemdInstall=$systemdServiceInstallValidationStatus, failedChecks=$systemdServiceInstallFailedCheckCount, missingChecks=$systemdServiceInstallMissingCheckCount, secretFindings=$systemdServiceInstallSecretFindingCount, installScript=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "installScriptExists" -Default $false), plan=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "installPlanValidationPassed" -Default $false), planDidNotMutate=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "installPlanDidNotMutate" -Default $false), renderedUnits=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "installPlanUsesRenderedUnits" -Default $false), report=$($paths.systemdServiceInstallValidation)" `
-    -Commands @("npm run flowchain:service:install:systemd:validate", "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>")
+    -Evidence "systemdInstall=$systemdServiceInstallValidationStatus, failedChecks=$systemdServiceInstallFailedCheckCount, missingChecks=$systemdServiceInstallMissingCheckCount, secretFindings=$systemdServiceInstallSecretFindingCount, installScript=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "installScriptExists" -Default $false), plan=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "installPlanValidationPassed" -Default $false), planDidNotMutate=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "installPlanDidNotMutate" -Default $false), renderedUnits=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "installPlanUsesRenderedUnits" -Default $false), relayerDefaultOff=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "bridgeRelayerDefaultOff" -Default $false), relayerOptIn=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "bridgeRelayerOptInStartsLoop" -Default $false), report=$($paths.systemdServiceInstallValidation)" `
+    -Commands @("npm run flowchain:service:install:systemd:validate", "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>", "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop")
 
 Add-AuditItem -Items $items -Id "wallet-create" `
     -Requirement "People can create wallets through the RPC service without receiving secret material." `

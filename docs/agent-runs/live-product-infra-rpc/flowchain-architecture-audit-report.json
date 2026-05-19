@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-19T12:40:09.7606621Z",
+    "generatedAt":  "2026-05-19T13:21:24.7820695Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -29,7 +29,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=87939, finalizedHeight=87939",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=88360, finalizedHeight=88360",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -124,9 +124,9 @@
                   {
                       "id":  "systemd-service-install-boundary",
                       "layer":  "Operations",
-                      "requirement":  "Owner-host Linux/VPS service lifecycle includes a real no-secret systemd plan/install/status/uninstall path for reboot-persistent live supervisor autorecovery from rendered units.",
+                      "requirement":  "Owner-host Linux/VPS service lifecycle includes a real no-secret systemd plan/install/status/uninstall path plus bridge-relayer opt-in plan for reboot-persistent live supervisor autorecovery from rendered units.",
                       "status":  "passed",
-                      "evidence":  "systemdInstallValidation=passed, failedChecks=0, installScript=True, plan=True, planDidNotMutate=True, renderedUnits=True, supervisor=True, hardening=True",
+                      "evidence":  "systemdInstallValidation=passed, failedChecks=0, installScript=True, plan=True, planDidNotMutate=True, renderedUnits=True, relayerDefaultOff=True, relayerOptIn=True, supervisor=True, hardening=True",
                       "files":  [
                                     "infra/scripts/flowchain-service-install-systemd.ps1",
                                     "infra/scripts/flowchain-service-install-systemd-validation.ps1",
@@ -136,6 +136,7 @@
                       "commands":  [
                                        "npm run flowchain:service:install:systemd:validate",
                                        "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                                       "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -StartBridgeRelayerLoop",
                                        "npm run flowchain:service:install:systemd -- -Action Install -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
                                        "npm run flowchain:service:install:systemd -- -Action Status",
                                        "npm run flowchain:service:install:systemd -- -Action Uninstall"
