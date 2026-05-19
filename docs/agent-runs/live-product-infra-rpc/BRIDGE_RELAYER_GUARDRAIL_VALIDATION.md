@@ -1,9 +1,9 @@
 ﻿# FlowChain Bridge Relayer Guardrail Validation
 
-Generated: 2026-05-19T20:25:31.8076530Z
+Generated: 2026-05-19T21:39:16.1917714Z
 Status: passed
 
-This validation proves a relayer run with missing owner Base 8453 inputs exits as an allowed blocked state without mutating the final Base scan cursor, staging a cursor, queueing credits, printing env values, or broadcasting.
+This validation proves a relayer run with missing owner Base 8453 inputs exits as an allowed blocked state without mutating the final Base scan cursor, staging a cursor, queueing credits, printing env values, or broadcasting. It also runs the bridge relayer unit suite and requires the same-process cursor concurrency test so the Base scan cursor cannot double-scan under concurrent SDK or harness calls.
 
 ## Checks
 
@@ -31,6 +31,10 @@ This validation proves a relayer run with missing owner Base 8453 inputs exits a
 - directObserveBroadcastsFalse: True
 - directObserveEnvValuesPrintedFalse: True
 - directObserveNoSecrets: True
+- bridgeRelayerTestsPassed: True
+- bridgeRelayerConcurrencyTestCovered: True
+- bridgeCursorAsyncLockImplemented: True
+- bridgeCursorLockUsesAsyncRetry: True
 - broadcastsFalse: True
 - envValuesPrintedFalse: True
 - noSecrets: True

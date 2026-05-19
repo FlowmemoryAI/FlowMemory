@@ -25,6 +25,8 @@ $directObserveReportRelPath = Join-Path $ValidationDir "direct-observe-report.js
 $directObserveReportPath = Join-Path $validationFullDir "direct-observe-report.json"
 $directObserveFinalCursorPath = Join-Path $validationFullDir "direct-observe-final-cursor.json"
 $directObserveStagedCursorPath = Join-Path $validationFullDir "direct-observe-staged-cursor.json"
+$bridgeRelayerSourcePath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "services/bridge-relayer/src/observe-base-lockbox.ts"
+$bridgeRelayerTestPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "services/bridge-relayer/test/bridge-relayer.test.ts"
 
 $requiredEnvNames = @(
     "FLOWCHAIN_OWNER_ENV_FILE",
@@ -250,6 +252,20 @@ if (-not [string]::IsNullOrWhiteSpace($directObserveOutputText)) {
     Assert-FlowChainNoSecretText -Text $directObserveOutputText -Label "bridge direct observe guardrail output"
 }
 
+$bridgeTestChild = Invoke-GuardrailChild -ArgumentList @(
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-Command",
+    "npm run bridge:test"
+) -TimeoutSeconds 300
+$bridgeTestOutputText = @($bridgeTestChild.outputRedacted) -join "`n"
+if (-not [string]::IsNullOrWhiteSpace($bridgeTestOutputText)) {
+    Assert-FlowChainNoSecretText -Text $bridgeTestOutputText -Label "bridge relayer test output"
+}
+$bridgeRelayerSourceText = Get-Content -Raw -LiteralPath $bridgeRelayerSourcePath
+$bridgeRelayerTestText = Get-Content -Raw -LiteralPath $bridgeRelayerTestPath
+
 $checks = [ordered]@{
     relayerCommandExitedZeroWithAllowBlocked = ([int]$child.exitCode -eq 0)
     relayerReportWritten = Test-Path -LiteralPath $relayerReportPath
@@ -275,6 +291,10 @@ $checks = [ordered]@{
     directObserveBroadcastsFalse = (Get-GuardrailProp -Object $directObserveReport -Name "broadcasts" -Default $true) -eq $false
     directObserveEnvValuesPrintedFalse = (Get-GuardrailProp -Object $directObserveReport -Name "envValuesPrinted" -Default $true) -eq $false
     directObserveNoSecrets = (Get-GuardrailProp -Object $directObserveReport -Name "noSecrets" -Default $false) -eq $true
+    bridgeRelayerTestsPassed = ([int]$bridgeTestChild.exitCode -eq 0)
+    bridgeRelayerConcurrencyTestCovered = $bridgeRelayerTestText.Contains("Base public-network pilot cursor serializes concurrent same-process scans")
+    bridgeCursorAsyncLockImplemented = $bridgeRelayerSourceText.Contains("async function acquireBridgeStateFileLock")
+    bridgeCursorLockUsesAsyncRetry = $bridgeRelayerSourceText.Contains("await sleep(APPLICATION_STATE_LOCK_RETRY_MS)")
     broadcastsFalse = (Get-GuardrailProp -Object $relayerReport -Name "broadcasts" -Default $true) -eq $false
     envValuesPrintedFalse = (Get-GuardrailProp -Object $relayerReport -Name "envValuesPrinted" -Default $true) -eq $false
     noSecrets = (Get-GuardrailProp -Object $relayerReport -Name "noSecrets" -Default $false) -eq $true
@@ -316,6 +336,12 @@ $report = [ordered]@{
         }
         cursor = $directObserveCursor
     }
+    bridgeRelayerTests = [ordered]@{
+        exitCode = [int]$bridgeTestChild.exitCode
+        timedOut = [bool]$bridgeTestChild.timedOut
+        stdoutPath = [string]$bridgeTestChild.stdoutPath
+        stderrPath = [string]$bridgeTestChild.stderrPath
+    }
     requiredEnvNamesClearedForScenario = @($requiredEnvNames)
     envValuesPrinted = $false
     noSecrets = $true
@@ -346,7 +372,7 @@ $markdownLines.Add("")
 $markdownLines.Add("Generated: $($report.generatedAt)")
 $markdownLines.Add("Status: $status")
 $markdownLines.Add("")
-$markdownLines.Add("This validation proves a relayer run with missing owner Base 8453 inputs exits as an allowed blocked state without mutating the final Base scan cursor, staging a cursor, queueing credits, printing env values, or broadcasting.")
+$markdownLines.Add("This validation proves a relayer run with missing owner Base 8453 inputs exits as an allowed blocked state without mutating the final Base scan cursor, staging a cursor, queueing credits, printing env values, or broadcasting. It also runs the bridge relayer unit suite and requires the same-process cursor concurrency test so the Base scan cursor cannot double-scan under concurrent SDK or harness calls.")
 $markdownLines.Add("")
 $markdownLines.Add("## Checks")
 $markdownLines.Add("")

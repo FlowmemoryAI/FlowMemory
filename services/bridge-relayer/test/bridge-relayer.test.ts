@@ -891,6 +891,85 @@ test("Base public-network pilot cursor advances over confirmed ranges", async ()
   }
 });
 
+test("Base public-network pilot cursor serializes concurrent same-process scans", async () => {
+  const stateDir = mkdtempSync(join(tmpdir(), "flowmemory-bridge-cursor-concurrent-"));
+  const cursorPath = join(stateDir, "cursor-state.json");
+  const ranges: { fromBlock?: string; toBlock?: string }[] = [];
+  const depositLog = sampleBridgeDepositLog(BASE_MAINNET_CHAIN_ID);
+  let blockNumberReads = 0;
+  const originalFetch = globalThis.fetch;
+  const previousCursorLockHold = process.env.FLOWCHAIN_BRIDGE_CURSOR_LOCK_TEST_HOLD_MS;
+  process.env.FLOWCHAIN_BRIDGE_CURSOR_LOCK_TEST_HOLD_MS = "50";
+  globalThis.fetch = async (_input, init) => {
+    const body = JSON.parse(String(init?.body ?? "{}")) as { method: string; params: Record<string, unknown>[] };
+    if (body.method === "eth_chainId") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x2105" }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_blockNumber") {
+      blockNumberReads += 1;
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: blockNumberReads === 1 ? "0x70" : "0x72" }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_getLogs") {
+      const range = body.params[0] ?? {};
+      ranges.push({
+        fromBlock: String(range.fromBlock),
+        toBlock: String(range.toBlock),
+      });
+      return new Response(JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        result: ranges.length === 1 ? [depositLog] : [],
+      }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_getBlockByNumber") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: canonicalBlockForLog(depositLog) }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, error: { message: "unexpected method" } }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  };
+
+  try {
+    const [firstRun, secondRun] = await Promise.all([
+      runBridgePipeline(parseBridgeArgs(baseMainnetPilotRpcArgs([
+        "--cursor-state",
+        cursorPath,
+      ]))),
+      runBridgePipeline(parseBridgeArgs(baseMainnetPilotRpcArgs([
+        "--cursor-state",
+        cursorPath,
+      ]))),
+    ]);
+    const cursor = JSON.parse(readFileSync(cursorPath, "utf8")) as { lastScannedBlock: string; lastConfirmedHead: string; lastLogCount: number };
+
+    assert.equal(firstRun.observations.length + secondRun.observations.length, 1);
+    assert.deepEqual(ranges, [
+      { fromBlock: "0x64", toBlock: "0x6b" },
+      { fromBlock: "0x6c", toBlock: "0x6d" },
+    ]);
+    assert.equal(cursor.lastScannedBlock, "109");
+    assert.equal(cursor.lastConfirmedHead, "109");
+    assert.equal(cursor.lastLogCount, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (previousCursorLockHold === undefined) {
+      delete process.env.FLOWCHAIN_BRIDGE_CURSOR_LOCK_TEST_HOLD_MS;
+    } else {
+      process.env.FLOWCHAIN_BRIDGE_CURSOR_LOCK_TEST_HOLD_MS = previousCursorLockHold;
+    }
+    rmSync(stateDir, { recursive: true, force: true });
+  }
+});
+
 test("Base public-network pilot cursor does not advance when no confirmed block is available", async () => {
   const stateDir = mkdtempSync(join(tmpdir(), "flowmemory-bridge-cursor-wait-"));
   const cursorPath = join(stateDir, "cursor-state.json");
