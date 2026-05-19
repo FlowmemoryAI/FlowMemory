@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_bundle_report.v3",
-    "generatedAt":  "2026-05-19T14:20:33.5491681Z",
+    "generatedAt":  "2026-05-19T19:12:32.7066166Z",
     "status":  "passed",
     "bundleDir":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle",
     "flowChainRpcIsRepoOwned":  true,
@@ -110,6 +110,8 @@
                                             "renderedReportNoSecrets":  true,
                                             "wildcardOriginRenderRejected":  true,
                                             "wildcardOriginRenderOutputNoSecrets":  true,
+                                            "publicUrlPathRenderRejected":  true,
+                                            "publicUrlPathRenderOutputNoSecrets":  true,
                                             "cleanupAttempted":  true,
                                             "broadcastsFalse":  true
                                         },
@@ -174,6 +176,8 @@
                    "ownerRenderWritesWindowsPreflight":  true,
                    "ownerRenderDoesNotPrintTokenHash":  true,
                    "ownerRenderFilesDoNotContainTokenHash":  true,
+                   "ownerRenderRejectsPublicUrlPath":  true,
+                   "ownerRenderPublicUrlPathRejectOutputNoSecrets":  true,
                    "includesPrivateOrigin":  true,
                    "includesRateLimitPlaceholder":  true,
                    "includesTlsPlaceholders":  true,

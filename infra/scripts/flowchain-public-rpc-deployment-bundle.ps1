@@ -153,6 +153,8 @@ function Invoke-PublicRpcBundleRenderValidation {
         renderedReportNoSecrets = $false
         wildcardOriginRenderRejected = $false
         wildcardOriginRenderOutputNoSecrets = $false
+        publicUrlPathRenderRejected = $false
+        publicUrlPathRenderOutputNoSecrets = $false
         cleanupAttempted = $false
         broadcastsFalse = $true
     }
@@ -285,6 +287,49 @@ function Invoke-PublicRpcBundleRenderValidation {
         $checks.wildcardOriginRenderRejected = $wildcardRenderExitCode -ne 0
         $checks.wildcardOriginRenderOutputNoSecrets = -not $wildcardRenderOutputText.Contains($safeTokenHash)
 
+        $pathPublicUrlOwnerEnvFile = Join-Path $tempRoot "owner-public-rpc-path-url.env"
+        $pathPublicUrlRenderDir = Join-Path $tempRoot "path-url-rendered"
+        New-Item -ItemType Directory -Force -Path $pathPublicUrlRenderDir | Out-Null
+        Set-Content -LiteralPath $pathPublicUrlOwnerEnvFile -Value (@(
+            "FLOWCHAIN_RPC_PUBLIC_URL=https://rpc.flowchain.example/rpc",
+            "FLOWCHAIN_RPC_ALLOWED_ORIGINS=https://wallet.flowchain.example,https://dashboard.flowchain.example",
+            "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE=60",
+            "FLOWCHAIN_RPC_TLS_TERMINATED=true",
+            "FLOWCHAIN_RPC_STATE_BACKUP_PATH=$backupDir",
+            "FLOWCHAIN_TESTER_WRITE_ENABLED=true",
+            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256=$safeTokenHash",
+            "FLOWCHAIN_TESTER_MAX_SEND_UNITS=10"
+        ) -join "`r`n") -Encoding UTF8
+        $previousErrorActionPreference = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+        try {
+            $pathPublicUrlRenderOutput = @(& powershell -NoProfile -ExecutionPolicy Bypass -File $renderScriptPath `
+                -BundleDir $BundleDir `
+                -RenderDir $pathPublicUrlRenderDir `
+                -OwnerEnvFile $pathPublicUrlOwnerEnvFile `
+                -RepoRoot $RepoRoot `
+                -ServiceUser "flowchain" `
+                -ServiceGroup "flowchain" `
+                -TlsCertificatePath $tlsCertPath `
+                -TlsCertificateKeyPath $tlsKeyPath `
+                -NginxExe $nginxExe 2>&1 | ForEach-Object { "$_" })
+            $pathPublicUrlRenderExitCode = $LASTEXITCODE
+            if ($null -eq $pathPublicUrlRenderExitCode) {
+                $pathPublicUrlRenderExitCode = 0
+            }
+        }
+        catch {
+            $pathPublicUrlRenderOutput = @($_.Exception.Message)
+            $pathPublicUrlRenderExitCode = 1
+        }
+        finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
+        $pathPublicUrlRenderOutputText = @($pathPublicUrlRenderOutput) -join "`n"
+        Assert-FlowChainNoSecretText -Text $pathPublicUrlRenderOutputText -Label "public RPC pathful public URL render output"
+        $checks.publicUrlPathRenderRejected = $pathPublicUrlRenderExitCode -ne 0
+        $checks.publicUrlPathRenderOutputNoSecrets = -not $pathPublicUrlRenderOutputText.Contains($safeTokenHash)
+
         Assert-FlowChainNoSecretText -Text $renderOutputText -Label "public RPC owner render output"
         Assert-FlowChainNoSecretText -Text $renderedAllText -Label "public RPC rendered owner files"
     }
@@ -302,6 +347,14 @@ function Invoke-PublicRpcBundleRenderValidation {
     }
 
     $failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+    $secretSafetyChecks = @(
+        "renderOutputDoesNotPrintTokenHash",
+        "renderedFilesDoNotContainTokenHash",
+        "renderedReportDoesNotContainTokenHash",
+        "renderedReportNoSecrets",
+        "wildcardOriginRenderOutputNoSecrets",
+        "publicUrlPathRenderOutputNoSecrets"
+    )
     return [ordered]@{
         schema = "flowchain.public_rpc_owner_render_validation.v0"
         status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
@@ -318,7 +371,7 @@ function Invoke-PublicRpcBundleRenderValidation {
             "public-rpc-render-report.json"
         )
         envValuesPrinted = $false
-        noSecrets = $failedChecks -notcontains "renderedReportNoSecrets"
+        noSecrets = @($secretSafetyChecks | Where-Object { $failedChecks -contains $_ }).Count -eq 0
         broadcasts = $false
     }
 }
@@ -518,6 +571,7 @@ $renderScriptRequiredTokens = @(
     'function Get-FlowChainEnvValue',
     'function Get-AllowedHttpsOrigins',
     'FLOWCHAIN_RPC_PUBLIC_URL',
+    'FLOWCHAIN_RPC_PUBLIC_URL must be an exact https origin',
     'FLOWCHAIN_RPC_ALLOWED_ORIGINS',
     'FLOWCHAIN_RPC_ALLOWED_ORIGINS must contain only exact https origins',
     'FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE',
@@ -951,10 +1005,17 @@ foreach ($name in $requiredEnvNames) {
 }
 
 $publicUrl = Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_PUBLIC_URL"
-if (-not $publicUrl.StartsWith("https://", [System.StringComparison]::OrdinalIgnoreCase)) {
-    throw "FLOWCHAIN_RPC_PUBLIC_URL must be https before rendering public RPC files."
+[System.Uri] $publicUri = $null
+if (-not [System.Uri]::TryCreate($publicUrl, [System.UriKind]::Absolute, [ref]$publicUri) `
+    -or $publicUri.Scheme -ne "https" `
+    -or [string]::IsNullOrWhiteSpace($publicUri.Host) `
+    -or -not [string]::IsNullOrWhiteSpace($publicUri.Query) `
+    -or -not [string]::IsNullOrWhiteSpace($publicUri.Fragment) `
+    -or -not [string]::IsNullOrWhiteSpace($publicUri.UserInfo) `
+    -or $publicUri.AbsolutePath -ne "/") {
+    throw "FLOWCHAIN_RPC_PUBLIC_URL must be an exact https origin without paths, query strings, fragments, or credentials before rendering public RPC files."
 }
-$publicUri = [System.Uri] $publicUrl
+$publicUrl = $publicUrl.TrimEnd("/")
 $allowedOrigins = @(Get-AllowedHttpsOrigins -Value (Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_ALLOWED_ORIGINS"))
 $rateLimit = Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE"
 if ($rateLimit -notmatch '^[1-9][0-9]*$') {
@@ -1199,6 +1260,8 @@ $checks = [ordered]@{
     ownerRenderWritesWindowsPreflight = ($renderValidation.checks.renderedWindowsPreflightWritten -eq $true)
     ownerRenderDoesNotPrintTokenHash = ($renderValidation.checks.renderOutputDoesNotPrintTokenHash -eq $true)
     ownerRenderFilesDoNotContainTokenHash = ($renderValidation.checks.renderedFilesDoNotContainTokenHash -eq $true)
+    ownerRenderRejectsPublicUrlPath = ($renderValidation.checks.publicUrlPathRenderRejected -eq $true)
+    ownerRenderPublicUrlPathRejectOutputNoSecrets = ($renderValidation.checks.publicUrlPathRenderOutputNoSecrets -eq $true)
     includesPrivateOrigin = ($nginxText.Contains("127.0.0.1:8787") -and $nginxPreflightScriptText.Contains("127.0.0.1:8787") -and $windowsNginxPreflightScriptText.Contains("127.0.0.1:8787"))
     includesRateLimitPlaceholder = $nginxText.Contains("<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>")
     includesTlsPlaceholders = ($nginxText.Contains("<PATH_TO_TLS_CERTIFICATE>") -and $nginxText.Contains("<PATH_TO_TLS_CERTIFICATE_KEY>"))

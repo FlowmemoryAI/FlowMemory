@@ -1217,6 +1217,8 @@ $publicRpcDeploymentBundleRequiredChecks = @(
     "ownerRenderWritesWindowsPreflight",
     "ownerRenderDoesNotPrintTokenHash",
     "ownerRenderFilesDoNotContainTokenHash",
+    "ownerRenderRejectsPublicUrlPath",
+    "ownerRenderPublicUrlPathRejectOutputNoSecrets",
     "includesPrivateOrigin",
     "includesRateLimitPlaceholder",
     "includesTlsPlaceholders",
