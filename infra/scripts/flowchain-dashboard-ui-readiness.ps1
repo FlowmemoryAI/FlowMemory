@@ -35,10 +35,22 @@ function Test-ScriptExists {
     return $null -ne $scripts.PSObject.Properties[$Name]
 }
 
+function Stop-DashboardUiProcessTree {
+    param([Parameter(Mandatory = $true)][int] $ProcessId)
+
+    $children = @(Get-CimInstance Win32_Process | Where-Object { $_.ParentProcessId -eq $ProcessId })
+    foreach ($child in $children) {
+        Stop-DashboardUiProcessTree -ProcessId ([int] $child.ProcessId)
+    }
+
+    Stop-Process -Id $ProcessId -Force -ErrorAction SilentlyContinue
+}
+
 function Invoke-DashboardUiCommand {
     param(
         [Parameter(Mandatory = $true)][string] $Label,
-        [Parameter(Mandatory = $true)][string[]] $ArgumentList
+        [Parameter(Mandatory = $true)][string[]] $ArgumentList,
+        [int] $TimeoutSeconds = 300
     )
 
     $psi = New-Object System.Diagnostics.ProcessStartInfo
@@ -54,17 +66,29 @@ function Invoke-DashboardUiCommand {
     $process.StartInfo = $psi
     $startedAt = [DateTimeOffset]::UtcNow
     [void] $process.Start()
-    $stdout = $process.StandardOutput.ReadToEnd()
-    $stderr = $process.StandardError.ReadToEnd()
-    $process.WaitForExit()
+    $stdoutTask = $process.StandardOutput.ReadToEndAsync()
+    $stderrTask = $process.StandardError.ReadToEndAsync()
+    $timedOut = -not $process.WaitForExit($TimeoutSeconds * 1000)
+    if ($timedOut) {
+        Stop-DashboardUiProcessTree -ProcessId $process.Id
+        [void] $process.WaitForExit(5000)
+    }
+    else {
+        $process.WaitForExit()
+    }
+    $stdout = $stdoutTask.Result
+    $stderr = $stderrTask.Result
     $finishedAt = [DateTimeOffset]::UtcNow
+    $exitCode = if ($timedOut) { 124 } else { $process.ExitCode }
 
     $command = "npm $($ArgumentList -join ' ')"
-    Write-Host "$Label exit code: $($process.ExitCode)"
+    Write-Host "$Label exit code: $exitCode"
     return [ordered]@{
         label = $Label
         command = $command
-        exitCode = $process.ExitCode
+        exitCode = $exitCode
+        timeoutSeconds = $TimeoutSeconds
+        timedOut = $timedOut
         durationSeconds = [int][Math]::Max(0, [Math]::Ceiling(($finishedAt - $startedAt).TotalSeconds))
         stdoutLineCount = @($stdout -split "`r?`n" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }).Count
         stderrLineCount = @($stderr -split "`r?`n" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }).Count
@@ -104,10 +128,10 @@ $specText = if (Test-Path -LiteralPath $browserSpecPath) { Get-Content -Raw -Lit
 $configText = if (Test-Path -LiteralPath $playwrightConfigPath) { Get-Content -Raw -LiteralPath $playwrightConfigPath } else { "" }
 
 $commands = @(
-    (Invoke-DashboardUiCommand -Label "dashboard unit render tests" -ArgumentList @("test", "--prefix", "apps/dashboard")),
-    (Invoke-DashboardUiCommand -Label "dashboard browser wallet faucet explorer loop" -ArgumentList @("run", "browser:e2e", "--prefix", "apps/dashboard")),
-    (Invoke-DashboardUiCommand -Label "dashboard production build" -ArgumentList @("run", "build", "--prefix", "apps/dashboard")),
-    (Invoke-DashboardUiCommand -Label "control-plane tester gateway tests" -ArgumentList @("test", "--prefix", "services/control-plane"))
+    (Invoke-DashboardUiCommand -Label "dashboard unit render tests" -ArgumentList @("test", "--prefix", "apps/dashboard") -TimeoutSeconds 180),
+    (Invoke-DashboardUiCommand -Label "dashboard browser wallet faucet explorer loop" -ArgumentList @("run", "browser:e2e", "--prefix", "apps/dashboard", "--", "--workers=1") -TimeoutSeconds 300),
+    (Invoke-DashboardUiCommand -Label "dashboard production build" -ArgumentList @("run", "build", "--prefix", "apps/dashboard") -TimeoutSeconds 300),
+    (Invoke-DashboardUiCommand -Label "control-plane tester gateway tests" -ArgumentList @("test", "--prefix", "services/control-plane") -TimeoutSeconds 300)
 )
 
 $checks = [ordered]@{
@@ -122,12 +146,15 @@ $checks = [ordered]@{
     testerFaucetCovered = $specText.Contains("/tester/faucet")
     testerSendCovered = $specText.Contains("/tester/wallets/send")
     explorerRouteCovered = $specText.Contains("/explorer")
+    testerLaunchRouteCovered = $specText.Contains("/tester")
+    publicRpcHeaderProofCovered = $specText.Contains("RPC headers")
     noSecretLeakageAsserted = $specText.Contains("expectNoUiLeakage")
     noHorizontalOverflowAsserted = $specText.Contains("expectNoHorizontalOverflow")
     dashboardUnitTestsPassed = ($commands | Where-Object { $_.label -eq "dashboard unit render tests" } | Select-Object -First 1).exitCode -eq 0
     dashboardBrowserE2ePassed = ($commands | Where-Object { $_.label -eq "dashboard browser wallet faucet explorer loop" } | Select-Object -First 1).exitCode -eq 0
     dashboardBuildPassed = ($commands | Where-Object { $_.label -eq "dashboard production build" } | Select-Object -First 1).exitCode -eq 0
     controlPlaneTesterGatewayTestsPassed = ($commands | Where-Object { $_.label -eq "control-plane tester gateway tests" } | Select-Object -First 1).exitCode -eq 0
+    commandsCompletedWithoutTimeout = @($commands | Where-Object { $_.timedOut -eq $true }).Count -eq 0
     secretMarkerFindingsEmpty = $true
     envValuesPrintedFalse = $true
     noSecrets = $true
@@ -143,7 +170,7 @@ $report = [ordered]@{
     secretMarkerFindings = @()
     commands = @($commands)
     browserProjects = @("chromium-desktop", "chromium-mobile")
-    coveredRoutes = @("/wallet?panel=tester", "/tester/wallets/create", "/tester/faucet", "/tester/wallets/send", "/explorer")
+    coveredRoutes = @("/wallet?panel=tester", "/tester/wallets/create", "/tester/faucet", "/tester/wallets/send", "/explorer", "/tester")
     envValuesPrinted = $false
     noSecrets = $true
     broadcasts = $false
@@ -174,7 +201,7 @@ $markdownLines = New-Object System.Collections.ArrayList
 [void] $markdownLines.Add("## Coverage")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("- Browser projects: chromium-desktop, chromium-mobile")
-[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection")
+[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof")
 [void] $markdownLines.Add("- Assertions: no secret text/storage leakage, no horizontal viewport overflow, no browser console errors")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("## Commands")

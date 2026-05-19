@@ -330,6 +330,11 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await page.getByRole("button", { name: /Transactions/ }).first().click();
     await expect(page.getByLabel("Explorer records")).toContainText(/transaction|transfer/i);
 
+    await page.goto("/tester");
+    await expect(page.getByRole("heading", { name: "Friends-and-family launch" })).toBeVisible();
+    await expect(page.getByText("RPC headers", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("HSTS, no-sniff, no-store, CSP")).toBeVisible();
+
     await expectNoUiLeakage(page);
     await expectNoHorizontalOverflow(page);
     expect(state.unhandledRequests).toEqual([]);

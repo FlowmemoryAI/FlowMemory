@@ -58,6 +58,7 @@ const liveReadinessReportCopies = [
   "public-tester-gateway-e2e-report.json",
   "ops-snapshot-report.json",
   "ops-alert-rules-report.json",
+  "ops-metrics-export-report.json",
   "incident-drill-report.json",
   "alert-install-validation-report.json",
   "ops-escalation-dry-run-report.json",
@@ -205,6 +206,7 @@ function writeLiveReadinessSummary() {
   const publicTesterGateway = reports["public-tester-gateway-e2e-report.json"];
   const opsSnapshot = reports["ops-snapshot-report.json"];
   const opsAlertRules = reports["ops-alert-rules-report.json"];
+  const opsMetricsExport = reports["ops-metrics-export-report.json"];
   const incidentDrill = reports["incident-drill-report.json"];
   const alertInstallValidation = reports["alert-install-validation-report.json"];
   const opsEscalationDryRun = reports["ops-escalation-dry-run-report.json"];
@@ -212,6 +214,14 @@ function writeLiveReadinessSummary() {
   const noSecretScan = reports["no-secret-scan-report.json"];
   const gates = [...liveReadinessGateLabels.keys()].map((id) => gateFromContractItem(contract, id));
   const activeRuleIds = asArray(opsAlertRules?.activeRuleIds).map((id) => sanitizeText(id));
+  const opsRequiredMetricNames = asArray(opsMetricsExport?.requiredMetricNames).map((name) => sanitizeText(name));
+  const publicRpcSecurityHeaderMetricNames = [
+    "flowchain_public_rpc_security_headers",
+    "flowchain_public_rpc_security_header_preflight",
+    "flowchain_public_rpc_rendered_security_headers",
+    "flowchain_public_rpc_rendered_security_header_preflight",
+  ];
+  const publicRpcSecurityHeaderMetricsPresent = publicRpcSecurityHeaderMetricNames.every((name) => opsRequiredMetricNames.includes(name));
   const alertRules = asArray(opsAlertRules?.rules).map((rule) => ({
     id: sanitizeText(rule?.id),
     severity: sanitizeText(rule?.severity),
@@ -270,6 +280,10 @@ function writeLiveReadinessSummary() {
       publicRpcOwnerRenderValidationStatus: asText(publicRpcDeploymentBundle?.renderValidation?.status, "not recorded"),
       publicRpcDeploymentAutomationStatus: asText(publicRpcDeploymentAutomation?.status, "not recorded"),
       publicRpcDeploymentAutomationAction: asText(publicRpcDeploymentAutomation?.action, "not recorded"),
+      publicRpcSecurityHeaders: publicRpcDeploymentBundle?.checks?.includesSecurityHeaders === true,
+      publicRpcSecurityHeaderPreflight: publicRpcDeploymentBundle?.checks?.preflightsCheckSecurityHeaders === true,
+      publicRpcRenderedSecurityHeaders: publicRpcDeploymentAutomation?.checks?.renderedNginxHasSecurityHeaders === true,
+      publicRpcRenderedSecurityHeaderPreflight: publicRpcDeploymentAutomation?.checks?.renderedPreflightChecksSecurityHeaders === true,
       externalTesterPacketStatus: asText(externalTesterPacket?.status, "not recorded"),
       externalTesterConnectPackStatus: asText(externalTesterConnectPack?.status, "not recorded"),
       ownerInputReady: ownerInputs?.ownerInputReady === true,
@@ -283,6 +297,9 @@ function writeLiveReadinessSummary() {
       opsCriticalRuleCount: asText(opsAlertRules?.criticalRuleCount, "0"),
       opsBlockedRuleCount: asText(opsAlertRules?.blockedRuleCount, "0"),
       opsUnmappedCurrentFindingCount: asArray(opsAlertRules?.unmappedCurrentFindingCodes).length,
+      opsMetricCount: asText(opsMetricsExport?.metricCount, "0"),
+      opsRequiredMetricsPresent: opsMetricsExport?.checks?.requiredMetricsPresent === true,
+      opsPublicRpcSecurityHeaderMetricsPresent: publicRpcSecurityHeaderMetricsPresent,
       incidentDrillStatus: asText(incidentDrill?.status, "not recorded"),
       alertInstallValidationStatus: asText(alertInstallValidation?.status, "not recorded"),
       opsEscalationDryRunStatus: asText(opsEscalationDryRun?.status, "not recorded"),

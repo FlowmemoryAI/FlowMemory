@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-19T22:01:46.3665435Z",
+    "generatedAt":  "2026-05-19T22:45:01.5940688Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -29,7 +29,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=93858, finalizedHeight=93858",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=93972, finalizedHeight=93972",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -629,7 +629,7 @@
                       "layer":  "Explorer and wallet UI",
                       "requirement":  "Dashboard browser verification covers the tester wallet panel, authenticated tester create/faucet/send operations, Explorer inspection, desktop and mobile viewports, no token/secret leakage, and no horizontal overflow.",
                       "status":  "passed",
-                      "evidence":  "dashboardUiStatus=passed, browserProjects=2, coveredRoutes=5, failedChecks=0, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
+                      "evidence":  "dashboardUiStatus=passed, browserProjects=2, coveredRoutes=6, failedChecks=0, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
                       "files":  [
                                     "apps/dashboard/playwright.config.ts",
                                     "apps/dashboard/e2e/flowchain-ui-readiness.spec.ts",
@@ -1008,7 +1008,8 @@
                                                                           "/tester/wallets/create",
                                                                           "/tester/faucet",
                                                                           "/tester/wallets/send",
-                                                                          "/explorer"
+                                                                          "/explorer",
+                                                                          "/tester"
                                                                       ],
                                          "publicDeploymentContractPacketSmoke":  true
                                      },

@@ -110,6 +110,10 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
   const relayerTimedOutStepCount = text(metrics.bridgeRelayerTimedOutStepCount, "0");
   const alertRuleCount = text(metrics.opsRuleCount, text(metrics.opsActiveRuleCount, "0"));
   const unmappedFindingCount = text(metrics.opsUnmappedCurrentFindingCount, "0");
+  const publicRpcHeadersReady = metrics.publicRpcSecurityHeaders === true && metrics.publicRpcRenderedSecurityHeaders === true;
+  const publicRpcHeaderPreflightReady =
+    metrics.publicRpcSecurityHeaderPreflight === true && metrics.publicRpcRenderedSecurityHeaderPreflight === true;
+  const publicRpcHeaderMetricsReady = metrics.opsPublicRpcSecurityHeaderMetricsPresent === true;
 
   const readinessCards: Array<{
     id: string;
@@ -140,6 +144,16 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
       command: fact(publicRpcGate, "next command", "npm run flowchain:public-rpc:check"),
       to: "/ops",
       Icon: Server,
+    },
+    {
+      id: "rpc-headers",
+      label: "RPC headers",
+      status: publicRpcHeadersReady && publicRpcHeaderPreflightReady && publicRpcHeaderMetricsReady ? "verified" : "pending",
+      value: boolText(publicRpcHeadersReady && publicRpcHeaderPreflightReady),
+      detail: "HSTS, no-sniff, no-store, CSP",
+      command: "npm run flowchain:public-rpc:deployment:automation",
+      to: "/ops",
+      Icon: ShieldAlert,
     },
     {
       id: "tester-gateway",
@@ -332,6 +346,11 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
           <span>Gateway proof</span>
           <strong>{text(testerLaunch.gatewayStatus, "not recorded")}</strong>
           <small>configured {boolText(testerLaunch.gatewayConfigured)}</small>
+        </div>
+        <div>
+          <span>RPC headers</span>
+          <strong>{boolText(publicRpcHeadersReady && publicRpcHeaderPreflightReady)}</strong>
+          <small>metrics {boolText(publicRpcHeaderMetricsReady)}</small>
         </div>
         <div>
           <span>Relayer timeout</span>
