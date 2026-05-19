@@ -289,17 +289,23 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await page.goto("/wallet?panel=tester");
 
     await expect(page.getByText("Tester gateway configured")).toBeVisible();
+    await expect(page.getByLabel("Tester launch path")).toContainText("Create, fund, send, inspect");
+    await expect(page.getByLabel("Tester launch path")).toContainText("needs passphrase");
     await page.getByLabel("Tester bearer token").fill(TESTER_TOKEN);
     await page.getByLabel("Tester wallet label").fill("friend-browser-a");
     await page.getByLabel("Tester wallet passphrase").fill("browser-test-passphrase");
     await page.getByRole("button", { name: /Create tester wallet/ }).click();
     await expect(page.getByRole("status")).toContainText("Tester wallet created");
+    await expect(page.getByLabel("Tester launch path")).toContainText("wallet ready");
+    await expect(page.getByLabel("Fund account")).toHaveValue(TESTER_ACCOUNT_A);
 
     await page.getByRole("button", { name: "Tester", exact: true }).click();
     await page.getByLabel("Fund account").fill(TESTER_ACCOUNT_A);
     await page.getByLabel("Faucet units").fill("2");
     await page.getByRole("button", { name: /Request tester faucet/ }).click();
     await expect(page.getByRole("status")).toContainText("Tester faucet accepted");
+    await expect(page.getByLabel("Tester launch path")).toContainText("funding proof");
+    await expect(page.getByLabel("Sender account")).toHaveValue(TESTER_ACCOUNT_A);
 
     await page.getByRole("button", { name: "Tester", exact: true }).click();
     await page.getByLabel("Sender account").fill(TESTER_ACCOUNT_A);

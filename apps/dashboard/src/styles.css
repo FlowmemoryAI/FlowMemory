@@ -897,6 +897,106 @@ input {
   gap: 16px;
 }
 
+.wallet-tester-flow {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(10, 33, 71, 0.1);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.34);
+}
+
+.wallet-tester-flow-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wallet-tester-flow-head div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.wallet-tester-flow-head strong {
+  color: #071d44;
+}
+
+.wallet-tester-flow-head span {
+  overflow: hidden;
+  color: #61718e;
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wallet-tester-flow-head a {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 10px;
+  color: #071d44;
+  border: 1px solid rgba(10, 33, 71, 0.12);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.5);
+  font-weight: 760;
+  text-decoration: none;
+}
+
+.wallet-tester-flow-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.wallet-tester-flow-steps button,
+.wallet-tester-flow-steps a {
+  display: grid;
+  grid-template-rows: 22px auto auto;
+  gap: 5px;
+  min-width: 0;
+  min-height: 86px;
+  padding: 10px;
+  color: #071d44;
+  border: 1px solid rgba(10, 33, 71, 0.1);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.4);
+  text-align: left;
+  text-decoration: none;
+}
+
+.wallet-tester-flow-steps button.complete,
+.wallet-tester-flow-steps a.complete {
+  border-color: rgba(10, 168, 115, 0.28);
+  background: rgba(10, 168, 115, 0.08);
+}
+
+.wallet-tester-flow-steps svg {
+  color: #0f5fff;
+}
+
+.wallet-tester-flow-steps strong,
+.wallet-tester-flow-steps small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wallet-tester-flow-steps strong {
+  font-size: 0.86rem;
+}
+
+.wallet-tester-flow-steps small {
+  color: #61718e;
+  font-size: 0.72rem;
+}
+
 .wallet-tester-readiness {
   display: grid;
   gap: 12px;
@@ -4830,6 +4930,7 @@ code {
   .explorer-facts,
   .explorer-launch-grid,
   .explorer-trace-steps,
+  .wallet-tester-flow-steps,
   .tester-launch-card-grid,
   .tester-launch-profile-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4857,6 +4958,7 @@ code {
   .explorer-facts,
   .explorer-launch-grid,
   .explorer-trace-steps,
+  .wallet-tester-flow-steps,
   .wallet-tester-links {
     grid-template-columns: 1fr;
   }

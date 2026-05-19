@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.service_supervisor_report.v0",
-    "generatedAt":  "2026-05-19T19:34:31.4134004Z",
+    "generatedAt":  "2026-05-19T21:02:41.3296021Z",
     "status":  "passed",
     "once":  true,
     "dryRun":  false,
@@ -30,7 +30,7 @@
                     },
     "iterations":  [
                        {
-                           "sampledAt":  "2026-05-19T19:33:25.0714132Z",
+                           "sampledAt":  "2026-05-19T21:01:41.1754614Z",
                            "restartReasons":  [
                                                   "bridge-relayer-loop-not-running"
                                               ],
@@ -41,34 +41,34 @@
                                           "reportStatus":  "passed",
                                           "nodeStatus":  "running",
                                           "controlPlaneStatus":  "running",
-                                          "latestHeight":  "15094",
-                                          "finalizedHeight":  "15094",
+                                          "latestHeight":  "15148",
+                                          "finalizedHeight":  "15148",
                                           "stateFileLastWriteAgeSeconds":  0,
                                           "liveProfile":  true,
                                           "maxBlocks":  0,
                                           "bridgeRelayerLoopStatus":  "stopped",
-                                          "bridgeRelayerLoopPid":  38380,
+                                          "bridgeRelayerLoopPid":  70132,
                                           "bridgeRelayerLoopCommandLineMatched":  false,
                                           "bridgeRelayerLoopReportStatus":  "blocked",
                                           "bridgeRelayerLoopReportHealthy":  true
                                       },
                            "restart":  {
                                            "exitCode":  0,
-                                           "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260519143329804-7172-36418a80.stdout.log",
-                                           "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260519143329804-7172-36418a80.stderr.log"
+                                           "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260519160144988-26992-17c6f442.stdout.log",
+                                           "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260519160144988-26992-17c6f442.stderr.log"
                                        },
                            "after":  {
                                          "exitCode":  0,
                                          "reportStatus":  "passed",
                                          "nodeStatus":  "running",
                                          "controlPlaneStatus":  "running",
-                                         "latestHeight":  "15103",
-                                         "finalizedHeight":  "15103",
+                                         "latestHeight":  "15156",
+                                         "finalizedHeight":  "15156",
                                          "stateFileLastWriteAgeSeconds":  0,
                                          "liveProfile":  true,
                                          "maxBlocks":  0,
                                          "bridgeRelayerLoopStatus":  "running",
-                                         "bridgeRelayerLoopPid":  27924,
+                                         "bridgeRelayerLoopPid":  7136,
                                          "bridgeRelayerLoopCommandLineMatched":  true,
                                          "bridgeRelayerLoopReportStatus":  "blocked",
                                          "bridgeRelayerLoopReportHealthy":  true

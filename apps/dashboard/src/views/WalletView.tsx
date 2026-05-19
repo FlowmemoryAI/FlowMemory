@@ -613,10 +613,15 @@ export function WalletView({ workbench }: WalletViewProps) {
       setWalletApiUrl(url);
       setResult(payload);
       setStatus(payload);
+      const createdAccountId = accountId(payload.account);
+      if (createdAccountId) {
+        setTesterFundAccount(createdAccountId);
+        setTesterFrom(createdAccountId);
+      }
       setTesterPassphrase("");
-      setActivePanel("receive");
+      setActivePanel("tester");
       await loadStatus({ clearMessage: false });
-      setMessage("Tester wallet created. Token stayed in this browser session only.");
+      setMessage("Tester wallet created. Request faucet funding next. Token stayed in this browser session only.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "tester wallet creation failed");
     } finally {
@@ -663,9 +668,9 @@ export function WalletView({ workbench }: WalletViewProps) {
       ]);
       setTesterFrom(accountId);
       setTesterFundAmountUnits("1");
-      setActivePanel("activity");
+      setActivePanel("tester");
       await loadStatus({ clearMessage: false });
-      setMessage("Tester faucet accepted by the capped gateway.");
+      setMessage("Tester faucet accepted by the capped gateway. Send tester units next.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "tester faucet failed");
     } finally {
@@ -788,6 +793,10 @@ export function WalletView({ workbench }: WalletViewProps) {
       status: statusLabel(transfer.status),
     })),
   ];
+  const testerFaucetProof = localActivity.some((row) => row.type.toLowerCase().includes("tester faucet")) ||
+    balances.some((balance) => balance.source === "tester-faucet");
+  const testerSendProof = localActivity.some((row) => row.type.toLowerCase().includes("tester send")) ||
+    transfers.some((transfer) => transfer.source === "tester-gateway" || transfer.transferId?.includes("tester"));
 
   return (
     <div className="wallet-app-shell">
@@ -1215,6 +1224,41 @@ export function WalletView({ workbench }: WalletViewProps) {
                   </div>
                 </dl>
                 {testerBlockers.length > 0 ? <p>{testerBlockers.join(", ")}</p> : null}
+              </section>
+
+              <section className="wallet-tester-flow" aria-label="Tester launch path">
+                <div className="wallet-tester-flow-head">
+                  <div>
+                    <strong>Create, fund, send, inspect</strong>
+                    <span>{primaryWalletAddress ? shortId(primaryWalletAddress, 8, 6) : "No tester account selected yet"}</span>
+                  </div>
+                  <Link to="/explorer">
+                    <Search size={15} aria-hidden="true" />
+                    Explorer
+                  </Link>
+                </div>
+                <div className="wallet-tester-flow-steps">
+                  <button type="button" className={activeAccountId ? "complete" : ""} onClick={() => setMessage("Use the wallet label and passphrase fields below to create the tester wallet.")}>
+                    <UserPlus size={16} aria-hidden="true" />
+                    <strong>Create</strong>
+                    <small>{activeAccountId ? "wallet ready" : "needs passphrase"}</small>
+                  </button>
+                  <button type="button" className={testerFaucetProof ? "complete" : ""} onClick={() => setTesterFundAccount(primaryWalletAddress)}>
+                    <Download size={16} aria-hidden="true" />
+                    <strong>Faucet</strong>
+                    <small>{testerFaucetProof ? "funding proof" : testerFaucetReady ? "ready to fund" : "needs token"}</small>
+                  </button>
+                  <button type="button" className={testerSendProof ? "complete" : ""} onClick={() => setTesterFrom(primaryWalletAddress)}>
+                    <Send size={16} aria-hidden="true" />
+                    <strong>Send</strong>
+                    <small>{testerSendProof ? "transfer proof" : testerSendReady ? "ready to send" : "needs recipient"}</small>
+                  </button>
+                  <Link className={testerSendProof ? "complete" : ""} to="/explorer">
+                    <Search size={16} aria-hidden="true" />
+                    <strong>Inspect</strong>
+                    <small>{testerSendProof ? "open records" : "after transfer"}</small>
+                  </Link>
+                </div>
               </section>
 
               <div className="wallet-panel-form">

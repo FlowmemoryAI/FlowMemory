@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.dashboard_ui_readiness_report.v0",
-    "generatedAt":  "2026-05-19T18:22:55.2342486+00:00",
+    "generatedAt":  "2026-05-19T20:37:59.7912387+00:00",
     "status":  "passed",
     "checks":  {
                    "dashboardPackageScriptPresent":  true,
@@ -52,7 +52,7 @@
                          "label":  "dashboard production build",
                          "command":  "npm run build --prefix apps/dashboard",
                          "exitCode":  0,
-                         "durationSeconds":  8,
+                         "durationSeconds":  4,
                          "stdoutLineCount":  19,
                          "stderrLineCount":  0
                      },
@@ -60,7 +60,7 @@
                          "label":  "control-plane tester gateway tests",
                          "command":  "npm test --prefix services/control-plane",
                          "exitCode":  0,
-                         "durationSeconds":  112,
+                         "durationSeconds":  111,
                          "stdoutLineCount":  77,
                          "stderrLineCount":  0
                      }
