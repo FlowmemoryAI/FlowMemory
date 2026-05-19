@@ -1,11 +1,13 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-19T19:49:05.1386649Z",
+    "generatedAt":  "2026-05-19T20:08:07.0266195Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
                           "serviceStatusStatus":  "passed",
                           "serviceMonitorStatus":  "passed",
+                          "publicRpcDeploymentBundleStatus":  "passed",
+                          "publicRpcDeploymentAutomationStatus":  "passed",
                           "externalTesterEvidenceStatus":  "passed",
                           "liveCutoverStatus":  "blocked",
                           "truthTableStatus":  "blocked-owner-input",
@@ -95,6 +97,66 @@
                         "type":  "gauge",
                         "help":  "One when public RPC readiness is passed.",
                         "value":  0
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_deployment_bundle_ready",
+                        "type":  "gauge",
+                        "help":  "One when the public RPC deployment bundle is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_deployment_automation_ready",
+                        "type":  "gauge",
+                        "help":  "One when public RPC deployment automation validation is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_disallowed_origin_preflight",
+                        "type":  "gauge",
+                        "help":  "One when the public RPC bundle includes a disallowed origin preflight.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_broad_state_blocked_preflight",
+                        "type":  "gauge",
+                        "help":  "One when the public RPC bundle blocks broad state paths in preflight.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_private_wallet_create_blocked_preflight",
+                        "type":  "gauge",
+                        "help":  "One when the public RPC bundle blocks private wallet creation paths in preflight.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_auth_forwarding_scoped",
+                        "type":  "gauge",
+                        "help":  "One when public RPC authorization forwarding is scoped to tester writes.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rendered_disallowed_origin_probe",
+                        "type":  "gauge",
+                        "help":  "One when rendered public RPC preflight has the disallowed origin probe.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rendered_broad_state_blocked_probe",
+                        "type":  "gauge",
+                        "help":  "One when rendered public RPC preflight blocks broad state paths.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rendered_private_wallet_create_blocked_probe",
+                        "type":  "gauge",
+                        "help":  "One when rendered public RPC preflight blocks private wallet creation paths.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rendered_auth_forwarding_scoped",
+                        "type":  "gauge",
+                        "help":  "One when rendered public RPC authorization forwarding is scoped to tester writes.",
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_backup_ready",
@@ -301,7 +363,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  48,
+    "metricCount":  58,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

@@ -40,6 +40,36 @@ flowchain_service_monitor_ready 1
 # HELP flowchain_public_rpc_ready One when public RPC readiness is passed.
 # TYPE flowchain_public_rpc_ready gauge
 flowchain_public_rpc_ready 0
+# HELP flowchain_public_rpc_deployment_bundle_ready One when the public RPC deployment bundle is passed.
+# TYPE flowchain_public_rpc_deployment_bundle_ready gauge
+flowchain_public_rpc_deployment_bundle_ready 1
+# HELP flowchain_public_rpc_deployment_automation_ready One when public RPC deployment automation validation is passed.
+# TYPE flowchain_public_rpc_deployment_automation_ready gauge
+flowchain_public_rpc_deployment_automation_ready 1
+# HELP flowchain_public_rpc_disallowed_origin_preflight One when the public RPC bundle includes a disallowed origin preflight.
+# TYPE flowchain_public_rpc_disallowed_origin_preflight gauge
+flowchain_public_rpc_disallowed_origin_preflight 1
+# HELP flowchain_public_rpc_broad_state_blocked_preflight One when the public RPC bundle blocks broad state paths in preflight.
+# TYPE flowchain_public_rpc_broad_state_blocked_preflight gauge
+flowchain_public_rpc_broad_state_blocked_preflight 1
+# HELP flowchain_public_rpc_private_wallet_create_blocked_preflight One when the public RPC bundle blocks private wallet creation paths in preflight.
+# TYPE flowchain_public_rpc_private_wallet_create_blocked_preflight gauge
+flowchain_public_rpc_private_wallet_create_blocked_preflight 1
+# HELP flowchain_public_rpc_auth_forwarding_scoped One when public RPC authorization forwarding is scoped to tester writes.
+# TYPE flowchain_public_rpc_auth_forwarding_scoped gauge
+flowchain_public_rpc_auth_forwarding_scoped 1
+# HELP flowchain_public_rpc_rendered_disallowed_origin_probe One when rendered public RPC preflight has the disallowed origin probe.
+# TYPE flowchain_public_rpc_rendered_disallowed_origin_probe gauge
+flowchain_public_rpc_rendered_disallowed_origin_probe 1
+# HELP flowchain_public_rpc_rendered_broad_state_blocked_probe One when rendered public RPC preflight blocks broad state paths.
+# TYPE flowchain_public_rpc_rendered_broad_state_blocked_probe gauge
+flowchain_public_rpc_rendered_broad_state_blocked_probe 1
+# HELP flowchain_public_rpc_rendered_private_wallet_create_blocked_probe One when rendered public RPC preflight blocks private wallet creation paths.
+# TYPE flowchain_public_rpc_rendered_private_wallet_create_blocked_probe gauge
+flowchain_public_rpc_rendered_private_wallet_create_blocked_probe 1
+# HELP flowchain_public_rpc_rendered_auth_forwarding_scoped One when rendered public RPC authorization forwarding is scoped to tester writes.
+# TYPE flowchain_public_rpc_rendered_auth_forwarding_scoped gauge
+flowchain_public_rpc_rendered_auth_forwarding_scoped 1
 # HELP flowchain_backup_ready One when backup readiness is passed.
 # TYPE flowchain_backup_ready gauge
 flowchain_backup_ready 0
