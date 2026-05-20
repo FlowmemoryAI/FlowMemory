@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T16:52:08.3988860Z",
+    "generatedAt":  "2026-05-20T20:37:17.2599441Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  33,
-    "criticalRuleCount":  26,
+    "ruleCount":  35,
+    "criticalRuleCount":  28,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -39,6 +39,7 @@
                                 "transaction-intake-invalid-rows",
                                 "no-secret-scan-not-passed",
                                 "backup-retention-unsafe",
+                                "bridge-deploy-control-validation-failed",
                                 "bridge-relayer-check-contract-failed",
                                 "bridge-relayer-latency-failed",
                                 "bridge-relayer-cursor-unsafe",
@@ -49,6 +50,7 @@
                                 "bridge-relayer-loop-unhealthy",
                                 "supervisor-relayer-recovery-failed",
                                 "supervisor-node-recovery-validation-failed",
+                                "service-install-validation-failed",
                                 "deployment-refresh-aborted",
                                 "truth-table-stale-or-failed",
                                 "external-tester-evidence-unsafe",
@@ -99,8 +101,12 @@
                    "findingsWithoutCommandsEmpty":  true,
                    "publicRpcEdgeHardeningRuleCoversSecurityHeaders":  true,
                    "publicRpcEdgeHardeningRuleCoversWalletCutover":  true,
+                   "publicRpcEdgeHardeningRuleCoversRollbackDrill":  true,
+                   "bridgeDeployControlRuleCoversDeploymentControls":  true,
                    "bridgeRelayerCheckContractRuleCoversFailedChecks":  true,
+                   "bridgeRelayerLoopRuleCoversValidationTelemetry":  true,
                    "supervisorNodeRecoveryRuleCoversLiveProfile":  true,
+                   "serviceInstallValidationRuleCoversAutorecoveryTelemetry":  true,
                    "externalTesterLaunchRuleCoversGatewayAndFaucet":  true,
                    "publicTesterGatewayRuleCoversNoSecretNoBroadcast":  true,
                    "ownerGoLiveHandoffRuleCoversReleaseReady":  true,
@@ -227,6 +233,20 @@
                                    ]
                   },
                   {
+                      "id":  "bridge-deploy-control-validation-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "bridge-deploy-control-validation-failed"
+                                       ],
+                      "signal":  "Bridge deploy/control validation is missing or failing.",
+                      "threshold":  "deploy/control validation is not passed, has failedChecks, misses deploy/pause/resume/emergency-stop checks, does not fail closed without owner env, does not require explicit owner broadcast acknowledgement, broadcasts, prints env values, or reports secrets",
+                      "commands":  [
+                                       "npm run flowchain:bridge:deploy:control:validate",
+                                       "npm run flowchain:bridge:deploy:base8453",
+                                       "npm run flowchain:bridge:emergency-stop"
+                                   ]
+                  },
+                  {
                       "id":  "bridge-relayer-check-contract-failed",
                       "severity":  "critical",
                       "findingCodes":  [
@@ -331,7 +351,7 @@
                                            "bridge-relayer-loop-unhealthy"
                                        ],
                       "signal":  "Bridge relayer loop is running without fresh no-secret/no-broadcast health evidence.",
-                      "threshold":  "service status reports bridgeRelayerLoop.status running and bridgeRelayerLoop.report.healthy is not true",
+                      "threshold":  "service status reports bridgeRelayerLoop.status running and bridgeRelayerLoop.report.healthy is not true, bridge relayer loop validation is not passed, no-secret/no-broadcast evidence is false, or PID cleanup after stop is not proven",
                       "commands":  [
                                        "npm run flowchain:service:status",
                                        "npm run flowchain:bridge:relayer:loop:validate",
@@ -366,6 +386,20 @@
                                        "npm run flowchain:service:supervisor:validate",
                                        "npm run flowchain:service:supervisor -- -Once",
                                        "npm run flowchain:service:restart -- -LiveProfile"
+                                   ]
+                  },
+                  {
+                      "id":  "service-install-validation-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "service-install-validation-failed"
+                                       ],
+                      "signal":  "Windows Scheduled Task or Linux systemd service install validation is missing or unsafe.",
+                      "threshold":  "Windows service install validation or systemd service install validation is not passed, has failedChecks or missing scripts, mutates host state, lacks live profile default, bridge-relayer opt-in, autorecovery, restart-always, least-privilege hardening, no-secret evidence, or no-broadcast evidence",
+                      "commands":  [
+                                       "npm run flowchain:service:install:validate",
+                                       "npm run flowchain:service:install:systemd:validate",
+                                       "npm run flowchain:service:status"
                                    ]
                   },
                   {
@@ -473,7 +507,7 @@
                                            "public-rpc-edge-hardening-failed"
                                        ],
                       "signal":  "Public RPC edge deployment hardening evidence is missing or failed.",
-                      "threshold":  "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, defensive response-header proof, or wallet/tester cutover command proof",
+                      "threshold":  "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, defensive response-header proof, wallet/tester cutover command proof, or rollback drill proof",
                       "commands":  [
                                        "npm run flowchain:public-rpc:deployment-bundle",
                                        "npm run flowchain:public-rpc:deployment:automation",

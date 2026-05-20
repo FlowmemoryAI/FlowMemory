@@ -1,16 +1,21 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T16:52:08.5768875Z",
+    "generatedAt":  "2026-05-20T20:37:17.9105603Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
                           "serviceStatusStatus":  "passed",
                           "serviceMonitorStatus":  "passed",
+                          "serviceInstallValidationStatus":  "passed",
+                          "systemdServiceInstallValidationStatus":  "passed",
                           "publicRpcSyntheticCanaryStatus":  "blocked",
                           "publicRpcDeploymentBundleStatus":  "passed",
                           "publicRpcDeploymentAutomationStatus":  "passed",
+                          "bridgeRelayerLoopValidationStatus":  "passed",
+                          "bridgeReleaseEvidenceValidationStatus":  "passed",
                           "externalTesterStatus":  "blocked",
                           "publicTesterGatewayStatus":  "passed",
+                          "externalTesterClientValidationStatus":  "passed",
                           "externalTesterEvidenceStatus":  "passed",
                           "dashboardUiStatus":  "passed",
                           "ownerInputsValidationStatus":  "passed",
@@ -25,19 +30,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  104297
+                        "value":  106084
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  104297
+                        "value":  106084
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  4
+                        "value":  6
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -61,13 +66,13 @@
                         "name":  "flowchain_transaction_intake_rows_total",
                         "type":  "gauge",
                         "help":  "Signed transaction intake rows recorded in local NDJSON intake.",
-                        "value":  181
+                        "value":  183
                     },
                     {
                         "name":  "flowchain_transaction_intake_accepted_rows_total",
                         "type":  "gauge",
                         "help":  "Crypto-verified signed transaction intake rows recorded locally.",
-                        "value":  181
+                        "value":  183
                     },
                     {
                         "name":  "flowchain_transaction_intake_invalid_rows",
@@ -79,7 +84,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  1785.577
+                        "value":  8656.887
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -109,13 +114,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  32
+                        "value":  34
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  25
+                        "value":  27
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -139,6 +144,108 @@
                         "name":  "flowchain_service_monitor_ready",
                         "type":  "gauge",
                         "help":  "One when service monitor report is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_service_install_validation_ready",
+                        "type":  "gauge",
+                        "help":  "One when Windows service install validation is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_service_install_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in Windows service install validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_service_install_missing_scripts",
+                        "type":  "gauge",
+                        "help":  "Missing package scripts in Windows service install validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_service_install_plan_did_not_mutate",
+                        "type":  "gauge",
+                        "help":  "One when Windows service install plan proved read-only.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_service_install_live_profile_default",
+                        "type":  "gauge",
+                        "help":  "One when Windows service install defaults to the live profile.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_service_install_bridge_relayer_opt_in",
+                        "type":  "gauge",
+                        "help":  "One when Windows service install has an explicit bridge relayer opt-in plan.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_service_install_status_read_only",
+                        "type":  "gauge",
+                        "help":  "One when Windows service status validation is read-only and non-mutating.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_service_install_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when Windows service install validation contains no secret findings.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_service_install_no_broadcasts",
+                        "type":  "gauge",
+                        "help":  "One when Windows service install validation performed no live broadcasts.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_systemd_service_install_validation_ready",
+                        "type":  "gauge",
+                        "help":  "One when systemd service install validation is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_systemd_service_install_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in systemd service install validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_systemd_service_install_rendered_units",
+                        "type":  "gauge",
+                        "help":  "One when systemd service install plans use rendered units.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_systemd_service_install_autorecovery_loop",
+                        "type":  "gauge",
+                        "help":  "One when the systemd supervisor unit uses the autorecovery loop.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_systemd_service_install_restart_always",
+                        "type":  "gauge",
+                        "help":  "One when the systemd supervisor unit restarts always.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_systemd_service_install_hardening",
+                        "type":  "gauge",
+                        "help":  "One when systemd service install validation proves least-privilege hardening.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_systemd_service_install_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when systemd service install validation contains no secret findings.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_systemd_service_install_no_broadcasts",
+                        "type":  "gauge",
+                        "help":  "One when systemd service install validation performed no live broadcasts.",
                         "value":  1
                     },
                     {
@@ -316,6 +423,12 @@
                         "value":  1
                     },
                     {
+                        "name":  "flowchain_public_rpc_command_plan_synthetic_canary",
+                        "type":  "gauge",
+                        "help":  "One when public RPC deployment automation includes the public RPC synthetic canary.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_public_rpc_command_plan_cutover_rehearsal",
                         "type":  "gauge",
                         "help":  "One when public RPC deployment automation includes live cutover rehearsal.",
@@ -331,6 +444,48 @@
                         "name":  "flowchain_public_rpc_command_plan_no_secret_scan",
                         "type":  "gauge",
                         "help":  "One when public RPC deployment automation includes no-secret scan verification.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rollback_drill_ready",
+                        "type":  "gauge",
+                        "help":  "One when public RPC deployment automation proves a no-mutation rollback drill.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rollback_drill_performed",
+                        "type":  "gauge",
+                        "help":  "One when public RPC deployment automation performed the rollback drill.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rollback_restored_previous",
+                        "type":  "gauge",
+                        "help":  "One when public RPC deployment automation restored rendered config from the previous config during rollback drill.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rollback_restored_original",
+                        "type":  "gauge",
+                        "help":  "One when public RPC deployment automation restored the original config after rollback drill.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rollback_artifacts_scoped",
+                        "type":  "gauge",
+                        "help":  "One when public RPC rollback drill artifacts stayed inside the render directory.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rollback_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when public RPC rollback drill reports no secrets.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rollback_no_broadcasts",
+                        "type":  "gauge",
+                        "help":  "One when public RPC rollback drill performs no live broadcasts.",
                         "value":  1
                     },
                     {
@@ -374,6 +529,60 @@
                         "type":  "gauge",
                         "help":  "One when bridge infrastructure readiness is passed.",
                         "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_validation_ready",
+                        "type":  "gauge",
+                        "help":  "One when bridge deploy/control validation is passed and safe.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in bridge deploy/control validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_missing_checks",
+                        "type":  "gauge",
+                        "help":  "Missing required checks in bridge deploy/control validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_missing_env_fail_closed",
+                        "type":  "gauge",
+                        "help":  "One when deploy, pause, resume, and emergency-stop fail closed without owner env.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_requires_broadcast_ack",
+                        "type":  "gauge",
+                        "help":  "One when bridge deploy/control execution requires explicit owner broadcast acknowledgement.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_pause_resume_emergency",
+                        "type":  "gauge",
+                        "help":  "One when pause, resume, and emergency-stop control paths are present.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_runbook_rollback",
+                        "type":  "gauge",
+                        "help":  "One when bridge deployment runbook covers dry-run, broadcast verification, and rollback.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when bridge deploy/control validation reports no secrets.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_no_broadcasts",
+                        "type":  "gauge",
+                        "help":  "One when bridge deploy/control validation made no broadcasts.",
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_bridge_relayer_guardrail_ready",
@@ -448,6 +657,66 @@
                         "value":  0
                     },
                     {
+                        "name":  "flowchain_bridge_release_evidence_validation_ready",
+                        "type":  "gauge",
+                        "help":  "One when bridge release evidence validation is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_cases_total",
+                        "type":  "gauge",
+                        "help":  "Bridge release evidence validation case count.",
+                        "value":  9
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_failed_cases",
+                        "type":  "gauge",
+                        "help":  "Failed bridge release evidence validation cases.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_missing_cases",
+                        "type":  "gauge",
+                        "help":  "Missing required bridge release evidence validation cases.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in bridge release evidence validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_secret_findings",
+                        "type":  "gauge",
+                        "help":  "Secret marker findings in bridge release evidence validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_release_broadcast_rejected",
+                        "type":  "gauge",
+                        "help":  "One when bridge release evidence validation rejects broadcast release evidence.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_withdrawal_broadcast_rejected",
+                        "type":  "gauge",
+                        "help":  "One when bridge release evidence validation rejects broadcast withdrawal intent.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_no_broadcasts",
+                        "type":  "gauge",
+                        "help":  "One when bridge release evidence validation made no broadcasts.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when bridge release evidence validation has no secret findings and reports no secrets.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_real_value_pilot_aggregate_ready",
                         "type":  "gauge",
                         "help":  "One when the real-value pilot aggregate proof is passed and safe.",
@@ -488,6 +757,66 @@
                         "type":  "gauge",
                         "help":  "One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence.",
                         "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_validation_ready",
+                        "type":  "gauge",
+                        "help":  "One when bridge relayer loop start/status/stop validation is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in bridge relayer loop validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_secret_findings",
+                        "type":  "gauge",
+                        "help":  "Secret marker findings in bridge relayer loop validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_poll_seconds",
+                        "type":  "gauge",
+                        "help":  "Configured bridge relayer loop poll seconds from validation.",
+                        "value":  5
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_settle_seconds",
+                        "type":  "gauge",
+                        "help":  "Configured bridge relayer loop validation settle seconds.",
+                        "value":  5
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_report_fresh",
+                        "type":  "gauge",
+                        "help":  "One when bridge relayer loop validation observed a fresh relayer report.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_blocked_only_owner_inputs",
+                        "type":  "gauge",
+                        "help":  "One when bridge relayer loop validation is blocked only by owner inputs.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_pid_cleanup_verified",
+                        "type":  "gauge",
+                        "help":  "One when bridge relayer loop validation proves stop removed PID state and no validation relayer process remains.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when bridge relayer loop validation reports no secrets and has no secret findings.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_no_broadcasts",
+                        "type":  "gauge",
+                        "help":  "One when bridge relayer loop validation made no live broadcasts.",
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_supervisor_bridge_relayer_requested",
@@ -667,6 +996,66 @@
                         "name":  "flowchain_public_tester_gateway_no_broadcasts",
                         "type":  "gauge",
                         "help":  "One when the public tester gateway E2E proof made no live broadcasts.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_validation_ready",
+                        "type":  "gauge",
+                        "help":  "One when standalone external tester client validation is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in standalone external tester client validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_secret_findings",
+                        "type":  "gauge",
+                        "help":  "Secret marker findings in standalone external tester client validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_dry_run_no_network",
+                        "type":  "gauge",
+                        "help":  "One when external tester client validation proves dry-run mode makes no network calls.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_routes_cover_reads",
+                        "type":  "gauge",
+                        "help":  "One when external tester client validation covers required read routes.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_routes_cover_writes",
+                        "type":  "gauge",
+                        "help":  "One when external tester client validation covers wallet create, faucet, and send routes.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_no_token_configured",
+                        "type":  "gauge",
+                        "help":  "One when external tester client dry-run proof stores no tester bearer token.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_no_broadcasts",
+                        "type":  "gauge",
+                        "help":  "One when external tester client validation proves no broadcasts.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when external tester client validation has no secret findings and reports no secrets.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_env_values_hidden",
+                        "type":  "gauge",
+                        "help":  "One when external tester client validation does not print environment values.",
                         "value":  1
                     },
                     {
@@ -871,19 +1260,19 @@
                         "name":  "flowchain_truth_gates_total",
                         "type":  "gauge",
                         "help":  "Total production truth table gates.",
-                        "value":  60
+                        "value":  64
                     },
                     {
                         "name":  "flowchain_truth_gates_passed",
                         "type":  "gauge",
                         "help":  "Passed production truth table gates.",
-                        "value":  44
+                        "value":  47
                     },
                     {
                         "name":  "flowchain_truth_gates_owner_blocked",
                         "type":  "gauge",
                         "help":  "Owner-input blocked production truth table gates.",
-                        "value":  16
+                        "value":  17
                     },
                     {
                         "name":  "flowchain_truth_gates_repo_blocked",
@@ -904,7 +1293,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  147,
+    "metricCount":  211,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

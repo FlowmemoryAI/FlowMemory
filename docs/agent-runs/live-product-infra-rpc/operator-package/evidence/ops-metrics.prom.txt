@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 104297
+flowchain_latest_height 106084
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 104297
+flowchain_finalized_height 106084
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 4
+flowchain_state_file_age_seconds 6
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -18,16 +18,16 @@ flowchain_height_advanced 1
 flowchain_mempool_depth 0
 # HELP flowchain_transaction_intake_rows_total Signed transaction intake rows recorded in local NDJSON intake.
 # TYPE flowchain_transaction_intake_rows_total gauge
-flowchain_transaction_intake_rows_total 181
+flowchain_transaction_intake_rows_total 183
 # HELP flowchain_transaction_intake_accepted_rows_total Crypto-verified signed transaction intake rows recorded locally.
 # TYPE flowchain_transaction_intake_accepted_rows_total gauge
-flowchain_transaction_intake_accepted_rows_total 181
+flowchain_transaction_intake_accepted_rows_total 183
 # HELP flowchain_transaction_intake_invalid_rows Invalid NDJSON rows in signed transaction intake.
 # TYPE flowchain_transaction_intake_invalid_rows gauge
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 1785.577
+flowchain_transaction_intake_file_age_seconds 8656.887
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -42,10 +42,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 32
+flowchain_ops_alert_rules_total 34
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 25
+flowchain_ops_alert_rules_critical 27
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -58,6 +58,57 @@ flowchain_service_status_ready 1
 # HELP flowchain_service_monitor_ready One when service monitor report is passed.
 # TYPE flowchain_service_monitor_ready gauge
 flowchain_service_monitor_ready 1
+# HELP flowchain_service_install_validation_ready One when Windows service install validation is passed.
+# TYPE flowchain_service_install_validation_ready gauge
+flowchain_service_install_validation_ready 1
+# HELP flowchain_service_install_failed_checks Failed checks in Windows service install validation.
+# TYPE flowchain_service_install_failed_checks gauge
+flowchain_service_install_failed_checks 0
+# HELP flowchain_service_install_missing_scripts Missing package scripts in Windows service install validation.
+# TYPE flowchain_service_install_missing_scripts gauge
+flowchain_service_install_missing_scripts 0
+# HELP flowchain_service_install_plan_did_not_mutate One when Windows service install plan proved read-only.
+# TYPE flowchain_service_install_plan_did_not_mutate gauge
+flowchain_service_install_plan_did_not_mutate 1
+# HELP flowchain_service_install_live_profile_default One when Windows service install defaults to the live profile.
+# TYPE flowchain_service_install_live_profile_default gauge
+flowchain_service_install_live_profile_default 1
+# HELP flowchain_service_install_bridge_relayer_opt_in One when Windows service install has an explicit bridge relayer opt-in plan.
+# TYPE flowchain_service_install_bridge_relayer_opt_in gauge
+flowchain_service_install_bridge_relayer_opt_in 1
+# HELP flowchain_service_install_status_read_only One when Windows service status validation is read-only and non-mutating.
+# TYPE flowchain_service_install_status_read_only gauge
+flowchain_service_install_status_read_only 1
+# HELP flowchain_service_install_no_secrets One when Windows service install validation contains no secret findings.
+# TYPE flowchain_service_install_no_secrets gauge
+flowchain_service_install_no_secrets 1
+# HELP flowchain_service_install_no_broadcasts One when Windows service install validation performed no live broadcasts.
+# TYPE flowchain_service_install_no_broadcasts gauge
+flowchain_service_install_no_broadcasts 1
+# HELP flowchain_systemd_service_install_validation_ready One when systemd service install validation is passed.
+# TYPE flowchain_systemd_service_install_validation_ready gauge
+flowchain_systemd_service_install_validation_ready 1
+# HELP flowchain_systemd_service_install_failed_checks Failed checks in systemd service install validation.
+# TYPE flowchain_systemd_service_install_failed_checks gauge
+flowchain_systemd_service_install_failed_checks 0
+# HELP flowchain_systemd_service_install_rendered_units One when systemd service install plans use rendered units.
+# TYPE flowchain_systemd_service_install_rendered_units gauge
+flowchain_systemd_service_install_rendered_units 1
+# HELP flowchain_systemd_service_install_autorecovery_loop One when the systemd supervisor unit uses the autorecovery loop.
+# TYPE flowchain_systemd_service_install_autorecovery_loop gauge
+flowchain_systemd_service_install_autorecovery_loop 1
+# HELP flowchain_systemd_service_install_restart_always One when the systemd supervisor unit restarts always.
+# TYPE flowchain_systemd_service_install_restart_always gauge
+flowchain_systemd_service_install_restart_always 1
+# HELP flowchain_systemd_service_install_hardening One when systemd service install validation proves least-privilege hardening.
+# TYPE flowchain_systemd_service_install_hardening gauge
+flowchain_systemd_service_install_hardening 1
+# HELP flowchain_systemd_service_install_no_secrets One when systemd service install validation contains no secret findings.
+# TYPE flowchain_systemd_service_install_no_secrets gauge
+flowchain_systemd_service_install_no_secrets 1
+# HELP flowchain_systemd_service_install_no_broadcasts One when systemd service install validation performed no live broadcasts.
+# TYPE flowchain_systemd_service_install_no_broadcasts gauge
+flowchain_systemd_service_install_no_broadcasts 1
 # HELP flowchain_public_rpc_ready One when public RPC readiness is passed.
 # TYPE flowchain_public_rpc_ready gauge
 flowchain_public_rpc_ready 0
@@ -145,6 +196,9 @@ flowchain_public_rpc_command_plan_tester_gateway_e2e 1
 # HELP flowchain_public_rpc_command_plan_wallet_tester_e2e One when public RPC deployment automation includes wallet tester E2E.
 # TYPE flowchain_public_rpc_command_plan_wallet_tester_e2e gauge
 flowchain_public_rpc_command_plan_wallet_tester_e2e 1
+# HELP flowchain_public_rpc_command_plan_synthetic_canary One when public RPC deployment automation includes the public RPC synthetic canary.
+# TYPE flowchain_public_rpc_command_plan_synthetic_canary gauge
+flowchain_public_rpc_command_plan_synthetic_canary 1
 # HELP flowchain_public_rpc_command_plan_cutover_rehearsal One when public RPC deployment automation includes live cutover rehearsal.
 # TYPE flowchain_public_rpc_command_plan_cutover_rehearsal gauge
 flowchain_public_rpc_command_plan_cutover_rehearsal 1
@@ -154,6 +208,27 @@ flowchain_public_rpc_command_plan_truth_table 1
 # HELP flowchain_public_rpc_command_plan_no_secret_scan One when public RPC deployment automation includes no-secret scan verification.
 # TYPE flowchain_public_rpc_command_plan_no_secret_scan gauge
 flowchain_public_rpc_command_plan_no_secret_scan 1
+# HELP flowchain_public_rpc_rollback_drill_ready One when public RPC deployment automation proves a no-mutation rollback drill.
+# TYPE flowchain_public_rpc_rollback_drill_ready gauge
+flowchain_public_rpc_rollback_drill_ready 1
+# HELP flowchain_public_rpc_rollback_drill_performed One when public RPC deployment automation performed the rollback drill.
+# TYPE flowchain_public_rpc_rollback_drill_performed gauge
+flowchain_public_rpc_rollback_drill_performed 1
+# HELP flowchain_public_rpc_rollback_restored_previous One when public RPC deployment automation restored rendered config from the previous config during rollback drill.
+# TYPE flowchain_public_rpc_rollback_restored_previous gauge
+flowchain_public_rpc_rollback_restored_previous 1
+# HELP flowchain_public_rpc_rollback_restored_original One when public RPC deployment automation restored the original config after rollback drill.
+# TYPE flowchain_public_rpc_rollback_restored_original gauge
+flowchain_public_rpc_rollback_restored_original 1
+# HELP flowchain_public_rpc_rollback_artifacts_scoped One when public RPC rollback drill artifacts stayed inside the render directory.
+# TYPE flowchain_public_rpc_rollback_artifacts_scoped gauge
+flowchain_public_rpc_rollback_artifacts_scoped 1
+# HELP flowchain_public_rpc_rollback_no_secrets One when public RPC rollback drill reports no secrets.
+# TYPE flowchain_public_rpc_rollback_no_secrets gauge
+flowchain_public_rpc_rollback_no_secrets 1
+# HELP flowchain_public_rpc_rollback_no_broadcasts One when public RPC rollback drill performs no live broadcasts.
+# TYPE flowchain_public_rpc_rollback_no_broadcasts gauge
+flowchain_public_rpc_rollback_no_broadcasts 1
 # HELP flowchain_backup_ready One when backup readiness is passed.
 # TYPE flowchain_backup_ready gauge
 flowchain_backup_ready 0
@@ -175,6 +250,33 @@ flowchain_bridge_live_ready 0
 # HELP flowchain_bridge_infra_ready One when bridge infrastructure readiness is passed.
 # TYPE flowchain_bridge_infra_ready gauge
 flowchain_bridge_infra_ready 0
+# HELP flowchain_bridge_deploy_control_validation_ready One when bridge deploy/control validation is passed and safe.
+# TYPE flowchain_bridge_deploy_control_validation_ready gauge
+flowchain_bridge_deploy_control_validation_ready 1
+# HELP flowchain_bridge_deploy_control_failed_checks Failed checks in bridge deploy/control validation.
+# TYPE flowchain_bridge_deploy_control_failed_checks gauge
+flowchain_bridge_deploy_control_failed_checks 0
+# HELP flowchain_bridge_deploy_control_missing_checks Missing required checks in bridge deploy/control validation.
+# TYPE flowchain_bridge_deploy_control_missing_checks gauge
+flowchain_bridge_deploy_control_missing_checks 0
+# HELP flowchain_bridge_deploy_control_missing_env_fail_closed One when deploy, pause, resume, and emergency-stop fail closed without owner env.
+# TYPE flowchain_bridge_deploy_control_missing_env_fail_closed gauge
+flowchain_bridge_deploy_control_missing_env_fail_closed 1
+# HELP flowchain_bridge_deploy_control_requires_broadcast_ack One when bridge deploy/control execution requires explicit owner broadcast acknowledgement.
+# TYPE flowchain_bridge_deploy_control_requires_broadcast_ack gauge
+flowchain_bridge_deploy_control_requires_broadcast_ack 1
+# HELP flowchain_bridge_deploy_control_pause_resume_emergency One when pause, resume, and emergency-stop control paths are present.
+# TYPE flowchain_bridge_deploy_control_pause_resume_emergency gauge
+flowchain_bridge_deploy_control_pause_resume_emergency 1
+# HELP flowchain_bridge_deploy_control_runbook_rollback One when bridge deployment runbook covers dry-run, broadcast verification, and rollback.
+# TYPE flowchain_bridge_deploy_control_runbook_rollback gauge
+flowchain_bridge_deploy_control_runbook_rollback 1
+# HELP flowchain_bridge_deploy_control_no_secrets One when bridge deploy/control validation reports no secrets.
+# TYPE flowchain_bridge_deploy_control_no_secrets gauge
+flowchain_bridge_deploy_control_no_secrets 1
+# HELP flowchain_bridge_deploy_control_no_broadcasts One when bridge deploy/control validation made no broadcasts.
+# TYPE flowchain_bridge_deploy_control_no_broadcasts gauge
+flowchain_bridge_deploy_control_no_broadcasts 1
 # HELP flowchain_bridge_relayer_guardrail_ready One when bridge relayer fail-closed guardrail is ready.
 # TYPE flowchain_bridge_relayer_guardrail_ready gauge
 flowchain_bridge_relayer_guardrail_ready 1
@@ -211,6 +313,36 @@ flowchain_bridge_runtime_credit_missing_checks 0
 # HELP flowchain_bridge_runtime_credit_false_checks Required runtime proof checks that are false in bridge runtime credit validation.
 # TYPE flowchain_bridge_runtime_credit_false_checks gauge
 flowchain_bridge_runtime_credit_false_checks 0
+# HELP flowchain_bridge_release_evidence_validation_ready One when bridge release evidence validation is passed.
+# TYPE flowchain_bridge_release_evidence_validation_ready gauge
+flowchain_bridge_release_evidence_validation_ready 1
+# HELP flowchain_bridge_release_evidence_cases_total Bridge release evidence validation case count.
+# TYPE flowchain_bridge_release_evidence_cases_total gauge
+flowchain_bridge_release_evidence_cases_total 9
+# HELP flowchain_bridge_release_evidence_failed_cases Failed bridge release evidence validation cases.
+# TYPE flowchain_bridge_release_evidence_failed_cases gauge
+flowchain_bridge_release_evidence_failed_cases 0
+# HELP flowchain_bridge_release_evidence_missing_cases Missing required bridge release evidence validation cases.
+# TYPE flowchain_bridge_release_evidence_missing_cases gauge
+flowchain_bridge_release_evidence_missing_cases 0
+# HELP flowchain_bridge_release_evidence_failed_checks Failed checks in bridge release evidence validation.
+# TYPE flowchain_bridge_release_evidence_failed_checks gauge
+flowchain_bridge_release_evidence_failed_checks 0
+# HELP flowchain_bridge_release_evidence_secret_findings Secret marker findings in bridge release evidence validation.
+# TYPE flowchain_bridge_release_evidence_secret_findings gauge
+flowchain_bridge_release_evidence_secret_findings 0
+# HELP flowchain_bridge_release_evidence_release_broadcast_rejected One when bridge release evidence validation rejects broadcast release evidence.
+# TYPE flowchain_bridge_release_evidence_release_broadcast_rejected gauge
+flowchain_bridge_release_evidence_release_broadcast_rejected 1
+# HELP flowchain_bridge_release_evidence_withdrawal_broadcast_rejected One when bridge release evidence validation rejects broadcast withdrawal intent.
+# TYPE flowchain_bridge_release_evidence_withdrawal_broadcast_rejected gauge
+flowchain_bridge_release_evidence_withdrawal_broadcast_rejected 1
+# HELP flowchain_bridge_release_evidence_no_broadcasts One when bridge release evidence validation made no broadcasts.
+# TYPE flowchain_bridge_release_evidence_no_broadcasts gauge
+flowchain_bridge_release_evidence_no_broadcasts 1
+# HELP flowchain_bridge_release_evidence_no_secrets One when bridge release evidence validation has no secret findings and reports no secrets.
+# TYPE flowchain_bridge_release_evidence_no_secrets gauge
+flowchain_bridge_release_evidence_no_secrets 1
 # HELP flowchain_real_value_pilot_aggregate_ready One when the real-value pilot aggregate proof is passed and safe.
 # TYPE flowchain_real_value_pilot_aggregate_ready gauge
 flowchain_real_value_pilot_aggregate_ready 1
@@ -232,6 +364,36 @@ flowchain_real_value_pilot_aggregate_owner_go_no_go 1
 # HELP flowchain_bridge_relayer_loop_healthy One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence.
 # TYPE flowchain_bridge_relayer_loop_healthy gauge
 flowchain_bridge_relayer_loop_healthy 0
+# HELP flowchain_bridge_relayer_loop_validation_ready One when bridge relayer loop start/status/stop validation is passed.
+# TYPE flowchain_bridge_relayer_loop_validation_ready gauge
+flowchain_bridge_relayer_loop_validation_ready 1
+# HELP flowchain_bridge_relayer_loop_failed_checks Failed checks in bridge relayer loop validation.
+# TYPE flowchain_bridge_relayer_loop_failed_checks gauge
+flowchain_bridge_relayer_loop_failed_checks 0
+# HELP flowchain_bridge_relayer_loop_secret_findings Secret marker findings in bridge relayer loop validation.
+# TYPE flowchain_bridge_relayer_loop_secret_findings gauge
+flowchain_bridge_relayer_loop_secret_findings 0
+# HELP flowchain_bridge_relayer_loop_poll_seconds Configured bridge relayer loop poll seconds from validation.
+# TYPE flowchain_bridge_relayer_loop_poll_seconds gauge
+flowchain_bridge_relayer_loop_poll_seconds 5
+# HELP flowchain_bridge_relayer_loop_settle_seconds Configured bridge relayer loop validation settle seconds.
+# TYPE flowchain_bridge_relayer_loop_settle_seconds gauge
+flowchain_bridge_relayer_loop_settle_seconds 5
+# HELP flowchain_bridge_relayer_loop_report_fresh One when bridge relayer loop validation observed a fresh relayer report.
+# TYPE flowchain_bridge_relayer_loop_report_fresh gauge
+flowchain_bridge_relayer_loop_report_fresh 1
+# HELP flowchain_bridge_relayer_loop_blocked_only_owner_inputs One when bridge relayer loop validation is blocked only by owner inputs.
+# TYPE flowchain_bridge_relayer_loop_blocked_only_owner_inputs gauge
+flowchain_bridge_relayer_loop_blocked_only_owner_inputs 1
+# HELP flowchain_bridge_relayer_loop_pid_cleanup_verified One when bridge relayer loop validation proves stop removed PID state and no validation relayer process remains.
+# TYPE flowchain_bridge_relayer_loop_pid_cleanup_verified gauge
+flowchain_bridge_relayer_loop_pid_cleanup_verified 1
+# HELP flowchain_bridge_relayer_loop_no_secrets One when bridge relayer loop validation reports no secrets and has no secret findings.
+# TYPE flowchain_bridge_relayer_loop_no_secrets gauge
+flowchain_bridge_relayer_loop_no_secrets 1
+# HELP flowchain_bridge_relayer_loop_no_broadcasts One when bridge relayer loop validation made no live broadcasts.
+# TYPE flowchain_bridge_relayer_loop_no_broadcasts gauge
+flowchain_bridge_relayer_loop_no_broadcasts 1
 # HELP flowchain_supervisor_bridge_relayer_requested One when the latest service supervisor report requested bridge relayer loop supervision.
 # TYPE flowchain_supervisor_bridge_relayer_requested gauge
 flowchain_supervisor_bridge_relayer_requested 0
@@ -322,6 +484,36 @@ flowchain_public_tester_gateway_no_secrets 1
 # HELP flowchain_public_tester_gateway_no_broadcasts One when the public tester gateway E2E proof made no live broadcasts.
 # TYPE flowchain_public_tester_gateway_no_broadcasts gauge
 flowchain_public_tester_gateway_no_broadcasts 1
+# HELP flowchain_external_tester_client_validation_ready One when standalone external tester client validation is passed.
+# TYPE flowchain_external_tester_client_validation_ready gauge
+flowchain_external_tester_client_validation_ready 1
+# HELP flowchain_external_tester_client_failed_checks Failed checks in standalone external tester client validation.
+# TYPE flowchain_external_tester_client_failed_checks gauge
+flowchain_external_tester_client_failed_checks 0
+# HELP flowchain_external_tester_client_secret_findings Secret marker findings in standalone external tester client validation.
+# TYPE flowchain_external_tester_client_secret_findings gauge
+flowchain_external_tester_client_secret_findings 0
+# HELP flowchain_external_tester_client_dry_run_no_network One when external tester client validation proves dry-run mode makes no network calls.
+# TYPE flowchain_external_tester_client_dry_run_no_network gauge
+flowchain_external_tester_client_dry_run_no_network 1
+# HELP flowchain_external_tester_client_routes_cover_reads One when external tester client validation covers required read routes.
+# TYPE flowchain_external_tester_client_routes_cover_reads gauge
+flowchain_external_tester_client_routes_cover_reads 1
+# HELP flowchain_external_tester_client_routes_cover_writes One when external tester client validation covers wallet create, faucet, and send routes.
+# TYPE flowchain_external_tester_client_routes_cover_writes gauge
+flowchain_external_tester_client_routes_cover_writes 1
+# HELP flowchain_external_tester_client_no_token_configured One when external tester client dry-run proof stores no tester bearer token.
+# TYPE flowchain_external_tester_client_no_token_configured gauge
+flowchain_external_tester_client_no_token_configured 1
+# HELP flowchain_external_tester_client_no_broadcasts One when external tester client validation proves no broadcasts.
+# TYPE flowchain_external_tester_client_no_broadcasts gauge
+flowchain_external_tester_client_no_broadcasts 1
+# HELP flowchain_external_tester_client_no_secrets One when external tester client validation has no secret findings and reports no secrets.
+# TYPE flowchain_external_tester_client_no_secrets gauge
+flowchain_external_tester_client_no_secrets 1
+# HELP flowchain_external_tester_client_env_values_hidden One when external tester client validation does not print environment values.
+# TYPE flowchain_external_tester_client_env_values_hidden gauge
+flowchain_external_tester_client_env_values_hidden 1
 # HELP flowchain_external_tester_evidence_ready One when external tester returned evidence validation is passed.
 # TYPE flowchain_external_tester_evidence_ready gauge
 flowchain_external_tester_evidence_ready 1
@@ -423,13 +615,13 @@ flowchain_live_cutover_missing_owner_inputs 14
 flowchain_no_secret_ready 1
 # HELP flowchain_truth_gates_total Total production truth table gates.
 # TYPE flowchain_truth_gates_total gauge
-flowchain_truth_gates_total 60
+flowchain_truth_gates_total 64
 # HELP flowchain_truth_gates_passed Passed production truth table gates.
 # TYPE flowchain_truth_gates_passed gauge
-flowchain_truth_gates_passed 44
+flowchain_truth_gates_passed 47
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
-flowchain_truth_gates_owner_blocked 16
+flowchain_truth_gates_owner_blocked 17
 # HELP flowchain_truth_gates_repo_blocked Repo-blocked production truth table gates.
 # TYPE flowchain_truth_gates_repo_blocked gauge
 flowchain_truth_gates_repo_blocked 0

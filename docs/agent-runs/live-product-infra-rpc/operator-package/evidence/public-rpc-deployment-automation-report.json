@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_automation_report.v1",
-    "generatedAt":  "2026-05-20T14:09:37.9806816Z",
+    "generatedAt":  "2026-05-20T20:21:25.8762420Z",
     "status":  "passed",
     "action":  "Validate",
     "flowChainRpcIsRepoOwned":  true,
@@ -19,6 +19,7 @@
                    "bundlePreflightsCheckMethodRejection":  true,
                    "commandPlanIncludesTesterGatewayE2e":  true,
                    "commandPlanIncludesWalletTesterE2e":  true,
+                   "commandPlanIncludesSyntheticCanary":  true,
                    "commandPlanIncludesCutoverRehearsal":  true,
                    "commandPlanIncludesTruthTable":  true,
                    "commandPlanIncludesNoSecretScan":  true,
@@ -89,7 +90,7 @@
                      "performed":  true,
                      "exitCode":  0,
                      "outputRedacted":  [
-                                            "FlowChain public RPC bundle rendered. Report: C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-40316-460953ab305c4adc923943c3ec3fab26\\rendered\\public-rpc-render-report.json"
+                                            "FlowChain public RPC bundle rendered. Report: C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-74044-7fccda8895eb4a5e8127e52394dd3504\\rendered\\public-rpc-render-report.json"
                                         ],
                      "failedChecks":  [
 
@@ -107,8 +108,8 @@
                                          "rollbackDrillBroadcastsFalse":  true
                                      },
                           "artifacts":  [
-                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-40316-460953ab305c4adc923943c3ec3fab26\\rendered\\previous-nginx-flowchain-rpc.conf",
-                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-40316-460953ab305c4adc923943c3ec3fab26\\rendered\\rollback-drill-current-before.conf"
+                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-74044-7fccda8895eb4a5e8127e52394dd3504\\rendered\\previous-nginx-flowchain-rpc.conf",
+                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-74044-7fccda8895eb4a5e8127e52394dd3504\\rendered\\rollback-drill-current-before.conf"
                                         ]
                       },
     "renderedFileNames":  [
@@ -181,6 +182,7 @@
                      "bash \u003cFLOWCHAIN_NGINX_PREFLIGHT_SCRIPT\u003e",
                      "powershell -NoProfile -ExecutionPolicy Bypass -File \u003cFLOWCHAIN_NGINX_WINDOWS_PREFLIGHT_SCRIPT\u003e",
                      "npm run flowchain:public-rpc:validate",
+                     "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
                      "npm run flowchain:public-rpc:abuse-test",
                      "npm run flowchain:tester:gateway:e2e",
                      "npm run flowchain:wallet:live-tester:e2e",

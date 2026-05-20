@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.dev_pack_e2e_report.v0",
-  "generatedAt": "2026-05-20T16:22:14.547Z",
+  "generatedAt": "2026-05-20T17:57:47.482Z",
   "status": "passed",
   "rpcUrl": "http://127.0.0.1:8787/rpc",
   "checks": {
@@ -51,10 +51,11 @@
     "inventoryGenerated": true,
     "inventorySafe": true
   },
+  "failedChecks": [],
   "methodCount": 82,
   "publicReadyMethodCount": 0,
-  "firstHeight": "103996",
-  "secondHeight": "103997",
+  "firstHeight": "104885",
+  "secondHeight": "104886",
   "missingEnvNames": [
     "FLOWCHAIN_BASE8453_FROM_BLOCK",
     "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -82,6 +83,7 @@
     "pythonSdk": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\python-sdk-e2e-report.json"
   },
   "noLiveBroadcast": true,
+  "broadcasts": false,
   "envValuesPrinted": false,
   "noSecrets": true,
   "languageSdks": [

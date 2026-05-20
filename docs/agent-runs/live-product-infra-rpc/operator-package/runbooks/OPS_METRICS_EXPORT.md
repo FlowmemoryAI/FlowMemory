@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-20T16:52:08.8271261Z
+Generated: 2026-05-20T20:37:18.1768788Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 147
+- Metric count: 211
 
 ## Required Metrics
 
@@ -27,6 +27,23 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_ops_alert_rules_total: present
 - flowchain_ops_active_alert_rules: present
 - flowchain_service_status_ready: present
+- flowchain_service_install_validation_ready: present
+- flowchain_service_install_failed_checks: present
+- flowchain_service_install_missing_scripts: present
+- flowchain_service_install_plan_did_not_mutate: present
+- flowchain_service_install_live_profile_default: present
+- flowchain_service_install_bridge_relayer_opt_in: present
+- flowchain_service_install_status_read_only: present
+- flowchain_service_install_no_secrets: present
+- flowchain_service_install_no_broadcasts: present
+- flowchain_systemd_service_install_validation_ready: present
+- flowchain_systemd_service_install_failed_checks: present
+- flowchain_systemd_service_install_rendered_units: present
+- flowchain_systemd_service_install_autorecovery_loop: present
+- flowchain_systemd_service_install_restart_always: present
+- flowchain_systemd_service_install_hardening: present
+- flowchain_systemd_service_install_no_secrets: present
+- flowchain_systemd_service_install_no_broadcasts: present
 - flowchain_public_rpc_ready: present
 - flowchain_public_rpc_synthetic_canary_ready: present
 - flowchain_public_rpc_synthetic_canary_probe_count: present
@@ -50,15 +67,33 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_public_rpc_command_plan_wallet_cutover_proof: present
 - flowchain_public_rpc_command_plan_tester_gateway_e2e: present
 - flowchain_public_rpc_command_plan_wallet_tester_e2e: present
+- flowchain_public_rpc_command_plan_synthetic_canary: present
 - flowchain_public_rpc_command_plan_cutover_rehearsal: present
 - flowchain_public_rpc_command_plan_truth_table: present
 - flowchain_public_rpc_command_plan_no_secret_scan: present
+- flowchain_public_rpc_rollback_drill_ready: present
+- flowchain_public_rpc_rollback_drill_performed: present
+- flowchain_public_rpc_rollback_restored_previous: present
+- flowchain_public_rpc_rollback_restored_original: present
+- flowchain_public_rpc_rollback_artifacts_scoped: present
+- flowchain_public_rpc_rollback_no_secrets: present
+- flowchain_public_rpc_rollback_no_broadcasts: present
 - flowchain_backup_ready: present
 - flowchain_backup_retention_count: present
 - flowchain_backup_retention_candidates: present
 - flowchain_backup_retention_snapshot_protected: present
 - flowchain_backup_retention_prune_errors: present
 - flowchain_bridge_live_ready: present
+- flowchain_bridge_infra_ready: present
+- flowchain_bridge_deploy_control_validation_ready: present
+- flowchain_bridge_deploy_control_failed_checks: present
+- flowchain_bridge_deploy_control_missing_checks: present
+- flowchain_bridge_deploy_control_missing_env_fail_closed: present
+- flowchain_bridge_deploy_control_requires_broadcast_ack: present
+- flowchain_bridge_deploy_control_pause_resume_emergency: present
+- flowchain_bridge_deploy_control_runbook_rollback: present
+- flowchain_bridge_deploy_control_no_secrets: present
+- flowchain_bridge_deploy_control_no_broadcasts: present
 - flowchain_bridge_relayer_guardrail_ready: present
 - flowchain_bridge_direct_observe_guardrail_ready: present
 - flowchain_bridge_direct_observe_staged_cursor_default: present
@@ -71,6 +106,16 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_bridge_runtime_credit_failed_checks: present
 - flowchain_bridge_runtime_credit_missing_checks: present
 - flowchain_bridge_runtime_credit_false_checks: present
+- flowchain_bridge_release_evidence_validation_ready: present
+- flowchain_bridge_release_evidence_cases_total: present
+- flowchain_bridge_release_evidence_failed_cases: present
+- flowchain_bridge_release_evidence_missing_cases: present
+- flowchain_bridge_release_evidence_failed_checks: present
+- flowchain_bridge_release_evidence_secret_findings: present
+- flowchain_bridge_release_evidence_release_broadcast_rejected: present
+- flowchain_bridge_release_evidence_withdrawal_broadcast_rejected: present
+- flowchain_bridge_release_evidence_no_broadcasts: present
+- flowchain_bridge_release_evidence_no_secrets: present
 - flowchain_real_value_pilot_aggregate_ready: present
 - flowchain_real_value_pilot_aggregate_commands_total: present
 - flowchain_real_value_pilot_aggregate_timed_out_commands: present
@@ -78,6 +123,16 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_real_value_pilot_aggregate_missing_proofs: present
 - flowchain_real_value_pilot_aggregate_owner_go_no_go: present
 - flowchain_bridge_relayer_loop_healthy: present
+- flowchain_bridge_relayer_loop_validation_ready: present
+- flowchain_bridge_relayer_loop_failed_checks: present
+- flowchain_bridge_relayer_loop_secret_findings: present
+- flowchain_bridge_relayer_loop_poll_seconds: present
+- flowchain_bridge_relayer_loop_settle_seconds: present
+- flowchain_bridge_relayer_loop_report_fresh: present
+- flowchain_bridge_relayer_loop_blocked_only_owner_inputs: present
+- flowchain_bridge_relayer_loop_pid_cleanup_verified: present
+- flowchain_bridge_relayer_loop_no_secrets: present
+- flowchain_bridge_relayer_loop_no_broadcasts: present
 - flowchain_supervisor_bridge_relayer_requested: present
 - flowchain_supervisor_bridge_relayer_recovery_healthy: present
 - flowchain_supervisor_node_recovery_validated: present
@@ -101,6 +156,16 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_public_tester_gateway_routes_covered: present
 - flowchain_public_tester_gateway_no_secrets: present
 - flowchain_public_tester_gateway_no_broadcasts: present
+- flowchain_external_tester_client_validation_ready: present
+- flowchain_external_tester_client_failed_checks: present
+- flowchain_external_tester_client_secret_findings: present
+- flowchain_external_tester_client_dry_run_no_network: present
+- flowchain_external_tester_client_routes_cover_reads: present
+- flowchain_external_tester_client_routes_cover_writes: present
+- flowchain_external_tester_client_no_token_configured: present
+- flowchain_external_tester_client_no_broadcasts: present
+- flowchain_external_tester_client_no_secrets: present
+- flowchain_external_tester_client_env_values_hidden: present
 - flowchain_external_tester_evidence_ready: present
 - flowchain_external_tester_evidence_failed_checks: present
 - flowchain_external_tester_evidence_missing_files: present
@@ -147,10 +212,16 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | opsAlertRulesLoaded | True |
 | serviceStatusLoaded | True |
 | serviceMonitorLoaded | True |
+| serviceInstallValidationLoaded | True |
+| systemdServiceInstallValidationLoaded | True |
 | publicRpcSyntheticCanaryLoaded | True |
 | externalTesterLoaded | True |
 | publicTesterGatewayLoaded | True |
+| externalTesterClientValidationLoaded | True |
 | externalTesterEvidenceLoaded | True |
+| bridgeDeployControlLoaded | True |
+| bridgeRelayerLoopValidationLoaded | True |
+| bridgeReleaseEvidenceValidationLoaded | True |
 | dashboardUiLoaded | True |
 | ownerInputsValidationLoaded | True |
 | ownerActivationPlanLoaded | True |
@@ -163,12 +234,18 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | markdownWritten | True |
 | metricCountSufficient | True |
 | requiredMetricsPresent | True |
+| serviceInstallValidationMetricsPresent | True |
 | externalTesterEvidenceMetricsPresent | True |
 | bridgeDirectObserveMetricsPresent | True |
 | bridgeRuntimeCreditMetricsPresent | True |
+| bridgeDeployControlMetricsPresent | True |
+| bridgeReleaseEvidenceMetricsPresent | True |
 | realValuePilotAggregateMetricsPresent | True |
+| bridgeRelayerLoopValidationMetricsPresent | True |
 | publicRpcEdgeMetricsPresent | True |
+| publicRpcRollbackDrillMetricsPresent | True |
 | publicTesterGatewayMetricsPresent | True |
+| externalTesterClientMetricsPresent | True |
 | transactionIntakeMetricsPresent | True |
 | dashboardUiMetricsPresent | True |
 | ownerInputsValidationMetricsPresent | True |
