@@ -80,6 +80,7 @@ $paths = [ordered]@{
     bridgeRelayerGuardrailValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
     bridgeRuntimeCreditValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
+    bridgeReconciliation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-report.json"
     bridgeReleaseEvidenceValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-validation-report.json"
     bridgePilotLocal = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "services/bridge-relayer/out/real-value-pilot-e2e/bridge-real-value-pilot-e2e-report.json"
     baseTxDiagnostic = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/live-l1-bridge-e2e/base-tx-diagnostic.json"
@@ -416,6 +417,9 @@ $bridgeRelayerLoopValidationExitCode = $bridgeRelayerLoopValidationResult.exitCo
 $bridgeRuntimeCreditValidationResult = Invoke-AuditChild -Path $paths.bridgeRuntimeCreditValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-runtime-credit-validation.ps1"))
 $bridgeRuntimeCreditValidationOutput = @($bridgeRuntimeCreditValidationResult.output)
 $bridgeRuntimeCreditValidationExitCode = $bridgeRuntimeCreditValidationResult.exitCode
+$bridgeReconciliationResult = Invoke-AuditChild -Path $paths.bridgeReconciliation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-reconciliation.ps1"))
+$bridgeReconciliationOutput = @($bridgeReconciliationResult.output)
+$bridgeReconciliationExitCode = $bridgeReconciliationResult.exitCode
 $bridgeReleaseEvidenceValidationResult = Invoke-AuditChild -Path $paths.bridgeReleaseEvidenceValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-release-evidence-validation.ps1"))
 $bridgeReleaseEvidenceValidationOutput = @($bridgeReleaseEvidenceValidationResult.output)
 $bridgeReleaseEvidenceValidationExitCode = $bridgeReleaseEvidenceValidationResult.exitCode
@@ -2192,6 +2196,58 @@ $bridgeRuntimeCreditValidationPassed = $bridgeRuntimeCreditValidationExitCode -e
     -and ((Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name "broadcasts" -Default $true) -eq $false)
+$bridgeReconciliation = $reports.bridgeReconciliation
+$bridgeReconciliationStatus = Get-ReportStatus -Report $bridgeReconciliation
+$bridgeReconciliationChecks = Get-AuditProp -Object $bridgeReconciliation -Name "checks"
+$bridgeReconciliationFailedChecks = @((Get-AuditProp -Object $bridgeReconciliation -Name "failedChecks" -Default @()))
+$bridgeReconciliationSecretFindings = @((Get-AuditProp -Object $bridgeReconciliation -Name "secretMarkerFindings" -Default @()))
+$bridgeReconciliationRows = @((Get-AuditProp -Object $bridgeReconciliation -Name "reconciliation" -Default @()))
+$bridgeReconciliationRequiredChecks = @(
+    "relayerOnceReportLoaded",
+    "relayerOnceStatusBlockedOrPassed",
+    "relayerOnceNoFailedChecks",
+    "relayerOnceNoSecrets",
+    "relayerOnceNoBroadcasts",
+    "relayerCountsNonNegative",
+    "pendingCreditsNonNegative",
+    "cursorModeStaged",
+    "cursorFinalNotCommittedWhenBlocked",
+    "relayerBlockedClassifiedOwnerInput",
+    "guardrailReportPassed",
+    "guardrailNoFailedChecks",
+    "guardrailCursorSafe",
+    "loopValidationPassedOrOwnerBlocked",
+    "runtimeCreditPassed",
+    "runtimeCreditNoFailedChecks",
+    "runtimeCreditAppliedOnce",
+    "runtimeReplayRejected",
+    "localPilotPassed",
+    "localPilotNoFailedChecks",
+    "localPilotExactValueConserved",
+    "localPilotDuplicateReplayRejected",
+    "releaseEvidenceValidationPassed",
+    "releaseEvidenceNoFailedChecks",
+    "reconciliationRowsPresent",
+    "liveReadinessBlockedOrPassed",
+    "bridgeInfraBlockedOrPassed",
+    "envValuesPrintedFalse",
+    "secretMarkerFindingsEmpty",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$bridgeReconciliationMissingChecks = @(Get-MissingAuditChecks -Checks $bridgeReconciliationChecks -Names $bridgeReconciliationRequiredChecks)
+$bridgeReconciliationFailedCheckCount = $bridgeReconciliationFailedChecks.Count
+$bridgeReconciliationSecretFindingCount = $bridgeReconciliationSecretFindings.Count
+$bridgeReconciliationMissingCheckCount = $bridgeReconciliationMissingChecks.Count
+$bridgeReconciliationPassed = $bridgeReconciliationExitCode -eq 0 `
+    -and $bridgeReconciliationStatus -eq "passed" `
+    -and $bridgeReconciliationFailedCheckCount -eq 0 `
+    -and $bridgeReconciliationSecretFindingCount -eq 0 `
+    -and $bridgeReconciliationMissingCheckCount -eq 0 `
+    -and $bridgeReconciliationRows.Count -ge 8 `
+    -and ((Get-AuditProp -Object $bridgeReconciliation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $bridgeReconciliation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $bridgeReconciliation -Name "broadcasts" -Default $true) -eq $false)
 $bridgeReleaseEvidenceValidation = $reports.bridgeReleaseEvidenceValidation
 $bridgeReleaseEvidenceValidationStatus = Get-ReportStatus -Report $bridgeReleaseEvidenceValidation
 $bridgeReleaseEvidenceValidationChecks = Get-AuditProp -Object $bridgeReleaseEvidenceValidation -Name "checks"
@@ -3086,6 +3142,12 @@ Add-AuditItem -Items $items -Id "bridge-runtime-credit-validation" `
     -Evidence "runtimeCreditStatus=$bridgeRuntimeCreditValidationStatus, failedChecks=$($bridgeRuntimeCreditFailedChecks.Count), missingChecks=$($bridgeRuntimeCreditMissingChecks.Count), falseRequiredChecks=$($bridgeRuntimeCreditFalseRequiredChecks.Count), missingRuntimeChecks=$($bridgeRuntimeCreditMissingRuntimeChecks.Count), falseRuntimeChecks=$($bridgeRuntimeCreditFalseRuntimeChecks.Count), latencyGate=$(Get-AuditProp -Object (Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name 'timing') -Name 'latencyGate' -Default 'missing'), queueToSpendableSeconds=$(Get-AuditProp -Object (Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name 'timing') -Name 'queueToSpendableSeconds' -Default ''), report=$($paths.bridgeRuntimeCreditValidation)" `
     -Commands @("npm run flowchain:bridge:runtime-credit:validate")
 
+Add-AuditItem -Items $items -Id "bridge-reconciliation" `
+    -Requirement "Bridge reconciliation summarizes live relayer observed/new/queued/applied/pending credits, cursor commit safety, local runtime credit proof, replay rejection, and release evidence validation in one no-secret operator report." `
+    -Status $(if ($bridgeReconciliationPassed) { "passed" } else { "failed" }) `
+    -Evidence "reconciliationStatus=$bridgeReconciliationStatus, rows=$($bridgeReconciliationRows.Count), failedChecks=$bridgeReconciliationFailedCheckCount, missingChecks=$bridgeReconciliationMissingCheckCount, secretFindings=$bridgeReconciliationSecretFindingCount, relayerBlockedOwner=$(Get-AuditProp -Object $bridgeReconciliationChecks -Name "relayerBlockedClassifiedOwnerInput" -Default $false), runtimeApplied=$(Get-AuditProp -Object $bridgeReconciliationChecks -Name "runtimeCreditAppliedOnce" -Default $false), replayRejected=$(Get-AuditProp -Object $bridgeReconciliationChecks -Name "localPilotDuplicateReplayRejected" -Default $false), report=$($paths.bridgeReconciliation)" `
+    -Commands @("npm run flowchain:bridge:reconciliation")
+
 Add-AuditItem -Items $items -Id "bridge-release-evidence-validation" `
     -Requirement "Bridge withdrawal/release evidence validation proves matching release evidence passes, missing inputs block, amount/token/recipient/chain/asset mismatches fail, broadcast flags are rejected, and validation remains no-secret/no-broadcast." `
     -Status $(if ($bridgeReleaseEvidenceValidationPassed) { "passed" } else { "failed" }) `
@@ -3207,6 +3269,8 @@ $report = [ordered]@{
     bridgeRelayerLoopValidationOutputRedacted = @($bridgeRelayerLoopValidationOutput | ForEach-Object { "$_" })
     bridgeRuntimeCreditValidationExitCode = $bridgeRuntimeCreditValidationExitCode
     bridgeRuntimeCreditValidationOutputRedacted = @($bridgeRuntimeCreditValidationOutput | ForEach-Object { "$_" })
+    bridgeReconciliationExitCode = $bridgeReconciliationExitCode
+    bridgeReconciliationOutputRedacted = @($bridgeReconciliationOutput | ForEach-Object { "$_" })
     ownerInputsExitCode = $ownerInputsExitCode
     ownerInputsOutputRedacted = @($ownerInputsOutput | ForEach-Object { "$_" })
     ownerOnboardingExitCode = $ownerOnboardingExitCode
@@ -3309,6 +3373,8 @@ $report = [ordered]@{
         bridgeRelayerLoopValidationPassed = $bridgeRelayerLoopValidationPassed
         bridgeRuntimeCreditValidationStatus = $bridgeRuntimeCreditValidationStatus
         bridgeRuntimeCreditValidationPassed = $bridgeRuntimeCreditValidationPassed
+        bridgeReconciliationStatus = $bridgeReconciliationStatus
+        bridgeReconciliationPassed = $bridgeReconciliationPassed
         publicDeploymentContractPacketSmoke = $publicDeploymentContractPacketSmoke
     }
     childProcessTimeoutSeconds = $ChildTimeoutSeconds

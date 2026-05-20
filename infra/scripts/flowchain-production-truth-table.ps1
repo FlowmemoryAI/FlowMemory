@@ -1508,6 +1508,61 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "bridge-reconciliation"
+        requirement = "Bridge reconciliation summarizes live relayer observed/new/queued/applied/pending credits, cursor commit safety, local runtime credit proof, replay rejection, and release evidence validation in one no-secret operator report."
+        path = "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-report.json"
+        command = "npm run flowchain:bridge:reconciliation"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "relayerOnceReportLoaded",
+            "relayerOnceStatusBlockedOrPassed",
+            "relayerOnceNoFailedChecks",
+            "relayerOnceNoSecrets",
+            "relayerOnceNoBroadcasts",
+            "relayerCountsNonNegative",
+            "pendingCreditsNonNegative",
+            "cursorModeStaged",
+            "cursorFinalNotCommittedWhenBlocked",
+            "relayerBlockedClassifiedOwnerInput",
+            "guardrailReportPassed",
+            "guardrailNoFailedChecks",
+            "guardrailCursorSafe",
+            "loopValidationPassedOrOwnerBlocked",
+            "runtimeCreditPassed",
+            "runtimeCreditNoFailedChecks",
+            "runtimeCreditAppliedOnce",
+            "runtimeReplayRejected",
+            "localPilotPassed",
+            "localPilotNoFailedChecks",
+            "localPilotExactValueConserved",
+            "localPilotDuplicateReplayRejected",
+            "releaseEvidenceValidationPassed",
+            "releaseEvidenceNoFailedChecks",
+            "reconciliationRowsPresent",
+            "liveReadinessBlockedOrPassed",
+            "bridgeInfraBlockedOrPassed",
+            "envValuesPrintedFalse",
+            "secretMarkerFindingsEmpty",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredMinimums = [ordered]@{
+            "counts.localRuntimeAppliedProofs" = 1
+            "counts.duplicateReplayRejectedProofs" = 1
+            "counts.releaseEvidenceValidationProofs" = 1
+        }
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "external-tester-readiness"
         requirement = "External tester flow remains blocked until public RPC, backup, bridge, and local tester evidence pass."
         path = "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"

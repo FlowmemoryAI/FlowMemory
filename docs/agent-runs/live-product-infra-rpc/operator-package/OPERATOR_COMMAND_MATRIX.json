@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-20T11:49:15.9212394Z",
+    "generatedAt":  "2026-05-20T12:00:19.8154634Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -241,6 +241,11 @@
                          "phase":  "bridge",
                          "command":  "npm run flowchain:bridge:runtime-credit:validate",
                          "purpose":  "Validate a production-shaped Base 8453 handoff becomes spendable, transferable, replay-safe, and restart/export/import-safe in isolated L1 state."
+                     },
+                     {
+                         "phase":  "bridge",
+                         "command":  "npm run flowchain:bridge:reconciliation",
+                         "purpose":  "Reconcile live relayer counts, cursor safety, runtime credit proof, replay rejection, and release evidence into one bridge operator report."
                      },
                      {
                          "phase":  "bridge",

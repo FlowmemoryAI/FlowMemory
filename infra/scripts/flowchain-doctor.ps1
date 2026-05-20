@@ -75,6 +75,7 @@ foreach ($scriptName in @(
         "flowchain:bridge:mock:e2e",
         "flowchain:bridge:live:check",
         "flowchain:bridge:relayer:once",
+        "flowchain:bridge:reconciliation",
         "flowchain:public-rpc:deployment-bundle",
         "flowchain:public-rpc:deployment:automation",
         "flowchain:backup:restore:validate",
