@@ -230,6 +230,42 @@ $backupRetentionPruneErrorCount = [int](Get-OpsProp -Object $backupDetails -Name
 $bridgeLiveStatus = Get-OpsStatus -Report $reports.bridgeLive
 $bridgeInfraStatus = Get-OpsStatus -Report $reports.bridgeInfra
 $bridgeRelayerStatus = Get-OpsStatus -Report $reports.bridgeRelayer
+$bridgeRelayerChecks = Get-OpsProp -Object $reports.bridgeRelayer -Name "checks"
+$bridgeRelayerFailedChecks = @((Get-OpsProp -Object $reports.bridgeRelayer -Name "failedChecks" -Default @()))
+$bridgeRelayerRequiredCheckNames = @(
+    "statusKnown",
+    "requiredEnvNamesPresent",
+    "childTimeoutRecorded",
+    "childProcessesDidNotTimeout",
+    "broadcastsFalse",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "readinessInfraChecked",
+    "readinessLiveCheckedWhenInfraPassed",
+    "blockedBeforeLiveReadinessWhenInfraBlocked",
+    "blockedBeforeObservationWhenReadinessBlocked",
+    "noQueuedTransactionsWhenBlocked",
+    "noAppliedCreditsWhenBlocked",
+    "cursorModeStaged",
+    "finalCursorNotCommittedWhenBlocked",
+    "finalCursorPathInsideRepo",
+    "stagedCursorPathInsideRepo",
+    "issuesClassified",
+    "externalBlockerClassifiedWhenBlocked",
+    "latencyGateRecorded",
+    "latencyGatePassedWhenApplied",
+    "queueAndApplyMatchWhenPassed",
+    "cursorSafeWhenPassed"
+)
+$bridgeRelayerMissingChecks = @($bridgeRelayerRequiredCheckNames | Where-Object {
+    (Get-OpsProp -Object $bridgeRelayerChecks -Name $_ -Default $false) -ne $true
+})
+$bridgeRelayerCheckContractReady = $bridgeRelayerStatus -in @("passed", "blocked") `
+    -and $bridgeRelayerFailedChecks.Count -eq 0 `
+    -and $bridgeRelayerMissingChecks.Count -eq 0 `
+    -and ((Get-OpsProp -Object $reports.bridgeRelayer -Name "broadcasts" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.bridgeRelayer -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.bridgeRelayer -Name "noSecrets" -Default $false) -eq $true)
 $bridgeRelayerCounts = Get-OpsProp -Object $reports.bridgeRelayer -Name "counts"
 $bridgeRelayerTiming = Get-OpsProp -Object $reports.bridgeRelayer -Name "timing"
 $bridgeRelayerLatencyGate = [string](Get-OpsProp -Object $bridgeRelayerTiming -Name "latencyGate" -Default "missing")
@@ -341,6 +377,9 @@ if ($backupStatus -eq "failed" -and $null -ne $backupRetentionCount -and ($backu
 }
 if ($bridgeLiveStatus -ne "passed" -or $bridgeInfraStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "bridge-not-ready" -Message "Base 8453 bridge readiness is not ready for external funded testing." -Commands @("npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check", "npm run flowchain:bridge:emergency-stop")
+}
+if (-not $bridgeRelayerCheckContractReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-relayer-check-contract-failed" -Message "Bridge relayer one-shot safety check contract is missing or has failed checks." -Commands @("npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh", "npm run flowchain:bridge:emergency-stop")
 }
 if ($bridgeRelayerStatus -eq "failed" -or $bridgeRelayerLatencyGate -eq "failed") {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-relayer-latency-failed" -Message "Bridge relayer failed or exceeded the handoff-to-spendable latency gate." -Commands @("npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:service:status", "npm run flowchain:bridge:emergency-stop")
@@ -496,6 +535,9 @@ $report = [ordered]@{
         bridgeLive = $bridgeLiveStatus
         bridgeInfra = $bridgeInfraStatus
         bridgeRelayer = $bridgeRelayerStatus
+        bridgeRelayerCheckContractReady = $bridgeRelayerCheckContractReady
+        bridgeRelayerFailedChecks = $bridgeRelayerFailedChecks.Count
+        bridgeRelayerMissingChecks = $bridgeRelayerMissingChecks.Count
         bridgeRelayerGuardrail = $bridgeRelayerGuardrailStatus
         bridgeRelayerGuardrailReady = $bridgeRelayerGuardrailReady
         bridgeRelayerDirectObserveGuardrailReady = $bridgeRelayerDirectObserveGuardrailReady

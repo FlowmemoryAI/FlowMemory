@@ -247,6 +247,53 @@ function New-DrillFallbackReport {
                 broadcasts = $false
             }
         }
+        "bridge-relayer-once-report.json" {
+            return [ordered]@{
+                schema = "flowchain.bridge_relayer_once_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "blocked"
+                queueDisabled = $false
+                childTimeoutSeconds = 300
+                readiness = [ordered]@{ infra = "blocked"; live = "not-run" }
+                counts = [ordered]@{ observedCredits = 0; newCredits = 0; queuedTransactions = 0; appliedCredits = 0 }
+                timing = [ordered]@{ latencyGate = "not-run"; handoffToSpendableSeconds = $null }
+                cursorCommit = [ordered]@{
+                    mode = "staged-cursor"
+                    finalCommitRequired = $true
+                    finalCommitted = $false
+                    reason = "not-run"
+                }
+                checks = [ordered]@{
+                    statusKnown = $true
+                    requiredEnvNamesPresent = $true
+                    childTimeoutRecorded = $true
+                    childProcessesDidNotTimeout = $true
+                    broadcastsFalse = $true
+                    envValuesPrintedFalse = $true
+                    noSecrets = $true
+                    readinessInfraChecked = $true
+                    readinessLiveCheckedWhenInfraPassed = $true
+                    blockedBeforeLiveReadinessWhenInfraBlocked = $true
+                    blockedBeforeObservationWhenReadinessBlocked = $true
+                    noQueuedTransactionsWhenBlocked = $true
+                    noAppliedCreditsWhenBlocked = $true
+                    cursorModeStaged = $true
+                    finalCursorNotCommittedWhenBlocked = $true
+                    finalCursorPathInsideRepo = $true
+                    stagedCursorPathInsideRepo = $true
+                    issuesClassified = $true
+                    externalBlockerClassifiedWhenBlocked = $true
+                    latencyGateRecorded = $true
+                    latencyGatePassedWhenApplied = $true
+                    queueAndApplyMatchWhenPassed = $true
+                    cursorSafeWhenPassed = $true
+                }
+                failedChecks = @()
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
+            }
+        }
         "bridge-relayer-guardrail-validation-report.json" {
             return [ordered]@{
                 schema = "flowchain.bridge_relayer_guardrail_validation_report.v0"
@@ -694,6 +741,30 @@ Invoke-SyntheticOpsCase -Id "public-rpc-edge-hardening-critical" `
         }
     }
 
+Invoke-SyntheticOpsCase -Id "bridge-relayer-check-contract-critical" `
+    -Requirement "A bridge relayer one-shot report with missing or failed safety checks is classified as a critical incident." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("bridge-relayer-check-contract-failed") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "bridge-relayer-once-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "blocked"
+            $checks = Get-DrillProp -Object $report -Name "checks"
+            if ($null -eq $checks) {
+                $checks = [ordered]@{}
+                Set-DrillProp -Object $report -Name "checks" -Value $checks
+            }
+            foreach ($name in @("noQueuedTransactionsWhenBlocked", "noAppliedCreditsWhenBlocked", "finalCursorNotCommittedWhenBlocked", "externalBlockerClassifiedWhenBlocked")) {
+                Set-DrillProp -Object $checks -Name $name -Value $false
+            }
+            Set-DrillProp -Object $report -Name "failedChecks" -Value @("noQueuedTransactionsWhenBlocked", "noAppliedCreditsWhenBlocked", "finalCursorNotCommittedWhenBlocked", "externalBlockerClassifiedWhenBlocked")
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
+        }
+    }
+
 Invoke-SyntheticOpsCase -Id "bridge-relayer-guardrail-critical" `
     -Requirement "A failed bridge relayer guardrail proof is classified as a critical incident before any relayer loop can be trusted." `
     -ExpectedStatus "failed" `
@@ -899,6 +970,7 @@ $requiredScenarios = @(
     "dashboard-ui-readiness-critical",
     "owner-inputs-validation-critical",
     "public-rpc-edge-hardening-critical",
+    "bridge-relayer-check-contract-critical",
     "bridge-relayer-guardrail-critical",
     "bridge-direct-observe-cursor-critical",
     "bridge-relayer-loop-unhealthy-critical",
@@ -918,7 +990,7 @@ $checks = [ordered]@{
     allRequiredScenariosCovered = $missingRequiredScenarios.Count -eq 0
     allCasesPassed = $failedCases.Count -eq 0
     failedCasesAbsent = $failedCases.Count -eq 0
-    minimumCaseCountMet = $cases.Count -ge 17
+    minimumCaseCountMet = $cases.Count -ge 18
     recoveryCommandPrinted = $recoveryPassed
     postDrillLiveStatusPassed = $postStatusPassed
     liveStateBeforeReadable = (Get-DrillProp -Object $liveStateBefore -Name "readable" -Default $false) -eq $true

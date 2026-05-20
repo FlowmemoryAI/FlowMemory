@@ -146,6 +146,14 @@ $rules = @(
         commands = @("npm run flowchain:backup:restore:validate", "npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:check")
     },
     [ordered]@{
+        id = "bridge-relayer-check-contract-failed"
+        severity = "critical"
+        findingCodes = @("bridge-relayer-check-contract-failed")
+        signal = "Bridge relayer one-shot safety check contract is missing or failing."
+        threshold = "relayer one-shot report is not passed/blocked, has failedChecks, misses required checks, prints env values, broadcasts, or reports secrets"
+        commands = @("npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
         id = "bridge-relayer-latency-failed"
         severity = "critical"
         findingCodes = @("bridge-relayer-latency-failed")
@@ -318,6 +326,10 @@ $activeRuleIdsWithoutCommands = @($rules | Where-Object { $activeRules.Contains(
 $publicRpcEdgeHardeningRule = @($rules | Where-Object { $_.id -eq "public-rpc-edge-hardening-failed" } | Select-Object -First 1)
 $publicRpcEdgeHardeningRuleCoversSecurityHeaders = $publicRpcEdgeHardeningRule.Count -eq 1 `
     -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("response-header", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$bridgeRelayerCheckContractRule = @($rules | Where-Object { $_.id -eq "bridge-relayer-check-contract-failed" } | Select-Object -First 1)
+$bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRule.Count -eq 1 `
+    -and ([string]$bridgeRelayerCheckContractRule[0].threshold).IndexOf("failedChecks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeRelayerCheckContractRule[0].threshold).IndexOf("required checks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
 $allCommands = @($rules | ForEach-Object { @($_.commands) })
 $commandsWithInlineEnvAssignment = @($allCommands | Where-Object { "$_" -match '(^|\s)(\$env:)?[A-Z][A-Z0-9_]+\s*=' })
 $commandsWithUrls = @($allCommands | Where-Object { "$_" -match 'https?://' })
@@ -336,6 +348,7 @@ $checks = [ordered]@{
     commandsAvoidUrls = $commandsWithUrls.Count -eq 0
     findingsWithoutCommandsEmpty = $findingsWithoutCommands.Count -eq 0
     publicRpcEdgeHardeningRuleCoversSecurityHeaders = $publicRpcEdgeHardeningRuleCoversSecurityHeaders
+    bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRuleCoversFailedChecks
     notificationPlanStoresNoSecrets = $true
     notificationPlanNoNetworkDelivery = $true
     envValuesPrintedFalse = $true

@@ -1,6 +1,6 @@
 ﻿# FlowChain Ops Alert Rules
 
-Generated: 2026-05-20T00:02:47.1582872Z
+Generated: 2026-05-20T00:48:15.2500605Z
 Status: passed
 Current alert state: blocked
 
@@ -14,6 +14,7 @@ This report maps local ops snapshot findings to operator actions. It does not se
 | state-file-stale | critical | Runtime state file is older than the monitor freshness threshold. | `npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30; npm run flowchain:service:restart -- -LiveProfile` |
 | secret-boundary-breach | critical | No-secret scan did not pass. | `npm run flowchain:no-secret:scan; npm run flowchain:emergency:export-evidence` |
 | backup-retention-unsafe | critical | Backup retention failed to protect the latest snapshot or reported prune errors. | `npm run flowchain:backup:restore:validate; npm run flowchain:backup:owner-path:dry-run; npm run flowchain:backup:check` |
+| bridge-relayer-check-contract-failed | critical | Bridge relayer one-shot safety check contract is missing or failing. | `npm run flowchain:bridge:relayer:once -- -AllowBlocked; npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh; npm run flowchain:bridge:emergency-stop` |
 | bridge-relayer-latency-failed | critical | Bridge relayer failed or exceeded the handoff-to-spendable latency gate. | `npm run flowchain:bridge:relayer:once -- -AllowBlocked; npm run flowchain:service:status; npm run flowchain:bridge:emergency-stop` |
 | bridge-relayer-cursor-unsafe | critical | Bridge relayer passed without safe staged cursor commit evidence. | `npm run flowchain:bridge:relayer:once -- -AllowBlocked; npm run flowchain:bridge:emergency-stop; npm run flowchain:service:status` |
 | bridge-relayer-guardrail-failed | critical | Bridge relayer fail-closed guardrail proof is missing or failed. | `npm run flowchain:bridge:relayer:guardrail:validate; npm run flowchain:bridge:relayer:once -- -AllowBlocked; npm run flowchain:bridge:emergency-stop` |
@@ -34,4 +35,4 @@ This report maps local ops snapshot findings to operator actions. It does not se
 | external-tester-evidence-invalid | blocked | External tester returned evidence is incomplete or transfer proof is inconsistent. | `npm run flowchain:tester:evidence:validate; npm run flowchain:external-tester:packet -- -AllowBlocked` |
 | deployment-contract-not-ready | blocked | Public deployment contract is not passed. | `npm run flowchain:public-deployment:contract -- -AllowBlocked` |
 
-Covered finding codes: `node-not-running, control-plane-not-running, service-status-not-passed, chain-height-unreadable, height-not-advancing, state-stale, no-secret-scan-not-passed, backup-retention-unsafe, bridge-relayer-latency-failed, bridge-relayer-cursor-unsafe, bridge-relayer-guardrail-failed, bridge-direct-observe-cursor-unsafe, bridge-relayer-loop-unhealthy, supervisor-relayer-recovery-failed, deployment-refresh-aborted, truth-table-stale-or-failed, external-tester-evidence-unsafe, dashboard-ui-readiness-failed, owner-inputs-validation-failed, public-rpc-edge-hardening-failed, public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, external-tester-evidence-invalid, deployment-contract-not-ready`
+Covered finding codes: `node-not-running, control-plane-not-running, service-status-not-passed, chain-height-unreadable, height-not-advancing, state-stale, no-secret-scan-not-passed, backup-retention-unsafe, bridge-relayer-check-contract-failed, bridge-relayer-latency-failed, bridge-relayer-cursor-unsafe, bridge-relayer-guardrail-failed, bridge-direct-observe-cursor-unsafe, bridge-relayer-loop-unhealthy, supervisor-relayer-recovery-failed, deployment-refresh-aborted, truth-table-stale-or-failed, external-tester-evidence-unsafe, dashboard-ui-readiness-failed, owner-inputs-validation-failed, public-rpc-edge-hardening-failed, public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, external-tester-evidence-invalid, deployment-contract-not-ready`

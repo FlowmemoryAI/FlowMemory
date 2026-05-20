@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-19T23:46:44.4871202Z",
+    "generatedAt":  "2026-05-20T00:48:51.6490839Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
@@ -10,11 +10,11 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-guardrail-critical\\input"
                 },
     "chain":  {
-                  "latestHeight":  "94881",
-                  "finalizedHeight":  "94881",
-                  "stateFileLastWriteAgeSeconds":  0,
+                  "latestHeight":  "95503",
+                  "finalizedHeight":  "95503",
+                  "stateFileLastWriteAgeSeconds":  1,
                   "monitorStatus":  "passed",
-                  "monitorSamples":  2,
+                  "monitorSamples":  3,
                   "monitorHeightAdvanced":  true
               },
     "reportStatuses":  {
@@ -60,6 +60,9 @@
                            "bridgeLive":  "blocked",
                            "bridgeInfra":  "blocked",
                            "bridgeRelayer":  "blocked",
+                           "bridgeRelayerCheckContractReady":  true,
+                           "bridgeRelayerFailedChecks":  0,
+                           "bridgeRelayerMissingChecks":  0,
                            "bridgeRelayerGuardrail":  "failed",
                            "bridgeRelayerGuardrailReady":  false,
                            "bridgeRelayerDirectObserveGuardrailReady":  false,

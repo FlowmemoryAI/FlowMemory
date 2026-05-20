@@ -1,9 +1,9 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-19T23:46:44.4871202Z
+Generated: 2026-05-20T00:48:51.6490839Z
 Status: failed
-Latest height: 94881
-Finalized height: 94881
+Latest height: 95503
+Finalized height: 95503
 
 ## Findings
 

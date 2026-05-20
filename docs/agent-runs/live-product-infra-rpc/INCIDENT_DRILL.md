@@ -1,6 +1,6 @@
 ﻿# FlowChain Incident Drill
 
-Generated: 2026-05-19T23:47:01.2715397Z
+Generated: 2026-05-20T00:49:09.1538114Z
 Status: passed
 Incident drill ready: True
 
@@ -21,6 +21,7 @@ This drill uses synthetic ops input reports for incident conditions, then checks
 | dashboard-ui-readiness-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | owner-inputs-validation-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | public-rpc-edge-hardening-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
+| bridge-relayer-check-contract-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | bridge-relayer-guardrail-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | bridge-direct-observe-cursor-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | bridge-relayer-loop-unhealthy-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
