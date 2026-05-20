@@ -447,6 +447,25 @@ describe("dashboard fixture", () => {
     expect(html).not.toContain("local-tester-write-token");
   });
 
+  it("renders signed transaction intake controls without exposing write RPC", () => {
+    const workbench = buildWorkbenchSnapshot(data, {
+      devnetState,
+      devnetDashboardState,
+      bridgeTestDeposit,
+      liveReadinessReport,
+    });
+    const html = renderToStaticMarkup(createElement(MemoryRouter, { initialEntries: ["/wallet?panel=signed"] }, createElement(WalletView, { workbench })));
+
+    expect(html).toContain("Signed transaction intake");
+    expect(html).toContain("/transactions/submit");
+    expect(html).toContain("Submit signed envelope");
+    expect(html).toContain("Intake only");
+    expect(html).toContain("Runtime direct");
+    expect(html).not.toContain("transaction_submit");
+    expect(html).not.toContain("privateKey");
+    expect(html).not.toContain("seedPhrase");
+  });
+
   it("renders the dedicated friends-and-family launch flow without secrets", () => {
     const workbench = buildWorkbenchSnapshot(data, {
       devnetState,

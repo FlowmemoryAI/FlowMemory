@@ -153,15 +153,58 @@ type TesterStatus = {
   localOnly?: boolean;
 };
 
+type RuntimeSubmitMode = "off" | "direct" | "node-inbox";
+
+type SignedSubmitResult = {
+  schema?: string;
+  accepted?: boolean;
+  intakeId?: string;
+  txId?: string;
+  status?: string;
+  forwardedTo?: string;
+  runtimeIntakePath?: string;
+  localOnly?: boolean;
+  message?: string;
+  reasonCode?: string;
+  crypto?: {
+    ok?: boolean;
+    transactionId?: string;
+    envelopeId?: string;
+    replayKey?: string;
+    failureCodes?: string[];
+  };
+};
+
+type SignedEnvelopeDraft = {
+  parsed: Record<string, unknown> | null;
+  error: string | null;
+  secretKeyPath: string | null;
+};
+
 type WalletApiResult<T> = {
   payload: T;
   url: string;
 };
 
-type ActionPanel = "home" | "wallet" | "send" | "receive" | "swap" | "activity" | "security" | "settings" | "staking" | "tester";
+type ActionPanel = "home" | "wallet" | "send" | "receive" | "swap" | "activity" | "security" | "settings" | "staking" | "tester" | "signed";
 
-const ACTION_PANELS: ActionPanel[] = ["home", "wallet", "send", "receive", "swap", "activity", "security", "settings", "staking", "tester"];
+const ACTION_PANELS: ActionPanel[] = ["home", "wallet", "send", "receive", "swap", "activity", "security", "settings", "staking", "tester", "signed"];
 const TESTER_WRITE_ENV_NAMES = ["FLOWCHAIN_TESTER_WRITE_ENABLED", "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256", "FLOWCHAIN_TESTER_MAX_SEND_UNITS"];
+const SECRET_SHAPED_KEYS = new Set([
+  "apikey",
+  "accesstoken",
+  "authtag",
+  "bearertoken",
+  "ciphertext",
+  "mnemonic",
+  "passphrase",
+  "password",
+  "privatekey",
+  "secret",
+  "secretkey",
+  "seedphrase",
+  "webhookurl",
+]);
 
 function panelFromQuery(value: string | null): ActionPanel | null {
   if (value === null) return null;
@@ -335,6 +378,75 @@ function unitsWithinCap(amount: string, cap: string | undefined): boolean {
   return parsedCap === null || parsedAmount <= parsedCap;
 }
 
+function normalizeJsonKey(value: string): string {
+  return value.replace(/[-_\s]/g, "").toLowerCase();
+}
+
+function findSecretShapedKey(value: unknown, path = "$"): string | null {
+  if (Array.isArray(value)) {
+    for (let index = 0; index < value.length; index += 1) {
+      const nested = findSecretShapedKey(value[index], `${path}[${index}]`);
+      if (nested !== null) {
+        return nested;
+      }
+    }
+    return null;
+  }
+
+  if (value === null || typeof value !== "object") {
+    return null;
+  }
+
+  for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+    if (SECRET_SHAPED_KEYS.has(normalizeJsonKey(key))) {
+      return `${path}.${key}`;
+    }
+    const nested = findSecretShapedKey(entry, `${path}.${key}`);
+    if (nested !== null) {
+      return nested;
+    }
+  }
+
+  return null;
+}
+
+function parseSignedEnvelopeDraft(value: string): SignedEnvelopeDraft {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) {
+    return { parsed: null, error: null, secretKeyPath: null };
+  }
+  try {
+    const parsed = JSON.parse(trimmed) as unknown;
+    if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return { parsed: null, error: "Signed envelope must be a JSON object.", secretKeyPath: null };
+    }
+    return {
+      parsed: parsed as Record<string, unknown>,
+      error: null,
+      secretKeyPath: findSecretShapedKey(parsed),
+    };
+  } catch {
+    return { parsed: null, error: "Paste valid signed envelope JSON.", secretKeyPath: null };
+  }
+}
+
+function nestedRecord(value: Record<string, unknown> | null, key: string): Record<string, unknown> | null {
+  const nested = value?.[key];
+  return nested !== null && typeof nested === "object" && !Array.isArray(nested) ? nested as Record<string, unknown> : null;
+}
+
+function signedEnvelopeSchema(value: Record<string, unknown> | null): string {
+  const direct = value?.schema;
+  const envelope = nestedRecord(value, "envelope")?.schema;
+  const document = nestedRecord(value, "document")?.schema;
+  for (const candidate of [direct, envelope, document]) {
+    if (typeof candidate === "string" && candidate.length > 0) {
+      return candidate;
+    }
+  }
+  return "not parsed";
+}
+
 function timestampLabel(): string {
   return new Date().toLocaleString(undefined, {
     month: "short",
@@ -379,6 +491,10 @@ export function WalletView({ workbench }: WalletViewProps) {
   const [testerFrom, setTesterFrom] = useState("");
   const [testerTo, setTesterTo] = useState("");
   const [testerAmountUnits, setTesterAmountUnits] = useState("1");
+  const [signedEnvelopeInput, setSignedEnvelopeInput] = useState("");
+  const [signedSubmittedBy, setSignedSubmittedBy] = useState("flowchain-wallet-ui");
+  const [signedRuntimeMode, setSignedRuntimeMode] = useState<RuntimeSubmitMode>("off");
+  const [signedSubmitResult, setSignedSubmitResult] = useState<SignedSubmitResult | null>(null);
   const [swapAmount, setSwapAmount] = useState("");
   const [search, setSearch] = useState("");
   const [activePanel, setActivePanel] = useState<ActionPanel>(initialPanel);
@@ -408,6 +524,12 @@ export function WalletView({ workbench }: WalletViewProps) {
   const testerCreateReady = testerGatewayConfigured && testerTokenReady && testerPassphrase.length >= 8 && !loading;
   const testerFaucetReady = testerGatewayConfigured && testerTokenReady && Boolean(testerFundAccount.trim() || primaryWalletAddress) && testerFundAmountValid && !loading;
   const testerSendReady = testerGatewayConfigured && testerTokenReady && Boolean(testerFrom.trim() || primaryWalletAddress) && Boolean(testerTo.trim()) && testerSendAmountValid && !loading;
+  const signedEnvelopeDraft = useMemo(() => parseSignedEnvelopeDraft(signedEnvelopeInput), [signedEnvelopeInput]);
+  const signedEnvelopeHasInput = signedEnvelopeInput.trim().length > 0;
+  const signedEnvelopeReady = signedEnvelopeDraft.parsed !== null && signedEnvelopeDraft.error === null && signedEnvelopeDraft.secretKeyPath === null && !loading;
+  const signedEnvelopeHelp = signedEnvelopeDraft.error
+    ?? (signedEnvelopeDraft.secretKeyPath ? `Remove secret-shaped field ${signedEnvelopeDraft.secretKeyPath}.` : null)
+    ?? (signedEnvelopeDraft.parsed ? `Schema ${signedEnvelopeSchema(signedEnvelopeDraft.parsed)} ready for local intake.` : "Paste a signed envelope from the dev pack.");
   const testerReportBlockers = [
     testerGatewayGate?.facts.find((fact) => fact.label === "blockers")?.value,
     externalTesterGate?.facts.find((fact) => fact.label === "blockers")?.value,
@@ -761,6 +883,52 @@ export function WalletView({ workbench }: WalletViewProps) {
     }
   }
 
+  async function submitSignedEnvelope() {
+    if (signedEnvelopeDraft.parsed === null) {
+      setMessage(signedEnvelopeDraft.error ?? "Paste a signed envelope JSON object first.");
+      return;
+    }
+    if (signedEnvelopeDraft.secretKeyPath !== null) {
+      setMessage(`Remove secret-shaped field ${signedEnvelopeDraft.secretKeyPath} before submitting.`);
+      return;
+    }
+    setLoading(true);
+    setMessage(null);
+    try {
+      const { payload, url } = await fetchWalletApi<SignedSubmitResult>(apiCandidates, "/transactions/submit", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          signedEnvelope: signedEnvelopeDraft.parsed,
+          submittedBy: signedSubmittedBy.trim() || "flowchain-wallet-ui",
+          runtimeSubmitMode: signedRuntimeMode,
+        }),
+      });
+      setWalletApiUrl(url);
+      setSignedSubmitResult(payload);
+      setLocalActivity((current) => [
+        {
+          id: payload.txId ?? payload.intakeId ?? `signed:${Date.now()}`,
+          type: payload.forwardedTo === "local-runtime-state" ? "Signed runtime submit" : "Signed intake accepted",
+          asset: "signed transaction",
+          route: shortId(payload.crypto?.transactionId ?? payload.txId ?? payload.intakeId ?? "local-file-intake"),
+          amount: safeText(payload.forwardedTo, signedRuntimeMode),
+          status: statusLabel(payload.status),
+        },
+        ...current,
+      ]);
+      if (signedRuntimeMode !== "off") {
+        await loadStatus({ clearMessage: false });
+      }
+      setActivePanel("signed");
+      setMessage(payload.accepted ? "Signed envelope accepted by local transaction intake." : safeText(payload.message, "Signed submit returned without acceptance."));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "signed transaction submit failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function submitSwapDraft() {
     if (!swapAmount.trim()) {
       setMessage("Enter a swap amount first.");
@@ -855,6 +1023,10 @@ export function WalletView({ workbench }: WalletViewProps) {
           <button className={activePanel === "tester" ? "active" : ""} type="button" onClick={() => setActivePanel("tester")}>
             <UserPlus size={19} aria-hidden="true" />
             Tester
+          </button>
+          <button className={activePanel === "signed" ? "active" : ""} type="button" onClick={() => setActivePanel("signed")}>
+            <BadgeCheck size={19} aria-hidden="true" />
+            Signed
           </button>
           <Link to="/bridge">
             <Network size={19} aria-hidden="true" />
@@ -986,6 +1158,11 @@ export function WalletView({ workbench }: WalletViewProps) {
             <span><UserPlus size={22} aria-hidden="true" /></span>
             <strong>Tester</strong>
             <small>Friend access</small>
+          </button>
+          <button type="button" onClick={() => setActivePanel("signed")}>
+            <span><BadgeCheck size={22} aria-hidden="true" /></span>
+            <strong>Signed</strong>
+            <small>Tx intake</small>
           </button>
         </section>
 
@@ -1176,6 +1353,7 @@ export function WalletView({ workbench }: WalletViewProps) {
                 {activePanel === "settings" || activePanel === "wallet" ? "Wallet settings" : null}
                 {activePanel === "staking" ? "Staking" : null}
                 {activePanel === "tester" ? "External tester tools" : null}
+                {activePanel === "signed" ? "Signed transaction intake" : null}
               </h2>
             </div>
             <button type="button" onClick={() => setActivePanel("home")}>Close</button>
@@ -1375,6 +1553,98 @@ export function WalletView({ workbench }: WalletViewProps) {
                   Open ops status
                 </Link>
               </div>
+            </div>
+          ) : null}
+
+          {activePanel === "signed" ? (
+            <div className="wallet-signed-panel">
+              <section className="wallet-signed-readiness">
+                <div>
+                  <strong>{signedSubmitResult?.accepted ? "Signed intake accepted" : "Local signed intake"}</strong>
+                  <span>{signedSubmitResult?.message ?? "Private transaction submission stays on /transactions/submit; public /rpc remains read-gated."}</span>
+                </div>
+                <dl>
+                  <div>
+                    <dt>endpoint</dt>
+                    <dd>/transactions/submit</dd>
+                  </div>
+                  <div>
+                    <dt>mode</dt>
+                    <dd>{signedRuntimeMode}</dd>
+                  </div>
+                  <div>
+                    <dt>schema</dt>
+                    <dd>{signedEnvelopeSchema(signedEnvelopeDraft.parsed)}</dd>
+                  </div>
+                  <div>
+                    <dt>crypto</dt>
+                    <dd>{signedSubmitResult?.crypto?.ok === true ? "verified" : "pending"}</dd>
+                  </div>
+                </dl>
+              </section>
+
+              <div className="wallet-panel-form wallet-signed-form">
+                <label>
+                  <span>Signed envelope JSON</span>
+                  <textarea
+                    value={signedEnvelopeInput}
+                    onChange={(event) => setSignedEnvelopeInput(event.target.value)}
+                    spellCheck={false}
+                    aria-invalid={signedEnvelopeHasInput && Boolean(signedEnvelopeDraft.error ?? signedEnvelopeDraft.secretKeyPath)}
+                    placeholder={'{"document":{"schema":"flowchain.product_transfer.v0"},"envelope":{"schema":"flowchain.local_transaction_envelope.v0"}}'}
+                  />
+                  <small className={signedEnvelopeDraft.error || signedEnvelopeDraft.secretKeyPath ? "wallet-field-help invalid" : "wallet-field-help"}>
+                    {signedEnvelopeHelp}
+                  </small>
+                </label>
+                <label>
+                  <span>Submitted by</span>
+                  <input value={signedSubmittedBy} onChange={(event) => setSignedSubmittedBy(event.target.value)} placeholder="flowchain-wallet-ui" />
+                </label>
+                <label>
+                  <span>Runtime mode</span>
+                  <select value={signedRuntimeMode} onChange={(event) => setSignedRuntimeMode(event.target.value as RuntimeSubmitMode)}>
+                    <option value="off">Intake only</option>
+                    <option value="direct">Runtime direct</option>
+                    <option value="node-inbox">Runtime inbox</option>
+                  </select>
+                  <small className="wallet-field-help">
+                    {signedRuntimeMode === "off" ? "Writes only the local intake proof." : "Forwards the signed transaction into the local runtime path."}
+                  </small>
+                </label>
+                <button type="button" disabled={!signedEnvelopeReady} onClick={() => void submitSignedEnvelope()}>
+                  <BadgeCheck size={17} aria-hidden="true" />
+                  {loading ? "Submitting" : "Submit signed envelope"}
+                </button>
+              </div>
+
+              {signedSubmitResult !== null ? (
+                <section className="wallet-signed-result" aria-label="Signed transaction result">
+                  <strong>{statusLabel(signedSubmitResult.status)}</strong>
+                  <dl>
+                    <div>
+                      <dt>tx</dt>
+                      <dd>{shortId(safeText(signedSubmitResult.txId ?? signedSubmitResult.crypto?.transactionId, "not assigned"), 10, 8)}</dd>
+                    </div>
+                    <div>
+                      <dt>intake</dt>
+                      <dd>{shortId(safeText(signedSubmitResult.intakeId, "not assigned"), 10, 8)}</dd>
+                    </div>
+                    <div>
+                      <dt>forwarded</dt>
+                      <dd>{safeText(signedSubmitResult.forwardedTo, "not forwarded")}</dd>
+                    </div>
+                    <div>
+                      <dt>replay key</dt>
+                      <dd>{shortId(safeText(signedSubmitResult.crypto?.replayKey, "not assigned"), 10, 8)}</dd>
+                    </div>
+                  </dl>
+                  <Link to="/explorer">
+                    <Search size={16} aria-hidden="true" />
+                    Inspect chain records
+                  </Link>
+                </section>
+              ) : null}
             </div>
           ) : null}
 
