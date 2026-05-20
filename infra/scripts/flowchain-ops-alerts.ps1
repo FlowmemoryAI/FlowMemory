@@ -250,6 +250,14 @@ $rules = @(
         commands = @("npm run flowchain:tester:evidence:validate", "npm run flowchain:no-secret:scan", "npm run flowchain:emergency:export-evidence")
     },
     [ordered]@{
+        id = "public-tester-gateway-e2e-failed"
+        severity = "critical"
+        findingCodes = @("public-tester-gateway-e2e-failed")
+        signal = "Public tester gateway E2E proof is missing or unsafe."
+        threshold = "gateway report is not passed, has failedChecks, misses wallet create/faucet/send/cap rejection/routes, prints env values, broadcasts, or reports secrets"
+        commands = @("npm run flowchain:tester:gateway:e2e", "npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked")
+    },
+    [ordered]@{
         id = "dashboard-ui-readiness-failed"
         severity = "critical"
         findingCodes = @("dashboard-ui-readiness-failed")
@@ -367,6 +375,11 @@ $externalTesterLaunchRuleCoversGatewayAndFaucet = $externalTesterLaunchRule.Coun
     -and ([string]$externalTesterLaunchRule[0].threshold).IndexOf("faucet route", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$externalTesterLaunchRule[0].threshold).IndexOf("local tester wallet rehearsal", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$externalTesterLaunchRule[0].threshold).IndexOf("live infra", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$publicTesterGatewayRule = @($rules | Where-Object { $_.id -eq "public-tester-gateway-e2e-failed" } | Select-Object -First 1)
+$publicTesterGatewayRuleCoversNoSecretNoBroadcast = $publicTesterGatewayRule.Count -eq 1 `
+    -and ([string]$publicTesterGatewayRule[0].threshold).IndexOf("failedChecks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicTesterGatewayRule[0].threshold).IndexOf("broadcasts", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicTesterGatewayRule[0].threshold).IndexOf("secrets", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
 $allCommands = @($rules | ForEach-Object { @($_.commands) })
 $commandsWithInlineEnvAssignment = @($allCommands | Where-Object { "$_" -match '(^|\s)(\$env:)?[A-Z][A-Z0-9_]+\s*=' })
 $commandsWithUrls = @($allCommands | Where-Object { "$_" -match 'https?://' })
@@ -389,6 +402,7 @@ $checks = [ordered]@{
     bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRuleCoversFailedChecks
     supervisorNodeRecoveryRuleCoversLiveProfile = $supervisorNodeRecoveryRuleCoversLiveProfile
     externalTesterLaunchRuleCoversGatewayAndFaucet = $externalTesterLaunchRuleCoversGatewayAndFaucet
+    publicTesterGatewayRuleCoversNoSecretNoBroadcast = $publicTesterGatewayRuleCoversNoSecretNoBroadcast
     notificationPlanStoresNoSecrets = $true
     notificationPlanNoNetworkDelivery = $true
     envValuesPrintedFalse = $true

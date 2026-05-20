@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T10:06:12.9393626Z",
+    "generatedAt":  "2026-05-20T10:58:58.2508051Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  29,
-    "criticalRuleCount":  22,
+    "ruleCount":  30,
+    "criticalRuleCount":  23,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -51,6 +51,7 @@
                                 "deployment-refresh-aborted",
                                 "truth-table-stale-or-failed",
                                 "external-tester-evidence-unsafe",
+                                "public-tester-gateway-e2e-failed",
                                 "dashboard-ui-readiness-failed",
                                 "owner-inputs-validation-failed",
                                 "public-rpc-edge-hardening-failed",
@@ -98,6 +99,7 @@
                    "bridgeRelayerCheckContractRuleCoversFailedChecks":  true,
                    "supervisorNodeRecoveryRuleCoversLiveProfile":  true,
                    "externalTesterLaunchRuleCoversGatewayAndFaucet":  true,
+                   "publicTesterGatewayRuleCoversNoSecretNoBroadcast":  true,
                    "notificationPlanStoresNoSecrets":  true,
                    "notificationPlanNoNetworkDelivery":  true,
                    "envValuesPrintedFalse":  true,
@@ -388,6 +390,20 @@
                                        "npm run flowchain:tester:evidence:validate",
                                        "npm run flowchain:no-secret:scan",
                                        "npm run flowchain:emergency:export-evidence"
+                                   ]
+                  },
+                  {
+                      "id":  "public-tester-gateway-e2e-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "public-tester-gateway-e2e-failed"
+                                       ],
+                      "signal":  "Public tester gateway E2E proof is missing or unsafe.",
+                      "threshold":  "gateway report is not passed, has failedChecks, misses wallet create/faucet/send/cap rejection/routes, prints env values, broadcasts, or reports secrets",
+                      "commands":  [
+                                       "npm run flowchain:tester:gateway:e2e",
+                                       "npm run flowchain:tester:readiness -- -AllowBlocked",
+                                       "npm run flowchain:external-tester:packet -- -AllowBlocked"
                                    ]
                   },
                   {

@@ -1,20 +1,11 @@
 {
     "schema":  "flowchain.ops_metrics_export_report.v0",
-    "generatedAt":  "2026-05-20T10:06:13.8886020Z",
+    "generatedAt":  "2026-05-20T10:59:04.0470848Z",
     "status":  "passed",
     "refresh":  {
-                    "performed":  true,
+                    "performed":  false,
                     "steps":  [
-                                  {
-                                      "name":  "ops-snapshot",
-                                      "exitCode":  0,
-                                      "outputLineCount":  5
-                                  },
-                                  {
-                                      "name":  "ops-alerts",
-                                      "exitCode":  0,
-                                      "outputLineCount":  5
-                                  }
+
                               ]
                 },
     "reportPaths":  {
@@ -30,6 +21,7 @@
                         "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
                         "bridgeRelayerGuardrail":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-guardrail-validation-report.json",
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
+                        "publicTesterGateway":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json",
                         "externalTesterEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-evidence-validation-report.json",
                         "dashboardUi":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
                         "ownerInputsValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-validation-report.json",
@@ -41,7 +33,7 @@
                     },
     "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.json",
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
-    "metricCount":  119,
+    "metricCount":  128,
     "requiredMetricNames":  [
                                 "flowchain_latest_height",
                                 "flowchain_finalized_height",
@@ -110,6 +102,15 @@
                                 "flowchain_external_tester_faucet_route_validated",
                                 "flowchain_external_tester_live_infra_ready",
                                 "flowchain_external_tester_missing_owner_inputs",
+                                "flowchain_public_tester_gateway_e2e_ready",
+                                "flowchain_public_tester_gateway_accounts_total",
+                                "flowchain_public_tester_gateway_failed_checks",
+                                "flowchain_public_tester_gateway_routes_total",
+                                "flowchain_public_tester_gateway_transfer_applied",
+                                "flowchain_public_tester_gateway_cap_rejected",
+                                "flowchain_public_tester_gateway_routes_covered",
+                                "flowchain_public_tester_gateway_no_secrets",
+                                "flowchain_public_tester_gateway_no_broadcasts",
                                 "flowchain_external_tester_evidence_ready",
                                 "flowchain_external_tester_evidence_failed_checks",
                                 "flowchain_external_tester_evidence_missing_files",
@@ -152,6 +153,7 @@
                    "serviceStatusLoaded":  true,
                    "serviceMonitorLoaded":  true,
                    "externalTesterLoaded":  true,
+                   "publicTesterGatewayLoaded":  true,
                    "externalTesterEvidenceLoaded":  true,
                    "dashboardUiLoaded":  true,
                    "ownerInputsValidationLoaded":  true,
@@ -168,6 +170,7 @@
                    "bridgeDirectObserveMetricsPresent":  true,
                    "bridgeRuntimeCreditMetricsPresent":  true,
                    "publicRpcEdgeMetricsPresent":  true,
+                   "publicTesterGatewayMetricsPresent":  true,
                    "transactionIntakeMetricsPresent":  true,
                    "dashboardUiMetricsPresent":  true,
                    "ownerInputsValidationMetricsPresent":  true,

@@ -32,6 +32,7 @@ $paths = [ordered]@{
     bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
     bridgeRelayerGuardrail = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
+    publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     externalTesterEvidence = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
     dashboardUi = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
     ownerInputsValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
@@ -213,6 +214,7 @@ $opsAlerts = $reports.opsAlerts
 $serviceStatus = $reports.serviceStatus
 $serviceMonitor = $reports.serviceMonitor
 $externalTester = $reports.externalTester
+$publicTesterGateway = $reports.publicTesterGateway
 $externalTesterEvidence = $reports.externalTesterEvidence
 $dashboardUi = $reports.dashboardUi
 $ownerInputsValidation = $reports.ownerInputsValidation
@@ -252,6 +254,10 @@ $externalTesterExternalSharingReady = (Get-MetricsProp -Object $externalTester -
 $externalTesterMissingEnvNames = @((Get-MetricsProp -Object $externalTester -Name "missingEnvNames" -Default @()))
 $externalTesterTesterNetwork = Get-MetricsProp -Object $externalTester -Name "testerNetwork"
 $externalTesterTesterCount = [int](Get-MetricsProp -Object $externalTesterTesterNetwork -Name "testerCount" -Default 0)
+$publicTesterGatewayChecks = Get-MetricsProp -Object $publicTesterGateway -Name "checks"
+$publicTesterGatewayFailedChecks = @((Get-MetricsProp -Object $publicTesterGateway -Name "failedChecks" -Default @()))
+$publicTesterGatewaySecretFindings = @((Get-MetricsProp -Object $publicTesterGateway -Name "secretMarkerFindings" -Default @()))
+$publicTesterGatewayRoutes = @((Get-MetricsProp -Object $publicTesterGateway -Name "routes" -Default @()))
 $publicRpcDeploymentBundleChecks = Get-MetricsProp -Object $publicRpcDeploymentBundle -Name "checks"
 $publicRpcDeploymentAutomationChecks = Get-MetricsProp -Object $publicRpcDeploymentAutomation -Name "checks"
 $publicRpcRequiredCutoverCommands = @(
@@ -360,6 +366,15 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_faucet_route_
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_live_infra_ready" -Help "One when live infra readiness has passed for external tester launch." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTesterLiveInfraReady" -Default (Get-MetricsProp -Object $externalTesterChecks -Name "liveInfraReady" -Default $false)))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_missing_owner_inputs" -Help "Owner input count still blocking external tester sharing." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTesterMissingEnvCount" -Default $externalTesterMissingEnvNames.Count))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_rehearsal_testers_total" -Help "Tester wallet count covered by the latest local tester rehearsal." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTesterTesterCount" -Default $externalTesterTesterCount))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_tester_gateway_e2e_ready" -Help "One when public tester gateway E2E wallet create, faucet, send, cap, route, no-secret, and no-broadcast proof is passed." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "publicTesterGatewayReady" -Default ((Get-MetricsStatus -Report $publicTesterGateway) -eq "passed")))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_tester_gateway_accounts_total" -Help "Tester accounts created by the public tester gateway E2E proof." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "publicTesterGatewayAccountCount" -Default (Get-MetricsProp -Object $publicTesterGateway -Name "accountCount" -Default 0)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_tester_gateway_failed_checks" -Help "Failed checks in the public tester gateway E2E proof." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "publicTesterGatewayFailedChecks" -Default $publicTesterGatewayFailedChecks.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_tester_gateway_routes_total" -Help "Routes covered by the public tester gateway E2E proof." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "publicTesterGatewayRouteCount" -Default $publicTesterGatewayRoutes.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_tester_gateway_transfer_applied" -Help "One when the gateway send proof applied to the local runtime." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "publicTesterGatewayTransferApplied" -Default (Get-MetricsProp -Object $publicTesterGatewayChecks -Name "transferAppliedLocalRuntime" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_tester_gateway_cap_rejected" -Help "One when the gateway rejects an over-cap tester send." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "publicTesterGatewayCapRejected" -Default (Get-MetricsProp -Object $publicTesterGatewayChecks -Name "capRejected" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_tester_gateway_routes_covered" -Help "One when the gateway E2E report covers all required tester routes." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "publicTesterGatewayRoutesCovered" -Default (Get-MetricsProp -Object $publicTesterGatewayChecks -Name "routesCoverRequired" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_tester_gateway_no_secrets" -Help "One when the public tester gateway E2E report and checks contain no secrets." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "publicTesterGatewayNoSecrets" -Default (((Get-MetricsProp -Object $publicTesterGateway -Name "noSecrets" -Default $false) -eq $true) -and $publicTesterGatewaySecretFindings.Count -eq 0)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_tester_gateway_no_broadcasts" -Help "One when the public tester gateway E2E proof made no live broadcasts." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "publicTesterGatewayNoBroadcasts" -Default ((Get-MetricsProp -Object $publicTesterGateway -Name "broadcasts" -Default $true) -eq $false)))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_ready" -Help "One when external tester returned evidence validation is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $externalTesterEvidence))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_failed_checks" -Help "Failed checks in the external tester returned evidence validation report." -Value (@((Get-MetricsProp -Object $externalTesterEvidence -Name "failedChecks" -Default @())).Count)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_missing_files" -Help "Missing required files in the external tester returned evidence folder." -Value (@((Get-MetricsProp -Object $externalTesterEvidence -Name "missingRequiredFiles" -Default @())).Count)
@@ -412,6 +427,7 @@ $metricsJson = [ordered]@{
         publicRpcDeploymentBundleStatus = Get-MetricsStatus -Report $publicRpcDeploymentBundle
         publicRpcDeploymentAutomationStatus = Get-MetricsStatus -Report $publicRpcDeploymentAutomation
         externalTesterStatus = Get-MetricsStatus -Report $externalTester
+        publicTesterGatewayStatus = Get-MetricsStatus -Report $publicTesterGateway
         externalTesterEvidenceStatus = Get-MetricsStatus -Report $externalTesterEvidence
         dashboardUiStatus = Get-MetricsStatus -Report $dashboardUi
         ownerInputsValidationStatus = Get-MetricsStatus -Report $ownerInputsValidation
@@ -505,6 +521,15 @@ $requiredMetricNames = @(
     "flowchain_external_tester_faucet_route_validated",
     "flowchain_external_tester_live_infra_ready",
     "flowchain_external_tester_missing_owner_inputs",
+    "flowchain_public_tester_gateway_e2e_ready",
+    "flowchain_public_tester_gateway_accounts_total",
+    "flowchain_public_tester_gateway_failed_checks",
+    "flowchain_public_tester_gateway_routes_total",
+    "flowchain_public_tester_gateway_transfer_applied",
+    "flowchain_public_tester_gateway_cap_rejected",
+    "flowchain_public_tester_gateway_routes_covered",
+    "flowchain_public_tester_gateway_no_secrets",
+    "flowchain_public_tester_gateway_no_broadcasts",
     "flowchain_external_tester_evidence_ready",
     "flowchain_external_tester_evidence_failed_checks",
     "flowchain_external_tester_evidence_missing_files",
@@ -548,6 +573,7 @@ $checks = [ordered]@{
     serviceStatusLoaded = $null -ne $serviceStatus
     serviceMonitorLoaded = $null -ne $serviceMonitor
     externalTesterLoaded = $null -ne $externalTester
+    publicTesterGatewayLoaded = $null -ne $publicTesterGateway
     externalTesterEvidenceLoaded = $null -ne $externalTesterEvidence
     dashboardUiLoaded = $null -ne $dashboardUi
     ownerInputsValidationLoaded = $null -ne $ownerInputsValidation
@@ -619,6 +645,17 @@ $checks = [ordered]@{
         "flowchain_public_rpc_command_plan_cutover_rehearsal",
         "flowchain_public_rpc_command_plan_truth_table",
         "flowchain_public_rpc_command_plan_no_secret_scan"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    publicTesterGatewayMetricsPresent = @(
+        "flowchain_public_tester_gateway_e2e_ready",
+        "flowchain_public_tester_gateway_accounts_total",
+        "flowchain_public_tester_gateway_failed_checks",
+        "flowchain_public_tester_gateway_routes_total",
+        "flowchain_public_tester_gateway_transfer_applied",
+        "flowchain_public_tester_gateway_cap_rejected",
+        "flowchain_public_tester_gateway_routes_covered",
+        "flowchain_public_tester_gateway_no_secrets",
+        "flowchain_public_tester_gateway_no_broadcasts"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     transactionIntakeMetricsPresent = @(
         "flowchain_mempool_depth",

@@ -57,6 +57,7 @@ $paths = [ordered]@{
     bridgeRelayerGuardrail = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRuntimeCredit = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
     externalTester = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
+    publicTesterGateway = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     externalTesterEvidence = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
     dashboardUi = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
     ownerInputsValidation = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
@@ -518,6 +519,36 @@ $externalTesterPublicGatewayReady = (Get-OpsProp -Object $externalTesterChecks -
 $externalTesterPublicGatewayFresh = (Get-OpsProp -Object $externalTesterChecks -Name "publicTesterGatewayFresh" -Default $false) -eq $true
 $externalTesterFaucetRouteValidated = (Get-OpsProp -Object $externalTesterChecks -Name "publicTesterGatewayFaucetRouteValidated" -Default $false) -eq $true
 $externalTesterLiveInfraReady = (Get-OpsProp -Object $externalTesterChecks -Name "liveInfraReady" -Default $false) -eq $true
+$publicTesterGatewayStatus = Get-OpsStatus -Report $reports.publicTesterGateway
+$publicTesterGatewayChecks = Get-OpsProp -Object $reports.publicTesterGateway -Name "checks"
+$publicTesterGatewayFailedChecks = @((Get-OpsProp -Object $reports.publicTesterGateway -Name "failedChecks" -Default @()))
+$publicTesterGatewaySecretFindings = @((Get-OpsProp -Object $reports.publicTesterGateway -Name "secretMarkerFindings" -Default @()))
+$publicTesterGatewayRoutes = @((Get-OpsProp -Object $reports.publicTesterGateway -Name "routes" -Default @()))
+$publicTesterGatewayAccountCount = ConvertTo-OpsInteger -Value (Get-OpsProp -Object $reports.publicTesterGateway -Name "accountCount" -Default 0)
+$publicTesterGatewayTransferApplied = (Get-OpsProp -Object $publicTesterGatewayChecks -Name "transferAppliedLocalRuntime" -Default $false) -eq $true
+$publicTesterGatewayCapRejected = (Get-OpsProp -Object $publicTesterGatewayChecks -Name "capRejected" -Default $false) -eq $true
+$publicTesterGatewayRoutesCovered = (Get-OpsProp -Object $publicTesterGatewayChecks -Name "routesCoverRequired" -Default $false) -eq $true
+$publicTesterGatewayNoSecrets = ((Get-OpsProp -Object $reports.publicTesterGateway -Name "noSecrets" -Default $false) -eq $true) `
+    -and $publicTesterGatewaySecretFindings.Count -eq 0 `
+    -and ((Get-OpsProp -Object $publicTesterGatewayChecks -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicTesterGatewayChecks -Name "secretMarkerFindingsEmpty" -Default $false) -eq $true)
+$publicTesterGatewayNoBroadcasts = ((Get-OpsProp -Object $reports.publicTesterGateway -Name "broadcasts" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.publicTesterGateway -Name "noLiveBroadcast" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicTesterGatewayChecks -Name "broadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicTesterGatewayChecks -Name "noLiveBroadcast" -Default $false) -eq $true)
+$publicTesterGatewayReady = $publicTesterGatewayStatus -eq "passed" `
+    -and $publicTesterGatewayFailedChecks.Count -eq 0 `
+    -and $publicTesterGatewayAccountCount -ge 2 `
+    -and ((Get-OpsProp -Object $publicTesterGatewayChecks -Name "walletCreateSchemaOk" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicTesterGatewayChecks -Name "testerFaucetSchemaOk" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicTesterGatewayChecks -Name "walletSendSchemaOk" -Default $false) -eq $true) `
+    -and $publicTesterGatewayTransferApplied `
+    -and $publicTesterGatewayCapRejected `
+    -and ((Get-OpsProp -Object $publicTesterGatewayChecks -Name "capRejectNoSecrets" -Default $false) -eq $true) `
+    -and $publicTesterGatewayRoutesCovered `
+    -and $publicTesterGatewayNoSecrets `
+    -and $publicTesterGatewayNoBroadcasts `
+    -and ((Get-OpsProp -Object $reports.publicTesterGateway -Name "envValuesPrinted" -Default $true) -eq $false)
 $externalTesterEvidenceStatus = Get-OpsStatus -Report $reports.externalTesterEvidence
 $externalTesterEvidenceChecks = Get-OpsProp -Object $reports.externalTesterEvidence -Name "checks"
 $externalTesterEvidenceFailedChecks = @((Get-OpsProp -Object $reports.externalTesterEvidence -Name "failedChecks" -Default @()))
@@ -648,6 +679,9 @@ if (-not $bridgeRuntimeCreditReady) {
 }
 if ($externalTesterStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "external-tester-not-shareable" -Message "External tester launch is not shareable; local rehearsal, public tester gateway, faucet route, external sharing, and live infra readiness must all pass first." -Commands @("npm run flowchain:wallet:live-tester:e2e", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked")
+}
+if (-not $publicTesterGatewayReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "public-tester-gateway-e2e-failed" -Message "Public tester gateway E2E proof is missing or unsafe; wallet create, faucet, capped send, cap rejection, routes, no-secret, and no-broadcast checks must pass." -Commands @("npm run flowchain:tester:gateway:e2e", "npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked")
 }
 if ($externalTesterEvidenceSecretFindings.Count -gt 0 -or $externalTesterEvidenceCredentialUrls.Count -gt 0 -or $externalTesterEvidenceEnvAssignments.Count -gt 0) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "external-tester-evidence-unsafe" -Message "External tester returned evidence contains a secret marker, credential URL, or env assignment." -Commands @("npm run flowchain:tester:evidence:validate", "npm run flowchain:no-secret:scan", "npm run flowchain:emergency:export-evidence")
@@ -860,6 +894,16 @@ $report = [ordered]@{
         externalTesterLiveInfraReady = $externalTesterLiveInfraReady
         externalTesterMissingEnvCount = $externalTesterMissingEnvNames.Count
         externalTesterTesterCount = $externalTesterTesterCount
+        publicTesterGateway = $publicTesterGatewayStatus
+        publicTesterGatewayReady = $publicTesterGatewayReady
+        publicTesterGatewayAccountCount = $publicTesterGatewayAccountCount
+        publicTesterGatewayFailedChecks = $publicTesterGatewayFailedChecks.Count
+        publicTesterGatewayRouteCount = $publicTesterGatewayRoutes.Count
+        publicTesterGatewayTransferApplied = $publicTesterGatewayTransferApplied
+        publicTesterGatewayCapRejected = $publicTesterGatewayCapRejected
+        publicTesterGatewayRoutesCovered = $publicTesterGatewayRoutesCovered
+        publicTesterGatewayNoSecrets = $publicTesterGatewayNoSecrets
+        publicTesterGatewayNoBroadcasts = $publicTesterGatewayNoBroadcasts
         externalTesterEvidence = $externalTesterEvidenceStatus
         externalTesterEvidenceFailedChecks = $externalTesterEvidenceFailedChecks.Count
         externalTesterEvidenceMissingFiles = $externalTesterEvidenceMissingFiles.Count

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T10:06:13.6885900Z",
+    "generatedAt":  "2026-05-20T10:59:03.8180779Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -9,6 +9,7 @@
                           "publicRpcDeploymentBundleStatus":  "passed",
                           "publicRpcDeploymentAutomationStatus":  "passed",
                           "externalTesterStatus":  "blocked",
+                          "publicTesterGatewayStatus":  "passed",
                           "externalTesterEvidenceStatus":  "passed",
                           "dashboardUiStatus":  "passed",
                           "ownerInputsValidationStatus":  "passed",
@@ -22,13 +23,13 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  100743
+                        "value":  101241
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  100743
+                        "value":  101241
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
@@ -40,7 +41,7 @@
                         "name":  "flowchain_monitor_samples_total",
                         "type":  "gauge",
                         "help":  "Service monitor samples recorded in the current ops snapshot.",
-                        "value":  3
+                        "value":  2
                     },
                     {
                         "name":  "flowchain_height_advanced",
@@ -76,7 +77,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  4863.567
+                        "value":  8025.036
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -106,13 +107,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  29
+                        "value":  30
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  22
+                        "value":  23
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -529,6 +530,60 @@
                         "value":  4
                     },
                     {
+                        "name":  "flowchain_public_tester_gateway_e2e_ready",
+                        "type":  "gauge",
+                        "help":  "One when public tester gateway E2E wallet create, faucet, send, cap, route, no-secret, and no-broadcast proof is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_tester_gateway_accounts_total",
+                        "type":  "gauge",
+                        "help":  "Tester accounts created by the public tester gateway E2E proof.",
+                        "value":  2
+                    },
+                    {
+                        "name":  "flowchain_public_tester_gateway_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in the public tester gateway E2E proof.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_public_tester_gateway_routes_total",
+                        "type":  "gauge",
+                        "help":  "Routes covered by the public tester gateway E2E proof.",
+                        "value":  5
+                    },
+                    {
+                        "name":  "flowchain_public_tester_gateway_transfer_applied",
+                        "type":  "gauge",
+                        "help":  "One when the gateway send proof applied to the local runtime.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_tester_gateway_cap_rejected",
+                        "type":  "gauge",
+                        "help":  "One when the gateway rejects an over-cap tester send.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_tester_gateway_routes_covered",
+                        "type":  "gauge",
+                        "help":  "One when the gateway E2E report covers all required tester routes.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_tester_gateway_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when the public tester gateway E2E report and checks contain no secrets.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_tester_gateway_no_broadcasts",
+                        "type":  "gauge",
+                        "help":  "One when the public tester gateway E2E proof made no live broadcasts.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_external_tester_evidence_ready",
                         "type":  "gauge",
                         "help":  "One when external tester returned evidence validation is passed.",
@@ -700,13 +755,13 @@
                         "name":  "flowchain_truth_gates_total",
                         "type":  "gauge",
                         "help":  "Total production truth table gates.",
-                        "value":  54
+                        "value":  55
                     },
                     {
                         "name":  "flowchain_truth_gates_passed",
                         "type":  "gauge",
                         "help":  "Passed production truth table gates.",
-                        "value":  38
+                        "value":  39
                     },
                     {
                         "name":  "flowchain_truth_gates_owner_blocked",
@@ -733,7 +788,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  119,
+    "metricCount":  128,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

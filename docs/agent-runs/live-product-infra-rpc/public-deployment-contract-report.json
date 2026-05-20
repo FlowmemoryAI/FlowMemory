@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-20T10:49:54.3345129Z",
+    "generatedAt":  "2026-05-20T11:00:17.9214048Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -124,7 +124,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=101151, finalizedHeight=101151",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=101253, finalizedHeight=101253",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -136,7 +136,7 @@
                       "id":  "pre-share-monitoring",
                       "requirement":  "The deployment has recent service-monitor evidence that block height advances over multiple samples.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=3, heightAdvanced=True",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True",
                       "commands":  [
                                        "npm run flowchain:service:monitor"
                                    ],
@@ -206,7 +206,7 @@
                       "id":  "ops-alert-rules",
                       "requirement":  "Owner deployment has a no-secret alert rule manifest that maps every current ops finding to operator commands without committing delivery credentials.",
                       "status":  "passed",
-                      "evidence":  "alertRules=passed, criticalRules=22, blockedRules=7, unmappedCurrentFindingCodes=0",
+                      "evidence":  "alertRules=passed, criticalRules=23, blockedRules=7, unmappedCurrentFindingCodes=0",
                       "commands":  [
                                        "npm run flowchain:ops:alerts -- -AllowBlocked"
                                    ],

@@ -602,6 +602,8 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Windows service plan");
     expect(html).toContain("Systemd service plan");
     expect(html).toContain("Public RPC automation");
+    expect(html).toContain("Tester gateway E2E");
+    expect(html).toContain("Tester gateway proof");
     expect(html).toContain("Ops install proof");
     expect(html).toContain("public-rpc-not-ready");
     expect(html).not.toContain("local-tester-write-token");

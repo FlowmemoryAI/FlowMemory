@@ -149,6 +149,13 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
   const publicRpcDeployAutomationAction = text(ops?.publicRpcDeploymentAutomationAction ?? metrics.publicRpcDeploymentAutomationAction, "not recorded");
   const publicRpcSecurityHeaders = isReadyFlag(ops?.publicRpcSecurityHeaders ?? metrics.publicRpcSecurityHeaders);
   const publicRpcRenderedSecurityHeaders = isReadyFlag(ops?.publicRpcRenderedSecurityHeaders ?? metrics.publicRpcRenderedSecurityHeaders);
+  const publicTesterGatewayStatus = text(ops?.publicTesterGatewayStatus ?? metrics.publicTesterGatewayStatus, "not recorded");
+  const publicTesterGatewayAccountCount = text(ops?.publicTesterGatewayAccountCount ?? metrics.publicTesterGatewayAccountCount, "0");
+  const publicTesterGatewayFailedChecks = text(ops?.publicTesterGatewayFailedChecks ?? metrics.publicTesterGatewayFailedChecks, "0");
+  const publicTesterGatewayTransferApplied = isReadyFlag(ops?.publicTesterGatewayTransferApplied ?? metrics.publicTesterGatewayTransferApplied);
+  const publicTesterGatewayCapRejected = isReadyFlag(ops?.publicTesterGatewayCapRejected ?? metrics.publicTesterGatewayCapRejected);
+  const publicTesterGatewayNoSecrets = isReadyFlag(ops?.publicTesterGatewayNoSecrets ?? metrics.publicTesterGatewayNoSecrets);
+  const publicTesterGatewayNoBroadcasts = isReadyFlag(ops?.publicTesterGatewayNoBroadcasts ?? metrics.publicTesterGatewayNoBroadcasts);
   const alertInstallValidationStatus = text(ops?.alertInstallValidationStatus ?? metrics.alertInstallValidationStatus, "not recorded");
   const opsMetricCount = text(ops?.opsMetricCount ?? metrics.opsMetricCount, "0");
   const opsRequiredMetricsPresent = isReadyFlag(ops?.opsRequiredMetricsPresent ?? metrics.opsRequiredMetricsPresent);
@@ -217,6 +224,11 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
           <small>mode {publicRpcDeployAutomationAction}</small>
         </div>
         <div>
+          <span>Tester gateway E2E</span>
+          <strong>{publicTesterGatewayStatus}</strong>
+          <small>accounts {publicTesterGatewayAccountCount}; failed {publicTesterGatewayFailedChecks}</small>
+        </div>
+        <div>
           <span>Delivery boundary</span>
           <strong>{networkNotifications}</strong>
           <small>network sends; stores secrets {storesSecrets}</small>
@@ -283,6 +295,11 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
               <span>RPC headers</span>
               <strong>{String(publicRpcSecurityHeaders && publicRpcRenderedSecurityHeaders)}</strong>
               <small>bundle {String(publicRpcSecurityHeaders)} / rendered {String(publicRpcRenderedSecurityHeaders)}</small>
+            </div>
+            <div>
+              <span>Tester gateway proof</span>
+              <strong>{String(publicTesterGatewayTransferApplied && publicTesterGatewayCapRejected)}</strong>
+              <small>no secrets {String(publicTesterGatewayNoSecrets)} / no broadcasts {String(publicTesterGatewayNoBroadcasts)}</small>
             </div>
           </section>
 
