@@ -18,6 +18,8 @@ $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Reso
 $statusBeforePath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-status-before.json"
 $statusAfterCrashPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-status-after-crash.json"
 $statusAfterPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-status-after.json"
+$statusAfterNodeCrashPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-node-status-after-crash.json"
+$statusAfterNodeRecoveryPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-node-status-after-recovery.json"
 $statusBeforeRelayerCrashPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-relayer-status-before-crash.json"
 $statusAfterRelayerCrashPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-relayer-status-after-crash.json"
 $statusDuringRelayerRecoveryPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-relayer-status-during-recovery.json"
@@ -25,6 +27,9 @@ $statusAfterRelayerRecoveryPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Pat
 $supervisorReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-supervisor-report.json"
 $restartReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-restart-report.json"
 $stopReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-stop-report.json"
+$nodeSupervisorReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-node-supervisor-report.json"
+$nodeRestartReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-node-restart-report.json"
+$nodeStopReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-node-stop-report.json"
 $relayerStartRestartReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-relayer-start-restart-report.json"
 $relayerStartStopReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-relayer-start-stop-report.json"
 $relayerSupervisorReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-relayer-supervisor-report.json"
@@ -242,6 +247,74 @@ try {
     $supervisorReport = Read-FlowChainJsonIfExists -Path $supervisorReportPath
     $restartAttempts = [int](Get-ValidationProp -Object $supervisorReport -Name "restartAttempts" -Default 0)
 
+    $beforeNodeCrashNode = Get-ValidationProp -Object $afterReport -Name "node"
+    $beforeNodeCrashPid = [int](Get-ValidationProp -Object $beforeNodeCrashNode -Name "pid" -Default 0)
+    if ($beforeNodeCrashPid -le 0) {
+        throw "Validation could not read isolated node PID."
+    }
+
+    Write-Host "Supervisor validation: killing isolated node PID $beforeNodeCrashPid."
+    Stop-Process -Id $beforeNodeCrashPid -Force -ErrorAction Stop
+    Start-Sleep -Seconds 2
+    Write-Host "Supervisor validation: confirming node crash state."
+    $afterNodeCrash = Invoke-ValidationStatus -Path $statusAfterNodeCrashPath
+    $afterNodeCrashReport = $afterNodeCrash.report
+    $afterNodeCrashStatus = [string](Get-ValidationProp -Object $afterNodeCrashReport -Name "status" -Default "missing")
+    $afterNodeCrashNode = Get-ValidationProp -Object $afterNodeCrashReport -Name "node"
+    $afterNodeCrashNodeStatus = [string](Get-ValidationProp -Object $afterNodeCrashNode -Name "status" -Default "missing")
+    $afterNodeCrashDetected = (@("blocked", "failed") -contains $afterNodeCrashStatus) -and $afterNodeCrashNodeStatus -ne "running"
+
+    Write-Host "Supervisor validation: running supervisor once for node recovery."
+    [void]$steps.Add([ordered]@{
+        name = "supervisor-once-node-recovery"
+        result = Invoke-ValidationChild -ArgumentList @(
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            (Join-Path $PSScriptRoot "flowchain-service-supervisor.ps1"),
+            "-StatePath",
+            $StatePath,
+            "-NodeDir",
+            $NodeDir,
+            "-ServicesDir",
+            $ServicesDir,
+            "-ControlPlaneHost",
+            $ControlPlaneHost,
+            "-ControlPlanePort",
+            "$ControlPlanePort",
+            "-Once",
+            "-IntervalSeconds",
+            "1",
+            "-MaxRestartAttempts",
+            "1",
+            "-ReportPath",
+            $nodeSupervisorReportPath,
+            "-StatusReportPath",
+            $statusAfterNodeCrashPath,
+            "-RestartReportPath",
+            $nodeRestartReportPath,
+            "-StopReportPath",
+            $nodeStopReportPath
+        )
+    })
+
+    Write-Host "Supervisor validation: verifying node recovered."
+    $afterNodeRecovery = Invoke-ValidationStatus -Path $statusAfterNodeRecoveryPath
+    $afterNodeRecoveryReport = $afterNodeRecovery.report
+    $afterNodeRecoveryStatus = [string](Get-ValidationProp -Object $afterNodeRecoveryReport -Name "status" -Default "missing")
+    $afterNodeRecoveryNode = Get-ValidationProp -Object $afterNodeRecoveryReport -Name "node"
+    $afterNodeRecoveryControlPlane = Get-ValidationProp -Object $afterNodeRecoveryReport -Name "controlPlane"
+    $afterNodeRecoveryChain = Get-ValidationProp -Object $afterNodeRecoveryReport -Name "chain"
+    $afterNodeRecoveryProfile = Get-ValidationProp -Object $afterNodeRecoveryReport -Name "serviceProfile"
+    $afterNodeRecoveryNodeRunning = [string](Get-ValidationProp -Object $afterNodeRecoveryNode -Name "status" -Default "") -eq "running"
+    $afterNodeRecoveryControlPlaneRunning = [string](Get-ValidationProp -Object $afterNodeRecoveryControlPlane -Name "status" -Default "") -eq "running"
+    $afterNodeRecoveryHeight = [string](Get-ValidationProp -Object $afterNodeRecoveryChain -Name "latestHeight" -Default "")
+    $afterNodeRecoveryLiveProfile = [bool](Get-ValidationProp -Object $afterNodeRecoveryProfile -Name "liveProfile" -Default $false)
+    $afterNodeRecoveryMaxBlocks = [int](Get-ValidationProp -Object $afterNodeRecoveryProfile -Name "maxBlocks" -Default -1)
+    $nodeSupervisorReport = Read-FlowChainJsonIfExists -Path $nodeSupervisorReportPath
+    $nodeRestartAttempts = [int](Get-ValidationProp -Object $nodeSupervisorReport -Name "restartAttempts" -Default 0)
+
     Write-Host "Supervisor validation: restarting isolated service with bridge relayer loop enabled."
     [void]$steps.Add([ordered]@{
         name = "restart-with-relayer-loop"
@@ -424,6 +497,18 @@ try {
         afterRecoveryHeightNumeric = $afterHeight -match '^\d+$'
         afterRecoveryLiveProfile = $afterLiveProfile
         afterRecoveryMaxBlocksUnbounded = $afterMaxBlocks -eq 0
+        beforeNodeCrashPidRecorded = $beforeNodeCrashPid -gt 0
+        nodeCrashStatusCommandPassed = [int]$afterNodeCrash.exitCode -eq 0
+        nodeCrashDetected = $afterNodeCrashDetected
+        supervisorNodeRecoveryCommandPassed = $stepByName.ContainsKey("supervisor-once-node-recovery") -and [int]$stepByName["supervisor-once-node-recovery"].exitCode -eq 0
+        nodeRestartAttemptsExactlyOne = $nodeRestartAttempts -eq 1
+        afterNodeRecoveryStatusCommandPassed = [int]$afterNodeRecovery.exitCode -eq 0
+        afterNodeRecoveryStatusPassed = $afterNodeRecoveryStatus -eq "passed"
+        afterNodeRecoveryNodeRunning = $afterNodeRecoveryNodeRunning
+        afterNodeRecoveryControlPlaneRunning = $afterNodeRecoveryControlPlaneRunning
+        afterNodeRecoveryHeightNumeric = $afterNodeRecoveryHeight -match '^\d+$'
+        afterNodeRecoveryLiveProfile = $afterNodeRecoveryLiveProfile
+        afterNodeRecoveryMaxBlocksUnbounded = $afterNodeRecoveryMaxBlocks -eq 0
         restartWithRelayerLoopCommandPassed = $stepByName.ContainsKey("restart-with-relayer-loop") -and [int]$stepByName["restart-with-relayer-loop"].exitCode -eq 0
         beforeRelayerCrashStatusCommandPassed = [int]$beforeRelayerCrash.exitCode -eq 0
         beforeRelayerCrashStatusPassed = $beforeRelayerCrashStatus -eq "passed"
@@ -483,6 +568,26 @@ try {
             maxBlocks = $afterMaxBlocks
         }
         restartAttempts = $restartAttempts
+        nodeRecovery = [ordered]@{
+            beforeCrash = [ordered]@{
+                status = $afterStatus
+                pid = $beforeNodeCrashPid
+            }
+            afterCrash = [ordered]@{
+                status = $afterNodeCrashStatus
+                nodeStatus = $afterNodeCrashNodeStatus
+                detected = $afterNodeCrashDetected
+            }
+            afterRecovery = [ordered]@{
+                status = $afterNodeRecoveryStatus
+                nodeRunning = $afterNodeRecoveryNodeRunning
+                controlPlaneRunning = $afterNodeRecoveryControlPlaneRunning
+                latestHeight = $afterNodeRecoveryHeight
+                liveProfile = $afterNodeRecoveryLiveProfile
+                maxBlocks = $afterNodeRecoveryMaxBlocks
+            }
+            restartAttempts = $nodeRestartAttempts
+        }
         relayerLoopRecovery = [ordered]@{
             beforeCrash = [ordered]@{
                 status = $beforeRelayerCrashStatus
@@ -522,6 +627,11 @@ try {
             restart = $restartReportPath
             stop = $stopReportPath
             after = $statusAfterPath
+            nodeAfterCrash = $statusAfterNodeCrashPath
+            nodeAfterRecovery = $statusAfterNodeRecoveryPath
+            nodeSupervisor = $nodeSupervisorReportPath
+            nodeRestart = $nodeRestartReportPath
+            nodeStop = $nodeStopReportPath
             relayerBeforeCrash = $statusBeforeRelayerCrashPath
             relayerAfterCrash = $statusAfterRelayerCrashPath
             relayerDuringRecovery = $statusDuringRelayerRecoveryPath

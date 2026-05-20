@@ -129,7 +129,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "service-supervisor-validation"
-        requirement = "Service supervisor validation proves a crashed local control-plane can be recovered under the live profile without deleting chain state."
+        requirement = "Service supervisor validation proves crashed local node, control-plane, and bridge relayer loop services can be recovered under the live profile without deleting chain state."
         path = "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
         command = "npm run flowchain:service:supervisor:validate"
         productionGate = $true
@@ -151,6 +151,18 @@ $definitions = @(
             "afterRecoveryHeightNumeric",
             "afterRecoveryLiveProfile",
             "afterRecoveryMaxBlocksUnbounded",
+            "beforeNodeCrashPidRecorded",
+            "nodeCrashStatusCommandPassed",
+            "nodeCrashDetected",
+            "supervisorNodeRecoveryCommandPassed",
+            "nodeRestartAttemptsExactlyOne",
+            "afterNodeRecoveryStatusCommandPassed",
+            "afterNodeRecoveryStatusPassed",
+            "afterNodeRecoveryNodeRunning",
+            "afterNodeRecoveryControlPlaneRunning",
+            "afterNodeRecoveryHeightNumeric",
+            "afterNodeRecoveryLiveProfile",
+            "afterNodeRecoveryMaxBlocksUnbounded",
             "childLogPathsInsideRepo",
             "secretMarkerFindingsEmpty",
             "envValuesPrintedFalse",
@@ -159,6 +171,7 @@ $definitions = @(
         )
         requiredMinimums = [ordered]@{
             restartAttempts = 1
+            "nodeRecovery.restartAttempts" = 1
         }
         requiredEmptyArrays = @(
             "failedChecks",
@@ -172,6 +185,12 @@ $definitions = @(
             "afterRecovery.controlPlaneRunning" = $true
             "afterRecovery.liveProfile" = $true
             "afterRecovery.maxBlocks" = 0
+            "nodeRecovery.afterCrash.detected" = $true
+            "nodeRecovery.afterRecovery.status" = "passed"
+            "nodeRecovery.afterRecovery.nodeRunning" = $true
+            "nodeRecovery.afterRecovery.controlPlaneRunning" = $true
+            "nodeRecovery.afterRecovery.liveProfile" = $true
+            "nodeRecovery.afterRecovery.maxBlocks" = 0
             "envValuesPrinted" = $false
             "noSecrets" = $true
             "broadcasts" = $false

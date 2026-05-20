@@ -619,10 +619,14 @@ $serviceSupervisorValidationStatus = Get-ReportStatus -Report $serviceSupervisor
 $serviceSupervisorBefore = Get-AuditProp -Object $serviceSupervisorValidation -Name "before"
 $serviceSupervisorAfterCrash = Get-AuditProp -Object $serviceSupervisorValidation -Name "afterCrash"
 $serviceSupervisorAfterRecovery = Get-AuditProp -Object $serviceSupervisorValidation -Name "afterRecovery"
+$serviceSupervisorNodeRecovery = Get-AuditProp -Object $serviceSupervisorValidation -Name "nodeRecovery"
+$serviceSupervisorNodeAfterCrash = Get-AuditProp -Object $serviceSupervisorNodeRecovery -Name "afterCrash"
+$serviceSupervisorNodeAfterRecovery = Get-AuditProp -Object $serviceSupervisorNodeRecovery -Name "afterRecovery"
 $serviceSupervisorRelayerRecovery = Get-AuditProp -Object $serviceSupervisorValidation -Name "relayerLoopRecovery"
 $serviceSupervisorRelayerAfterCrash = Get-AuditProp -Object $serviceSupervisorRelayerRecovery -Name "afterCrash"
 $serviceSupervisorRelayerAfterRecovery = Get-AuditProp -Object $serviceSupervisorRelayerRecovery -Name "afterRecovery"
 $serviceSupervisorRestartAttempts = [int](Get-AuditProp -Object $serviceSupervisorValidation -Name "restartAttempts" -Default 0)
+$serviceSupervisorNodeRestartAttempts = [int](Get-AuditProp -Object $serviceSupervisorNodeRecovery -Name "restartAttempts" -Default 0)
 $serviceSupervisorRelayerRestartAttempts = [int](Get-AuditProp -Object $serviceSupervisorRelayerRecovery -Name "restartAttempts" -Default 0)
 $serviceSupervisorChecks = Get-AuditProp -Object $serviceSupervisorValidation -Name "checks"
 $serviceSupervisorFailedChecks = @((Get-AuditProp -Object $serviceSupervisorValidation -Name "failedChecks" -Default @()))
@@ -644,6 +648,18 @@ $serviceSupervisorRequiredChecks = @(
     "afterRecoveryHeightNumeric",
     "afterRecoveryLiveProfile",
     "afterRecoveryMaxBlocksUnbounded",
+    "beforeNodeCrashPidRecorded",
+    "nodeCrashStatusCommandPassed",
+    "nodeCrashDetected",
+    "supervisorNodeRecoveryCommandPassed",
+    "nodeRestartAttemptsExactlyOne",
+    "afterNodeRecoveryStatusCommandPassed",
+    "afterNodeRecoveryStatusPassed",
+    "afterNodeRecoveryNodeRunning",
+    "afterNodeRecoveryControlPlaneRunning",
+    "afterNodeRecoveryHeightNumeric",
+    "afterNodeRecoveryLiveProfile",
+    "afterNodeRecoveryMaxBlocksUnbounded",
     "restartWithRelayerLoopCommandPassed",
     "beforeRelayerCrashStatusCommandPassed",
     "beforeRelayerCrashStatusPassed",
@@ -2531,9 +2547,9 @@ Add-AuditItem -Items $items -Id "sustained-block-production" `
     -Commands @("npm run flowchain:service:monitor -- -DurationSeconds $MonitorDurationSeconds -PollSeconds $MonitorPollSeconds -MaxStateAgeSeconds $MonitorMaxStateAgeSeconds")
 
 Add-AuditItem -Items $items -Id "service-supervisor-autorecovery" `
-    -Requirement "Live service supervisor can recover crashed local control-plane and bridge-relayer-loop processes under the live profile without deleting chain state." `
+    -Requirement "Live service supervisor can recover crashed local node, control-plane, and bridge-relayer-loop processes under the live profile without deleting chain state." `
     -Status $(if ($serviceSupervisorValidationPassed) { "passed" } else { "failed" }) `
-    -Evidence "supervisorValidation=$serviceSupervisorValidationStatus, restartAttempts=$serviceSupervisorRestartAttempts, relayerRestartAttempts=$serviceSupervisorRelayerRestartAttempts, failedChecks=$($serviceSupervisorFailedChecks.Count), missingChecks=$($serviceSupervisorMissingChecks.Count), secretFindings=$($serviceSupervisorSecretFindings.Count), before=$(Get-AuditProp -Object $serviceSupervisorBefore -Name "status" -Default "missing"), afterCrash=$(Get-AuditProp -Object $serviceSupervisorAfterCrash -Name "status" -Default "missing"), afterRecovery=$(Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "status" -Default "missing"), relayerAfterCrash=$(Get-AuditProp -Object $serviceSupervisorRelayerAfterCrash -Name "loopStatus" -Default "missing"), relayerAfterRecovery=$(Get-AuditProp -Object $serviceSupervisorRelayerAfterRecovery -Name "loopStatus" -Default "missing"), report=$($paths.serviceSupervisorValidation)" `
+    -Evidence "supervisorValidation=$serviceSupervisorValidationStatus, restartAttempts=$serviceSupervisorRestartAttempts, nodeRestartAttempts=$serviceSupervisorNodeRestartAttempts, relayerRestartAttempts=$serviceSupervisorRelayerRestartAttempts, failedChecks=$($serviceSupervisorFailedChecks.Count), missingChecks=$($serviceSupervisorMissingChecks.Count), secretFindings=$($serviceSupervisorSecretFindings.Count), before=$(Get-AuditProp -Object $serviceSupervisorBefore -Name "status" -Default "missing"), afterCrash=$(Get-AuditProp -Object $serviceSupervisorAfterCrash -Name "status" -Default "missing"), afterRecovery=$(Get-AuditProp -Object $serviceSupervisorAfterRecovery -Name "status" -Default "missing"), nodeAfterCrash=$(Get-AuditProp -Object $serviceSupervisorNodeAfterCrash -Name "nodeStatus" -Default "missing"), nodeAfterRecovery=$(Get-AuditProp -Object $serviceSupervisorNodeAfterRecovery -Name "nodeRunning" -Default $false), relayerAfterCrash=$(Get-AuditProp -Object $serviceSupervisorRelayerAfterCrash -Name "loopStatus" -Default "missing"), relayerAfterRecovery=$(Get-AuditProp -Object $serviceSupervisorRelayerAfterRecovery -Name "loopStatus" -Default "missing"), report=$($paths.serviceSupervisorValidation)" `
     -Commands @("npm run flowchain:service:supervisor:validate")
 
 Add-AuditItem -Items $items -Id "service-install-validation" `
