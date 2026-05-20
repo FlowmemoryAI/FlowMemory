@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T21:31:54.8499920Z",
+    "generatedAt":  "2026-05-20T21:51:27.8298196Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  36,
-    "criticalRuleCount":  29,
+    "ruleCount":  37,
+    "criticalRuleCount":  30,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -46,6 +46,7 @@
                                 "bridge-relayer-guardrail-failed",
                                 "bridge-direct-observe-cursor-unsafe",
                                 "bridge-runtime-credit-validation-failed",
+                                "bridge-reconciliation-failed",
                                 "real-value-pilot-aggregate-failed",
                                 "bridge-relayer-loop-unhealthy",
                                 "supervisor-relayer-recovery-failed",
@@ -106,6 +107,7 @@
                    "bridgeDeployControlRuleCoversDeploymentControls":  true,
                    "bridgeRelayerCheckContractRuleCoversFailedChecks":  true,
                    "bridgeRelayerLoopRuleCoversValidationTelemetry":  true,
+                   "bridgeReconciliationRuleCoversCursorAndReplay":  true,
                    "supervisorNodeRecoveryRuleCoversLiveProfile":  true,
                    "serviceInstallValidationRuleCoversAutorecoveryTelemetry":  true,
                    "externalTesterLaunchRuleCoversGatewayAndFaucet":  true,
@@ -329,6 +331,21 @@
                       "commands":  [
                                        "npm run flowchain:bridge:runtime-credit:validate",
                                        "npm run flowchain:service:status",
+                                       "npm run flowchain:bridge:emergency-stop"
+                                   ]
+                  },
+                  {
+                      "id":  "bridge-reconciliation-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "bridge-reconciliation-failed"
+                                       ],
+                      "signal":  "Bridge reconciliation report is missing or failing.",
+                      "threshold":  "reconciliation status is not passed, relayer counts are negative, pending credits are negative, staged cursor safety is missing, runtime credit or replay rejection proof is missing, release evidence validation is missing, broadcasts, prints env values, or reports secrets",
+                      "commands":  [
+                                       "npm run flowchain:bridge:reconciliation",
+                                       "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                                       "npm run flowchain:bridge:runtime-credit:validate",
                                        "npm run flowchain:bridge:emergency-stop"
                                    ]
                   },

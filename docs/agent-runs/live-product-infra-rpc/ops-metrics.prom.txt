@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 106621
+flowchain_latest_height 106769
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 106621
+flowchain_finalized_height 106769
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 8
+flowchain_state_file_age_seconds 5
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -27,7 +27,7 @@ flowchain_transaction_intake_accepted_rows_total 187
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 1396.494
+flowchain_transaction_intake_file_age_seconds 2570.592
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -42,10 +42,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 36
+flowchain_ops_alert_rules_total 37
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 29
+flowchain_ops_alert_rules_critical 30
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -313,6 +313,54 @@ flowchain_bridge_runtime_credit_missing_checks 0
 # HELP flowchain_bridge_runtime_credit_false_checks Required runtime proof checks that are false in bridge runtime credit validation.
 # TYPE flowchain_bridge_runtime_credit_false_checks gauge
 flowchain_bridge_runtime_credit_false_checks 0
+# HELP flowchain_bridge_reconciliation_ready One when bridge reconciliation report is passed and safe.
+# TYPE flowchain_bridge_reconciliation_ready gauge
+flowchain_bridge_reconciliation_ready 1
+# HELP flowchain_bridge_reconciliation_rows_total Bridge reconciliation lane count.
+# TYPE flowchain_bridge_reconciliation_rows_total gauge
+flowchain_bridge_reconciliation_rows_total 8
+# HELP flowchain_bridge_reconciliation_failed_checks Failed checks in bridge reconciliation.
+# TYPE flowchain_bridge_reconciliation_failed_checks gauge
+flowchain_bridge_reconciliation_failed_checks 0
+# HELP flowchain_bridge_reconciliation_observed_credits Live bridge credits observed by the relayer during reconciliation.
+# TYPE flowchain_bridge_reconciliation_observed_credits gauge
+flowchain_bridge_reconciliation_observed_credits 0
+# HELP flowchain_bridge_reconciliation_new_credits Live bridge credits classified as new during reconciliation.
+# TYPE flowchain_bridge_reconciliation_new_credits gauge
+flowchain_bridge_reconciliation_new_credits 0
+# HELP flowchain_bridge_reconciliation_queued_transactions L1 bridge credit transactions queued during reconciliation.
+# TYPE flowchain_bridge_reconciliation_queued_transactions gauge
+flowchain_bridge_reconciliation_queued_transactions 0
+# HELP flowchain_bridge_reconciliation_applied_credits L1 bridge credits applied during reconciliation.
+# TYPE flowchain_bridge_reconciliation_applied_credits gauge
+flowchain_bridge_reconciliation_applied_credits 0
+# HELP flowchain_bridge_reconciliation_pending_credits Pending live bridge credits from reconciliation.
+# TYPE flowchain_bridge_reconciliation_pending_credits gauge
+flowchain_bridge_reconciliation_pending_credits 0
+# HELP flowchain_bridge_reconciliation_cursor_staged One when bridge reconciliation cursor mode is staged.
+# TYPE flowchain_bridge_reconciliation_cursor_staged gauge
+flowchain_bridge_reconciliation_cursor_staged 1
+# HELP flowchain_bridge_reconciliation_cursor_committed One when bridge reconciliation reports a final cursor commit.
+# TYPE flowchain_bridge_reconciliation_cursor_committed gauge
+flowchain_bridge_reconciliation_cursor_committed 0
+# HELP flowchain_bridge_reconciliation_cursor_not_committed_when_blocked One when final relayer cursor was not committed while blocked on owner inputs.
+# TYPE flowchain_bridge_reconciliation_cursor_not_committed_when_blocked gauge
+flowchain_bridge_reconciliation_cursor_not_committed_when_blocked 1
+# HELP flowchain_bridge_reconciliation_runtime_credit_applied One when bridge reconciliation includes runtime credit applied proof.
+# TYPE flowchain_bridge_reconciliation_runtime_credit_applied gauge
+flowchain_bridge_reconciliation_runtime_credit_applied 1
+# HELP flowchain_bridge_reconciliation_replay_rejected One when bridge reconciliation includes duplicate replay rejection proof.
+# TYPE flowchain_bridge_reconciliation_replay_rejected gauge
+flowchain_bridge_reconciliation_replay_rejected 1
+# HELP flowchain_bridge_reconciliation_release_evidence_validated One when bridge release evidence validation is included in reconciliation.
+# TYPE flowchain_bridge_reconciliation_release_evidence_validated gauge
+flowchain_bridge_reconciliation_release_evidence_validated 1
+# HELP flowchain_bridge_reconciliation_no_secrets One when bridge reconciliation reports no secrets and has no secret findings.
+# TYPE flowchain_bridge_reconciliation_no_secrets gauge
+flowchain_bridge_reconciliation_no_secrets 1
+# HELP flowchain_bridge_reconciliation_no_broadcasts One when bridge reconciliation confirms no live broadcasts were made.
+# TYPE flowchain_bridge_reconciliation_no_broadcasts gauge
+flowchain_bridge_reconciliation_no_broadcasts 1
 # HELP flowchain_bridge_release_evidence_validation_ready One when bridge release evidence validation is passed.
 # TYPE flowchain_bridge_release_evidence_validation_ready gauge
 flowchain_bridge_release_evidence_validation_ready 1

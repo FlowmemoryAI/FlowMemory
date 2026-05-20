@@ -60,6 +60,7 @@ $paths = [ordered]@{
     bridgeRelayer = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     bridgeRelayerGuardrail = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRuntimeCredit = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
+    bridgeReconciliation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-report.json"
     realValuePilotAggregate = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json"
     externalTester = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     publicTesterGateway = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
@@ -644,6 +645,30 @@ $bridgeRuntimeCreditReady = $bridgeRuntimeCreditStatus -eq "passed" `
     -and ((Get-OpsProp -Object $reports.bridgeRuntimeCredit -Name "broadcasts" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $reports.bridgeRuntimeCredit -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $reports.bridgeRuntimeCredit -Name "noSecrets" -Default $false) -eq $true)
+$bridgeReconciliationStatus = Get-OpsStatus -Report $reports.bridgeReconciliation
+$bridgeReconciliationChecks = Get-OpsProp -Object $reports.bridgeReconciliation -Name "checks"
+$bridgeReconciliationCounts = Get-OpsProp -Object $reports.bridgeReconciliation -Name "counts"
+$bridgeReconciliationCursorCommit = Get-OpsProp -Object $reports.bridgeReconciliation -Name "cursorCommit"
+$bridgeReconciliationRows = @((Get-OpsProp -Object $reports.bridgeReconciliation -Name "reconciliation" -Default @()))
+$bridgeReconciliationFailedChecks = @((Get-OpsProp -Object $reports.bridgeReconciliation -Name "failedChecks" -Default @()))
+$bridgeReconciliationSecretFindings = @((Get-OpsProp -Object $reports.bridgeReconciliation -Name "secretMarkerFindings" -Default @()))
+$bridgeReconciliationReady = $bridgeReconciliationStatus -eq "passed" `
+    -and $bridgeReconciliationFailedChecks.Count -eq 0 `
+    -and $bridgeReconciliationSecretFindings.Count -eq 0 `
+    -and $bridgeReconciliationRows.Count -ge 8 `
+    -and ((Get-OpsProp -Object $bridgeReconciliationChecks -Name "relayerOnceReportLoaded" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeReconciliationChecks -Name "relayerCountsNonNegative" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeReconciliationChecks -Name "pendingCreditsNonNegative" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeReconciliationChecks -Name "cursorModeStaged" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeReconciliationChecks -Name "cursorFinalNotCommittedWhenBlocked" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeReconciliationChecks -Name "relayerBlockedClassifiedOwnerInput" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeReconciliationChecks -Name "runtimeCreditAppliedOnce" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeReconciliationChecks -Name "runtimeReplayRejected" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeReconciliationChecks -Name "localPilotDuplicateReplayRejected" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeReconciliationChecks -Name "releaseEvidenceValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.bridgeReconciliation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.bridgeReconciliation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.bridgeReconciliation -Name "broadcasts" -Default $true) -eq $false)
 $realValuePilotAggregateStatus = Get-OpsStatus -Report $reports.realValuePilotAggregate
 $realValuePilotAggregateChecks = Get-OpsProp -Object $reports.realValuePilotAggregate -Name "checks"
 $realValuePilotAggregateTimedOutCommands = @((Get-OpsProp -Object $reports.realValuePilotAggregate -Name "timedOutCommands" -Default @()))
@@ -884,6 +909,9 @@ if (-not $bridgeRelayerDirectObserveGuardrailReady) {
 }
 if (-not $bridgeRuntimeCreditReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-runtime-credit-validation-failed" -Message "Bridge runtime credit validation is missing or failed: Base 8453 handoff must become L1 spendable, reject replay, transfer, and survive restart/export/import." -Commands @("npm run flowchain:bridge:runtime-credit:validate", "npm run flowchain:service:status", "npm run flowchain:bridge:emergency-stop")
+}
+if (-not $bridgeReconciliationReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-reconciliation-failed" -Message "Bridge reconciliation is missing or unsafe: relayer counts, staged cursor safety, runtime credit, replay rejection, and release evidence validation must reconcile without secrets or broadcasts." -Commands @("npm run flowchain:bridge:reconciliation", "npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:runtime-credit:validate", "npm run flowchain:bridge:emergency-stop")
 }
 if (-not $realValuePilotAggregateReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "real-value-pilot-aggregate-failed" -Message "Real-value pilot aggregate proof is missing or failed: contracts, bridge, runtime, wallet, control-dashboard, and ops proofs must pass without timeouts, failed commands, missing proofs, secrets, or broadcasts." -Commands @("npm run flowchain:real-value-pilot:e2e -- -SkipBaseline -ChildTimeoutSeconds 1800", "npm run flowchain:completion:audit -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop")
@@ -1143,6 +1171,20 @@ $report = [ordered]@{
         bridgeRuntimeCreditMissingRuntimeChecks = $bridgeRuntimeCreditMissingChecks.Count
         bridgeRuntimeCreditFalseRuntimeChecks = $bridgeRuntimeCreditFalseChecks.Count
         bridgeRuntimeCreditProofFailedChecks = $bridgeRuntimeCreditProofFailedChecks.Count
+        bridgeReconciliation = $bridgeReconciliationStatus
+        bridgeReconciliationReady = $bridgeReconciliationReady
+        bridgeReconciliationRows = $bridgeReconciliationRows.Count
+        bridgeReconciliationFailedChecks = $bridgeReconciliationFailedChecks.Count
+        bridgeReconciliationObservedCredits = ConvertTo-OpsInteger -Value (Get-OpsProp -Object $bridgeReconciliationCounts -Name "observedCredits" -Default 0)
+        bridgeReconciliationNewCredits = ConvertTo-OpsInteger -Value (Get-OpsProp -Object $bridgeReconciliationCounts -Name "newCredits" -Default 0)
+        bridgeReconciliationQueuedTransactions = ConvertTo-OpsInteger -Value (Get-OpsProp -Object $bridgeReconciliationCounts -Name "queuedTransactions" -Default 0)
+        bridgeReconciliationAppliedCredits = ConvertTo-OpsInteger -Value (Get-OpsProp -Object $bridgeReconciliationCounts -Name "appliedCredits" -Default 0)
+        bridgeReconciliationPendingCredits = ConvertTo-OpsInteger -Value (Get-OpsProp -Object $bridgeReconciliationCounts -Name "pendingCredits" -Default 0)
+        bridgeReconciliationCursorMode = Get-OpsProp -Object $bridgeReconciliationCursorCommit -Name "mode" -Default ""
+        bridgeReconciliationCursorCommitted = Get-OpsProp -Object $bridgeReconciliationCursorCommit -Name "finalCommitted" -Default $false
+        bridgeReconciliationRuntimeApplied = Get-OpsProp -Object $bridgeReconciliationChecks -Name "runtimeCreditAppliedOnce" -Default $false
+        bridgeReconciliationReplayRejected = Get-OpsProp -Object $bridgeReconciliationChecks -Name "localPilotDuplicateReplayRejected" -Default $false
+        bridgeReconciliationReleaseEvidenceValidated = Get-OpsProp -Object $bridgeReconciliationChecks -Name "releaseEvidenceValidationPassed" -Default $false
         realValuePilotAggregate = $realValuePilotAggregateStatus
         realValuePilotAggregateReady = $realValuePilotAggregateReady
         realValuePilotAggregateCommandsRun = $realValuePilotAggregateCommandsRun.Count

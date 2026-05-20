@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T21:32:02.4375138Z",
+    "generatedAt":  "2026-05-20T21:51:33.7473902Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -12,6 +12,7 @@
                           "publicRpcDeploymentBundleStatus":  "passed",
                           "publicRpcDeploymentAutomationStatus":  "passed",
                           "bridgeRelayerLoopValidationStatus":  "passed",
+                          "bridgeReconciliationStatus":  "passed",
                           "bridgeReleaseEvidenceValidationStatus":  "passed",
                           "externalTesterStatus":  "blocked",
                           "publicTesterGatewayStatus":  "passed",
@@ -31,19 +32,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  106621
+                        "value":  106769
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  106621
+                        "value":  106769
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  8
+                        "value":  5
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -85,7 +86,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  1396.494
+                        "value":  2570.592
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -115,13 +116,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  36
+                        "value":  37
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  29
+                        "value":  30
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -656,6 +657,102 @@
                         "type":  "gauge",
                         "help":  "Required runtime proof checks that are false in bridge runtime credit validation.",
                         "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_reconciliation_ready",
+                        "type":  "gauge",
+                        "help":  "One when bridge reconciliation report is passed and safe.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_reconciliation_rows_total",
+                        "type":  "gauge",
+                        "help":  "Bridge reconciliation lane count.",
+                        "value":  8
+                    },
+                    {
+                        "name":  "flowchain_bridge_reconciliation_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in bridge reconciliation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_reconciliation_observed_credits",
+                        "type":  "gauge",
+                        "help":  "Live bridge credits observed by the relayer during reconciliation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_reconciliation_new_credits",
+                        "type":  "gauge",
+                        "help":  "Live bridge credits classified as new during reconciliation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_reconciliation_queued_transactions",
+                        "type":  "gauge",
+                        "help":  "L1 bridge credit transactions queued during reconciliation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_reconciliation_applied_credits",
+                        "type":  "gauge",
+                        "help":  "L1 bridge credits applied during reconciliation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_reconciliation_pending_credits",
+                        "type":  "gauge",
+                        "help":  "Pending live bridge credits from reconciliation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_reconciliation_cursor_staged",
+                        "type":  "gauge",
+                        "help":  "One when bridge reconciliation cursor mode is staged.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_reconciliation_cursor_committed",
+                        "type":  "gauge",
+                        "help":  "One when bridge reconciliation reports a final cursor commit.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_reconciliation_cursor_not_committed_when_blocked",
+                        "type":  "gauge",
+                        "help":  "One when final relayer cursor was not committed while blocked on owner inputs.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_reconciliation_runtime_credit_applied",
+                        "type":  "gauge",
+                        "help":  "One when bridge reconciliation includes runtime credit applied proof.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_reconciliation_replay_rejected",
+                        "type":  "gauge",
+                        "help":  "One when bridge reconciliation includes duplicate replay rejection proof.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_reconciliation_release_evidence_validated",
+                        "type":  "gauge",
+                        "help":  "One when bridge release evidence validation is included in reconciliation.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_reconciliation_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when bridge reconciliation reports no secrets and has no secret findings.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_reconciliation_no_broadcasts",
+                        "type":  "gauge",
+                        "help":  "One when bridge reconciliation confirms no live broadcasts were made.",
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_bridge_release_evidence_validation_ready",
@@ -1360,7 +1457,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  222,
+    "metricCount":  238,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

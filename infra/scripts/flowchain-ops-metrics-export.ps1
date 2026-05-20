@@ -36,6 +36,7 @@ $paths = [ordered]@{
     bridgeDeployControl = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json"
     bridgeRelayerGuardrail = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
+    bridgeReconciliation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-report.json"
     bridgeReleaseEvidenceValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-validation-report.json"
     realValuePilotAggregate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
@@ -238,6 +239,7 @@ $ownerActivationPlan = $reports.ownerActivationPlan
 $ownerGoLiveHandoff = $reports.ownerGoLiveHandoff
 $bridgeDeployControl = $reports.bridgeDeployControl
 $bridgeRelayerLoopValidation = $reports.bridgeRelayerLoopValidation
+$bridgeReconciliation = $reports.bridgeReconciliation
 $bridgeReleaseEvidenceValidation = $reports.bridgeReleaseEvidenceValidation
 $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
 $publicRpcDeploymentAutomation = $reports.publicRpcDeploymentAutomation
@@ -409,6 +411,26 @@ $bridgeRelayerLoopValidationSecretFindings = @((Get-MetricsProp -Object $bridgeR
 $bridgeRelayerLoopValidationObserved = Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "observed"
 $bridgeRelayerLoopValidationStatusRelayer = Get-MetricsProp -Object $bridgeRelayerLoopValidationObserved -Name "statusRelayerLoop"
 $bridgeRelayerLoopValidationStatusReport = Get-MetricsProp -Object $bridgeRelayerLoopValidationStatusRelayer -Name "report"
+$bridgeReconciliationChecks = Get-MetricsProp -Object $bridgeReconciliation -Name "checks"
+$bridgeReconciliationCounts = Get-MetricsProp -Object $bridgeReconciliation -Name "counts"
+$bridgeReconciliationCursorCommit = Get-MetricsProp -Object $bridgeReconciliation -Name "cursorCommit"
+$bridgeReconciliationRows = @((Get-MetricsProp -Object $bridgeReconciliation -Name "reconciliation" -Default @()))
+$bridgeReconciliationFailedChecks = @((Get-MetricsProp -Object $bridgeReconciliation -Name "failedChecks" -Default @()))
+$bridgeReconciliationSecretFindings = @((Get-MetricsProp -Object $bridgeReconciliation -Name "secretMarkerFindings" -Default @()))
+$bridgeReconciliationReady = (Get-MetricsStatus -Report $bridgeReconciliation) -eq "passed" `
+    -and $bridgeReconciliationFailedChecks.Count -eq 0 `
+    -and $bridgeReconciliationSecretFindings.Count -eq 0 `
+    -and $bridgeReconciliationRows.Count -ge 8 `
+    -and ((Get-MetricsProp -Object $bridgeReconciliationChecks -Name "relayerCountsNonNegative" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeReconciliationChecks -Name "pendingCreditsNonNegative" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeReconciliationChecks -Name "cursorModeStaged" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeReconciliationChecks -Name "cursorFinalNotCommittedWhenBlocked" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeReconciliationChecks -Name "runtimeCreditAppliedOnce" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeReconciliationChecks -Name "localPilotDuplicateReplayRejected" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeReconciliationChecks -Name "releaseEvidenceValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeReconciliation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-MetricsProp -Object $bridgeReconciliation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeReconciliation -Name "broadcasts" -Default $true) -eq $false)
 $bridgeReleaseEvidenceValidationChecks = Get-MetricsProp -Object $bridgeReleaseEvidenceValidation -Name "checks"
 $bridgeReleaseEvidenceValidationFailedChecks = @((Get-MetricsProp -Object $bridgeReleaseEvidenceValidation -Name "failedChecks" -Default @()))
 $bridgeReleaseEvidenceValidationFailedCases = @((Get-MetricsProp -Object $bridgeReleaseEvidenceValidation -Name "failedCases" -Default @()))
@@ -542,6 +564,22 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_transfer_laten
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_credit_failed_checks" -Help "Failed checks in bridge runtime credit validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRuntimeCreditFailedChecks"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_credit_missing_checks" -Help "Missing required runtime proof checks in bridge runtime credit validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRuntimeCreditMissingRuntimeChecks"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_credit_false_checks" -Help "Required runtime proof checks that are false in bridge runtime credit validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRuntimeCreditFalseRuntimeChecks"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_reconciliation_ready" -Help "One when bridge reconciliation report is passed and safe." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeReconciliationReady" -Default $bridgeReconciliationReady))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_reconciliation_rows_total" -Help "Bridge reconciliation lane count." -Value (ConvertTo-MetricNumber -Value $bridgeReconciliationRows.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_reconciliation_failed_checks" -Help "Failed checks in bridge reconciliation." -Value (ConvertTo-MetricNumber -Value $bridgeReconciliationFailedChecks.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_reconciliation_observed_credits" -Help "Live bridge credits observed by the relayer during reconciliation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $bridgeReconciliationCounts -Name "observedCredits" -Default 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_reconciliation_new_credits" -Help "Live bridge credits classified as new during reconciliation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $bridgeReconciliationCounts -Name "newCredits" -Default 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_reconciliation_queued_transactions" -Help "L1 bridge credit transactions queued during reconciliation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $bridgeReconciliationCounts -Name "queuedTransactions" -Default 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_reconciliation_applied_credits" -Help "L1 bridge credits applied during reconciliation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $bridgeReconciliationCounts -Name "appliedCredits" -Default 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_reconciliation_pending_credits" -Help "Pending live bridge credits from reconciliation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $bridgeReconciliationCounts -Name "pendingCredits" -Default 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_reconciliation_cursor_staged" -Help "One when bridge reconciliation cursor mode is staged." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $bridgeReconciliationCursorCommit -Name "mode" -Default "") -eq "staged-cursor"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_reconciliation_cursor_committed" -Help "One when bridge reconciliation reports a final cursor commit." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $bridgeReconciliationCursorCommit -Name "finalCommitted" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_reconciliation_cursor_not_committed_when_blocked" -Help "One when final relayer cursor was not committed while blocked on owner inputs." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $bridgeReconciliationChecks -Name "cursorFinalNotCommittedWhenBlocked" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_reconciliation_runtime_credit_applied" -Help "One when bridge reconciliation includes runtime credit applied proof." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $bridgeReconciliationChecks -Name "runtimeCreditAppliedOnce" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_reconciliation_replay_rejected" -Help "One when bridge reconciliation includes duplicate replay rejection proof." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $bridgeReconciliationChecks -Name "localPilotDuplicateReplayRejected" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_reconciliation_release_evidence_validated" -Help "One when bridge release evidence validation is included in reconciliation." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $bridgeReconciliationChecks -Name "releaseEvidenceValidationPassed" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_reconciliation_no_secrets" -Help "One when bridge reconciliation reports no secrets and has no secret findings." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $bridgeReconciliation -Name "noSecrets" -Default $false) -eq $true) -and $bridgeReconciliationSecretFindings.Count -eq 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_reconciliation_no_broadcasts" -Help "One when bridge reconciliation confirms no live broadcasts were made." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $bridgeReconciliation -Name "broadcasts" -Default $true) -eq $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_release_evidence_validation_ready" -Help "One when bridge release evidence validation is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $bridgeReleaseEvidenceValidation))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_release_evidence_cases_total" -Help "Bridge release evidence validation case count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $bridgeReleaseEvidenceValidation -Name "caseCount" -Default 0))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_release_evidence_failed_cases" -Help "Failed bridge release evidence validation cases." -Value (ConvertTo-MetricNumber -Value $bridgeReleaseEvidenceValidationFailedCases.Count)
@@ -680,6 +718,7 @@ $metricsJson = [ordered]@{
         publicRpcDeploymentBundleStatus = Get-MetricsStatus -Report $publicRpcDeploymentBundle
         publicRpcDeploymentAutomationStatus = Get-MetricsStatus -Report $publicRpcDeploymentAutomation
         bridgeRelayerLoopValidationStatus = Get-MetricsStatus -Report $bridgeRelayerLoopValidation
+        bridgeReconciliationStatus = Get-MetricsStatus -Report $bridgeReconciliation
         bridgeReleaseEvidenceValidationStatus = Get-MetricsStatus -Report $bridgeReleaseEvidenceValidation
         externalTesterStatus = Get-MetricsStatus -Report $externalTester
         publicTesterGatewayStatus = Get-MetricsStatus -Report $publicTesterGateway
@@ -807,6 +846,22 @@ $requiredMetricNames = @(
     "flowchain_bridge_runtime_credit_failed_checks",
     "flowchain_bridge_runtime_credit_missing_checks",
     "flowchain_bridge_runtime_credit_false_checks",
+    "flowchain_bridge_reconciliation_ready",
+    "flowchain_bridge_reconciliation_rows_total",
+    "flowchain_bridge_reconciliation_failed_checks",
+    "flowchain_bridge_reconciliation_observed_credits",
+    "flowchain_bridge_reconciliation_new_credits",
+    "flowchain_bridge_reconciliation_queued_transactions",
+    "flowchain_bridge_reconciliation_applied_credits",
+    "flowchain_bridge_reconciliation_pending_credits",
+    "flowchain_bridge_reconciliation_cursor_staged",
+    "flowchain_bridge_reconciliation_cursor_committed",
+    "flowchain_bridge_reconciliation_cursor_not_committed_when_blocked",
+    "flowchain_bridge_reconciliation_runtime_credit_applied",
+    "flowchain_bridge_reconciliation_replay_rejected",
+    "flowchain_bridge_reconciliation_release_evidence_validated",
+    "flowchain_bridge_reconciliation_no_secrets",
+    "flowchain_bridge_reconciliation_no_broadcasts",
     "flowchain_bridge_release_evidence_validation_ready",
     "flowchain_bridge_release_evidence_cases_total",
     "flowchain_bridge_release_evidence_failed_cases",
@@ -934,6 +989,7 @@ $checks = [ordered]@{
     externalTesterEvidenceLoaded = $null -ne $externalTesterEvidence
     bridgeDeployControlLoaded = $null -ne $bridgeDeployControl
     bridgeRelayerLoopValidationLoaded = $null -ne $bridgeRelayerLoopValidation
+    bridgeReconciliationLoaded = $null -ne $bridgeReconciliation
     bridgeReleaseEvidenceValidationLoaded = $null -ne $bridgeReleaseEvidenceValidation
     dashboardUiLoaded = $null -ne $dashboardUi
     devPackLoaded = $null -ne $devPack
@@ -1003,6 +1059,24 @@ $checks = [ordered]@{
         "flowchain_bridge_runtime_credit_failed_checks",
         "flowchain_bridge_runtime_credit_missing_checks",
         "flowchain_bridge_runtime_credit_false_checks"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    bridgeReconciliationMetricsPresent = @(
+        "flowchain_bridge_reconciliation_ready",
+        "flowchain_bridge_reconciliation_rows_total",
+        "flowchain_bridge_reconciliation_failed_checks",
+        "flowchain_bridge_reconciliation_observed_credits",
+        "flowchain_bridge_reconciliation_new_credits",
+        "flowchain_bridge_reconciliation_queued_transactions",
+        "flowchain_bridge_reconciliation_applied_credits",
+        "flowchain_bridge_reconciliation_pending_credits",
+        "flowchain_bridge_reconciliation_cursor_staged",
+        "flowchain_bridge_reconciliation_cursor_committed",
+        "flowchain_bridge_reconciliation_cursor_not_committed_when_blocked",
+        "flowchain_bridge_reconciliation_runtime_credit_applied",
+        "flowchain_bridge_reconciliation_replay_rejected",
+        "flowchain_bridge_reconciliation_release_evidence_validated",
+        "flowchain_bridge_reconciliation_no_secrets",
+        "flowchain_bridge_reconciliation_no_broadcasts"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     bridgeDeployControlMetricsPresent = @(
         "flowchain_bridge_deploy_control_validation_ready",

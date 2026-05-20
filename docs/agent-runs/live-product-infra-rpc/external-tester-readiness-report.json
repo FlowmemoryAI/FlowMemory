@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.external_tester_readiness_report.v0",
-    "generatedAt":  "2026-05-20T21:38:54.3378914Z",
+    "generatedAt":  "2026-05-20T22:09:37.5017114Z",
     "status":  "blocked",
     "localTesterRehearsalReady":  true,
     "externalSharingReady":  false,
@@ -15,14 +15,14 @@
                    "publicTesterGatewayFaucetRouteValidated":  true,
                    "liveInfraReady":  false
                },
-    "latestHeight":  "106669",
-    "stateFileLastWriteAgeSeconds":  0,
+    "latestHeight":  "106903",
+    "stateFileLastWriteAgeSeconds":  5,
     "testerNetwork":  {
                           "status":  "passed",
-                          "generatedAt":  "2026-05-20T21:37:35.5036099Z",
+                          "generatedAt":  "2026-05-20T22:07:51.0971450Z",
                           "testerCount":  4,
-                          "chainBeforeBlock":  "106647",
-                          "chainAfterBlock":  "106660",
+                          "chainBeforeBlock":  "106881",
+                          "chainAfterBlock":  "106895",
                           "walletCreateCount":  4,
                           "transferCount":  4,
                           "packetExecutableSmokeValidated":  true,
@@ -50,7 +50,7 @@
                       },
     "publicTesterGateway":  {
                                 "status":  "passed",
-                                "generatedAt":  "2026-05-20T21:16:34.8224853Z",
+                                "generatedAt":  "2026-05-20T22:00:18.9854636Z",
                                 "fresh":  true,
                                 "ready":  true,
                                 "maxSendUnits":  "10",

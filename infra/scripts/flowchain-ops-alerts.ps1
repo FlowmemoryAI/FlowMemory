@@ -210,6 +210,14 @@ $rules = @(
         commands = @("npm run flowchain:bridge:runtime-credit:validate", "npm run flowchain:service:status", "npm run flowchain:bridge:emergency-stop")
     },
     [ordered]@{
+        id = "bridge-reconciliation-failed"
+        severity = "critical"
+        findingCodes = @("bridge-reconciliation-failed")
+        signal = "Bridge reconciliation report is missing or failing."
+        threshold = "reconciliation status is not passed, relayer counts are negative, pending credits are negative, staged cursor safety is missing, runtime credit or replay rejection proof is missing, release evidence validation is missing, broadcasts, prints env values, or reports secrets"
+        commands = @("npm run flowchain:bridge:reconciliation", "npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:runtime-credit:validate", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
         id = "real-value-pilot-aggregate-failed"
         severity = "critical"
         findingCodes = @("real-value-pilot-aggregate-failed")
@@ -433,6 +441,13 @@ $bridgeRelayerLoopRuleCoversValidationTelemetry = $bridgeRelayerLoopRule.Count -
     -and ([string]$bridgeRelayerLoopRule[0].threshold).IndexOf("no-broadcast", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$bridgeRelayerLoopRule[0].threshold).IndexOf("PID cleanup", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and (@($bridgeRelayerLoopRule[0].commands) -contains "npm run flowchain:bridge:relayer:loop:validate")
+$bridgeReconciliationRule = @($rules | Where-Object { $_.id -eq "bridge-reconciliation-failed" } | Select-Object -First 1)
+$bridgeReconciliationRuleCoversCursorAndReplay = $bridgeReconciliationRule.Count -eq 1 `
+    -and ([string]$bridgeReconciliationRule[0].threshold).IndexOf("staged cursor", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeReconciliationRule[0].threshold).IndexOf("runtime credit", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeReconciliationRule[0].threshold).IndexOf("replay rejection", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeReconciliationRule[0].threshold).IndexOf("release evidence", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($bridgeReconciliationRule[0].commands) -contains "npm run flowchain:bridge:reconciliation")
 $supervisorNodeRecoveryRule = @($rules | Where-Object { $_.id -eq "supervisor-node-recovery-validation-failed" } | Select-Object -First 1)
 $supervisorNodeRecoveryRuleCoversLiveProfile = $supervisorNodeRecoveryRule.Count -eq 1 `
     -and ([string]$supervisorNodeRecoveryRule[0].threshold).IndexOf("live-profile", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
@@ -495,6 +510,7 @@ $checks = [ordered]@{
     bridgeDeployControlRuleCoversDeploymentControls = $bridgeDeployControlRuleCoversDeploymentControls
     bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRuleCoversFailedChecks
     bridgeRelayerLoopRuleCoversValidationTelemetry = $bridgeRelayerLoopRuleCoversValidationTelemetry
+    bridgeReconciliationRuleCoversCursorAndReplay = $bridgeReconciliationRuleCoversCursorAndReplay
     supervisorNodeRecoveryRuleCoversLiveProfile = $supervisorNodeRecoveryRuleCoversLiveProfile
     serviceInstallValidationRuleCoversAutorecoveryTelemetry = $serviceInstallValidationRuleCoversAutorecoveryTelemetry
     externalTesterLaunchRuleCoversGatewayAndFaucet = $externalTesterLaunchRuleCoversGatewayAndFaucet

@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-20T21:32:02.9815308Z
+Generated: 2026-05-20T21:51:34.0779252Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 222
+- Metric count: 238
 
 ## Required Metrics
 
@@ -106,6 +106,22 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_bridge_runtime_credit_failed_checks: present
 - flowchain_bridge_runtime_credit_missing_checks: present
 - flowchain_bridge_runtime_credit_false_checks: present
+- flowchain_bridge_reconciliation_ready: present
+- flowchain_bridge_reconciliation_rows_total: present
+- flowchain_bridge_reconciliation_failed_checks: present
+- flowchain_bridge_reconciliation_observed_credits: present
+- flowchain_bridge_reconciliation_new_credits: present
+- flowchain_bridge_reconciliation_queued_transactions: present
+- flowchain_bridge_reconciliation_applied_credits: present
+- flowchain_bridge_reconciliation_pending_credits: present
+- flowchain_bridge_reconciliation_cursor_staged: present
+- flowchain_bridge_reconciliation_cursor_committed: present
+- flowchain_bridge_reconciliation_cursor_not_committed_when_blocked: present
+- flowchain_bridge_reconciliation_runtime_credit_applied: present
+- flowchain_bridge_reconciliation_replay_rejected: present
+- flowchain_bridge_reconciliation_release_evidence_validated: present
+- flowchain_bridge_reconciliation_no_secrets: present
+- flowchain_bridge_reconciliation_no_broadcasts: present
 - flowchain_bridge_release_evidence_validation_ready: present
 - flowchain_bridge_release_evidence_cases_total: present
 - flowchain_bridge_release_evidence_failed_cases: present
@@ -232,6 +248,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | externalTesterEvidenceLoaded | True |
 | bridgeDeployControlLoaded | True |
 | bridgeRelayerLoopValidationLoaded | True |
+| bridgeReconciliationLoaded | True |
 | bridgeReleaseEvidenceValidationLoaded | True |
 | dashboardUiLoaded | True |
 | devPackLoaded | True |
@@ -250,6 +267,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | externalTesterEvidenceMetricsPresent | True |
 | bridgeDirectObserveMetricsPresent | True |
 | bridgeRuntimeCreditMetricsPresent | True |
+| bridgeReconciliationMetricsPresent | True |
 | bridgeDeployControlMetricsPresent | True |
 | bridgeReleaseEvidenceMetricsPresent | True |
 | realValuePilotAggregateMetricsPresent | True |
