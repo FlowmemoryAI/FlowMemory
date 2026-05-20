@@ -72,6 +72,7 @@ $paths = [ordered]@{
     liveWallet = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json"
     testerNetwork = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
     publicRpc = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
+    publicRpcSyntheticCanary = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json"
     backup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     bridgeLive = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
@@ -385,6 +386,9 @@ $publicRpcValidationExitCode = $publicRpcValidationResult.exitCode
 $publicRpcAbuseTestResult = Invoke-AuditChild -Path $paths.publicRpcAbuseTest -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-abuse-test.ps1"))
 $publicRpcAbuseTestOutput = @($publicRpcAbuseTestResult.output)
 $publicRpcAbuseTestExitCode = $publicRpcAbuseTestResult.exitCode
+$publicRpcSyntheticCanaryResult = Invoke-AuditChild -Path $paths.publicRpcSyntheticCanary -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-synthetic-canary.ps1"), "-AllowBlocked")
+$publicRpcSyntheticCanaryOutput = @($publicRpcSyntheticCanaryResult.output)
+$publicRpcSyntheticCanaryExitCode = $publicRpcSyntheticCanaryResult.exitCode
 $publicTesterGatewayResult = Invoke-AuditChild -Path $paths.publicTesterGateway -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-tester-gateway-e2e.ps1"))
 $publicTesterGatewayOutput = @($publicTesterGatewayResult.output)
 $publicTesterGatewayExitCode = $publicTesterGatewayResult.exitCode
@@ -963,6 +967,7 @@ $ownerEnvReadinessValidation = $reports.ownerEnvReadinessValidation
 $ownerInputsValidation = $reports.ownerInputsValidation
 $publicRpcValidation = $reports.publicRpcValidation
 $publicRpcAbuseTest = $reports.publicRpcAbuseTest
+$publicRpcSyntheticCanary = $reports.publicRpcSyntheticCanary
 $publicTesterGateway = $reports.publicTesterGateway
 $externalTesterPacket = $reports.externalTesterPacket
 $testerWalletCreatesCount = @((Get-AuditProp -Object $testerNetwork -Name "testerWalletCreates" -Default @())).Count
@@ -1669,6 +1674,31 @@ $publicRpcAbuseTestPassed = $publicRpcAbuseTestExitCode -eq 0 `
     -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "broadcasts" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "noSecrets" -Default $false) -eq $true)
+$publicRpcSyntheticCanaryStatus = Get-ReportStatus -Report $publicRpcSyntheticCanary
+$publicRpcSyntheticCanaryChecks = Get-AuditProp -Object $publicRpcSyntheticCanary -Name "checks"
+$publicRpcSyntheticCanaryFailedChecks = @((Get-AuditProp -Object $publicRpcSyntheticCanary -Name "failedChecks" -Default @()))
+$publicRpcSyntheticCanarySecretFindings = @((Get-AuditProp -Object $publicRpcSyntheticCanary -Name "secretMarkerFindings" -Default @()))
+$publicRpcSyntheticCanaryMissingEnvNames = @((Get-AuditProp -Object $publicRpcSyntheticCanary -Name "missingEnvNames" -Default @()))
+$publicRpcSyntheticCanaryReady = (Get-AuditProp -Object $publicRpcSyntheticCanary -Name "syntheticCanaryReady" -Default $false) -eq $true
+$publicRpcSyntheticCanaryOwnerBlocked = (Get-AuditProp -Object $publicRpcSyntheticCanary -Name "blockedOnlyOnKnownExternalOwnerInputs" -Default $false) -eq $true
+$publicRpcSyntheticCanaryNoWriteMethods = ((Get-AuditProp -Object $publicRpcSyntheticCanaryChecks -Name "noWriteMethodsPlanned" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcSyntheticCanaryChecks -Name "noWriteMethodsInvoked" -Default $false) -eq $true)
+$publicRpcSyntheticCanaryReadPlanCovered = ((Get-AuditProp -Object $publicRpcSyntheticCanaryChecks -Name "plannedReadPathsCovered" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcSyntheticCanaryChecks -Name "plannedReadMethodsCovered" -Default $false) -eq $true)
+$publicRpcSyntheticCanarySafe = $publicRpcSyntheticCanaryExitCode -eq 0 `
+    -and $publicRpcSyntheticCanaryStatus -in @("passed", "blocked") `
+    -and $publicRpcSyntheticCanaryFailedChecks.Count -eq 0 `
+    -and $publicRpcSyntheticCanarySecretFindings.Count -eq 0 `
+    -and $publicRpcSyntheticCanaryNoWriteMethods `
+    -and $publicRpcSyntheticCanaryReadPlanCovered `
+    -and ((Get-AuditProp -Object $publicRpcSyntheticCanaryChecks -Name "safeReadMethodAllowlistEnforced" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcSyntheticCanaryChecks -Name "responseHygienePassed" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcSyntheticCanary -Name "endpointValuePrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $publicRpcSyntheticCanary -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $publicRpcSyntheticCanary -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcSyntheticCanary -Name "broadcasts" -Default $true) -eq $false)
+$publicRpcSyntheticCanaryPassed = $publicRpcSyntheticCanarySafe -and $publicRpcSyntheticCanaryStatus -eq "passed" -and $publicRpcSyntheticCanaryReady
+$publicRpcSyntheticCanaryBlockedSafe = $publicRpcSyntheticCanarySafe -and $publicRpcSyntheticCanaryStatus -eq "blocked" -and $publicRpcSyntheticCanaryOwnerBlocked
 $testerWriteTokenSetup = $reports.testerWriteTokenSetup
 $testerWriteTokenSetupStatus = Get-ReportStatus -Report $testerWriteTokenSetup
 $testerWriteTokenSetupChecks = Get-AuditProp -Object $testerWriteTokenSetup -Name "checks"
@@ -3022,6 +3052,13 @@ Add-AuditItem -Items $items -Id "public-rpc-abuse-test" `
     -Evidence "abuseStatus=$publicRpcAbuseTestStatus, abuseReady=$publicRpcAbuseTestReady, failedChecks=$publicRpcAbuseFailedCheckCount, secretFindings=$publicRpcAbuseSecretFindingCount, missingChecks=$($publicRpcAbuseMissingChecks.Count), report=$($paths.publicRpcAbuseTest)" `
     -Commands @("npm run flowchain:public-rpc:abuse-test")
 
+Add-AuditItem -Items $items -Id "public-rpc-synthetic-canary" `
+    -Requirement "Public RPC synthetic canary proves the owner endpoint with read-only HTTP/JSON-RPC probes, denies write methods, and blocks safely without endpoint values until the endpoint exists." `
+    -Status $(if ($publicRpcSyntheticCanaryPassed) { "passed" } elseif ($publicRpcSyntheticCanaryBlockedSafe) { "blocked" } else { "failed" }) `
+    -Evidence "canaryStatus=$publicRpcSyntheticCanaryStatus, ready=$publicRpcSyntheticCanaryReady, ownerBlocked=$publicRpcSyntheticCanaryOwnerBlocked, probes=$(Get-AuditProp -Object $publicRpcSyntheticCanary -Name "probeCount" -Default 0), failedProbes=$(Get-AuditProp -Object $publicRpcSyntheticCanary -Name "failedProbeCount" -Default 0), noWriteMethods=$publicRpcSyntheticCanaryNoWriteMethods, readPlanCovered=$publicRpcSyntheticCanaryReadPlanCovered, report=$($paths.publicRpcSyntheticCanary)" `
+    -Commands @("npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked") `
+    -Blockers @($publicRpcSyntheticCanaryMissingEnvNames)
+
 Add-AuditItem -Items $items -Id "tester-write-token-setup" `
     -Requirement "Tester write token setup creates or preserves the raw bearer token only in ignored local storage, writes only its SHA-256 digest and send cap into the ignored owner env file, and proves no token or digest is printed to committed evidence." `
     -Status $(if ($testerWriteTokenSetupPassed) { "passed" } else { "failed" }) `
@@ -3132,10 +3169,10 @@ Add-AuditItem -Items $items -Id "incident-drill" `
     -Commands @("npm run flowchain:ops:incident-drill")
 
 Add-AuditItem -Items $items -Id "public-rpc-external-sharing" `
-    -Requirement "External/public RPC is configured behind owner TLS, CORS, rate limit, endpoint checks, and response hygiene." `
-    -Status $(if ((Get-ReportStatus -Report $reports.publicRpc) -eq "passed") { "passed" } else { "blocked" }) `
-    -Evidence "publicRpcStatus=$(Get-ReportStatus -Report $reports.publicRpc), report=$($paths.publicRpc)" `
-    -Commands @("npm run flowchain:public-rpc:check") `
+    -Requirement "External/public RPC is configured behind owner TLS, CORS, rate limit, endpoint checks, response hygiene, and a passing read-only synthetic canary before sharing." `
+    -Status $(if ((Get-ReportStatus -Report $reports.publicRpc) -eq "passed" -and $publicRpcSyntheticCanaryPassed) { "passed" } elseif ((Get-ReportStatus -Report $reports.publicRpc) -eq "blocked" -or $publicRpcSyntheticCanaryBlockedSafe) { "blocked" } else { "failed" }) `
+    -Evidence "publicRpcStatus=$(Get-ReportStatus -Report $reports.publicRpc), canaryStatus=$publicRpcSyntheticCanaryStatus, canaryReady=$publicRpcSyntheticCanaryReady, noWriteMethods=$publicRpcSyntheticCanaryNoWriteMethods, reports=$($paths.publicRpc), $($paths.publicRpcSyntheticCanary)" `
+    -Commands @("npm run flowchain:public-rpc:check", "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked") `
     -Blockers @("FLOWCHAIN_RPC_PUBLIC_URL", "FLOWCHAIN_RPC_ALLOWED_ORIGINS", "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE", "FLOWCHAIN_RPC_TLS_TERMINATED")
 
 $backupReadinessStatus = Get-ReportStatus -Report $reports.backup
@@ -3309,6 +3346,8 @@ $report = [ordered]@{
     publicRpcValidationOutputRedacted = @($publicRpcValidationOutput | ForEach-Object { "$_" })
     publicRpcAbuseTestExitCode = $publicRpcAbuseTestExitCode
     publicRpcAbuseTestOutputRedacted = @($publicRpcAbuseTestOutput | ForEach-Object { "$_" })
+    publicRpcSyntheticCanaryExitCode = $publicRpcSyntheticCanaryExitCode
+    publicRpcSyntheticCanaryOutputRedacted = @($publicRpcSyntheticCanaryOutput | ForEach-Object { "$_" })
     testerWriteTokenSetupExitCode = $testerWriteTokenSetupExitCode
     testerWriteTokenSetupOutputRedacted = @($testerWriteTokenSetupOutput | ForEach-Object { "$_" })
     publicTesterGatewayExitCode = $publicTesterGatewayExitCode
@@ -3413,6 +3452,10 @@ $report = [ordered]@{
         testerWriteTokenSetupPassed = $testerWriteTokenSetupPassed
         publicTesterGatewayStatus = $publicTesterGatewayStatus
         publicTesterGatewayPassed = $publicTesterGatewayPassed
+        publicRpcSyntheticCanaryStatus = $publicRpcSyntheticCanaryStatus
+        publicRpcSyntheticCanaryReady = $publicRpcSyntheticCanaryReady
+        publicRpcSyntheticCanaryOwnerBlocked = $publicRpcSyntheticCanaryOwnerBlocked
+        publicRpcSyntheticCanarySafe = $publicRpcSyntheticCanarySafe
         dashboardUiReadinessStatus = $dashboardUiReadinessStatus
         dashboardUiReadinessPassed = $dashboardUiReadinessPassed
         dashboardUiBrowserProjects = @($dashboardUiBrowserProjects)
@@ -3473,6 +3516,7 @@ $report = [ordered]@{
         "npm run flowchain:operator:package",
         "npm run flowchain:operator:package:verify",
         "npm run flowchain:public-rpc:validate",
+        "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
         "npm run flowchain:public-rpc:abuse-test",
         "npm run flowchain:tester:gateway:e2e",
         "npm run flowchain:dashboard:ui:readiness",

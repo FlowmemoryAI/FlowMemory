@@ -55,6 +55,7 @@ $reportPaths = [ordered]@{
     liveWallet = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json"
     testerNetwork = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
     publicRpcReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
+    publicRpcSyntheticCanary = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json"
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
     publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
     backupReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
@@ -612,10 +613,12 @@ Add-ArchitectureItem -Items $items -Id "node-operator-package-verify-boundary" -
 $publicRpcValidation = $reports.publicRpcValidation
 $publicRpcAbuseTest = $reports.publicRpcAbuseTest
 $publicRpc = $reports.publicRpcReadiness
+$publicRpcSyntheticCanary = $reports.publicRpcSyntheticCanary
 $rpcFiles = @(
     "services/control-plane/src/server.ts",
     "services/control-plane/src/methods.ts",
     "infra/scripts/flowchain-public-rpc-readiness.ps1",
+    "infra/scripts/flowchain-public-rpc-synthetic-canary.ps1",
     "infra/scripts/flowchain-public-rpc-validation.ps1",
     "infra/scripts/flowchain-public-rpc-abuse-test.ps1"
 )
@@ -660,8 +663,26 @@ $publicRpcAbusePassed = $publicRpcAbuseStatus -eq "passed" `
     -and $publicRpcAbuseMissingChecks.Count -eq 0 `
     -and ((Get-ArchitectureProp -Object $publicRpcAbuseTest -Name "ownerValuesRequired" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $publicRpcAbuseTest -Name "noSecrets" -Default $false) -eq $true)
+$publicRpcSyntheticCanaryStatus = Get-ArchitectureStatus -Report $publicRpcSyntheticCanary
+$publicRpcSyntheticCanaryChecks = Get-ArchitectureProp -Object $publicRpcSyntheticCanary -Name "checks"
+$publicRpcSyntheticCanaryReady = Get-ArchitectureProp -Object $publicRpcSyntheticCanary -Name "syntheticCanaryReady" -Default $false
+$publicRpcSyntheticCanaryOwnerBlocked = Get-ArchitectureProp -Object $publicRpcSyntheticCanary -Name "blockedOnlyOnKnownExternalOwnerInputs" -Default $false
+$publicRpcSyntheticCanaryNoWriteMethods = ((Get-ArchitectureProp -Object $publicRpcSyntheticCanaryChecks -Name "noWriteMethodsPlanned" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcSyntheticCanaryChecks -Name "noWriteMethodsInvoked" -Default $false) -eq $true)
+$publicRpcSyntheticCanaryReadPlanCovered = ((Get-ArchitectureProp -Object $publicRpcSyntheticCanaryChecks -Name "plannedReadPathsCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcSyntheticCanaryChecks -Name "plannedReadMethodsCovered" -Default $false) -eq $true)
+$publicRpcSyntheticCanarySafe = $publicRpcSyntheticCanaryStatus -in @("passed", "blocked") `
+    -and ($publicRpcSyntheticCanaryNoWriteMethods -eq $true) `
+    -and ($publicRpcSyntheticCanaryReadPlanCovered -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcSyntheticCanaryChecks -Name "safeReadMethodAllowlistEnforced" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcSyntheticCanaryChecks -Name "responseHygienePassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcSyntheticCanary -Name "endpointValuePrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $publicRpcSyntheticCanary -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $publicRpcSyntheticCanary -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcSyntheticCanary -Name "broadcasts" -Default $true) -eq $false)
 $rpcBoundaryReady = (Test-AllRepoFilesExist -Paths $rpcFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:validate") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:synthetic-canary") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:abuse-test") `
     -and ($publicRpcValidationStatus -eq "passed") `
     -and ($corsAllowed -eq $true) `
@@ -673,13 +694,14 @@ $rpcBoundaryReady = (Test-AllRepoFilesExist -Paths $rpcFiles) `
     -and ($securityHeaderSkip -eq $true) `
     -and ($securityHeaderPolicy -eq $true) `
     -and ($responseHygiene -eq $true) `
+    -and ($publicRpcSyntheticCanarySafe -eq $true) `
     -and ($publicRpcAbusePassed -eq $true)
 Add-ArchitectureItem -Items $items -Id "rpc-api-boundary" -Layer "RPC/API" `
-    -Requirement "The control-plane API has explicit health/discovery/readiness/CORS/live security-header/rate-limit validation, narrow public reads, and abuse rejection before it can be exposed publicly." `
+    -Requirement "The control-plane API has explicit health/discovery/readiness/CORS/live security-header/rate-limit validation, read-only synthetic canary coverage, narrow public reads, and abuse rejection before it can be exposed publicly." `
     -Status $(if ($rpcBoundaryReady) { "passed" } else { "failed" }) `
-    -Evidence "validationStatus=$publicRpcValidationStatus, corsAllowed=$corsAllowed, corsRejected=$corsRejected, endpointChecks=$endpointChecks, securityHeaderSkip=$securityHeaderSkip, securityHeaderPolicy=$securityHeaderPolicy, rateLimitProbe=$rateLimitProbe, rateLimitRejected=$rateLimitRejected, rateLimitRetryAfter=$rateLimitRetryAfter, responseHygiene=$responseHygiene, abuseStatus=$publicRpcAbuseStatus, abusePassed=$publicRpcAbusePassed, abuseMissingChecks=$($publicRpcAbuseMissingChecks.Count)" `
+    -Evidence "validationStatus=$publicRpcValidationStatus, corsAllowed=$corsAllowed, corsRejected=$corsRejected, endpointChecks=$endpointChecks, securityHeaderSkip=$securityHeaderSkip, securityHeaderPolicy=$securityHeaderPolicy, rateLimitProbe=$rateLimitProbe, rateLimitRejected=$rateLimitRejected, rateLimitRetryAfter=$rateLimitRetryAfter, responseHygiene=$responseHygiene, canaryStatus=$publicRpcSyntheticCanaryStatus, canarySafe=$publicRpcSyntheticCanarySafe, noWriteMethods=$publicRpcSyntheticCanaryNoWriteMethods, abuseStatus=$publicRpcAbuseStatus, abusePassed=$publicRpcAbusePassed, abuseMissingChecks=$($publicRpcAbuseMissingChecks.Count)" `
     -Files $rpcFiles `
-    -Commands @("npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:abuse-test")
+    -Commands @("npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked", "npm run flowchain:public-rpc:abuse-test")
 
 $publicRpcStatus = Get-ArchitectureStatus -Report $publicRpc
 $publicRpcReady = Get-ArchitectureProp -Object $publicRpc -Name "publicRpcReady" -Default $false
@@ -688,11 +710,11 @@ $publicRpcLiveHeaderProbe = Get-ArchitectureProp -Object $publicRpcChecks -Name 
 $publicRpcLiveHeaders = ((Get-ArchitectureProp -Object $publicRpcChecks -Name "securityHeadersProbePerformed" -Default $false) -eq $true) -and ((Get-ArchitectureProp -Object $publicRpcChecks -Name "securityHeadersAllRequiredPresent" -Default $false) -eq $true)
 $publicRpcHeaderPolicyReady = Get-ArchitectureProp -Object $publicRpcChecks -Name "securityHeadersAllRequiredPresent" -Default $false
 Add-ArchitectureItem -Items $items -Id "public-rpc-edge" -Layer "Public edge" `
-    -Requirement "External RPC exposure is a distinct owner-operated edge with TLS, allowed origins, rate limits, live security-header proof, endpoint checks, and response hygiene." `
-    -Status $(if ($publicRpcStatus -eq "passed" -and $publicRpcReady -eq $true) { "passed" } elseif ($publicRpcStatus -eq "blocked") { "blocked" } else { "failed" }) `
-    -Evidence "publicRpcStatus=$publicRpcStatus, publicRpcReady=$publicRpcReady, liveHeaderProbe=$publicRpcLiveHeaderProbe, liveHeaders=$publicRpcLiveHeaders, headerPolicyReady=$publicRpcHeaderPolicyReady" `
-    -Files @("infra/scripts/flowchain-public-rpc-readiness.ps1", "docs/OPERATIONS/FLOWCHAIN_OWNER_OPERATED_PUBLIC_RPC.md") `
-    -Commands @("npm run flowchain:public-rpc:check") `
+    -Requirement "External RPC exposure is a distinct owner-operated edge with TLS, allowed origins, rate limits, live security-header proof, endpoint checks, response hygiene, and passing read-only synthetic canary." `
+    -Status $(if ($publicRpcStatus -eq "passed" -and $publicRpcReady -eq $true -and $publicRpcSyntheticCanaryReady -eq $true) { "passed" } elseif ($publicRpcStatus -eq "blocked" -or ($publicRpcSyntheticCanaryStatus -eq "blocked" -and $publicRpcSyntheticCanaryOwnerBlocked -eq $true)) { "blocked" } else { "failed" }) `
+    -Evidence "publicRpcStatus=$publicRpcStatus, publicRpcReady=$publicRpcReady, liveHeaderProbe=$publicRpcLiveHeaderProbe, liveHeaders=$publicRpcLiveHeaders, headerPolicyReady=$publicRpcHeaderPolicyReady, canaryStatus=$publicRpcSyntheticCanaryStatus, canaryReady=$publicRpcSyntheticCanaryReady, canarySafe=$publicRpcSyntheticCanarySafe" `
+    -Files @("infra/scripts/flowchain-public-rpc-readiness.ps1", "infra/scripts/flowchain-public-rpc-synthetic-canary.ps1", "docs/OPERATIONS/FLOWCHAIN_OWNER_OPERATED_PUBLIC_RPC.md") `
+    -Commands @("npm run flowchain:public-rpc:check", "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked") `
     -Blockers @("FLOWCHAIN_RPC_PUBLIC_URL", "FLOWCHAIN_RPC_ALLOWED_ORIGINS", "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE", "FLOWCHAIN_RPC_TLS_TERMINATED")
 
 $publicRpcEdgeTemplate = $reports.publicRpcEdgeTemplate
@@ -1562,8 +1584,9 @@ $dataFlows = @(
     },
     [ordered]@{
         name = "public-rpc-exposure"
-        path = @("owner TLS endpoint", "allowed-origin/rate-limit gate", "control-plane HTTP server", "JSON-RPC/REST methods", "runtime state reads")
+        path = @("owner TLS endpoint", "allowed-origin/rate-limit gate", "control-plane HTTP server", "read-only synthetic canary", "JSON-RPC/REST methods", "runtime state reads")
         latestEvidence = $reportPaths.publicRpcReadiness
+        canaryEvidence = $reportPaths.publicRpcSyntheticCanary
         blockedBy = @("FLOWCHAIN_RPC_PUBLIC_URL", "FLOWCHAIN_RPC_ALLOWED_ORIGINS", "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE", "FLOWCHAIN_RPC_TLS_TERMINATED")
     },
     [ordered]@{
