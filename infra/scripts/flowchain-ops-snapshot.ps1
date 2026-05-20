@@ -55,6 +55,7 @@ $paths = [ordered]@{
     bridgeInfra = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
     bridgeRelayer = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     bridgeRelayerGuardrail = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
+    bridgeRuntimeCredit = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
     externalTester = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     externalTesterEvidence = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
     dashboardUi = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
@@ -471,6 +472,32 @@ $bridgeRelayerGuardrailReady = $bridgeRelayerGuardrailStatus -eq "passed" `
     -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "envValuesPrintedFalse" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $bridgeRelayerGuardrailChecks -Name "noSecrets" -Default $false) -eq $true) `
     -and $bridgeRelayerDirectObserveGuardrailReady
+$bridgeRuntimeCreditStatus = Get-OpsStatus -Report $reports.bridgeRuntimeCredit
+$bridgeRuntimeCreditChecks = Get-OpsProp -Object $reports.bridgeRuntimeCredit -Name "checks"
+$bridgeRuntimeCreditTiming = Get-OpsProp -Object $reports.bridgeRuntimeCredit -Name "timing"
+$bridgeRuntimeCreditFailedChecks = @((Get-OpsProp -Object $reports.bridgeRuntimeCredit -Name "failedChecks" -Default @()))
+$bridgeRuntimeCreditMissingChecks = @((Get-OpsProp -Object $reports.bridgeRuntimeCredit -Name "missingRuntimeChecks" -Default @()))
+$bridgeRuntimeCreditFalseChecks = @((Get-OpsProp -Object $reports.bridgeRuntimeCredit -Name "falseRuntimeChecks" -Default @()))
+$bridgeRuntimeCreditProofFailedChecks = @((Get-OpsProp -Object $reports.bridgeRuntimeCredit -Name "proofFailedChecks" -Default @()))
+$bridgeRuntimeCreditLatencySeconds = Get-OpsProp -Object $bridgeRuntimeCreditTiming -Name "queueToSpendableSeconds" -Default $null
+$bridgeRuntimeTransferLatencySeconds = Get-OpsProp -Object $bridgeRuntimeCreditTiming -Name "transferSettlementSeconds" -Default $null
+$bridgeRuntimeCreditReady = $bridgeRuntimeCreditStatus -eq "passed" `
+    -and $bridgeRuntimeCreditFailedChecks.Count -eq 0 `
+    -and $bridgeRuntimeCreditMissingChecks.Count -eq 0 `
+    -and $bridgeRuntimeCreditFalseChecks.Count -eq 0 `
+    -and $bridgeRuntimeCreditProofFailedChecks.Count -eq 0 `
+    -and ((Get-OpsProp -Object $bridgeRuntimeCreditChecks -Name "sourceChainBase8453" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRuntimeCreditChecks -Name "creditAppliedOnce" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRuntimeCreditChecks -Name "creditedBalanceTransferable" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRuntimeCreditChecks -Name "replayRejected" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRuntimeCreditChecks -Name "restartPreservesCreditHistory" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRuntimeCreditChecks -Name "exportImportPreservesReplayProtection" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRuntimeCreditChecks -Name "latencyRecorded" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRuntimeCreditChecks -Name "latencyGatePassed" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeRuntimeCreditChecks -Name "transferLatencyUnderTarget" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.bridgeRuntimeCredit -Name "broadcasts" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.bridgeRuntimeCredit -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.bridgeRuntimeCredit -Name "noSecrets" -Default $false) -eq $true)
 $externalTesterStatus = Get-OpsStatus -Report $reports.externalTester
 $externalTesterEvidenceStatus = Get-OpsStatus -Report $reports.externalTesterEvidence
 $externalTesterEvidenceChecks = Get-OpsProp -Object $reports.externalTesterEvidence -Name "checks"
@@ -596,6 +623,9 @@ if (-not $bridgeRelayerGuardrailReady) {
 }
 if (-not $bridgeRelayerDirectObserveGuardrailReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-direct-observe-cursor-unsafe" -Message "Standalone Base 8453 observer cursor guardrail is missing, failed, or could touch the final relayer cursor without explicit owner opt-in." -Commands @("npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop")
+}
+if (-not $bridgeRuntimeCreditReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-runtime-credit-validation-failed" -Message "Bridge runtime credit validation is missing or failed: Base 8453 handoff must become L1 spendable, reject replay, transfer, and survive restart/export/import." -Commands @("npm run flowchain:bridge:runtime-credit:validate", "npm run flowchain:service:status", "npm run flowchain:bridge:emergency-stop")
 }
 if ($externalTesterStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "external-tester-not-shareable" -Message "External tester packet must remain not-shareable." -Commands @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet")
@@ -789,6 +819,14 @@ $report = [ordered]@{
         bridgeRelayerCursorCommitRequired = $bridgeRelayerCursorCommitRequired
         bridgeRelayerCursorCommitted = $bridgeRelayerCursorCommitted
         bridgeRelayerCursorReason = $bridgeRelayerCursorReason
+        bridgeRuntimeCredit = $bridgeRuntimeCreditStatus
+        bridgeRuntimeCreditReady = $bridgeRuntimeCreditReady
+        bridgeRuntimeCreditLatencySeconds = $bridgeRuntimeCreditLatencySeconds
+        bridgeRuntimeTransferLatencySeconds = $bridgeRuntimeTransferLatencySeconds
+        bridgeRuntimeCreditFailedChecks = $bridgeRuntimeCreditFailedChecks.Count
+        bridgeRuntimeCreditMissingRuntimeChecks = $bridgeRuntimeCreditMissingChecks.Count
+        bridgeRuntimeCreditFalseRuntimeChecks = $bridgeRuntimeCreditFalseChecks.Count
+        bridgeRuntimeCreditProofFailedChecks = $bridgeRuntimeCreditProofFailedChecks.Count
         externalTester = $externalTesterStatus
         externalTesterEvidence = $externalTesterEvidenceStatus
         externalTesterEvidenceFailedChecks = $externalTesterEvidenceFailedChecks.Count

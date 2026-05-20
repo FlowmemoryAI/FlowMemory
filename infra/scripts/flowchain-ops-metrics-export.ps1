@@ -325,6 +325,12 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_direct_observe_staged_
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_direct_observe_cursor_not_final" -Help "One when standalone Base observer cursor state is not the final relayer cursor." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDirectObserveCursorNotFinal"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_direct_observe_final_cursor_unchanged" -Help "One when standalone Base observer leaves final relayer cursor unchanged." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDirectObserveFinalCursorUnchanged"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_direct_observe_staged_cursor_not_written" -Help "One when missing-input standalone Base observer leaves staged cursor state unwritten." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDirectObserveStagedCursorNotWritten"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_credit_ready" -Help "One when production-shaped Base 8453 runtime credit validation is passed." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRuntimeCreditReady"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_credit_latency_seconds" -Help "Seconds from bridge handoff queue to spendable L1 credit in runtime validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRuntimeCreditLatencySeconds"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_transfer_latency_seconds" -Help "Seconds from credited wallet transfer queue to spendable transfer in runtime validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRuntimeTransferLatencySeconds"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_credit_failed_checks" -Help "Failed checks in bridge runtime credit validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRuntimeCreditFailedChecks"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_credit_missing_checks" -Help "Missing required runtime proof checks in bridge runtime credit validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRuntimeCreditMissingRuntimeChecks"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_credit_false_checks" -Help "Required runtime proof checks that are false in bridge runtime credit validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRuntimeCreditFalseRuntimeChecks"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_loop_healthy" -Help "One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRelayerLoopReportHealthy"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_bridge_relayer_requested" -Help "One when the latest service supervisor report requested bridge relayer loop supervision." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorBridgeRelayerRequested"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_bridge_relayer_recovery_healthy" -Help "One when supervisor relayer-loop recovery evidence is healthy, or relayer supervision was not requested." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorBridgeRelayerRecoveryHealthy"))
@@ -457,6 +463,12 @@ $requiredMetricNames = @(
     "flowchain_bridge_direct_observe_cursor_not_final",
     "flowchain_bridge_direct_observe_final_cursor_unchanged",
     "flowchain_bridge_direct_observe_staged_cursor_not_written",
+    "flowchain_bridge_runtime_credit_ready",
+    "flowchain_bridge_runtime_credit_latency_seconds",
+    "flowchain_bridge_runtime_transfer_latency_seconds",
+    "flowchain_bridge_runtime_credit_failed_checks",
+    "flowchain_bridge_runtime_credit_missing_checks",
+    "flowchain_bridge_runtime_credit_false_checks",
     "flowchain_bridge_relayer_loop_healthy",
     "flowchain_supervisor_bridge_relayer_requested",
     "flowchain_supervisor_bridge_relayer_recovery_healthy",
@@ -533,6 +545,14 @@ $checks = [ordered]@{
         "flowchain_bridge_direct_observe_cursor_not_final",
         "flowchain_bridge_direct_observe_final_cursor_unchanged",
         "flowchain_bridge_direct_observe_staged_cursor_not_written"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    bridgeRuntimeCreditMetricsPresent = @(
+        "flowchain_bridge_runtime_credit_ready",
+        "flowchain_bridge_runtime_credit_latency_seconds",
+        "flowchain_bridge_runtime_transfer_latency_seconds",
+        "flowchain_bridge_runtime_credit_failed_checks",
+        "flowchain_bridge_runtime_credit_missing_checks",
+        "flowchain_bridge_runtime_credit_false_checks"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     publicRpcEdgeMetricsPresent = @(
         "flowchain_public_rpc_deployment_bundle_ready",

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-20T06:23:04.1652575Z",
+    "generatedAt":  "2026-05-20T06:53:20.6226063Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -18,10 +18,10 @@
                                   "Every missing production edge fails closed on exact owner input names, with no secrets, env values, or live broadcasts."
                               ],
     "itemCounts":  {
-                       "passed":  21,
+                       "passed":  22,
                        "blocked":  7,
                        "failed":  0,
-                       "total":  28
+                       "total":  29
                    },
     "items":  [
                   {
@@ -29,7 +29,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=98663, finalizedHeight=98663",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=99072, finalizedHeight=99072",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -67,7 +67,7 @@
                       "layer":  "Operations",
                       "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=3, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=28, alertCoveredFindings=30, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=98, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, supervisorNodeRecoveryMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=21, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=19, incidentFailed=0",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=29, alertCoveredFindings=31, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=106, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, supervisorNodeRecoveryMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=22, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=19, incidentFailed=0",
                       "files":  [
                                     "infra/scripts/flowchain-service-monitor.ps1",
                                     "infra/scripts/flowchain-service-supervisor.ps1",
@@ -319,6 +319,8 @@
                                     "infra/scripts/flowchain-bridge-relayer-once.ps1",
                                     "infra/scripts/flowchain-bridge-relayer-guardrail-validation.ps1",
                                     "infra/scripts/flowchain-bridge-relayer-loop-validation.ps1",
+                                    "infra/scripts/flowchain-bridge-runtime-credit-validation.ps1",
+                                    "infra/scripts/flowchain-real-value-pilot-runtime.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/BRIDGE_RELAYER_LOOP_VALIDATION.md",
                                     "infra/scripts/flowchain-service-start.ps1"
                                 ],
@@ -353,6 +355,8 @@
                                     "infra/scripts/flowchain-bridge-relayer-once.ps1",
                                     "infra/scripts/flowchain-bridge-relayer-guardrail-validation.ps1",
                                     "infra/scripts/flowchain-bridge-relayer-loop-validation.ps1",
+                                    "infra/scripts/flowchain-bridge-runtime-credit-validation.ps1",
+                                    "infra/scripts/flowchain-real-value-pilot-runtime.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/BRIDGE_RELAYER_LOOP_VALIDATION.md",
                                     "infra/scripts/flowchain-service-start.ps1"
                                 ],
@@ -372,6 +376,25 @@
                                        "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                                        "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                        "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                   ]
+                  },
+                  {
+                      "id":  "bridge-runtime-credit-proof",
+                      "layer":  "Bridge",
+                      "requirement":  "The bridge runtime has a local production-shaped proof that a Base 8453 handoff becomes spendable on L1 within the settlement target, can be transferred by the credited wallet, rejects replay, and survives restart/export/import without broadcasts.",
+                      "status":  "passed",
+                      "evidence":  "runtimeCredit=passed, failedChecks=0, missingRuntimeChecks=0, falseRuntimeChecks=0, latencyGate=passed, queueToSpendableSeconds=0.679, transferSeconds=0.609",
+                      "files":  [
+                                    "infra/scripts/flowchain-bridge-runtime-credit-validation.ps1",
+                                    "infra/scripts/flowchain-real-value-pilot-runtime.ps1",
+                                    "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json",
+                                    "docs/agent-runs/live-product-infra-rpc/BRIDGE_RUNTIME_CREDIT_VALIDATION.md"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:bridge:runtime-credit:validate"
+                                   ],
+                      "blockers":  [
+
                                    ]
                   },
                   {
@@ -968,6 +991,7 @@
                         "bridgeRelayerOnce":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-once-report.json",
                         "bridgeRelayerGuardrailValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-guardrail-validation-report.json",
                         "bridgeRelayerLoopValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-loop-validation-report.json",
+                        "bridgeRuntimeCreditValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-runtime-credit-validation-report.json",
                         "bridgePilotLocal":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\services\\bridge-relayer\\out\\real-value-pilot-e2e\\bridge-real-value-pilot-e2e-report.json",
                         "baseTxDiagnostic":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\live-l1-bridge-e2e\\base-tx-diagnostic.json",
                         "ownerOnboarding":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-onboarding-report.json",
@@ -1052,15 +1076,15 @@
                                      },
     "opsAlertCoverage":  {
                              "status":  "passed",
-                             "ruleCount":  28,
-                             "criticalRuleCount":  21,
+                             "ruleCount":  29,
+                             "criticalRuleCount":  22,
                              "blockedRuleCount":  7,
-                             "coveredFindingCount":  30,
+                             "coveredFindingCount":  31,
                              "unmappedCurrentFindingCount":  0
                          },
     "opsMetricsCoverage":  {
                                "exportStatus":  "passed",
-                               "metricCount":  98,
+                               "metricCount":  106,
                                "exportFailedCheckCount":  0,
                                "installStatus":  "passed",
                                "installFailedCheckCount":  0,

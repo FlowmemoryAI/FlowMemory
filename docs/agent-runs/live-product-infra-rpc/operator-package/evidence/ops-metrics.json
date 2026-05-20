@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T06:23:43.2734773Z",
+    "generatedAt":  "2026-05-20T06:53:02.3591585Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -21,19 +21,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  98794
+                        "value":  99072
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  98794
+                        "value":  99072
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  6
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -75,7 +75,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  11749.481
+                        "value":  13501.594
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -360,6 +360,42 @@
                         "value":  1
                     },
                     {
+                        "name":  "flowchain_bridge_runtime_credit_ready",
+                        "type":  "gauge",
+                        "help":  "One when production-shaped Base 8453 runtime credit validation is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_runtime_credit_latency_seconds",
+                        "type":  "gauge",
+                        "help":  "Seconds from bridge handoff queue to spendable L1 credit in runtime validation.",
+                        "value":  0.679
+                    },
+                    {
+                        "name":  "flowchain_bridge_runtime_transfer_latency_seconds",
+                        "type":  "gauge",
+                        "help":  "Seconds from credited wallet transfer queue to spendable transfer in runtime validation.",
+                        "value":  0.609
+                    },
+                    {
+                        "name":  "flowchain_bridge_runtime_credit_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in bridge runtime credit validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_runtime_credit_missing_checks",
+                        "type":  "gauge",
+                        "help":  "Missing required runtime proof checks in bridge runtime credit validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_runtime_credit_false_checks",
+                        "type":  "gauge",
+                        "help":  "Required runtime proof checks that are false in bridge runtime credit validation.",
+                        "value":  0
+                    },
+                    {
                         "name":  "flowchain_bridge_relayer_loop_healthy",
                         "type":  "gauge",
                         "help":  "One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence.",
@@ -618,7 +654,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  100,
+    "metricCount":  106,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

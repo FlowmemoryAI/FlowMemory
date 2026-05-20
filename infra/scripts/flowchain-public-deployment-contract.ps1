@@ -75,6 +75,7 @@ $paths = [ordered]@{
     bridgeRelayerOnce = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     bridgeRelayerGuardrailValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
+    bridgeRuntimeCreditValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     architectureAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"
@@ -392,6 +393,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-relayer-once" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-once.ps1"), "-AllowBlocked", "-ReportPath", $paths.bridgeRelayerOnce)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-relayer-guardrail-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-guardrail-validation.ps1"), "-ReportPath", $paths.bridgeRelayerGuardrailValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-relayer-loop-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-loop-validation.ps1"), "-ReportPath", $paths.bridgeRelayerLoopValidation)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-runtime-credit-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-runtime-credit-validation.ps1"), "-ReportPath", $paths.bridgeRuntimeCreditValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "external-tester-packet" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-packet.ps1"), "-AllowBlocked", "-ReportPath", $paths.externalTesterPacket)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "no-secret-scan" -ArgumentList @(
         "-NoProfile",
@@ -1214,6 +1216,42 @@ Add-DeploymentItem -Items $items -Id "base8453-bridge-relayer-queue" `
     -Commands @("npm run flowchain:bridge:relayer:once", "npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:loop:validate") `
     -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
 
+$bridgeRuntimeCreditValidation = $reports.bridgeRuntimeCreditValidation
+$bridgeRuntimeCreditStatus = Get-DeploymentStatus -Report $bridgeRuntimeCreditValidation
+$bridgeRuntimeCreditChecks = Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "checks"
+$bridgeRuntimeCreditTiming = Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "timing"
+$bridgeRuntimeCreditFailedChecks = @((Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "failedChecks" -Default @()))
+$bridgeRuntimeCreditMissingRuntimeChecks = @((Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "missingRuntimeChecks" -Default @()))
+$bridgeRuntimeCreditFalseRuntimeChecks = @((Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "falseRuntimeChecks" -Default @()))
+$bridgeRuntimeCreditProofFailedChecks = @((Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "proofFailedChecks" -Default @()))
+$bridgeRuntimeCreditReady = ($bridgeRuntimeCreditStatus -eq "passed") `
+    -and ($bridgeRuntimeCreditFailedChecks.Count -eq 0) `
+    -and ($bridgeRuntimeCreditMissingRuntimeChecks.Count -eq 0) `
+    -and ($bridgeRuntimeCreditFalseRuntimeChecks.Count -eq 0) `
+    -and ($bridgeRuntimeCreditProofFailedChecks.Count -eq 0) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "requiredRuntimeChecksCovered" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "requiredRuntimeChecksPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "sourceChainBase8453" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "creditAppliedOnce" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "creditedBalanceTransferable" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "replayRejected" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "restartPreservesCreditHistory" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "exportImportPreservesReplayProtection" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "latencyGatePassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "transferLatencyUnderTarget" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "proofBroadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "handoffNoReleaseBroadcast" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "handoffNoWithdrawalBroadcast" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "broadcasts" -Default $true) -eq $false) `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:bridge:runtime-credit:validate")
+Add-DeploymentItem -Items $items -Id "base8453-bridge-runtime-credit-proof" `
+    -Requirement "The deployment has a local production-shaped proof that a Base 8453 bridge handoff becomes spendable on L1 within the settlement target, can be spent by the credited wallet, rejects replay, and survives restart/export/import without live broadcasts." `
+    -Status $(if ($bridgeRuntimeCreditReady) { "passed" } else { "failed" }) `
+    -Evidence "runtimeCredit=$bridgeRuntimeCreditStatus, failedChecks=$($bridgeRuntimeCreditFailedChecks.Count), missingRuntimeChecks=$($bridgeRuntimeCreditMissingRuntimeChecks.Count), falseRuntimeChecks=$($bridgeRuntimeCreditFalseRuntimeChecks.Count), latencyGate=$(Get-DeploymentProp -Object $bridgeRuntimeCreditTiming -Name 'latencyGate' -Default 'missing'), queueToSpendableSeconds=$(Get-DeploymentProp -Object $bridgeRuntimeCreditTiming -Name 'queueToSpendableSeconds' -Default ''), transferSeconds=$(Get-DeploymentProp -Object $bridgeRuntimeCreditTiming -Name 'transferSettlementSeconds' -Default '')" `
+    -Commands @("npm run flowchain:bridge:runtime-credit:validate")
+
 $externalTester = $reports.externalTester
 $externalPacket = $reports.externalTesterPacket
 $externalTesterStatus = Get-DeploymentStatus -Report $externalTester
@@ -1374,9 +1412,10 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:backup:restore:verify",
         "npm run flowchain:backup:check",
         "npm run flowchain:bridge:live:check",
-        "npm run flowchain:bridge:infra:check",
-        "npm run flowchain:bridge:relayer:once",
-        "npm run flowchain:tester:readiness",
+                                                 "npm run flowchain:bridge:infra:check",
+                                                 "npm run flowchain:bridge:relayer:once",
+                                                 "npm run flowchain:bridge:runtime-credit:validate",
+                                                 "npm run flowchain:tester:readiness",
         "npm run flowchain:external-tester:packet",
         "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
         "npm run flowchain:truth-table -- -AllowBlocked",

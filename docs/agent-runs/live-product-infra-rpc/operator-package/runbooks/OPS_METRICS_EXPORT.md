@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-20T06:23:43.4872794Z
+Generated: 2026-05-20T06:53:02.5941589Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 100
+- Metric count: 106
 
 ## Required Metrics
 
@@ -57,6 +57,12 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_bridge_direct_observe_cursor_not_final: present
 - flowchain_bridge_direct_observe_final_cursor_unchanged: present
 - flowchain_bridge_direct_observe_staged_cursor_not_written: present
+- flowchain_bridge_runtime_credit_ready: present
+- flowchain_bridge_runtime_credit_latency_seconds: present
+- flowchain_bridge_runtime_transfer_latency_seconds: present
+- flowchain_bridge_runtime_credit_failed_checks: present
+- flowchain_bridge_runtime_credit_missing_checks: present
+- flowchain_bridge_runtime_credit_false_checks: present
 - flowchain_bridge_relayer_loop_healthy: present
 - flowchain_supervisor_bridge_relayer_requested: present
 - flowchain_supervisor_bridge_relayer_recovery_healthy: present
@@ -120,6 +126,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | requiredMetricsPresent | True |
 | externalTesterEvidenceMetricsPresent | True |
 | bridgeDirectObserveMetricsPresent | True |
+| bridgeRuntimeCreditMetricsPresent | True |
 | publicRpcEdgeMetricsPresent | True |
 | transactionIntakeMetricsPresent | True |
 | dashboardUiMetricsPresent | True |

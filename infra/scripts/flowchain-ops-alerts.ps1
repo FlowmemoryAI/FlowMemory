@@ -194,6 +194,14 @@ $rules = @(
         commands = @("npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop")
     },
     [ordered]@{
+        id = "bridge-runtime-credit-validation-failed"
+        severity = "critical"
+        findingCodes = @("bridge-runtime-credit-validation-failed")
+        signal = "Base 8453 runtime credit proof is missing or failing."
+        threshold = "runtime credit validation is not passed, has failed/missing/false checks, exceeds latency gates, broadcasts, prints env values, or reports secrets"
+        commands = @("npm run flowchain:bridge:runtime-credit:validate", "npm run flowchain:service:status", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
         id = "bridge-relayer-loop-unhealthy"
         severity = "critical"
         findingCodes = @("bridge-relayer-loop-unhealthy")

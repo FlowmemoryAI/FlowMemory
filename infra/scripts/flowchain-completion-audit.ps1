@@ -77,6 +77,7 @@ $paths = [ordered]@{
     bridgeRelayerOnce = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     bridgeRelayerGuardrailValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
+    bridgeRuntimeCreditValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
     bridgeReleaseEvidenceValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-validation-report.json"
     bridgePilotLocal = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "services/bridge-relayer/out/real-value-pilot-e2e/bridge-real-value-pilot-e2e-report.json"
     baseTxDiagnostic = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/live-l1-bridge-e2e/base-tx-diagnostic.json"
@@ -404,6 +405,9 @@ $bridgeRelayerGuardrailValidationExitCode = $bridgeRelayerGuardrailValidationRes
 $bridgeRelayerLoopValidationResult = Invoke-AuditChild -Path $paths.bridgeRelayerLoopValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-loop-validation.ps1"))
 $bridgeRelayerLoopValidationOutput = @($bridgeRelayerLoopValidationResult.output)
 $bridgeRelayerLoopValidationExitCode = $bridgeRelayerLoopValidationResult.exitCode
+$bridgeRuntimeCreditValidationResult = Invoke-AuditChild -Path $paths.bridgeRuntimeCreditValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-runtime-credit-validation.ps1"))
+$bridgeRuntimeCreditValidationOutput = @($bridgeRuntimeCreditValidationResult.output)
+$bridgeRuntimeCreditValidationExitCode = $bridgeRuntimeCreditValidationResult.exitCode
 $bridgeReleaseEvidenceValidationResult = Invoke-AuditChild -Path $paths.bridgeReleaseEvidenceValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-release-evidence-validation.ps1"))
 $bridgeReleaseEvidenceValidationOutput = @($bridgeReleaseEvidenceValidationResult.output)
 $bridgeReleaseEvidenceValidationExitCode = $bridgeReleaseEvidenceValidationResult.exitCode
@@ -2045,6 +2049,56 @@ $bridgeRelayerLoopValidationPassed = $bridgeRelayerLoopValidationExitCode -eq 0 
     -and ((Get-AuditProp -Object $bridgeRelayerLoopValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $bridgeRelayerLoopValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $bridgeRelayerLoopValidation -Name "broadcasts" -Default $true) -eq $false)
+$bridgeRuntimeCreditValidation = $reports.bridgeRuntimeCreditValidation
+$bridgeRuntimeCreditValidationStatus = Get-ReportStatus -Report $bridgeRuntimeCreditValidation
+$bridgeRuntimeCreditChecks = Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name "checks"
+$bridgeRuntimeCreditFailedChecks = @((Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name "failedChecks" -Default @()))
+$bridgeRuntimeCreditMissingRuntimeChecks = @((Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name "missingRuntimeChecks" -Default @()))
+$bridgeRuntimeCreditFalseRuntimeChecks = @((Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name "falseRuntimeChecks" -Default @()))
+$bridgeRuntimeCreditProofFailedChecks = @((Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name "proofFailedChecks" -Default @()))
+$bridgeRuntimeCreditSecretFindings = @((Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name "secretMarkerFindings" -Default @()))
+$bridgeRuntimeCreditRequiredChecks = @(
+    "childCommandPassed",
+    "childDidNotTimeout",
+    "proofReportWritten",
+    "proofClassificationReady",
+    "proofFailedChecksEmpty",
+    "requiredRuntimeChecksCovered",
+    "requiredRuntimeChecksPassed",
+    "sourceChainBase8453",
+    "creditAppliedOnce",
+    "creditedBalanceTransferable",
+    "replayRejected",
+    "restartPreservesCreditHistory",
+    "exportImportPreservesReplayProtection",
+    "latencyRecorded",
+    "latencyGatePassed",
+    "transferLatencyUnderTarget",
+    "proofBroadcastsFalse",
+    "proofEnvValuesPrintedFalse",
+    "proofNoSecrets",
+    "handoffReportReadable",
+    "handoffNoReleaseBroadcast",
+    "handoffNoWithdrawalBroadcast",
+    "secretMarkerFindingsEmpty",
+    "broadcastsFalse",
+    "envValuesPrintedFalse",
+    "noSecrets"
+)
+$bridgeRuntimeCreditMissingChecks = @(Get-MissingAuditChecks -Checks $bridgeRuntimeCreditChecks -Names $bridgeRuntimeCreditRequiredChecks)
+$bridgeRuntimeCreditFalseRequiredChecks = @($bridgeRuntimeCreditRequiredChecks | Where-Object { (Get-AuditProp -Object $bridgeRuntimeCreditChecks -Name $_ -Default $false) -ne $true })
+$bridgeRuntimeCreditValidationPassed = $bridgeRuntimeCreditValidationExitCode -eq 0 `
+    -and $bridgeRuntimeCreditValidationStatus -eq "passed" `
+    -and $bridgeRuntimeCreditFailedChecks.Count -eq 0 `
+    -and $bridgeRuntimeCreditMissingRuntimeChecks.Count -eq 0 `
+    -and $bridgeRuntimeCreditFalseRuntimeChecks.Count -eq 0 `
+    -and $bridgeRuntimeCreditProofFailedChecks.Count -eq 0 `
+    -and $bridgeRuntimeCreditSecretFindings.Count -eq 0 `
+    -and $bridgeRuntimeCreditMissingChecks.Count -eq 0 `
+    -and $bridgeRuntimeCreditFalseRequiredChecks.Count -eq 0 `
+    -and ((Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name "broadcasts" -Default $true) -eq $false)
 $bridgeReleaseEvidenceValidation = $reports.bridgeReleaseEvidenceValidation
 $bridgeReleaseEvidenceValidationStatus = Get-ReportStatus -Report $bridgeReleaseEvidenceValidation
 $bridgeReleaseEvidenceValidationChecks = Get-AuditProp -Object $bridgeReleaseEvidenceValidation -Name "checks"
@@ -2920,6 +2974,12 @@ Add-AuditItem -Items $items -Id "bridge-relayer-loop-validation" `
     -Evidence "loopStatus=$bridgeRelayerLoopValidationStatus, failedChecks=$bridgeRelayerLoopFailedCheckCount, missingChecks=$bridgeRelayerLoopMissingCheckCount, secretFindings=$bridgeRelayerLoopSecretFindingCount, loopHealthy=$(Get-AuditProp -Object $bridgeRelayerLoopChecks -Name "statusRelayerReportHealthy" -Default $false), stopped=$(Get-AuditProp -Object $bridgeRelayerLoopChecks -Name "statusAfterStopNotRunning" -Default $false), report=$($paths.bridgeRelayerLoopValidation)" `
     -Commands @("npm run flowchain:bridge:relayer:loop:validate")
 
+Add-AuditItem -Items $items -Id "bridge-runtime-credit-validation" `
+    -Requirement "Bridge runtime credit validation proves a production-shaped Base 8453 handoff can be queued into an isolated L1, become spendable within the settlement target, reject replay, spend from the credited wallet, and survive restart/export/import without secrets or broadcasts." `
+    -Status $(if ($bridgeRuntimeCreditValidationPassed) { "passed" } else { "failed" }) `
+    -Evidence "runtimeCreditStatus=$bridgeRuntimeCreditValidationStatus, failedChecks=$($bridgeRuntimeCreditFailedChecks.Count), missingChecks=$($bridgeRuntimeCreditMissingChecks.Count), falseRequiredChecks=$($bridgeRuntimeCreditFalseRequiredChecks.Count), missingRuntimeChecks=$($bridgeRuntimeCreditMissingRuntimeChecks.Count), falseRuntimeChecks=$($bridgeRuntimeCreditFalseRuntimeChecks.Count), latencyGate=$(Get-AuditProp -Object (Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name 'timing') -Name 'latencyGate' -Default 'missing'), queueToSpendableSeconds=$(Get-AuditProp -Object (Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name 'timing') -Name 'queueToSpendableSeconds' -Default ''), report=$($paths.bridgeRuntimeCreditValidation)" `
+    -Commands @("npm run flowchain:bridge:runtime-credit:validate")
+
 Add-AuditItem -Items $items -Id "bridge-release-evidence-validation" `
     -Requirement "Bridge withdrawal/release evidence validation proves matching release evidence passes, missing inputs block, amount/token/recipient/chain/asset mismatches fail, broadcast flags are rejected, and validation remains no-secret/no-broadcast." `
     -Status $(if ($bridgeReleaseEvidenceValidationPassed) { "passed" } else { "failed" }) `
@@ -3035,6 +3095,8 @@ $report = [ordered]@{
     bridgeRelayerGuardrailValidationOutputRedacted = @($bridgeRelayerGuardrailValidationOutput | ForEach-Object { "$_" })
     bridgeRelayerLoopValidationExitCode = $bridgeRelayerLoopValidationExitCode
     bridgeRelayerLoopValidationOutputRedacted = @($bridgeRelayerLoopValidationOutput | ForEach-Object { "$_" })
+    bridgeRuntimeCreditValidationExitCode = $bridgeRuntimeCreditValidationExitCode
+    bridgeRuntimeCreditValidationOutputRedacted = @($bridgeRuntimeCreditValidationOutput | ForEach-Object { "$_" })
     ownerInputsExitCode = $ownerInputsExitCode
     ownerInputsOutputRedacted = @($ownerInputsOutput | ForEach-Object { "$_" })
     ownerOnboardingExitCode = $ownerOnboardingExitCode
@@ -3131,6 +3193,8 @@ $report = [ordered]@{
         bridgeRelayerGuardrailValidationPassed = $bridgeRelayerGuardrailValidationPassed
         bridgeRelayerLoopValidationStatus = $bridgeRelayerLoopValidationStatus
         bridgeRelayerLoopValidationPassed = $bridgeRelayerLoopValidationPassed
+        bridgeRuntimeCreditValidationStatus = $bridgeRuntimeCreditValidationStatus
+        bridgeRuntimeCreditValidationPassed = $bridgeRuntimeCreditValidationPassed
         publicDeploymentContractPacketSmoke = $publicDeploymentContractPacketSmoke
     }
     childProcessTimeoutSeconds = $ChildTimeoutSeconds
@@ -3176,6 +3240,7 @@ $report = [ordered]@{
         "npm run flowchain:dev-pack:e2e",
         "npm run flowchain:bridge:relayer:guardrail:validate",
         "npm run flowchain:bridge:relayer:loop:validate",
+        "npm run flowchain:bridge:runtime-credit:validate",
         "npm run flowchain:bridge:release:evidence:validate",
         "npm run flowchain:ops:snapshot",
         "npm run flowchain:ops:alerts",

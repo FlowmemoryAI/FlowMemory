@@ -66,6 +66,7 @@ $reportPaths = [ordered]@{
     bridgeRelayerOnce = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     bridgeRelayerGuardrailValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
+    bridgeRuntimeCreditValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
     bridgePilotLocal = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "services/bridge-relayer/out/real-value-pilot-e2e/bridge-real-value-pilot-e2e-report.json"
     baseTxDiagnostic = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/live-l1-bridge-e2e/base-tx-diagnostic.json"
     ownerOnboarding = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json"
@@ -874,6 +875,8 @@ $bridgeLiveFiles = @(
     "infra/scripts/flowchain-bridge-relayer-once.ps1",
     "infra/scripts/flowchain-bridge-relayer-guardrail-validation.ps1",
     "infra/scripts/flowchain-bridge-relayer-loop-validation.ps1",
+    "infra/scripts/flowchain-bridge-runtime-credit-validation.ps1",
+    "infra/scripts/flowchain-real-value-pilot-runtime.ps1",
     "docs/agent-runs/live-product-infra-rpc/BRIDGE_RELAYER_LOOP_VALIDATION.md",
     "infra/scripts/flowchain-service-start.ps1"
 )
@@ -926,6 +929,33 @@ $bridgeRelayerLoopReady = ($bridgeRelayerLoopStatus -eq "passed") `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopValidation -Name "broadcasts" -Default $true) -eq $false)
+$bridgeRuntimeCreditValidation = $reports.bridgeRuntimeCreditValidation
+$bridgeRuntimeCreditStatus = Get-ArchitectureStatus -Report $bridgeRuntimeCreditValidation
+$bridgeRuntimeCreditChecks = Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "checks"
+$bridgeRuntimeCreditTiming = Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "timing"
+$bridgeRuntimeCreditFailedChecks = @((Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "failedChecks" -Default @()))
+$bridgeRuntimeCreditMissingRuntimeChecks = @((Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "missingRuntimeChecks" -Default @()))
+$bridgeRuntimeCreditFalseRuntimeChecks = @((Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "falseRuntimeChecks" -Default @()))
+$bridgeRuntimeCreditProofFailedChecks = @((Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "proofFailedChecks" -Default @()))
+$bridgeRuntimeCreditReady = ($bridgeRuntimeCreditStatus -eq "passed") `
+    -and ($bridgeRuntimeCreditFailedChecks.Count -eq 0) `
+    -and ($bridgeRuntimeCreditMissingRuntimeChecks.Count -eq 0) `
+    -and ($bridgeRuntimeCreditFalseRuntimeChecks.Count -eq 0) `
+    -and ($bridgeRuntimeCreditProofFailedChecks.Count -eq 0) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "sourceChainBase8453" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "creditAppliedOnce" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "creditedBalanceTransferable" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "replayRejected" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "restartPreservesCreditHistory" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "exportImportPreservesReplayProtection" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "latencyGatePassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "transferLatencyUnderTarget" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "handoffNoReleaseBroadcast" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "handoffNoWithdrawalBroadcast" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "broadcasts" -Default $true) -eq $false) `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:bridge:runtime-credit:validate")
 $bridgeRelayerChecks = Get-ArchitectureProp -Object $bridgeRelayer -Name "checks"
 $bridgeRelayerFailedChecks = @((Get-ArchitectureProp -Object $bridgeRelayer -Name "failedChecks" -Default @()))
 $bridgeRelayerCheckContractReady = ($bridgeRelayerFailedChecks.Count -eq 0) `
@@ -989,6 +1019,13 @@ Add-ArchitectureItem -Items $items -Id "bridge-relayer-runtime-queue" -Layer "Br
     -Files $bridgeLiveFiles `
     -Commands @("npm run flowchain:bridge:relayer:once", "npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:loop:validate", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop") `
     -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
+
+Add-ArchitectureItem -Items $items -Id "bridge-runtime-credit-proof" -Layer "Bridge" `
+    -Requirement "The bridge runtime has a local production-shaped proof that a Base 8453 handoff becomes spendable on L1 within the settlement target, can be transferred by the credited wallet, rejects replay, and survives restart/export/import without broadcasts." `
+    -Status $(if ($bridgeRuntimeCreditReady) { "passed" } else { "failed" }) `
+    -Evidence "runtimeCredit=$bridgeRuntimeCreditStatus, failedChecks=$($bridgeRuntimeCreditFailedChecks.Count), missingRuntimeChecks=$($bridgeRuntimeCreditMissingRuntimeChecks.Count), falseRuntimeChecks=$($bridgeRuntimeCreditFalseRuntimeChecks.Count), latencyGate=$(Get-ArchitectureProp -Object $bridgeRuntimeCreditTiming -Name 'latencyGate' -Default 'missing'), queueToSpendableSeconds=$(Get-ArchitectureProp -Object $bridgeRuntimeCreditTiming -Name 'queueToSpendableSeconds' -Default ''), transferSeconds=$(Get-ArchitectureProp -Object $bridgeRuntimeCreditTiming -Name 'transferSettlementSeconds' -Default '')" `
+    -Files @("infra/scripts/flowchain-bridge-runtime-credit-validation.ps1", "infra/scripts/flowchain-real-value-pilot-runtime.ps1", "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json", "docs/agent-runs/live-product-infra-rpc/BRIDGE_RUNTIME_CREDIT_VALIDATION.md") `
+    -Commands @("npm run flowchain:bridge:runtime-credit:validate")
 
 $backupStatus = Get-ArchitectureStatus -Report $reports.backupReadiness
 $backupValidation = $reports.backupRestoreValidation

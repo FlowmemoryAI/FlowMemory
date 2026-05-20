@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 98794
+flowchain_latest_height 99072
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 98794
+flowchain_finalized_height 99072
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 6
+flowchain_state_file_age_seconds 1
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -27,7 +27,7 @@ flowchain_transaction_intake_accepted_rows_total 159
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 11749.481
+flowchain_transaction_intake_file_age_seconds 13501.594
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -169,6 +169,24 @@ flowchain_bridge_direct_observe_final_cursor_unchanged 1
 # HELP flowchain_bridge_direct_observe_staged_cursor_not_written One when missing-input standalone Base observer leaves staged cursor state unwritten.
 # TYPE flowchain_bridge_direct_observe_staged_cursor_not_written gauge
 flowchain_bridge_direct_observe_staged_cursor_not_written 1
+# HELP flowchain_bridge_runtime_credit_ready One when production-shaped Base 8453 runtime credit validation is passed.
+# TYPE flowchain_bridge_runtime_credit_ready gauge
+flowchain_bridge_runtime_credit_ready 1
+# HELP flowchain_bridge_runtime_credit_latency_seconds Seconds from bridge handoff queue to spendable L1 credit in runtime validation.
+# TYPE flowchain_bridge_runtime_credit_latency_seconds gauge
+flowchain_bridge_runtime_credit_latency_seconds 0.679
+# HELP flowchain_bridge_runtime_transfer_latency_seconds Seconds from credited wallet transfer queue to spendable transfer in runtime validation.
+# TYPE flowchain_bridge_runtime_transfer_latency_seconds gauge
+flowchain_bridge_runtime_transfer_latency_seconds 0.609
+# HELP flowchain_bridge_runtime_credit_failed_checks Failed checks in bridge runtime credit validation.
+# TYPE flowchain_bridge_runtime_credit_failed_checks gauge
+flowchain_bridge_runtime_credit_failed_checks 0
+# HELP flowchain_bridge_runtime_credit_missing_checks Missing required runtime proof checks in bridge runtime credit validation.
+# TYPE flowchain_bridge_runtime_credit_missing_checks gauge
+flowchain_bridge_runtime_credit_missing_checks 0
+# HELP flowchain_bridge_runtime_credit_false_checks Required runtime proof checks that are false in bridge runtime credit validation.
+# TYPE flowchain_bridge_runtime_credit_false_checks gauge
+flowchain_bridge_runtime_credit_false_checks 0
 # HELP flowchain_bridge_relayer_loop_healthy One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence.
 # TYPE flowchain_bridge_relayer_loop_healthy gauge
 flowchain_bridge_relayer_loop_healthy 0

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-20T06:28:45.1112655Z",
+    "generatedAt":  "2026-05-20T06:53:37.4862482Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -76,6 +76,7 @@
                             "flowchain:bridge:deploy:control:validate",
                             "flowchain:bridge:relayer:guardrail:validate",
                             "flowchain:bridge:relayer:loop:validate",
+                            "flowchain:bridge:runtime-credit:validate",
                             "flowchain:bridge:release:evidence:validate",
                             "flowchain:external-tester:packet",
                             "flowchain:external-tester:packet:validate",
@@ -313,6 +314,11 @@
                               "phase":  "bridge",
                               "command":  "npm run flowchain:bridge:relayer:loop:validate",
                               "purpose":  "Validate relayer loop start, fresh health reporting, clean stop, PID cleanup, and no leftover validation relayer process."
+                          },
+                          {
+                              "phase":  "bridge",
+                              "command":  "npm run flowchain:bridge:runtime-credit:validate",
+                              "purpose":  "Validate a production-shaped Base 8453 handoff becomes spendable, transferable, replay-safe, and restart/export/import-safe in isolated L1 state."
                           },
                           {
                               "phase":  "bridge",
@@ -838,6 +844,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json",
                          "destination":  "evidence/bridge-relayer-loop-validation-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json",
+                         "destination":  "evidence/bridge-runtime-credit-validation-report.json",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"

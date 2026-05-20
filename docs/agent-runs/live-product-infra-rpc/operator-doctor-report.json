@@ -1,12 +1,12 @@
 {
     "schema":  "flowchain.doctor_report.v0",
-    "generatedAt":  "2026-05-20T06:28:44.3652463Z",
+    "generatedAt":  "2026-05-20T06:53:36.8742321Z",
     "status":  "blocked",
     "repoRoot":  "E:/FlowMemory/flowmemory-live-infra-rpc",
-    "diskFreeGiB":  91.07,
-    "stateFileLastWriteAgeSeconds":  1,
-    "latestHeight":  "98830",
-    "finalizedHeight":  "98830",
+    "diskFreeGiB":  90.64,
+    "stateFileLastWriteAgeSeconds":  5,
+    "latestHeight":  "99072",
+    "finalizedHeight":  "99072",
     "localUrls":  {
                       "controlPlaneHealth":  "http://127.0.0.1:8787/health",
                       "dashboard":  "http://127.0.0.1:5173/"
@@ -282,21 +282,21 @@
                        "name":  "disk-free:E",
                        "status":  "running",
                        "owner":  "storage",
-                       "detail":  "91.07 GiB free on E:",
+                       "detail":  "90.64 GiB free on E:",
                        "nextCommand":  "free disk space before public operation"
                    },
                    {
                        "name":  "state-file",
                        "status":  "running",
                        "owner":  "storage",
-                       "detail":  "devnet/local/state.json age seconds: 1",
+                       "detail":  "devnet/local/state.json age seconds: 5",
                        "nextCommand":  "npm run flowchain:service:start -- -LiveProfile"
                    },
                    {
                        "name":  "service-status-report",
                        "status":  "running",
                        "owner":  "service",
-                       "detail":  "latestHeight=98830 finalizedHeight=98830 stateAge=3",
+                       "detail":  "latestHeight=99072 finalizedHeight=99072 stateAge=1",
                        "nextCommand":  "npm run flowchain:service:status -- -AllowBlocked"
                    },
                    {

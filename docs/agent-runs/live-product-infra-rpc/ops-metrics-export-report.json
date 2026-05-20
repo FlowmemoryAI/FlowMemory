@@ -1,20 +1,11 @@
 {
     "schema":  "flowchain.ops_metrics_export_report.v0",
-    "generatedAt":  "2026-05-20T06:23:43.4872794Z",
+    "generatedAt":  "2026-05-20T06:53:02.5941589Z",
     "status":  "passed",
     "refresh":  {
-                    "performed":  true,
+                    "performed":  false,
                     "steps":  [
-                                  {
-                                      "name":  "ops-snapshot",
-                                      "exitCode":  0,
-                                      "outputLineCount":  5
-                                  },
-                                  {
-                                      "name":  "ops-alerts",
-                                      "exitCode":  0,
-                                      "outputLineCount":  5
-                                  }
+
                               ]
                 },
     "reportPaths":  {
@@ -41,7 +32,7 @@
                     },
     "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.json",
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
-    "metricCount":  100,
+    "metricCount":  106,
     "requiredMetricNames":  [
                                 "flowchain_latest_height",
                                 "flowchain_finalized_height",
@@ -89,6 +80,12 @@
                                 "flowchain_bridge_direct_observe_cursor_not_final",
                                 "flowchain_bridge_direct_observe_final_cursor_unchanged",
                                 "flowchain_bridge_direct_observe_staged_cursor_not_written",
+                                "flowchain_bridge_runtime_credit_ready",
+                                "flowchain_bridge_runtime_credit_latency_seconds",
+                                "flowchain_bridge_runtime_transfer_latency_seconds",
+                                "flowchain_bridge_runtime_credit_failed_checks",
+                                "flowchain_bridge_runtime_credit_missing_checks",
+                                "flowchain_bridge_runtime_credit_false_checks",
                                 "flowchain_bridge_relayer_loop_healthy",
                                 "flowchain_supervisor_bridge_relayer_requested",
                                 "flowchain_supervisor_bridge_relayer_recovery_healthy",
@@ -152,6 +149,7 @@
                    "requiredMetricsPresent":  true,
                    "externalTesterEvidenceMetricsPresent":  true,
                    "bridgeDirectObserveMetricsPresent":  true,
+                   "bridgeRuntimeCreditMetricsPresent":  true,
                    "publicRpcEdgeMetricsPresent":  true,
                    "transactionIntakeMetricsPresent":  true,
                    "dashboardUiMetricsPresent":  true,

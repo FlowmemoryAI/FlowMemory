@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Command Matrix
 
-Generated: 2026-05-20T06:28:45.1112655Z
+Generated: 2026-05-20T06:53:37.4862482Z
 
 | Phase | Command | Purpose |
 | --- | --- | --- |
@@ -49,6 +49,7 @@ Generated: 2026-05-20T06:28:45.1112655Z
 | bridge | `npm run flowchain:bridge:deploy:control:validate` | Validate Base 8453 deploy, pause, resume, and emergency-stop gates fail closed without owner env and require broadcast acknowledgements. |
 | bridge | `npm run flowchain:bridge:relayer:guardrail:validate` | Prove missing owner inputs cannot mutate cursor state or queue credits. |
 | bridge | `npm run flowchain:bridge:relayer:loop:validate` | Validate relayer loop start, fresh health reporting, clean stop, PID cleanup, and no leftover validation relayer process. |
+| bridge | `npm run flowchain:bridge:runtime-credit:validate` | Validate a production-shaped Base 8453 handoff becomes spendable, transferable, replay-safe, and restart/export/import-safe in isolated L1 state. |
 | bridge | `npm run flowchain:bridge:release:evidence:validate` | Validate withdrawal/release evidence matching, mismatch rejection, and no-broadcast boundaries. |
 | testers | `npm run flowchain:external-tester:packet -- -AllowBlocked` | Regenerate the friends-and-family packet and fail closed until public gates pass. |
 | testers | `npm run flowchain:external-tester:packet:validate` | Validate the packet and connect pack are no-secret, locally executable, and not externally shareable before owner inputs. |

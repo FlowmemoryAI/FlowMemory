@@ -1324,6 +1324,54 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "bridge-runtime-credit-validation"
+        requirement = "Bridge runtime credit validation proves a production-shaped Base 8453 handoff can be queued into an isolated L1, become spendable within the settlement target, reject replay, spend from the credited wallet, and survive restart/export/import without secrets or broadcasts."
+        path = "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
+        command = "npm run flowchain:bridge:runtime-credit:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "childCommandPassed",
+            "childDidNotTimeout",
+            "proofReportWritten",
+            "proofClassificationReady",
+            "proofFailedChecksEmpty",
+            "requiredRuntimeChecksCovered",
+            "requiredRuntimeChecksPassed",
+            "sourceChainBase8453",
+            "creditAppliedOnce",
+            "creditedBalanceTransferable",
+            "replayRejected",
+            "restartPreservesCreditHistory",
+            "exportImportPreservesReplayProtection",
+            "latencyRecorded",
+            "latencyGatePassed",
+            "transferLatencyUnderTarget",
+            "proofBroadcastsFalse",
+            "proofEnvValuesPrintedFalse",
+            "proofNoSecrets",
+            "handoffReportReadable",
+            "handoffNoReleaseBroadcast",
+            "handoffNoWithdrawalBroadcast",
+            "secretMarkerFindingsEmpty",
+            "broadcastsFalse",
+            "envValuesPrintedFalse",
+            "noSecrets"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingRuntimeChecks",
+            "falseRuntimeChecks",
+            "proofFailedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "external-tester-readiness"
         requirement = "External tester flow remains blocked until public RPC, backup, bridge, and local tester evidence pass."
         path = "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
@@ -1899,7 +1947,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-release-evidence-validation", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "tester-write-token-setup", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "bridge-release-evidence-validation", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "tester-write-token-setup", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"
