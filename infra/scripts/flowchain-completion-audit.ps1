@@ -2698,6 +2698,7 @@ $opsAlertRequiredChecks = @(
     "commandsAvoidUrls",
     "supervisorNodeRecoveryRuleCoversLiveProfile",
     "bridgeRelayerLoopRuleCoversValidationTelemetry",
+    "serviceInstallValidationRuleCoversAutorecoveryTelemetry",
     "findingsWithoutCommandsEmpty",
     "notificationPlanStoresNoSecrets",
     "notificationPlanNoNetworkDelivery",
@@ -3264,9 +3265,9 @@ Add-AuditItem -Items $items -Id "ops-snapshot" `
     -Commands @("npm run flowchain:ops:snapshot -- -AllowBlocked")
 
 Add-AuditItem -Items $items -Id "ops-alert-rules" `
-    -Requirement "Ops alert rules map every current ops finding to local operator commands with critical and blocked rule coverage, no unmapped current findings, and no external delivery credentials." `
+    -Requirement "Ops alert rules map every current ops finding, service-install validation regression, and autorecovery telemetry regression to local operator commands with critical and blocked rule coverage, no unmapped current findings, and no external delivery credentials." `
     -Status $(if ($opsAlertRulesPassed) { "passed" } else { "failed" }) `
-    -Evidence "alertRules=$opsAlertRulesStatus, rules=$opsAlertRuleCount, criticalRules=$opsAlertCriticalRuleCount, blockedRules=$opsAlertBlockedRuleCount, failedChecks=$opsAlertFailedCheckCount, missingChecks=$opsAlertMissingCheckCount, secretFindings=$opsAlertSecretFindingCount, unmapped=$($opsAlertUnmappedCodes.Count), rulesWithoutCommands=$($opsAlertRulesWithoutCommands.Count), commandUrls=$($opsAlertCommandsWithUrls.Count), inlineEnvAssignments=$($opsAlertCommandsWithInlineEnvAssignment.Count), report=$($paths.opsAlertRules)" `
+    -Evidence "alertRules=$opsAlertRulesStatus, rules=$opsAlertRuleCount, criticalRules=$opsAlertCriticalRuleCount, blockedRules=$opsAlertBlockedRuleCount, failedChecks=$opsAlertFailedCheckCount, missingChecks=$opsAlertMissingCheckCount, secretFindings=$opsAlertSecretFindingCount, serviceInstallAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "serviceInstallValidationRuleCoversAutorecoveryTelemetry" -Default $false), unmapped=$($opsAlertUnmappedCodes.Count), rulesWithoutCommands=$($opsAlertRulesWithoutCommands.Count), commandUrls=$($opsAlertCommandsWithUrls.Count), inlineEnvAssignments=$($opsAlertCommandsWithInlineEnvAssignment.Count), report=$($paths.opsAlertRules)" `
     -Commands @("npm run flowchain:ops:alerts -- -AllowBlocked")
 
 Add-AuditItem -Items $items -Id "ops-alert-install-validation" `

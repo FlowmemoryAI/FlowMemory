@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T19:43:17.7883328Z",
+    "generatedAt":  "2026-05-20T20:06:44.3489141Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  33,
-    "criticalRuleCount":  26,
+    "ruleCount":  34,
+    "criticalRuleCount":  27,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -49,6 +49,7 @@
                                 "bridge-relayer-loop-unhealthy",
                                 "supervisor-relayer-recovery-failed",
                                 "supervisor-node-recovery-validation-failed",
+                                "service-install-validation-failed",
                                 "deployment-refresh-aborted",
                                 "truth-table-stale-or-failed",
                                 "external-tester-evidence-unsafe",
@@ -102,6 +103,7 @@
                    "bridgeRelayerCheckContractRuleCoversFailedChecks":  true,
                    "bridgeRelayerLoopRuleCoversValidationTelemetry":  true,
                    "supervisorNodeRecoveryRuleCoversLiveProfile":  true,
+                   "serviceInstallValidationRuleCoversAutorecoveryTelemetry":  true,
                    "externalTesterLaunchRuleCoversGatewayAndFaucet":  true,
                    "publicTesterGatewayRuleCoversNoSecretNoBroadcast":  true,
                    "ownerGoLiveHandoffRuleCoversReleaseReady":  true,
@@ -367,6 +369,20 @@
                                        "npm run flowchain:service:supervisor:validate",
                                        "npm run flowchain:service:supervisor -- -Once",
                                        "npm run flowchain:service:restart -- -LiveProfile"
+                                   ]
+                  },
+                  {
+                      "id":  "service-install-validation-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "service-install-validation-failed"
+                                       ],
+                      "signal":  "Windows Scheduled Task or Linux systemd service install validation is missing or unsafe.",
+                      "threshold":  "Windows service install validation or systemd service install validation is not passed, has failedChecks or missing scripts, mutates host state, lacks live profile default, bridge-relayer opt-in, autorecovery, restart-always, least-privilege hardening, no-secret evidence, or no-broadcast evidence",
+                      "commands":  [
+                                       "npm run flowchain:service:install:validate",
+                                       "npm run flowchain:service:install:systemd:validate",
+                                       "npm run flowchain:service:status"
                                    ]
                   },
                   {

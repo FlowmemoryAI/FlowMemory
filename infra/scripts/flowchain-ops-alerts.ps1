@@ -234,6 +234,14 @@ $rules = @(
         commands = @("npm run flowchain:service:supervisor:validate", "npm run flowchain:service:supervisor -- -Once", "npm run flowchain:service:restart -- -LiveProfile")
     },
     [ordered]@{
+        id = "service-install-validation-failed"
+        severity = "critical"
+        findingCodes = @("service-install-validation-failed")
+        signal = "Windows Scheduled Task or Linux systemd service install validation is missing or unsafe."
+        threshold = "Windows service install validation or systemd service install validation is not passed, has failedChecks or missing scripts, mutates host state, lacks live profile default, bridge-relayer opt-in, autorecovery, restart-always, least-privilege hardening, no-secret evidence, or no-broadcast evidence"
+        commands = @("npm run flowchain:service:install:validate", "npm run flowchain:service:install:systemd:validate", "npm run flowchain:service:status")
+    },
+    [ordered]@{
         id = "deployment-refresh-aborted"
         severity = "critical"
         findingCodes = @("deployment-refresh-aborted")
@@ -400,6 +408,18 @@ $supervisorNodeRecoveryRule = @($rules | Where-Object { $_.id -eq "supervisor-no
 $supervisorNodeRecoveryRuleCoversLiveProfile = $supervisorNodeRecoveryRule.Count -eq 1 `
     -and ([string]$supervisorNodeRecoveryRule[0].threshold).IndexOf("live-profile", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$supervisorNodeRecoveryRule[0].threshold).IndexOf("unbounded", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$serviceInstallValidationRule = @($rules | Where-Object { $_.id -eq "service-install-validation-failed" } | Select-Object -First 1)
+$serviceInstallValidationRuleCoversAutorecoveryTelemetry = $serviceInstallValidationRule.Count -eq 1 `
+    -and ([string]$serviceInstallValidationRule[0].threshold).IndexOf("systemd", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$serviceInstallValidationRule[0].threshold).IndexOf("failedChecks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$serviceInstallValidationRule[0].threshold).IndexOf("bridge-relayer opt-in", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$serviceInstallValidationRule[0].threshold).IndexOf("autorecovery", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$serviceInstallValidationRule[0].threshold).IndexOf("restart-always", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$serviceInstallValidationRule[0].threshold).IndexOf("hardening", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$serviceInstallValidationRule[0].threshold).IndexOf("no-secret", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$serviceInstallValidationRule[0].threshold).IndexOf("no-broadcast", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($serviceInstallValidationRule[0].commands) -contains "npm run flowchain:service:install:validate") `
+    -and (@($serviceInstallValidationRule[0].commands) -contains "npm run flowchain:service:install:systemd:validate")
 $externalTesterLaunchRule = @($rules | Where-Object { $_.id -eq "external-tester-not-shareable" } | Select-Object -First 1)
 $externalTesterLaunchRuleCoversGatewayAndFaucet = $externalTesterLaunchRule.Count -eq 1 `
     -and ([string]$externalTesterLaunchRule[0].threshold).IndexOf("public tester gateway", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
@@ -437,6 +457,7 @@ $checks = [ordered]@{
     bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRuleCoversFailedChecks
     bridgeRelayerLoopRuleCoversValidationTelemetry = $bridgeRelayerLoopRuleCoversValidationTelemetry
     supervisorNodeRecoveryRuleCoversLiveProfile = $supervisorNodeRecoveryRuleCoversLiveProfile
+    serviceInstallValidationRuleCoversAutorecoveryTelemetry = $serviceInstallValidationRuleCoversAutorecoveryTelemetry
     externalTesterLaunchRuleCoversGatewayAndFaucet = $externalTesterLaunchRuleCoversGatewayAndFaucet
     publicTesterGatewayRuleCoversNoSecretNoBroadcast = $publicTesterGatewayRuleCoversNoSecretNoBroadcast
     ownerGoLiveHandoffRuleCoversReleaseReady = $ownerGoLiveHandoffRuleCoversReleaseReady

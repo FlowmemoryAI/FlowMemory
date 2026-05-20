@@ -47,6 +47,8 @@ $paths = [ordered]@{
     serviceSupervisor = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-report.json"
     serviceSupervisorValidation = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
     serviceMonitor = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
+    serviceInstallValidation = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
+    systemdServiceInstallValidation = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"
     publicRpc = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
     publicRpcSyntheticCanary = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json"
     publicRpcDeploymentBundle = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
@@ -272,6 +274,8 @@ $findings = New-Object System.Collections.ArrayList
 $service = $reports.serviceStatus
 $serviceSupervisor = $reports.serviceSupervisor
 $serviceSupervisorValidation = $reports.serviceSupervisorValidation
+$serviceInstallValidation = $reports.serviceInstallValidation
+$systemdServiceInstallValidation = $reports.systemdServiceInstallValidation
 $monitor = $reports.serviceMonitor
 $serviceStatus = Get-OpsStatus -Report $service
 $monitorStatus = Get-OpsStatus -Report $monitor
@@ -317,6 +321,39 @@ $supervisorNodeRecoveryHealthy = $supervisorValidationStatus -eq "passed" `
     -and $supervisorNodeRecoveryControlPlaneRunning `
     -and $supervisorNodeRecoveryLiveProfile `
     -and $supervisorNodeRecoveryMaxBlocksUnbounded
+$serviceInstallValidationStatus = Get-OpsStatus -Report $serviceInstallValidation
+$serviceInstallValidationChecks = Get-OpsProp -Object $serviceInstallValidation -Name "checks"
+$serviceInstallValidationFailedChecks = @((Get-OpsProp -Object $serviceInstallValidation -Name "failedChecks" -Default @()))
+$serviceInstallValidationSecretFindings = @((Get-OpsProp -Object $serviceInstallValidation -Name "secretMarkerFindings" -Default @()))
+$serviceInstallValidationMissingPackageScripts = @((Get-OpsProp -Object $serviceInstallValidation -Name "missingPackageScripts" -Default @()))
+$serviceInstallValidationReady = $serviceInstallValidationStatus -eq "passed" `
+    -and $serviceInstallValidationFailedChecks.Count -eq 0 `
+    -and $serviceInstallValidationSecretFindings.Count -eq 0 `
+    -and $serviceInstallValidationMissingPackageScripts.Count -eq 0 `
+    -and ((Get-OpsProp -Object $serviceInstallValidationChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $serviceInstallValidationChecks -Name "liveProfileDefault" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $serviceInstallValidationChecks -Name "bridgeRelayerOptInStartsLoop" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $serviceInstallValidationChecks -Name "statusActionReadOnly" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $serviceInstallValidationChecks -Name "statusDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $serviceInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $serviceInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $serviceInstallValidation -Name "broadcasts" -Default $true) -eq $false)
+$systemdServiceInstallValidationStatus = Get-OpsStatus -Report $systemdServiceInstallValidation
+$systemdServiceInstallValidationChecks = Get-OpsProp -Object $systemdServiceInstallValidation -Name "checks"
+$systemdServiceInstallValidationFailedChecks = @((Get-OpsProp -Object $systemdServiceInstallValidation -Name "failedChecks" -Default @()))
+$systemdServiceInstallValidationSecretFindings = @((Get-OpsProp -Object $systemdServiceInstallValidation -Name "secretMarkerFindings" -Default @()))
+$systemdServiceInstallValidationReady = $systemdServiceInstallValidationStatus -eq "passed" `
+    -and $systemdServiceInstallValidationFailedChecks.Count -eq 0 `
+    -and $systemdServiceInstallValidationSecretFindings.Count -eq 0 `
+    -and ((Get-OpsProp -Object $systemdServiceInstallValidationChecks -Name "installPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $systemdServiceInstallValidationChecks -Name "installPlanUsesRenderedUnits" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $systemdServiceInstallValidationChecks -Name "supervisorUsesAutorecoveryLoop" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $systemdServiceInstallValidationChecks -Name "supervisorRestartAlways" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $systemdServiceInstallValidationChecks -Name "leastPrivilegeHardeningPresent" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $systemdServiceInstallValidation -Name "hostMutationPerformed" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $systemdServiceInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $systemdServiceInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $systemdServiceInstallValidation -Name "broadcasts" -Default $true) -eq $false)
 $latestHeight = [string](Get-OpsProp -Object $chain -Name "latestHeight" -Default "")
 $finalizedHeight = [string](Get-OpsProp -Object $chain -Name "finalizedHeight" -Default "")
 $stateAge = [int](Get-OpsProp -Object $chain -Name "stateFileLastWriteAgeSeconds" -Default 999999)
@@ -357,6 +394,9 @@ if ($supervisorBridgeRelayerRequested -eq $true -and $supervisorRelayerRecoveryH
 }
 if ($supervisorNodeRecoveryHealthy -ne $true) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "supervisor-node-recovery-validation-failed" -Message "Service supervisor node crash recovery validation is missing or failed." -Commands @("npm run flowchain:service:supervisor:validate", "npm run flowchain:service:supervisor -- -Once", "npm run flowchain:service:restart -- -LiveProfile")
+}
+if ($serviceInstallValidationReady -ne $true -or $systemdServiceInstallValidationReady -ne $true) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "service-install-validation-failed" -Message "Windows or systemd service install validation is missing, unsafe, or failed." -Commands @("npm run flowchain:service:install:validate", "npm run flowchain:service:install:systemd:validate", "npm run flowchain:service:status")
 }
 
 $publicRpcStatus = Get-OpsStatus -Report $reports.publicRpc
@@ -816,6 +856,11 @@ $incidentCommands = [ordered]@{
         "npm run flowchain:bridge:relayer:loop:validate",
         "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop"
     )
+    serviceInstall = @(
+        "npm run flowchain:service:install:validate",
+        "npm run flowchain:service:install:systemd:validate",
+        "npm run flowchain:service:status"
+    )
 }
 
 $report = [ordered]@{
@@ -856,6 +901,20 @@ $report = [ordered]@{
         serviceSupervisor = $supervisorStatus
         serviceSupervisorValidation = $supervisorValidationStatus
         serviceMonitor = $monitorStatus
+        serviceInstallValidation = $serviceInstallValidationStatus
+        serviceInstallValidationReady = $serviceInstallValidationReady
+        serviceInstallValidationFailedChecks = $serviceInstallValidationFailedChecks.Count
+        serviceInstallValidationMissingScripts = $serviceInstallValidationMissingPackageScripts.Count
+        serviceInstallValidationNoSecrets = (Get-OpsProp -Object $serviceInstallValidation -Name "noSecrets" -Default $false)
+        serviceInstallValidationNoBroadcasts = ((Get-OpsProp -Object $serviceInstallValidation -Name "broadcasts" -Default $true) -eq $false)
+        systemdServiceInstallValidation = $systemdServiceInstallValidationStatus
+        systemdServiceInstallValidationReady = $systemdServiceInstallValidationReady
+        systemdServiceInstallValidationFailedChecks = $systemdServiceInstallValidationFailedChecks.Count
+        systemdServiceInstallAutorecoveryLoop = Get-OpsProp -Object $systemdServiceInstallValidationChecks -Name "supervisorUsesAutorecoveryLoop" -Default $false
+        systemdServiceInstallRestartAlways = Get-OpsProp -Object $systemdServiceInstallValidationChecks -Name "supervisorRestartAlways" -Default $false
+        systemdServiceInstallHardening = Get-OpsProp -Object $systemdServiceInstallValidationChecks -Name "leastPrivilegeHardeningPresent" -Default $false
+        systemdServiceInstallNoSecrets = (Get-OpsProp -Object $systemdServiceInstallValidation -Name "noSecrets" -Default $false)
+        systemdServiceInstallNoBroadcasts = ((Get-OpsProp -Object $systemdServiceInstallValidation -Name "broadcasts" -Default $true) -eq $false)
         transactionIntake = if ($txIntakeInvalidRows -eq 0) { "passed" } else { "failed" }
         transactionIntakeInvalidRows = $txIntakeInvalidRows
         transactionIntakeRows = Get-OpsProp -Object $txIntakeFacts -Name "rowCount" -Default 0

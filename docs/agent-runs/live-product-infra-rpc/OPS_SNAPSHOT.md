@@ -1,10 +1,10 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-20T16:52:00.8998685Z
+Generated: 2026-05-20T20:06:36.7970803Z
 Status: blocked
-Latest height: 104297
-Finalized height: 104297
-Transaction intake rows: 181
+Latest height: 105950
+Finalized height: 105950
+Transaction intake rows: 183
 Runtime inbox files: 0
 
 ## Findings
@@ -64,3 +64,8 @@ Runtime inbox files: 0
 - npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop
 - npm run flowchain:bridge:relayer:loop:validate
 - npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop
+
+### serviceInstall
+- npm run flowchain:service:install:validate
+- npm run flowchain:service:install:systemd:validate
+- npm run flowchain:service:status
