@@ -228,6 +228,11 @@ $launchSequence = @(
             "npm run flowchain:owner-inputs -- -AllowBlocked",
             "npm run flowchain:owner-inputs:validate"
         )
+        expectedReportPaths = @(
+            "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-report.json",
+            "docs/agent-runs/live-product-infra-rpc/owner-inputs-report.json",
+            "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
+        )
     },
     [ordered]@{
         id = "render-public-rpc"
@@ -240,6 +245,10 @@ $launchSequence = @(
             "npm run flowchain:public-rpc:deployment-bundle",
             "npm run flowchain:public-rpc:deployment:automation",
             "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-automation.ps1 -Action Render -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -OwnerEnvFile <FLOWCHAIN_OWNER_ENV_FILE> -TlsCertificatePath <PATH_TO_TLS_CERTIFICATE> -TlsCertificateKeyPath <PATH_TO_TLS_CERTIFICATE_KEY> -NginxExe <FLOWCHAIN_NGINX_EXE>"
+        )
+        expectedReportPaths = @(
+            "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json",
+            "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
         )
     },
     [ordered]@{
@@ -254,6 +263,9 @@ $launchSequence = @(
             "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>",
             "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop"
         )
+        expectedReportPaths = @(
+            "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"
+        )
     },
     [ordered]@{
         id = "local-service"
@@ -265,6 +277,10 @@ $launchSequence = @(
         commands = @(
             "npm run flowchain:service:status",
             "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30"
+        )
+        expectedReportPaths = @(
+            "docs/agent-runs/live-product-infra-rpc/service-status-report.json",
+            "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
         )
     },
     [ordered]@{
@@ -280,6 +296,12 @@ $launchSequence = @(
             "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
             "npm run flowchain:public-rpc:abuse-test"
         )
+        expectedReportPaths = @(
+            "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json",
+            "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json",
+            "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json",
+            "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
+        )
     },
     [ordered]@{
         id = "backup"
@@ -292,6 +314,11 @@ $launchSequence = @(
             "npm run flowchain:backup:check -- -AllowBlocked",
             "npm run flowchain:backup:restore:validate",
             "npm run flowchain:backup:owner-path:dry-run"
+        )
+        expectedReportPaths = @(
+            "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json",
+            "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json",
+            "docs/agent-runs/live-product-infra-rpc/backup-owner-path-dry-run-report.json"
         )
     },
     [ordered]@{
@@ -308,6 +335,14 @@ $launchSequence = @(
             "npm run flowchain:bridge:relayer:loop:validate",
             "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
             "npm run flowchain:bridge:reconciliation"
+        )
+        expectedReportPaths = @(
+            "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json",
+            "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json",
+            "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json",
+            "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json",
+            "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json",
+            "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-report.json"
         )
     },
     [ordered]@{
@@ -326,6 +361,15 @@ $launchSequence = @(
             "npm run flowchain:external-tester:client:validate",
             "npm run flowchain:tester:evidence:validate"
         )
+        expectedReportPaths = @(
+            "docs/agent-runs/live-product-infra-rpc/tester-write-token-setup-report.json",
+            "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json",
+            "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json",
+            "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json",
+            "docs/agent-runs/live-product-infra-rpc/external-tester-packet-validation-report.json",
+            "docs/agent-runs/live-product-infra-rpc/external-tester-client-validation-report.json",
+            "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
+        )
     },
     [ordered]@{
         id = "final-audit"
@@ -341,6 +385,13 @@ $launchSequence = @(
             "npm run flowchain:truth-table -- -AllowBlocked",
             "npm run flowchain:no-secret:scan"
         )
+        expectedReportPaths = @(
+            "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json",
+            "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json",
+            "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json",
+            "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json",
+            "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
+        )
     }
 )
 $rollbackCommands = @(
@@ -355,6 +406,10 @@ $rollbackCommands = @(
 $launchSequenceCommands = @($launchSequence | ForEach-Object { @($_.commands) })
 $launchSequenceCommandText = @($launchSequenceCommands) -join "`n"
 $rollbackCommandText = @($rollbackCommands) -join "`n"
+$launchSequenceExpectedReportPaths = @($launchSequence | ForEach-Object { @($_.expectedReportPaths) } | ForEach-Object { "$_" } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+$invalidLaunchSequenceExpectedReportPaths = @($launchSequenceExpectedReportPaths | Where-Object {
+        $_ -notmatch '^docs/agent-runs/live-product-infra-rpc/[A-Za-z0-9_.\-/]+$'
+    })
 $launchSequencePackageScriptNames = @(Get-HandoffNpmRunScriptNames -Commands $launchSequenceCommands)
 $rollbackPackageScriptNames = @(Get-HandoffNpmRunScriptNames -Commands $rollbackCommands)
 $missingLaunchSequencePackageScriptNames = @($launchSequencePackageScriptNames | Where-Object { -not (Test-HandoffPackageScript -Name $_) })
@@ -407,6 +462,8 @@ $checks = [ordered]@{
     launchSequencePresent = @($launchSequence).Count -ge 8
     launchSequenceEveryStepHasCommands = @($launchSequence | Where-Object { @($_.commands).Count -eq 0 }).Count -eq 0
     launchSequenceEveryStepHasExpectedStatuses = @($launchSequence | Where-Object { @($_.expectedStatuses).Count -eq 0 }).Count -eq 0
+    launchSequenceEveryStepHasExpectedReportPath = @($launchSequence | Where-Object { @($_.expectedReportPaths).Count -eq 0 }).Count -eq 0
+    launchSequenceExpectedReportPathsScoped = $invalidLaunchSequenceExpectedReportPaths.Count -eq 0
     launchSequenceEveryStepStopsOnFailure = @($launchSequence | Where-Object { $_.stopOnFailure -ne $true }).Count -eq 0
     launchSequenceCoversOwnerEnvReadiness = $launchSequenceCommandText.Contains("flowchain:owner-env:readiness")
     launchSequenceCoversPublicRpcRender = $launchSequenceCommandText.Contains("flowchain-public-rpc-deployment-automation.ps1 -Action Render")
@@ -461,6 +518,8 @@ $report = [ordered]@{
     nextCommandCount = @($nextCommands).Count
     launchSequenceCount = @($launchSequence).Count
     launchSequenceCommandCount = @($launchSequenceCommands).Count
+    launchSequenceExpectedReportPathCount = @($launchSequenceExpectedReportPaths).Count
+    invalidLaunchSequenceExpectedReportPaths = @($invalidLaunchSequenceExpectedReportPaths)
     launchSequencePackageScriptCount = @($launchSequencePackageScriptNames).Count
     missingLaunchSequencePackageScriptNames = @($missingLaunchSequencePackageScriptNames)
     rollbackCommandCount = @($rollbackCommands).Count
@@ -521,12 +580,13 @@ foreach ($stage in @($stages)) {
 $markdownLines.Add("")
 $markdownLines.Add("## Ordered Launch Sequence")
 $markdownLines.Add("")
-$markdownLines.Add("| Step | Expected status | Stop on failure | Commands |")
-$markdownLines.Add("| --- | --- | --- | --- |")
+$markdownLines.Add("| Step | Expected status | Stop on failure | Commands | Evidence reports |")
+$markdownLines.Add("| --- | --- | --- | --- | --- |")
 foreach ($step in @($launchSequence)) {
     $commands = @($step.commands) -join "<br>"
     $expected = @($step.expectedStatuses) -join ", "
-    $markdownLines.Add("| $($step.title.Replace('|','/')) | $expected | $($step.stopOnFailure) | $($commands.Replace('|','/')) |")
+    $evidenceReports = @($step.expectedReportPaths) -join "<br>"
+    $markdownLines.Add("| $($step.title.Replace('|','/')) | $expected | $($step.stopOnFailure) | $($commands.Replace('|','/')) | $($evidenceReports.Replace('|','/')) |")
 }
 $markdownLines.Add("")
 $markdownLines.Add("## Rollback Commands")

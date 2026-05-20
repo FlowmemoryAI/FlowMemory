@@ -342,7 +342,7 @@ $rules = @(
         severity = "critical"
         findingCodes = @("owner-go-live-handoff-failed")
         signal = "Owner go-live handoff is missing or unsafe."
-        threshold = "handoff report is not passed, has failedChecks or secretMarkerFindings, has fewer than eight stages, lacks an ordered launch sequence, references missing package scripts, lacks rollback commands, lacks next owner-input commands, prints env values, broadcasts, reports secrets, or claims release readiness before the truth table is clear"
+        threshold = "handoff report is not passed, has failedChecks or secretMarkerFindings, has fewer than eight stages, lacks an ordered launch sequence, lacks expected evidence report paths, references missing package scripts, lacks rollback commands, lacks next owner-input commands, prints env values, broadcasts, reports secrets, or claims release readiness before the truth table is clear"
         commands = @("npm run flowchain:owner:go-live-handoff", "npm run flowchain:owner:activation-plan", "npm run flowchain:truth-table -- -AllowBlocked")
     },
     [ordered]@{
@@ -526,6 +526,7 @@ $ownerGoLiveHandoffRuleCoversReleaseReady = $ownerGoLiveHandoffRule.Count -eq 1 
     -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("truth table", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
 $ownerGoLiveHandoffRuleCoversLaunchAndRollback = $ownerGoLiveHandoffRule.Count -eq 1 `
     -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("ordered launch sequence", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("evidence report paths", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("rollback commands", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("missing package scripts", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and (@($ownerGoLiveHandoffRule[0].commands) -contains "npm run flowchain:owner:go-live-handoff")

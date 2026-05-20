@@ -914,6 +914,8 @@ $ownerGoLiveHandoffChecks = Get-OpsProp -Object $reports.ownerGoLiveHandoff -Nam
 $ownerGoLiveHandoffStageCount = [int](Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "stageCount" -Default 0)
 $ownerGoLiveHandoffLaunchSequenceCount = [int](Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "launchSequenceCount" -Default 0)
 $ownerGoLiveHandoffLaunchSequenceCommandCount = [int](Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "launchSequenceCommandCount" -Default 0)
+$ownerGoLiveHandoffExpectedReportPathCount = [int](Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "launchSequenceExpectedReportPathCount" -Default 0)
+$ownerGoLiveHandoffInvalidExpectedReportPaths = @((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "invalidLaunchSequenceExpectedReportPaths" -Default @()))
 $ownerGoLiveHandoffMissingLaunchPackageScripts = @((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "missingLaunchSequencePackageScriptNames" -Default @()))
 $ownerGoLiveHandoffRollbackCommandCount = [int](Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "rollbackCommandCount" -Default 0)
 $ownerGoLiveHandoffMissingRollbackPackageScripts = @((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "missingRollbackPackageScriptNames" -Default @()))
@@ -924,8 +926,12 @@ $ownerGoLiveHandoffReady = $ownerGoLiveHandoffStatus -eq "passed" `
     -and $ownerGoLiveHandoffStageCount -ge 8 `
     -and $ownerGoLiveHandoffLaunchSequenceCount -ge 8 `
     -and $ownerGoLiveHandoffLaunchSequenceCommandCount -ge 20 `
+    -and $ownerGoLiveHandoffExpectedReportPathCount -ge 8 `
+    -and $ownerGoLiveHandoffInvalidExpectedReportPaths.Count -eq 0 `
     -and $ownerGoLiveHandoffRollbackCommandCount -ge 4 `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequencePresent" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepHasExpectedReportPath" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceExpectedReportPathsScoped" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepStopsOnFailure" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversCutoverAudit" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversTruthAndNoSecret" -Default $false) -eq $true) `
@@ -1410,6 +1416,8 @@ $report = [ordered]@{
         ownerGoLiveStageCount = $ownerGoLiveHandoffStageCount
         ownerGoLiveLaunchSequenceCount = $ownerGoLiveHandoffLaunchSequenceCount
         ownerGoLiveLaunchSequenceCommandCount = $ownerGoLiveHandoffLaunchSequenceCommandCount
+        ownerGoLiveExpectedReportPathCount = $ownerGoLiveHandoffExpectedReportPathCount
+        ownerGoLiveInvalidExpectedReportPaths = $ownerGoLiveHandoffInvalidExpectedReportPaths.Count
         ownerGoLiveMissingLaunchPackageScripts = $ownerGoLiveHandoffMissingLaunchPackageScripts.Count
         ownerGoLiveRollbackCommandCount = $ownerGoLiveHandoffRollbackCommandCount
         ownerGoLiveMissingRollbackPackageScripts = $ownerGoLiveHandoffMissingRollbackPackageScripts.Count

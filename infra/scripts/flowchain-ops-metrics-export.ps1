@@ -322,18 +322,24 @@ $ownerGoLiveHandoffChecks = Get-MetricsProp -Object $ownerGoLiveHandoff -Name "c
 $ownerGoLiveHandoffStageCount = [int](Get-MetricsProp -Object $ownerGoLiveHandoff -Name "stageCount" -Default 0)
 $ownerGoLiveHandoffLaunchSequenceCount = [int](Get-MetricsProp -Object $ownerGoLiveHandoff -Name "launchSequenceCount" -Default 0)
 $ownerGoLiveHandoffLaunchSequenceCommandCount = [int](Get-MetricsProp -Object $ownerGoLiveHandoff -Name "launchSequenceCommandCount" -Default 0)
+$ownerGoLiveHandoffExpectedReportPathCount = [int](Get-MetricsProp -Object $ownerGoLiveHandoff -Name "launchSequenceExpectedReportPathCount" -Default 0)
+$ownerGoLiveHandoffInvalidExpectedReportPaths = @((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "invalidLaunchSequenceExpectedReportPaths" -Default @()))
 $ownerGoLiveHandoffMissingLaunchPackageScripts = @((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "missingLaunchSequencePackageScriptNames" -Default @()))
 $ownerGoLiveHandoffRollbackCommandCount = [int](Get-MetricsProp -Object $ownerGoLiveHandoff -Name "rollbackCommandCount" -Default 0)
 $ownerGoLiveHandoffMissingRollbackPackageScripts = @((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "missingRollbackPackageScriptNames" -Default @()))
 $ownerGoLiveHandoffLaunchSequenceReady = ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequencePresent" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepHasCommands" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepHasExpectedStatuses" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepHasExpectedReportPath" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceExpectedReportPathsScoped" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepStopsOnFailure" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversCutoverAudit" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversTruthAndNoSecret" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCommandsAvoidInlineEnvAssignment" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCommandsAvoidUrls" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequencePackageScriptsPresent" -Default $false) -eq $true) `
+    -and $ownerGoLiveHandoffExpectedReportPathCount -ge 8 `
+    -and $ownerGoLiveHandoffInvalidExpectedReportPaths.Count -eq 0 `
     -and $ownerGoLiveHandoffMissingLaunchPackageScripts.Count -eq 0
 $ownerGoLiveHandoffRollbackReady = ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCommandsPresent" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversLocalStop" -Default $false) -eq $true) `
@@ -347,6 +353,7 @@ $ownerGoLiveHandoffReady = (Get-MetricsStatus -Report $ownerGoLiveHandoff) -eq "
     -and $ownerGoLiveHandoffStageCount -ge 8 `
     -and $ownerGoLiveHandoffLaunchSequenceCount -ge 8 `
     -and $ownerGoLiveHandoffLaunchSequenceCommandCount -ge 20 `
+    -and $ownerGoLiveHandoffExpectedReportPathCount -ge 8 `
     -and $ownerGoLiveHandoffRollbackCommandCount -ge 4 `
     -and $ownerGoLiveHandoffLaunchSequenceReady `
     -and $ownerGoLiveHandoffRollbackReady `
@@ -776,6 +783,8 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_failed_checks" 
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_sequence_ready" -Help "One when the owner go-live launch sequence has commands, expected statuses, stop-on-failure gates, final audits, and no unsafe command text." -Value (ConvertTo-MetricBool -Value $ownerGoLiveHandoffLaunchSequenceReady)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_sequence_steps" -Help "Ordered owner go-live launch sequence step count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveLaunchSequenceCount" -Default $ownerGoLiveHandoffLaunchSequenceCount))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_sequence_commands" -Help "Ordered owner go-live launch sequence command count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveLaunchSequenceCommandCount" -Default $ownerGoLiveHandoffLaunchSequenceCommandCount))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_evidence_reports" -Help "Expected evidence report path count in the owner go-live launch sequence." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveExpectedReportPathCount" -Default $ownerGoLiveHandoffExpectedReportPathCount))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_invalid_evidence_reports" -Help "Invalid or out-of-scope expected evidence report paths in the owner go-live launch sequence." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveInvalidExpectedReportPaths" -Default $ownerGoLiveHandoffInvalidExpectedReportPaths.Count))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_missing_package_scripts" -Help "Missing package scripts referenced by owner go-live launch sequence npm commands." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveMissingLaunchPackageScripts" -Default $ownerGoLiveHandoffMissingLaunchPackageScripts.Count))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_rollback_ready" -Help "One when owner go-live rollback commands cover ops snapshot, local service stop, and bridge emergency stop." -Value (ConvertTo-MetricBool -Value $ownerGoLiveHandoffRollbackReady)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_rollback_commands" -Help "Owner go-live rollback command count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveRollbackCommandCount" -Default $ownerGoLiveHandoffRollbackCommandCount))
@@ -1088,6 +1097,8 @@ $requiredMetricNames = @(
     "flowchain_owner_go_live_launch_sequence_ready",
     "flowchain_owner_go_live_launch_sequence_steps",
     "flowchain_owner_go_live_launch_sequence_commands",
+    "flowchain_owner_go_live_launch_evidence_reports",
+    "flowchain_owner_go_live_launch_invalid_evidence_reports",
     "flowchain_owner_go_live_launch_missing_package_scripts",
     "flowchain_owner_go_live_rollback_ready",
     "flowchain_owner_go_live_rollback_commands",
@@ -1413,6 +1424,8 @@ $checks = [ordered]@{
         "flowchain_owner_go_live_launch_sequence_ready",
         "flowchain_owner_go_live_launch_sequence_steps",
         "flowchain_owner_go_live_launch_sequence_commands",
+        "flowchain_owner_go_live_launch_evidence_reports",
+        "flowchain_owner_go_live_launch_invalid_evidence_reports",
         "flowchain_owner_go_live_launch_missing_package_scripts",
         "flowchain_owner_go_live_rollback_ready",
         "flowchain_owner_go_live_rollback_commands",

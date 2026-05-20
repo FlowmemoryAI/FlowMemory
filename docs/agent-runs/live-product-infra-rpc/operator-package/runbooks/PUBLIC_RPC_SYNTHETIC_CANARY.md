@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Synthetic Canary
 
-Generated: 2026-05-20T23:22:19.4541528Z
+Generated: 2026-05-20T23:38:11.5862226Z
 Status: blocked
 
 This canary runs only read-only public endpoint probes. It does not create wallets, request faucet funds, submit transactions, or broadcast bridge operations.

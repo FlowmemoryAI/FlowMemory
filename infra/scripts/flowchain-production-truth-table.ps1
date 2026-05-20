@@ -705,6 +705,7 @@ $definitions = @(
             mustNotSendCount = 6
             launchSequenceCount = 8
             launchSequenceCommandCount = 20
+            launchSequenceExpectedReportPathCount = 8
             rollbackCommandCount = 4
         }
         requiredChecks = @(
@@ -727,6 +728,8 @@ $definitions = @(
             "launchSequencePresent",
             "launchSequenceEveryStepHasCommands",
             "launchSequenceEveryStepHasExpectedStatuses",
+            "launchSequenceEveryStepHasExpectedReportPath",
+            "launchSequenceExpectedReportPathsScoped",
             "launchSequenceEveryStepStopsOnFailure",
             "launchSequenceCoversOwnerEnvReadiness",
             "launchSequenceCoversPublicRpcRender",

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-20T23:22:21.6999172Z",
+    "generatedAt":  "2026-05-20T23:38:14.0166067Z",
     "status":  "blocked",
     "refresh":  {
                     "performed":  true,
@@ -24,9 +24,9 @@
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "107373",
-                  "finalizedHeight":  "107373",
-                  "stateFileLastWriteAgeSeconds":  2,
+                  "latestHeight":  "107467",
+                  "finalizedHeight":  "107467",
+                  "stateFileLastWriteAgeSeconds":  4,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true,
@@ -38,10 +38,10 @@
                               "txIntakeRows":  187,
                               "txIntakeAcceptedRows":  187,
                               "txIntakeInvalidRows":  0,
-                              "txIntakeLastWriteAgeSeconds":  8030.755,
+                              "txIntakeLastWriteAgeSeconds":  8982.929,
                               "runtimeSubmitDir":  "devnet/local/intake/runtime-submit",
                               "runtimeSubmitFileCount":  4,
-                              "runtimeSubmitNewestFileAgeSeconds":  481228.074,
+                              "runtimeSubmitNewestFileAgeSeconds":  482180.27,
                               "runtimeInboxDir":  "devnet/local/node/inbox",
                               "runtimeInboxFileCount":  0,
                               "runtimeInboxNewestFileAgeSeconds":  null,
@@ -297,6 +297,8 @@
                            "ownerGoLiveStageCount":  8,
                            "ownerGoLiveLaunchSequenceCount":  9,
                            "ownerGoLiveLaunchSequenceCommandCount":  36,
+                           "ownerGoLiveExpectedReportPathCount":  33,
+                           "ownerGoLiveInvalidExpectedReportPaths":  0,
                            "ownerGoLiveMissingLaunchPackageScripts":  0,
                            "ownerGoLiveRollbackCommandCount":  7,
                            "ownerGoLiveMissingRollbackPackageScripts":  0,
