@@ -2697,6 +2697,7 @@ $opsAlertRequiredChecks = @(
     "commandsAvoidInlineEnvAssignment",
     "commandsAvoidUrls",
     "supervisorNodeRecoveryRuleCoversLiveProfile",
+    "bridgeRelayerLoopRuleCoversValidationTelemetry",
     "findingsWithoutCommandsEmpty",
     "notificationPlanStoresNoSecrets",
     "notificationPlanNoNetworkDelivery",

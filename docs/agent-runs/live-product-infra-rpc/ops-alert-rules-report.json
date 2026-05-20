@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T16:52:08.3988860Z",
+    "generatedAt":  "2026-05-20T19:43:17.7883328Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -100,6 +100,7 @@
                    "publicRpcEdgeHardeningRuleCoversSecurityHeaders":  true,
                    "publicRpcEdgeHardeningRuleCoversWalletCutover":  true,
                    "bridgeRelayerCheckContractRuleCoversFailedChecks":  true,
+                   "bridgeRelayerLoopRuleCoversValidationTelemetry":  true,
                    "supervisorNodeRecoveryRuleCoversLiveProfile":  true,
                    "externalTesterLaunchRuleCoversGatewayAndFaucet":  true,
                    "publicTesterGatewayRuleCoversNoSecretNoBroadcast":  true,
@@ -331,7 +332,7 @@
                                            "bridge-relayer-loop-unhealthy"
                                        ],
                       "signal":  "Bridge relayer loop is running without fresh no-secret/no-broadcast health evidence.",
-                      "threshold":  "service status reports bridgeRelayerLoop.status running and bridgeRelayerLoop.report.healthy is not true",
+                      "threshold":  "service status reports bridgeRelayerLoop.status running and bridgeRelayerLoop.report.healthy is not true, bridge relayer loop validation is not passed, no-secret/no-broadcast evidence is false, or PID cleanup after stop is not proven",
                       "commands":  [
                                        "npm run flowchain:service:status",
                                        "npm run flowchain:bridge:relayer:loop:validate",

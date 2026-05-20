@@ -2122,6 +2122,7 @@ $definitions = @(
             "commandsAvoidInlineEnvAssignment",
             "commandsAvoidUrls",
             "supervisorNodeRecoveryRuleCoversLiveProfile",
+            "bridgeRelayerLoopRuleCoversValidationTelemetry",
             "publicTesterGatewayRuleCoversNoSecretNoBroadcast",
             "ownerGoLiveHandoffRuleCoversReleaseReady",
             "findingsWithoutCommandsEmpty",

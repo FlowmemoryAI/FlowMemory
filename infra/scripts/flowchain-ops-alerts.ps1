@@ -214,7 +214,7 @@ $rules = @(
         severity = "critical"
         findingCodes = @("bridge-relayer-loop-unhealthy")
         signal = "Bridge relayer loop is running without fresh no-secret/no-broadcast health evidence."
-        threshold = "service status reports bridgeRelayerLoop.status running and bridgeRelayerLoop.report.healthy is not true"
+        threshold = "service status reports bridgeRelayerLoop.status running and bridgeRelayerLoop.report.healthy is not true, bridge relayer loop validation is not passed, no-secret/no-broadcast evidence is false, or PID cleanup after stop is not proven"
         commands = @("npm run flowchain:service:status", "npm run flowchain:bridge:relayer:loop:validate", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop", "npm run flowchain:bridge:emergency-stop")
     },
     [ordered]@{
@@ -389,6 +389,13 @@ $bridgeRelayerCheckContractRule = @($rules | Where-Object { $_.id -eq "bridge-re
 $bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRule.Count -eq 1 `
     -and ([string]$bridgeRelayerCheckContractRule[0].threshold).IndexOf("failedChecks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$bridgeRelayerCheckContractRule[0].threshold).IndexOf("required checks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$bridgeRelayerLoopRule = @($rules | Where-Object { $_.id -eq "bridge-relayer-loop-unhealthy" } | Select-Object -First 1)
+$bridgeRelayerLoopRuleCoversValidationTelemetry = $bridgeRelayerLoopRule.Count -eq 1 `
+    -and ([string]$bridgeRelayerLoopRule[0].threshold).IndexOf("validation", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeRelayerLoopRule[0].threshold).IndexOf("no-secret", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeRelayerLoopRule[0].threshold).IndexOf("no-broadcast", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeRelayerLoopRule[0].threshold).IndexOf("PID cleanup", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($bridgeRelayerLoopRule[0].commands) -contains "npm run flowchain:bridge:relayer:loop:validate")
 $supervisorNodeRecoveryRule = @($rules | Where-Object { $_.id -eq "supervisor-node-recovery-validation-failed" } | Select-Object -First 1)
 $supervisorNodeRecoveryRuleCoversLiveProfile = $supervisorNodeRecoveryRule.Count -eq 1 `
     -and ([string]$supervisorNodeRecoveryRule[0].threshold).IndexOf("live-profile", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
@@ -428,6 +435,7 @@ $checks = [ordered]@{
     publicRpcEdgeHardeningRuleCoversSecurityHeaders = $publicRpcEdgeHardeningRuleCoversSecurityHeaders
     publicRpcEdgeHardeningRuleCoversWalletCutover = $publicRpcEdgeHardeningRuleCoversWalletCutover
     bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRuleCoversFailedChecks
+    bridgeRelayerLoopRuleCoversValidationTelemetry = $bridgeRelayerLoopRuleCoversValidationTelemetry
     supervisorNodeRecoveryRuleCoversLiveProfile = $supervisorNodeRecoveryRuleCoversLiveProfile
     externalTesterLaunchRuleCoversGatewayAndFaucet = $externalTesterLaunchRuleCoversGatewayAndFaucet
     publicTesterGatewayRuleCoversNoSecretNoBroadcast = $publicTesterGatewayRuleCoversNoSecretNoBroadcast
