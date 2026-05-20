@@ -311,6 +311,9 @@ $opsMetricsExportChecks = Get-ArchitectureProp -Object $opsMetricsExport -Name "
 $opsMetricsExportMetricCount = [int](Get-ArchitectureProp -Object $opsMetricsExport -Name "metricCount" -Default 0)
 $opsMetricsExportRequiredMetricNames = @((Get-ArchitectureProp -Object $opsMetricsExport -Name "requiredMetricNames" -Default @()))
 $publicRpcSecurityHeaderMetricNames = @(
+    "flowchain_public_rpc_live_security_header_probe",
+    "flowchain_public_rpc_live_security_headers",
+    "flowchain_public_rpc_security_header_policy_ready",
     "flowchain_public_rpc_security_headers",
     "flowchain_public_rpc_security_header_preflight",
     "flowchain_public_rpc_rendered_security_headers",
@@ -624,6 +627,8 @@ $endpointChecks = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name 
 $rateLimitProbe = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name "rateLimitProbePerformed" -Default $false
 $rateLimitRejected = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name "rateLimitRejected" -Default $false
 $rateLimitRetryAfter = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name "rateLimitRetryAfterHeaderPresent" -Default $false
+$securityHeaderSkip = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name "securityHeaderProbeSkippedForLocalEndpoint" -Default $false
+$securityHeaderPolicy = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name "securityHeaderPassRequiredOnlyForPublicMode" -Default $false
 $responseHygiene = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name "responseHygienePassed" -Default $false
 $publicRpcAbuseStatus = Get-ArchitectureStatus -Report $publicRpcAbuseTest
 $publicRpcAbuseReady = Get-ArchitectureProp -Object $publicRpcAbuseTest -Name "abuseTestReady" -Default $false
@@ -665,21 +670,27 @@ $rpcBoundaryReady = (Test-AllRepoFilesExist -Paths $rpcFiles) `
     -and ($rateLimitProbe -eq $true) `
     -and ($rateLimitRejected -eq $true) `
     -and ($rateLimitRetryAfter -eq $true) `
+    -and ($securityHeaderSkip -eq $true) `
+    -and ($securityHeaderPolicy -eq $true) `
     -and ($responseHygiene -eq $true) `
     -and ($publicRpcAbusePassed -eq $true)
 Add-ArchitectureItem -Items $items -Id "rpc-api-boundary" -Layer "RPC/API" `
-    -Requirement "The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation, narrow public reads, and abuse rejection before it can be exposed publicly." `
+    -Requirement "The control-plane API has explicit health/discovery/readiness/CORS/live security-header/rate-limit validation, narrow public reads, and abuse rejection before it can be exposed publicly." `
     -Status $(if ($rpcBoundaryReady) { "passed" } else { "failed" }) `
-    -Evidence "validationStatus=$publicRpcValidationStatus, corsAllowed=$corsAllowed, corsRejected=$corsRejected, endpointChecks=$endpointChecks, rateLimitProbe=$rateLimitProbe, rateLimitRejected=$rateLimitRejected, rateLimitRetryAfter=$rateLimitRetryAfter, responseHygiene=$responseHygiene, abuseStatus=$publicRpcAbuseStatus, abusePassed=$publicRpcAbusePassed, abuseMissingChecks=$($publicRpcAbuseMissingChecks.Count)" `
+    -Evidence "validationStatus=$publicRpcValidationStatus, corsAllowed=$corsAllowed, corsRejected=$corsRejected, endpointChecks=$endpointChecks, securityHeaderSkip=$securityHeaderSkip, securityHeaderPolicy=$securityHeaderPolicy, rateLimitProbe=$rateLimitProbe, rateLimitRejected=$rateLimitRejected, rateLimitRetryAfter=$rateLimitRetryAfter, responseHygiene=$responseHygiene, abuseStatus=$publicRpcAbuseStatus, abusePassed=$publicRpcAbusePassed, abuseMissingChecks=$($publicRpcAbuseMissingChecks.Count)" `
     -Files $rpcFiles `
     -Commands @("npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:abuse-test")
 
 $publicRpcStatus = Get-ArchitectureStatus -Report $publicRpc
 $publicRpcReady = Get-ArchitectureProp -Object $publicRpc -Name "publicRpcReady" -Default $false
+$publicRpcChecks = Get-ArchitectureProp -Object $publicRpc -Name "checks"
+$publicRpcLiveHeaderProbe = Get-ArchitectureProp -Object $publicRpcChecks -Name "securityHeadersProbePerformed" -Default $false
+$publicRpcLiveHeaders = ((Get-ArchitectureProp -Object $publicRpcChecks -Name "securityHeadersProbePerformed" -Default $false) -eq $true) -and ((Get-ArchitectureProp -Object $publicRpcChecks -Name "securityHeadersAllRequiredPresent" -Default $false) -eq $true)
+$publicRpcHeaderPolicyReady = Get-ArchitectureProp -Object $publicRpcChecks -Name "securityHeadersAllRequiredPresent" -Default $false
 Add-ArchitectureItem -Items $items -Id "public-rpc-edge" -Layer "Public edge" `
-    -Requirement "External RPC exposure is a distinct owner-operated edge with TLS, allowed origins, rate limits, endpoint checks, and response hygiene." `
+    -Requirement "External RPC exposure is a distinct owner-operated edge with TLS, allowed origins, rate limits, live security-header proof, endpoint checks, and response hygiene." `
     -Status $(if ($publicRpcStatus -eq "passed" -and $publicRpcReady -eq $true) { "passed" } elseif ($publicRpcStatus -eq "blocked") { "blocked" } else { "failed" }) `
-    -Evidence "publicRpcStatus=$publicRpcStatus, publicRpcReady=$publicRpcReady" `
+    -Evidence "publicRpcStatus=$publicRpcStatus, publicRpcReady=$publicRpcReady, liveHeaderProbe=$publicRpcLiveHeaderProbe, liveHeaders=$publicRpcLiveHeaders, headerPolicyReady=$publicRpcHeaderPolicyReady" `
     -Files @("infra/scripts/flowchain-public-rpc-readiness.ps1", "docs/OPERATIONS/FLOWCHAIN_OWNER_OPERATED_PUBLIC_RPC.md") `
     -Commands @("npm run flowchain:public-rpc:check") `
     -Blockers @("FLOWCHAIN_RPC_PUBLIC_URL", "FLOWCHAIN_RPC_ALLOWED_ORIGINS", "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE", "FLOWCHAIN_RPC_TLS_TERMINATED")

@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-20T12:37:06.2230102Z",
+  "generatedAt": "2026-05-20T13:04:15.6794894Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -8,8 +8,8 @@
   "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
   "privateRpcUrl": "http://127.0.0.1:8787",
   "metrics": {
-    "latestHeight": "102185",
-    "finalizedHeight": "102185",
+    "latestHeight": "102394",
+    "finalizedHeight": "102394",
     "monitorHeightAdvanced": true,
     "serviceSupervisorValidationStatus": "passed",
     "serviceSupervisorRestartAttempts": "1",
@@ -1326,7 +1326,7 @@
       "label": "Private L1 origin",
       "status": "passed",
       "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
-      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=102142, finalizedHeight=102142",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=102367, finalizedHeight=102367",
       "commands": [
         "npm run flowchain:service:status"
       ],
@@ -1553,19 +1553,19 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-20T12:37:06.2230102Z"
+      "generatedAt": "2026-05-20T13:04:15.6794894Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
       "schema": "flowchain.live_infra_check_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-20T12:42:00.7786149Z"
+      "generatedAt": "2026-05-20T13:07:14.1892955Z"
     },
     {
       "fileName": "service-status-report.json",
       "schema": "flowchain.service_status_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-20T12:41:46.1751150Z"
+      "generatedAt": "2026-05-20T13:07:01.7262066Z"
     },
     {
       "fileName": "service-monitor-report.json",
@@ -1607,13 +1607,13 @@
       "fileName": "public-rpc-readiness-report.json",
       "schema": "flowchain.public_rpc_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-20T12:41:39.7361602Z"
+      "generatedAt": "2026-05-20T13:06:55.6914665Z"
     },
     {
       "fileName": "backup-readiness-report.json",
       "schema": "flowchain.backup_readiness_report.v1",
       "status": "blocked",
-      "generatedAt": "2026-05-20T12:41:51.2849889Z"
+      "generatedAt": "2026-05-20T13:07:06.1450677Z"
     },
     {
       "fileName": "backup-owner-path-dry-run-report.json",
@@ -1625,7 +1625,7 @@
       "fileName": "bridge-relayer-once-report.json",
       "schema": "flowchain.bridge_relayer_once_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-20T12:41:57.6334679Z"
+      "generatedAt": "2026-05-20T13:07:11.5903255Z"
     },
     {
       "fileName": "bridge-relayer-guardrail-validation-report.json",
@@ -1649,19 +1649,19 @@
       "fileName": "external-tester-packet-report.json",
       "schema": "flowchain.external_tester_packet_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-20T12:42:03.8520655Z"
+      "generatedAt": "2026-05-20T13:07:16.9720647Z"
     },
     {
       "fileName": "external-tester-connect-pack.json",
       "schema": "flowchain.external_tester_connect_pack.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-20T12:42:03.8520655Z"
+      "generatedAt": "2026-05-20T13:07:16.9720647Z"
     },
     {
       "fileName": "external-tester-readiness-report.json",
       "schema": "flowchain.external_tester_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-20T12:42:01.5616408Z"
+      "generatedAt": "2026-05-20T13:07:14.9531542Z"
     },
     {
       "fileName": "public-tester-gateway-e2e-report.json",
@@ -1709,7 +1709,7 @@
       "fileName": "owner-inputs-report.json",
       "schema": "flowchain.owner_inputs_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-20T12:42:03.0005671Z"
+      "generatedAt": "2026-05-20T13:07:16.2520452Z"
     },
     {
       "fileName": "owner-activation-plan-report.json",
@@ -1721,7 +1721,7 @@
       "fileName": "no-secret-scan-report.json",
       "schema": "flowchain.no_secret_scan_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-20T13:00:59.5465757Z"
+      "generatedAt": "2026-05-20T13:07:31.2392666Z"
     }
   ],
   "envValuesPrinted": false,

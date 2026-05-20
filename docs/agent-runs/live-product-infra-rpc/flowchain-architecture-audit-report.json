@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-20T07:11:51.5044173Z",
+    "generatedAt":  "2026-05-20T13:03:02.9421177Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -29,7 +29,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=99115, finalizedHeight=99115",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=102185, finalizedHeight=102185",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -51,7 +51,7 @@
                       "layer":  "Operations",
                       "requirement":  "Operator doctor covers host tools, package scripts, state path, disk, service evidence, ports, owner-input groups, and owner env-file status without printing owner values.",
                       "status":  "passed",
-                      "evidence":  "doctorStatus=blocked, checks=54, failedChecks=0, blockedChecks=5, blockedOnlyOwner=True",
+                      "evidence":  "doctorStatus=blocked, checks=57, failedChecks=0, blockedChecks=5, blockedOnlyOwner=True",
                       "files":  [
                                     "infra/scripts/flowchain-doctor.ps1"
                                 ],
@@ -67,7 +67,7 @@
                       "layer":  "Operations",
                       "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=29, alertCoveredFindings=31, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=106, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, supervisorNodeRecoveryMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=22, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=19, incidentFailed=0",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=30, alertCoveredFindings=32, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=131, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, supervisorNodeRecoveryMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=23, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=20, incidentFailed=0",
                       "files":  [
                                     "infra/scripts/flowchain-service-monitor.ps1",
                                     "infra/scripts/flowchain-service-supervisor.ps1",
@@ -158,7 +158,7 @@
                       "layer":  "Operations",
                       "requirement":  "Node operator packaging collects no-secret runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates.",
                       "status":  "passed",
-                      "evidence":  "operatorPackage=passed, commands=57, runbooks=36, evidenceReports=42, failedChecks=0, noSecretScan=True",
+                      "evidence":  "operatorPackage=passed, commands=60, runbooks=42, evidenceReports=45, failedChecks=0, noSecretScan=True",
                       "files":  [
                                     "infra/scripts/flowchain-operator-package.ps1",
                                     "docs/developer/FLOWCHAIN_NODE_OPERATOR.md"
@@ -175,7 +175,7 @@
                       "layer":  "Operations",
                       "requirement":  "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, forbidden local files, and no-secret scan.",
                       "status":  "passed",
-                      "evidence":  "operatorPackageVerify=passed, expectedFiles=71, commands=57, failedChecks=0, noSecretScan=True",
+                      "evidence":  "operatorPackageVerify=passed, expectedFiles=80, commands=60, failedChecks=0, noSecretScan=True",
                       "files":  [
                                     "infra/scripts/flowchain-operator-package-verify.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/OPERATOR_PACKAGE_VERIFY.md"
@@ -190,9 +190,9 @@
                   {
                       "id":  "rpc-api-boundary",
                       "layer":  "RPC/API",
-                      "requirement":  "The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation, narrow public reads, and abuse rejection before it can be exposed publicly.",
+                      "requirement":  "The control-plane API has explicit health/discovery/readiness/CORS/live security-header/rate-limit validation, narrow public reads, and abuse rejection before it can be exposed publicly.",
                       "status":  "passed",
-                      "evidence":  "validationStatus=passed, corsAllowed=True, corsRejected=True, endpointChecks=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True, abuseStatus=passed, abusePassed=True, abuseMissingChecks=0",
+                      "evidence":  "validationStatus=passed, corsAllowed=True, corsRejected=True, endpointChecks=True, securityHeaderSkip=True, securityHeaderPolicy=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True, abuseStatus=passed, abusePassed=True, abuseMissingChecks=0",
                       "files":  [
                                     "services/control-plane/src/server.ts",
                                     "services/control-plane/src/methods.ts",
@@ -211,9 +211,9 @@
                   {
                       "id":  "public-rpc-edge",
                       "layer":  "Public edge",
-                      "requirement":  "External RPC exposure is a distinct owner-operated edge with TLS, allowed origins, rate limits, endpoint checks, and response hygiene.",
+                      "requirement":  "External RPC exposure is a distinct owner-operated edge with TLS, allowed origins, rate limits, live security-header proof, endpoint checks, and response hygiene.",
                       "status":  "blocked",
-                      "evidence":  "publicRpcStatus=blocked, publicRpcReady=False",
+                      "evidence":  "publicRpcStatus=blocked, publicRpcReady=False, liveHeaderProbe=False, liveHeaders=False, headerPolicyReady=True",
                       "files":  [
                                     "infra/scripts/flowchain-public-rpc-readiness.ps1",
                                     "docs/OPERATIONS/FLOWCHAIN_OWNER_OPERATED_PUBLIC_RPC.md"
@@ -581,7 +581,7 @@
                       "layer":  "Developer ecosystem",
                       "requirement":  "Developer SDK/devkit and docs connect to the real FlowChain RPC, generate a live RPC reference, read wallet data, submit a runtime-backed local wallet send, and fail closed for public readiness.",
                       "status":  "passed",
-                      "evidence":  "devPackStatus=passed, methodCount=82, heights=96930-\u003e96931, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\dev-pack-e2e-report.json",
+                      "evidence":  "devPackStatus=passed, methodCount=82, heights=101490-\u003e101491, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\dev-pack-e2e-report.json",
                       "files":  [
                                     "services/flowchain-sdk/src/client.ts",
                                     "services/flowchain-sdk/src/cli.ts",
@@ -669,7 +669,7 @@
                       "layer":  "Explorer and wallet UI",
                       "requirement":  "Dashboard browser verification covers the tester wallet panel, authenticated tester create/faucet/send operations, Explorer inspection, tester launch readiness, L1 activation cockpit, desktop and mobile viewports, no token/secret leakage, and no horizontal overflow.",
                       "status":  "passed",
-                      "evidence":  "dashboardUiStatus=passed, browserProjects=2, coveredRoutes=7, failedChecks=0, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
+                      "evidence":  "dashboardUiStatus=passed, browserProjects=2, coveredRoutes=8, failedChecks=0, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
                       "files":  [
                                     "apps/dashboard/playwright.config.ts",
                                     "apps/dashboard/e2e/flowchain-ui-readiness.spec.ts",
@@ -1070,21 +1070,22 @@
                                                                           "/tester/wallets/send",
                                                                           "/explorer",
                                                                           "/tester",
-                                                                          "/activation"
+                                                                          "/activation",
+                                                                          "/bridge"
                                                                       ],
                                          "publicDeploymentContractPacketSmoke":  true
                                      },
     "opsAlertCoverage":  {
                              "status":  "passed",
-                             "ruleCount":  29,
-                             "criticalRuleCount":  22,
+                             "ruleCount":  30,
+                             "criticalRuleCount":  23,
                              "blockedRuleCount":  7,
-                             "coveredFindingCount":  31,
+                             "coveredFindingCount":  32,
                              "unmappedCurrentFindingCount":  0
                          },
     "opsMetricsCoverage":  {
                                "exportStatus":  "passed",
-                               "metricCount":  106,
+                               "metricCount":  131,
                                "exportFailedCheckCount":  0,
                                "installStatus":  "passed",
                                "installFailedCheckCount":  0,
