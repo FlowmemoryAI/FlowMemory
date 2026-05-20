@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-20T02:10:48.4120213Z",
+    "generatedAt":  "2026-05-20T02:29:34.9552004Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -96,9 +96,9 @@
                   },
                   {
                       "id":  "public-rpc-edge-template",
-                      "requirement":  "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, disallowed-origin and blocked-private-path probes, verification, rollback, and no broad local state mirror.",
+                      "requirement":  "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, wallet/tester cutover proof, disallowed-origin and blocked-private-path probes, verification, rollback, and no broad local state mirror.",
                       "status":  "passed",
-                      "evidence":  "edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, testerWritePreflight=True, disallowedOriginPreflight=True, blockedStatePreflight=True, privateWalletCreateBlocked=True, authForwardingScoped=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True, publicStateMirrorExcluded=True, devnetStatePublicRpcExcluded=True",
+                      "evidence":  "edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, testerWritePreflight=True, walletCutoverCommands=True, disallowedOriginPreflight=True, blockedStatePreflight=True, privateWalletCreateBlocked=True, authForwardingScoped=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True, publicStateMirrorExcluded=True, devnetStatePublicRpcExcluded=True",
                       "commands":  [
                                        "npm run flowchain:public-rpc:edge-template",
                                        "npm run flowchain:public-rpc:deployment-bundle"
@@ -109,9 +109,9 @@
                   },
                   {
                       "id":  "public-rpc-deployment-automation",
-                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, disallowed-origin and blocked-private-path probes, verification, and rollback drill phases without host mutation or owner-value leakage.",
+                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, wallet/tester cutover proof commands, disallowed-origin and blocked-private-path probes, verification, and rollback drill phases without host mutation or owner-value leakage.",
                       "status":  "passed",
-                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, testerUnauthProbe=True, disallowedOriginProbe=True, blockedStateProbe=True, privateWalletCreateBlocked=True, authForwardingScoped=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, hostMutationFalse=True",
+                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, testerUnauthProbe=True, walletTesterE2e=True, cutoverRehearsal=True, disallowedOriginProbe=True, blockedStateProbe=True, privateWalletCreateBlocked=True, authForwardingScoped=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, hostMutationFalse=True",
                       "commands":  [
                                        "npm run flowchain:public-rpc:deployment:automation"
                                    ],
@@ -123,7 +123,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=96396, finalizedHeight=96396",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=96572, finalizedHeight=96572",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -620,6 +620,7 @@
                                                  "npm run flowchain:public-rpc:validate",
                                                  "npm run flowchain:public-rpc:abuse-test",
                                                  "npm run flowchain:tester:gateway:e2e",
+                                                 "npm run flowchain:wallet:live-tester:e2e",
                                                  "npm run flowchain:public-rpc:check",
                                                  "npm run flowchain:backup:restore:validate",
                                                  "npm run flowchain:backup:install:validate",
@@ -635,6 +636,9 @@
                                                  "npm run flowchain:bridge:relayer:once",
                                                  "npm run flowchain:tester:readiness",
                                                  "npm run flowchain:external-tester:packet",
+                                                 "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
+                                                 "npm run flowchain:truth-table -- -AllowBlocked",
+                                                 "npm run flowchain:no-secret:scan",
                                                  "npm run flowchain:completion:audit"
                                              ],
                              "rollback":  [

@@ -396,13 +396,19 @@ function New-CommandPlan {
         "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_NGINX_WINDOWS_PREFLIGHT_SCRIPT>",
         "npm run flowchain:public-rpc:validate",
         "npm run flowchain:public-rpc:abuse-test",
-        "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+        "npm run flowchain:tester:gateway:e2e",
+        "npm run flowchain:wallet:live-tester:e2e",
+        "npm run flowchain:public-deployment:contract -- -AllowBlocked",
+        "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
+        "npm run flowchain:truth-table -- -AllowBlocked",
+        "npm run flowchain:no-secret:scan"
     )
 }
 
 $bundleReport = Ensure-PublicRpcDeploymentBundle
 $bundleStatus = [string](Get-DeployProp -Object $bundleReport -Name "status" -Default "missing")
 $bundleChecks = Get-DeployProp -Object $bundleReport -Name "checks"
+$commandPlan = New-CommandPlan
 $packageJson = Get-Content -Raw -LiteralPath (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "package.json") | ConvertFrom-Json
 $hasPackageScript = $packageJson.PSObject.Properties.Name -contains "scripts" -and $packageJson.scripts.PSObject.Properties.Name -contains "flowchain:public-rpc:deployment:automation"
 $baseChecks = [ordered]@{
@@ -505,6 +511,11 @@ $checks = [ordered]@{}
 foreach ($entry in $baseChecks.GetEnumerator()) {
     $checks[$entry.Key] = $entry.Value
 }
+$checks.commandPlanIncludesTesterGatewayE2e = @($commandPlan) -contains "npm run flowchain:tester:gateway:e2e"
+$checks.commandPlanIncludesWalletTesterE2e = @($commandPlan) -contains "npm run flowchain:wallet:live-tester:e2e"
+$checks.commandPlanIncludesCutoverRehearsal = @($commandPlan) -contains "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked"
+$checks.commandPlanIncludesTruthTable = @($commandPlan) -contains "npm run flowchain:truth-table -- -AllowBlocked"
+$checks.commandPlanIncludesNoSecretScan = @($commandPlan) -contains "npm run flowchain:no-secret:scan"
 $checks.ownerPathsOutsideRepo = $ownerPathsOutsideRepo
 $checks.hostMutationPerformedFalse = $hostMutationPerformed -eq $false
 $checks.valuesPrintedFalse = $true
@@ -588,7 +599,7 @@ $report = [ordered]@{
         "rollback-drill-no-host-mutation",
         "rollback-or-emergency-stop"
     )
-    commands = New-CommandPlan
+    commands = @($commandPlan)
     valuesPrinted = $false
     envValuesPrinted = $false
     noSecrets = $true

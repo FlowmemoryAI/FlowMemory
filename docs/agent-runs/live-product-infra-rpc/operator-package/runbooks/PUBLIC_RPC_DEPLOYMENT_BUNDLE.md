@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Bundle
 
-Generated: 2026-05-20T00:03:45.3612209Z
+Generated: 2026-05-20T02:22:51.4392829Z
 Status: passed
 
 This bundle packages placeholder-only files for an owner-operated HTTPS edge in front of the repo-owned private RPC origin `127.0.0.1:8787`.
@@ -66,10 +66,15 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - npm run flowchain:ops:snapshot -- -AllowBlocked
 - npm run flowchain:public-rpc:validate
 - npm run flowchain:public-rpc:check
+- npm run flowchain:tester:gateway:e2e
+- npm run flowchain:wallet:live-tester:e2e
 - npm run flowchain:backup:restore:validate
 - npm run flowchain:backup:check
 - npm run flowchain:public-deployment:contract -- -AllowBlocked
 - npm run flowchain:external-tester:packet -- -AllowBlocked
+- npm run flowchain:live:cutover:rehearsal -- -AllowBlocked
+- npm run flowchain:truth-table -- -AllowBlocked
+- npm run flowchain:no-secret:scan
 
 ## Owner-Host Render Commands
 

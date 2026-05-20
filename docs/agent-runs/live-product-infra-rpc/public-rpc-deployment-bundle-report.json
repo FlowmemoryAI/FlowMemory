@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_bundle_report.v3",
-    "generatedAt":  "2026-05-20T00:03:45.3612209Z",
+    "generatedAt":  "2026-05-20T02:22:51.4392829Z",
     "status":  "passed",
     "bundleDir":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle",
     "flowChainRpcIsRepoOwned":  true,
@@ -51,10 +51,15 @@
                              "npm run flowchain:ops:snapshot -- -AllowBlocked",
                              "npm run flowchain:public-rpc:validate",
                              "npm run flowchain:public-rpc:check",
+                             "npm run flowchain:tester:gateway:e2e",
+                             "npm run flowchain:wallet:live-tester:e2e",
                              "npm run flowchain:backup:restore:validate",
                              "npm run flowchain:backup:check",
                              "npm run flowchain:public-deployment:contract -- -AllowBlocked",
-                             "npm run flowchain:external-tester:packet -- -AllowBlocked"
+                             "npm run flowchain:external-tester:packet -- -AllowBlocked",
+                             "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
+                             "npm run flowchain:truth-table -- -AllowBlocked",
+                             "npm run flowchain:no-secret:scan"
                          ],
     "ownerRenderCommands":  [
                                 "powershell -NoProfile -ExecutionPolicy Bypass -File render-public-rpc-bundle.template.ps1 -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -OwnerEnvFile \u003cFLOWCHAIN_OWNER_ENV_FILE\u003e -RepoRoot \u003cFLOWCHAIN_REPO_ABSOLUTE_PATH\u003e -ServiceUser \u003cFLOWCHAIN_SERVICE_USER\u003e -ServiceGroup \u003cFLOWCHAIN_SERVICE_GROUP\u003e -TlsCertificatePath \u003cPATH_TO_TLS_CERTIFICATE\u003e -TlsCertificateKeyPath \u003cPATH_TO_TLS_CERTIFICATE_KEY\u003e -NginxExe \u003cFLOWCHAIN_NGINX_EXE\u003e"

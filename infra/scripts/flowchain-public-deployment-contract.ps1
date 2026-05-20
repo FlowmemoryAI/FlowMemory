@@ -544,6 +544,14 @@ $edgeTemplateDevnetStateExcluded = Get-DeploymentProp -Object $publicRpcEdgeTemp
 $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
 $publicRpcDeploymentBundleStatus = Get-DeploymentStatus -Report $publicRpcDeploymentBundle
 $deploymentBundleChecks = Get-DeploymentProp -Object $publicRpcDeploymentBundle -Name "checks"
+$deploymentBundleRequiredCommands = @((Get-DeploymentProp -Object $publicRpcDeploymentBundle -Name "requiredCommands" -Default @()) | ForEach-Object { "$_" })
+$deploymentBundleCoversWalletCutover = @(
+    "npm run flowchain:tester:gateway:e2e",
+    "npm run flowchain:wallet:live-tester:e2e",
+    "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
+    "npm run flowchain:truth-table -- -AllowBlocked",
+    "npm run flowchain:no-secret:scan"
+) | Where-Object { $_ -notin $deploymentBundleRequiredCommands } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
 $deploymentBundleReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "nginxTemplateWritten" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "nginxPreflightScriptWritten" -Default $false) -eq $true) `
@@ -562,6 +570,7 @@ $deploymentBundleReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerRenderDoesNotPrintTokenHash" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerEnvExampleWritten" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "verifyRunbookWritten" -Default $false) -eq $true) `
+    -and ($deploymentBundleCoversWalletCutover -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "rollbackRunbookWritten" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $publicRpcDeploymentBundle -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $publicRpcDeploymentBundle -Name "noSecrets" -Default $false) -eq $true)
@@ -599,6 +608,11 @@ $deploymentAutomationReady = $publicRpcDeploymentAutomationStatus -eq "passed" `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryOwnerPathsOutsideRepo" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSnapshotWritten" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSnapshotNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesTesterGatewayE2e" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesWalletTesterE2e" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesTruthTable" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesNoSecretScan" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $publicRpcDeploymentAutomation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $publicRpcDeploymentAutomation -Name "noSecrets" -Default $false) -eq $true) `
@@ -615,15 +629,15 @@ $publicRpcEdgeTemplateReady = ($publicRpcEdgeTemplateStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $publicRpcEdgeTemplate -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $publicRpcEdgeTemplate -Name "noSecrets" -Default $false) -eq $true)
 Add-DeploymentItem -Items $items -Id "public-rpc-edge-template" `
-    -Requirement "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, disallowed-origin and blocked-private-path probes, verification, rollback, and no broad local state mirror." `
+    -Requirement "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, wallet/tester cutover proof, disallowed-origin and blocked-private-path probes, verification, rollback, and no broad local state mirror." `
     -Status $(if ($publicRpcEdgeTemplateReady -and $deploymentBundleReady) { "passed" } else { "failed" }) `
-    -Evidence "edgeTemplateStatus=$publicRpcEdgeTemplateStatus, bundleStatus=$publicRpcDeploymentBundleStatus, renderValidation=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false)), testerWritePreflight=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false)), disallowedOriginPreflight=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesDisallowedOriginPreflight" -Default $false)), blockedStatePreflight=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesBroadStateBlockedPreflight" -Default $false)), privateWalletCreateBlocked=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesPrivateWalletCreateBlockedPreflight" -Default $false)), authForwardingScoped=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "authorizationForwardingScopedToTesterWrite" -Default $false)), repoOwned=$edgeTemplateRepoOwned, requiresTls=$edgeTemplateRequiresTls, requiresRateLimit=$edgeTemplateRequiresRateLimit, forwardsOrigin=$edgeTemplateForwardsOrigin, publicStateMirrorExcluded=$edgeTemplateStateExcluded, devnetStatePublicRpcExcluded=$edgeTemplateDevnetStateExcluded" `
+    -Evidence "edgeTemplateStatus=$publicRpcEdgeTemplateStatus, bundleStatus=$publicRpcDeploymentBundleStatus, renderValidation=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false)), testerWritePreflight=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false)), walletCutoverCommands=$deploymentBundleCoversWalletCutover, disallowedOriginPreflight=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesDisallowedOriginPreflight" -Default $false)), blockedStatePreflight=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesBroadStateBlockedPreflight" -Default $false)), privateWalletCreateBlocked=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesPrivateWalletCreateBlockedPreflight" -Default $false)), authForwardingScoped=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "authorizationForwardingScopedToTesterWrite" -Default $false)), repoOwned=$edgeTemplateRepoOwned, requiresTls=$edgeTemplateRequiresTls, requiresRateLimit=$edgeTemplateRequiresRateLimit, forwardsOrigin=$edgeTemplateForwardsOrigin, publicStateMirrorExcluded=$edgeTemplateStateExcluded, devnetStatePublicRpcExcluded=$edgeTemplateDevnetStateExcluded" `
     -Commands @("npm run flowchain:public-rpc:edge-template", "npm run flowchain:public-rpc:deployment-bundle")
 
 Add-DeploymentItem -Items $items -Id "public-rpc-deployment-automation" `
-    -Requirement "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, disallowed-origin and blocked-private-path probes, verification, and rollback drill phases without host mutation or owner-value leakage." `
+    -Requirement "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, wallet/tester cutover proof commands, disallowed-origin and blocked-private-path probes, verification, and rollback drill phases without host mutation or owner-value leakage." `
     -Status $(if ($deploymentAutomationReady) { "passed" } else { "failed" }) `
-    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), testerUnauthProbe=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false), disallowedOriginProbe=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasDisallowedOriginProbe" -Default $false), blockedStateProbe=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightBlocksBroadStatePath" -Default $false), privateWalletCreateBlocked=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightBlocksPrivateWalletCreate" -Default $false), authForwardingScoped=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedNginxAuthorizationForwardingScoped" -Default $false), rollbackDrill=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false), renderSummary=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryPresent" -Default $false), renderSnapshot=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSnapshotWritten" -Default $false), hostMutationFalse=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false)" `
+    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), testerUnauthProbe=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false), walletTesterE2e=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesWalletTesterE2e" -Default $false), cutoverRehearsal=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false), disallowedOriginProbe=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasDisallowedOriginProbe" -Default $false), blockedStateProbe=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightBlocksBroadStatePath" -Default $false), privateWalletCreateBlocked=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightBlocksPrivateWalletCreate" -Default $false), authForwardingScoped=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedNginxAuthorizationForwardingScoped" -Default $false), rollbackDrill=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false), renderSummary=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryPresent" -Default $false), renderSnapshot=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSnapshotWritten" -Default $false), hostMutationFalse=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false)" `
     -Commands @("npm run flowchain:public-rpc:deployment:automation")
 
 $service = $reports.serviceStatus
@@ -1301,6 +1315,7 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:public-rpc:validate",
         "npm run flowchain:public-rpc:abuse-test",
         "npm run flowchain:tester:gateway:e2e",
+        "npm run flowchain:wallet:live-tester:e2e",
         "npm run flowchain:public-rpc:check",
         "npm run flowchain:backup:restore:validate",
         "npm run flowchain:backup:install:validate",
@@ -1316,6 +1331,9 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:bridge:relayer:once",
         "npm run flowchain:tester:readiness",
         "npm run flowchain:external-tester:packet",
+        "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
+        "npm run flowchain:truth-table -- -AllowBlocked",
+        "npm run flowchain:no-secret:scan",
         "npm run flowchain:completion:audit"
     )
     rollback = @(

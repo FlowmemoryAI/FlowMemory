@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Automation
 
-Generated: 2026-05-20T00:03:48.8616442Z
+Generated: 2026-05-20T02:22:59.2305223Z
 Status: passed
 Action: Validate
 
@@ -17,6 +17,11 @@ This validator proves the owner-host public RPC deployment path can render concr
 - bundleHasRollbackRunbook: True
 - bundleHasSecurityHeaders: True
 - bundlePreflightsCheckSecurityHeaders: True
+- commandPlanIncludesTesterGatewayE2e: True
+- commandPlanIncludesWalletTesterE2e: True
+- commandPlanIncludesCutoverRehearsal: True
+- commandPlanIncludesTruthTable: True
+- commandPlanIncludesNoSecretScan: True
 - ownerPathsOutsideRepo: True
 - hostMutationPerformedFalse: True
 - valuesPrintedFalse: True
@@ -97,4 +102,9 @@ This validator proves the owner-host public RPC deployment path can render concr
 - powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_NGINX_WINDOWS_PREFLIGHT_SCRIPT>
 - npm run flowchain:public-rpc:validate
 - npm run flowchain:public-rpc:abuse-test
+- npm run flowchain:tester:gateway:e2e
+- npm run flowchain:wallet:live-tester:e2e
 - npm run flowchain:public-deployment:contract -- -AllowBlocked
+- npm run flowchain:live:cutover:rehearsal -- -AllowBlocked
+- npm run flowchain:truth-table -- -AllowBlocked
+- npm run flowchain:no-secret:scan
