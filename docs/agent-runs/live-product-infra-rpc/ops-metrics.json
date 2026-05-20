@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T16:52:08.5768875Z",
+    "generatedAt":  "2026-05-20T18:33:47.6209885Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -11,6 +11,7 @@
                           "publicRpcDeploymentAutomationStatus":  "passed",
                           "externalTesterStatus":  "blocked",
                           "publicTesterGatewayStatus":  "passed",
+                          "externalTesterClientValidationStatus":  "passed",
                           "externalTesterEvidenceStatus":  "passed",
                           "dashboardUiStatus":  "passed",
                           "ownerInputsValidationStatus":  "passed",
@@ -109,13 +110,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  32
+                        "value":  33
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  25
+                        "value":  26
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -670,6 +671,66 @@
                         "value":  1
                     },
                     {
+                        "name":  "flowchain_external_tester_client_validation_ready",
+                        "type":  "gauge",
+                        "help":  "One when standalone external tester client validation is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in standalone external tester client validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_secret_findings",
+                        "type":  "gauge",
+                        "help":  "Secret marker findings in standalone external tester client validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_dry_run_no_network",
+                        "type":  "gauge",
+                        "help":  "One when external tester client validation proves dry-run mode makes no network calls.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_routes_cover_reads",
+                        "type":  "gauge",
+                        "help":  "One when external tester client validation covers required read routes.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_routes_cover_writes",
+                        "type":  "gauge",
+                        "help":  "One when external tester client validation covers wallet create, faucet, and send routes.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_no_token_configured",
+                        "type":  "gauge",
+                        "help":  "One when external tester client dry-run proof stores no tester bearer token.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_no_broadcasts",
+                        "type":  "gauge",
+                        "help":  "One when external tester client validation proves no broadcasts.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when external tester client validation has no secret findings and reports no secrets.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_client_env_values_hidden",
+                        "type":  "gauge",
+                        "help":  "One when external tester client validation does not print environment values.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_external_tester_evidence_ready",
                         "type":  "gauge",
                         "help":  "One when external tester returned evidence validation is passed.",
@@ -871,19 +932,19 @@
                         "name":  "flowchain_truth_gates_total",
                         "type":  "gauge",
                         "help":  "Total production truth table gates.",
-                        "value":  60
+                        "value":  64
                     },
                     {
                         "name":  "flowchain_truth_gates_passed",
                         "type":  "gauge",
                         "help":  "Passed production truth table gates.",
-                        "value":  44
+                        "value":  47
                     },
                     {
                         "name":  "flowchain_truth_gates_owner_blocked",
                         "type":  "gauge",
                         "help":  "Owner-input blocked production truth table gates.",
-                        "value":  16
+                        "value":  17
                     },
                     {
                         "name":  "flowchain_truth_gates_repo_blocked",
@@ -904,7 +965,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  147,
+    "metricCount":  157,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

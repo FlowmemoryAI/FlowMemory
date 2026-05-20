@@ -35,6 +35,7 @@ $paths = [ordered]@{
     realValuePilotAggregate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
+    externalTesterClientValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-client-validation-report.json"
     externalTesterEvidence = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
     dashboardUi = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
     ownerInputsValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
@@ -220,6 +221,7 @@ $publicRpc = $reports.publicRpc
 $publicRpcSyntheticCanary = $reports.publicRpcSyntheticCanary
 $externalTester = $reports.externalTester
 $publicTesterGateway = $reports.publicTesterGateway
+$externalTesterClientValidation = $reports.externalTesterClientValidation
 $externalTesterEvidence = $reports.externalTesterEvidence
 $dashboardUi = $reports.dashboardUi
 $ownerInputsValidation = $reports.ownerInputsValidation
@@ -275,6 +277,9 @@ $publicTesterGatewayChecks = Get-MetricsProp -Object $publicTesterGateway -Name 
 $publicTesterGatewayFailedChecks = @((Get-MetricsProp -Object $publicTesterGateway -Name "failedChecks" -Default @()))
 $publicTesterGatewaySecretFindings = @((Get-MetricsProp -Object $publicTesterGateway -Name "secretMarkerFindings" -Default @()))
 $publicTesterGatewayRoutes = @((Get-MetricsProp -Object $publicTesterGateway -Name "routes" -Default @()))
+$externalTesterClientValidationChecks = Get-MetricsProp -Object $externalTesterClientValidation -Name "checks"
+$externalTesterClientValidationFailedChecks = @((Get-MetricsProp -Object $externalTesterClientValidation -Name "failedChecks" -Default @()))
+$externalTesterClientValidationSecretFindings = @((Get-MetricsProp -Object $externalTesterClientValidation -Name "secretMarkerFindings" -Default @()))
 $publicRpcChecks = Get-MetricsProp -Object $publicRpc -Name "checks"
 $publicRpcSyntheticCanaryChecks = Get-MetricsProp -Object $publicRpcSyntheticCanary -Name "checks"
 $publicRpcSyntheticCanaryMissingEnvCount = @((Get-MetricsProp -Object $publicRpcSyntheticCanary -Name "missingEnvNames" -Default @())).Count
@@ -409,6 +414,16 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_public_tester_gateway_cap_rej
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_tester_gateway_routes_covered" -Help "One when the gateway E2E report covers all required tester routes." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "publicTesterGatewayRoutesCovered" -Default (Get-MetricsProp -Object $publicTesterGatewayChecks -Name "routesCoverRequired" -Default $false)))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_tester_gateway_no_secrets" -Help "One when the public tester gateway E2E report and checks contain no secrets." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "publicTesterGatewayNoSecrets" -Default (((Get-MetricsProp -Object $publicTesterGateway -Name "noSecrets" -Default $false) -eq $true) -and $publicTesterGatewaySecretFindings.Count -eq 0)))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_tester_gateway_no_broadcasts" -Help "One when the public tester gateway E2E proof made no live broadcasts." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "publicTesterGatewayNoBroadcasts" -Default ((Get-MetricsProp -Object $publicTesterGateway -Name "broadcasts" -Default $true) -eq $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_client_validation_ready" -Help "One when standalone external tester client validation is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $externalTesterClientValidation))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_client_failed_checks" -Help "Failed checks in standalone external tester client validation." -Value ($externalTesterClientValidationFailedChecks.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_client_secret_findings" -Help "Secret marker findings in standalone external tester client validation." -Value ($externalTesterClientValidationSecretFindings.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_client_dry_run_no_network" -Help "One when external tester client validation proves dry-run mode makes no network calls." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $externalTesterClientValidationChecks -Name "dryRunNoNetwork" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_client_routes_cover_reads" -Help "One when external tester client validation covers required read routes." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $externalTesterClientValidationChecks -Name "plannedRoutesCoverReads" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_client_routes_cover_writes" -Help "One when external tester client validation covers wallet create, faucet, and send routes." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $externalTesterClientValidationChecks -Name "plannedRoutesCoverWrites" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_client_no_token_configured" -Help "One when external tester client dry-run proof stores no tester bearer token." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $externalTesterClientValidationChecks -Name "tokenNotConfiguredInDryRun" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_client_no_broadcasts" -Help "One when external tester client validation proves no broadcasts." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $externalTesterClientValidation -Name "broadcasts" -Default $true) -eq $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_client_no_secrets" -Help "One when external tester client validation has no secret findings and reports no secrets." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $externalTesterClientValidation -Name "noSecrets" -Default $false) -eq $true) -and $externalTesterClientValidationSecretFindings.Count -eq 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_client_env_values_hidden" -Help "One when external tester client validation does not print environment values." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $externalTesterClientValidation -Name "envValuesPrinted" -Default $true) -eq $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_ready" -Help "One when external tester returned evidence validation is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $externalTesterEvidence))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_failed_checks" -Help "Failed checks in the external tester returned evidence validation report." -Value (@((Get-MetricsProp -Object $externalTesterEvidence -Name "failedChecks" -Default @())).Count)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_missing_files" -Help "Missing required files in the external tester returned evidence folder." -Value (@((Get-MetricsProp -Object $externalTesterEvidence -Name "missingRequiredFiles" -Default @())).Count)
@@ -468,6 +483,7 @@ $metricsJson = [ordered]@{
         publicRpcDeploymentAutomationStatus = Get-MetricsStatus -Report $publicRpcDeploymentAutomation
         externalTesterStatus = Get-MetricsStatus -Report $externalTester
         publicTesterGatewayStatus = Get-MetricsStatus -Report $publicTesterGateway
+        externalTesterClientValidationStatus = Get-MetricsStatus -Report $externalTesterClientValidation
         externalTesterEvidenceStatus = Get-MetricsStatus -Report $externalTesterEvidence
         dashboardUiStatus = Get-MetricsStatus -Report $dashboardUi
         ownerInputsValidationStatus = Get-MetricsStatus -Report $ownerInputsValidation
@@ -585,6 +601,16 @@ $requiredMetricNames = @(
     "flowchain_public_tester_gateway_routes_covered",
     "flowchain_public_tester_gateway_no_secrets",
     "flowchain_public_tester_gateway_no_broadcasts",
+    "flowchain_external_tester_client_validation_ready",
+    "flowchain_external_tester_client_failed_checks",
+    "flowchain_external_tester_client_secret_findings",
+    "flowchain_external_tester_client_dry_run_no_network",
+    "flowchain_external_tester_client_routes_cover_reads",
+    "flowchain_external_tester_client_routes_cover_writes",
+    "flowchain_external_tester_client_no_token_configured",
+    "flowchain_external_tester_client_no_broadcasts",
+    "flowchain_external_tester_client_no_secrets",
+    "flowchain_external_tester_client_env_values_hidden",
     "flowchain_external_tester_evidence_ready",
     "flowchain_external_tester_evidence_failed_checks",
     "flowchain_external_tester_evidence_missing_files",
@@ -635,6 +661,7 @@ $checks = [ordered]@{
     publicRpcSyntheticCanaryLoaded = $null -ne $publicRpcSyntheticCanary
     externalTesterLoaded = $null -ne $externalTester
     publicTesterGatewayLoaded = $null -ne $publicTesterGateway
+    externalTesterClientValidationLoaded = $null -ne $externalTesterClientValidation
     externalTesterEvidenceLoaded = $null -ne $externalTesterEvidence
     dashboardUiLoaded = $null -ne $dashboardUi
     ownerInputsValidationLoaded = $null -ne $ownerInputsValidation
@@ -734,6 +761,18 @@ $checks = [ordered]@{
         "flowchain_public_tester_gateway_routes_covered",
         "flowchain_public_tester_gateway_no_secrets",
         "flowchain_public_tester_gateway_no_broadcasts"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    externalTesterClientMetricsPresent = @(
+        "flowchain_external_tester_client_validation_ready",
+        "flowchain_external_tester_client_failed_checks",
+        "flowchain_external_tester_client_secret_findings",
+        "flowchain_external_tester_client_dry_run_no_network",
+        "flowchain_external_tester_client_routes_cover_reads",
+        "flowchain_external_tester_client_routes_cover_writes",
+        "flowchain_external_tester_client_no_token_configured",
+        "flowchain_external_tester_client_no_broadcasts",
+        "flowchain_external_tester_client_no_secrets",
+        "flowchain_external_tester_client_env_values_hidden"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     transactionIntakeMetricsPresent = @(
         "flowchain_mempool_depth",

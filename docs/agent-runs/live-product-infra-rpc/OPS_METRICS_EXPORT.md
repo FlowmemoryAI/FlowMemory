@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-20T16:52:08.8271261Z
+Generated: 2026-05-20T18:33:47.9179942Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 147
+- Metric count: 157
 
 ## Required Metrics
 
@@ -101,6 +101,16 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_public_tester_gateway_routes_covered: present
 - flowchain_public_tester_gateway_no_secrets: present
 - flowchain_public_tester_gateway_no_broadcasts: present
+- flowchain_external_tester_client_validation_ready: present
+- flowchain_external_tester_client_failed_checks: present
+- flowchain_external_tester_client_secret_findings: present
+- flowchain_external_tester_client_dry_run_no_network: present
+- flowchain_external_tester_client_routes_cover_reads: present
+- flowchain_external_tester_client_routes_cover_writes: present
+- flowchain_external_tester_client_no_token_configured: present
+- flowchain_external_tester_client_no_broadcasts: present
+- flowchain_external_tester_client_no_secrets: present
+- flowchain_external_tester_client_env_values_hidden: present
 - flowchain_external_tester_evidence_ready: present
 - flowchain_external_tester_evidence_failed_checks: present
 - flowchain_external_tester_evidence_missing_files: present
@@ -150,6 +160,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | publicRpcSyntheticCanaryLoaded | True |
 | externalTesterLoaded | True |
 | publicTesterGatewayLoaded | True |
+| externalTesterClientValidationLoaded | True |
 | externalTesterEvidenceLoaded | True |
 | dashboardUiLoaded | True |
 | ownerInputsValidationLoaded | True |
@@ -169,6 +180,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | realValuePilotAggregateMetricsPresent | True |
 | publicRpcEdgeMetricsPresent | True |
 | publicTesterGatewayMetricsPresent | True |
+| externalTesterClientMetricsPresent | True |
 | transactionIntakeMetricsPresent | True |
 | dashboardUiMetricsPresent | True |
 | ownerInputsValidationMetricsPresent | True |

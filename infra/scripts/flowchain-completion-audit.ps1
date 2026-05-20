@@ -2767,6 +2767,7 @@ $opsMetricsExportPassed = $opsMetricsExportExitCode -eq 0 `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "metricsJsonWritten" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "requiredMetricsPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "externalTesterClientMetricsPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "supervisorNodeRecoveryMetricsPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "prometheusHasHelpAndType" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "envValuesPrintedFalse" -Default $false) -eq $true) `
@@ -3270,9 +3271,9 @@ Add-AuditItem -Items $items -Id "ops-alert-install-validation" `
     -Commands @("npm run flowchain:ops:alerts:install:validate")
 
 Add-AuditItem -Items $items -Id "ops-metrics-export" `
-    -Requirement "Ops metrics export writes no-secret JSON and Prometheus textfile metrics from current L1 operations evidence, including public RPC edge deployment hardening coverage, without hiding owner-input blockers." `
+    -Requirement "Ops metrics export writes no-secret JSON and Prometheus textfile metrics from current L1 operations evidence, including public RPC edge deployment hardening and external tester client validation coverage, without hiding owner-input blockers." `
     -Status $(if ($opsMetricsExportPassed) { "passed" } else { "failed" }) `
-    -Evidence "metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, failedChecks=$($opsMetricsExportFailedChecks.Count), secretFindings=$($opsMetricsExportSecretFindings.Count), metricsJsonWritten=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "metricsJsonWritten" -Default $false), prometheusTextWritten=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "prometheusTextWritten" -Default $false), requiredMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "requiredMetricsPresent" -Default $false), publicRpcEdgeMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), supervisorNodeRecoveryMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "supervisorNodeRecoveryMetricsPresent" -Default $false), report=$($paths.opsMetricsExport)" `
+    -Evidence "metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, failedChecks=$($opsMetricsExportFailedChecks.Count), secretFindings=$($opsMetricsExportSecretFindings.Count), metricsJsonWritten=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "metricsJsonWritten" -Default $false), prometheusTextWritten=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "prometheusTextWritten" -Default $false), requiredMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "requiredMetricsPresent" -Default $false), publicRpcEdgeMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), externalTesterClientMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "externalTesterClientMetricsPresent" -Default $false), supervisorNodeRecoveryMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "supervisorNodeRecoveryMetricsPresent" -Default $false), report=$($paths.opsMetricsExport)" `
     -Commands @("npm run flowchain:ops:metrics:export -- -AllowBlocked")
 
 Add-AuditItem -Items $items -Id "ops-metrics-install-validation" `

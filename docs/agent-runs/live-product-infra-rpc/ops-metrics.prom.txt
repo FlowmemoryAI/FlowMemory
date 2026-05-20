@@ -42,10 +42,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 32
+flowchain_ops_alert_rules_total 33
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 25
+flowchain_ops_alert_rules_critical 26
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -322,6 +322,36 @@ flowchain_public_tester_gateway_no_secrets 1
 # HELP flowchain_public_tester_gateway_no_broadcasts One when the public tester gateway E2E proof made no live broadcasts.
 # TYPE flowchain_public_tester_gateway_no_broadcasts gauge
 flowchain_public_tester_gateway_no_broadcasts 1
+# HELP flowchain_external_tester_client_validation_ready One when standalone external tester client validation is passed.
+# TYPE flowchain_external_tester_client_validation_ready gauge
+flowchain_external_tester_client_validation_ready 1
+# HELP flowchain_external_tester_client_failed_checks Failed checks in standalone external tester client validation.
+# TYPE flowchain_external_tester_client_failed_checks gauge
+flowchain_external_tester_client_failed_checks 0
+# HELP flowchain_external_tester_client_secret_findings Secret marker findings in standalone external tester client validation.
+# TYPE flowchain_external_tester_client_secret_findings gauge
+flowchain_external_tester_client_secret_findings 0
+# HELP flowchain_external_tester_client_dry_run_no_network One when external tester client validation proves dry-run mode makes no network calls.
+# TYPE flowchain_external_tester_client_dry_run_no_network gauge
+flowchain_external_tester_client_dry_run_no_network 1
+# HELP flowchain_external_tester_client_routes_cover_reads One when external tester client validation covers required read routes.
+# TYPE flowchain_external_tester_client_routes_cover_reads gauge
+flowchain_external_tester_client_routes_cover_reads 1
+# HELP flowchain_external_tester_client_routes_cover_writes One when external tester client validation covers wallet create, faucet, and send routes.
+# TYPE flowchain_external_tester_client_routes_cover_writes gauge
+flowchain_external_tester_client_routes_cover_writes 1
+# HELP flowchain_external_tester_client_no_token_configured One when external tester client dry-run proof stores no tester bearer token.
+# TYPE flowchain_external_tester_client_no_token_configured gauge
+flowchain_external_tester_client_no_token_configured 1
+# HELP flowchain_external_tester_client_no_broadcasts One when external tester client validation proves no broadcasts.
+# TYPE flowchain_external_tester_client_no_broadcasts gauge
+flowchain_external_tester_client_no_broadcasts 1
+# HELP flowchain_external_tester_client_no_secrets One when external tester client validation has no secret findings and reports no secrets.
+# TYPE flowchain_external_tester_client_no_secrets gauge
+flowchain_external_tester_client_no_secrets 1
+# HELP flowchain_external_tester_client_env_values_hidden One when external tester client validation does not print environment values.
+# TYPE flowchain_external_tester_client_env_values_hidden gauge
+flowchain_external_tester_client_env_values_hidden 1
 # HELP flowchain_external_tester_evidence_ready One when external tester returned evidence validation is passed.
 # TYPE flowchain_external_tester_evidence_ready gauge
 flowchain_external_tester_evidence_ready 1
@@ -423,13 +453,13 @@ flowchain_live_cutover_missing_owner_inputs 14
 flowchain_no_secret_ready 1
 # HELP flowchain_truth_gates_total Total production truth table gates.
 # TYPE flowchain_truth_gates_total gauge
-flowchain_truth_gates_total 60
+flowchain_truth_gates_total 64
 # HELP flowchain_truth_gates_passed Passed production truth table gates.
 # TYPE flowchain_truth_gates_passed gauge
-flowchain_truth_gates_passed 44
+flowchain_truth_gates_passed 47
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
-flowchain_truth_gates_owner_blocked 16
+flowchain_truth_gates_owner_blocked 17
 # HELP flowchain_truth_gates_repo_blocked Repo-blocked production truth table gates.
 # TYPE flowchain_truth_gates_repo_blocked gauge
 flowchain_truth_gates_repo_blocked 0
