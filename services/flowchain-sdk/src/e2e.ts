@@ -198,8 +198,8 @@ function writeInventoryReport(args: {
     },
     {
       surface: "Browser readiness example",
-      status: args.checks.browserExamplePresent ? "partial" : "missing",
-      evidence: "Static browser readiness example exists; external starter packaging is still future work.",
+      status: implementedIf(args.checks.browserExamplePresent && args.checks.browserExampleSmokePassed),
+      evidence: "No-dependency browser starter checks discovery/readiness, fails closed before public shareability, and has a mechanical smoke test.",
     },
     {
       surface: "Developer docs",
@@ -371,6 +371,15 @@ async function main() {
   const cliSignedSubmit = JSON.parse(cliSignedSubmitText) as JsonValue;
   const browserExamplePath = resolve(root, "examples", "flowchain-browser-readiness", "index.html");
   const browserExampleText = existsSync(browserExamplePath) ? readFileSync(browserExamplePath, "utf8") : "";
+  const browserModulePath = resolve(root, "examples", "flowchain-browser-readiness", "browser-readiness.js");
+  const browserModuleText = existsSync(browserModulePath) ? readFileSync(browserModulePath, "utf8") : "";
+  const browserSmokePath = resolve(root, "examples", "flowchain-browser-readiness", "smoke.mjs");
+  const browserSmokeText = execFileSync(process.execPath, [browserSmokePath], {
+    cwd: root,
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  const browserSmoke = JSON.parse(browserSmokeText) as JsonValue;
   const requiredDocs = [
     "docs/developer/FLOWCHAIN_QUICKSTART.md",
     "docs/developer/FLOWCHAIN_WALLET_INTEGRATION.md",
@@ -437,7 +446,12 @@ async function main() {
     cliSignedTransactionSubmit: String(asRecord(cliSignedSubmit).schema ?? "") === "flowmemory.control_plane.transaction_submit_result.v0"
       && asRecord(cliSignedSubmit).accepted === true
       && asRecord(cliSignedSubmit).status === "accepted_crypto_verified",
-    browserExamplePresent: browserExampleText.includes("/rpc/discover") && browserExampleText.includes("/rpc/readiness"),
+    browserExamplePresent: `${browserExampleText}\n${browserModuleText}`.includes("/rpc/discover")
+      && `${browserExampleText}\n${browserModuleText}`.includes("/rpc/readiness")
+      && browserExampleText.includes("./browser-readiness.js"),
+    browserExampleSmokePassed: String(asRecord(browserSmoke).schema ?? "") === "flowchain.example.browser_readiness_smoke.v0"
+      && asRecord(browserSmoke).status === "passed"
+      && asRecord(browserSmoke).safeToSharePublicly === false,
     developerGuidesPresent: missingDocs.length === 0,
     heightAdvanced: firstHeight !== null && secondHeight !== null && BigInt(secondHeight) > BigInt(firstHeight),
     publicReadinessFailClosed: readiness.publicRpcReady === false && readiness.productionReady === false,

@@ -82,6 +82,12 @@ The browser readiness example lives at:
 examples/flowchain-browser-readiness/index.html
 ```
 
+Run its no-dependency browser-starter smoke with:
+
+```powershell
+npm run smoke --prefix examples/flowchain-browser-readiness
+```
+
 ## Safety Rules
 
 - Default RPC is `http://127.0.0.1:8787/rpc`.
@@ -103,6 +109,6 @@ npm run flowchain:dev-pack:e2e
 ```
 
 `flowchain:sdk:e2e` checks the expanded SDK/CLI surface, the Node.js example,
-the browser readiness example, and the required developer docs. `flowchain:dev-pack:e2e`
-regenerates `docs/sdk/RPC_REFERENCE.generated.md` from live `rpc_discover`
-output.
+the browser readiness starter, the generated ecosystem inventory, and the
+required developer docs. `flowchain:dev-pack:e2e` regenerates
+`docs/sdk/RPC_REFERENCE.generated.md` from live `rpc_discover` output.

@@ -29,8 +29,15 @@ transfer, and prints a public-safe summary.
 
 ## Browser Example
 
+The browser readiness starter lives in
+`examples/flowchain-browser-readiness/`. Run its checked no-dependency smoke:
+
+```powershell
+npm run smoke --prefix examples/flowchain-browser-readiness
+```
+
 Open `examples/flowchain-browser-readiness/index.html` while the local control
-plane is running. It calls:
+plane is running, or serve that directory with any static file server. It calls:
 
 - `GET /rpc/discover`
 - `GET /rpc/readiness`

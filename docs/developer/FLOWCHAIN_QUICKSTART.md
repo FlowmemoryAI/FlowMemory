@@ -158,6 +158,7 @@ Outputs:
 - `docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json`
 - `docs/agent-runs/live-product-dev-pack/DEV_PACK.md`
 - `docs/agent-runs/live-product-dev-pack/HANDOFF.md`
+- `docs/agent-runs/live-product-dev-pack/INVENTORY.md`
 - `docs/sdk/RPC_REFERENCE.generated.md`
 
 ## Run The Examples
@@ -166,10 +167,13 @@ Outputs:
 node examples/flowchain-node-quickstart.mjs
 node examples/flowchain-node-quickstart.mjs --send
 node examples/flowchain-signed-envelope.mjs --submit
+npm run smoke --prefix examples/flowchain-browser-readiness
 ```
 
 Open `examples/flowchain-browser-readiness/index.html` from a browser when you
-need a fetch-only readiness example for a public or local RPC origin.
+need a fetch-only readiness example for a public or local RPC origin. The smoke
+test proves the starter only calls discovery/readiness, redacts URL credentials,
+and stays not-shareable before public readiness passes.
 
 ## Current Limits
 
