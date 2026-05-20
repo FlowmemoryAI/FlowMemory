@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T18:53:40.4012266Z",
+    "generatedAt":  "2026-05-20T19:20:23.5969868Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -9,6 +9,7 @@
                           "publicRpcSyntheticCanaryStatus":  "blocked",
                           "publicRpcDeploymentBundleStatus":  "passed",
                           "publicRpcDeploymentAutomationStatus":  "passed",
+                          "bridgeReleaseEvidenceValidationStatus":  "passed",
                           "externalTesterStatus":  "blocked",
                           "publicTesterGatewayStatus":  "passed",
                           "externalTesterClientValidationStatus":  "passed",
@@ -453,6 +454,66 @@
                         "type":  "gauge",
                         "help":  "Required runtime proof checks that are false in bridge runtime credit validation.",
                         "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_validation_ready",
+                        "type":  "gauge",
+                        "help":  "One when bridge release evidence validation is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_cases_total",
+                        "type":  "gauge",
+                        "help":  "Bridge release evidence validation case count.",
+                        "value":  9
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_failed_cases",
+                        "type":  "gauge",
+                        "help":  "Failed bridge release evidence validation cases.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_missing_cases",
+                        "type":  "gauge",
+                        "help":  "Missing required bridge release evidence validation cases.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in bridge release evidence validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_secret_findings",
+                        "type":  "gauge",
+                        "help":  "Secret marker findings in bridge release evidence validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_release_broadcast_rejected",
+                        "type":  "gauge",
+                        "help":  "One when bridge release evidence validation rejects broadcast release evidence.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_withdrawal_broadcast_rejected",
+                        "type":  "gauge",
+                        "help":  "One when bridge release evidence validation rejects broadcast withdrawal intent.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_no_broadcasts",
+                        "type":  "gauge",
+                        "help":  "One when bridge release evidence validation made no broadcasts.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_release_evidence_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when bridge release evidence validation has no secret findings and reports no secrets.",
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_real_value_pilot_aggregate_ready",
@@ -971,7 +1032,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  158,
+    "metricCount":  168,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

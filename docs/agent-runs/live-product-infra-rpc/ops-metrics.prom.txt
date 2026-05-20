@@ -214,6 +214,36 @@ flowchain_bridge_runtime_credit_missing_checks 0
 # HELP flowchain_bridge_runtime_credit_false_checks Required runtime proof checks that are false in bridge runtime credit validation.
 # TYPE flowchain_bridge_runtime_credit_false_checks gauge
 flowchain_bridge_runtime_credit_false_checks 0
+# HELP flowchain_bridge_release_evidence_validation_ready One when bridge release evidence validation is passed.
+# TYPE flowchain_bridge_release_evidence_validation_ready gauge
+flowchain_bridge_release_evidence_validation_ready 1
+# HELP flowchain_bridge_release_evidence_cases_total Bridge release evidence validation case count.
+# TYPE flowchain_bridge_release_evidence_cases_total gauge
+flowchain_bridge_release_evidence_cases_total 9
+# HELP flowchain_bridge_release_evidence_failed_cases Failed bridge release evidence validation cases.
+# TYPE flowchain_bridge_release_evidence_failed_cases gauge
+flowchain_bridge_release_evidence_failed_cases 0
+# HELP flowchain_bridge_release_evidence_missing_cases Missing required bridge release evidence validation cases.
+# TYPE flowchain_bridge_release_evidence_missing_cases gauge
+flowchain_bridge_release_evidence_missing_cases 0
+# HELP flowchain_bridge_release_evidence_failed_checks Failed checks in bridge release evidence validation.
+# TYPE flowchain_bridge_release_evidence_failed_checks gauge
+flowchain_bridge_release_evidence_failed_checks 0
+# HELP flowchain_bridge_release_evidence_secret_findings Secret marker findings in bridge release evidence validation.
+# TYPE flowchain_bridge_release_evidence_secret_findings gauge
+flowchain_bridge_release_evidence_secret_findings 0
+# HELP flowchain_bridge_release_evidence_release_broadcast_rejected One when bridge release evidence validation rejects broadcast release evidence.
+# TYPE flowchain_bridge_release_evidence_release_broadcast_rejected gauge
+flowchain_bridge_release_evidence_release_broadcast_rejected 1
+# HELP flowchain_bridge_release_evidence_withdrawal_broadcast_rejected One when bridge release evidence validation rejects broadcast withdrawal intent.
+# TYPE flowchain_bridge_release_evidence_withdrawal_broadcast_rejected gauge
+flowchain_bridge_release_evidence_withdrawal_broadcast_rejected 1
+# HELP flowchain_bridge_release_evidence_no_broadcasts One when bridge release evidence validation made no broadcasts.
+# TYPE flowchain_bridge_release_evidence_no_broadcasts gauge
+flowchain_bridge_release_evidence_no_broadcasts 1
+# HELP flowchain_bridge_release_evidence_no_secrets One when bridge release evidence validation has no secret findings and reports no secrets.
+# TYPE flowchain_bridge_release_evidence_no_secrets gauge
+flowchain_bridge_release_evidence_no_secrets 1
 # HELP flowchain_real_value_pilot_aggregate_ready One when the real-value pilot aggregate proof is passed and safe.
 # TYPE flowchain_real_value_pilot_aggregate_ready gauge
 flowchain_real_value_pilot_aggregate_ready 1

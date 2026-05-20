@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-20T18:53:40.6535123Z
+Generated: 2026-05-20T19:20:23.8159929Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 158
+- Metric count: 168
 
 ## Required Metrics
 
@@ -72,6 +72,16 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_bridge_runtime_credit_failed_checks: present
 - flowchain_bridge_runtime_credit_missing_checks: present
 - flowchain_bridge_runtime_credit_false_checks: present
+- flowchain_bridge_release_evidence_validation_ready: present
+- flowchain_bridge_release_evidence_cases_total: present
+- flowchain_bridge_release_evidence_failed_cases: present
+- flowchain_bridge_release_evidence_missing_cases: present
+- flowchain_bridge_release_evidence_failed_checks: present
+- flowchain_bridge_release_evidence_secret_findings: present
+- flowchain_bridge_release_evidence_release_broadcast_rejected: present
+- flowchain_bridge_release_evidence_withdrawal_broadcast_rejected: present
+- flowchain_bridge_release_evidence_no_broadcasts: present
+- flowchain_bridge_release_evidence_no_secrets: present
 - flowchain_real_value_pilot_aggregate_ready: present
 - flowchain_real_value_pilot_aggregate_commands_total: present
 - flowchain_real_value_pilot_aggregate_timed_out_commands: present
@@ -163,6 +173,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | publicTesterGatewayLoaded | True |
 | externalTesterClientValidationLoaded | True |
 | externalTesterEvidenceLoaded | True |
+| bridgeReleaseEvidenceValidationLoaded | True |
 | dashboardUiLoaded | True |
 | ownerInputsValidationLoaded | True |
 | ownerActivationPlanLoaded | True |
@@ -178,6 +189,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | externalTesterEvidenceMetricsPresent | True |
 | bridgeDirectObserveMetricsPresent | True |
 | bridgeRuntimeCreditMetricsPresent | True |
+| bridgeReleaseEvidenceMetricsPresent | True |
 | realValuePilotAggregateMetricsPresent | True |
 | publicRpcEdgeMetricsPresent | True |
 | publicTesterGatewayMetricsPresent | True |

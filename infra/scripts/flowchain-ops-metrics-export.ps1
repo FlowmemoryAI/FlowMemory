@@ -32,6 +32,7 @@ $paths = [ordered]@{
     bridgeLive = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
     bridgeRelayerGuardrail = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
+    bridgeReleaseEvidenceValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-validation-report.json"
     realValuePilotAggregate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
@@ -227,6 +228,7 @@ $dashboardUi = $reports.dashboardUi
 $ownerInputsValidation = $reports.ownerInputsValidation
 $ownerActivationPlan = $reports.ownerActivationPlan
 $ownerGoLiveHandoff = $reports.ownerGoLiveHandoff
+$bridgeReleaseEvidenceValidation = $reports.bridgeReleaseEvidenceValidation
 $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
 $publicRpcDeploymentAutomation = $reports.publicRpcDeploymentAutomation
 $liveCutover = $reports.liveCutover
@@ -285,6 +287,11 @@ $publicRpcSyntheticCanaryChecks = Get-MetricsProp -Object $publicRpcSyntheticCan
 $publicRpcSyntheticCanaryMissingEnvCount = @((Get-MetricsProp -Object $publicRpcSyntheticCanary -Name "missingEnvNames" -Default @())).Count
 $publicRpcDeploymentBundleChecks = Get-MetricsProp -Object $publicRpcDeploymentBundle -Name "checks"
 $publicRpcDeploymentAutomationChecks = Get-MetricsProp -Object $publicRpcDeploymentAutomation -Name "checks"
+$bridgeReleaseEvidenceValidationChecks = Get-MetricsProp -Object $bridgeReleaseEvidenceValidation -Name "checks"
+$bridgeReleaseEvidenceValidationFailedChecks = @((Get-MetricsProp -Object $bridgeReleaseEvidenceValidation -Name "failedChecks" -Default @()))
+$bridgeReleaseEvidenceValidationFailedCases = @((Get-MetricsProp -Object $bridgeReleaseEvidenceValidation -Name "failedCases" -Default @()))
+$bridgeReleaseEvidenceValidationMissingCases = @((Get-MetricsProp -Object $bridgeReleaseEvidenceValidation -Name "missingRequiredCases" -Default @()))
+$bridgeReleaseEvidenceValidationSecretFindings = @((Get-MetricsProp -Object $bridgeReleaseEvidenceValidation -Name "secretMarkerFindings" -Default @()))
 $publicRpcRequiredCutoverCommands = @(
     "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
     "npm run flowchain:tester:gateway:e2e",
@@ -380,6 +387,16 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_transfer_laten
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_credit_failed_checks" -Help "Failed checks in bridge runtime credit validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRuntimeCreditFailedChecks"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_credit_missing_checks" -Help "Missing required runtime proof checks in bridge runtime credit validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRuntimeCreditMissingRuntimeChecks"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_credit_false_checks" -Help "Required runtime proof checks that are false in bridge runtime credit validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRuntimeCreditFalseRuntimeChecks"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_release_evidence_validation_ready" -Help "One when bridge release evidence validation is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $bridgeReleaseEvidenceValidation))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_release_evidence_cases_total" -Help "Bridge release evidence validation case count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $bridgeReleaseEvidenceValidation -Name "caseCount" -Default 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_release_evidence_failed_cases" -Help "Failed bridge release evidence validation cases." -Value (ConvertTo-MetricNumber -Value $bridgeReleaseEvidenceValidationFailedCases.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_release_evidence_missing_cases" -Help "Missing required bridge release evidence validation cases." -Value (ConvertTo-MetricNumber -Value $bridgeReleaseEvidenceValidationMissingCases.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_release_evidence_failed_checks" -Help "Failed checks in bridge release evidence validation." -Value (ConvertTo-MetricNumber -Value $bridgeReleaseEvidenceValidationFailedChecks.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_release_evidence_secret_findings" -Help "Secret marker findings in bridge release evidence validation." -Value (ConvertTo-MetricNumber -Value $bridgeReleaseEvidenceValidationSecretFindings.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_release_evidence_release_broadcast_rejected" -Help "One when bridge release evidence validation rejects broadcast release evidence." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $bridgeReleaseEvidenceValidationChecks -Name "releaseBroadcastRejected" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_release_evidence_withdrawal_broadcast_rejected" -Help "One when bridge release evidence validation rejects broadcast withdrawal intent." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $bridgeReleaseEvidenceValidationChecks -Name "withdrawalBroadcastRejected" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_release_evidence_no_broadcasts" -Help "One when bridge release evidence validation made no broadcasts." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $bridgeReleaseEvidenceValidation -Name "broadcasts" -Default $true) -eq $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_release_evidence_no_secrets" -Help "One when bridge release evidence validation has no secret findings and reports no secrets." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $bridgeReleaseEvidenceValidation -Name "noSecrets" -Default $false) -eq $true) -and $bridgeReleaseEvidenceValidationSecretFindings.Count -eq 0))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_real_value_pilot_aggregate_ready" -Help "One when the real-value pilot aggregate proof is passed and safe." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "realValuePilotAggregateReady"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_real_value_pilot_aggregate_commands_total" -Help "Proof commands run by the real-value pilot aggregate gate." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "realValuePilotAggregateCommandsRun"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_real_value_pilot_aggregate_timed_out_commands" -Help "Timed-out proof commands in the real-value pilot aggregate gate." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "realValuePilotAggregateTimedOutCommands"))
@@ -484,6 +501,7 @@ $metricsJson = [ordered]@{
         publicRpcSyntheticCanaryStatus = Get-MetricsStatus -Report $publicRpcSyntheticCanary
         publicRpcDeploymentBundleStatus = Get-MetricsStatus -Report $publicRpcDeploymentBundle
         publicRpcDeploymentAutomationStatus = Get-MetricsStatus -Report $publicRpcDeploymentAutomation
+        bridgeReleaseEvidenceValidationStatus = Get-MetricsStatus -Report $bridgeReleaseEvidenceValidation
         externalTesterStatus = Get-MetricsStatus -Report $externalTester
         publicTesterGatewayStatus = Get-MetricsStatus -Report $publicTesterGateway
         externalTesterClientValidationStatus = Get-MetricsStatus -Report $externalTesterClientValidation
@@ -575,6 +593,16 @@ $requiredMetricNames = @(
     "flowchain_bridge_runtime_credit_failed_checks",
     "flowchain_bridge_runtime_credit_missing_checks",
     "flowchain_bridge_runtime_credit_false_checks",
+    "flowchain_bridge_release_evidence_validation_ready",
+    "flowchain_bridge_release_evidence_cases_total",
+    "flowchain_bridge_release_evidence_failed_cases",
+    "flowchain_bridge_release_evidence_missing_cases",
+    "flowchain_bridge_release_evidence_failed_checks",
+    "flowchain_bridge_release_evidence_secret_findings",
+    "flowchain_bridge_release_evidence_release_broadcast_rejected",
+    "flowchain_bridge_release_evidence_withdrawal_broadcast_rejected",
+    "flowchain_bridge_release_evidence_no_broadcasts",
+    "flowchain_bridge_release_evidence_no_secrets",
     "flowchain_real_value_pilot_aggregate_ready",
     "flowchain_real_value_pilot_aggregate_commands_total",
     "flowchain_real_value_pilot_aggregate_timed_out_commands",
@@ -667,6 +695,7 @@ $checks = [ordered]@{
     publicTesterGatewayLoaded = $null -ne $publicTesterGateway
     externalTesterClientValidationLoaded = $null -ne $externalTesterClientValidation
     externalTesterEvidenceLoaded = $null -ne $externalTesterEvidence
+    bridgeReleaseEvidenceValidationLoaded = $null -ne $bridgeReleaseEvidenceValidation
     dashboardUiLoaded = $null -ne $dashboardUi
     ownerInputsValidationLoaded = $null -ne $ownerInputsValidation
     ownerActivationPlanLoaded = $null -ne $ownerActivationPlan
@@ -715,6 +744,18 @@ $checks = [ordered]@{
         "flowchain_bridge_runtime_credit_failed_checks",
         "flowchain_bridge_runtime_credit_missing_checks",
         "flowchain_bridge_runtime_credit_false_checks"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    bridgeReleaseEvidenceMetricsPresent = @(
+        "flowchain_bridge_release_evidence_validation_ready",
+        "flowchain_bridge_release_evidence_cases_total",
+        "flowchain_bridge_release_evidence_failed_cases",
+        "flowchain_bridge_release_evidence_missing_cases",
+        "flowchain_bridge_release_evidence_failed_checks",
+        "flowchain_bridge_release_evidence_secret_findings",
+        "flowchain_bridge_release_evidence_release_broadcast_rejected",
+        "flowchain_bridge_release_evidence_withdrawal_broadcast_rejected",
+        "flowchain_bridge_release_evidence_no_broadcasts",
+        "flowchain_bridge_release_evidence_no_secrets"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     realValuePilotAggregateMetricsPresent = @(
         "flowchain_real_value_pilot_aggregate_ready",

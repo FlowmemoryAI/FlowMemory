@@ -387,7 +387,7 @@ $truthTableAccepted = $truthTableReportStatus -in @("passed", "blocked-owner-inp
 $failedSteps = @($steps | Where-Object {
         "$($_.status)" -eq "failed" `
             -or "$($_.status)" -eq "blocked-repo-work" `
-            -or ("$($_.status)" -eq "stale" -and -not ("$($_.name)" -eq "Production truth table" -and $truthTableSelfReferenceStale)) `
+            -or ("$($_.status)" -eq "stale" -and -not ("$($_.name)" -eq "Production truth table" -and $truthTableAccepted)) `
             -or [int] $_.exitCode -eq 124 `
             -or $_.timedOut -eq $true
     })
