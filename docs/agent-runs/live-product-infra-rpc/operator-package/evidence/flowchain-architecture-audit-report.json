@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-20T03:33:36.4375271Z",
+    "generatedAt":  "2026-05-20T05:13:02.6560433Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -11,7 +11,7 @@
                                   "The dashboard has a browser-level desktop/mobile proof for tester wallet create, faucet, send, and Explorer inspection without leaking tester tokens or causing horizontal overflow.",
                                   "Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.",
                                   "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven, bounds relayer child processes, stages the Base scan cursor until L1 credit proof, can queue new relayer handoffs into the L1, and remains live-blocked until owner guardrails are configured.",
-                                  "State backup, monitoring, reboot-persistent service install, operator doctor diagnostics, node-operator packaging, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
+                                  "State backup, monitoring, node/control-plane/bridge-relayer autorecovery, reboot-persistent service install, operator doctor diagnostics, node-operator packaging, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
                                   "Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.",
                                   "Owner signup checklist maps the external services and local setup values needed for public operation without requesting secrets.",
                                   "The owner-operated public deployment contract has pre-exposure and rollback commands and cannot become shareable until all public gates pass.",
@@ -29,7 +29,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=97043, finalizedHeight=97043",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=98078, finalizedHeight=98078",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -67,7 +67,7 @@
                       "layer":  "Operations",
                       "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=26, alertCoveredFindings=28, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=86, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=19, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=18, incidentFailed=0",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=27, alertCoveredFindings=29, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=93, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=20, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=18, incidentFailed=0",
                       "files":  [
                                     "infra/scripts/flowchain-service-monitor.ps1",
                                     "infra/scripts/flowchain-service-supervisor.ps1",
@@ -158,7 +158,7 @@
                       "layer":  "Operations",
                       "requirement":  "Node operator packaging collects no-secret runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates.",
                       "status":  "passed",
-                      "evidence":  "operatorPackage=passed, commands=55, runbooks=35, evidenceReports=40, failedChecks=0, noSecretScan=True",
+                      "evidence":  "operatorPackage=passed, commands=56, runbooks=36, evidenceReports=41, failedChecks=0, noSecretScan=True",
                       "files":  [
                                     "infra/scripts/flowchain-operator-package.ps1",
                                     "docs/developer/FLOWCHAIN_NODE_OPERATOR.md"
@@ -175,7 +175,7 @@
                       "layer":  "Operations",
                       "requirement":  "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, forbidden local files, and no-secret scan.",
                       "status":  "passed",
-                      "evidence":  "operatorPackageVerify=passed, expectedFiles=68, commands=55, failedChecks=0, noSecretScan=True",
+                      "evidence":  "operatorPackageVerify=passed, expectedFiles=71, commands=56, failedChecks=0, noSecretScan=True",
                       "files":  [
                                     "infra/scripts/flowchain-operator-package-verify.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/OPERATOR_PACKAGE_VERIFY.md"
@@ -709,7 +709,7 @@
                                        "live service supervisor",
                                        "service status check",
                                        "restart with live profile",
-                                       "private node/control-plane recovery"
+                                       "private node/control-plane/relayer recovery"
                                    ],
                           "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-validation-report.json"
                       },
@@ -1019,15 +1019,15 @@
                                      },
     "opsAlertCoverage":  {
                              "status":  "passed",
-                             "ruleCount":  26,
-                             "criticalRuleCount":  19,
+                             "ruleCount":  27,
+                             "criticalRuleCount":  20,
                              "blockedRuleCount":  7,
-                             "coveredFindingCount":  28,
+                             "coveredFindingCount":  29,
                              "unmappedCurrentFindingCount":  0
                          },
     "opsMetricsCoverage":  {
                                "exportStatus":  "passed",
-                               "metricCount":  86,
+                               "metricCount":  93,
                                "exportFailedCheckCount":  0,
                                "installStatus":  "passed",
                                "installFailedCheckCount":  0,
@@ -1042,6 +1042,18 @@
                                "systemdTimerUnitPlanned":  true,
                                "noExternalDelivery":  true
                            },
+    "serviceSupervisorAutorecovery":  {
+                                          "status":  "passed",
+                                          "controlPlaneRestartAttempts":  1,
+                                          "nodeRestartAttempts":  1,
+                                          "relayerRestartAttempts":  1,
+                                          "nodeCrashDetected":  true,
+                                          "nodeRecovered":  true,
+                                          "controlPlaneRecoveredAfterNodeCrash":  true,
+                                          "nodeRecoveryLiveProfile":  true,
+                                          "nodeRecoveryMaxBlocksUnbounded":  true,
+                                          "relayerRecovered":  true
+                                      },
     "bridgeRelayerSafetyEvidence":  {
                                         "status":  "blocked",
                                         "childTimeoutSeconds":  300,

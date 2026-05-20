@@ -277,6 +277,8 @@ $supervisorValidation = $reports.serviceSupervisorValidation
 $supervisorValidationStatus = Get-ArchitectureStatus -Report $supervisorValidation
 $supervisorRestartAttempts = [int](Get-ArchitectureProp -Object $supervisorValidation -Name "restartAttempts" -Default 0)
 $supervisorChecks = Get-ArchitectureProp -Object $supervisorValidation -Name "checks"
+$supervisorNodeRecovery = Get-ArchitectureProp -Object $supervisorValidation -Name "nodeRecovery"
+$supervisorNodeRestartAttempts = [int](Get-ArchitectureProp -Object $supervisorNodeRecovery -Name "restartAttempts" -Default 0)
 $supervisorRelayerRecovery = Get-ArchitectureProp -Object $supervisorValidation -Name "relayerLoopRecovery"
 $supervisorRelayerRestartAttempts = [int](Get-ArchitectureProp -Object $supervisorRelayerRecovery -Name "restartAttempts" -Default 0)
 $serviceInstallValidation = $reports.serviceInstallValidation
@@ -374,6 +376,14 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ($monitorSamples -ge 2) `
     -and ($supervisorValidationStatus -eq "passed") `
     -and ($supervisorRestartAttempts -ge 1) `
+    -and ($supervisorNodeRestartAttempts -ge 1) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "beforeNodeCrashPidRecorded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "nodeCrashDetected" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "nodeRestartAttemptsExactlyOne" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryNodeRunning" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryControlPlaneRunning" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryLiveProfile" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryMaxBlocksUnbounded" -Default $false) -eq $true) `
     -and ($supervisorRelayerRestartAttempts -ge 1) `
     -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "relayerCrashDetected" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false) -eq $true) `
@@ -436,7 +446,7 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
 Add-ArchitectureItem -Items $items -Id "ops-observability-boundary" -Layer "Operations" `
     -Requirement "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers." `
     -Status $(if ($observabilityReady) { "passed" } else { "failed" }) `
-    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, supervisorRelayerRestartAttempts=$supervisorRelayerRestartAttempts, supervisorRelayerRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false), opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), alertInstall=$alertInstallValidationStatus, systemdAlert=$(Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false), alertInstallFailedChecks=$($alertInstallFailedChecks.Count), metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, publicRpcEdgeMetrics=$(Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), publicRpcSecurityHeaderMetrics=$opsMetricsHasPublicRpcSecurityHeaderMetrics, metricsInstall=$metricsInstallValidationStatus, systemdMetrics=$(Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdValidationPassed" -Default $false), metricsInstallFailedChecks=$($metricsInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
+    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, supervisorNodeRestartAttempts=$supervisorNodeRestartAttempts, supervisorNodeRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryNodeRunning" -Default $false), supervisorRelayerRestartAttempts=$supervisorRelayerRestartAttempts, supervisorRelayerRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false), opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), alertInstall=$alertInstallValidationStatus, systemdAlert=$(Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false), alertInstallFailedChecks=$($alertInstallFailedChecks.Count), metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, publicRpcEdgeMetrics=$(Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), publicRpcSecurityHeaderMetrics=$opsMetricsHasPublicRpcSecurityHeaderMetrics, metricsInstall=$metricsInstallValidationStatus, systemdMetrics=$(Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdValidationPassed" -Default $false), metricsInstallFailedChecks=$($metricsInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
     -Files $observabilityFiles `
     -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:alerts:install:systemd:validate", "npm run flowchain:ops:metrics:export -- -AllowBlocked", "npm run flowchain:ops:metrics:install:validate", "npm run flowchain:ops:metrics:install:systemd:validate", "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
 
@@ -1431,7 +1441,7 @@ $dataFlows = @(
     },
     [ordered]@{
         name = "owner-host-service-lifecycle"
-        path = @("Windows Scheduled Task", "repo working directory", "live service supervisor", "service status check", "restart with live profile", "private node/control-plane recovery")
+        path = @("Windows Scheduled Task", "repo working directory", "live service supervisor", "service status check", "restart with live profile", "private node/control-plane/relayer recovery")
         latestEvidence = $reportPaths.serviceInstallValidation
     },
     [ordered]@{
@@ -1497,7 +1507,7 @@ $objectiveDeliverables = @(
     "The dashboard has a browser-level desktop/mobile proof for tester wallet create, faucet, send, and Explorer inspection without leaking tester tokens or causing horizontal overflow.",
     "Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.",
     "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven, bounds relayer child processes, stages the Base scan cursor until L1 credit proof, can queue new relayer handoffs into the L1, and remains live-blocked until owner guardrails are configured.",
-    "State backup, monitoring, reboot-persistent service install, operator doctor diagnostics, node-operator packaging, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
+    "State backup, monitoring, node/control-plane/bridge-relayer autorecovery, reboot-persistent service install, operator doctor diagnostics, node-operator packaging, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
     "Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.",
     "Owner signup checklist maps the external services and local setup values needed for public operation without requesting secrets.",
     "The owner-operated public deployment contract has pre-exposure and rollback commands and cannot become shareable until all public gates pass.",
@@ -1565,6 +1575,18 @@ $report = [ordered]@{
         missingPublicRpcSecurityHeaderMetricNames = @($missingPublicRpcSecurityHeaderMetricNames)
         systemdTimerUnitPlanned = (Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdTimerUnitPlanned" -Default $false)
         noExternalDelivery = (Get-ArchitectureProp -Object $metricsInstallChecks -Name "noExternalDelivery" -Default $false)
+    }
+    serviceSupervisorAutorecovery = [ordered]@{
+        status = $supervisorValidationStatus
+        controlPlaneRestartAttempts = $supervisorRestartAttempts
+        nodeRestartAttempts = $supervisorNodeRestartAttempts
+        relayerRestartAttempts = $supervisorRelayerRestartAttempts
+        nodeCrashDetected = (Get-ArchitectureProp -Object $supervisorChecks -Name "nodeCrashDetected" -Default $false)
+        nodeRecovered = (Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryNodeRunning" -Default $false)
+        controlPlaneRecoveredAfterNodeCrash = (Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryControlPlaneRunning" -Default $false)
+        nodeRecoveryLiveProfile = (Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryLiveProfile" -Default $false)
+        nodeRecoveryMaxBlocksUnbounded = (Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryMaxBlocksUnbounded" -Default $false)
+        relayerRecovered = (Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false)
     }
     bridgeRelayerSafetyEvidence = [ordered]@{
         status = $bridgeRelayerStatus
