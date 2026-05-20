@@ -44,6 +44,7 @@ $paths = [ordered]@{
     publicRpcEdgeTemplate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-edge-template-report.json"
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
     publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
+    testerWriteTokenSetup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/tester-write-token-setup-report.json"
     publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     dashboardUiReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
     secondComputerReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/second-computer-readiness-report.json"
@@ -406,6 +407,9 @@ $bridgeRelayerLoopValidationExitCode = $bridgeRelayerLoopValidationResult.exitCo
 $bridgeReleaseEvidenceValidationResult = Invoke-AuditChild -Path $paths.bridgeReleaseEvidenceValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-release-evidence-validation.ps1"))
 $bridgeReleaseEvidenceValidationOutput = @($bridgeReleaseEvidenceValidationResult.output)
 $bridgeReleaseEvidenceValidationExitCode = $bridgeReleaseEvidenceValidationResult.exitCode
+$testerWriteTokenSetupResult = Invoke-AuditChild -Path $paths.testerWriteTokenSetup -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-tester-write-token-setup.ps1"), "-ReportPath", $paths.testerWriteTokenSetup)
+$testerWriteTokenSetupOutput = @($testerWriteTokenSetupResult.output)
+$testerWriteTokenSetupExitCode = $testerWriteTokenSetupResult.exitCode
 $ownerInputsResult = Invoke-AuditChild -Path $paths.ownerInputs -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-inputs.ps1"), "-AllowBlocked")
 $ownerInputsOutput = @($ownerInputsResult.output)
 $ownerInputsExitCode = $ownerInputsResult.exitCode
@@ -1548,6 +1552,42 @@ $publicRpcAbuseTestPassed = $publicRpcAbuseTestExitCode -eq 0 `
     -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "broadcasts" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicRpcAbuseTest -Name "noSecrets" -Default $false) -eq $true)
+$testerWriteTokenSetup = $reports.testerWriteTokenSetup
+$testerWriteTokenSetupStatus = Get-ReportStatus -Report $testerWriteTokenSetup
+$testerWriteTokenSetupChecks = Get-AuditProp -Object $testerWriteTokenSetup -Name "checks"
+$testerWriteTokenSetupRequiredChecks = @(
+    "tokenPathGitIgnored",
+    "ownerEnvPathGitIgnored",
+    "tokenFileExists",
+    "ownerEnvFileExists",
+    "tokenLengthSufficient",
+    "tokenHashLengthValid",
+    "ownerEnvTesterEnabledWritten",
+    "ownerEnvTesterHashWritten",
+    "ownerEnvTesterCapWritten",
+    "rawTokenPrintedFalse",
+    "tokenHashPrintedFalse",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse",
+    "secretMarkerFindingsEmpty"
+)
+$testerWriteTokenSetupFailedChecks = @((Get-AuditProp -Object $testerWriteTokenSetup -Name "failedChecks" -Default @()))
+$testerWriteTokenSetupSecretFindings = @((Get-AuditProp -Object $testerWriteTokenSetup -Name "secretMarkerFindings" -Default @()))
+$testerWriteTokenSetupMissingChecks = @($testerWriteTokenSetupRequiredChecks | Where-Object {
+    (Get-AuditProp -Object $testerWriteTokenSetupChecks -Name $_ -Default $false) -ne $true
+})
+$testerWriteTokenSetupPassed = $testerWriteTokenSetupExitCode -eq 0 `
+    -and $testerWriteTokenSetupStatus -eq "passed" `
+    -and $testerWriteTokenSetupFailedChecks.Count -eq 0 `
+    -and $testerWriteTokenSetupSecretFindings.Count -eq 0 `
+    -and $testerWriteTokenSetupMissingChecks.Count -eq 0 `
+    -and ((Get-AuditProp -Object $testerWriteTokenSetup -Name "maxSendUnitsConfigured" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $testerWriteTokenSetup -Name "rawTokenPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $testerWriteTokenSetup -Name "tokenHashPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $testerWriteTokenSetup -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $testerWriteTokenSetup -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $testerWriteTokenSetup -Name "broadcasts" -Default $true) -eq $false)
 $publicTesterGatewayStatus = Get-ReportStatus -Report $publicTesterGateway
 $publicTesterGatewayPassed = $publicTesterGatewayExitCode -eq 0 `
     -and $publicTesterGatewayStatus -eq "passed" `
@@ -2700,6 +2740,12 @@ Add-AuditItem -Items $items -Id "public-rpc-abuse-test" `
     -Evidence "abuseStatus=$publicRpcAbuseTestStatus, abuseReady=$publicRpcAbuseTestReady, failedChecks=$publicRpcAbuseFailedCheckCount, secretFindings=$publicRpcAbuseSecretFindingCount, missingChecks=$($publicRpcAbuseMissingChecks.Count), report=$($paths.publicRpcAbuseTest)" `
     -Commands @("npm run flowchain:public-rpc:abuse-test")
 
+Add-AuditItem -Items $items -Id "tester-write-token-setup" `
+    -Requirement "Tester write token setup creates or preserves the raw bearer token only in ignored local storage, writes only its SHA-256 digest and send cap into the ignored owner env file, and proves no token or digest is printed to committed evidence." `
+    -Status $(if ($testerWriteTokenSetupPassed) { "passed" } else { "failed" }) `
+    -Evidence "tokenSetupStatus=$testerWriteTokenSetupStatus, failedChecks=$($testerWriteTokenSetupFailedChecks.Count), missingChecks=$($testerWriteTokenSetupMissingChecks.Count), secretFindings=$($testerWriteTokenSetupSecretFindings.Count), tokenPath=$(Get-AuditProp -Object $testerWriteTokenSetup -Name "tokenPath"), ownerEnvFile=$(Get-AuditProp -Object $testerWriteTokenSetup -Name "ownerEnvFile"), report=$($paths.testerWriteTokenSetup)" `
+    -Commands @("npm run flowchain:tester:token:setup")
+
 Add-AuditItem -Items $items -Id "public-tester-gateway-e2e" `
     -Requirement "Public tester write gateway proves bearer auth configuration, public-only wallet creation, capped send settlement, and over-cap rejection on a temporary local control-plane." `
     -Status $(if ($publicTesterGatewayPassed) { "passed" } else { "failed" }) `
@@ -2959,6 +3005,8 @@ $report = [ordered]@{
     publicRpcValidationOutputRedacted = @($publicRpcValidationOutput | ForEach-Object { "$_" })
     publicRpcAbuseTestExitCode = $publicRpcAbuseTestExitCode
     publicRpcAbuseTestOutputRedacted = @($publicRpcAbuseTestOutput | ForEach-Object { "$_" })
+    testerWriteTokenSetupExitCode = $testerWriteTokenSetupExitCode
+    testerWriteTokenSetupOutputRedacted = @($testerWriteTokenSetupOutput | ForEach-Object { "$_" })
     publicTesterGatewayExitCode = $publicTesterGatewayExitCode
     publicTesterGatewayOutputRedacted = @($publicTesterGatewayOutput | ForEach-Object { "$_" })
     dashboardUiReadinessExitCode = $dashboardUiReadinessExitCode
@@ -3051,6 +3099,8 @@ $report = [ordered]@{
         ownerActivationPlanStatus = $ownerActivationPlanStatus
         ownerActivationPlanPassed = $ownerActivationPlanPassed
         ownerActivationPlanActivationReady = $ownerActivationPlanActivationReady
+        testerWriteTokenSetupStatus = $testerWriteTokenSetupStatus
+        testerWriteTokenSetupPassed = $testerWriteTokenSetupPassed
         publicTesterGatewayStatus = $publicTesterGatewayStatus
         publicTesterGatewayPassed = $publicTesterGatewayPassed
         dashboardUiReadinessStatus = $dashboardUiReadinessStatus

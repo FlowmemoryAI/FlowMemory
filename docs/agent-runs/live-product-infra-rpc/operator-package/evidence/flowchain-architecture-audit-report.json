@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-20T05:31:31.3308114Z",
+    "generatedAt":  "2026-05-20T05:59:12.5555284Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -18,10 +18,10 @@
                                   "Every missing production edge fails closed on exact owner input names, with no secrets, env values, or live broadcasts."
                               ],
     "itemCounts":  {
-                       "passed":  20,
+                       "passed":  21,
                        "blocked":  7,
                        "failed":  0,
-                       "total":  27
+                       "total":  28
                    },
     "items":  [
                   {
@@ -29,7 +29,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=98307, finalizedHeight=98307",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=98477, finalizedHeight=98477",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -609,6 +609,22 @@
                                    ]
                   },
                   {
+                      "id":  "tester-write-token-setup-boundary",
+                      "layer":  "External tester launch",
+                      "requirement":  "Friends-and-family tester write access has a no-secret setup proof where the raw bearer token stays in ignored local storage, only its digest and cap are written to the ignored owner env file, and committed evidence prints neither token nor digest.",
+                      "status":  "passed",
+                      "evidence":  "tokenSetupStatus=passed, tokenPath=devnet/local/owner-inputs/tester-write-token.local.txt, ownerEnvFile=devnet/local/owner-inputs/flowchain-owner.local.env, tokenCreated=False, tokenPreserved=True, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\tester-write-token-setup-report.json",
+                      "files":  [
+                                    "infra/scripts/flowchain-tester-write-token-setup.ps1"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:tester:token:setup"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "public-tester-gateway-boundary",
                       "layer":  "External tester launch",
                       "requirement":  "Public tester write gateway has a local production-shaped E2E proof for bearer auth, public-only wallet creation, capped wallet sends, balance settlement, and over-cap rejection.",
@@ -653,7 +669,7 @@
                       "layer":  "Verification",
                       "requirement":  "Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, operator doctor, node-operator package, developer dev-pack, and completion evidence into one auditable path.",
                       "status":  "passed",
-                      "evidence":  "liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, packetSmoke=True, connectPackReady=True, publicTesterGateway=passed, dashboardUi=passed, operatorDoctor=blocked, operatorPackage=passed, operatorPackageVerify=passed, devPack=passed",
+                      "evidence":  "liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, packetSmoke=True, connectPackReady=True, testerTokenSetup=passed, publicTesterGateway=passed, dashboardUi=passed, operatorDoctor=blocked, operatorPackage=passed, operatorPackageVerify=passed, devPack=passed",
                       "files":  [
                                     "infra/scripts/flowchain-live-infra-check.ps1",
                                     "infra/scripts/flowchain-live-product-e2e.ps1",
@@ -665,6 +681,7 @@
                                     "infra/scripts/flowchain-external-tester-readiness.ps1",
                                     "infra/scripts/flowchain-external-tester-packet.ps1",
                                     "infra/scripts/flowchain-external-tester-evidence-validation.ps1",
+                                    "infra/scripts/flowchain-tester-write-token-setup.ps1",
                                     "infra/scripts/flowchain-public-tester-gateway-e2e.ps1",
                                     "infra/scripts/flowchain-dashboard-ui-readiness.ps1",
                                     "apps/dashboard/playwright.config.ts",
@@ -675,6 +692,7 @@
                                        "npm run flowchain:live-product:e2e",
                                        "npm run flowchain:completion:audit",
                                        "npm run flowchain:external-tester:packet",
+                                       "npm run flowchain:tester:token:setup",
                                        "npm run flowchain:tester:gateway:e2e",
                                        "npm run flowchain:dashboard:ui:readiness",
                                        "npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json",
@@ -728,9 +746,20 @@
                           "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-verify-report.json"
                       },
                       {
+                          "name":  "tester-write-token-setup",
+                          "path":  [
+                                       "ignored local bearer token file",
+                                       "SHA-256 digest only in ignored owner env",
+                                       "tester send cap env gate",
+                                       "no-secret setup evidence",
+                                       "public tester gateway auth"
+                                   ],
+                          "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\tester-write-token-setup-report.json"
+                      },
+                      {
                           "name":  "public-tester-gateway",
                           "path":  [
-                                       "tester bearer token",
+                                       "tester token setup proof",
                                        "public edge /tester/wallets/create",
                                        "public-only wallet metadata",
                                        "public edge /tester/wallets/send",
@@ -738,7 +767,8 @@
                                        "runtime block",
                                        "balance proof"
                                    ],
-                          "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json"
+                          "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json",
+                          "tokenSetupEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\tester-write-token-setup-report.json"
                       },
                       {
                           "name":  "dashboard-wallet-explorer",
@@ -954,6 +984,7 @@
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
                         "externalTesterPacket":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-packet-report.json",
                         "externalTesterEvidenceValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-evidence-validation-report.json",
+                        "testerWriteTokenSetup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\tester-write-token-setup-report.json",
                         "publicTesterGateway":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json",
                         "dashboardUiReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
                         "devPack":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\dev-pack-e2e-report.json",
@@ -998,6 +1029,8 @@
                                                                    "connectPackBroadcastsFalse":  true
                                                                },
                                          "testerNetworkFresh":  true,
+                                         "testerWriteTokenSetupStatus":  "passed",
+                                         "testerWriteTokenSetupReady":  true,
                                          "publicTesterGatewayStatus":  "passed",
                                          "publicTesterGatewayReady":  true,
                                          "dashboardUiStatus":  "passed",

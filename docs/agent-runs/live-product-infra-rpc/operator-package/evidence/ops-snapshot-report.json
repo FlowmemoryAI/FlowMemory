@@ -1,27 +1,18 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-20T05:31:07.7991178Z",
+    "generatedAt":  "2026-05-20T05:55:28.2044116Z",
     "status":  "blocked",
     "refresh":  {
-                    "performed":  true,
+                    "performed":  false,
                     "steps":  [
-                                  {
-                                      "name":  "service-status",
-                                      "exitCode":  0,
-                                      "outputLineCount":  10
-                                  },
-                                  {
-                                      "name":  "service-monitor",
-                                      "exitCode":  0,
-                                      "outputLineCount":  4
-                                  }
+
                               ],
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "98307",
-                  "finalizedHeight":  "98307",
-                  "stateFileLastWriteAgeSeconds":  5,
+                  "latestHeight":  "98477",
+                  "finalizedHeight":  "98477",
+                  "stateFileLastWriteAgeSeconds":  3,
                   "monitorStatus":  "passed",
                   "monitorSamples":  3,
                   "monitorHeightAdvanced":  true,
@@ -33,10 +24,10 @@
                               "txIntakeRows":  159,
                               "txIntakeAcceptedRows":  159,
                               "txIntakeInvalidRows":  0,
-                              "txIntakeLastWriteAgeSeconds":  8596.177,
+                              "txIntakeLastWriteAgeSeconds":  10056.634,
                               "runtimeSubmitDir":  "devnet/local/intake/runtime-submit",
                               "runtimeSubmitFileCount":  4,
-                              "runtimeSubmitNewestFileAgeSeconds":  416955.006,
+                              "runtimeSubmitNewestFileAgeSeconds":  418415.451,
                               "runtimeInboxDir":  "devnet/local/node/inbox",
                               "runtimeInboxFileCount":  0,
                               "runtimeInboxNewestFileAgeSeconds":  null,
@@ -73,7 +64,7 @@
                            "supervisorNodeRecoveryControlPlaneRunning":  true,
                            "supervisorNodeRecoveryLiveProfile":  true,
                            "supervisorNodeRecoveryMaxBlocksUnbounded":  true,
-                           "supervisorNodeRecoveryLatestHeight":  "15252",
+                           "supervisorNodeRecoveryLatestHeight":  "15319",
                            "supervisorLatestRestartReasons":  [
 
                                                               ],

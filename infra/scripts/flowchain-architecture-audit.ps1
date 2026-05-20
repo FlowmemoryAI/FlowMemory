@@ -82,6 +82,7 @@ $reportPaths = [ordered]@{
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     externalTesterEvidenceValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
+    testerWriteTokenSetup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/tester-write-token-setup-report.json"
     publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     dashboardUiReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
     devPack = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"
@@ -1261,6 +1262,7 @@ Add-ArchitectureItem -Items $items -Id "secret-broadcast-boundary" -Layer "Secur
 $liveInfra = $reports.liveInfra
 $externalTester = $reports.externalTester
 $externalTesterPacket = $reports.externalTesterPacket
+$testerWriteTokenSetup = $reports.testerWriteTokenSetup
 $publicTesterGateway = $reports.publicTesterGateway
 $dashboardUiReadiness = $reports.dashboardUiReadiness
 $devPackStatus = Get-ArchitectureStatus -Report $devPack
@@ -1293,6 +1295,7 @@ $productGateFiles = @(
     "infra/scripts/flowchain-external-tester-readiness.ps1",
     "infra/scripts/flowchain-external-tester-packet.ps1",
     "infra/scripts/flowchain-external-tester-evidence-validation.ps1",
+    "infra/scripts/flowchain-tester-write-token-setup.ps1",
     "infra/scripts/flowchain-public-tester-gateway-e2e.ps1",
     "infra/scripts/flowchain-dashboard-ui-readiness.ps1",
     "apps/dashboard/playwright.config.ts",
@@ -1302,6 +1305,24 @@ $liveInfraGateStatus = Get-ArchitectureStatus -Report $liveInfra
 $liveProductGateStatus = Get-ArchitectureStatus -Report $liveProduct
 $externalTesterStatus = Get-ArchitectureStatus -Report $externalTester
 $externalTesterPacketStatus = Get-ArchitectureStatus -Report $externalTesterPacket
+$testerWriteTokenSetupStatus = Get-ArchitectureStatus -Report $testerWriteTokenSetup
+$testerWriteTokenSetupChecks = Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "checks"
+$testerWriteTokenSetupReady = ($testerWriteTokenSetupStatus -eq "passed") `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetupChecks -Name "tokenPathGitIgnored" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetupChecks -Name "ownerEnvPathGitIgnored" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetupChecks -Name "tokenFileExists" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetupChecks -Name "ownerEnvFileExists" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetupChecks -Name "ownerEnvTesterHashWritten" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetupChecks -Name "ownerEnvTesterCapWritten" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetupChecks -Name "rawTokenPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetupChecks -Name "tokenHashPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "rawTokenPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "tokenHashPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "broadcasts" -Default $true) -eq $false) `
+    -and (@((Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "failedChecks" -Default @())).Count -eq 0) `
+    -and (@((Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "secretMarkerFindings" -Default @())).Count -eq 0)
 $publicTesterGatewayStatus = Get-ArchitectureStatus -Report $publicTesterGateway
 $publicTesterGatewayReady = ($publicTesterGatewayStatus -eq "passed") `
     -and ((Get-ArchitectureProp -Object $publicTesterGateway -Name "testerGatewayConfigured" -Default $false) -eq $true) `
@@ -1385,6 +1406,12 @@ Add-ArchitectureItem -Items $items -Id "external-tester-launch-boundary" -Layer 
     -Files @("infra/scripts/flowchain-external-tester-readiness.ps1", "infra/scripts/flowchain-external-tester-packet.ps1", "infra/scripts/flowchain-external-tester-evidence-validation.ps1", "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md", "docs/agent-runs/live-product-infra-rpc/external-tester-connect-pack.json", "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_EVIDENCE_VALIDATION.md") `
     -Commands @("npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked", "npm run flowchain:tester:evidence:validate") `
     -Blockers @($missingOwnerInputs)
+Add-ArchitectureItem -Items $items -Id "tester-write-token-setup-boundary" -Layer "External tester launch" `
+    -Requirement "Friends-and-family tester write access has a no-secret setup proof where the raw bearer token stays in ignored local storage, only its digest and cap are written to the ignored owner env file, and committed evidence prints neither token nor digest." `
+    -Status $(if ($testerWriteTokenSetupReady) { "passed" } else { "failed" }) `
+    -Evidence "tokenSetupStatus=$testerWriteTokenSetupStatus, tokenPath=$(Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "tokenPath"), ownerEnvFile=$(Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "ownerEnvFile"), tokenCreated=$(Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "tokenCreated"), tokenPreserved=$(Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "tokenPreserved"), report=$($reportPaths.testerWriteTokenSetup)" `
+    -Files @("infra/scripts/flowchain-tester-write-token-setup.ps1") `
+    -Commands @("npm run flowchain:tester:token:setup")
 Add-ArchitectureItem -Items $items -Id "public-tester-gateway-boundary" -Layer "External tester launch" `
     -Requirement "Public tester write gateway has a local production-shaped E2E proof for bearer auth, public-only wallet creation, capped wallet sends, balance settlement, and over-cap rejection." `
     -Status $(if ($publicTesterGatewayReady) { "passed" } else { "failed" }) `
@@ -1406,6 +1433,7 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:operator:package") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:operator:package:verify") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:dev-pack:e2e") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:tester:token:setup") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:tester:gateway:e2e") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:tester:evidence:validate") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:dashboard:ui:readiness") `
@@ -1417,6 +1445,7 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and ($externalTesterPacketExecutableSmokeValidated -eq $true) `
     -and ($externalTesterEvidenceValidationPassed -eq $true) `
     -and ($externalTesterConnectPackReady -eq $true) `
+    -and ($testerWriteTokenSetupReady -eq $true) `
     -and ($publicTesterGatewayReady -eq $true) `
     -and ($dashboardUiReady -eq $true) `
     -and ($operatorDoctorReady -eq $true) `
@@ -1426,9 +1455,9 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
 Add-ArchitectureItem -Items $items -Id "aggregate-verification-boundary" -Layer "Verification" `
     -Requirement "Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, operator doctor, node-operator package, developer dev-pack, and completion evidence into one auditable path." `
     -Status $(if ($productGateReady) { "passed" } else { "failed" }) `
-    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus, packetSmoke=$externalTesterPacketExecutableSmokeValidated, connectPackReady=$externalTesterConnectPackReady, publicTesterGateway=$publicTesterGatewayStatus, dashboardUi=$dashboardUiStatus, operatorDoctor=$operatorDoctorStatus, operatorPackage=$operatorPackageStatus, operatorPackageVerify=$operatorPackageVerifyStatus, devPack=$devPackStatus" `
+    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus, packetSmoke=$externalTesterPacketExecutableSmokeValidated, connectPackReady=$externalTesterConnectPackReady, testerTokenSetup=$testerWriteTokenSetupStatus, publicTesterGateway=$publicTesterGatewayStatus, dashboardUi=$dashboardUiStatus, operatorDoctor=$operatorDoctorStatus, operatorPackage=$operatorPackageStatus, operatorPackageVerify=$operatorPackageVerifyStatus, devPack=$devPackStatus" `
     -Files $productGateFiles `
-    -Commands @("npm run flowchain:live-infra:check", "npm run flowchain:live-product:e2e", "npm run flowchain:completion:audit", "npm run flowchain:external-tester:packet", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:dashboard:ui:readiness", "npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json", "npm run flowchain:operator:package", "npm run flowchain:operator:package:verify", "npm run flowchain:dev-pack:e2e")
+    -Commands @("npm run flowchain:live-infra:check", "npm run flowchain:live-product:e2e", "npm run flowchain:completion:audit", "npm run flowchain:external-tester:packet", "npm run flowchain:tester:token:setup", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:dashboard:ui:readiness", "npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json", "npm run flowchain:operator:package", "npm run flowchain:operator:package:verify", "npm run flowchain:dev-pack:e2e")
 
 $failedItems = @($items | Where-Object { $_.status -eq "failed" })
 $blockedItems = @($items | Where-Object { $_.status -eq "blocked" })
@@ -1460,9 +1489,15 @@ $dataFlows = @(
         latestEvidence = $reportPaths.operatorPackageVerify
     },
     [ordered]@{
+        name = "tester-write-token-setup"
+        path = @("ignored local bearer token file", "SHA-256 digest only in ignored owner env", "tester send cap env gate", "no-secret setup evidence", "public tester gateway auth")
+        latestEvidence = $reportPaths.testerWriteTokenSetup
+    },
+    [ordered]@{
         name = "public-tester-gateway"
-        path = @("tester bearer token", "public edge /tester/wallets/create", "public-only wallet metadata", "public edge /tester/wallets/send", "cap enforcement", "runtime block", "balance proof")
+        path = @("tester token setup proof", "public edge /tester/wallets/create", "public-only wallet metadata", "public edge /tester/wallets/send", "cap enforcement", "runtime block", "balance proof")
         latestEvidence = $reportPaths.publicTesterGateway
+        tokenSetupEvidence = $reportPaths.testerWriteTokenSetup
     },
     [ordered]@{
         name = "dashboard-wallet-explorer"
@@ -1555,6 +1590,8 @@ $report = [ordered]@{
         connectPackReady = $externalTesterConnectPackReady
         connectPackChecks = $externalTesterConnectPackChecks
         testerNetworkFresh = $externalTesterNetworkFresh
+        testerWriteTokenSetupStatus = $testerWriteTokenSetupStatus
+        testerWriteTokenSetupReady = $testerWriteTokenSetupReady
         publicTesterGatewayStatus = $publicTesterGatewayStatus
         publicTesterGatewayReady = $publicTesterGatewayReady
         dashboardUiStatus = $dashboardUiStatus

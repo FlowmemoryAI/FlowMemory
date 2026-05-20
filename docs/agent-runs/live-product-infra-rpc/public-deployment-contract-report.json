@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-20T05:33:38.8723892Z",
+    "generatedAt":  "2026-05-20T06:07:36.6516577Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -9,10 +9,10 @@
     "connectPackReady":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
-                       "passed":  23,
+                       "passed":  24,
                        "blocked":  6,
                        "failed":  0,
-                       "total":  29
+                       "total":  30
                    },
     "items":  [
                   {
@@ -41,6 +41,7 @@
                                        "npm run flowchain:public-rpc:deployment:automation",
                                        "npm run flowchain:public-rpc:validate",
                                        "npm run flowchain:public-rpc:abuse-test",
+                                       "npm run flowchain:tester:token:setup",
                                        "npm run flowchain:tester:gateway:e2e",
                                        "npm run flowchain:public-rpc:check -- -AllowBlocked",
                                        "npm run flowchain:backup:restore:validate",
@@ -123,7 +124,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=98328, finalizedHeight=98328",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=98641, finalizedHeight=98641",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -449,6 +450,18 @@
                                    ]
                   },
                   {
+                      "id":  "tester-write-token-setup",
+                      "requirement":  "Friends-and-family tester writes have a no-secret setup proof: the raw bearer token stays in ignored local storage, only its SHA-256 digest and send cap enter the ignored owner env file, and committed evidence prints neither token nor digest.",
+                      "status":  "passed",
+                      "evidence":  "tokenSetupStatus=passed, tokenPath=devnet/local/owner-inputs/tester-write-token.local.txt, ownerEnvFile=devnet/local/owner-inputs/flowchain-owner.local.env, tokenCreated=False, tokenPreserved=True",
+                      "commands":  [
+                                       "npm run flowchain:tester:token:setup"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "public-tester-write-gateway",
                       "requirement":  "The public deployment has a local production-shaped proof for authenticated tester wallet creation, capped tester faucet funding, capped tester sends, balance settlement, and over-cap rejection.",
                       "status":  "passed",
@@ -578,6 +591,7 @@
                         "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
                         "publicRpcValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation-report.json",
                         "publicRpcAbuseTest":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test-report.json",
+                        "testerWriteTokenSetup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\tester-write-token-setup-report.json",
                         "publicTesterGateway":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json",
                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
                         "backupRestoreValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-report.json",

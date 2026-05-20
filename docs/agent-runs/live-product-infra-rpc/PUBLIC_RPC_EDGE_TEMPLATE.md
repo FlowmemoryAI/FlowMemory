@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Edge Template
 
-Generated: 2026-05-20T00:03:39.8607943Z
+Generated: 2026-05-20T05:56:17.1481120Z
 Status: passed
 
 FlowChain RPC is served by this repository on the private origin 127.0.0.1:8787. Public RPC means placing an owner-operated HTTPS edge in front of that origin.

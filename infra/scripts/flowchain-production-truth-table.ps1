@@ -648,6 +648,43 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "tester-write-token-setup"
+        requirement = "Tester write token setup creates or preserves the raw bearer token only in ignored local storage, writes only its SHA-256 digest and send cap into the ignored owner env file, and proves no token or digest is printed to committed evidence."
+        path = "docs/agent-runs/live-product-infra-rpc/tester-write-token-setup-report.json"
+        command = "npm run flowchain:tester:token:setup"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "tokenPathGitIgnored",
+            "ownerEnvPathGitIgnored",
+            "tokenFileExists",
+            "ownerEnvFileExists",
+            "tokenLengthSufficient",
+            "tokenHashLengthValid",
+            "ownerEnvTesterEnabledWritten",
+            "ownerEnvTesterHashWritten",
+            "ownerEnvTesterCapWritten",
+            "rawTokenPrintedFalse",
+            "tokenHashPrintedFalse",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "maxSendUnitsConfigured" = $true
+            "rawTokenPrinted" = $false
+            "tokenHashPrinted" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "public-rpc-readiness"
         requirement = "Public FlowChain RPC has URL, TLS acknowledgement, CORS, rate limit, backup path, and response hygiene."
         path = "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
@@ -1802,7 +1839,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "live-cutover-rehearsal"
-        requirement = "Live cutover rehearsal runs owner-env, public deployment, local tester wallet network, tester packet, completion, truth table, and no-secret gates through one redacted command and blocks only on known owner inputs before external sharing."
+        requirement = "Live cutover rehearsal runs owner-env, public deployment, local tester wallet network, tester write-token setup, tester packet, completion, truth table, and no-secret gates through one redacted command and blocks only on known owner inputs before external sharing."
         path = "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json"
         command = "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked"
         productionGate = $true
@@ -1821,6 +1858,7 @@ $definitions = @(
             "ownerEnvReady",
             "publicDeploymentReady",
             "testerNetworkE2ePassed",
+            "testerWriteTokenSetupPassed",
             "testerPacketShareable",
             "completionReady",
             "truthTableCompleted",
@@ -1840,7 +1878,7 @@ $definitions = @(
             "noSecrets" = $true
             "broadcasts" = $false
         }
-        staleIfOlderThan = @("owner-env-readiness", "public-deployment-contract", "tester-network-e2e", "external-tester-packet", "completion-audit")
+        staleIfOlderThan = @("owner-env-readiness", "public-deployment-contract", "tester-network-e2e", "tester-write-token-setup", "external-tester-packet", "completion-audit")
     },
     [ordered]@{
         id = "architecture-audit"
@@ -1857,7 +1895,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-release-evidence-validation", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-release-evidence-validation", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "tester-write-token-setup", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"

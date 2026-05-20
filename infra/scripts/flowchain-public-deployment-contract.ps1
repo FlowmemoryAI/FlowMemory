@@ -64,6 +64,7 @@ $paths = [ordered]@{
     publicRpc = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
     publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
+    testerWriteTokenSetup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/tester-write-token-setup-report.json"
     publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     backup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
@@ -343,6 +344,7 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:public-rpc:deployment:automation",
     "npm run flowchain:public-rpc:validate",
     "npm run flowchain:public-rpc:abuse-test",
+    "npm run flowchain:tester:token:setup",
     "npm run flowchain:tester:gateway:e2e",
     "npm run flowchain:public-rpc:check -- -AllowBlocked",
     "npm run flowchain:backup:restore:validate",
@@ -378,6 +380,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-deployment-automation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-deployment-automation.ps1"), "-ReportPath", $paths.publicRpcDeploymentAutomation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-validation.ps1"), "-ReportPath", $paths.publicRpcValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-abuse-test" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-abuse-test.ps1"), "-ReportPath", $paths.publicRpcAbuseTest)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "tester-write-token-setup" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-tester-write-token-setup.ps1"), "-ReportPath", $paths.testerWriteTokenSetup)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-tester-gateway-e2e" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-tester-gateway-e2e.ps1"), "-ReportPath", $paths.publicTesterGateway)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-readiness" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.publicRpc)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "backup-restore-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-restore-validation.ps1"), "-ReportPath", $paths.backupRestoreValidation)
@@ -1243,6 +1246,31 @@ Add-DeploymentItem -Items $items -Id "external-tester-sharing" `
     -Evidence "externalTester=$externalTesterStatus, localTesterRehearsalReady=$localTesterRehearsalReady, testerNetworkFresh=$externalTesterNetworkFresh, publicTesterGatewayReady=$externalTesterPublicGatewayReady, faucetRoute=$externalTesterFaucetRouteValidated, packetSmoke=$packetExecutableSmokeValidated, testerFaucet=$packetTesterFaucet, capRejected=$packetTesterCapRejected, connectPackReady=$connectPackReady, externalSharingReady=$externalSharingReady, packet=$externalPacketStatus, packetShareable=$packetShareable" `
     -Commands @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet") `
     -Blockers @($ownerMissingInputs)
+
+$testerWriteTokenSetup = $reports.testerWriteTokenSetup
+$testerWriteTokenSetupStatus = Get-DeploymentStatus -Report $testerWriteTokenSetup
+$testerWriteTokenSetupChecks = Get-DeploymentProp -Object $testerWriteTokenSetup -Name "checks"
+$testerWriteTokenSetupReady = ($testerWriteTokenSetupStatus -eq "passed") `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetupChecks -Name "tokenPathGitIgnored" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetupChecks -Name "ownerEnvPathGitIgnored" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetupChecks -Name "tokenFileExists" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetupChecks -Name "ownerEnvFileExists" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetupChecks -Name "ownerEnvTesterHashWritten" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetupChecks -Name "ownerEnvTesterCapWritten" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetupChecks -Name "rawTokenPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetupChecks -Name "tokenHashPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetup -Name "rawTokenPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetup -Name "tokenHashPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetup -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetup -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetup -Name "broadcasts" -Default $true) -eq $false) `
+    -and (@((Get-DeploymentProp -Object $testerWriteTokenSetup -Name "failedChecks" -Default @())).Count -eq 0) `
+    -and (@((Get-DeploymentProp -Object $testerWriteTokenSetup -Name "secretMarkerFindings" -Default @())).Count -eq 0)
+Add-DeploymentItem -Items $items -Id "tester-write-token-setup" `
+    -Requirement "Friends-and-family tester writes have a no-secret setup proof: the raw bearer token stays in ignored local storage, only its SHA-256 digest and send cap enter the ignored owner env file, and committed evidence prints neither token nor digest." `
+    -Status $(if ($testerWriteTokenSetupReady) { "passed" } else { "failed" }) `
+    -Evidence "tokenSetupStatus=$testerWriteTokenSetupStatus, tokenPath=$(Get-DeploymentProp -Object $testerWriteTokenSetup -Name "tokenPath"), ownerEnvFile=$(Get-DeploymentProp -Object $testerWriteTokenSetup -Name "ownerEnvFile"), tokenCreated=$(Get-DeploymentProp -Object $testerWriteTokenSetup -Name "tokenCreated"), tokenPreserved=$(Get-DeploymentProp -Object $testerWriteTokenSetup -Name "tokenPreserved")" `
+    -Commands @("npm run flowchain:tester:token:setup")
 
 $publicTesterGateway = $reports.publicTesterGateway
 $publicTesterGatewayStatus = Get-DeploymentStatus -Report $publicTesterGateway
