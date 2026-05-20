@@ -301,6 +301,9 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
 
     await page.getByRole("button", { name: "Tester", exact: true }).click();
     await page.getByLabel("Fund account").fill(TESTER_ACCOUNT_A);
+    await page.getByLabel("Faucet units").fill("3");
+    await expect(page.getByLabel("Faucet units")).toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByRole("button", { name: /Request tester faucet/ })).toBeDisabled();
     await page.getByLabel("Faucet units").fill("2");
     await page.getByRole("button", { name: /Request tester faucet/ }).click();
     await expect(page.getByRole("status")).toContainText("Tester faucet accepted");
@@ -310,6 +313,9 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await page.getByRole("button", { name: "Tester", exact: true }).click();
     await page.getByLabel("Sender account").fill(TESTER_ACCOUNT_A);
     await page.getByLabel("Recipient account").fill(TESTER_ACCOUNT_B);
+    await page.getByLabel("Amount units").fill("3");
+    await expect(page.getByLabel("Amount units")).toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByRole("button", { name: /Send tester units/ })).toBeDisabled();
     await page.getByLabel("Amount units").fill("1");
     await page.getByRole("button", { name: /Send tester units/ }).click();
     await expect(page.getByRole("status")).toContainText("Tester send accepted");

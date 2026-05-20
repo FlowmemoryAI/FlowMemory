@@ -314,6 +314,27 @@ function statusLabel(value: string | undefined): string {
   return value ? value.replace(/_/g, " ") : "pending";
 }
 
+function parsePositiveUnits(value: string | undefined): bigint | null {
+  const trimmed = value?.trim() ?? "";
+  if (!/^[1-9][0-9]*$/.test(trimmed)) {
+    return null;
+  }
+  try {
+    return BigInt(trimmed);
+  } catch {
+    return null;
+  }
+}
+
+function unitsWithinCap(amount: string, cap: string | undefined): boolean {
+  const parsedAmount = parsePositiveUnits(amount);
+  if (parsedAmount === null) {
+    return false;
+  }
+  const parsedCap = parsePositiveUnits(cap);
+  return parsedCap === null || parsedAmount <= parsedCap;
+}
+
 function timestampLabel(): string {
   return new Date().toLocaleString(undefined, {
     month: "short",
@@ -379,10 +400,14 @@ export function WalletView({ workbench }: WalletViewProps) {
   const testerGatewayGate = liveReadinessRecords.find((record) => record.id === "public-tester-write-gateway");
   const externalTesterGate = liveReadinessRecords.find((record) => record.id === "external-tester-sharing");
   const testerGatewayConfigured = testerStatus?.configured === true;
+  const testerMaxUnits = testerStatus?.maxSendUnits;
   const testerTokenReady = testerToken.trim().length > 0;
+  const testerFundAmountValid = unitsWithinCap(testerFundAmountUnits, testerMaxUnits);
+  const testerSendAmountValid = unitsWithinCap(testerAmountUnits, testerMaxUnits);
+  const testerCapHelp = parsePositiveUnits(testerMaxUnits) === null ? "Gateway cap not loaded yet." : `Max ${testerMaxUnits} units per tester action.`;
   const testerCreateReady = testerGatewayConfigured && testerTokenReady && testerPassphrase.length >= 8 && !loading;
-  const testerFaucetReady = testerGatewayConfigured && testerTokenReady && Boolean(testerFundAccount.trim() || primaryWalletAddress) && Boolean(testerFundAmountUnits.trim()) && !loading;
-  const testerSendReady = testerGatewayConfigured && testerTokenReady && Boolean(testerFrom.trim() || primaryWalletAddress) && Boolean(testerTo.trim()) && Boolean(testerAmountUnits.trim()) && !loading;
+  const testerFaucetReady = testerGatewayConfigured && testerTokenReady && Boolean(testerFundAccount.trim() || primaryWalletAddress) && testerFundAmountValid && !loading;
+  const testerSendReady = testerGatewayConfigured && testerTokenReady && Boolean(testerFrom.trim() || primaryWalletAddress) && Boolean(testerTo.trim()) && testerSendAmountValid && !loading;
   const testerReportBlockers = [
     testerGatewayGate?.facts.find((fact) => fact.label === "blockers")?.value,
     externalTesterGate?.facts.find((fact) => fact.label === "blockers")?.value,
@@ -639,6 +664,10 @@ export function WalletView({ workbench }: WalletViewProps) {
       setMessage("Enter tester token, account, and amount units first.");
       return;
     }
+    if (!testerFundAmountValid) {
+      setMessage(`Enter a positive faucet amount no higher than ${testerMaxUnits ?? "the configured tester cap"}.`);
+      return;
+    }
     setLoading(true);
     setMessage(null);
     try {
@@ -686,6 +715,10 @@ export function WalletView({ workbench }: WalletViewProps) {
     }
     if (!testerTokenReady || !fromAccountId || !testerTo.trim() || !testerAmountUnits.trim()) {
       setMessage("Enter tester token, sender, recipient, and amount units first.");
+      return;
+    }
+    if (!testerSendAmountValid) {
+      setMessage(`Enter a positive send amount no higher than ${testerMaxUnits ?? "the configured tester cap"}.`);
       return;
     }
     setLoading(true);
@@ -1287,7 +1320,16 @@ export function WalletView({ workbench }: WalletViewProps) {
                 </label>
                 <label>
                   <span>Faucet units</span>
-                  <input value={testerFundAmountUnits} onChange={(event) => setTesterFundAmountUnits(event.target.value)} inputMode="numeric" placeholder="1" />
+                  <input
+                    value={testerFundAmountUnits}
+                    onChange={(event) => setTesterFundAmountUnits(event.target.value)}
+                    inputMode="numeric"
+                    placeholder="1"
+                    aria-invalid={testerFundAmountUnits.trim().length > 0 && !testerFundAmountValid}
+                  />
+                  <small className={testerFundAmountUnits.trim().length > 0 && !testerFundAmountValid ? "wallet-field-help invalid" : "wallet-field-help"}>
+                    {testerCapHelp}
+                  </small>
                 </label>
                 <button type="button" disabled={!testerFaucetReady} onClick={() => void submitTesterFaucet()}>
                   <Download size={17} aria-hidden="true" />
@@ -1306,7 +1348,16 @@ export function WalletView({ workbench }: WalletViewProps) {
                 </label>
                 <label>
                   <span>Amount units</span>
-                  <input value={testerAmountUnits} onChange={(event) => setTesterAmountUnits(event.target.value)} inputMode="numeric" placeholder="1" />
+                  <input
+                    value={testerAmountUnits}
+                    onChange={(event) => setTesterAmountUnits(event.target.value)}
+                    inputMode="numeric"
+                    placeholder="1"
+                    aria-invalid={testerAmountUnits.trim().length > 0 && !testerSendAmountValid}
+                  />
+                  <small className={testerAmountUnits.trim().length > 0 && !testerSendAmountValid ? "wallet-field-help invalid" : "wallet-field-help"}>
+                    {testerCapHelp}
+                  </small>
                 </label>
                 <button type="button" disabled={!testerSendReady} onClick={() => void submitTesterSend()}>
                   <Send size={17} aria-hidden="true" />

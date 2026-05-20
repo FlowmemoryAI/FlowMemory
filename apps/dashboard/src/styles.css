@@ -1102,6 +1102,22 @@ input {
   background: rgba(255, 255, 255, 0.46);
 }
 
+.wallet-panel-form input[aria-invalid="true"] {
+  border-color: rgba(170, 63, 63, 0.48);
+  background: rgba(255, 246, 244, 0.72);
+}
+
+.wallet-field-help {
+  color: #61718e;
+  font-size: 0.73rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.wallet-field-help.invalid {
+  color: #943333;
+}
+
 .wallet-panel-form button,
 .wallet-receive-panel button {
   display: inline-flex;
