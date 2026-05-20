@@ -396,6 +396,7 @@ function New-CommandPlan {
         "bash <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>",
         "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_NGINX_WINDOWS_PREFLIGHT_SCRIPT>",
         "npm run flowchain:public-rpc:validate",
+        "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
         "npm run flowchain:public-rpc:abuse-test",
         "npm run flowchain:tester:gateway:e2e",
         "npm run flowchain:wallet:live-tester:e2e",
@@ -515,6 +516,7 @@ foreach ($entry in $baseChecks.GetEnumerator()) {
 }
 $checks.commandPlanIncludesTesterGatewayE2e = @($commandPlan) -contains "npm run flowchain:tester:gateway:e2e"
 $checks.commandPlanIncludesWalletTesterE2e = @($commandPlan) -contains "npm run flowchain:wallet:live-tester:e2e"
+$checks.commandPlanIncludesSyntheticCanary = @($commandPlan) -contains "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked"
 $checks.commandPlanIncludesCutoverRehearsal = @($commandPlan) -contains "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked"
 $checks.commandPlanIncludesTruthTable = @($commandPlan) -contains "npm run flowchain:truth-table -- -AllowBlocked"
 $checks.commandPlanIncludesNoSecretScan = @($commandPlan) -contains "npm run flowchain:no-secret:scan"

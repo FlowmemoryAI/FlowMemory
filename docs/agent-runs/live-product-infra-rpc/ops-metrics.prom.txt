@@ -145,6 +145,9 @@ flowchain_public_rpc_command_plan_tester_gateway_e2e 1
 # HELP flowchain_public_rpc_command_plan_wallet_tester_e2e One when public RPC deployment automation includes wallet tester E2E.
 # TYPE flowchain_public_rpc_command_plan_wallet_tester_e2e gauge
 flowchain_public_rpc_command_plan_wallet_tester_e2e 1
+# HELP flowchain_public_rpc_command_plan_synthetic_canary One when public RPC deployment automation includes the public RPC synthetic canary.
+# TYPE flowchain_public_rpc_command_plan_synthetic_canary gauge
+flowchain_public_rpc_command_plan_synthetic_canary 1
 # HELP flowchain_public_rpc_command_plan_cutover_rehearsal One when public RPC deployment automation includes live cutover rehearsal.
 # TYPE flowchain_public_rpc_command_plan_cutover_rehearsal gauge
 flowchain_public_rpc_command_plan_cutover_rehearsal 1

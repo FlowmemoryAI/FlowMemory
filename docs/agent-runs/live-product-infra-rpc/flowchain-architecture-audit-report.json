@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-20T18:41:57.5958912Z",
+    "generatedAt":  "2026-05-20T18:53:55.2489003Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -29,7 +29,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=105185, finalizedHeight=105185",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=105255, finalizedHeight=105255",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -67,7 +67,7 @@
                       "layer":  "Operations",
                       "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, external tester client validation telemetry, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=33, alertCoveredFindings=35, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=157, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, supervisorNodeRecoveryMetrics=True, externalTesterClientMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=26, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=20, incidentFailed=0",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=33, alertCoveredFindings=35, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=158, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, supervisorNodeRecoveryMetrics=True, externalTesterClientMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=26, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=20, incidentFailed=0",
                       "files":  [
                                     "infra/scripts/flowchain-service-monitor.ps1",
                                     "infra/scripts/flowchain-service-supervisor.ps1",
@@ -258,7 +258,7 @@
                       "layer":  "Public edge",
                       "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, defensive response-header probes, tester write unauthenticated rejection probe, wallet/tester cutover proof commands, post-deploy verification, and rollback drill phases without host mutation or owner-value leakage.",
                       "status":  "passed",
-                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, securityHeaders=True, securityHeaderPreflight=True, methodRejectionProbes=True, testerUnauthProbe=True, walletTesterE2e=True, cutoverRehearsal=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, hostMutationFalse=True",
+                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, securityHeaders=True, securityHeaderPreflight=True, methodRejectionProbes=True, testerUnauthProbe=True, walletTesterE2e=True, syntheticCanary=True, cutoverRehearsal=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, hostMutationFalse=True",
                       "files":  [
                                     "infra/scripts/flowchain-public-rpc-deployment-automation.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_AUTOMATION.md",
@@ -1092,7 +1092,7 @@
                          },
     "opsMetricsCoverage":  {
                                "exportStatus":  "passed",
-                               "metricCount":  157,
+                               "metricCount":  158,
                                "exportFailedCheckCount":  0,
                                "installStatus":  "passed",
                                "installFailedCheckCount":  0,

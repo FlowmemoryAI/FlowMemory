@@ -439,6 +439,7 @@ $requiredCommands = @(
     "npm run flowchain:ops:snapshot -- -AllowBlocked",
     "npm run flowchain:public-rpc:validate",
     "npm run flowchain:public-rpc:check",
+    "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
     "npm run flowchain:tester:gateway:e2e",
     "npm run flowchain:wallet:live-tester:e2e",
     "npm run flowchain:backup:restore:validate",

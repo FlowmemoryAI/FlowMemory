@@ -1122,7 +1122,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "public-rpc-deployment-automation"
-        requirement = "Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, post-deploy verification, and rollback phases without host mutation or owner-value leakage."
+        requirement = "Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, synthetic public RPC canary, post-deploy verification, and rollback phases without host mutation or owner-value leakage."
         path = "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
         command = "npm run flowchain:public-rpc:deployment:automation"
         productionGate = $true
@@ -1154,6 +1154,7 @@ $definitions = @(
             "renderedPreflightHasReadinessProbe",
             "renderedPreflightHasTesterUnauthProbe",
             "renderedPreflightHasMethodRejectionProbes",
+            "commandPlanIncludesSyntheticCanary",
             "renderedFilesDoNotContainTokenHash",
             "renderedReportDoesNotContainTokenHash",
             "renderedReportKeepsOwnerPathsOutsideRepo",

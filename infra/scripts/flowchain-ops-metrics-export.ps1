@@ -286,6 +286,7 @@ $publicRpcSyntheticCanaryMissingEnvCount = @((Get-MetricsProp -Object $publicRpc
 $publicRpcDeploymentBundleChecks = Get-MetricsProp -Object $publicRpcDeploymentBundle -Name "checks"
 $publicRpcDeploymentAutomationChecks = Get-MetricsProp -Object $publicRpcDeploymentAutomation -Name "checks"
 $publicRpcRequiredCutoverCommands = @(
+    "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
     "npm run flowchain:tester:gateway:e2e",
     "npm run flowchain:wallet:live-tester:e2e",
     "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
@@ -296,6 +297,7 @@ $publicRpcDeploymentBundleRequiredCommands = @((Get-MetricsProp -Object $publicR
 $publicRpcDeploymentBundleWalletCutoverProofReady = @($publicRpcRequiredCutoverCommands | Where-Object { $_ -notin $publicRpcDeploymentBundleRequiredCommands }).Count -eq 0
 $publicRpcDeploymentAutomationWalletCutoverProofReady = ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTesterGatewayE2e" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesWalletTesterE2e" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesSyntheticCanary" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTruthTable" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesNoSecretScan" -Default $false) -eq $true)
@@ -355,6 +357,7 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_rendered_method_re
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_wallet_cutover_proof" -Help "One when public RPC deployment automation includes all wallet/tester cutover proof commands." -Value (ConvertTo-MetricBool -Value $publicRpcDeploymentAutomationWalletCutoverProofReady)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_tester_gateway_e2e" -Help "One when public RPC deployment automation includes tester gateway E2E." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTesterGatewayE2e" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_wallet_tester_e2e" -Help "One when public RPC deployment automation includes wallet tester E2E." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesWalletTesterE2e" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_synthetic_canary" -Help "One when public RPC deployment automation includes the public RPC synthetic canary." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesSyntheticCanary" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_cutover_rehearsal" -Help "One when public RPC deployment automation includes live cutover rehearsal." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_truth_table" -Help "One when public RPC deployment automation includes production truth table verification." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTruthTable" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_no_secret_scan" -Help "One when public RPC deployment automation includes no-secret scan verification." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesNoSecretScan" -Default $false))
@@ -550,6 +553,7 @@ $requiredMetricNames = @(
     "flowchain_public_rpc_command_plan_wallet_cutover_proof",
     "flowchain_public_rpc_command_plan_tester_gateway_e2e",
     "flowchain_public_rpc_command_plan_wallet_tester_e2e",
+    "flowchain_public_rpc_command_plan_synthetic_canary",
     "flowchain_public_rpc_command_plan_cutover_rehearsal",
     "flowchain_public_rpc_command_plan_truth_table",
     "flowchain_public_rpc_command_plan_no_secret_scan",
@@ -747,6 +751,7 @@ $checks = [ordered]@{
         "flowchain_public_rpc_command_plan_wallet_cutover_proof",
         "flowchain_public_rpc_command_plan_tester_gateway_e2e",
         "flowchain_public_rpc_command_plan_wallet_tester_e2e",
+        "flowchain_public_rpc_command_plan_synthetic_canary",
         "flowchain_public_rpc_command_plan_cutover_rehearsal",
         "flowchain_public_rpc_command_plan_truth_table",
         "flowchain_public_rpc_command_plan_no_secret_scan"

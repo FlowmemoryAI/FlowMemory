@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T18:33:47.6209885Z",
+    "generatedAt":  "2026-05-20T18:53:40.4012266Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -314,6 +314,12 @@
                         "name":  "flowchain_public_rpc_command_plan_wallet_tester_e2e",
                         "type":  "gauge",
                         "help":  "One when public RPC deployment automation includes wallet tester E2E.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_command_plan_synthetic_canary",
+                        "type":  "gauge",
+                        "help":  "One when public RPC deployment automation includes the public RPC synthetic canary.",
                         "value":  1
                     },
                     {
@@ -965,7 +971,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  157,
+    "metricCount":  158,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,
