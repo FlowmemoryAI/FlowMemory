@@ -1406,7 +1406,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "dashboard-ui-readiness"
-        requirement = "Dashboard browser readiness proves desktop and mobile users can create a tester wallet, request faucet funds, send tester units, inspect the result in Explorer, and avoid token/secret leakage or horizontal overflow."
+        requirement = "Dashboard browser readiness proves desktop and mobile users can create a tester wallet, request faucet funds, send tester units, inspect the result in Explorer, review tester launch readiness, review the L1 activation cockpit, and avoid token/secret leakage or horizontal overflow."
         path = "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
         command = "npm run flowchain:dashboard:ui:readiness"
         productionGate = $true
@@ -1423,6 +1423,8 @@ $definitions = @(
             "testerFaucetCovered",
             "testerSendCovered",
             "explorerRouteCovered",
+            "testerLaunchRouteCovered",
+            "activationRouteCovered",
             "noSecretLeakageAsserted",
             "noHorizontalOverflowAsserted",
             "dashboardUnitTestsPassed",

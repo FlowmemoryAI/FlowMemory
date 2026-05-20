@@ -1282,9 +1282,16 @@ $dashboardUiCoveredRoutes = @((Get-ArchitectureProp -Object $dashboardUiReadines
 $dashboardUiReady = ($dashboardUiStatus -eq "passed") `
     -and ($dashboardUiFailedChecks.Count -eq 0) `
     -and ($dashboardUiBrowserProjects.Count -ge 2) `
-    -and ($dashboardUiCoveredRoutes.Count -ge 5) `
+    -and ($dashboardUiCoveredRoutes.Count -ge 7) `
     -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "desktopProjectConfigured" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "mobileProjectConfigured" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "walletTesterRouteCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "testerWalletCreateCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "testerFaucetCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "testerSendCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "explorerRouteCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "testerLaunchRouteCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "activationRouteCovered" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "dashboardBrowserE2ePassed" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "dashboardBuildPassed" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "controlPlaneTesterGatewayTestsPassed" -Default $false) -eq $true) `
@@ -1351,10 +1358,10 @@ Add-ArchitectureItem -Items $items -Id "public-tester-gateway-boundary" -Layer "
     -Files @("services/control-plane/src/server.ts", "infra/scripts/flowchain-public-tester-gateway-e2e.ps1") `
     -Commands @("npm run flowchain:tester:gateway:e2e")
 Add-ArchitectureItem -Items $items -Id "dashboard-ui-browser-boundary" -Layer "Explorer and wallet UI" `
-    -Requirement "Dashboard browser verification covers the tester wallet panel, authenticated tester create/faucet/send operations, Explorer inspection, desktop and mobile viewports, no token/secret leakage, and no horizontal overflow." `
+    -Requirement "Dashboard browser verification covers the tester wallet panel, authenticated tester create/faucet/send operations, Explorer inspection, tester launch readiness, L1 activation cockpit, desktop and mobile viewports, no token/secret leakage, and no horizontal overflow." `
     -Status $(if ($dashboardUiReady) { "passed" } else { "failed" }) `
     -Evidence "dashboardUiStatus=$dashboardUiStatus, browserProjects=$($dashboardUiBrowserProjects.Count), coveredRoutes=$($dashboardUiCoveredRoutes.Count), failedChecks=$($dashboardUiFailedChecks.Count), report=$($reportPaths.dashboardUiReadiness)" `
-    -Files @("apps/dashboard/playwright.config.ts", "apps/dashboard/e2e/flowchain-ui-readiness.spec.ts", "apps/dashboard/src/views/WalletView.tsx", "apps/dashboard/src/views/ExplorerView.tsx", "infra/scripts/flowchain-dashboard-ui-readiness.ps1") `
+    -Files @("apps/dashboard/playwright.config.ts", "apps/dashboard/e2e/flowchain-ui-readiness.spec.ts", "apps/dashboard/src/views/WalletView.tsx", "apps/dashboard/src/views/ExplorerView.tsx", "apps/dashboard/src/views/ExternalTesterLaunchView.tsx", "apps/dashboard/src/views/OwnerActivationView.tsx", "infra/scripts/flowchain-dashboard-ui-readiness.ps1") `
     -Commands @("npm run flowchain:dashboard:ui:readiness", "npm run browser:e2e --prefix apps/dashboard")
 $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:live-infra:check") `

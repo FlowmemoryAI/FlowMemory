@@ -1547,6 +1547,8 @@ $dashboardUiRequiredChecks = @(
     "testerFaucetCovered",
     "testerSendCovered",
     "explorerRouteCovered",
+    "testerLaunchRouteCovered",
+    "activationRouteCovered",
     "noSecretLeakageAsserted",
     "noHorizontalOverflowAsserted",
     "dashboardUnitTestsPassed",
@@ -1572,7 +1574,7 @@ $dashboardUiReadinessPassed = $dashboardUiReadinessExitCode -eq 0 `
     -and $dashboardUiFailedChecks.Count -eq 0 `
     -and $dashboardUiSecretFindingCount -eq 0 `
     -and $dashboardUiBrowserProjects.Count -ge 2 `
-    -and $dashboardUiCoveredRoutes.Count -ge 5 `
+    -and $dashboardUiCoveredRoutes.Count -ge 7 `
     -and ((Get-AuditProp -Object $dashboardUiReadiness -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $dashboardUiReadiness -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $dashboardUiReadiness -Name "broadcasts" -Default $true) -eq $false)
@@ -2639,7 +2641,7 @@ Add-AuditItem -Items $items -Id "public-tester-gateway-e2e" `
     -Commands @("npm run flowchain:tester:gateway:e2e")
 
 Add-AuditItem -Items $items -Id "dashboard-ui-readiness" `
-    -Requirement "Dashboard browser readiness proves desktop and mobile users can create a tester wallet, request faucet funds, send tester units, inspect the result in Explorer, and avoid token/secret leakage or horizontal overflow." `
+    -Requirement "Dashboard browser readiness proves desktop and mobile users can create a tester wallet, request faucet funds, send tester units, inspect the result in Explorer, review tester launch readiness, review the L1 activation cockpit, and avoid token/secret leakage or horizontal overflow." `
     -Status $(if ($dashboardUiReadinessPassed) { "passed" } else { "failed" }) `
     -Evidence "dashboardUiStatus=$dashboardUiReadinessStatus, browserProjects=$($dashboardUiBrowserProjects.Count), coveredRoutes=$($dashboardUiCoveredRoutes.Count), failedChecks=$($dashboardUiFailedChecks.Count), missingChecks=$($dashboardUiMissingChecks.Count), secretFindings=$dashboardUiSecretFindingCount, report=$($paths.dashboardUiReadiness)" `
     -Commands @("npm run flowchain:dashboard:ui:readiness", "npm run browser:e2e --prefix apps/dashboard")

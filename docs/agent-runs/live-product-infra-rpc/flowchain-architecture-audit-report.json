@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-20T00:42:04.2983930Z",
+    "generatedAt":  "2026-05-20T01:25:10.7784465Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -29,7 +29,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=95455, finalizedHeight=95455",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=95902, finalizedHeight=95902",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -67,7 +67,7 @@
                       "layer":  "Operations",
                       "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=3, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=25, alertCoveredFindings=27, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=70, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=18, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=17, incidentFailed=0",
+                      "evidence":  "monitorStatus=passed, samples=3, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=26, alertCoveredFindings=28, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=70, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=19, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=18, incidentFailed=0",
                       "files":  [
                                     "infra/scripts/flowchain-service-monitor.ps1",
                                     "infra/scripts/flowchain-service-supervisor.ps1",
@@ -628,14 +628,16 @@
                   {
                       "id":  "dashboard-ui-browser-boundary",
                       "layer":  "Explorer and wallet UI",
-                      "requirement":  "Dashboard browser verification covers the tester wallet panel, authenticated tester create/faucet/send operations, Explorer inspection, desktop and mobile viewports, no token/secret leakage, and no horizontal overflow.",
+                      "requirement":  "Dashboard browser verification covers the tester wallet panel, authenticated tester create/faucet/send operations, Explorer inspection, tester launch readiness, L1 activation cockpit, desktop and mobile viewports, no token/secret leakage, and no horizontal overflow.",
                       "status":  "passed",
-                      "evidence":  "dashboardUiStatus=passed, browserProjects=2, coveredRoutes=6, failedChecks=0, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
+                      "evidence":  "dashboardUiStatus=passed, browserProjects=2, coveredRoutes=7, failedChecks=0, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
                       "files":  [
                                     "apps/dashboard/playwright.config.ts",
                                     "apps/dashboard/e2e/flowchain-ui-readiness.spec.ts",
                                     "apps/dashboard/src/views/WalletView.tsx",
                                     "apps/dashboard/src/views/ExplorerView.tsx",
+                                    "apps/dashboard/src/views/ExternalTesterLaunchView.tsx",
+                                    "apps/dashboard/src/views/OwnerActivationView.tsx",
                                     "infra/scripts/flowchain-dashboard-ui-readiness.ps1"
                                 ],
                       "commands":  [
@@ -1010,16 +1012,17 @@
                                                                           "/tester/faucet",
                                                                           "/tester/wallets/send",
                                                                           "/explorer",
-                                                                          "/tester"
+                                                                          "/tester",
+                                                                          "/activation"
                                                                       ],
                                          "publicDeploymentContractPacketSmoke":  true
                                      },
     "opsAlertCoverage":  {
                              "status":  "passed",
-                             "ruleCount":  25,
-                             "criticalRuleCount":  18,
+                             "ruleCount":  26,
+                             "criticalRuleCount":  19,
                              "blockedRuleCount":  7,
-                             "coveredFindingCount":  27,
+                             "coveredFindingCount":  28,
                              "unmappedCurrentFindingCount":  0
                          },
     "opsMetricsCoverage":  {
