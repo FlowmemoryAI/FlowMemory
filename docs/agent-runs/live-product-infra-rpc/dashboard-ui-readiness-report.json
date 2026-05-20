@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.dashboard_ui_readiness_report.v0",
-    "generatedAt":  "2026-05-20T00:26:02.7243885+00:00",
+    "generatedAt":  "2026-05-20T01:03:13.6638873+00:00",
     "status":  "passed",
     "checks":  {
                    "dashboardPackageScriptPresent":  true,
@@ -41,7 +41,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  180,
                          "timedOut":  false,
-                         "durationSeconds":  5,
+                         "durationSeconds":  4,
                          "stdoutLineCount":  7,
                          "stderrLineCount":  0
                      },
@@ -51,9 +51,9 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  26,
+                         "durationSeconds":  25,
                          "stdoutLineCount":  6,
-                         "stderrLineCount":  12
+                         "stderrLineCount":  16
                      },
                      {
                          "label":  "dashboard production build",
@@ -71,7 +71,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  152,
+                         "durationSeconds":  129,
                          "stdoutLineCount":  77,
                          "stderrLineCount":  0
                      }

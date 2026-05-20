@@ -341,6 +341,11 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await expect(page.getByText("RPC headers", { exact: true }).first()).toBeVisible();
     await expect(page.getByText("HSTS, no-sniff, no-store, CSP")).toBeVisible();
 
+    await page.goto("/ops");
+    await expect(page.getByRole("heading", { name: "Ops center" })).toBeVisible();
+    await expect(page.getByLabel("Bridge relayer check contract")).toContainText("Relayer check contract");
+    await expect(page.getByLabel("Bridge relayer check contract")).toContainText("bridge-relayer-check-contract-failed");
+
     await expectNoUiLeakage(page);
     await expectNoHorizontalOverflow(page);
     expect(state.unhandledRequests).toEqual([]);

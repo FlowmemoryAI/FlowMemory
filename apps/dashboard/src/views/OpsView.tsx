@@ -64,6 +64,10 @@ function statusFromOps(value: unknown): DashboardStatus {
   return "observed";
 }
 
+function isReadyFlag(value: unknown): boolean {
+  return value === true || text(value, "").toLowerCase() === "true";
+}
+
 function parseFindings(ops: UnknownRecord | null): OpsFinding[] {
   return asArray(ops?.findings).filter(isRecord).map((finding) => ({
     severity: text(finding.severity, "observed"),
@@ -107,6 +111,7 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
   const ops = isRecord(liveReadiness?.ops) ? liveReadiness.ops : null;
   const findings = parseFindings(ops);
   const activeRules = parseRules(ops);
+  const coveredFindingCodes = stringList(ops?.coveredFindingCodes);
   const incidentCommands = parseIncidentCommands(ops);
   const dryRunEvents = parseDryRunEvents(ops);
   const alertState = text(ops?.alertState ?? metrics.opsAlertState, "not recorded");
@@ -117,6 +122,13 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
   const latestHeight = text(ops?.latestHeight ?? metrics.latestHeight);
   const criticalCount = text(ops?.criticalCount ?? metrics.opsCriticalCount, "0");
   const blockedCount = text(ops?.blockedCount ?? metrics.opsBlockedCount, "0");
+  const bridgeRelayerCheckContractReadyValue = ops?.bridgeRelayerCheckContractReady ?? metrics.bridgeRelayerCheckContractReady;
+  const bridgeRelayerCheckContractReady = isReadyFlag(bridgeRelayerCheckContractReadyValue)
+    ? "ready"
+    : text(bridgeRelayerCheckContractReadyValue, "not recorded");
+  const bridgeRelayerFailedChecks = text(ops?.bridgeRelayerFailedChecks ?? metrics.bridgeRelayerFailedChecks, "0");
+  const bridgeRelayerMissingChecks = text(ops?.bridgeRelayerMissingChecks ?? metrics.bridgeRelayerMissingChecks, "0");
+  const bridgeRelayerCheckRuleCovered = coveredFindingCodes.includes("bridge-relayer-check-contract-failed");
   const bridgeGuardrailStatus = text(ops?.bridgeRelayerGuardrailStatus ?? metrics.bridgeRelayerGuardrailStatus, "not recorded");
   const bridgeGuardrailReady = text(ops?.bridgeRelayerGuardrailReady, bridgeGuardrailStatus === "passed" ? "true" : "false");
   const bridgeRelayerLoopValidationStatus = text(metrics.bridgeRelayerLoopValidationStatus, "not recorded");
@@ -167,6 +179,11 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
           <small>{escalationDryRunEvents} mapped events</small>
         </div>
         <div>
+          <span>Relayer checks</span>
+          <strong>{bridgeRelayerCheckContractReady}</strong>
+          <small>failed {bridgeRelayerFailedChecks} / missing {bridgeRelayerMissingChecks}</small>
+        </div>
+        <div>
           <span>Bridge guardrail</span>
           <strong>{bridgeGuardrailStatus}</strong>
           <small>fail-closed proof ready {bridgeGuardrailReady}</small>
@@ -190,6 +207,29 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
 
       <section className="ops-layout">
         <div className="ops-main">
+          <section className="ops-relayer-contract" aria-label="Bridge relayer check contract">
+            <div>
+              <span>Relayer check contract</span>
+              <strong>{bridgeRelayerCheckContractReady}</strong>
+              <small>one-shot safety report</small>
+            </div>
+            <div>
+              <span>Failed checks</span>
+              <strong>{bridgeRelayerFailedChecks}</strong>
+              <small>must stay zero before launch</small>
+            </div>
+            <div>
+              <span>Missing checks</span>
+              <strong>{bridgeRelayerMissingChecks}</strong>
+              <small>required report fields</small>
+            </div>
+            <div>
+              <span>Critical rule</span>
+              <strong>{bridgeRelayerCheckRuleCovered ? "covered" : "missing"}</strong>
+              <small>bridge-relayer-check-contract-failed</small>
+            </div>
+          </section>
+
           <article className="panel ops-findings-panel">
             <div className="panel-heading">
               <div>
@@ -200,7 +240,7 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
                 <StatusBadge status={statusFromOps(alertState)} compact />
                 <span>
                   <ShieldCheck size={15} aria-hidden="true" />
-                  relayer guardrail {bridgeGuardrailStatus}
+                  relayer checks {bridgeRelayerCheckContractReady}
                 </span>
               </div>
             </div>

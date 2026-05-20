@@ -4195,6 +4195,54 @@ code {
   min-width: 0;
 }
 
+.ops-main {
+  display: grid;
+  gap: 14px;
+}
+
+.ops-relayer-contract {
+  display: grid;
+  grid-template-columns: 1.15fr repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid #b8c7c0;
+  border-radius: 8px;
+  background: #b8c7c0;
+  box-shadow: var(--shadow);
+}
+
+.ops-relayer-contract div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px;
+  background: #f7faf5;
+}
+
+.ops-relayer-contract span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.ops-relayer-contract strong,
+.ops-relayer-contract small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.ops-relayer-contract strong {
+  color: var(--ink);
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 1.02rem;
+}
+
+.ops-relayer-contract small {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
 .ops-findings-panel {
   display: grid;
   gap: 12px;
@@ -4842,6 +4890,7 @@ code {
   .explorer-launch-boundary,
   .explorer-layout,
   .ops-command-panel,
+  .ops-relayer-contract,
   .ops-layout {
     grid-template-columns: 1fr;
   }

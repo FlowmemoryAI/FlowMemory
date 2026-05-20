@@ -523,6 +523,8 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Current findings");
     expect(html).toContain("Incident commands");
     expect(html).toContain("network sends; stores secrets");
+    expect(html).toContain("Relayer check contract");
+    expect(html).toContain("bridge-relayer-check-contract-failed");
     expect(html).toContain("Relayer loop");
     expect(html).toContain("Escalation dry run");
     expect(html).toContain("public-rpc-not-ready");
