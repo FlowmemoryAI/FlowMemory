@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T12:26:11.9006339Z",
+    "generatedAt":  "2026-05-20T14:12:42.4656354Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -23,19 +23,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  102051
+                        "value":  102799
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  102051
+                        "value":  102799
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  4
+                        "value":  5
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -59,13 +59,13 @@
                         "name":  "flowchain_transaction_intake_rows_total",
                         "type":  "gauge",
                         "help":  "Signed transaction intake rows recorded in local NDJSON intake.",
-                        "value":  173
+                        "value":  175
                     },
                     {
                         "name":  "flowchain_transaction_intake_accepted_rows_total",
                         "type":  "gauge",
                         "help":  "Crypto-verified signed transaction intake rows recorded locally.",
-                        "value":  173
+                        "value":  175
                     },
                     {
                         "name":  "flowchain_transaction_intake_invalid_rows",
@@ -77,7 +77,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  3629.613
+                        "value":  1127.91
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -389,13 +389,13 @@
                         "name":  "flowchain_bridge_runtime_credit_latency_seconds",
                         "type":  "gauge",
                         "help":  "Seconds from bridge handoff queue to spendable L1 credit in runtime validation.",
-                        "value":  0.679
+                        "value":  0.686
                     },
                     {
                         "name":  "flowchain_bridge_runtime_transfer_latency_seconds",
                         "type":  "gauge",
                         "help":  "Seconds from credited wallet transfer queue to spendable transfer in runtime validation.",
-                        "value":  0.609
+                        "value":  0.548
                     },
                     {
                         "name":  "flowchain_bridge_runtime_credit_failed_checks",

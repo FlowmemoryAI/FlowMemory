@@ -80,6 +80,7 @@ $paths = [ordered]@{
     bridgeRelayerGuardrailValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
     bridgeRuntimeCreditValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
+    realValuePilotAggregate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json"
     bridgeReconciliation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-report.json"
     bridgeReleaseEvidenceValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-validation-report.json"
     bridgePilotLocal = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "services/bridge-relayer/out/real-value-pilot-e2e/bridge-real-value-pilot-e2e-report.json"
@@ -417,6 +418,9 @@ $bridgeRelayerLoopValidationExitCode = $bridgeRelayerLoopValidationResult.exitCo
 $bridgeRuntimeCreditValidationResult = Invoke-AuditChild -Path $paths.bridgeRuntimeCreditValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-runtime-credit-validation.ps1"))
 $bridgeRuntimeCreditValidationOutput = @($bridgeRuntimeCreditValidationResult.output)
 $bridgeRuntimeCreditValidationExitCode = $bridgeRuntimeCreditValidationResult.exitCode
+$realValuePilotAggregateResult = Invoke-AuditChild -Path $paths.realValuePilotAggregate -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-real-value-pilot-e2e.ps1"), "-SkipBaseline", "-ChildTimeoutSeconds", "1800", "-ReportDir", "devnet/local/real-value-pilot-aggregate", "-ReportPath", $paths.realValuePilotAggregate)
+$realValuePilotAggregateOutput = @($realValuePilotAggregateResult.output)
+$realValuePilotAggregateExitCode = $realValuePilotAggregateResult.exitCode
 $bridgeReconciliationResult = Invoke-AuditChild -Path $paths.bridgeReconciliation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-reconciliation.ps1"))
 $bridgeReconciliationOutput = @($bridgeReconciliationResult.output)
 $bridgeReconciliationExitCode = $bridgeReconciliationResult.exitCode
@@ -2200,6 +2204,56 @@ $bridgeRuntimeCreditValidationPassed = $bridgeRuntimeCreditValidationExitCode -e
     -and ((Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name "broadcasts" -Default $true) -eq $false)
+$realValuePilotAggregate = $reports.realValuePilotAggregate
+$realValuePilotAggregateStatus = Get-ReportStatus -Report $realValuePilotAggregate
+$realValuePilotAggregateChecks = Get-AuditProp -Object $realValuePilotAggregate -Name "checks"
+$realValuePilotAggregateTimedOutCommands = @((Get-AuditProp -Object $realValuePilotAggregate -Name "timedOutCommands" -Default @()))
+$realValuePilotAggregateFailedCommands = @((Get-AuditProp -Object $realValuePilotAggregate -Name "failedCommands" -Default @()))
+$realValuePilotAggregateMissingProofs = @((Get-AuditProp -Object $realValuePilotAggregate -Name "missingProofs" -Default @()))
+$realValuePilotAggregateMissingExpectedCommands = @((Get-AuditProp -Object $realValuePilotAggregate -Name "missingExpectedCommands" -Default @()))
+$realValuePilotAggregateCommandsRun = @((Get-AuditProp -Object $realValuePilotAggregate -Name "commandsRun" -Default @()) | ForEach-Object { "$_" })
+$realValuePilotAggregateRequiredCommands = @(
+    "npm run flowchain:real-value-pilot:contracts",
+    "npm run flowchain:real-value-pilot:bridge",
+    "npm run flowchain:real-value-pilot:runtime",
+    "npm run flowchain:real-value-pilot:wallet",
+    "npm run flowchain:real-value-pilot:control-dashboard",
+    "npm run flowchain:real-value-pilot:ops"
+)
+$realValuePilotAggregateMissingCommandsRun = @($realValuePilotAggregateRequiredCommands | Where-Object { $_ -notin $realValuePilotAggregateCommandsRun })
+$realValuePilotAggregateRequiredChecks = @(
+    "pilotSpecPresent",
+    "baselineScriptsPresent",
+    "requiredProofScriptsPresent",
+    "requiredProofCommandsRun",
+    "childTimeoutSecondsPositive",
+    "commandsDidNotTimeout",
+    "commandsDidNotFail",
+    "missingProofsEmpty",
+    "ownerGoNoGoTrue",
+    "outputTailsRedacted",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$realValuePilotAggregateMissingChecks = @(Get-MissingAuditChecks -Checks $realValuePilotAggregateChecks -Names $realValuePilotAggregateRequiredChecks)
+$realValuePilotAggregateFalseRequiredChecks = @($realValuePilotAggregateRequiredChecks | Where-Object { (Get-AuditProp -Object $realValuePilotAggregateChecks -Name $_ -Default $false) -ne $true })
+$realValuePilotAggregateOwnerGoNoGo = Get-AuditProp -Object (Get-AuditProp -Object $realValuePilotAggregate -Name "ownerGoNoGo") -Name "go" -Default $false
+$realValuePilotAggregatePassed = $realValuePilotAggregateExitCode -eq 0 `
+    -and $realValuePilotAggregateStatus -eq "passed" `
+    -and $realValuePilotAggregateTimedOutCommands.Count -eq 0 `
+    -and $realValuePilotAggregateFailedCommands.Count -eq 0 `
+    -and $realValuePilotAggregateMissingProofs.Count -eq 0 `
+    -and $realValuePilotAggregateMissingExpectedCommands.Count -eq 0 `
+    -and $realValuePilotAggregateMissingCommandsRun.Count -eq 0 `
+    -and $realValuePilotAggregateMissingChecks.Count -eq 0 `
+    -and $realValuePilotAggregateFalseRequiredChecks.Count -eq 0 `
+    -and $realValuePilotAggregateOwnerGoNoGo -eq $true `
+    -and ((Get-AuditProp -Object $realValuePilotAggregate -Name "skipBaseline" -Default $false) -eq $true) `
+    -and ([int](Get-AuditProp -Object $realValuePilotAggregate -Name "childTimeoutSeconds" -Default 0) -ge 1) `
+    -and ((Get-AuditProp -Object $realValuePilotAggregate -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $realValuePilotAggregate -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $realValuePilotAggregate -Name "broadcasts" -Default $true) -eq $false)
 $bridgeReconciliation = $reports.bridgeReconciliation
 $bridgeReconciliationStatus = Get-ReportStatus -Report $bridgeReconciliation
 $bridgeReconciliationChecks = Get-AuditProp -Object $bridgeReconciliation -Name "checks"
@@ -3146,6 +3200,12 @@ Add-AuditItem -Items $items -Id "bridge-runtime-credit-validation" `
     -Evidence "runtimeCreditStatus=$bridgeRuntimeCreditValidationStatus, failedChecks=$($bridgeRuntimeCreditFailedChecks.Count), missingChecks=$($bridgeRuntimeCreditMissingChecks.Count), falseRequiredChecks=$($bridgeRuntimeCreditFalseRequiredChecks.Count), missingRuntimeChecks=$($bridgeRuntimeCreditMissingRuntimeChecks.Count), falseRuntimeChecks=$($bridgeRuntimeCreditFalseRuntimeChecks.Count), latencyGate=$(Get-AuditProp -Object (Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name 'timing') -Name 'latencyGate' -Default 'missing'), queueToSpendableSeconds=$(Get-AuditProp -Object (Get-AuditProp -Object $bridgeRuntimeCreditValidation -Name 'timing') -Name 'queueToSpendableSeconds' -Default ''), report=$($paths.bridgeRuntimeCreditValidation)" `
     -Commands @("npm run flowchain:bridge:runtime-credit:validate")
 
+Add-AuditItem -Items $items -Id "real-value-pilot-aggregate" `
+    -Requirement "Real-value pilot aggregate runs contracts, bridge, runtime, wallet, control-dashboard, and ops proofs under bounded child timeouts with redacted logs, no failed commands, no timed-out commands, and an owner go/no-go result." `
+    -Status $(if ($realValuePilotAggregatePassed) { "passed" } else { "failed" }) `
+    -Evidence "aggregateStatus=$realValuePilotAggregateStatus, childTimeoutSeconds=$(Get-AuditProp -Object $realValuePilotAggregate -Name 'childTimeoutSeconds' -Default ''), commandsRun=$($realValuePilotAggregateCommandsRun.Count), missingCommands=$($realValuePilotAggregateMissingCommandsRun.Count), missingExpectedCommands=$($realValuePilotAggregateMissingExpectedCommands.Count), timedOut=$($realValuePilotAggregateTimedOutCommands.Count), failedCommands=$($realValuePilotAggregateFailedCommands.Count), missingProofs=$($realValuePilotAggregateMissingProofs.Count), ownerGoNoGo=$realValuePilotAggregateOwnerGoNoGo, report=$($paths.realValuePilotAggregate)" `
+    -Commands @("npm run flowchain:real-value-pilot:e2e -- -SkipBaseline -ChildTimeoutSeconds 1800")
+
 Add-AuditItem -Items $items -Id "bridge-reconciliation" `
     -Requirement "Bridge reconciliation summarizes live relayer observed/new/queued/applied/pending credits, cursor commit safety, local runtime credit proof, replay rejection, and release evidence validation in one no-secret operator report." `
     -Status $(if ($bridgeReconciliationPassed) { "passed" } else { "failed" }) `
@@ -3273,6 +3333,8 @@ $report = [ordered]@{
     bridgeRelayerLoopValidationOutputRedacted = @($bridgeRelayerLoopValidationOutput | ForEach-Object { "$_" })
     bridgeRuntimeCreditValidationExitCode = $bridgeRuntimeCreditValidationExitCode
     bridgeRuntimeCreditValidationOutputRedacted = @($bridgeRuntimeCreditValidationOutput | ForEach-Object { "$_" })
+    realValuePilotAggregateExitCode = $realValuePilotAggregateExitCode
+    realValuePilotAggregateOutputRedacted = @($realValuePilotAggregateOutput | ForEach-Object { "$_" })
     bridgeReconciliationExitCode = $bridgeReconciliationExitCode
     bridgeReconciliationOutputRedacted = @($bridgeReconciliationOutput | ForEach-Object { "$_" })
     ownerInputsExitCode = $ownerInputsExitCode
@@ -3377,6 +3439,8 @@ $report = [ordered]@{
         bridgeRelayerLoopValidationPassed = $bridgeRelayerLoopValidationPassed
         bridgeRuntimeCreditValidationStatus = $bridgeRuntimeCreditValidationStatus
         bridgeRuntimeCreditValidationPassed = $bridgeRuntimeCreditValidationPassed
+        realValuePilotAggregateStatus = $realValuePilotAggregateStatus
+        realValuePilotAggregatePassed = $realValuePilotAggregatePassed
         bridgeReconciliationStatus = $bridgeReconciliationStatus
         bridgeReconciliationPassed = $bridgeReconciliationPassed
         publicDeploymentContractPacketSmoke = $publicDeploymentContractPacketSmoke
@@ -3425,6 +3489,7 @@ $report = [ordered]@{
         "npm run flowchain:bridge:relayer:guardrail:validate",
         "npm run flowchain:bridge:relayer:loop:validate",
         "npm run flowchain:bridge:runtime-credit:validate",
+        "npm run flowchain:real-value-pilot:e2e -- -SkipBaseline -ChildTimeoutSeconds 1800",
         "npm run flowchain:bridge:release:evidence:validate",
         "npm run flowchain:ops:snapshot",
         "npm run flowchain:ops:alerts",

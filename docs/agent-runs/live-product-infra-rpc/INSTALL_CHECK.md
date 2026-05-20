@@ -1,6 +1,6 @@
 ﻿# FlowChain Install Check
 
-Generated: 2026-05-20T11:49:04.9199413Z
+Generated: 2026-05-20T13:49:41.3809158Z
 Status: passed
 
 This is the owner-host install preflight for running FlowChain outside a developer-only shell. It checks tools, package commands, runbooks, no-secret service install validations, systemd install validation, and operator package verification without mutating the host.

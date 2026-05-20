@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.service_status_report.v0",
-    "generatedAt":  "2026-05-20T11:02:18.3829962Z",
+    "generatedAt":  "2026-05-20T14:11:00.5525004Z",
     "status":  "passed",
     "bind":  {
                  "host":  "127.0.0.1",
@@ -9,14 +9,14 @@
              },
     "node":  {
                  "status":  "running",
-                 "pid":  68812,
+                 "pid":  61564,
                  "pidPath":  "devnet\\local\\node\\flowchain-node.pid",
                  "pidSource":  "pid-file",
                  "commandLineMatched":  true
              },
     "controlPlane":  {
                          "status":  "running",
-                         "pid":  28192,
+                         "pid":  46952,
                          "pidPath":  "devnet\\local\\services\\control-plane.pid",
                          "commandLineMatched":  true
                      },
@@ -53,12 +53,12 @@
                               },
     "chain":  {
                   "stateFileReadable":  true,
-                  "latestHeight":  "101275",
-                  "latestHash":  "0x658b879ca2ec337916b3ae3ab4fef669f58a11277e415b4f4ecb126a0075871c",
-                  "latestRoot":  "0xa62d7f89841ba7d6a7981f10b522b727002d6b979c1c2bf897e85b6906255ed5",
-                  "stateFileLastWriteAgeSeconds":  3,
-                  "finalizedHeight":  "101275",
-                  "finalizedHash":  "0x658b879ca2ec337916b3ae3ab4fef669f58a11277e415b4f4ecb126a0075871c",
+                  "latestHeight":  "102799",
+                  "latestHash":  "0x6358ca42baacda392426815b0d7e65e836581f0cdf3fe838d38657b9cbb6ca99",
+                  "latestRoot":  "0x0281ebc5fc7aabe46aa0c1925211193cdad6e55a57b1dcf2a2edd6dfd7bf19ef",
+                  "stateFileLastWriteAgeSeconds":  5,
+                  "finalizedHeight":  "102799",
+                  "finalizedHash":  "0x6358ca42baacda392426815b0d7e65e836581f0cdf3fe838d38657b9cbb6ca99",
                   "mempoolDepth":  0,
                   "peerCount":  null
               },

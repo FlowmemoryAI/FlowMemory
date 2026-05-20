@@ -1,6 +1,6 @@
 ﻿# FlowChain Bridge Runtime Credit Validation
 
-Generated: 2026-05-20T06:52:12.2587225Z
+Generated: 2026-05-20T14:06:59.4922642Z
 Status: passed
 
 This validation runs the production-shaped Base 8453 runtime credit proof in an isolated local state, verifies a bridge handoff becomes spendable within the settlement target, rejects replay, spends from the credited wallet, survives restart/export/import, and records no-secret/no-broadcast boundaries.

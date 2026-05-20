@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.state_backup_report.v1",
-    "generatedAt":  "2026-05-20T00:07:54.3644342Z",
+    "generatedAt":  "2026-05-20T14:02:45.8974829Z",
     "status":  "passed",
     "requiredEnvNames":  [
                              "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
@@ -13,33 +13,33 @@
     "snapshot":  {
                      "attempted":  true,
                      "created":  true,
-                     "snapshotName":  "flowchain-state-snapshot-20260520T000746323Z",
+                     "snapshotName":  "flowchain-state-snapshot-20260520T140238275Z",
                      "stateArtifactName":  "state.json",
                      "manifestName":  "manifest.json",
                      "latestManifestName":  "latest-manifest.json",
-                     "stateFileSha256":  "d21a9dc0ed4a8c7318f659a36ab7b4a5669354cfdb65e30622757942b2a928ab",
-                     "stateBytes":  43491728,
+                     "stateFileSha256":  "8356e4b95f8820a9e0f90a656b1ad201f72483225759e1faa9951c2aa1f67642",
+                     "stateBytes":  47484804,
                      "sourceStateReadable":  true,
                      "snapshotReadable":  true,
                      "manifestReadable":  true,
                      "writeVerified":  true,
-                     "snapshotManifestSha256":  "959c7a56ace67e32f55e12973d394a469ad4774681cddffa295bb1636d74bc7e",
-                     "latestManifestSha256":  "959c7a56ace67e32f55e12973d394a469ad4774681cddffa295bb1636d74bc7e",
+                     "snapshotManifestSha256":  "1d5566e419ea46c977d95f1054e50e49d06771348a4103ad4d088e3e9902af79",
+                     "latestManifestSha256":  "1d5566e419ea46c977d95f1054e50e49d06771348a4103ad4d088e3e9902af79",
                      "latestManifestReadable":  true,
                      "latestPointerWrittenAtomically":  true,
                      "latestPointerMatchesSnapshotManifest":  true,
                      "attempts":  1,
-                     "latestHeight":  "95151",
-                     "latestHash":  "0xd7c12a4bb616dd4de1cd8c967fb52a7f08ae6443cf08ec9327deaf79272ae73f",
-                     "latestRoot":  "0xbcfc66ad0764f17dc75a66e6a4bacd898ad515e448b9e20d6f12387020b71b9b",
-                     "finalizedHeight":  "95151"
+                     "latestHeight":  "102725",
+                     "latestHash":  "0x626d4a49f10fca8b4b3ec2032d02492afcf8423604bd6ec964c6f84c0b24e95e",
+                     "latestRoot":  "0x0281ebc5fc7aabe46aa0c1925211193cdad6e55a57b1dcf2a2edd6dfd7bf19ef",
+                     "finalizedHeight":  "102725"
                  },
     "retention":  {
                       "enabled":  true,
                       "retentionCount":  14,
                       "candidateCount":  1,
                       "retainedSnapshotNames":  [
-                                                    "flowchain-state-snapshot-20260520T000746323Z"
+                                                    "flowchain-state-snapshot-20260520T140238275Z"
                                                 ],
                       "prunedSnapshotNames":  [
 

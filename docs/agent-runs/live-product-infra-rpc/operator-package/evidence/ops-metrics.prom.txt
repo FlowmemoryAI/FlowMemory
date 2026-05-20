@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 102051
+flowchain_latest_height 102799
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 102051
+flowchain_finalized_height 102799
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 4
+flowchain_state_file_age_seconds 5
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -18,16 +18,16 @@ flowchain_height_advanced 1
 flowchain_mempool_depth 0
 # HELP flowchain_transaction_intake_rows_total Signed transaction intake rows recorded in local NDJSON intake.
 # TYPE flowchain_transaction_intake_rows_total gauge
-flowchain_transaction_intake_rows_total 173
+flowchain_transaction_intake_rows_total 175
 # HELP flowchain_transaction_intake_accepted_rows_total Crypto-verified signed transaction intake rows recorded locally.
 # TYPE flowchain_transaction_intake_accepted_rows_total gauge
-flowchain_transaction_intake_accepted_rows_total 173
+flowchain_transaction_intake_accepted_rows_total 175
 # HELP flowchain_transaction_intake_invalid_rows Invalid NDJSON rows in signed transaction intake.
 # TYPE flowchain_transaction_intake_invalid_rows gauge
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 3629.613
+flowchain_transaction_intake_file_age_seconds 1127.91
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -183,10 +183,10 @@ flowchain_bridge_direct_observe_staged_cursor_not_written 1
 flowchain_bridge_runtime_credit_ready 1
 # HELP flowchain_bridge_runtime_credit_latency_seconds Seconds from bridge handoff queue to spendable L1 credit in runtime validation.
 # TYPE flowchain_bridge_runtime_credit_latency_seconds gauge
-flowchain_bridge_runtime_credit_latency_seconds 0.679
+flowchain_bridge_runtime_credit_latency_seconds 0.686
 # HELP flowchain_bridge_runtime_transfer_latency_seconds Seconds from credited wallet transfer queue to spendable transfer in runtime validation.
 # TYPE flowchain_bridge_runtime_transfer_latency_seconds gauge
-flowchain_bridge_runtime_transfer_latency_seconds 0.609
+flowchain_bridge_runtime_transfer_latency_seconds 0.548
 # HELP flowchain_bridge_runtime_credit_failed_checks Failed checks in bridge runtime credit validation.
 # TYPE flowchain_bridge_runtime_credit_failed_checks gauge
 flowchain_bridge_runtime_credit_failed_checks 0

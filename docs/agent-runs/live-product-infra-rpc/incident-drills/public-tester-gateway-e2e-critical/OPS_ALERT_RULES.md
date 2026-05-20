@@ -1,6 +1,6 @@
 ﻿# FlowChain Ops Alert Rules
 
-Generated: 2026-05-20T11:13:25.5762886Z
+Generated: 2026-05-20T14:11:49.9900081Z
 Status: passed
 Current alert state: critical
 

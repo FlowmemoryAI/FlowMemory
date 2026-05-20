@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-20T13:04:15.6794894Z",
+    "generatedAt":  "2026-05-20T14:16:34.6408159Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -124,7 +124,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=102367, finalizedHeight=102367",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=102848, finalizedHeight=102848",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -427,7 +427,7 @@
                       "id":  "base8453-bridge-runtime-credit-proof",
                       "requirement":  "The deployment has a local production-shaped proof that a Base 8453 bridge handoff becomes spendable on L1 within the settlement target, can be spent by the credited wallet, rejects replay, and survives restart/export/import without live broadcasts.",
                       "status":  "passed",
-                      "evidence":  "runtimeCredit=passed, failedChecks=0, missingRuntimeChecks=0, falseRuntimeChecks=0, latencyGate=passed, queueToSpendableSeconds=0.679, transferSeconds=0.609",
+                      "evidence":  "runtimeCredit=passed, failedChecks=0, missingRuntimeChecks=0, falseRuntimeChecks=0, latencyGate=passed, queueToSpendableSeconds=0.686, transferSeconds=0.548",
                       "commands":  [
                                        "npm run flowchain:bridge:runtime-credit:validate"
                                    ],

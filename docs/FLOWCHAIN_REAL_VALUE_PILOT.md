@@ -89,6 +89,14 @@ The script writes:
 devnet/local/real-value-pilot/flowchain-real-value-pilot-e2e-report.json
 ```
 
+Production readiness automation may keep logs in an ignored local report
+directory while writing the machine-readable gate report into committed
+evidence:
+
+```powershell
+npm run flowchain:real-value-pilot:e2e -- -SkipBaseline -ChildTimeoutSeconds 1800 -ReportPath docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json
+```
+
 The report must show `status: "passed"` before the owner can mark the capped
 pilot go, with empty `missingProofs`, `failedCommands`, and
 `timedOutCommands`. Until then, missing proof rows and timed-out proof commands

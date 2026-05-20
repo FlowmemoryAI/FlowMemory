@@ -576,8 +576,8 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Transfer settlement");
     expect(html).toContain("Relayer guardrail");
     expect(html).toContain("Relayer loop");
-    expect(html).toContain("0.679s");
-    expect(html).toContain("0.609s");
+    expect(html).toContain(`${liveReadinessReport.metrics.bridgeRuntimeCreditLatencySeconds}s`);
+    expect(html).toContain(`${liveReadinessReport.metrics.bridgeRuntimeCreditTransferSeconds}s`);
     expect(html).not.toContain("local-tester-write-token");
   });
 

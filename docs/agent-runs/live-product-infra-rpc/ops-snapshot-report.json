@@ -1,27 +1,18 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-20T12:26:09.7484119Z",
+    "generatedAt":  "2026-05-20T14:12:22.5680285Z",
     "status":  "blocked",
     "refresh":  {
-                    "performed":  true,
+                    "performed":  false,
                     "steps":  [
-                                  {
-                                      "name":  "service-status",
-                                      "exitCode":  0,
-                                      "outputLineCount":  10
-                                  },
-                                  {
-                                      "name":  "service-monitor",
-                                      "exitCode":  0,
-                                      "outputLineCount":  4
-                                  }
+
                               ],
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "102051",
-                  "finalizedHeight":  "102051",
-                  "stateFileLastWriteAgeSeconds":  4,
+                  "latestHeight":  "102799",
+                  "finalizedHeight":  "102799",
+                  "stateFileLastWriteAgeSeconds":  5,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true,
@@ -30,13 +21,13 @@
     "transactionIntake":  {
                               "txIntakePath":  "devnet/local/intake/transactions.ndjson",
                               "txIntakeExists":  true,
-                              "txIntakeRows":  173,
-                              "txIntakeAcceptedRows":  173,
+                              "txIntakeRows":  175,
+                              "txIntakeAcceptedRows":  175,
                               "txIntakeInvalidRows":  0,
-                              "txIntakeLastWriteAgeSeconds":  3629.613,
+                              "txIntakeLastWriteAgeSeconds":  1127.91,
                               "runtimeSubmitDir":  "devnet/local/intake/runtime-submit",
                               "runtimeSubmitFileCount":  4,
-                              "runtimeSubmitNewestFileAgeSeconds":  441856.787,
+                              "runtimeSubmitNewestFileAgeSeconds":  448229.585,
                               "runtimeInboxDir":  "devnet/local/node/inbox",
                               "runtimeInboxFileCount":  0,
                               "runtimeInboxNewestFileAgeSeconds":  null,
@@ -49,8 +40,8 @@
                            "serviceMonitor":  "passed",
                            "transactionIntake":  "passed",
                            "transactionIntakeInvalidRows":  0,
-                           "transactionIntakeRows":  173,
-                           "transactionIntakeAcceptedRows":  173,
+                           "transactionIntakeRows":  175,
+                           "transactionIntakeAcceptedRows":  175,
                            "runtimeSubmitFileCount":  4,
                            "runtimeInboxFileCount":  0,
                            "mempoolDepth":  0,
@@ -73,7 +64,7 @@
                            "supervisorNodeRecoveryControlPlaneRunning":  true,
                            "supervisorNodeRecoveryLiveProfile":  true,
                            "supervisorNodeRecoveryMaxBlocksUnbounded":  true,
-                           "supervisorNodeRecoveryLatestHeight":  "15319",
+                           "supervisorNodeRecoveryLatestHeight":  "15381",
                            "supervisorLatestRestartReasons":  [
 
                                                               ],
@@ -127,8 +118,8 @@
                            "bridgeRelayerCursorReason":  "not-run",
                            "bridgeRuntimeCredit":  "passed",
                            "bridgeRuntimeCreditReady":  true,
-                           "bridgeRuntimeCreditLatencySeconds":  0.679,
-                           "bridgeRuntimeTransferLatencySeconds":  0.609,
+                           "bridgeRuntimeCreditLatencySeconds":  0.686,
+                           "bridgeRuntimeTransferLatencySeconds":  0.548,
                            "bridgeRuntimeCreditFailedChecks":  0,
                            "bridgeRuntimeCreditMissingRuntimeChecks":  0,
                            "bridgeRuntimeCreditFalseRuntimeChecks":  0,

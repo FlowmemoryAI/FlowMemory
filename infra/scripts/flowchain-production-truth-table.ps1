@@ -1510,6 +1510,45 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "real-value-pilot-aggregate"
+        requirement = "Real-value pilot aggregate coordinates contracts, bridge, runtime, wallet, control-dashboard, and ops proofs under bounded child timeouts before a funded owner pilot can be treated as complete."
+        path = "docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json"
+        command = "npm run flowchain:real-value-pilot:e2e -- -SkipBaseline -ChildTimeoutSeconds 1800 -ReportPath docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "pilotSpecPresent",
+            "baselineScriptsPresent",
+            "requiredProofScriptsPresent",
+            "requiredProofCommandsRun",
+            "childTimeoutSecondsPositive",
+            "commandsDidNotTimeout",
+            "commandsDidNotFail",
+            "missingProofsEmpty",
+            "ownerGoNoGoTrue",
+            "outputTailsRedacted",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredMinimums = [ordered]@{
+            "childTimeoutSeconds" = 1
+        }
+        requiredEmptyArrays = @(
+            "missingProofs",
+            "missingExpectedCommands",
+            "timedOutCommands",
+            "failedCommands"
+        )
+        requiredReportProperties = [ordered]@{
+            "skipBaseline" = $true
+            "ownerGoNoGo.go" = $true
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "bridge-reconciliation"
         requirement = "Bridge reconciliation summarizes live relayer observed/new/queued/applied/pending credits, cursor commit safety, local runtime credit proof, replay rejection, and release evidence validation in one no-secret operator report."
         path = "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-report.json"
@@ -2146,7 +2185,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "tester-write-token-setup", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "tester-write-token-setup", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"

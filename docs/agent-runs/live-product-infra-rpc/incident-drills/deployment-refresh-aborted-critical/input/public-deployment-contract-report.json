@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-20T11:00:17.9214048Z",
+    "generatedAt":  "2026-05-20T14:09:29.2690932Z",
     "status":  "failed",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -124,7 +124,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=101253, finalizedHeight=101253",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=102783, finalizedHeight=102783",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -305,7 +305,7 @@
                   },
                   {
                       "id":  "public-rpc-edge",
-                      "requirement":  "The owner TLS edge must pass endpoint, CORS, rate-limit, readiness, and response-hygiene checks before sharing.",
+                      "requirement":  "The owner TLS edge must pass endpoint, CORS, live security-header, rate-limit, readiness, and response-hygiene checks before sharing.",
                       "status":  "blocked",
                       "evidence":  "publicRpcStatus=blocked, publicRpcReady=False, validationStatus=passed, validationPassed=True, abuseStatus=passed, abusePassed=True",
                       "commands":  [
@@ -427,7 +427,7 @@
                       "id":  "base8453-bridge-runtime-credit-proof",
                       "requirement":  "The deployment has a local production-shaped proof that a Base 8453 bridge handoff becomes spendable on L1 within the settlement target, can be spent by the credited wallet, rejects replay, and survives restart/export/import without live broadcasts.",
                       "status":  "passed",
-                      "evidence":  "runtimeCredit=passed, failedChecks=0, missingRuntimeChecks=0, falseRuntimeChecks=0, latencyGate=passed, queueToSpendableSeconds=0.679, transferSeconds=0.609",
+                      "evidence":  "runtimeCredit=passed, failedChecks=0, missingRuntimeChecks=0, falseRuntimeChecks=0, latencyGate=passed, queueToSpendableSeconds=0.686, transferSeconds=0.548",
                       "commands":  [
                                        "npm run flowchain:bridge:runtime-credit:validate"
                                    ],

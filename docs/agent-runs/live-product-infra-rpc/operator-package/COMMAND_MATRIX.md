@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Command Matrix
 
-Generated: 2026-05-20T13:03:26.8671671Z
+Generated: 2026-05-20T14:14:38.8024435Z
 
 | Phase | Command | Purpose |
 | --- | --- | --- |
@@ -52,6 +52,7 @@ Generated: 2026-05-20T13:03:26.8671671Z
 | bridge | `npm run flowchain:bridge:relayer:guardrail:validate` | Prove missing owner inputs cannot mutate cursor state or queue credits. |
 | bridge | `npm run flowchain:bridge:relayer:loop:validate` | Validate relayer loop start, fresh health reporting, clean stop, PID cleanup, and no leftover validation relayer process. |
 | bridge | `npm run flowchain:bridge:runtime-credit:validate` | Validate a production-shaped Base 8453 handoff becomes spendable, transferable, replay-safe, and restart/export/import-safe in isolated L1 state. |
+| bridge | `npm run flowchain:real-value-pilot:e2e -- -SkipBaseline -ChildTimeoutSeconds 1800` | Run the bounded aggregate pilot proof across contracts, bridge, runtime, wallet, control-dashboard, and ops before owner-funded pilot approval. |
 | bridge | `npm run flowchain:bridge:reconciliation` | Reconcile live relayer counts, cursor safety, runtime credit proof, replay rejection, and release evidence into one bridge operator report. |
 | bridge | `npm run flowchain:bridge:release:evidence:validate` | Validate withdrawal/release evidence matching, mismatch rejection, and no-broadcast boundaries. |
 | testers | `npm run flowchain:external-tester:packet -- -AllowBlocked` | Regenerate the friends-and-family packet and fail closed until public gates pass. |

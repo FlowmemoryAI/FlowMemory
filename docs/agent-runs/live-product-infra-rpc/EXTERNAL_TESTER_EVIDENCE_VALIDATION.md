@@ -1,6 +1,6 @@
 ﻿# FlowChain External Tester Evidence Validation
 
-Generated: 2026-05-19T14:59:16.4786341Z
+Generated: 2026-05-20T14:11:17.3940955Z
 Status: passed
 
 This validates a redacted friends-and-family evidence folder before owner review. It checks required files, JSON readability, block-height advancement, wallet transfer consistency, amount cap, and no-secret boundaries.

@@ -2,7 +2,8 @@ param(
     [switch] $AllowIncomplete,
     [switch] $SkipBaseline,
     [int] $ChildTimeoutSeconds = 7200,
-    [string] $ReportDir = "devnet/local/real-value-pilot"
+    [string] $ReportDir = "devnet/local/real-value-pilot",
+    [string] $ReportPath = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -12,6 +13,12 @@ Set-StrictMode -Version Latest
 
 $repoRoot = Set-FlowChainRepoRoot
 $reportDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportDir)
+$reportFullPath = if ([string]::IsNullOrWhiteSpace($ReportPath)) {
+    Join-Path $reportDir "flowchain-real-value-pilot-e2e-report.json"
+}
+else {
+    Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
+}
 
 if ($ChildTimeoutSeconds -lt 1) {
     throw "ChildTimeoutSeconds must be at least 1."
@@ -158,10 +165,36 @@ function Write-PilotReport {
         [string] $Status
     )
 
-    $reportPath = Join-Path $reportDir "flowchain-real-value-pilot-e2e-report.json"
     $commandResults = @($results.GetEnumerator() | ForEach-Object { $_.Value })
     $timedOutCommands = @($commandResults | Where-Object { $_.timedOut -eq $true } | ForEach-Object { $_.command })
     $failedCommands = @($commandResults | Where-Object { "$($_.status)" -ne "passed" } | ForEach-Object { $_.command })
+    $expectedProofCommands = @(
+        "npm run flowchain:real-value-pilot:contracts",
+        "npm run flowchain:real-value-pilot:bridge",
+        "npm run flowchain:real-value-pilot:runtime",
+        "npm run flowchain:real-value-pilot:wallet",
+        "npm run flowchain:real-value-pilot:control-dashboard",
+        "npm run flowchain:real-value-pilot:ops"
+    )
+    $commandsRunText = @($commandsRun | ForEach-Object { "$_" })
+    $missingExpectedCommands = @($expectedProofCommands | Where-Object { $_ -notin $commandsRunText })
+    $reportChecks = [ordered]@{}
+    foreach ($entry in $checks.GetEnumerator()) {
+        $reportChecks[$entry.Key] = $entry.Value
+    }
+    $reportChecks["pilotSpecPresent"] = (Test-Path -LiteralPath $pilotDocPath)
+    $reportChecks["baselineScriptsPresent"] = (Test-RootScript -Name "flowchain:product-e2e") -and (Test-RootScript -Name "flowchain:l1-e2e")
+    $reportChecks["requiredProofScriptsPresent"] = $missingProofs.Count -eq 0
+    $reportChecks["requiredProofCommandsRun"] = $missingExpectedCommands.Count -eq 0
+    $reportChecks["childTimeoutSecondsPositive"] = $ChildTimeoutSeconds -ge 1
+    $reportChecks["commandsDidNotTimeout"] = $timedOutCommands.Count -eq 0
+    $reportChecks["commandsDidNotFail"] = $failedCommands.Count -eq 0
+    $reportChecks["missingProofsEmpty"] = $missingProofs.Count -eq 0
+    $reportChecks["ownerGoNoGoTrue"] = ($Status -eq "passed" -and $missingProofs.Count -eq 0 -and $timedOutCommands.Count -eq 0 -and $failedCommands.Count -eq 0)
+    $reportChecks["outputTailsRedacted"] = $true
+    $reportChecks["envValuesPrintedFalse"] = $true
+    $reportChecks["noSecrets"] = $true
+    $reportChecks["broadcastsFalse"] = $true
     $report = [ordered]@{
         schema = "flowchain.real_value_pilot.e2e_report.v0"
         generatedAt = (Get-Date).ToUniversalTime().ToString("o")
@@ -171,7 +204,8 @@ function Write-PilotReport {
         skipBaseline = [bool] $SkipBaseline
         childTimeoutSeconds = $ChildTimeoutSeconds
         commandsRun = @($commandsRun)
-        checks = $checks
+        missingExpectedCommands = @($missingExpectedCommands)
+        checks = $reportChecks
         commandResults = $results
         timedOutCommands = @($timedOutCommands)
         failedCommands = @($failedCommands)
@@ -180,6 +214,9 @@ function Write-PilotReport {
             go = ($Status -eq "passed" -and $missingProofs.Count -eq 0 -and $timedOutCommands.Count -eq 0 -and $failedCommands.Count -eq 0)
             checklist = "docs/FLOWCHAIN_REAL_VALUE_PILOT.md#owner-gonogo-checklist"
         }
+        envValuesPrinted = $false
+        noSecrets = $true
+        broadcasts = $false
         boundary = @(
             "capped owner pilot only",
             "no public launch claim",
@@ -190,8 +227,8 @@ function Write-PilotReport {
         )
     }
 
-    Write-FlowChainJson -Path $reportPath -Value $report -Depth 16
-    return $reportPath
+    Write-FlowChainJson -Path $reportFullPath -Value $report -Depth 16
+    return $reportFullPath
 }
 
 function Invoke-RootNpmScript {

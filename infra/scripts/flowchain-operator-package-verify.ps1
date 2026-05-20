@@ -115,6 +115,8 @@ $expectedFiles = @(
     "evidence/bridge-deploy-control-validation-report.json",
     "evidence/bridge-relayer-guardrail-validation-report.json",
     "evidence/bridge-relayer-loop-validation-report.json",
+    "evidence/bridge-runtime-credit-validation-report.json",
+    "evidence/real-value-pilot-aggregate-report.json",
     "evidence/bridge-reconciliation-report.json",
     "evidence/bridge-release-evidence-validation-report.json",
     "evidence/external-tester-packet-report.json",
