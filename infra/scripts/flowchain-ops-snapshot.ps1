@@ -910,12 +910,26 @@ $ownerGoLiveHandoffStatus = Get-OpsStatus -Report $reports.ownerGoLiveHandoff
 $ownerGoLiveHandoffFailedChecks = @((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "failedChecks" -Default @()))
 $ownerGoLiveHandoffSecretFindings = @((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "secretMarkerFindings" -Default @()))
 $ownerGoLiveHandoffNextInputs = @((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "nextOwnerInputNames" -Default @()))
+$ownerGoLiveHandoffChecks = Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "checks"
 $ownerGoLiveHandoffStageCount = [int](Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "stageCount" -Default 0)
+$ownerGoLiveHandoffLaunchSequenceCount = [int](Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "launchSequenceCount" -Default 0)
+$ownerGoLiveHandoffLaunchSequenceCommandCount = [int](Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "launchSequenceCommandCount" -Default 0)
+$ownerGoLiveHandoffRollbackCommandCount = [int](Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "rollbackCommandCount" -Default 0)
 $ownerGoLiveHandoffReleaseReady = (Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "releaseReady" -Default $false) -eq $true
 $ownerGoLiveHandoffReady = $ownerGoLiveHandoffStatus -eq "passed" `
     -and $ownerGoLiveHandoffFailedChecks.Count -eq 0 `
     -and $ownerGoLiveHandoffSecretFindings.Count -eq 0 `
     -and $ownerGoLiveHandoffStageCount -ge 8 `
+    -and $ownerGoLiveHandoffLaunchSequenceCount -ge 8 `
+    -and $ownerGoLiveHandoffLaunchSequenceCommandCount -ge 20 `
+    -and $ownerGoLiveHandoffRollbackCommandCount -ge 4 `
+    -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequencePresent" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepStopsOnFailure" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversCutoverAudit" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversTruthAndNoSecret" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCommandsPresent" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversLocalStop" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversBridgeEmergencyStop" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "broadcasts" -Default $true) -eq $false)
@@ -1035,7 +1049,7 @@ if (-not $ownerInputsValidationReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "owner-inputs-validation-failed" -Message "Owner input validation scenarios are missing, failed, or unsafe to use for live cutover." -Commands @("npm run flowchain:owner-inputs:validate", "npm run flowchain:owner-inputs", "npm run flowchain:owner-env:readiness")
 }
 if (-not $ownerGoLiveHandoffReady) {
-    Add-OpsFinding -Findings $findings -Severity "critical" -Code "owner-go-live-handoff-failed" -Message "Owner go-live handoff is missing or unsafe; the operator needs a no-secret stage deck, next-input list, validation commands, and release-ready guardrail before public launch." -Commands @("npm run flowchain:owner:go-live-handoff", "npm run flowchain:owner:activation-plan", "npm run flowchain:truth-table -- -AllowBlocked")
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "owner-go-live-handoff-failed" -Message "Owner go-live handoff is missing or unsafe; the operator needs a no-secret stage deck, ordered launch sequence, rollback commands, next-input list, validation commands, and release-ready guardrail before public launch." -Commands @("npm run flowchain:owner:go-live-handoff", "npm run flowchain:owner:activation-plan", "npm run flowchain:truth-table -- -AllowBlocked")
 }
 if ($deploymentRefreshUnsafe) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "deployment-refresh-aborted" -Message "Public deployment dependency refresh aborted or skipped dependency gates." -Commands @("npm run flowchain:public-deployment:contract -- -AllowBlocked", "npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked", "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh")
@@ -1388,6 +1402,9 @@ $report = [ordered]@{
         ownerGoLiveHandoffReady = $ownerGoLiveHandoffReady
         ownerGoLiveReleaseReady = $ownerGoLiveHandoffReleaseReady
         ownerGoLiveStageCount = $ownerGoLiveHandoffStageCount
+        ownerGoLiveLaunchSequenceCount = $ownerGoLiveHandoffLaunchSequenceCount
+        ownerGoLiveLaunchSequenceCommandCount = $ownerGoLiveHandoffLaunchSequenceCommandCount
+        ownerGoLiveRollbackCommandCount = $ownerGoLiveHandoffRollbackCommandCount
         ownerGoLiveNextInputCount = $ownerGoLiveHandoffNextInputs.Count
         ownerGoLiveFailedChecks = $ownerGoLiveHandoffFailedChecks.Count
         ownerGoLiveSecretFindings = $ownerGoLiveHandoffSecretFindings.Count

@@ -39,6 +39,7 @@ $paths = [ordered]@{
     ownerOnboarding = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json"
     ownerSignupChecklist = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-signup-checklist-report.json"
     ownerActivationPlan = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json"
+    ownerGoLiveHandoff = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-go-live-handoff-report.json"
     ownerEnvTemplate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-template-report.json"
     ownerEnvReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-report.json"
     ownerEnvReadinessValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-validation-report.json"
@@ -966,6 +967,7 @@ $ownerInputs = $reports.ownerInputs
 $ownerOnboarding = $reports.ownerOnboarding
 $ownerSignupChecklist = $reports.ownerSignupChecklist
 $ownerEnvTemplate = $reports.ownerEnvTemplate
+$ownerGoLiveHandoff = $reports.ownerGoLiveHandoff
 $ownerEnvReadiness = $reports.ownerEnvReadiness
 $ownerEnvReadinessValidation = $reports.ownerEnvReadinessValidation
 $ownerInputsValidation = $reports.ownerInputsValidation
@@ -1289,6 +1291,79 @@ $ownerActivationPlanPassed = $ownerActivationPlanExitCode -eq 0 `
     -and ((Get-AuditProp -Object $ownerActivationPlan -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $ownerActivationPlan -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $ownerActivationPlan -Name "broadcasts" -Default $true) -eq $false)
+$ownerGoLiveHandoffStatus = Get-ReportStatus -Report $ownerGoLiveHandoff
+$ownerGoLiveHandoffChecks = Get-AuditProp -Object $ownerGoLiveHandoff -Name "checks"
+$ownerGoLiveHandoffRequiredChecks = @(
+    "packageScriptPresent",
+    "activationPlanLoaded",
+    "activationPlanPassed",
+    "signupChecklistLoaded",
+    "signupChecklistPassed",
+    "ownerInputsLoaded",
+    "truthTableLoaded",
+    "stageDeckPresent",
+    "stageCountMinimumMet",
+    "everyStageHasValidationCommand",
+    "everyStageHasOwnerMustNotSend",
+    "nonReadyStagesExplainBlockers",
+    "requiredEnvCoverageComplete",
+    "knownOwnerInputBlockersOnly",
+    "nextOwnerInputsPresentWhenBlocked",
+    "nextCommandsPresent",
+    "launchSequencePresent",
+    "launchSequenceEveryStepHasCommands",
+    "launchSequenceEveryStepHasExpectedStatuses",
+    "launchSequenceEveryStepStopsOnFailure",
+    "launchSequenceCoversOwnerEnvReadiness",
+    "launchSequenceCoversPublicRpcRender",
+    "launchSequenceCoversSystemdInstallPlan",
+    "launchSequenceCoversServiceMonitor",
+    "launchSequenceCoversPublicRpcCanary",
+    "launchSequenceCoversBackupRestore",
+    "launchSequenceCoversBridgeRelayer",
+    "launchSequenceCoversTesterPacket",
+    "launchSequenceCoversCutoverAudit",
+    "launchSequenceCoversTruthAndNoSecret",
+    "launchSequenceCommandsAvoidInlineEnvAssignment",
+    "launchSequenceCommandsAvoidUrls",
+    "rollbackCommandsPresent",
+    "rollbackCoversLocalStop",
+    "rollbackCoversBridgeEmergencyStop",
+    "rollbackCoversOpsSnapshot",
+    "releaseClaimBlockedUntilTruthPassed",
+    "packetShareBlockedUntilReady",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse",
+    "secretMarkerFindingsEmpty"
+)
+$ownerGoLiveHandoffMissingChecks = Get-MissingAuditChecks -Checks $ownerGoLiveHandoffChecks -Names $ownerGoLiveHandoffRequiredChecks
+$ownerGoLiveHandoffFailedChecks = @((Get-AuditProp -Object $ownerGoLiveHandoff -Name "failedChecks" -Default @()))
+$ownerGoLiveHandoffSecretFindings = @((Get-AuditProp -Object $ownerGoLiveHandoff -Name "secretMarkerFindings" -Default @()))
+$ownerGoLiveHandoffUnknownMissing = @((Get-AuditProp -Object $ownerGoLiveHandoff -Name "unknownMissingEnvNames" -Default @()))
+$ownerGoLiveHandoffUnknownInvalid = @((Get-AuditProp -Object $ownerGoLiveHandoff -Name "unknownInvalidEnvNames" -Default @()))
+$ownerGoLiveHandoffInvalid = @((Get-AuditProp -Object $ownerGoLiveHandoff -Name "invalidEnvNames" -Default @()))
+$ownerGoLiveHandoffStageCount = [int](Get-AuditProp -Object $ownerGoLiveHandoff -Name "stageCount" -Default 0)
+$ownerGoLiveHandoffLaunchSequenceCount = [int](Get-AuditProp -Object $ownerGoLiveHandoff -Name "launchSequenceCount" -Default 0)
+$ownerGoLiveHandoffLaunchSequenceCommandCount = [int](Get-AuditProp -Object $ownerGoLiveHandoff -Name "launchSequenceCommandCount" -Default 0)
+$ownerGoLiveHandoffRollbackCommandCount = [int](Get-AuditProp -Object $ownerGoLiveHandoff -Name "rollbackCommandCount" -Default 0)
+$ownerGoLiveHandoffReleaseReady = (Get-AuditProp -Object $ownerGoLiveHandoff -Name "releaseReady" -Default $false) -eq $true
+$ownerGoLiveHandoffFailedCheckCount = @($ownerGoLiveHandoffFailedChecks | Where-Object { $null -ne $_ }).Count
+$ownerGoLiveHandoffSecretFindingCount = @($ownerGoLiveHandoffSecretFindings | Where-Object { $null -ne $_ }).Count
+$ownerGoLiveHandoffMissingCheckCount = @($ownerGoLiveHandoffMissingChecks | Where-Object { $null -ne $_ }).Count
+$ownerGoLiveHandoffPassed = $ownerGoLiveHandoffStatus -eq "passed" `
+    -and $ownerGoLiveHandoffMissingCheckCount -eq 0 `
+    -and $ownerGoLiveHandoffFailedCheckCount -eq 0 `
+    -and $ownerGoLiveHandoffSecretFindingCount -eq 0 `
+    -and $ownerGoLiveHandoffUnknownMissing.Count -eq 0 `
+    -and $ownerGoLiveHandoffUnknownInvalid.Count -eq 0 `
+    -and $ownerGoLiveHandoffInvalid.Count -eq 0 `
+    -and $ownerGoLiveHandoffStageCount -ge 8 `
+    -and $ownerGoLiveHandoffLaunchSequenceCount -ge 8 `
+    -and $ownerGoLiveHandoffRollbackCommandCount -ge 4 `
+    -and ((Get-AuditProp -Object $ownerGoLiveHandoff -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $ownerGoLiveHandoff -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $ownerGoLiveHandoff -Name "broadcasts" -Default $true) -eq $false)
 $ownerEnvTemplateStatus = Get-ReportStatus -Report $ownerEnvTemplate
 $ownerEnvTemplateGitIgnored = Get-AuditProp -Object $ownerEnvTemplate -Name "pathIsGitIgnored" -Default $false
 $ownerEnvTemplateIncludesRequired = Get-AuditProp -Object $ownerEnvTemplate -Name "templateIncludesAllRequiredEnvNames" -Default $false
@@ -3150,6 +3225,12 @@ Add-AuditItem -Items $items -Id "owner-activation-plan" `
     -Evidence "activationPlanStatus=$ownerActivationPlanStatus, activationReady=$ownerActivationPlanActivationReady, stages=$ownerActivationPlanStageCount, readyStages=$ownerActivationPlanReadyStageCount, failedChecks=$ownerActivationPlanFailedCheckCount, secretFindings=$ownerActivationPlanSecretFindingCount, missingChecks=$ownerActivationPlanMissingCheckCount, report=$($paths.ownerActivationPlan)" `
     -Commands @("npm run flowchain:owner:activation-plan")
 
+Add-AuditItem -Items $items -Id "owner-go-live-handoff" `
+    -Requirement "Owner go-live handoff converts the remaining owner inputs and activation stages into one ordered launch sequence with expected statuses, stop-on-failure gates, rollback commands, and no-secret boundaries." `
+    -Status $(if ($ownerGoLiveHandoffPassed) { "passed" } else { "failed" }) `
+    -Evidence "handoffStatus=$ownerGoLiveHandoffStatus, releaseReady=$ownerGoLiveHandoffReleaseReady, stages=$ownerGoLiveHandoffStageCount, launchSteps=$ownerGoLiveHandoffLaunchSequenceCount, launchCommands=$ownerGoLiveHandoffLaunchSequenceCommandCount, rollbackCommands=$ownerGoLiveHandoffRollbackCommandCount, failedChecks=$ownerGoLiveHandoffFailedCheckCount, secretFindings=$ownerGoLiveHandoffSecretFindingCount, missingChecks=$ownerGoLiveHandoffMissingCheckCount, report=$($paths.ownerGoLiveHandoff)" `
+    -Commands @("npm run flowchain:owner:go-live-handoff")
+
 Add-AuditItem -Items $items -Id "owner-env-template" `
     -Requirement "Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added." `
     -Status $(if ($ownerEnvTemplatePassed) { "passed" } else { "failed" }) `
@@ -3672,6 +3753,7 @@ $report = [ordered]@{
         "npm run flowchain:owner:onboarding",
         "npm run flowchain:owner:signup-checklist",
         "npm run flowchain:owner:activation-plan",
+        "npm run flowchain:owner:go-live-handoff",
         "npm run flowchain:owner-env:template",
         "npm run flowchain:owner-env:readiness:validate",
         "npm run flowchain:owner-env:readiness -- -AllowBlocked",

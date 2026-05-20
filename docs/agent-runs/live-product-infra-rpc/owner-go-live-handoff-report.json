@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.owner_go_live_handoff_report.v0",
-    "generatedAt":  "2026-05-20T15:14:43.4459247Z",
+    "generatedAt":  "2026-05-20T23:05:47.5233940Z",
     "status":  "passed",
     "releaseReady":  false,
     "activationReady":  false,
@@ -26,6 +26,26 @@
                    "knownOwnerInputBlockersOnly":  true,
                    "nextOwnerInputsPresentWhenBlocked":  true,
                    "nextCommandsPresent":  true,
+                   "launchSequencePresent":  true,
+                   "launchSequenceEveryStepHasCommands":  true,
+                   "launchSequenceEveryStepHasExpectedStatuses":  true,
+                   "launchSequenceEveryStepStopsOnFailure":  true,
+                   "launchSequenceCoversOwnerEnvReadiness":  true,
+                   "launchSequenceCoversPublicRpcRender":  true,
+                   "launchSequenceCoversSystemdInstallPlan":  true,
+                   "launchSequenceCoversServiceMonitor":  true,
+                   "launchSequenceCoversPublicRpcCanary":  true,
+                   "launchSequenceCoversBackupRestore":  true,
+                   "launchSequenceCoversBridgeRelayer":  true,
+                   "launchSequenceCoversTesterPacket":  true,
+                   "launchSequenceCoversCutoverAudit":  true,
+                   "launchSequenceCoversTruthAndNoSecret":  true,
+                   "launchSequenceCommandsAvoidInlineEnvAssignment":  true,
+                   "launchSequenceCommandsAvoidUrls":  true,
+                   "rollbackCommandsPresent":  true,
+                   "rollbackCoversLocalStop":  true,
+                   "rollbackCoversBridgeEmergencyStop":  true,
+                   "rollbackCoversOpsSnapshot":  true,
                    "releaseClaimBlockedUntilTruthPassed":  true,
                    "packetShareBlockedUntilReady":  true,
                    "envValuesPrintedFalse":  true,
@@ -76,7 +96,8 @@
                             "FLOWCHAIN_BASE8453_FROM_BLOCK",
                             "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                             "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-                            "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                            "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                            "FLOWCHAIN_BASE8453_TO_BLOCK"
                         ],
     "invalidEnvNames":  [
 
@@ -106,7 +127,10 @@
     "stageCount":  8,
     "readyStageCount":  1,
     "blockedStageCount":  7,
-    "nextCommandCount":  59,
+    "nextCommandCount":  61,
+    "launchSequenceCount":  9,
+    "launchSequenceCommandCount":  36,
+    "rollbackCommandCount":  7,
     "mustNotSendCount":  18,
     "externalResourceCount":  10,
     "stages":  [
@@ -517,6 +541,161 @@
                        "nextCommand":  "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked"
                    }
                ],
+    "launchSequence":  [
+                           {
+                               "id":  "owner-inputs",
+                               "phase":  "owner-inputs",
+                               "title":  "Validate ignored owner inputs",
+                               "expectedStatuses":  [
+                                                        "passed"
+                                                    ],
+                               "ownerInputBlockedAllowedBeforeInputs":  true,
+                               "stopOnFailure":  true,
+                               "commands":  [
+                                                "npm run flowchain:owner-env:readiness -- -AllowBlocked",
+                                                "npm run flowchain:owner-inputs -- -AllowBlocked",
+                                                "npm run flowchain:owner-inputs:validate"
+                                            ]
+                           },
+                           {
+                               "id":  "render-public-rpc",
+                               "phase":  "public-rpc",
+                               "title":  "Render public RPC edge artifacts",
+                               "expectedStatuses":  [
+                                                        "passed"
+                                                    ],
+                               "ownerInputBlockedAllowedBeforeInputs":  true,
+                               "stopOnFailure":  true,
+                               "commands":  [
+                                                "npm run flowchain:public-rpc:deployment-bundle",
+                                                "npm run flowchain:public-rpc:deployment:automation",
+                                                "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-automation.ps1 -Action Render -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -OwnerEnvFile \u003cFLOWCHAIN_OWNER_ENV_FILE\u003e -TlsCertificatePath \u003cPATH_TO_TLS_CERTIFICATE\u003e -TlsCertificateKeyPath \u003cPATH_TO_TLS_CERTIFICATE_KEY\u003e -NginxExe \u003cFLOWCHAIN_NGINX_EXE\u003e"
+                                            ]
+                           },
+                           {
+                               "id":  "service-install",
+                               "phase":  "service",
+                               "title":  "Plan reboot-persistent services",
+                               "expectedStatuses":  [
+                                                        "passed"
+                                                    ],
+                               "ownerInputBlockedAllowedBeforeInputs":  false,
+                               "stopOnFailure":  true,
+                               "commands":  [
+                                                "npm run flowchain:service:install:systemd:validate",
+                                                "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                                                "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -StartBridgeRelayerLoop"
+                                            ]
+                           },
+                           {
+                               "id":  "local-service",
+                               "phase":  "service",
+                               "title":  "Prove live service health",
+                               "expectedStatuses":  [
+                                                        "passed"
+                                                    ],
+                               "ownerInputBlockedAllowedBeforeInputs":  false,
+                               "stopOnFailure":  true,
+                               "commands":  [
+                                                "npm run flowchain:service:status",
+                                                "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30"
+                                            ]
+                           },
+                           {
+                               "id":  "public-rpc",
+                               "phase":  "public-rpc",
+                               "title":  "Validate public RPC exposure",
+                               "expectedStatuses":  [
+                                                        "passed"
+                                                    ],
+                               "ownerInputBlockedAllowedBeforeInputs":  true,
+                               "stopOnFailure":  true,
+                               "commands":  [
+                                                "npm run flowchain:public-rpc:check -- -AllowBlocked",
+                                                "npm run flowchain:public-rpc:validate",
+                                                "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
+                                                "npm run flowchain:public-rpc:abuse-test"
+                                            ]
+                           },
+                           {
+                               "id":  "backup",
+                               "phase":  "backup",
+                               "title":  "Prove backup and restore",
+                               "expectedStatuses":  [
+                                                        "passed"
+                                                    ],
+                               "ownerInputBlockedAllowedBeforeInputs":  true,
+                               "stopOnFailure":  true,
+                               "commands":  [
+                                                "npm run flowchain:backup:check -- -AllowBlocked",
+                                                "npm run flowchain:backup:restore:validate",
+                                                "npm run flowchain:backup:owner-path:dry-run"
+                                            ]
+                           },
+                           {
+                               "id":  "bridge",
+                               "phase":  "bridge",
+                               "title":  "Harden bridge relayer pilot",
+                               "expectedStatuses":  [
+                                                        "passed"
+                                                    ],
+                               "ownerInputBlockedAllowedBeforeInputs":  true,
+                               "stopOnFailure":  true,
+                               "commands":  [
+                                                "npm run flowchain:bridge:live:check -- -AllowBlocked",
+                                                "npm run flowchain:bridge:infra:check -- -AllowBlocked",
+                                                "npm run flowchain:bridge:relayer:guardrail:validate",
+                                                "npm run flowchain:bridge:relayer:loop:validate",
+                                                "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                                                "npm run flowchain:bridge:reconciliation"
+                                            ]
+                           },
+                           {
+                               "id":  "testers",
+                               "phase":  "testers",
+                               "title":  "Validate external tester launch",
+                               "expectedStatuses":  [
+                                                        "passed"
+                                                    ],
+                               "ownerInputBlockedAllowedBeforeInputs":  true,
+                               "stopOnFailure":  true,
+                               "commands":  [
+                                                "npm run flowchain:tester:token:setup",
+                                                "npm run flowchain:tester:gateway:e2e",
+                                                "npm run flowchain:wallet:live-tester:e2e",
+                                                "npm run flowchain:external-tester:packet -- -AllowBlocked",
+                                                "npm run flowchain:external-tester:packet:validate",
+                                                "npm run flowchain:external-tester:client:validate",
+                                                "npm run flowchain:tester:evidence:validate"
+                                            ]
+                           },
+                           {
+                               "id":  "final-audit",
+                               "phase":  "final-audit",
+                               "title":  "Run release gates",
+                               "expectedStatuses":  [
+                                                        "passed"
+                                                    ],
+                               "ownerInputBlockedAllowedBeforeInputs":  true,
+                               "stopOnFailure":  true,
+                               "commands":  [
+                                                "npm run flowchain:public-deployment:contract -- -AllowBlocked",
+                                                "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
+                                                "npm run flowchain:completion:audit -- -AllowBlocked",
+                                                "npm run flowchain:truth-table -- -AllowBlocked",
+                                                "npm run flowchain:no-secret:scan"
+                                            ]
+                           }
+                       ],
+    "rollbackCommands":  [
+                             "npm run flowchain:ops:snapshot -- -AllowBlocked",
+                             "npm run flowchain:service:status",
+                             "npm run flowchain:service:restart -- -LiveProfile",
+                             "npm run flowchain:service:stop",
+                             "npm run flowchain:emergency:stop-local",
+                             "npm run flowchain:bridge:emergency-stop",
+                             "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+                         ],
     "reportStatuses":  [
                            {
                                "name":  "ownerActivationPlan",
@@ -735,6 +914,7 @@
                          "npm run flowchain:operator:package",
                          "npm run flowchain:operator:package:verify",
                          "npm run flowchain:public-rpc:validate",
+                         "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
                          "npm run flowchain:public-rpc:abuse-test",
                          "npm run flowchain:tester:gateway:e2e",
                          "npm run flowchain:dashboard:ui:readiness",
@@ -766,6 +946,7 @@
                          "npm run flowchain:bridge:diagnose:tx",
                          "npm run flowchain:tester:readiness",
                          "npm run flowchain:external-tester:packet",
+                         "npm run flowchain:external-tester:client:validate",
                          "npm run flowchain:tester:evidence:validate",
                          "npm run flowchain:public-deployment:contract",
                          "npm run flowchain:architecture:audit",

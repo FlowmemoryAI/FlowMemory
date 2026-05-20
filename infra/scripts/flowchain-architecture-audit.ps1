@@ -72,6 +72,7 @@ $reportPaths = [ordered]@{
     baseTxDiagnostic = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/live-l1-bridge-e2e/base-tx-diagnostic.json"
     ownerOnboarding = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json"
     ownerSignupChecklist = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-signup-checklist-report.json"
+    ownerGoLiveHandoff = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-go-live-handoff-report.json"
     ownerInputs = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-report.json"
     ownerEnvReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-report.json"
     ownerEnvReadinessValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-validation-report.json"
@@ -1399,6 +1400,43 @@ Add-ArchitectureItem -Items $items -Id "public-deployment-contract-boundary" -La
     -Commands @("npm run flowchain:public-deployment:contract -- -AllowBlocked") `
     -Blockers @($missingOwnerInputs)
 
+$ownerGoLiveHandoff = $reports.ownerGoLiveHandoff
+$ownerGoLiveHandoffStatus = Get-ArchitectureStatus -Report $ownerGoLiveHandoff
+$ownerGoLiveHandoffChecks = Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "checks"
+$ownerGoLiveHandoffFailedChecks = @((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "failedChecks" -Default @()))
+$ownerGoLiveHandoffSecretFindings = @((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "secretMarkerFindings" -Default @()))
+$ownerGoLiveHandoffStageCount = [int](Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "stageCount" -Default 0)
+$ownerGoLiveHandoffLaunchSequenceCount = [int](Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "launchSequenceCount" -Default 0)
+$ownerGoLiveHandoffLaunchSequenceCommandCount = [int](Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "launchSequenceCommandCount" -Default 0)
+$ownerGoLiveHandoffRollbackCommandCount = [int](Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "rollbackCommandCount" -Default 0)
+$ownerGoLiveHandoffSafe = $ownerGoLiveHandoffStatus -eq "passed" `
+    -and $ownerGoLiveHandoffFailedChecks.Count -eq 0 `
+    -and $ownerGoLiveHandoffSecretFindings.Count -eq 0 `
+    -and $ownerGoLiveHandoffStageCount -ge 8 `
+    -and $ownerGoLiveHandoffLaunchSequenceCount -ge 8 `
+    -and $ownerGoLiveHandoffLaunchSequenceCommandCount -ge 20 `
+    -and $ownerGoLiveHandoffRollbackCommandCount -ge 4 `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequencePresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversPublicRpcRender" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversSystemdInstallPlan" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversBackupRestore" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversBridgeRelayer" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversTesterPacket" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversCutoverAudit" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCommandsPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversLocalStop" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversBridgeEmergencyStop" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "broadcasts" -Default $true) -eq $false)
+Add-ArchitectureItem -Items $items -Id "owner-go-live-launch-boundary" -Layer "Deployment/governance" `
+    -Requirement "Owner go-live handoff sequences owner inputs, public RPC render, service install, live monitoring, public RPC canaries, backup restore proof, bridge relayer pilot, external testers, final audits, and rollback commands as one no-secret launch-control boundary." `
+    -Status $(if ($ownerGoLiveHandoffSafe) { "passed" } else { "failed" }) `
+    -Evidence "handoffStatus=$ownerGoLiveHandoffStatus, stages=$ownerGoLiveHandoffStageCount, launchSteps=$ownerGoLiveHandoffLaunchSequenceCount, launchCommands=$ownerGoLiveHandoffLaunchSequenceCommandCount, rollbackCommands=$ownerGoLiveHandoffRollbackCommandCount, failedChecks=$($ownerGoLiveHandoffFailedChecks.Count), secretFindings=$($ownerGoLiveHandoffSecretFindings.Count)" `
+    -Files @("infra/scripts/flowchain-owner-go-live-handoff.ps1", "docs/agent-runs/live-product-infra-rpc/OWNER_GO_LIVE_HANDOFF.md") `
+    -Commands @("npm run flowchain:owner:go-live-handoff") `
+    -Blockers @($missingOwnerInputs)
+
 $ownerInputs = $reports.ownerInputs
 $ownerInputsValidation = $reports.ownerInputsValidation
 $ownerInputFiles = @(
@@ -1806,6 +1844,12 @@ $dataFlows = @(
         latestEvidence = $reportPaths.ownerSignupChecklist
     },
     [ordered]@{
+        name = "owner-go-live-launch"
+        path = @("ignored owner inputs", "public RPC render", "systemd service plan", "live monitor", "public canary", "backup restore proof", "bridge relayer pilot", "external tester packet", "completion/truth/no-secret gates", "rollback commands")
+        latestEvidence = $reportPaths.ownerGoLiveHandoff
+        blockedBy = @("FLOWCHAIN_RPC_PUBLIC_URL", "FLOWCHAIN_RPC_STATE_BACKUP_PATH", "FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL")
+    },
+    [ordered]@{
         name = "base8453-bridge-credit"
         path = @("Base 8453 lockbox event", "staged scan cursor", "read-only bridge observer", "deposit validation", "bridge credit handoff", "runtime block inclusion", "safe cursor commit", "wallet spend path")
         latestEvidence = $reportPaths.bridgeRelayerOnce
@@ -1831,6 +1875,7 @@ $objectiveDeliverables = @(
     "Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.",
     "Owner signup checklist maps the external services and local setup values needed for public operation without requesting secrets.",
     "The owner-operated public deployment contract has pre-exposure and rollback commands and cannot become shareable until all public gates pass.",
+    "The owner go-live handoff gives the operator one ordered launch sequence with expected statuses, stop-on-failure gates, rollback commands, and final release audits.",
     "Every missing production edge fails closed on exact owner input names, with no secrets, env values, or live broadcasts."
 )
 

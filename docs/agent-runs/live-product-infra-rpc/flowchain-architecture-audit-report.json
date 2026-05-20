@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-20T22:44:19.1829755Z",
+    "generatedAt":  "2026-05-20T23:07:10.7768321Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -15,13 +15,14 @@
                                   "Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.",
                                   "Owner signup checklist maps the external services and local setup values needed for public operation without requesting secrets.",
                                   "The owner-operated public deployment contract has pre-exposure and rollback commands and cannot become shareable until all public gates pass.",
+                                  "The owner go-live handoff gives the operator one ordered launch sequence with expected statuses, stop-on-failure gates, rollback commands, and final release audits.",
                                   "Every missing production edge fails closed on exact owner input names, with no secrets, env values, or live broadcasts."
                               ],
     "itemCounts":  {
-                       "passed":  22,
+                       "passed":  23,
                        "blocked":  7,
                        "failed":  0,
-                       "total":  29
+                       "total":  30
                    },
     "items":  [
                   {
@@ -29,7 +30,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=107102, finalizedHeight=107102",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=107268, finalizedHeight=107268",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -67,7 +68,7 @@
                       "layer":  "Operations",
                       "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, backup restore and owner-path telemetry, service-install validation telemetry, bridge relayer-loop validation telemetry, bridge reconciliation telemetry, bridge release-evidence validation telemetry, external tester client validation telemetry, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=40, alertCoveredFindings=42, relayerLoopAlertCoverage=True, bridgeReconciliationAlert=True, secondComputerAlert=True, serviceInstallAlertCoverage=True, devPackAlert=True, publicRpcRollbackAlert=True, backupRestoreAlert=True, backupOwnerPathAlert=True, bridgeDeployControlAlert=True, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=265, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, publicRpcRollbackMetrics=True, backupRestoreMetrics=True, backupOwnerPathMetrics=True, bridgeDeployControlMetrics=True, supervisorNodeRecoveryMetrics=True, serviceInstallValidationMetrics=True, bridgeRelayerLoopValidationMetrics=True, bridgeReconciliationMetrics=True, bridgeReleaseEvidenceMetrics=True, externalTesterClientMetrics=True, secondComputerMetrics=True, devPackMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=33, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=20, incidentFailed=0",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=40, alertCoveredFindings=42, relayerLoopAlertCoverage=True, bridgeReconciliationAlert=True, secondComputerAlert=True, serviceInstallAlertCoverage=True, devPackAlert=True, publicRpcRollbackAlert=True, backupRestoreAlert=True, backupOwnerPathAlert=True, bridgeDeployControlAlert=True, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=270, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, publicRpcRollbackMetrics=True, backupRestoreMetrics=True, backupOwnerPathMetrics=True, bridgeDeployControlMetrics=True, supervisorNodeRecoveryMetrics=True, serviceInstallValidationMetrics=True, bridgeRelayerLoopValidationMetrics=True, bridgeReconciliationMetrics=True, bridgeReleaseEvidenceMetrics=True, externalTesterClientMetrics=True, secondComputerMetrics=True, devPackMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=33, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=20, incidentFailed=0",
                       "files":  [
                                     "infra/scripts/flowchain-service-monitor.ps1",
                                     "infra/scripts/flowchain-service-supervisor.ps1",
@@ -449,6 +450,36 @@
                                 ],
                       "commands":  [
                                        "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+                                   ],
+                      "blockers":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                   ]
+                  },
+                  {
+                      "id":  "owner-go-live-launch-boundary",
+                      "layer":  "Deployment/governance",
+                      "requirement":  "Owner go-live handoff sequences owner inputs, public RPC render, service install, live monitoring, public RPC canaries, backup restore proof, bridge relayer pilot, external testers, final audits, and rollback commands as one no-secret launch-control boundary.",
+                      "status":  "passed",
+                      "evidence":  "handoffStatus=passed, stages=8, launchSteps=9, launchCommands=36, rollbackCommands=7, failedChecks=0, secretFindings=0",
+                      "files":  [
+                                    "infra/scripts/flowchain-owner-go-live-handoff.ps1",
+                                    "docs/agent-runs/live-product-infra-rpc/OWNER_GO_LIVE_HANDOFF.md"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:owner:go-live-handoff"
                                    ],
                       "blockers":  [
                                        "FLOWCHAIN_PILOT_OPERATOR_ACK",
@@ -882,6 +913,28 @@
                           "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-signup-checklist-report.json"
                       },
                       {
+                          "name":  "owner-go-live-launch",
+                          "path":  [
+                                       "ignored owner inputs",
+                                       "public RPC render",
+                                       "systemd service plan",
+                                       "live monitor",
+                                       "public canary",
+                                       "backup restore proof",
+                                       "bridge relayer pilot",
+                                       "external tester packet",
+                                       "completion/truth/no-secret gates",
+                                       "rollback commands"
+                                   ],
+                          "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-go-live-handoff-report.json",
+                          "blockedBy":  [
+                                            "FLOWCHAIN_RPC_PUBLIC_URL",
+                                            "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                            "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                            "FLOWCHAIN_BASE8453_RPC_URL"
+                                        ]
+                      },
+                      {
                           "name":  "base8453-bridge-credit",
                           "path":  [
                                        "Base 8453 lockbox event",
@@ -1005,6 +1058,7 @@
                         "baseTxDiagnostic":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\live-l1-bridge-e2e\\base-tx-diagnostic.json",
                         "ownerOnboarding":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-onboarding-report.json",
                         "ownerSignupChecklist":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-signup-checklist-report.json",
+                        "ownerGoLiveHandoff":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-go-live-handoff-report.json",
                         "ownerInputs":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-report.json",
                         "ownerEnvReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-report.json",
                         "ownerEnvReadinessValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-validation-report.json",
@@ -1094,7 +1148,7 @@
                          },
     "opsMetricsCoverage":  {
                                "exportStatus":  "passed",
-                               "metricCount":  265,
+                               "metricCount":  270,
                                "exportFailedCheckCount":  0,
                                "installStatus":  "passed",
                                "installFailedCheckCount":  0,

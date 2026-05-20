@@ -201,6 +201,147 @@ Add-HandoffUniqueMany -Target $nextCommands -Values @(
     "npm run flowchain:no-secret:scan"
 )
 
+$launchSequence = @(
+    [ordered]@{
+        id = "owner-inputs"
+        phase = "owner-inputs"
+        title = "Validate ignored owner inputs"
+        expectedStatuses = @("passed")
+        ownerInputBlockedAllowedBeforeInputs = $true
+        stopOnFailure = $true
+        commands = @(
+            "npm run flowchain:owner-env:readiness -- -AllowBlocked",
+            "npm run flowchain:owner-inputs -- -AllowBlocked",
+            "npm run flowchain:owner-inputs:validate"
+        )
+    },
+    [ordered]@{
+        id = "render-public-rpc"
+        phase = "public-rpc"
+        title = "Render public RPC edge artifacts"
+        expectedStatuses = @("passed")
+        ownerInputBlockedAllowedBeforeInputs = $true
+        stopOnFailure = $true
+        commands = @(
+            "npm run flowchain:public-rpc:deployment-bundle",
+            "npm run flowchain:public-rpc:deployment:automation",
+            "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-automation.ps1 -Action Render -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -OwnerEnvFile <FLOWCHAIN_OWNER_ENV_FILE> -TlsCertificatePath <PATH_TO_TLS_CERTIFICATE> -TlsCertificateKeyPath <PATH_TO_TLS_CERTIFICATE_KEY> -NginxExe <FLOWCHAIN_NGINX_EXE>"
+        )
+    },
+    [ordered]@{
+        id = "service-install"
+        phase = "service"
+        title = "Plan reboot-persistent services"
+        expectedStatuses = @("passed")
+        ownerInputBlockedAllowedBeforeInputs = $false
+        stopOnFailure = $true
+        commands = @(
+            "npm run flowchain:service:install:systemd:validate",
+            "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>",
+            "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop"
+        )
+    },
+    [ordered]@{
+        id = "local-service"
+        phase = "service"
+        title = "Prove live service health"
+        expectedStatuses = @("passed")
+        ownerInputBlockedAllowedBeforeInputs = $false
+        stopOnFailure = $true
+        commands = @(
+            "npm run flowchain:service:status",
+            "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30"
+        )
+    },
+    [ordered]@{
+        id = "public-rpc"
+        phase = "public-rpc"
+        title = "Validate public RPC exposure"
+        expectedStatuses = @("passed")
+        ownerInputBlockedAllowedBeforeInputs = $true
+        stopOnFailure = $true
+        commands = @(
+            "npm run flowchain:public-rpc:check -- -AllowBlocked",
+            "npm run flowchain:public-rpc:validate",
+            "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
+            "npm run flowchain:public-rpc:abuse-test"
+        )
+    },
+    [ordered]@{
+        id = "backup"
+        phase = "backup"
+        title = "Prove backup and restore"
+        expectedStatuses = @("passed")
+        ownerInputBlockedAllowedBeforeInputs = $true
+        stopOnFailure = $true
+        commands = @(
+            "npm run flowchain:backup:check -- -AllowBlocked",
+            "npm run flowchain:backup:restore:validate",
+            "npm run flowchain:backup:owner-path:dry-run"
+        )
+    },
+    [ordered]@{
+        id = "bridge"
+        phase = "bridge"
+        title = "Harden bridge relayer pilot"
+        expectedStatuses = @("passed")
+        ownerInputBlockedAllowedBeforeInputs = $true
+        stopOnFailure = $true
+        commands = @(
+            "npm run flowchain:bridge:live:check -- -AllowBlocked",
+            "npm run flowchain:bridge:infra:check -- -AllowBlocked",
+            "npm run flowchain:bridge:relayer:guardrail:validate",
+            "npm run flowchain:bridge:relayer:loop:validate",
+            "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+            "npm run flowchain:bridge:reconciliation"
+        )
+    },
+    [ordered]@{
+        id = "testers"
+        phase = "testers"
+        title = "Validate external tester launch"
+        expectedStatuses = @("passed")
+        ownerInputBlockedAllowedBeforeInputs = $true
+        stopOnFailure = $true
+        commands = @(
+            "npm run flowchain:tester:token:setup",
+            "npm run flowchain:tester:gateway:e2e",
+            "npm run flowchain:wallet:live-tester:e2e",
+            "npm run flowchain:external-tester:packet -- -AllowBlocked",
+            "npm run flowchain:external-tester:packet:validate",
+            "npm run flowchain:external-tester:client:validate",
+            "npm run flowchain:tester:evidence:validate"
+        )
+    },
+    [ordered]@{
+        id = "final-audit"
+        phase = "final-audit"
+        title = "Run release gates"
+        expectedStatuses = @("passed")
+        ownerInputBlockedAllowedBeforeInputs = $true
+        stopOnFailure = $true
+        commands = @(
+            "npm run flowchain:public-deployment:contract -- -AllowBlocked",
+            "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
+            "npm run flowchain:completion:audit -- -AllowBlocked",
+            "npm run flowchain:truth-table -- -AllowBlocked",
+            "npm run flowchain:no-secret:scan"
+        )
+    }
+)
+$rollbackCommands = @(
+    "npm run flowchain:ops:snapshot -- -AllowBlocked",
+    "npm run flowchain:service:status",
+    "npm run flowchain:service:restart -- -LiveProfile",
+    "npm run flowchain:service:stop",
+    "npm run flowchain:emergency:stop-local",
+    "npm run flowchain:bridge:emergency-stop",
+    "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+)
+$launchSequenceCommands = @($launchSequence | ForEach-Object { @($_.commands) })
+$launchSequenceCommandText = @($launchSequenceCommands) -join "`n"
+$rollbackCommandText = @($rollbackCommands) -join "`n"
+
 $coveredRequiredEnvNames = New-Object System.Collections.ArrayList
 foreach ($stage in @($stages)) {
     Add-HandoffUniqueMany -Target $coveredRequiredEnvNames -Values @($stage.requiredEnvNames | Where-Object { $_ -in $requiredOwnerEnvNames })
@@ -245,6 +386,26 @@ $checks = [ordered]@{
     knownOwnerInputBlockersOnly = $knownOwnerInputOnly
     nextOwnerInputsPresentWhenBlocked = if ($releaseReady) { $true } else { @($nextOwnerInputNames).Count -gt 0 }
     nextCommandsPresent = @($nextCommands).Count -ge 6
+    launchSequencePresent = @($launchSequence).Count -ge 8
+    launchSequenceEveryStepHasCommands = @($launchSequence | Where-Object { @($_.commands).Count -eq 0 }).Count -eq 0
+    launchSequenceEveryStepHasExpectedStatuses = @($launchSequence | Where-Object { @($_.expectedStatuses).Count -eq 0 }).Count -eq 0
+    launchSequenceEveryStepStopsOnFailure = @($launchSequence | Where-Object { $_.stopOnFailure -ne $true }).Count -eq 0
+    launchSequenceCoversOwnerEnvReadiness = $launchSequenceCommandText.Contains("flowchain:owner-env:readiness")
+    launchSequenceCoversPublicRpcRender = $launchSequenceCommandText.Contains("flowchain-public-rpc-deployment-automation.ps1 -Action Render")
+    launchSequenceCoversSystemdInstallPlan = $launchSequenceCommandText.Contains("flowchain:service:install:systemd -- -Action Plan")
+    launchSequenceCoversServiceMonitor = $launchSequenceCommandText.Contains("flowchain:service:monitor")
+    launchSequenceCoversPublicRpcCanary = $launchSequenceCommandText.Contains("flowchain:public-rpc:synthetic-canary")
+    launchSequenceCoversBackupRestore = $launchSequenceCommandText.Contains("flowchain:backup:restore:validate")
+    launchSequenceCoversBridgeRelayer = $launchSequenceCommandText.Contains("flowchain:bridge:relayer:once")
+    launchSequenceCoversTesterPacket = $launchSequenceCommandText.Contains("flowchain:external-tester:packet")
+    launchSequenceCoversCutoverAudit = $launchSequenceCommandText.Contains("flowchain:live:cutover:rehearsal") -and $launchSequenceCommandText.Contains("flowchain:completion:audit")
+    launchSequenceCoversTruthAndNoSecret = $launchSequenceCommandText.Contains("flowchain:truth-table") -and $launchSequenceCommandText.Contains("flowchain:no-secret:scan")
+    launchSequenceCommandsAvoidInlineEnvAssignment = @($launchSequenceCommands | Where-Object { "$_" -match '(^|\s)(\$env:)?[A-Z][A-Z0-9_]+\s*=' }).Count -eq 0
+    launchSequenceCommandsAvoidUrls = @($launchSequenceCommands | Where-Object { "$_" -match 'https?://' }).Count -eq 0
+    rollbackCommandsPresent = @($rollbackCommands).Count -ge 4
+    rollbackCoversLocalStop = $rollbackCommandText.Contains("flowchain:service:stop") -and $rollbackCommandText.Contains("flowchain:emergency:stop-local")
+    rollbackCoversBridgeEmergencyStop = $rollbackCommandText.Contains("flowchain:bridge:emergency-stop")
+    rollbackCoversOpsSnapshot = $rollbackCommandText.Contains("flowchain:ops:snapshot")
     releaseClaimBlockedUntilTruthPassed = $releaseReady -or (-not $truthTableClear)
     packetShareBlockedUntilReady = $packetShareable -or (-not $releaseReady)
     envValuesPrintedFalse = $true
@@ -278,9 +439,14 @@ $report = [ordered]@{
     readyStageCount = @($stages | Where-Object { $_.ready -eq $true }).Count
     blockedStageCount = @($nonReadyStages).Count
     nextCommandCount = @($nextCommands).Count
+    launchSequenceCount = @($launchSequence).Count
+    launchSequenceCommandCount = @($launchSequenceCommands).Count
+    rollbackCommandCount = @($rollbackCommands).Count
     mustNotSendCount = @($mustNotSend).Count
     externalResourceCount = @($externalResources).Count
     stages = @($stages)
+    launchSequence = @($launchSequence)
+    rollbackCommands = @($rollbackCommands)
     reportStatuses = @($reportStatuses)
     externalResources = @($externalResources)
     mustNotSend = @($mustNotSend)
@@ -327,6 +493,22 @@ $markdownLines.Add("| --- | --- | --- | --- |")
 foreach ($stage in @($stages)) {
     $blocking = if (@($stage.blockingEnvNames).Count -gt 0) { (@($stage.blockingEnvNames) -join ", ") } else { "none" }
     $markdownLines.Add("| $($stage.title.Replace('|','/')) | $($stage.status) | $blocking | $($stage.nextCommand.Replace('|','/')) |")
+}
+$markdownLines.Add("")
+$markdownLines.Add("## Ordered Launch Sequence")
+$markdownLines.Add("")
+$markdownLines.Add("| Step | Expected status | Stop on failure | Commands |")
+$markdownLines.Add("| --- | --- | --- | --- |")
+foreach ($step in @($launchSequence)) {
+    $commands = @($step.commands) -join "<br>"
+    $expected = @($step.expectedStatuses) -join ", "
+    $markdownLines.Add("| $($step.title.Replace('|','/')) | $expected | $($step.stopOnFailure) | $($commands.Replace('|','/')) |")
+}
+$markdownLines.Add("")
+$markdownLines.Add("## Rollback Commands")
+$markdownLines.Add("")
+foreach ($command in @($rollbackCommands)) {
+    $markdownLines.Add("- $command")
 }
 $markdownLines.Add("")
 $markdownLines.Add("## External Resources")

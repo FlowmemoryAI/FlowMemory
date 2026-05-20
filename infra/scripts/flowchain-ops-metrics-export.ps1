@@ -318,11 +318,32 @@ $ownerActivationPlanReady = (Get-MetricsStatus -Report $ownerActivationPlan) -eq
 $ownerGoLiveHandoffFailedChecks = @((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "failedChecks" -Default @()))
 $ownerGoLiveHandoffSecretFindings = @((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "secretMarkerFindings" -Default @()))
 $ownerGoLiveHandoffNextInputs = @((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "nextOwnerInputNames" -Default @()))
+$ownerGoLiveHandoffChecks = Get-MetricsProp -Object $ownerGoLiveHandoff -Name "checks"
 $ownerGoLiveHandoffStageCount = [int](Get-MetricsProp -Object $ownerGoLiveHandoff -Name "stageCount" -Default 0)
+$ownerGoLiveHandoffLaunchSequenceCount = [int](Get-MetricsProp -Object $ownerGoLiveHandoff -Name "launchSequenceCount" -Default 0)
+$ownerGoLiveHandoffLaunchSequenceCommandCount = [int](Get-MetricsProp -Object $ownerGoLiveHandoff -Name "launchSequenceCommandCount" -Default 0)
+$ownerGoLiveHandoffRollbackCommandCount = [int](Get-MetricsProp -Object $ownerGoLiveHandoff -Name "rollbackCommandCount" -Default 0)
+$ownerGoLiveHandoffLaunchSequenceReady = ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequencePresent" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepHasCommands" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepHasExpectedStatuses" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepStopsOnFailure" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversCutoverAudit" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversTruthAndNoSecret" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCommandsAvoidInlineEnvAssignment" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCommandsAvoidUrls" -Default $false) -eq $true)
+$ownerGoLiveHandoffRollbackReady = ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCommandsPresent" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversLocalStop" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversBridgeEmergencyStop" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversOpsSnapshot" -Default $false) -eq $true)
 $ownerGoLiveHandoffReady = (Get-MetricsStatus -Report $ownerGoLiveHandoff) -eq "passed" `
     -and $ownerGoLiveHandoffFailedChecks.Count -eq 0 `
     -and $ownerGoLiveHandoffSecretFindings.Count -eq 0 `
     -and $ownerGoLiveHandoffStageCount -ge 8 `
+    -and $ownerGoLiveHandoffLaunchSequenceCount -ge 8 `
+    -and $ownerGoLiveHandoffLaunchSequenceCommandCount -ge 20 `
+    -and $ownerGoLiveHandoffRollbackCommandCount -ge 4 `
+    -and $ownerGoLiveHandoffLaunchSequenceReady `
+    -and $ownerGoLiveHandoffRollbackReady `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "broadcasts" -Default $true) -eq $false)
@@ -746,6 +767,11 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_release_ready" 
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_stages_total" -Help "Owner go-live handoff stage count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveStageCount" -Default $ownerGoLiveHandoffStageCount))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_next_inputs_total" -Help "Owner input names still listed as needed by the go-live handoff." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveNextInputCount" -Default $ownerGoLiveHandoffNextInputs.Count))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_failed_checks" -Help "Failed checks in the owner go-live handoff report." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveFailedChecks" -Default $ownerGoLiveHandoffFailedChecks.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_sequence_ready" -Help "One when the owner go-live launch sequence has commands, expected statuses, stop-on-failure gates, final audits, and no unsafe command text." -Value (ConvertTo-MetricBool -Value $ownerGoLiveHandoffLaunchSequenceReady)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_sequence_steps" -Help "Ordered owner go-live launch sequence step count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveLaunchSequenceCount" -Default $ownerGoLiveHandoffLaunchSequenceCount))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_sequence_commands" -Help "Ordered owner go-live launch sequence command count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveLaunchSequenceCommandCount" -Default $ownerGoLiveHandoffLaunchSequenceCommandCount))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_rollback_ready" -Help "One when owner go-live rollback commands cover ops snapshot, local service stop, and bridge emergency stop." -Value (ConvertTo-MetricBool -Value $ownerGoLiveHandoffRollbackReady)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_rollback_commands" -Help "Owner go-live rollback command count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveRollbackCommandCount" -Default $ownerGoLiveHandoffRollbackCommandCount))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_deployment_ready" -Help "One when public deployment contract is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "publicDeployment"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_ready" -Help "One when the live cutover rehearsal is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $liveCutover))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_tester_network_e2e_passed" -Help "One when live cutover rehearsal directly ran the local tester wallet network E2E." -Value (ConvertTo-MetricBool -Value (Get-MetricsPathProp -Object $liveCutover -Path "ready.testerNetworkE2ePassed" -Default $false))
@@ -1051,6 +1077,11 @@ $requiredMetricNames = @(
     "flowchain_owner_go_live_stages_total",
     "flowchain_owner_go_live_next_inputs_total",
     "flowchain_owner_go_live_failed_checks",
+    "flowchain_owner_go_live_launch_sequence_ready",
+    "flowchain_owner_go_live_launch_sequence_steps",
+    "flowchain_owner_go_live_launch_sequence_commands",
+    "flowchain_owner_go_live_rollback_ready",
+    "flowchain_owner_go_live_rollback_commands",
     "flowchain_public_deployment_ready",
     "flowchain_live_cutover_ready",
     "flowchain_live_cutover_tester_network_e2e_passed",
@@ -1368,7 +1399,12 @@ $checks = [ordered]@{
         "flowchain_owner_go_live_release_ready",
         "flowchain_owner_go_live_stages_total",
         "flowchain_owner_go_live_next_inputs_total",
-        "flowchain_owner_go_live_failed_checks"
+        "flowchain_owner_go_live_failed_checks",
+        "flowchain_owner_go_live_launch_sequence_ready",
+        "flowchain_owner_go_live_launch_sequence_steps",
+        "flowchain_owner_go_live_launch_sequence_commands",
+        "flowchain_owner_go_live_rollback_ready",
+        "flowchain_owner_go_live_rollback_commands"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     liveCutoverMetricsPresent = @(
         "flowchain_live_cutover_ready",

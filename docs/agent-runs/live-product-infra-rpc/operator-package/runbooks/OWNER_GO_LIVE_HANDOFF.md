@@ -1,6 +1,6 @@
 # FlowChain Owner Go-Live Handoff
 
-Generated: 2026-05-20T15:14:43.4459247Z
+Generated: 2026-05-20T23:05:47.5233940Z
 Status: passed
 Release ready: False
 
@@ -35,6 +35,30 @@ This handoff records names, statuses, resource boundaries, and validation comman
 | Configure capped Base 8453 bridge pilot observation | needs-owner-input | FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:bridge:live:check -- -AllowBlocked |
 | Release the external tester packet only after public gates pass | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:wallet:live-tester:e2e |
 | Run final no-secret production audit before public use | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:live:cutover:rehearsal -- -AllowBlocked |
+
+## Ordered Launch Sequence
+
+| Step | Expected status | Stop on failure | Commands |
+| --- | --- | --- | --- |
+| Validate ignored owner inputs | passed | True | npm run flowchain:owner-env:readiness -- -AllowBlocked<br>npm run flowchain:owner-inputs -- -AllowBlocked<br>npm run flowchain:owner-inputs:validate |
+| Render public RPC edge artifacts | passed | True | npm run flowchain:public-rpc:deployment-bundle<br>npm run flowchain:public-rpc:deployment:automation<br>powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-automation.ps1 -Action Render -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -OwnerEnvFile <FLOWCHAIN_OWNER_ENV_FILE> -TlsCertificatePath <PATH_TO_TLS_CERTIFICATE> -TlsCertificateKeyPath <PATH_TO_TLS_CERTIFICATE_KEY> -NginxExe <FLOWCHAIN_NGINX_EXE> |
+| Plan reboot-persistent services | passed | True | npm run flowchain:service:install:systemd:validate<br>npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR><br>npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop |
+| Prove live service health | passed | True | npm run flowchain:service:status<br>npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30 |
+| Validate public RPC exposure | passed | True | npm run flowchain:public-rpc:check -- -AllowBlocked<br>npm run flowchain:public-rpc:validate<br>npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked<br>npm run flowchain:public-rpc:abuse-test |
+| Prove backup and restore | passed | True | npm run flowchain:backup:check -- -AllowBlocked<br>npm run flowchain:backup:restore:validate<br>npm run flowchain:backup:owner-path:dry-run |
+| Harden bridge relayer pilot | passed | True | npm run flowchain:bridge:live:check -- -AllowBlocked<br>npm run flowchain:bridge:infra:check -- -AllowBlocked<br>npm run flowchain:bridge:relayer:guardrail:validate<br>npm run flowchain:bridge:relayer:loop:validate<br>npm run flowchain:bridge:relayer:once -- -AllowBlocked<br>npm run flowchain:bridge:reconciliation |
+| Validate external tester launch | passed | True | npm run flowchain:tester:token:setup<br>npm run flowchain:tester:gateway:e2e<br>npm run flowchain:wallet:live-tester:e2e<br>npm run flowchain:external-tester:packet -- -AllowBlocked<br>npm run flowchain:external-tester:packet:validate<br>npm run flowchain:external-tester:client:validate<br>npm run flowchain:tester:evidence:validate |
+| Run release gates | passed | True | npm run flowchain:public-deployment:contract -- -AllowBlocked<br>npm run flowchain:live:cutover:rehearsal -- -AllowBlocked<br>npm run flowchain:completion:audit -- -AllowBlocked<br>npm run flowchain:truth-table -- -AllowBlocked<br>npm run flowchain:no-secret:scan |
+
+## Rollback Commands
+
+- npm run flowchain:ops:snapshot -- -AllowBlocked
+- npm run flowchain:service:status
+- npm run flowchain:service:restart -- -LiveProfile
+- npm run flowchain:service:stop
+- npm run flowchain:emergency:stop-local
+- npm run flowchain:bridge:emergency-stop
+- npm run flowchain:public-deployment:contract -- -AllowBlocked
 
 ## External Resources
 
@@ -93,6 +117,7 @@ This handoff records names, statuses, resource boundaries, and validation comman
 - npm run flowchain:operator:package
 - npm run flowchain:operator:package:verify
 - npm run flowchain:public-rpc:validate
+- npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked
 - npm run flowchain:public-rpc:abuse-test
 - npm run flowchain:tester:gateway:e2e
 - npm run flowchain:dashboard:ui:readiness
@@ -124,6 +149,7 @@ This handoff records names, statuses, resource boundaries, and validation comman
 - npm run flowchain:bridge:diagnose:tx
 - npm run flowchain:tester:readiness
 - npm run flowchain:external-tester:packet
+- npm run flowchain:external-tester:client:validate
 - npm run flowchain:tester:evidence:validate
 - npm run flowchain:public-deployment:contract
 - npm run flowchain:architecture:audit

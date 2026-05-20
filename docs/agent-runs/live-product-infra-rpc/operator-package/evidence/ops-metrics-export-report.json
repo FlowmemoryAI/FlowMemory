@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics_export_report.v0",
-    "generatedAt":  "2026-05-20T22:43:05.9013232Z",
+    "generatedAt":  "2026-05-20T23:06:59.8270783Z",
     "status":  "passed",
     "refresh":  {
                     "performed":  false,
@@ -47,7 +47,7 @@
                     },
     "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.json",
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
-    "metricCount":  265,
+    "metricCount":  270,
     "requiredMetricNames":  [
                                 "flowchain_latest_height",
                                 "flowchain_finalized_height",
@@ -285,6 +285,11 @@
                                 "flowchain_owner_go_live_stages_total",
                                 "flowchain_owner_go_live_next_inputs_total",
                                 "flowchain_owner_go_live_failed_checks",
+                                "flowchain_owner_go_live_launch_sequence_ready",
+                                "flowchain_owner_go_live_launch_sequence_steps",
+                                "flowchain_owner_go_live_launch_sequence_commands",
+                                "flowchain_owner_go_live_rollback_ready",
+                                "flowchain_owner_go_live_rollback_commands",
                                 "flowchain_public_deployment_ready",
                                 "flowchain_live_cutover_ready",
                                 "flowchain_live_cutover_tester_network_e2e_passed",

@@ -703,6 +703,9 @@ $definitions = @(
             stageCount = 8
             nextCommandCount = 6
             mustNotSendCount = 6
+            launchSequenceCount = 8
+            launchSequenceCommandCount = 20
+            rollbackCommandCount = 4
         }
         requiredChecks = @(
             "packageScriptPresent",
@@ -721,6 +724,26 @@ $definitions = @(
             "knownOwnerInputBlockersOnly",
             "nextOwnerInputsPresentWhenBlocked",
             "nextCommandsPresent",
+            "launchSequencePresent",
+            "launchSequenceEveryStepHasCommands",
+            "launchSequenceEveryStepHasExpectedStatuses",
+            "launchSequenceEveryStepStopsOnFailure",
+            "launchSequenceCoversOwnerEnvReadiness",
+            "launchSequenceCoversPublicRpcRender",
+            "launchSequenceCoversSystemdInstallPlan",
+            "launchSequenceCoversServiceMonitor",
+            "launchSequenceCoversPublicRpcCanary",
+            "launchSequenceCoversBackupRestore",
+            "launchSequenceCoversBridgeRelayer",
+            "launchSequenceCoversTesterPacket",
+            "launchSequenceCoversCutoverAudit",
+            "launchSequenceCoversTruthAndNoSecret",
+            "launchSequenceCommandsAvoidInlineEnvAssignment",
+            "launchSequenceCommandsAvoidUrls",
+            "rollbackCommandsPresent",
+            "rollbackCoversLocalStop",
+            "rollbackCoversBridgeEmergencyStop",
+            "rollbackCoversOpsSnapshot",
             "releaseClaimBlockedUntilTruthPassed",
             "packetShareBlockedUntilReady",
             "envValuesPrintedFalse",
@@ -2143,6 +2166,7 @@ $definitions = @(
             "secondComputerRuleCoversBundleVerifyNoSecret",
             "publicTesterGatewayRuleCoversNoSecretNoBroadcast",
             "ownerGoLiveHandoffRuleCoversReleaseReady",
+            "ownerGoLiveHandoffRuleCoversLaunchAndRollback",
             "findingsWithoutCommandsEmpty",
             "notificationPlanStoresNoSecrets",
             "notificationPlanNoNetworkDelivery",
