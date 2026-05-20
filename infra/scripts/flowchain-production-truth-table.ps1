@@ -163,6 +163,27 @@ $definitions = @(
             "afterNodeRecoveryHeightNumeric",
             "afterNodeRecoveryLiveProfile",
             "afterNodeRecoveryMaxBlocksUnbounded",
+            "restartWithRelayerLoopCommandPassed",
+            "beforeRelayerCrashStatusCommandPassed",
+            "beforeRelayerCrashStatusPassed",
+            "beforeRelayerCrashPidRecorded",
+            "beforeRelayerCrashRunning",
+            "beforeRelayerCrashCommandLineMatched",
+            "beforeRelayerCrashReportHealthy",
+            "relayerCrashStatusCommandPassed",
+            "relayerCrashDetected",
+            "supervisorRelayerRecoveryCommandPassed",
+            "relayerRestartAttemptsExactlyOne",
+            "afterRelayerRecoveryStatusCommandPassed",
+            "afterRelayerRecoveryStatusPassed",
+            "afterRelayerRecoveryNodeRunning",
+            "afterRelayerRecoveryControlPlaneRunning",
+            "afterRelayerRecoveryLiveProfile",
+            "afterRelayerRecoveryMaxBlocksUnbounded",
+            "afterRelayerRecoveryLoopRunning",
+            "afterRelayerRecoveryLoopPidRecorded",
+            "afterRelayerRecoveryLoopCommandLineMatched",
+            "afterRelayerRecoveryLoopReportHealthy",
             "childLogPathsInsideRepo",
             "secretMarkerFindingsEmpty",
             "envValuesPrintedFalse",
@@ -172,6 +193,7 @@ $definitions = @(
         requiredMinimums = [ordered]@{
             restartAttempts = 1
             "nodeRecovery.restartAttempts" = 1
+            "relayerLoopRecovery.restartAttempts" = 1
         }
         requiredEmptyArrays = @(
             "failedChecks",
@@ -191,6 +213,21 @@ $definitions = @(
             "nodeRecovery.afterRecovery.controlPlaneRunning" = $true
             "nodeRecovery.afterRecovery.liveProfile" = $true
             "nodeRecovery.afterRecovery.maxBlocks" = 0
+            "relayerLoopRecovery.beforeCrash.status" = "passed"
+            "relayerLoopRecovery.beforeCrash.loopStatus" = "running"
+            "relayerLoopRecovery.beforeCrash.commandLineMatched" = $true
+            "relayerLoopRecovery.beforeCrash.reportHealthy" = $true
+            "relayerLoopRecovery.afterCrash.status" = "passed"
+            "relayerLoopRecovery.afterCrash.loopStatus" = "stopped"
+            "relayerLoopRecovery.afterCrash.detected" = $true
+            "relayerLoopRecovery.afterRecovery.status" = "passed"
+            "relayerLoopRecovery.afterRecovery.nodeRunning" = $true
+            "relayerLoopRecovery.afterRecovery.controlPlaneRunning" = $true
+            "relayerLoopRecovery.afterRecovery.liveProfile" = $true
+            "relayerLoopRecovery.afterRecovery.maxBlocks" = 0
+            "relayerLoopRecovery.afterRecovery.loopStatus" = "running"
+            "relayerLoopRecovery.afterRecovery.loopCommandLineMatched" = $true
+            "relayerLoopRecovery.afterRecovery.reportHealthy" = $true
             "envValuesPrinted" = $false
             "noSecrets" = $true
             "broadcasts" = $false
