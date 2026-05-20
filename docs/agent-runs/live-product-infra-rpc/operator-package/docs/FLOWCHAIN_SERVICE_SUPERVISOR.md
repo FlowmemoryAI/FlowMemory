@@ -26,9 +26,12 @@ npm run flowchain:service:supervisor:validate
 
 The validation command starts an isolated service instance under
 `devnet/local/service-supervisor-validation/`, kills only that instance's
-control-plane process, runs the supervisor once, verifies recovery, then repeats
-the proof with `-StartBridgeRelayerLoop` by killing only that isolated relayer
-loop and proving supervisor recovery. It does not stop the live owner service.
+control-plane process, runs the supervisor once, verifies recovery, then kills
+only the isolated block-producing node and proves the supervisor restarts it
+under `-LiveProfile` with `MaxBlocks=0` and the control-plane readable again.
+It then repeats the proof with `-StartBridgeRelayerLoop` by killing only that
+isolated relayer loop and proving supervisor recovery. It does not stop the
+live owner service.
 
 ## Install On Windows Owner Host
 
@@ -67,6 +70,9 @@ after the bridge owner inputs and pilot guardrails pass.
 - `service-supervisor-status-report.json`
 - `service-supervisor-restart-report.json`
 - `service-supervisor-validation-report.json`
+- `service-supervisor-validation-node-status-after-crash.json`
+- `service-supervisor-validation-node-status-after-recovery.json`
+- `service-supervisor-validation-node-supervisor-report.json`
 - `service-install-windows-report.json`
 - `service-install-windows-status-report.json`
 - `service-install-windows-uninstall-absent-report.json`
