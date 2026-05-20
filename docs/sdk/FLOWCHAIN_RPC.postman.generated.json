@@ -1,0 +1,150 @@
+{
+  "info": {
+    "name": "FlowChain Local RPC",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Public-safe local FlowChain requests generated from live rpc_discover output. Do not add secrets to this committed collection."
+  },
+  "variable": [
+    {
+      "key": "flowchain_origin",
+      "value": "http://127.0.0.1:8787",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "RPC discovery",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{flowchain_origin}}/rpc/discover",
+          "host": [
+            "{{flowchain_origin}}"
+          ],
+          "path": [
+            "rpc",
+            "discover"
+          ]
+        }
+      }
+    },
+    {
+      "name": "RPC readiness",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{flowchain_origin}}/rpc/readiness",
+          "host": [
+            "{{flowchain_origin}}"
+          ],
+          "path": [
+            "rpc",
+            "readiness"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Chain status",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "content-type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{flowchain_origin}}/rpc",
+          "host": [
+            "{{flowchain_origin}}"
+          ],
+          "path": [
+            "rpc"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": \"chain_status\",\n  \"method\": \"chain_status\",\n  \"params\": {}\n}"
+        }
+      }
+    },
+    {
+      "name": "Latest blocks",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "content-type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{flowchain_origin}}/rpc",
+          "host": [
+            "{{flowchain_origin}}"
+          ],
+          "path": [
+            "rpc"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": \"block_list\",\n  \"method\": \"block_list\",\n  \"params\": {\n    \"limit\": 5\n  }\n}"
+        }
+      }
+    },
+    {
+      "name": "Wallet balances",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "content-type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{flowchain_origin}}/rpc",
+          "host": [
+            "{{flowchain_origin}}"
+          ],
+          "path": [
+            "rpc"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": \"wallet_balance_list\",\n  \"method\": \"wallet_balance_list\",\n  \"params\": {\n    \"limit\": 5\n  }\n}"
+        }
+      }
+    },
+    {
+      "name": "Bridge readiness",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "content-type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{flowchain_origin}}/rpc",
+          "host": [
+            "{{flowchain_origin}}"
+          ],
+          "path": [
+            "rpc"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": \"bridge_live_readiness\",\n  \"method\": \"bridge_live_readiness\",\n  \"params\": {}\n}"
+        }
+      }
+    }
+  ],
+  "event": [],
+  "x-flowchain-method-count": 82
+}

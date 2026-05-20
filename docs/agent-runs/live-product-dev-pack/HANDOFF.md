@@ -12,6 +12,7 @@ Implemented in this slice:
 - SDK and CLI signed transaction envelope submission backed by the crypto-verified `transaction_submit` RPC.
 - Node.js SDK example under `examples/flowchain-node-quickstart.mjs` and browser readiness example under `examples/flowchain-browser-readiness/`.
 - Signed envelope example under `examples/flowchain-signed-envelope.mjs` that creates local wallets in memory, signs a FlowChain product transfer envelope, submits it to local cryptographic intake, and can write a CLI-ready envelope file.
+- Generated OpenAPI, Postman, and cURL artifacts for builders who want direct HTTP examples before adopting the TypeScript SDK.
 - Developer guides for wallet integration, bridge integration, node operations, app building, explorer/indexer use, faucet/tester funds, release compatibility, and troubleshooting.
 - Generated RPC reference from live `rpc_discover`.
 - Developer ecosystem inventory classifying implemented, partial, blocked, and missing surfaces.

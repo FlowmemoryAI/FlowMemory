@@ -151,7 +151,8 @@ npm run flowchain:dev-pack:e2e
 These commands attach to local RPC, verify discovery/readiness, check block
 height, read block/transaction/account/wallet/bridge surfaces, submit a
 runtime-backed local wallet send, run CLI commands with JSON output, verify the
-Node.js and browser examples, and regenerate the RPC reference.
+Node.js and browser examples, and regenerate the RPC reference plus HTTP
+starter artifacts.
 
 Outputs:
 
@@ -160,6 +161,9 @@ Outputs:
 - `docs/agent-runs/live-product-dev-pack/HANDOFF.md`
 - `docs/agent-runs/live-product-dev-pack/INVENTORY.md`
 - `docs/sdk/RPC_REFERENCE.generated.md`
+- `docs/sdk/FLOWCHAIN_RPC.openapi.generated.json`
+- `docs/sdk/FLOWCHAIN_RPC.postman.generated.json`
+- `docs/sdk/FLOWCHAIN_HTTP_EXAMPLES.generated.md`
 
 ## Run The Examples
 

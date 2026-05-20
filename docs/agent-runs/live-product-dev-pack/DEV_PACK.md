@@ -2,11 +2,11 @@
 
 Status: `passed`
 
-Generated at: `2026-05-20T08:45:07.455Z`
-Checks: `35/35`
+Generated at: `2026-05-20T11:25:39.532Z`
+Checks: `38/38`
 Method count: `82`
 Public-ready method count: `0`
-Height: `100136 -> 100137`
+Height: `101490 -> 101491`
 
 ## Remaining Live Inputs
 
@@ -31,3 +31,6 @@ Height: `100136 -> 100137`
 - handoff: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-dev-pack\HANDOFF.md`
 - inventory: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-dev-pack\INVENTORY.md`
 - rpcReference: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\sdk\RPC_REFERENCE.generated.md`
+- openApi: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\sdk\FLOWCHAIN_RPC.openapi.generated.json`
+- postman: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\sdk\FLOWCHAIN_RPC.postman.generated.json`
+- curlExamples: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\sdk\FLOWCHAIN_HTTP_EXAMPLES.generated.md`

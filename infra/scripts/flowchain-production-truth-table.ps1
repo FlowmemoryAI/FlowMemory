@@ -1949,7 +1949,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "live-cutover-rehearsal"
-        requirement = "Live cutover rehearsal runs owner-env, public deployment, local tester wallet network, tester write-token setup, tester packet, completion, truth table, and no-secret gates through one redacted command and blocks only on known owner inputs before external sharing."
+        requirement = "Live cutover rehearsal runs owner-env, public deployment, local tester wallet network, tester write-token setup, tester packet, packet validation, completion, truth table, and no-secret gates through one redacted command and blocks only on known owner inputs before external sharing."
         path = "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json"
         command = "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked"
         productionGate = $true
@@ -1970,6 +1970,7 @@ $definitions = @(
             "testerNetworkE2ePassed",
             "testerWriteTokenSetupPassed",
             "testerPacketShareable",
+            "testerPacketValidationPassed",
             "completionReady",
             "truthTableCompleted",
             "noSecretScanPassed",

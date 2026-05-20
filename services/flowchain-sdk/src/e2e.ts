@@ -67,11 +67,15 @@ function methodEntry(discovery: Record<string, JsonValue>, methodName: string): 
 }
 
 function accountIdFromBalance(row: Record<string, JsonValue>): string | null {
-  return stringValue(row.walletAddress ?? null) ?? stringValue(asRecord(row.balance ?? {}).accountId ?? null);
+  const nestedBalance = asRecord(row.balance ?? {});
+  const source = stringValue(row.source ?? null);
+  const status = stringValue(row.status ?? null);
+  if (source !== "local-runtime-balance" && status !== "local_runtime") return null;
+  return stringValue(nestedBalance.accountId ?? null) ?? stringValue(row.walletAddress ?? null);
 }
 
 function amountFromBalance(row: Record<string, JsonValue>): bigint {
-  const amount = stringValue(row.amount ?? asRecord(row.balance ?? {}).units ?? "0") ?? "0";
+  const amount = stringValue(asRecord(row.balance ?? {}).units ?? row.amount ?? "0") ?? "0";
   return /^\d+$/.test(amount) ? BigInt(amount) : 0n;
 }
 
@@ -122,6 +126,254 @@ function writeGeneratedReference(discovery: Record<string, JsonValue>, outputPat
     "",
   ];
   writeFileSync(outputPath, lines.join("\n"), "utf8");
+}
+
+function rpcOriginFromUrl(rpcUrl: string): string {
+  try {
+    const url = new URL(rpcUrl);
+    url.pathname = "";
+    url.search = "";
+    url.hash = "";
+    return url.toString().replace(/\/$/, "");
+  } catch {
+    return "http://127.0.0.1:8787";
+  }
+}
+
+function discoveryMethodNames(discovery: Record<string, JsonValue>): string[] {
+  return asArray(discovery.methods)
+    .map((method) => stringValue(asRecord(method).method))
+    .filter((method): method is string => method !== null && method.length > 0)
+    .sort((left, right) => left.localeCompare(right));
+}
+
+function writeOpenApiSpec(args: {
+  discovery: Record<string, JsonValue>;
+  rpcUrl: string;
+  outputPath: string;
+}) {
+  const methodNames = discoveryMethodNames(args.discovery);
+  const origin = rpcOriginFromUrl(args.rpcUrl);
+  const spec = {
+    openapi: "3.1.0",
+    info: {
+      title: "FlowChain JSON-RPC",
+      version: String(args.discovery.version ?? "v0"),
+      description: "Local/private FlowChain JSON-RPC contract generated from live rpc_discover output. Public exposure remains gated by owner public RPC readiness.",
+    },
+    servers: [
+      {
+        url: origin,
+        description: "Local FlowChain control-plane origin",
+      },
+    ],
+    paths: {
+      "/rpc/discover": {
+        get: {
+          summary: "Discover FlowChain RPC methods",
+          operationId: "rpcDiscover",
+          responses: {
+            "200": {
+              description: "FlowChain RPC discovery document",
+            },
+          },
+        },
+      },
+      "/rpc/readiness": {
+        get: {
+          summary: "Read public/live readiness without values",
+          operationId: "rpcReadiness",
+          responses: {
+            "200": {
+              description: "FlowChain readiness with missing owner input names only",
+            },
+          },
+        },
+      },
+      "/rpc": {
+        post: {
+          summary: "Call a FlowChain JSON-RPC method",
+          operationId: "jsonRpcCall",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["jsonrpc", "id", "method"],
+                  additionalProperties: false,
+                  properties: {
+                    jsonrpc: { const: "2.0" },
+                    id: {
+                      oneOf: [
+                        { type: "string" },
+                        { type: "number" },
+                        { type: "null" },
+                      ],
+                    },
+                    method: {
+                      type: "string",
+                      enum: methodNames,
+                    },
+                    params: {
+                      type: ["object", "array", "null"],
+                      additionalProperties: true,
+                    },
+                  },
+                },
+                examples: {
+                  chainStatus: {
+                    summary: "Read chain status",
+                    value: {
+                      jsonrpc: "2.0",
+                      id: "chain-status",
+                      method: "chain_status",
+                      params: {},
+                    },
+                  },
+                  blockList: {
+                    summary: "Read latest blocks",
+                    value: {
+                      jsonrpc: "2.0",
+                      id: "block-list",
+                      method: "block_list",
+                      params: { limit: 5 },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": {
+              description: "JSON-RPC result or JSON-RPC error envelope",
+            },
+          },
+        },
+      },
+    },
+    "x-flowchain-method-count": methodNames.length,
+    "x-flowchain-public-ready-method-count": numberValue(args.discovery.publicReadyMethodCount ?? 0),
+    "x-flowchain-public-exposure": "blocked until owner public RPC readiness passes",
+  };
+  writeFileSync(args.outputPath, JSON.stringify(redactJsonValue(spec as unknown as JsonValue), null, 2), "utf8");
+}
+
+function postmanJsonRpcItem(name: string, method: string, params: JsonValue = {}): Record<string, JsonValue> {
+  return {
+    name,
+    request: {
+      method: "POST",
+      header: [
+        { key: "content-type", value: "application/json" },
+      ],
+      url: {
+        raw: "{{flowchain_origin}}/rpc",
+        host: ["{{flowchain_origin}}"],
+        path: ["rpc"],
+      },
+      body: {
+        mode: "raw",
+        raw: JSON.stringify({ jsonrpc: "2.0", id: method, method, params }, null, 2),
+      },
+    },
+  };
+}
+
+function writePostmanCollection(args: {
+  discovery: Record<string, JsonValue>;
+  rpcUrl: string;
+  outputPath: string;
+}) {
+  const origin = rpcOriginFromUrl(args.rpcUrl);
+  const collection = {
+    info: {
+      name: "FlowChain Local RPC",
+      schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+      description: "Public-safe local FlowChain requests generated from live rpc_discover output. Do not add secrets to this committed collection.",
+    },
+    variable: [
+      {
+        key: "flowchain_origin",
+        value: origin,
+        type: "string",
+      },
+    ],
+    item: [
+      {
+        name: "RPC discovery",
+        request: {
+          method: "GET",
+          url: {
+            raw: "{{flowchain_origin}}/rpc/discover",
+            host: ["{{flowchain_origin}}"],
+            path: ["rpc", "discover"],
+          },
+        },
+      },
+      {
+        name: "RPC readiness",
+        request: {
+          method: "GET",
+          url: {
+            raw: "{{flowchain_origin}}/rpc/readiness",
+            host: ["{{flowchain_origin}}"],
+            path: ["rpc", "readiness"],
+          },
+        },
+      },
+      postmanJsonRpcItem("Chain status", "chain_status"),
+      postmanJsonRpcItem("Latest blocks", "block_list", { limit: 5 }),
+      postmanJsonRpcItem("Wallet balances", "wallet_balance_list", { limit: 5 }),
+      postmanJsonRpcItem("Bridge readiness", "bridge_live_readiness"),
+    ],
+    event: [],
+    "x-flowchain-method-count": discoveryMethodNames(args.discovery).length,
+  };
+  writeFileSync(args.outputPath, JSON.stringify(redactJsonValue(collection as unknown as JsonValue), null, 2), "utf8");
+}
+
+function writeCurlExamples(args: {
+  rpcUrl: string;
+  outputPath: string;
+}) {
+  const origin = rpcOriginFromUrl(args.rpcUrl);
+  const rpcUrl = `${origin}/rpc`;
+  const lines = [
+    "# FlowChain HTTP Starter",
+    "",
+    "Generated by `npm run flowchain:dev-pack:e2e`.",
+    "",
+    "These examples target the local/private FlowChain control-plane RPC. Public exposure still requires the owner public RPC gate.",
+    "",
+    "## Discovery",
+    "",
+    "```powershell",
+    `curl.exe -sS ${origin}/rpc/discover`,
+    "```",
+    "",
+    "## Readiness",
+    "",
+    "```powershell",
+    `curl.exe -sS ${origin}/rpc/readiness`,
+    "```",
+    "",
+    "## Chain Status",
+    "",
+    "```powershell",
+    `curl.exe -sS ${rpcUrl} -H "content-type: application/json" --data "{\\"jsonrpc\\":\\"2.0\\",\\"id\\":\\"chain-status\\",\\"method\\":\\"chain_status\\",\\"params\\":{}}"`,
+    "```",
+    "",
+    "## Latest Blocks",
+    "",
+    "```powershell",
+    `curl.exe -sS ${rpcUrl} -H "content-type: application/json" --data "{\\"jsonrpc\\":\\"2.0\\",\\"id\\":\\"block-list\\",\\"method\\":\\"block_list\\",\\"params\\":{\\"limit\\":5}}"`,
+    "```",
+    "",
+    "Do not commit bearer tokens, private wallet routes, or owner env values into HTTP client collections.",
+    "",
+  ];
+  writeFileSync(args.outputPath, lines.join("\n"), "utf8");
 }
 
 function writeMarkdownReport(report: DevPackReport, outputPath: string) {
@@ -200,6 +452,11 @@ function writeInventoryReport(args: {
       surface: "Browser readiness example",
       status: implementedIf(args.checks.browserExamplePresent && args.checks.browserExampleSmokePassed),
       evidence: "No-dependency browser starter checks discovery/readiness, fails closed before public shareability, and has a mechanical smoke test.",
+    },
+    {
+      surface: "HTTP/OpenAPI starter pack",
+      status: implementedIf(args.checks.openApiSpecGenerated && args.checks.postmanCollectionGenerated && args.checks.curlExamplesGenerated),
+      evidence: "Generated OpenAPI, Postman, and cURL artifacts give non-SDK builders a public-safe local RPC starting point.",
     },
     {
       surface: "Developer docs",
@@ -407,7 +664,13 @@ async function main() {
   const markdownPath = resolve(runDir, "DEV_PACK.md");
   const handoffPath = resolve(runDir, "HANDOFF.md");
   const inventoryPath = resolve(runDir, "INVENTORY.md");
+  const openApiPath = resolve(sdkDocsDir, "FLOWCHAIN_RPC.openapi.generated.json");
+  const postmanPath = resolve(sdkDocsDir, "FLOWCHAIN_RPC.postman.generated.json");
+  const curlExamplesPath = resolve(sdkDocsDir, "FLOWCHAIN_HTTP_EXAMPLES.generated.md");
   writeGeneratedReference(discovery, referencePath);
+  writeOpenApiSpec({ discovery, rpcUrl, outputPath: openApiPath });
+  writePostmanCollection({ discovery, rpcUrl, outputPath: postmanPath });
+  writeCurlExamples({ rpcUrl, outputPath: curlExamplesPath });
 
   const baseChecks = {
     discoveryLoaded: String(discovery.schema ?? "") === "flowchain.rpc.discovery.v0",
@@ -452,6 +715,15 @@ async function main() {
     browserExampleSmokePassed: String(asRecord(browserSmoke).schema ?? "") === "flowchain.example.browser_readiness_smoke.v0"
       && asRecord(browserSmoke).status === "passed"
       && asRecord(browserSmoke).safeToSharePublicly === false,
+    openApiSpecGenerated: existsSync(openApiPath)
+      && readFileSync(openApiPath, "utf8").includes('"openapi": "3.1.0"')
+      && readFileSync(openApiPath, "utf8").includes('"chain_status"'),
+    postmanCollectionGenerated: existsSync(postmanPath)
+      && readFileSync(postmanPath, "utf8").includes('"FlowChain Local RPC"')
+      && readFileSync(postmanPath, "utf8").includes("chain_status"),
+    curlExamplesGenerated: existsSync(curlExamplesPath)
+      && readFileSync(curlExamplesPath, "utf8").includes("curl.exe -sS")
+      && readFileSync(curlExamplesPath, "utf8").includes("chain_status"),
     developerGuidesPresent: missingDocs.length === 0,
     heightAdvanced: firstHeight !== null && secondHeight !== null && BigInt(secondHeight) > BigInt(firstHeight),
     publicReadinessFailClosed: readiness.publicRpcReady === false && readiness.productionReady === false,
@@ -471,6 +743,7 @@ async function main() {
   const checks = {
     ...baseChecks,
     inventoryGenerated: inventoryText.includes("| SDK package | implemented |")
+      && inventoryText.includes("| HTTP/OpenAPI starter pack | implemented |")
       && inventoryText.includes("blocked-owner-input")
       && inventoryText.includes("| Additional language SDKs | missing |"),
     inventorySafe: !/(privateKey|private_key|seed phrase|mnemonic|apiKey|webhook|BEGIN RSA PRIVATE KEY|BEGIN OPENSSH PRIVATE KEY)/i.test(inventoryText),
@@ -493,6 +766,9 @@ async function main() {
       handoff: handoffPath,
       inventory: inventoryPath,
       rpcReference: referencePath,
+      openApi: openApiPath,
+      postman: postmanPath,
+      curlExamples: curlExamplesPath,
     },
     noLiveBroadcast: true,
     envValuesPrinted: false,
@@ -518,6 +794,7 @@ async function main() {
       "- SDK and CLI signed transaction envelope submission backed by the crypto-verified `transaction_submit` RPC.",
       "- Node.js SDK example under `examples/flowchain-node-quickstart.mjs` and browser readiness example under `examples/flowchain-browser-readiness/`.",
       "- Signed envelope example under `examples/flowchain-signed-envelope.mjs` that creates local wallets in memory, signs a FlowChain product transfer envelope, submits it to local cryptographic intake, and can write a CLI-ready envelope file.",
+      "- Generated OpenAPI, Postman, and cURL artifacts for builders who want direct HTTP examples before adopting the TypeScript SDK.",
       "- Developer guides for wallet integration, bridge integration, node operations, app building, explorer/indexer use, faucet/tester funds, release compatibility, and troubleshooting.",
       "- Generated RPC reference from live `rpc_discover`.",
       "- Developer ecosystem inventory classifying implemented, partial, blocked, and missing surfaces.",

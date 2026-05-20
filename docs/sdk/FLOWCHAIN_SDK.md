@@ -88,6 +88,21 @@ Run its no-dependency browser-starter smoke with:
 npm run smoke --prefix examples/flowchain-browser-readiness
 ```
 
+## HTTP Artifacts
+
+`npm run flowchain:dev-pack:e2e` also generates direct HTTP tooling for
+builders who want to inspect the RPC before using the SDK:
+
+```text
+docs/sdk/FLOWCHAIN_RPC.openapi.generated.json
+docs/sdk/FLOWCHAIN_RPC.postman.generated.json
+docs/sdk/FLOWCHAIN_HTTP_EXAMPLES.generated.md
+```
+
+The OpenAPI and Postman files are generated from live `rpc_discover` output.
+They intentionally use local/private endpoints and must not contain bearer
+tokens, private wallet routes, or owner env values.
+
 ## Safety Rules
 
 - Default RPC is `http://127.0.0.1:8787/rpc`.

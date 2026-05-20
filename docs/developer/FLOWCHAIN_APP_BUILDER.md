@@ -46,6 +46,24 @@ It does not submit transactions or bridge actions.
 The local `/state` mirror and `devnet_state` method are for private debugging
 and are intentionally excluded from the owner public edge.
 
+## HTTP Tooling
+
+Developers who are not using the TypeScript SDK can start from generated HTTP
+artifacts:
+
+- `docs/sdk/FLOWCHAIN_RPC.openapi.generated.json`
+- `docs/sdk/FLOWCHAIN_RPC.postman.generated.json`
+- `docs/sdk/FLOWCHAIN_HTTP_EXAMPLES.generated.md`
+
+These are generated from live `rpc_discover` output by:
+
+```powershell
+npm run flowchain:dev-pack:e2e
+```
+
+They are local/private starter artifacts. Do not add bearer tokens, private
+wallet routes, or owner env values to committed HTTP collections.
+
 ## Common Panels
 
 Balance panel:

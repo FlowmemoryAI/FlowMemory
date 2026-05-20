@@ -9,11 +9,13 @@ function asArray(value) {
 }
 
 function accountIdFromBalance(row) {
-  return row.walletAddress ?? asRecord(row.balance).accountId ?? null;
+  const nestedBalance = asRecord(row.balance);
+  if (row.source !== "local-runtime-balance" && row.status !== "local_runtime") return null;
+  return nestedBalance.accountId ?? row.walletAddress ?? null;
 }
 
 function amountFromBalance(row) {
-  const amount = row.amount ?? asRecord(row.balance).units ?? "0";
+  const amount = asRecord(row.balance).units ?? row.amount ?? "0";
   return /^\d+$/.test(String(amount)) ? BigInt(String(amount)) : 0n;
 }
 
