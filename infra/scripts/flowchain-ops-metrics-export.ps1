@@ -31,6 +31,8 @@ $paths = [ordered]@{
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     publicRpcDeploymentAutomation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
     backup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
+    backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
+    backupOwnerPathDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-owner-path-dry-run-report.json"
     bridgeLive = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
     bridgeDeployControl = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json"
@@ -245,6 +247,8 @@ $bridgeReconciliation = $reports.bridgeReconciliation
 $bridgeReleaseEvidenceValidation = $reports.bridgeReleaseEvidenceValidation
 $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
 $publicRpcDeploymentAutomation = $reports.publicRpcDeploymentAutomation
+$backupRestoreValidation = $reports.backupRestoreValidation
+$backupOwnerPathDryRun = $reports.backupOwnerPathDryRun
 $liveCutover = $reports.liveCutover
 $truthTable = $reports.truthTable
 $noSecret = $reports.noSecret
@@ -348,6 +352,12 @@ $publicRpcDeploymentAutomationRollbackReady = ((Get-MetricsProp -Object $publicR
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillNoSecrets" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillBroadcastsFalse" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true)
+$backupRestoreValidationChecks = Get-MetricsProp -Object $backupRestoreValidation -Name "checks"
+$backupRestoreValidationFailedChecks = @((Get-MetricsProp -Object $backupRestoreValidation -Name "failedChecks" -Default @()))
+$backupRestoreValidationSecretFindings = @((Get-MetricsProp -Object $backupRestoreValidation -Name "secretMarkerFindings" -Default @()))
+$backupOwnerPathDryRunChecks = Get-MetricsProp -Object $backupOwnerPathDryRun -Name "checks"
+$backupOwnerPathDryRunFailedChecks = @((Get-MetricsProp -Object $backupOwnerPathDryRun -Name "failedChecks" -Default @()))
+$backupOwnerPathDryRunSecretFindings = @((Get-MetricsProp -Object $backupOwnerPathDryRun -Name "secretMarkerFindings" -Default @()))
 $serviceInstallValidationChecks = Get-MetricsProp -Object $serviceInstallValidation -Name "checks"
 $serviceInstallValidationFailedChecks = @((Get-MetricsProp -Object $serviceInstallValidation -Name "failedChecks" -Default @()))
 $serviceInstallValidationMissingPackageScripts = @((Get-MetricsProp -Object $serviceInstallValidation -Name "missingPackageScripts" -Default @()))
@@ -565,6 +575,22 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_retention_count" -Help
 Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_retention_candidates" -Help "Number of eligible state backup snapshots seen by retention." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "backupRetentionCandidateCount"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_retention_snapshot_protected" -Help "One when retention protected the latest state backup snapshot." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "backupRetentionCurrentSnapshotProtected"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_retention_prune_errors" -Help "State backup retention prune error count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "backupRetentionPruneErrorCount"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_restore_validation_ready" -Help "One when backup restore validation is passed and safe." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "backupRestoreValidationReady" -Default ((Get-MetricsStatus -Report $backupRestoreValidation) -eq "passed")))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_restore_validation_failed_checks" -Help "Failed checks in backup restore validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "backupRestoreValidationFailedChecks" -Default $backupRestoreValidationFailedChecks.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_restore_validation_missing_checks" -Help "Missing required checks in backup restore validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "backupRestoreValidationMissingChecks" -Default 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_restore_validation_secret_findings" -Help "Secret marker findings in backup restore validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "backupRestoreValidationSecretFindings" -Default $backupRestoreValidationSecretFindings.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_restore_hash_round_trip" -Help "One when backup restore validation proves a state hash round trip." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "backupRestoreValidationHashRoundTrip" -Default (Get-MetricsProp -Object $backupRestoreValidationChecks -Name "backupRestoreHashRoundTrip" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_restore_live_state_protected" -Help "One when backup restore validation targets protected live state safely." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "backupRestoreValidationLiveStateProtected" -Default (Get-MetricsProp -Object $backupRestoreValidationChecks -Name "restoreTargetsLiveStateProtected" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_restore_retention_protected" -Help "One when backup restore validation proves retention protects the current snapshot." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "backupRestoreValidationRetentionProtected" -Default (Get-MetricsProp -Object $backupRestoreValidationChecks -Name "retentionReportProtectsCurrentSnapshot" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_owner_path_dry_run_ready" -Help "One when the owner-path backup dry run is passed and safe." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "backupOwnerPathDryRunReady" -Default ((Get-MetricsStatus -Report $backupOwnerPathDryRun) -eq "passed")))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_owner_path_dry_run_failed_checks" -Help "Failed checks in backup owner-path dry run." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "backupOwnerPathDryRunFailedChecks" -Default $backupOwnerPathDryRunFailedChecks.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_owner_path_dry_run_missing_checks" -Help "Missing required checks in backup owner-path dry run." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "backupOwnerPathDryRunMissingChecks" -Default 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_owner_path_dry_run_secret_findings" -Help "Secret marker findings in backup owner-path dry run." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "backupOwnerPathDryRunSecretFindings" -Default $backupOwnerPathDryRunSecretFindings.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_owner_path_dry_run_snapshot_proof" -Help "One when backup owner-path dry run proves snapshot creation." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "backupOwnerPathDryRunSnapshotProof" -Default (Get-MetricsProp -Object $backupOwnerPathDryRunChecks -Name "snapshotProofPassed" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_owner_path_dry_run_restore_proof" -Help "One when backup owner-path dry run proves restore verification." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "backupOwnerPathDryRunRestoreProof" -Default (Get-MetricsProp -Object $backupOwnerPathDryRunChecks -Name "restoreProofPassed" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_owner_path_dry_run_live_state_protected" -Help "One when backup owner-path dry run protects live state." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "backupOwnerPathDryRunLiveStateProtected" -Default (Get-MetricsProp -Object $backupOwnerPathDryRunChecks -Name "restoreLiveStateProtected" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_owner_path_dry_run_no_mutation" -Help "One when backup owner-path dry run proves restore does not mutate live state." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "backupOwnerPathDryRunDidNotMutateLiveState" -Default (Get-MetricsProp -Object $backupOwnerPathDryRunChecks -Name "restoreDidNotMutateLiveState" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_owner_path_dry_run_no_secrets" -Help "One when backup owner-path dry run reports no secrets and has no secret findings." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $backupOwnerPathDryRun -Name "noSecrets" -Default $false) -eq $true) -and $backupOwnerPathDryRunSecretFindings.Count -eq 0))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_live_ready" -Help "One when bridge live readiness is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeLive"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_infra_ready" -Help "One when bridge infrastructure readiness is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeInfra"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_deploy_control_validation_ready" -Help "One when bridge deploy/control validation is passed and safe." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDeployControlReady" -Default $bridgeDeployControlReady))
@@ -752,6 +778,8 @@ $metricsJson = [ordered]@{
         publicRpcSyntheticCanaryStatus = Get-MetricsStatus -Report $publicRpcSyntheticCanary
         publicRpcDeploymentBundleStatus = Get-MetricsStatus -Report $publicRpcDeploymentBundle
         publicRpcDeploymentAutomationStatus = Get-MetricsStatus -Report $publicRpcDeploymentAutomation
+        backupRestoreValidationStatus = Get-MetricsStatus -Report $backupRestoreValidation
+        backupOwnerPathDryRunStatus = Get-MetricsStatus -Report $backupOwnerPathDryRun
         bridgeRelayerLoopValidationStatus = Get-MetricsStatus -Report $bridgeRelayerLoopValidation
         bridgeReconciliationStatus = Get-MetricsStatus -Report $bridgeReconciliation
         bridgeReleaseEvidenceValidationStatus = Get-MetricsStatus -Report $bridgeReleaseEvidenceValidation
@@ -859,6 +887,22 @@ $requiredMetricNames = @(
     "flowchain_backup_retention_candidates",
     "flowchain_backup_retention_snapshot_protected",
     "flowchain_backup_retention_prune_errors",
+    "flowchain_backup_restore_validation_ready",
+    "flowchain_backup_restore_validation_failed_checks",
+    "flowchain_backup_restore_validation_missing_checks",
+    "flowchain_backup_restore_validation_secret_findings",
+    "flowchain_backup_restore_hash_round_trip",
+    "flowchain_backup_restore_live_state_protected",
+    "flowchain_backup_restore_retention_protected",
+    "flowchain_backup_owner_path_dry_run_ready",
+    "flowchain_backup_owner_path_dry_run_failed_checks",
+    "flowchain_backup_owner_path_dry_run_missing_checks",
+    "flowchain_backup_owner_path_dry_run_secret_findings",
+    "flowchain_backup_owner_path_dry_run_snapshot_proof",
+    "flowchain_backup_owner_path_dry_run_restore_proof",
+    "flowchain_backup_owner_path_dry_run_live_state_protected",
+    "flowchain_backup_owner_path_dry_run_no_mutation",
+    "flowchain_backup_owner_path_dry_run_no_secrets",
     "flowchain_bridge_live_ready",
     "flowchain_bridge_infra_ready",
     "flowchain_bridge_deploy_control_validation_ready",
@@ -1030,6 +1074,8 @@ $checks = [ordered]@{
     serviceInstallValidationLoaded = $null -ne $serviceInstallValidation
     systemdServiceInstallValidationLoaded = $null -ne $systemdServiceInstallValidation
     publicRpcSyntheticCanaryLoaded = $null -ne $publicRpcSyntheticCanary
+    backupRestoreValidationLoaded = $null -ne $backupRestoreValidation
+    backupOwnerPathDryRunLoaded = $null -ne $backupOwnerPathDryRun
     externalTesterLoaded = $null -ne $externalTester
     publicTesterGatewayLoaded = $null -ne $publicTesterGateway
     externalTesterClientValidationLoaded = $null -ne $externalTesterClientValidation
@@ -1052,6 +1098,26 @@ $checks = [ordered]@{
     markdownWritten = $true
     metricCountSufficient = @($metrics).Count -ge 35
     requiredMetricsPresent = $missingMetricNames.Count -eq 0
+    backupRestoreValidationMetricsPresent = @(
+        "flowchain_backup_restore_validation_ready",
+        "flowchain_backup_restore_validation_failed_checks",
+        "flowchain_backup_restore_validation_missing_checks",
+        "flowchain_backup_restore_validation_secret_findings",
+        "flowchain_backup_restore_hash_round_trip",
+        "flowchain_backup_restore_live_state_protected",
+        "flowchain_backup_restore_retention_protected"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    backupOwnerPathDryRunMetricsPresent = @(
+        "flowchain_backup_owner_path_dry_run_ready",
+        "flowchain_backup_owner_path_dry_run_failed_checks",
+        "flowchain_backup_owner_path_dry_run_missing_checks",
+        "flowchain_backup_owner_path_dry_run_secret_findings",
+        "flowchain_backup_owner_path_dry_run_snapshot_proof",
+        "flowchain_backup_owner_path_dry_run_restore_proof",
+        "flowchain_backup_owner_path_dry_run_live_state_protected",
+        "flowchain_backup_owner_path_dry_run_no_mutation",
+        "flowchain_backup_owner_path_dry_run_no_secrets"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     serviceInstallValidationMetricsPresent = @(
         "flowchain_service_install_validation_ready",
         "flowchain_service_install_failed_checks",

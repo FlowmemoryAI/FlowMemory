@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T22:19:47.9971318Z",
+    "generatedAt":  "2026-05-20T22:42:55.4470230Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  38,
-    "criticalRuleCount":  31,
+    "ruleCount":  40,
+    "criticalRuleCount":  33,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -39,6 +39,8 @@
                                 "transaction-intake-invalid-rows",
                                 "no-secret-scan-not-passed",
                                 "backup-retention-unsafe",
+                                "backup-restore-validation-failed",
+                                "backup-owner-path-dry-run-failed",
                                 "bridge-deploy-control-validation-failed",
                                 "bridge-relayer-check-contract-failed",
                                 "bridge-relayer-latency-failed",
@@ -105,6 +107,8 @@
                    "publicRpcEdgeHardeningRuleCoversSecurityHeaders":  true,
                    "publicRpcEdgeHardeningRuleCoversWalletCutover":  true,
                    "publicRpcEdgeHardeningRuleCoversRollbackDrill":  true,
+                   "backupRestoreValidationRuleCoversSafety":  true,
+                   "backupOwnerPathDryRunRuleCoversOwnerPath":  true,
                    "bridgeDeployControlRuleCoversDeploymentControls":  true,
                    "bridgeRelayerCheckContractRuleCoversFailedChecks":  true,
                    "bridgeRelayerLoopRuleCoversValidationTelemetry":  true,
@@ -236,6 +240,34 @@
                                        "npm run flowchain:backup:restore:validate",
                                        "npm run flowchain:backup:owner-path:dry-run",
                                        "npm run flowchain:backup:check"
+                                   ]
+                  },
+                  {
+                      "id":  "backup-restore-validation-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "backup-restore-validation-failed"
+                                       ],
+                      "signal":  "Backup restore validation is missing or unsafe.",
+                      "threshold":  "snapshot/restore round-trip, tamper/corruption detection, retention, live-state protection, no-secret, and no-broadcast backup restore checks must all pass",
+                      "commands":  [
+                                       "npm run flowchain:backup:restore:validate",
+                                       "npm run flowchain:backup:create",
+                                       "npm run flowchain:backup:restore:verify"
+                                   ]
+                  },
+                  {
+                      "id":  "backup-owner-path-dry-run-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "backup-owner-path-dry-run-failed"
+                                       ],
+                      "signal":  "Backup owner-path dry run is missing or unsafe.",
+                      "threshold":  "ignored local owner path, snapshot proof, restore proof, retention, live-state non-mutation, no-secret, and no-broadcast owner-path dry-run checks must all pass",
+                      "commands":  [
+                                       "npm run flowchain:backup:owner-path:dry-run",
+                                       "npm run flowchain:backup:check -- -AllowBlocked",
+                                       "npm run flowchain:backup:restore:validate"
                                    ]
                   },
                   {

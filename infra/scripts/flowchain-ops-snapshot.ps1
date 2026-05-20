@@ -54,6 +54,8 @@ $paths = [ordered]@{
     publicRpcDeploymentBundle = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     publicRpcDeploymentAutomation = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
     backup = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
+    backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
+    backupOwnerPathDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-owner-path-dry-run-report.json"
     bridgeLive = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
     bridgeDeployControl = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json"
@@ -469,6 +471,68 @@ $backupRetentionCount = Get-OpsProp -Object $backupDetails -Name "retentionCount
 $backupRetentionCandidateCount = Get-OpsProp -Object $backupDetails -Name "retentionCandidateCount" -Default $null
 $backupRetentionCurrentSnapshotProtected = Get-OpsProp -Object $backupDetails -Name "retentionCurrentSnapshotProtected" -Default $false
 $backupRetentionPruneErrorCount = [int](Get-OpsProp -Object $backupDetails -Name "retentionPruneErrorCount" -Default 0)
+$backupRestoreValidationStatus = Get-OpsStatus -Report $reports.backupRestoreValidation
+$backupRestoreValidationChecks = Get-OpsProp -Object $reports.backupRestoreValidation -Name "checks"
+$backupRestoreValidationFailedChecks = @((Get-OpsProp -Object $reports.backupRestoreValidation -Name "failedChecks" -Default @()))
+$backupRestoreValidationSecretFindings = @((Get-OpsProp -Object $reports.backupRestoreValidation -Name "secretMarkerFindings" -Default @()))
+$backupRestoreValidationRequiredChecks = @(
+    "backupCommandPassed",
+    "restoreCommandPassed",
+    "backupRestoreHashRoundTrip",
+    "latestRestoreUsedLatestSnapshot",
+    "restoreTargetsLiveStateProtected",
+    "liveStateNonMutationProven",
+    "corruptedSnapshotDetected",
+    "manifestTamperDetected",
+    "missingStateArtifactDetected",
+    "missingSnapshotManifestDetected",
+    "latestPointerTamperDetected",
+    "wrongChainStateMismatchDetected",
+    "retentionPrunedOldestSnapshot",
+    "retentionRetainedNewestSnapshots",
+    "retentionReportProtectsCurrentSnapshot",
+    "retentionRestoreUsedNewestSnapshot",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "secretMarkerFindingsEmpty",
+    "broadcastsFalse"
+)
+$backupRestoreValidationMissingChecks = @($backupRestoreValidationRequiredChecks | Where-Object { (Get-OpsProp -Object $backupRestoreValidationChecks -Name $_ -Default $false) -ne $true })
+$backupRestoreValidationReady = $backupRestoreValidationStatus -eq "passed" `
+    -and $backupRestoreValidationFailedChecks.Count -eq 0 `
+    -and $backupRestoreValidationSecretFindings.Count -eq 0 `
+    -and $backupRestoreValidationMissingChecks.Count -eq 0 `
+    -and ((Get-OpsProp -Object $reports.backupRestoreValidation -Name "valuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.backupRestoreValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.backupRestoreValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.backupRestoreValidation -Name "broadcasts" -Default $true) -eq $false)
+$backupOwnerPathDryRunStatus = Get-OpsStatus -Report $reports.backupOwnerPathDryRun
+$backupOwnerPathDryRunChecks = Get-OpsProp -Object $reports.backupOwnerPathDryRun -Name "checks"
+$backupOwnerPathDryRunFailedChecks = @((Get-OpsProp -Object $reports.backupOwnerPathDryRun -Name "failedChecks" -Default @()))
+$backupOwnerPathDryRunSecretFindings = @((Get-OpsProp -Object $reports.backupOwnerPathDryRun -Name "secretMarkerFindings" -Default @()))
+$backupOwnerPathDryRunRequiredChecks = @(
+    "readinessStatusPassed",
+    "snapshotProofPassed",
+    "restoreProofPassed",
+    "retentionCurrentSnapshotProtected",
+    "retentionPruneErrorsEmpty",
+    "backupRetentionProtectedSnapshot",
+    "restoreLiveStateProtected",
+    "restoreDidNotMutateLiveState",
+    "ownerBackupEnvRestored",
+    "secretMarkerFindingsEmpty",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$backupOwnerPathDryRunMissingChecks = @($backupOwnerPathDryRunRequiredChecks | Where-Object { (Get-OpsProp -Object $backupOwnerPathDryRunChecks -Name $_ -Default $false) -ne $true })
+$backupOwnerPathDryRunReady = $backupOwnerPathDryRunStatus -eq "passed" `
+    -and $backupOwnerPathDryRunFailedChecks.Count -eq 0 `
+    -and $backupOwnerPathDryRunSecretFindings.Count -eq 0 `
+    -and $backupOwnerPathDryRunMissingChecks.Count -eq 0 `
+    -and ((Get-OpsProp -Object $reports.backupOwnerPathDryRun -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.backupOwnerPathDryRun -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.backupOwnerPathDryRun -Name "broadcasts" -Default $true) -eq $false)
 $bridgeLiveStatus = Get-OpsStatus -Report $reports.bridgeLive
 $bridgeInfraStatus = Get-OpsStatus -Report $reports.bridgeInfra
 $bridgeDeployControlStatus = Get-OpsStatus -Report $reports.bridgeDeployControl
@@ -907,6 +971,12 @@ if ($backupStatus -ne "passed") {
 if ($backupStatus -eq "failed" -and $null -ne $backupRetentionCount -and ($backupRetentionCurrentSnapshotProtected -ne $true -or $backupRetentionPruneErrorCount -gt 0)) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "backup-retention-unsafe" -Message "State backup retention failed to protect the latest snapshot or reported prune errors." -Commands @("npm run flowchain:backup:restore:validate", "npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:check")
 }
+if (-not $backupRestoreValidationReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "backup-restore-validation-failed" -Message "Backup restore validation is missing or unsafe; snapshot/restore round-trip, tamper/corruption detection, retention, live-state protection, and no-secret checks must pass." -Commands @("npm run flowchain:backup:restore:validate", "npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify")
+}
+if (-not $backupOwnerPathDryRunReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "backup-owner-path-dry-run-failed" -Message "Backup owner-path dry run is missing or unsafe; ignored local owner-path injection, snapshot proof, restore proof, retention proof, and live-state non-mutation must pass." -Commands @("npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:check -- -AllowBlocked", "npm run flowchain:backup:restore:validate")
+}
 if ($bridgeLiveStatus -ne "passed" -or $bridgeInfraStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "bridge-not-ready" -Message "Base 8453 bridge readiness is not ready for external funded testing." -Commands @("npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check", "npm run flowchain:bridge:emergency-stop")
 }
@@ -1163,6 +1233,23 @@ $report = [ordered]@{
         backupRetentionCandidateCount = $backupRetentionCandidateCount
         backupRetentionCurrentSnapshotProtected = $backupRetentionCurrentSnapshotProtected
         backupRetentionPruneErrorCount = $backupRetentionPruneErrorCount
+        backupRestoreValidation = $backupRestoreValidationStatus
+        backupRestoreValidationReady = $backupRestoreValidationReady
+        backupRestoreValidationFailedChecks = $backupRestoreValidationFailedChecks.Count
+        backupRestoreValidationMissingChecks = $backupRestoreValidationMissingChecks.Count
+        backupRestoreValidationSecretFindings = $backupRestoreValidationSecretFindings.Count
+        backupRestoreValidationHashRoundTrip = Get-OpsProp -Object $backupRestoreValidationChecks -Name "backupRestoreHashRoundTrip" -Default $false
+        backupRestoreValidationLiveStateProtected = Get-OpsProp -Object $backupRestoreValidationChecks -Name "restoreTargetsLiveStateProtected" -Default $false
+        backupRestoreValidationRetentionProtected = Get-OpsProp -Object $backupRestoreValidationChecks -Name "retentionReportProtectsCurrentSnapshot" -Default $false
+        backupOwnerPathDryRun = $backupOwnerPathDryRunStatus
+        backupOwnerPathDryRunReady = $backupOwnerPathDryRunReady
+        backupOwnerPathDryRunFailedChecks = $backupOwnerPathDryRunFailedChecks.Count
+        backupOwnerPathDryRunMissingChecks = $backupOwnerPathDryRunMissingChecks.Count
+        backupOwnerPathDryRunSecretFindings = $backupOwnerPathDryRunSecretFindings.Count
+        backupOwnerPathDryRunSnapshotProof = Get-OpsProp -Object $backupOwnerPathDryRunChecks -Name "snapshotProofPassed" -Default $false
+        backupOwnerPathDryRunRestoreProof = Get-OpsProp -Object $backupOwnerPathDryRunChecks -Name "restoreProofPassed" -Default $false
+        backupOwnerPathDryRunLiveStateProtected = Get-OpsProp -Object $backupOwnerPathDryRunChecks -Name "restoreLiveStateProtected" -Default $false
+        backupOwnerPathDryRunDidNotMutateLiveState = Get-OpsProp -Object $backupOwnerPathDryRunChecks -Name "restoreDidNotMutateLiveState" -Default $false
         bridgeLive = $bridgeLiveStatus
         bridgeInfra = $bridgeInfraStatus
         bridgeDeployControl = $bridgeDeployControlStatus

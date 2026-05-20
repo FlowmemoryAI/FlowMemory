@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 106963
+flowchain_latest_height 107102
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 106963
+flowchain_finalized_height 107102
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 5
+flowchain_state_file_age_seconds 8
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -27,7 +27,7 @@ flowchain_transaction_intake_accepted_rows_total 187
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 4268.384
+flowchain_transaction_intake_file_age_seconds 5655.628
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -42,10 +42,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 38
+flowchain_ops_alert_rules_total 40
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 31
+flowchain_ops_alert_rules_critical 33
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -244,6 +244,54 @@ flowchain_backup_retention_snapshot_protected 0
 # HELP flowchain_backup_retention_prune_errors State backup retention prune error count.
 # TYPE flowchain_backup_retention_prune_errors gauge
 flowchain_backup_retention_prune_errors 0
+# HELP flowchain_backup_restore_validation_ready One when backup restore validation is passed and safe.
+# TYPE flowchain_backup_restore_validation_ready gauge
+flowchain_backup_restore_validation_ready 1
+# HELP flowchain_backup_restore_validation_failed_checks Failed checks in backup restore validation.
+# TYPE flowchain_backup_restore_validation_failed_checks gauge
+flowchain_backup_restore_validation_failed_checks 0
+# HELP flowchain_backup_restore_validation_missing_checks Missing required checks in backup restore validation.
+# TYPE flowchain_backup_restore_validation_missing_checks gauge
+flowchain_backup_restore_validation_missing_checks 0
+# HELP flowchain_backup_restore_validation_secret_findings Secret marker findings in backup restore validation.
+# TYPE flowchain_backup_restore_validation_secret_findings gauge
+flowchain_backup_restore_validation_secret_findings 0
+# HELP flowchain_backup_restore_hash_round_trip One when backup restore validation proves a state hash round trip.
+# TYPE flowchain_backup_restore_hash_round_trip gauge
+flowchain_backup_restore_hash_round_trip 1
+# HELP flowchain_backup_restore_live_state_protected One when backup restore validation targets protected live state safely.
+# TYPE flowchain_backup_restore_live_state_protected gauge
+flowchain_backup_restore_live_state_protected 1
+# HELP flowchain_backup_restore_retention_protected One when backup restore validation proves retention protects the current snapshot.
+# TYPE flowchain_backup_restore_retention_protected gauge
+flowchain_backup_restore_retention_protected 1
+# HELP flowchain_backup_owner_path_dry_run_ready One when the owner-path backup dry run is passed and safe.
+# TYPE flowchain_backup_owner_path_dry_run_ready gauge
+flowchain_backup_owner_path_dry_run_ready 1
+# HELP flowchain_backup_owner_path_dry_run_failed_checks Failed checks in backup owner-path dry run.
+# TYPE flowchain_backup_owner_path_dry_run_failed_checks gauge
+flowchain_backup_owner_path_dry_run_failed_checks 0
+# HELP flowchain_backup_owner_path_dry_run_missing_checks Missing required checks in backup owner-path dry run.
+# TYPE flowchain_backup_owner_path_dry_run_missing_checks gauge
+flowchain_backup_owner_path_dry_run_missing_checks 0
+# HELP flowchain_backup_owner_path_dry_run_secret_findings Secret marker findings in backup owner-path dry run.
+# TYPE flowchain_backup_owner_path_dry_run_secret_findings gauge
+flowchain_backup_owner_path_dry_run_secret_findings 0
+# HELP flowchain_backup_owner_path_dry_run_snapshot_proof One when backup owner-path dry run proves snapshot creation.
+# TYPE flowchain_backup_owner_path_dry_run_snapshot_proof gauge
+flowchain_backup_owner_path_dry_run_snapshot_proof 1
+# HELP flowchain_backup_owner_path_dry_run_restore_proof One when backup owner-path dry run proves restore verification.
+# TYPE flowchain_backup_owner_path_dry_run_restore_proof gauge
+flowchain_backup_owner_path_dry_run_restore_proof 1
+# HELP flowchain_backup_owner_path_dry_run_live_state_protected One when backup owner-path dry run protects live state.
+# TYPE flowchain_backup_owner_path_dry_run_live_state_protected gauge
+flowchain_backup_owner_path_dry_run_live_state_protected 1
+# HELP flowchain_backup_owner_path_dry_run_no_mutation One when backup owner-path dry run proves restore does not mutate live state.
+# TYPE flowchain_backup_owner_path_dry_run_no_mutation gauge
+flowchain_backup_owner_path_dry_run_no_mutation 1
+# HELP flowchain_backup_owner_path_dry_run_no_secrets One when backup owner-path dry run reports no secrets and has no secret findings.
+# TYPE flowchain_backup_owner_path_dry_run_no_secrets gauge
+flowchain_backup_owner_path_dry_run_no_secrets 1
 # HELP flowchain_bridge_live_ready One when bridge live readiness is passed.
 # TYPE flowchain_bridge_live_ready gauge
 flowchain_bridge_live_ready 0

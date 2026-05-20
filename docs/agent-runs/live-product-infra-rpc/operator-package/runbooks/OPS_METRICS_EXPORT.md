@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-20T22:19:55.8638452Z
+Generated: 2026-05-20T22:43:05.9013232Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 249
+- Metric count: 265
 
 ## Required Metrics
 
@@ -83,6 +83,22 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_backup_retention_candidates: present
 - flowchain_backup_retention_snapshot_protected: present
 - flowchain_backup_retention_prune_errors: present
+- flowchain_backup_restore_validation_ready: present
+- flowchain_backup_restore_validation_failed_checks: present
+- flowchain_backup_restore_validation_missing_checks: present
+- flowchain_backup_restore_validation_secret_findings: present
+- flowchain_backup_restore_hash_round_trip: present
+- flowchain_backup_restore_live_state_protected: present
+- flowchain_backup_restore_retention_protected: present
+- flowchain_backup_owner_path_dry_run_ready: present
+- flowchain_backup_owner_path_dry_run_failed_checks: present
+- flowchain_backup_owner_path_dry_run_missing_checks: present
+- flowchain_backup_owner_path_dry_run_secret_findings: present
+- flowchain_backup_owner_path_dry_run_snapshot_proof: present
+- flowchain_backup_owner_path_dry_run_restore_proof: present
+- flowchain_backup_owner_path_dry_run_live_state_protected: present
+- flowchain_backup_owner_path_dry_run_no_mutation: present
+- flowchain_backup_owner_path_dry_run_no_secrets: present
 - flowchain_bridge_live_ready: present
 - flowchain_bridge_infra_ready: present
 - flowchain_bridge_deploy_control_validation_ready: present
@@ -253,6 +269,8 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | serviceInstallValidationLoaded | True |
 | systemdServiceInstallValidationLoaded | True |
 | publicRpcSyntheticCanaryLoaded | True |
+| backupRestoreValidationLoaded | True |
+| backupOwnerPathDryRunLoaded | True |
 | externalTesterLoaded | True |
 | publicTesterGatewayLoaded | True |
 | externalTesterClientValidationLoaded | True |
@@ -275,6 +293,8 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | markdownWritten | True |
 | metricCountSufficient | True |
 | requiredMetricsPresent | True |
+| backupRestoreValidationMetricsPresent | True |
+| backupOwnerPathDryRunMetricsPresent | True |
 | serviceInstallValidationMetricsPresent | True |
 | externalTesterEvidenceMetricsPresent | True |
 | bridgeDirectObserveMetricsPresent | True |

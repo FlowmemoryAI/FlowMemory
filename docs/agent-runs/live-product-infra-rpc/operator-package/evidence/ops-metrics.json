@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T22:19:55.4496072Z",
+    "generatedAt":  "2026-05-20T22:43:05.2080815Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -11,6 +11,8 @@
                           "publicRpcSyntheticCanaryStatus":  "blocked",
                           "publicRpcDeploymentBundleStatus":  "passed",
                           "publicRpcDeploymentAutomationStatus":  "passed",
+                          "backupRestoreValidationStatus":  "passed",
+                          "backupOwnerPathDryRunStatus":  "passed",
                           "bridgeRelayerLoopValidationStatus":  "passed",
                           "bridgeReconciliationStatus":  "passed",
                           "bridgeReleaseEvidenceValidationStatus":  "passed",
@@ -33,19 +35,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  106963
+                        "value":  107102
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  106963
+                        "value":  107102
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  5
+                        "value":  8
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -87,7 +89,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  4268.384
+                        "value":  5655.628
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -117,13 +119,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  38
+                        "value":  40
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  31
+                        "value":  33
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -520,6 +522,102 @@
                         "type":  "gauge",
                         "help":  "State backup retention prune error count.",
                         "value":  0
+                    },
+                    {
+                        "name":  "flowchain_backup_restore_validation_ready",
+                        "type":  "gauge",
+                        "help":  "One when backup restore validation is passed and safe.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_backup_restore_validation_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in backup restore validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_backup_restore_validation_missing_checks",
+                        "type":  "gauge",
+                        "help":  "Missing required checks in backup restore validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_backup_restore_validation_secret_findings",
+                        "type":  "gauge",
+                        "help":  "Secret marker findings in backup restore validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_backup_restore_hash_round_trip",
+                        "type":  "gauge",
+                        "help":  "One when backup restore validation proves a state hash round trip.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_backup_restore_live_state_protected",
+                        "type":  "gauge",
+                        "help":  "One when backup restore validation targets protected live state safely.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_backup_restore_retention_protected",
+                        "type":  "gauge",
+                        "help":  "One when backup restore validation proves retention protects the current snapshot.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_backup_owner_path_dry_run_ready",
+                        "type":  "gauge",
+                        "help":  "One when the owner-path backup dry run is passed and safe.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_backup_owner_path_dry_run_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in backup owner-path dry run.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_backup_owner_path_dry_run_missing_checks",
+                        "type":  "gauge",
+                        "help":  "Missing required checks in backup owner-path dry run.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_backup_owner_path_dry_run_secret_findings",
+                        "type":  "gauge",
+                        "help":  "Secret marker findings in backup owner-path dry run.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_backup_owner_path_dry_run_snapshot_proof",
+                        "type":  "gauge",
+                        "help":  "One when backup owner-path dry run proves snapshot creation.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_backup_owner_path_dry_run_restore_proof",
+                        "type":  "gauge",
+                        "help":  "One when backup owner-path dry run proves restore verification.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_backup_owner_path_dry_run_live_state_protected",
+                        "type":  "gauge",
+                        "help":  "One when backup owner-path dry run protects live state.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_backup_owner_path_dry_run_no_mutation",
+                        "type":  "gauge",
+                        "help":  "One when backup owner-path dry run proves restore does not mutate live state.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_backup_owner_path_dry_run_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when backup owner-path dry run reports no secrets and has no secret findings.",
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_bridge_live_ready",
@@ -1524,7 +1622,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  249,
+    "metricCount":  265,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

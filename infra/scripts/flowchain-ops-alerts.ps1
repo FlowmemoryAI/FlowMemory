@@ -154,6 +154,22 @@ $rules = @(
         commands = @("npm run flowchain:backup:restore:validate", "npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:check")
     },
     [ordered]@{
+        id = "backup-restore-validation-failed"
+        severity = "critical"
+        findingCodes = @("backup-restore-validation-failed")
+        signal = "Backup restore validation is missing or unsafe."
+        threshold = "snapshot/restore round-trip, tamper/corruption detection, retention, live-state protection, no-secret, and no-broadcast backup restore checks must all pass"
+        commands = @("npm run flowchain:backup:restore:validate", "npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify")
+    },
+    [ordered]@{
+        id = "backup-owner-path-dry-run-failed"
+        severity = "critical"
+        findingCodes = @("backup-owner-path-dry-run-failed")
+        signal = "Backup owner-path dry run is missing or unsafe."
+        threshold = "ignored local owner path, snapshot proof, restore proof, retention, live-state non-mutation, no-secret, and no-broadcast owner-path dry-run checks must all pass"
+        commands = @("npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:check -- -AllowBlocked", "npm run flowchain:backup:restore:validate")
+    },
+    [ordered]@{
         id = "bridge-deploy-control-validation-failed"
         severity = "critical"
         findingCodes = @("bridge-deploy-control-validation-failed")
@@ -429,6 +445,20 @@ $publicRpcEdgeHardeningRuleCoversRollbackDrill = $publicRpcEdgeHardeningRule.Cou
     -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("rollback", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("drill", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and (@($publicRpcEdgeHardeningRule[0].commands) -contains "npm run flowchain:public-rpc:deployment:automation")
+$backupRestoreValidationRule = @($rules | Where-Object { $_.id -eq "backup-restore-validation-failed" } | Select-Object -First 1)
+$backupRestoreValidationRuleCoversSafety = $backupRestoreValidationRule.Count -eq 1 `
+    -and ([string]$backupRestoreValidationRule[0].threshold).IndexOf("snapshot/restore", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$backupRestoreValidationRule[0].threshold).IndexOf("tamper", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$backupRestoreValidationRule[0].threshold).IndexOf("retention", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$backupRestoreValidationRule[0].threshold).IndexOf("live-state", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($backupRestoreValidationRule[0].commands) -contains "npm run flowchain:backup:restore:validate")
+$backupOwnerPathDryRunRule = @($rules | Where-Object { $_.id -eq "backup-owner-path-dry-run-failed" } | Select-Object -First 1)
+$backupOwnerPathDryRunRuleCoversOwnerPath = $backupOwnerPathDryRunRule.Count -eq 1 `
+    -and ([string]$backupOwnerPathDryRunRule[0].threshold).IndexOf("ignored local owner path", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$backupOwnerPathDryRunRule[0].threshold).IndexOf("snapshot", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$backupOwnerPathDryRunRule[0].threshold).IndexOf("restore", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$backupOwnerPathDryRunRule[0].threshold).IndexOf("live-state", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($backupOwnerPathDryRunRule[0].commands) -contains "npm run flowchain:backup:owner-path:dry-run")
 $bridgeRelayerCheckContractRule = @($rules | Where-Object { $_.id -eq "bridge-relayer-check-contract-failed" } | Select-Object -First 1)
 $bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRule.Count -eq 1 `
     -and ([string]$bridgeRelayerCheckContractRule[0].threshold).IndexOf("failedChecks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
@@ -522,6 +552,8 @@ $checks = [ordered]@{
     publicRpcEdgeHardeningRuleCoversSecurityHeaders = $publicRpcEdgeHardeningRuleCoversSecurityHeaders
     publicRpcEdgeHardeningRuleCoversWalletCutover = $publicRpcEdgeHardeningRuleCoversWalletCutover
     publicRpcEdgeHardeningRuleCoversRollbackDrill = $publicRpcEdgeHardeningRuleCoversRollbackDrill
+    backupRestoreValidationRuleCoversSafety = $backupRestoreValidationRuleCoversSafety
+    backupOwnerPathDryRunRuleCoversOwnerPath = $backupOwnerPathDryRunRuleCoversOwnerPath
     bridgeDeployControlRuleCoversDeploymentControls = $bridgeDeployControlRuleCoversDeploymentControls
     bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRuleCoversFailedChecks
     bridgeRelayerLoopRuleCoversValidationTelemetry = $bridgeRelayerLoopRuleCoversValidationTelemetry
