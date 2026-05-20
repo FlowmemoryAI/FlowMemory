@@ -202,6 +202,14 @@ $rules = @(
         commands = @("npm run flowchain:bridge:runtime-credit:validate", "npm run flowchain:service:status", "npm run flowchain:bridge:emergency-stop")
     },
     [ordered]@{
+        id = "real-value-pilot-aggregate-failed"
+        severity = "critical"
+        findingCodes = @("real-value-pilot-aggregate-failed")
+        signal = "Real-value pilot aggregate proof is missing or failing."
+        threshold = "aggregate report is not passed, has timed-out commands, failed commands, missing proofs, missing expected commands, false owner go/no-go, broadcasts, prints env values, or reports secrets"
+        commands = @("npm run flowchain:real-value-pilot:e2e -- -SkipBaseline -ChildTimeoutSeconds 1800", "npm run flowchain:completion:audit -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
         id = "bridge-relayer-loop-unhealthy"
         severity = "critical"
         findingCodes = @("bridge-relayer-loop-unhealthy")

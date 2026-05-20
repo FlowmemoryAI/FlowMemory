@@ -31,6 +31,7 @@ $paths = [ordered]@{
     bridgeLive = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
     bridgeRelayerGuardrail = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
+    realValuePilotAggregate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     externalTesterEvidence = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
@@ -349,6 +350,12 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_transfer_laten
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_credit_failed_checks" -Help "Failed checks in bridge runtime credit validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRuntimeCreditFailedChecks"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_credit_missing_checks" -Help "Missing required runtime proof checks in bridge runtime credit validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRuntimeCreditMissingRuntimeChecks"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_runtime_credit_false_checks" -Help "Required runtime proof checks that are false in bridge runtime credit validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRuntimeCreditFalseRuntimeChecks"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_real_value_pilot_aggregate_ready" -Help "One when the real-value pilot aggregate proof is passed and safe." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "realValuePilotAggregateReady"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_real_value_pilot_aggregate_commands_total" -Help "Proof commands run by the real-value pilot aggregate gate." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "realValuePilotAggregateCommandsRun"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_real_value_pilot_aggregate_timed_out_commands" -Help "Timed-out proof commands in the real-value pilot aggregate gate." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "realValuePilotAggregateTimedOutCommands"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_real_value_pilot_aggregate_failed_commands" -Help "Failed proof commands in the real-value pilot aggregate gate." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "realValuePilotAggregateFailedCommands"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_real_value_pilot_aggregate_missing_proofs" -Help "Missing expected proof artifacts in the real-value pilot aggregate gate." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "realValuePilotAggregateMissingProofs"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_real_value_pilot_aggregate_owner_go_no_go" -Help "One when owner go/no-go is true in the real-value pilot aggregate gate." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "realValuePilotAggregateOwnerGoNoGo"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_loop_healthy" -Help "One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRelayerLoopReportHealthy"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_bridge_relayer_requested" -Help "One when the latest service supervisor report requested bridge relayer loop supervision." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorBridgeRelayerRequested"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_bridge_relayer_recovery_healthy" -Help "One when supervisor relayer-loop recovery evidence is healthy, or relayer supervision was not requested." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorBridgeRelayerRecoveryHealthy"))
@@ -514,6 +521,12 @@ $requiredMetricNames = @(
     "flowchain_bridge_runtime_credit_failed_checks",
     "flowchain_bridge_runtime_credit_missing_checks",
     "flowchain_bridge_runtime_credit_false_checks",
+    "flowchain_real_value_pilot_aggregate_ready",
+    "flowchain_real_value_pilot_aggregate_commands_total",
+    "flowchain_real_value_pilot_aggregate_timed_out_commands",
+    "flowchain_real_value_pilot_aggregate_failed_commands",
+    "flowchain_real_value_pilot_aggregate_missing_proofs",
+    "flowchain_real_value_pilot_aggregate_owner_go_no_go",
     "flowchain_bridge_relayer_loop_healthy",
     "flowchain_supervisor_bridge_relayer_requested",
     "flowchain_supervisor_bridge_relayer_recovery_healthy",
@@ -630,6 +643,14 @@ $checks = [ordered]@{
         "flowchain_bridge_runtime_credit_failed_checks",
         "flowchain_bridge_runtime_credit_missing_checks",
         "flowchain_bridge_runtime_credit_false_checks"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    realValuePilotAggregateMetricsPresent = @(
+        "flowchain_real_value_pilot_aggregate_ready",
+        "flowchain_real_value_pilot_aggregate_commands_total",
+        "flowchain_real_value_pilot_aggregate_timed_out_commands",
+        "flowchain_real_value_pilot_aggregate_failed_commands",
+        "flowchain_real_value_pilot_aggregate_missing_proofs",
+        "flowchain_real_value_pilot_aggregate_owner_go_no_go"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     publicRpcEdgeMetricsPresent = @(
         "flowchain_public_rpc_deployment_bundle_ready",

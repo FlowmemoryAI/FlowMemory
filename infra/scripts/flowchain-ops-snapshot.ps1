@@ -56,6 +56,7 @@ $paths = [ordered]@{
     bridgeRelayer = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     bridgeRelayerGuardrail = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRuntimeCredit = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
+    realValuePilotAggregate = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json"
     externalTester = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     publicTesterGateway = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     externalTesterEvidence = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
@@ -504,6 +505,28 @@ $bridgeRuntimeCreditReady = $bridgeRuntimeCreditStatus -eq "passed" `
     -and ((Get-OpsProp -Object $reports.bridgeRuntimeCredit -Name "broadcasts" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $reports.bridgeRuntimeCredit -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $reports.bridgeRuntimeCredit -Name "noSecrets" -Default $false) -eq $true)
+$realValuePilotAggregateStatus = Get-OpsStatus -Report $reports.realValuePilotAggregate
+$realValuePilotAggregateChecks = Get-OpsProp -Object $reports.realValuePilotAggregate -Name "checks"
+$realValuePilotAggregateTimedOutCommands = @((Get-OpsProp -Object $reports.realValuePilotAggregate -Name "timedOutCommands" -Default @()))
+$realValuePilotAggregateFailedCommands = @((Get-OpsProp -Object $reports.realValuePilotAggregate -Name "failedCommands" -Default @()))
+$realValuePilotAggregateMissingProofs = @((Get-OpsProp -Object $reports.realValuePilotAggregate -Name "missingProofs" -Default @()))
+$realValuePilotAggregateMissingExpectedCommands = @((Get-OpsProp -Object $reports.realValuePilotAggregate -Name "missingExpectedCommands" -Default @()))
+$realValuePilotAggregateCommandsRun = @((Get-OpsProp -Object $reports.realValuePilotAggregate -Name "commandsRun" -Default @()))
+$realValuePilotAggregateOwnerGoNoGo = Get-OpsProp -Object (Get-OpsProp -Object $reports.realValuePilotAggregate -Name "ownerGoNoGo") -Name "go" -Default $false
+$realValuePilotAggregateReady = $realValuePilotAggregateStatus -eq "passed" `
+    -and $realValuePilotAggregateCommandsRun.Count -ge 6 `
+    -and $realValuePilotAggregateTimedOutCommands.Count -eq 0 `
+    -and $realValuePilotAggregateFailedCommands.Count -eq 0 `
+    -and $realValuePilotAggregateMissingProofs.Count -eq 0 `
+    -and $realValuePilotAggregateMissingExpectedCommands.Count -eq 0 `
+    -and $realValuePilotAggregateOwnerGoNoGo -eq $true `
+    -and ((Get-OpsProp -Object $realValuePilotAggregateChecks -Name "requiredProofCommandsRun" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $realValuePilotAggregateChecks -Name "commandsDidNotTimeout" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $realValuePilotAggregateChecks -Name "commandsDidNotFail" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $realValuePilotAggregateChecks -Name "outputTailsRedacted" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.realValuePilotAggregate -Name "broadcasts" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.realValuePilotAggregate -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.realValuePilotAggregate -Name "noSecrets" -Default $false) -eq $true)
 $externalTesterStatus = Get-OpsStatus -Report $reports.externalTester
 $externalTesterChecks = Get-OpsProp -Object $reports.externalTester -Name "checks"
 $externalTesterLocalRehearsalReady = (Get-OpsProp -Object $reports.externalTester -Name "localTesterRehearsalReady" -Default $false) -eq $true
@@ -677,6 +700,9 @@ if (-not $bridgeRelayerDirectObserveGuardrailReady) {
 }
 if (-not $bridgeRuntimeCreditReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-runtime-credit-validation-failed" -Message "Bridge runtime credit validation is missing or failed: Base 8453 handoff must become L1 spendable, reject replay, transfer, and survive restart/export/import." -Commands @("npm run flowchain:bridge:runtime-credit:validate", "npm run flowchain:service:status", "npm run flowchain:bridge:emergency-stop")
+}
+if (-not $realValuePilotAggregateReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "real-value-pilot-aggregate-failed" -Message "Real-value pilot aggregate proof is missing or failed: contracts, bridge, runtime, wallet, control-dashboard, and ops proofs must pass without timeouts, failed commands, missing proofs, secrets, or broadcasts." -Commands @("npm run flowchain:real-value-pilot:e2e -- -SkipBaseline -ChildTimeoutSeconds 1800", "npm run flowchain:completion:audit -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop")
 }
 if ($externalTesterStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "external-tester-not-shareable" -Message "External tester launch is not shareable; local rehearsal, public tester gateway, faucet route, external sharing, and live infra readiness must all pass first." -Commands @("npm run flowchain:wallet:live-tester:e2e", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked")
@@ -884,6 +910,14 @@ $report = [ordered]@{
         bridgeRuntimeCreditMissingRuntimeChecks = $bridgeRuntimeCreditMissingChecks.Count
         bridgeRuntimeCreditFalseRuntimeChecks = $bridgeRuntimeCreditFalseChecks.Count
         bridgeRuntimeCreditProofFailedChecks = $bridgeRuntimeCreditProofFailedChecks.Count
+        realValuePilotAggregate = $realValuePilotAggregateStatus
+        realValuePilotAggregateReady = $realValuePilotAggregateReady
+        realValuePilotAggregateCommandsRun = $realValuePilotAggregateCommandsRun.Count
+        realValuePilotAggregateTimedOutCommands = $realValuePilotAggregateTimedOutCommands.Count
+        realValuePilotAggregateFailedCommands = $realValuePilotAggregateFailedCommands.Count
+        realValuePilotAggregateMissingProofs = $realValuePilotAggregateMissingProofs.Count
+        realValuePilotAggregateMissingExpectedCommands = $realValuePilotAggregateMissingExpectedCommands.Count
+        realValuePilotAggregateOwnerGoNoGo = $realValuePilotAggregateOwnerGoNoGo
         externalTester = $externalTesterStatus
         externalTesterLocalRehearsalReady = $externalTesterLocalRehearsalReady
         externalTesterExternalSharingReady = $externalTesterExternalSharingReady

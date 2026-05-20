@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T14:12:42.4656354Z",
+    "generatedAt":  "2026-05-20T14:54:37.3787186Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -23,19 +23,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  102799
+                        "value":  103125
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  102799
+                        "value":  103125
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  5
+                        "value":  4
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -77,7 +77,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  1127.91
+                        "value":  3254.742
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -107,13 +107,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  30
+                        "value":  31
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  23
+                        "value":  24
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -414,6 +414,42 @@
                         "type":  "gauge",
                         "help":  "Required runtime proof checks that are false in bridge runtime credit validation.",
                         "value":  0
+                    },
+                    {
+                        "name":  "flowchain_real_value_pilot_aggregate_ready",
+                        "type":  "gauge",
+                        "help":  "One when the real-value pilot aggregate proof is passed and safe.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_real_value_pilot_aggregate_commands_total",
+                        "type":  "gauge",
+                        "help":  "Proof commands run by the real-value pilot aggregate gate.",
+                        "value":  6
+                    },
+                    {
+                        "name":  "flowchain_real_value_pilot_aggregate_timed_out_commands",
+                        "type":  "gauge",
+                        "help":  "Timed-out proof commands in the real-value pilot aggregate gate.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_real_value_pilot_aggregate_failed_commands",
+                        "type":  "gauge",
+                        "help":  "Failed proof commands in the real-value pilot aggregate gate.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_real_value_pilot_aggregate_missing_proofs",
+                        "type":  "gauge",
+                        "help":  "Missing expected proof artifacts in the real-value pilot aggregate gate.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_real_value_pilot_aggregate_owner_go_no_go",
+                        "type":  "gauge",
+                        "help":  "One when owner go/no-go is true in the real-value pilot aggregate gate.",
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_bridge_relayer_loop_healthy",
@@ -773,13 +809,13 @@
                         "name":  "flowchain_truth_gates_total",
                         "type":  "gauge",
                         "help":  "Total production truth table gates.",
-                        "value":  58
+                        "value":  59
                     },
                     {
                         "name":  "flowchain_truth_gates_passed",
                         "type":  "gauge",
                         "help":  "Passed production truth table gates.",
-                        "value":  42
+                        "value":  43
                     },
                     {
                         "name":  "flowchain_truth_gates_owner_blocked",
@@ -806,7 +842,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  131,
+    "metricCount":  137,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

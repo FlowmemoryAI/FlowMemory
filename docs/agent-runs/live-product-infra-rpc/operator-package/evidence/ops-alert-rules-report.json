@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T14:12:23.8687397Z",
+    "generatedAt":  "2026-05-20T14:54:36.9270094Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  30,
-    "criticalRuleCount":  23,
+    "ruleCount":  31,
+    "criticalRuleCount":  24,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -45,6 +45,7 @@
                                 "bridge-relayer-guardrail-failed",
                                 "bridge-direct-observe-cursor-unsafe",
                                 "bridge-runtime-credit-validation-failed",
+                                "real-value-pilot-aggregate-failed",
                                 "bridge-relayer-loop-unhealthy",
                                 "supervisor-relayer-recovery-failed",
                                 "supervisor-node-recovery-validation-failed",
@@ -303,6 +304,20 @@
                       "commands":  [
                                        "npm run flowchain:bridge:runtime-credit:validate",
                                        "npm run flowchain:service:status",
+                                       "npm run flowchain:bridge:emergency-stop"
+                                   ]
+                  },
+                  {
+                      "id":  "real-value-pilot-aggregate-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "real-value-pilot-aggregate-failed"
+                                       ],
+                      "signal":  "Real-value pilot aggregate proof is missing or failing.",
+                      "threshold":  "aggregate report is not passed, has timed-out commands, failed commands, missing proofs, missing expected commands, false owner go/no-go, broadcasts, prints env values, or reports secrets",
+                      "commands":  [
+                                       "npm run flowchain:real-value-pilot:e2e -- -SkipBaseline -ChildTimeoutSeconds 1800",
+                                       "npm run flowchain:completion:audit -- -AllowBlocked",
                                        "npm run flowchain:bridge:emergency-stop"
                                    ]
                   },

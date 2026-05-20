@@ -353,12 +353,15 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
 
     await page.goto("/bridge");
     await expect(page.getByRole("heading", { name: "Bridge funds into Flowchain" })).toBeVisible();
-    await expect(page.getByLabel("Bridge runtime proof")).toContainText("Runtime credit");
-    await expect(page.getByLabel("Bridge runtime proof")).toContainText("Transfer settlement");
-    await expect(page.getByLabel("Bridge runtime proof")).toContainText("Relayer guardrail");
-    await expect(page.getByLabel("Bridge runtime proof")).toContainText("Relayer loop");
-    await expect(page.getByLabel("Bridge runtime proof")).toContainText("0.679s");
-    await expect(page.getByLabel("Bridge runtime proof")).toContainText("0.609s");
+    const bridgeRuntimeProof = page.getByLabel("Bridge runtime proof");
+    await expect(bridgeRuntimeProof).toContainText("Pilot aggregate");
+    await expect(bridgeRuntimeProof).toContainText("Runtime credit");
+    await expect(bridgeRuntimeProof).toContainText("Transfer settlement");
+    await expect(bridgeRuntimeProof).toContainText("Relayer guardrail");
+    await expect(bridgeRuntimeProof).toContainText("Relayer loop");
+    await expect(bridgeRuntimeProof).toContainText(/\d+ proof commands/);
+    await expect(bridgeRuntimeProof).toContainText(/\d+(\.\d+)?s to spendable credit/);
+    await expect(bridgeRuntimeProof).toContainText(/\d+(\.\d+)?s/);
     await expectNoHorizontalOverflow(page);
 
     await page.goto("/ops");

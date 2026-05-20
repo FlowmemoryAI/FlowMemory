@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 102799
+flowchain_latest_height 103125
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 102799
+flowchain_finalized_height 103125
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 5
+flowchain_state_file_age_seconds 4
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -27,7 +27,7 @@ flowchain_transaction_intake_accepted_rows_total 175
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 1127.91
+flowchain_transaction_intake_file_age_seconds 3254.742
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -42,10 +42,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 30
+flowchain_ops_alert_rules_total 31
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 23
+flowchain_ops_alert_rules_critical 24
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -196,6 +196,24 @@ flowchain_bridge_runtime_credit_missing_checks 0
 # HELP flowchain_bridge_runtime_credit_false_checks Required runtime proof checks that are false in bridge runtime credit validation.
 # TYPE flowchain_bridge_runtime_credit_false_checks gauge
 flowchain_bridge_runtime_credit_false_checks 0
+# HELP flowchain_real_value_pilot_aggregate_ready One when the real-value pilot aggregate proof is passed and safe.
+# TYPE flowchain_real_value_pilot_aggregate_ready gauge
+flowchain_real_value_pilot_aggregate_ready 1
+# HELP flowchain_real_value_pilot_aggregate_commands_total Proof commands run by the real-value pilot aggregate gate.
+# TYPE flowchain_real_value_pilot_aggregate_commands_total gauge
+flowchain_real_value_pilot_aggregate_commands_total 6
+# HELP flowchain_real_value_pilot_aggregate_timed_out_commands Timed-out proof commands in the real-value pilot aggregate gate.
+# TYPE flowchain_real_value_pilot_aggregate_timed_out_commands gauge
+flowchain_real_value_pilot_aggregate_timed_out_commands 0
+# HELP flowchain_real_value_pilot_aggregate_failed_commands Failed proof commands in the real-value pilot aggregate gate.
+# TYPE flowchain_real_value_pilot_aggregate_failed_commands gauge
+flowchain_real_value_pilot_aggregate_failed_commands 0
+# HELP flowchain_real_value_pilot_aggregate_missing_proofs Missing expected proof artifacts in the real-value pilot aggregate gate.
+# TYPE flowchain_real_value_pilot_aggregate_missing_proofs gauge
+flowchain_real_value_pilot_aggregate_missing_proofs 0
+# HELP flowchain_real_value_pilot_aggregate_owner_go_no_go One when owner go/no-go is true in the real-value pilot aggregate gate.
+# TYPE flowchain_real_value_pilot_aggregate_owner_go_no_go gauge
+flowchain_real_value_pilot_aggregate_owner_go_no_go 1
 # HELP flowchain_bridge_relayer_loop_healthy One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence.
 # TYPE flowchain_bridge_relayer_loop_healthy gauge
 flowchain_bridge_relayer_loop_healthy 0
@@ -375,10 +393,10 @@ flowchain_live_cutover_missing_owner_inputs 14
 flowchain_no_secret_ready 1
 # HELP flowchain_truth_gates_total Total production truth table gates.
 # TYPE flowchain_truth_gates_total gauge
-flowchain_truth_gates_total 58
+flowchain_truth_gates_total 59
 # HELP flowchain_truth_gates_passed Passed production truth table gates.
 # TYPE flowchain_truth_gates_passed gauge
-flowchain_truth_gates_passed 42
+flowchain_truth_gates_passed 43
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
 flowchain_truth_gates_owner_blocked 16

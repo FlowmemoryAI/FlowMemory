@@ -157,8 +157,9 @@ $checks = [ordered]@{
     testerLaunchRouteCovered = $specText.Contains("/tester")
     activationRouteCovered = $specText.Contains("/activation")
     bridgeRouteCovered = $specText.Contains("/bridge")
-    bridgePilotRuntimeProofCovered = $specText.Contains("Bridge runtime proof") -and $specText.Contains("Runtime credit") -and $specText.Contains("Relayer guardrail")
+    bridgePilotRuntimeProofCovered = $specText.Contains("Bridge runtime proof") -and $specText.Contains("Runtime credit") -and $specText.Contains("Relayer guardrail") -and $specText.Contains("Pilot aggregate")
     bridgeRuntimeCreditProofCovered = $specText.Contains("Bridge runtime credit") -and $specText.Contains("flowchain:bridge:runtime-credit:validate") -and $workbenchText.Contains("base8453-bridge-runtime-credit-proof")
+    realValuePilotAggregateProofCovered = $specText.Contains("Pilot aggregate") -and $specText.Contains("proof commands") -and $workbenchText.Contains("pilot aggregate")
     publicRpcHeaderProofCovered = $specText.Contains("RPC headers")
     noSecretLeakageAsserted = $specText.Contains("expectNoUiLeakage")
     noHorizontalOverflowAsserted = $specText.Contains("expectNoHorizontalOverflow")
@@ -183,7 +184,7 @@ $report = [ordered]@{
     commands = @($commands)
     browserProjects = @("chromium-desktop", "chromium-mobile")
     coveredRoutes = @("/wallet?panel=tester", "/tester/wallets/create", "/tester/faucet", "/tester/wallets/send", "/explorer", "/tester", "/activation", "/bridge")
-    coveredProofs = @("base8453-bridge-runtime-credit-proof")
+    coveredProofs = @("base8453-bridge-runtime-credit-proof", "real-value-pilot-aggregate-proof")
     envValuesPrinted = $false
     noSecrets = $true
     broadcasts = $false
@@ -214,7 +215,7 @@ $markdownLines = New-Object System.Collections.ArrayList
 [void] $markdownLines.Add("## Coverage")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("- Browser projects: chromium-desktop, chromium-mobile")
-[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof -> activation cockpit owner-input proof -> bridge pilot runtime proof -> bridge runtime credit proof")
+[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof -> activation cockpit owner-input proof -> bridge pilot runtime proof -> bridge runtime credit proof -> real-value pilot aggregate proof")
 [void] $markdownLines.Add("- Assertions: no secret text/storage leakage, no horizontal viewport overflow, no browser console errors")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("## Commands")

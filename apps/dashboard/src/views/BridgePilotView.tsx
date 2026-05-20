@@ -383,7 +383,17 @@ export function BridgePilotView({ workbench }: BridgePilotViewProps) {
     usdEstimate ??
     (priceStatus === "loading" ? "Loading ETH/USD quote" : "USD quote unavailable");
   const runtimeCreditStatus = liveMetrics.bridgeRuntimeCreditValidationStatus ?? liveMetrics.bridgeRuntimeCreditStatus;
+  const pilotAggregateStatus = liveMetrics.realValuePilotAggregateStatus;
+  const pilotAggregateReady = liveMetrics.realValuePilotAggregateReady === true;
+  const pilotAggregateCommandCount = text(liveMetrics.realValuePilotAggregateCommandsRun, "0");
   const bridgeProofCards = [
+    {
+      label: "Pilot aggregate",
+      value: text(pilotAggregateStatus),
+      detail: `${pilotAggregateCommandCount} proof commands`,
+      status: pilotAggregateReady ? "verified" : statusFromMetric(pilotAggregateStatus),
+      Icon: ListChecks,
+    },
     {
       label: "Runtime credit",
       value: text(runtimeCreditStatus),

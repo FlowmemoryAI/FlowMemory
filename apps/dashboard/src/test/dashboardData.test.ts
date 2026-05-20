@@ -166,6 +166,7 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.liveReadiness.some((record) => record.id === "public-rpc-edge")).toBe(true);
     expect(workbench.sections.liveReadiness.some((record) => record.id === "base8453-bridge-runtime-credit-proof")).toBe(true);
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge runtime credit")?.value).toBe("passed");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "pilot aggregate")?.value).toBe("passed");
     expect(workbench.sections.realValuePilot.some((record) => record.facts.some((fact) => fact.label === "scope" && fact.value === "capped owner testing"))).toBe(true);
     expect(workbench.sections.realValuePilot.some((record) => record.facts.some((fact) => fact.label === "source chain ID" && fact.value === "8453"))).toBe(true);
     expect(workbench.sections.explorerRecords.length).toBeGreaterThan(0);
@@ -572,10 +573,12 @@ describe("dashboard fixture", () => {
 
     expect(html).toContain("Bridge runtime proof");
     expect(html).toContain("Relayer and credit checks");
+    expect(html).toContain("Pilot aggregate");
     expect(html).toContain("Runtime credit");
     expect(html).toContain("Transfer settlement");
     expect(html).toContain("Relayer guardrail");
     expect(html).toContain("Relayer loop");
+    expect(html).toContain(`${liveReadinessReport.metrics.realValuePilotAggregateCommandsRun} proof commands`);
     expect(html).toContain(`${liveReadinessReport.metrics.bridgeRuntimeCreditLatencySeconds}s`);
     expect(html).toContain(`${liveReadinessReport.metrics.bridgeRuntimeCreditTransferSeconds}s`);
     expect(html).not.toContain("local-tester-write-token");

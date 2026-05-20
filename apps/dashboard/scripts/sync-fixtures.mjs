@@ -56,6 +56,7 @@ const liveReadinessReportCopies = [
   "bridge-relayer-guardrail-validation-report.json",
   "bridge-relayer-loop-validation-report.json",
   "bridge-runtime-credit-validation-report.json",
+  "real-value-pilot-aggregate-report.json",
   "external-tester-packet-report.json",
   "external-tester-connect-pack.json",
   "external-tester-readiness-report.json",
@@ -211,6 +212,7 @@ function writeLiveReadinessSummary() {
   const bridgeRelayerGuardrail = reports["bridge-relayer-guardrail-validation-report.json"];
   const bridgeRelayerLoopValidation = reports["bridge-relayer-loop-validation-report.json"];
   const bridgeRuntimeCreditValidation = reports["bridge-runtime-credit-validation-report.json"];
+  const realValuePilotAggregate = reports["real-value-pilot-aggregate-report.json"];
   const backupOwnerPathDryRun = reports["backup-owner-path-dry-run-report.json"];
   const publicRpcDeploymentBundle = reports["public-rpc-deployment-bundle-report.json"];
   const publicRpcDeploymentAutomation = reports["public-rpc-deployment-automation-report.json"];
@@ -334,6 +336,13 @@ function writeLiveReadinessSummary() {
       bridgeRuntimeCreditLatencySeconds: asText(bridgeRuntimeCreditValidation?.timing?.queueToSpendableSeconds, "not recorded"),
       bridgeRuntimeCreditTransferSeconds: asText(bridgeRuntimeCreditValidation?.timing?.transferSettlementSeconds, "not recorded"),
       bridgeRuntimeCreditFailedChecks: asText(asArray(bridgeRuntimeCreditValidation?.failedChecks).length, "0"),
+      realValuePilotAggregateStatus: asText(opsSnapshot?.reportStatuses?.realValuePilotAggregate ?? realValuePilotAggregate?.status, "not recorded"),
+      realValuePilotAggregateReady: opsSnapshot?.reportStatuses?.realValuePilotAggregateReady === true || (realValuePilotAggregate?.status === "passed" && realValuePilotAggregate?.ownerGoNoGo?.go === true),
+      realValuePilotAggregateCommandsRun: asText(opsSnapshot?.reportStatuses?.realValuePilotAggregateCommandsRun ?? asArray(realValuePilotAggregate?.commandsRun).length, "0"),
+      realValuePilotAggregateTimedOutCommands: asText(opsSnapshot?.reportStatuses?.realValuePilotAggregateTimedOutCommands ?? asArray(realValuePilotAggregate?.timedOutCommands).length, "0"),
+      realValuePilotAggregateFailedCommands: asText(opsSnapshot?.reportStatuses?.realValuePilotAggregateFailedCommands ?? asArray(realValuePilotAggregate?.failedCommands).length, "0"),
+      realValuePilotAggregateMissingProofs: asText(opsSnapshot?.reportStatuses?.realValuePilotAggregateMissingProofs ?? asArray(realValuePilotAggregate?.missingProofs).length, "0"),
+      realValuePilotAggregateOwnerGoNoGo: opsSnapshot?.reportStatuses?.realValuePilotAggregateOwnerGoNoGo === true || realValuePilotAggregate?.ownerGoNoGo?.go === true,
       backupOwnerPathDryRunStatus: asText(backupOwnerPathDryRun?.status, "not recorded"),
       publicRpcDeploymentBundleStatus: asText(publicRpcDeploymentBundle?.status, "not recorded"),
       publicRpcOwnerRenderValidationStatus: asText(publicRpcDeploymentBundle?.renderValidation?.status, "not recorded"),
@@ -418,6 +427,13 @@ function writeLiveReadinessSummary() {
       bridgeRuntimeCreditReady: opsSnapshot?.reportStatuses?.bridgeRuntimeCreditReady === true || bridgeRuntimeCreditValidation?.status === "passed",
       bridgeRuntimeCreditLatencySeconds: asText(opsSnapshot?.reportStatuses?.bridgeRuntimeCreditLatencySeconds ?? bridgeRuntimeCreditValidation?.timing?.queueToSpendableSeconds, "not recorded"),
       bridgeRuntimeTransferLatencySeconds: asText(opsSnapshot?.reportStatuses?.bridgeRuntimeTransferLatencySeconds ?? bridgeRuntimeCreditValidation?.timing?.transferSettlementSeconds, "not recorded"),
+      realValuePilotAggregateStatus: asText(opsSnapshot?.reportStatuses?.realValuePilotAggregate ?? realValuePilotAggregate?.status, "not recorded"),
+      realValuePilotAggregateReady: opsSnapshot?.reportStatuses?.realValuePilotAggregateReady === true || (realValuePilotAggregate?.status === "passed" && realValuePilotAggregate?.ownerGoNoGo?.go === true),
+      realValuePilotAggregateCommandsRun: asText(opsSnapshot?.reportStatuses?.realValuePilotAggregateCommandsRun ?? asArray(realValuePilotAggregate?.commandsRun).length, "0"),
+      realValuePilotAggregateTimedOutCommands: asText(opsSnapshot?.reportStatuses?.realValuePilotAggregateTimedOutCommands ?? asArray(realValuePilotAggregate?.timedOutCommands).length, "0"),
+      realValuePilotAggregateFailedCommands: asText(opsSnapshot?.reportStatuses?.realValuePilotAggregateFailedCommands ?? asArray(realValuePilotAggregate?.failedCommands).length, "0"),
+      realValuePilotAggregateMissingProofs: asText(opsSnapshot?.reportStatuses?.realValuePilotAggregateMissingProofs ?? asArray(realValuePilotAggregate?.missingProofs).length, "0"),
+      realValuePilotAggregateOwnerGoNoGo: opsSnapshot?.reportStatuses?.realValuePilotAggregateOwnerGoNoGo === true || realValuePilotAggregate?.ownerGoNoGo?.go === true,
       criticalCount: asText(opsSnapshot?.criticalCount, "0"),
       blockedCount: asText(opsSnapshot?.blockedCount, "0"),
       latestHeight: asText(opsSnapshot?.chain?.latestHeight, latestHeight),
