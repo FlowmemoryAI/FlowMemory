@@ -649,6 +649,56 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "owner-go-live-handoff"
+        requirement = "Owner go-live handoff converts activation stages, remaining owner inputs, external resources, validation commands, and do-not-send boundaries into one machine-readable launch deck without printing owner values."
+        path = "docs/agent-runs/live-product-infra-rpc/owner-go-live-handoff-report.json"
+        command = "npm run flowchain:owner:go-live-handoff"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings",
+            "unknownMissingEnvNames",
+            "unknownInvalidEnvNames",
+            "invalidEnvNames"
+        )
+        requiredMinimums = [ordered]@{
+            stageCount = 8
+            nextCommandCount = 6
+            mustNotSendCount = 6
+        }
+        requiredChecks = @(
+            "packageScriptPresent",
+            "activationPlanLoaded",
+            "activationPlanPassed",
+            "signupChecklistLoaded",
+            "signupChecklistPassed",
+            "ownerInputsLoaded",
+            "truthTableLoaded",
+            "stageDeckPresent",
+            "stageCountMinimumMet",
+            "everyStageHasValidationCommand",
+            "everyStageHasOwnerMustNotSend",
+            "nonReadyStagesExplainBlockers",
+            "requiredEnvCoverageComplete",
+            "knownOwnerInputBlockersOnly",
+            "nextOwnerInputsPresentWhenBlocked",
+            "nextCommandsPresent",
+            "releaseClaimBlockedUntilTruthPassed",
+            "packetShareBlockedUntilReady",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+            "noLiveBroadcast" = $true
+        }
+    },
+    [ordered]@{
         id = "owner-env-template"
         requirement = "Owner env template creates or preserves an ignored local-only NAME=value scaffold for every required owner input without recording real values."
         path = "docs/agent-runs/live-product-infra-rpc/owner-env-template-report.json"

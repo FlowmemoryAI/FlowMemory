@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-20T15:00:06.4334623Z",
+    "generatedAt":  "2026-05-20T15:14:59.9584292Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -45,6 +45,7 @@
                             "flowchain:owner:onboarding",
                             "flowchain:owner:signup-checklist",
                             "flowchain:owner:activation-plan",
+                            "flowchain:owner:go-live-handoff",
                             "flowchain:owner-env:template",
                             "flowchain:owner-env:readiness",
                             "flowchain:owner-env:readiness:validate",
@@ -188,6 +189,11 @@
                               "phase":  "owner-setup",
                               "command":  "npm run flowchain:owner:activation-plan",
                               "purpose":  "Generate the current ordered launch activation plan and exact validation commands."
+                          },
+                          {
+                              "phase":  "owner-setup",
+                              "command":  "npm run flowchain:owner:go-live-handoff",
+                              "purpose":  "Generate the exact no-secret go-live handoff deck, next owner inputs, validation commands, and do-not-send list."
                           },
                           {
                               "phase":  "owner-setup",
@@ -474,6 +480,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/OWNER_ACTIVATION_PLAN.md",
                          "destination":  "runbooks/OWNER_ACTIVATION_PLAN.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/OWNER_GO_LIVE_HANDOFF.md",
+                         "destination":  "runbooks/OWNER_GO_LIVE_HANDOFF.md",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"
@@ -777,6 +790,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json",
                          "destination":  "evidence/owner-activation-plan-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/owner-go-live-handoff-report.json",
+                         "destination":  "evidence/owner-go-live-handoff-report.json",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"

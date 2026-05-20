@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Package Verify
 
-Generated: 2026-05-20T15:00:15.9559583Z
+Generated: 2026-05-20T15:15:08.0639767Z
 Status: passed
 
 ## Checks
@@ -32,8 +32,8 @@ Status: passed
 
 - Package report: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\operator-package-report.json`
 - Package directory: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\operator-package`
-- Expected files: 82
+- Expected files: 84
 - Missing files: 0
 - Forbidden local files: 0
-- Command count: 61
+- Command count: 62
 - Owner-input names: 17
