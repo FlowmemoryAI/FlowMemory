@@ -58,6 +58,57 @@ flowchain_service_status_ready 1
 # HELP flowchain_service_monitor_ready One when service monitor report is passed.
 # TYPE flowchain_service_monitor_ready gauge
 flowchain_service_monitor_ready 1
+# HELP flowchain_service_install_validation_ready One when Windows service install validation is passed.
+# TYPE flowchain_service_install_validation_ready gauge
+flowchain_service_install_validation_ready 1
+# HELP flowchain_service_install_failed_checks Failed checks in Windows service install validation.
+# TYPE flowchain_service_install_failed_checks gauge
+flowchain_service_install_failed_checks 0
+# HELP flowchain_service_install_missing_scripts Missing package scripts in Windows service install validation.
+# TYPE flowchain_service_install_missing_scripts gauge
+flowchain_service_install_missing_scripts 0
+# HELP flowchain_service_install_plan_did_not_mutate One when Windows service install plan proved read-only.
+# TYPE flowchain_service_install_plan_did_not_mutate gauge
+flowchain_service_install_plan_did_not_mutate 1
+# HELP flowchain_service_install_live_profile_default One when Windows service install defaults to the live profile.
+# TYPE flowchain_service_install_live_profile_default gauge
+flowchain_service_install_live_profile_default 1
+# HELP flowchain_service_install_bridge_relayer_opt_in One when Windows service install has an explicit bridge relayer opt-in plan.
+# TYPE flowchain_service_install_bridge_relayer_opt_in gauge
+flowchain_service_install_bridge_relayer_opt_in 1
+# HELP flowchain_service_install_status_read_only One when Windows service status validation is read-only and non-mutating.
+# TYPE flowchain_service_install_status_read_only gauge
+flowchain_service_install_status_read_only 1
+# HELP flowchain_service_install_no_secrets One when Windows service install validation contains no secret findings.
+# TYPE flowchain_service_install_no_secrets gauge
+flowchain_service_install_no_secrets 1
+# HELP flowchain_service_install_no_broadcasts One when Windows service install validation performed no live broadcasts.
+# TYPE flowchain_service_install_no_broadcasts gauge
+flowchain_service_install_no_broadcasts 1
+# HELP flowchain_systemd_service_install_validation_ready One when systemd service install validation is passed.
+# TYPE flowchain_systemd_service_install_validation_ready gauge
+flowchain_systemd_service_install_validation_ready 1
+# HELP flowchain_systemd_service_install_failed_checks Failed checks in systemd service install validation.
+# TYPE flowchain_systemd_service_install_failed_checks gauge
+flowchain_systemd_service_install_failed_checks 0
+# HELP flowchain_systemd_service_install_rendered_units One when systemd service install plans use rendered units.
+# TYPE flowchain_systemd_service_install_rendered_units gauge
+flowchain_systemd_service_install_rendered_units 1
+# HELP flowchain_systemd_service_install_autorecovery_loop One when the systemd supervisor unit uses the autorecovery loop.
+# TYPE flowchain_systemd_service_install_autorecovery_loop gauge
+flowchain_systemd_service_install_autorecovery_loop 1
+# HELP flowchain_systemd_service_install_restart_always One when the systemd supervisor unit restarts always.
+# TYPE flowchain_systemd_service_install_restart_always gauge
+flowchain_systemd_service_install_restart_always 1
+# HELP flowchain_systemd_service_install_hardening One when systemd service install validation proves least-privilege hardening.
+# TYPE flowchain_systemd_service_install_hardening gauge
+flowchain_systemd_service_install_hardening 1
+# HELP flowchain_systemd_service_install_no_secrets One when systemd service install validation contains no secret findings.
+# TYPE flowchain_systemd_service_install_no_secrets gauge
+flowchain_systemd_service_install_no_secrets 1
+# HELP flowchain_systemd_service_install_no_broadcasts One when systemd service install validation performed no live broadcasts.
+# TYPE flowchain_systemd_service_install_no_broadcasts gauge
+flowchain_systemd_service_install_no_broadcasts 1
 # HELP flowchain_public_rpc_ready One when public RPC readiness is passed.
 # TYPE flowchain_public_rpc_ready gauge
 flowchain_public_rpc_ready 0

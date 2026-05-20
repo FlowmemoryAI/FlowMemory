@@ -24,6 +24,8 @@ $paths = [ordered]@{
     opsAlerts = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
     serviceStatus = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
+    serviceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
+    systemdServiceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"
     publicRpc = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
     publicRpcSyntheticCanary = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json"
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
@@ -219,6 +221,8 @@ $opsSnapshot = $reports.opsSnapshot
 $opsAlerts = $reports.opsAlerts
 $serviceStatus = $reports.serviceStatus
 $serviceMonitor = $reports.serviceMonitor
+$serviceInstallValidation = $reports.serviceInstallValidation
+$systemdServiceInstallValidation = $reports.systemdServiceInstallValidation
 $publicRpc = $reports.publicRpc
 $publicRpcSyntheticCanary = $reports.publicRpcSyntheticCanary
 $externalTester = $reports.externalTester
@@ -289,6 +293,11 @@ $publicRpcSyntheticCanaryChecks = Get-MetricsProp -Object $publicRpcSyntheticCan
 $publicRpcSyntheticCanaryMissingEnvCount = @((Get-MetricsProp -Object $publicRpcSyntheticCanary -Name "missingEnvNames" -Default @())).Count
 $publicRpcDeploymentBundleChecks = Get-MetricsProp -Object $publicRpcDeploymentBundle -Name "checks"
 $publicRpcDeploymentAutomationChecks = Get-MetricsProp -Object $publicRpcDeploymentAutomation -Name "checks"
+$serviceInstallValidationChecks = Get-MetricsProp -Object $serviceInstallValidation -Name "checks"
+$serviceInstallValidationFailedChecks = @((Get-MetricsProp -Object $serviceInstallValidation -Name "failedChecks" -Default @()))
+$serviceInstallValidationMissingPackageScripts = @((Get-MetricsProp -Object $serviceInstallValidation -Name "missingPackageScripts" -Default @()))
+$systemdServiceInstallValidationChecks = Get-MetricsProp -Object $systemdServiceInstallValidation -Name "checks"
+$systemdServiceInstallValidationFailedChecks = @((Get-MetricsProp -Object $systemdServiceInstallValidation -Name "failedChecks" -Default @()))
 $bridgeRelayerLoopValidationChecks = Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "checks"
 $bridgeRelayerLoopValidationFailedChecks = @((Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "failedChecks" -Default @()))
 $bridgeRelayerLoopValidationSecretFindings = @((Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "secretMarkerFindings" -Default @()))
@@ -343,6 +352,23 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_ops_alert_rules_blocked" -Hel
 Add-MetricGauge -Metrics $metrics -Name "flowchain_ops_active_alert_rules" -Help "Active ops alert rule count for the current findings." -Value (@((Get-MetricsProp -Object $opsAlerts -Name "activeRuleIds" -Default @())).Count)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_service_status_ready" -Help "One when service status report is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $serviceStatus))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_service_monitor_ready" -Help "One when service monitor report is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $serviceMonitor))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_service_install_validation_ready" -Help "One when Windows service install validation is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $serviceInstallValidation))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_service_install_failed_checks" -Help "Failed checks in Windows service install validation." -Value (ConvertTo-MetricNumber -Value $serviceInstallValidationFailedChecks.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_service_install_missing_scripts" -Help "Missing package scripts in Windows service install validation." -Value (ConvertTo-MetricNumber -Value $serviceInstallValidationMissingPackageScripts.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_service_install_plan_did_not_mutate" -Help "One when Windows service install plan proved read-only." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $serviceInstallValidationChecks -Name "planDidNotMutate" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_service_install_live_profile_default" -Help "One when Windows service install defaults to the live profile." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $serviceInstallValidationChecks -Name "liveProfileDefault" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_service_install_bridge_relayer_opt_in" -Help "One when Windows service install has an explicit bridge relayer opt-in plan." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $serviceInstallValidationChecks -Name "bridgeRelayerOptInStartsLoop" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_service_install_status_read_only" -Help "One when Windows service status validation is read-only and non-mutating." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $serviceInstallValidationChecks -Name "statusActionReadOnly" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $serviceInstallValidationChecks -Name "statusDidNotMutate" -Default $false) -eq $true)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_service_install_no_secrets" -Help "One when Windows service install validation contains no secret findings." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $serviceInstallValidation -Name "noSecrets" -Default $false) -eq $true))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_service_install_no_broadcasts" -Help "One when Windows service install validation performed no live broadcasts." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $serviceInstallValidation -Name "broadcasts" -Default $true) -eq $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_systemd_service_install_validation_ready" -Help "One when systemd service install validation is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $systemdServiceInstallValidation))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_systemd_service_install_failed_checks" -Help "Failed checks in systemd service install validation." -Value (ConvertTo-MetricNumber -Value $systemdServiceInstallValidationFailedChecks.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_systemd_service_install_rendered_units" -Help "One when systemd service install plans use rendered units." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $systemdServiceInstallValidationChecks -Name "installPlanUsesRenderedUnits" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_systemd_service_install_autorecovery_loop" -Help "One when the systemd supervisor unit uses the autorecovery loop." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $systemdServiceInstallValidationChecks -Name "supervisorUsesAutorecoveryLoop" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_systemd_service_install_restart_always" -Help "One when the systemd supervisor unit restarts always." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $systemdServiceInstallValidationChecks -Name "supervisorRestartAlways" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_systemd_service_install_hardening" -Help "One when systemd service install validation proves least-privilege hardening." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $systemdServiceInstallValidationChecks -Name "leastPrivilegeHardeningPresent" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_systemd_service_install_no_secrets" -Help "One when systemd service install validation contains no secret findings." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $systemdServiceInstallValidation -Name "noSecrets" -Default $false) -eq $true))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_systemd_service_install_no_broadcasts" -Help "One when systemd service install validation performed no live broadcasts." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $systemdServiceInstallValidation -Name "broadcasts" -Default $true) -eq $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_ready" -Help "One when public RPC readiness is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "publicRpc"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_synthetic_canary_ready" -Help "One when the public RPC synthetic canary passed all read-only live probes." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "publicRpcSyntheticCanaryReady" -Default (Get-MetricsProp -Object $publicRpcSyntheticCanary -Name "syntheticCanaryReady" -Default $false)))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_synthetic_canary_probe_count" -Help "Read-only public RPC synthetic canary probe count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "publicRpcSyntheticCanaryProbeCount" -Default (Get-MetricsProp -Object $publicRpcSyntheticCanary -Name "probeCount" -Default 0)))
@@ -516,6 +542,8 @@ $metricsJson = [ordered]@{
         opsAlertRulesStatus = Get-MetricsStatus -Report $opsAlerts
         serviceStatusStatus = Get-MetricsStatus -Report $serviceStatus
         serviceMonitorStatus = Get-MetricsStatus -Report $serviceMonitor
+        serviceInstallValidationStatus = Get-MetricsStatus -Report $serviceInstallValidation
+        systemdServiceInstallValidationStatus = Get-MetricsStatus -Report $systemdServiceInstallValidation
         publicRpcSyntheticCanaryStatus = Get-MetricsStatus -Report $publicRpcSyntheticCanary
         publicRpcDeploymentBundleStatus = Get-MetricsStatus -Report $publicRpcDeploymentBundle
         publicRpcDeploymentAutomationStatus = Get-MetricsStatus -Report $publicRpcDeploymentAutomation
@@ -567,6 +595,23 @@ $requiredMetricNames = @(
     "flowchain_ops_alert_rules_total",
     "flowchain_ops_active_alert_rules",
     "flowchain_service_status_ready",
+    "flowchain_service_install_validation_ready",
+    "flowchain_service_install_failed_checks",
+    "flowchain_service_install_missing_scripts",
+    "flowchain_service_install_plan_did_not_mutate",
+    "flowchain_service_install_live_profile_default",
+    "flowchain_service_install_bridge_relayer_opt_in",
+    "flowchain_service_install_status_read_only",
+    "flowchain_service_install_no_secrets",
+    "flowchain_service_install_no_broadcasts",
+    "flowchain_systemd_service_install_validation_ready",
+    "flowchain_systemd_service_install_failed_checks",
+    "flowchain_systemd_service_install_rendered_units",
+    "flowchain_systemd_service_install_autorecovery_loop",
+    "flowchain_systemd_service_install_restart_always",
+    "flowchain_systemd_service_install_hardening",
+    "flowchain_systemd_service_install_no_secrets",
+    "flowchain_systemd_service_install_no_broadcasts",
     "flowchain_public_rpc_ready",
     "flowchain_public_rpc_synthetic_canary_ready",
     "flowchain_public_rpc_synthetic_canary_probe_count",
@@ -719,6 +764,8 @@ $checks = [ordered]@{
     opsAlertRulesLoaded = $null -ne $opsAlerts
     serviceStatusLoaded = $null -ne $serviceStatus
     serviceMonitorLoaded = $null -ne $serviceMonitor
+    serviceInstallValidationLoaded = $null -ne $serviceInstallValidation
+    systemdServiceInstallValidationLoaded = $null -ne $systemdServiceInstallValidation
     publicRpcSyntheticCanaryLoaded = $null -ne $publicRpcSyntheticCanary
     externalTesterLoaded = $null -ne $externalTester
     publicTesterGatewayLoaded = $null -ne $publicTesterGateway
@@ -738,6 +785,25 @@ $checks = [ordered]@{
     markdownWritten = $true
     metricCountSufficient = @($metrics).Count -ge 35
     requiredMetricsPresent = $missingMetricNames.Count -eq 0
+    serviceInstallValidationMetricsPresent = @(
+        "flowchain_service_install_validation_ready",
+        "flowchain_service_install_failed_checks",
+        "flowchain_service_install_missing_scripts",
+        "flowchain_service_install_plan_did_not_mutate",
+        "flowchain_service_install_live_profile_default",
+        "flowchain_service_install_bridge_relayer_opt_in",
+        "flowchain_service_install_status_read_only",
+        "flowchain_service_install_no_secrets",
+        "flowchain_service_install_no_broadcasts",
+        "flowchain_systemd_service_install_validation_ready",
+        "flowchain_systemd_service_install_failed_checks",
+        "flowchain_systemd_service_install_rendered_units",
+        "flowchain_systemd_service_install_autorecovery_loop",
+        "flowchain_systemd_service_install_restart_always",
+        "flowchain_systemd_service_install_hardening",
+        "flowchain_systemd_service_install_no_secrets",
+        "flowchain_systemd_service_install_no_broadcasts"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     externalTesterEvidenceMetricsPresent = @(
         "flowchain_external_tester_ready",
         "flowchain_external_tester_local_rehearsal_ready",

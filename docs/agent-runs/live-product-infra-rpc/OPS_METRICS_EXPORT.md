@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-20T19:43:33.6320720Z
+Generated: 2026-05-20T19:56:00.9689038Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 178
+- Metric count: 195
 
 ## Required Metrics
 
@@ -27,6 +27,23 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_ops_alert_rules_total: present
 - flowchain_ops_active_alert_rules: present
 - flowchain_service_status_ready: present
+- flowchain_service_install_validation_ready: present
+- flowchain_service_install_failed_checks: present
+- flowchain_service_install_missing_scripts: present
+- flowchain_service_install_plan_did_not_mutate: present
+- flowchain_service_install_live_profile_default: present
+- flowchain_service_install_bridge_relayer_opt_in: present
+- flowchain_service_install_status_read_only: present
+- flowchain_service_install_no_secrets: present
+- flowchain_service_install_no_broadcasts: present
+- flowchain_systemd_service_install_validation_ready: present
+- flowchain_systemd_service_install_failed_checks: present
+- flowchain_systemd_service_install_rendered_units: present
+- flowchain_systemd_service_install_autorecovery_loop: present
+- flowchain_systemd_service_install_restart_always: present
+- flowchain_systemd_service_install_hardening: present
+- flowchain_systemd_service_install_no_secrets: present
+- flowchain_systemd_service_install_no_broadcasts: present
 - flowchain_public_rpc_ready: present
 - flowchain_public_rpc_synthetic_canary_ready: present
 - flowchain_public_rpc_synthetic_canary_probe_count: present
@@ -178,6 +195,8 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | opsAlertRulesLoaded | True |
 | serviceStatusLoaded | True |
 | serviceMonitorLoaded | True |
+| serviceInstallValidationLoaded | True |
+| systemdServiceInstallValidationLoaded | True |
 | publicRpcSyntheticCanaryLoaded | True |
 | externalTesterLoaded | True |
 | publicTesterGatewayLoaded | True |
@@ -197,6 +216,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | markdownWritten | True |
 | metricCountSufficient | True |
 | requiredMetricsPresent | True |
+| serviceInstallValidationMetricsPresent | True |
 | externalTesterEvidenceMetricsPresent | True |
 | bridgeDirectObserveMetricsPresent | True |
 | bridgeRuntimeCreditMetricsPresent | True |
