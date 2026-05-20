@@ -520,6 +520,8 @@ describe("dashboard fixture", () => {
     const html = renderToStaticMarkup(createElement(MemoryRouter, { initialEntries: ["/activation"] }, createElement(OwnerActivationView, { workbench })));
 
     expect(html).toContain("L1 activation");
+    expect(html).toContain("Release");
+    expect(html).toContain("handoff passed");
     expect(html).toContain("Activation stages");
     expect(html).toContain("Expose repo-owned FlowChain RPC");
     expect(html).toContain("Provision durable state backup storage");

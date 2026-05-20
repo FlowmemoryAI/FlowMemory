@@ -346,6 +346,7 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await page.goto("/activation");
     await expect(page.getByRole("heading", { name: "L1 activation" })).toBeVisible();
     await expect(page.getByLabel("L1 activation status")).toContainText("Needed now");
+    await expect(page.getByLabel("L1 activation status")).toContainText("Release");
     await expect(page.getByRole("heading", { name: "Needed now" })).toBeVisible();
     await expect(page.getByLabel("Next owner inputs")).toContainText("FLOWCHAIN_RPC_PUBLIC_URL");
     await expect(page.getByText("Expose repo-owned FlowChain RPC", { exact: false })).toBeVisible();

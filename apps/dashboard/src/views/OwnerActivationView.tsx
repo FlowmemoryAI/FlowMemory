@@ -110,31 +110,35 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
   const liveReadiness = isRecord(workbench.raw.liveReadinessReport) ? workbench.raw.liveReadinessReport : null;
   const metrics = isRecord(liveReadiness?.metrics) ? liveReadiness.metrics : {};
   const activation = isRecord(liveReadiness?.ownerActivation) ? liveReadiness.ownerActivation : null;
-  const stages = asArray(activation?.stages).map(parseStage).filter((stage): stage is ActivationStage => stage !== null);
-  const missingEnvNames = stringList(activation?.missingEnvNames);
-  const invalidEnvNames = stringList(activation?.invalidEnvNames);
-  const nextOwnerInputNames = stringList(activation?.nextOwnerInputNames);
-  const requiredOwnerEnvNames = stringList(activation?.requiredOwnerEnvNames);
-  const optionalOwnerEnvNames = stringList(activation?.optionalOwnerEnvNames);
-  const nextCommands = stringList(activation?.nextCommands);
-  const forbiddenItems = stringList(activation?.forbiddenItems);
+  const handoff = isRecord(liveReadiness?.ownerGoLiveHandoff) ? liveReadiness.ownerGoLiveHandoff : null;
+  const stageSource = handoff ?? activation;
+  const stages = asArray(stageSource?.stages).map(parseStage).filter((stage): stage is ActivationStage => stage !== null);
+  const missingEnvNames = stringList(handoff?.missingEnvNames ?? activation?.missingEnvNames);
+  const invalidEnvNames = stringList(handoff?.invalidEnvNames ?? activation?.invalidEnvNames);
+  const nextOwnerInputNames = stringList(handoff?.nextOwnerInputNames ?? activation?.nextOwnerInputNames);
+  const requiredOwnerEnvNames = stringList(handoff?.requiredOwnerEnvNames ?? activation?.requiredOwnerEnvNames);
+  const optionalOwnerEnvNames = stringList(handoff?.optionalOwnerEnvNames ?? activation?.optionalOwnerEnvNames);
+  const nextCommands = stringList(handoff?.nextCommands ?? activation?.nextCommands);
+  const forbiddenItems = stringList(handoff?.forbiddenItems ?? activation?.forbiddenItems);
   const activationReady = activation?.activationReady === true;
+  const releaseReady = handoff?.releaseReady === true;
+  const handoffStatus = text(handoff?.status ?? metrics.ownerGoLiveHandoffStatus, "not recorded");
   const activationStatus = text(activation?.status ?? metrics.ownerActivationStatus, "not recorded");
-  const readyStageCount = text(activation?.readyStageCount ?? metrics.ownerActivationReadyStageCount, "0");
-  const stageCount = text(activation?.stageCount ?? metrics.ownerActivationStageCount, String(stages.length));
-  const blockedStageCount = text(activation?.blockedStageCount, "0");
+  const readyStageCount = text(handoff?.readyStageCount ?? activation?.readyStageCount ?? metrics.ownerActivationReadyStageCount, "0");
+  const stageCount = text(handoff?.stageCount ?? activation?.stageCount ?? metrics.ownerGoLiveStageCount ?? metrics.ownerActivationStageCount, String(stages.length));
+  const blockedStageCount = text(handoff?.blockedStageCount ?? activation?.blockedStageCount, "0");
   const needsInputCount = text(activation?.stagesNeedingOwnerInputCount, "0");
   const needsValidationCount = text(activation?.stagesNeedingValidationCount, "0");
-  const noSecrets = activation?.noSecrets === true;
-  const envValuesPrinted = activation?.envValuesPrinted === true;
-  const broadcasts = activation?.broadcasts === true;
+  const noSecrets = (handoff ?? activation)?.noSecrets === true;
+  const envValuesPrinted = (handoff ?? activation)?.envValuesPrinted === true;
+  const broadcasts = (handoff ?? activation)?.broadcasts === true;
 
   return (
     <div className="view-stack activation-view">
       <SectionHeader
         eyebrow="go-live activation"
         title="L1 activation"
-        detail="Ordered owner setup, validation commands, public RPC, backup, tester gateway, and Base 8453 bridge inputs from the current activation evidence."
+        detail="Owner go-live handoff, validation commands, public RPC, backup, tester gateway, and Base 8453 bridge inputs from the current launch evidence."
         action={
           <div className="workbench-header-actions">
             <Link className="button" to="/tester">
@@ -154,6 +158,11 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
       />
 
       <section className="activation-command-panel" aria-label="L1 activation status">
+        <div>
+          <span>Release</span>
+          <strong>{releaseReady ? "ready" : "blocked"}</strong>
+          <small>handoff {handoffStatus}</small>
+        </div>
         <div>
           <span>Activation</span>
           <strong>{activationReady ? "ready" : "blocked"}</strong>
@@ -189,7 +198,7 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
                 <ClipboardCheck size={18} aria-hidden="true" />
                 <h2>Activation stages</h2>
               </div>
-              <StatusBadge status={statusFromText(activationReady ? "ready" : "pending")} compact />
+              <StatusBadge status={statusFromText(releaseReady || activationReady ? "ready" : "pending")} compact />
             </div>
 
             {stages.length > 0 ? (
@@ -246,7 +255,7 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
                 })}
               </div>
             ) : (
-              <EmptyState title="Activation plan missing" detail="Run npm run flowchain:owner:activation-plan, then refresh dashboard fixtures." />
+              <EmptyState title="Go-live handoff missing" detail="Run npm run flowchain:owner:go-live-handoff, then refresh dashboard fixtures." />
             )}
           </article>
         </div>

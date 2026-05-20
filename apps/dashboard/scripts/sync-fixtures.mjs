@@ -69,6 +69,7 @@ const liveReadinessReportCopies = [
   "ops-escalation-dry-run-report.json",
   "owner-inputs-report.json",
   "owner-activation-plan-report.json",
+  "owner-go-live-handoff-report.json",
   "no-secret-scan-report.json",
 ];
 
@@ -228,6 +229,7 @@ function writeLiveReadinessSummary() {
   const opsEscalationDryRun = reports["ops-escalation-dry-run-report.json"];
   const ownerInputs = reports["owner-inputs-report.json"];
   const ownerActivationPlan = reports["owner-activation-plan-report.json"];
+  const ownerGoLiveHandoff = reports["owner-go-live-handoff-report.json"];
   const noSecretScan = reports["no-secret-scan-report.json"];
   const gates = [...liveReadinessGateLabels.keys()].map((id) => gateFromContractItem(contract, id));
   const activeRuleIds = asArray(opsAlertRules?.activeRuleIds).map((id) => sanitizeText(id));
@@ -257,7 +259,7 @@ function writeLiveReadinessSummary() {
   const connectPackCheckValues = Object.values(externalTesterPacket?.connectPackChecks ?? {});
   const bridgeRelayerSteps = asArray(bridgeRelayer?.steps);
   const bridgeRelayerTimedOutSteps = timedOutSteps(bridgeRelayerSteps);
-  const activationStages = asArray(ownerActivationPlan?.stages).map((stage) => ({
+  const toActivationStage = (stage) => ({
     id: sanitizeText(stage?.id),
     title: sanitizeText(stage?.title),
     status: sanitizeText(stage?.status),
@@ -279,8 +281,11 @@ function writeLiveReadinessSummary() {
       status: sanitizeText(sourceReport?.status),
       path: sanitizeText(sourceReport?.path),
     })),
-  }));
+  });
+  const activationStages = asArray(ownerActivationPlan?.stages).map(toActivationStage);
+  const goLiveStages = asArray(ownerGoLiveHandoff?.stages).map(toActivationStage);
   const activationForbiddenItems = uniqueTexts(activationStages.flatMap((stage) => stage.ownerMustNotSend));
+  const goLiveForbiddenItems = uniqueTexts(ownerGoLiveHandoff?.mustNotSend ?? goLiveStages.flatMap((stage) => stage.ownerMustNotSend));
   const latestHeight = asText(serviceStatus?.chain?.latestHeight, "not recorded");
   const finalizedHeight = asText(serviceStatus?.chain?.finalizedHeight, "not recorded");
   const privateRpcUrl = serviceStatus?.bind
@@ -365,6 +370,11 @@ function writeLiveReadinessSummary() {
       ownerActivationStageCount: asText(ownerActivationPlan?.stageCount, String(activationStages.length)),
       ownerActivationReadyStageCount: asText(ownerActivationPlan?.readyStageCount, "0"),
       ownerActivationMissingCount: asArray(ownerActivationPlan?.missingEnvNames).length,
+      ownerGoLiveHandoffStatus: asText(ownerGoLiveHandoff?.status, "not recorded"),
+      ownerGoLiveHandoffReady: ownerGoLiveHandoff?.status === "passed" && asArray(ownerGoLiveHandoff?.failedChecks).length === 0,
+      ownerGoLiveReleaseReady: ownerGoLiveHandoff?.releaseReady === true,
+      ownerGoLiveNextInputCount: asArray(ownerGoLiveHandoff?.nextOwnerInputNames).length,
+      ownerGoLiveStageCount: asText(ownerGoLiveHandoff?.stageCount, String(goLiveStages.length)),
       noSecretStatus: asText(noSecretScan?.status, "not recorded"),
       opsSnapshotStatus: asText(opsSnapshot?.status, "not recorded"),
       opsAlertState: asText(opsAlertRules?.currentAlertState, "not recorded"),
@@ -487,6 +497,35 @@ function writeLiveReadinessSummary() {
       noSecrets: ownerActivationPlan?.noSecrets === true,
       broadcasts: ownerActivationPlan?.broadcasts === true,
       envValuesPrinted: ownerActivationPlan?.envValuesPrinted === true,
+    },
+    ownerGoLiveHandoff: {
+      status: asText(ownerGoLiveHandoff?.status, "not recorded"),
+      releaseReady: ownerGoLiveHandoff?.releaseReady === true,
+      activationReady: ownerGoLiveHandoff?.activationReady === true,
+      deploymentReady: ownerGoLiveHandoff?.deploymentReady === true,
+      packetShareable: ownerGoLiveHandoff?.packetShareable === true,
+      completionReady: ownerGoLiveHandoff?.completionReady === true,
+      truthTableClear: ownerGoLiveHandoff?.truthTableClear === true,
+      blockedOnlyOnKnownOwnerInputs: ownerGoLiveHandoff?.blockedOnlyOnKnownOwnerInputs === true,
+      stageCount: asText(ownerGoLiveHandoff?.stageCount, String(goLiveStages.length)),
+      readyStageCount: asText(ownerGoLiveHandoff?.readyStageCount, "0"),
+      blockedStageCount: asText(ownerGoLiveHandoff?.blockedStageCount, "0"),
+      nextCommandCount: asText(ownerGoLiveHandoff?.nextCommandCount, "0"),
+      mustNotSendCount: asText(ownerGoLiveHandoff?.mustNotSendCount, "0"),
+      missingEnvNames: uniqueTexts(ownerGoLiveHandoff?.missingEnvNames),
+      invalidEnvNames: uniqueTexts(ownerGoLiveHandoff?.invalidEnvNames),
+      nextOwnerInputNames: uniqueTexts(ownerGoLiveHandoff?.nextOwnerInputNames),
+      requiredOwnerEnvNames: uniqueTexts(ownerGoLiveHandoff?.requiredOwnerEnvNames),
+      optionalOwnerEnvNames: uniqueTexts(ownerGoLiveHandoff?.optionalOwnerEnvNames),
+      nextCommands: commandList(ownerGoLiveHandoff?.nextCommands, 10),
+      forbiddenItems: goLiveForbiddenItems,
+      externalResources: uniqueTexts(ownerGoLiveHandoff?.externalResources),
+      stages: goLiveStages,
+      checks: ownerGoLiveHandoff?.checks ?? {},
+      failedChecks: uniqueTexts(ownerGoLiveHandoff?.failedChecks),
+      noSecrets: ownerGoLiveHandoff?.noSecrets === true,
+      broadcasts: ownerGoLiveHandoff?.broadcasts === true,
+      envValuesPrinted: ownerGoLiveHandoff?.envValuesPrinted === true,
     },
     testerLaunch: {
       status: asText(externalTesterPacket?.status ?? externalTesterReadiness?.status, "not recorded"),
