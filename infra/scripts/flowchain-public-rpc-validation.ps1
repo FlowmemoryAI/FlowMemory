@@ -155,6 +155,7 @@ try {
     $checks = Get-ValidationProp -Object $readinessReport -Name "checks"
     $deploymentChecks = Get-ValidationProp -Object $readinessReport -Name "deploymentChecks"
     $cors = Get-ValidationProp -Object $readinessReport -Name "cors"
+    $securityHeaders = Get-ValidationProp -Object $readinessReport -Name "securityHeaders"
     $endpointChecks = @((Get-ValidationProp -Object $readinessReport -Name "endpointChecks" -Default @()))
     $failedEndpointChecks = @($endpointChecks | Where-Object { "$($_.status)" -ne "passed" })
     $missingEnvNames = @((Get-ValidationProp -Object $readinessReport -Name "missingEnvNames" -Default @()))
@@ -172,6 +173,8 @@ try {
         allowedOriginAccepted = (Get-ValidationProp -Object $checks -Name "corsConfiguredOriginAccepted" -Default $false) -eq $true -and (Get-ValidationProp -Object $cors -Name "configuredOriginAccepted" -Default $false) -eq $true
         disallowedOriginProbePerformed = (Get-ValidationProp -Object $checks -Name "corsDisallowedOriginProbePerformed" -Default $false) -eq $true -and (Get-ValidationProp -Object $cors -Name "disallowedOriginProbePerformed" -Default $false) -eq $true
         disallowedOriginRejected = (Get-ValidationProp -Object $checks -Name "corsDisallowedOriginRejected" -Default $false) -eq $true -and (Get-ValidationProp -Object $cors -Name "disallowedOriginRejected" -Default $false) -eq $true
+        securityHeaderProbeSkippedForLocalEndpoint = (Get-ValidationProp -Object $checks -Name "securityHeadersSkippedUntilPublicMode" -Default $false) -eq $true -and (Get-ValidationProp -Object $securityHeaders -Name "performed" -Default $true) -eq $false
+        securityHeaderPassRequiredOnlyForPublicMode = (Get-ValidationProp -Object $checks -Name "securityHeadersAllRequiredPresent" -Default $false) -eq $true
         rateLimitProbePerformed = (Get-ValidationProp -Object $checks -Name "rateLimitProbePerformed" -Default $false) -eq $true
         rateLimitRejected = (Get-ValidationProp -Object $checks -Name "rateLimitRejectionObserved" -Default $false) -eq $true
         rateLimitRetryAfterHeaderPresent = (Get-ValidationProp -Object $checks -Name "rateLimitRetryAfterHeaderPresent" -Default $false) -eq $true

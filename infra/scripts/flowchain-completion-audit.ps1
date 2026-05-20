@@ -1589,6 +1589,8 @@ $publicRpcValidationSecretFindings = @((Get-AuditProp -Object $publicRpcValidati
 $publicRpcValidationAllowed = Get-AuditProp -Object $publicRpcValidationChecks -Name "allowedOriginAccepted" -Default $false
 $publicRpcValidationDisallowedProbe = Get-AuditProp -Object $publicRpcValidationChecks -Name "disallowedOriginProbePerformed" -Default $false
 $publicRpcValidationDisallowedRejected = Get-AuditProp -Object $publicRpcValidationChecks -Name "disallowedOriginRejected" -Default $false
+$publicRpcValidationSecurityHeaderSkip = Get-AuditProp -Object $publicRpcValidationChecks -Name "securityHeaderProbeSkippedForLocalEndpoint" -Default $false
+$publicRpcValidationSecurityHeaderPolicy = Get-AuditProp -Object $publicRpcValidationChecks -Name "securityHeaderPassRequiredOnlyForPublicMode" -Default $false
 $publicRpcValidationEndpointChecks = Get-AuditProp -Object $publicRpcValidationChecks -Name "noFailedEndpointChecks" -Default $false
 $publicRpcValidationRateLimitProbe = Get-AuditProp -Object $publicRpcValidationChecks -Name "rateLimitProbePerformed" -Default $false
 $publicRpcValidationRateLimitRejected = Get-AuditProp -Object $publicRpcValidationChecks -Name "rateLimitRejected" -Default $false
@@ -1604,6 +1606,8 @@ $publicRpcValidationPassed = $publicRpcValidationExitCode -eq 0 `
     -and $publicRpcValidationAllowed -eq $true `
     -and $publicRpcValidationDisallowedProbe -eq $true `
     -and $publicRpcValidationDisallowedRejected -eq $true `
+    -and $publicRpcValidationSecurityHeaderSkip -eq $true `
+    -and $publicRpcValidationSecurityHeaderPolicy -eq $true `
     -and $publicRpcValidationEndpointChecks -eq $true `
     -and $publicRpcValidationRateLimitProbe -eq $true `
     -and $publicRpcValidationRateLimitRejected -eq $true `
@@ -2953,9 +2957,9 @@ Add-AuditItem -Items $items -Id "node-operator-package-verify" `
     -Commands @("npm run flowchain:operator:package:verify")
 
 Add-AuditItem -Items $items -Id "public-rpc-readiness-validator-self-test" `
-    -Requirement "Public RPC readiness validator proves endpoint checks, CORS allowed-origin acceptance, disallowed-origin rejection, bounded rate-limit rejection, retry-after evidence, and response hygiene against a temporary local control plane." `
+    -Requirement "Public RPC readiness validator proves endpoint checks, CORS allowed-origin acceptance, disallowed-origin rejection, live public-edge security-header policy, bounded rate-limit rejection, retry-after evidence, and response hygiene against a temporary local control plane." `
     -Status $(if ($publicRpcValidationPassed) { "passed" } else { "failed" }) `
-    -Evidence "validationStatus=$publicRpcValidationStatus, allowedOriginAccepted=$publicRpcValidationAllowed, disallowedProbe=$publicRpcValidationDisallowedProbe, disallowedRejected=$publicRpcValidationDisallowedRejected, endpointChecks=$publicRpcValidationEndpointChecks, rateLimitProbe=$publicRpcValidationRateLimitProbe, rateLimitRejected=$publicRpcValidationRateLimitRejected, rateLimitRetryAfter=$publicRpcValidationRateLimitRetryAfter, responseHygiene=$publicRpcValidationHygiene, failedChecks=$publicRpcValidationFailedCheckCount, secretFindings=$publicRpcValidationSecretFindingCount, report=$($paths.publicRpcValidation)" `
+    -Evidence "validationStatus=$publicRpcValidationStatus, allowedOriginAccepted=$publicRpcValidationAllowed, disallowedProbe=$publicRpcValidationDisallowedProbe, disallowedRejected=$publicRpcValidationDisallowedRejected, securityHeaderSkip=$publicRpcValidationSecurityHeaderSkip, securityHeaderPolicy=$publicRpcValidationSecurityHeaderPolicy, endpointChecks=$publicRpcValidationEndpointChecks, rateLimitProbe=$publicRpcValidationRateLimitProbe, rateLimitRejected=$publicRpcValidationRateLimitRejected, rateLimitRetryAfter=$publicRpcValidationRateLimitRetryAfter, responseHygiene=$publicRpcValidationHygiene, failedChecks=$publicRpcValidationFailedCheckCount, secretFindings=$publicRpcValidationSecretFindingCount, report=$($paths.publicRpcValidation)" `
     -Commands @("npm run flowchain:public-rpc:validate")
 
 Add-AuditItem -Items $items -Id "public-rpc-abuse-test" `

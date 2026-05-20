@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_readiness_report.v0",
-    "generatedAt":  "2026-05-20T12:06:03.3278129Z",
+    "generatedAt":  "2026-05-20T12:41:39.7361602Z",
     "status":  "blocked",
     "publicRpcReady":  false,
     "publicMode":  false,
@@ -38,6 +38,15 @@
                    "corsDisallowedOriginProbePerformed":  false,
                    "corsDisallowedOriginRejected":  false,
                    "corsWildcardRejectedForPublicMode":  true,
+                   "securityHeadersProbePerformed":  false,
+                   "securityHeadersSkippedUntilPublicMode":  true,
+                   "securityHeadersAllRequiredPresent":  true,
+                   "securityHeadersStrictTransportSecurity":  true,
+                   "securityHeadersContentTypeOptionsNosniff":  true,
+                   "securityHeadersCacheControlNoStore":  true,
+                   "securityHeadersReferrerPolicyNoReferrer":  true,
+                   "securityHeadersFrameOptionsDeny":  true,
+                   "securityHeadersContentSecurityPolicyDefaultNone":  true,
                    "backupPathConfigured":  false,
                    "backupPathExists":  false,
                    "backupPathWritable":  false,
@@ -104,6 +113,18 @@
                  "wildcardRejectedForPublicMode":  true,
                  "headerValuePrinted":  false
              },
+    "securityHeaders":  {
+                            "performed":  false,
+                            "skippedUntilPublicMode":  true,
+                            "strictTransportSecurity":  null,
+                            "contentTypeOptionsNosniff":  null,
+                            "cacheControlNoStore":  null,
+                            "referrerPolicyNoReferrer":  null,
+                            "frameOptionsDeny":  null,
+                            "contentSecurityPolicyDefaultNone":  null,
+                            "allRequiredPresent":  null,
+                            "headerValuesPrinted":  false
+                        },
     "rateLimit":  {
                       "configured":  false,
                       "probePerformed":  false,

@@ -213,6 +213,7 @@ $opsSnapshot = $reports.opsSnapshot
 $opsAlerts = $reports.opsAlerts
 $serviceStatus = $reports.serviceStatus
 $serviceMonitor = $reports.serviceMonitor
+$publicRpc = $reports.publicRpc
 $externalTester = $reports.externalTester
 $publicTesterGateway = $reports.publicTesterGateway
 $externalTesterEvidence = $reports.externalTesterEvidence
@@ -258,6 +259,7 @@ $publicTesterGatewayChecks = Get-MetricsProp -Object $publicTesterGateway -Name 
 $publicTesterGatewayFailedChecks = @((Get-MetricsProp -Object $publicTesterGateway -Name "failedChecks" -Default @()))
 $publicTesterGatewaySecretFindings = @((Get-MetricsProp -Object $publicTesterGateway -Name "secretMarkerFindings" -Default @()))
 $publicTesterGatewayRoutes = @((Get-MetricsProp -Object $publicTesterGateway -Name "routes" -Default @()))
+$publicRpcChecks = Get-MetricsProp -Object $publicRpc -Name "checks"
 $publicRpcDeploymentBundleChecks = Get-MetricsProp -Object $publicRpcDeploymentBundle -Name "checks"
 $publicRpcDeploymentAutomationChecks = Get-MetricsProp -Object $publicRpcDeploymentAutomation -Name "checks"
 $publicRpcRequiredCutoverCommands = @(
@@ -302,6 +304,9 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_ops_active_alert_rules" -Help
 Add-MetricGauge -Metrics $metrics -Name "flowchain_service_status_ready" -Help "One when service status report is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $serviceStatus))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_service_monitor_ready" -Help "One when service monitor report is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $serviceMonitor))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_ready" -Help "One when public RPC readiness is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "publicRpc"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_live_security_header_probe" -Help "One when the configured public RPC endpoint security-header probe ran against a non-local public URL." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcChecks -Name "securityHeadersProbePerformed" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_live_security_headers" -Help "One when the live public RPC endpoint was probed and returned all required defensive security headers." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $publicRpcChecks -Name "securityHeadersProbePerformed" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $publicRpcChecks -Name "securityHeadersAllRequiredPresent" -Default $false) -eq $true)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_security_header_policy_ready" -Help "One when the public RPC readiness policy requires live headers only for non-local public endpoints and currently passes that policy." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcChecks -Name "securityHeadersAllRequiredPresent" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_deployment_bundle_ready" -Help "One when the public RPC deployment bundle is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $publicRpcDeploymentBundle))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_deployment_automation_ready" -Help "One when public RPC deployment automation validation is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $publicRpcDeploymentAutomation))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_disallowed_origin_preflight" -Help "One when the public RPC bundle includes a disallowed origin preflight." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentBundleChecks -Name "includesDisallowedOriginPreflight" -Default $false))
@@ -471,6 +476,9 @@ $requiredMetricNames = @(
     "flowchain_ops_active_alert_rules",
     "flowchain_service_status_ready",
     "flowchain_public_rpc_ready",
+    "flowchain_public_rpc_live_security_header_probe",
+    "flowchain_public_rpc_live_security_headers",
+    "flowchain_public_rpc_security_header_policy_ready",
     "flowchain_public_rpc_deployment_bundle_ready",
     "flowchain_public_rpc_deployment_automation_ready",
     "flowchain_public_rpc_disallowed_origin_preflight",
@@ -626,6 +634,9 @@ $checks = [ordered]@{
     publicRpcEdgeMetricsPresent = @(
         "flowchain_public_rpc_deployment_bundle_ready",
         "flowchain_public_rpc_deployment_automation_ready",
+        "flowchain_public_rpc_live_security_header_probe",
+        "flowchain_public_rpc_live_security_headers",
+        "flowchain_public_rpc_security_header_policy_ready",
         "flowchain_public_rpc_disallowed_origin_preflight",
         "flowchain_public_rpc_broad_state_blocked_preflight",
         "flowchain_public_rpc_private_wallet_create_blocked_preflight",

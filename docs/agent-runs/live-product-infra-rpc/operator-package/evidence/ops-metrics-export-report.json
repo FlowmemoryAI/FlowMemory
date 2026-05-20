@@ -1,11 +1,20 @@
 {
     "schema":  "flowchain.ops_metrics_export_report.v0",
-    "generatedAt":  "2026-05-20T10:59:04.0470848Z",
+    "generatedAt":  "2026-05-20T12:26:12.0916382Z",
     "status":  "passed",
     "refresh":  {
-                    "performed":  false,
+                    "performed":  true,
                     "steps":  [
-
+                                  {
+                                      "name":  "ops-snapshot",
+                                      "exitCode":  0,
+                                      "outputLineCount":  5
+                                  },
+                                  {
+                                      "name":  "ops-alerts",
+                                      "exitCode":  0,
+                                      "outputLineCount":  5
+                                  }
                               ]
                 },
     "reportPaths":  {
@@ -33,7 +42,7 @@
                     },
     "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.json",
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
-    "metricCount":  128,
+    "metricCount":  131,
     "requiredMetricNames":  [
                                 "flowchain_latest_height",
                                 "flowchain_finalized_height",
@@ -52,6 +61,9 @@
                                 "flowchain_ops_active_alert_rules",
                                 "flowchain_service_status_ready",
                                 "flowchain_public_rpc_ready",
+                                "flowchain_public_rpc_live_security_header_probe",
+                                "flowchain_public_rpc_live_security_headers",
+                                "flowchain_public_rpc_security_header_policy_ready",
                                 "flowchain_public_rpc_deployment_bundle_ready",
                                 "flowchain_public_rpc_deployment_automation_ready",
                                 "flowchain_public_rpc_disallowed_origin_preflight",

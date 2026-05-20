@@ -846,6 +846,8 @@ $definitions = @(
             "allowedOriginAccepted",
             "disallowedOriginProbePerformed",
             "disallowedOriginRejected",
+            "securityHeaderProbeSkippedForLocalEndpoint",
+            "securityHeaderPassRequiredOnlyForPublicMode",
             "rateLimitProbePerformed",
             "rateLimitRejected",
             "rateLimitRetryAfterHeaderPresent",

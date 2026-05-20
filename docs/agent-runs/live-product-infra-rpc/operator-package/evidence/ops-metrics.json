@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T10:59:03.8180779Z",
+    "generatedAt":  "2026-05-20T12:26:11.9006339Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -23,19 +23,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  101241
+                        "value":  102051
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  101241
+                        "value":  102051
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  5
+                        "value":  4
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -59,13 +59,13 @@
                         "name":  "flowchain_transaction_intake_rows_total",
                         "type":  "gauge",
                         "help":  "Signed transaction intake rows recorded in local NDJSON intake.",
-                        "value":  169
+                        "value":  173
                     },
                     {
                         "name":  "flowchain_transaction_intake_accepted_rows_total",
                         "type":  "gauge",
                         "help":  "Crypto-verified signed transaction intake rows recorded locally.",
-                        "value":  169
+                        "value":  173
                     },
                     {
                         "name":  "flowchain_transaction_intake_invalid_rows",
@@ -77,7 +77,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  8025.036
+                        "value":  3629.613
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -144,6 +144,24 @@
                         "type":  "gauge",
                         "help":  "One when public RPC readiness is passed.",
                         "value":  0
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_live_security_header_probe",
+                        "type":  "gauge",
+                        "help":  "One when the configured public RPC endpoint security-header probe ran against a non-local public URL.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_live_security_headers",
+                        "type":  "gauge",
+                        "help":  "One when the live public RPC endpoint was probed and returned all required defensive security headers.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_security_header_policy_ready",
+                        "type":  "gauge",
+                        "help":  "One when the public RPC readiness policy requires live headers only for non-local public endpoints and currently passes that policy.",
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_public_rpc_deployment_bundle_ready",
@@ -755,13 +773,13 @@
                         "name":  "flowchain_truth_gates_total",
                         "type":  "gauge",
                         "help":  "Total production truth table gates.",
-                        "value":  55
+                        "value":  58
                     },
                     {
                         "name":  "flowchain_truth_gates_passed",
                         "type":  "gauge",
                         "help":  "Passed production truth table gates.",
-                        "value":  39
+                        "value":  42
                     },
                     {
                         "name":  "flowchain_truth_gates_owner_blocked",
@@ -788,7 +806,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  128,
+    "metricCount":  131,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

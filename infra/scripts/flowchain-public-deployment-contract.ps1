@@ -928,6 +928,8 @@ $publicValidationChecks = Get-DeploymentProp -Object $publicValidation -Name "ch
 $publicValidationPassed = ($publicValidationStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $publicValidationChecks -Name "allowedOriginAccepted" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $publicValidationChecks -Name "disallowedOriginRejected" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicValidationChecks -Name "securityHeaderProbeSkippedForLocalEndpoint" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicValidationChecks -Name "securityHeaderPassRequiredOnlyForPublicMode" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $publicValidationChecks -Name "rateLimitProbePerformed" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $publicValidationChecks -Name "rateLimitRejected" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $publicValidationChecks -Name "rateLimitRetryAfterHeaderPresent" -Default $false) -eq $true) `
@@ -971,7 +973,7 @@ Add-DeploymentItem -Items $items -Id "public-rpc-abuse-test" `
     -Evidence "abuseStatus=$publicAbuseStatus, abuseReady=$publicAbuseReady, missingChecks=$($publicAbuseMissingChecks.Count)" `
     -Commands @("npm run flowchain:public-rpc:abuse-test")
 Add-DeploymentItem -Items $items -Id "public-rpc-edge" `
-    -Requirement "The owner TLS edge must pass endpoint, CORS, rate-limit, readiness, and response-hygiene checks before sharing." `
+    -Requirement "The owner TLS edge must pass endpoint, CORS, live security-header, rate-limit, readiness, and response-hygiene checks before sharing." `
     -Status $(if (($publicRpcStatus -eq "passed") -and ($publicRpcReady -eq $true) -and ($publicValidationPassed -eq $true) -and ($publicAbusePassed -eq $true)) { "passed" } elseif (($publicRpcStatus -eq "blocked") -and ($publicValidationPassed -eq $true) -and ($publicAbusePassed -eq $true)) { "blocked" } else { "failed" }) `
     -Evidence "publicRpcStatus=$publicRpcStatus, publicRpcReady=$publicRpcReady, validationStatus=$publicValidationStatus, validationPassed=$publicValidationPassed, abuseStatus=$publicAbuseStatus, abusePassed=$publicAbusePassed" `
     -Commands @("npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:abuse-test", "npm run flowchain:public-rpc:check") `

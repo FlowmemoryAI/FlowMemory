@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 101241
+flowchain_latest_height 102051
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 101241
+flowchain_finalized_height 102051
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 5
+flowchain_state_file_age_seconds 4
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -18,16 +18,16 @@ flowchain_height_advanced 1
 flowchain_mempool_depth 0
 # HELP flowchain_transaction_intake_rows_total Signed transaction intake rows recorded in local NDJSON intake.
 # TYPE flowchain_transaction_intake_rows_total gauge
-flowchain_transaction_intake_rows_total 169
+flowchain_transaction_intake_rows_total 173
 # HELP flowchain_transaction_intake_accepted_rows_total Crypto-verified signed transaction intake rows recorded locally.
 # TYPE flowchain_transaction_intake_accepted_rows_total gauge
-flowchain_transaction_intake_accepted_rows_total 169
+flowchain_transaction_intake_accepted_rows_total 173
 # HELP flowchain_transaction_intake_invalid_rows Invalid NDJSON rows in signed transaction intake.
 # TYPE flowchain_transaction_intake_invalid_rows gauge
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 8025.036
+flowchain_transaction_intake_file_age_seconds 3629.613
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -61,6 +61,15 @@ flowchain_service_monitor_ready 1
 # HELP flowchain_public_rpc_ready One when public RPC readiness is passed.
 # TYPE flowchain_public_rpc_ready gauge
 flowchain_public_rpc_ready 0
+# HELP flowchain_public_rpc_live_security_header_probe One when the configured public RPC endpoint security-header probe ran against a non-local public URL.
+# TYPE flowchain_public_rpc_live_security_header_probe gauge
+flowchain_public_rpc_live_security_header_probe 0
+# HELP flowchain_public_rpc_live_security_headers One when the live public RPC endpoint was probed and returned all required defensive security headers.
+# TYPE flowchain_public_rpc_live_security_headers gauge
+flowchain_public_rpc_live_security_headers 0
+# HELP flowchain_public_rpc_security_header_policy_ready One when the public RPC readiness policy requires live headers only for non-local public endpoints and currently passes that policy.
+# TYPE flowchain_public_rpc_security_header_policy_ready gauge
+flowchain_public_rpc_security_header_policy_ready 1
 # HELP flowchain_public_rpc_deployment_bundle_ready One when the public RPC deployment bundle is passed.
 # TYPE flowchain_public_rpc_deployment_bundle_ready gauge
 flowchain_public_rpc_deployment_bundle_ready 1
@@ -366,10 +375,10 @@ flowchain_live_cutover_missing_owner_inputs 14
 flowchain_no_secret_ready 1
 # HELP flowchain_truth_gates_total Total production truth table gates.
 # TYPE flowchain_truth_gates_total gauge
-flowchain_truth_gates_total 55
+flowchain_truth_gates_total 58
 # HELP flowchain_truth_gates_passed Passed production truth table gates.
 # TYPE flowchain_truth_gates_passed gauge
-flowchain_truth_gates_passed 39
+flowchain_truth_gates_passed 42
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
 flowchain_truth_gates_owner_blocked 16

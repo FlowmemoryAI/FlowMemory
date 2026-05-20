@@ -147,8 +147,17 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
   const publicRpcDeployBundleStatus = text(ops?.publicRpcDeploymentBundleStatus ?? metrics.publicRpcDeploymentBundleStatus, "not recorded");
   const publicRpcDeployAutomationStatus = text(ops?.publicRpcDeploymentAutomationStatus ?? metrics.publicRpcDeploymentAutomationStatus, "not recorded");
   const publicRpcDeployAutomationAction = text(ops?.publicRpcDeploymentAutomationAction ?? metrics.publicRpcDeploymentAutomationAction, "not recorded");
+  const publicRpcLiveSecurityHeaderProbe = isReadyFlag(ops?.publicRpcLiveSecurityHeaderProbe ?? metrics.publicRpcLiveSecurityHeaderProbe);
+  const publicRpcLiveSecurityHeaders = isReadyFlag(ops?.publicRpcLiveSecurityHeaders ?? metrics.publicRpcLiveSecurityHeaders);
+  const publicRpcSecurityHeaderPolicyReady = isReadyFlag(ops?.publicRpcSecurityHeaderPolicyReady ?? metrics.publicRpcSecurityHeaderPolicyReady);
   const publicRpcSecurityHeaders = isReadyFlag(ops?.publicRpcSecurityHeaders ?? metrics.publicRpcSecurityHeaders);
   const publicRpcRenderedSecurityHeaders = isReadyFlag(ops?.publicRpcRenderedSecurityHeaders ?? metrics.publicRpcRenderedSecurityHeaders);
+  const publicRpcLiveHeaderProofReady =
+    publicRpcLiveSecurityHeaderProbe &&
+    publicRpcLiveSecurityHeaders &&
+    publicRpcSecurityHeaderPolicyReady &&
+    publicRpcSecurityHeaders &&
+    publicRpcRenderedSecurityHeaders;
   const publicTesterGatewayStatus = text(ops?.publicTesterGatewayStatus ?? metrics.publicTesterGatewayStatus, "not recorded");
   const publicTesterGatewayAccountCount = text(ops?.publicTesterGatewayAccountCount ?? metrics.publicTesterGatewayAccountCount, "0");
   const publicTesterGatewayFailedChecks = text(ops?.publicTesterGatewayFailedChecks ?? metrics.publicTesterGatewayFailedChecks, "0");
@@ -293,8 +302,8 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
             </div>
             <div>
               <span>RPC headers</span>
-              <strong>{String(publicRpcSecurityHeaders && publicRpcRenderedSecurityHeaders)}</strong>
-              <small>bundle {String(publicRpcSecurityHeaders)} / rendered {String(publicRpcRenderedSecurityHeaders)}</small>
+              <strong>{String(publicRpcLiveHeaderProofReady)}</strong>
+              <small>live {String(publicRpcLiveSecurityHeaders)} / probe {String(publicRpcLiveSecurityHeaderProbe)} / policy {String(publicRpcSecurityHeaderPolicyReady)} / rendered {String(publicRpcRenderedSecurityHeaders)}</small>
             </div>
             <div>
               <span>Tester gateway proof</span>

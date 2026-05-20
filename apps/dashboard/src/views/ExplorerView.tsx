@@ -169,9 +169,18 @@ export function ExplorerView({ data, workbench }: { data: DashboardData; workben
   const relayerTimedOutSteps = factValue(liveReadinessSummary, ["relayer timed out steps"], "0");
   const alertRules = factValue(liveReadinessSummary, ["alert rules"], "0");
   const unmappedFindings = factValue(liveReadinessSummary, ["unmapped findings"], "0");
+  const publicRpcLiveHeaderProbe = factValue(liveReadinessSummary, ["RPC live header probe"], "false");
+  const publicRpcLiveHeaders = factValue(liveReadinessSummary, ["RPC live headers"], "false");
+  const publicRpcHeaderPolicy = factValue(liveReadinessSummary, ["RPC header policy"], "false");
   const publicRpcHeaders = factValue(liveReadinessSummary, ["RPC headers"], "false");
   const publicRpcHeaderPreflight = factValue(liveReadinessSummary, ["RPC header preflight"], "false");
   const publicRpcHeaderMetrics = factValue(liveReadinessSummary, ["RPC header metrics"], "false");
+  const publicRpcLiveHeaderProof =
+    publicRpcLiveHeaderProbe === "true" &&
+    publicRpcLiveHeaders === "true" &&
+    publicRpcHeaders === "true" &&
+    publicRpcHeaderPreflight === "true" &&
+    publicRpcHeaderMetrics === "true";
   const sourceStatus: DashboardStatus = workbench.source === "control-plane" ? "verified" : "stale";
   const testerTraceSteps: Array<{
     id: string;
@@ -249,9 +258,9 @@ export function ExplorerView({ data, workbench }: { data: DashboardData; workben
     {
       id: "rpc-headers",
       label: "RPC headers",
-      detail: "Defensive response-header proof",
-      value: `preflight ${publicRpcHeaderPreflight}; metrics ${publicRpcHeaderMetrics}`,
-      status: publicRpcHeaders === "true" && publicRpcHeaderPreflight === "true" && publicRpcHeaderMetrics === "true" ? "verified" : "pending",
+      detail: `live probe ${publicRpcLiveHeaderProbe}; policy ${publicRpcHeaderPolicy}`,
+      value: `live ${publicRpcLiveHeaders}; rendered ${publicRpcHeaders}; metrics ${publicRpcHeaderMetrics}`,
+      status: publicRpcLiveHeaderProof ? "verified" : "pending",
       targetCategory: "records",
       Icon: ShieldCheck,
     },

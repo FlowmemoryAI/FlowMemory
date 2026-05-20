@@ -113,7 +113,16 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
   const publicRpcHeadersReady = metrics.publicRpcSecurityHeaders === true && metrics.publicRpcRenderedSecurityHeaders === true;
   const publicRpcHeaderPreflightReady =
     metrics.publicRpcSecurityHeaderPreflight === true && metrics.publicRpcRenderedSecurityHeaderPreflight === true;
+  const publicRpcLiveHeaderProbeReady = metrics.publicRpcLiveSecurityHeaderProbe === true;
+  const publicRpcLiveHeadersReady = metrics.publicRpcLiveSecurityHeaders === true;
+  const publicRpcHeaderPolicyReady = metrics.publicRpcSecurityHeaderPolicyReady === true;
   const publicRpcHeaderMetricsReady = metrics.opsPublicRpcSecurityHeaderMetricsPresent === true;
+  const publicRpcLiveHeaderProofReady =
+    publicRpcLiveHeaderProbeReady &&
+    publicRpcLiveHeadersReady &&
+    publicRpcHeadersReady &&
+    publicRpcHeaderPreflightReady &&
+    publicRpcHeaderMetricsReady;
 
   const readinessCards: Array<{
     id: string;
@@ -148,9 +157,13 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
     {
       id: "rpc-headers",
       label: "RPC headers",
-      status: publicRpcHeadersReady && publicRpcHeaderPreflightReady && publicRpcHeaderMetricsReady ? "verified" : "pending",
-      value: boolText(publicRpcHeadersReady && publicRpcHeaderPreflightReady),
-      detail: "HSTS, no-sniff, no-store, CSP",
+      status: publicRpcLiveHeaderProofReady ? "verified" : "pending",
+      value: boolText(publicRpcLiveHeadersReady),
+      detail: publicRpcLiveHeaderProbeReady
+        ? "Live HSTS, no-sniff, no-store, CSP"
+        : publicRpcHeaderPolicyReady
+          ? "Rendered policy ready; live probe waits for public URL; HSTS, no-sniff, no-store, CSP"
+          : "Header policy incomplete; HSTS, no-sniff, no-store, CSP",
       command: "npm run flowchain:public-rpc:deployment:automation",
       to: "/ops",
       Icon: ShieldAlert,
@@ -359,8 +372,8 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
         </div>
         <div>
           <span>RPC headers</span>
-          <strong>{boolText(publicRpcHeadersReady && publicRpcHeaderPreflightReady)}</strong>
-          <small>metrics {boolText(publicRpcHeaderMetricsReady)}</small>
+          <strong>{boolText(publicRpcLiveHeaderProofReady)}</strong>
+          <small>live {boolText(publicRpcLiveHeadersReady)}; probe {boolText(publicRpcLiveHeaderProbeReady)}; metrics {boolText(publicRpcHeaderMetricsReady)}</small>
         </div>
         <div>
           <span>Relayer timeout</span>

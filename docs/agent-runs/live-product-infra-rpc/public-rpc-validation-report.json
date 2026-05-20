@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_validation_report.v0",
-    "generatedAt":  "2026-05-20T08:47:11.7894567Z",
+    "generatedAt":  "2026-05-20T12:25:17.0115805Z",
     "status":  "passed",
     "validationScope":  "local-control-plane-public-rpc-readiness-rehearsal",
     "publicRpcReady":  false,
@@ -16,6 +16,8 @@
                    "allowedOriginAccepted":  true,
                    "disallowedOriginProbePerformed":  true,
                    "disallowedOriginRejected":  true,
+                   "securityHeaderProbeSkippedForLocalEndpoint":  true,
+                   "securityHeaderPassRequiredOnlyForPublicMode":  true,
                    "rateLimitProbePerformed":  true,
                    "rateLimitRejected":  true,
                    "rateLimitRetryAfterHeaderPresent":  true,
