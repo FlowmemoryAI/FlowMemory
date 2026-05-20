@@ -1751,6 +1751,98 @@ test("HTTP server rejects abusive public RPC POST shapes before dispatch", async
   }
 });
 
+test("HTTP server accepts local private signed transaction submit route while public RPC stays read-gated", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-http-signed-submit-"));
+  const previousTxIntake = process.env.FLOWCHAIN_CONTROL_PLANE_TX_INTAKE_PATH;
+  const previousPublicUrl = process.env.FLOWCHAIN_RPC_PUBLIC_URL;
+  process.env.FLOWCHAIN_CONTROL_PLANE_TX_INTAKE_PATH = join(dir, "transactions.ndjson");
+  const server = startControlPlaneServer({ host: "127.0.0.1", port: 0 });
+
+  try {
+    await once(server, "listening");
+    const address = server.address();
+    assert.equal(typeof address, "object");
+    assert.notEqual(address, null);
+    const baseUrl = `http://127.0.0.1:${address?.port}`;
+
+    const blockedRpc = await fetch(`${baseUrl}/rpc`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: "blocked",
+        method: "transaction_submit",
+        params: { signedEnvelope: productionSignedEnvelope("wallet-transfer") },
+      }),
+    });
+    assert.equal(blockedRpc.status, 200);
+    const blockedBody = await blockedRpc.json() as JsonObject;
+    assert.equal(((blockedBody.error as JsonObject).data as JsonObject).reasonCode, "method.not_found");
+
+    const submit = await fetch(`${baseUrl}/transactions/submit`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        signedEnvelope: productionSignedEnvelope("wallet-transfer"),
+        submittedBy: "http-local-submit-test",
+      }),
+    });
+    assert.equal(submit.status, 200);
+    const submitBody = await submit.json() as JsonObject;
+    assert.equal(submitBody.schema, "flowmemory.control_plane.transaction_submit_result.v0");
+    assert.equal(submitBody.accepted, true);
+    assert.equal(submitBody.forwardedTo, "local-file-intake");
+
+    const mempool = await fetch(`${baseUrl}/rpc`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: "mempool", method: "mempool_list", params: { limit: 10 } }),
+    });
+    assert.equal(mempool.status, 200);
+    const mempoolBody = await mempool.json() as JsonObject;
+    assert.equal((mempoolBody.result as JsonObject).count, 1);
+
+    process.env.FLOWCHAIN_RPC_PUBLIC_URL = "https://rpc.example.test";
+    const disabled = await fetch(`${baseUrl}/transactions/submit`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        signedEnvelope: productionSignedEnvelope("validator-finality"),
+        submittedBy: "http-public-disabled-test",
+      }),
+    });
+    assert.equal(disabled.status, 404);
+    const disabledBody = await disabled.json() as JsonObject;
+    assert.equal(disabledBody.reasonCode, "local_private_write_disabled");
+
+    process.env.FLOWCHAIN_RPC_PUBLIC_URL = "not-a-url";
+    const malformedPublicUrlDisabled = await fetch(`${baseUrl}/transactions/submit`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        signedEnvelope: productionSignedEnvelope("validator-finality"),
+        submittedBy: "http-malformed-public-disabled-test",
+      }),
+    });
+    assert.equal(malformedPublicUrlDisabled.status, 404);
+    const malformedPublicUrlDisabledBody = await malformedPublicUrlDisabled.json() as JsonObject;
+    assert.equal(malformedPublicUrlDisabledBody.reasonCode, "local_private_write_disabled");
+  } finally {
+    server.close();
+    if (previousTxIntake === undefined) {
+      delete process.env.FLOWCHAIN_CONTROL_PLANE_TX_INTAKE_PATH;
+    } else {
+      process.env.FLOWCHAIN_CONTROL_PLANE_TX_INTAKE_PATH = previousTxIntake;
+    }
+    if (previousPublicUrl === undefined) {
+      delete process.env.FLOWCHAIN_RPC_PUBLIC_URL;
+    } else {
+      process.env.FLOWCHAIN_RPC_PUBLIC_URL = previousPublicUrl;
+    }
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("control-plane cargo target override must stay inside the repository", () => {
   const previousTarget = process.env.FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR;
   process.env.FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR = tmpdir();

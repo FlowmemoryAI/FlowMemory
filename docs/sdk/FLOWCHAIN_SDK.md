@@ -34,6 +34,10 @@ const included = await client.waitForTransaction({
   timeoutMs: 30000,
   pollMs: 1000
 });
+const signedSubmit = await client.submitSignedEnvelope(signedEnvelope, {
+  submittedBy: "sdk-local-test",
+  runtimeSubmitMode: "off"
+});
 ```
 
 ## CLI Examples
@@ -52,6 +56,7 @@ npm run flowchain:devkit -- mempool --json --limit 5
 npm run flowchain:devkit -- wallet-balances --json --limit 5
 npm run flowchain:devkit -- wallet-transfers --json --limit 5
 npm run flowchain:devkit -- wallet-send --json --from <account-id> --to <account-id> --amount-units 1
+npm run flowchain:devkit -- submit-signed-transaction --json --signed-envelope devnet/local/flowchain-signed-envelope-example/signed-envelope.json
 npm run flowchain:devkit -- wait-transaction --json --tx <tx-id> --seconds 30
 npm run flowchain:devkit -- wallet-metadata --json --limit 5
 npm run flowchain:devkit -- faucet-events --json --limit 5
@@ -67,6 +72,8 @@ npm run flowchain:devkit -- withdrawals --json --limit 5
 ```powershell
 node examples/flowchain-node-quickstart.mjs
 node examples/flowchain-node-quickstart.mjs --send
+node examples/flowchain-signed-envelope.mjs --submit
+node examples/flowchain-signed-envelope.mjs --no-submit --write devnet/local/flowchain-signed-envelope-example/signed-envelope.json
 ```
 
 The browser readiness example lives at:
@@ -79,6 +86,9 @@ examples/flowchain-browser-readiness/index.html
 
 - Default RPC is `http://127.0.0.1:8787/rpc`.
 - The devkit does not expose a public listener.
+- Signed envelope submission uses local/private `transaction_submit` cryptographic
+  intake through `/transactions/submit` by default; it does not turn on public
+  write access and `/rpc` remains public-read guarded.
 - Live Base 8453 bridge commands stay blocked until owner inputs exist.
 - Diagnostics are redacted before printing or writing reports.
 - Do not call this SDK EVM-compatible unless EVM JSON-RPC compatibility is

@@ -36,6 +36,20 @@ export interface WaitForTransactionRequest {
   pollMs?: number;
 }
 
+export interface SignedTransactionSubmitRequest {
+  signedEnvelope?: JsonValue;
+  signedTransaction?: JsonValue;
+  submittedBy?: string;
+  expectedNonce?: string;
+  runtimeSubmit?: boolean;
+  forwardToRuntime?: boolean;
+  runtimeSubmitMode?: "off" | "direct" | "node-inbox";
+  runtimeTransaction?: JsonValue;
+  runtimeTx?: JsonValue;
+}
+
+export type SubmitSignedEnvelopeOptions = Omit<SignedTransactionSubmitRequest, "signedEnvelope" | "signedTransaction">;
+
 export class FlowChainRpcError extends Error {
   readonly code: number;
   readonly data?: JsonValue;
@@ -190,6 +204,14 @@ export class FlowChainClient {
 
   transactionGet(params: JsonValue) {
     return this.call("transaction_get", params);
+  }
+
+  submitSignedTransaction(request: SignedTransactionSubmitRequest) {
+    return this.postControlPlane("/transactions/submit", request as unknown as JsonValue);
+  }
+
+  submitSignedEnvelope(signedEnvelope: JsonValue, options: SubmitSignedEnvelopeOptions = {}) {
+    return this.submitSignedTransaction({ ...options, signedEnvelope });
   }
 
   async waitForTransaction(request: WaitForTransactionRequest) {

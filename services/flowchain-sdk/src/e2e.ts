@@ -233,6 +233,40 @@ async function main() {
     env: { ...process.env, FLOWCHAIN_RPC_URL: rpcUrl },
   });
   const nodeExample = JSON.parse(nodeExampleText) as JsonValue;
+  const signedEnvelopeExamplePath = resolve(root, "examples", "flowchain-signed-envelope.mjs");
+  const signedEnvelopeExampleText = execFileSync(process.execPath, [signedEnvelopeExamplePath, "--submit"], {
+    cwd: root,
+    encoding: "utf8",
+    windowsHide: true,
+    env: { ...process.env, FLOWCHAIN_RPC_URL: rpcUrl },
+  });
+  const signedEnvelopeExample = JSON.parse(signedEnvelopeExampleText) as JsonValue;
+  const cliSignedEnvelopePath = resolve(root, "devnet", "local", "flowchain-signed-envelope-example", "dev-pack-cli-signed-envelope.json");
+  const cliSignedEnvelopePreparedText = execFileSync(process.execPath, [signedEnvelopeExamplePath, "--no-submit", "--write", cliSignedEnvelopePath], {
+    cwd: root,
+    encoding: "utf8",
+    windowsHide: true,
+    env: { ...process.env, FLOWCHAIN_RPC_URL: rpcUrl },
+  });
+  const cliSignedEnvelopePrepared = JSON.parse(cliSignedEnvelopePreparedText) as JsonValue;
+  const cliSignedSubmitText = execFileSync(process.execPath, [
+    cliPath,
+    "submit-signed-transaction",
+    "--json",
+    "--signed-envelope",
+    cliSignedEnvelopePath,
+    "--submitted-by",
+    "flowchain-dev-pack-cli",
+    "--runtime-submit-mode",
+    "off",
+    "--rpc",
+    rpcUrl,
+  ], {
+    cwd: root,
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  const cliSignedSubmit = JSON.parse(cliSignedSubmitText) as JsonValue;
   const browserExamplePath = resolve(root, "examples", "flowchain-browser-readiness", "index.html");
   const browserExampleText = existsSync(browserExamplePath) ? readFileSync(browserExamplePath, "utf8") : "";
   const requiredDocs = [
@@ -289,6 +323,17 @@ async function main() {
     cliJsonBlocks: String(asRecord(cliBlocks).schema ?? "") === "flowmemory.control_plane.block_list.v0",
     cliJsonWaitTransaction: String(asRecord(cliWaitTransaction).schema ?? "") === "flowchain.sdk.wait_transaction.v0" && asRecord(cliWaitTransaction).status === "included",
     nodeExamplePassed: String(asRecord(nodeExample).schema ?? "") === "flowchain.example.node_quickstart.v0" && asRecord(nodeExample).status === "passed",
+    signedEnvelopeExamplePassed: String(asRecord(signedEnvelopeExample).schema ?? "") === "flowchain.example.signed_envelope.v0"
+      && asRecord(signedEnvelopeExample).status === "passed"
+      && asRecord(signedEnvelopeExample).submitAccepted === true
+      && asRecord(signedEnvelopeExample).mempoolIntakeFound === true,
+    cliSignedEnvelopePrepared: String(asRecord(cliSignedEnvelopePrepared).schema ?? "") === "flowchain.example.signed_envelope.v0"
+      && asRecord(cliSignedEnvelopePrepared).status === "passed"
+      && asRecord(cliSignedEnvelopePrepared).submitted === false
+      && typeof asRecord(cliSignedEnvelopePrepared).writtenPath === "string",
+    cliSignedTransactionSubmit: String(asRecord(cliSignedSubmit).schema ?? "") === "flowmemory.control_plane.transaction_submit_result.v0"
+      && asRecord(cliSignedSubmit).accepted === true
+      && asRecord(cliSignedSubmit).status === "accepted_crypto_verified",
     browserExamplePresent: browserExampleText.includes("/rpc/discover") && browserExampleText.includes("/rpc/readiness"),
     developerGuidesPresent: missingDocs.length === 0,
     heightAdvanced: firstHeight !== null && secondHeight !== null && BigInt(secondHeight) > BigInt(firstHeight),
@@ -335,14 +380,15 @@ async function main() {
       "- CLI commands for discovery, readiness, status, wallet balances, wallet transfers, bridge readiness, bridge status, and diagnostics.",
       "- CLI commands for blocks, transactions, mempool, accounts, balances, wallet metadata, faucet events, finality, bridge deposits, bridge credits, and withdrawals.",
       "- SDK and CLI transaction-inclusion wait helpers backed by `transaction_get` polling.",
+      "- SDK and CLI signed transaction envelope submission backed by the crypto-verified `transaction_submit` RPC.",
       "- Node.js SDK example under `examples/flowchain-node-quickstart.mjs` and browser readiness example under `examples/flowchain-browser-readiness/`.",
+      "- Signed envelope example under `examples/flowchain-signed-envelope.mjs` that creates local wallets in memory, signs a FlowChain product transfer envelope, submits it to local cryptographic intake, and can write a CLI-ready envelope file.",
       "- Developer guides for wallet integration, bridge integration, node operations, app building, explorer/indexer use, faucet/tester funds, release compatibility, and troubleshooting.",
       "- Generated RPC reference from live `rpc_discover`.",
-      "- Dev-pack E2E report proving local RPC attachment, height reads, explorer reads, wallet reads, bridge lifecycle reads, runtime-backed local wallet sends, CLI JSON output, sample example execution, and public readiness fail-closed behavior.",
+      "- Dev-pack E2E report proving local RPC attachment, height reads, explorer reads, wallet reads, bridge lifecycle reads, runtime-backed local wallet sends, signed-envelope intake, CLI JSON output, sample example execution, and public readiness fail-closed behavior.",
       "",
       "Remaining buildout:",
       "",
-      "- Add signed transaction envelope examples once wallet signing boundaries are finalized for SDK use.",
       "- Promote the browser example to a packaged Vite/React app if the dashboard app is split into a reusable external starter.",
       "- Keep public/live readiness blocked until owner inputs and public deployment gates pass.",
       "",

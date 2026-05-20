@@ -4,6 +4,8 @@ export {
   type FlowChainClientOptions,
   type JsonRpcResponse,
   type JsonValue,
+  type SignedTransactionSubmitRequest,
+  type SubmitSignedEnvelopeOptions,
   type WaitForTransactionRequest,
   type WalletSendRequest,
 } from "./client.ts";

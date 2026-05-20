@@ -105,6 +105,30 @@ activity row to appear in the Explorer/RPC transaction index:
 npm run flowchain:devkit -- wait-transaction --json --tx <tx-id> --seconds 30
 ```
 
+## Submit A Signed Local Envelope
+
+Use the signed-envelope example to create two in-memory local wallets, sign a
+FlowChain product transfer document, verify the signature, and submit the
+envelope to the private `transaction_submit` cryptographic intake:
+
+```powershell
+node examples/flowchain-signed-envelope.mjs --submit
+```
+
+To generate a CLI-ready envelope without submitting it:
+
+```powershell
+node examples/flowchain-signed-envelope.mjs --no-submit --write devnet/local/flowchain-signed-envelope-example/signed-envelope.json
+npm run flowchain:devkit -- submit-signed-transaction --json --signed-envelope devnet/local/flowchain-signed-envelope-example/signed-envelope.json --submitted-by local-devkit
+```
+
+`submit-signed-transaction` posts to the private local `/transactions/submit`
+route, which dispatches the same `transaction_submit` crypto verifier used by
+the control plane. It defaults to local file intake with runtime forwarding off.
+Do not use `--runtime-submit` unless you are intentionally testing a local
+runtime adapter transaction and understand the fixture shape. The public `/rpc`
+surface stays read-gated and does not expose this write method.
+
 ## Read Bridge Readiness
 
 ```powershell
@@ -141,6 +165,7 @@ Outputs:
 ```powershell
 node examples/flowchain-node-quickstart.mjs
 node examples/flowchain-node-quickstart.mjs --send
+node examples/flowchain-signed-envelope.mjs --submit
 ```
 
 Open `examples/flowchain-browser-readiness/index.html` from a browser when you
@@ -152,7 +177,6 @@ need a fetch-only readiness example for a public or local RPC origin.
 - Public RPC remains blocked until owner public endpoint inputs are configured.
 - Live bridge remains blocked until owner Base 8453 inputs and operator
   acknowledgement are configured.
-- Signed transaction envelope SDK examples are still a follow-up. The current
-  devkit wallet send uses the existing local control-plane wallet-send path, and
-  public tester writes use the authenticated `/tester/wallets/*` gateway instead
-  of the private local wallet routes.
+- Signed transaction envelope submission is available for local/private
+  cryptographic intake. Public tester writes still use the authenticated
+  `/tester/wallets/*` gateway instead of private local wallet routes.

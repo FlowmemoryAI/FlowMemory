@@ -70,6 +70,41 @@ test("submits wallet send through control-plane HTTP path", async () => {
   ]);
 });
 
+test("submits signed envelopes through transaction_submit", async () => {
+  const calls: { url: string; body: unknown }[] = [];
+  const client = new FlowChainClient({
+    rpcUrl: "http://127.0.0.1:8787/rpc",
+    fetchImpl: (async (url, init) => {
+      calls.push({ url: String(url), body: JSON.parse(String(init?.body)) });
+      return new Response(JSON.stringify({
+        schema: "flowmemory.control_plane.transaction_submit_result.v0",
+        accepted: true,
+      }), { status: 200 });
+    }) as typeof fetch,
+  });
+  const signedEnvelope = {
+    document: { schema: "flowchain.product_transfer.v0" },
+    envelope: { schema: "flowchain.local_transaction_envelope.v0" },
+  };
+
+  const result = await client.submitSignedEnvelope(signedEnvelope, {
+    submittedBy: "sdk-test",
+    runtimeSubmitMode: "off",
+  }) as Record<string, unknown>;
+
+  assert.equal(result.accepted, true);
+  assert.deepEqual(calls, [
+    {
+      url: "http://127.0.0.1:8787/transactions/submit",
+      body: {
+        signedEnvelope,
+        submittedBy: "sdk-test",
+        runtimeSubmitMode: "off",
+      },
+    },
+  ]);
+});
+
 test("waits for transaction inclusion through transaction_get", async () => {
   const calls: unknown[] = [];
   let attempts = 0;

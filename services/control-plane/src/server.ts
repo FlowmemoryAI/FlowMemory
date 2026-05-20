@@ -128,6 +128,32 @@ function publicRpcMethodNotFound(request: Record<string, unknown>): RpcResponse 
   ) as RpcResponse;
 }
 
+function publicRpcUrlIsExternal(): boolean {
+  const raw = process.env.FLOWCHAIN_RPC_PUBLIC_URL?.trim();
+  if (raw === undefined || raw.length === 0) {
+    return false;
+  }
+  try {
+    const url = new URL(raw);
+    return !["127.0.0.1", "localhost", "::1"].includes(url.hostname.toLowerCase());
+  } catch {
+    return true;
+  }
+}
+
+function writeLocalWriteDisabled(res: ServerResponse, schema: string): void {
+  writeJson(res, 404, {
+    schema,
+    accepted: false,
+    message: "local private write route is disabled while an external public RPC URL is configured",
+    reasonCode: "local_private_write_disabled",
+    localOnly: true,
+    productionReady: false,
+    envValuesPrinted: false,
+    noSecrets: true,
+  });
+}
+
 function dispatchPublicJsonRpc(request: unknown, context: ControlPlaneContext): RpcResponse | RpcResponse[] | undefined {
   if (Array.isArray(request)) {
     const responses = request
@@ -141,6 +167,14 @@ function dispatchPublicJsonRpc(request: unknown, context: ControlPlaneContext): 
   }
 
   return dispatchJsonRpc(request, context);
+}
+
+function writeDispatchResult(res: ServerResponse, response: ReturnType<typeof dispatchJsonRpc>): void {
+  if (!Array.isArray(response) && "error" in response) {
+    writeJson(res, 400, response);
+    return;
+  }
+  writeJson(res, 200, jsonResult(response));
 }
 
 function isJsonContentType(req: IncomingMessage): boolean {
@@ -934,6 +968,43 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
             message: error instanceof Error ? error.message : "wallet creation failed",
             secretMaterialReturned: false,
             localOnly: true,
+          });
+        });
+      return;
+    }
+
+    if (req.method === "POST" && requestUrl?.pathname === "/transactions/submit") {
+      if (!requireJsonContentType(req, res)) {
+        return;
+      }
+      if (publicRpcUrlIsExternal()) {
+        writeLocalWriteDisabled(res, "flowmemory.control_plane.transaction_submit_disabled.v0");
+        return;
+      }
+      readRequestBody(req)
+        .then((body) => {
+          const payload = body.length > 0 ? JSON.parse(body) as unknown : {};
+          const response = dispatchJsonRpc({
+            jsonrpc: "2.0",
+            id: "transactions-submit",
+            method: "transaction_submit",
+            params: payload,
+          }, { state });
+          writeDispatchResult(res, response);
+        })
+        .catch((error) => {
+          if (error instanceof HttpRequestError) {
+            writeRequestError(res, error, "transaction submit failed");
+            return;
+          }
+          writeJson(res, 400, {
+            schema: "flowmemory.control_plane.transaction_submit_error.v0",
+            accepted: false,
+            message: error instanceof Error ? error.message : "transaction submit failed",
+            localOnly: true,
+            productionReady: false,
+            envValuesPrinted: false,
+            noSecrets: true,
           });
         });
       return;
