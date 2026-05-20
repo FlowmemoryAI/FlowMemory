@@ -1,9 +1,9 @@
 {
     "schema":  "flowchain.live_service_tester_network_e2e_report.v0",
-    "generatedAt":  "2026-05-20T02:31:51.5671875Z",
+    "generatedAt":  "2026-05-20T02:46:02.4181155Z",
     "status":  "passed",
     "rpcEndpoint":  "local-private-127.0.0.1",
-    "runId":  "20260520022943054-46628",
+    "runId":  "20260520024429524-3048",
     "checks":  {
                    "serviceStatusSucceeded":  true,
                    "healthSchemaOk":  true,
@@ -41,14 +41,14 @@
     "serviceHealthSchema":  "flowmemory.control_plane.health.v0",
     "rpcDiscoverSchema":  "flowchain.rpc.discovery.v0",
     "rpcReadinessSchema":  "flowchain.rpc.readiness.v0",
-    "chainBeforeBlock":  "96578",
-    "chainAfterBlock":  "96592",
+    "chainBeforeBlock":  "96706",
+    "chainAfterBlock":  "96720",
     "testerCount":  4,
     "testerAccountIds":  [
-                             "0x8aeb09d8734af4accdf19a923cc1b9d83f7349a31c6ede347c9d95d4f223cd1c",
-                             "0x8a84fe4851b9ddb6ebf08792251d9580bbf818ed290c8497eac1aa8748dd85f6",
-                             "0x3d619dbdc6da389fffcb8c77813f193ad0d92326869ac58baddc795e85b6e284",
-                             "0xd54206f95b47815cbd6876d5d738cf27cc379405a763faf0206a1151bf312727"
+                             "0xc98c6e9d6764b550fd9227e44d7b4b2b7294b453be1a0958207dc569364d0a00",
+                             "0x2806ed55594826cdfaf6c6e12cdf56826d35720c0a0f2a5be99cb2097cd6d4ea",
+                             "0x852dc3996b82f06d43715a8ae5542bffa8e975e4ab88001f50b1cd918ac275d0",
+                             "0x8a09b75061346b0ff281a594625d3495a5c1cb11d8b5ee0bb2b7eb51fb4e69aa"
                          ],
     "testerWalletCreates":  [
                                 {
@@ -57,7 +57,7 @@
                                     "created":  true,
                                     "alreadyExists":  false,
                                     "isolated":  true,
-                                    "accountId":  "0x8aeb09d8734af4accdf19a923cc1b9d83f7349a31c6ede347c9d95d4f223cd1c",
+                                    "accountId":  "0xc98c6e9d6764b550fd9227e44d7b4b2b7294b453be1a0958207dc569364d0a00",
                                     "keyScheme":  "secp256k1",
                                     "secretMaterialReturned":  false,
                                     "credentialStored":  false
@@ -68,7 +68,7 @@
                                     "created":  true,
                                     "alreadyExists":  false,
                                     "isolated":  true,
-                                    "accountId":  "0x8a84fe4851b9ddb6ebf08792251d9580bbf818ed290c8497eac1aa8748dd85f6",
+                                    "accountId":  "0x2806ed55594826cdfaf6c6e12cdf56826d35720c0a0f2a5be99cb2097cd6d4ea",
                                     "keyScheme":  "secp256k1",
                                     "secretMaterialReturned":  false,
                                     "credentialStored":  false
@@ -79,7 +79,7 @@
                                     "created":  true,
                                     "alreadyExists":  false,
                                     "isolated":  true,
-                                    "accountId":  "0x3d619dbdc6da389fffcb8c77813f193ad0d92326869ac58baddc795e85b6e284",
+                                    "accountId":  "0x852dc3996b82f06d43715a8ae5542bffa8e975e4ab88001f50b1cd918ac275d0",
                                     "keyScheme":  "secp256k1",
                                     "secretMaterialReturned":  false,
                                     "credentialStored":  false
@@ -90,81 +90,81 @@
                                     "created":  true,
                                     "alreadyExists":  false,
                                     "isolated":  true,
-                                    "accountId":  "0xd54206f95b47815cbd6876d5d738cf27cc379405a763faf0206a1151bf312727",
+                                    "accountId":  "0x8a09b75061346b0ff281a594625d3495a5c1cb11d8b5ee0bb2b7eb51fb4e69aa",
                                     "keyScheme":  "secp256k1",
                                     "secretMaterialReturned":  false,
                                     "credentialStored":  false
                                 }
                             ],
     "fundingTxIds":  [
-                         "0xda0b9d9b738851a5e064fc0ec87beb1fcbdd3fd781c6a27133d0a321bcbbf31f",
-                         "0x0f15823c114f8861febce09f1a1876a6ca25cdb662709576757a7e9ace4d39af",
-                         "0x405c64412abc1ac7158f45c4c346bb57ad8f994f9377a616af85aeed11db74d5",
-                         "0xec833f7a7aa4795c782e5ae9865c14e76d85e8d182a8d5343ef86f36c2c0fcc7",
-                         "0x6f586ea514c3abaf32b20e9dfcbc44e30688a91727f7a70eb7f2aba5ac8ba8a2",
-                         "0xd5fb3642526af4b6317e33daec0deeefc507199eca58987269f20984a46d72b9",
-                         "0x7500648b1705f69a576b5aff856109f9773b31fcb4928161f925b83f314aeaa4",
-                         "0xa35322a1bd7a604d94ca2597ca1e34a502c954658f7155cef119bf9e85d932ea"
+                         "0xffc6483264fe9462cd03cdec6ef516e63be47912626d449268a04045f63e774a",
+                         "0x7aaaf251ad9968cf0955f0418d26853d3108f21d872435c5c6f68d90263c9a51",
+                         "0x271a463a7472bc1f6cb76480a1b1ee1a0ea5f84eb6502d326aad2c35bbcbd110",
+                         "0xa507680c5ff9d326976df555f07742cd2925eb74d88843a218a1a21790db383d",
+                         "0x76f7e5d67a8eeff0f022ba6e6272e7de5dcf1977d011ea0e2b8ca9c16843511d",
+                         "0xcc92b01540befdef9a2f39246a21a792d0812740afc5ca7fbbbb6baf713f99d0",
+                         "0x7d9796847c63d2fd3f7ca955b781c813ab997ec5668c711f858fac13bec398cb",
+                         "0xf1d037c9573b8fd8ef9edc0cec3ca5d503ad2a0c878a9abc70f15da2e0269865"
                      ],
     "transferResults":  [
                             {
-                                "from":  "0x8aeb09d8734af4accdf19a923cc1b9d83f7349a31c6ede347c9d95d4f223cd1c",
-                                "to":  "0x8a84fe4851b9ddb6ebf08792251d9580bbf818ed290c8497eac1aa8748dd85f6",
+                                "from":  "0xc98c6e9d6764b550fd9227e44d7b4b2b7294b453be1a0958207dc569364d0a00",
+                                "to":  "0x2806ed55594826cdfaf6c6e12cdf56826d35720c0a0f2a5be99cb2097cd6d4ea",
                                 "amount":  "11",
-                                "transferId":  "0x48c89c5cee573b48c0612a2614a61ae2267ffd78fe804e203ee1ec0608a07d01",
+                                "transferId":  "0x372dbcaf25d26410a0c6c90edb6a346db4071b34e0140fff17baf1bd0924da6f",
                                 "txIds":  [
-                                              "0x1b1a3164aa56a779d7e9c62d72a7934c2314d058e750da85d28eea53ad76c9af"
+                                              "0xa7760c9d0b349d5ba697ca7f8828574d1f83fb72ca51da568b4f9aeafb186000"
                                           ],
                                 "status":  "queued_local_runtime"
                             },
                             {
-                                "from":  "0x8a84fe4851b9ddb6ebf08792251d9580bbf818ed290c8497eac1aa8748dd85f6",
-                                "to":  "0x3d619dbdc6da389fffcb8c77813f193ad0d92326869ac58baddc795e85b6e284",
+                                "from":  "0x2806ed55594826cdfaf6c6e12cdf56826d35720c0a0f2a5be99cb2097cd6d4ea",
+                                "to":  "0x852dc3996b82f06d43715a8ae5542bffa8e975e4ab88001f50b1cd918ac275d0",
                                 "amount":  "13",
-                                "transferId":  "0x1455ae841ce52af4e8dd99a8f095c637fd50f495b362b5825021b72b0628196d",
+                                "transferId":  "0x478c5cc720d0c6f15bfbaaa045aae5bf426e0c12a7dde39bb9bbf71689d19ede",
                                 "txIds":  [
-                                              "0x2673873e7de91c2f6fb0211ad06dcc0187f0db649563dd86c4af374a3ba03b36"
+                                              "0x479caf5ef41b942765fd9d57b450e3d4d24568a916ae60ceddf098d733ec1ce3"
                                           ],
                                 "status":  "queued_local_runtime"
                             },
                             {
-                                "from":  "0x3d619dbdc6da389fffcb8c77813f193ad0d92326869ac58baddc795e85b6e284",
-                                "to":  "0xd54206f95b47815cbd6876d5d738cf27cc379405a763faf0206a1151bf312727",
+                                "from":  "0x852dc3996b82f06d43715a8ae5542bffa8e975e4ab88001f50b1cd918ac275d0",
+                                "to":  "0x8a09b75061346b0ff281a594625d3495a5c1cb11d8b5ee0bb2b7eb51fb4e69aa",
                                 "amount":  "17",
-                                "transferId":  "0xe3588f7b9a04a3a12ed85cd2f6c4d983240150f846a9b8ec8f23e50353b82eb7",
+                                "transferId":  "0x35ae99854276cb53dd7766b700c43818ddb05d0a0f9b1fe50b6834b0582ee5c5",
                                 "txIds":  [
-                                              "0x500b0b618ef2408af299596758cb7e23a4d06a1719759985280bf98f96656638"
+                                              "0x9108bd25cf3caa67f7fbd7b73470f5103976d03747158bc25af377bfcf42ed44"
                                           ],
                                 "status":  "queued_local_runtime"
                             },
                             {
-                                "from":  "0xd54206f95b47815cbd6876d5d738cf27cc379405a763faf0206a1151bf312727",
-                                "to":  "0x8aeb09d8734af4accdf19a923cc1b9d83f7349a31c6ede347c9d95d4f223cd1c",
+                                "from":  "0x8a09b75061346b0ff281a594625d3495a5c1cb11d8b5ee0bb2b7eb51fb4e69aa",
+                                "to":  "0xc98c6e9d6764b550fd9227e44d7b4b2b7294b453be1a0958207dc569364d0a00",
                                 "amount":  "19",
-                                "transferId":  "0x8ffd24ecc84372fc57f0d0cc86ea8f8f5fad1156662a9c93e336ea2c12010525",
+                                "transferId":  "0x8df409ae8c982bedcaee91c6cd0138736e1f96fbe43e51ffd393e1f17480cc37",
                                 "txIds":  [
-                                              "0x72cd1b7f9378458b167d901909ad34a67e7dfff267bd10ff802401d235c94de1"
+                                              "0xf5439a86e7907fd2746bcbdb82102709001c8dcde6ef1cee205b731a39cd97a0"
                                           ],
                                 "status":  "queued_local_runtime"
                             }
                         ],
     "expectedBalances":  {
-                             "0x8aeb09d8734af4accdf19a923cc1b9d83f7349a31c6ede347c9d95d4f223cd1c":  108,
-                             "0x8a84fe4851b9ddb6ebf08792251d9580bbf818ed290c8497eac1aa8748dd85f6":  98,
-                             "0x3d619dbdc6da389fffcb8c77813f193ad0d92326869ac58baddc795e85b6e284":  96,
-                             "0xd54206f95b47815cbd6876d5d738cf27cc379405a763faf0206a1151bf312727":  98
+                             "0xc98c6e9d6764b550fd9227e44d7b4b2b7294b453be1a0958207dc569364d0a00":  108,
+                             "0x2806ed55594826cdfaf6c6e12cdf56826d35720c0a0f2a5be99cb2097cd6d4ea":  98,
+                             "0x852dc3996b82f06d43715a8ae5542bffa8e975e4ab88001f50b1cd918ac275d0":  96,
+                             "0x8a09b75061346b0ff281a594625d3495a5c1cb11d8b5ee0bb2b7eb51fb4e69aa":  98
                          },
     "balancesAfter":  {
-                          "0x8aeb09d8734af4accdf19a923cc1b9d83f7349a31c6ede347c9d95d4f223cd1c":  "108",
-                          "0x8a84fe4851b9ddb6ebf08792251d9580bbf818ed290c8497eac1aa8748dd85f6":  "98",
-                          "0x3d619dbdc6da389fffcb8c77813f193ad0d92326869ac58baddc795e85b6e284":  "96",
-                          "0xd54206f95b47815cbd6876d5d738cf27cc379405a763faf0206a1151bf312727":  "98"
+                          "0xc98c6e9d6764b550fd9227e44d7b4b2b7294b453be1a0958207dc569364d0a00":  "108",
+                          "0x2806ed55594826cdfaf6c6e12cdf56826d35720c0a0f2a5be99cb2097cd6d4ea":  "98",
+                          "0x852dc3996b82f06d43715a8ae5542bffa8e975e4ab88001f50b1cd918ac275d0":  "96",
+                          "0x8a09b75061346b0ff281a594625d3495a5c1cb11d8b5ee0bb2b7eb51fb4e69aa":  "98"
                       },
     "transferHistoryCounts":  {
-                                  "0x8aeb09d8734af4accdf19a923cc1b9d83f7349a31c6ede347c9d95d4f223cd1c":  2,
-                                  "0x8a84fe4851b9ddb6ebf08792251d9580bbf818ed290c8497eac1aa8748dd85f6":  2,
-                                  "0x3d619dbdc6da389fffcb8c77813f193ad0d92326869ac58baddc795e85b6e284":  2,
-                                  "0xd54206f95b47815cbd6876d5d738cf27cc379405a763faf0206a1151bf312727":  2
+                                  "0xc98c6e9d6764b550fd9227e44d7b4b2b7294b453be1a0958207dc569364d0a00":  2,
+                                  "0x2806ed55594826cdfaf6c6e12cdf56826d35720c0a0f2a5be99cb2097cd6d4ea":  2,
+                                  "0x852dc3996b82f06d43715a8ae5542bffa8e975e4ab88001f50b1cd918ac275d0":  2,
+                                  "0x8a09b75061346b0ff281a594625d3495a5c1cb11d8b5ee0bb2b7eb51fb4e69aa":  2
                               },
     "packetExecutableSmokeValidated":  true,
     "packetSmokeChecks":  {

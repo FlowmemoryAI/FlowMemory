@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.owner_activation_plan_report.v0",
-    "generatedAt":  "2026-05-20T01:15:47.1140711+00:00",
+    "generatedAt":  "2026-05-20T02:05:21.3398546+00:00",
     "status":  "passed",
     "activationReady":  false,
     "checks":  {
@@ -444,6 +444,7 @@
                                                 "owner env file contents"
                                             ],
                        "validationCommands":  [
+                                                  "npm run flowchain:wallet:live-tester:e2e",
                                                   "npm run flowchain:external-tester:packet -- -AllowBlocked",
                                                   "npm run flowchain:external-tester:packet:validate",
                                                   "npm run flowchain:dashboard:ui:readiness"
@@ -524,6 +525,7 @@
                                                 "wallet recovery material"
                                             ],
                        "validationCommands":  [
+                                                  "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
                                                   "npm run flowchain:completion:audit -- -AllowBlocked",
                                                   "npm run flowchain:truth-table -- -AllowBlocked",
                                                   "npm run flowchain:no-secret:scan"
@@ -563,6 +565,8 @@
                          "npm run flowchain:owner-inputs -- -AllowBlocked",
                          "npm run flowchain:public-rpc:check -- -AllowBlocked",
                          "npm run flowchain:bridge:live:check -- -AllowBlocked",
+                         "npm run flowchain:wallet:live-tester:e2e",
+                         "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
                          "npm run flowchain:completion:audit -- -AllowBlocked"
                      ],
     "envValuesPrinted":  false,

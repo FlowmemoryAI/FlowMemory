@@ -203,6 +203,20 @@ $publicRpcDeploymentBundleStatus = Get-OpsStatus -Report $publicRpcDeploymentBun
 $publicRpcDeploymentAutomationStatus = Get-OpsStatus -Report $publicRpcDeploymentAutomation
 $publicRpcDeploymentBundleChecks = Get-OpsProp -Object $publicRpcDeploymentBundle -Name "checks"
 $publicRpcDeploymentAutomationChecks = Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "checks"
+$publicRpcRequiredCutoverCommands = @(
+    "npm run flowchain:tester:gateway:e2e",
+    "npm run flowchain:wallet:live-tester:e2e",
+    "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
+    "npm run flowchain:truth-table -- -AllowBlocked",
+    "npm run flowchain:no-secret:scan"
+)
+$publicRpcDeploymentBundleRequiredCommands = @((Get-OpsProp -Object $publicRpcDeploymentBundle -Name "requiredCommands" -Default @()) | ForEach-Object { "$_" })
+$publicRpcDeploymentBundleWalletCutoverProofReady = @($publicRpcRequiredCutoverCommands | Where-Object { $_ -notin $publicRpcDeploymentBundleRequiredCommands }).Count -eq 0
+$publicRpcDeploymentAutomationWalletCutoverProofReady = ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTesterGatewayE2e" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesWalletTesterE2e" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTruthTable" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesNoSecretScan" -Default $false) -eq $true)
 $publicRpcEdgeHardeningReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and $publicRpcDeploymentAutomationStatus -eq "passed" `
     -and ((Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesDisallowedOriginPreflight" -Default $false) -eq $true) `
@@ -211,6 +225,7 @@ $publicRpcEdgeHardeningReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ((Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "authorizationForwardingScopedToTesterWrite" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesSecurityHeaders" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "preflightsCheckSecurityHeaders" -Default $false) -eq $true) `
+    -and ($publicRpcDeploymentBundleWalletCutoverProofReady -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentBundle -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentBundle -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasDisallowedOriginProbe" -Default $false) -eq $true) `
@@ -219,6 +234,7 @@ $publicRpcEdgeHardeningReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxAuthorizationForwardingScoped" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasSecurityHeaders" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightChecksSecurityHeaders" -Default $false) -eq $true) `
+    -and ($publicRpcDeploymentAutomationWalletCutoverProofReady -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "broadcasts" -Default $true) -eq $false)
@@ -539,12 +555,19 @@ $report = [ordered]@{
         publicRpcAuthorizationForwardingScoped = Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "authorizationForwardingScopedToTesterWrite" -Default $false
         publicRpcSecurityHeaders = Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesSecurityHeaders" -Default $false
         publicRpcSecurityHeaderPreflight = Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "preflightsCheckSecurityHeaders" -Default $false
+        publicRpcWalletCutoverCommands = $publicRpcDeploymentBundleWalletCutoverProofReady
         publicRpcRenderedDisallowedOriginProbe = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasDisallowedOriginProbe" -Default $false
         publicRpcRenderedBroadStateBlockedProbe = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightBlocksBroadStatePath" -Default $false
         publicRpcRenderedPrivateWalletCreateBlockedProbe = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightBlocksPrivateWalletCreate" -Default $false
         publicRpcRenderedAuthorizationForwardingScoped = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxAuthorizationForwardingScoped" -Default $false
         publicRpcRenderedSecurityHeaders = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasSecurityHeaders" -Default $false
         publicRpcRenderedSecurityHeaderPreflight = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightChecksSecurityHeaders" -Default $false
+        publicRpcCommandPlanWalletCutoverProof = $publicRpcDeploymentAutomationWalletCutoverProofReady
+        publicRpcCommandPlanTesterGatewayE2e = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTesterGatewayE2e" -Default $false
+        publicRpcCommandPlanWalletTesterE2e = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesWalletTesterE2e" -Default $false
+        publicRpcCommandPlanCutoverRehearsal = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false
+        publicRpcCommandPlanTruthTable = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTruthTable" -Default $false
+        publicRpcCommandPlanNoSecretScan = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesNoSecretScan" -Default $false
         backup = $backupStatus
         backupRetentionCount = $backupRetentionCount
         backupRetentionCandidateCount = $backupRetentionCandidateCount

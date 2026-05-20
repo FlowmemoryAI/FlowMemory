@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-20T01:44:52.6098912Z",
+    "generatedAt":  "2026-05-20T02:42:13.2182506Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
@@ -10,11 +10,11 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\truth-table-stale-critical\\input"
                 },
     "chain":  {
-                  "latestHeight":  "96125",
-                  "finalizedHeight":  "96125",
-                  "stateFileLastWriteAgeSeconds":  6,
+                  "latestHeight":  "96674",
+                  "finalizedHeight":  "96674",
+                  "stateFileLastWriteAgeSeconds":  1,
                   "monitorStatus":  "passed",
-                  "monitorSamples":  3,
+                  "monitorSamples":  2,
                   "monitorHeightAdvanced":  true
               },
     "reportStatuses":  {
@@ -46,12 +46,19 @@
                            "publicRpcAuthorizationForwardingScoped":  true,
                            "publicRpcSecurityHeaders":  true,
                            "publicRpcSecurityHeaderPreflight":  true,
+                           "publicRpcWalletCutoverCommands":  true,
                            "publicRpcRenderedDisallowedOriginProbe":  true,
                            "publicRpcRenderedBroadStateBlockedProbe":  true,
                            "publicRpcRenderedPrivateWalletCreateBlockedProbe":  true,
                            "publicRpcRenderedAuthorizationForwardingScoped":  true,
                            "publicRpcRenderedSecurityHeaders":  true,
                            "publicRpcRenderedSecurityHeaderPreflight":  true,
+                           "publicRpcCommandPlanWalletCutoverProof":  true,
+                           "publicRpcCommandPlanTesterGatewayE2e":  true,
+                           "publicRpcCommandPlanWalletTesterE2e":  true,
+                           "publicRpcCommandPlanCutoverRehearsal":  true,
+                           "publicRpcCommandPlanTruthTable":  true,
+                           "publicRpcCommandPlanNoSecretScan":  true,
                            "backup":  "blocked",
                            "backupRetentionCount":  null,
                            "backupRetentionCandidateCount":  null,

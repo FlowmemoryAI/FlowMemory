@@ -246,6 +246,20 @@ $ownerActivationPlanReady = (Get-MetricsStatus -Report $ownerActivationPlan) -eq
     -and ((Get-MetricsProp -Object $ownerActivationPlan -Name "broadcasts" -Default $true) -eq $false)
 $publicRpcDeploymentBundleChecks = Get-MetricsProp -Object $publicRpcDeploymentBundle -Name "checks"
 $publicRpcDeploymentAutomationChecks = Get-MetricsProp -Object $publicRpcDeploymentAutomation -Name "checks"
+$publicRpcRequiredCutoverCommands = @(
+    "npm run flowchain:tester:gateway:e2e",
+    "npm run flowchain:wallet:live-tester:e2e",
+    "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
+    "npm run flowchain:truth-table -- -AllowBlocked",
+    "npm run flowchain:no-secret:scan"
+)
+$publicRpcDeploymentBundleRequiredCommands = @((Get-MetricsProp -Object $publicRpcDeploymentBundle -Name "requiredCommands" -Default @()) | ForEach-Object { "$_" })
+$publicRpcDeploymentBundleWalletCutoverProofReady = @($publicRpcRequiredCutoverCommands | Where-Object { $_ -notin $publicRpcDeploymentBundleRequiredCommands }).Count -eq 0
+$publicRpcDeploymentAutomationWalletCutoverProofReady = ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTesterGatewayE2e" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesWalletTesterE2e" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTruthTable" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesNoSecretScan" -Default $false) -eq $true)
 $externalTesterEvidenceTransferConsistent = (Get-MetricsProp -Object $externalTesterEvidenceChecks -Name "transferFound" -Default $false) -eq $true `
     -and (Get-MetricsProp -Object $externalTesterEvidenceChecks -Name "transferMatchesAccounts" -Default $false) -eq $true `
     -and (Get-MetricsProp -Object $externalTesterEvidenceChecks -Name "transferAmountMatches" -Default $false) -eq $true `
@@ -275,12 +289,19 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_private_wallet_cre
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_auth_forwarding_scoped" -Help "One when public RPC authorization forwarding is scoped to tester writes." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentBundleChecks -Name "authorizationForwardingScopedToTesterWrite" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_security_headers" -Help "One when the public RPC bundle includes defensive response headers." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentBundleChecks -Name "includesSecurityHeaders" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_security_header_preflight" -Help "One when public RPC preflights check defensive response headers." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentBundleChecks -Name "preflightsCheckSecurityHeaders" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_wallet_cutover_commands" -Help "One when the public RPC deployment bundle requires wallet/tester cutover verification commands." -Value (ConvertTo-MetricBool -Value $publicRpcDeploymentBundleWalletCutoverProofReady)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_rendered_disallowed_origin_probe" -Help "One when rendered public RPC preflight has the disallowed origin probe." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasDisallowedOriginProbe" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_rendered_broad_state_blocked_probe" -Help "One when rendered public RPC preflight blocks broad state paths." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightBlocksBroadStatePath" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_rendered_private_wallet_create_blocked_probe" -Help "One when rendered public RPC preflight blocks private wallet creation paths." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightBlocksPrivateWalletCreate" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_rendered_auth_forwarding_scoped" -Help "One when rendered public RPC authorization forwarding is scoped to tester writes." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxAuthorizationForwardingScoped" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_rendered_security_headers" -Help "One when rendered public RPC Nginx config includes defensive response headers." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasSecurityHeaders" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_rendered_security_header_preflight" -Help "One when rendered public RPC preflights check defensive response headers." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightChecksSecurityHeaders" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_wallet_cutover_proof" -Help "One when public RPC deployment automation includes all wallet/tester cutover proof commands." -Value (ConvertTo-MetricBool -Value $publicRpcDeploymentAutomationWalletCutoverProofReady)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_tester_gateway_e2e" -Help "One when public RPC deployment automation includes tester gateway E2E." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTesterGatewayE2e" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_wallet_tester_e2e" -Help "One when public RPC deployment automation includes wallet tester E2E." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesWalletTesterE2e" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_cutover_rehearsal" -Help "One when public RPC deployment automation includes live cutover rehearsal." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_truth_table" -Help "One when public RPC deployment automation includes production truth table verification." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTruthTable" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_no_secret_scan" -Help "One when public RPC deployment automation includes no-secret scan verification." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesNoSecretScan" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_ready" -Help "One when backup readiness is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "backup"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_retention_count" -Help "Configured state backup retention count from backup readiness." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "backupRetentionCount"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_retention_candidates" -Help "Number of eligible state backup snapshots seen by retention." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "backupRetentionCandidateCount"))
@@ -393,8 +414,15 @@ $requiredMetricNames = @(
     "flowchain_public_rpc_auth_forwarding_scoped",
     "flowchain_public_rpc_security_headers",
     "flowchain_public_rpc_security_header_preflight",
+    "flowchain_public_rpc_wallet_cutover_commands",
     "flowchain_public_rpc_rendered_security_headers",
     "flowchain_public_rpc_rendered_security_header_preflight",
+    "flowchain_public_rpc_command_plan_wallet_cutover_proof",
+    "flowchain_public_rpc_command_plan_tester_gateway_e2e",
+    "flowchain_public_rpc_command_plan_wallet_tester_e2e",
+    "flowchain_public_rpc_command_plan_cutover_rehearsal",
+    "flowchain_public_rpc_command_plan_truth_table",
+    "flowchain_public_rpc_command_plan_no_secret_scan",
     "flowchain_backup_ready",
     "flowchain_backup_retention_count",
     "flowchain_backup_retention_candidates",
@@ -488,12 +516,19 @@ $checks = [ordered]@{
         "flowchain_public_rpc_auth_forwarding_scoped",
         "flowchain_public_rpc_security_headers",
         "flowchain_public_rpc_security_header_preflight",
+        "flowchain_public_rpc_wallet_cutover_commands",
         "flowchain_public_rpc_rendered_disallowed_origin_probe",
         "flowchain_public_rpc_rendered_broad_state_blocked_probe",
         "flowchain_public_rpc_rendered_private_wallet_create_blocked_probe",
         "flowchain_public_rpc_rendered_auth_forwarding_scoped",
         "flowchain_public_rpc_rendered_security_headers",
-        "flowchain_public_rpc_rendered_security_header_preflight"
+        "flowchain_public_rpc_rendered_security_header_preflight",
+        "flowchain_public_rpc_command_plan_wallet_cutover_proof",
+        "flowchain_public_rpc_command_plan_tester_gateway_e2e",
+        "flowchain_public_rpc_command_plan_wallet_tester_e2e",
+        "flowchain_public_rpc_command_plan_cutover_rehearsal",
+        "flowchain_public_rpc_command_plan_truth_table",
+        "flowchain_public_rpc_command_plan_no_secret_scan"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     dashboardUiMetricsPresent = @(
         "flowchain_dashboard_ui_ready",
