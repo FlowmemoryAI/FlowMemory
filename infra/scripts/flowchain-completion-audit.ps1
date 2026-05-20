@@ -1246,6 +1246,7 @@ $publicRpcDeploymentBundleRequiredChecks = @(
     "ownerRenderDoesNotPrintTokenHash",
     "ownerRenderFilesDoNotContainTokenHash",
     "ownerRenderIncludesSecurityHeaders",
+    "ownerRenderPreflightsRejectWrongMethods",
     "ownerRenderRejectsPublicUrlPath",
     "ownerRenderPublicUrlPathRejectOutputNoSecrets",
     "includesPrivateOrigin",
@@ -1253,6 +1254,7 @@ $publicRpcDeploymentBundleRequiredChecks = @(
     "includesTlsPlaceholders",
     "includesSecurityHeaders",
     "preflightsCheckSecurityHeaders",
+    "includesMethodRejectionPreflight",
     "includesCorsOriginForwarding",
     "publicStateMirrorExcluded",
     "devnetStatePublicRpcExcluded",
@@ -1303,7 +1305,9 @@ $publicRpcDeploymentBundlePassed = $publicRpcDeploymentBundleExitCode -eq 0 `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "ownerRenderDoesNotPrintTokenHash" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "includesSecurityHeaders" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "ownerRenderIncludesSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "ownerRenderPreflightsRejectWrongMethods" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "preflightsCheckSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "includesMethodRejectionPreflight" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "envExampleHasAllRequiredNames" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "secretMarkerFindingsEmpty" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundle -Name "valuesPrinted" -Default $true) -eq $false) `
@@ -1325,6 +1329,7 @@ $publicRpcDeploymentAutomationRequiredChecks = @(
     "bundleHasShellPreflight",
     "bundleHasWindowsPreflight",
     "bundleHasRollbackRunbook",
+    "bundlePreflightsCheckMethodRejection",
     "ownerPathsOutsideRepo",
     "hostMutationPerformedFalse",
     "valuesPrintedFalse",
@@ -1345,6 +1350,7 @@ $publicRpcDeploymentAutomationRequiredChecks = @(
     "renderedPreflightHasTesterUnauthProbe",
     "renderedPreflightHasDisallowedOriginProbe",
     "renderedPreflightChecksSecurityHeaders",
+    "renderedPreflightHasMethodRejectionProbes",
     "renderedPreflightBlocksBroadStatePath",
     "renderedPreflightBlocksPrivateWalletCreate",
     "renderedNginxAuthorizationForwardingScoped",
@@ -1380,6 +1386,7 @@ $publicRpcDeploymentAutomationPassed = $publicRpcDeploymentAutomationExitCode -e
     -and $publicRpcDeploymentAutomationSecretFindingCount -eq 0 `
     -and $publicRpcDeploymentAutomationMissingCheckCount -eq 0 `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "bundlePreflightsCheckMethodRejection" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedFilesKeepPrivateOrigin" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasTls" -Default $false) -eq $true) `
@@ -1390,6 +1397,7 @@ $publicRpcDeploymentAutomationPassed = $publicRpcDeploymentAutomationExitCode -e
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasReadinessProbe" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightChecksSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasMethodRejectionProbes" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedReportSummaryPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedReportSummaryPassed" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedReportSummaryListsFiles" -Default $false) -eq $true) `

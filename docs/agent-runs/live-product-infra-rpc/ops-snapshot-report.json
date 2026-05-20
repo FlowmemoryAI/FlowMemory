@@ -1,20 +1,29 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-20T05:55:28.2044116Z",
+    "generatedAt":  "2026-05-20T06:23:41.0891092Z",
     "status":  "blocked",
     "refresh":  {
-                    "performed":  false,
+                    "performed":  true,
                     "steps":  [
-
+                                  {
+                                      "name":  "service-status",
+                                      "exitCode":  0,
+                                      "outputLineCount":  10
+                                  },
+                                  {
+                                      "name":  "service-monitor",
+                                      "exitCode":  0,
+                                      "outputLineCount":  4
+                                  }
                               ],
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "98477",
-                  "finalizedHeight":  "98477",
-                  "stateFileLastWriteAgeSeconds":  3,
+                  "latestHeight":  "98794",
+                  "finalizedHeight":  "98794",
+                  "stateFileLastWriteAgeSeconds":  6,
                   "monitorStatus":  "passed",
-                  "monitorSamples":  3,
+                  "monitorSamples":  2,
                   "monitorHeightAdvanced":  true,
                   "mempoolDepth":  0
               },
@@ -24,10 +33,10 @@
                               "txIntakeRows":  159,
                               "txIntakeAcceptedRows":  159,
                               "txIntakeInvalidRows":  0,
-                              "txIntakeLastWriteAgeSeconds":  10056.634,
+                              "txIntakeLastWriteAgeSeconds":  11749.481,
                               "runtimeSubmitDir":  "devnet/local/intake/runtime-submit",
                               "runtimeSubmitFileCount":  4,
-                              "runtimeSubmitNewestFileAgeSeconds":  418415.451,
+                              "runtimeSubmitNewestFileAgeSeconds":  420108.317,
                               "runtimeInboxDir":  "devnet/local/node/inbox",
                               "runtimeInboxFileCount":  0,
                               "runtimeInboxNewestFileAgeSeconds":  null,

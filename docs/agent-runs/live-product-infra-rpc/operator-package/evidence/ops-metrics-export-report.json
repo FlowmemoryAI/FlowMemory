@@ -1,11 +1,20 @@
 {
     "schema":  "flowchain.ops_metrics_export_report.v0",
-    "generatedAt":  "2026-05-20T05:55:31.9268967Z",
+    "generatedAt":  "2026-05-20T06:23:43.4872794Z",
     "status":  "passed",
     "refresh":  {
-                    "performed":  false,
+                    "performed":  true,
                     "steps":  [
-
+                                  {
+                                      "name":  "ops-snapshot",
+                                      "exitCode":  0,
+                                      "outputLineCount":  5
+                                  },
+                                  {
+                                      "name":  "ops-alerts",
+                                      "exitCode":  0,
+                                      "outputLineCount":  5
+                                  }
                               ]
                 },
     "reportPaths":  {
@@ -32,7 +41,7 @@
                     },
     "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.json",
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
-    "metricCount":  98,
+    "metricCount":  100,
     "requiredMetricNames":  [
                                 "flowchain_latest_height",
                                 "flowchain_finalized_height",

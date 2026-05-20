@@ -48,6 +48,28 @@ Invoke-WebRequest -Uri "$publicBase/health" -Method Get -Headers $headers -Timeo
 Invoke-WebRequest -Uri "$publicBase/rpc/readiness" -Method Get -Headers $headers -TimeoutSec 10 | Out-Null
 $body = '{"jsonrpc":"2.0","id":1,"method":"rpc_readiness","params":{}}'
 Invoke-WebRequest -Uri "$publicBase/rpc" -Method Post -ContentType "application/json" -Headers $headers -Body $body -TimeoutSec 10 | Out-Null
+$rpcGetStatusCode = 0
+try {
+    Invoke-WebRequest -Uri "$publicBase/rpc" -Method Get -Headers $headers -TimeoutSec 10 | Out-Null
+    $rpcGetStatusCode = 200
+}
+catch {
+    if ($_.Exception.PSObject.Properties.Name -contains "Response" -and $null -ne $_.Exception.Response) {
+        $rpcGetStatusCode = [int]$_.Exception.Response.StatusCode
+    } else { throw }
+}
+if ($rpcGetStatusCode -ne 405) { throw "RPC endpoint GET preflight did not return HTTP 405." }
+$readOnlyPostStatusCode = 0
+try {
+    Invoke-WebRequest -Uri "$publicBase/rpc/readiness" -Method Post -ContentType "application/json" -Headers $headers -Body "{}" -TimeoutSec 10 | Out-Null
+    $readOnlyPostStatusCode = 200
+}
+catch {
+    if ($_.Exception.PSObject.Properties.Name -contains "Response" -and $null -ne $_.Exception.Response) {
+        $readOnlyPostStatusCode = [int]$_.Exception.Response.StatusCode
+    } else { throw }
+}
+if ($readOnlyPostStatusCode -ne 405) { throw "Read-only RPC readiness POST preflight did not return HTTP 405." }
 $disallowedStatusCode = 0
 try {
     Invoke-WebRequest -Uri "$publicBase/rpc/readiness" -Method Get -Headers @{ Origin = $DisallowedOrigin } -TimeoutSec 10 | Out-Null

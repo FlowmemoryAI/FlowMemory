@@ -46,11 +46,17 @@ curl -fsS --max-time 5 "http://127.0.0.1:8787/health" >/dev/null
 curl -fsS --max-time 10 "${public_url%/}/health" >/dev/null
 curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/rpc/readiness" >/dev/null
 curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","id":1,"method":"rpc_readiness","params":{}}' "${public_url%/}/rpc" >/dev/null
+rpc_get_body="$(mktemp)"
+readonly_post_body="$(mktemp)"
 disallowed_body="$(mktemp)"
 broad_state_body="$(mktemp)"
 tester_unauth_body="$(mktemp)"
 private_wallet_body="$(mktemp)"
-trap 'rm -f "${disallowed_body}" "${broad_state_body}" "${tester_unauth_body}" "${private_wallet_body}"' EXIT
+trap 'rm -f "${rpc_get_body}" "${readonly_post_body}" "${disallowed_body}" "${broad_state_body}" "${tester_unauth_body}" "${private_wallet_body}"' EXIT
+rpc_get_status="$(curl -sS -o "${rpc_get_body}" -w "%{http_code}" --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/rpc")"
+test "${rpc_get_status}" = "405"
+readonly_post_status="$(curl -sS -o "${readonly_post_body}" -w "%{http_code}" --max-time 10 -H "Origin: ${allowed_origin}" -H "Content-Type: application/json" --data '{}' "${public_url%/}/rpc/readiness")"
+test "${readonly_post_status}" = "405"
 disallowed_status="$(curl -sS -o "${disallowed_body}" -w "%{http_code}" --max-time 10 -H "Origin: ${disallowed_origin}" "${public_url%/}/rpc/readiness")"
 test "${disallowed_status}" = "403"
 broad_state_status="$(curl -sS -o "${broad_state_body}" -w "%{http_code}" --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/devnet/local/state.json")"

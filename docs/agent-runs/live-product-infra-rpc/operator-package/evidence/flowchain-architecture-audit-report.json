@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-20T05:59:12.5555284Z",
+    "generatedAt":  "2026-05-20T06:23:04.1652575Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -29,7 +29,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=98477, finalizedHeight=98477",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=98663, finalizedHeight=98663",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -233,7 +233,7 @@
                       "layer":  "Public edge",
                       "requirement":  "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, defensive response headers, tester write preflight, wallet/tester cutover proof, disallowed-origin and blocked-private-path probes, verification, rollback, and no broad local state mirror.",
                       "status":  "passed",
-                      "evidence":  "edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, testerWritePreflight=True, walletCutoverCommands=True, securityHeaders=True, securityHeaderPreflight=True, ownerRenderSecurityHeaders=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True, publicStateMirrorExcluded=True, devnetStatePublicRpcExcluded=True",
+                      "evidence":  "edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, testerWritePreflight=True, methodRejectionPreflight=True, walletCutoverCommands=True, securityHeaders=True, securityHeaderPreflight=True, ownerRenderSecurityHeaders=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True, publicStateMirrorExcluded=True, devnetStatePublicRpcExcluded=True",
                       "files":  [
                                     "infra/scripts/flowchain-public-rpc-edge-template.ps1",
                                     "infra/scripts/flowchain-public-rpc-deployment-bundle.ps1",
@@ -254,7 +254,7 @@
                       "layer":  "Public edge",
                       "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, defensive response-header probes, tester write unauthenticated rejection probe, wallet/tester cutover proof commands, post-deploy verification, and rollback drill phases without host mutation or owner-value leakage.",
                       "status":  "passed",
-                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, securityHeaders=True, securityHeaderPreflight=True, testerUnauthProbe=True, walletTesterE2e=True, cutoverRehearsal=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, hostMutationFalse=True",
+                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, securityHeaders=True, securityHeaderPreflight=True, methodRejectionProbes=True, testerUnauthProbe=True, walletTesterE2e=True, cutoverRehearsal=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, hostMutationFalse=True",
                       "files":  [
                                     "infra/scripts/flowchain-public-rpc-deployment-automation.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_AUTOMATION.md",

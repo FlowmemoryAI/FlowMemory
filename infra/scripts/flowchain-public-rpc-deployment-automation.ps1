@@ -279,6 +279,7 @@ function Test-RenderedDeployment {
         renderedPreflightHasTesterUnauthProbe = $renderedAllText.Contains("/tester/status") -and $renderedAllText.Contains("/tester/wallets/create") -and $renderedAllText.Contains("flowmemory.control_plane.tester_write_auth_required.v0")
         renderedPreflightHasDisallowedOriginProbe = $renderedAllText.Contains("blocked-origin.flowchain.example") -and $renderedAllText.Contains("403")
         renderedPreflightChecksSecurityHeaders = $renderedAllText.Contains("add_header Strict-Transport-Security") -and $renderedAllText.Contains("add_header Content-Security-Policy")
+        renderedPreflightHasMethodRejectionProbes = $renderedAllText.Contains('test "${rpc_get_status}" = "405"') -and $renderedAllText.Contains('test "${readonly_post_status}" = "405"') -and $renderedAllText.Contains("RPC endpoint GET preflight did not return HTTP 405.") -and $renderedAllText.Contains("Read-only RPC readiness POST preflight did not return HTTP 405.")
         renderedPreflightBlocksBroadStatePath = $renderedAllText.Contains("/devnet/local/state.json") -and $renderedAllText.Contains("404")
         renderedPreflightBlocksPrivateWalletCreate = $renderedAllText.Contains("/wallets/create") -and $renderedAllText.Contains("404")
         renderedFilesDoNotContainTokenHash = -not $renderedAllText.Contains($TokenHashSentinel)
@@ -421,6 +422,7 @@ $baseChecks = [ordered]@{
     bundleHasRollbackRunbook = (Get-DeployProp -Object $bundleChecks -Name "rollbackRunbookWritten" -Default $false) -eq $true
     bundleHasSecurityHeaders = (Get-DeployProp -Object $bundleChecks -Name "includesSecurityHeaders" -Default $false) -eq $true
     bundlePreflightsCheckSecurityHeaders = (Get-DeployProp -Object $bundleChecks -Name "preflightsCheckSecurityHeaders" -Default $false) -eq $true
+    bundlePreflightsCheckMethodRejection = (Get-DeployProp -Object $bundleChecks -Name "includesMethodRejectionPreflight" -Default $false) -eq $true
 }
 
 $scenario = [ordered]@{

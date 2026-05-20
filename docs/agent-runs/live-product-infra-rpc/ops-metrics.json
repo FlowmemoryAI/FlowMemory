@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T05:55:31.7596255Z",
+    "generatedAt":  "2026-05-20T06:23:43.2734773Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -21,25 +21,25 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  98477
+                        "value":  98794
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  98477
+                        "value":  98794
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  3
+                        "value":  6
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
                         "type":  "gauge",
                         "help":  "Service monitor samples recorded in the current ops snapshot.",
-                        "value":  3
+                        "value":  2
                     },
                     {
                         "name":  "flowchain_height_advanced",
@@ -75,7 +75,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  10056.634
+                        "value":  11749.481
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -192,6 +192,12 @@
                         "value":  1
                     },
                     {
+                        "name":  "flowchain_public_rpc_method_rejection_preflight",
+                        "type":  "gauge",
+                        "help":  "One when public RPC preflights include wrong-method rejection probes.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_public_rpc_wallet_cutover_commands",
                         "type":  "gauge",
                         "help":  "One when the public RPC deployment bundle requires wallet/tester cutover verification commands.",
@@ -231,6 +237,12 @@
                         "name":  "flowchain_public_rpc_rendered_security_header_preflight",
                         "type":  "gauge",
                         "help":  "One when rendered public RPC preflights check defensive response headers.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rendered_method_rejection_preflight",
+                        "type":  "gauge",
+                        "help":  "One when rendered public RPC preflights prove wrong HTTP methods are rejected.",
                         "value":  1
                     },
                     {
@@ -573,13 +585,13 @@
                         "name":  "flowchain_truth_gates_total",
                         "type":  "gauge",
                         "help":  "Total production truth table gates.",
-                        "value":  52
+                        "value":  53
                     },
                     {
                         "name":  "flowchain_truth_gates_passed",
                         "type":  "gauge",
                         "help":  "Passed production truth table gates.",
-                        "value":  36
+                        "value":  37
                     },
                     {
                         "name":  "flowchain_truth_gates_owner_blocked",
@@ -606,7 +618,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  98,
+    "metricCount":  100,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

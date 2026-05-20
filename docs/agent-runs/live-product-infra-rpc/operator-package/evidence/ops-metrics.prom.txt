@@ -1,15 +1,15 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 98477
+flowchain_latest_height 98794
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 98477
+flowchain_finalized_height 98794
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 3
+flowchain_state_file_age_seconds 6
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
-flowchain_monitor_samples_total 3
+flowchain_monitor_samples_total 2
 # HELP flowchain_height_advanced One when service monitor proved advancing block height.
 # TYPE flowchain_height_advanced gauge
 flowchain_height_advanced 1
@@ -27,7 +27,7 @@ flowchain_transaction_intake_accepted_rows_total 159
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 10056.634
+flowchain_transaction_intake_file_age_seconds 11749.481
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -85,6 +85,9 @@ flowchain_public_rpc_security_headers 1
 # HELP flowchain_public_rpc_security_header_preflight One when public RPC preflights check defensive response headers.
 # TYPE flowchain_public_rpc_security_header_preflight gauge
 flowchain_public_rpc_security_header_preflight 1
+# HELP flowchain_public_rpc_method_rejection_preflight One when public RPC preflights include wrong-method rejection probes.
+# TYPE flowchain_public_rpc_method_rejection_preflight gauge
+flowchain_public_rpc_method_rejection_preflight 1
 # HELP flowchain_public_rpc_wallet_cutover_commands One when the public RPC deployment bundle requires wallet/tester cutover verification commands.
 # TYPE flowchain_public_rpc_wallet_cutover_commands gauge
 flowchain_public_rpc_wallet_cutover_commands 1
@@ -106,6 +109,9 @@ flowchain_public_rpc_rendered_security_headers 1
 # HELP flowchain_public_rpc_rendered_security_header_preflight One when rendered public RPC preflights check defensive response headers.
 # TYPE flowchain_public_rpc_rendered_security_header_preflight gauge
 flowchain_public_rpc_rendered_security_header_preflight 1
+# HELP flowchain_public_rpc_rendered_method_rejection_preflight One when rendered public RPC preflights prove wrong HTTP methods are rejected.
+# TYPE flowchain_public_rpc_rendered_method_rejection_preflight gauge
+flowchain_public_rpc_rendered_method_rejection_preflight 1
 # HELP flowchain_public_rpc_command_plan_wallet_cutover_proof One when public RPC deployment automation includes all wallet/tester cutover proof commands.
 # TYPE flowchain_public_rpc_command_plan_wallet_cutover_proof gauge
 flowchain_public_rpc_command_plan_wallet_cutover_proof 1
@@ -276,10 +282,10 @@ flowchain_live_cutover_missing_owner_inputs 14
 flowchain_no_secret_ready 1
 # HELP flowchain_truth_gates_total Total production truth table gates.
 # TYPE flowchain_truth_gates_total gauge
-flowchain_truth_gates_total 52
+flowchain_truth_gates_total 53
 # HELP flowchain_truth_gates_passed Passed production truth table gates.
 # TYPE flowchain_truth_gates_passed gauge
-flowchain_truth_gates_passed 36
+flowchain_truth_gates_passed 37
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
 flowchain_truth_gates_owner_blocked 16

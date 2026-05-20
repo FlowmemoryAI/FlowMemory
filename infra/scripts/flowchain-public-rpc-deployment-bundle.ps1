@@ -144,6 +144,7 @@ function Invoke-PublicRpcBundleRenderValidation {
         renderedNginxHasRateLimit = $false
         renderedSystemdUsesOwnerEnv = $false
         renderedPreflightsUsePublicUrl = $false
+        renderedPreflightsRejectWrongMethods = $false
         renderedReportPassed = $false
         renderedReportAllowedOriginCount = $false
         renderedReportKeepsOwnerPathsOutsideRepo = $false
@@ -231,6 +232,7 @@ function Invoke-PublicRpcBundleRenderValidation {
         $checks.renderedNginxHasSecurityHeaders = Test-TextContainsAllTokens -Text $renderedAllText -Tokens $publicRpcSecurityHeaderTokens
         $checks.renderedSystemdUsesOwnerEnv = $renderedAllText.Contains("EnvironmentFile=$ownerEnvFile") -and $renderedAllText.Contains("FLOWCHAIN_OWNER_ENV_FILE=$ownerEnvFile")
         $checks.renderedPreflightsUsePublicUrl = $renderedAllText.Contains("https://rpc.flowchain.example") -and $renderedAllText.Contains("https://wallet.flowchain.example")
+        $checks.renderedPreflightsRejectWrongMethods = $renderedAllText.Contains('test "${rpc_get_status}" = "405"') -and $renderedAllText.Contains('test "${readonly_post_status}" = "405"') -and $renderedAllText.Contains('$rpcGetStatusCode -ne 405') -and $renderedAllText.Contains('$readOnlyPostStatusCode -ne 405')
         $checks.renderOutputDoesNotPrintTokenHash = -not $renderOutputText.Contains($safeTokenHash)
         $checks.renderedFilesDoNotContainTokenHash = -not $renderedAllText.Contains($safeTokenHash)
 
@@ -563,7 +565,11 @@ $preflightRequiredTokens = @(
     'tester_unauth_status=',
     '${public_url%/}/tester/wallets/create',
     'test "${tester_unauth_status}" = "401"',
-    'flowmemory.control_plane.tester_write_auth_required.v0'
+    'flowmemory.control_plane.tester_write_auth_required.v0',
+    'rpc_get_status=',
+    'test "${rpc_get_status}" = "405"',
+    'readonly_post_status=',
+    'test "${readonly_post_status}" = "405"'
 )
 
 $windowsPreflightRequiredTokens = @(
@@ -588,6 +594,8 @@ $windowsPreflightRequiredTokens = @(
     '$testerStatus = Invoke-WebRequest -Uri "$publicBase/tester/status"',
     '$testerUnauthStatusCode -ne 401',
     'flowmemory.control_plane.tester_write_auth_required.v0',
+    '$rpcGetStatusCode -ne 405',
+    '$readOnlyPostStatusCode -ne 405',
     '$placeholderPattern = [regex]::Escape("<") + "(FLOWCHAIN_|PATH_TO_TLS_|FLOWCHAIN_NGINX_)"',
     '"method":"rpc_readiness"'
 )
@@ -767,11 +775,17 @@ $nginxPreflightScriptLines = @(
     'curl -fsS --max-time 10 "${public_url%/}/health" >/dev/null',
     'curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/rpc/readiness" >/dev/null',
     'curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" -H "Content-Type: application/json" --data ''{"jsonrpc":"2.0","id":1,"method":"rpc_readiness","params":{}}'' "${public_url%/}/rpc" >/dev/null',
+    'rpc_get_body="$(mktemp)"',
+    'readonly_post_body="$(mktemp)"',
     'disallowed_body="$(mktemp)"',
     'broad_state_body="$(mktemp)"',
     'tester_unauth_body="$(mktemp)"',
     'private_wallet_body="$(mktemp)"',
-    'trap ''rm -f "${disallowed_body}" "${broad_state_body}" "${tester_unauth_body}" "${private_wallet_body}"'' EXIT',
+    'trap ''rm -f "${rpc_get_body}" "${readonly_post_body}" "${disallowed_body}" "${broad_state_body}" "${tester_unauth_body}" "${private_wallet_body}"'' EXIT',
+    'rpc_get_status="$(curl -sS -o "${rpc_get_body}" -w "%{http_code}" --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/rpc")"',
+    'test "${rpc_get_status}" = "405"',
+    'readonly_post_status="$(curl -sS -o "${readonly_post_body}" -w "%{http_code}" --max-time 10 -H "Origin: ${allowed_origin}" -H "Content-Type: application/json" --data ''{}'' "${public_url%/}/rpc/readiness")"',
+    'test "${readonly_post_status}" = "405"',
     'disallowed_status="$(curl -sS -o "${disallowed_body}" -w "%{http_code}" --max-time 10 -H "Origin: ${disallowed_origin}" "${public_url%/}/rpc/readiness")"',
     'test "${disallowed_status}" = "403"',
     'broad_state_status="$(curl -sS -o "${broad_state_body}" -w "%{http_code}" --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/devnet/local/state.json")"',
@@ -854,6 +868,28 @@ $windowsNginxPreflightScriptLines = @(
     'Invoke-WebRequest -Uri "$publicBase/rpc/readiness" -Method Get -Headers $headers -TimeoutSec 10 | Out-Null',
     '$body = ''{"jsonrpc":"2.0","id":1,"method":"rpc_readiness","params":{}}''',
     'Invoke-WebRequest -Uri "$publicBase/rpc" -Method Post -ContentType "application/json" -Headers $headers -Body $body -TimeoutSec 10 | Out-Null',
+    '$rpcGetStatusCode = 0',
+    'try {',
+    '    Invoke-WebRequest -Uri "$publicBase/rpc" -Method Get -Headers $headers -TimeoutSec 10 | Out-Null',
+    '    $rpcGetStatusCode = 200',
+    '}',
+    'catch {',
+    '    if ($_.Exception.PSObject.Properties.Name -contains "Response" -and $null -ne $_.Exception.Response) {',
+    '        $rpcGetStatusCode = [int]$_.Exception.Response.StatusCode',
+    '    } else { throw }',
+    '}',
+    'if ($rpcGetStatusCode -ne 405) { throw "RPC endpoint GET preflight did not return HTTP 405." }',
+    '$readOnlyPostStatusCode = 0',
+    'try {',
+    '    Invoke-WebRequest -Uri "$publicBase/rpc/readiness" -Method Post -ContentType "application/json" -Headers $headers -Body "{}" -TimeoutSec 10 | Out-Null',
+    '    $readOnlyPostStatusCode = 200',
+    '}',
+    'catch {',
+    '    if ($_.Exception.PSObject.Properties.Name -contains "Response" -and $null -ne $_.Exception.Response) {',
+    '        $readOnlyPostStatusCode = [int]$_.Exception.Response.StatusCode',
+    '    } else { throw }',
+    '}',
+    'if ($readOnlyPostStatusCode -ne 405) { throw "Read-only RPC readiness POST preflight did not return HTTP 405." }',
     '$disallowedStatusCode = 0',
     'try {',
     '    Invoke-WebRequest -Uri "$publicBase/rpc/readiness" -Method Get -Headers @{ Origin = $DisallowedOrigin } -TimeoutSec 10 | Out-Null',
@@ -1345,6 +1381,7 @@ $checks = [ordered]@{
     ownerRenderDoesNotPrintTokenHash = ($renderValidation.checks.renderOutputDoesNotPrintTokenHash -eq $true)
     ownerRenderFilesDoNotContainTokenHash = ($renderValidation.checks.renderedFilesDoNotContainTokenHash -eq $true)
     ownerRenderIncludesSecurityHeaders = ($renderValidation.checks.renderedNginxHasSecurityHeaders -eq $true)
+    ownerRenderPreflightsRejectWrongMethods = ($renderValidation.checks.renderedPreflightsRejectWrongMethods -eq $true)
     ownerRenderRejectsPublicUrlPath = ($renderValidation.checks.publicUrlPathRenderRejected -eq $true)
     ownerRenderPublicUrlPathRejectOutputNoSecrets = ($renderValidation.checks.publicUrlPathRenderOutputNoSecrets -eq $true)
     includesPrivateOrigin = ($nginxText.Contains("127.0.0.1:8787") -and $nginxPreflightScriptText.Contains("127.0.0.1:8787") -and $windowsNginxPreflightScriptText.Contains("127.0.0.1:8787"))
@@ -1352,6 +1389,7 @@ $checks = [ordered]@{
     includesTlsPlaceholders = ($nginxText.Contains("<PATH_TO_TLS_CERTIFICATE>") -and $nginxText.Contains("<PATH_TO_TLS_CERTIFICATE_KEY>"))
     includesSecurityHeaders = Test-TextContainsAllTokens -Text $nginxText -Tokens $publicRpcSecurityHeaderTokens
     preflightsCheckSecurityHeaders = ($nginxPreflightScriptText.Contains("add_header Strict-Transport-Security") -and $nginxPreflightScriptText.Contains("add_header Content-Security-Policy") -and $windowsNginxPreflightScriptText.Contains("add_header Strict-Transport-Security") -and $windowsNginxPreflightScriptText.Contains("add_header Content-Security-Policy"))
+    includesMethodRejectionPreflight = ($nginxPreflightScriptText.Contains('test "${rpc_get_status}" = "405"') -and $nginxPreflightScriptText.Contains('test "${readonly_post_status}" = "405"') -and $windowsNginxPreflightScriptText.Contains("RPC endpoint GET preflight did not return HTTP 405.") -and $windowsNginxPreflightScriptText.Contains("Read-only RPC readiness POST preflight did not return HTTP 405."))
     includesCorsOriginForwarding = ($nginxText.Contains('proxy_set_header Origin $http_origin;') -and $nginxPreflightScriptText.Contains('Origin: ${allowed_origin}'))
     publicStateMirrorExcluded = (-not $nginxText.Contains("|state|")) -and (-not $nginxText.Contains("/state")) -and (-not @($edgeTemplateReport.publicReadMirrorPaths).Contains("/state"))
     devnetStatePublicRpcExcluded = (-not @($edgeTemplateReport.publicSafeJsonRpcMethods).Contains("devnet_state"))
