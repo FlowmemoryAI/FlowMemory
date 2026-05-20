@@ -476,9 +476,9 @@ function writeInventoryReport(args: {
       evidence: "`examples/flowchain-node-quickstart.mjs --send` runs against the local RPC.",
     },
     {
-      surface: "Browser readiness example",
-      status: implementedIf(args.checks.browserExamplePresent && args.checks.browserExampleSmokePassed),
-      evidence: "No-dependency browser starter checks discovery/readiness, fails closed before public shareability, and has a mechanical smoke test.",
+      surface: "Browser readiness starter",
+      status: implementedIf(args.checks.browserExamplePresent && args.checks.browserExampleViteReactPackaged && args.checks.browserExampleBuildPassed && args.checks.browserExampleSmokePassed),
+      evidence: "Packaged Vite/React browser starter checks discovery/readiness, fails closed before public shareability, builds successfully, and has a mechanical smoke test.",
     },
     {
       surface: "HTTP/OpenAPI starter pack",
@@ -710,9 +710,22 @@ async function main() {
   const cliSignedSubmit = JSON.parse(cliSignedSubmitText) as JsonValue;
   const browserExamplePath = resolve(root, "examples", "flowchain-browser-readiness", "index.html");
   const browserExampleText = existsSync(browserExamplePath) ? readFileSync(browserExamplePath, "utf8") : "";
+  const browserPackagePath = resolve(root, "examples", "flowchain-browser-readiness", "package.json");
+  const browserPackage = existsSync(browserPackagePath) ? asRecord(JSON.parse(readFileSync(browserPackagePath, "utf8")) as JsonValue) : {};
+  const browserPackageScripts = asRecord(browserPackage.scripts ?? {});
+  const browserPackageDependencies = asRecord(browserPackage.dependencies ?? {});
+  const browserPackageDevDependencies = asRecord(browserPackage.devDependencies ?? {});
+  const browserEntryPath = resolve(root, "examples", "flowchain-browser-readiness", "src", "main.jsx");
+  const browserEntryText = existsSync(browserEntryPath) ? readFileSync(browserEntryPath, "utf8") : "";
   const browserModulePath = resolve(root, "examples", "flowchain-browser-readiness", "browser-readiness.js");
   const browserModuleText = existsSync(browserModulePath) ? readFileSync(browserModulePath, "utf8") : "";
   const browserSmokePath = resolve(root, "examples", "flowchain-browser-readiness", "smoke.mjs");
+  const browserExampleDir = resolve(root, "examples", "flowchain-browser-readiness");
+  const browserBuildText = execFileSync(process.execPath, [resolve(root, "node_modules", "vite", "bin", "vite.js"), "build"], {
+    cwd: browserExampleDir,
+    encoding: "utf8",
+    windowsHide: true,
+  });
   const browserSmokeText = execFileSync(process.execPath, [browserSmokePath], {
     cwd: root,
     encoding: "utf8",
@@ -794,9 +807,24 @@ async function main() {
       && asRecord(cliSignedSubmit).status === "accepted_crypto_verified",
     browserExamplePresent: `${browserExampleText}\n${browserModuleText}`.includes("/rpc/discover")
       && `${browserExampleText}\n${browserModuleText}`.includes("/rpc/readiness")
-      && browserExampleText.includes("./browser-readiness.js"),
+      && browserExampleText.includes("/src/main.jsx")
+      && browserEntryText.includes("../browser-readiness.js"),
+    browserExampleViteReactPackaged: browserPackage.name === "@flowmemory/flowchain-browser-readiness-example"
+      && String(browserPackageScripts.dev ?? "").includes("vite")
+      && browserPackageScripts.build === "vite build"
+      && String(browserPackageScripts.preview ?? "").includes("vite preview")
+      && typeof browserPackageDependencies.react === "string"
+      && typeof browserPackageDependencies["react-dom"] === "string"
+      && typeof browserPackageDependencies["lucide-react"] === "string"
+      && typeof browserPackageDevDependencies.vite === "string"
+      && browserEntryText.includes("createRoot")
+      && browserEntryText.includes("lucide-react")
+      && browserEntryText.includes("checkFlowChainBrowserReadiness"),
+    browserExampleBuildPassed: browserBuildText.includes("built in")
+      && existsSync(resolve(root, "examples", "flowchain-browser-readiness", "dist", "index.html")),
     browserExampleSmokePassed: String(asRecord(browserSmoke).schema ?? "") === "flowchain.example.browser_readiness_smoke.v0"
       && asRecord(browserSmoke).status === "passed"
+      && asRecord(browserSmoke).viteReactPackaged === true
       && asRecord(browserSmoke).safeToSharePublicly === false,
     openApiSpecGenerated: existsSync(openApiPath)
       && readFileSync(openApiPath, "utf8").includes('"openapi": "3.1.0"')
@@ -893,17 +921,16 @@ async function main() {
       "- CLI commands for blocks, transactions, mempool, accounts, balances, wallet metadata, faucet events, finality, bridge deposits, bridge credits, and withdrawals.",
       "- SDK and CLI transaction-inclusion wait helpers backed by `transaction_get` polling.",
       "- SDK and CLI signed transaction envelope submission backed by the crypto-verified `transaction_submit` RPC.",
-      "- Node.js SDK example under `examples/flowchain-node-quickstart.mjs` and browser readiness example under `examples/flowchain-browser-readiness/`.",
+      "- Node.js SDK example under `examples/flowchain-node-quickstart.mjs` and packaged Vite/React browser readiness starter under `examples/flowchain-browser-readiness/`.",
       "- Signed envelope example under `examples/flowchain-signed-envelope.mjs` that creates local wallets in memory, signs a FlowChain product transfer envelope, submits it to local cryptographic intake, and can write a CLI-ready envelope file.",
       "- Generated OpenAPI, Postman, and cURL artifacts for builders who want direct HTTP examples before adopting the TypeScript SDK.",
       "- Developer guides for wallet integration, bridge integration, node operations, app building, explorer/indexer use, faucet/tester funds, release compatibility, and troubleshooting.",
       "- Generated RPC reference from live `rpc_discover`.",
       "- Developer ecosystem inventory classifying implemented, partial, blocked, and missing surfaces, including Python as the first additional language SDK.",
-      "- Dev-pack E2E report proving local RPC attachment, height reads, explorer reads, wallet reads, bridge lifecycle reads, runtime-backed local wallet sends, signed-envelope intake, CLI JSON output, Python SDK/devkit execution, sample example execution, and public readiness fail-closed behavior.",
+      "- Dev-pack E2E report proving local RPC attachment, height reads, explorer reads, wallet reads, bridge lifecycle reads, runtime-backed local wallet sends, signed-envelope intake, CLI JSON output, Python SDK/devkit execution, packaged browser starter build/smoke, sample example execution, and public readiness fail-closed behavior.",
       "",
       "Remaining buildout:",
       "",
-      "- Promote the browser example to a packaged Vite/React app if the dashboard app is split into a reusable external starter.",
       "- Keep public/live readiness blocked until owner inputs and public deployment gates pass.",
       "",
       `Report: \`${reportPath}\``,

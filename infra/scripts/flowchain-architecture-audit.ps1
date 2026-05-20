@@ -1455,12 +1455,14 @@ $devPackReady = (Test-RepoFile -Path "services/flowchain-sdk/src/client.ts") `
     -and ((Get-ArchitectureProp -Object $devPackChecks -Name "walletTransfersReadable" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $devPackChecks -Name "walletBalancesReadable" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $devPackChecks -Name "walletSendRuntimeBacked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $devPackChecks -Name "browserExampleViteReactPackaged" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $devPackChecks -Name "browserExampleBuildPassed" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $devPackChecks -Name "publicReadinessFailClosed" -Default $false) -eq $true)
 Add-ArchitectureItem -Items $items -Id "developer-dev-pack-boundary" -Layer "Developer ecosystem" `
-    -Requirement "Developer SDK/devkit and docs connect to the real FlowChain RPC, generate a live RPC reference, read wallet data, submit a runtime-backed local wallet send, and fail closed for public readiness." `
+    -Requirement "Developer SDK/devkit and docs connect to the real FlowChain RPC, generate a live RPC reference, read wallet data, submit a runtime-backed local wallet send, prove the packaged browser starter, and fail closed for public readiness." `
     -Status $(if ($devPackReady) { "passed" } else { "failed" }) `
     -Evidence "devPackStatus=$devPackStatus, methodCount=$(Get-ArchitectureProp -Object $devPack -Name "methodCount"), heights=$(Get-ArchitectureProp -Object $devPack -Name "firstHeight")->$(Get-ArchitectureProp -Object $devPack -Name "secondHeight"), report=$($reportPaths.devPack)" `
-    -Files @("services/flowchain-sdk/src/client.ts", "services/flowchain-sdk/src/cli.ts", "docs/developer/FLOWCHAIN_QUICKSTART.md", "docs/sdk/RPC_REFERENCE.generated.md") `
+    -Files @("services/flowchain-sdk/src/client.ts", "services/flowchain-sdk/src/cli.ts", "examples/flowchain-browser-readiness/package.json", "examples/flowchain-browser-readiness/src/main.jsx", "docs/developer/FLOWCHAIN_QUICKSTART.md", "docs/sdk/RPC_REFERENCE.generated.md") `
     -Commands @("npm run flowchain:dev-pack:e2e")
 $productGateFiles = @(
     "infra/scripts/flowchain-live-infra-check.ps1",

@@ -3087,7 +3087,7 @@ Add-AuditItem -Items $items -Id "rpc-connect-local" `
     -Commands @("npm run flowchain:tester:readiness -- -AllowBlocked")
 
 Add-AuditItem -Items $items -Id "developer-dev-pack" `
-    -Requirement "Developer SDK/devkit proof connects to the real RPC, checks readiness/discovery, reads wallet data, submits runtime-backed local wallet sends, proves CLI examples, signed-envelope submission, browser smoke, OpenAPI/Postman/cURL docs, Python SDK/devkit, and keeps public readiness fail-closed." `
+    -Requirement "Developer SDK/devkit proof connects to the real RPC, checks readiness/discovery, reads wallet data, submits runtime-backed local wallet sends, proves CLI examples, signed-envelope submission, packaged Vite/React browser starter build/smoke, OpenAPI/Postman/cURL docs, Python SDK/devkit, and keeps public readiness fail-closed." `
     -Status $(if ($devPackPassed) { "passed" } else { "failed" }) `
     -Evidence "devPackStatus=$(Get-ReportStatus -Report $devPack), heights=$devPackFirstHeight->$devPackSecondHeight, methodCount=$devPackMethodCount, publicReadyMethodCount=$devPackPublicReadyMethodCount, missingChecks=$($devPackMissingChecks.Count), failedChecks=$($devPackFailedChecks.Count), languageSdks=$($devPackLanguageSdks.Count), missingReportPaths=$($devPackMissingReportPathNames.Count), noLiveBroadcast=$(Get-AuditProp -Object $devPack -Name "noLiveBroadcast" -Default $false), report=$($paths.devPack)" `
     -Commands @("npm run flowchain:dev-pack:e2e")

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 
 import {
   checkFlowChainBrowserReadiness,
@@ -7,6 +8,25 @@ import {
 } from "./browser-readiness.js";
 
 const calls = [];
+const packageJson = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8"));
+const indexHtml = readFileSync(new URL("./index.html", import.meta.url), "utf8");
+const mainSource = readFileSync(new URL("./src/main.jsx", import.meta.url), "utf8");
+const cssSource = readFileSync(new URL("./src/styles.css", import.meta.url), "utf8");
+
+assert.equal(packageJson.scripts.dev.includes("vite"), true);
+assert.equal(packageJson.scripts.build, "vite build");
+assert.equal(packageJson.scripts.preview.includes("vite preview"), true);
+assert.equal(packageJson.dependencies.react.startsWith("^18."), true);
+assert.equal(packageJson.dependencies["react-dom"].startsWith("^18."), true);
+assert.equal(packageJson.dependencies["lucide-react"].length > 0, true);
+assert.equal(packageJson.devDependencies.vite.length > 0, true);
+assert.equal(indexHtml.includes("/src/main.jsx"), true);
+assert.equal(mainSource.includes("createRoot"), true);
+assert.equal(mainSource.includes("lucide-react"), true);
+assert.equal(mainSource.includes("checkFlowChainBrowserReadiness"), true);
+assert.equal(mainSource.includes("/rpc/discover"), true);
+assert.equal(mainSource.includes("/rpc/readiness"), true);
+assert.equal(/letter-spacing:\s*-\d/i.test(cssSource), false);
 
 async function fetchMock(url) {
   const parsed = new URL(url);
@@ -58,6 +78,8 @@ console.log(JSON.stringify({
   schema: "flowchain.example.browser_readiness_smoke.v0",
   status: "passed",
   endpointCalls: calls,
+  viteReactPackaged: true,
+  buildScriptPresent: true,
   safeToSharePublicly: summary.safeToSharePublicly,
   noSecrets: true,
 }, null, 2));

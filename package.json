@@ -9,7 +9,8 @@
     "services/flowmemory",
     "services/control-plane",
     "services/bridge-relayer",
-    "services/flowchain-sdk"
+    "services/flowchain-sdk",
+    "examples/flowchain-browser-readiness"
   ],
   "scripts": {
     "test": "npm test --prefix services/shared && npm test --prefix services/indexer && npm test --prefix services/verifier && npm test --prefix services/flowmemory && npm test --prefix services/control-plane && npm test --prefix services/bridge-relayer",
@@ -92,6 +93,9 @@
     "flowchain:dev-pack:e2e": "npm run e2e --prefix services/flowchain-sdk",
     "flowchain:sdk:e2e": "npm run e2e --prefix services/flowchain-sdk",
     "flowchain:devkit": "npm run cli --prefix services/flowchain-sdk --",
+    "flowchain:browser-readiness:dev": "npm run dev --prefix examples/flowchain-browser-readiness",
+    "flowchain:browser-readiness:build": "npm run build --prefix examples/flowchain-browser-readiness",
+    "flowchain:browser-readiness:smoke": "npm run smoke --prefix examples/flowchain-browser-readiness",
     "flowchain:python-sdk:test": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$env:PYTHONPATH='sdks/python'; python -m unittest discover sdks/python/tests\"",
     "flowchain:python-sdk:e2e": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-python-sdk-e2e.ps1",
     "flowchain:python-devkit": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-python-devkit.ps1",

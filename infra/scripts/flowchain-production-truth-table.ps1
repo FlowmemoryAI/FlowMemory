@@ -1301,7 +1301,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "developer-dev-pack"
-        requirement = "Developer SDK/devkit proof connects to the real RPC, proves Node and Python SDKs, CLI examples, signed-envelope submission, browser smoke, generated OpenAPI/Postman/cURL docs, runtime-backed local wallet sends, and public readiness fail-closed behavior."
+        requirement = "Developer SDK/devkit proof connects to the real RPC, proves Node and Python SDKs, CLI examples, signed-envelope submission, packaged Vite/React browser starter build/smoke, generated OpenAPI/Postman/cURL docs, runtime-backed local wallet sends, and public readiness fail-closed behavior."
         path = "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"
         command = "npm run flowchain:dev-pack:e2e"
         productionGate = $true
@@ -1334,6 +1334,8 @@ $definitions = @(
             "cliSignedEnvelopePrepared",
             "cliSignedTransactionSubmit",
             "browserExamplePresent",
+            "browserExampleViteReactPackaged",
+            "browserExampleBuildPassed",
             "browserExampleSmokePassed",
             "openApiSpecGenerated",
             "postmanCollectionGenerated",
