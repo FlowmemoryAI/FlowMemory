@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.dev_pack_e2e_report.v0",
-  "generatedAt": "2026-05-20T03:07:50.993Z",
+  "generatedAt": "2026-05-20T08:25:34.690Z",
   "status": "passed",
   "rpcUrl": "http://127.0.0.1:8787/rpc",
   "checks": {
@@ -35,12 +35,14 @@
     "heightAdvanced": true,
     "publicReadinessFailClosed": true,
     "publicWriteMethodsBlockedFromPublicList": true,
-    "broadLocalStateBlockedFromPublicList": true
+    "broadLocalStateBlockedFromPublicList": true,
+    "inventoryGenerated": true,
+    "inventorySafe": true
   },
   "methodCount": 82,
   "publicReadyMethodCount": 0,
-  "firstHeight": "96930",
-  "secondHeight": "96931",
+  "firstHeight": "99950",
+  "secondHeight": "99951",
   "missingEnvNames": [
     "FLOWCHAIN_BASE8453_FROM_BLOCK",
     "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -60,6 +62,7 @@
     "json": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\dev-pack-e2e-report.json",
     "markdown": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\DEV_PACK.md",
     "handoff": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\HANDOFF.md",
+    "inventory": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\INVENTORY.md",
     "rpcReference": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\sdk\\RPC_REFERENCE.generated.md"
   },
   "noLiveBroadcast": true,

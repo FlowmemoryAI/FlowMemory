@@ -283,7 +283,10 @@ foreach ($file in @(
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET_VALIDATION.md"; target = "runbooks/EXTERNAL_TESTER_PACKET_VALIDATION.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_EVIDENCE_VALIDATION.md"; target = "runbooks/EXTERNAL_TESTER_EVIDENCE_VALIDATION.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/LIVE_CUTOVER_REHEARSAL.md"; target = "runbooks/LIVE_CUTOVER_REHEARSAL.md"; required = $true },
-    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/DASHBOARD_UI_READINESS.md"; target = "runbooks/DASHBOARD_UI_READINESS.md"; required = $true }
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/DASHBOARD_UI_READINESS.md"; target = "runbooks/DASHBOARD_UI_READINESS.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-dev-pack/DEV_PACK.md"; target = "runbooks/DEV_PACK.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-dev-pack/HANDOFF.md"; target = "runbooks/DEV_PACK_HANDOFF.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-dev-pack/INVENTORY.md"; target = "runbooks/DEV_PACK_INVENTORY.md"; required = $true }
 )) {
     [void] $copiedRunbooks.Add((Copy-OperatorPackageFile -Source $file.source -Destination $file.target -Required:([bool] $file.required)))
 }
@@ -412,7 +415,7 @@ $readmeLines.Add("- ``OPERATOR_PACKAGE_MANIFEST.json``")
 $readmeLines.Add("- ``OPERATOR_COMMAND_MATRIX.json``")
 $readmeLines.Add("- ``COMMAND_MATRIX.md``")
 $readmeLines.Add("- ``docs/`` copied developer and operations docs")
-$readmeLines.Add("- ``runbooks/`` copied generated public RPC, service, backup, alert, activation, dashboard, and tester packet runbooks")
+$readmeLines.Add("- ``runbooks/`` copied generated public RPC, service, backup, alert, activation, dashboard, dev-pack, and tester packet runbooks")
 $readmeLines.Add("- ``evidence/`` copied latest readiness and validation reports")
 Set-Content -LiteralPath $readmePath -Value $readmeLines -Encoding UTF8
 

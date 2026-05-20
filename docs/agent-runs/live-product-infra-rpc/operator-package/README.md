@@ -1,6 +1,6 @@
 ﻿# FlowChain Node Operator Package
 
-Generated: 2026-05-20T08:09:48.7919077Z
+Generated: 2026-05-20T08:33:13.6855221Z
 
 This package collects no-secret runbooks, command matrices, and current evidence for operating the private live-profile FlowChain L1 and for preparing the owner-operated public RPC edge. It does not contain owner values.
 
@@ -47,5 +47,5 @@ FlowChain RPC is repo-owned. The public endpoint is an owner-operated HTTPS edge
 - `OPERATOR_COMMAND_MATRIX.json`
 - `COMMAND_MATRIX.md`
 - `docs/` copied developer and operations docs
-- `runbooks/` copied generated public RPC, service, backup, alert, activation, dashboard, and tester packet runbooks
+- `runbooks/` copied generated public RPC, service, backup, alert, activation, dashboard, dev-pack, and tester packet runbooks
 - `evidence/` copied latest readiness and validation reports

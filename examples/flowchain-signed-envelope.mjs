@@ -124,6 +124,10 @@ async function main() {
     ? await client.mempoolList({ limit: 50 })
     : null;
   const mempoolTx = typeof txId === "string" ? findMempoolTx(mempool, txId) : null;
+  const transactionDetail = typeof txId === "string"
+    ? await client.transactionGet({ txId }).catch(() => null)
+    : null;
+  const transactionDetailFound = asRecord(transactionDetail).schema === "flowmemory.control_plane.transaction_detail.v0";
 
   console.log(JSON.stringify({
     schema: "flowchain.example.signed_envelope.v0",
@@ -134,7 +138,8 @@ async function main() {
     submitAccepted: asRecord(submit).accepted === true,
     submitStatus: asRecord(submit).status ?? null,
     txId,
-    mempoolIntakeFound: mempoolTx !== null,
+    mempoolIntakeFound: mempoolTx !== null || transactionDetailFound,
+    transactionDetailFound,
     writtenPath,
     signer: {
       address: accountA.address,
