@@ -27,6 +27,7 @@ import {
 import { WalletView } from "../views/WalletView";
 import { ExternalTesterLaunchView } from "../views/ExternalTesterLaunchView";
 import { ExplorerView } from "../views/ExplorerView";
+import { BridgePilotView } from "../views/BridgePilotView";
 import { OpsView } from "../views/OpsView";
 import { OwnerActivationView } from "../views/OwnerActivationView";
 import { WorkbenchView } from "../views/WorkbenchView";
@@ -555,6 +556,26 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Transactions");
     expect(html).toContain("Wallets");
     expect(html).toContain("Bridge");
+    expect(html).not.toContain("local-tester-write-token");
+  });
+
+  it("renders bridge pilot runtime proof from live readiness evidence", () => {
+    const workbench = buildWorkbenchSnapshot(data, {
+      devnetState,
+      devnetDashboardState,
+      bridgeTestDeposit,
+      liveReadinessReport,
+    });
+    const html = renderToStaticMarkup(createElement(MemoryRouter, { initialEntries: ["/bridge"] }, createElement(BridgePilotView, { workbench })));
+
+    expect(html).toContain("Bridge runtime proof");
+    expect(html).toContain("Relayer and credit checks");
+    expect(html).toContain("Runtime credit");
+    expect(html).toContain("Transfer settlement");
+    expect(html).toContain("Relayer guardrail");
+    expect(html).toContain("Relayer loop");
+    expect(html).toContain("0.679s");
+    expect(html).toContain("0.609s");
     expect(html).not.toContain("local-tester-write-token");
   });
 

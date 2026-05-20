@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.dashboard_ui_readiness_report.v0",
-    "generatedAt":  "2026-05-20T07:46:48.3809135+00:00",
+    "generatedAt":  "2026-05-20T08:09:36.1967380+00:00",
     "status":  "passed",
     "checks":  {
                    "dashboardPackageScriptPresent":  true,
@@ -16,6 +16,8 @@
                    "explorerRouteCovered":  true,
                    "testerLaunchRouteCovered":  true,
                    "activationRouteCovered":  true,
+                   "bridgeRouteCovered":  true,
+                   "bridgePilotRuntimeProofCovered":  true,
                    "bridgeRuntimeCreditProofCovered":  true,
                    "publicRpcHeaderProofCovered":  true,
                    "noSecretLeakageAsserted":  true,
@@ -53,9 +55,9 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  26,
+                         "durationSeconds":  28,
                          "stdoutLineCount":  6,
-                         "stderrLineCount":  24
+                         "stderrLineCount":  28
                      },
                      {
                          "label":  "dashboard production build",
@@ -73,7 +75,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  180,
+                         "durationSeconds":  165,
                          "stdoutLineCount":  83,
                          "stderrLineCount":  0
                      }
@@ -89,7 +91,8 @@
                           "/tester/wallets/send",
                           "/explorer",
                           "/tester",
-                          "/activation"
+                          "/activation",
+                          "/bridge"
                       ],
     "coveredProofs":  [
                           "base8453-bridge-runtime-credit-proof"

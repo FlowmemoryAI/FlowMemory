@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  Activity,
   AlertTriangle,
   ArrowRightLeft,
   ChevronDown,
@@ -7,6 +8,7 @@ import {
   Copy,
   ExternalLink,
   Info,
+  ListChecks,
   Lock,
   ShieldCheck,
   Wallet,
@@ -82,6 +84,35 @@ function statusFromReadiness(readiness: BridgeReadiness | null): DashboardStatus
   }
 
   return "pending";
+}
+
+function text(value: unknown, fallback = "not recorded"): string {
+  if (value === null || value === undefined || value === "") {
+    return fallback;
+  }
+  return String(value);
+}
+
+function statusFromMetric(value: unknown, fallback: DashboardStatus = "pending"): DashboardStatus {
+  const normalized = text(value, "").toLowerCase();
+  if (normalized === "passed" || normalized === "ready" || normalized === "verified" || normalized === "true") {
+    return "verified";
+  }
+  if (normalized === "failed" || normalized === "failure") {
+    return "failed";
+  }
+  if (normalized === "stale") {
+    return "stale";
+  }
+  if (normalized === "blocked" || normalized === "pending" || normalized === "false") {
+    return "pending";
+  }
+  return fallback;
+}
+
+function secondsLabel(value: unknown): string {
+  const parsed = text(value);
+  return parsed === "not recorded" ? parsed : `${parsed}s`;
 }
 
 function isBytes32(value: string): boolean {
@@ -310,6 +341,8 @@ function errorMessage(error: unknown): string {
 
 export function BridgePilotView({ workbench }: BridgePilotViewProps) {
   const readiness = asReadiness(workbench.controlPlane.bridgeLiveReadiness);
+  const liveReadinessReport = isRecord(workbench.raw.liveReadinessReport) ? workbench.raw.liveReadinessReport : null;
+  const liveMetrics = isRecord(liveReadinessReport?.metrics) ? liveReadinessReport.metrics : {};
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [chainId, setChainId] = useState<string | null>(null);
   const [amountEth, setAmountEth] = useState("0.00001");
@@ -349,6 +382,43 @@ export function BridgePilotView({ workbench }: BridgePilotViewProps) {
   const usdEstimateLabel =
     usdEstimate ??
     (priceStatus === "loading" ? "Loading ETH/USD quote" : "USD quote unavailable");
+  const runtimeCreditStatus = liveMetrics.bridgeRuntimeCreditValidationStatus ?? liveMetrics.bridgeRuntimeCreditStatus;
+  const bridgeProofCards = [
+    {
+      label: "Runtime credit",
+      value: text(runtimeCreditStatus),
+      detail: `${secondsLabel(liveMetrics.bridgeRuntimeCreditLatencySeconds)} to spendable credit`,
+      status: statusFromMetric(runtimeCreditStatus),
+      Icon: Activity,
+    },
+    {
+      label: "Transfer settlement",
+      value: secondsLabel(liveMetrics.bridgeRuntimeCreditTransferSeconds),
+      detail: "wallet credit transfer proof",
+      status: liveMetrics.bridgeRuntimeCreditReady === true ? "verified" : statusFromMetric(runtimeCreditStatus),
+      Icon: ArrowRightLeft,
+    },
+    {
+      label: "Relayer guardrail",
+      value: text(liveMetrics.bridgeRelayerGuardrailStatus),
+      detail: "fail-closed cursor and broadcast checks",
+      status: statusFromMetric(liveMetrics.bridgeRelayerGuardrailStatus),
+      Icon: ShieldCheck,
+    },
+    {
+      label: "Relayer loop",
+      value: text(liveMetrics.bridgeRelayerLoopValidationStatus),
+      detail: "start, health, stop, and cleanup proof",
+      status: statusFromMetric(liveMetrics.bridgeRelayerLoopValidationStatus),
+      Icon: ListChecks,
+    },
+  ] satisfies Array<{
+    label: string;
+    value: string;
+    detail: string;
+    status: DashboardStatus;
+    Icon: typeof Activity;
+  }>;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -522,6 +592,30 @@ export function BridgePilotView({ workbench }: BridgePilotViewProps) {
         </section>
 
         <section className="flowchain-bridge-layout" aria-label="Flowchain bridge">
+          <section className="bridge-proof-rail" aria-label="Bridge runtime proof">
+            <div className="bridge-proof-intro">
+              <span>Bridge runtime proof</span>
+              <strong>Relayer and credit checks</strong>
+              <small>Latest no-secret launch evidence.</small>
+            </div>
+            {bridgeProofCards.map((card) => {
+              const Icon = card.Icon;
+              return (
+                <article className="bridge-proof-item" key={card.label}>
+                  <div className="bridge-proof-item-heading">
+                    <span aria-hidden="true">
+                      <Icon size={18} />
+                    </span>
+                    <StatusBadge status={card.status} compact />
+                  </div>
+                  <strong>{card.label}</strong>
+                  <p>{card.value}</p>
+                  <small>{card.detail}</small>
+                </article>
+              );
+            })}
+          </section>
+
           <article className="bridge-console" aria-label="Bridge transaction form">
             <div className="bridge-route-row">
               <label>

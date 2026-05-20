@@ -349,6 +349,16 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await expect(page.getByText("Expose repo-owned FlowChain RPC", { exact: false })).toBeVisible();
     await expect(page.getByLabel("Missing owner inputs")).toContainText("FLOWCHAIN_RPC_PUBLIC_URL");
 
+    await page.goto("/bridge");
+    await expect(page.getByRole("heading", { name: "Bridge funds into Flowchain" })).toBeVisible();
+    await expect(page.getByLabel("Bridge runtime proof")).toContainText("Runtime credit");
+    await expect(page.getByLabel("Bridge runtime proof")).toContainText("Transfer settlement");
+    await expect(page.getByLabel("Bridge runtime proof")).toContainText("Relayer guardrail");
+    await expect(page.getByLabel("Bridge runtime proof")).toContainText("Relayer loop");
+    await expect(page.getByLabel("Bridge runtime proof")).toContainText("0.679s");
+    await expect(page.getByLabel("Bridge runtime proof")).toContainText("0.609s");
+    await expectNoHorizontalOverflow(page);
+
     await page.goto("/ops");
     await expect(page.getByRole("heading", { name: "Ops center" })).toBeVisible();
     await expect(page.getByLabel("Bridge relayer check contract")).toContainText("Relayer check contract");
