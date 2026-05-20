@@ -88,6 +88,25 @@ Run its no-dependency browser-starter smoke with:
 npm run smoke --prefix examples/flowchain-browser-readiness
 ```
 
+## Python SDK
+
+The dependency-free Python SDK and devkit live at:
+
+```text
+sdks/python
+```
+
+Run the Python quickstart and CLI with:
+
+```powershell
+$env:PYTHONPATH = "sdks/python"
+python examples/flowchain-python-quickstart.py
+python -m flowchain.cli status --json
+npm run flowchain:python-sdk:e2e
+```
+
+Details are in `docs/sdk/FLOWCHAIN_PYTHON_SDK.md`.
+
 ## HTTP Artifacts
 
 `npm run flowchain:dev-pack:e2e` also generates direct HTTP tooling for
@@ -124,6 +143,7 @@ npm run flowchain:dev-pack:e2e
 ```
 
 `flowchain:sdk:e2e` checks the expanded SDK/CLI surface, the Node.js example,
-the browser readiness starter, the generated ecosystem inventory, and the
-required developer docs. `flowchain:dev-pack:e2e` regenerates
-`docs/sdk/RPC_REFERENCE.generated.md` from live `rpc_discover` output.
+the browser readiness starter, the Python SDK/devkit, the generated ecosystem
+inventory, and the required developer docs. `flowchain:dev-pack:e2e`
+regenerates `docs/sdk/RPC_REFERENCE.generated.md` from live `rpc_discover`
+output.

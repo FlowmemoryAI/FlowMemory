@@ -21,6 +21,17 @@ interface DevPackReport {
   noLiveBroadcast: boolean;
   envValuesPrinted: boolean;
   noSecrets: boolean;
+  languageSdks: LanguageSdkEvidence[];
+}
+
+interface LanguageSdkEvidence {
+  language: string;
+  status: "implemented" | "partial" | "missing";
+  packagePath: string;
+  devkitCommand: string;
+  e2eCommand: string;
+  reportPath: string;
+  checks: Record<string, boolean>;
 }
 
 function asRecord(value: JsonValue): Record<string, JsonValue> {
@@ -38,6 +49,10 @@ function stringValue(value: JsonValue): string | null {
 
 function numberValue(value: JsonValue): number {
   return typeof value === "number" ? value : Number.parseInt(String(value ?? "0"), 10);
+}
+
+function booleanValue(value: JsonValue): boolean {
+  return value === true;
 }
 
 function heightValue(status: Record<string, JsonValue>): bigint | null {
@@ -398,6 +413,10 @@ function writeMarkdownReport(report: DevPackReport, outputPath: string) {
     "",
     ...Object.entries(report.reportPaths).map(([name, path]) => `- ${name}: \`${path}\``),
     "",
+    "## Language SDKs",
+    "",
+    ...report.languageSdks.map((sdk) => `- ${sdk.language}: \`${sdk.status}\` (${sdk.packagePath})`),
+    "",
   ];
   writeFileSync(outputPath, lines.join("\n"), "utf8");
 }
@@ -409,6 +428,7 @@ function writeInventoryReport(args: {
   missingEnvNames: string[];
   methodCount: number;
   publicReadyMethodCount: number;
+  languageSdks: LanguageSdkEvidence[];
 }) {
   const implementedIf = (ok: boolean) => ok ? "implemented" : "partial";
   const docsStatus = args.missingDocs.length === 0 ? "implemented" : "partial";
@@ -417,6 +437,11 @@ function writeInventoryReport(args: {
     ? "blocked-owner-input"
     : "implemented";
   const rpcStatus = args.missingEnvNames.some((name) => name.startsWith("FLOWCHAIN_RPC_")) ? "blocked-owner-input" : "implemented";
+  const implementedLanguageSdks = args.languageSdks.filter((sdk) => sdk.status === "implemented");
+  const languageSdkStatus = implementedLanguageSdks.length > 0 ? "implemented" : "missing";
+  const languageSdkEvidence = implementedLanguageSdks.length > 0
+    ? `${implementedLanguageSdks.map((sdk) => `${sdk.language.slice(0, 1).toUpperCase()}${sdk.language.slice(1)} SDK/devkit`).join(", ")} passes live RPC e2e; reports: ${implementedLanguageSdks.map((sdk) => sdk.reportPath).join(", ")}.`
+    : "The current dev pack supports the first TypeScript/Node SDK only.";
   const inventory = [
     {
       surface: "SDK package",
@@ -490,8 +515,8 @@ function writeInventoryReport(args: {
     },
     {
       surface: "Additional language SDKs",
-      status: "missing",
-      evidence: "The current dev pack supports the first TypeScript/Node SDK only.",
+      status: languageSdkStatus,
+      evidence: languageSdkEvidence,
     },
   ];
   const lines = [
@@ -584,6 +609,61 @@ async function main() {
         encoding: "utf8",
         windowsHide: true,
       })) as JsonValue;
+  const pythonSdkReportPath = resolve(runDir, "python-sdk-e2e-report.json");
+  const pythonSdkScriptPath = resolve(root, "infra", "scripts", "flowchain-python-sdk-e2e.ps1");
+  const powershellPath = process.platform === "win32" ? "powershell.exe" : "pwsh";
+  const pythonSdkArgs = [
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    pythonSdkScriptPath,
+    "-RpcUrl",
+    rpcUrl,
+    "-ReportPath",
+    pythonSdkReportPath,
+    ...(walletSendTxId === null ? [] : ["-WaitTxId", walletSendTxId]),
+  ];
+  execFileSync(powershellPath, pythonSdkArgs, {
+    cwd: root,
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  const pythonSdkReport = JSON.parse(readFileSync(pythonSdkReportPath, "utf8")) as JsonValue;
+  const pythonSdkReportRecord = asRecord(pythonSdkReport);
+  const pythonSdkChecksRecord = asRecord(pythonSdkReportRecord.checks ?? {});
+  const pythonSdkChecks = {
+    unitTestsPassed: booleanValue(pythonSdkChecksRecord.unitTestsPassed ?? false),
+    discoveryLoaded: booleanValue(pythonSdkChecksRecord.discoveryLoaded ?? false),
+    readinessLoaded: booleanValue(pythonSdkChecksRecord.readinessLoaded ?? false),
+    statusReadable: booleanValue(pythonSdkChecksRecord.statusReadable ?? false),
+    blocksReadable: booleanValue(pythonSdkChecksRecord.blocksReadable ?? false),
+    walletReadsReadable: booleanValue(pythonSdkChecksRecord.walletReadsReadable ?? false),
+    bridgeStatusReadable: booleanValue(pythonSdkChecksRecord.bridgeStatusReadable ?? false),
+    pythonDevkitJsonStatus: booleanValue(pythonSdkChecksRecord.pythonDevkitJsonStatus ?? false),
+    pythonDevkitJsonBlocks: booleanValue(pythonSdkChecksRecord.pythonDevkitJsonBlocks ?? false),
+    pythonDevkitWaitTransaction: booleanValue(pythonSdkChecksRecord.pythonDevkitWaitTransaction ?? false),
+    pythonQuickstartPassed: booleanValue(pythonSdkChecksRecord.pythonQuickstartPassed ?? false),
+    publicReadinessFailClosed: booleanValue(pythonSdkChecksRecord.publicReadinessFailClosed ?? false),
+    noSecrets: booleanValue(pythonSdkChecksRecord.noSecrets ?? false),
+  };
+  const pythonSdkPackagePath = resolve(root, "sdks", "python");
+  const pythonSdkDocsPath = resolve(sdkDocsDir, "FLOWCHAIN_PYTHON_SDK.md");
+  const pythonSdkImplemented = pythonSdkReportRecord.status === "passed"
+    && existsSync(pythonSdkPackagePath)
+    && existsSync(pythonSdkDocsPath)
+    && Object.values(pythonSdkChecks).every(Boolean);
+  const languageSdks: LanguageSdkEvidence[] = [
+    {
+      language: "python",
+      status: pythonSdkImplemented ? "implemented" : "partial",
+      packagePath: "sdks/python",
+      devkitCommand: "npm run flowchain:python-devkit -- status --json",
+      e2eCommand: "npm run flowchain:python-sdk:e2e",
+      reportPath: "docs/agent-runs/live-product-dev-pack/python-sdk-e2e-report.json",
+      checks: pythonSdkChecks,
+    },
+  ];
   const nodeExamplePath = resolve(root, "examples", "flowchain-node-quickstart.mjs");
   const nodeExampleText = execFileSync(process.execPath, [nodeExamplePath, "--send"], {
     cwd: root,
@@ -648,6 +728,7 @@ async function main() {
     "docs/developer/FLOWCHAIN_RELEASE_COMPATIBILITY.md",
     "docs/developer/FLOWCHAIN_TROUBLESHOOTING.md",
     "docs/sdk/FLOWCHAIN_SDK.md",
+    "docs/sdk/FLOWCHAIN_PYTHON_SDK.md",
     "docs/sdk/RPC_REFERENCE.generated.md",
   ];
   const missingDocs = requiredDocs.filter((docPath) => !existsSync(resolve(root, docPath)));
@@ -725,6 +806,14 @@ async function main() {
       && readFileSync(curlExamplesPath, "utf8").includes("curl.exe -sS")
       && readFileSync(curlExamplesPath, "utf8").includes("chain_status"),
     developerGuidesPresent: missingDocs.length === 0,
+    pythonSdkE2ePassed: pythonSdkImplemented,
+    pythonSdkDiscoveryLoaded: pythonSdkChecks.discoveryLoaded,
+    pythonSdkReadinessLoaded: pythonSdkChecks.readinessLoaded,
+    pythonDevkitJsonStatus: pythonSdkChecks.pythonDevkitJsonStatus,
+    pythonDevkitJsonBlocks: pythonSdkChecks.pythonDevkitJsonBlocks,
+    pythonDevkitWaitTransaction: pythonSdkChecks.pythonDevkitWaitTransaction,
+    pythonSdkDocsPresent: existsSync(pythonSdkDocsPath) && existsSync(resolve(pythonSdkPackagePath, "README.md")),
+    pythonSdkSafeDiagnostics: pythonSdkChecks.noSecrets,
     heightAdvanced: firstHeight !== null && secondHeight !== null && BigInt(secondHeight) > BigInt(firstHeight),
     publicReadinessFailClosed: readiness.publicRpcReady === false && readiness.productionReady === false,
     publicWriteMethodsBlockedFromPublicList: transactionSubmit?.publicRpcEligible === false && walletTransferHistory?.publicRpcEligible === true,
@@ -738,6 +827,7 @@ async function main() {
     missingEnvNames,
     methodCount: numberValue(discovery.methodCount ?? 0),
     publicReadyMethodCount: numberValue(discovery.publicReadyMethodCount ?? 0),
+    languageSdks,
   });
   const inventoryText = existsSync(inventoryPath) ? readFileSync(inventoryPath, "utf8") : "";
   const checks = {
@@ -745,7 +835,8 @@ async function main() {
     inventoryGenerated: inventoryText.includes("| SDK package | implemented |")
       && inventoryText.includes("| HTTP/OpenAPI starter pack | implemented |")
       && inventoryText.includes("blocked-owner-input")
-      && inventoryText.includes("| Additional language SDKs | missing |"),
+      && inventoryText.includes("| Additional language SDKs | implemented |")
+      && inventoryText.includes("Python SDK/devkit passes live RPC e2e"),
     inventorySafe: !/(privateKey|private_key|seed phrase|mnemonic|apiKey|webhook|BEGIN RSA PRIVATE KEY|BEGIN OPENSSH PRIVATE KEY)/i.test(inventoryText),
   };
   const status = Object.values(checks).every(Boolean) ? "passed" : "failed";
@@ -769,10 +860,12 @@ async function main() {
       openApi: openApiPath,
       postman: postmanPath,
       curlExamples: curlExamplesPath,
+      pythonSdk: pythonSdkReportPath,
     },
     noLiveBroadcast: true,
     envValuesPrinted: false,
     noSecrets: true,
+    languageSdks,
   };
 
   writeFileSync(reportPath, JSON.stringify(redactJsonValue(report as unknown as JsonValue), null, 2), "utf8");
@@ -787,6 +880,7 @@ async function main() {
       "Implemented in this slice:",
       "",
       "- Private FlowChain SDK/devkit package under `services/flowchain-sdk`.",
+      "- Dependency-free Python SDK/devkit package under `sdks/python` with live RPC E2E evidence.",
       "- Typed JSON-RPC client over the real FlowChain `/rpc` surface.",
       "- CLI commands for discovery, readiness, status, wallet balances, wallet transfers, bridge readiness, bridge status, and diagnostics.",
       "- CLI commands for blocks, transactions, mempool, accounts, balances, wallet metadata, faucet events, finality, bridge deposits, bridge credits, and withdrawals.",
@@ -797,8 +891,8 @@ async function main() {
       "- Generated OpenAPI, Postman, and cURL artifacts for builders who want direct HTTP examples before adopting the TypeScript SDK.",
       "- Developer guides for wallet integration, bridge integration, node operations, app building, explorer/indexer use, faucet/tester funds, release compatibility, and troubleshooting.",
       "- Generated RPC reference from live `rpc_discover`.",
-      "- Developer ecosystem inventory classifying implemented, partial, blocked, and missing surfaces.",
-      "- Dev-pack E2E report proving local RPC attachment, height reads, explorer reads, wallet reads, bridge lifecycle reads, runtime-backed local wallet sends, signed-envelope intake, CLI JSON output, sample example execution, and public readiness fail-closed behavior.",
+      "- Developer ecosystem inventory classifying implemented, partial, blocked, and missing surfaces, including Python as the first additional language SDK.",
+      "- Dev-pack E2E report proving local RPC attachment, height reads, explorer reads, wallet reads, bridge lifecycle reads, runtime-backed local wallet sends, signed-envelope intake, CLI JSON output, Python SDK/devkit execution, sample example execution, and public readiness fail-closed behavior.",
       "",
       "Remaining buildout:",
       "",

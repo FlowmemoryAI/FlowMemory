@@ -11,8 +11,8 @@ and external tester gates have passed.
   accounting, replay protection, caps, and blocked-owner-input behavior.
 - `FLOWCHAIN_NODE_OPERATOR.md`: service commands, public RPC deployment
   boundary, backups, monitoring, and incident drills.
-- `FLOWCHAIN_APP_BUILDER.md`: SDK, CLI, Node.js example, browser readiness
-  example, and activity/bridge panels.
+- `FLOWCHAIN_APP_BUILDER.md`: SDK, CLI, Node.js/Python examples, browser
+  readiness example, and activity/bridge panels.
 - `FLOWCHAIN_EXPLORER_INDEXER.md`: block, transaction, account, finality,
   provenance, and bridge lookup methods.
 - `FLOWCHAIN_FAUCET_TESTER_FUNDS.md`: local no-value faucet/test allocation

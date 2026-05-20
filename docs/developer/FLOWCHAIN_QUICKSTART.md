@@ -151,8 +151,8 @@ npm run flowchain:dev-pack:e2e
 These commands attach to local RPC, verify discovery/readiness, check block
 height, read block/transaction/account/wallet/bridge surfaces, submit a
 runtime-backed local wallet send, run CLI commands with JSON output, verify the
-Node.js and browser examples, and regenerate the RPC reference plus HTTP
-starter artifacts.
+Node.js, Python, and browser examples, and regenerate the RPC reference plus
+HTTP starter artifacts.
 
 Outputs:
 
@@ -160,16 +160,19 @@ Outputs:
 - `docs/agent-runs/live-product-dev-pack/DEV_PACK.md`
 - `docs/agent-runs/live-product-dev-pack/HANDOFF.md`
 - `docs/agent-runs/live-product-dev-pack/INVENTORY.md`
+- `docs/agent-runs/live-product-dev-pack/python-sdk-e2e-report.json`
 - `docs/sdk/RPC_REFERENCE.generated.md`
 - `docs/sdk/FLOWCHAIN_RPC.openapi.generated.json`
 - `docs/sdk/FLOWCHAIN_RPC.postman.generated.json`
 - `docs/sdk/FLOWCHAIN_HTTP_EXAMPLES.generated.md`
+- `docs/sdk/FLOWCHAIN_PYTHON_SDK.md`
 
 ## Run The Examples
 
 ```powershell
 node examples/flowchain-node-quickstart.mjs
 node examples/flowchain-node-quickstart.mjs --send
+python examples/flowchain-python-quickstart.py
 node examples/flowchain-signed-envelope.mjs --submit
 npm run smoke --prefix examples/flowchain-browser-readiness
 ```

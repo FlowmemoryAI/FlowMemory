@@ -5,6 +5,7 @@ Status: `passed`
 Implemented in this slice:
 
 - Private FlowChain SDK/devkit package under `services/flowchain-sdk`.
+- Dependency-free Python SDK/devkit package under `sdks/python` with live RPC E2E evidence.
 - Typed JSON-RPC client over the real FlowChain `/rpc` surface.
 - CLI commands for discovery, readiness, status, wallet balances, wallet transfers, bridge readiness, bridge status, and diagnostics.
 - CLI commands for blocks, transactions, mempool, accounts, balances, wallet metadata, faucet events, finality, bridge deposits, bridge credits, and withdrawals.
@@ -15,8 +16,8 @@ Implemented in this slice:
 - Generated OpenAPI, Postman, and cURL artifacts for builders who want direct HTTP examples before adopting the TypeScript SDK.
 - Developer guides for wallet integration, bridge integration, node operations, app building, explorer/indexer use, faucet/tester funds, release compatibility, and troubleshooting.
 - Generated RPC reference from live `rpc_discover`.
-- Developer ecosystem inventory classifying implemented, partial, blocked, and missing surfaces.
-- Dev-pack E2E report proving local RPC attachment, height reads, explorer reads, wallet reads, bridge lifecycle reads, runtime-backed local wallet sends, signed-envelope intake, CLI JSON output, sample example execution, and public readiness fail-closed behavior.
+- Developer ecosystem inventory classifying implemented, partial, blocked, and missing surfaces, including Python as the first additional language SDK.
+- Dev-pack E2E report proving local RPC attachment, height reads, explorer reads, wallet reads, bridge lifecycle reads, runtime-backed local wallet sends, signed-envelope intake, CLI JSON output, Python SDK/devkit execution, sample example execution, and public readiness fail-closed behavior.
 
 Remaining buildout:
 

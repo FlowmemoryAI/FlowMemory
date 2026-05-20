@@ -366,7 +366,8 @@ foreach ($file in @(
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"; target = "evidence/flowchain-architecture-audit-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json"; target = "evidence/flowchain-completion-audit-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"; target = "evidence/production-truth-table-report.json"; required = $true },
-    [ordered]@{ source = "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"; target = "evidence/dev-pack-e2e-report.json"; required = $true }
+    [ordered]@{ source = "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"; target = "evidence/dev-pack-e2e-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-dev-pack/python-sdk-e2e-report.json"; target = "evidence/python-sdk-e2e-report.json"; required = $true }
 )) {
     [void] $copiedEvidence.Add((Copy-OperatorPackageFile -Source $file.source -Destination $file.target -Required:([bool] $file.required)))
 }

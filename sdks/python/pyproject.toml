@@ -1,0 +1,12 @@
+[project]
+name = "flowchain-sdk"
+version = "0.1.0"
+description = "Dependency-free Python client and CLI for the local FlowChain RPC."
+requires-python = ">=3.10"
+readme = "README.md"
+
+[project.scripts]
+flowchain = "flowchain.cli:main"
+
+[tool.setuptools]
+packages = ["flowchain"]

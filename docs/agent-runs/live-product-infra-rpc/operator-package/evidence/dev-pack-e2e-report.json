@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.dev_pack_e2e_report.v0",
-  "generatedAt": "2026-05-20T13:53:34.015Z",
+  "generatedAt": "2026-05-20T16:22:14.547Z",
   "status": "passed",
   "rpcUrl": "http://127.0.0.1:8787/rpc",
   "checks": {
@@ -36,6 +36,14 @@
     "postmanCollectionGenerated": true,
     "curlExamplesGenerated": true,
     "developerGuidesPresent": true,
+    "pythonSdkE2ePassed": true,
+    "pythonSdkDiscoveryLoaded": true,
+    "pythonSdkReadinessLoaded": true,
+    "pythonDevkitJsonStatus": true,
+    "pythonDevkitJsonBlocks": true,
+    "pythonDevkitWaitTransaction": true,
+    "pythonSdkDocsPresent": true,
+    "pythonSdkSafeDiagnostics": true,
     "heightAdvanced": true,
     "publicReadinessFailClosed": true,
     "publicWriteMethodsBlockedFromPublicList": true,
@@ -45,8 +53,8 @@
   },
   "methodCount": 82,
   "publicReadyMethodCount": 0,
-  "firstHeight": "102634",
-  "secondHeight": "102635",
+  "firstHeight": "103996",
+  "secondHeight": "103997",
   "missingEnvNames": [
     "FLOWCHAIN_BASE8453_FROM_BLOCK",
     "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -70,9 +78,35 @@
     "rpcReference": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\sdk\\RPC_REFERENCE.generated.md",
     "openApi": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\sdk\\FLOWCHAIN_RPC.openapi.generated.json",
     "postman": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\sdk\\FLOWCHAIN_RPC.postman.generated.json",
-    "curlExamples": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\sdk\\FLOWCHAIN_HTTP_EXAMPLES.generated.md"
+    "curlExamples": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\sdk\\FLOWCHAIN_HTTP_EXAMPLES.generated.md",
+    "pythonSdk": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\python-sdk-e2e-report.json"
   },
   "noLiveBroadcast": true,
   "envValuesPrinted": false,
-  "noSecrets": true
+  "noSecrets": true,
+  "languageSdks": [
+    {
+      "language": "python",
+      "status": "implemented",
+      "packagePath": "sdks/python",
+      "devkitCommand": "npm run flowchain:python-devkit -- status --json",
+      "e2eCommand": "npm run flowchain:python-sdk:e2e",
+      "reportPath": "docs/agent-runs/live-product-dev-pack/python-sdk-e2e-report.json",
+      "checks": {
+        "unitTestsPassed": true,
+        "discoveryLoaded": true,
+        "readinessLoaded": true,
+        "statusReadable": true,
+        "blocksReadable": true,
+        "walletReadsReadable": true,
+        "bridgeStatusReadable": true,
+        "pythonDevkitJsonStatus": true,
+        "pythonDevkitJsonBlocks": true,
+        "pythonDevkitWaitTransaction": true,
+        "pythonQuickstartPassed": true,
+        "publicReadinessFailClosed": true,
+        "noSecrets": true
+      }
+    }
+  ]
 }
