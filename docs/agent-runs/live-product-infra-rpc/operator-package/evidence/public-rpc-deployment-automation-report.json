@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_automation_report.v1",
-    "generatedAt":  "2026-05-19T20:00:20.7782069Z",
+    "generatedAt":  "2026-05-20T00:03:48.8616442Z",
     "status":  "passed",
     "action":  "Validate",
     "flowChainRpcIsRepoOwned":  true,
@@ -14,6 +14,8 @@
                    "bundleHasShellPreflight":  true,
                    "bundleHasWindowsPreflight":  true,
                    "bundleHasRollbackRunbook":  true,
+                   "bundleHasSecurityHeaders":  true,
+                   "bundlePreflightsCheckSecurityHeaders":  true,
                    "ownerPathsOutsideRepo":  true,
                    "hostMutationPerformedFalse":  true,
                    "valuesPrintedFalse":  true,
@@ -36,11 +38,13 @@
                    "renderedNginxHasTls":  true,
                    "renderedNginxHasCorsForwarding":  true,
                    "renderedNginxHasRateLimit":  true,
+                   "renderedNginxHasSecurityHeaders":  true,
                    "renderedNginxAuthorizationForwardingScoped":  true,
                    "renderedSystemdUsesOwnerEnv":  true,
                    "renderedPreflightHasReadinessProbe":  true,
                    "renderedPreflightHasTesterUnauthProbe":  true,
                    "renderedPreflightHasDisallowedOriginProbe":  true,
+                   "renderedPreflightChecksSecurityHeaders":  true,
                    "renderedPreflightBlocksBroadStatePath":  true,
                    "renderedPreflightBlocksPrivateWalletCreate":  true,
                    "renderedFilesDoNotContainTokenHash":  true,
@@ -48,6 +52,13 @@
                    "renderedReportKeepsOwnerPathsOutsideRepo":  true,
                    "renderedReportNoSecrets":  true,
                    "renderedReportBroadcastsFalse":  true,
+                   "renderedReportSummaryPresent":  true,
+                   "renderedReportSummaryPassed":  true,
+                   "renderedReportSummaryListsFiles":  true,
+                   "renderedReportSummaryHasRequiredEnvNames":  true,
+                   "renderedReportSummaryNoSecrets":  true,
+                   "renderedReportSummaryBroadcastsFalse":  true,
+                   "renderedReportSummaryOwnerPathsOutsideRepo":  true,
                    "rollbackDrillPerformed":  true,
                    "rollbackRenderedConfigExists":  true,
                    "rollbackPreviousConfigWritten":  true,
@@ -56,6 +67,8 @@
                    "rollbackArtifactsStayedInsideRenderDir":  true,
                    "rollbackDrillNoSecrets":  true,
                    "rollbackDrillBroadcastsFalse":  true,
+                   "renderedReportSnapshotWritten":  true,
+                   "renderedReportSnapshotNoSecrets":  true,
                    "cleanupAttempted":  true
                },
     "failedChecks":  [
@@ -69,7 +82,7 @@
                      "performed":  true,
                      "exitCode":  0,
                      "outputRedacted":  [
-                                            "FlowChain public RPC bundle rendered. Report: C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-68276-b054a29bb14948589cfa0472980ef9e5\\rendered\\public-rpc-render-report.json"
+                                            "FlowChain public RPC bundle rendered. Report: C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-66196-02b70805b6f4437e8a372bbeecf41704\\rendered\\public-rpc-render-report.json"
                                         ],
                      "failedChecks":  [
 
@@ -87,8 +100,8 @@
                                          "rollbackDrillBroadcastsFalse":  true
                                      },
                           "artifacts":  [
-                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-68276-b054a29bb14948589cfa0472980ef9e5\\rendered\\previous-nginx-flowchain-rpc.conf",
-                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-68276-b054a29bb14948589cfa0472980ef9e5\\rendered\\rollback-drill-current-before.conf"
+                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-66196-02b70805b6f4437e8a372bbeecf41704\\rendered\\previous-nginx-flowchain-rpc.conf",
+                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-66196-02b70805b6f4437e8a372bbeecf41704\\rendered\\rollback-drill-current-before.conf"
                                         ]
                       },
     "renderedFileNames":  [
@@ -99,6 +112,36 @@
                               "nginx-preflight.ps1"
                           ],
     "renderedReportPath":  "",
+    "renderedReportSnapshotPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-render-report-snapshot.json",
+    "renderedReportSummary":  {
+                                  "schema":  "flowchain.public_rpc_owner_render_report.v0",
+                                  "status":  "passed",
+                                  "renderedFileCount":  5,
+                                  "renderedFiles":  [
+                                                        "nginx-flowchain-rpc.conf",
+                                                        "flowchain-live.service",
+                                                        "flowchain-supervisor.service",
+                                                        "nginx-preflight.sh",
+                                                        "nginx-preflight.ps1"
+                                                    ],
+                                  "requiredEnvNameCount":  8,
+                                  "requiredEnvNames":  [
+                                                           "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                           "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                           "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                           "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                           "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                           "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                                                           "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                                                           "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+                                                       ],
+                                  "allowedOriginCount":  2,
+                                  "renderDirInsideRepo":  false,
+                                  "ownerEnvFileInsideRepo":  false,
+                                  "envValuesPrinted":  false,
+                                  "noSecrets":  true,
+                                  "broadcasts":  false
+                              },
     "ownerInputsRequired":  [
                                 "FLOWCHAIN_RPC_PUBLIC_URL",
                                 "FLOWCHAIN_RPC_ALLOWED_ORIGINS",

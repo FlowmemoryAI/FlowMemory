@@ -34,6 +34,7 @@ The repository now provides:
 - `npm run flowchain:tester:readiness` for a fail-closed decision report before inviting external testers; it refreshes service and live-infra status and requires a fresh live tester-wallet network proof.
 - `npm run flowchain:owner:onboarding` for a no-values owner packet that distinguishes repo-owned FlowChain RPC from the external Base 8453 RPC dependency and lists the signup/setup groups.
 - `npm run flowchain:owner:signup-checklist` for a no-values owner checklist that maps public RPC edge, tester write token/cap, always-on host, backup storage, Base 8453 RPC, bridge details, and local env-file setup to exact owner actions.
+- `npm run flowchain:owner:activation-plan` for the ordered launch activation plan that maps the remaining owner inputs to stages, exact validation commands, resource boundaries, and no-secret handoff instructions.
 - `npm run flowchain:owner-env:template` for an ignored local owner env-file scaffold with empty assignments only.
 - `npm run flowchain:owner-env:readiness:validate` for a no-values self-test proving unsafe owner env-file paths fail before live gates run.
 - `npm run flowchain:owner-env:readiness` for a one-command owner env-file readiness gate that runs owner inputs, live infrastructure, and public deployment checks with redacted output.
@@ -42,6 +43,7 @@ The repository now provides:
 - `npm run flowchain:external-tester:packet` for a tester handoff packet that remains marked not shareable until the external readiness gates pass.
 - `npm run flowchain:public-deployment:contract` for a no-values public deployment contract that ties origin service status, public RPC, backup, bridge, tester sharing, rollback commands, and owner inputs into one machine-readable gate.
 - `npm run flowchain:architecture:audit` for a no-values architecture audit that maps runtime, RPC, wallets, bridge, backup, operations, verification, and fail-closed owner boundaries to concrete evidence.
+- `npm run flowchain:dashboard:ui:readiness` for desktop and mobile browser verification of tester wallet create, faucet, send, Explorer inspection, tester launch readiness, and the L1 activation cockpit.
 - `npm run flowchain:completion:audit` for the full prompt-to-artifact completion audit before claiming readiness.
 - `npm run flowchain:live-product:e2e` as the product-level aggregate that runs the local production-shaped path, restores the live service profile, runs the live-service wallet transfer proofs, and then runs live-infra readiness.
 

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.dashboard_ui_readiness_report.v0",
-    "generatedAt":  "2026-05-19T20:37:59.7912387+00:00",
+    "generatedAt":  "2026-05-20T01:19:06.0336106+00:00",
     "status":  "passed",
     "checks":  {
                    "dashboardPackageScriptPresent":  true,
@@ -14,12 +14,16 @@
                    "testerFaucetCovered":  true,
                    "testerSendCovered":  true,
                    "explorerRouteCovered":  true,
+                   "testerLaunchRouteCovered":  true,
+                   "activationRouteCovered":  true,
+                   "publicRpcHeaderProofCovered":  true,
                    "noSecretLeakageAsserted":  true,
                    "noHorizontalOverflowAsserted":  true,
                    "dashboardUnitTestsPassed":  true,
                    "dashboardBrowserE2ePassed":  true,
                    "dashboardBuildPassed":  true,
                    "controlPlaneTesterGatewayTestsPassed":  true,
+                   "commandsCompletedWithoutTimeout":  true,
                    "secretMarkerFindingsEmpty":  true,
                    "envValuesPrintedFalse":  true,
                    "noSecrets":  true,
@@ -36,22 +40,28 @@
                          "label":  "dashboard unit render tests",
                          "command":  "npm test --prefix apps/dashboard",
                          "exitCode":  0,
+                         "timeoutSeconds":  180,
+                         "timedOut":  false,
                          "durationSeconds":  4,
                          "stdoutLineCount":  7,
                          "stderrLineCount":  0
                      },
                      {
                          "label":  "dashboard browser wallet faucet explorer loop",
-                         "command":  "npm run browser:e2e --prefix apps/dashboard",
+                         "command":  "npm run browser:e2e --prefix apps/dashboard -- --workers=1",
                          "exitCode":  0,
-                         "durationSeconds":  14,
+                         "timeoutSeconds":  300,
+                         "timedOut":  false,
+                         "durationSeconds":  24,
                          "stdoutLineCount":  6,
-                         "stderrLineCount":  8
+                         "stderrLineCount":  20
                      },
                      {
                          "label":  "dashboard production build",
                          "command":  "npm run build --prefix apps/dashboard",
                          "exitCode":  0,
+                         "timeoutSeconds":  300,
+                         "timedOut":  false,
                          "durationSeconds":  4,
                          "stdoutLineCount":  19,
                          "stderrLineCount":  0
@@ -60,7 +70,9 @@
                          "label":  "control-plane tester gateway tests",
                          "command":  "npm test --prefix services/control-plane",
                          "exitCode":  0,
-                         "durationSeconds":  111,
+                         "timeoutSeconds":  300,
+                         "timedOut":  false,
+                         "durationSeconds":  156,
                          "stdoutLineCount":  77,
                          "stderrLineCount":  0
                      }
@@ -74,7 +86,9 @@
                           "/tester/wallets/create",
                           "/tester/faucet",
                           "/tester/wallets/send",
-                          "/explorer"
+                          "/explorer",
+                          "/tester",
+                          "/activation"
                       ],
     "envValuesPrinted":  false,
     "noSecrets":  true,

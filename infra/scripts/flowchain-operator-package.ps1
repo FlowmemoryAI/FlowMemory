@@ -202,7 +202,7 @@ $commandMatrix = @(
     [ordered]@{ phase = "testers"; command = "npm run flowchain:external-tester:packet:validate"; purpose = "Validate the packet and connect pack are no-secret, locally executable, and not externally shareable before owner inputs." },
     [ordered]@{ phase = "testers"; command = "npm run flowchain:tester:evidence:validate"; purpose = "Validate redacted friends-and-family evidence intake for block-height advancement, wallet transfer consistency, and no-secret boundaries." },
     [ordered]@{ phase = "testers"; command = "npm run flowchain:tester:token:setup"; purpose = "Create or preserve the raw tester bearer token in ignored local storage and write only its digest to the ignored owner env file." },
-    [ordered]@{ phase = "testers"; command = "npm run flowchain:dashboard:ui:readiness"; purpose = "Run desktop and mobile browser verification for tester wallet create, faucet, send, and Explorer inspection." },
+    [ordered]@{ phase = "testers"; command = "npm run flowchain:dashboard:ui:readiness"; purpose = "Run desktop and mobile browser verification for tester wallet create, faucet, send, Explorer inspection, tester launch readiness, and the L1 activation cockpit." },
     [ordered]@{ phase = "cutover"; command = "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked"; purpose = "Run owner-env, public deployment, tester packet, completion, truth table, and no-secret gates as one redacted rehearsal." },
     [ordered]@{ phase = "release"; command = "npm run flowchain:operator:package:verify"; purpose = "Verify the generated operator package contents and no-secret boundary." },
     [ordered]@{ phase = "release"; command = "npm run flowchain:completion:audit -- -AllowBlocked"; purpose = "Run the production readiness gate without false public-ready claims." },
@@ -405,7 +405,7 @@ $readmeLines.Add("- ``OPERATOR_PACKAGE_MANIFEST.json``")
 $readmeLines.Add("- ``OPERATOR_COMMAND_MATRIX.json``")
 $readmeLines.Add("- ``COMMAND_MATRIX.md``")
 $readmeLines.Add("- ``docs/`` copied developer and operations docs")
-$readmeLines.Add("- ``runbooks/`` copied generated public RPC, service, backup, alert, and tester packet runbooks")
+$readmeLines.Add("- ``runbooks/`` copied generated public RPC, service, backup, alert, activation, dashboard, and tester packet runbooks")
 $readmeLines.Add("- ``evidence/`` copied latest readiness and validation reports")
 Set-Content -LiteralPath $readmePath -Value $readmeLines -Encoding UTF8
 

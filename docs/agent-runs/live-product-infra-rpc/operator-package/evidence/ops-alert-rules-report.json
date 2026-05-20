@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-19T21:25:36.4093872Z",
+    "generatedAt":  "2026-05-20T00:48:15.2500605Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  24,
-    "criticalRuleCount":  17,
+    "ruleCount":  26,
+    "criticalRuleCount":  19,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -38,6 +38,7 @@
                                 "state-stale",
                                 "no-secret-scan-not-passed",
                                 "backup-retention-unsafe",
+                                "bridge-relayer-check-contract-failed",
                                 "bridge-relayer-latency-failed",
                                 "bridge-relayer-cursor-unsafe",
                                 "bridge-relayer-guardrail-failed",
@@ -45,6 +46,7 @@
                                 "bridge-relayer-loop-unhealthy",
                                 "supervisor-relayer-recovery-failed",
                                 "deployment-refresh-aborted",
+                                "truth-table-stale-or-failed",
                                 "external-tester-evidence-unsafe",
                                 "dashboard-ui-readiness-failed",
                                 "owner-inputs-validation-failed",
@@ -88,6 +90,8 @@
                    "commandsAvoidInlineEnvAssignment":  true,
                    "commandsAvoidUrls":  true,
                    "findingsWithoutCommandsEmpty":  true,
+                   "publicRpcEdgeHardeningRuleCoversSecurityHeaders":  true,
+                   "bridgeRelayerCheckContractRuleCoversFailedChecks":  true,
                    "notificationPlanStoresNoSecrets":  true,
                    "notificationPlanNoNetworkDelivery":  true,
                    "envValuesPrintedFalse":  true,
@@ -197,6 +201,20 @@
                                    ]
                   },
                   {
+                      "id":  "bridge-relayer-check-contract-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "bridge-relayer-check-contract-failed"
+                                       ],
+                      "signal":  "Bridge relayer one-shot safety check contract is missing or failing.",
+                      "threshold":  "relayer one-shot report is not passed/blocked, has failedChecks, misses required checks, prints env values, broadcasts, or reports secrets",
+                      "commands":  [
+                                       "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                                       "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh",
+                                       "npm run flowchain:bridge:emergency-stop"
+                                   ]
+                  },
+                  {
                       "id":  "bridge-relayer-latency-failed",
                       "severity":  "critical",
                       "findingCodes":  [
@@ -297,6 +315,20 @@
                                    ]
                   },
                   {
+                      "id":  "truth-table-stale-or-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "truth-table-stale-or-failed"
+                                       ],
+                      "signal":  "Production truth table is stale, failed, missing, or reports repo-owned blockers.",
+                      "threshold":  "production truth table status is failed/stale/missing or failed, stale, or blocked-repo-work gate count is greater than zero",
+                      "commands":  [
+                                       "npm run flowchain:truth-table -- -AllowBlocked",
+                                       "npm run flowchain:completion:audit -- -AllowBlocked",
+                                       "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked"
+                                   ]
+                  },
+                  {
                       "id":  "external-tester-evidence-unsafe",
                       "severity":  "critical",
                       "findingCodes":  [
@@ -345,7 +377,7 @@
                                            "public-rpc-edge-hardening-failed"
                                        ],
                       "signal":  "Public RPC edge deployment hardening evidence is missing or failed.",
-                      "threshold":  "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, or scoped authorization forwarding proof",
+                      "threshold":  "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, or defensive response-header proof",
                       "commands":  [
                                        "npm run flowchain:public-rpc:deployment-bundle",
                                        "npm run flowchain:public-rpc:deployment:automation",

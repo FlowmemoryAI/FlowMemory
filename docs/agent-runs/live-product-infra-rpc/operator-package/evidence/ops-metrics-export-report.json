@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics_export_report.v0",
-    "generatedAt":  "2026-05-19T21:25:41.7019570Z",
+    "generatedAt":  "2026-05-20T00:02:49.6614132Z",
     "status":  "passed",
     "refresh":  {
                     "performed":  false,
@@ -31,7 +31,7 @@
                     },
     "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.json",
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
-    "metricCount":  66,
+    "metricCount":  70,
     "requiredMetricNames":  [
                                 "flowchain_latest_height",
                                 "flowchain_finalized_height",
@@ -49,6 +49,10 @@
                                 "flowchain_public_rpc_broad_state_blocked_preflight",
                                 "flowchain_public_rpc_private_wallet_create_blocked_preflight",
                                 "flowchain_public_rpc_auth_forwarding_scoped",
+                                "flowchain_public_rpc_security_headers",
+                                "flowchain_public_rpc_security_header_preflight",
+                                "flowchain_public_rpc_rendered_security_headers",
+                                "flowchain_public_rpc_rendered_security_header_preflight",
                                 "flowchain_backup_ready",
                                 "flowchain_backup_retention_count",
                                 "flowchain_backup_retention_candidates",

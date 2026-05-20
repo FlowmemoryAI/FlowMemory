@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-19T21:25:41.5179517Z",
+    "generatedAt":  "2026-05-20T00:02:49.4994156Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -20,25 +20,25 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  93581
+                        "value":  95054
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  93581
+                        "value":  95054
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  3
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
                         "type":  "gauge",
                         "help":  "Service monitor samples recorded in the current ops snapshot.",
-                        "value":  2
+                        "value":  3
                     },
                     {
                         "name":  "flowchain_height_advanced",
@@ -62,13 +62,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  24
+                        "value":  25
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  17
+                        "value":  18
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -137,6 +137,18 @@
                         "value":  1
                     },
                     {
+                        "name":  "flowchain_public_rpc_security_headers",
+                        "type":  "gauge",
+                        "help":  "One when the public RPC bundle includes defensive response headers.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_security_header_preflight",
+                        "type":  "gauge",
+                        "help":  "One when public RPC preflights check defensive response headers.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_public_rpc_rendered_disallowed_origin_probe",
                         "type":  "gauge",
                         "help":  "One when rendered public RPC preflight has the disallowed origin probe.",
@@ -158,6 +170,18 @@
                         "name":  "flowchain_public_rpc_rendered_auth_forwarding_scoped",
                         "type":  "gauge",
                         "help":  "One when rendered public RPC authorization forwarding is scoped to tester writes.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rendered_security_headers",
+                        "type":  "gauge",
+                        "help":  "One when rendered public RPC Nginx config includes defensive response headers.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rendered_security_header_preflight",
+                        "type":  "gauge",
+                        "help":  "One when rendered public RPC preflights check defensive response headers.",
                         "value":  1
                     },
                     {
@@ -413,7 +437,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  66,
+    "metricCount":  70,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

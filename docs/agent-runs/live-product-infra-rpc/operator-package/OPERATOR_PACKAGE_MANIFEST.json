@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-19T21:31:08.2684295Z",
+    "generatedAt":  "2026-05-20T01:30:38.9740738Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -336,7 +336,7 @@
                           {
                               "phase":  "testers",
                               "command":  "npm run flowchain:dashboard:ui:readiness",
-                              "purpose":  "Run desktop and mobile browser verification for tester wallet create, faucet, send, and Explorer inspection."
+                              "purpose":  "Run desktop and mobile browser verification for tester wallet create, faucet, send, Explorer inspection, tester launch readiness, and the L1 activation cockpit."
                           },
                           {
                               "phase":  "cutover",

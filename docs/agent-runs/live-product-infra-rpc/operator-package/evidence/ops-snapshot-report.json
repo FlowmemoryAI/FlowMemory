@@ -1,29 +1,20 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-19T21:25:31.4197430Z",
+    "generatedAt":  "2026-05-20T00:48:15.5090684Z",
     "status":  "blocked",
     "refresh":  {
-                    "performed":  true,
+                    "performed":  false,
                     "steps":  [
-                                  {
-                                      "name":  "service-status",
-                                      "exitCode":  0,
-                                      "outputLineCount":  10
-                                  },
-                                  {
-                                      "name":  "service-monitor",
-                                      "exitCode":  0,
-                                      "outputLineCount":  4
-                                  }
+
                               ],
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "93581",
-                  "finalizedHeight":  "93581",
-                  "stateFileLastWriteAgeSeconds":  3,
+                  "latestHeight":  "95503",
+                  "finalizedHeight":  "95503",
+                  "stateFileLastWriteAgeSeconds":  1,
                   "monitorStatus":  "passed",
-                  "monitorSamples":  2,
+                  "monitorSamples":  3,
                   "monitorHeightAdvanced":  true
               },
     "reportStatuses":  {
@@ -53,10 +44,14 @@
                            "publicRpcBroadStateBlockedPreflight":  true,
                            "publicRpcPrivateWalletCreateBlockedPreflight":  true,
                            "publicRpcAuthorizationForwardingScoped":  true,
+                           "publicRpcSecurityHeaders":  true,
+                           "publicRpcSecurityHeaderPreflight":  true,
                            "publicRpcRenderedDisallowedOriginProbe":  true,
                            "publicRpcRenderedBroadStateBlockedProbe":  true,
                            "publicRpcRenderedPrivateWalletCreateBlockedProbe":  true,
                            "publicRpcRenderedAuthorizationForwardingScoped":  true,
+                           "publicRpcRenderedSecurityHeaders":  true,
+                           "publicRpcRenderedSecurityHeaderPreflight":  true,
                            "backup":  "blocked",
                            "backupRetentionCount":  null,
                            "backupRetentionCandidateCount":  null,
@@ -65,6 +60,9 @@
                            "bridgeLive":  "blocked",
                            "bridgeInfra":  "blocked",
                            "bridgeRelayer":  "blocked",
+                           "bridgeRelayerCheckContractReady":  true,
+                           "bridgeRelayerFailedChecks":  0,
+                           "bridgeRelayerMissingChecks":  0,
                            "bridgeRelayerGuardrail":  "passed",
                            "bridgeRelayerGuardrailReady":  true,
                            "bridgeRelayerDirectObserveGuardrailReady":  true,
@@ -111,6 +109,10 @@
                            "deploymentRefreshSkippedSteps":  [
 
                                                              ],
+                           "truthTable":  "blocked-owner-input",
+                           "truthTableFailedGates":  0,
+                           "truthTableStaleGates":  0,
+                           "truthTableRepoBlockedGates":  0,
                            "noSecret":  "passed"
                        },
     "findings":  [
@@ -238,6 +240,7 @@
                         "dashboardUi":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
                         "ownerInputsValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-validation-report.json",
                         "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
+                        "truthTable":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\production-truth-table-report.json",
                         "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json"
                     },
     "broadcasts":  false,

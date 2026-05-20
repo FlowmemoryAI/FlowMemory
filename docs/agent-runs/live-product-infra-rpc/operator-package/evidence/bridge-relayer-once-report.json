@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.bridge_relayer_once_report.v0",
-    "generatedAt":  "2026-05-19T21:29:06.1440631Z",
+    "generatedAt":  "2026-05-20T01:26:59.4837492Z",
     "status":  "blocked",
     "mode":  "base8453-pilot",
     "queueDisabled":  false,
@@ -17,16 +17,16 @@
                    "appliedCredits":  0
                },
     "timing":  {
-                   "runStartedAt":  "2026-05-19T21:29:04.2934005Z",
-                   "infraCheckedAt":  "2026-05-19T21:29:06.0790617Z",
+                   "runStartedAt":  "2026-05-20T01:26:57.7530483Z",
+                   "infraCheckedAt":  "2026-05-20T01:26:59.3137403Z",
                    "liveCheckedAt":  null,
                    "baseObservedAt":  null,
                    "handoffWrittenAt":  null,
                    "nodeIngestedAt":  null,
                    "creditAppliedAt":  null,
                    "firstSpendableAt":  null,
-                   "completedAt":  "2026-05-19T21:29:06.1000615Z",
-                   "totalSeconds":  1.807,
+                   "completedAt":  "2026-05-20T01:26:59.3297421Z",
+                   "totalSeconds":  1.577,
                    "handoffToSpendableSeconds":  null,
                    "codePathWithin60Seconds":  null,
                    "latencyGate":  "not-run"
@@ -90,11 +90,11 @@
                       "status":  "passed",
                       "exitCode":  0,
                       "timedOut":  false,
-                      "durationSeconds":  1.52,
+                      "durationSeconds":  1.34,
                       "logPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-once\\logs\\bridge-infra-readiness.log",
                       "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-once\\bridge-infra-readiness-report.json",
                       "reason":  "",
-                      "at":  "2026-05-19T21:29:05.9481619Z"
+                      "at":  "2026-05-20T01:26:59.2037388Z"
                   }
               ],
     "issues":  [
@@ -105,6 +105,34 @@
                        "owner":  "owner/operator"
                    }
                ],
+    "checks":  {
+                   "statusKnown":  true,
+                   "requiredEnvNamesPresent":  true,
+                   "childTimeoutRecorded":  true,
+                   "childProcessesDidNotTimeout":  true,
+                   "broadcastsFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "readinessInfraChecked":  true,
+                   "readinessLiveCheckedWhenInfraPassed":  true,
+                   "blockedBeforeLiveReadinessWhenInfraBlocked":  true,
+                   "blockedBeforeObservationWhenReadinessBlocked":  true,
+                   "noQueuedTransactionsWhenBlocked":  true,
+                   "noAppliedCreditsWhenBlocked":  true,
+                   "cursorModeStaged":  true,
+                   "finalCursorNotCommittedWhenBlocked":  true,
+                   "finalCursorPathInsideRepo":  true,
+                   "stagedCursorPathInsideRepo":  true,
+                   "issuesClassified":  true,
+                   "externalBlockerClassifiedWhenBlocked":  true,
+                   "latencyGateRecorded":  true,
+                   "latencyGatePassedWhenApplied":  true,
+                   "queueAndApplyMatchWhenPassed":  true,
+                   "cursorSafeWhenPassed":  true
+               },
+    "failedChecks":  [
+
+                     ],
     "requiredEnvNames":  [
                              "FLOWCHAIN_PILOT_OPERATOR_ACK",
                              "FLOWCHAIN_BASE8453_RPC_URL",

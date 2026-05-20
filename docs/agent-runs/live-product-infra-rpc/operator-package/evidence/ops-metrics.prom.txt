@@ -1,15 +1,15 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 93581
+flowchain_latest_height 95054
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 93581
+flowchain_finalized_height 95054
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 3
+flowchain_state_file_age_seconds 1
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
-flowchain_monitor_samples_total 2
+flowchain_monitor_samples_total 3
 # HELP flowchain_height_advanced One when service monitor proved advancing block height.
 # TYPE flowchain_height_advanced gauge
 flowchain_height_advanced 1
@@ -21,10 +21,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 24
+flowchain_ops_alert_rules_total 25
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 17
+flowchain_ops_alert_rules_critical 18
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -58,6 +58,12 @@ flowchain_public_rpc_private_wallet_create_blocked_preflight 1
 # HELP flowchain_public_rpc_auth_forwarding_scoped One when public RPC authorization forwarding is scoped to tester writes.
 # TYPE flowchain_public_rpc_auth_forwarding_scoped gauge
 flowchain_public_rpc_auth_forwarding_scoped 1
+# HELP flowchain_public_rpc_security_headers One when the public RPC bundle includes defensive response headers.
+# TYPE flowchain_public_rpc_security_headers gauge
+flowchain_public_rpc_security_headers 1
+# HELP flowchain_public_rpc_security_header_preflight One when public RPC preflights check defensive response headers.
+# TYPE flowchain_public_rpc_security_header_preflight gauge
+flowchain_public_rpc_security_header_preflight 1
 # HELP flowchain_public_rpc_rendered_disallowed_origin_probe One when rendered public RPC preflight has the disallowed origin probe.
 # TYPE flowchain_public_rpc_rendered_disallowed_origin_probe gauge
 flowchain_public_rpc_rendered_disallowed_origin_probe 1
@@ -70,6 +76,12 @@ flowchain_public_rpc_rendered_private_wallet_create_blocked_probe 1
 # HELP flowchain_public_rpc_rendered_auth_forwarding_scoped One when rendered public RPC authorization forwarding is scoped to tester writes.
 # TYPE flowchain_public_rpc_rendered_auth_forwarding_scoped gauge
 flowchain_public_rpc_rendered_auth_forwarding_scoped 1
+# HELP flowchain_public_rpc_rendered_security_headers One when rendered public RPC Nginx config includes defensive response headers.
+# TYPE flowchain_public_rpc_rendered_security_headers gauge
+flowchain_public_rpc_rendered_security_headers 1
+# HELP flowchain_public_rpc_rendered_security_header_preflight One when rendered public RPC preflights check defensive response headers.
+# TYPE flowchain_public_rpc_rendered_security_header_preflight gauge
+flowchain_public_rpc_rendered_security_header_preflight 1
 # HELP flowchain_backup_ready One when backup readiness is passed.
 # TYPE flowchain_backup_ready gauge
 flowchain_backup_ready 0
