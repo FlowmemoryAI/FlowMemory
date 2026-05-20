@@ -1,6 +1,6 @@
 ﻿# FlowChain Ops Alert Rules
 
-Generated: 2026-05-20T06:53:02.2481538Z
+Generated: 2026-05-20T07:30:10.1447900Z
 Status: passed
 Current alert state: blocked
 
@@ -34,7 +34,7 @@ This report maps local ops snapshot findings to operator actions. It does not se
 | backup-not-ready | blocked | State backup readiness is not passed. | `npm run flowchain:backup:restore:validate; npm run flowchain:backup:check` |
 | bridge-not-ready | blocked | Base 8453 bridge readiness is not passed. | `npm run flowchain:bridge:live:check; npm run flowchain:bridge:infra:check; npm run flowchain:bridge:emergency-stop` |
 | bridge-relayer-not-ready | blocked | Bridge relayer one-shot proof is not ready. | `npm run flowchain:bridge:relayer:once -- -AllowBlocked; npm run flowchain:bridge:live:check; npm run flowchain:bridge:infra:check` |
-| external-tester-not-shareable | blocked | External tester packet is not shareable. | `npm run flowchain:tester:readiness; npm run flowchain:external-tester:packet` |
+| external-tester-not-shareable | blocked | External tester packet is not shareable. | `npm run flowchain:wallet:live-tester:e2e; npm run flowchain:tester:gateway:e2e; npm run flowchain:tester:readiness -- -AllowBlocked; npm run flowchain:external-tester:packet -- -AllowBlocked` |
 | external-tester-evidence-invalid | blocked | External tester returned evidence is incomplete or transfer proof is inconsistent. | `npm run flowchain:tester:evidence:validate; npm run flowchain:external-tester:packet -- -AllowBlocked` |
 | deployment-contract-not-ready | blocked | Public deployment contract is not passed. | `npm run flowchain:public-deployment:contract -- -AllowBlocked` |
 

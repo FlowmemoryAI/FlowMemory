@@ -1,9 +1,9 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-20T06:52:53.2741238Z
+Generated: 2026-05-20T07:30:08.7828381Z
 Status: blocked
-Latest height: 99072
-Finalized height: 99072
+Latest height: 99432
+Finalized height: 99432
 Transaction intake rows: 159
 Runtime inbox files: 0
 
@@ -13,7 +13,7 @@ Runtime inbox files: 0
 - blocked: backup-not-ready - State backup is not ready for public operation.
 - blocked: bridge-not-ready - Base 8453 bridge readiness is not ready for external funded testing.
 - blocked: bridge-relayer-not-ready - Bridge relayer one-shot proof is not ready.
-- blocked: external-tester-not-shareable - External tester packet must remain not-shareable.
+- blocked: external-tester-not-shareable - External tester launch is not shareable; local rehearsal, public tester gateway, faucet route, external sharing, and live infra readiness must all pass first.
 - blocked: deployment-contract-not-ready - Public deployment contract is not ready.
 
 ## Incident Commands

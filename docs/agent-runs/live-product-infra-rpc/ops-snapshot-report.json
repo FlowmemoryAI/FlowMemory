@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-20T06:52:53.2741238Z",
+    "generatedAt":  "2026-05-20T07:30:08.7828381Z",
     "status":  "blocked",
     "refresh":  {
                     "performed":  true,
@@ -19,11 +19,11 @@
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "99072",
-                  "finalizedHeight":  "99072",
-                  "stateFileLastWriteAgeSeconds":  1,
+                  "latestHeight":  "99432",
+                  "finalizedHeight":  "99432",
+                  "stateFileLastWriteAgeSeconds":  3,
                   "monitorStatus":  "passed",
-                  "monitorSamples":  2,
+                  "monitorSamples":  3,
                   "monitorHeightAdvanced":  true,
                   "mempoolDepth":  0
               },
@@ -33,10 +33,10 @@
                               "txIntakeRows":  159,
                               "txIntakeAcceptedRows":  159,
                               "txIntakeInvalidRows":  0,
-                              "txIntakeLastWriteAgeSeconds":  13501.594,
+                              "txIntakeLastWriteAgeSeconds":  15737.157,
                               "runtimeSubmitDir":  "devnet/local/intake/runtime-submit",
                               "runtimeSubmitFileCount":  4,
-                              "runtimeSubmitNewestFileAgeSeconds":  421860.404,
+                              "runtimeSubmitNewestFileAgeSeconds":  424095.989,
                               "runtimeInboxDir":  "devnet/local/node/inbox",
                               "runtimeInboxFileCount":  0,
                               "runtimeInboxNewestFileAgeSeconds":  null,
@@ -131,6 +131,19 @@
                            "bridgeRuntimeCreditFalseRuntimeChecks":  0,
                            "bridgeRuntimeCreditProofFailedChecks":  0,
                            "externalTester":  "blocked",
+                           "externalTesterLocalRehearsalReady":  true,
+                           "externalTesterExternalSharingReady":  false,
+                           "externalTesterServiceReady":  true,
+                           "externalTesterChainProducing":  true,
+                           "externalTesterWalletNetworkReady":  true,
+                           "externalTesterWalletNetworkFresh":  true,
+                           "externalTesterPacketSmokeValidated":  true,
+                           "externalTesterPublicGatewayReady":  true,
+                           "externalTesterPublicGatewayFresh":  true,
+                           "externalTesterFaucetRouteValidated":  true,
+                           "externalTesterLiveInfraReady":  false,
+                           "externalTesterMissingEnvCount":  14,
+                           "externalTesterTesterCount":  4,
                            "externalTesterEvidence":  "passed",
                            "externalTesterEvidenceFailedChecks":  0,
                            "externalTesterEvidenceMissingFiles":  0,
@@ -226,10 +239,12 @@
                      {
                          "severity":  "blocked",
                          "code":  "external-tester-not-shareable",
-                         "message":  "External tester packet must remain not-shareable.",
+                         "message":  "External tester launch is not shareable; local rehearsal, public tester gateway, faucet route, external sharing, and live infra readiness must all pass first.",
                          "commands":  [
-                                          "npm run flowchain:tester:readiness",
-                                          "npm run flowchain:external-tester:packet"
+                                          "npm run flowchain:wallet:live-tester:e2e",
+                                          "npm run flowchain:tester:gateway:e2e",
+                                          "npm run flowchain:tester:readiness -- -AllowBlocked",
+                                          "npm run flowchain:external-tester:packet -- -AllowBlocked"
                                       ]
                      },
                      {

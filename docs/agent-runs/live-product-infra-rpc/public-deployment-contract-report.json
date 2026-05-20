@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-20T07:13:11.0844874Z",
+    "generatedAt":  "2026-05-20T07:36:40.1631972Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -124,7 +124,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=99265, finalizedHeight=99265",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=99491, finalizedHeight=99491",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -136,7 +136,7 @@
                       "id":  "pre-share-monitoring",
                       "requirement":  "The deployment has recent service-monitor evidence that block height advances over multiple samples.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True",
+                      "evidence":  "monitorStatus=passed, samples=3, heightAdvanced=True",
                       "commands":  [
                                        "npm run flowchain:service:monitor"
                                    ],

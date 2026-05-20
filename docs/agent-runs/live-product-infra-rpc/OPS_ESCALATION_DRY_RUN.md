@@ -1,6 +1,6 @@
 ﻿# FlowChain Ops Escalation Dry Run
 
-Generated: 2026-05-20T05:56:09.8425355Z
+Generated: 2026-05-20T07:23:55.8631113Z
 Status: passed
 Current alert state: blocked
 
@@ -37,5 +37,5 @@ This dry run maps current ops findings to local operator actions. It does not se
 - backup-not-ready: blocked, rule backup-not-ready, commands `npm run flowchain:backup:restore:validate; npm run flowchain:backup:check`
 - bridge-not-ready: blocked, rule bridge-not-ready, commands `npm run flowchain:bridge:live:check; npm run flowchain:bridge:infra:check; npm run flowchain:bridge:emergency-stop`
 - bridge-relayer-not-ready: blocked, rule bridge-relayer-not-ready, commands `npm run flowchain:bridge:relayer:once -- -AllowBlocked; npm run flowchain:bridge:live:check; npm run flowchain:bridge:infra:check`
-- external-tester-not-shareable: blocked, rule external-tester-not-shareable, commands `npm run flowchain:tester:readiness; npm run flowchain:external-tester:packet`
+- external-tester-not-shareable: blocked, rule external-tester-not-shareable, commands `npm run flowchain:wallet:live-tester:e2e; npm run flowchain:tester:gateway:e2e; npm run flowchain:tester:readiness -- -AllowBlocked; npm run flowchain:external-tester:packet -- -AllowBlocked`
 - deployment-contract-not-ready: blocked, rule deployment-contract-not-ready, commands `npm run flowchain:public-deployment:contract -- -AllowBlocked`

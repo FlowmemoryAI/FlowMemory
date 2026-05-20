@@ -1,15 +1,15 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 99072
+flowchain_latest_height 99432
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 99072
+flowchain_finalized_height 99432
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 1
+flowchain_state_file_age_seconds 3
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
-flowchain_monitor_samples_total 2
+flowchain_monitor_samples_total 3
 # HELP flowchain_height_advanced One when service monitor proved advancing block height.
 # TYPE flowchain_height_advanced gauge
 flowchain_height_advanced 1
@@ -27,7 +27,7 @@ flowchain_transaction_intake_accepted_rows_total 159
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 13501.594
+flowchain_transaction_intake_file_age_seconds 15737.157
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -42,10 +42,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 28
+flowchain_ops_alert_rules_total 29
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 21
+flowchain_ops_alert_rules_critical 22
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -214,6 +214,45 @@ flowchain_supervisor_node_recovery_unbounded 1
 # HELP flowchain_external_tester_ready One when external tester readiness is passed.
 # TYPE flowchain_external_tester_ready gauge
 flowchain_external_tester_ready 0
+# HELP flowchain_external_tester_local_rehearsal_ready One when the local tester wallet network rehearsal is ready for external launch.
+# TYPE flowchain_external_tester_local_rehearsal_ready gauge
+flowchain_external_tester_local_rehearsal_ready 1
+# HELP flowchain_external_tester_external_sharing_ready One when the external tester packet is shareable.
+# TYPE flowchain_external_tester_external_sharing_ready gauge
+flowchain_external_tester_external_sharing_ready 0
+# HELP flowchain_external_tester_service_ready One when service status is ready for external tester launch.
+# TYPE flowchain_external_tester_service_ready gauge
+flowchain_external_tester_service_ready 1
+# HELP flowchain_external_tester_chain_producing One when the chain is producing blocks for external tester launch.
+# TYPE flowchain_external_tester_chain_producing gauge
+flowchain_external_tester_chain_producing 1
+# HELP flowchain_external_tester_wallet_network_ready One when tester wallet create, faucet, send, and read rehearsal is passed.
+# TYPE flowchain_external_tester_wallet_network_ready gauge
+flowchain_external_tester_wallet_network_ready 1
+# HELP flowchain_external_tester_wallet_network_fresh One when tester wallet rehearsal evidence is fresh.
+# TYPE flowchain_external_tester_wallet_network_fresh gauge
+flowchain_external_tester_wallet_network_fresh 1
+# HELP flowchain_external_tester_packet_smoke_validated One when the share packet executable smoke path is validated.
+# TYPE flowchain_external_tester_packet_smoke_validated gauge
+flowchain_external_tester_packet_smoke_validated 1
+# HELP flowchain_external_tester_public_gateway_ready One when the public tester write gateway E2E is ready.
+# TYPE flowchain_external_tester_public_gateway_ready gauge
+flowchain_external_tester_public_gateway_ready 1
+# HELP flowchain_external_tester_public_gateway_fresh One when public tester gateway E2E evidence is fresh.
+# TYPE flowchain_external_tester_public_gateway_fresh gauge
+flowchain_external_tester_public_gateway_fresh 1
+# HELP flowchain_external_tester_faucet_route_validated One when the public tester faucet route is validated.
+# TYPE flowchain_external_tester_faucet_route_validated gauge
+flowchain_external_tester_faucet_route_validated 1
+# HELP flowchain_external_tester_live_infra_ready One when live infra readiness has passed for external tester launch.
+# TYPE flowchain_external_tester_live_infra_ready gauge
+flowchain_external_tester_live_infra_ready 0
+# HELP flowchain_external_tester_missing_owner_inputs Owner input count still blocking external tester sharing.
+# TYPE flowchain_external_tester_missing_owner_inputs gauge
+flowchain_external_tester_missing_owner_inputs 14
+# HELP flowchain_external_tester_rehearsal_testers_total Tester wallet count covered by the latest local tester rehearsal.
+# TYPE flowchain_external_tester_rehearsal_testers_total gauge
+flowchain_external_tester_rehearsal_testers_total 4
 # HELP flowchain_external_tester_evidence_ready One when external tester returned evidence validation is passed.
 # TYPE flowchain_external_tester_evidence_ready gauge
 flowchain_external_tester_evidence_ready 1
@@ -300,10 +339,10 @@ flowchain_live_cutover_missing_owner_inputs 14
 flowchain_no_secret_ready 1
 # HELP flowchain_truth_gates_total Total production truth table gates.
 # TYPE flowchain_truth_gates_total gauge
-flowchain_truth_gates_total 53
+flowchain_truth_gates_total 54
 # HELP flowchain_truth_gates_passed Passed production truth table gates.
 # TYPE flowchain_truth_gates_passed gauge
-flowchain_truth_gates_passed 37
+flowchain_truth_gates_passed 38
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
 flowchain_truth_gates_owner_blocked 16

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T06:53:02.2481538Z",
+    "generatedAt":  "2026-05-20T07:30:10.1447900Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -97,6 +97,7 @@
                    "publicRpcEdgeHardeningRuleCoversWalletCutover":  true,
                    "bridgeRelayerCheckContractRuleCoversFailedChecks":  true,
                    "supervisorNodeRecoveryRuleCoversLiveProfile":  true,
+                   "externalTesterLaunchRuleCoversGatewayAndFaucet":  true,
                    "notificationPlanStoresNoSecrets":  true,
                    "notificationPlanNoNetworkDelivery":  true,
                    "envValuesPrintedFalse":  true,
@@ -493,10 +494,12 @@
                                            "external-tester-not-shareable"
                                        ],
                       "signal":  "External tester packet is not shareable.",
-                      "threshold":  "tester readiness status is not passed",
+                      "threshold":  "tester readiness status is not passed, local tester wallet rehearsal is not ready/fresh, public tester gateway or faucet route is not validated, external sharing is false, or live infra readiness is blocked",
                       "commands":  [
-                                       "npm run flowchain:tester:readiness",
-                                       "npm run flowchain:external-tester:packet"
+                                       "npm run flowchain:wallet:live-tester:e2e",
+                                       "npm run flowchain:tester:gateway:e2e",
+                                       "npm run flowchain:tester:readiness -- -AllowBlocked",
+                                       "npm run flowchain:external-tester:packet -- -AllowBlocked"
                                    ]
                   },
                   {

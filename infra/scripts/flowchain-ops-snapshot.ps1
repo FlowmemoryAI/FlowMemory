@@ -499,6 +499,21 @@ $bridgeRuntimeCreditReady = $bridgeRuntimeCreditStatus -eq "passed" `
     -and ((Get-OpsProp -Object $reports.bridgeRuntimeCredit -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $reports.bridgeRuntimeCredit -Name "noSecrets" -Default $false) -eq $true)
 $externalTesterStatus = Get-OpsStatus -Report $reports.externalTester
+$externalTesterChecks = Get-OpsProp -Object $reports.externalTester -Name "checks"
+$externalTesterLocalRehearsalReady = (Get-OpsProp -Object $reports.externalTester -Name "localTesterRehearsalReady" -Default $false) -eq $true
+$externalTesterExternalSharingReady = (Get-OpsProp -Object $reports.externalTester -Name "externalSharingReady" -Default $false) -eq $true
+$externalTesterMissingEnvNames = @((Get-OpsProp -Object $reports.externalTester -Name "missingEnvNames" -Default @()))
+$externalTesterTesterNetwork = Get-OpsProp -Object $reports.externalTester -Name "testerNetwork"
+$externalTesterTesterCount = [int](Get-OpsProp -Object $externalTesterTesterNetwork -Name "testerCount" -Default 0)
+$externalTesterServiceReady = (Get-OpsProp -Object $externalTesterChecks -Name "serviceReady" -Default $false) -eq $true
+$externalTesterChainProducing = (Get-OpsProp -Object $externalTesterChecks -Name "chainProducing" -Default $false) -eq $true
+$externalTesterWalletNetworkReady = (Get-OpsProp -Object $externalTesterChecks -Name "testerWalletNetworkReady" -Default $false) -eq $true
+$externalTesterWalletNetworkFresh = (Get-OpsProp -Object $externalTesterChecks -Name "testerWalletNetworkFresh" -Default $false) -eq $true
+$externalTesterPacketSmokeValidated = (Get-OpsProp -Object $externalTesterChecks -Name "packetExecutableSmokeValidated" -Default $false) -eq $true
+$externalTesterPublicGatewayReady = (Get-OpsProp -Object $externalTesterChecks -Name "publicTesterGatewayReady" -Default $false) -eq $true
+$externalTesterPublicGatewayFresh = (Get-OpsProp -Object $externalTesterChecks -Name "publicTesterGatewayFresh" -Default $false) -eq $true
+$externalTesterFaucetRouteValidated = (Get-OpsProp -Object $externalTesterChecks -Name "publicTesterGatewayFaucetRouteValidated" -Default $false) -eq $true
+$externalTesterLiveInfraReady = (Get-OpsProp -Object $externalTesterChecks -Name "liveInfraReady" -Default $false) -eq $true
 $externalTesterEvidenceStatus = Get-OpsStatus -Report $reports.externalTesterEvidence
 $externalTesterEvidenceChecks = Get-OpsProp -Object $reports.externalTesterEvidence -Name "checks"
 $externalTesterEvidenceFailedChecks = @((Get-OpsProp -Object $reports.externalTesterEvidence -Name "failedChecks" -Default @()))
@@ -628,7 +643,7 @@ if (-not $bridgeRuntimeCreditReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-runtime-credit-validation-failed" -Message "Bridge runtime credit validation is missing or failed: Base 8453 handoff must become L1 spendable, reject replay, transfer, and survive restart/export/import." -Commands @("npm run flowchain:bridge:runtime-credit:validate", "npm run flowchain:service:status", "npm run flowchain:bridge:emergency-stop")
 }
 if ($externalTesterStatus -ne "passed") {
-    Add-OpsFinding -Findings $findings -Severity "blocked" -Code "external-tester-not-shareable" -Message "External tester packet must remain not-shareable." -Commands @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet")
+    Add-OpsFinding -Findings $findings -Severity "blocked" -Code "external-tester-not-shareable" -Message "External tester launch is not shareable; local rehearsal, public tester gateway, faucet route, external sharing, and live infra readiness must all pass first." -Commands @("npm run flowchain:wallet:live-tester:e2e", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked")
 }
 if ($externalTesterEvidenceSecretFindings.Count -gt 0 -or $externalTesterEvidenceCredentialUrls.Count -gt 0 -or $externalTesterEvidenceEnvAssignments.Count -gt 0) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "external-tester-evidence-unsafe" -Message "External tester returned evidence contains a secret marker, credential URL, or env assignment." -Commands @("npm run flowchain:tester:evidence:validate", "npm run flowchain:no-secret:scan", "npm run flowchain:emergency:export-evidence")
@@ -828,6 +843,19 @@ $report = [ordered]@{
         bridgeRuntimeCreditFalseRuntimeChecks = $bridgeRuntimeCreditFalseChecks.Count
         bridgeRuntimeCreditProofFailedChecks = $bridgeRuntimeCreditProofFailedChecks.Count
         externalTester = $externalTesterStatus
+        externalTesterLocalRehearsalReady = $externalTesterLocalRehearsalReady
+        externalTesterExternalSharingReady = $externalTesterExternalSharingReady
+        externalTesterServiceReady = $externalTesterServiceReady
+        externalTesterChainProducing = $externalTesterChainProducing
+        externalTesterWalletNetworkReady = $externalTesterWalletNetworkReady
+        externalTesterWalletNetworkFresh = $externalTesterWalletNetworkFresh
+        externalTesterPacketSmokeValidated = $externalTesterPacketSmokeValidated
+        externalTesterPublicGatewayReady = $externalTesterPublicGatewayReady
+        externalTesterPublicGatewayFresh = $externalTesterPublicGatewayFresh
+        externalTesterFaucetRouteValidated = $externalTesterFaucetRouteValidated
+        externalTesterLiveInfraReady = $externalTesterLiveInfraReady
+        externalTesterMissingEnvCount = $externalTesterMissingEnvNames.Count
+        externalTesterTesterCount = $externalTesterTesterCount
         externalTesterEvidence = $externalTesterEvidenceStatus
         externalTesterEvidenceFailedChecks = $externalTesterEvidenceFailedChecks.Count
         externalTesterEvidenceMissingFiles = $externalTesterEvidenceMissingFiles.Count

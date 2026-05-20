@@ -310,8 +310,8 @@ $rules = @(
         severity = "blocked"
         findingCodes = @("external-tester-not-shareable")
         signal = "External tester packet is not shareable."
-        threshold = "tester readiness status is not passed"
-        commands = @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet")
+        threshold = "tester readiness status is not passed, local tester wallet rehearsal is not ready/fresh, public tester gateway or faucet route is not validated, external sharing is false, or live infra readiness is blocked"
+        commands = @("npm run flowchain:wallet:live-tester:e2e", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked")
     },
     [ordered]@{
         id = "external-tester-evidence-invalid"
@@ -361,6 +361,12 @@ $supervisorNodeRecoveryRule = @($rules | Where-Object { $_.id -eq "supervisor-no
 $supervisorNodeRecoveryRuleCoversLiveProfile = $supervisorNodeRecoveryRule.Count -eq 1 `
     -and ([string]$supervisorNodeRecoveryRule[0].threshold).IndexOf("live-profile", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$supervisorNodeRecoveryRule[0].threshold).IndexOf("unbounded", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$externalTesterLaunchRule = @($rules | Where-Object { $_.id -eq "external-tester-not-shareable" } | Select-Object -First 1)
+$externalTesterLaunchRuleCoversGatewayAndFaucet = $externalTesterLaunchRule.Count -eq 1 `
+    -and ([string]$externalTesterLaunchRule[0].threshold).IndexOf("public tester gateway", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$externalTesterLaunchRule[0].threshold).IndexOf("faucet route", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$externalTesterLaunchRule[0].threshold).IndexOf("local tester wallet rehearsal", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$externalTesterLaunchRule[0].threshold).IndexOf("live infra", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
 $allCommands = @($rules | ForEach-Object { @($_.commands) })
 $commandsWithInlineEnvAssignment = @($allCommands | Where-Object { "$_" -match '(^|\s)(\$env:)?[A-Z][A-Z0-9_]+\s*=' })
 $commandsWithUrls = @($allCommands | Where-Object { "$_" -match 'https?://' })
@@ -382,6 +388,7 @@ $checks = [ordered]@{
     publicRpcEdgeHardeningRuleCoversWalletCutover = $publicRpcEdgeHardeningRuleCoversWalletCutover
     bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRuleCoversFailedChecks
     supervisorNodeRecoveryRuleCoversLiveProfile = $supervisorNodeRecoveryRuleCoversLiveProfile
+    externalTesterLaunchRuleCoversGatewayAndFaucet = $externalTesterLaunchRuleCoversGatewayAndFaucet
     notificationPlanStoresNoSecrets = $true
     notificationPlanNoNetworkDelivery = $true
     envValuesPrintedFalse = $true

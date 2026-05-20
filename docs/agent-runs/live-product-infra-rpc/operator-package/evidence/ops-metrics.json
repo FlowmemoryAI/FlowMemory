@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T06:53:02.3591585Z",
+    "generatedAt":  "2026-05-20T07:30:10.9348836Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -8,6 +8,7 @@
                           "serviceMonitorStatus":  "passed",
                           "publicRpcDeploymentBundleStatus":  "passed",
                           "publicRpcDeploymentAutomationStatus":  "passed",
+                          "externalTesterStatus":  "blocked",
                           "externalTesterEvidenceStatus":  "passed",
                           "dashboardUiStatus":  "passed",
                           "ownerInputsValidationStatus":  "passed",
@@ -21,25 +22,25 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  99072
+                        "value":  99432
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  99072
+                        "value":  99432
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  1
+                        "value":  3
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
                         "type":  "gauge",
                         "help":  "Service monitor samples recorded in the current ops snapshot.",
-                        "value":  2
+                        "value":  3
                     },
                     {
                         "name":  "flowchain_height_advanced",
@@ -75,7 +76,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  13501.594
+                        "value":  15737.157
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -105,13 +106,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  28
+                        "value":  29
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  21
+                        "value":  22
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -450,6 +451,84 @@
                         "value":  0
                     },
                     {
+                        "name":  "flowchain_external_tester_local_rehearsal_ready",
+                        "type":  "gauge",
+                        "help":  "One when the local tester wallet network rehearsal is ready for external launch.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_external_sharing_ready",
+                        "type":  "gauge",
+                        "help":  "One when the external tester packet is shareable.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_external_tester_service_ready",
+                        "type":  "gauge",
+                        "help":  "One when service status is ready for external tester launch.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_chain_producing",
+                        "type":  "gauge",
+                        "help":  "One when the chain is producing blocks for external tester launch.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_wallet_network_ready",
+                        "type":  "gauge",
+                        "help":  "One when tester wallet create, faucet, send, and read rehearsal is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_wallet_network_fresh",
+                        "type":  "gauge",
+                        "help":  "One when tester wallet rehearsal evidence is fresh.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_packet_smoke_validated",
+                        "type":  "gauge",
+                        "help":  "One when the share packet executable smoke path is validated.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_public_gateway_ready",
+                        "type":  "gauge",
+                        "help":  "One when the public tester write gateway E2E is ready.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_public_gateway_fresh",
+                        "type":  "gauge",
+                        "help":  "One when public tester gateway E2E evidence is fresh.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_faucet_route_validated",
+                        "type":  "gauge",
+                        "help":  "One when the public tester faucet route is validated.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_external_tester_live_infra_ready",
+                        "type":  "gauge",
+                        "help":  "One when live infra readiness has passed for external tester launch.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_external_tester_missing_owner_inputs",
+                        "type":  "gauge",
+                        "help":  "Owner input count still blocking external tester sharing.",
+                        "value":  14
+                    },
+                    {
+                        "name":  "flowchain_external_tester_rehearsal_testers_total",
+                        "type":  "gauge",
+                        "help":  "Tester wallet count covered by the latest local tester rehearsal.",
+                        "value":  4
+                    },
+                    {
                         "name":  "flowchain_external_tester_evidence_ready",
                         "type":  "gauge",
                         "help":  "One when external tester returned evidence validation is passed.",
@@ -621,13 +700,13 @@
                         "name":  "flowchain_truth_gates_total",
                         "type":  "gauge",
                         "help":  "Total production truth table gates.",
-                        "value":  53
+                        "value":  54
                     },
                     {
                         "name":  "flowchain_truth_gates_passed",
                         "type":  "gauge",
                         "help":  "Passed production truth table gates.",
-                        "value":  37
+                        "value":  38
                     },
                     {
                         "name":  "flowchain_truth_gates_owner_blocked",
@@ -654,7 +733,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  106,
+    "metricCount":  119,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

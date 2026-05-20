@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-20T06:53:20.6226063Z",
+    "generatedAt":  "2026-05-20T07:11:51.5044173Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -29,7 +29,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=99072, finalizedHeight=99072",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=99115, finalizedHeight=99115",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -158,7 +158,7 @@
                       "layer":  "Operations",
                       "requirement":  "Node operator packaging collects no-secret runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates.",
                       "status":  "passed",
-                      "evidence":  "operatorPackage=passed, commands=56, runbooks=36, evidenceReports=41, failedChecks=0, noSecretScan=True",
+                      "evidence":  "operatorPackage=passed, commands=57, runbooks=36, evidenceReports=42, failedChecks=0, noSecretScan=True",
                       "files":  [
                                     "infra/scripts/flowchain-operator-package.ps1",
                                     "docs/developer/FLOWCHAIN_NODE_OPERATOR.md"
@@ -175,7 +175,7 @@
                       "layer":  "Operations",
                       "requirement":  "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, forbidden local files, and no-secret scan.",
                       "status":  "passed",
-                      "evidence":  "operatorPackageVerify=passed, expectedFiles=71, commands=56, failedChecks=0, noSecretScan=True",
+                      "evidence":  "operatorPackageVerify=passed, expectedFiles=71, commands=57, failedChecks=0, noSecretScan=True",
                       "files":  [
                                     "infra/scripts/flowchain-operator-package-verify.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/OPERATOR_PACKAGE_VERIFY.md"

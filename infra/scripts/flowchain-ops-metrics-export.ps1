@@ -212,6 +212,7 @@ $opsSnapshot = $reports.opsSnapshot
 $opsAlerts = $reports.opsAlerts
 $serviceStatus = $reports.serviceStatus
 $serviceMonitor = $reports.serviceMonitor
+$externalTester = $reports.externalTester
 $externalTesterEvidence = $reports.externalTesterEvidence
 $dashboardUi = $reports.dashboardUi
 $ownerInputsValidation = $reports.ownerInputsValidation
@@ -227,6 +228,7 @@ $chain = Get-MetricsProp -Object $opsSnapshot -Name "chain"
 $transactionIntake = Get-MetricsProp -Object $opsSnapshot -Name "transactionIntake"
 $reportStatuses = Get-MetricsProp -Object $opsSnapshot -Name "reportStatuses"
 $truthCounts = Get-MetricsProp -Object $truthTable -Name "classificationCounts"
+$externalTesterChecks = Get-MetricsProp -Object $externalTester -Name "checks"
 $externalTesterEvidenceChecks = Get-MetricsProp -Object $externalTesterEvidence -Name "checks"
 $dashboardUiChecks = Get-MetricsProp -Object $dashboardUi -Name "checks"
 $ownerInputsValidationScenarios = @((Get-MetricsProp -Object $ownerInputsValidation -Name "scenarios" -Default @()))
@@ -245,6 +247,11 @@ $ownerActivationPlanReady = (Get-MetricsStatus -Report $ownerActivationPlan) -eq
     -and ((Get-MetricsProp -Object $ownerActivationPlan -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-MetricsProp -Object $ownerActivationPlan -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerActivationPlan -Name "broadcasts" -Default $true) -eq $false)
+$externalTesterLocalRehearsalReady = (Get-MetricsProp -Object $externalTester -Name "localTesterRehearsalReady" -Default $false) -eq $true
+$externalTesterExternalSharingReady = (Get-MetricsProp -Object $externalTester -Name "externalSharingReady" -Default $false) -eq $true
+$externalTesterMissingEnvNames = @((Get-MetricsProp -Object $externalTester -Name "missingEnvNames" -Default @()))
+$externalTesterTesterNetwork = Get-MetricsProp -Object $externalTester -Name "testerNetwork"
+$externalTesterTesterCount = [int](Get-MetricsProp -Object $externalTesterTesterNetwork -Name "testerCount" -Default 0)
 $publicRpcDeploymentBundleChecks = Get-MetricsProp -Object $publicRpcDeploymentBundle -Name "checks"
 $publicRpcDeploymentAutomationChecks = Get-MetricsProp -Object $publicRpcDeploymentAutomation -Name "checks"
 $publicRpcRequiredCutoverCommands = @(
@@ -340,6 +347,19 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_node_crash_detecte
 Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_node_recovery_live_profile" -Help "One when isolated node recovery returned under the live profile." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorNodeRecoveryLiveProfile"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_node_recovery_unbounded" -Help "One when isolated node recovery preserved MaxBlocks=0." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorNodeRecoveryMaxBlocksUnbounded"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_ready" -Help "One when external tester readiness is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTester"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_local_rehearsal_ready" -Help "One when the local tester wallet network rehearsal is ready for external launch." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTesterLocalRehearsalReady" -Default $externalTesterLocalRehearsalReady))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_external_sharing_ready" -Help "One when the external tester packet is shareable." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTesterExternalSharingReady" -Default $externalTesterExternalSharingReady))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_service_ready" -Help "One when service status is ready for external tester launch." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTesterServiceReady" -Default (Get-MetricsProp -Object $externalTesterChecks -Name "serviceReady" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_chain_producing" -Help "One when the chain is producing blocks for external tester launch." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTesterChainProducing" -Default (Get-MetricsProp -Object $externalTesterChecks -Name "chainProducing" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_wallet_network_ready" -Help "One when tester wallet create, faucet, send, and read rehearsal is passed." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTesterWalletNetworkReady" -Default (Get-MetricsProp -Object $externalTesterChecks -Name "testerWalletNetworkReady" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_wallet_network_fresh" -Help "One when tester wallet rehearsal evidence is fresh." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTesterWalletNetworkFresh" -Default (Get-MetricsProp -Object $externalTesterChecks -Name "testerWalletNetworkFresh" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_packet_smoke_validated" -Help "One when the share packet executable smoke path is validated." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTesterPacketSmokeValidated" -Default (Get-MetricsProp -Object $externalTesterChecks -Name "packetExecutableSmokeValidated" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_public_gateway_ready" -Help "One when the public tester write gateway E2E is ready." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTesterPublicGatewayReady" -Default (Get-MetricsProp -Object $externalTesterChecks -Name "publicTesterGatewayReady" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_public_gateway_fresh" -Help "One when public tester gateway E2E evidence is fresh." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTesterPublicGatewayFresh" -Default (Get-MetricsProp -Object $externalTesterChecks -Name "publicTesterGatewayFresh" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_faucet_route_validated" -Help "One when the public tester faucet route is validated." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTesterFaucetRouteValidated" -Default (Get-MetricsProp -Object $externalTesterChecks -Name "publicTesterGatewayFaucetRouteValidated" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_live_infra_ready" -Help "One when live infra readiness has passed for external tester launch." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTesterLiveInfraReady" -Default (Get-MetricsProp -Object $externalTesterChecks -Name "liveInfraReady" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_missing_owner_inputs" -Help "Owner input count still blocking external tester sharing." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTesterMissingEnvCount" -Default $externalTesterMissingEnvNames.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_rehearsal_testers_total" -Help "Tester wallet count covered by the latest local tester rehearsal." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTesterTesterCount" -Default $externalTesterTesterCount))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_ready" -Help "One when external tester returned evidence validation is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $externalTesterEvidence))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_failed_checks" -Help "Failed checks in the external tester returned evidence validation report." -Value (@((Get-MetricsProp -Object $externalTesterEvidence -Name "failedChecks" -Default @())).Count)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_missing_files" -Help "Missing required files in the external tester returned evidence folder." -Value (@((Get-MetricsProp -Object $externalTesterEvidence -Name "missingRequiredFiles" -Default @())).Count)
@@ -391,6 +411,7 @@ $metricsJson = [ordered]@{
         serviceMonitorStatus = Get-MetricsStatus -Report $serviceMonitor
         publicRpcDeploymentBundleStatus = Get-MetricsStatus -Report $publicRpcDeploymentBundle
         publicRpcDeploymentAutomationStatus = Get-MetricsStatus -Report $publicRpcDeploymentAutomation
+        externalTesterStatus = Get-MetricsStatus -Report $externalTester
         externalTesterEvidenceStatus = Get-MetricsStatus -Report $externalTesterEvidence
         dashboardUiStatus = Get-MetricsStatus -Report $dashboardUi
         ownerInputsValidationStatus = Get-MetricsStatus -Report $ownerInputsValidation
@@ -477,6 +498,13 @@ $requiredMetricNames = @(
     "flowchain_supervisor_node_crash_detected",
     "flowchain_supervisor_node_recovery_live_profile",
     "flowchain_supervisor_node_recovery_unbounded",
+    "flowchain_external_tester_ready",
+    "flowchain_external_tester_local_rehearsal_ready",
+    "flowchain_external_tester_external_sharing_ready",
+    "flowchain_external_tester_public_gateway_ready",
+    "flowchain_external_tester_faucet_route_validated",
+    "flowchain_external_tester_live_infra_ready",
+    "flowchain_external_tester_missing_owner_inputs",
     "flowchain_external_tester_evidence_ready",
     "flowchain_external_tester_evidence_failed_checks",
     "flowchain_external_tester_evidence_missing_files",
@@ -519,6 +547,7 @@ $checks = [ordered]@{
     opsAlertRulesLoaded = $null -ne $opsAlerts
     serviceStatusLoaded = $null -ne $serviceStatus
     serviceMonitorLoaded = $null -ne $serviceMonitor
+    externalTesterLoaded = $null -ne $externalTester
     externalTesterEvidenceLoaded = $null -ne $externalTesterEvidence
     dashboardUiLoaded = $null -ne $dashboardUi
     ownerInputsValidationLoaded = $null -ne $ownerInputsValidation
@@ -532,6 +561,20 @@ $checks = [ordered]@{
     metricCountSufficient = @($metrics).Count -ge 35
     requiredMetricsPresent = $missingMetricNames.Count -eq 0
     externalTesterEvidenceMetricsPresent = @(
+        "flowchain_external_tester_ready",
+        "flowchain_external_tester_local_rehearsal_ready",
+        "flowchain_external_tester_external_sharing_ready",
+        "flowchain_external_tester_service_ready",
+        "flowchain_external_tester_chain_producing",
+        "flowchain_external_tester_wallet_network_ready",
+        "flowchain_external_tester_wallet_network_fresh",
+        "flowchain_external_tester_packet_smoke_validated",
+        "flowchain_external_tester_public_gateway_ready",
+        "flowchain_external_tester_public_gateway_fresh",
+        "flowchain_external_tester_faucet_route_validated",
+        "flowchain_external_tester_live_infra_ready",
+        "flowchain_external_tester_missing_owner_inputs",
+        "flowchain_external_tester_rehearsal_testers_total",
         "flowchain_external_tester_evidence_ready",
         "flowchain_external_tester_evidence_failed_checks",
         "flowchain_external_tester_evidence_missing_files",
