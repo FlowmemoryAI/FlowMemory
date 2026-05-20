@@ -888,6 +888,32 @@ $bridgeRelayerLoopReady = ($bridgeRelayerLoopStatus -eq "passed") `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopValidation -Name "broadcasts" -Default $true) -eq $false)
+$bridgeRelayerChecks = Get-ArchitectureProp -Object $bridgeRelayer -Name "checks"
+$bridgeRelayerFailedChecks = @((Get-ArchitectureProp -Object $bridgeRelayer -Name "failedChecks" -Default @()))
+$bridgeRelayerCheckContractReady = ($bridgeRelayerFailedChecks.Count -eq 0) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "statusKnown" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "requiredEnvNamesPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "childTimeoutRecorded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "childProcessesDidNotTimeout" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "broadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "envValuesPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "readinessInfraChecked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "readinessLiveCheckedWhenInfraPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "blockedBeforeLiveReadinessWhenInfraBlocked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "blockedBeforeObservationWhenReadinessBlocked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "noQueuedTransactionsWhenBlocked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "noAppliedCreditsWhenBlocked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "cursorModeStaged" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "finalCursorNotCommittedWhenBlocked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "finalCursorPathInsideRepo" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "stagedCursorPathInsideRepo" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "issuesClassified" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "externalBlockerClassifiedWhenBlocked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "latencyGateRecorded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "latencyGatePassedWhenApplied" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "queueAndApplyMatchWhenPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "cursorSafeWhenPassed" -Default $false) -eq $true)
 $bridgeRelayerCounts = Get-ArchitectureProp -Object $bridgeRelayer -Name "counts"
 $bridgeRelayerCursorCommit = Get-ArchitectureProp -Object $bridgeRelayer -Name "cursorCommit"
 $bridgeRelayerSteps = @((Get-ArchitectureProp -Object $bridgeRelayer -Name "steps" -Default @()))
@@ -907,6 +933,7 @@ $bridgeRelayerReady = (Test-AllRepoFilesExist -Paths $bridgeLiveFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:once") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:guardrail:validate") `
     -and ($bridgeRelayerStatus -eq "passed") `
+    -and $bridgeRelayerCheckContractReady `
     -and ((Get-ArchitectureProp -Object $bridgeRelayer -Name "broadcasts" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayer -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayer -Name "noSecrets" -Default $false) -eq $true) `
@@ -916,11 +943,11 @@ $bridgeRelayerReady = (Test-AllRepoFilesExist -Paths $bridgeLiveFiles) `
     -and $bridgeRelayerGuardrailReady `
     -and $bridgeRelayerLoopReady `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:loop:validate")
-$bridgeRelayerBlockedSafely = ($bridgeRelayerStatus -eq "blocked") -and $bridgeRelayerGuardrailReady -and $bridgeRelayerLoopReady -and $bridgeRelayerChildTimeoutReady
+$bridgeRelayerBlockedSafely = ($bridgeRelayerStatus -eq "blocked") -and $bridgeRelayerCheckContractReady -and $bridgeRelayerGuardrailReady -and $bridgeRelayerLoopReady -and $bridgeRelayerChildTimeoutReady
 Add-ArchitectureItem -Items $items -Id "bridge-relayer-runtime-queue" -Layer "Bridge" `
     -Requirement "The live bridge relayer path checks owner guardrails, bounds child process execution, validates the isolated relayer loop start/stop path plus fresh no-secret/no-broadcast loop health, observes Base 8453 deposits with a staged cursor, builds runtime handoff, filters already-seen replay keys, queues new credits into the running L1, waits for main-state credit evidence, commits the Base cursor only after safe proof without broadcasts, and proves missing-owner-input runs leave cursor state untouched." `
     -Status $(if ($bridgeRelayerReady) { "passed" } elseif ($bridgeRelayerBlockedSafely) { "blocked" } else { "failed" }) `
-    -Evidence "relayer=$bridgeRelayerStatus, childTimeoutSeconds=$bridgeRelayerChildTimeoutSeconds, timedOutSteps=$($bridgeRelayerTimedOutSteps.Count), guardrail=$bridgeRelayerGuardrailStatus, guardrailChildTimeoutRecorded=$(Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name 'relayerChildTimeoutRecorded' -Default $false), guardrailNoChildTimeouts=$(Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name 'relayerNoChildTimeouts' -Default $false), loopValidation=$bridgeRelayerLoopStatus, loopFailedChecks=$($bridgeRelayerLoopFailedChecks.Count), loopReportHealthy=$(Get-ArchitectureProp -Object $bridgeRelayerLoopChecks -Name 'statusRelayerReportHealthy' -Default $false), observed=$(Get-ArchitectureProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$bridgeRelayerNewCount, queued=$bridgeRelayerQueuedCount, applied=$bridgeRelayerAppliedCount, cursorCommitRequired=$bridgeRelayerCursorCommitRequired, cursorCommitted=$bridgeRelayerCursorCommitted, cursorReason=$bridgeRelayerCursorReason" `
+    -Evidence "relayer=$bridgeRelayerStatus, onceChecksReady=$bridgeRelayerCheckContractReady, onceFailedChecks=$($bridgeRelayerFailedChecks.Count), childTimeoutSeconds=$bridgeRelayerChildTimeoutSeconds, timedOutSteps=$($bridgeRelayerTimedOutSteps.Count), guardrail=$bridgeRelayerGuardrailStatus, guardrailChildTimeoutRecorded=$(Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name 'relayerChildTimeoutRecorded' -Default $false), guardrailNoChildTimeouts=$(Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name 'relayerNoChildTimeouts' -Default $false), loopValidation=$bridgeRelayerLoopStatus, loopFailedChecks=$($bridgeRelayerLoopFailedChecks.Count), loopReportHealthy=$(Get-ArchitectureProp -Object $bridgeRelayerLoopChecks -Name 'statusRelayerReportHealthy' -Default $false), observed=$(Get-ArchitectureProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$bridgeRelayerNewCount, queued=$bridgeRelayerQueuedCount, applied=$bridgeRelayerAppliedCount, cursorCommitRequired=$bridgeRelayerCursorCommitRequired, cursorCommitted=$bridgeRelayerCursorCommitted, cursorReason=$bridgeRelayerCursorReason" `
     -Files $bridgeLiveFiles `
     -Commands @("npm run flowchain:bridge:relayer:once", "npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:loop:validate", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop") `
     -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")

@@ -126,6 +126,17 @@ $ownerEnvState = [ordered]@{
     ignoredEnvNames = @()
     problem = ""
 }
+$requiredEnvNames = @(
+    "FLOWCHAIN_PILOT_OPERATOR_ACK",
+    "FLOWCHAIN_BASE8453_RPC_URL",
+    "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+    "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+    "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+    "FLOWCHAIN_BASE8453_FROM_BLOCK",
+    "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+    "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+    "FLOWCHAIN_PILOT_CONFIRMATIONS"
+)
 
 function Add-RelayerStep {
     param(
@@ -369,6 +380,9 @@ function Get-ObjectMemberValue {
         [Parameter(Mandatory = $true)][string] $Name
     )
     if ($null -eq $Object) { return $null }
+    if ($Object -is [System.Collections.IDictionary] -and $Object.Contains($Name)) {
+        return $Object[$Name]
+    }
     $property = $Object.PSObject.Properties[$Name]
     if ($null -eq $property) { return $null }
     return $property.Value
@@ -383,7 +397,31 @@ function Get-ObjectKeys {
 function Test-ObjectHasKey {
     param([AllowNull()][object] $Object, [string] $Name)
     if ($null -eq $Object) { return $false }
+    if ($Object -is [System.Collections.IDictionary]) { return $Object.Contains($Name) }
     return $Object.PSObject.Properties.Name -contains $Name
+}
+
+function Test-RelayerPathInsideRepo {
+    param([AllowNull()][object] $Path)
+
+    if ($null -eq $Path -or [string]::IsNullOrWhiteSpace("$Path")) {
+        return $false
+    }
+    try {
+        $root = [System.IO.Path]::GetFullPath($repoRoot).TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+        $rootWithSeparator = "$root$([System.IO.Path]::DirectorySeparatorChar)"
+        $fullPath = [System.IO.Path]::GetFullPath("$Path")
+        return $fullPath.Equals($root, [System.StringComparison]::OrdinalIgnoreCase) -or $fullPath.StartsWith($rootWithSeparator, [System.StringComparison]::OrdinalIgnoreCase)
+    }
+    catch {
+        return $false
+    }
+}
+
+function Get-RelayerFailedChecks {
+    param([Parameter(Mandatory = $true)][System.Collections.Specialized.OrderedDictionary] $Checks)
+
+    return @($Checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
 }
 
 function Read-RelayerJson {
@@ -548,6 +586,56 @@ function Complete-RelayerRun {
         $timing.latencyGate = if ($Status -eq "passed") { "not-run-no-new-credits" } else { "not-run" }
     }
 
+    $timedOutSteps = @($steps | Where-Object {
+        (Get-ObjectMemberValue -Object $_ -Name "timedOut") -eq $true -or "$(Get-ObjectMemberValue -Object $_ -Name "exitCode")" -eq "124"
+    })
+    $unclassifiedIssues = @($issues | Where-Object {
+        $kind = "$(Get-ObjectMemberValue -Object $_ -Name "kind")"
+        $code = "$(Get-ObjectMemberValue -Object $_ -Name "code")"
+        $owner = "$(Get-ObjectMemberValue -Object $_ -Name "owner")"
+        ($kind -notin @("external", "code")) -or [string]::IsNullOrWhiteSpace($code) -or [string]::IsNullOrWhiteSpace($owner)
+    })
+    $externalIssues = @($issues | Where-Object { "$(Get-ObjectMemberValue -Object $_ -Name "kind")" -eq "external" })
+    $requiredEnvNamesPresent = $true
+    $seenRequiredEnvNames = New-Object System.Collections.Generic.HashSet[string]([System.StringComparer]::Ordinal)
+    foreach ($name in $requiredEnvNames) {
+        if ([string]::IsNullOrWhiteSpace($name) -or -not $seenRequiredEnvNames.Add($name)) {
+            $requiredEnvNamesPresent = $false
+            break
+        }
+    }
+    $requiredEnvNamesPresent = $requiredEnvNamesPresent -and ($seenRequiredEnvNames.Count -eq 9)
+    $readinessBlocked = $readiness.infra -ne "passed" -or $readiness.live -ne "passed"
+    $reportBroadcasts = $false
+    $reportEnvValuesPrinted = $false
+    $reportNoSecrets = $true
+    $checks = [ordered]@{
+        statusKnown = $Status -in @("passed", "blocked", "failed")
+        requiredEnvNamesPresent = $requiredEnvNamesPresent
+        childTimeoutRecorded = $ChildTimeoutSeconds -ge 1
+        childProcessesDidNotTimeout = $timedOutSteps.Count -eq 0
+        broadcastsFalse = $reportBroadcasts -eq $false
+        envValuesPrintedFalse = $reportEnvValuesPrinted -eq $false
+        noSecrets = $reportNoSecrets -eq $true
+        readinessInfraChecked = $readiness.infra -ne "not-run"
+        readinessLiveCheckedWhenInfraPassed = ($readiness.infra -ne "passed") -or ($readiness.live -ne "not-run")
+        blockedBeforeLiveReadinessWhenInfraBlocked = ($readiness.infra -eq "passed") -or ($readiness.live -eq "not-run")
+        blockedBeforeObservationWhenReadinessBlocked = (-not $readinessBlocked) -or (($counts.observedCredits -eq 0) -and ($counts.newCredits -eq 0) -and ($null -eq $timing.baseObservedAt) -and ($null -eq $timing.handoffWrittenAt))
+        noQueuedTransactionsWhenBlocked = ($Status -ne "blocked") -or ($counts.queuedTransactions -eq 0)
+        noAppliedCreditsWhenBlocked = ($Status -ne "blocked") -or ($counts.appliedCredits -eq 0)
+        cursorModeStaged = "$($cursorCommit.mode)" -eq "staged-cursor"
+        finalCursorNotCommittedWhenBlocked = ($Status -ne "blocked") -or ($cursorCommit.finalCommitted -eq $false)
+        finalCursorPathInsideRepo = Test-RelayerPathInsideRepo -Path $cursorCommit.finalCursorPath
+        stagedCursorPathInsideRepo = Test-RelayerPathInsideRepo -Path $cursorCommit.stagedCursorPath
+        issuesClassified = $unclassifiedIssues.Count -eq 0
+        externalBlockerClassifiedWhenBlocked = ($Status -ne "blocked") -or ($externalIssues.Count -gt 0)
+        latencyGateRecorded = -not [string]::IsNullOrWhiteSpace("$($timing.latencyGate)")
+        latencyGatePassedWhenApplied = ($counts.appliedCredits -eq 0) -or ("$($timing.latencyGate)" -eq "passed")
+        queueAndApplyMatchWhenPassed = ($Status -ne "passed") -or ($counts.newCredits -eq 0) -or (($NoQueue.IsPresent -eq $false) -and ($counts.queuedTransactions -ge $counts.newCredits) -and ($counts.appliedCredits -eq $counts.newCredits))
+        cursorSafeWhenPassed = ($Status -ne "passed") -or (($NoQueue.IsPresent -eq $false) -and (($cursorCommit.finalCommitted -eq $true) -or ($cursorCommit.finalCommitRequired -eq $false)))
+    }
+    $failedChecks = @(Get-RelayerFailedChecks -Checks $checks)
+
     $report = [ordered]@{
         schema = "flowchain.bridge_relayer_once_report.v0"
         generatedAt = (Get-Date).ToUniversalTime().ToString("o")
@@ -564,21 +652,13 @@ function Complete-RelayerRun {
         artifacts = $artifacts
         steps = @($steps)
         issues = @($issues)
-        requiredEnvNames = @(
-            "FLOWCHAIN_PILOT_OPERATOR_ACK",
-            "FLOWCHAIN_BASE8453_RPC_URL",
-            "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
-            "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
-            "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
-            "FLOWCHAIN_BASE8453_FROM_BLOCK",
-            "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
-            "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-            "FLOWCHAIN_PILOT_CONFIRMATIONS"
-        )
+        checks = $checks
+        failedChecks = @($failedChecks)
+        requiredEnvNames = @($requiredEnvNames)
         command = "npm run flowchain:bridge:relayer:once"
-        broadcasts = $false
-        envValuesPrinted = $false
-        noSecrets = $true
+        broadcasts = $reportBroadcasts
+        envValuesPrinted = $reportEnvValuesPrinted
+        noSecrets = $reportNoSecrets
     }
     $reportText = $report | ConvertTo-Json -Depth 24
     Assert-FlowChainNoSecretText -Text $reportText -Label "bridge relayer once report"

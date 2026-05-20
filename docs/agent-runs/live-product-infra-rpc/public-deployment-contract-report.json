@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-20T00:27:32.7012165Z",
+    "generatedAt":  "2026-05-20T00:42:50.5414556Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -123,7 +123,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=95338, finalizedHeight=95338",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=95496, finalizedHeight=95496",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -404,7 +404,7 @@
                       "id":  "base8453-bridge-relayer-queue",
                       "requirement":  "The bridge relayer has a no-broadcast one-shot path plus an isolated loop validation that checks owner guardrails, proves fresh no-secret/no-broadcast loop health, observes Base 8453 deposits with a staged cursor, filters replays, queues new credits into the running L1, waits for main-state credit evidence, records handoff-to-spendable latency, only commits the Base cursor after safe proof, and proves missing-owner-input runs plus standalone observation leave final cursor state untouched.",
                       "status":  "blocked",
-                      "evidence":  "relayer=blocked, guardrail=passed, directObserveStagedDefault=True, directObserveCursorNotFinal=True, loopValidation=passed, loopFailedChecks=0, loopReportHealthy=True, observed=0, new=0, queued=0, applied=0, latencyGate=not-run, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run, handoffToSpendableSeconds=",
+                      "evidence":  "relayer=blocked, onceChecksReady=True, onceFailedChecks=0, guardrail=passed, directObserveStagedDefault=True, directObserveCursorNotFinal=True, loopValidation=passed, loopFailedChecks=0, loopReportHealthy=True, observed=0, new=0, queued=0, applied=0, latencyGate=not-run, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run, handoffToSpendableSeconds=",
                       "commands":  [
                                        "npm run flowchain:bridge:relayer:once",
                                        "npm run flowchain:bridge:relayer:guardrail:validate",
