@@ -1947,6 +1947,43 @@ $definitions = @(
         staleIfOlderThan = @("public-tester-gateway-e2e")
     },
     [ordered]@{
+        id = "external-tester-client-validation"
+        requirement = "Standalone friends-and-family tester client validates the generated connect pack in a no-network dry run covering read routes, wallet create, faucet, send, redaction, no-token storage, no secrets, and no broadcasts."
+        path = "docs/agent-runs/live-product-infra-rpc/external-tester-client-validation-report.json"
+        command = "npm run flowchain:external-tester:client:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "clientScriptExists",
+            "connectPackExists",
+            "connectPackSchemaValid",
+            "clientExitCodeZero",
+            "dryRunReportWritten",
+            "dryRunSchemaValid",
+            "dryRunStatusPlanned",
+            "dryRunNoNetwork",
+            "blockedConnectPackAllowedOnlyByFlag",
+            "plannedRoutesCoverReads",
+            "plannedRoutesCoverWrites",
+            "endpointRedacted",
+            "tokenNotConfiguredInDryRun",
+            "broadcastsFalse",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+        staleIfOlderThan = @("external-tester-packet")
+    },
+    [ordered]@{
         id = "external-tester-evidence-validation"
         requirement = "External tester evidence validation proves redacted friends-and-family evidence contains required files, advancing block height, matching wallet transfer and balances, amount caps, and no-secret boundaries."
         path = "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
@@ -2353,7 +2390,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "live-cutover-rehearsal"
-        requirement = "Live cutover rehearsal runs owner-env, public deployment, local tester wallet network, tester write-token setup, tester packet, packet validation, completion, truth table, and no-secret gates through one redacted command and blocks only on known owner inputs before external sharing."
+        requirement = "Live cutover rehearsal runs owner-env, public deployment, local tester wallet network, tester write-token setup, tester packet, packet validation, external tester client validation, completion, truth table, and no-secret gates through one redacted command and blocks only on known owner inputs before external sharing."
         path = "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json"
         command = "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked"
         productionGate = $true
@@ -2375,6 +2412,7 @@ $definitions = @(
             "testerWriteTokenSetupPassed",
             "testerPacketShareable",
             "testerPacketValidationPassed",
+            "testerClientValidationPassed",
             "completionReady",
             "truthTableCompleted",
             "noSecretScanPassed",
@@ -2393,7 +2431,7 @@ $definitions = @(
             "noSecrets" = $true
             "broadcasts" = $false
         }
-        staleIfOlderThan = @("owner-env-readiness", "public-deployment-contract", "tester-network-e2e", "tester-write-token-setup", "external-tester-packet", "completion-audit")
+        staleIfOlderThan = @("owner-env-readiness", "public-deployment-contract", "tester-network-e2e", "tester-write-token-setup", "external-tester-packet", "external-tester-packet-validation", "external-tester-client-validation", "completion-audit")
     },
     [ordered]@{
         id = "architecture-audit"
@@ -2410,7 +2448,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "base-tx-diagnostic-fail-closed", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-synthetic-canary", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "tester-write-token-setup", "dashboard-ui-readiness", "developer-dev-pack", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "base-tx-diagnostic-fail-closed", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-client-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-synthetic-canary", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "tester-write-token-setup", "dashboard-ui-readiness", "developer-dev-pack", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"
@@ -2790,6 +2828,11 @@ function ConvertTo-TruthEvidence {
             "inventorySafe",
             "scansGeneratedDevPackReports",
             "scansGeneratedSdkDocs",
+            "dryRunNoNetwork",
+            "blockedConnectPackAllowedOnlyByFlag",
+            "plannedRoutesCoverReads",
+            "plannedRoutesCoverWrites",
+            "tokenNotConfiguredInDryRun",
             "desktopProjectConfigured",
             "mobileProjectConfigured",
             "bridgeRouteCovered",

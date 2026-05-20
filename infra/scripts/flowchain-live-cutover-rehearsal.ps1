@@ -56,6 +56,7 @@ $paths = [ordered]@{
     testerWriteTokenSetup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/tester-write-token-setup-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     externalTesterPacketValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-validation-report.json"
+    externalTesterClientValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-client-validation-report.json"
     completionAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json"
     truthTable = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
     noSecret = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
@@ -305,6 +306,12 @@ try {
         -ExpectedReportPath $paths.externalTesterPacketValidation))
 
     [void] $steps.Add((Invoke-CutoverStep `
+        -Name "External tester client validation" `
+        -Command "npm run flowchain:external-tester:client:validate" `
+        -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-client-validation.ps1")) `
+        -ExpectedReportPath $paths.externalTesterClientValidation))
+
+    [void] $steps.Add((Invoke-CutoverStep `
         -Name "Completion audit" `
         -Command "npm run flowchain:completion:audit -- -NoRefresh -AllowBlocked" `
         -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-completion-audit.ps1"), "-NoRefresh", "-AllowBlocked") `
@@ -391,6 +398,7 @@ $ready = [ordered]@{
     testerWriteTokenSetupPassed = (Get-CutoverReportStatus -Report $reports.testerWriteTokenSetup) -eq "passed"
     testerPacketShareable = (Get-CutoverProp -Object $reports.externalTesterPacket -Name "packetShareable" -Default $false) -eq $true
     testerPacketValidationPassed = (Get-CutoverReportStatus -Report $reports.externalTesterPacketValidation) -eq "passed"
+    testerClientValidationPassed = (Get-CutoverReportStatus -Report $reports.externalTesterClientValidation) -eq "passed"
     completionReady = (Get-CutoverProp -Object $reports.completionAudit -Name "completionReady" -Default $false) -eq $true
     truthTableCompleted = $truthTableReportStatus -in @("passed", "blocked-owner-input")
     truthTableAccepted = $truthTableAccepted
@@ -420,7 +428,7 @@ $checks = [ordered]@{
     ownerEnvFileExists = $ownerEnvExists
     ownerEnvFileIsFile = $ownerEnvIsFile
     ownerEnvFileGitIgnored = $ownerEnvGitIgnore.ignored -eq $true
-    stepsRan = @($steps).Count -eq 9
+    stepsRan = @($steps).Count -eq 10
     stepCommandsSucceeded = @($steps | Where-Object { [int] $_.exitCode -ne 0 -and "$($_.status)" -ne "blocked" }).Count -eq 0
     noFailedSteps = $failedSteps.Count -eq 0
     missingEnvNamesEmpty = @($missingEnvNames).Count -eq 0
@@ -433,6 +441,7 @@ $checks = [ordered]@{
     testerWriteTokenSetupPassed = $ready.testerWriteTokenSetupPassed
     testerPacketShareable = $ready.testerPacketShareable
     testerPacketValidationPassed = $ready.testerPacketValidationPassed
+    testerClientValidationPassed = $ready.testerClientValidationPassed
     completionReady = $ready.completionReady
     truthTableCompleted = $ready.truthTableCompleted
     truthTableAccepted = $ready.truthTableAccepted
@@ -487,6 +496,7 @@ $report = [ordered]@{
         "npm run flowchain:wallet:live-tester:e2e",
         "npm run flowchain:tester:token:setup",
         "npm run flowchain:external-tester:packet:validate",
+        "npm run flowchain:external-tester:client:validate",
         "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
         "npm run flowchain:truth-table -- -AllowBlocked"
     )
@@ -505,7 +515,7 @@ $markdownLines.Add("")
 $markdownLines.Add("Generated: $($report.generatedAt)")
 $markdownLines.Add("Status: $status")
 $markdownLines.Add("")
-$markdownLines.Add("This command runs the owner-env, public deployment, local tester wallet network, tester write-token setup, tester packet, packet validation, completion audit, truth table, and no-secret gates through one redacted rehearsal. It records env names and statuses only.")
+$markdownLines.Add("This command runs the owner-env, public deployment, local tester wallet network, tester write-token setup, tester packet, packet validation, external tester client validation, completion audit, truth table, and no-secret gates through one redacted rehearsal. It records env names and statuses only.")
 $markdownLines.Add("")
 $markdownLines.Add("Owner env file: ``$ownerEnvRelativePath``")
 $markdownLines.Add("Owner env file git-ignored: $($ownerEnvGitIgnore.ignored)")

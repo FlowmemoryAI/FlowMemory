@@ -56,6 +56,7 @@ $paths = [ordered]@{
     operatorPackageVerify = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-verify-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     externalTesterPacketValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-validation-report.json"
+    externalTesterClientValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-client-validation-report.json"
     externalTesterEvidenceValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
@@ -476,6 +477,9 @@ $externalTesterPacketExitCode = $externalTesterPacketResult.exitCode
 $externalTesterPacketValidationResult = Invoke-AuditChild -Path $paths.externalTesterPacketValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-packet-validation.ps1"))
 $externalTesterPacketValidationOutput = @($externalTesterPacketValidationResult.output)
 $externalTesterPacketValidationExitCode = $externalTesterPacketValidationResult.exitCode
+$externalTesterClientValidationResult = Invoke-AuditChild -Path $paths.externalTesterClientValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-client-validation.ps1"))
+$externalTesterClientValidationOutput = @($externalTesterClientValidationResult.output)
+$externalTesterClientValidationExitCode = $externalTesterClientValidationResult.exitCode
 $externalTesterEvidenceValidationResult = Invoke-AuditChild -Path $paths.externalTesterEvidenceValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-evidence-validation.ps1"))
 $externalTesterEvidenceValidationOutput = @($externalTesterEvidenceValidationResult.output)
 $externalTesterEvidenceValidationExitCode = $externalTesterEvidenceValidationResult.exitCode
@@ -2540,6 +2544,39 @@ $externalTesterPacketValidationPassed = $externalTesterPacketValidationExitCode 
     -and ((Get-AuditProp -Object $externalTesterPacketValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $externalTesterPacketValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $externalTesterPacketValidation -Name "broadcasts" -Default $true) -eq $false)
+$externalTesterClientValidation = $reports.externalTesterClientValidation
+$externalTesterClientValidationStatus = Get-ReportStatus -Report $externalTesterClientValidation
+$externalTesterClientValidationChecks = Get-AuditProp -Object $externalTesterClientValidation -Name "checks"
+$externalTesterClientValidationFailedChecks = @((Get-AuditProp -Object $externalTesterClientValidation -Name "failedChecks" -Default @()))
+$externalTesterClientValidationSecretFindings = @((Get-AuditProp -Object $externalTesterClientValidation -Name "secretMarkerFindings" -Default @()))
+$externalTesterClientValidationRequiredChecks = @(
+    "clientScriptExists",
+    "connectPackExists",
+    "connectPackSchemaValid",
+    "clientExitCodeZero",
+    "dryRunReportWritten",
+    "dryRunSchemaValid",
+    "dryRunStatusPlanned",
+    "dryRunNoNetwork",
+    "blockedConnectPackAllowedOnlyByFlag",
+    "plannedRoutesCoverReads",
+    "plannedRoutesCoverWrites",
+    "endpointRedacted",
+    "tokenNotConfiguredInDryRun",
+    "broadcastsFalse",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "secretMarkerFindingsEmpty"
+)
+$externalTesterClientValidationMissingChecks = @(Get-MissingAuditChecks -Checks $externalTesterClientValidationChecks -Names $externalTesterClientValidationRequiredChecks)
+$externalTesterClientValidationPassed = $externalTesterClientValidationExitCode -eq 0 `
+    -and $externalTesterClientValidationStatus -eq "passed" `
+    -and $externalTesterClientValidationFailedChecks.Count -eq 0 `
+    -and $externalTesterClientValidationSecretFindings.Count -eq 0 `
+    -and $externalTesterClientValidationMissingChecks.Count -eq 0 `
+    -and ((Get-AuditProp -Object $externalTesterClientValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $externalTesterClientValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $externalTesterClientValidation -Name "broadcasts" -Default $true) -eq $false)
 $externalTesterEvidenceValidation = $reports.externalTesterEvidenceValidation
 $externalTesterEvidenceValidationStatus = Get-ReportStatus -Report $externalTesterEvidenceValidation
 $externalTesterEvidenceValidationChecks = Get-AuditProp -Object $externalTesterEvidenceValidation -Name "checks"
@@ -2609,6 +2646,7 @@ $externalTesterLaunchPassed = ($externalTesterStatus -eq "passed") `
     -and ($externalTesterNetworkFresh -eq $true) `
     -and ($externalTesterPacketExecutableSmokeValidated -eq $true) `
     -and ($externalTesterConnectPackReady -eq $true) `
+    -and ($externalTesterClientValidationPassed -eq $true) `
     -and ($externalTesterEvidenceValidationPassed -eq $true)
 $externalTesterLaunchBlocked = ($externalTesterStatus -eq "blocked") `
     -and ($externalTesterPacketStatus -eq "blocked") `
@@ -2617,6 +2655,7 @@ $externalTesterLaunchBlocked = ($externalTesterStatus -eq "blocked") `
     -and ($externalTesterNetworkFresh -eq $true) `
     -and ($externalTesterPacketExecutableSmokeValidated -eq $true) `
     -and ($externalTesterConnectPackReady -eq $true) `
+    -and ($externalTesterClientValidationPassed -eq $true) `
     -and ($externalTesterEvidenceValidationPassed -eq $true)
 $opsSnapshot = $reports.opsSnapshot
 $opsSnapshotStatus = Get-ReportStatus -Report $opsSnapshot
@@ -3193,6 +3232,12 @@ Add-AuditItem -Items $items -Id "external-tester-packet-validation" `
     -Evidence "validationStatus=$externalTesterPacketValidationStatus, failedChecks=$($externalTesterPacketValidationFailedChecks.Count), missingChecks=$($externalTesterPacketValidationMissingChecks.Count), secretFindings=$($externalTesterPacketValidationSecretFindings.Count), packetShareable=$(Get-AuditProp -Object $externalTesterPacketValidation -Name "packetShareable" -Default $true), report=$($paths.externalTesterPacketValidation)" `
     -Commands @("npm run flowchain:external-tester:packet:validate")
 
+Add-AuditItem -Items $items -Id "external-tester-client-validation" `
+    -Requirement "External tester client validation proves the generated connect pack can drive the standalone tester client in a no-network dry run covering read routes, wallet create, faucet, send, redaction, no-token storage, no secrets, and no broadcasts." `
+    -Status $(if ($externalTesterClientValidationPassed) { "passed" } else { "failed" }) `
+    -Evidence "clientValidationStatus=$externalTesterClientValidationStatus, failedChecks=$($externalTesterClientValidationFailedChecks.Count), missingChecks=$($externalTesterClientValidationMissingChecks.Count), secretFindings=$($externalTesterClientValidationSecretFindings.Count), report=$($paths.externalTesterClientValidation)" `
+    -Commands @("npm run flowchain:external-tester:client:validate")
+
 Add-AuditItem -Items $items -Id "external-tester-evidence-validation" `
     -Requirement "External tester evidence validation proves returned friends-and-family evidence is complete, redacted, height-advancing, wallet-transfer consistent, amount-capped, and no-secret before owner review." `
     -Status $(if ($externalTesterEvidenceValidationPassed) { "passed" } else { "failed" }) `
@@ -3200,10 +3245,10 @@ Add-AuditItem -Items $items -Id "external-tester-evidence-validation" `
     -Commands @("npm run flowchain:tester:evidence:validate")
 
 Add-AuditItem -Items $items -Id "friends-and-family-launch" `
-    -Requirement "Friends-and-family tester launch requires fresh tester-wallet evidence, executable packet-route smoke, a machine-readable connection pack, and validated returned evidence, and remains blocked until public RPC, backup, and Base bridge gates pass." `
+    -Requirement "Friends-and-family tester launch requires fresh tester-wallet evidence, executable packet-route smoke, a machine-readable connection pack, standalone client validation, and validated returned evidence, and remains blocked until public RPC, backup, and Base bridge gates pass." `
     -Status $(if ($externalTesterLaunchPassed) { "passed" } elseif ($externalTesterLaunchBlocked) { "blocked" } else { "failed" }) `
-    -Evidence "externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, packetStatus=$externalTesterPacketStatus, shareable=$externalTesterPacketShareable, packetSmoke=$externalTesterPacketExecutableSmokeValidated, smokeRoutes=$($externalTesterPacketSmokeRoutes.Count), connectPackReady=$externalTesterConnectPackReady, evidenceValidation=$externalTesterEvidenceValidationPassed, externalSharingReady=$externalSharingReady" `
-    -Commands @("npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked", "npm run flowchain:tester:evidence:validate") `
+    -Evidence "externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, packetStatus=$externalTesterPacketStatus, shareable=$externalTesterPacketShareable, packetSmoke=$externalTesterPacketExecutableSmokeValidated, smokeRoutes=$($externalTesterPacketSmokeRoutes.Count), connectPackReady=$externalTesterConnectPackReady, clientValidation=$externalTesterClientValidationPassed, evidenceValidation=$externalTesterEvidenceValidationPassed, externalSharingReady=$externalSharingReady" `
+    -Commands @("npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked", "npm run flowchain:external-tester:client:validate", "npm run flowchain:tester:evidence:validate") `
     -Blockers @($missingEnv)
 
 Add-AuditItem -Items $items -Id "ops-snapshot" `
@@ -3630,6 +3675,7 @@ $report = [ordered]@{
         "npm run flowchain:bridge:diagnose:tx",
         "npm run flowchain:tester:readiness",
         "npm run flowchain:external-tester:packet",
+        "npm run flowchain:external-tester:client:validate",
         "npm run flowchain:tester:evidence:validate",
         "npm run flowchain:public-deployment:contract",
         "npm run flowchain:architecture:audit",
