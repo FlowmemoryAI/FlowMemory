@@ -1,9 +1,9 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 95054
+flowchain_latest_height 96031
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 95054
+flowchain_finalized_height 96031
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
 flowchain_state_file_age_seconds 1
@@ -21,10 +21,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 25
+flowchain_ops_alert_rules_total 26
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 18
+flowchain_ops_alert_rules_critical 19
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -160,9 +160,15 @@ flowchain_dashboard_ui_browser_e2e_ready 1
 # HELP flowchain_dashboard_ui_build_ready One when dashboard production build proof passed.
 # TYPE flowchain_dashboard_ui_build_ready gauge
 flowchain_dashboard_ui_build_ready 1
-# HELP flowchain_dashboard_ui_tester_flow_covered One when create, faucet, send, and explorer routes are covered by dashboard UI readiness.
+# HELP flowchain_dashboard_ui_tester_flow_covered One when create, faucet, send, tester launch, and explorer routes are covered by dashboard UI readiness.
 # TYPE flowchain_dashboard_ui_tester_flow_covered gauge
 flowchain_dashboard_ui_tester_flow_covered 1
+# HELP flowchain_dashboard_ui_tester_launch_covered One when the dashboard tester launch route is covered by readiness.
+# TYPE flowchain_dashboard_ui_tester_launch_covered gauge
+flowchain_dashboard_ui_tester_launch_covered 1
+# HELP flowchain_dashboard_ui_activation_covered One when the dashboard activation cockpit route is covered by readiness.
+# TYPE flowchain_dashboard_ui_activation_covered gauge
+flowchain_dashboard_ui_activation_covered 1
 # HELP flowchain_owner_inputs_validation_ready One when owner input validation scenarios are passed.
 # TYPE flowchain_owner_inputs_validation_ready gauge
 flowchain_owner_inputs_validation_ready 1
@@ -175,12 +181,33 @@ flowchain_owner_inputs_validation_scenarios_failed 0
 # HELP flowchain_owner_inputs_required_env_total Required owner input env names tracked by validation.
 # TYPE flowchain_owner_inputs_required_env_total gauge
 flowchain_owner_inputs_required_env_total 17
+# HELP flowchain_owner_activation_plan_ready One when the owner activation plan report is passed and safe to use.
+# TYPE flowchain_owner_activation_plan_ready gauge
+flowchain_owner_activation_plan_ready 1
+# HELP flowchain_owner_activation_ready One when the owner activation plan reports all launch inputs are present.
+# TYPE flowchain_owner_activation_ready gauge
+flowchain_owner_activation_ready 0
+# HELP flowchain_owner_activation_stages_total Owner activation plan stage count.
+# TYPE flowchain_owner_activation_stages_total gauge
+flowchain_owner_activation_stages_total 8
+# HELP flowchain_owner_activation_ready_stages Owner activation plan stages currently ready.
+# TYPE flowchain_owner_activation_ready_stages gauge
+flowchain_owner_activation_ready_stages 2
+# HELP flowchain_owner_activation_missing_env_total Owner activation input names still missing before live cutover.
+# TYPE flowchain_owner_activation_missing_env_total gauge
+flowchain_owner_activation_missing_env_total 14
+# HELP flowchain_owner_activation_invalid_env_total Owner activation input names currently invalid.
+# TYPE flowchain_owner_activation_invalid_env_total gauge
+flowchain_owner_activation_invalid_env_total 0
 # HELP flowchain_public_deployment_ready One when public deployment contract is passed.
 # TYPE flowchain_public_deployment_ready gauge
 flowchain_public_deployment_ready 0
 # HELP flowchain_live_cutover_ready One when the live cutover rehearsal is passed.
 # TYPE flowchain_live_cutover_ready gauge
 flowchain_live_cutover_ready 0
+# HELP flowchain_live_cutover_tester_network_e2e_passed One when live cutover rehearsal directly ran the local tester wallet network E2E.
+# TYPE flowchain_live_cutover_tester_network_e2e_passed gauge
+flowchain_live_cutover_tester_network_e2e_passed 1
 # HELP flowchain_live_cutover_owner_blocked One when live cutover is blocked only on known owner inputs.
 # TYPE flowchain_live_cutover_owner_blocked gauge
 flowchain_live_cutover_owner_blocked 1
@@ -198,7 +225,7 @@ flowchain_truth_gates_total 51
 flowchain_truth_gates_passed 35
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
-flowchain_truth_gates_owner_blocked 16
+flowchain_truth_gates_owner_blocked 15
 # HELP flowchain_truth_gates_repo_blocked Repo-blocked production truth table gates.
 # TYPE flowchain_truth_gates_repo_blocked gauge
 flowchain_truth_gates_repo_blocked 0
@@ -207,4 +234,4 @@ flowchain_truth_gates_repo_blocked 0
 flowchain_truth_gates_failed 0
 # HELP flowchain_truth_gates_stale Stale production truth table gates.
 # TYPE flowchain_truth_gates_stale gauge
-flowchain_truth_gates_stale 0
+flowchain_truth_gates_stale 1

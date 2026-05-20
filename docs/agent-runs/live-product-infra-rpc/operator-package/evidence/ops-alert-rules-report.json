@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T00:48:15.2500605Z",
+    "generatedAt":  "2026-05-20T01:39:17.8222114Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -348,8 +348,8 @@
                       "findingCodes":  [
                                            "dashboard-ui-readiness-failed"
                                        ],
-                      "signal":  "Dashboard wallet, faucet, send, explorer, or no-secret UI readiness proof is missing or failed.",
-                      "threshold":  "dashboard UI readiness status is not passed, required tester flow coverage is false, browser E2E/build proof is false, or no-secret flags are unsafe",
+                      "signal":  "Dashboard wallet, faucet, send, tester launch, explorer, activation cockpit, or no-secret UI readiness proof is missing or failed.",
+                      "threshold":  "dashboard UI readiness status is not passed, required tester flow, activation cockpit, browser E2E/build proof is false, or no-secret flags are unsafe",
                       "commands":  [
                                        "npm run flowchain:dashboard:ui:readiness",
                                        "npm run flowchain:dashboard:build",

@@ -205,6 +205,9 @@ flowchain_public_deployment_ready 0
 # HELP flowchain_live_cutover_ready One when the live cutover rehearsal is passed.
 # TYPE flowchain_live_cutover_ready gauge
 flowchain_live_cutover_ready 0
+# HELP flowchain_live_cutover_tester_network_e2e_passed One when live cutover rehearsal directly ran the local tester wallet network E2E.
+# TYPE flowchain_live_cutover_tester_network_e2e_passed gauge
+flowchain_live_cutover_tester_network_e2e_passed 1
 # HELP flowchain_live_cutover_owner_blocked One when live cutover is blocked only on known owner inputs.
 # TYPE flowchain_live_cutover_owner_blocked gauge
 flowchain_live_cutover_owner_blocked 1
@@ -222,7 +225,7 @@ flowchain_truth_gates_total 51
 flowchain_truth_gates_passed 35
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
-flowchain_truth_gates_owner_blocked 16
+flowchain_truth_gates_owner_blocked 15
 # HELP flowchain_truth_gates_repo_blocked Repo-blocked production truth table gates.
 # TYPE flowchain_truth_gates_repo_blocked gauge
 flowchain_truth_gates_repo_blocked 0
@@ -231,4 +234,4 @@ flowchain_truth_gates_repo_blocked 0
 flowchain_truth_gates_failed 0
 # HELP flowchain_truth_gates_stale Stale production truth table gates.
 # TYPE flowchain_truth_gates_stale gauge
-flowchain_truth_gates_stale 0
+flowchain_truth_gates_stale 1

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T01:39:23.7343617Z",
+    "generatedAt":  "2026-05-20T01:58:59.7378231Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -13,7 +13,7 @@
                           "ownerInputsValidationStatus":  "passed",
                           "ownerActivationPlanStatus":  "passed",
                           "liveCutoverStatus":  "blocked",
-                          "truthTableStatus":  "blocked-owner-input",
+                          "truthTableStatus":  "stale",
                           "noSecretStatus":  "passed"
                       },
     "metrics":  [
@@ -432,6 +432,12 @@
                         "value":  0
                     },
                     {
+                        "name":  "flowchain_live_cutover_tester_network_e2e_passed",
+                        "type":  "gauge",
+                        "help":  "One when live cutover rehearsal directly ran the local tester wallet network E2E.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_live_cutover_owner_blocked",
                         "type":  "gauge",
                         "help":  "One when live cutover is blocked only on known owner inputs.",
@@ -465,7 +471,7 @@
                         "name":  "flowchain_truth_gates_owner_blocked",
                         "type":  "gauge",
                         "help":  "Owner-input blocked production truth table gates.",
-                        "value":  16
+                        "value":  15
                     },
                     {
                         "name":  "flowchain_truth_gates_repo_blocked",
@@ -483,10 +489,10 @@
                         "name":  "flowchain_truth_gates_stale",
                         "type":  "gauge",
                         "help":  "Stale production truth table gates.",
-                        "value":  0
+                        "value":  1
                     }
                 ],
-    "metricCount":  78,
+    "metricCount":  79,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

@@ -52,6 +52,7 @@ $optionalOwnerInputs = @(
 $paths = [ordered]@{
     ownerEnvReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-report.json"
     publicDeploymentContract = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
+    testerNetwork = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     completionAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json"
     truthTable = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
@@ -269,6 +270,12 @@ try {
         -ExpectedReportPath $paths.publicDeploymentContract))
 
     [void] $steps.Add((Invoke-CutoverStep `
+        -Name "Local tester wallet network E2E" `
+        -Command "npm run flowchain:wallet:live-tester:e2e" `
+        -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-service-tester-network-e2e.ps1")) `
+        -ExpectedReportPath $paths.testerNetwork))
+
+    [void] $steps.Add((Invoke-CutoverStep `
         -Name "External tester packet" `
         -Command "npm run flowchain:external-tester:packet -- -AllowBlocked" `
         -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-packet.ps1"), "-AllowBlocked") `
@@ -341,6 +348,7 @@ $failedSteps = @($steps | Where-Object { "$($_.status)" -eq "failed" -or [int] $
 $ready = [ordered]@{
     ownerEnvReady = (Get-CutoverProp -Object (Get-CutoverProp -Object $reports.ownerEnvReadiness -Name "readiness") -Name "ownerInputsReady" -Default $false) -eq $true
     publicDeploymentReady = (Get-CutoverProp -Object $reports.publicDeploymentContract -Name "deploymentReady" -Default $false) -eq $true
+    testerNetworkE2ePassed = (Get-CutoverReportStatus -Report $reports.testerNetwork) -eq "passed"
     testerPacketShareable = (Get-CutoverProp -Object $reports.externalTesterPacket -Name "packetShareable" -Default $false) -eq $true
     completionReady = (Get-CutoverProp -Object $reports.completionAudit -Name "completionReady" -Default $false) -eq $true
     truthTableCompleted = (Get-CutoverReportStatus -Report $reports.truthTable) -in @("passed", "blocked-owner-input")
@@ -368,7 +376,7 @@ $checks = [ordered]@{
     ownerEnvFileExists = $ownerEnvExists
     ownerEnvFileIsFile = $ownerEnvIsFile
     ownerEnvFileGitIgnored = $ownerEnvGitIgnore.ignored -eq $true
-    stepsRan = @($steps).Count -eq 6
+    stepsRan = @($steps).Count -eq 7
     stepCommandsSucceeded = @($steps | Where-Object { [int] $_.exitCode -ne 0 -and "$($_.status)" -ne "blocked" }).Count -eq 0
     noFailedSteps = $failedSteps.Count -eq 0
     missingEnvNamesEmpty = @($missingEnvNames).Count -eq 0
@@ -377,6 +385,7 @@ $checks = [ordered]@{
     blockedOnlyOnKnownOwnerInputs = $blockedOnlyOnKnownOwnerInputs
     ownerEnvReady = $ready.ownerEnvReady
     publicDeploymentReady = $ready.publicDeploymentReady
+    testerNetworkE2ePassed = $ready.testerNetworkE2ePassed
     testerPacketShareable = $ready.testerPacketShareable
     completionReady = $ready.completionReady
     truthTableCompleted = $ready.truthTableCompleted
@@ -424,6 +433,7 @@ $report = [ordered]@{
     nextCommands = @(
         "npm run flowchain:owner-env:readiness -- -AllowBlocked",
         "npm run flowchain:public-deployment:contract -- -AllowBlocked",
+        "npm run flowchain:wallet:live-tester:e2e",
         "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
         "npm run flowchain:truth-table -- -AllowBlocked"
     )
@@ -442,7 +452,7 @@ $markdownLines.Add("")
 $markdownLines.Add("Generated: $($report.generatedAt)")
 $markdownLines.Add("Status: $status")
 $markdownLines.Add("")
-$markdownLines.Add("This command runs the owner-env, public deployment, tester packet, completion audit, truth table, and no-secret gates through one redacted rehearsal. It records env names and statuses only.")
+$markdownLines.Add("This command runs the owner-env, public deployment, local tester wallet network, tester packet, completion audit, truth table, and no-secret gates through one redacted rehearsal. It records env names and statuses only.")
 $markdownLines.Add("")
 $markdownLines.Add("Owner env file: ``$ownerEnvRelativePath``")
 $markdownLines.Add("Owner env file git-ignored: $($ownerEnvGitIgnore.ignored)")

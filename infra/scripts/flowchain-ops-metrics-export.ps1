@@ -322,6 +322,7 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_activation_missing_env_
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_activation_invalid_env_total" -Help "Owner activation input names currently invalid." -Value (ConvertTo-MetricNumber -Value $ownerActivationPlanInvalidEnvNames.Count)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_deployment_ready" -Help "One when public deployment contract is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "publicDeployment"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_ready" -Help "One when the live cutover rehearsal is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $liveCutover))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_tester_network_e2e_passed" -Help "One when live cutover rehearsal directly ran the local tester wallet network E2E." -Value (ConvertTo-MetricBool -Value (Get-MetricsPathProp -Object $liveCutover -Path "ready.testerNetworkE2ePassed" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_owner_blocked" -Help "One when live cutover is blocked only on known owner inputs." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $liveCutover -Name "blockedOnlyOnKnownExternalOwnerInputs"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_missing_owner_inputs" -Help "Number of required owner input names still blocking live cutover." -Value @((Get-MetricsProp -Object $liveCutover -Name "missingEnvNames" -Default @())).Count
 Add-MetricGauge -Metrics $metrics -Name "flowchain_no_secret_ready" -Help "One when no-secret scan is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $noSecret))
@@ -433,6 +434,7 @@ $requiredMetricNames = @(
     "flowchain_owner_activation_invalid_env_total",
     "flowchain_public_deployment_ready",
     "flowchain_live_cutover_ready",
+    "flowchain_live_cutover_tester_network_e2e_passed",
     "flowchain_live_cutover_owner_blocked",
     "flowchain_live_cutover_missing_owner_inputs",
     "flowchain_no_secret_ready",
@@ -514,6 +516,12 @@ $checks = [ordered]@{
         "flowchain_owner_activation_ready_stages",
         "flowchain_owner_activation_missing_env_total",
         "flowchain_owner_activation_invalid_env_total"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    liveCutoverMetricsPresent = @(
+        "flowchain_live_cutover_ready",
+        "flowchain_live_cutover_tester_network_e2e_passed",
+        "flowchain_live_cutover_owner_blocked",
+        "flowchain_live_cutover_missing_owner_inputs"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     prometheusHasHelpAndType = $prometheusTextFromFile.Contains("# HELP flowchain_latest_height") -and $prometheusTextFromFile.Contains("# TYPE flowchain_latest_height gauge")
     prometheusContainsNoUrls = $prometheusTextFromFile -notmatch 'https?://'

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-20T00:48:15.5090684Z",
+    "generatedAt":  "2026-05-20T01:39:18.1164209Z",
     "status":  "blocked",
     "refresh":  {
                     "performed":  false,
@@ -10,8 +10,8 @@
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "95503",
-                  "finalizedHeight":  "95503",
+                  "latestHeight":  "96031",
+                  "finalizedHeight":  "96031",
                   "stateFileLastWriteAgeSeconds":  1,
                   "monitorStatus":  "passed",
                   "monitorSamples":  3,
@@ -90,12 +90,21 @@
                            "dashboardUiTesterWalletCreateCovered":  true,
                            "dashboardUiTesterFaucetCovered":  true,
                            "dashboardUiTesterSendCovered":  true,
+                           "dashboardUiTesterLaunchRouteCovered":  true,
                            "dashboardUiExplorerRouteCovered":  true,
+                           "dashboardUiActivationRouteCovered":  true,
                            "ownerInputsValidation":  "passed",
                            "ownerInputsValidationReady":  true,
                            "ownerInputsValidationScenarioCount":  6,
                            "ownerInputsValidationFailedScenarios":  0,
                            "ownerInputsValidationRequiredEnvCount":  17,
+                           "ownerActivationPlan":  "passed",
+                           "ownerActivationPlanReady":  true,
+                           "ownerActivationReady":  false,
+                           "ownerActivationStageCount":  8,
+                           "ownerActivationReadyStageCount":  2,
+                           "ownerActivationMissingEnvCount":  14,
+                           "ownerActivationInvalidEnvCount":  0,
                            "publicDeployment":  "blocked",
                            "deploymentRefreshAborted":  false,
                            "deploymentRefreshAbortStep":  "",
@@ -239,6 +248,7 @@
                         "externalTesterEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-evidence-validation-report.json",
                         "dashboardUi":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
                         "ownerInputsValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-validation-report.json",
+                        "ownerActivationPlan":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-activation-plan-report.json",
                         "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
                         "truthTable":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\production-truth-table-report.json",
                         "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json"

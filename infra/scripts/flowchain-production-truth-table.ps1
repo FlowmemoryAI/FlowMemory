@@ -1740,7 +1740,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "live-cutover-rehearsal"
-        requirement = "Live cutover rehearsal runs owner-env, public deployment, tester packet, completion, truth table, and no-secret gates through one redacted command and blocks only on known owner inputs before external sharing."
+        requirement = "Live cutover rehearsal runs owner-env, public deployment, local tester wallet network, tester packet, completion, truth table, and no-secret gates through one redacted command and blocks only on known owner inputs before external sharing."
         path = "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json"
         command = "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked"
         productionGate = $true
@@ -1758,6 +1758,7 @@ $definitions = @(
             "unknownMissingEnvNamesEmpty",
             "ownerEnvReady",
             "publicDeploymentReady",
+            "testerNetworkE2ePassed",
             "testerPacketShareable",
             "completionReady",
             "truthTableCompleted",
@@ -1777,7 +1778,7 @@ $definitions = @(
             "noSecrets" = $true
             "broadcasts" = $false
         }
-        staleIfOlderThan = @("owner-env-readiness", "public-deployment-contract", "external-tester-packet", "completion-audit")
+        staleIfOlderThan = @("owner-env-readiness", "public-deployment-contract", "tester-network-e2e", "external-tester-packet", "completion-audit")
     },
     [ordered]@{
         id = "architecture-audit"

@@ -1,9 +1,9 @@
 # FlowChain Live Cutover Rehearsal
 
-Generated: 2026-05-20T01:48:27.1217943Z
+Generated: 2026-05-20T02:03:12.9346783Z
 Status: blocked
 
-This command runs the owner-env, public deployment, tester packet, completion audit, truth table, and no-secret gates through one redacted rehearsal. It records env names and statuses only.
+This command runs the owner-env, public deployment, local tester wallet network, tester packet, completion audit, truth table, and no-secret gates through one redacted rehearsal. It records env names and statuses only.
 
 Owner env file: `devnet/local/owner-inputs/flowchain-owner.local.env`
 Owner env file git-ignored: True
@@ -15,6 +15,7 @@ Blocked only on known owner inputs: True
 | --- | --- |
 | ownerEnvReady | False |
 | publicDeploymentReady | False |
+| testerNetworkE2ePassed | True |
 | testerPacketShareable | False |
 | completionReady | False |
 | truthTableCompleted | False |
@@ -26,6 +27,7 @@ Blocked only on known owner inputs: True
 | --- | --- | --- |
 | Owner env readiness | blocked | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\owner-env-readiness-report.json` |
 | Public deployment contract | blocked | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\public-deployment-contract-report.json` |
+| Local tester wallet network E2E | passed | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\live-service-tester-network-e2e-report.json` |
 | External tester packet | blocked | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\external-tester-packet-report.json` |
 | Completion audit | blocked | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\flowchain-completion-audit-report.json` |
 | Production truth table | passed | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\production-truth-table-report.json` |
@@ -52,6 +54,7 @@ Blocked only on known owner inputs: True
 
 - npm run flowchain:owner-env:readiness -- -AllowBlocked
 - npm run flowchain:public-deployment:contract -- -AllowBlocked
+- npm run flowchain:wallet:live-tester:e2e
 - npm run flowchain:live:cutover:rehearsal -- -AllowBlocked
 - npm run flowchain:truth-table -- -AllowBlocked
 

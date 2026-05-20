@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics_export_report.v0",
-    "generatedAt":  "2026-05-20T01:39:23.9713676Z",
+    "generatedAt":  "2026-05-20T01:58:59.8868243Z",
     "status":  "passed",
     "refresh":  {
                     "performed":  false,
@@ -32,7 +32,7 @@
                     },
     "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.json",
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
-    "metricCount":  78,
+    "metricCount":  79,
     "requiredMetricNames":  [
                                 "flowchain_latest_height",
                                 "flowchain_finalized_height",
@@ -93,6 +93,7 @@
                                 "flowchain_owner_activation_invalid_env_total",
                                 "flowchain_public_deployment_ready",
                                 "flowchain_live_cutover_ready",
+                                "flowchain_live_cutover_tester_network_e2e_passed",
                                 "flowchain_live_cutover_owner_blocked",
                                 "flowchain_live_cutover_missing_owner_inputs",
                                 "flowchain_no_secret_ready",
@@ -127,6 +128,7 @@
                    "dashboardUiMetricsPresent":  true,
                    "ownerInputsValidationMetricsPresent":  true,
                    "ownerActivationPlanMetricsPresent":  true,
+                   "liveCutoverMetricsPresent":  true,
                    "prometheusHasHelpAndType":  true,
                    "prometheusContainsNoUrls":  true,
                    "prometheusContainsNoEnvAssignments":  true,
