@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-20T05:19:43.1393512Z",
+    "generatedAt":  "2026-05-20T05:33:38.8723892Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -123,7 +123,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=98194, finalizedHeight=98194",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=98328, finalizedHeight=98328",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -135,7 +135,7 @@
                       "id":  "pre-share-monitoring",
                       "requirement":  "The deployment has recent service-monitor evidence that block height advances over multiple samples.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True",
+                      "evidence":  "monitorStatus=passed, samples=3, heightAdvanced=True",
                       "commands":  [
                                        "npm run flowchain:service:monitor"
                                    ],
@@ -145,9 +145,9 @@
                   },
                   {
                       "id":  "service-autorecovery",
-                      "requirement":  "The owner service has an autorecovery supervisor and an isolated recovery drill proving control-plane restart without touching live state.",
+                      "requirement":  "The owner service has an autorecovery supervisor and an isolated recovery drill proving node, control-plane, and bridge-relayer-loop restart without touching live state.",
                       "status":  "passed",
-                      "evidence":  "supervisorValidation=passed, restartAttempts=1",
+                      "evidence":  "supervisorValidation=passed, restartAttempts=1, nodeRestartAttempts=1, relayerRestartAttempts=1, nodeRecovered=True, relayerRecovered=True",
                       "commands":  [
                                        "npm run flowchain:service:supervisor:validate",
                                        "npm run flowchain:service:supervisor -- -IntervalSeconds 30 -MaxRestartAttempts 3"
@@ -205,7 +205,7 @@
                       "id":  "ops-alert-rules",
                       "requirement":  "Owner deployment has a no-secret alert rule manifest that maps every current ops finding to operator commands without committing delivery credentials.",
                       "status":  "passed",
-                      "evidence":  "alertRules=passed, criticalRules=20, blockedRules=7, unmappedCurrentFindingCodes=0",
+                      "evidence":  "alertRules=passed, criticalRules=21, blockedRules=7, unmappedCurrentFindingCodes=0",
                       "commands":  [
                                        "npm run flowchain:ops:alerts -- -AllowBlocked"
                                    ],

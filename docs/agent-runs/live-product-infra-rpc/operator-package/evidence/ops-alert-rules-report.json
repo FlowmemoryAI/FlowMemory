@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T04:23:18.1749755Z",
+    "generatedAt":  "2026-05-20T05:31:14.5123238Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  27,
-    "criticalRuleCount":  20,
+    "ruleCount":  28,
+    "criticalRuleCount":  21,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -46,6 +46,7 @@
                                 "bridge-direct-observe-cursor-unsafe",
                                 "bridge-relayer-loop-unhealthy",
                                 "supervisor-relayer-recovery-failed",
+                                "supervisor-node-recovery-validation-failed",
                                 "deployment-refresh-aborted",
                                 "truth-table-stale-or-failed",
                                 "external-tester-evidence-unsafe",
@@ -94,6 +95,7 @@
                    "publicRpcEdgeHardeningRuleCoversSecurityHeaders":  true,
                    "publicRpcEdgeHardeningRuleCoversWalletCutover":  true,
                    "bridgeRelayerCheckContractRuleCoversFailedChecks":  true,
+                   "supervisorNodeRecoveryRuleCoversLiveProfile":  true,
                    "notificationPlanStoresNoSecrets":  true,
                    "notificationPlanNoNetworkDelivery":  true,
                    "envValuesPrintedFalse":  true,
@@ -314,6 +316,20 @@
                                        "npm run flowchain:service:supervisor:validate",
                                        "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop",
                                        "npm run flowchain:bridge:emergency-stop"
+                                   ]
+                  },
+                  {
+                      "id":  "supervisor-node-recovery-validation-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "supervisor-node-recovery-validation-failed"
+                                       ],
+                      "signal":  "Service supervisor node crash recovery validation is missing or failed.",
+                      "threshold":  "service-supervisor-validation report is not passed or node crash, restart, live-profile, unbounded, node-running, or control-plane-readable recovery checks are false",
+                      "commands":  [
+                                       "npm run flowchain:service:supervisor:validate",
+                                       "npm run flowchain:service:supervisor -- -Once",
+                                       "npm run flowchain:service:restart -- -LiveProfile"
                                    ]
                   },
                   {

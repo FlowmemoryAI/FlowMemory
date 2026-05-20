@@ -1,0 +1,96 @@
+{
+    "schema":  "flowchain.dashboard_ui_readiness_report.v0",
+    "generatedAt":  "2026-05-20T03:50:08.9401590+00:00",
+    "status":  "passed",
+    "checks":  {
+                   "dashboardPackageScriptPresent":  true,
+                   "rootPackageScriptPresent":  true,
+                   "playwrightConfigExists":  true,
+                   "browserSpecExists":  true,
+                   "desktopProjectConfigured":  true,
+                   "mobileProjectConfigured":  true,
+                   "walletTesterRouteCovered":  true,
+                   "testerWalletCreateCovered":  true,
+                   "testerFaucetCovered":  true,
+                   "testerSendCovered":  true,
+                   "explorerRouteCovered":  true,
+                   "testerLaunchRouteCovered":  true,
+                   "activationRouteCovered":  true,
+                   "publicRpcHeaderProofCovered":  true,
+                   "noSecretLeakageAsserted":  true,
+                   "noHorizontalOverflowAsserted":  true,
+                   "dashboardUnitTestsPassed":  true,
+                   "dashboardBrowserE2ePassed":  true,
+                   "dashboardBuildPassed":  true,
+                   "controlPlaneTesterGatewayTestsPassed":  true,
+                   "commandsCompletedWithoutTimeout":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "commands":  [
+                     {
+                         "label":  "dashboard unit render tests",
+                         "command":  "npm test --prefix apps/dashboard",
+                         "exitCode":  0,
+                         "timeoutSeconds":  180,
+                         "timedOut":  false,
+                         "durationSeconds":  4,
+                         "stdoutLineCount":  7,
+                         "stderrLineCount":  0
+                     },
+                     {
+                         "label":  "dashboard browser wallet faucet explorer loop",
+                         "command":  "npm run browser:e2e --prefix apps/dashboard -- --workers=1",
+                         "exitCode":  0,
+                         "timeoutSeconds":  300,
+                         "timedOut":  false,
+                         "durationSeconds":  25,
+                         "stdoutLineCount":  6,
+                         "stderrLineCount":  20
+                     },
+                     {
+                         "label":  "dashboard production build",
+                         "command":  "npm run build --prefix apps/dashboard",
+                         "exitCode":  0,
+                         "timeoutSeconds":  300,
+                         "timedOut":  false,
+                         "durationSeconds":  4,
+                         "stdoutLineCount":  19,
+                         "stderrLineCount":  0
+                     },
+                     {
+                         "label":  "control-plane tester gateway tests",
+                         "command":  "npm test --prefix services/control-plane",
+                         "exitCode":  0,
+                         "timeoutSeconds":  300,
+                         "timedOut":  false,
+                         "durationSeconds":  160,
+                         "stdoutLineCount":  83,
+                         "stderrLineCount":  0
+                     }
+                 ],
+    "browserProjects":  [
+                            "chromium-desktop",
+                            "chromium-mobile"
+                        ],
+    "coveredRoutes":  [
+                          "/wallet?panel=tester",
+                          "/tester/wallets/create",
+                          "/tester/faucet",
+                          "/tester/wallets/send",
+                          "/explorer",
+                          "/tester",
+                          "/activation"
+                      ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

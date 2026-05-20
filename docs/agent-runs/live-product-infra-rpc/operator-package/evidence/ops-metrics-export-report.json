@@ -1,20 +1,11 @@
 {
     "schema":  "flowchain.ops_metrics_export_report.v0",
-    "generatedAt":  "2026-05-20T04:23:19.1242615Z",
+    "generatedAt":  "2026-05-20T05:31:21.9960636Z",
     "status":  "passed",
     "refresh":  {
-                    "performed":  true,
+                    "performed":  false,
                     "steps":  [
-                                  {
-                                      "name":  "ops-snapshot",
-                                      "exitCode":  0,
-                                      "outputLineCount":  5
-                                  },
-                                  {
-                                      "name":  "ops-alerts",
-                                      "exitCode":  0,
-                                      "outputLineCount":  5
-                                  }
+
                               ]
                 },
     "reportPaths":  {
@@ -41,7 +32,7 @@
                     },
     "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.json",
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
-    "metricCount":  93,
+    "metricCount":  98,
     "requiredMetricNames":  [
                                 "flowchain_latest_height",
                                 "flowchain_finalized_height",
@@ -92,6 +83,11 @@
                                 "flowchain_bridge_relayer_loop_healthy",
                                 "flowchain_supervisor_bridge_relayer_requested",
                                 "flowchain_supervisor_bridge_relayer_recovery_healthy",
+                                "flowchain_supervisor_node_recovery_validated",
+                                "flowchain_supervisor_node_restart_attempts",
+                                "flowchain_supervisor_node_crash_detected",
+                                "flowchain_supervisor_node_recovery_live_profile",
+                                "flowchain_supervisor_node_recovery_unbounded",
                                 "flowchain_external_tester_evidence_ready",
                                 "flowchain_external_tester_evidence_failed_checks",
                                 "flowchain_external_tester_evidence_missing_files",
@@ -153,6 +149,7 @@
                    "ownerInputsValidationMetricsPresent":  true,
                    "ownerActivationPlanMetricsPresent":  true,
                    "liveCutoverMetricsPresent":  true,
+                   "supervisorNodeRecoveryMetricsPresent":  true,
                    "prometheusHasHelpAndType":  true,
                    "prometheusContainsNoUrls":  true,
                    "prometheusContainsNoEnvAssignments":  true,

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-20T04:23:53.4765001Z",
+    "generatedAt":  "2026-05-20T05:32:00.4313378Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
@@ -10,11 +10,11 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-check-contract-critical\\input"
                 },
     "chain":  {
-                  "latestHeight":  "97692",
-                  "finalizedHeight":  "97692",
-                  "stateFileLastWriteAgeSeconds":  1,
+                  "latestHeight":  "98307",
+                  "finalizedHeight":  "98307",
+                  "stateFileLastWriteAgeSeconds":  5,
                   "monitorStatus":  "passed",
-                  "monitorSamples":  2,
+                  "monitorSamples":  3,
                   "monitorHeightAdvanced":  true,
                   "mempoolDepth":  0
               },
@@ -24,10 +24,10 @@
                               "txIntakeRows":  159,
                               "txIntakeAcceptedRows":  159,
                               "txIntakeInvalidRows":  0,
-                              "txIntakeLastWriteAgeSeconds":  4561.786,
+                              "txIntakeLastWriteAgeSeconds":  8648.447,
                               "runtimeSubmitDir":  "devnet/local/intake/runtime-submit",
                               "runtimeSubmitFileCount":  4,
-                              "runtimeSubmitNewestFileAgeSeconds":  412920.667,
+                              "runtimeSubmitNewestFileAgeSeconds":  417007.372,
                               "runtimeInboxDir":  "devnet/local/node/inbox",
                               "runtimeInboxFileCount":  0,
                               "runtimeInboxNewestFileAgeSeconds":  null,
@@ -36,6 +36,7 @@
     "reportStatuses":  {
                            "serviceStatus":  "passed",
                            "serviceSupervisor":  "passed",
+                           "serviceSupervisorValidation":  "passed",
                            "serviceMonitor":  "passed",
                            "transactionIntake":  "passed",
                            "transactionIntakeInvalidRows":  0,
@@ -56,6 +57,14 @@
                            "supervisorBridgeRelayerAfterStatus":  "missing",
                            "supervisorBridgeRelayerAfterCommandLineMatched":  false,
                            "supervisorBridgeRelayerAfterReportHealthy":  false,
+                           "supervisorNodeRecoveryHealthy":  true,
+                           "supervisorNodeRestartAttempts":  1,
+                           "supervisorNodeCrashDetected":  true,
+                           "supervisorNodeRecovered":  true,
+                           "supervisorNodeRecoveryControlPlaneRunning":  true,
+                           "supervisorNodeRecoveryLiveProfile":  true,
+                           "supervisorNodeRecoveryMaxBlocksUnbounded":  true,
+                           "supervisorNodeRecoveryLatestHeight":  "15252",
                            "supervisorLatestRestartReasons":  [
 
                                                               ],
@@ -278,6 +287,7 @@
     "reportPaths":  {
                         "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-check-contract-critical\\input\\service-status-report.json",
                         "serviceSupervisor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-check-contract-critical\\input\\service-supervisor-report.json",
+                        "serviceSupervisorValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-check-contract-critical\\input\\service-supervisor-validation-report.json",
                         "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-check-contract-critical\\input\\service-monitor-report.json",
                         "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-check-contract-critical\\input\\public-rpc-readiness-report.json",
                         "publicRpcDeploymentBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-check-contract-critical\\input\\public-rpc-deployment-bundle-report.json",

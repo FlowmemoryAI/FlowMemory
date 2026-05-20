@@ -45,6 +45,7 @@ function Resolve-OpsInputReportPath {
 $paths = [ordered]@{
     serviceStatus = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
     serviceSupervisor = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-report.json"
+    serviceSupervisorValidation = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
     serviceMonitor = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     publicRpc = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
     publicRpcDeploymentBundle = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
@@ -260,6 +261,7 @@ foreach ($entry in $paths.GetEnumerator()) {
 $findings = New-Object System.Collections.ArrayList
 $service = $reports.serviceStatus
 $serviceSupervisor = $reports.serviceSupervisor
+$serviceSupervisorValidation = $reports.serviceSupervisorValidation
 $monitor = $reports.serviceMonitor
 $serviceStatus = Get-OpsStatus -Report $service
 $monitorStatus = Get-OpsStatus -Report $monitor
@@ -288,6 +290,23 @@ $supervisorRelayerAfterStatus = [string](Get-OpsProp -Object $supervisorLatestAf
 $supervisorRelayerAfterCommandLineMatched = Get-OpsProp -Object $supervisorLatestAfter -Name "bridgeRelayerLoopCommandLineMatched" -Default $false
 $supervisorRelayerAfterReportHealthy = Get-OpsProp -Object $supervisorLatestAfter -Name "bridgeRelayerLoopReportHealthy" -Default $false
 $supervisorRelayerRecoveryHealthy = (-not ($supervisorBridgeRelayerRequested -eq $true)) -or ($supervisorStatus -in @("passed", "watching") -and $supervisorRelayerAfterStatus -eq "running" -and $supervisorRelayerAfterCommandLineMatched -eq $true -and $supervisorRelayerAfterReportHealthy -eq $true)
+$supervisorValidationStatus = Get-OpsStatus -Report $serviceSupervisorValidation
+$supervisorValidationChecks = Get-OpsProp -Object $serviceSupervisorValidation -Name "checks"
+$supervisorNodeRecovery = Get-OpsProp -Object $serviceSupervisorValidation -Name "nodeRecovery"
+$supervisorNodeAfterRecovery = Get-OpsProp -Object $supervisorNodeRecovery -Name "afterRecovery"
+$supervisorNodeRestartAttempts = [int](Get-OpsProp -Object $supervisorNodeRecovery -Name "restartAttempts" -Default 0)
+$supervisorNodeCrashDetected = (Get-OpsProp -Object $supervisorValidationChecks -Name "nodeCrashDetected" -Default $false) -eq $true
+$supervisorNodeRecovered = (Get-OpsProp -Object $supervisorValidationChecks -Name "afterNodeRecoveryNodeRunning" -Default $false) -eq $true
+$supervisorNodeRecoveryControlPlaneRunning = (Get-OpsProp -Object $supervisorValidationChecks -Name "afterNodeRecoveryControlPlaneRunning" -Default $false) -eq $true
+$supervisorNodeRecoveryLiveProfile = (Get-OpsProp -Object $supervisorValidationChecks -Name "afterNodeRecoveryLiveProfile" -Default $false) -eq $true
+$supervisorNodeRecoveryMaxBlocksUnbounded = (Get-OpsProp -Object $supervisorValidationChecks -Name "afterNodeRecoveryMaxBlocksUnbounded" -Default $false) -eq $true
+$supervisorNodeRecoveryHealthy = $supervisorValidationStatus -eq "passed" `
+    -and $supervisorNodeRestartAttempts -ge 1 `
+    -and $supervisorNodeCrashDetected `
+    -and $supervisorNodeRecovered `
+    -and $supervisorNodeRecoveryControlPlaneRunning `
+    -and $supervisorNodeRecoveryLiveProfile `
+    -and $supervisorNodeRecoveryMaxBlocksUnbounded
 $latestHeight = [string](Get-OpsProp -Object $chain -Name "latestHeight" -Default "")
 $finalizedHeight = [string](Get-OpsProp -Object $chain -Name "finalizedHeight" -Default "")
 $stateAge = [int](Get-OpsProp -Object $chain -Name "stateFileLastWriteAgeSeconds" -Default 999999)
@@ -325,6 +344,9 @@ if ($bridgeRelayerLoopStatus -eq "running" -and $bridgeRelayerLoopReportHealthy 
 }
 if ($supervisorBridgeRelayerRequested -eq $true -and $supervisorRelayerRecoveryHealthy -ne $true) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "supervisor-relayer-recovery-failed" -Message "Service supervisor requested the bridge relayer loop but latest recovery evidence does not show a healthy relayer loop." -Commands @("npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop", "npm run flowchain:service:supervisor:validate", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop", "npm run flowchain:bridge:emergency-stop")
+}
+if ($supervisorNodeRecoveryHealthy -ne $true) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "supervisor-node-recovery-validation-failed" -Message "Service supervisor node crash recovery validation is missing or failed." -Commands @("npm run flowchain:service:supervisor:validate", "npm run flowchain:service:supervisor -- -Once", "npm run flowchain:service:restart -- -LiveProfile")
 }
 
 $publicRpcStatus = Get-OpsStatus -Report $reports.publicRpc
@@ -692,6 +714,7 @@ $report = [ordered]@{
     reportStatuses = [ordered]@{
         serviceStatus = $serviceStatus
         serviceSupervisor = $supervisorStatus
+        serviceSupervisorValidation = $supervisorValidationStatus
         serviceMonitor = $monitorStatus
         transactionIntake = if ($txIntakeInvalidRows -eq 0) { "passed" } else { "failed" }
         transactionIntakeInvalidRows = $txIntakeInvalidRows
@@ -712,6 +735,14 @@ $report = [ordered]@{
         supervisorBridgeRelayerAfterStatus = $supervisorRelayerAfterStatus
         supervisorBridgeRelayerAfterCommandLineMatched = $supervisorRelayerAfterCommandLineMatched
         supervisorBridgeRelayerAfterReportHealthy = $supervisorRelayerAfterReportHealthy
+        supervisorNodeRecoveryHealthy = $supervisorNodeRecoveryHealthy
+        supervisorNodeRestartAttempts = $supervisorNodeRestartAttempts
+        supervisorNodeCrashDetected = $supervisorNodeCrashDetected
+        supervisorNodeRecovered = $supervisorNodeRecovered
+        supervisorNodeRecoveryControlPlaneRunning = $supervisorNodeRecoveryControlPlaneRunning
+        supervisorNodeRecoveryLiveProfile = $supervisorNodeRecoveryLiveProfile
+        supervisorNodeRecoveryMaxBlocksUnbounded = $supervisorNodeRecoveryMaxBlocksUnbounded
+        supervisorNodeRecoveryLatestHeight = [string](Get-OpsProp -Object $supervisorNodeAfterRecovery -Name "latestHeight" -Default "")
         supervisorLatestRestartReasons = @($supervisorLatestRestartReasons)
         publicRpc = $publicRpcStatus
         publicRpcDeploymentBundle = $publicRpcDeploymentBundleStatus

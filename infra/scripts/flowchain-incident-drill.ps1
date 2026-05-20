@@ -18,6 +18,7 @@ New-Item -ItemType Directory -Force -Path $runDir | Out-Null
 $baseReportPaths = [ordered]@{
     "service-status-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
     "service-supervisor-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-report.json"
+    "service-supervisor-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
     "service-monitor-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     "public-rpc-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
     "public-rpc-deployment-bundle-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
@@ -113,6 +114,43 @@ function New-DrillFallbackReport {
                     postRestartPollSeconds = 1
                 }
                 iterations = @()
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
+            }
+        }
+        "service-supervisor-validation-report.json" {
+            return [ordered]@{
+                schema = "flowchain.service_supervisor_validation_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "passed"
+                restartAttempts = 1
+                nodeRecovery = [ordered]@{
+                    afterCrash = [ordered]@{
+                        status = "failed"
+                        nodeStatus = "stopped"
+                        detected = $true
+                    }
+                    afterRecovery = [ordered]@{
+                        status = "passed"
+                        nodeRunning = $true
+                        controlPlaneRunning = $true
+                        latestHeight = "100"
+                        liveProfile = $true
+                        maxBlocks = 0
+                    }
+                    restartAttempts = 1
+                }
+                checks = [ordered]@{
+                    nodeCrashDetected = $true
+                    nodeRestartAttemptsExactlyOne = $true
+                    afterNodeRecoveryNodeRunning = $true
+                    afterNodeRecoveryControlPlaneRunning = $true
+                    afterNodeRecoveryLiveProfile = $true
+                    afterNodeRecoveryMaxBlocksUnbounded = $true
+                }
+                failedChecks = @()
+                secretMarkerFindings = @()
                 envValuesPrinted = $false
                 noSecrets = $true
                 broadcasts = $false
@@ -906,6 +944,47 @@ Invoke-SyntheticOpsCase -Id "supervisor-relayer-recovery-failed-critical" `
                     }
                 }
             )
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
+        }
+    }
+
+Invoke-SyntheticOpsCase -Id "supervisor-node-recovery-validation-critical" `
+    -Requirement "A missing or failed supervisor node crash recovery proof is classified as a critical incident before live service autorecovery is trusted." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("supervisor-node-recovery-validation-failed") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "service-supervisor-validation-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "failed"
+            $nodeRecovery = Get-DrillProp -Object $report -Name "nodeRecovery"
+            if ($null -eq $nodeRecovery) {
+                $nodeRecovery = [ordered]@{}
+                Set-DrillProp -Object $report -Name "nodeRecovery" -Value $nodeRecovery
+            }
+            Set-DrillProp -Object $nodeRecovery -Name "restartAttempts" -Value 0
+            $afterRecovery = Get-DrillProp -Object $nodeRecovery -Name "afterRecovery"
+            if ($null -eq $afterRecovery) {
+                $afterRecovery = [ordered]@{}
+                Set-DrillProp -Object $nodeRecovery -Name "afterRecovery" -Value $afterRecovery
+            }
+            Set-DrillProp -Object $afterRecovery -Name "status" -Value "failed"
+            Set-DrillProp -Object $afterRecovery -Name "nodeRunning" -Value $false
+            Set-DrillProp -Object $afterRecovery -Name "controlPlaneRunning" -Value $false
+            Set-DrillProp -Object $afterRecovery -Name "liveProfile" -Value $false
+            Set-DrillProp -Object $afterRecovery -Name "maxBlocks" -Value 1
+            $checks = Get-DrillProp -Object $report -Name "checks"
+            if ($null -eq $checks) {
+                $checks = [ordered]@{}
+                Set-DrillProp -Object $report -Name "checks" -Value $checks
+            }
+            foreach ($name in @("nodeCrashDetected", "nodeRestartAttemptsExactlyOne", "afterNodeRecoveryNodeRunning", "afterNodeRecoveryControlPlaneRunning", "afterNodeRecoveryLiveProfile", "afterNodeRecoveryMaxBlocksUnbounded")) {
+                Set-DrillProp -Object $checks -Name $name -Value $false
+            }
+            Set-DrillProp -Object $report -Name "failedChecks" -Value @("nodeCrashDetected", "nodeRestartAttemptsExactlyOne", "afterNodeRecoveryNodeRunning", "afterNodeRecoveryControlPlaneRunning", "afterNodeRecoveryLiveProfile", "afterNodeRecoveryMaxBlocksUnbounded")
+            Set-DrillProp -Object $report -Name "secretMarkerFindings" -Value @()
             Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
             Set-DrillProp -Object $report -Name "noSecrets" -Value $true
             Set-DrillProp -Object $report -Name "broadcasts" -Value $false

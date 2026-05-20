@@ -1,0 +1,208 @@
+{
+    "schema":  "flowchain.service_supervisor_validation_report.v0",
+    "generatedAt":  "2026-05-20T05:03:23.6985833Z",
+    "status":  "failed",
+    "statePath":  "devnet/local/service-supervisor-validation/state.json",
+    "nodeDir":  "devnet/local/service-supervisor-validation/node",
+    "servicesDir":  "devnet/local/service-supervisor-validation/services",
+    "controlPlane":  {
+                         "host":  "127.0.0.1",
+                         "port":  8797,
+                         "killedPid":  57580
+                     },
+    "before":  {
+                   "status":  "passed"
+               },
+    "afterCrash":  {
+                       "status":  "failed",
+                       "controlPlaneStatus":  "stopped"
+                   },
+    "afterRecovery":  {
+                          "status":  "passed",
+                          "nodeRunning":  true,
+                          "controlPlaneRunning":  true,
+                          "latestHeight":  "15243",
+                          "liveProfile":  true,
+                          "maxBlocks":  0
+                      },
+    "restartAttempts":  1,
+    "nodeRecovery":  {
+                         "beforeCrash":  {
+                                             "status":  "passed",
+                                             "pid":  69092
+                                         },
+                         "afterCrash":  {
+                                            "status":  "failed",
+                                            "nodeStatus":  "stopped",
+                                            "detected":  true
+                                        },
+                         "afterRecovery":  {
+                                               "status":  "failed",
+                                               "nodeRunning":  false,
+                                               "controlPlaneRunning":  false,
+                                               "latestHeight":  "15252",
+                                               "liveProfile":  false,
+                                               "maxBlocks":  1
+                                           },
+                         "restartAttempts":  0
+                     },
+    "relayerLoopRecovery":  {
+                                "beforeCrash":  {
+                                                    "status":  "passed",
+                                                    "loopStatus":  "running",
+                                                    "pid":  8560,
+                                                    "commandLineMatched":  true,
+                                                    "reportStatus":  "blocked",
+                                                    "reportHealthy":  true
+                                                },
+                                "afterCrash":  {
+                                                   "status":  "passed",
+                                                   "loopStatus":  "stopped",
+                                                   "detected":  true
+                                               },
+                                "afterRecovery":  {
+                                                      "status":  "passed",
+                                                      "nodeRunning":  true,
+                                                      "controlPlaneRunning":  true,
+                                                      "liveProfile":  true,
+                                                      "maxBlocks":  0,
+                                                      "loopStatus":  "running",
+                                                      "loopPid":  26476,
+                                                      "loopCommandLineMatched":  true,
+                                                      "reportStatus":  "blocked",
+                                                      "reportHealthy":  true
+                                                  },
+                                "restartAttempts":  1
+                            },
+    "checks":  {
+                   "preCleanStopCommandPassed":  true,
+                   "startIsolatedLiveServiceCommandPassed":  true,
+                   "beforeStatusCommandPassed":  true,
+                   "beforeStatusPassed":  true,
+                   "beforeControlPlanePidRecorded":  true,
+                   "crashStatusCommandPassed":  true,
+                   "crashStatusDetected":  true,
+                   "supervisorOnceRecoveryCommandPassed":  true,
+                   "restartAttemptsExactlyOne":  true,
+                   "afterStatusCommandPassed":  true,
+                   "afterRecoveryStatusPassed":  true,
+                   "afterRecoveryNodeRunning":  true,
+                   "afterRecoveryControlPlaneRunning":  true,
+                   "afterRecoveryHeightNumeric":  true,
+                   "afterRecoveryLiveProfile":  true,
+                   "afterRecoveryMaxBlocksUnbounded":  true,
+                   "beforeNodeCrashPidRecorded":  true,
+                   "nodeCrashStatusCommandPassed":  true,
+                   "nodeCrashDetected":  false,
+                   "supervisorNodeRecoveryCommandPassed":  true,
+                   "nodeRestartAttemptsExactlyOne":  false,
+                   "afterNodeRecoveryStatusCommandPassed":  true,
+                   "afterNodeRecoveryStatusPassed":  true,
+                   "afterNodeRecoveryNodeRunning":  false,
+                   "afterNodeRecoveryControlPlaneRunning":  false,
+                   "afterNodeRecoveryHeightNumeric":  true,
+                   "afterNodeRecoveryLiveProfile":  false,
+                   "afterNodeRecoveryMaxBlocksUnbounded":  false,
+                   "restartWithRelayerLoopCommandPassed":  true,
+                   "beforeRelayerCrashStatusCommandPassed":  true,
+                   "beforeRelayerCrashStatusPassed":  true,
+                   "beforeRelayerCrashPidRecorded":  true,
+                   "beforeRelayerCrashRunning":  true,
+                   "beforeRelayerCrashCommandLineMatched":  true,
+                   "beforeRelayerCrashReportHealthy":  true,
+                   "relayerCrashStatusCommandPassed":  true,
+                   "relayerCrashDetected":  true,
+                   "supervisorRelayerRecoveryCommandPassed":  true,
+                   "relayerRestartAttemptsExactlyOne":  true,
+                   "afterRelayerRecoveryStatusCommandPassed":  true,
+                   "afterRelayerRecoveryStatusPassed":  true,
+                   "afterRelayerRecoveryNodeRunning":  true,
+                   "afterRelayerRecoveryControlPlaneRunning":  true,
+                   "afterRelayerRecoveryLiveProfile":  true,
+                   "afterRelayerRecoveryMaxBlocksUnbounded":  true,
+                   "afterRelayerRecoveryLoopRunning":  true,
+                   "afterRelayerRecoveryLoopPidRecorded":  true,
+                   "afterRelayerRecoveryLoopCommandLineMatched":  true,
+                   "afterRelayerRecoveryLoopReportHealthy":  true,
+                   "childLogPathsInsideRepo":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+                         "nodeCrashDetected",
+                         "nodeRestartAttemptsExactlyOne",
+                         "afterNodeRecoveryNodeRunning",
+                         "afterNodeRecoveryControlPlaneRunning",
+                         "afterNodeRecoveryLiveProfile",
+                         "afterNodeRecoveryMaxBlocksUnbounded"
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "reportPaths":  {
+                        "validation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-report.json",
+                        "before":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-status-before.json",
+                        "afterCrash":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-status-after-crash.json",
+                        "supervisor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-supervisor-report.json",
+                        "restart":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-restart-report.json",
+                        "stop":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-stop-report.json",
+                        "after":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-status-after.json",
+                        "nodeAfterCrash":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-node-status-after-crash.json",
+                        "nodeAfterRecovery":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-node-status-after-recovery.json",
+                        "nodeSupervisor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-node-supervisor-report.json",
+                        "nodeRestart":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-node-restart-report.json",
+                        "nodeStop":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-node-stop-report.json",
+                        "relayerBeforeCrash":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-relayer-status-before-crash.json",
+                        "relayerAfterCrash":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-relayer-status-after-crash.json",
+                        "relayerDuringRecovery":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-relayer-status-during-recovery.json",
+                        "relayerAfterRecovery":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-relayer-status-after-recovery.json",
+                        "relayerStartRestart":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-relayer-start-restart-report.json",
+                        "relayerStartStop":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-relayer-start-stop-report.json",
+                        "relayerSupervisor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-relayer-supervisor-report.json",
+                        "relayerRestart":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-relayer-restart-report.json",
+                        "relayerStop":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-relayer-stop-report.json"
+                    },
+    "steps":  [
+                  {
+                      "name":  "pre-clean-stop",
+                      "exitCode":  0,
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260519235654055-23900-6ab759f1.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260519235654055-23900-6ab759f1.stderr.log"
+                  },
+                  {
+                      "name":  "start-isolated-live-service",
+                      "exitCode":  0,
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260519235657204-23900-7a343cdf.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260519235657204-23900-7a343cdf.stderr.log"
+                  },
+                  {
+                      "name":  "supervisor-once-recovery",
+                      "exitCode":  0,
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260519235801161-23900-3d547034.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260519235801161-23900-3d547034.stderr.log"
+                  },
+                  {
+                      "name":  "supervisor-once-node-recovery",
+                      "exitCode":  0,
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260519235838183-23900-17955fa2.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260519235838183-23900-17955fa2.stderr.log"
+                  },
+                  {
+                      "name":  "restart-with-relayer-loop",
+                      "exitCode":  0,
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520000028734-23900-3bc61561.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520000028734-23900-3bc61561.stderr.log"
+                  },
+                  {
+                      "name":  "supervisor-once-relayer-loop-recovery",
+                      "exitCode":  0,
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520000203935-23900-ce79a662.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520000203935-23900-ce79a662.stderr.log"
+                  }
+              ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

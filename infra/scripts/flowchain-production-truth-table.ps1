@@ -1538,6 +1538,7 @@ $definitions = @(
             "everyActiveRuleHasCommands",
             "commandsAvoidInlineEnvAssignment",
             "commandsAvoidUrls",
+            "supervisorNodeRecoveryRuleCoversLiveProfile",
             "findingsWithoutCommandsEmpty",
             "notificationPlanStoresNoSecrets",
             "notificationPlanNoNetworkDelivery",
@@ -1566,7 +1567,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "ops-metrics-export"
-        requirement = "Ops metrics export converts no-secret service, alert, public-readiness, bridge, tester, truth-table, and no-secret evidence into JSON plus Prometheus textfile metrics without network delivery or owner-value leakage."
+        requirement = "Ops metrics export converts no-secret service, supervisor autorecovery, alert, public-readiness, bridge, tester, truth-table, and no-secret evidence into JSON plus Prometheus textfile metrics without network delivery or owner-value leakage."
         path = "docs/agent-runs/live-product-infra-rpc/ops-metrics-export-report.json"
         command = "npm run flowchain:ops:metrics:export"
         productionGate = $true
@@ -1587,6 +1588,7 @@ $definitions = @(
             "metricCountSufficient",
             "requiredMetricsPresent",
             "externalTesterEvidenceMetricsPresent",
+            "supervisorNodeRecoveryMetricsPresent",
             "prometheusHasHelpAndType",
             "prometheusContainsNoUrls",
             "prometheusContainsNoEnvAssignments",

@@ -210,6 +210,14 @@ $rules = @(
         commands = @("npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop", "npm run flowchain:service:supervisor:validate", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop", "npm run flowchain:bridge:emergency-stop")
     },
     [ordered]@{
+        id = "supervisor-node-recovery-validation-failed"
+        severity = "critical"
+        findingCodes = @("supervisor-node-recovery-validation-failed")
+        signal = "Service supervisor node crash recovery validation is missing or failed."
+        threshold = "service-supervisor-validation report is not passed or node crash, restart, live-profile, unbounded, node-running, or control-plane-readable recovery checks are false"
+        commands = @("npm run flowchain:service:supervisor:validate", "npm run flowchain:service:supervisor -- -Once", "npm run flowchain:service:restart -- -LiveProfile")
+    },
+    [ordered]@{
         id = "deployment-refresh-aborted"
         severity = "critical"
         findingCodes = @("deployment-refresh-aborted")
@@ -341,6 +349,10 @@ $bridgeRelayerCheckContractRule = @($rules | Where-Object { $_.id -eq "bridge-re
 $bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRule.Count -eq 1 `
     -and ([string]$bridgeRelayerCheckContractRule[0].threshold).IndexOf("failedChecks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$bridgeRelayerCheckContractRule[0].threshold).IndexOf("required checks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$supervisorNodeRecoveryRule = @($rules | Where-Object { $_.id -eq "supervisor-node-recovery-validation-failed" } | Select-Object -First 1)
+$supervisorNodeRecoveryRuleCoversLiveProfile = $supervisorNodeRecoveryRule.Count -eq 1 `
+    -and ([string]$supervisorNodeRecoveryRule[0].threshold).IndexOf("live-profile", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$supervisorNodeRecoveryRule[0].threshold).IndexOf("unbounded", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
 $allCommands = @($rules | ForEach-Object { @($_.commands) })
 $commandsWithInlineEnvAssignment = @($allCommands | Where-Object { "$_" -match '(^|\s)(\$env:)?[A-Z][A-Z0-9_]+\s*=' })
 $commandsWithUrls = @($allCommands | Where-Object { "$_" -match 'https?://' })
@@ -361,6 +373,7 @@ $checks = [ordered]@{
     publicRpcEdgeHardeningRuleCoversSecurityHeaders = $publicRpcEdgeHardeningRuleCoversSecurityHeaders
     publicRpcEdgeHardeningRuleCoversWalletCutover = $publicRpcEdgeHardeningRuleCoversWalletCutover
     bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRuleCoversFailedChecks
+    supervisorNodeRecoveryRuleCoversLiveProfile = $supervisorNodeRecoveryRuleCoversLiveProfile
     notificationPlanStoresNoSecrets = $true
     notificationPlanNoNetworkDelivery = $true
     envValuesPrintedFalse = $true

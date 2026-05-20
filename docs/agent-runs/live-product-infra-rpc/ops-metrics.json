@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T04:23:18.9438954Z",
+    "generatedAt":  "2026-05-20T05:31:21.8030658Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -13,7 +13,7 @@
                           "ownerInputsValidationStatus":  "passed",
                           "ownerActivationPlanStatus":  "passed",
                           "liveCutoverStatus":  "blocked",
-                          "truthTableStatus":  "failed",
+                          "truthTableStatus":  "blocked-owner-input",
                           "noSecretStatus":  "passed"
                       },
     "metrics":  [
@@ -21,25 +21,25 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  97692
+                        "value":  98307
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  97692
+                        "value":  98307
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  1
+                        "value":  5
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
                         "type":  "gauge",
                         "help":  "Service monitor samples recorded in the current ops snapshot.",
-                        "value":  2
+                        "value":  3
                     },
                     {
                         "name":  "flowchain_height_advanced",
@@ -75,7 +75,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  4525.094
+                        "value":  8596.177
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -105,13 +105,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  27
+                        "value":  28
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  20
+                        "value":  21
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -366,6 +366,36 @@
                         "value":  1
                     },
                     {
+                        "name":  "flowchain_supervisor_node_recovery_validated",
+                        "type":  "gauge",
+                        "help":  "One when isolated supervisor validation proves node crash recovery under the live profile.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_supervisor_node_restart_attempts",
+                        "type":  "gauge",
+                        "help":  "Node recovery restart attempts recorded by isolated supervisor validation.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_supervisor_node_crash_detected",
+                        "type":  "gauge",
+                        "help":  "One when isolated supervisor validation detected a killed node process.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_supervisor_node_recovery_live_profile",
+                        "type":  "gauge",
+                        "help":  "One when isolated node recovery returned under the live profile.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_supervisor_node_recovery_unbounded",
+                        "type":  "gauge",
+                        "help":  "One when isolated node recovery preserved MaxBlocks=0.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_external_tester_ready",
                         "type":  "gauge",
                         "help":  "One when external tester readiness is passed.",
@@ -543,19 +573,19 @@
                         "name":  "flowchain_truth_gates_total",
                         "type":  "gauge",
                         "help":  "Total production truth table gates.",
-                        "value":  51
+                        "value":  52
                     },
                     {
                         "name":  "flowchain_truth_gates_passed",
                         "type":  "gauge",
                         "help":  "Passed production truth table gates.",
-                        "value":  35
+                        "value":  36
                     },
                     {
                         "name":  "flowchain_truth_gates_owner_blocked",
                         "type":  "gauge",
                         "help":  "Owner-input blocked production truth table gates.",
-                        "value":  13
+                        "value":  16
                     },
                     {
                         "name":  "flowchain_truth_gates_repo_blocked",
@@ -567,16 +597,16 @@
                         "name":  "flowchain_truth_gates_failed",
                         "type":  "gauge",
                         "help":  "Failed production truth table gates.",
-                        "value":  2
+                        "value":  0
                     },
                     {
                         "name":  "flowchain_truth_gates_stale",
                         "type":  "gauge",
                         "help":  "Stale production truth table gates.",
-                        "value":  1
+                        "value":  0
                     }
                 ],
-    "metricCount":  93,
+    "metricCount":  98,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

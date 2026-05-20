@@ -676,10 +676,26 @@ Add-DeploymentItem -Items $items -Id "pre-share-monitoring" `
 $supervisorValidation = $reports.serviceSupervisorValidation
 $supervisorValidationStatus = Get-DeploymentStatus -Report $supervisorValidation
 $supervisorRestartAttempts = [int](Get-DeploymentProp -Object $supervisorValidation -Name "restartAttempts" -Default 0)
+$supervisorNodeRecovery = Get-DeploymentProp -Object $supervisorValidation -Name "nodeRecovery"
+$supervisorRelayerRecovery = Get-DeploymentProp -Object $supervisorValidation -Name "relayerLoopRecovery"
+$supervisorChecks = Get-DeploymentProp -Object $supervisorValidation -Name "checks"
+$supervisorNodeRestartAttempts = [int](Get-DeploymentProp -Object $supervisorNodeRecovery -Name "restartAttempts" -Default 0)
+$supervisorRelayerRestartAttempts = [int](Get-DeploymentProp -Object $supervisorRelayerRecovery -Name "restartAttempts" -Default 0)
+$supervisorRecoveryReady = ($supervisorValidationStatus -eq "passed") `
+    -and ($supervisorRestartAttempts -ge 1) `
+    -and ($supervisorNodeRestartAttempts -ge 1) `
+    -and ($supervisorRelayerRestartAttempts -ge 1) `
+    -and ((Get-DeploymentProp -Object $supervisorChecks -Name "nodeCrashDetected" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $supervisorChecks -Name "afterNodeRecoveryNodeRunning" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $supervisorChecks -Name "afterNodeRecoveryControlPlaneRunning" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $supervisorChecks -Name "afterNodeRecoveryLiveProfile" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $supervisorChecks -Name "afterNodeRecoveryMaxBlocksUnbounded" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $supervisorChecks -Name "relayerCrashDetected" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false) -eq $true)
 Add-DeploymentItem -Items $items -Id "service-autorecovery" `
-    -Requirement "The owner service has an autorecovery supervisor and an isolated recovery drill proving control-plane restart without touching live state." `
-    -Status $(if (($supervisorValidationStatus -eq "passed") -and ($supervisorRestartAttempts -ge 1)) { "passed" } else { "failed" }) `
-    -Evidence "supervisorValidation=$supervisorValidationStatus, restartAttempts=$supervisorRestartAttempts" `
+    -Requirement "The owner service has an autorecovery supervisor and an isolated recovery drill proving node, control-plane, and bridge-relayer-loop restart without touching live state." `
+    -Status $(if ($supervisorRecoveryReady) { "passed" } else { "failed" }) `
+    -Evidence "supervisorValidation=$supervisorValidationStatus, restartAttempts=$supervisorRestartAttempts, nodeRestartAttempts=$supervisorNodeRestartAttempts, relayerRestartAttempts=$supervisorRelayerRestartAttempts, nodeRecovered=$(Get-DeploymentProp -Object $supervisorChecks -Name "afterNodeRecoveryNodeRunning" -Default $false), relayerRecovered=$(Get-DeploymentProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false)" `
     -Commands @("npm run flowchain:service:supervisor:validate", "npm run flowchain:service:supervisor -- -IntervalSeconds 30 -MaxRestartAttempts 3")
 
 $serviceInstallValidation = $reports.serviceInstallValidation

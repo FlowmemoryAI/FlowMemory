@@ -326,6 +326,11 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_direct_observe_staged_
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_loop_healthy" -Help "One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRelayerLoopReportHealthy"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_bridge_relayer_requested" -Help "One when the latest service supervisor report requested bridge relayer loop supervision." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorBridgeRelayerRequested"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_bridge_relayer_recovery_healthy" -Help "One when supervisor relayer-loop recovery evidence is healthy, or relayer supervision was not requested." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorBridgeRelayerRecoveryHealthy"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_node_recovery_validated" -Help "One when isolated supervisor validation proves node crash recovery under the live profile." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorNodeRecoveryHealthy"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_node_restart_attempts" -Help "Node recovery restart attempts recorded by isolated supervisor validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorNodeRestartAttempts"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_node_crash_detected" -Help "One when isolated supervisor validation detected a killed node process." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorNodeCrashDetected"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_node_recovery_live_profile" -Help "One when isolated node recovery returned under the live profile." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorNodeRecoveryLiveProfile"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_node_recovery_unbounded" -Help "One when isolated node recovery preserved MaxBlocks=0." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorNodeRecoveryMaxBlocksUnbounded"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_ready" -Help "One when external tester readiness is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "externalTester"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_ready" -Help "One when external tester returned evidence validation is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $externalTesterEvidence))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_failed_checks" -Help "Failed checks in the external tester returned evidence validation report." -Value (@((Get-MetricsProp -Object $externalTesterEvidence -Name "failedChecks" -Default @())).Count)
@@ -453,6 +458,11 @@ $requiredMetricNames = @(
     "flowchain_bridge_relayer_loop_healthy",
     "flowchain_supervisor_bridge_relayer_requested",
     "flowchain_supervisor_bridge_relayer_recovery_healthy",
+    "flowchain_supervisor_node_recovery_validated",
+    "flowchain_supervisor_node_restart_attempts",
+    "flowchain_supervisor_node_crash_detected",
+    "flowchain_supervisor_node_recovery_live_profile",
+    "flowchain_supervisor_node_recovery_unbounded",
     "flowchain_external_tester_evidence_ready",
     "flowchain_external_tester_evidence_failed_checks",
     "flowchain_external_tester_evidence_missing_files",
@@ -581,6 +591,13 @@ $checks = [ordered]@{
         "flowchain_live_cutover_tester_network_e2e_passed",
         "flowchain_live_cutover_owner_blocked",
         "flowchain_live_cutover_missing_owner_inputs"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    supervisorNodeRecoveryMetricsPresent = @(
+        "flowchain_supervisor_node_recovery_validated",
+        "flowchain_supervisor_node_restart_attempts",
+        "flowchain_supervisor_node_crash_detected",
+        "flowchain_supervisor_node_recovery_live_profile",
+        "flowchain_supervisor_node_recovery_unbounded"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     prometheusHasHelpAndType = $prometheusTextFromFile.Contains("# HELP flowchain_latest_height") -and $prometheusTextFromFile.Contains("# TYPE flowchain_latest_height gauge")
     prometheusContainsNoUrls = $prometheusTextFromFile -notmatch 'https?://'
