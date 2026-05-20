@@ -15,6 +15,7 @@ import { FlowMemoryView } from "./views/FlowMemoryView";
 import { FlowPulseStreamView } from "./views/FlowPulseStreamView";
 import { HardwareNodesView } from "./views/HardwareNodesView";
 import { OpsView } from "./views/OpsView";
+import { OwnerActivationView } from "./views/OwnerActivationView";
 import { OverviewView } from "./views/OverviewView";
 import { RawJsonInspectorView } from "./views/RawJsonInspectorView";
 import { RootfieldsView } from "./views/RootfieldsView";
@@ -121,6 +122,7 @@ export default function App() {
     <AppShell data={data} canaryData={canaryData} workbench={workbench}>
       <Routes>
         <Route path="/" element={<WorkbenchView data={data} workbench={workbench} onRefresh={() => setVersion((current) => current + 1)} />} />
+        <Route path="/activation" element={<OwnerActivationView workbench={workbench} />} />
         <Route path="/wallet" element={<WalletView workbench={workbench} />} />
         <Route path="/tester" element={<ExternalTesterLaunchView workbench={workbench} />} />
         <Route path="/bridge" element={<BridgePilotView workbench={workbench} />} />

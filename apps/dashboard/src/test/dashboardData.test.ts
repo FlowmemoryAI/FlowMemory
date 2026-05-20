@@ -28,6 +28,7 @@ import { WalletView } from "../views/WalletView";
 import { ExternalTesterLaunchView } from "../views/ExternalTesterLaunchView";
 import { ExplorerView } from "../views/ExplorerView";
 import { OpsView } from "../views/OpsView";
+import { OwnerActivationView } from "../views/OwnerActivationView";
 import { WorkbenchView } from "../views/WorkbenchView";
 
 describe("dashboard fixture", () => {
@@ -480,6 +481,29 @@ describe("dashboard fixture", () => {
     expect(html).toContain("/tester/wallets/send");
     expect(html).toContain("/explorer/summary");
     expect(html).toContain("npm run flowchain:external-tester:packet");
+    expect(html).not.toContain("local-tester-write-token");
+  });
+
+  it("renders the L1 activation cockpit without owner values", () => {
+    const workbench = buildWorkbenchSnapshot(data, {
+      devnetState,
+      devnetDashboardState,
+      bridgeTestDeposit,
+      liveReadinessReport,
+    });
+    const html = renderToStaticMarkup(createElement(MemoryRouter, { initialEntries: ["/activation"] }, createElement(OwnerActivationView, { workbench })));
+
+    expect(html).toContain("L1 activation");
+    expect(html).toContain("Activation stages");
+    expect(html).toContain("Expose repo-owned FlowChain RPC");
+    expect(html).toContain("Provision durable state backup storage");
+    expect(html).toContain("Configure capped Base 8453 bridge pilot observation");
+    expect(html).toContain("Owner inputs");
+    expect(html).toContain("Next commands");
+    expect(html).toContain("Do not send");
+    expect(html).toContain("FLOWCHAIN_RPC_PUBLIC_URL");
+    expect(html).toContain("FLOWCHAIN_BASE8453_RPC_URL");
+    expect(html).toContain("npm run flowchain:owner-env:readiness");
     expect(html).not.toContain("local-tester-write-token");
   });
 

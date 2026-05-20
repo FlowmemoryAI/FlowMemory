@@ -341,6 +341,12 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await expect(page.getByText("RPC headers", { exact: true }).first()).toBeVisible();
     await expect(page.getByText("HSTS, no-sniff, no-store, CSP")).toBeVisible();
 
+    await page.goto("/activation");
+    await expect(page.getByRole("heading", { name: "L1 activation" })).toBeVisible();
+    await expect(page.getByLabel("L1 activation status")).toContainText("Missing inputs");
+    await expect(page.getByText("Expose repo-owned FlowChain RPC", { exact: false })).toBeVisible();
+    await expect(page.getByLabel("Missing owner inputs")).toContainText("FLOWCHAIN_RPC_PUBLIC_URL");
+
     await page.goto("/ops");
     await expect(page.getByRole("heading", { name: "Ops center" })).toBeVisible();
     await expect(page.getByLabel("Bridge relayer check contract")).toContainText("Relayer check contract");

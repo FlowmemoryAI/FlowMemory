@@ -1,12 +1,12 @@
 # FlowChain Dashboard UI Readiness
 
-Generated: 2026-05-20T01:03:13.6638873+00:00
+Generated: 2026-05-20T01:19:06.0336106+00:00
 Status: passed
 
 ## Coverage
 
 - Browser projects: chromium-desktop, chromium-mobile
-- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof
+- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof -> activation cockpit owner-input proof
 - Assertions: no secret text/storage leakage, no horizontal viewport overflow, no browser console errors
 
 ## Commands

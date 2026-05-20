@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.external_tester_readiness_report.v0",
-    "generatedAt":  "2026-05-20T01:05:08.7906380Z",
+    "generatedAt":  "2026-05-20T01:22:29.4572359Z",
     "status":  "blocked",
     "localTesterRehearsalReady":  true,
     "externalSharingReady":  false,
@@ -15,7 +15,7 @@
                    "publicTesterGatewayFaucetRouteValidated":  true,
                    "liveInfraReady":  false
                },
-    "latestHeight":  "95731",
+    "latestHeight":  "95902",
     "stateFileLastWriteAgeSeconds":  1,
     "testerNetwork":  {
                           "status":  "passed",
@@ -50,7 +50,7 @@
                       },
     "publicTesterGateway":  {
                                 "status":  "passed",
-                                "generatedAt":  "2026-05-20T00:40:34.4381103Z",
+                                "generatedAt":  "2026-05-20T01:22:29.0095320Z",
                                 "fresh":  true,
                                 "ready":  true,
                                 "maxSendUnits":  "10",
@@ -143,14 +143,15 @@
                     "testerNetworkRefreshOutputRedactedTail":  [
 
                                                                ],
-                    "publicTesterGatewayRefreshPerformed":  false,
-                    "publicTesterGatewayFreshBeforeRefresh":  true,
+                    "publicTesterGatewayRefreshPerformed":  true,
+                    "publicTesterGatewayFreshBeforeRefresh":  false,
                     "publicTesterGatewayReadyBeforeRefresh":  true,
                     "publicTesterGatewayFreshAfterRefresh":  true,
                     "publicTesterGatewayReadyAfterRefresh":  true,
-                    "publicTesterGatewayRefreshExitCode":  null,
+                    "publicTesterGatewayRefreshExitCode":  0,
                     "publicTesterGatewayRefreshOutputRedactedTail":  [
-
+                                                                         "FlowChain public tester gateway E2E status: passed",
+                                                                         "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json"
                                                                      ]
                 },
     "ownerNextActions":  [

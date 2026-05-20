@@ -147,6 +147,7 @@ $checks = [ordered]@{
     testerSendCovered = $specText.Contains("/tester/wallets/send")
     explorerRouteCovered = $specText.Contains("/explorer")
     testerLaunchRouteCovered = $specText.Contains("/tester")
+    activationRouteCovered = $specText.Contains("/activation")
     publicRpcHeaderProofCovered = $specText.Contains("RPC headers")
     noSecretLeakageAsserted = $specText.Contains("expectNoUiLeakage")
     noHorizontalOverflowAsserted = $specText.Contains("expectNoHorizontalOverflow")
@@ -170,7 +171,7 @@ $report = [ordered]@{
     secretMarkerFindings = @()
     commands = @($commands)
     browserProjects = @("chromium-desktop", "chromium-mobile")
-    coveredRoutes = @("/wallet?panel=tester", "/tester/wallets/create", "/tester/faucet", "/tester/wallets/send", "/explorer", "/tester")
+    coveredRoutes = @("/wallet?panel=tester", "/tester/wallets/create", "/tester/faucet", "/tester/wallets/send", "/explorer", "/tester", "/activation")
     envValuesPrinted = $false
     noSecrets = $true
     broadcasts = $false
@@ -201,7 +202,7 @@ $markdownLines = New-Object System.Collections.ArrayList
 [void] $markdownLines.Add("## Coverage")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("- Browser projects: chromium-desktop, chromium-mobile")
-[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof")
+[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof -> activation cockpit owner-input proof")
 [void] $markdownLines.Add("- Assertions: no secret text/storage leakage, no horizontal viewport overflow, no browser console errors")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("## Commands")

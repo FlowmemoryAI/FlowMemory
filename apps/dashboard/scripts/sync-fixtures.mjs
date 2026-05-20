@@ -63,6 +63,7 @@ const liveReadinessReportCopies = [
   "alert-install-validation-report.json",
   "ops-escalation-dry-run-report.json",
   "owner-inputs-report.json",
+  "owner-activation-plan-report.json",
   "no-secret-scan-report.json",
 ];
 
@@ -131,6 +132,10 @@ function blockerList(value) {
 
 function recordEntries(value) {
   return value && typeof value === "object" && !Array.isArray(value) ? Object.entries(value) : [];
+}
+
+function uniqueTexts(values) {
+  return [...new Set(asArray(values).map((value) => sanitizeText(value)).filter((value) => value !== "not recorded"))];
 }
 
 function gateFromContractItem(contract, id) {
@@ -211,6 +216,7 @@ function writeLiveReadinessSummary() {
   const alertInstallValidation = reports["alert-install-validation-report.json"];
   const opsEscalationDryRun = reports["ops-escalation-dry-run-report.json"];
   const ownerInputs = reports["owner-inputs-report.json"];
+  const ownerActivationPlan = reports["owner-activation-plan-report.json"];
   const noSecretScan = reports["no-secret-scan-report.json"];
   const gates = [...liveReadinessGateLabels.keys()].map((id) => gateFromContractItem(contract, id));
   const activeRuleIds = asArray(opsAlertRules?.activeRuleIds).map((id) => sanitizeText(id));
@@ -240,6 +246,26 @@ function writeLiveReadinessSummary() {
   const connectPackCheckValues = Object.values(externalTesterPacket?.connectPackChecks ?? {});
   const bridgeRelayerSteps = asArray(bridgeRelayer?.steps);
   const bridgeRelayerTimedOutSteps = timedOutSteps(bridgeRelayerSteps);
+  const activationStages = asArray(ownerActivationPlan?.stages).map((stage) => ({
+    id: sanitizeText(stage?.id),
+    title: sanitizeText(stage?.title),
+    status: sanitizeText(stage?.status),
+    ready: stage?.ready === true,
+    requiredEnvNames: uniqueTexts(stage?.requiredEnvNames),
+    optionalEnvNames: uniqueTexts(stage?.optionalEnvNames),
+    missingEnvNames: uniqueTexts(stage?.missingEnvNames),
+    invalidEnvNames: uniqueTexts(stage?.invalidEnvNames),
+    externalAccountsOrResources: uniqueTexts(stage?.externalAccountsOrResources),
+    ownerMustDo: uniqueTexts(stage?.ownerMustDo),
+    ownerMustNotSend: uniqueTexts(stage?.ownerMustNotSend),
+    validationCommands: commandList(stage?.validationCommands, 8),
+    sourceReports: asArray(stage?.sourceReports).map((sourceReport) => ({
+      name: sanitizeText(sourceReport?.name),
+      status: sanitizeText(sourceReport?.status),
+      path: sanitizeText(sourceReport?.path),
+    })),
+  }));
+  const activationForbiddenItems = uniqueTexts(activationStages.flatMap((stage) => stage.ownerMustNotSend));
   const latestHeight = asText(serviceStatus?.chain?.latestHeight, "not recorded");
   const finalizedHeight = asText(serviceStatus?.chain?.finalizedHeight, "not recorded");
   const privateRpcUrl = serviceStatus?.bind
@@ -290,6 +316,11 @@ function writeLiveReadinessSummary() {
       externalTesterPacketStatus: asText(externalTesterPacket?.status, "not recorded"),
       externalTesterConnectPackStatus: asText(externalTesterConnectPack?.status, "not recorded"),
       ownerInputReady: ownerInputs?.ownerInputReady === true,
+      ownerActivationStatus: asText(ownerActivationPlan?.status, "not recorded"),
+      ownerActivationReady: ownerActivationPlan?.activationReady === true,
+      ownerActivationStageCount: asText(ownerActivationPlan?.stageCount, String(activationStages.length)),
+      ownerActivationReadyStageCount: asText(ownerActivationPlan?.readyStageCount, "0"),
+      ownerActivationMissingCount: asArray(ownerActivationPlan?.missingEnvNames).length,
       noSecretStatus: asText(noSecretScan?.status, "not recorded"),
       opsSnapshotStatus: asText(opsSnapshot?.status, "not recorded"),
       opsAlertState: asText(opsAlertRules?.currentAlertState, "not recorded"),
@@ -353,6 +384,25 @@ function writeLiveReadinessSummary() {
       })),
       sendsNetworkNotifications: opsAlertRules?.notificationPlan?.sendsNetworkNotifications === true,
       storesSecrets: opsAlertRules?.notificationPlan?.storesSecrets === true,
+    },
+    ownerActivation: {
+      status: asText(ownerActivationPlan?.status, "not recorded"),
+      activationReady: ownerActivationPlan?.activationReady === true,
+      stageCount: asText(ownerActivationPlan?.stageCount, String(activationStages.length)),
+      readyStageCount: asText(ownerActivationPlan?.readyStageCount, "0"),
+      stagesNeedingOwnerInputCount: asText(ownerActivationPlan?.stagesNeedingOwnerInputCount, "0"),
+      missingEnvNames: uniqueTexts(ownerActivationPlan?.missingEnvNames),
+      invalidEnvNames: uniqueTexts(ownerActivationPlan?.invalidEnvNames),
+      requiredOwnerEnvNames: uniqueTexts(ownerActivationPlan?.requiredOwnerEnvNames),
+      optionalOwnerEnvNames: uniqueTexts(ownerActivationPlan?.optionalOwnerEnvNames),
+      nextCommands: commandList(ownerActivationPlan?.nextCommands, 10),
+      forbiddenItems: activationForbiddenItems,
+      stages: activationStages,
+      checks: ownerActivationPlan?.checks ?? {},
+      failedChecks: uniqueTexts(ownerActivationPlan?.failedChecks),
+      noSecrets: ownerActivationPlan?.noSecrets === true,
+      broadcasts: ownerActivationPlan?.broadcasts === true,
+      envValuesPrinted: ownerActivationPlan?.envValuesPrinted === true,
     },
     testerLaunch: {
       status: asText(externalTesterPacket?.status ?? externalTesterReadiness?.status, "not recorded"),

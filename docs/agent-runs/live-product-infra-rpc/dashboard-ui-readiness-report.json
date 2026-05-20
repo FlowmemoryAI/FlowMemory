@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.dashboard_ui_readiness_report.v0",
-    "generatedAt":  "2026-05-20T01:03:13.6638873+00:00",
+    "generatedAt":  "2026-05-20T01:19:06.0336106+00:00",
     "status":  "passed",
     "checks":  {
                    "dashboardPackageScriptPresent":  true,
@@ -15,6 +15,7 @@
                    "testerSendCovered":  true,
                    "explorerRouteCovered":  true,
                    "testerLaunchRouteCovered":  true,
+                   "activationRouteCovered":  true,
                    "publicRpcHeaderProofCovered":  true,
                    "noSecretLeakageAsserted":  true,
                    "noHorizontalOverflowAsserted":  true,
@@ -51,9 +52,9 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  25,
+                         "durationSeconds":  24,
                          "stdoutLineCount":  6,
-                         "stderrLineCount":  16
+                         "stderrLineCount":  20
                      },
                      {
                          "label":  "dashboard production build",
@@ -71,7 +72,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  129,
+                         "durationSeconds":  156,
                          "stdoutLineCount":  77,
                          "stderrLineCount":  0
                      }
@@ -86,7 +87,8 @@
                           "/tester/faucet",
                           "/tester/wallets/send",
                           "/explorer",
-                          "/tester"
+                          "/tester",
+                          "/activation"
                       ],
     "envValuesPrinted":  false,
     "noSecrets":  true,
