@@ -122,6 +122,18 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
   const latestHeight = text(ops?.latestHeight ?? metrics.latestHeight);
   const criticalCount = text(ops?.criticalCount ?? metrics.opsCriticalCount, "0");
   const blockedCount = text(ops?.blockedCount ?? metrics.opsBlockedCount, "0");
+  const serviceSupervisorValidationStatus = text(ops?.serviceSupervisorValidationStatus ?? metrics.serviceSupervisorValidationStatus, "not recorded");
+  const serviceSupervisorRestartAttempts = text(ops?.serviceSupervisorRestartAttempts ?? metrics.serviceSupervisorRestartAttempts, "0");
+  const serviceSupervisorNodeRestartAttempts = text(ops?.serviceSupervisorNodeRestartAttempts ?? metrics.serviceSupervisorNodeRestartAttempts, "0");
+  const serviceSupervisorRelayerRestartAttempts = text(ops?.serviceSupervisorRelayerRestartAttempts ?? metrics.serviceSupervisorRelayerRestartAttempts, "0");
+  const serviceInstallValidationStatus = text(ops?.serviceInstallValidationStatus ?? metrics.serviceInstallValidationStatus, "not recorded");
+  const serviceInstallPlanDidNotMutate = isReadyFlag(ops?.serviceInstallPlanDidNotMutate ?? metrics.serviceInstallPlanDidNotMutate);
+  const serviceInstallStatusDidNotMutate = isReadyFlag(ops?.serviceInstallStatusDidNotMutate ?? metrics.serviceInstallStatusDidNotMutate);
+  const serviceInstallRelayerOptInStartsLoop = isReadyFlag(ops?.serviceInstallRelayerOptInStartsLoop ?? metrics.serviceInstallRelayerOptInStartsLoop);
+  const systemdServiceInstallValidationStatus = text(ops?.systemdServiceInstallValidationStatus ?? metrics.systemdServiceInstallValidationStatus, "not recorded");
+  const systemdInstallPlanUsesRenderedUnits = isReadyFlag(ops?.systemdInstallPlanUsesRenderedUnits ?? metrics.systemdInstallPlanUsesRenderedUnits);
+  const systemdBridgeRelayerDefaultOff = isReadyFlag(ops?.systemdBridgeRelayerDefaultOff ?? metrics.systemdBridgeRelayerDefaultOff);
+  const systemdBridgeRelayerOptInStartsLoop = isReadyFlag(ops?.systemdBridgeRelayerOptInStartsLoop ?? metrics.systemdBridgeRelayerOptInStartsLoop);
   const bridgeRelayerCheckContractReadyValue = ops?.bridgeRelayerCheckContractReady ?? metrics.bridgeRelayerCheckContractReady;
   const bridgeRelayerCheckContractReady = isReadyFlag(bridgeRelayerCheckContractReadyValue)
     ? "ready"
@@ -132,8 +144,14 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
   const bridgeGuardrailStatus = text(ops?.bridgeRelayerGuardrailStatus ?? metrics.bridgeRelayerGuardrailStatus, "not recorded");
   const bridgeGuardrailReady = text(ops?.bridgeRelayerGuardrailReady, bridgeGuardrailStatus === "passed" ? "true" : "false");
   const bridgeRelayerLoopValidationStatus = text(metrics.bridgeRelayerLoopValidationStatus, "not recorded");
-  const publicRpcDeployAutomationStatus = text(metrics.publicRpcDeploymentAutomationStatus, "not recorded");
-  const publicRpcDeployAutomationAction = text(metrics.publicRpcDeploymentAutomationAction, "not recorded");
+  const publicRpcDeployBundleStatus = text(ops?.publicRpcDeploymentBundleStatus ?? metrics.publicRpcDeploymentBundleStatus, "not recorded");
+  const publicRpcDeployAutomationStatus = text(ops?.publicRpcDeploymentAutomationStatus ?? metrics.publicRpcDeploymentAutomationStatus, "not recorded");
+  const publicRpcDeployAutomationAction = text(ops?.publicRpcDeploymentAutomationAction ?? metrics.publicRpcDeploymentAutomationAction, "not recorded");
+  const publicRpcSecurityHeaders = isReadyFlag(ops?.publicRpcSecurityHeaders ?? metrics.publicRpcSecurityHeaders);
+  const publicRpcRenderedSecurityHeaders = isReadyFlag(ops?.publicRpcRenderedSecurityHeaders ?? metrics.publicRpcRenderedSecurityHeaders);
+  const alertInstallValidationStatus = text(ops?.alertInstallValidationStatus ?? metrics.alertInstallValidationStatus, "not recorded");
+  const opsMetricCount = text(ops?.opsMetricCount ?? metrics.opsMetricCount, "0");
+  const opsRequiredMetricsPresent = isReadyFlag(ops?.opsRequiredMetricsPresent ?? metrics.opsRequiredMetricsPresent);
   const networkNotifications = text(ops?.sendsNetworkNotifications, "false");
   const storesSecrets = text(ops?.storesSecrets, "false");
 
@@ -227,6 +245,44 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
               <span>Critical rule</span>
               <strong>{bridgeRelayerCheckRuleCovered ? "covered" : "missing"}</strong>
               <small>bridge-relayer-check-contract-failed</small>
+            </div>
+          </section>
+
+          <section className="ops-automation-proof" aria-label="Service and deployment automation proof">
+            <div>
+              <span>Autorecovery drill</span>
+              <strong>{serviceSupervisorValidationStatus}</strong>
+              <small>control-plane {serviceSupervisorRestartAttempts} / node {serviceSupervisorNodeRestartAttempts} / relayer {serviceSupervisorRelayerRestartAttempts}</small>
+            </div>
+            <div>
+              <span>Windows service plan</span>
+              <strong>{serviceInstallValidationStatus}</strong>
+              <small>plan safe {String(serviceInstallPlanDidNotMutate)} / status safe {String(serviceInstallStatusDidNotMutate)}</small>
+            </div>
+            <div>
+              <span>Systemd service plan</span>
+              <strong>{systemdServiceInstallValidationStatus}</strong>
+              <small>rendered units {String(systemdInstallPlanUsesRenderedUnits)} / relayer off {String(systemdBridgeRelayerDefaultOff)}</small>
+            </div>
+            <div>
+              <span>Relayer opt-in</span>
+              <strong>{String(serviceInstallRelayerOptInStartsLoop && systemdBridgeRelayerOptInStartsLoop)}</strong>
+              <small>Windows and systemd install plans start the relayer loop only with owner opt-in</small>
+            </div>
+            <div>
+              <span>Public RPC automation</span>
+              <strong>{publicRpcDeployAutomationStatus}</strong>
+              <small>bundle {publicRpcDeployBundleStatus} / action {publicRpcDeployAutomationAction}</small>
+            </div>
+            <div>
+              <span>Ops install proof</span>
+              <strong>{alertInstallValidationStatus}</strong>
+              <small>metrics {opsMetricCount}; required metrics {String(opsRequiredMetricsPresent)}</small>
+            </div>
+            <div>
+              <span>RPC headers</span>
+              <strong>{String(publicRpcSecurityHeaders && publicRpcRenderedSecurityHeaders)}</strong>
+              <small>bundle {String(publicRpcSecurityHeaders)} / rendered {String(publicRpcRenderedSecurityHeaders)}</small>
             </div>
           </section>
 

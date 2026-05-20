@@ -4532,12 +4532,31 @@ code {
   box-shadow: var(--shadow);
 }
 
+.ops-automation-proof {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid #c4c6b8;
+  border-radius: 8px;
+  background: #c4c6b8;
+  box-shadow: var(--shadow);
+}
+
 .ops-relayer-contract div {
   display: grid;
   gap: 6px;
   min-width: 0;
   padding: 12px;
   background: #f7faf5;
+}
+
+.ops-automation-proof div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px;
+  background: #faf9f2;
 }
 
 .ops-relayer-contract span {
@@ -4547,19 +4566,30 @@ code {
   text-transform: uppercase;
 }
 
+.ops-automation-proof span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
 .ops-relayer-contract strong,
-.ops-relayer-contract small {
+.ops-relayer-contract small,
+.ops-automation-proof strong,
+.ops-automation-proof small {
   display: block;
   overflow-wrap: anywhere;
 }
 
-.ops-relayer-contract strong {
+.ops-relayer-contract strong,
+.ops-automation-proof strong {
   color: var(--ink);
   font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
   font-size: 1.02rem;
 }
 
-.ops-relayer-contract small {
+.ops-relayer-contract small,
+.ops-automation-proof small {
   color: var(--muted);
   line-height: 1.35;
 }
@@ -5214,6 +5244,7 @@ code {
   .activation-layout,
   .ops-command-panel,
   .ops-relayer-contract,
+  .ops-automation-proof,
   .ops-layout {
     grid-template-columns: 1fr;
   }

@@ -598,6 +598,11 @@ describe("dashboard fixture", () => {
     expect(html).toContain("bridge-relayer-check-contract-failed");
     expect(html).toContain("Relayer loop");
     expect(html).toContain("Escalation dry run");
+    expect(html).toContain("Autorecovery drill");
+    expect(html).toContain("Windows service plan");
+    expect(html).toContain("Systemd service plan");
+    expect(html).toContain("Public RPC automation");
+    expect(html).toContain("Ops install proof");
     expect(html).toContain("public-rpc-not-ready");
     expect(html).not.toContain("local-tester-write-token");
   });

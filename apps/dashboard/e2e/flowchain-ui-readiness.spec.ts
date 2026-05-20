@@ -365,6 +365,9 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await expect(page.getByRole("heading", { name: "Ops center" })).toBeVisible();
     await expect(page.getByLabel("Bridge relayer check contract")).toContainText("Relayer check contract");
     await expect(page.getByLabel("Bridge relayer check contract")).toContainText("bridge-relayer-check-contract-failed");
+    await expect(page.getByLabel("Service and deployment automation proof")).toContainText("Autorecovery drill");
+    await expect(page.getByLabel("Service and deployment automation proof")).toContainText("Public RPC automation");
+    await expect(page.getByLabel("Service and deployment automation proof")).toContainText("Systemd service plan");
 
     await page.goto("/");
     await expect(page.getByLabel("Public L1 launch readiness")).toContainText("Bridge runtime credit");

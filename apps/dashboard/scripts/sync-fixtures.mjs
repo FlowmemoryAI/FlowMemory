@@ -44,6 +44,9 @@ const liveReadinessReportCopies = [
   "flowchain-live-infra-check-report.json",
   "service-status-report.json",
   "service-monitor-report.json",
+  "service-supervisor-validation-report.json",
+  "service-install-validation-report.json",
+  "systemd-service-install-validation-report.json",
   "public-rpc-deployment-bundle-report.json",
   "public-rpc-deployment-automation-report.json",
   "public-rpc-readiness-report.json",
@@ -201,6 +204,9 @@ function writeLiveReadinessSummary() {
   const contract = reports["public-deployment-contract-report.json"];
   const serviceStatus = reports["service-status-report.json"];
   const monitor = reports["service-monitor-report.json"];
+  const serviceSupervisorValidation = reports["service-supervisor-validation-report.json"];
+  const serviceInstallValidation = reports["service-install-validation-report.json"];
+  const systemdServiceInstallValidation = reports["systemd-service-install-validation-report.json"];
   const bridgeRelayer = reports["bridge-relayer-once-report.json"];
   const bridgeRelayerGuardrail = reports["bridge-relayer-guardrail-validation-report.json"];
   const bridgeRelayerLoopValidation = reports["bridge-relayer-loop-validation-report.json"];
@@ -300,6 +306,18 @@ function writeLiveReadinessSummary() {
       latestHeight,
       finalizedHeight,
       monitorHeightAdvanced: monitor?.heightAdvanced === true,
+      serviceSupervisorValidationStatus: asText(serviceSupervisorValidation?.status, "not recorded"),
+      serviceSupervisorRestartAttempts: asText(serviceSupervisorValidation?.restartAttempts, "0"),
+      serviceSupervisorNodeRestartAttempts: asText(serviceSupervisorValidation?.nodeRecovery?.restartAttempts, "0"),
+      serviceSupervisorRelayerRestartAttempts: asText(serviceSupervisorValidation?.relayerLoopRecovery?.restartAttempts, "0"),
+      serviceInstallValidationStatus: asText(serviceInstallValidation?.status, "not recorded"),
+      serviceInstallPlanDidNotMutate: serviceInstallValidation?.checks?.planDidNotMutate === true,
+      serviceInstallStatusDidNotMutate: serviceInstallValidation?.checks?.statusDidNotMutate === true,
+      serviceInstallRelayerOptInStartsLoop: serviceInstallValidation?.checks?.bridgeRelayerOptInStartsLoop === true,
+      systemdServiceInstallValidationStatus: asText(systemdServiceInstallValidation?.status, "not recorded"),
+      systemdInstallPlanUsesRenderedUnits: systemdServiceInstallValidation?.checks?.installPlanUsesRenderedUnits === true,
+      systemdBridgeRelayerDefaultOff: systemdServiceInstallValidation?.checks?.bridgeRelayerDefaultOff === true,
+      systemdBridgeRelayerOptInStartsLoop: systemdServiceInstallValidation?.checks?.bridgeRelayerOptInStartsLoop === true,
       bridgeRelayerStatus: asText(bridgeRelayer?.status, "not recorded"),
       bridgeQueuedTransactions: asText(bridgeRelayer?.counts?.queuedTransactions, "0"),
       bridgeRelayerChildTimeoutSeconds: asText(bridgeRelayer?.childTimeoutSeconds, "not recorded"),
@@ -360,6 +378,25 @@ function writeLiveReadinessSummary() {
       alertInstallValidationStatus: asText(alertInstallValidation?.status, "not recorded"),
       escalationDryRunStatus: asText(opsEscalationDryRun?.status, "not recorded"),
       escalationDryRunEvents: asText(opsEscalationDryRun?.dryRunEventCount, "0"),
+      serviceSupervisorValidationStatus: asText(serviceSupervisorValidation?.status, "not recorded"),
+      serviceSupervisorRestartAttempts: asText(serviceSupervisorValidation?.restartAttempts, "0"),
+      serviceSupervisorNodeRestartAttempts: asText(serviceSupervisorValidation?.nodeRecovery?.restartAttempts, "0"),
+      serviceSupervisorRelayerRestartAttempts: asText(serviceSupervisorValidation?.relayerLoopRecovery?.restartAttempts, "0"),
+      serviceInstallValidationStatus: asText(serviceInstallValidation?.status, "not recorded"),
+      serviceInstallPlanDidNotMutate: serviceInstallValidation?.checks?.planDidNotMutate === true,
+      serviceInstallStatusDidNotMutate: serviceInstallValidation?.checks?.statusDidNotMutate === true,
+      serviceInstallRelayerOptInStartsLoop: serviceInstallValidation?.checks?.bridgeRelayerOptInStartsLoop === true,
+      systemdServiceInstallValidationStatus: asText(systemdServiceInstallValidation?.status, "not recorded"),
+      systemdInstallPlanUsesRenderedUnits: systemdServiceInstallValidation?.checks?.installPlanUsesRenderedUnits === true,
+      systemdBridgeRelayerDefaultOff: systemdServiceInstallValidation?.checks?.bridgeRelayerDefaultOff === true,
+      systemdBridgeRelayerOptInStartsLoop: systemdServiceInstallValidation?.checks?.bridgeRelayerOptInStartsLoop === true,
+      publicRpcDeploymentBundleStatus: asText(publicRpcDeploymentBundle?.status, "not recorded"),
+      publicRpcDeploymentAutomationStatus: asText(publicRpcDeploymentAutomation?.status, "not recorded"),
+      publicRpcDeploymentAutomationAction: asText(publicRpcDeploymentAutomation?.action, "not recorded"),
+      publicRpcSecurityHeaders: publicRpcDeploymentBundle?.checks?.includesSecurityHeaders === true,
+      publicRpcRenderedSecurityHeaders: publicRpcDeploymentAutomation?.checks?.renderedNginxHasSecurityHeaders === true,
+      opsMetricCount: asText(opsMetricsExport?.metricCount, "0"),
+      opsRequiredMetricsPresent: opsMetricsExport?.checks?.requiredMetricsPresent === true,
       bridgeRelayerCheckContractReady: opsSnapshot?.reportStatuses?.bridgeRelayerCheckContractReady === true,
       bridgeRelayerFailedChecks: asText(opsSnapshot?.reportStatuses?.bridgeRelayerFailedChecks, "0"),
       bridgeRelayerMissingChecks: asText(opsSnapshot?.reportStatuses?.bridgeRelayerMissingChecks, "0"),
