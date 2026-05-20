@@ -338,6 +338,8 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
 
     await page.goto("/tester");
     await expect(page.getByRole("heading", { name: "Friends-and-family launch" })).toBeVisible();
+    await expect(page.getByLabel("Tester launch status")).toContainText("Live infra");
+    await expect(page.getByLabel("Tester launch status")).toContainText("Missing inputs");
     await expect(page.getByText("RPC headers", { exact: true }).first()).toBeVisible();
     await expect(page.getByText("HSTS, no-sniff, no-store, CSP")).toBeVisible();
 

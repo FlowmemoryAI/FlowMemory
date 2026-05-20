@@ -480,6 +480,8 @@ describe("dashboard fixture", () => {
 
     expect(html).toContain("Friends-and-family launch");
     expect(html).toContain("Shareable");
+    expect(html).toContain("Live infra");
+    expect(html).toContain("Missing inputs");
     expect(html).toContain("Packet smoke");
     expect(html).toContain("Gateway proof");
     expect(html).toContain("Relayer timeout");

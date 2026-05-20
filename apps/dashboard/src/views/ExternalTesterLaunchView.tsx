@@ -330,6 +330,16 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
         <div>
           <span>Shareable</span>
           <strong>{boolText(report?.packetShareable === true || testerLaunch.shareable === true)}</strong>
+          <small>external sharing {boolText(testerLaunch.externalSharingReady)}</small>
+        </div>
+        <div>
+          <span>Live infra</span>
+          <strong>{boolText(testerLaunch.liveInfraReady)}</strong>
+          <small>chain {boolText(testerLaunch.chainProducing)}</small>
+        </div>
+        <div>
+          <span>Missing inputs</span>
+          <strong>{text(testerLaunch.missingOwnerInputCount, "0")}</strong>
           <small>deployment {boolText(report?.deploymentReady === true)}</small>
         </div>
         <div>
@@ -365,7 +375,7 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
         <div>
           <span>Tester network</span>
           <strong>{boolText(testerLaunch.testerNetworkFresh)}</strong>
-          <small>rehearsal {boolText(testerLaunch.localTesterRehearsalReady)}</small>
+          <small>rehearsal {boolText(testerLaunch.localTesterRehearsalReady)}; testers {text(testerLaunch.testerCount, "0")}</small>
         </div>
         <div>
           <span>Chain head</span>
