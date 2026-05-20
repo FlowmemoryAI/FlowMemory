@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T21:51:27.8298196Z",
+    "generatedAt":  "2026-05-20T22:19:47.9971318Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  37,
-    "criticalRuleCount":  30,
+    "ruleCount":  38,
+    "criticalRuleCount":  31,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -57,6 +57,7 @@
                                 "external-tester-evidence-unsafe",
                                 "public-tester-gateway-e2e-failed",
                                 "dashboard-ui-readiness-failed",
+                                "second-computer-readiness-failed",
                                 "developer-dev-pack-readiness-failed",
                                 "owner-inputs-validation-failed",
                                 "owner-go-live-handoff-failed",
@@ -112,6 +113,7 @@
                    "serviceInstallValidationRuleCoversAutorecoveryTelemetry":  true,
                    "externalTesterLaunchRuleCoversGatewayAndFaucet":  true,
                    "publicTesterGatewayRuleCoversNoSecretNoBroadcast":  true,
+                   "secondComputerRuleCoversBundleVerifyNoSecret":  true,
                    "ownerGoLiveHandoffRuleCoversReleaseReady":  true,
                    "devPackRuleCoversBrowserStarter":  true,
                    "notificationPlanStoresNoSecrets":  true,
@@ -489,6 +491,20 @@
                                        "npm run flowchain:dashboard:ui:readiness",
                                        "npm run flowchain:dashboard:build",
                                        "npm test --prefix apps/dashboard"
+                                   ]
+                  },
+                  {
+                      "id":  "second-computer-readiness-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "second-computer-readiness-failed"
+                                       ],
+                      "signal":  "Second-computer source bundle or verifier readiness is missing or unsafe.",
+                      "threshold":  "second-computer readiness status is not passed, bundle or verify command failed, manifest next commands are missing, bundle hash is absent, local-output or env-file exclusions are missing, stage no-secret scan failed, broadcasts, prints env values, or reports secrets",
+                      "commands":  [
+                                       "npm run flowchain:second-computer:readiness",
+                                       "npm run flowchain:second-computer:bundle -- -Force",
+                                       "npm run flowchain:second-computer:verify"
                                    ]
                   },
                   {

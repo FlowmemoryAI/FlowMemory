@@ -1,9 +1,9 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 106769
+flowchain_latest_height 106963
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 106769
+flowchain_finalized_height 106963
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
 flowchain_state_file_age_seconds 5
@@ -27,7 +27,7 @@ flowchain_transaction_intake_accepted_rows_total 187
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 2570.592
+flowchain_transaction_intake_file_age_seconds 4268.384
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -42,10 +42,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 37
+flowchain_ops_alert_rules_total 38
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 30
+flowchain_ops_alert_rules_critical 31
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -598,6 +598,39 @@ flowchain_dashboard_ui_tester_launch_covered 1
 # HELP flowchain_dashboard_ui_activation_covered One when the dashboard activation cockpit route is covered by readiness.
 # TYPE flowchain_dashboard_ui_activation_covered gauge
 flowchain_dashboard_ui_activation_covered 1
+# HELP flowchain_second_computer_ready One when the no-secret second-computer bundle and verifier readiness proof is passed.
+# TYPE flowchain_second_computer_ready gauge
+flowchain_second_computer_ready 1
+# HELP flowchain_second_computer_bundle_created One when the second-computer source bundle zip was created.
+# TYPE flowchain_second_computer_bundle_created gauge
+flowchain_second_computer_bundle_created 1
+# HELP flowchain_second_computer_bundle_sha256_present One when the second-computer bundle report includes a SHA-256 hash.
+# TYPE flowchain_second_computer_bundle_sha256_present gauge
+flowchain_second_computer_bundle_sha256_present 1
+# HELP flowchain_second_computer_stage_no_secret_ready One when the staged second-computer bundle no-secret scan passed.
+# TYPE flowchain_second_computer_stage_no_secret_ready gauge
+flowchain_second_computer_stage_no_secret_ready 1
+# HELP flowchain_second_computer_verify_checks_passed One when second-computer local verifier checks passed.
+# TYPE flowchain_second_computer_verify_checks_passed gauge
+flowchain_second_computer_verify_checks_passed 1
+# HELP flowchain_second_computer_failed_checks Failed checks in second-computer readiness.
+# TYPE flowchain_second_computer_failed_checks gauge
+flowchain_second_computer_failed_checks 0
+# HELP flowchain_second_computer_missing_next_commands Missing manifest next commands in second-computer readiness.
+# TYPE flowchain_second_computer_missing_next_commands gauge
+flowchain_second_computer_missing_next_commands 0
+# HELP flowchain_second_computer_failed_verify_checks Failed verifier checks in second-computer readiness.
+# TYPE flowchain_second_computer_failed_verify_checks gauge
+flowchain_second_computer_failed_verify_checks 0
+# HELP flowchain_second_computer_secret_findings Secret marker findings in second-computer readiness.
+# TYPE flowchain_second_computer_secret_findings gauge
+flowchain_second_computer_secret_findings 0
+# HELP flowchain_second_computer_no_secrets One when second-computer readiness reports no secrets and no env value printing.
+# TYPE flowchain_second_computer_no_secrets gauge
+flowchain_second_computer_no_secrets 1
+# HELP flowchain_second_computer_no_broadcasts One when second-computer readiness confirms no broadcasts.
+# TYPE flowchain_second_computer_no_broadcasts gauge
+flowchain_second_computer_no_broadcasts 1
 # HELP flowchain_dev_pack_ready One when developer SDK/devkit, docs, Python SDK, signed-envelope, browser starter, and fail-closed public readiness proof are passed.
 # TYPE flowchain_dev_pack_ready gauge
 flowchain_dev_pack_ready 1

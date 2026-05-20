@@ -44,6 +44,7 @@ $paths = [ordered]@{
     externalTesterClientValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-client-validation-report.json"
     externalTesterEvidence = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
     dashboardUi = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
+    secondComputerReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/second-computer-readiness-report.json"
     devPack = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"
     ownerInputsValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     ownerActivationPlan = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json"
@@ -233,6 +234,7 @@ $publicTesterGateway = $reports.publicTesterGateway
 $externalTesterClientValidation = $reports.externalTesterClientValidation
 $externalTesterEvidence = $reports.externalTesterEvidence
 $dashboardUi = $reports.dashboardUi
+$secondComputerReadiness = $reports.secondComputerReadiness
 $devPack = $reports.devPack
 $ownerInputsValidation = $reports.ownerInputsValidation
 $ownerActivationPlan = $reports.ownerActivationPlan
@@ -255,6 +257,28 @@ $truthCounts = Get-MetricsProp -Object $truthTable -Name "classificationCounts"
 $externalTesterChecks = Get-MetricsProp -Object $externalTester -Name "checks"
 $externalTesterEvidenceChecks = Get-MetricsProp -Object $externalTesterEvidence -Name "checks"
 $dashboardUiChecks = Get-MetricsProp -Object $dashboardUi -Name "checks"
+$secondComputerChecks = Get-MetricsProp -Object $secondComputerReadiness -Name "checks"
+$secondComputerFailedChecks = @((Get-MetricsProp -Object $secondComputerReadiness -Name "failedChecks" -Default @()))
+$secondComputerMissingNextCommands = @((Get-MetricsProp -Object $secondComputerReadiness -Name "missingNextCommands" -Default @()))
+$secondComputerFailedVerifyChecks = @((Get-MetricsProp -Object $secondComputerReadiness -Name "failedVerifyChecks" -Default @()))
+$secondComputerSecretFindings = @((Get-MetricsProp -Object $secondComputerReadiness -Name "secretMarkerFindings" -Default @()))
+$secondComputerReady = (Get-MetricsStatus -Report $secondComputerReadiness) -eq "passed" `
+    -and $secondComputerFailedChecks.Count -eq 0 `
+    -and $secondComputerMissingNextCommands.Count -eq 0 `
+    -and $secondComputerFailedVerifyChecks.Count -eq 0 `
+    -and $secondComputerSecretFindings.Count -eq 0 `
+    -and ((Get-MetricsProp -Object $secondComputerChecks -Name "bundleCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $secondComputerChecks -Name "verifyCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $secondComputerChecks -Name "stageNoSecretScanPassed" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $secondComputerChecks -Name "bundleZipCreated" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $secondComputerChecks -Name "bundleSha256Present" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $secondComputerChecks -Name "manifestNextCommandsPresent" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $secondComputerChecks -Name "excludesEnvFiles" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $secondComputerChecks -Name "excludesLocalRuntime" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $secondComputerChecks -Name "verifyChecksPassed" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $secondComputerReadiness -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-MetricsProp -Object $secondComputerReadiness -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $secondComputerReadiness -Name "broadcasts" -Default $true) -eq $false)
 $devPackChecks = Get-MetricsProp -Object $devPack -Name "checks"
 $devPackFailedChecks = @((Get-MetricsProp -Object $devPack -Name "failedChecks" -Default @()))
 $devPackLanguageSdks = @((Get-MetricsProp -Object $devPack -Name "languageSdks" -Default @()))
@@ -659,6 +683,17 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_build_ready" -He
 Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_tester_flow_covered" -Help "One when create, faucet, send, tester launch, and explorer routes are covered by dashboard UI readiness." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $dashboardUiChecks -Name "testerWalletCreateCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "testerFaucetCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "testerSendCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "testerLaunchRouteCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "explorerRouteCovered" -Default $false) -eq $true)))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_tester_launch_covered" -Help "One when the dashboard tester launch route is covered by readiness." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $dashboardUiChecks -Name "testerLaunchRouteCovered" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_activation_covered" -Help "One when the dashboard activation cockpit route is covered by readiness." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $dashboardUiChecks -Name "activationRouteCovered" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_second_computer_ready" -Help "One when the no-secret second-computer bundle and verifier readiness proof is passed." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "secondComputerReady" -Default $secondComputerReady))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_second_computer_bundle_created" -Help "One when the second-computer source bundle zip was created." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "secondComputerBundleCreated" -Default (Get-MetricsProp -Object $secondComputerChecks -Name "bundleZipCreated" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_second_computer_bundle_sha256_present" -Help "One when the second-computer bundle report includes a SHA-256 hash." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "secondComputerBundleSha256Present" -Default (Get-MetricsProp -Object $secondComputerChecks -Name "bundleSha256Present" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_second_computer_stage_no_secret_ready" -Help "One when the staged second-computer bundle no-secret scan passed." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "secondComputerStageNoSecretScan" -Default (Get-MetricsProp -Object $secondComputerChecks -Name "stageNoSecretScanPassed" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_second_computer_verify_checks_passed" -Help "One when second-computer local verifier checks passed." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "secondComputerVerifyChecksPassed" -Default (Get-MetricsProp -Object $secondComputerChecks -Name "verifyChecksPassed" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_second_computer_failed_checks" -Help "Failed checks in second-computer readiness." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "secondComputerFailedChecks" -Default $secondComputerFailedChecks.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_second_computer_missing_next_commands" -Help "Missing manifest next commands in second-computer readiness." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "secondComputerMissingNextCommands" -Default $secondComputerMissingNextCommands.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_second_computer_failed_verify_checks" -Help "Failed verifier checks in second-computer readiness." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "secondComputerFailedVerifyChecks" -Default $secondComputerFailedVerifyChecks.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_second_computer_secret_findings" -Help "Secret marker findings in second-computer readiness." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "secondComputerSecretFindings" -Default $secondComputerSecretFindings.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_second_computer_no_secrets" -Help "One when second-computer readiness reports no secrets and no env value printing." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $secondComputerReadiness -Name "noSecrets" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $secondComputerReadiness -Name "envValuesPrinted" -Default $true) -eq $false) -and $secondComputerSecretFindings.Count -eq 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_second_computer_no_broadcasts" -Help "One when second-computer readiness confirms no broadcasts." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $secondComputerReadiness -Name "broadcasts" -Default $true) -eq $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_dev_pack_ready" -Help "One when developer SDK/devkit, docs, Python SDK, signed-envelope, browser starter, and fail-closed public readiness proof are passed." -Value (ConvertTo-MetricBool -Value $devPackReady)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_dev_pack_failed_checks" -Help "Failed checks in the developer pack E2E report." -Value (ConvertTo-MetricNumber -Value $devPackFailedChecks.Count)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_dev_pack_methods_total" -Help "RPC method count discovered by developer pack E2E." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $devPack -Name "methodCount" -Default 0))
@@ -725,6 +760,7 @@ $metricsJson = [ordered]@{
         externalTesterClientValidationStatus = Get-MetricsStatus -Report $externalTesterClientValidation
         externalTesterEvidenceStatus = Get-MetricsStatus -Report $externalTesterEvidence
         dashboardUiStatus = Get-MetricsStatus -Report $dashboardUi
+        secondComputerReadinessStatus = Get-MetricsStatus -Report $secondComputerReadiness
         devPackStatus = Get-MetricsStatus -Report $devPack
         ownerInputsValidationStatus = Get-MetricsStatus -Report $ownerInputsValidation
         ownerActivationPlanStatus = Get-MetricsStatus -Report $ownerActivationPlan
@@ -934,6 +970,17 @@ $requiredMetricNames = @(
     "flowchain_dashboard_ui_tester_flow_covered",
     "flowchain_dashboard_ui_tester_launch_covered",
     "flowchain_dashboard_ui_activation_covered",
+    "flowchain_second_computer_ready",
+    "flowchain_second_computer_bundle_created",
+    "flowchain_second_computer_bundle_sha256_present",
+    "flowchain_second_computer_stage_no_secret_ready",
+    "flowchain_second_computer_verify_checks_passed",
+    "flowchain_second_computer_failed_checks",
+    "flowchain_second_computer_missing_next_commands",
+    "flowchain_second_computer_failed_verify_checks",
+    "flowchain_second_computer_secret_findings",
+    "flowchain_second_computer_no_secrets",
+    "flowchain_second_computer_no_broadcasts",
     "flowchain_dev_pack_ready",
     "flowchain_dev_pack_failed_checks",
     "flowchain_dev_pack_methods_total",
@@ -992,6 +1039,7 @@ $checks = [ordered]@{
     bridgeReconciliationLoaded = $null -ne $bridgeReconciliation
     bridgeReleaseEvidenceValidationLoaded = $null -ne $bridgeReleaseEvidenceValidation
     dashboardUiLoaded = $null -ne $dashboardUi
+    secondComputerLoaded = $null -ne $secondComputerReadiness
     devPackLoaded = $null -ne $devPack
     ownerInputsValidationLoaded = $null -ne $ownerInputsValidation
     ownerActivationPlanLoaded = $null -ne $ownerActivationPlan
@@ -1208,6 +1256,19 @@ $checks = [ordered]@{
         "flowchain_dashboard_ui_tester_flow_covered",
         "flowchain_dashboard_ui_tester_launch_covered",
         "flowchain_dashboard_ui_activation_covered"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    secondComputerMetricsPresent = @(
+        "flowchain_second_computer_ready",
+        "flowchain_second_computer_bundle_created",
+        "flowchain_second_computer_bundle_sha256_present",
+        "flowchain_second_computer_stage_no_secret_ready",
+        "flowchain_second_computer_verify_checks_passed",
+        "flowchain_second_computer_failed_checks",
+        "flowchain_second_computer_missing_next_commands",
+        "flowchain_second_computer_failed_verify_checks",
+        "flowchain_second_computer_secret_findings",
+        "flowchain_second_computer_no_secrets",
+        "flowchain_second_computer_no_broadcasts"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     devPackMetricsPresent = @(
         "flowchain_dev_pack_ready",

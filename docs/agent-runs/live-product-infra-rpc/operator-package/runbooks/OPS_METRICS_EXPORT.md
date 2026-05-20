@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-20T21:51:34.0779252Z
+Generated: 2026-05-20T22:19:55.8638452Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 238
+- Metric count: 249
 
 ## Required Metrics
 
@@ -194,6 +194,17 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_dashboard_ui_tester_flow_covered: present
 - flowchain_dashboard_ui_tester_launch_covered: present
 - flowchain_dashboard_ui_activation_covered: present
+- flowchain_second_computer_ready: present
+- flowchain_second_computer_bundle_created: present
+- flowchain_second_computer_bundle_sha256_present: present
+- flowchain_second_computer_stage_no_secret_ready: present
+- flowchain_second_computer_verify_checks_passed: present
+- flowchain_second_computer_failed_checks: present
+- flowchain_second_computer_missing_next_commands: present
+- flowchain_second_computer_failed_verify_checks: present
+- flowchain_second_computer_secret_findings: present
+- flowchain_second_computer_no_secrets: present
+- flowchain_second_computer_no_broadcasts: present
 - flowchain_dev_pack_ready: present
 - flowchain_dev_pack_failed_checks: present
 - flowchain_dev_pack_methods_total: present
@@ -251,6 +262,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | bridgeReconciliationLoaded | True |
 | bridgeReleaseEvidenceValidationLoaded | True |
 | dashboardUiLoaded | True |
+| secondComputerLoaded | True |
 | devPackLoaded | True |
 | ownerInputsValidationLoaded | True |
 | ownerActivationPlanLoaded | True |
@@ -278,6 +290,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | externalTesterClientMetricsPresent | True |
 | transactionIntakeMetricsPresent | True |
 | dashboardUiMetricsPresent | True |
+| secondComputerMetricsPresent | True |
 | devPackMetricsPresent | True |
 | ownerInputsValidationMetricsPresent | True |
 | ownerActivationPlanMetricsPresent | True |

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-20T22:03:43.2413664Z",
+    "generatedAt":  "2026-05-20T22:21:01.4542155Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -29,7 +29,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=106844, finalizedHeight=106844",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=106963, finalizedHeight=106963",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -67,7 +67,7 @@
                       "layer":  "Operations",
                       "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, service-install validation telemetry, bridge relayer-loop validation telemetry, bridge reconciliation telemetry, bridge release-evidence validation telemetry, external tester client validation telemetry, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=37, alertCoveredFindings=39, relayerLoopAlertCoverage=True, bridgeReconciliationAlert=True, serviceInstallAlertCoverage=True, devPackAlert=True, publicRpcRollbackAlert=True, bridgeDeployControlAlert=True, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=238, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, publicRpcRollbackMetrics=True, bridgeDeployControlMetrics=True, supervisorNodeRecoveryMetrics=True, serviceInstallValidationMetrics=True, bridgeRelayerLoopValidationMetrics=True, bridgeReconciliationMetrics=True, bridgeReleaseEvidenceMetrics=True, externalTesterClientMetrics=True, devPackMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=30, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=20, incidentFailed=0",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=38, alertCoveredFindings=40, relayerLoopAlertCoverage=True, bridgeReconciliationAlert=True, secondComputerAlert=True, serviceInstallAlertCoverage=True, devPackAlert=True, publicRpcRollbackAlert=True, bridgeDeployControlAlert=True, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=249, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, publicRpcRollbackMetrics=True, bridgeDeployControlMetrics=True, supervisorNodeRecoveryMetrics=True, serviceInstallValidationMetrics=True, bridgeRelayerLoopValidationMetrics=True, bridgeReconciliationMetrics=True, bridgeReleaseEvidenceMetrics=True, externalTesterClientMetrics=True, secondComputerMetrics=True, devPackMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=31, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=20, incidentFailed=0",
                       "files":  [
                                     "infra/scripts/flowchain-service-monitor.ps1",
                                     "infra/scripts/flowchain-service-supervisor.ps1",
@@ -1086,15 +1086,15 @@
                                      },
     "opsAlertCoverage":  {
                              "status":  "passed",
-                             "ruleCount":  37,
-                             "criticalRuleCount":  30,
+                             "ruleCount":  38,
+                             "criticalRuleCount":  31,
                              "blockedRuleCount":  7,
-                             "coveredFindingCount":  39,
+                             "coveredFindingCount":  40,
                              "unmappedCurrentFindingCount":  0
                          },
     "opsMetricsCoverage":  {
                                "exportStatus":  "passed",
-                               "metricCount":  238,
+                               "metricCount":  249,
                                "exportFailedCheckCount":  0,
                                "installStatus":  "passed",
                                "installFailedCheckCount":  0,
@@ -1138,6 +1138,10 @@
                                "missingExternalTesterClientMetricNames":  [
 
                                                                           ],
+                               "secondComputerMetricsPresent":  true,
+                               "missingSecondComputerMetricNames":  [
+
+                                                                    ],
                                "devPackMetricsPresent":  true,
                                "missingDevPackMetricNames":  [
 

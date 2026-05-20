@@ -66,6 +66,7 @@ $paths = [ordered]@{
     publicTesterGateway = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     externalTesterEvidence = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
     dashboardUi = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
+    secondComputerReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/second-computer-readiness-report.json"
     ownerInputsValidation = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     ownerActivationPlan = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json"
     ownerGoLiveHandoff = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-go-live-handoff-report.json"
@@ -766,6 +767,29 @@ $dashboardUiReady = $dashboardUiStatus -eq "passed" `
     -and ((Get-OpsProp -Object $reports.dashboardUi -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $reports.dashboardUi -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $reports.dashboardUi -Name "broadcasts" -Default $true) -eq $false)
+$secondComputerStatus = Get-OpsStatus -Report $reports.secondComputerReadiness
+$secondComputerChecks = Get-OpsProp -Object $reports.secondComputerReadiness -Name "checks"
+$secondComputerFailedChecks = @((Get-OpsProp -Object $reports.secondComputerReadiness -Name "failedChecks" -Default @()))
+$secondComputerMissingNextCommands = @((Get-OpsProp -Object $reports.secondComputerReadiness -Name "missingNextCommands" -Default @()))
+$secondComputerFailedVerifyChecks = @((Get-OpsProp -Object $reports.secondComputerReadiness -Name "failedVerifyChecks" -Default @()))
+$secondComputerSecretFindings = @((Get-OpsProp -Object $reports.secondComputerReadiness -Name "secretMarkerFindings" -Default @()))
+$secondComputerReady = $secondComputerStatus -eq "passed" `
+    -and $secondComputerFailedChecks.Count -eq 0 `
+    -and $secondComputerMissingNextCommands.Count -eq 0 `
+    -and $secondComputerFailedVerifyChecks.Count -eq 0 `
+    -and $secondComputerSecretFindings.Count -eq 0 `
+    -and ((Get-OpsProp -Object $secondComputerChecks -Name "bundleCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $secondComputerChecks -Name "verifyCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $secondComputerChecks -Name "stageNoSecretScanPassed" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $secondComputerChecks -Name "bundleZipCreated" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $secondComputerChecks -Name "bundleSha256Present" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $secondComputerChecks -Name "manifestNextCommandsPresent" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $secondComputerChecks -Name "excludesEnvFiles" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $secondComputerChecks -Name "excludesLocalRuntime" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $secondComputerChecks -Name "verifyChecksPassed" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.secondComputerReadiness -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.secondComputerReadiness -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.secondComputerReadiness -Name "broadcasts" -Default $true) -eq $false)
 $devPackStatus = Get-OpsStatus -Report $reports.devPack
 $devPackChecks = Get-OpsProp -Object $reports.devPack -Name "checks"
 $devPackFailedChecks = @((Get-OpsProp -Object $reports.devPack -Name "failedChecks" -Default @()))
@@ -930,6 +954,9 @@ elseif ($externalTesterEvidenceStatus -ne "passed" -or $externalTesterEvidenceFa
 }
 if (-not $dashboardUiReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "dashboard-ui-readiness-failed" -Message "Dashboard wallet, faucet, send, tester launch, explorer, activation cockpit, or no-secret UI readiness proof is missing or failed." -Commands @("npm run flowchain:dashboard:ui:readiness", "npm run flowchain:dashboard:build", "npm test --prefix apps/dashboard")
+}
+if (-not $secondComputerReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "second-computer-readiness-failed" -Message "Second-computer readiness is missing or unsafe; the offline source bundle, verifier, manifest commands, local-output exclusions, and no-secret scan must pass before sharing setup packages." -Commands @("npm run flowchain:second-computer:readiness", "npm run flowchain:second-computer:bundle -- -Force", "npm run flowchain:second-computer:verify")
 }
 if (-not $devPackReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "developer-dev-pack-readiness-failed" -Message "Developer pack readiness proof is missing or unsafe; SDK/devkit, Python SDK, signed-envelope submission, packaged browser starter build/smoke, no-secret, and fail-closed public readiness checks must pass." -Commands @("npm run flowchain:dev-pack:e2e", "npm run flowchain:browser-readiness:build", "npm run flowchain:browser-readiness:smoke", "npm run flowchain:python-sdk:e2e")
@@ -1235,6 +1262,16 @@ $report = [ordered]@{
         dashboardUiTesterLaunchRouteCovered = Get-OpsProp -Object $dashboardUiChecks -Name "testerLaunchRouteCovered" -Default $false
         dashboardUiExplorerRouteCovered = Get-OpsProp -Object $dashboardUiChecks -Name "explorerRouteCovered" -Default $false
         dashboardUiActivationRouteCovered = Get-OpsProp -Object $dashboardUiChecks -Name "activationRouteCovered" -Default $false
+        secondComputerReadiness = $secondComputerStatus
+        secondComputerReady = $secondComputerReady
+        secondComputerFailedChecks = $secondComputerFailedChecks.Count
+        secondComputerMissingNextCommands = $secondComputerMissingNextCommands.Count
+        secondComputerFailedVerifyChecks = $secondComputerFailedVerifyChecks.Count
+        secondComputerSecretFindings = $secondComputerSecretFindings.Count
+        secondComputerBundleCreated = Get-OpsProp -Object $secondComputerChecks -Name "bundleZipCreated" -Default $false
+        secondComputerBundleSha256Present = Get-OpsProp -Object $secondComputerChecks -Name "bundleSha256Present" -Default $false
+        secondComputerStageNoSecretScan = Get-OpsProp -Object $secondComputerChecks -Name "stageNoSecretScanPassed" -Default $false
+        secondComputerVerifyChecksPassed = Get-OpsProp -Object $secondComputerChecks -Name "verifyChecksPassed" -Default $false
         devPack = $devPackStatus
         devPackReady = $devPackReady
         devPackFailedChecks = $devPackFailedChecks.Count

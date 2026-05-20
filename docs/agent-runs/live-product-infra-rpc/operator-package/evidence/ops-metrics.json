@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T21:51:33.7473902Z",
+    "generatedAt":  "2026-05-20T22:19:55.4496072Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -19,6 +19,7 @@
                           "externalTesterClientValidationStatus":  "passed",
                           "externalTesterEvidenceStatus":  "passed",
                           "dashboardUiStatus":  "passed",
+                          "secondComputerReadinessStatus":  "passed",
                           "devPackStatus":  "passed",
                           "ownerInputsValidationStatus":  "passed",
                           "ownerActivationPlanStatus":  "passed",
@@ -32,13 +33,13 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  106769
+                        "value":  106963
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  106769
+                        "value":  106963
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
@@ -86,7 +87,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  2570.592
+                        "value":  4268.384
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -116,13 +117,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  37
+                        "value":  38
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  30
+                        "value":  31
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -1229,6 +1230,72 @@
                         "value":  1
                     },
                     {
+                        "name":  "flowchain_second_computer_ready",
+                        "type":  "gauge",
+                        "help":  "One when the no-secret second-computer bundle and verifier readiness proof is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_second_computer_bundle_created",
+                        "type":  "gauge",
+                        "help":  "One when the second-computer source bundle zip was created.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_second_computer_bundle_sha256_present",
+                        "type":  "gauge",
+                        "help":  "One when the second-computer bundle report includes a SHA-256 hash.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_second_computer_stage_no_secret_ready",
+                        "type":  "gauge",
+                        "help":  "One when the staged second-computer bundle no-secret scan passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_second_computer_verify_checks_passed",
+                        "type":  "gauge",
+                        "help":  "One when second-computer local verifier checks passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_second_computer_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in second-computer readiness.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_second_computer_missing_next_commands",
+                        "type":  "gauge",
+                        "help":  "Missing manifest next commands in second-computer readiness.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_second_computer_failed_verify_checks",
+                        "type":  "gauge",
+                        "help":  "Failed verifier checks in second-computer readiness.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_second_computer_secret_findings",
+                        "type":  "gauge",
+                        "help":  "Secret marker findings in second-computer readiness.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_second_computer_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when second-computer readiness reports no secrets and no env value printing.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_second_computer_no_broadcasts",
+                        "type":  "gauge",
+                        "help":  "One when second-computer readiness confirms no broadcasts.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_dev_pack_ready",
                         "type":  "gauge",
                         "help":  "One when developer SDK/devkit, docs, Python SDK, signed-envelope, browser starter, and fail-closed public readiness proof are passed.",
@@ -1457,7 +1524,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  238,
+    "metricCount":  249,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

@@ -298,6 +298,14 @@ $rules = @(
         commands = @("npm run flowchain:dashboard:ui:readiness", "npm run flowchain:dashboard:build", "npm test --prefix apps/dashboard")
     },
     [ordered]@{
+        id = "second-computer-readiness-failed"
+        severity = "critical"
+        findingCodes = @("second-computer-readiness-failed")
+        signal = "Second-computer source bundle or verifier readiness is missing or unsafe."
+        threshold = "second-computer readiness status is not passed, bundle or verify command failed, manifest next commands are missing, bundle hash is absent, local-output or env-file exclusions are missing, stage no-secret scan failed, broadcasts, prints env values, or reports secrets"
+        commands = @("npm run flowchain:second-computer:readiness", "npm run flowchain:second-computer:bundle -- -Force", "npm run flowchain:second-computer:verify")
+    },
+    [ordered]@{
         id = "developer-dev-pack-readiness-failed"
         severity = "critical"
         findingCodes = @("developer-dev-pack-readiness-failed")
@@ -475,6 +483,13 @@ $publicTesterGatewayRuleCoversNoSecretNoBroadcast = $publicTesterGatewayRule.Cou
     -and ([string]$publicTesterGatewayRule[0].threshold).IndexOf("failedChecks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$publicTesterGatewayRule[0].threshold).IndexOf("broadcasts", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$publicTesterGatewayRule[0].threshold).IndexOf("secrets", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$secondComputerRule = @($rules | Where-Object { $_.id -eq "second-computer-readiness-failed" } | Select-Object -First 1)
+$secondComputerRuleCoversBundleVerifyNoSecret = $secondComputerRule.Count -eq 1 `
+    -and ([string]$secondComputerRule[0].threshold).IndexOf("bundle", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$secondComputerRule[0].threshold).IndexOf("verify", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$secondComputerRule[0].threshold).IndexOf("manifest next commands", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$secondComputerRule[0].threshold).IndexOf("no-secret", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($secondComputerRule[0].commands) -contains "npm run flowchain:second-computer:readiness")
 $ownerGoLiveHandoffRule = @($rules | Where-Object { $_.id -eq "owner-go-live-handoff-failed" } | Select-Object -First 1)
 $ownerGoLiveHandoffRuleCoversReleaseReady = $ownerGoLiveHandoffRule.Count -eq 1 `
     -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("release readiness", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
@@ -515,6 +530,7 @@ $checks = [ordered]@{
     serviceInstallValidationRuleCoversAutorecoveryTelemetry = $serviceInstallValidationRuleCoversAutorecoveryTelemetry
     externalTesterLaunchRuleCoversGatewayAndFaucet = $externalTesterLaunchRuleCoversGatewayAndFaucet
     publicTesterGatewayRuleCoversNoSecretNoBroadcast = $publicTesterGatewayRuleCoversNoSecretNoBroadcast
+    secondComputerRuleCoversBundleVerifyNoSecret = $secondComputerRuleCoversBundleVerifyNoSecret
     ownerGoLiveHandoffRuleCoversReleaseReady = $ownerGoLiveHandoffRuleCoversReleaseReady
     devPackRuleCoversBrowserStarter = $devPackRuleCoversBrowserStarter
     notificationPlanStoresNoSecrets = $true
