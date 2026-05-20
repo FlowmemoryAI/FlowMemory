@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-20T20:21:34.6019710Z
+Generated: 2026-05-20T20:37:18.1768788Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 202
+- Metric count: 211
 
 ## Required Metrics
 
@@ -84,6 +84,16 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_backup_retention_snapshot_protected: present
 - flowchain_backup_retention_prune_errors: present
 - flowchain_bridge_live_ready: present
+- flowchain_bridge_infra_ready: present
+- flowchain_bridge_deploy_control_validation_ready: present
+- flowchain_bridge_deploy_control_failed_checks: present
+- flowchain_bridge_deploy_control_missing_checks: present
+- flowchain_bridge_deploy_control_missing_env_fail_closed: present
+- flowchain_bridge_deploy_control_requires_broadcast_ack: present
+- flowchain_bridge_deploy_control_pause_resume_emergency: present
+- flowchain_bridge_deploy_control_runbook_rollback: present
+- flowchain_bridge_deploy_control_no_secrets: present
+- flowchain_bridge_deploy_control_no_broadcasts: present
 - flowchain_bridge_relayer_guardrail_ready: present
 - flowchain_bridge_direct_observe_guardrail_ready: present
 - flowchain_bridge_direct_observe_staged_cursor_default: present
@@ -209,6 +219,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | publicTesterGatewayLoaded | True |
 | externalTesterClientValidationLoaded | True |
 | externalTesterEvidenceLoaded | True |
+| bridgeDeployControlLoaded | True |
 | bridgeRelayerLoopValidationLoaded | True |
 | bridgeReleaseEvidenceValidationLoaded | True |
 | dashboardUiLoaded | True |
@@ -227,6 +238,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | externalTesterEvidenceMetricsPresent | True |
 | bridgeDirectObserveMetricsPresent | True |
 | bridgeRuntimeCreditMetricsPresent | True |
+| bridgeDeployControlMetricsPresent | True |
 | bridgeReleaseEvidenceMetricsPresent | True |
 | realValuePilotAggregateMetricsPresent | True |
 | bridgeRelayerLoopValidationMetricsPresent | True |

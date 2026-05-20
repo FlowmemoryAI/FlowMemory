@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T20:21:34.1557557Z",
+    "generatedAt":  "2026-05-20T20:37:17.9105603Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -30,19 +30,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  105950
+                        "value":  106084
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  105950
+                        "value":  106084
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  2
+                        "value":  6
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -84,7 +84,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  7728.626
+                        "value":  8656.887
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -529,6 +529,60 @@
                         "type":  "gauge",
                         "help":  "One when bridge infrastructure readiness is passed.",
                         "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_validation_ready",
+                        "type":  "gauge",
+                        "help":  "One when bridge deploy/control validation is passed and safe.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in bridge deploy/control validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_missing_checks",
+                        "type":  "gauge",
+                        "help":  "Missing required checks in bridge deploy/control validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_missing_env_fail_closed",
+                        "type":  "gauge",
+                        "help":  "One when deploy, pause, resume, and emergency-stop fail closed without owner env.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_requires_broadcast_ack",
+                        "type":  "gauge",
+                        "help":  "One when bridge deploy/control execution requires explicit owner broadcast acknowledgement.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_pause_resume_emergency",
+                        "type":  "gauge",
+                        "help":  "One when pause, resume, and emergency-stop control paths are present.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_runbook_rollback",
+                        "type":  "gauge",
+                        "help":  "One when bridge deployment runbook covers dry-run, broadcast verification, and rollback.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when bridge deploy/control validation reports no secrets.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_deploy_control_no_broadcasts",
+                        "type":  "gauge",
+                        "help":  "One when bridge deploy/control validation made no broadcasts.",
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_bridge_relayer_guardrail_ready",
@@ -1239,7 +1293,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  202,
+    "metricCount":  211,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T20:21:33.4407477Z",
+    "generatedAt":  "2026-05-20T20:37:17.2599441Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  34,
-    "criticalRuleCount":  27,
+    "ruleCount":  35,
+    "criticalRuleCount":  28,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -39,6 +39,7 @@
                                 "transaction-intake-invalid-rows",
                                 "no-secret-scan-not-passed",
                                 "backup-retention-unsafe",
+                                "bridge-deploy-control-validation-failed",
                                 "bridge-relayer-check-contract-failed",
                                 "bridge-relayer-latency-failed",
                                 "bridge-relayer-cursor-unsafe",
@@ -101,6 +102,7 @@
                    "publicRpcEdgeHardeningRuleCoversSecurityHeaders":  true,
                    "publicRpcEdgeHardeningRuleCoversWalletCutover":  true,
                    "publicRpcEdgeHardeningRuleCoversRollbackDrill":  true,
+                   "bridgeDeployControlRuleCoversDeploymentControls":  true,
                    "bridgeRelayerCheckContractRuleCoversFailedChecks":  true,
                    "bridgeRelayerLoopRuleCoversValidationTelemetry":  true,
                    "supervisorNodeRecoveryRuleCoversLiveProfile":  true,
@@ -228,6 +230,20 @@
                                        "npm run flowchain:backup:restore:validate",
                                        "npm run flowchain:backup:owner-path:dry-run",
                                        "npm run flowchain:backup:check"
+                                   ]
+                  },
+                  {
+                      "id":  "bridge-deploy-control-validation-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "bridge-deploy-control-validation-failed"
+                                       ],
+                      "signal":  "Bridge deploy/control validation is missing or failing.",
+                      "threshold":  "deploy/control validation is not passed, has failedChecks, misses deploy/pause/resume/emergency-stop checks, does not fail closed without owner env, does not require explicit owner broadcast acknowledgement, broadcasts, prints env values, or reports secrets",
+                      "commands":  [
+                                       "npm run flowchain:bridge:deploy:control:validate",
+                                       "npm run flowchain:bridge:deploy:base8453",
+                                       "npm run flowchain:bridge:emergency-stop"
                                    ]
                   },
                   {

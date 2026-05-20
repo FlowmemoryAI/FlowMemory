@@ -154,6 +154,14 @@ $rules = @(
         commands = @("npm run flowchain:backup:restore:validate", "npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:check")
     },
     [ordered]@{
+        id = "bridge-deploy-control-validation-failed"
+        severity = "critical"
+        findingCodes = @("bridge-deploy-control-validation-failed")
+        signal = "Bridge deploy/control validation is missing or failing."
+        threshold = "deploy/control validation is not passed, has failedChecks, misses deploy/pause/resume/emergency-stop checks, does not fail closed without owner env, does not require explicit owner broadcast acknowledgement, broadcasts, prints env values, or reports secrets"
+        commands = @("npm run flowchain:bridge:deploy:control:validate", "npm run flowchain:bridge:deploy:base8453", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
         id = "bridge-relayer-check-contract-failed"
         severity = "critical"
         findingCodes = @("bridge-relayer-check-contract-failed")
@@ -401,6 +409,15 @@ $bridgeRelayerCheckContractRule = @($rules | Where-Object { $_.id -eq "bridge-re
 $bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRule.Count -eq 1 `
     -and ([string]$bridgeRelayerCheckContractRule[0].threshold).IndexOf("failedChecks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$bridgeRelayerCheckContractRule[0].threshold).IndexOf("required checks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$bridgeDeployControlRule = @($rules | Where-Object { $_.id -eq "bridge-deploy-control-validation-failed" } | Select-Object -First 1)
+$bridgeDeployControlRuleCoversDeploymentControls = $bridgeDeployControlRule.Count -eq 1 `
+    -and ([string]$bridgeDeployControlRule[0].threshold).IndexOf("deploy", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeDeployControlRule[0].threshold).IndexOf("pause", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeDeployControlRule[0].threshold).IndexOf("resume", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeDeployControlRule[0].threshold).IndexOf("emergency-stop", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeDeployControlRule[0].threshold).IndexOf("fail closed", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeDeployControlRule[0].threshold).IndexOf("broadcast acknowledgement", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($bridgeDeployControlRule[0].commands) -contains "npm run flowchain:bridge:deploy:control:validate")
 $bridgeRelayerLoopRule = @($rules | Where-Object { $_.id -eq "bridge-relayer-loop-unhealthy" } | Select-Object -First 1)
 $bridgeRelayerLoopRuleCoversValidationTelemetry = $bridgeRelayerLoopRule.Count -eq 1 `
     -and ([string]$bridgeRelayerLoopRule[0].threshold).IndexOf("validation", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
@@ -459,6 +476,7 @@ $checks = [ordered]@{
     publicRpcEdgeHardeningRuleCoversSecurityHeaders = $publicRpcEdgeHardeningRuleCoversSecurityHeaders
     publicRpcEdgeHardeningRuleCoversWalletCutover = $publicRpcEdgeHardeningRuleCoversWalletCutover
     publicRpcEdgeHardeningRuleCoversRollbackDrill = $publicRpcEdgeHardeningRuleCoversRollbackDrill
+    bridgeDeployControlRuleCoversDeploymentControls = $bridgeDeployControlRuleCoversDeploymentControls
     bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRuleCoversFailedChecks
     bridgeRelayerLoopRuleCoversValidationTelemetry = $bridgeRelayerLoopRuleCoversValidationTelemetry
     supervisorNodeRecoveryRuleCoversLiveProfile = $supervisorNodeRecoveryRuleCoversLiveProfile

@@ -334,6 +334,19 @@ $publicRpcRollbackDrillMetricNames = @(
 )
 $missingPublicRpcRollbackDrillMetricNames = @($publicRpcRollbackDrillMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
 $opsMetricsHasPublicRpcRollbackDrillMetrics = $missingPublicRpcRollbackDrillMetricNames.Count -eq 0
+$bridgeDeployControlMetricNames = @(
+    "flowchain_bridge_deploy_control_validation_ready",
+    "flowchain_bridge_deploy_control_failed_checks",
+    "flowchain_bridge_deploy_control_missing_checks",
+    "flowchain_bridge_deploy_control_missing_env_fail_closed",
+    "flowchain_bridge_deploy_control_requires_broadcast_ack",
+    "flowchain_bridge_deploy_control_pause_resume_emergency",
+    "flowchain_bridge_deploy_control_runbook_rollback",
+    "flowchain_bridge_deploy_control_no_secrets",
+    "flowchain_bridge_deploy_control_no_broadcasts"
+)
+$missingBridgeDeployControlMetricNames = @($bridgeDeployControlMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasBridgeDeployControlMetrics = $missingBridgeDeployControlMetricNames.Count -eq 0
 $supervisorNodeRecoveryMetricNames = @(
     "flowchain_supervisor_node_recovery_validated",
     "flowchain_supervisor_node_restart_attempts",
@@ -505,6 +518,7 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeRelayerLoopRuleCoversValidationTelemetry" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "serviceInstallValidationRuleCoversAutorecoveryTelemetry" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversRollbackDrill" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeDeployControlRuleCoversDeploymentControls" -Default $false) -eq $true) `
     -and ($opsMetricsExportStatus -eq "passed") `
     -and ($opsMetricsExportMetricCount -ge 10) `
     -and ($opsMetricsExportFailedChecks.Count -eq 0) `
@@ -516,6 +530,8 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ($opsMetricsHasPublicRpcSecurityHeaderMetrics -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcRollbackDrillMetricsPresent" -Default $false) -eq $true) `
     -and ($opsMetricsHasPublicRpcRollbackDrillMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "bridgeDeployControlMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasBridgeDeployControlMetrics -eq $true) `
     -and ($opsMetricsHasSupervisorNodeRecoveryMetrics -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "serviceInstallValidationMetricsPresent" -Default $false) -eq $true) `
     -and ($opsMetricsHasServiceInstallValidationMetrics -eq $true) `
@@ -550,7 +566,7 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
 Add-ArchitectureItem -Items $items -Id "ops-observability-boundary" -Layer "Operations" `
     -Requirement "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, service-install validation telemetry, bridge relayer-loop validation telemetry, bridge release-evidence validation telemetry, external tester client validation telemetry, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers." `
     -Status $(if ($observabilityReady) { "passed" } else { "failed" }) `
-    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, supervisorNodeRestartAttempts=$supervisorNodeRestartAttempts, supervisorNodeRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryNodeRunning" -Default $false), supervisorRelayerRestartAttempts=$supervisorRelayerRestartAttempts, supervisorRelayerRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false), opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), relayerLoopAlertCoverage=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeRelayerLoopRuleCoversValidationTelemetry" -Default $false), serviceInstallAlertCoverage=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "serviceInstallValidationRuleCoversAutorecoveryTelemetry" -Default $false), publicRpcRollbackAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversRollbackDrill" -Default $false), alertInstall=$alertInstallValidationStatus, systemdAlert=$(Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false), alertInstallFailedChecks=$($alertInstallFailedChecks.Count), metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, publicRpcEdgeMetrics=$(Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), publicRpcSecurityHeaderMetrics=$opsMetricsHasPublicRpcSecurityHeaderMetrics, publicRpcRollbackMetrics=$opsMetricsHasPublicRpcRollbackDrillMetrics, supervisorNodeRecoveryMetrics=$opsMetricsHasSupervisorNodeRecoveryMetrics, serviceInstallValidationMetrics=$opsMetricsHasServiceInstallValidationMetrics, bridgeRelayerLoopValidationMetrics=$opsMetricsHasBridgeRelayerLoopValidationMetrics, bridgeReleaseEvidenceMetrics=$opsMetricsHasBridgeReleaseEvidenceMetrics, externalTesterClientMetrics=$opsMetricsHasExternalTesterClientMetrics, metricsInstall=$metricsInstallValidationStatus, systemdMetrics=$(Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdValidationPassed" -Default $false), metricsInstallFailedChecks=$($metricsInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
+    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, supervisorNodeRestartAttempts=$supervisorNodeRestartAttempts, supervisorNodeRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryNodeRunning" -Default $false), supervisorRelayerRestartAttempts=$supervisorRelayerRestartAttempts, supervisorRelayerRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false), opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), relayerLoopAlertCoverage=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeRelayerLoopRuleCoversValidationTelemetry" -Default $false), serviceInstallAlertCoverage=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "serviceInstallValidationRuleCoversAutorecoveryTelemetry" -Default $false), publicRpcRollbackAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversRollbackDrill" -Default $false), bridgeDeployControlAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeDeployControlRuleCoversDeploymentControls" -Default $false), alertInstall=$alertInstallValidationStatus, systemdAlert=$(Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false), alertInstallFailedChecks=$($alertInstallFailedChecks.Count), metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, publicRpcEdgeMetrics=$(Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), publicRpcSecurityHeaderMetrics=$opsMetricsHasPublicRpcSecurityHeaderMetrics, publicRpcRollbackMetrics=$opsMetricsHasPublicRpcRollbackDrillMetrics, bridgeDeployControlMetrics=$opsMetricsHasBridgeDeployControlMetrics, supervisorNodeRecoveryMetrics=$opsMetricsHasSupervisorNodeRecoveryMetrics, serviceInstallValidationMetrics=$opsMetricsHasServiceInstallValidationMetrics, bridgeRelayerLoopValidationMetrics=$opsMetricsHasBridgeRelayerLoopValidationMetrics, bridgeReleaseEvidenceMetrics=$opsMetricsHasBridgeReleaseEvidenceMetrics, externalTesterClientMetrics=$opsMetricsHasExternalTesterClientMetrics, metricsInstall=$metricsInstallValidationStatus, systemdMetrics=$(Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdValidationPassed" -Default $false), metricsInstallFailedChecks=$($metricsInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
     -Files $observabilityFiles `
     -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:alerts:install:systemd:validate", "npm run flowchain:ops:metrics:export -- -AllowBlocked", "npm run flowchain:ops:metrics:install:validate", "npm run flowchain:ops:metrics:install:systemd:validate", "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
 
@@ -1785,6 +1801,8 @@ $report = [ordered]@{
         missingPublicRpcSecurityHeaderMetricNames = @($missingPublicRpcSecurityHeaderMetricNames)
         publicRpcRollbackDrillMetricsPresent = $opsMetricsHasPublicRpcRollbackDrillMetrics
         missingPublicRpcRollbackDrillMetricNames = @($missingPublicRpcRollbackDrillMetricNames)
+        bridgeDeployControlMetricsPresent = $opsMetricsHasBridgeDeployControlMetrics
+        missingBridgeDeployControlMetricNames = @($missingBridgeDeployControlMetricNames)
         supervisorNodeRecoveryMetricsPresent = $opsMetricsHasSupervisorNodeRecoveryMetrics
         missingSupervisorNodeRecoveryMetricNames = @($missingSupervisorNodeRecoveryMetricNames)
         serviceInstallValidationMetricsPresent = $opsMetricsHasServiceInstallValidationMetrics

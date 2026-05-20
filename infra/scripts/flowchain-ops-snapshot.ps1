@@ -56,6 +56,7 @@ $paths = [ordered]@{
     backup = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     bridgeLive = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
+    bridgeDeployControl = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json"
     bridgeRelayer = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     bridgeRelayerGuardrail = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRuntimeCredit = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
@@ -467,6 +468,83 @@ $backupRetentionCurrentSnapshotProtected = Get-OpsProp -Object $backupDetails -N
 $backupRetentionPruneErrorCount = [int](Get-OpsProp -Object $backupDetails -Name "retentionPruneErrorCount" -Default 0)
 $bridgeLiveStatus = Get-OpsStatus -Report $reports.bridgeLive
 $bridgeInfraStatus = Get-OpsStatus -Report $reports.bridgeInfra
+$bridgeDeployControlStatus = Get-OpsStatus -Report $reports.bridgeDeployControl
+$bridgeDeployControlChecks = Get-OpsProp -Object $reports.bridgeDeployControl -Name "checks"
+$bridgeDeployControlFailedChecks = @((Get-OpsProp -Object $reports.bridgeDeployControl -Name "failedChecks" -Default @()))
+$bridgeDeployControlSecretFindings = @((Get-OpsProp -Object $reports.bridgeDeployControl -Name "secretMarkerFindings" -Default @()))
+$bridgeDeployControlRequiredChecks = @(
+    "packageScriptDeployPresent",
+    "packageScriptPausePresent",
+    "packageScriptResumePresent",
+    "packageScriptEmergencyStopPresent",
+    "packageScriptValidationPresent",
+    "deployScriptExists",
+    "controlScriptExists",
+    "foundryScriptExists",
+    "lockboxContractExists",
+    "deploymentRunbookExists",
+    "deployMissingEnvCommandFailedClosed",
+    "deployMissingEnvReportWritten",
+    "deployMissingEnvReportBlockedNoBroadcast",
+    "pauseMissingEnvCommandFailedClosed",
+    "pauseMissingEnvReportBlockedNoBroadcast",
+    "resumeMissingEnvCommandFailedClosed",
+    "resumeMissingEnvReportBlockedNoBroadcast",
+    "emergencyStopMissingEnvCommandFailedClosed",
+    "emergencyStopMissingEnvReportBlockedNoBroadcast",
+    "deployRequiresBase8453ChainId",
+    "deployRequiresPilotAck",
+    "deployRequiresBroadcastAck",
+    "deployRequiresAcknowledgeBroadcastSwitch",
+    "deployMapsFoundryPilotAck",
+    "deployMapsNativeAndErc20Caps",
+    "deployDryRunNoBroadcastStatus",
+    "deployBroadcastUsesForgeBroadcast",
+    "controlExecuteRequiresOwnerKeyAndBroadcastAck",
+    "controlNoExecuteReportsReadyNoBroadcast",
+    "controlSupportsPauseResumeEmergency",
+    "controlExecuteUsesCastSend",
+    "foundryScriptGatesBase8453",
+    "foundryScriptRequiresTotalCapOnBase",
+    "foundryScriptDeploysLockboxAndSpine",
+    "lockboxHasNonReentrantPauseEmergency",
+    "lockboxHasCapsAndReplayProtection",
+    "lockboxRejectsPlaceholderRecipient",
+    "lockboxHasReleaseAuthority",
+    "runbookHasDryRunBroadcastVerifyRollback",
+    "childProcessesDidNotTimeout",
+    "validationArtifactsInsideRepo",
+    "secretMarkerFindingsEmpty",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$bridgeDeployControlMissingChecks = @($bridgeDeployControlRequiredChecks | Where-Object {
+    (Get-OpsProp -Object $bridgeDeployControlChecks -Name $_ -Default $false) -ne $true
+})
+$bridgeDeployControlMissingEnvFailClosed = ((Get-OpsProp -Object $bridgeDeployControlChecks -Name "deployMissingEnvCommandFailedClosed" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeDeployControlChecks -Name "pauseMissingEnvCommandFailedClosed" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeDeployControlChecks -Name "resumeMissingEnvCommandFailedClosed" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeDeployControlChecks -Name "emergencyStopMissingEnvCommandFailedClosed" -Default $false) -eq $true)
+$bridgeDeployControlBroadcastAckRequired = ((Get-OpsProp -Object $bridgeDeployControlChecks -Name "deployRequiresBroadcastAck" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeDeployControlChecks -Name "deployRequiresAcknowledgeBroadcastSwitch" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeDeployControlChecks -Name "controlExecuteRequiresOwnerKeyAndBroadcastAck" -Default $false) -eq $true)
+$bridgeDeployControlPauseResumeEmergencyReady = ((Get-OpsProp -Object $bridgeDeployControlChecks -Name "packageScriptPausePresent" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeDeployControlChecks -Name "packageScriptResumePresent" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeDeployControlChecks -Name "packageScriptEmergencyStopPresent" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeDeployControlChecks -Name "controlSupportsPauseResumeEmergency" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeDeployControlChecks -Name "controlExecuteUsesCastSend" -Default $false) -eq $true)
+$bridgeDeployControlReady = $bridgeDeployControlStatus -eq "passed" `
+    -and $bridgeDeployControlFailedChecks.Count -eq 0 `
+    -and $bridgeDeployControlSecretFindings.Count -eq 0 `
+    -and $bridgeDeployControlMissingChecks.Count -eq 0 `
+    -and $bridgeDeployControlMissingEnvFailClosed `
+    -and $bridgeDeployControlBroadcastAckRequired `
+    -and $bridgeDeployControlPauseResumeEmergencyReady `
+    -and ((Get-OpsProp -Object $bridgeDeployControlChecks -Name "runbookHasDryRunBroadcastVerifyRollback" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.bridgeDeployControl -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.bridgeDeployControl -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.bridgeDeployControl -Name "broadcasts" -Default $true) -eq $false)
 $bridgeRelayerStatus = Get-OpsStatus -Report $reports.bridgeRelayer
 $bridgeRelayerChecks = Get-OpsProp -Object $reports.bridgeRelayer -Name "checks"
 $bridgeRelayerFailedChecks = @((Get-OpsProp -Object $reports.bridgeRelayer -Name "failedChecks" -Default @()))
@@ -756,6 +834,9 @@ if ($backupStatus -eq "failed" -and $null -ne $backupRetentionCount -and ($backu
 if ($bridgeLiveStatus -ne "passed" -or $bridgeInfraStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "bridge-not-ready" -Message "Base 8453 bridge readiness is not ready for external funded testing." -Commands @("npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check", "npm run flowchain:bridge:emergency-stop")
 }
+if (-not $bridgeDeployControlReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-deploy-control-validation-failed" -Message "Bridge deploy/control validation is missing or failed: deploy, pause, resume, and emergency-stop paths must fail closed and require explicit owner broadcast acknowledgement." -Commands @("npm run flowchain:bridge:deploy:control:validate", "npm run flowchain:bridge:deploy:base8453", "npm run flowchain:bridge:emergency-stop")
+}
 if (-not $bridgeRelayerCheckContractReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-relayer-check-contract-failed" -Message "Bridge relayer one-shot safety check contract is missing or has failed checks." -Commands @("npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh", "npm run flowchain:bridge:emergency-stop")
 }
@@ -999,6 +1080,16 @@ $report = [ordered]@{
         backupRetentionPruneErrorCount = $backupRetentionPruneErrorCount
         bridgeLive = $bridgeLiveStatus
         bridgeInfra = $bridgeInfraStatus
+        bridgeDeployControl = $bridgeDeployControlStatus
+        bridgeDeployControlReady = $bridgeDeployControlReady
+        bridgeDeployControlFailedChecks = $bridgeDeployControlFailedChecks.Count
+        bridgeDeployControlMissingChecks = $bridgeDeployControlMissingChecks.Count
+        bridgeDeployControlMissingEnvFailClosed = $bridgeDeployControlMissingEnvFailClosed
+        bridgeDeployControlBroadcastAckRequired = $bridgeDeployControlBroadcastAckRequired
+        bridgeDeployControlPauseResumeEmergencyReady = $bridgeDeployControlPauseResumeEmergencyReady
+        bridgeDeployControlRunbookRollback = Get-OpsProp -Object $bridgeDeployControlChecks -Name "runbookHasDryRunBroadcastVerifyRollback" -Default $false
+        bridgeDeployControlNoSecrets = ((Get-OpsProp -Object $reports.bridgeDeployControl -Name "noSecrets" -Default $false) -eq $true) -and $bridgeDeployControlSecretFindings.Count -eq 0
+        bridgeDeployControlNoBroadcasts = (Get-OpsProp -Object $reports.bridgeDeployControl -Name "broadcasts" -Default $true) -eq $false
         bridgeRelayer = $bridgeRelayerStatus
         bridgeRelayerCheckContractReady = $bridgeRelayerCheckContractReady
         bridgeRelayerFailedChecks = $bridgeRelayerFailedChecks.Count

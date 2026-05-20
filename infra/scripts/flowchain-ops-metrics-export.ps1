@@ -33,6 +33,7 @@ $paths = [ordered]@{
     backup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     bridgeLive = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
+    bridgeDeployControl = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json"
     bridgeRelayerGuardrail = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
     bridgeReleaseEvidenceValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-validation-report.json"
@@ -233,6 +234,7 @@ $dashboardUi = $reports.dashboardUi
 $ownerInputsValidation = $reports.ownerInputsValidation
 $ownerActivationPlan = $reports.ownerActivationPlan
 $ownerGoLiveHandoff = $reports.ownerGoLiveHandoff
+$bridgeDeployControl = $reports.bridgeDeployControl
 $bridgeRelayerLoopValidation = $reports.bridgeRelayerLoopValidation
 $bridgeReleaseEvidenceValidation = $reports.bridgeReleaseEvidenceValidation
 $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
@@ -307,6 +309,82 @@ $serviceInstallValidationFailedChecks = @((Get-MetricsProp -Object $serviceInsta
 $serviceInstallValidationMissingPackageScripts = @((Get-MetricsProp -Object $serviceInstallValidation -Name "missingPackageScripts" -Default @()))
 $systemdServiceInstallValidationChecks = Get-MetricsProp -Object $systemdServiceInstallValidation -Name "checks"
 $systemdServiceInstallValidationFailedChecks = @((Get-MetricsProp -Object $systemdServiceInstallValidation -Name "failedChecks" -Default @()))
+$bridgeDeployControlChecks = Get-MetricsProp -Object $bridgeDeployControl -Name "checks"
+$bridgeDeployControlFailedChecks = @((Get-MetricsProp -Object $bridgeDeployControl -Name "failedChecks" -Default @()))
+$bridgeDeployControlSecretFindings = @((Get-MetricsProp -Object $bridgeDeployControl -Name "secretMarkerFindings" -Default @()))
+$bridgeDeployControlRequiredChecks = @(
+    "packageScriptDeployPresent",
+    "packageScriptPausePresent",
+    "packageScriptResumePresent",
+    "packageScriptEmergencyStopPresent",
+    "packageScriptValidationPresent",
+    "deployScriptExists",
+    "controlScriptExists",
+    "foundryScriptExists",
+    "lockboxContractExists",
+    "deploymentRunbookExists",
+    "deployMissingEnvCommandFailedClosed",
+    "deployMissingEnvReportWritten",
+    "deployMissingEnvReportBlockedNoBroadcast",
+    "pauseMissingEnvCommandFailedClosed",
+    "pauseMissingEnvReportBlockedNoBroadcast",
+    "resumeMissingEnvCommandFailedClosed",
+    "resumeMissingEnvReportBlockedNoBroadcast",
+    "emergencyStopMissingEnvCommandFailedClosed",
+    "emergencyStopMissingEnvReportBlockedNoBroadcast",
+    "deployRequiresBase8453ChainId",
+    "deployRequiresPilotAck",
+    "deployRequiresBroadcastAck",
+    "deployRequiresAcknowledgeBroadcastSwitch",
+    "deployMapsFoundryPilotAck",
+    "deployMapsNativeAndErc20Caps",
+    "deployDryRunNoBroadcastStatus",
+    "deployBroadcastUsesForgeBroadcast",
+    "controlExecuteRequiresOwnerKeyAndBroadcastAck",
+    "controlNoExecuteReportsReadyNoBroadcast",
+    "controlSupportsPauseResumeEmergency",
+    "controlExecuteUsesCastSend",
+    "foundryScriptGatesBase8453",
+    "foundryScriptRequiresTotalCapOnBase",
+    "foundryScriptDeploysLockboxAndSpine",
+    "lockboxHasNonReentrantPauseEmergency",
+    "lockboxHasCapsAndReplayProtection",
+    "lockboxRejectsPlaceholderRecipient",
+    "lockboxHasReleaseAuthority",
+    "runbookHasDryRunBroadcastVerifyRollback",
+    "childProcessesDidNotTimeout",
+    "validationArtifactsInsideRepo",
+    "secretMarkerFindingsEmpty",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$bridgeDeployControlMissingChecks = @($bridgeDeployControlRequiredChecks | Where-Object {
+    (Get-MetricsProp -Object $bridgeDeployControlChecks -Name $_ -Default $false) -ne $true
+})
+$bridgeDeployControlMissingEnvFailClosed = ((Get-MetricsProp -Object $bridgeDeployControlChecks -Name "deployMissingEnvCommandFailedClosed" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeDeployControlChecks -Name "pauseMissingEnvCommandFailedClosed" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeDeployControlChecks -Name "resumeMissingEnvCommandFailedClosed" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeDeployControlChecks -Name "emergencyStopMissingEnvCommandFailedClosed" -Default $false) -eq $true)
+$bridgeDeployControlBroadcastAckRequired = ((Get-MetricsProp -Object $bridgeDeployControlChecks -Name "deployRequiresBroadcastAck" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeDeployControlChecks -Name "deployRequiresAcknowledgeBroadcastSwitch" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeDeployControlChecks -Name "controlExecuteRequiresOwnerKeyAndBroadcastAck" -Default $false) -eq $true)
+$bridgeDeployControlPauseResumeEmergencyReady = ((Get-MetricsProp -Object $bridgeDeployControlChecks -Name "packageScriptPausePresent" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeDeployControlChecks -Name "packageScriptResumePresent" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeDeployControlChecks -Name "packageScriptEmergencyStopPresent" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeDeployControlChecks -Name "controlSupportsPauseResumeEmergency" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeDeployControlChecks -Name "controlExecuteUsesCastSend" -Default $false) -eq $true)
+$bridgeDeployControlReady = (Get-MetricsStatus -Report $bridgeDeployControl) -eq "passed" `
+    -and $bridgeDeployControlFailedChecks.Count -eq 0 `
+    -and $bridgeDeployControlSecretFindings.Count -eq 0 `
+    -and $bridgeDeployControlMissingChecks.Count -eq 0 `
+    -and $bridgeDeployControlMissingEnvFailClosed `
+    -and $bridgeDeployControlBroadcastAckRequired `
+    -and $bridgeDeployControlPauseResumeEmergencyReady `
+    -and ((Get-MetricsProp -Object $bridgeDeployControlChecks -Name "runbookHasDryRunBroadcastVerifyRollback" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeDeployControl -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-MetricsProp -Object $bridgeDeployControl -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeDeployControl -Name "broadcasts" -Default $true) -eq $false)
 $bridgeRelayerLoopValidationChecks = Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "checks"
 $bridgeRelayerLoopValidationFailedChecks = @((Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "failedChecks" -Default @()))
 $bridgeRelayerLoopValidationSecretFindings = @((Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "secretMarkerFindings" -Default @()))
@@ -425,6 +503,15 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_retention_snapshot_pro
 Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_retention_prune_errors" -Help "State backup retention prune error count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "backupRetentionPruneErrorCount"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_live_ready" -Help "One when bridge live readiness is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeLive"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_infra_ready" -Help "One when bridge infrastructure readiness is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeInfra"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_deploy_control_validation_ready" -Help "One when bridge deploy/control validation is passed and safe." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDeployControlReady" -Default $bridgeDeployControlReady))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_deploy_control_failed_checks" -Help "Failed checks in bridge deploy/control validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDeployControlFailedChecks" -Default $bridgeDeployControlFailedChecks.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_deploy_control_missing_checks" -Help "Missing required checks in bridge deploy/control validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDeployControlMissingChecks" -Default $bridgeDeployControlMissingChecks.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_deploy_control_missing_env_fail_closed" -Help "One when deploy, pause, resume, and emergency-stop fail closed without owner env." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDeployControlMissingEnvFailClosed" -Default $bridgeDeployControlMissingEnvFailClosed))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_deploy_control_requires_broadcast_ack" -Help "One when bridge deploy/control execution requires explicit owner broadcast acknowledgement." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDeployControlBroadcastAckRequired" -Default $bridgeDeployControlBroadcastAckRequired))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_deploy_control_pause_resume_emergency" -Help "One when pause, resume, and emergency-stop control paths are present." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDeployControlPauseResumeEmergencyReady" -Default $bridgeDeployControlPauseResumeEmergencyReady))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_deploy_control_runbook_rollback" -Help "One when bridge deployment runbook covers dry-run, broadcast verification, and rollback." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDeployControlRunbookRollback" -Default (Get-MetricsProp -Object $bridgeDeployControlChecks -Name "runbookHasDryRunBroadcastVerifyRollback" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_deploy_control_no_secrets" -Help "One when bridge deploy/control validation reports no secrets." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDeployControlNoSecrets" -Default (((Get-MetricsProp -Object $bridgeDeployControl -Name "noSecrets" -Default $false) -eq $true) -and $bridgeDeployControlSecretFindings.Count -eq 0)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_deploy_control_no_broadcasts" -Help "One when bridge deploy/control validation made no broadcasts." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDeployControlNoBroadcasts" -Default ((Get-MetricsProp -Object $bridgeDeployControl -Name "broadcasts" -Default $true) -eq $false)))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_guardrail_ready" -Help "One when bridge relayer fail-closed guardrail is ready." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRelayerGuardrailReady"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_direct_observe_guardrail_ready" -Help "One when standalone Base observer cursor guardrail is ready." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRelayerDirectObserveGuardrailReady"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_direct_observe_staged_cursor_default" -Help "One when standalone Base observer defaults to staged cursor state." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDirectObserveUsesStagedCursorByDefault"))
@@ -668,6 +755,16 @@ $requiredMetricNames = @(
     "flowchain_backup_retention_snapshot_protected",
     "flowchain_backup_retention_prune_errors",
     "flowchain_bridge_live_ready",
+    "flowchain_bridge_infra_ready",
+    "flowchain_bridge_deploy_control_validation_ready",
+    "flowchain_bridge_deploy_control_failed_checks",
+    "flowchain_bridge_deploy_control_missing_checks",
+    "flowchain_bridge_deploy_control_missing_env_fail_closed",
+    "flowchain_bridge_deploy_control_requires_broadcast_ack",
+    "flowchain_bridge_deploy_control_pause_resume_emergency",
+    "flowchain_bridge_deploy_control_runbook_rollback",
+    "flowchain_bridge_deploy_control_no_secrets",
+    "flowchain_bridge_deploy_control_no_broadcasts",
     "flowchain_bridge_relayer_guardrail_ready",
     "flowchain_bridge_direct_observe_guardrail_ready",
     "flowchain_bridge_direct_observe_staged_cursor_default",
@@ -794,6 +891,7 @@ $checks = [ordered]@{
     publicTesterGatewayLoaded = $null -ne $publicTesterGateway
     externalTesterClientValidationLoaded = $null -ne $externalTesterClientValidation
     externalTesterEvidenceLoaded = $null -ne $externalTesterEvidence
+    bridgeDeployControlLoaded = $null -ne $bridgeDeployControl
     bridgeRelayerLoopValidationLoaded = $null -ne $bridgeRelayerLoopValidation
     bridgeReleaseEvidenceValidationLoaded = $null -ne $bridgeReleaseEvidenceValidation
     dashboardUiLoaded = $null -ne $dashboardUi
@@ -863,6 +961,17 @@ $checks = [ordered]@{
         "flowchain_bridge_runtime_credit_failed_checks",
         "flowchain_bridge_runtime_credit_missing_checks",
         "flowchain_bridge_runtime_credit_false_checks"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    bridgeDeployControlMetricsPresent = @(
+        "flowchain_bridge_deploy_control_validation_ready",
+        "flowchain_bridge_deploy_control_failed_checks",
+        "flowchain_bridge_deploy_control_missing_checks",
+        "flowchain_bridge_deploy_control_missing_env_fail_closed",
+        "flowchain_bridge_deploy_control_requires_broadcast_ack",
+        "flowchain_bridge_deploy_control_pause_resume_emergency",
+        "flowchain_bridge_deploy_control_runbook_rollback",
+        "flowchain_bridge_deploy_control_no_secrets",
+        "flowchain_bridge_deploy_control_no_broadcasts"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     bridgeReleaseEvidenceMetricsPresent = @(
         "flowchain_bridge_release_evidence_validation_ready",
