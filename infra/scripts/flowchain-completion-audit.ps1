@@ -1551,6 +1551,14 @@ $publicRpcDeploymentAutomationRequiredChecks = @(
     "commandPlanIncludesCutoverRehearsal",
     "commandPlanIncludesTruthTable",
     "commandPlanIncludesNoSecretScan",
+    "rollbackDrillPerformed",
+    "rollbackRenderedConfigExists",
+    "rollbackPreviousConfigWritten",
+    "rollbackRenderedConfigRestoredFromPrevious",
+    "rollbackOriginalConfigRestoredAfterDrill",
+    "rollbackArtifactsStayedInsideRenderDir",
+    "rollbackDrillNoSecrets",
+    "rollbackDrillBroadcastsFalse",
     "cleanupAttempted"
 )
 $publicRpcDeploymentAutomationMissingChecks = Get-MissingAuditChecks -Checks $publicRpcDeploymentAutomationChecks -Names $publicRpcDeploymentAutomationRequiredChecks
@@ -1585,6 +1593,12 @@ $publicRpcDeploymentAutomationPassed = $publicRpcDeploymentAutomationExitCode -e
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedReportSummaryOwnerPathsOutsideRepo" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedReportSnapshotWritten" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedReportSnapshotNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackRenderedConfigRestoredFromPrevious" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackOriginalConfigRestoredAfterDrill" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackArtifactsStayedInsideRenderDir" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillBroadcastsFalse" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "secretMarkerFindingsEmpty" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "valuesPrinted" -Default $true) -eq $false) `
@@ -2696,6 +2710,7 @@ $opsAlertRequiredChecks = @(
     "everyActiveRuleHasCommands",
     "commandsAvoidInlineEnvAssignment",
     "commandsAvoidUrls",
+    "publicRpcEdgeHardeningRuleCoversRollbackDrill",
     "supervisorNodeRecoveryRuleCoversLiveProfile",
     "bridgeRelayerLoopRuleCoversValidationTelemetry",
     "serviceInstallValidationRuleCoversAutorecoveryTelemetry",
@@ -2770,6 +2785,7 @@ $opsMetricsExportPassed = $opsMetricsExportExitCode -eq 0 `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "metricsJsonWritten" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "requiredMetricsPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcRollbackDrillMetricsPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "serviceInstallValidationMetricsPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeRelayerLoopValidationMetricsPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeReleaseEvidenceMetricsPresent" -Default $false) -eq $true) `
@@ -3267,7 +3283,7 @@ Add-AuditItem -Items $items -Id "ops-snapshot" `
 Add-AuditItem -Items $items -Id "ops-alert-rules" `
     -Requirement "Ops alert rules map every current ops finding, service-install validation regression, and autorecovery telemetry regression to local operator commands with critical and blocked rule coverage, no unmapped current findings, and no external delivery credentials." `
     -Status $(if ($opsAlertRulesPassed) { "passed" } else { "failed" }) `
-    -Evidence "alertRules=$opsAlertRulesStatus, rules=$opsAlertRuleCount, criticalRules=$opsAlertCriticalRuleCount, blockedRules=$opsAlertBlockedRuleCount, failedChecks=$opsAlertFailedCheckCount, missingChecks=$opsAlertMissingCheckCount, secretFindings=$opsAlertSecretFindingCount, serviceInstallAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "serviceInstallValidationRuleCoversAutorecoveryTelemetry" -Default $false), unmapped=$($opsAlertUnmappedCodes.Count), rulesWithoutCommands=$($opsAlertRulesWithoutCommands.Count), commandUrls=$($opsAlertCommandsWithUrls.Count), inlineEnvAssignments=$($opsAlertCommandsWithInlineEnvAssignment.Count), report=$($paths.opsAlertRules)" `
+    -Evidence "alertRules=$opsAlertRulesStatus, rules=$opsAlertRuleCount, criticalRules=$opsAlertCriticalRuleCount, blockedRules=$opsAlertBlockedRuleCount, failedChecks=$opsAlertFailedCheckCount, missingChecks=$opsAlertMissingCheckCount, secretFindings=$opsAlertSecretFindingCount, publicRpcRollbackAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversRollbackDrill" -Default $false), serviceInstallAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "serviceInstallValidationRuleCoversAutorecoveryTelemetry" -Default $false), unmapped=$($opsAlertUnmappedCodes.Count), rulesWithoutCommands=$($opsAlertRulesWithoutCommands.Count), commandUrls=$($opsAlertCommandsWithUrls.Count), inlineEnvAssignments=$($opsAlertCommandsWithInlineEnvAssignment.Count), report=$($paths.opsAlertRules)" `
     -Commands @("npm run flowchain:ops:alerts -- -AllowBlocked")
 
 Add-AuditItem -Items $items -Id "ops-alert-install-validation" `
@@ -3279,7 +3295,7 @@ Add-AuditItem -Items $items -Id "ops-alert-install-validation" `
 Add-AuditItem -Items $items -Id "ops-metrics-export" `
     -Requirement "Ops metrics export writes no-secret JSON and Prometheus textfile metrics from current L1 operations evidence, including public RPC edge deployment hardening, bridge relayer-loop validation, bridge release-evidence validation, and external tester client validation coverage, without hiding owner-input blockers." `
     -Status $(if ($opsMetricsExportPassed) { "passed" } else { "failed" }) `
-    -Evidence "metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, failedChecks=$($opsMetricsExportFailedChecks.Count), secretFindings=$($opsMetricsExportSecretFindings.Count), metricsJsonWritten=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "metricsJsonWritten" -Default $false), prometheusTextWritten=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "prometheusTextWritten" -Default $false), requiredMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "requiredMetricsPresent" -Default $false), publicRpcEdgeMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), serviceInstallValidationMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "serviceInstallValidationMetricsPresent" -Default $false), bridgeRelayerLoopValidationMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeRelayerLoopValidationMetricsPresent" -Default $false), bridgeReleaseEvidenceMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeReleaseEvidenceMetricsPresent" -Default $false), externalTesterClientMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "externalTesterClientMetricsPresent" -Default $false), supervisorNodeRecoveryMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "supervisorNodeRecoveryMetricsPresent" -Default $false), report=$($paths.opsMetricsExport)" `
+    -Evidence "metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, failedChecks=$($opsMetricsExportFailedChecks.Count), secretFindings=$($opsMetricsExportSecretFindings.Count), metricsJsonWritten=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "metricsJsonWritten" -Default $false), prometheusTextWritten=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "prometheusTextWritten" -Default $false), requiredMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "requiredMetricsPresent" -Default $false), publicRpcEdgeMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), publicRpcRollbackDrillMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcRollbackDrillMetricsPresent" -Default $false), serviceInstallValidationMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "serviceInstallValidationMetricsPresent" -Default $false), bridgeRelayerLoopValidationMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeRelayerLoopValidationMetricsPresent" -Default $false), bridgeReleaseEvidenceMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeReleaseEvidenceMetricsPresent" -Default $false), externalTesterClientMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "externalTesterClientMetricsPresent" -Default $false), supervisorNodeRecoveryMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "supervisorNodeRecoveryMetricsPresent" -Default $false), report=$($paths.opsMetricsExport)" `
     -Commands @("npm run flowchain:ops:metrics:export -- -AllowBlocked")
 
 Add-AuditItem -Items $items -Id "ops-metrics-install-validation" `

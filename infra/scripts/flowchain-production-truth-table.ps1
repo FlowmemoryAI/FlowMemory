@@ -1160,6 +1160,14 @@ $definitions = @(
             "renderedReportKeepsOwnerPathsOutsideRepo",
             "renderedReportNoSecrets",
             "renderedReportBroadcastsFalse",
+            "rollbackDrillPerformed",
+            "rollbackRenderedConfigExists",
+            "rollbackPreviousConfigWritten",
+            "rollbackRenderedConfigRestoredFromPrevious",
+            "rollbackOriginalConfigRestoredAfterDrill",
+            "rollbackArtifactsStayedInsideRenderDir",
+            "rollbackDrillNoSecrets",
+            "rollbackDrillBroadcastsFalse",
             "cleanupAttempted"
         )
         requiredEmptyArrays = @(
@@ -2121,6 +2129,7 @@ $definitions = @(
             "everyActiveRuleHasCommands",
             "commandsAvoidInlineEnvAssignment",
             "commandsAvoidUrls",
+            "publicRpcEdgeHardeningRuleCoversRollbackDrill",
             "supervisorNodeRecoveryRuleCoversLiveProfile",
             "bridgeRelayerLoopRuleCoversValidationTelemetry",
             "serviceInstallValidationRuleCoversAutorecoveryTelemetry",
@@ -2178,6 +2187,7 @@ $definitions = @(
             "markdownWritten",
             "metricCountSufficient",
             "requiredMetricsPresent",
+            "publicRpcRollbackDrillMetricsPresent",
             "serviceInstallValidationMetricsPresent",
             "externalTesterEvidenceMetricsPresent",
             "publicTesterGatewayMetricsPresent",

@@ -293,6 +293,15 @@ $publicRpcSyntheticCanaryChecks = Get-MetricsProp -Object $publicRpcSyntheticCan
 $publicRpcSyntheticCanaryMissingEnvCount = @((Get-MetricsProp -Object $publicRpcSyntheticCanary -Name "missingEnvNames" -Default @())).Count
 $publicRpcDeploymentBundleChecks = Get-MetricsProp -Object $publicRpcDeploymentBundle -Name "checks"
 $publicRpcDeploymentAutomationChecks = Get-MetricsProp -Object $publicRpcDeploymentAutomation -Name "checks"
+$publicRpcDeploymentAutomationRollbackReady = ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackRenderedConfigExists" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackPreviousConfigWritten" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackRenderedConfigRestoredFromPrevious" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackOriginalConfigRestoredAfterDrill" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackArtifactsStayedInsideRenderDir" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillBroadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true)
 $serviceInstallValidationChecks = Get-MetricsProp -Object $serviceInstallValidation -Name "checks"
 $serviceInstallValidationFailedChecks = @((Get-MetricsProp -Object $serviceInstallValidation -Name "failedChecks" -Default @()))
 $serviceInstallValidationMissingPackageScripts = @((Get-MetricsProp -Object $serviceInstallValidation -Name "missingPackageScripts" -Default @()))
@@ -402,6 +411,13 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_synth
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_cutover_rehearsal" -Help "One when public RPC deployment automation includes live cutover rehearsal." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_truth_table" -Help "One when public RPC deployment automation includes production truth table verification." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTruthTable" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_no_secret_scan" -Help "One when public RPC deployment automation includes no-secret scan verification." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesNoSecretScan" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_rollback_drill_ready" -Help "One when public RPC deployment automation proves a no-mutation rollback drill." -Value (ConvertTo-MetricBool -Value $publicRpcDeploymentAutomationRollbackReady)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_rollback_drill_performed" -Help "One when public RPC deployment automation performed the rollback drill." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_rollback_restored_previous" -Help "One when public RPC deployment automation restored rendered config from the previous config during rollback drill." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackRenderedConfigRestoredFromPrevious" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_rollback_restored_original" -Help "One when public RPC deployment automation restored the original config after rollback drill." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackOriginalConfigRestoredAfterDrill" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_rollback_artifacts_scoped" -Help "One when public RPC rollback drill artifacts stayed inside the render directory." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackArtifactsStayedInsideRenderDir" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_rollback_no_secrets" -Help "One when public RPC rollback drill reports no secrets." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillNoSecrets" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_rollback_no_broadcasts" -Help "One when public RPC rollback drill performs no live broadcasts." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillBroadcastsFalse" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_ready" -Help "One when backup readiness is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "backup"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_retention_count" -Help "Configured state backup retention count from backup readiness." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "backupRetentionCount"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_backup_retention_candidates" -Help "Number of eligible state backup snapshots seen by retention." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "backupRetentionCandidateCount"))
@@ -639,6 +655,13 @@ $requiredMetricNames = @(
     "flowchain_public_rpc_command_plan_cutover_rehearsal",
     "flowchain_public_rpc_command_plan_truth_table",
     "flowchain_public_rpc_command_plan_no_secret_scan",
+    "flowchain_public_rpc_rollback_drill_ready",
+    "flowchain_public_rpc_rollback_drill_performed",
+    "flowchain_public_rpc_rollback_restored_previous",
+    "flowchain_public_rpc_rollback_restored_original",
+    "flowchain_public_rpc_rollback_artifacts_scoped",
+    "flowchain_public_rpc_rollback_no_secrets",
+    "flowchain_public_rpc_rollback_no_broadcasts",
     "flowchain_backup_ready",
     "flowchain_backup_retention_count",
     "flowchain_backup_retention_candidates",
@@ -903,7 +926,23 @@ $checks = [ordered]@{
         "flowchain_public_rpc_command_plan_synthetic_canary",
         "flowchain_public_rpc_command_plan_cutover_rehearsal",
         "flowchain_public_rpc_command_plan_truth_table",
-        "flowchain_public_rpc_command_plan_no_secret_scan"
+        "flowchain_public_rpc_command_plan_no_secret_scan",
+        "flowchain_public_rpc_rollback_drill_ready",
+        "flowchain_public_rpc_rollback_drill_performed",
+        "flowchain_public_rpc_rollback_restored_previous",
+        "flowchain_public_rpc_rollback_restored_original",
+        "flowchain_public_rpc_rollback_artifacts_scoped",
+        "flowchain_public_rpc_rollback_no_secrets",
+        "flowchain_public_rpc_rollback_no_broadcasts"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    publicRpcRollbackDrillMetricsPresent = @(
+        "flowchain_public_rpc_rollback_drill_ready",
+        "flowchain_public_rpc_rollback_drill_performed",
+        "flowchain_public_rpc_rollback_restored_previous",
+        "flowchain_public_rpc_rollback_restored_original",
+        "flowchain_public_rpc_rollback_artifacts_scoped",
+        "flowchain_public_rpc_rollback_no_secrets",
+        "flowchain_public_rpc_rollback_no_broadcasts"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     publicTesterGatewayMetricsPresent = @(
         "flowchain_public_tester_gateway_e2e_ready",

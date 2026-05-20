@@ -428,6 +428,15 @@ $publicRpcDeploymentAutomationWalletCutoverProofReady = ((Get-OpsProp -Object $p
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTruthTable" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesNoSecretScan" -Default $false) -eq $true)
+$publicRpcDeploymentAutomationRollbackReady = ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackRenderedConfigExists" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackPreviousConfigWritten" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackRenderedConfigRestoredFromPrevious" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackOriginalConfigRestoredAfterDrill" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackArtifactsStayedInsideRenderDir" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillBroadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true)
 $publicRpcEdgeHardeningReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and $publicRpcDeploymentAutomationStatus -eq "passed" `
     -and ((Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesDisallowedOriginPreflight" -Default $false) -eq $true) `
@@ -446,6 +455,7 @@ $publicRpcEdgeHardeningReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasSecurityHeaders" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightChecksSecurityHeaders" -Default $false) -eq $true) `
     -and ($publicRpcDeploymentAutomationWalletCutoverProofReady -eq $true) `
+    -and ($publicRpcDeploymentAutomationRollbackReady -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "broadcasts" -Default $true) -eq $false)
@@ -975,6 +985,13 @@ $report = [ordered]@{
         publicRpcCommandPlanCutoverRehearsal = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false
         publicRpcCommandPlanTruthTable = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTruthTable" -Default $false
         publicRpcCommandPlanNoSecretScan = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesNoSecretScan" -Default $false
+        publicRpcRollbackDrillReady = $publicRpcDeploymentAutomationRollbackReady
+        publicRpcRollbackDrillPerformed = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false
+        publicRpcRollbackRestoredPrevious = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackRenderedConfigRestoredFromPrevious" -Default $false
+        publicRpcRollbackRestoredOriginal = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackOriginalConfigRestoredAfterDrill" -Default $false
+        publicRpcRollbackArtifactsScoped = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackArtifactsStayedInsideRenderDir" -Default $false
+        publicRpcRollbackNoSecrets = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillNoSecrets" -Default $false
+        publicRpcRollbackNoBroadcasts = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillBroadcastsFalse" -Default $false
         backup = $backupStatus
         backupRetentionCount = $backupRetentionCount
         backupRetentionCandidateCount = $backupRetentionCandidateCount

@@ -208,6 +208,27 @@ flowchain_public_rpc_command_plan_truth_table 1
 # HELP flowchain_public_rpc_command_plan_no_secret_scan One when public RPC deployment automation includes no-secret scan verification.
 # TYPE flowchain_public_rpc_command_plan_no_secret_scan gauge
 flowchain_public_rpc_command_plan_no_secret_scan 1
+# HELP flowchain_public_rpc_rollback_drill_ready One when public RPC deployment automation proves a no-mutation rollback drill.
+# TYPE flowchain_public_rpc_rollback_drill_ready gauge
+flowchain_public_rpc_rollback_drill_ready 1
+# HELP flowchain_public_rpc_rollback_drill_performed One when public RPC deployment automation performed the rollback drill.
+# TYPE flowchain_public_rpc_rollback_drill_performed gauge
+flowchain_public_rpc_rollback_drill_performed 1
+# HELP flowchain_public_rpc_rollback_restored_previous One when public RPC deployment automation restored rendered config from the previous config during rollback drill.
+# TYPE flowchain_public_rpc_rollback_restored_previous gauge
+flowchain_public_rpc_rollback_restored_previous 1
+# HELP flowchain_public_rpc_rollback_restored_original One when public RPC deployment automation restored the original config after rollback drill.
+# TYPE flowchain_public_rpc_rollback_restored_original gauge
+flowchain_public_rpc_rollback_restored_original 1
+# HELP flowchain_public_rpc_rollback_artifacts_scoped One when public RPC rollback drill artifacts stayed inside the render directory.
+# TYPE flowchain_public_rpc_rollback_artifacts_scoped gauge
+flowchain_public_rpc_rollback_artifacts_scoped 1
+# HELP flowchain_public_rpc_rollback_no_secrets One when public RPC rollback drill reports no secrets.
+# TYPE flowchain_public_rpc_rollback_no_secrets gauge
+flowchain_public_rpc_rollback_no_secrets 1
+# HELP flowchain_public_rpc_rollback_no_broadcasts One when public RPC rollback drill performs no live broadcasts.
+# TYPE flowchain_public_rpc_rollback_no_broadcasts gauge
+flowchain_public_rpc_rollback_no_broadcasts 1
 # HELP flowchain_backup_ready One when backup readiness is passed.
 # TYPE flowchain_backup_ready gauge
 flowchain_backup_ready 0

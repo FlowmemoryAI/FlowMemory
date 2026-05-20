@@ -302,7 +302,7 @@ $rules = @(
         severity = "critical"
         findingCodes = @("public-rpc-edge-hardening-failed")
         signal = "Public RPC edge deployment hardening evidence is missing or failed."
-        threshold = "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, defensive response-header proof, or wallet/tester cutover command proof"
+        threshold = "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, defensive response-header proof, wallet/tester cutover command proof, or rollback drill proof"
         commands = @("npm run flowchain:public-rpc:deployment-bundle", "npm run flowchain:public-rpc:deployment:automation", "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh")
     },
     [ordered]@{
@@ -393,6 +393,10 @@ $publicRpcEdgeHardeningRuleCoversSecurityHeaders = $publicRpcEdgeHardeningRule.C
 $publicRpcEdgeHardeningRuleCoversWalletCutover = $publicRpcEdgeHardeningRule.Count -eq 1 `
     -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("wallet/tester", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("cutover", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$publicRpcEdgeHardeningRuleCoversRollbackDrill = $publicRpcEdgeHardeningRule.Count -eq 1 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("rollback", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("drill", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($publicRpcEdgeHardeningRule[0].commands) -contains "npm run flowchain:public-rpc:deployment:automation")
 $bridgeRelayerCheckContractRule = @($rules | Where-Object { $_.id -eq "bridge-relayer-check-contract-failed" } | Select-Object -First 1)
 $bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRule.Count -eq 1 `
     -and ([string]$bridgeRelayerCheckContractRule[0].threshold).IndexOf("failedChecks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
@@ -454,6 +458,7 @@ $checks = [ordered]@{
     findingsWithoutCommandsEmpty = $findingsWithoutCommands.Count -eq 0
     publicRpcEdgeHardeningRuleCoversSecurityHeaders = $publicRpcEdgeHardeningRuleCoversSecurityHeaders
     publicRpcEdgeHardeningRuleCoversWalletCutover = $publicRpcEdgeHardeningRuleCoversWalletCutover
+    publicRpcEdgeHardeningRuleCoversRollbackDrill = $publicRpcEdgeHardeningRuleCoversRollbackDrill
     bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRuleCoversFailedChecks
     bridgeRelayerLoopRuleCoversValidationTelemetry = $bridgeRelayerLoopRuleCoversValidationTelemetry
     supervisorNodeRecoveryRuleCoversLiveProfile = $supervisorNodeRecoveryRuleCoversLiveProfile

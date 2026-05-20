@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T20:06:52.1925378Z",
+    "generatedAt":  "2026-05-20T20:21:34.1557557Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -444,6 +444,48 @@
                         "name":  "flowchain_public_rpc_command_plan_no_secret_scan",
                         "type":  "gauge",
                         "help":  "One when public RPC deployment automation includes no-secret scan verification.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rollback_drill_ready",
+                        "type":  "gauge",
+                        "help":  "One when public RPC deployment automation proves a no-mutation rollback drill.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rollback_drill_performed",
+                        "type":  "gauge",
+                        "help":  "One when public RPC deployment automation performed the rollback drill.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rollback_restored_previous",
+                        "type":  "gauge",
+                        "help":  "One when public RPC deployment automation restored rendered config from the previous config during rollback drill.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rollback_restored_original",
+                        "type":  "gauge",
+                        "help":  "One when public RPC deployment automation restored the original config after rollback drill.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rollback_artifacts_scoped",
+                        "type":  "gauge",
+                        "help":  "One when public RPC rollback drill artifacts stayed inside the render directory.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rollback_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when public RPC rollback drill reports no secrets.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rollback_no_broadcasts",
+                        "type":  "gauge",
+                        "help":  "One when public RPC rollback drill performs no live broadcasts.",
                         "value":  1
                     },
                     {
@@ -1197,7 +1239,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  195,
+    "metricCount":  202,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,
