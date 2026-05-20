@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 103125
+flowchain_latest_height 103440
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 103125
+flowchain_finalized_height 103440
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 4
+flowchain_state_file_age_seconds 3
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -27,7 +27,7 @@ flowchain_transaction_intake_accepted_rows_total 175
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 3254.742
+flowchain_transaction_intake_file_age_seconds 5669.287
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -42,10 +42,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 31
+flowchain_ops_alert_rules_total 32
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 24
+flowchain_ops_alert_rules_critical 25
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -373,6 +373,21 @@ flowchain_owner_activation_missing_env_total 14
 # HELP flowchain_owner_activation_invalid_env_total Owner activation input names currently invalid.
 # TYPE flowchain_owner_activation_invalid_env_total gauge
 flowchain_owner_activation_invalid_env_total 0
+# HELP flowchain_owner_go_live_handoff_ready One when the owner go-live handoff report is passed and safe to use.
+# TYPE flowchain_owner_go_live_handoff_ready gauge
+flowchain_owner_go_live_handoff_ready 1
+# HELP flowchain_owner_go_live_release_ready One when the owner go-live handoff says public release readiness is clear.
+# TYPE flowchain_owner_go_live_release_ready gauge
+flowchain_owner_go_live_release_ready 0
+# HELP flowchain_owner_go_live_stages_total Owner go-live handoff stage count.
+# TYPE flowchain_owner_go_live_stages_total gauge
+flowchain_owner_go_live_stages_total 8
+# HELP flowchain_owner_go_live_next_inputs_total Owner input names still listed as needed by the go-live handoff.
+# TYPE flowchain_owner_go_live_next_inputs_total gauge
+flowchain_owner_go_live_next_inputs_total 14
+# HELP flowchain_owner_go_live_failed_checks Failed checks in the owner go-live handoff report.
+# TYPE flowchain_owner_go_live_failed_checks gauge
+flowchain_owner_go_live_failed_checks 0
 # HELP flowchain_public_deployment_ready One when public deployment contract is passed.
 # TYPE flowchain_public_deployment_ready gauge
 flowchain_public_deployment_ready 0
@@ -393,10 +408,10 @@ flowchain_live_cutover_missing_owner_inputs 14
 flowchain_no_secret_ready 1
 # HELP flowchain_truth_gates_total Total production truth table gates.
 # TYPE flowchain_truth_gates_total gauge
-flowchain_truth_gates_total 59
+flowchain_truth_gates_total 60
 # HELP flowchain_truth_gates_passed Passed production truth table gates.
 # TYPE flowchain_truth_gates_passed gauge
-flowchain_truth_gates_passed 43
+flowchain_truth_gates_passed 44
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
 flowchain_truth_gates_owner_blocked 16

@@ -38,6 +38,7 @@ $paths = [ordered]@{
     dashboardUi = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
     ownerInputsValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     ownerActivationPlan = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json"
+    ownerGoLiveHandoff = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-go-live-handoff-report.json"
     publicDeployment = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     liveCutover = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json"
     truthTable = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
@@ -221,6 +222,7 @@ $externalTesterEvidence = $reports.externalTesterEvidence
 $dashboardUi = $reports.dashboardUi
 $ownerInputsValidation = $reports.ownerInputsValidation
 $ownerActivationPlan = $reports.ownerActivationPlan
+$ownerGoLiveHandoff = $reports.ownerGoLiveHandoff
 $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
 $publicRpcDeploymentAutomation = $reports.publicRpcDeploymentAutomation
 $liveCutover = $reports.liveCutover
@@ -251,6 +253,17 @@ $ownerActivationPlanReady = (Get-MetricsStatus -Report $ownerActivationPlan) -eq
     -and ((Get-MetricsProp -Object $ownerActivationPlan -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-MetricsProp -Object $ownerActivationPlan -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerActivationPlan -Name "broadcasts" -Default $true) -eq $false)
+$ownerGoLiveHandoffFailedChecks = @((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "failedChecks" -Default @()))
+$ownerGoLiveHandoffSecretFindings = @((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "secretMarkerFindings" -Default @()))
+$ownerGoLiveHandoffNextInputs = @((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "nextOwnerInputNames" -Default @()))
+$ownerGoLiveHandoffStageCount = [int](Get-MetricsProp -Object $ownerGoLiveHandoff -Name "stageCount" -Default 0)
+$ownerGoLiveHandoffReady = (Get-MetricsStatus -Report $ownerGoLiveHandoff) -eq "passed" `
+    -and $ownerGoLiveHandoffFailedChecks.Count -eq 0 `
+    -and $ownerGoLiveHandoffSecretFindings.Count -eq 0 `
+    -and $ownerGoLiveHandoffStageCount -ge 8 `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "broadcasts" -Default $true) -eq $false)
 $externalTesterLocalRehearsalReady = (Get-MetricsProp -Object $externalTester -Name "localTesterRehearsalReady" -Default $false) -eq $true
 $externalTesterExternalSharingReady = (Get-MetricsProp -Object $externalTester -Name "externalSharingReady" -Default $false) -eq $true
 $externalTesterMissingEnvNames = @((Get-MetricsProp -Object $externalTester -Name "missingEnvNames" -Default @()))
@@ -409,6 +422,11 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_activation_stages_total
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_activation_ready_stages" -Help "Owner activation plan stages currently ready." -Value (ConvertTo-MetricNumber -Value $ownerActivationPlanReadyStageCount)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_activation_missing_env_total" -Help "Owner activation input names still missing before live cutover." -Value (ConvertTo-MetricNumber -Value $ownerActivationPlanMissingEnvNames.Count)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_activation_invalid_env_total" -Help "Owner activation input names currently invalid." -Value (ConvertTo-MetricNumber -Value $ownerActivationPlanInvalidEnvNames.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_handoff_ready" -Help "One when the owner go-live handoff report is passed and safe to use." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveHandoffReady" -Default $ownerGoLiveHandoffReady))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_release_ready" -Help "One when the owner go-live handoff says public release readiness is clear." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveReleaseReady" -Default (Get-MetricsProp -Object $ownerGoLiveHandoff -Name "releaseReady" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_stages_total" -Help "Owner go-live handoff stage count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveStageCount" -Default $ownerGoLiveHandoffStageCount))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_next_inputs_total" -Help "Owner input names still listed as needed by the go-live handoff." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveNextInputCount" -Default $ownerGoLiveHandoffNextInputs.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_failed_checks" -Help "Failed checks in the owner go-live handoff report." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveFailedChecks" -Default $ownerGoLiveHandoffFailedChecks.Count))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_deployment_ready" -Help "One when public deployment contract is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "publicDeployment"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_ready" -Help "One when the live cutover rehearsal is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $liveCutover))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_tester_network_e2e_passed" -Help "One when live cutover rehearsal directly ran the local tester wallet network E2E." -Value (ConvertTo-MetricBool -Value (Get-MetricsPathProp -Object $liveCutover -Path "ready.testerNetworkE2ePassed" -Default $false))
@@ -444,6 +462,7 @@ $metricsJson = [ordered]@{
         dashboardUiStatus = Get-MetricsStatus -Report $dashboardUi
         ownerInputsValidationStatus = Get-MetricsStatus -Report $ownerInputsValidation
         ownerActivationPlanStatus = Get-MetricsStatus -Report $ownerActivationPlan
+        ownerGoLiveHandoffStatus = Get-MetricsStatus -Report $ownerGoLiveHandoff
         liveCutoverStatus = Get-MetricsStatus -Report $liveCutover
         truthTableStatus = Get-MetricsStatus -Report $truthTable
         noSecretStatus = Get-MetricsStatus -Report $noSecret
@@ -573,6 +592,11 @@ $requiredMetricNames = @(
     "flowchain_owner_activation_ready_stages",
     "flowchain_owner_activation_missing_env_total",
     "flowchain_owner_activation_invalid_env_total",
+    "flowchain_owner_go_live_handoff_ready",
+    "flowchain_owner_go_live_release_ready",
+    "flowchain_owner_go_live_stages_total",
+    "flowchain_owner_go_live_next_inputs_total",
+    "flowchain_owner_go_live_failed_checks",
     "flowchain_public_deployment_ready",
     "flowchain_live_cutover_ready",
     "flowchain_live_cutover_tester_network_e2e_passed",
@@ -599,6 +623,7 @@ $checks = [ordered]@{
     dashboardUiLoaded = $null -ne $dashboardUi
     ownerInputsValidationLoaded = $null -ne $ownerInputsValidation
     ownerActivationPlanLoaded = $null -ne $ownerActivationPlan
+    ownerGoLiveHandoffLoaded = $null -ne $ownerGoLiveHandoff
     liveCutoverLoaded = $null -ne $liveCutover
     truthTableLoaded = $null -ne $truthTable
     noSecretLoaded = $null -ne $noSecret
@@ -719,6 +744,13 @@ $checks = [ordered]@{
         "flowchain_owner_activation_ready_stages",
         "flowchain_owner_activation_missing_env_total",
         "flowchain_owner_activation_invalid_env_total"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    ownerGoLiveHandoffMetricsPresent = @(
+        "flowchain_owner_go_live_handoff_ready",
+        "flowchain_owner_go_live_release_ready",
+        "flowchain_owner_go_live_stages_total",
+        "flowchain_owner_go_live_next_inputs_total",
+        "flowchain_owner_go_live_failed_checks"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     liveCutoverMetricsPresent = @(
         "flowchain_live_cutover_ready",

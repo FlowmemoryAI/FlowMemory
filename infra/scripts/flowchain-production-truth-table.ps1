@@ -1913,6 +1913,7 @@ $definitions = @(
             "commandsAvoidUrls",
             "supervisorNodeRecoveryRuleCoversLiveProfile",
             "publicTesterGatewayRuleCoversNoSecretNoBroadcast",
+            "ownerGoLiveHandoffRuleCoversReleaseReady",
             "findingsWithoutCommandsEmpty",
             "notificationPlanStoresNoSecrets",
             "notificationPlanNoNetworkDelivery",
@@ -1941,7 +1942,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "ops-metrics-export"
-        requirement = "Ops metrics export converts no-secret service, supervisor autorecovery, alert, public-readiness, bridge, tester, truth-table, and no-secret evidence into JSON plus Prometheus textfile metrics without network delivery or owner-value leakage."
+        requirement = "Ops metrics export converts no-secret service, supervisor autorecovery, alert, public-readiness, bridge, tester, owner handoff, truth-table, and no-secret evidence into JSON plus Prometheus textfile metrics without network delivery or owner-value leakage."
         path = "docs/agent-runs/live-product-infra-rpc/ops-metrics-export-report.json"
         command = "npm run flowchain:ops:metrics:export"
         productionGate = $true
@@ -1954,6 +1955,7 @@ $definitions = @(
             "serviceMonitorLoaded",
             "externalTesterEvidenceLoaded",
             "liveCutoverLoaded",
+            "ownerGoLiveHandoffLoaded",
             "truthTableLoaded",
             "noSecretLoaded",
             "metricsJsonWritten",
@@ -1963,6 +1965,7 @@ $definitions = @(
             "requiredMetricsPresent",
             "externalTesterEvidenceMetricsPresent",
             "publicTesterGatewayMetricsPresent",
+            "ownerGoLiveHandoffMetricsPresent",
             "supervisorNodeRecoveryMetricsPresent",
             "prometheusHasHelpAndType",
             "prometheusContainsNoUrls",

@@ -282,6 +282,14 @@ $rules = @(
         commands = @("npm run flowchain:owner-inputs:validate", "npm run flowchain:owner-inputs", "npm run flowchain:owner-env:readiness")
     },
     [ordered]@{
+        id = "owner-go-live-handoff-failed"
+        severity = "critical"
+        findingCodes = @("owner-go-live-handoff-failed")
+        signal = "Owner go-live handoff is missing or unsafe."
+        threshold = "handoff report is not passed, has failedChecks or secretMarkerFindings, has fewer than eight stages, lacks next owner-input commands, prints env values, broadcasts, reports secrets, or claims release readiness before the truth table is clear"
+        commands = @("npm run flowchain:owner:go-live-handoff", "npm run flowchain:owner:activation-plan", "npm run flowchain:truth-table -- -AllowBlocked")
+    },
+    [ordered]@{
         id = "public-rpc-edge-hardening-failed"
         severity = "critical"
         findingCodes = @("public-rpc-edge-hardening-failed")
@@ -388,6 +396,10 @@ $publicTesterGatewayRuleCoversNoSecretNoBroadcast = $publicTesterGatewayRule.Cou
     -and ([string]$publicTesterGatewayRule[0].threshold).IndexOf("failedChecks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$publicTesterGatewayRule[0].threshold).IndexOf("broadcasts", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$publicTesterGatewayRule[0].threshold).IndexOf("secrets", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$ownerGoLiveHandoffRule = @($rules | Where-Object { $_.id -eq "owner-go-live-handoff-failed" } | Select-Object -First 1)
+$ownerGoLiveHandoffRuleCoversReleaseReady = $ownerGoLiveHandoffRule.Count -eq 1 `
+    -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("release readiness", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("truth table", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
 $allCommands = @($rules | ForEach-Object { @($_.commands) })
 $commandsWithInlineEnvAssignment = @($allCommands | Where-Object { "$_" -match '(^|\s)(\$env:)?[A-Z][A-Z0-9_]+\s*=' })
 $commandsWithUrls = @($allCommands | Where-Object { "$_" -match 'https?://' })
@@ -411,6 +423,7 @@ $checks = [ordered]@{
     supervisorNodeRecoveryRuleCoversLiveProfile = $supervisorNodeRecoveryRuleCoversLiveProfile
     externalTesterLaunchRuleCoversGatewayAndFaucet = $externalTesterLaunchRuleCoversGatewayAndFaucet
     publicTesterGatewayRuleCoversNoSecretNoBroadcast = $publicTesterGatewayRuleCoversNoSecretNoBroadcast
+    ownerGoLiveHandoffRuleCoversReleaseReady = $ownerGoLiveHandoffRuleCoversReleaseReady
     notificationPlanStoresNoSecrets = $true
     notificationPlanNoNetworkDelivery = $true
     envValuesPrintedFalse = $true

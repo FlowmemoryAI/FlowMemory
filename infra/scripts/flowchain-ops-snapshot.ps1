@@ -63,6 +63,7 @@ $paths = [ordered]@{
     dashboardUi = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
     ownerInputsValidation = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     ownerActivationPlan = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json"
+    ownerGoLiveHandoff = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-go-live-handoff-report.json"
     publicDeployment = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     truthTable = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
     noSecret = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
@@ -628,6 +629,19 @@ $ownerActivationPlanReady = $ownerActivationPlanStatus -eq "passed" `
     -and ((Get-OpsProp -Object $reports.ownerActivationPlan -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $reports.ownerActivationPlan -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $reports.ownerActivationPlan -Name "broadcasts" -Default $true) -eq $false)
+$ownerGoLiveHandoffStatus = Get-OpsStatus -Report $reports.ownerGoLiveHandoff
+$ownerGoLiveHandoffFailedChecks = @((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "failedChecks" -Default @()))
+$ownerGoLiveHandoffSecretFindings = @((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "secretMarkerFindings" -Default @()))
+$ownerGoLiveHandoffNextInputs = @((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "nextOwnerInputNames" -Default @()))
+$ownerGoLiveHandoffStageCount = [int](Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "stageCount" -Default 0)
+$ownerGoLiveHandoffReleaseReady = (Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "releaseReady" -Default $false) -eq $true
+$ownerGoLiveHandoffReady = $ownerGoLiveHandoffStatus -eq "passed" `
+    -and $ownerGoLiveHandoffFailedChecks.Count -eq 0 `
+    -and $ownerGoLiveHandoffSecretFindings.Count -eq 0 `
+    -and $ownerGoLiveHandoffStageCount -ge 8 `
+    -and ((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "broadcasts" -Default $true) -eq $false)
 $deploymentStatus = Get-OpsStatus -Report $reports.publicDeployment
 $deploymentRefresh = Get-OpsProp -Object $reports.publicDeployment -Name "dependencyRefresh"
 $deploymentRefreshAborted = (Get-OpsProp -Object $deploymentRefresh -Name "aborted" -Default $false) -eq $true
@@ -721,6 +735,9 @@ if (-not $dashboardUiReady) {
 }
 if (-not $ownerInputsValidationReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "owner-inputs-validation-failed" -Message "Owner input validation scenarios are missing, failed, or unsafe to use for live cutover." -Commands @("npm run flowchain:owner-inputs:validate", "npm run flowchain:owner-inputs", "npm run flowchain:owner-env:readiness")
+}
+if (-not $ownerGoLiveHandoffReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "owner-go-live-handoff-failed" -Message "Owner go-live handoff is missing or unsafe; the operator needs a no-secret stage deck, next-input list, validation commands, and release-ready guardrail before public launch." -Commands @("npm run flowchain:owner:go-live-handoff", "npm run flowchain:owner:activation-plan", "npm run flowchain:truth-table -- -AllowBlocked")
 }
 if ($deploymentRefreshUnsafe) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "deployment-refresh-aborted" -Message "Public deployment dependency refresh aborted or skipped dependency gates." -Commands @("npm run flowchain:public-deployment:contract -- -AllowBlocked", "npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked", "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh")
@@ -972,6 +989,13 @@ $report = [ordered]@{
         ownerActivationReadyStageCount = $ownerActivationPlanReadyStageCount
         ownerActivationMissingEnvCount = $ownerActivationPlanMissingEnvNames.Count
         ownerActivationInvalidEnvCount = $ownerActivationPlanInvalidEnvNames.Count
+        ownerGoLiveHandoff = $ownerGoLiveHandoffStatus
+        ownerGoLiveHandoffReady = $ownerGoLiveHandoffReady
+        ownerGoLiveReleaseReady = $ownerGoLiveHandoffReleaseReady
+        ownerGoLiveStageCount = $ownerGoLiveHandoffStageCount
+        ownerGoLiveNextInputCount = $ownerGoLiveHandoffNextInputs.Count
+        ownerGoLiveFailedChecks = $ownerGoLiveHandoffFailedChecks.Count
+        ownerGoLiveSecretFindings = $ownerGoLiveHandoffSecretFindings.Count
         publicDeployment = $deploymentStatus
         deploymentRefreshAborted = $deploymentRefreshAborted
         deploymentRefreshAbortStep = $deploymentRefreshAbortStep
