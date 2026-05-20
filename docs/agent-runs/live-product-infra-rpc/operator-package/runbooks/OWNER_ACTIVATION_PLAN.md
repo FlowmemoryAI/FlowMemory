@@ -1,6 +1,6 @@
 # FlowChain Owner Activation Plan
 
-Generated: 2026-05-20T01:15:47.1140711+00:00
+Generated: 2026-05-20T02:05:21.3398546+00:00
 Status: passed
 Activation ready: False
 
@@ -33,8 +33,8 @@ This plan is the current launch handoff. It records names, statuses, and command
 | Provision durable state backup storage | needs-owner-input | FLOWCHAIN_RPC_STATE_BACKUP_PATH | npm run flowchain:backup:check -- -AllowBlocked; npm run flowchain:backup:restore:validate; npm run flowchain:backup:owner-path:dry-run |
 | Enable capped friends-and-family tester writes | needs-validation | none | npm run flowchain:tester:token:setup; npm run flowchain:tester:gateway:e2e; npm run flowchain:external-tester:packet -- -AllowBlocked; npm run flowchain:external-tester:packet:validate |
 | Configure capped Base 8453 bridge pilot observation | needs-owner-input | FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:bridge:live:check -- -AllowBlocked; npm run flowchain:bridge:infra:check -- -AllowBlocked; npm run flowchain:bridge:relayer:guardrail:validate; npm run flowchain:bridge:relayer:loop:validate |
-| Release the external tester packet only after public gates pass | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:external-tester:packet -- -AllowBlocked; npm run flowchain:external-tester:packet:validate; npm run flowchain:dashboard:ui:readiness |
-| Run final no-secret production audit before public use | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:completion:audit -- -AllowBlocked; npm run flowchain:truth-table -- -AllowBlocked; npm run flowchain:no-secret:scan |
+| Release the external tester packet only after public gates pass | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:wallet:live-tester:e2e; npm run flowchain:external-tester:packet -- -AllowBlocked; npm run flowchain:external-tester:packet:validate; npm run flowchain:dashboard:ui:readiness |
+| Run final no-secret production audit before public use | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:live:cutover:rehearsal -- -AllowBlocked; npm run flowchain:completion:audit -- -AllowBlocked; npm run flowchain:truth-table -- -AllowBlocked; npm run flowchain:no-secret:scan |
 
 ## Owner Actions
 
@@ -100,4 +100,6 @@ This plan is the current launch handoff. It records names, statuses, and command
 - npm run flowchain:owner-inputs -- -AllowBlocked
 - npm run flowchain:public-rpc:check -- -AllowBlocked
 - npm run flowchain:bridge:live:check -- -AllowBlocked
+- npm run flowchain:wallet:live-tester:e2e
+- npm run flowchain:live:cutover:rehearsal -- -AllowBlocked
 - npm run flowchain:completion:audit -- -AllowBlocked

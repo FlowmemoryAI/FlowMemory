@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T01:58:59.7378231Z",
+    "generatedAt":  "2026-05-20T02:09:38.0995449Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -13,7 +13,7 @@
                           "ownerInputsValidationStatus":  "passed",
                           "ownerActivationPlanStatus":  "passed",
                           "liveCutoverStatus":  "blocked",
-                          "truthTableStatus":  "stale",
+                          "truthTableStatus":  "blocked-owner-input",
                           "noSecretStatus":  "passed"
                       },
     "metrics":  [
@@ -21,19 +21,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  96031
+                        "value":  96321
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  96031
+                        "value":  96321
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  1
+                        "value":  3
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -471,7 +471,7 @@
                         "name":  "flowchain_truth_gates_owner_blocked",
                         "type":  "gauge",
                         "help":  "Owner-input blocked production truth table gates.",
-                        "value":  15
+                        "value":  16
                     },
                     {
                         "name":  "flowchain_truth_gates_repo_blocked",
@@ -489,7 +489,7 @@
                         "name":  "flowchain_truth_gates_stale",
                         "type":  "gauge",
                         "help":  "Stale production truth table gates.",
-                        "value":  1
+                        "value":  0
                     }
                 ],
     "metricCount":  79,

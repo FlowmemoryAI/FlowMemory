@@ -292,7 +292,7 @@ $stages = @(
         -Id "friends-and-family-launch" `
         -Title "Release the external tester packet only after public gates pass" `
         -RequiredEnvNames $requiredOwnerEnvNames `
-        -ValidationCommands @("npm run flowchain:external-tester:packet -- -AllowBlocked", "npm run flowchain:external-tester:packet:validate", "npm run flowchain:dashboard:ui:readiness") `
+        -ValidationCommands @("npm run flowchain:wallet:live-tester:e2e", "npm run flowchain:external-tester:packet -- -AllowBlocked", "npm run flowchain:external-tester:packet:validate", "npm run flowchain:dashboard:ui:readiness") `
         -OwnerMustDo @("Share wallet/tester instructions only after the packet report marks external sharing ready.", "Keep per-send caps low for the first pilot.") `
         -OwnerMustNotSend @("Raw tester token in GitHub or chat", "owner env file contents") `
         -ExternalAccountsOrResources @("Friends-and-family tester list") `
@@ -302,7 +302,7 @@ $stages = @(
         -Id "final-go-live-audit" `
         -Title "Run final no-secret production audit before public use" `
         -RequiredEnvNames $requiredOwnerEnvNames `
-        -ValidationCommands @("npm run flowchain:completion:audit -- -AllowBlocked", "npm run flowchain:truth-table -- -AllowBlocked", "npm run flowchain:no-secret:scan") `
+        -ValidationCommands @("npm run flowchain:live:cutover:rehearsal -- -AllowBlocked", "npm run flowchain:completion:audit -- -AllowBlocked", "npm run flowchain:truth-table -- -AllowBlocked", "npm run flowchain:no-secret:scan") `
         -OwnerMustDo @("Run the aggregate gates after all owner values are configured.", "Do not announce public readiness until completionReady is true and the truth table has no owner blockers.") `
         -OwnerMustNotSend @("Any secret-bearing provider URL", "wallet recovery material") `
         -ExternalAccountsOrResources @("None beyond the configured launch resources") `
@@ -372,6 +372,8 @@ $report = [ordered]@{
         "npm run flowchain:owner-inputs -- -AllowBlocked",
         "npm run flowchain:public-rpc:check -- -AllowBlocked",
         "npm run flowchain:bridge:live:check -- -AllowBlocked",
+        "npm run flowchain:wallet:live-tester:e2e",
+        "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
         "npm run flowchain:completion:audit -- -AllowBlocked"
     )
     envValuesPrinted = $false

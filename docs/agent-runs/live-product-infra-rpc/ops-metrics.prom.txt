@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 96031
+flowchain_latest_height 96321
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 96031
+flowchain_finalized_height 96321
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 1
+flowchain_state_file_age_seconds 3
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 3
@@ -225,7 +225,7 @@ flowchain_truth_gates_total 51
 flowchain_truth_gates_passed 35
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
-flowchain_truth_gates_owner_blocked 15
+flowchain_truth_gates_owner_blocked 16
 # HELP flowchain_truth_gates_repo_blocked Repo-blocked production truth table gates.
 # TYPE flowchain_truth_gates_repo_blocked gauge
 flowchain_truth_gates_repo_blocked 0
@@ -234,4 +234,4 @@ flowchain_truth_gates_repo_blocked 0
 flowchain_truth_gates_failed 0
 # HELP flowchain_truth_gates_stale Stale production truth table gates.
 # TYPE flowchain_truth_gates_stale gauge
-flowchain_truth_gates_stale 1
+flowchain_truth_gates_stale 0
