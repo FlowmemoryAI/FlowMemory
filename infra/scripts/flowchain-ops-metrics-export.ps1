@@ -43,6 +43,7 @@ $paths = [ordered]@{
     externalTesterClientValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-client-validation-report.json"
     externalTesterEvidence = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
     dashboardUi = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
+    devPack = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"
     ownerInputsValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     ownerActivationPlan = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json"
     ownerGoLiveHandoff = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-go-live-handoff-report.json"
@@ -231,6 +232,7 @@ $publicTesterGateway = $reports.publicTesterGateway
 $externalTesterClientValidation = $reports.externalTesterClientValidation
 $externalTesterEvidence = $reports.externalTesterEvidence
 $dashboardUi = $reports.dashboardUi
+$devPack = $reports.devPack
 $ownerInputsValidation = $reports.ownerInputsValidation
 $ownerActivationPlan = $reports.ownerActivationPlan
 $ownerGoLiveHandoff = $reports.ownerGoLiveHandoff
@@ -251,6 +253,22 @@ $truthCounts = Get-MetricsProp -Object $truthTable -Name "classificationCounts"
 $externalTesterChecks = Get-MetricsProp -Object $externalTester -Name "checks"
 $externalTesterEvidenceChecks = Get-MetricsProp -Object $externalTesterEvidence -Name "checks"
 $dashboardUiChecks = Get-MetricsProp -Object $dashboardUi -Name "checks"
+$devPackChecks = Get-MetricsProp -Object $devPack -Name "checks"
+$devPackFailedChecks = @((Get-MetricsProp -Object $devPack -Name "failedChecks" -Default @()))
+$devPackLanguageSdks = @((Get-MetricsProp -Object $devPack -Name "languageSdks" -Default @()))
+$devPackImplementedLanguageSdks = @($devPackLanguageSdks | Where-Object { [string](Get-MetricsProp -Object $_ -Name "status" -Default "") -eq "implemented" })
+$devPackReady = (Get-MetricsStatus -Report $devPack) -eq "passed" `
+    -and $devPackFailedChecks.Count -eq 0 `
+    -and ((Get-MetricsProp -Object $devPackChecks -Name "pythonSdkE2ePassed" -Default $false) -eq $true) `
+    -and ($devPackImplementedLanguageSdks.Count -ge 1) `
+    -and ((Get-MetricsProp -Object $devPackChecks -Name "browserExampleViteReactPackaged" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $devPackChecks -Name "browserExampleBuildPassed" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $devPackChecks -Name "browserExampleSmokePassed" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $devPackChecks -Name "publicReadinessFailClosed" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $devPack -Name "noLiveBroadcast" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $devPack -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-MetricsProp -Object $devPack -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $devPack -Name "broadcasts" -Default $true) -eq $false)
 $ownerInputsValidationScenarios = @((Get-MetricsProp -Object $ownerInputsValidation -Name "scenarios" -Default @()))
 $ownerInputsValidationFailedScenarios = @($ownerInputsValidationScenarios | Where-Object { (Get-MetricsProp -Object $_ -Name "passed" -Default $false) -ne $true })
 $ownerInputsValidationRequiredEnvNames = @((Get-MetricsProp -Object $ownerInputsValidation -Name "requiredEnvNames" -Default @()))
@@ -603,6 +621,17 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_build_ready" -He
 Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_tester_flow_covered" -Help "One when create, faucet, send, tester launch, and explorer routes are covered by dashboard UI readiness." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $dashboardUiChecks -Name "testerWalletCreateCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "testerFaucetCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "testerSendCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "testerLaunchRouteCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "explorerRouteCovered" -Default $false) -eq $true)))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_tester_launch_covered" -Help "One when the dashboard tester launch route is covered by readiness." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $dashboardUiChecks -Name "testerLaunchRouteCovered" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_activation_covered" -Help "One when the dashboard activation cockpit route is covered by readiness." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $dashboardUiChecks -Name "activationRouteCovered" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dev_pack_ready" -Help "One when developer SDK/devkit, docs, Python SDK, signed-envelope, browser starter, and fail-closed public readiness proof are passed." -Value (ConvertTo-MetricBool -Value $devPackReady)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dev_pack_failed_checks" -Help "Failed checks in the developer pack E2E report." -Value (ConvertTo-MetricNumber -Value $devPackFailedChecks.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dev_pack_methods_total" -Help "RPC method count discovered by developer pack E2E." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $devPack -Name "methodCount" -Default 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dev_pack_public_ready_methods" -Help "Public-ready method count reported by developer pack E2E." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $devPack -Name "publicReadyMethodCount" -Default 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dev_pack_language_sdks_total" -Help "Implemented language SDK count in the developer pack report." -Value (ConvertTo-MetricNumber -Value $devPackImplementedLanguageSdks.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dev_pack_python_sdk_ready" -Help "One when Python SDK/devkit E2E proof passed." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $devPackChecks -Name "pythonSdkE2ePassed" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dev_pack_browser_starter_packaged" -Help "One when the browser readiness starter is packaged as Vite/React." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $devPackChecks -Name "browserExampleViteReactPackaged" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dev_pack_browser_starter_build_ready" -Help "One when the browser readiness starter production build passed." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $devPackChecks -Name "browserExampleBuildPassed" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dev_pack_browser_starter_smoke_ready" -Help "One when the browser readiness starter smoke proof passed." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $devPackChecks -Name "browserExampleSmokePassed" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dev_pack_public_readiness_fail_closed" -Help "One when developer pack public readiness proof fails closed before owner inputs." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $devPackChecks -Name "publicReadinessFailClosed" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dev_pack_no_secrets" -Help "One when developer pack evidence reports no secrets and no env value printing." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $devPack -Name "noSecrets" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $devPack -Name "envValuesPrinted" -Default $true) -eq $false)))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_inputs_validation_ready" -Help "One when owner input validation scenarios are passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $ownerInputsValidation))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_inputs_validation_scenarios_total" -Help "Owner input validation scenario count." -Value (ConvertTo-MetricNumber -Value $ownerInputsValidationScenarios.Count)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_inputs_validation_scenarios_failed" -Help "Owner input validation scenario failures." -Value (ConvertTo-MetricNumber -Value $ownerInputsValidationFailedScenarios.Count)
@@ -657,6 +686,7 @@ $metricsJson = [ordered]@{
         externalTesterClientValidationStatus = Get-MetricsStatus -Report $externalTesterClientValidation
         externalTesterEvidenceStatus = Get-MetricsStatus -Report $externalTesterEvidence
         dashboardUiStatus = Get-MetricsStatus -Report $dashboardUi
+        devPackStatus = Get-MetricsStatus -Report $devPack
         ownerInputsValidationStatus = Get-MetricsStatus -Report $ownerInputsValidation
         ownerActivationPlanStatus = Get-MetricsStatus -Report $ownerActivationPlan
         ownerGoLiveHandoffStatus = Get-MetricsStatus -Report $ownerGoLiveHandoff
@@ -849,6 +879,17 @@ $requiredMetricNames = @(
     "flowchain_dashboard_ui_tester_flow_covered",
     "flowchain_dashboard_ui_tester_launch_covered",
     "flowchain_dashboard_ui_activation_covered",
+    "flowchain_dev_pack_ready",
+    "flowchain_dev_pack_failed_checks",
+    "flowchain_dev_pack_methods_total",
+    "flowchain_dev_pack_public_ready_methods",
+    "flowchain_dev_pack_language_sdks_total",
+    "flowchain_dev_pack_python_sdk_ready",
+    "flowchain_dev_pack_browser_starter_packaged",
+    "flowchain_dev_pack_browser_starter_build_ready",
+    "flowchain_dev_pack_browser_starter_smoke_ready",
+    "flowchain_dev_pack_public_readiness_fail_closed",
+    "flowchain_dev_pack_no_secrets",
     "flowchain_owner_inputs_validation_ready",
     "flowchain_owner_inputs_validation_scenarios_total",
     "flowchain_owner_inputs_validation_scenarios_failed",
@@ -895,6 +936,7 @@ $checks = [ordered]@{
     bridgeRelayerLoopValidationLoaded = $null -ne $bridgeRelayerLoopValidation
     bridgeReleaseEvidenceValidationLoaded = $null -ne $bridgeReleaseEvidenceValidation
     dashboardUiLoaded = $null -ne $dashboardUi
+    devPackLoaded = $null -ne $devPack
     ownerInputsValidationLoaded = $null -ne $ownerInputsValidation
     ownerActivationPlanLoaded = $null -ne $ownerActivationPlan
     ownerGoLiveHandoffLoaded = $null -ne $ownerGoLiveHandoff
@@ -1092,6 +1134,19 @@ $checks = [ordered]@{
         "flowchain_dashboard_ui_tester_flow_covered",
         "flowchain_dashboard_ui_tester_launch_covered",
         "flowchain_dashboard_ui_activation_covered"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    devPackMetricsPresent = @(
+        "flowchain_dev_pack_ready",
+        "flowchain_dev_pack_failed_checks",
+        "flowchain_dev_pack_methods_total",
+        "flowchain_dev_pack_public_ready_methods",
+        "flowchain_dev_pack_language_sdks_total",
+        "flowchain_dev_pack_python_sdk_ready",
+        "flowchain_dev_pack_browser_starter_packaged",
+        "flowchain_dev_pack_browser_starter_build_ready",
+        "flowchain_dev_pack_browser_starter_smoke_ready",
+        "flowchain_dev_pack_public_readiness_fail_closed",
+        "flowchain_dev_pack_no_secrets"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     ownerInputsValidationMetricsPresent = @(
         "flowchain_owner_inputs_validation_ready",

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-20T20:38:13.3829846Z",
+    "generatedAt":  "2026-05-20T21:33:15.0808024Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -29,7 +29,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=106213, finalizedHeight=106213",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=106621, finalizedHeight=106621",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -67,7 +67,7 @@
                       "layer":  "Operations",
                       "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, service-install validation telemetry, bridge relayer-loop validation telemetry, bridge release-evidence validation telemetry, external tester client validation telemetry, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=35, alertCoveredFindings=37, relayerLoopAlertCoverage=True, serviceInstallAlertCoverage=True, publicRpcRollbackAlert=True, bridgeDeployControlAlert=True, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=211, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, publicRpcRollbackMetrics=True, bridgeDeployControlMetrics=True, supervisorNodeRecoveryMetrics=True, serviceInstallValidationMetrics=True, bridgeRelayerLoopValidationMetrics=True, bridgeReleaseEvidenceMetrics=True, externalTesterClientMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=28, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=20, incidentFailed=0",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=36, alertCoveredFindings=38, relayerLoopAlertCoverage=True, serviceInstallAlertCoverage=True, devPackAlert=True, publicRpcRollbackAlert=True, bridgeDeployControlAlert=True, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=222, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, publicRpcRollbackMetrics=True, bridgeDeployControlMetrics=True, supervisorNodeRecoveryMetrics=True, serviceInstallValidationMetrics=True, bridgeRelayerLoopValidationMetrics=True, bridgeReleaseEvidenceMetrics=True, externalTesterClientMetrics=True, devPackMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=29, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=20, incidentFailed=0",
                       "files":  [
                                     "infra/scripts/flowchain-service-monitor.ps1",
                                     "infra/scripts/flowchain-service-supervisor.ps1",
@@ -583,12 +583,14 @@
                   {
                       "id":  "developer-dev-pack-boundary",
                       "layer":  "Developer ecosystem",
-                      "requirement":  "Developer SDK/devkit and docs connect to the real FlowChain RPC, generate a live RPC reference, read wallet data, submit a runtime-backed local wallet send, and fail closed for public readiness.",
+                      "requirement":  "Developer SDK/devkit and docs connect to the real FlowChain RPC, generate a live RPC reference, read wallet data, submit a runtime-backed local wallet send, prove the packaged browser starter, and fail closed for public readiness.",
                       "status":  "passed",
-                      "evidence":  "devPackStatus=passed, methodCount=82, heights=104885-\u003e104886, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\dev-pack-e2e-report.json",
+                      "evidence":  "devPackStatus=passed, methodCount=82, heights=106437-\u003e106438, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\dev-pack-e2e-report.json",
                       "files":  [
                                     "services/flowchain-sdk/src/client.ts",
                                     "services/flowchain-sdk/src/cli.ts",
+                                    "examples/flowchain-browser-readiness/package.json",
+                                    "examples/flowchain-browser-readiness/src/main.jsx",
                                     "docs/developer/FLOWCHAIN_QUICKSTART.md",
                                     "docs/sdk/RPC_REFERENCE.generated.md"
                                 ],
@@ -1084,15 +1086,15 @@
                                      },
     "opsAlertCoverage":  {
                              "status":  "passed",
-                             "ruleCount":  35,
-                             "criticalRuleCount":  28,
+                             "ruleCount":  36,
+                             "criticalRuleCount":  29,
                              "blockedRuleCount":  7,
-                             "coveredFindingCount":  37,
+                             "coveredFindingCount":  38,
                              "unmappedCurrentFindingCount":  0
                          },
     "opsMetricsCoverage":  {
                                "exportStatus":  "passed",
-                               "metricCount":  211,
+                               "metricCount":  222,
                                "exportFailedCheckCount":  0,
                                "installStatus":  "passed",
                                "installFailedCheckCount":  0,
@@ -1132,6 +1134,10 @@
                                "missingExternalTesterClientMetricNames":  [
 
                                                                           ],
+                               "devPackMetricsPresent":  true,
+                               "missingDevPackMetricNames":  [
+
+                                                             ],
                                "systemdTimerUnitPlanned":  true,
                                "noExternalDelivery":  true
                            },

@@ -290,6 +290,14 @@ $rules = @(
         commands = @("npm run flowchain:dashboard:ui:readiness", "npm run flowchain:dashboard:build", "npm test --prefix apps/dashboard")
     },
     [ordered]@{
+        id = "developer-dev-pack-readiness-failed"
+        severity = "critical"
+        findingCodes = @("developer-dev-pack-readiness-failed")
+        signal = "Developer pack SDK/devkit, docs, or browser starter readiness proof is missing or unsafe."
+        threshold = "dev-pack report is not passed, has failedChecks, has fewer than one implemented language SDK, lacks Python SDK, signed-envelope submission, packaged Vite/React browser starter build/smoke proof, public readiness fail-closed proof, or no-secret/no-broadcast flags"
+        commands = @("npm run flowchain:dev-pack:e2e", "npm run flowchain:browser-readiness:build", "npm run flowchain:browser-readiness:smoke", "npm run flowchain:python-sdk:e2e")
+    },
+    [ordered]@{
         id = "owner-inputs-validation-failed"
         severity = "critical"
         findingCodes = @("owner-inputs-validation-failed")
@@ -456,6 +464,14 @@ $ownerGoLiveHandoffRule = @($rules | Where-Object { $_.id -eq "owner-go-live-han
 $ownerGoLiveHandoffRuleCoversReleaseReady = $ownerGoLiveHandoffRule.Count -eq 1 `
     -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("release readiness", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("truth table", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$devPackRule = @($rules | Where-Object { $_.id -eq "developer-dev-pack-readiness-failed" } | Select-Object -First 1)
+$devPackRuleCoversBrowserStarter = $devPackRule.Count -eq 1 `
+    -and ([string]$devPackRule[0].threshold).IndexOf("Vite/React", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$devPackRule[0].threshold).IndexOf("build/smoke", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$devPackRule[0].threshold).IndexOf("fail-closed", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($devPackRule[0].commands) -contains "npm run flowchain:dev-pack:e2e") `
+    -and (@($devPackRule[0].commands) -contains "npm run flowchain:browser-readiness:build") `
+    -and (@($devPackRule[0].commands) -contains "npm run flowchain:browser-readiness:smoke")
 $allCommands = @($rules | ForEach-Object { @($_.commands) })
 $commandsWithInlineEnvAssignment = @($allCommands | Where-Object { "$_" -match '(^|\s)(\$env:)?[A-Z][A-Z0-9_]+\s*=' })
 $commandsWithUrls = @($allCommands | Where-Object { "$_" -match 'https?://' })
@@ -484,6 +500,7 @@ $checks = [ordered]@{
     externalTesterLaunchRuleCoversGatewayAndFaucet = $externalTesterLaunchRuleCoversGatewayAndFaucet
     publicTesterGatewayRuleCoversNoSecretNoBroadcast = $publicTesterGatewayRuleCoversNoSecretNoBroadcast
     ownerGoLiveHandoffRuleCoversReleaseReady = $ownerGoLiveHandoffRuleCoversReleaseReady
+    devPackRuleCoversBrowserStarter = $devPackRuleCoversBrowserStarter
     notificationPlanStoresNoSecrets = $true
     notificationPlanNoNetworkDelivery = $true
     envValuesPrintedFalse = $true

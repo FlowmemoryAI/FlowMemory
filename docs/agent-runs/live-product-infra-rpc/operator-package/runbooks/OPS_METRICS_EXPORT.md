@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-20T20:37:18.1768788Z
+Generated: 2026-05-20T21:32:02.9815308Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 211
+- Metric count: 222
 
 ## Required Metrics
 
@@ -178,6 +178,17 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_dashboard_ui_tester_flow_covered: present
 - flowchain_dashboard_ui_tester_launch_covered: present
 - flowchain_dashboard_ui_activation_covered: present
+- flowchain_dev_pack_ready: present
+- flowchain_dev_pack_failed_checks: present
+- flowchain_dev_pack_methods_total: present
+- flowchain_dev_pack_public_ready_methods: present
+- flowchain_dev_pack_language_sdks_total: present
+- flowchain_dev_pack_python_sdk_ready: present
+- flowchain_dev_pack_browser_starter_packaged: present
+- flowchain_dev_pack_browser_starter_build_ready: present
+- flowchain_dev_pack_browser_starter_smoke_ready: present
+- flowchain_dev_pack_public_readiness_fail_closed: present
+- flowchain_dev_pack_no_secrets: present
 - flowchain_owner_inputs_validation_ready: present
 - flowchain_owner_inputs_validation_scenarios_total: present
 - flowchain_owner_inputs_validation_scenarios_failed: present
@@ -223,6 +234,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | bridgeRelayerLoopValidationLoaded | True |
 | bridgeReleaseEvidenceValidationLoaded | True |
 | dashboardUiLoaded | True |
+| devPackLoaded | True |
 | ownerInputsValidationLoaded | True |
 | ownerActivationPlanLoaded | True |
 | ownerGoLiveHandoffLoaded | True |
@@ -248,6 +260,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | externalTesterClientMetricsPresent | True |
 | transactionIntakeMetricsPresent | True |
 | dashboardUiMetricsPresent | True |
+| devPackMetricsPresent | True |
 | ownerInputsValidationMetricsPresent | True |
 | ownerActivationPlanMetricsPresent | True |
 | ownerGoLiveHandoffMetricsPresent | True |

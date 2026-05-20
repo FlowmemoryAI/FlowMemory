@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T20:37:17.9105603Z",
+    "generatedAt":  "2026-05-20T21:32:02.4375138Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -18,6 +18,7 @@
                           "externalTesterClientValidationStatus":  "passed",
                           "externalTesterEvidenceStatus":  "passed",
                           "dashboardUiStatus":  "passed",
+                          "devPackStatus":  "passed",
                           "ownerInputsValidationStatus":  "passed",
                           "ownerActivationPlanStatus":  "passed",
                           "ownerGoLiveHandoffStatus":  "passed",
@@ -30,19 +31,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  106084
+                        "value":  106621
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  106084
+                        "value":  106621
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  6
+                        "value":  8
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -66,13 +67,13 @@
                         "name":  "flowchain_transaction_intake_rows_total",
                         "type":  "gauge",
                         "help":  "Signed transaction intake rows recorded in local NDJSON intake.",
-                        "value":  183
+                        "value":  187
                     },
                     {
                         "name":  "flowchain_transaction_intake_accepted_rows_total",
                         "type":  "gauge",
                         "help":  "Crypto-verified signed transaction intake rows recorded locally.",
-                        "value":  183
+                        "value":  187
                     },
                     {
                         "name":  "flowchain_transaction_intake_invalid_rows",
@@ -84,7 +85,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  8656.887
+                        "value":  1396.494
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -114,13 +115,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  34
+                        "value":  36
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  27
+                        "value":  29
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -1131,6 +1132,72 @@
                         "value":  1
                     },
                     {
+                        "name":  "flowchain_dev_pack_ready",
+                        "type":  "gauge",
+                        "help":  "One when developer SDK/devkit, docs, Python SDK, signed-envelope, browser starter, and fail-closed public readiness proof are passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_dev_pack_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in the developer pack E2E report.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_dev_pack_methods_total",
+                        "type":  "gauge",
+                        "help":  "RPC method count discovered by developer pack E2E.",
+                        "value":  82
+                    },
+                    {
+                        "name":  "flowchain_dev_pack_public_ready_methods",
+                        "type":  "gauge",
+                        "help":  "Public-ready method count reported by developer pack E2E.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_dev_pack_language_sdks_total",
+                        "type":  "gauge",
+                        "help":  "Implemented language SDK count in the developer pack report.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_dev_pack_python_sdk_ready",
+                        "type":  "gauge",
+                        "help":  "One when Python SDK/devkit E2E proof passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_dev_pack_browser_starter_packaged",
+                        "type":  "gauge",
+                        "help":  "One when the browser readiness starter is packaged as Vite/React.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_dev_pack_browser_starter_build_ready",
+                        "type":  "gauge",
+                        "help":  "One when the browser readiness starter production build passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_dev_pack_browser_starter_smoke_ready",
+                        "type":  "gauge",
+                        "help":  "One when the browser readiness starter smoke proof passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_dev_pack_public_readiness_fail_closed",
+                        "type":  "gauge",
+                        "help":  "One when developer pack public readiness proof fails closed before owner inputs.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_dev_pack_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when developer pack evidence reports no secrets and no env value printing.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_owner_inputs_validation_ready",
                         "type":  "gauge",
                         "help":  "One when owner input validation scenarios are passed.",
@@ -1293,7 +1360,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  211,
+    "metricCount":  222,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

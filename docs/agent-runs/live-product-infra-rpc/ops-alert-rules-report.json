@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T20:37:17.2599441Z",
+    "generatedAt":  "2026-05-20T21:31:54.8499920Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  35,
-    "criticalRuleCount":  28,
+    "ruleCount":  36,
+    "criticalRuleCount":  29,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -56,6 +56,7 @@
                                 "external-tester-evidence-unsafe",
                                 "public-tester-gateway-e2e-failed",
                                 "dashboard-ui-readiness-failed",
+                                "developer-dev-pack-readiness-failed",
                                 "owner-inputs-validation-failed",
                                 "owner-go-live-handoff-failed",
                                 "public-rpc-edge-hardening-failed",
@@ -110,6 +111,7 @@
                    "externalTesterLaunchRuleCoversGatewayAndFaucet":  true,
                    "publicTesterGatewayRuleCoversNoSecretNoBroadcast":  true,
                    "ownerGoLiveHandoffRuleCoversReleaseReady":  true,
+                   "devPackRuleCoversBrowserStarter":  true,
                    "notificationPlanStoresNoSecrets":  true,
                    "notificationPlanNoNetworkDelivery":  true,
                    "envValuesPrintedFalse":  true,
@@ -470,6 +472,21 @@
                                        "npm run flowchain:dashboard:ui:readiness",
                                        "npm run flowchain:dashboard:build",
                                        "npm test --prefix apps/dashboard"
+                                   ]
+                  },
+                  {
+                      "id":  "developer-dev-pack-readiness-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "developer-dev-pack-readiness-failed"
+                                       ],
+                      "signal":  "Developer pack SDK/devkit, docs, or browser starter readiness proof is missing or unsafe.",
+                      "threshold":  "dev-pack report is not passed, has failedChecks, has fewer than one implemented language SDK, lacks Python SDK, signed-envelope submission, packaged Vite/React browser starter build/smoke proof, public readiness fail-closed proof, or no-secret/no-broadcast flags",
+                      "commands":  [
+                                       "npm run flowchain:dev-pack:e2e",
+                                       "npm run flowchain:browser-readiness:build",
+                                       "npm run flowchain:browser-readiness:smoke",
+                                       "npm run flowchain:python-sdk:e2e"
                                    ]
                   },
                   {

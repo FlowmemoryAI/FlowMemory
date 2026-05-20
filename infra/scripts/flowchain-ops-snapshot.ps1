@@ -68,6 +68,7 @@ $paths = [ordered]@{
     ownerInputsValidation = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     ownerActivationPlan = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json"
     ownerGoLiveHandoff = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-go-live-handoff-report.json"
+    devPack = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"
     publicDeployment = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     truthTable = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
     noSecret = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
@@ -740,6 +741,32 @@ $dashboardUiReady = $dashboardUiStatus -eq "passed" `
     -and ((Get-OpsProp -Object $reports.dashboardUi -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $reports.dashboardUi -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $reports.dashboardUi -Name "broadcasts" -Default $true) -eq $false)
+$devPackStatus = Get-OpsStatus -Report $reports.devPack
+$devPackChecks = Get-OpsProp -Object $reports.devPack -Name "checks"
+$devPackFailedChecks = @((Get-OpsProp -Object $reports.devPack -Name "failedChecks" -Default @()))
+$devPackLanguageSdks = @((Get-OpsProp -Object $reports.devPack -Name "languageSdks" -Default @()))
+$devPackImplementedLanguageSdks = @($devPackLanguageSdks | Where-Object { [string](Get-OpsProp -Object $_ -Name "status" -Default "") -eq "implemented" })
+$devPackMethodCount = ConvertTo-OpsInteger -Value (Get-OpsProp -Object $reports.devPack -Name "methodCount" -Default 0)
+$devPackPublicReadyMethodCount = ConvertTo-OpsInteger -Value (Get-OpsProp -Object $reports.devPack -Name "publicReadyMethodCount" -Default -1) -Default -1
+$devPackReady = $devPackStatus -eq "passed" `
+    -and $devPackFailedChecks.Count -eq 0 `
+    -and $devPackMethodCount -ge 20 `
+    -and $devPackPublicReadyMethodCount -eq 0 `
+    -and ((Get-OpsProp -Object $devPackChecks -Name "discoveryLoaded" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $devPackChecks -Name "readinessLoaded" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $devPackChecks -Name "walletSendRuntimeBacked" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $devPackChecks -Name "signedEnvelopeExamplePassed" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $devPackChecks -Name "cliSignedTransactionSubmit" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $devPackChecks -Name "pythonSdkE2ePassed" -Default $false) -eq $true) `
+    -and ($devPackImplementedLanguageSdks.Count -ge 1) `
+    -and ((Get-OpsProp -Object $devPackChecks -Name "browserExampleViteReactPackaged" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $devPackChecks -Name "browserExampleBuildPassed" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $devPackChecks -Name "browserExampleSmokePassed" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $devPackChecks -Name "publicReadinessFailClosed" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.devPack -Name "noLiveBroadcast" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.devPack -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.devPack -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.devPack -Name "broadcasts" -Default $true) -eq $false)
 $ownerInputsValidationStatus = Get-OpsStatus -Report $reports.ownerInputsValidation
 $ownerInputsValidationScenarios = @((Get-OpsProp -Object $reports.ownerInputsValidation -Name "scenarios" -Default @()))
 $ownerInputsValidationFailedScenarios = @($ownerInputsValidationScenarios | Where-Object { (Get-OpsProp -Object $_ -Name "passed" -Default $false) -ne $true })
@@ -875,6 +902,9 @@ elseif ($externalTesterEvidenceStatus -ne "passed" -or $externalTesterEvidenceFa
 }
 if (-not $dashboardUiReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "dashboard-ui-readiness-failed" -Message "Dashboard wallet, faucet, send, tester launch, explorer, activation cockpit, or no-secret UI readiness proof is missing or failed." -Commands @("npm run flowchain:dashboard:ui:readiness", "npm run flowchain:dashboard:build", "npm test --prefix apps/dashboard")
+}
+if (-not $devPackReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "developer-dev-pack-readiness-failed" -Message "Developer pack readiness proof is missing or unsafe; SDK/devkit, Python SDK, signed-envelope submission, packaged browser starter build/smoke, no-secret, and fail-closed public readiness checks must pass." -Commands @("npm run flowchain:dev-pack:e2e", "npm run flowchain:browser-readiness:build", "npm run flowchain:browser-readiness:smoke", "npm run flowchain:python-sdk:e2e")
 }
 if (-not $ownerInputsValidationReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "owner-inputs-validation-failed" -Message "Owner input validation scenarios are missing, failed, or unsafe to use for live cutover." -Commands @("npm run flowchain:owner-inputs:validate", "npm run flowchain:owner-inputs", "npm run flowchain:owner-env:readiness")
@@ -1163,6 +1193,19 @@ $report = [ordered]@{
         dashboardUiTesterLaunchRouteCovered = Get-OpsProp -Object $dashboardUiChecks -Name "testerLaunchRouteCovered" -Default $false
         dashboardUiExplorerRouteCovered = Get-OpsProp -Object $dashboardUiChecks -Name "explorerRouteCovered" -Default $false
         dashboardUiActivationRouteCovered = Get-OpsProp -Object $dashboardUiChecks -Name "activationRouteCovered" -Default $false
+        devPack = $devPackStatus
+        devPackReady = $devPackReady
+        devPackFailedChecks = $devPackFailedChecks.Count
+        devPackMethodCount = $devPackMethodCount
+        devPackPublicReadyMethodCount = $devPackPublicReadyMethodCount
+        devPackLanguageSdkCount = $devPackLanguageSdks.Count
+        devPackImplementedLanguageSdkCount = $devPackImplementedLanguageSdks.Count
+        devPackPythonSdkReady = Get-OpsProp -Object $devPackChecks -Name "pythonSdkE2ePassed" -Default $false
+        devPackBrowserStarterPackaged = Get-OpsProp -Object $devPackChecks -Name "browserExampleViteReactPackaged" -Default $false
+        devPackBrowserStarterBuild = Get-OpsProp -Object $devPackChecks -Name "browserExampleBuildPassed" -Default $false
+        devPackBrowserStarterSmoke = Get-OpsProp -Object $devPackChecks -Name "browserExampleSmokePassed" -Default $false
+        devPackPublicReadinessFailClosed = Get-OpsProp -Object $devPackChecks -Name "publicReadinessFailClosed" -Default $false
+        devPackNoSecrets = Get-OpsProp -Object $reports.devPack -Name "noSecrets" -Default $false
         ownerInputsValidation = $ownerInputsValidationStatus
         ownerInputsValidationReady = $ownerInputsValidationReady
         ownerInputsValidationScenarioCount = $ownerInputsValidationScenarios.Count

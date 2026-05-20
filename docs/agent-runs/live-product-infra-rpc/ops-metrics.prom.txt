@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 106084
+flowchain_latest_height 106621
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 106084
+flowchain_finalized_height 106621
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 6
+flowchain_state_file_age_seconds 8
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -18,16 +18,16 @@ flowchain_height_advanced 1
 flowchain_mempool_depth 0
 # HELP flowchain_transaction_intake_rows_total Signed transaction intake rows recorded in local NDJSON intake.
 # TYPE flowchain_transaction_intake_rows_total gauge
-flowchain_transaction_intake_rows_total 183
+flowchain_transaction_intake_rows_total 187
 # HELP flowchain_transaction_intake_accepted_rows_total Crypto-verified signed transaction intake rows recorded locally.
 # TYPE flowchain_transaction_intake_accepted_rows_total gauge
-flowchain_transaction_intake_accepted_rows_total 183
+flowchain_transaction_intake_accepted_rows_total 187
 # HELP flowchain_transaction_intake_invalid_rows Invalid NDJSON rows in signed transaction intake.
 # TYPE flowchain_transaction_intake_invalid_rows gauge
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 8656.887
+flowchain_transaction_intake_file_age_seconds 1396.494
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -42,10 +42,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 34
+flowchain_ops_alert_rules_total 36
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 27
+flowchain_ops_alert_rules_critical 29
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -550,6 +550,39 @@ flowchain_dashboard_ui_tester_launch_covered 1
 # HELP flowchain_dashboard_ui_activation_covered One when the dashboard activation cockpit route is covered by readiness.
 # TYPE flowchain_dashboard_ui_activation_covered gauge
 flowchain_dashboard_ui_activation_covered 1
+# HELP flowchain_dev_pack_ready One when developer SDK/devkit, docs, Python SDK, signed-envelope, browser starter, and fail-closed public readiness proof are passed.
+# TYPE flowchain_dev_pack_ready gauge
+flowchain_dev_pack_ready 1
+# HELP flowchain_dev_pack_failed_checks Failed checks in the developer pack E2E report.
+# TYPE flowchain_dev_pack_failed_checks gauge
+flowchain_dev_pack_failed_checks 0
+# HELP flowchain_dev_pack_methods_total RPC method count discovered by developer pack E2E.
+# TYPE flowchain_dev_pack_methods_total gauge
+flowchain_dev_pack_methods_total 82
+# HELP flowchain_dev_pack_public_ready_methods Public-ready method count reported by developer pack E2E.
+# TYPE flowchain_dev_pack_public_ready_methods gauge
+flowchain_dev_pack_public_ready_methods 0
+# HELP flowchain_dev_pack_language_sdks_total Implemented language SDK count in the developer pack report.
+# TYPE flowchain_dev_pack_language_sdks_total gauge
+flowchain_dev_pack_language_sdks_total 1
+# HELP flowchain_dev_pack_python_sdk_ready One when Python SDK/devkit E2E proof passed.
+# TYPE flowchain_dev_pack_python_sdk_ready gauge
+flowchain_dev_pack_python_sdk_ready 1
+# HELP flowchain_dev_pack_browser_starter_packaged One when the browser readiness starter is packaged as Vite/React.
+# TYPE flowchain_dev_pack_browser_starter_packaged gauge
+flowchain_dev_pack_browser_starter_packaged 1
+# HELP flowchain_dev_pack_browser_starter_build_ready One when the browser readiness starter production build passed.
+# TYPE flowchain_dev_pack_browser_starter_build_ready gauge
+flowchain_dev_pack_browser_starter_build_ready 1
+# HELP flowchain_dev_pack_browser_starter_smoke_ready One when the browser readiness starter smoke proof passed.
+# TYPE flowchain_dev_pack_browser_starter_smoke_ready gauge
+flowchain_dev_pack_browser_starter_smoke_ready 1
+# HELP flowchain_dev_pack_public_readiness_fail_closed One when developer pack public readiness proof fails closed before owner inputs.
+# TYPE flowchain_dev_pack_public_readiness_fail_closed gauge
+flowchain_dev_pack_public_readiness_fail_closed 1
+# HELP flowchain_dev_pack_no_secrets One when developer pack evidence reports no secrets and no env value printing.
+# TYPE flowchain_dev_pack_no_secrets gauge
+flowchain_dev_pack_no_secrets 1
 # HELP flowchain_owner_inputs_validation_ready One when owner input validation scenarios are passed.
 # TYPE flowchain_owner_inputs_validation_ready gauge
 flowchain_owner_inputs_validation_ready 1
