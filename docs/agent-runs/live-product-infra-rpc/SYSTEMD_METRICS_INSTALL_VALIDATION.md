@@ -1,6 +1,6 @@
 ﻿# FlowChain Systemd Metrics Install Validation
 
-Generated: 2026-05-19T18:01:48.1009693Z
+Generated: 2026-05-20T00:03:29.1871345Z
 Status: passed
 
 This validation proves the Linux systemd timer path for recurring ops metrics export is present, no-secret, non-mutating in Plan mode, and writes only local JSON plus Prometheus textfile metrics.

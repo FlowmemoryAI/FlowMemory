@@ -1,6 +1,6 @@
 ﻿# FlowChain Backup Install Validation
 
-Generated: 2026-05-19T14:24:42.8513608Z
+Generated: 2026-05-20T00:09:53.7658325Z
 Status: passed
 
 This validation proves the Windows Scheduled Task and Linux systemd timer install paths are planned, no-secret, non-mutating in plan mode, rotate snapshots by retention count, schedule recurring restore drills, and fail closed unless the owner backup path env is configured for actual backup and restore runs.

@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Automation
 
-Generated: 2026-05-19T21:50:52.1079394Z
+Generated: 2026-05-20T00:03:48.8616442Z
 Status: passed
 Action: Validate
 
@@ -53,6 +53,13 @@ This validator proves the owner-host public RPC deployment path can render concr
 - renderedReportKeepsOwnerPathsOutsideRepo: True
 - renderedReportNoSecrets: True
 - renderedReportBroadcastsFalse: True
+- renderedReportSummaryPresent: True
+- renderedReportSummaryPassed: True
+- renderedReportSummaryListsFiles: True
+- renderedReportSummaryHasRequiredEnvNames: True
+- renderedReportSummaryNoSecrets: True
+- renderedReportSummaryBroadcastsFalse: True
+- renderedReportSummaryOwnerPathsOutsideRepo: True
 - rollbackDrillPerformed: True
 - rollbackRenderedConfigExists: True
 - rollbackPreviousConfigWritten: True
@@ -61,6 +68,8 @@ This validator proves the owner-host public RPC deployment path can render concr
 - rollbackArtifactsStayedInsideRenderDir: True
 - rollbackDrillNoSecrets: True
 - rollbackDrillBroadcastsFalse: True
+- renderedReportSnapshotWritten: True
+- renderedReportSnapshotNoSecrets: True
 - cleanupAttempted: True
 
 ## Deployment Phases

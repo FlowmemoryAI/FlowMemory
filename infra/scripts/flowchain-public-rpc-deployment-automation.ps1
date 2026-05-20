@@ -4,6 +4,7 @@ param(
     [string] $BundleDir = "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle",
     [string] $ReportPath = "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json",
     [string] $MarkdownPath = "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_AUTOMATION.md",
+    [string] $RenderReportSnapshotPath = "docs/agent-runs/live-product-infra-rpc/public-rpc-render-report-snapshot.json",
     [string] $RenderDir = "",
     [string] $OwnerEnvFile = "",
     [string] $ServiceUser = "flowchain",
@@ -24,6 +25,7 @@ $repoRoot = Set-FlowChainRepoRoot
 $bundleFullDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $BundleDir)
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
 $markdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $MarkdownPath)
+$renderReportSnapshotFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $RenderReportSnapshotPath)
 $bundleReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
 $renderScriptPath = Join-Path $bundleFullDir "render-public-rpc-bundle.template.ps1"
 
@@ -102,6 +104,38 @@ function Get-DeploymentChecksPassed {
         }
     }
     return $true
+}
+
+function New-DeploymentRenderReportSummary {
+    param(
+        [AllowNull()][object] $Report,
+        [string[]] $RenderedFileNames = @()
+    )
+
+    if ($null -eq $Report) {
+        return $null
+    }
+
+    $renderedFiles = @((Get-DeployProp -Object $Report -Name "renderedFiles" -Default @()) | ForEach-Object { "$_" })
+    if ($renderedFiles.Count -eq 0) {
+        $renderedFiles = @($RenderedFileNames | ForEach-Object { "$_" })
+    }
+    $requiredEnvNames = @((Get-DeployProp -Object $Report -Name "requiredEnvNames" -Default @()) | ForEach-Object { "$_" })
+
+    return [ordered]@{
+        schema = [string](Get-DeployProp -Object $Report -Name "schema" -Default "")
+        status = [string](Get-DeployProp -Object $Report -Name "status" -Default "")
+        renderedFileCount = $renderedFiles.Count
+        renderedFiles = @($renderedFiles)
+        requiredEnvNameCount = $requiredEnvNames.Count
+        requiredEnvNames = @($requiredEnvNames)
+        allowedOriginCount = [int](Get-DeployProp -Object $Report -Name "allowedOriginCount" -Default 0)
+        renderDirInsideRepo = [bool](Get-DeployProp -Object $Report -Name "renderDirInsideRepo" -Default $true)
+        ownerEnvFileInsideRepo = [bool](Get-DeployProp -Object $Report -Name "ownerEnvFileInsideRepo" -Default $true)
+        envValuesPrinted = [bool](Get-DeployProp -Object $Report -Name "envValuesPrinted" -Default $true)
+        noSecrets = [bool](Get-DeployProp -Object $Report -Name "noSecrets" -Default $false)
+        broadcasts = [bool](Get-DeployProp -Object $Report -Name "broadcasts" -Default $true)
+    }
 }
 
 $publicRpcSecurityHeaderTokens = @(
@@ -258,6 +292,8 @@ function Test-RenderedDeployment {
         checks = $checks
         renderedFileNames = @($renderedPaths | ForEach-Object { Split-Path -Leaf $_ })
         renderedReportPath = $renderedReportPath
+        renderedReport = $renderReport
+        renderedReportSummary = New-DeploymentRenderReportSummary -Report $renderReport -RenderedFileNames @($renderedPaths | ForEach-Object { Split-Path -Leaf $_ })
     }
 }
 
@@ -391,6 +427,8 @@ $rendered = [ordered]@{
     checks = [ordered]@{}
     renderedFileNames = @()
     renderedReportPath = ""
+    renderedReport = $null
+    renderedReportSummary = $null
 }
 $rollbackDrill = [ordered]@{
     checks = [ordered]@{}
@@ -480,10 +518,35 @@ if ($Action -eq "Validate" -or $Action -eq "Render") {
     foreach ($entry in $rendered.checks.GetEnumerator()) {
         $checks[$entry.Key] = $entry.Value
     }
+    $checks.renderedReportSummaryPresent = $null -ne $rendered.renderedReportSummary
+    $checks.renderedReportSummaryPassed = $null -ne $rendered.renderedReportSummary -and $rendered.renderedReportSummary.status -eq "passed"
+    $checks.renderedReportSummaryListsFiles = $null -ne $rendered.renderedReportSummary -and [int]$rendered.renderedReportSummary.renderedFileCount -eq @($rendered.renderedFileNames).Count
+    $checks.renderedReportSummaryHasRequiredEnvNames = $null -ne $rendered.renderedReportSummary -and [int]$rendered.renderedReportSummary.requiredEnvNameCount -eq 8
+    $checks.renderedReportSummaryNoSecrets = $null -ne $rendered.renderedReportSummary -and $rendered.renderedReportSummary.noSecrets -eq $true -and $rendered.renderedReportSummary.envValuesPrinted -eq $false
+    $checks.renderedReportSummaryBroadcastsFalse = $null -ne $rendered.renderedReportSummary -and $rendered.renderedReportSummary.broadcasts -eq $false
+    $checks.renderedReportSummaryOwnerPathsOutsideRepo = $null -ne $rendered.renderedReportSummary -and $rendered.renderedReportSummary.renderDirInsideRepo -eq $false -and $rendered.renderedReportSummary.ownerEnvFileInsideRepo -eq $false
     if ($Action -eq "Validate") {
         foreach ($entry in $rollbackDrill.checks.GetEnumerator()) {
             $checks[$entry.Key] = $entry.Value
         }
+        if ($null -ne $rendered.renderedReportSummary) {
+            $snapshot = [ordered]@{
+                schema = "flowchain.public_rpc_render_report_snapshot.v1"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                source = "flowchain-public-rpc-deployment-automation Validate"
+                renderReportSummary = $rendered.renderedReportSummary
+                renderedFileNames = @($rendered.renderedFileNames)
+                valuesPrinted = $false
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
+            }
+            $snapshotText = $snapshot | ConvertTo-Json -Depth 12
+            Assert-FlowChainNoSecretText -Text $snapshotText -Label "public RPC render report snapshot"
+            Write-FlowChainJson -Path $renderReportSnapshotFullPath -Value $snapshot -Depth 12
+        }
+        $checks.renderedReportSnapshotWritten = Test-Path -LiteralPath $renderReportSnapshotFullPath
+        $checks.renderedReportSnapshotNoSecrets = $checks.renderedReportSnapshotWritten -and (Read-FlowChainJsonIfExists -Path $renderReportSnapshotFullPath).noSecrets -eq $true
         $checks.cleanupAttempted = $cleanupAttempted
     }
 }
@@ -504,6 +567,8 @@ $report = [ordered]@{
     rollbackDrill = $rollbackDrill
     renderedFileNames = @($rendered.renderedFileNames)
     renderedReportPath = if ($Action -eq "Render") { $rendered.renderedReportPath } else { "" }
+    renderedReportSnapshotPath = if ($Action -eq "Validate") { $renderReportSnapshotFullPath } else { "" }
+    renderedReportSummary = $rendered.renderedReportSummary
     ownerInputsRequired = @(
         "FLOWCHAIN_RPC_PUBLIC_URL",
         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
