@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Package Verify
 
-Generated: 2026-05-20T15:15:08.0639767Z
+Generated: 2026-05-20T15:51:01.6997705Z
 Status: passed
 
 ## Checks
@@ -15,6 +15,9 @@ Status: passed
 | commandMatrixExists | True |
 | commandMatrixCountMatches | True |
 | expectedFilesPresent | True |
+| manifestRunbookHashesPresent | True |
+| manifestEvidenceHashesPresent | True |
+| manifestDestinationHashesMatch | True |
 | reportRunbookCountEnough | True |
 | reportEvidenceCountEnough | True |
 | operatorDoctorEvidencePresent | True |
@@ -35,5 +38,6 @@ Status: passed
 - Expected files: 84
 - Missing files: 0
 - Forbidden local files: 0
+- Hash problems: 0
 - Command count: 62
 - Owner-input names: 17

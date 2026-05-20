@@ -1115,6 +1115,8 @@ $definitions = @(
             "manifestWritten",
             "runbookDocsCopied",
             "evidenceReportsCopied",
+            "copiedFileHashesWritten",
+            "copiedFileHashesMatch",
             "ownerInputNamesOnly",
             "flowChainRpcIsRepoOwned",
             "thirdPartyFlowChainRpcProviderNeededFalse",
@@ -1126,6 +1128,8 @@ $definitions = @(
         )
         requiredEmptyArrays = @(
             "failedChecks",
+            "copiedFileHashMismatches",
+            "copiedFilesMissingHashes",
             "secretMarkerFindings"
         )
     },
@@ -1145,6 +1149,9 @@ $definitions = @(
             "commandMatrixExists",
             "commandMatrixCountMatches",
             "expectedFilesPresent",
+            "manifestRunbookHashesPresent",
+            "manifestEvidenceHashesPresent",
+            "manifestDestinationHashesMatch",
             "reportRunbookCountEnough",
             "reportEvidenceCountEnough",
             "ownerInputNamesOnly",
@@ -1157,6 +1164,7 @@ $definitions = @(
         )
         requiredEmptyArrays = @(
             "failedChecks",
+            "hashProblems",
             "secretMarkerFindings"
         )
     },

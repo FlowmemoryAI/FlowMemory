@@ -73,17 +73,30 @@ function Copy-OperatorPackageFile {
             copied = $false
             required = $Required.IsPresent
             reason = "missing"
+            sourceSha256 = ""
+            destinationSha256 = ""
+            contentHashMatches = $false
         }
     }
 
     New-Item -ItemType Directory -Force -Path (Split-Path -Parent $destinationFullPath) | Out-Null
     Copy-Item -LiteralPath $sourceFullPath -Destination $destinationFullPath -Force
+    $sourceHash = (Get-FileHash -LiteralPath $sourceFullPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $destinationHash = (Get-FileHash -LiteralPath $destinationFullPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $sourceItem = Get-Item -LiteralPath $sourceFullPath
+    $destinationItem = Get-Item -LiteralPath $destinationFullPath
     return [ordered]@{
         source = $Source
         destination = $Destination
         copied = $true
         required = $Required.IsPresent
         reason = "copied"
+        sourceSha256 = $sourceHash
+        destinationSha256 = $destinationHash
+        contentHashMatches = $sourceHash -eq $destinationHash
+        byteLength = [int64] $destinationItem.Length
+        sourceLastWriteTimeUtc = $sourceItem.LastWriteTimeUtc.ToString("o")
+        destinationLastWriteTimeUtc = $destinationItem.LastWriteTimeUtc.ToString("o")
     }
 }
 
@@ -361,6 +374,12 @@ foreach ($file in @(
 $missingScripts = @($requiredScripts | Where-Object { -not (Test-OperatorPackageScript -Name $_) })
 $missingRequiredRunbooks = @($copiedRunbooks | Where-Object { $_.required -eq $true -and $_.copied -ne $true })
 $missingRequiredEvidence = @($copiedEvidence | Where-Object { $_.required -eq $true -and $_.copied -ne $true })
+$copiedFileHashMismatches = @(@($copiedRunbooks + $copiedEvidence) | Where-Object {
+        $_.required -eq $true -and ($_.copied -ne $true -or $_.contentHashMatches -ne $true)
+    } | ForEach-Object { $_.destination })
+$copiedFilesMissingHashes = @(@($copiedRunbooks + $copiedEvidence) | Where-Object {
+        $_.required -eq $true -and ($_.copied -eq $true) -and ([string]::IsNullOrWhiteSpace([string]$_.sourceSha256) -or [string]::IsNullOrWhiteSpace([string]$_.destinationSha256))
+    } | ForEach-Object { $_.destination })
 
 $ownerOnboarding = Read-FlowChainJsonIfExists -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json")
 $flowChainRpcIsOurs = (Get-OperatorPackageProp -Object $ownerOnboarding -Name "flowChainRpcIsOurs" -Default $false) -eq $true
@@ -452,6 +471,8 @@ $checks = [ordered]@{
     manifestWritten = Test-Path -LiteralPath $manifestPath
     runbookDocsCopied = $missingRequiredRunbooks.Count -eq 0
     evidenceReportsCopied = $missingRequiredEvidence.Count -eq 0
+    copiedFileHashesWritten = $copiedFilesMissingHashes.Count -eq 0
+    copiedFileHashesMatch = $copiedFileHashMismatches.Count -eq 0
     ownerInputNamesOnly = $ownerInputNames.Count -eq 17
     flowChainRpcIsRepoOwned = $flowChainRpcIsOurs
     thirdPartyFlowChainRpcProviderNeededFalse = -not $thirdPartyFlowChainRpcProviderNeeded
@@ -478,6 +499,8 @@ $report = [ordered]@{
     missingScripts = @($missingScripts)
     missingRequiredRunbooks = @($missingRequiredRunbooks)
     missingRequiredEvidence = @($missingRequiredEvidence)
+    copiedFileHashMismatches = @($copiedFileHashMismatches)
+    copiedFilesMissingHashes = @($copiedFilesMissingHashes)
     checks = $checks
     failedChecks = @($failedChecks)
     secretMarkerFindings = @($scanSecretFindings)

@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Package
 
-Generated: 2026-05-20T15:15:02.2620144Z
+Generated: 2026-05-20T15:50:54.4353447Z
 Status: passed
 
 ## Package
@@ -21,6 +21,8 @@ Status: passed
 | manifestWritten | True |
 | runbookDocsCopied | True |
 | evidenceReportsCopied | True |
+| copiedFileHashesWritten | True |
+| copiedFileHashesMatch | True |
 | ownerInputNamesOnly | True |
 | flowChainRpcIsRepoOwned | True |
 | thirdPartyFlowChainRpcProviderNeededFalse | True |

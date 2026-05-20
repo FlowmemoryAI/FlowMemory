@@ -34,6 +34,61 @@ function Get-OperatorVerifyProp {
     return $Default
 }
 
+function Get-OperatorVerifyFileHash {
+    param([Parameter(Mandatory = $true)][string] $Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return ""
+    }
+
+    return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+}
+
+function Get-OperatorVerifyHashProblems {
+    param(
+        [AllowNull()][object[]] $Entries,
+        [Parameter(Mandatory = $true)][string] $Kind,
+        [Parameter(Mandatory = $true)][string] $PackageRoot
+    )
+
+    $problems = New-Object System.Collections.ArrayList
+    foreach ($entry in @($Entries)) {
+        $required = (Get-OperatorVerifyProp -Object $entry -Name "required" -Default $false) -eq $true
+        if (-not $required) {
+            continue
+        }
+        $destination = [string](Get-OperatorVerifyProp -Object $entry -Name "destination" -Default "")
+        $manifestDestinationHash = [string](Get-OperatorVerifyProp -Object $entry -Name "destinationSha256" -Default "")
+        $manifestSourceHash = [string](Get-OperatorVerifyProp -Object $entry -Name "sourceSha256" -Default "")
+        $manifestMatched = (Get-OperatorVerifyProp -Object $entry -Name "contentHashMatches" -Default $false) -eq $true
+        $destinationPath = Join-Path $PackageRoot $destination
+        $actualDestinationHash = Get-OperatorVerifyFileHash -Path $destinationPath
+        $reason = ""
+        if ([string]::IsNullOrWhiteSpace($destination)) {
+            $reason = "missing-destination"
+        }
+        elseif ([string]::IsNullOrWhiteSpace($manifestDestinationHash) -or [string]::IsNullOrWhiteSpace($manifestSourceHash)) {
+            $reason = "missing-manifest-hash"
+        }
+        elseif (-not $manifestMatched -or $manifestDestinationHash -ne $manifestSourceHash) {
+            $reason = "source-destination-hash-mismatch-at-copy"
+        }
+        elseif ([string]::IsNullOrWhiteSpace($actualDestinationHash) -or $actualDestinationHash -ne $manifestDestinationHash) {
+            $reason = "destination-hash-mismatch"
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($reason)) {
+            [void] $problems.Add([ordered]@{
+                kind = $Kind
+                destination = $destination
+                reason = $reason
+            })
+        }
+    }
+
+    return @($problems)
+}
+
 $packageReport = Read-FlowChainJsonIfExists -Path $packageReportFullPath
 $packageStatus = [string](Get-OperatorVerifyProp -Object $packageReport -Name "status" -Default "missing")
 $packageDir = [string](Get-OperatorVerifyProp -Object $packageReport -Name "packageDir" -Default "")
@@ -138,6 +193,11 @@ $manifestOwnerInputs = @((Get-OperatorVerifyProp -Object $manifest -Name "ownerI
 $reportOwnerInputs = @((Get-OperatorVerifyProp -Object $packageReport -Name "ownerInputNames" -Default @()))
 $manifestCommands = @((Get-OperatorVerifyProp -Object $manifest -Name "commandMatrix" -Default @()))
 $matrixCommands = @((Get-OperatorVerifyProp -Object $matrix -Name "commands" -Default @()))
+$manifestRunbooks = @((Get-OperatorVerifyProp -Object $manifest -Name "runbooks" -Default @()))
+$manifestEvidence = @((Get-OperatorVerifyProp -Object $manifest -Name "evidence" -Default @()))
+$runbookHashProblems = @(Get-OperatorVerifyHashProblems -Entries $manifestRunbooks -Kind "runbook" -PackageRoot $packageFullPath)
+$evidenceHashProblems = @(Get-OperatorVerifyHashProblems -Entries $manifestEvidence -Kind "evidence" -PackageRoot $packageFullPath)
+$hashProblems = @($runbookHashProblems + $evidenceHashProblems)
 $badOwnerInputNames = @($manifestOwnerInputs | Where-Object { "$_" -notmatch '^FLOWCHAIN_[A-Z0-9_]+$' -or "$_" -match '=' -or "$_" -match 'https?://' })
 $operatorDoctor = Read-FlowChainJsonIfExists -Path (Join-Path $packageFullPath "evidence/operator-doctor-report.json")
 $operatorDoctorStatus = [string](Get-OperatorVerifyProp -Object $operatorDoctor -Name "status" -Default "missing")
@@ -175,6 +235,9 @@ $checks = [ordered]@{
     commandMatrixExists = $null -ne $matrix
     commandMatrixCountMatches = $manifestCommands.Count -ge 20 -and $matrixCommands.Count -eq $manifestCommands.Count
     expectedFilesPresent = $missingFiles.Count -eq 0
+    manifestRunbookHashesPresent = $manifestRunbooks.Count -ge 10 -and $runbookHashProblems.Count -eq 0
+    manifestEvidenceHashesPresent = $manifestEvidence.Count -ge 15 -and $evidenceHashProblems.Count -eq 0
+    manifestDestinationHashesMatch = $hashProblems.Count -eq 0
     reportRunbookCountEnough = [int](Get-OperatorVerifyProp -Object $packageReport -Name "runbookCount" -Default 0) -ge 10
     reportEvidenceCountEnough = [int](Get-OperatorVerifyProp -Object $packageReport -Name "evidenceReportCount" -Default 0) -ge 15
     operatorDoctorEvidencePresent = $null -ne $operatorDoctor
@@ -201,6 +264,8 @@ $report = [ordered]@{
     expectedFileCount = $expectedFiles.Count
     missingFiles = @($missingFiles)
     forbiddenFiles = @($forbiddenFiles)
+    hashProblems = @($hashProblems)
+    hashProblemCount = $hashProblems.Count
     commandCount = $manifestCommands.Count
     operatorDoctorStatus = $operatorDoctorStatus
     operatorDoctorFailedCheckCount = $operatorDoctorFailedChecks.Count
@@ -238,6 +303,7 @@ $markdownLines.Add("- Package directory: ``$packageFullPath``")
 $markdownLines.Add("- Expected files: $($expectedFiles.Count)")
 $markdownLines.Add("- Missing files: $($missingFiles.Count)")
 $markdownLines.Add("- Forbidden local files: $($forbiddenFiles.Count)")
+$markdownLines.Add("- Hash problems: $($hashProblems.Count)")
 $markdownLines.Add("- Command count: $($manifestCommands.Count)")
 $markdownLines.Add("- Owner-input names: $($manifestOwnerInputs.Count)")
 Set-Content -LiteralPath $markdownFullPath -Value $markdownLines -Encoding UTF8

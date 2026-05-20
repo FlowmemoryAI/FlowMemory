@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_report.v0",
-    "generatedAt":  "2026-05-20T15:15:02.2620144Z",
+    "generatedAt":  "2026-05-20T15:50:54.4353447Z",
     "status":  "passed",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "manifestPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package\\OPERATOR_PACKAGE_MANIFEST.json",
@@ -18,6 +18,12 @@
     "missingRequiredEvidence":  [
 
                                 ],
+    "copiedFileHashMismatches":  [
+
+                                 ],
+    "copiedFilesMissingHashes":  [
+
+                                 ],
     "checks":  {
                    "packageScriptsPresent":  true,
                    "commandMatrixWritten":  true,
@@ -25,6 +31,8 @@
                    "manifestWritten":  true,
                    "runbookDocsCopied":  true,
                    "evidenceReportsCopied":  true,
+                   "copiedFileHashesWritten":  true,
+                   "copiedFileHashesMatch":  true,
                    "ownerInputNamesOnly":  true,
                    "flowChainRpcIsRepoOwned":  true,
                    "thirdPartyFlowChainRpcProviderNeededFalse":  true,

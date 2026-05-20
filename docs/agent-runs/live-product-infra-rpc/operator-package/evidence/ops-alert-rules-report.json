@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T14:54:36.9270094Z",
+    "generatedAt":  "2026-05-20T15:28:09.7214353Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  31,
-    "criticalRuleCount":  24,
+    "ruleCount":  32,
+    "criticalRuleCount":  25,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -55,6 +55,7 @@
                                 "public-tester-gateway-e2e-failed",
                                 "dashboard-ui-readiness-failed",
                                 "owner-inputs-validation-failed",
+                                "owner-go-live-handoff-failed",
                                 "public-rpc-edge-hardening-failed",
                                 "public-rpc-not-ready",
                                 "backup-not-ready",
@@ -101,6 +102,7 @@
                    "supervisorNodeRecoveryRuleCoversLiveProfile":  true,
                    "externalTesterLaunchRuleCoversGatewayAndFaucet":  true,
                    "publicTesterGatewayRuleCoversNoSecretNoBroadcast":  true,
+                   "ownerGoLiveHandoffRuleCoversReleaseReady":  true,
                    "notificationPlanStoresNoSecrets":  true,
                    "notificationPlanNoNetworkDelivery":  true,
                    "envValuesPrintedFalse":  true,
@@ -447,6 +449,20 @@
                                        "npm run flowchain:owner-inputs:validate",
                                        "npm run flowchain:owner-inputs",
                                        "npm run flowchain:owner-env:readiness"
+                                   ]
+                  },
+                  {
+                      "id":  "owner-go-live-handoff-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "owner-go-live-handoff-failed"
+                                       ],
+                      "signal":  "Owner go-live handoff is missing or unsafe.",
+                      "threshold":  "handoff report is not passed, has failedChecks or secretMarkerFindings, has fewer than eight stages, lacks next owner-input commands, prints env values, broadcasts, reports secrets, or claims release readiness before the truth table is clear",
+                      "commands":  [
+                                       "npm run flowchain:owner:go-live-handoff",
+                                       "npm run flowchain:owner:activation-plan",
+                                       "npm run flowchain:truth-table -- -AllowBlocked"
                                    ]
                   },
                   {
