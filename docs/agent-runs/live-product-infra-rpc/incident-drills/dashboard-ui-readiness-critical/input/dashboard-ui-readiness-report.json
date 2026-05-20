@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.dashboard_ui_readiness_report.v0",
-    "generatedAt":  "2026-05-20T00:26:02.7243885+00:00",
+    "generatedAt":  "2026-05-20T01:19:06.0336106+00:00",
     "status":  "failed",
     "checks":  {
                    "dashboardPackageScriptPresent":  true,
@@ -15,6 +15,7 @@
                    "testerSendCovered":  false,
                    "explorerRouteCovered":  true,
                    "testerLaunchRouteCovered":  true,
+                   "activationRouteCovered":  true,
                    "publicRpcHeaderProofCovered":  true,
                    "noSecretLeakageAsserted":  true,
                    "noHorizontalOverflowAsserted":  true,
@@ -44,7 +45,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  180,
                          "timedOut":  false,
-                         "durationSeconds":  5,
+                         "durationSeconds":  4,
                          "stdoutLineCount":  7,
                          "stderrLineCount":  0
                      },
@@ -54,9 +55,9 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  26,
+                         "durationSeconds":  24,
                          "stdoutLineCount":  6,
-                         "stderrLineCount":  12
+                         "stderrLineCount":  20
                      },
                      {
                          "label":  "dashboard production build",
@@ -74,7 +75,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  152,
+                         "durationSeconds":  156,
                          "stdoutLineCount":  77,
                          "stderrLineCount":  0
                      }
@@ -89,7 +90,8 @@
                           "/tester/faucet",
                           "/tester/wallets/send",
                           "/explorer",
-                          "/tester"
+                          "/tester",
+                          "/activation"
                       ],
     "envValuesPrinted":  false,
     "noSecrets":  true,

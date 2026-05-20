@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-20T00:48:25.7003225Z",
+    "generatedAt":  "2026-05-20T01:44:47.7764128Z",
     "status":  "blocked",
     "refresh":  {
                     "performed":  false,
@@ -10,9 +10,9 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input"
                 },
     "chain":  {
-                  "latestHeight":  "95503",
-                  "finalizedHeight":  "95503",
-                  "stateFileLastWriteAgeSeconds":  1,
+                  "latestHeight":  "96125",
+                  "finalizedHeight":  "96125",
+                  "stateFileLastWriteAgeSeconds":  6,
                   "monitorStatus":  "passed",
                   "monitorSamples":  3,
                   "monitorHeightAdvanced":  true
@@ -90,12 +90,21 @@
                            "dashboardUiTesterWalletCreateCovered":  true,
                            "dashboardUiTesterFaucetCovered":  true,
                            "dashboardUiTesterSendCovered":  true,
+                           "dashboardUiTesterLaunchRouteCovered":  true,
                            "dashboardUiExplorerRouteCovered":  true,
+                           "dashboardUiActivationRouteCovered":  true,
                            "ownerInputsValidation":  "passed",
                            "ownerInputsValidationReady":  true,
                            "ownerInputsValidationScenarioCount":  6,
                            "ownerInputsValidationFailedScenarios":  0,
                            "ownerInputsValidationRequiredEnvCount":  17,
+                           "ownerActivationPlan":  "passed",
+                           "ownerActivationPlanReady":  true,
+                           "ownerActivationReady":  false,
+                           "ownerActivationStageCount":  8,
+                           "ownerActivationReadyStageCount":  2,
+                           "ownerActivationMissingEnvCount":  14,
+                           "ownerActivationInvalidEnvCount":  0,
                            "publicDeployment":  "blocked",
                            "deploymentRefreshAborted":  false,
                            "deploymentRefreshAbortStep":  "",
@@ -239,6 +248,7 @@
                         "externalTesterEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input\\external-tester-evidence-validation-report.json",
                         "dashboardUi":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input\\dashboard-ui-readiness-report.json",
                         "ownerInputsValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input\\owner-inputs-validation-report.json",
+                        "ownerActivationPlan":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input\\owner-activation-plan-report.json",
                         "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input\\public-deployment-contract-report.json",
                         "truthTable":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input\\production-truth-table-report.json",
                         "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\input\\no-secret-scan-report.json"

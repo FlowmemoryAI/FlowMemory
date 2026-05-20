@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T00:02:49.4994156Z",
+    "generatedAt":  "2026-05-20T01:39:23.7343617Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -11,6 +11,7 @@
                           "externalTesterEvidenceStatus":  "passed",
                           "dashboardUiStatus":  "passed",
                           "ownerInputsValidationStatus":  "passed",
+                          "ownerActivationPlanStatus":  "passed",
                           "liveCutoverStatus":  "blocked",
                           "truthTableStatus":  "blocked-owner-input",
                           "noSecretStatus":  "passed"
@@ -20,13 +21,13 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  95054
+                        "value":  96031
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  95054
+                        "value":  96031
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
@@ -62,13 +63,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  25
+                        "value":  26
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  18
+                        "value":  19
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -343,7 +344,19 @@
                     {
                         "name":  "flowchain_dashboard_ui_tester_flow_covered",
                         "type":  "gauge",
-                        "help":  "One when create, faucet, send, and explorer routes are covered by dashboard UI readiness.",
+                        "help":  "One when create, faucet, send, tester launch, and explorer routes are covered by dashboard UI readiness.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_dashboard_ui_tester_launch_covered",
+                        "type":  "gauge",
+                        "help":  "One when the dashboard tester launch route is covered by readiness.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_dashboard_ui_activation_covered",
+                        "type":  "gauge",
+                        "help":  "One when the dashboard activation cockpit route is covered by readiness.",
                         "value":  1
                     },
                     {
@@ -369,6 +382,42 @@
                         "type":  "gauge",
                         "help":  "Required owner input env names tracked by validation.",
                         "value":  17
+                    },
+                    {
+                        "name":  "flowchain_owner_activation_plan_ready",
+                        "type":  "gauge",
+                        "help":  "One when the owner activation plan report is passed and safe to use.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_owner_activation_ready",
+                        "type":  "gauge",
+                        "help":  "One when the owner activation plan reports all launch inputs are present.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_owner_activation_stages_total",
+                        "type":  "gauge",
+                        "help":  "Owner activation plan stage count.",
+                        "value":  8
+                    },
+                    {
+                        "name":  "flowchain_owner_activation_ready_stages",
+                        "type":  "gauge",
+                        "help":  "Owner activation plan stages currently ready.",
+                        "value":  2
+                    },
+                    {
+                        "name":  "flowchain_owner_activation_missing_env_total",
+                        "type":  "gauge",
+                        "help":  "Owner activation input names still missing before live cutover.",
+                        "value":  14
+                    },
+                    {
+                        "name":  "flowchain_owner_activation_invalid_env_total",
+                        "type":  "gauge",
+                        "help":  "Owner activation input names currently invalid.",
+                        "value":  0
                     },
                     {
                         "name":  "flowchain_public_deployment_ready",
@@ -437,7 +486,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  70,
+    "metricCount":  78,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

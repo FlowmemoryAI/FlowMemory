@@ -1,9 +1,9 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-20T00:48:43.0075492Z
+Generated: 2026-05-20T01:45:05.3633762Z
 Status: failed
-Latest height: 95503
-Finalized height: 95503
+Latest height: 96125
+Finalized height: 96125
 
 ## Findings
 
@@ -12,7 +12,7 @@ Finalized height: 95503
 - blocked: bridge-not-ready - Base 8453 bridge readiness is not ready for external funded testing.
 - blocked: bridge-relayer-not-ready - Bridge relayer one-shot proof is not ready.
 - blocked: external-tester-not-shareable - External tester packet must remain not-shareable.
-- critical: dashboard-ui-readiness-failed - Dashboard wallet, faucet, send, explorer, or no-secret UI readiness proof is missing or failed.
+- critical: dashboard-ui-readiness-failed - Dashboard wallet, faucet, send, tester launch, explorer, activation cockpit, or no-secret UI readiness proof is missing or failed.
 - blocked: deployment-contract-not-ready - Public deployment contract is not ready.
 
 ## Incident Commands

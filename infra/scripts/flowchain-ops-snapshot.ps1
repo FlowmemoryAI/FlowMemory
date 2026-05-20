@@ -52,6 +52,7 @@ $paths = [ordered]@{
     externalTesterEvidence = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
     dashboardUi = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
     ownerInputsValidation = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
+    ownerActivationPlan = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json"
     publicDeployment = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     truthTable = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
     noSecret = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
@@ -322,7 +323,9 @@ $dashboardUiReady = $dashboardUiStatus -eq "passed" `
     -and ((Get-OpsProp -Object $dashboardUiChecks -Name "testerWalletCreateCovered" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $dashboardUiChecks -Name "testerFaucetCovered" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $dashboardUiChecks -Name "testerSendCovered" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $dashboardUiChecks -Name "testerLaunchRouteCovered" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $dashboardUiChecks -Name "explorerRouteCovered" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $dashboardUiChecks -Name "activationRouteCovered" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $dashboardUiChecks -Name "noSecretLeakageAsserted" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $dashboardUiChecks -Name "dashboardBrowserE2ePassed" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $dashboardUiChecks -Name "dashboardBuildPassed" -Default $false) -eq $true) `
@@ -340,6 +343,21 @@ $ownerInputsValidationReady = $ownerInputsValidationStatus -eq "passed" `
     -and ((Get-OpsProp -Object $reports.ownerInputsValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $reports.ownerInputsValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $reports.ownerInputsValidation -Name "broadcasts" -Default $true) -eq $false)
+$ownerActivationPlanStatus = Get-OpsStatus -Report $reports.ownerActivationPlan
+$ownerActivationPlanFailedChecks = @((Get-OpsProp -Object $reports.ownerActivationPlan -Name "failedChecks" -Default @()))
+$ownerActivationPlanSecretFindings = @((Get-OpsProp -Object $reports.ownerActivationPlan -Name "secretMarkerFindings" -Default @()))
+$ownerActivationPlanMissingEnvNames = @((Get-OpsProp -Object $reports.ownerActivationPlan -Name "missingEnvNames" -Default @()))
+$ownerActivationPlanInvalidEnvNames = @((Get-OpsProp -Object $reports.ownerActivationPlan -Name "invalidEnvNames" -Default @()))
+$ownerActivationPlanStageCount = [int](Get-OpsProp -Object $reports.ownerActivationPlan -Name "stageCount" -Default 0)
+$ownerActivationPlanReadyStageCount = [int](Get-OpsProp -Object $reports.ownerActivationPlan -Name "readyStageCount" -Default 0)
+$ownerActivationPlanActivationReady = (Get-OpsProp -Object $reports.ownerActivationPlan -Name "activationReady" -Default $false) -eq $true
+$ownerActivationPlanReady = $ownerActivationPlanStatus -eq "passed" `
+    -and $ownerActivationPlanFailedChecks.Count -eq 0 `
+    -and $ownerActivationPlanSecretFindings.Count -eq 0 `
+    -and $ownerActivationPlanStageCount -ge 8 `
+    -and ((Get-OpsProp -Object $reports.ownerActivationPlan -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.ownerActivationPlan -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.ownerActivationPlan -Name "broadcasts" -Default $true) -eq $false)
 $deploymentStatus = Get-OpsStatus -Report $reports.publicDeployment
 $deploymentRefresh = Get-OpsProp -Object $reports.publicDeployment -Name "dependencyRefresh"
 $deploymentRefreshAborted = (Get-OpsProp -Object $deploymentRefresh -Name "aborted" -Default $false) -eq $true
@@ -406,7 +424,7 @@ elseif ($externalTesterEvidenceStatus -ne "passed" -or $externalTesterEvidenceFa
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "external-tester-evidence-invalid" -Message "External tester returned evidence validation is not passed or transfer proof is inconsistent." -Commands @("npm run flowchain:tester:evidence:validate", "npm run flowchain:external-tester:packet -- -AllowBlocked")
 }
 if (-not $dashboardUiReady) {
-    Add-OpsFinding -Findings $findings -Severity "critical" -Code "dashboard-ui-readiness-failed" -Message "Dashboard wallet, faucet, send, explorer, or no-secret UI readiness proof is missing or failed." -Commands @("npm run flowchain:dashboard:ui:readiness", "npm run flowchain:dashboard:build", "npm test --prefix apps/dashboard")
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "dashboard-ui-readiness-failed" -Message "Dashboard wallet, faucet, send, tester launch, explorer, activation cockpit, or no-secret UI readiness proof is missing or failed." -Commands @("npm run flowchain:dashboard:ui:readiness", "npm run flowchain:dashboard:build", "npm test --prefix apps/dashboard")
 }
 if (-not $ownerInputsValidationReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "owner-inputs-validation-failed" -Message "Owner input validation scenarios are missing, failed, or unsafe to use for live cutover." -Commands @("npm run flowchain:owner-inputs:validate", "npm run flowchain:owner-inputs", "npm run flowchain:owner-env:readiness")
@@ -565,12 +583,21 @@ $report = [ordered]@{
         dashboardUiTesterWalletCreateCovered = Get-OpsProp -Object $dashboardUiChecks -Name "testerWalletCreateCovered" -Default $false
         dashboardUiTesterFaucetCovered = Get-OpsProp -Object $dashboardUiChecks -Name "testerFaucetCovered" -Default $false
         dashboardUiTesterSendCovered = Get-OpsProp -Object $dashboardUiChecks -Name "testerSendCovered" -Default $false
+        dashboardUiTesterLaunchRouteCovered = Get-OpsProp -Object $dashboardUiChecks -Name "testerLaunchRouteCovered" -Default $false
         dashboardUiExplorerRouteCovered = Get-OpsProp -Object $dashboardUiChecks -Name "explorerRouteCovered" -Default $false
+        dashboardUiActivationRouteCovered = Get-OpsProp -Object $dashboardUiChecks -Name "activationRouteCovered" -Default $false
         ownerInputsValidation = $ownerInputsValidationStatus
         ownerInputsValidationReady = $ownerInputsValidationReady
         ownerInputsValidationScenarioCount = $ownerInputsValidationScenarios.Count
         ownerInputsValidationFailedScenarios = $ownerInputsValidationFailedScenarios.Count
         ownerInputsValidationRequiredEnvCount = $ownerInputsValidationRequiredEnvNames.Count
+        ownerActivationPlan = $ownerActivationPlanStatus
+        ownerActivationPlanReady = $ownerActivationPlanReady
+        ownerActivationReady = $ownerActivationPlanActivationReady
+        ownerActivationStageCount = $ownerActivationPlanStageCount
+        ownerActivationReadyStageCount = $ownerActivationPlanReadyStageCount
+        ownerActivationMissingEnvCount = $ownerActivationPlanMissingEnvNames.Count
+        ownerActivationInvalidEnvCount = $ownerActivationPlanInvalidEnvNames.Count
         publicDeployment = $deploymentStatus
         deploymentRefreshAborted = $deploymentRefreshAborted
         deploymentRefreshAbortStep = $deploymentRefreshAbortStep

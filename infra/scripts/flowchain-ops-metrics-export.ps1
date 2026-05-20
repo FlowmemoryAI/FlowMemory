@@ -35,6 +35,7 @@ $paths = [ordered]@{
     externalTesterEvidence = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
     dashboardUi = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
     ownerInputsValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
+    ownerActivationPlan = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json"
     publicDeployment = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     liveCutover = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json"
     truthTable = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
@@ -214,6 +215,7 @@ $serviceMonitor = $reports.serviceMonitor
 $externalTesterEvidence = $reports.externalTesterEvidence
 $dashboardUi = $reports.dashboardUi
 $ownerInputsValidation = $reports.ownerInputsValidation
+$ownerActivationPlan = $reports.ownerActivationPlan
 $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
 $publicRpcDeploymentAutomation = $reports.publicRpcDeploymentAutomation
 $liveCutover = $reports.liveCutover
@@ -229,6 +231,19 @@ $dashboardUiChecks = Get-MetricsProp -Object $dashboardUi -Name "checks"
 $ownerInputsValidationScenarios = @((Get-MetricsProp -Object $ownerInputsValidation -Name "scenarios" -Default @()))
 $ownerInputsValidationFailedScenarios = @($ownerInputsValidationScenarios | Where-Object { (Get-MetricsProp -Object $_ -Name "passed" -Default $false) -ne $true })
 $ownerInputsValidationRequiredEnvNames = @((Get-MetricsProp -Object $ownerInputsValidation -Name "requiredEnvNames" -Default @()))
+$ownerActivationPlanFailedChecks = @((Get-MetricsProp -Object $ownerActivationPlan -Name "failedChecks" -Default @()))
+$ownerActivationPlanSecretFindings = @((Get-MetricsProp -Object $ownerActivationPlan -Name "secretMarkerFindings" -Default @()))
+$ownerActivationPlanMissingEnvNames = @((Get-MetricsProp -Object $ownerActivationPlan -Name "missingEnvNames" -Default @()))
+$ownerActivationPlanInvalidEnvNames = @((Get-MetricsProp -Object $ownerActivationPlan -Name "invalidEnvNames" -Default @()))
+$ownerActivationPlanStageCount = [int](Get-MetricsProp -Object $ownerActivationPlan -Name "stageCount" -Default 0)
+$ownerActivationPlanReadyStageCount = [int](Get-MetricsProp -Object $ownerActivationPlan -Name "readyStageCount" -Default 0)
+$ownerActivationPlanReady = (Get-MetricsStatus -Report $ownerActivationPlan) -eq "passed" `
+    -and $ownerActivationPlanFailedChecks.Count -eq 0 `
+    -and $ownerActivationPlanSecretFindings.Count -eq 0 `
+    -and $ownerActivationPlanStageCount -ge 8 `
+    -and ((Get-MetricsProp -Object $ownerActivationPlan -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-MetricsProp -Object $ownerActivationPlan -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerActivationPlan -Name "broadcasts" -Default $true) -eq $false)
 $publicRpcDeploymentBundleChecks = Get-MetricsProp -Object $publicRpcDeploymentBundle -Name "checks"
 $publicRpcDeploymentAutomationChecks = Get-MetricsProp -Object $publicRpcDeploymentAutomation -Name "checks"
 $externalTesterEvidenceTransferConsistent = (Get-MetricsProp -Object $externalTesterEvidenceChecks -Name "transferFound" -Default $false) -eq $true `
@@ -292,11 +307,19 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_external_tester_evidence_tran
 Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_ready" -Help "One when dashboard UI readiness is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $dashboardUi))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_browser_e2e_ready" -Help "One when dashboard browser E2E proof passed." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $dashboardUiChecks -Name "dashboardBrowserE2ePassed" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_build_ready" -Help "One when dashboard production build proof passed." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $dashboardUiChecks -Name "dashboardBuildPassed" -Default $false))
-Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_tester_flow_covered" -Help "One when create, faucet, send, and explorer routes are covered by dashboard UI readiness." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $dashboardUiChecks -Name "testerWalletCreateCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "testerFaucetCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "testerSendCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "explorerRouteCovered" -Default $false) -eq $true)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_tester_flow_covered" -Help "One when create, faucet, send, tester launch, and explorer routes are covered by dashboard UI readiness." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $dashboardUiChecks -Name "testerWalletCreateCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "testerFaucetCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "testerSendCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "testerLaunchRouteCovered" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $dashboardUiChecks -Name "explorerRouteCovered" -Default $false) -eq $true)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_tester_launch_covered" -Help "One when the dashboard tester launch route is covered by readiness." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $dashboardUiChecks -Name "testerLaunchRouteCovered" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_dashboard_ui_activation_covered" -Help "One when the dashboard activation cockpit route is covered by readiness." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $dashboardUiChecks -Name "activationRouteCovered" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_inputs_validation_ready" -Help "One when owner input validation scenarios are passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $ownerInputsValidation))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_inputs_validation_scenarios_total" -Help "Owner input validation scenario count." -Value (ConvertTo-MetricNumber -Value $ownerInputsValidationScenarios.Count)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_inputs_validation_scenarios_failed" -Help "Owner input validation scenario failures." -Value (ConvertTo-MetricNumber -Value $ownerInputsValidationFailedScenarios.Count)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_inputs_required_env_total" -Help "Required owner input env names tracked by validation." -Value (ConvertTo-MetricNumber -Value $ownerInputsValidationRequiredEnvNames.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_activation_plan_ready" -Help "One when the owner activation plan report is passed and safe to use." -Value (ConvertTo-MetricBool -Value $ownerActivationPlanReady)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_activation_ready" -Help "One when the owner activation plan reports all launch inputs are present." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $ownerActivationPlan -Name "activationReady" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_activation_stages_total" -Help "Owner activation plan stage count." -Value (ConvertTo-MetricNumber -Value $ownerActivationPlanStageCount)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_activation_ready_stages" -Help "Owner activation plan stages currently ready." -Value (ConvertTo-MetricNumber -Value $ownerActivationPlanReadyStageCount)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_activation_missing_env_total" -Help "Owner activation input names still missing before live cutover." -Value (ConvertTo-MetricNumber -Value $ownerActivationPlanMissingEnvNames.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_activation_invalid_env_total" -Help "Owner activation input names currently invalid." -Value (ConvertTo-MetricNumber -Value $ownerActivationPlanInvalidEnvNames.Count)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_deployment_ready" -Help "One when public deployment contract is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "publicDeployment"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_ready" -Help "One when the live cutover rehearsal is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $liveCutover))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_owner_blocked" -Help "One when live cutover is blocked only on known owner inputs." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $liveCutover -Name "blockedOnlyOnKnownExternalOwnerInputs"))
@@ -328,6 +351,7 @@ $metricsJson = [ordered]@{
         externalTesterEvidenceStatus = Get-MetricsStatus -Report $externalTesterEvidence
         dashboardUiStatus = Get-MetricsStatus -Report $dashboardUi
         ownerInputsValidationStatus = Get-MetricsStatus -Report $ownerInputsValidation
+        ownerActivationPlanStatus = Get-MetricsStatus -Report $ownerActivationPlan
         liveCutoverStatus = Get-MetricsStatus -Report $liveCutover
         truthTableStatus = Get-MetricsStatus -Report $truthTable
         noSecretStatus = Get-MetricsStatus -Report $noSecret
@@ -395,10 +419,18 @@ $requiredMetricNames = @(
     "flowchain_dashboard_ui_browser_e2e_ready",
     "flowchain_dashboard_ui_build_ready",
     "flowchain_dashboard_ui_tester_flow_covered",
+    "flowchain_dashboard_ui_tester_launch_covered",
+    "flowchain_dashboard_ui_activation_covered",
     "flowchain_owner_inputs_validation_ready",
     "flowchain_owner_inputs_validation_scenarios_total",
     "flowchain_owner_inputs_validation_scenarios_failed",
     "flowchain_owner_inputs_required_env_total",
+    "flowchain_owner_activation_plan_ready",
+    "flowchain_owner_activation_ready",
+    "flowchain_owner_activation_stages_total",
+    "flowchain_owner_activation_ready_stages",
+    "flowchain_owner_activation_missing_env_total",
+    "flowchain_owner_activation_invalid_env_total",
     "flowchain_public_deployment_ready",
     "flowchain_live_cutover_ready",
     "flowchain_live_cutover_owner_blocked",
@@ -421,6 +453,7 @@ $checks = [ordered]@{
     externalTesterEvidenceLoaded = $null -ne $externalTesterEvidence
     dashboardUiLoaded = $null -ne $dashboardUi
     ownerInputsValidationLoaded = $null -ne $ownerInputsValidation
+    ownerActivationPlanLoaded = $null -ne $ownerActivationPlan
     liveCutoverLoaded = $null -ne $liveCutover
     truthTableLoaded = $null -ne $truthTable
     noSecretLoaded = $null -ne $noSecret
@@ -464,13 +497,23 @@ $checks = [ordered]@{
         "flowchain_dashboard_ui_ready",
         "flowchain_dashboard_ui_browser_e2e_ready",
         "flowchain_dashboard_ui_build_ready",
-        "flowchain_dashboard_ui_tester_flow_covered"
+        "flowchain_dashboard_ui_tester_flow_covered",
+        "flowchain_dashboard_ui_tester_launch_covered",
+        "flowchain_dashboard_ui_activation_covered"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     ownerInputsValidationMetricsPresent = @(
         "flowchain_owner_inputs_validation_ready",
         "flowchain_owner_inputs_validation_scenarios_total",
         "flowchain_owner_inputs_validation_scenarios_failed",
         "flowchain_owner_inputs_required_env_total"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    ownerActivationPlanMetricsPresent = @(
+        "flowchain_owner_activation_plan_ready",
+        "flowchain_owner_activation_ready",
+        "flowchain_owner_activation_stages_total",
+        "flowchain_owner_activation_ready_stages",
+        "flowchain_owner_activation_missing_env_total",
+        "flowchain_owner_activation_invalid_env_total"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     prometheusHasHelpAndType = $prometheusTextFromFile.Contains("# HELP flowchain_latest_height") -and $prometheusTextFromFile.Contains("# TYPE flowchain_latest_height gauge")
     prometheusContainsNoUrls = $prometheusTextFromFile -notmatch 'https?://'

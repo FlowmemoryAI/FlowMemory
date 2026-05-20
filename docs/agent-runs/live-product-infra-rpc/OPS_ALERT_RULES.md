@@ -1,6 +1,6 @@
 ﻿# FlowChain Ops Alert Rules
 
-Generated: 2026-05-20T00:48:15.2500605Z
+Generated: 2026-05-20T01:39:17.8222114Z
 Status: passed
 Current alert state: blocked
 
@@ -24,7 +24,7 @@ This report maps local ops snapshot findings to operator actions. It does not se
 | deployment-refresh-aborted | critical | Public deployment dependency refresh aborted or skipped child gates. | `npm run flowchain:public-deployment:contract -- -AllowBlocked; npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked; npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh` |
 | truth-table-stale-or-failed | critical | Production truth table is stale, failed, missing, or reports repo-owned blockers. | `npm run flowchain:truth-table -- -AllowBlocked; npm run flowchain:completion:audit -- -AllowBlocked; npm run flowchain:live:cutover:rehearsal -- -AllowBlocked` |
 | external-tester-evidence-unsafe | critical | External tester returned evidence contains a secret marker, credential URL, or env assignment. | `npm run flowchain:tester:evidence:validate; npm run flowchain:no-secret:scan; npm run flowchain:emergency:export-evidence` |
-| dashboard-ui-readiness-failed | critical | Dashboard wallet, faucet, send, explorer, or no-secret UI readiness proof is missing or failed. | `npm run flowchain:dashboard:ui:readiness; npm run flowchain:dashboard:build; npm test --prefix apps/dashboard` |
+| dashboard-ui-readiness-failed | critical | Dashboard wallet, faucet, send, tester launch, explorer, activation cockpit, or no-secret UI readiness proof is missing or failed. | `npm run flowchain:dashboard:ui:readiness; npm run flowchain:dashboard:build; npm test --prefix apps/dashboard` |
 | owner-inputs-validation-failed | critical | Owner input validation scenarios are missing, failed, or unsafe to use for live cutover. | `npm run flowchain:owner-inputs:validate; npm run flowchain:owner-inputs; npm run flowchain:owner-env:readiness` |
 | public-rpc-edge-hardening-failed | critical | Public RPC edge deployment hardening evidence is missing or failed. | `npm run flowchain:public-rpc:deployment-bundle; npm run flowchain:public-rpc:deployment:automation; npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh` |
 | public-rpc-not-shareable | blocked | Public RPC readiness gate is not passed. | `npm run flowchain:public-rpc:check; npm run flowchain:public-rpc:validate; npm run flowchain:public-rpc:abuse-test` |

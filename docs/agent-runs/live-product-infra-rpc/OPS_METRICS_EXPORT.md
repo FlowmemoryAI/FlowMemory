@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-20T00:02:49.6614132Z
+Generated: 2026-05-20T01:39:23.9713676Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 70
+- Metric count: 78
 
 ## Required Metrics
 
@@ -56,10 +56,18 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_dashboard_ui_browser_e2e_ready: present
 - flowchain_dashboard_ui_build_ready: present
 - flowchain_dashboard_ui_tester_flow_covered: present
+- flowchain_dashboard_ui_tester_launch_covered: present
+- flowchain_dashboard_ui_activation_covered: present
 - flowchain_owner_inputs_validation_ready: present
 - flowchain_owner_inputs_validation_scenarios_total: present
 - flowchain_owner_inputs_validation_scenarios_failed: present
 - flowchain_owner_inputs_required_env_total: present
+- flowchain_owner_activation_plan_ready: present
+- flowchain_owner_activation_ready: present
+- flowchain_owner_activation_stages_total: present
+- flowchain_owner_activation_ready_stages: present
+- flowchain_owner_activation_missing_env_total: present
+- flowchain_owner_activation_invalid_env_total: present
 - flowchain_public_deployment_ready: present
 - flowchain_live_cutover_ready: present
 - flowchain_live_cutover_owner_blocked: present
@@ -81,6 +89,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | externalTesterEvidenceLoaded | True |
 | dashboardUiLoaded | True |
 | ownerInputsValidationLoaded | True |
+| ownerActivationPlanLoaded | True |
 | liveCutoverLoaded | True |
 | truthTableLoaded | True |
 | noSecretLoaded | True |
@@ -94,6 +103,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | publicRpcEdgeMetricsPresent | True |
 | dashboardUiMetricsPresent | True |
 | ownerInputsValidationMetricsPresent | True |
+| ownerActivationPlanMetricsPresent | True |
 | prometheusHasHelpAndType | True |
 | prometheusContainsNoUrls | True |
 | prometheusContainsNoEnvAssignments | True |

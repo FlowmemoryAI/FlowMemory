@@ -229,8 +229,8 @@ $rules = @(
         id = "dashboard-ui-readiness-failed"
         severity = "critical"
         findingCodes = @("dashboard-ui-readiness-failed")
-        signal = "Dashboard wallet, faucet, send, explorer, or no-secret UI readiness proof is missing or failed."
-        threshold = "dashboard UI readiness status is not passed, required tester flow coverage is false, browser E2E/build proof is false, or no-secret flags are unsafe"
+        signal = "Dashboard wallet, faucet, send, tester launch, explorer, activation cockpit, or no-secret UI readiness proof is missing or failed."
+        threshold = "dashboard UI readiness status is not passed, required tester flow, activation cockpit, browser E2E/build proof is false, or no-secret flags are unsafe"
         commands = @("npm run flowchain:dashboard:ui:readiness", "npm run flowchain:dashboard:build", "npm test --prefix apps/dashboard")
     },
     [ordered]@{
