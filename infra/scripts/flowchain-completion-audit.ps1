@@ -76,6 +76,7 @@ $paths = [ordered]@{
     bridgeRelayerOnce = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     bridgeRelayerGuardrailValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
+    bridgeReleaseEvidenceValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-validation-report.json"
     bridgePilotLocal = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "services/bridge-relayer/out/real-value-pilot-e2e/bridge-real-value-pilot-e2e-report.json"
     baseTxDiagnostic = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/live-l1-bridge-e2e/base-tx-diagnostic.json"
     productionL1 = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/production-l1-e2e/flowchain-production-l1-e2e-report.json"
@@ -402,6 +403,9 @@ $bridgeRelayerGuardrailValidationExitCode = $bridgeRelayerGuardrailValidationRes
 $bridgeRelayerLoopValidationResult = Invoke-AuditChild -Path $paths.bridgeRelayerLoopValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-loop-validation.ps1"))
 $bridgeRelayerLoopValidationOutput = @($bridgeRelayerLoopValidationResult.output)
 $bridgeRelayerLoopValidationExitCode = $bridgeRelayerLoopValidationResult.exitCode
+$bridgeReleaseEvidenceValidationResult = Invoke-AuditChild -Path $paths.bridgeReleaseEvidenceValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-release-evidence-validation.ps1"))
+$bridgeReleaseEvidenceValidationOutput = @($bridgeReleaseEvidenceValidationResult.output)
+$bridgeReleaseEvidenceValidationExitCode = $bridgeReleaseEvidenceValidationResult.exitCode
 $ownerInputsResult = Invoke-AuditChild -Path $paths.ownerInputs -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-inputs.ps1"), "-AllowBlocked")
 $ownerInputsOutput = @($ownerInputsResult.output)
 $ownerInputsExitCode = $ownerInputsResult.exitCode
@@ -1977,6 +1981,45 @@ $bridgeRelayerLoopValidationPassed = $bridgeRelayerLoopValidationExitCode -eq 0 
     -and ((Get-AuditProp -Object $bridgeRelayerLoopValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $bridgeRelayerLoopValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $bridgeRelayerLoopValidation -Name "broadcasts" -Default $true) -eq $false)
+$bridgeReleaseEvidenceValidation = $reports.bridgeReleaseEvidenceValidation
+$bridgeReleaseEvidenceValidationStatus = Get-ReportStatus -Report $bridgeReleaseEvidenceValidation
+$bridgeReleaseEvidenceValidationChecks = Get-AuditProp -Object $bridgeReleaseEvidenceValidation -Name "checks"
+$bridgeReleaseEvidenceValidationFailedChecks = @((Get-AuditProp -Object $bridgeReleaseEvidenceValidation -Name "failedChecks" -Default @()))
+$bridgeReleaseEvidenceValidationFailedCases = @((Get-AuditProp -Object $bridgeReleaseEvidenceValidation -Name "failedCases" -Default @()))
+$bridgeReleaseEvidenceValidationMissingCases = @((Get-AuditProp -Object $bridgeReleaseEvidenceValidation -Name "missingRequiredCases" -Default @()))
+$bridgeReleaseEvidenceValidationSecretFindings = @((Get-AuditProp -Object $bridgeReleaseEvidenceValidation -Name "secretMarkerFindings" -Default @()))
+$bridgeReleaseEvidenceValidationRequiredChecks = @(
+    "releaseEvidenceScriptExists",
+    "matchingEvidencePasses",
+    "missingInputsBlock",
+    "amountMismatchFails",
+    "tokenMismatchFails",
+    "recipientMismatchFails",
+    "chainMismatchFails",
+    "assetMismatchFails",
+    "releaseBroadcastRejected",
+    "withdrawalBroadcastRejected",
+    "allRequiredCasesCovered",
+    "failedCasesAbsent",
+    "noSecretScanPassed",
+    "broadcastsFalse",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "secretMarkerFindingsEmpty"
+)
+$bridgeReleaseEvidenceValidationMissingChecks = @(Get-MissingAuditChecks -Checks $bridgeReleaseEvidenceValidationChecks -Names $bridgeReleaseEvidenceValidationRequiredChecks)
+$bridgeReleaseEvidenceValidationFalseRequiredChecks = @($bridgeReleaseEvidenceValidationRequiredChecks | Where-Object { (Get-AuditProp -Object $bridgeReleaseEvidenceValidationChecks -Name $_ -Default $false) -ne $true })
+$bridgeReleaseEvidenceValidationPassed = $bridgeReleaseEvidenceValidationExitCode -eq 0 `
+    -and $bridgeReleaseEvidenceValidationStatus -eq "passed" `
+    -and $bridgeReleaseEvidenceValidationFailedChecks.Count -eq 0 `
+    -and $bridgeReleaseEvidenceValidationFailedCases.Count -eq 0 `
+    -and $bridgeReleaseEvidenceValidationMissingCases.Count -eq 0 `
+    -and $bridgeReleaseEvidenceValidationSecretFindings.Count -eq 0 `
+    -and $bridgeReleaseEvidenceValidationMissingChecks.Count -eq 0 `
+    -and $bridgeReleaseEvidenceValidationFalseRequiredChecks.Count -eq 0 `
+    -and ((Get-AuditProp -Object $bridgeReleaseEvidenceValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $bridgeReleaseEvidenceValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $bridgeReleaseEvidenceValidation -Name "broadcasts" -Default $true) -eq $false)
 $externalTesterPacketStatus = Get-ReportStatus -Report $externalTesterPacket
 $externalTesterPacketShareable = Get-AuditProp -Object $externalTesterPacket -Name "packetShareable" -Default $false
 $externalTesterPacketPath = [string](Get-AuditProp -Object $externalTesterPacket -Name "packetPath" -Default $paths.externalTesterPacket)
@@ -2805,6 +2848,12 @@ Add-AuditItem -Items $items -Id "bridge-relayer-loop-validation" `
     -Evidence "loopStatus=$bridgeRelayerLoopValidationStatus, failedChecks=$bridgeRelayerLoopFailedCheckCount, missingChecks=$bridgeRelayerLoopMissingCheckCount, secretFindings=$bridgeRelayerLoopSecretFindingCount, loopHealthy=$(Get-AuditProp -Object $bridgeRelayerLoopChecks -Name "statusRelayerReportHealthy" -Default $false), stopped=$(Get-AuditProp -Object $bridgeRelayerLoopChecks -Name "statusAfterStopNotRunning" -Default $false), report=$($paths.bridgeRelayerLoopValidation)" `
     -Commands @("npm run flowchain:bridge:relayer:loop:validate")
 
+Add-AuditItem -Items $items -Id "bridge-release-evidence-validation" `
+    -Requirement "Bridge withdrawal/release evidence validation proves matching release evidence passes, missing inputs block, amount/token/recipient/chain/asset mismatches fail, broadcast flags are rejected, and validation remains no-secret/no-broadcast." `
+    -Status $(if ($bridgeReleaseEvidenceValidationPassed) { "passed" } else { "failed" }) `
+    -Evidence "releaseEvidenceValidation=$bridgeReleaseEvidenceValidationStatus, cases=$(Get-AuditProp -Object $bridgeReleaseEvidenceValidation -Name "caseCount" -Default 0), failedChecks=$($bridgeReleaseEvidenceValidationFailedChecks.Count), failedCases=$($bridgeReleaseEvidenceValidationFailedCases.Count), missingCases=$($bridgeReleaseEvidenceValidationMissingCases.Count), secretFindings=$($bridgeReleaseEvidenceValidationSecretFindings.Count), report=$($paths.bridgeReleaseEvidenceValidation)" `
+    -Commands @("npm run flowchain:bridge:release:evidence:validate")
+
 Add-AuditItem -Items $items -Id "live-infra-aggregate-refresh" `
     -Requirement "Completion audit refreshes the live-infra aggregate gate before deciding readiness." `
     -Status $(if ($liveInfraStatus -eq "passed") { "passed" } elseif ($liveInfraStatus -eq "blocked") { "blocked" } else { "failed" }) `
@@ -3051,6 +3100,7 @@ $report = [ordered]@{
         "npm run flowchain:dev-pack:e2e",
         "npm run flowchain:bridge:relayer:guardrail:validate",
         "npm run flowchain:bridge:relayer:loop:validate",
+        "npm run flowchain:bridge:release:evidence:validate",
         "npm run flowchain:ops:snapshot",
         "npm run flowchain:ops:alerts",
         "npm run flowchain:ops:alerts:install:systemd:validate",

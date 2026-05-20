@@ -158,6 +158,7 @@
     "flowchain:bridge:resume": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base8453-control.ps1 -Action Resume",
     "flowchain:bridge:withdraw:intent": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base-mainnet-pilot-observe.ps1 -ApplyCredit -WithdrawalIntent -ReportPath devnet/local/bridge-live-readiness/bridge-withdraw-intent-report.json",
     "flowchain:bridge:release:evidence": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-release-evidence.ps1",
+    "flowchain:bridge:release:evidence:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-release-evidence-validation.ps1",
     "flowchain:bridge:local-credit:smoke": "npm run bridge:local-credit:smoke",
     "flowchain:bridge:command-matrix": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-command-matrix.ps1",
     "flowchain:bridge:no-secret-audit": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-no-secret-audit.ps1",

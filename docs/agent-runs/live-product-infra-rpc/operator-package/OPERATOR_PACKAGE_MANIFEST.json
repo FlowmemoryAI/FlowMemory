@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-20T04:24:58.6195794Z",
+    "generatedAt":  "2026-05-20T04:48:10.5021575Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -76,6 +76,7 @@
                             "flowchain:bridge:deploy:control:validate",
                             "flowchain:bridge:relayer:guardrail:validate",
                             "flowchain:bridge:relayer:loop:validate",
+                            "flowchain:bridge:release:evidence:validate",
                             "flowchain:external-tester:packet",
                             "flowchain:external-tester:packet:validate",
                             "flowchain:tester:evidence:validate",
@@ -312,6 +313,11 @@
                               "phase":  "bridge",
                               "command":  "npm run flowchain:bridge:relayer:loop:validate",
                               "purpose":  "Validate relayer loop start, fresh health reporting, clean stop, PID cleanup, and no leftover validation relayer process."
+                          },
+                          {
+                              "phase":  "bridge",
+                              "command":  "npm run flowchain:bridge:release:evidence:validate",
+                              "purpose":  "Validate withdrawal/release evidence matching, mismatch rejection, and no-broadcast boundaries."
                           },
                           {
                               "phase":  "testers",
@@ -564,6 +570,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/BRIDGE_RELAYER_LOOP_VALIDATION.md",
                          "destination":  "runbooks/BRIDGE_RELAYER_LOOP_VALIDATION.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/BRIDGE_RELEASE_EVIDENCE_VALIDATION.md",
+                         "destination":  "runbooks/BRIDGE_RELEASE_EVIDENCE_VALIDATION.md",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"
@@ -825,6 +838,13 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json",
                          "destination":  "evidence/bridge-relayer-loop-validation-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-validation-report.json",
+                         "destination":  "evidence/bridge-release-evidence-validation-report.json",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"

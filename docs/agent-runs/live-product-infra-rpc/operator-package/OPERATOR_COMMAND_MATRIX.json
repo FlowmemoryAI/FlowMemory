@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-20T04:24:58.6195794Z",
+    "generatedAt":  "2026-05-20T04:48:10.5021575Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -226,6 +226,11 @@
                          "phase":  "bridge",
                          "command":  "npm run flowchain:bridge:relayer:loop:validate",
                          "purpose":  "Validate relayer loop start, fresh health reporting, clean stop, PID cleanup, and no leftover validation relayer process."
+                     },
+                     {
+                         "phase":  "bridge",
+                         "command":  "npm run flowchain:bridge:release:evidence:validate",
+                         "purpose":  "Validate withdrawal/release evidence matching, mismatch rejection, and no-broadcast boundaries."
                      },
                      {
                          "phase":  "testers",
