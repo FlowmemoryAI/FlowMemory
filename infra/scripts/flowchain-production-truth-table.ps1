@@ -1446,6 +1446,21 @@ $definitions = @(
         ownerInputGate = $true
     },
     [ordered]@{
+        id = "base-tx-diagnostic-fail-closed"
+        requirement = "Base 8453 transaction diagnosis fails closed without owner env/tx inputs, prints no env values, writes no secrets, and never broadcasts."
+        path = "devnet/local/live-l1-bridge-e2e/base-tx-diagnostic.json"
+        command = "npm run flowchain:bridge:diagnose:tx"
+        productionGate = $true
+        ownerInputGate = $false
+        blockedAsPassed = $true
+        requiredReportProperties = [ordered]@{
+            "safeReasonCode" = "missing-env"
+            "broadcasts" = $false
+            "printsEnvValues" = $false
+            "noSecrets" = $true
+        }
+    },
+    [ordered]@{
         id = "bridge-deploy-control-validation"
         requirement = "Base 8453 bridge deploy, pause, resume, and emergency-stop paths fail closed without owner env, require explicit pilot and broadcast acknowledgements, map capped pilot deployment env into Foundry, and remain no-broadcast during validation."
         path = "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json"
@@ -2322,7 +2337,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-synthetic-canary", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "tester-write-token-setup", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "base-tx-diagnostic-fail-closed", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-synthetic-canary", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "tester-write-token-setup", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"
@@ -2614,7 +2629,12 @@ function ConvertTo-TruthEvidence {
         "opsAlertRulesStatus",
         "completionReady",
         "blockedOnlyOnKnownExternalOwnerInputs",
-        "blockedOnlyOnOwnerInputs"
+        "blockedOnlyOnOwnerInputs",
+        "safeReasonCode",
+        "printsEnvValues",
+        "envValuesPrinted",
+        "noSecrets",
+        "broadcasts"
     )) {
         $value = Get-TruthProp -Object $Report -Name $name
         if ($null -ne $value -and -not [string]::IsNullOrWhiteSpace("$value")) {
@@ -2784,6 +2804,38 @@ function Get-TruthClassification {
     }
     if ($rawStatus -in @("failed", "error", "invalid")) {
         return "failed"
+    }
+    if ($rawStatus -eq "blocked" -and ((Get-TruthProp -Object $Definition -Name "blockedAsPassed" -Default $false) -eq $true)) {
+        $requiredChecks = @((Get-TruthProp -Object $Definition -Name "requiredChecks" -Default @()))
+        if ($requiredChecks.Count -gt 0) {
+            $checks = Get-TruthProp -Object $Report -Name "checks"
+            foreach ($name in $requiredChecks) {
+                if ((Get-TruthProp -Object $checks -Name $name -Default $false) -ne $true) {
+                    return "failed"
+                }
+            }
+        }
+
+        foreach ($path in @((Get-TruthProp -Object $Definition -Name "requiredEmptyArrays" -Default @()))) {
+            if (-not (Test-TruthPathExists -Object $Report -Path ([string] $path))) {
+                return "failed"
+            }
+            if (@((Get-TruthPathProp -Object $Report -Path ([string] $path))).Count -ne 0) {
+                return "failed"
+            }
+        }
+
+        $requiredReportProperties = Get-TruthProp -Object $Definition -Name "requiredReportProperties"
+        if ($null -ne $requiredReportProperties -and $requiredReportProperties -is [System.Collections.IDictionary]) {
+            foreach ($entry in $requiredReportProperties.GetEnumerator()) {
+                $actual = Get-TruthPathProp -Object $Report -Path ([string] $entry.Key)
+                if (-not (Test-TruthExpectedValue -Actual $actual -Expected $entry.Value)) {
+                    return "failed"
+                }
+            }
+        }
+
+        return "passed"
     }
     if ($rawStatus -eq "blocked") {
         $criticalFindings = @((Get-TruthProp -Object $Report -Name "findings" -Default @()) | Where-Object {
