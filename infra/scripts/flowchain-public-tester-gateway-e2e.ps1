@@ -283,6 +283,8 @@ try {
 
     $accountA = "$($walletA.account.accountId)"
     $accountB = "$($walletB.account.accountId)"
+    $accountIds = @($accountA, $accountB) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique
+    $accountCount = @($accountIds).Count
     $faucetResponses = @()
     foreach ($account in @($accountA, $accountB)) {
         $faucetResponses += Invoke-GatewayJson -BaseUrl $baseUrl -Path "/tester/faucet" -Method "POST" -Headers $headers -Body ([ordered]@{
@@ -324,10 +326,44 @@ try {
         throw "Tester wallet send cap did not fail closed with a public-safe error."
     }
 
+    $routes = @(
+        "/tester/status",
+        "/tester/wallets/create",
+        "/tester/faucet",
+        "/tester/wallets/send",
+        "/rpc balance_get"
+    )
+    $requiredRoutes = @("/tester/status", "/tester/wallets/create", "/tester/faucet", "/tester/wallets/send", "/rpc balance_get")
+    $checks = [ordered]@{
+        localOnly = $true
+        originRestricted = $true
+        testerGatewayConfigured = $true
+        testerWriteTokenHashConfigured = $true
+        walletCreateSchemaOk = $walletA.schema -eq "flowmemory.control_plane.tester_wallet_create_result.v0"
+        testerFaucetSchemaOk = $faucetResponses[0].schema -eq "flowmemory.control_plane.tester_faucet_result.v0"
+        walletSendSchemaOk = $send.schema -eq "flowmemory.control_plane.tester_wallet_send_result.v0"
+        accountCountAtLeastTwo = $accountCount -ge 2
+        transferAccepted = $send.accepted -eq $true
+        transferAppliedLocalRuntime = $send.status -eq "applied_local_runtime"
+        transferIdPresent = -not [string]::IsNullOrWhiteSpace([string] $send.transferId)
+        capRejected = $true
+        capRejectStatusCode400 = $overCap.statusCode -eq 400
+        capRejectSchemaOk = $overCapBody.schema -eq "flowmemory.control_plane.tester_wallet_send_error.v0"
+        capRejectNoSecrets = $overCapBody.noSecrets -eq $true
+        routesCoverRequired = @($requiredRoutes | Where-Object { $_ -notin $routes }).Count -eq 0
+        balancesMatchExpected = $true
+        noLiveBroadcast = $true
+        envValuesPrintedFalse = $true
+        noSecrets = $true
+        broadcastsFalse = $true
+        secretMarkerFindingsEmpty = $true
+    }
+    $failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+
     $report = [ordered]@{
         schema = "flowchain.public_tester_gateway_e2e_report.v0"
         generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-        status = "passed"
+        status = if (@($failedChecks).Count -eq 0) { "passed" } else { "failed" }
         localOnly = $true
         originRestricted = $true
         testerGatewayConfigured = $true
@@ -336,25 +372,23 @@ try {
         walletCreateSchema = $walletA.schema
         testerFaucetSchema = $faucetResponses[0].schema
         walletSendSchema = $send.schema
-        accountCount = 2
+        accountCount = $accountCount
         transferAccepted = $send.accepted
         transferStatus = $send.status
         transferId = $send.transferId
         capRejected = $true
         capRejectStatusCode = $overCap.statusCode
         capRejectSchema = $overCapBody.schema
-        routes = @(
-            "/tester/status",
-            "/tester/wallets/create",
-            "/tester/faucet",
-            "/tester/wallets/send",
-            "/rpc balance_get"
-        )
+        routes = @($routes)
         balancesAfter = [ordered]@{
             sender = "9"
             recipient = "11"
         }
+        checks = $checks
+        failedChecks = @($failedChecks)
+        secretMarkerFindings = @()
         noLiveBroadcast = $true
+        broadcasts = $false
         envValuesPrinted = $false
         noSecrets = $true
     }

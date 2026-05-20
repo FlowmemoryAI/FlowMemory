@@ -685,6 +685,59 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "public-tester-gateway-e2e"
+        requirement = "Public tester write gateway proves friends-and-family wallet create, capped faucet funding, capped tester-to-tester send settlement, over-cap rejection, and no-secret/no-broadcast behavior on a temporary local control plane."
+        path = "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
+        command = "npm run flowchain:tester:gateway:e2e"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "localOnly",
+            "originRestricted",
+            "testerGatewayConfigured",
+            "testerWriteTokenHashConfigured",
+            "walletCreateSchemaOk",
+            "testerFaucetSchemaOk",
+            "walletSendSchemaOk",
+            "accountCountAtLeastTwo",
+            "transferAccepted",
+            "transferAppliedLocalRuntime",
+            "transferIdPresent",
+            "capRejected",
+            "capRejectStatusCode400",
+            "capRejectSchemaOk",
+            "capRejectNoSecrets",
+            "routesCoverRequired",
+            "balancesMatchExpected",
+            "noLiveBroadcast",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredMinimums = [ordered]@{
+            accountCount = 2
+        }
+        requiredReportProperties = [ordered]@{
+            "localOnly" = $true
+            "originRestricted" = $true
+            "testerGatewayConfigured" = $true
+            "testerWriteTokenHashConfigured" = $true
+            "transferAccepted" = $true
+            "transferStatus" = "applied_local_runtime"
+            "capRejected" = $true
+            "capRejectStatusCode" = 400
+            "noLiveBroadcast" = $true
+            "broadcasts" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+        }
+    },
+    [ordered]@{
         id = "public-rpc-readiness"
         requirement = "Public FlowChain RPC has URL, TLS acknowledgement, CORS, rate limit, backup path, and response hygiene."
         path = "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
@@ -1378,6 +1431,7 @@ $definitions = @(
         command = "npm run flowchain:tester:readiness -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
+        staleIfOlderThan = @("public-tester-gateway-e2e")
     },
     [ordered]@{
         id = "bridge-release-evidence-validation"
@@ -1495,6 +1549,7 @@ $definitions = @(
             "externalSharingReady" = $false
             "packetExecutableSmokeValidated" = $true
         }
+        staleIfOlderThan = @("public-tester-gateway-e2e")
     },
     [ordered]@{
         id = "external-tester-evidence-validation"
@@ -1947,7 +2002,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "bridge-release-evidence-validation", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "tester-write-token-setup", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "tester-write-token-setup", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"
