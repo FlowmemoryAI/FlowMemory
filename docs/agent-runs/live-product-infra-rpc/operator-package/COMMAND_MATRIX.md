@@ -1,15 +1,17 @@
 ﻿# FlowChain Operator Command Matrix
 
-Generated: 2026-05-20T10:27:46.7934896Z
+Generated: 2026-05-20T11:49:15.9212394Z
 
 | Phase | Command | Purpose |
 | --- | --- | --- |
 | preflight | `npm run flowchain:prereq` | Check required local tooling. |
 | preflight | `npm run flowchain:doctor` | Summarize repo and runtime health. |
+| preflight | `npm run flowchain:install:check` | Run the no-secret owner-host install preflight and install validation proof. |
 | service | `npm run flowchain:service:start -- -LiveProfile` | Start the private live-profile node and RPC service. |
 | service | `npm run flowchain:service:status -- -AllowBlocked` | Verify node, control-plane, height, and state freshness. |
 | service | `npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30` | Observe block production over a sampling window. |
 | service | `npm run flowchain:service:restart -- -LiveProfile` | Restart without deleting runtime state. |
+| service | `npm run flowchain:upgrade:rehearse` | Prove upgrade and rollback preserve local L1 state without host mutation. |
 | service | `npm run flowchain:service:stop` | Stop local services without deleting state. |
 | autorecovery | `npm run flowchain:service:supervisor:validate` | Prove the supervisor can recover a failed local control plane. |
 | autorecovery | `npm run flowchain:service:install:windows -- -Action Plan` | Render the no-secret Windows Scheduled Task install plan. |

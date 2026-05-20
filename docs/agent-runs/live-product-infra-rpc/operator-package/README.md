@@ -1,6 +1,6 @@
 ﻿# FlowChain Node Operator Package
 
-Generated: 2026-05-20T10:27:46.7934896Z
+Generated: 2026-05-20T11:49:15.9212394Z
 
 This package collects no-secret runbooks, command matrices, and current evidence for operating the private live-profile FlowChain L1 and for preparing the owner-operated public RPC edge. It does not contain owner values.
 
@@ -8,14 +8,14 @@ This package collects no-secret runbooks, command matrices, and current evidence
 
 - `npm run flowchain:prereq`
 - `npm run flowchain:doctor`
+- `npm run flowchain:install:check`
 - `npm run flowchain:service:start -- -LiveProfile`
 - `npm run flowchain:service:status -- -AllowBlocked`
 - `npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30`
 - `npm run flowchain:service:restart -- -LiveProfile`
+- `npm run flowchain:upgrade:rehearse`
 - `npm run flowchain:service:stop`
 - `npm run flowchain:service:supervisor:validate`
-- `npm run flowchain:service:install:windows -- -Action Plan`
-- `npm run flowchain:service:install:validate`
 
 ## Public Launch Boundary
 

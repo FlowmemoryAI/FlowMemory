@@ -338,6 +338,89 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "upgrade-rehearsal"
+        requirement = "State-preserving upgrade and rollback rehearsal copies live L1 state, verifies matching hashes after next-release and rollback restore, and documents exact operator commands without host mutation."
+        path = "docs/agent-runs/live-product-infra-rpc/upgrade-rehearsal-report.json"
+        command = "npm run flowchain:upgrade:rehearse"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "stateSourceExists",
+            "sourceStateReadable",
+            "previousReleaseStateCopied",
+            "backupStateCopied",
+            "nextReleaseStateCopied",
+            "rollbackStateCopied",
+            "sourceStateHashPresent",
+            "previousStateHashMatchesSource",
+            "nextStateHashMatchesSource",
+            "rollbackStateHashMatchesSource",
+            "chainIdPreserved",
+            "genesisHashPreserved",
+            "nextBlockNumberPreserved",
+            "packageManifestCaptured",
+            "migrationManifestWritten",
+            "rollbackManifestWritten",
+            "rollbackCommandsPresent",
+            "verifyCommandsPresent",
+            "workDirInsideRepo",
+            "hostMutationPerformedFalse",
+            "envValuesPrintedFalse",
+            "secretMarkerFindingsEmpty",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "hostMutationPerformed" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "install-check"
+        requirement = "Top-level owner-host install check verifies tools, package commands, install runbooks, Windows service install validation, Linux systemd validation, and no-secret boundaries as one operator preflight."
+        path = "docs/agent-runs/live-product-infra-rpc/install-check-report.json"
+        command = "npm run flowchain:install:check"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "repoRootResolved",
+            "packageJsonReadable",
+            "requiredPackageScriptsPresent",
+            "requiredRunbooksPresent",
+            "requiredToolsPresent",
+            "diskFreeMeetsMinimum",
+            "serviceInstallValidationReportPassed",
+            "systemdInstallValidationReportPassed",
+            "childValidationsPassed",
+            "childValidationsDidNotTimeout",
+            "ownerInputNamesOnly",
+            "ownerInputAbsenceIsNonRepoBlocker",
+            "hostMutationPerformedFalse",
+            "envValuesPrintedFalse",
+            "secretMarkerFindingsEmpty",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingScripts",
+            "missingDocs",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "hostMutationPerformed" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "live-product-e2e"
         requirement = "Local live-product e2e covers runtime, wallet, live infra, and tester rehearsal without public claims."
         path = "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json"

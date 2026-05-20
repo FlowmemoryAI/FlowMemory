@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.dev_pack_e2e_report.v0",
-  "generatedAt": "2026-05-20T08:45:07.455Z",
+  "generatedAt": "2026-05-20T11:25:39.532Z",
   "status": "passed",
   "rpcUrl": "http://127.0.0.1:8787/rpc",
   "checks": {
@@ -32,6 +32,9 @@
     "cliSignedTransactionSubmit": true,
     "browserExamplePresent": true,
     "browserExampleSmokePassed": true,
+    "openApiSpecGenerated": true,
+    "postmanCollectionGenerated": true,
+    "curlExamplesGenerated": true,
     "developerGuidesPresent": true,
     "heightAdvanced": true,
     "publicReadinessFailClosed": true,
@@ -42,8 +45,8 @@
   },
   "methodCount": 82,
   "publicReadyMethodCount": 0,
-  "firstHeight": "100136",
-  "secondHeight": "100137",
+  "firstHeight": "101490",
+  "secondHeight": "101491",
   "missingEnvNames": [
     "FLOWCHAIN_BASE8453_FROM_BLOCK",
     "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
@@ -64,7 +67,10 @@
     "markdown": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\DEV_PACK.md",
     "handoff": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\HANDOFF.md",
     "inventory": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\INVENTORY.md",
-    "rpcReference": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\sdk\\RPC_REFERENCE.generated.md"
+    "rpcReference": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\sdk\\RPC_REFERENCE.generated.md",
+    "openApi": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\sdk\\FLOWCHAIN_RPC.openapi.generated.json",
+    "postman": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\sdk\\FLOWCHAIN_RPC.postman.generated.json",
+    "curlExamples": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\sdk\\FLOWCHAIN_HTTP_EXAMPLES.generated.md"
   },
   "noLiveBroadcast": true,
   "envValuesPrinted": false,

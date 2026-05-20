@@ -37,6 +37,8 @@
     "build:production": "npm run launch:candidate && npm run build --prefix apps/dashboard",
     "flowchain:prereq": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-check-prereqs.ps1",
     "flowchain:doctor": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-doctor.ps1",
+    "flowchain:install:check": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-install-check.ps1",
+    "flowchain:upgrade:rehearse": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-upgrade-rehearsal.ps1",
     "flowchain:init": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-init.ps1",
     "flowchain:operator:package": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-operator-package.ps1",
     "flowchain:operator:package:verify": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-operator-package-verify.ps1",

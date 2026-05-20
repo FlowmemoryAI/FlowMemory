@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-20T10:27:46.7934896Z",
+    "generatedAt":  "2026-05-20T11:49:15.9212394Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -26,6 +26,8 @@
     "requiredScripts":  [
                             "flowchain:prereq",
                             "flowchain:doctor",
+                            "flowchain:install:check",
+                            "flowchain:upgrade:rehearse",
                             "flowchain:service:start",
                             "flowchain:service:status",
                             "flowchain:service:monitor",
@@ -101,6 +103,11 @@
                               "purpose":  "Summarize repo and runtime health."
                           },
                           {
+                              "phase":  "preflight",
+                              "command":  "npm run flowchain:install:check",
+                              "purpose":  "Run the no-secret owner-host install preflight and install validation proof."
+                          },
+                          {
                               "phase":  "service",
                               "command":  "npm run flowchain:service:start -- -LiveProfile",
                               "purpose":  "Start the private live-profile node and RPC service."
@@ -119,6 +126,11 @@
                               "phase":  "service",
                               "command":  "npm run flowchain:service:restart -- -LiveProfile",
                               "purpose":  "Restart without deleting runtime state."
+                          },
+                          {
+                              "phase":  "service",
+                              "command":  "npm run flowchain:upgrade:rehearse",
+                              "purpose":  "Prove upgrade and rollback preserve local L1 state without host mutation."
                           },
                           {
                               "phase":  "service",
@@ -476,6 +488,20 @@
                          "reason":  "copied"
                      },
                      {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/INSTALL_CHECK.md",
+                         "destination":  "runbooks/INSTALL_CHECK.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/INSTALL_UPGRADE.md",
+                         "destination":  "runbooks/INSTALL_UPGRADE.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
                          "source":  "docs/agent-runs/live-product-infra-rpc/WINDOWS_SERVICE_INSTALL.md",
                          "destination":  "runbooks/WINDOWS_SERVICE_INSTALL.md",
                          "copied":  true,
@@ -676,6 +702,20 @@
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json",
                          "destination":  "evidence/service-supervisor-validation-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/install-check-report.json",
+                         "destination":  "evidence/install-check-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/upgrade-rehearsal-report.json",
+                         "destination":  "evidence/upgrade-rehearsal-report.json",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied"

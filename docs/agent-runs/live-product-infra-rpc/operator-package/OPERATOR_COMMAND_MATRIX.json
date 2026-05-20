@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-20T10:27:46.7934896Z",
+    "generatedAt":  "2026-05-20T11:49:15.9212394Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -11,6 +11,11 @@
                          "phase":  "preflight",
                          "command":  "npm run flowchain:doctor",
                          "purpose":  "Summarize repo and runtime health."
+                     },
+                     {
+                         "phase":  "preflight",
+                         "command":  "npm run flowchain:install:check",
+                         "purpose":  "Run the no-secret owner-host install preflight and install validation proof."
                      },
                      {
                          "phase":  "service",
@@ -31,6 +36,11 @@
                          "phase":  "service",
                          "command":  "npm run flowchain:service:restart -- -LiveProfile",
                          "purpose":  "Restart without deleting runtime state."
+                     },
+                     {
+                         "phase":  "service",
+                         "command":  "npm run flowchain:upgrade:rehearse",
+                         "purpose":  "Prove upgrade and rollback preserve local L1 state without host mutation."
                      },
                      {
                          "phase":  "service",

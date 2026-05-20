@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-20T10:06:13.8886020Z
+Generated: 2026-05-20T10:59:04.0470848Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 119
+- Metric count: 128
 
 ## Required Metrics
 
@@ -78,6 +78,15 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_external_tester_faucet_route_validated: present
 - flowchain_external_tester_live_infra_ready: present
 - flowchain_external_tester_missing_owner_inputs: present
+- flowchain_public_tester_gateway_e2e_ready: present
+- flowchain_public_tester_gateway_accounts_total: present
+- flowchain_public_tester_gateway_failed_checks: present
+- flowchain_public_tester_gateway_routes_total: present
+- flowchain_public_tester_gateway_transfer_applied: present
+- flowchain_public_tester_gateway_cap_rejected: present
+- flowchain_public_tester_gateway_routes_covered: present
+- flowchain_public_tester_gateway_no_secrets: present
+- flowchain_public_tester_gateway_no_broadcasts: present
 - flowchain_external_tester_evidence_ready: present
 - flowchain_external_tester_evidence_failed_checks: present
 - flowchain_external_tester_evidence_missing_files: present
@@ -120,6 +129,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | serviceStatusLoaded | True |
 | serviceMonitorLoaded | True |
 | externalTesterLoaded | True |
+| publicTesterGatewayLoaded | True |
 | externalTesterEvidenceLoaded | True |
 | dashboardUiLoaded | True |
 | ownerInputsValidationLoaded | True |
@@ -136,6 +146,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | bridgeDirectObserveMetricsPresent | True |
 | bridgeRuntimeCreditMetricsPresent | True |
 | publicRpcEdgeMetricsPresent | True |
+| publicTesterGatewayMetricsPresent | True |
 | transactionIntakeMetricsPresent | True |
 | dashboardUiMetricsPresent | True |
 | ownerInputsValidationMetricsPresent | True |

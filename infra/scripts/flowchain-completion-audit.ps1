@@ -28,6 +28,8 @@ $paths = [ordered]@{
     operatorDoctor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json"
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     serviceSupervisorValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
+    installCheck = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/install-check-report.json"
+    upgradeRehearsal = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/upgrade-rehearsal-report.json"
     serviceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
     systemdServiceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"
     liveProduct = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json"
@@ -351,6 +353,12 @@ $serviceInstallValidationExitCode = $serviceInstallValidationResult.exitCode
 $systemdServiceInstallValidationResult = Invoke-AuditChild -Path $paths.systemdServiceInstallValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-install-systemd-validation.ps1"))
 $systemdServiceInstallValidationOutput = @($systemdServiceInstallValidationResult.output)
 $systemdServiceInstallValidationExitCode = $systemdServiceInstallValidationResult.exitCode
+$upgradeRehearsalResult = Invoke-AuditChild -Path $paths.upgradeRehearsal -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-upgrade-rehearsal.ps1"))
+$upgradeRehearsalOutput = @($upgradeRehearsalResult.output)
+$upgradeRehearsalExitCode = $upgradeRehearsalResult.exitCode
+$installCheckResult = Invoke-AuditChild -Path $paths.installCheck -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-install-check.ps1"))
+$installCheckOutput = @($installCheckResult.output)
+$installCheckExitCode = $installCheckResult.exitCode
 $liveWalletResult = Invoke-AuditChild -Path $paths.liveWallet -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-service-wallet-e2e.ps1"))
 $liveWalletOutput = @($liveWalletResult.output)
 $liveWalletExitCode = $liveWalletResult.exitCode
@@ -847,6 +855,91 @@ $systemdServiceInstallValidationPassed = $systemdServiceInstallValidationExitCod
     -and ((Get-AuditProp -Object $systemdServiceInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $systemdServiceInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $systemdServiceInstallValidation -Name "broadcasts" -Default $true) -eq $false)
+$upgradeRehearsal = $reports.upgradeRehearsal
+$upgradeRehearsalStatus = Get-ReportStatus -Report $upgradeRehearsal
+$upgradeRehearsalChecks = Get-AuditProp -Object $upgradeRehearsal -Name "checks"
+$upgradeRehearsalFailedChecks = @((Get-AuditProp -Object $upgradeRehearsal -Name "failedChecks" -Default @()))
+$upgradeRehearsalSecretFindings = @((Get-AuditProp -Object $upgradeRehearsal -Name "secretMarkerFindings" -Default @()))
+$upgradeRehearsalRequiredChecks = @(
+    "stateSourceExists",
+    "sourceStateReadable",
+    "previousReleaseStateCopied",
+    "backupStateCopied",
+    "nextReleaseStateCopied",
+    "rollbackStateCopied",
+    "sourceStateHashPresent",
+    "previousStateHashMatchesSource",
+    "nextStateHashMatchesSource",
+    "rollbackStateHashMatchesSource",
+    "chainIdPreserved",
+    "genesisHashPreserved",
+    "nextBlockNumberPreserved",
+    "packageManifestCaptured",
+    "migrationManifestWritten",
+    "rollbackManifestWritten",
+    "rollbackCommandsPresent",
+    "verifyCommandsPresent",
+    "workDirInsideRepo",
+    "hostMutationPerformedFalse",
+    "envValuesPrintedFalse",
+    "secretMarkerFindingsEmpty",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$upgradeRehearsalMissingChecks = @(Get-MissingAuditChecks -Checks $upgradeRehearsalChecks -Names $upgradeRehearsalRequiredChecks)
+$upgradeRehearsalFailedCheckCount = $upgradeRehearsalFailedChecks.Count
+$upgradeRehearsalSecretFindingCount = $upgradeRehearsalSecretFindings.Count
+$upgradeRehearsalMissingCheckCount = $upgradeRehearsalMissingChecks.Count
+$upgradeRehearsalPassed = $upgradeRehearsalExitCode -eq 0 `
+    -and $upgradeRehearsalStatus -eq "passed" `
+    -and $upgradeRehearsalFailedCheckCount -eq 0 `
+    -and $upgradeRehearsalSecretFindingCount -eq 0 `
+    -and $upgradeRehearsalMissingCheckCount -eq 0 `
+    -and ((Get-AuditProp -Object $upgradeRehearsal -Name "hostMutationPerformed" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $upgradeRehearsal -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $upgradeRehearsal -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $upgradeRehearsal -Name "broadcasts" -Default $true) -eq $false)
+$installCheck = $reports.installCheck
+$installCheckStatus = Get-ReportStatus -Report $installCheck
+$installCheckChecks = Get-AuditProp -Object $installCheck -Name "checks"
+$installCheckFailedChecks = @((Get-AuditProp -Object $installCheck -Name "failedChecks" -Default @()))
+$installCheckSecretFindings = @((Get-AuditProp -Object $installCheck -Name "secretMarkerFindings" -Default @()))
+$installCheckMissingScripts = @((Get-AuditProp -Object $installCheck -Name "missingScripts" -Default @()))
+$installCheckMissingDocs = @((Get-AuditProp -Object $installCheck -Name "missingDocs" -Default @()))
+$installCheckRequiredChecks = @(
+    "repoRootResolved",
+    "packageJsonReadable",
+    "requiredPackageScriptsPresent",
+    "requiredRunbooksPresent",
+    "requiredToolsPresent",
+    "diskFreeMeetsMinimum",
+    "serviceInstallValidationReportPassed",
+    "systemdInstallValidationReportPassed",
+    "childValidationsPassed",
+    "childValidationsDidNotTimeout",
+    "ownerInputNamesOnly",
+    "ownerInputAbsenceIsNonRepoBlocker",
+    "hostMutationPerformedFalse",
+    "envValuesPrintedFalse",
+    "secretMarkerFindingsEmpty",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$installCheckMissingChecks = @(Get-MissingAuditChecks -Checks $installCheckChecks -Names $installCheckRequiredChecks)
+$installCheckFailedCheckCount = $installCheckFailedChecks.Count
+$installCheckSecretFindingCount = $installCheckSecretFindings.Count
+$installCheckMissingCheckCount = $installCheckMissingChecks.Count
+$installCheckPassed = $installCheckExitCode -eq 0 `
+    -and $installCheckStatus -eq "passed" `
+    -and $installCheckFailedCheckCount -eq 0 `
+    -and $installCheckSecretFindingCount -eq 0 `
+    -and $installCheckMissingScripts.Count -eq 0 `
+    -and $installCheckMissingDocs.Count -eq 0 `
+    -and $installCheckMissingCheckCount -eq 0 `
+    -and ((Get-AuditProp -Object $installCheck -Name "hostMutationPerformed" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $installCheck -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $installCheck -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $installCheck -Name "broadcasts" -Default $true) -eq $false)
 $liveProduct = $reports.liveProduct
 $externalTester = $reports.externalTester
 $testerNetwork = $reports.testerNetwork
@@ -2669,6 +2762,18 @@ Add-AuditItem -Items $items -Id "systemd-service-install-validation" `
     -Evidence "systemdInstall=$systemdServiceInstallValidationStatus, failedChecks=$systemdServiceInstallFailedCheckCount, missingChecks=$systemdServiceInstallMissingCheckCount, secretFindings=$systemdServiceInstallSecretFindingCount, installScript=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "installScriptExists" -Default $false), plan=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "installPlanValidationPassed" -Default $false), planDidNotMutate=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "installPlanDidNotMutate" -Default $false), renderedUnits=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "installPlanUsesRenderedUnits" -Default $false), relayerDefaultOff=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "bridgeRelayerDefaultOff" -Default $false), relayerOptIn=$(Get-AuditProp -Object $systemdServiceInstallChecks -Name "bridgeRelayerOptInStartsLoop" -Default $false), report=$($paths.systemdServiceInstallValidation)" `
     -Commands @("npm run flowchain:service:install:systemd:validate", "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>", "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop")
 
+Add-AuditItem -Items $items -Id "upgrade-rehearsal" `
+    -Requirement "State-preserving upgrade and rollback rehearsal copies live L1 state, verifies matching hashes after next-release and rollback restore, and documents exact operator commands without host mutation." `
+    -Status $(if ($upgradeRehearsalPassed) { "passed" } else { "failed" }) `
+    -Evidence "upgradeRehearsal=$upgradeRehearsalStatus, failedChecks=$upgradeRehearsalFailedCheckCount, missingChecks=$upgradeRehearsalMissingCheckCount, secretFindings=$upgradeRehearsalSecretFindingCount, stateHashPresent=$(Get-AuditProp -Object $upgradeRehearsalChecks -Name "sourceStateHashPresent" -Default $false), nextStateMatches=$(Get-AuditProp -Object $upgradeRehearsalChecks -Name "nextStateHashMatchesSource" -Default $false), rollbackStateMatches=$(Get-AuditProp -Object $upgradeRehearsalChecks -Name "rollbackStateHashMatchesSource" -Default $false), report=$($paths.upgradeRehearsal)" `
+    -Commands @("npm run flowchain:upgrade:rehearse")
+
+Add-AuditItem -Items $items -Id "install-check" `
+    -Requirement "Top-level owner-host install check verifies tools, package commands, install runbooks, Windows service install validation, Linux systemd validation, and no-secret boundaries as one operator preflight." `
+    -Status $(if ($installCheckPassed) { "passed" } else { "failed" }) `
+    -Evidence "installCheck=$installCheckStatus, failedChecks=$installCheckFailedCheckCount, missingChecks=$installCheckMissingCheckCount, secretFindings=$installCheckSecretFindingCount, missingScripts=$($installCheckMissingScripts.Count), missingDocs=$($installCheckMissingDocs.Count), childValidations=$(Get-AuditProp -Object $installCheckChecks -Name "childValidationsPassed" -Default $false), ownerInputBlockerAllowed=$(Get-AuditProp -Object $installCheckChecks -Name "ownerInputAbsenceIsNonRepoBlocker" -Default $false), report=$($paths.installCheck)" `
+    -Commands @("npm run flowchain:install:check")
+
 Add-AuditItem -Items $items -Id "wallet-create" `
     -Requirement "People can create wallets through the RPC service without receiving secret material." `
     -Status $(if ($testerNetworkPassed -and $testerWalletCreatesCount -ge 4) { "passed" } else { "failed" }) `
@@ -3058,6 +3163,10 @@ $report = [ordered]@{
     serviceInstallValidationOutputRedacted = @($serviceInstallValidationOutput | ForEach-Object { "$_" })
     systemdServiceInstallValidationExitCode = $systemdServiceInstallValidationExitCode
     systemdServiceInstallValidationOutputRedacted = @($systemdServiceInstallValidationOutput | ForEach-Object { "$_" })
+    upgradeRehearsalExitCode = $upgradeRehearsalExitCode
+    upgradeRehearsalOutputRedacted = @($upgradeRehearsalOutput | ForEach-Object { "$_" })
+    installCheckExitCode = $installCheckExitCode
+    installCheckOutputRedacted = @($installCheckOutput | ForEach-Object { "$_" })
     liveWalletExitCode = $liveWalletExitCode
     liveWalletOutputRedacted = @($liveWalletOutput | ForEach-Object { "$_" })
     testerNetworkExitCode = $testerNetworkExitCode
@@ -3186,6 +3295,10 @@ $report = [ordered]@{
         serviceInstallValidationPassed = $serviceInstallValidationPassed
         systemdServiceInstallValidationStatus = $systemdServiceInstallValidationStatus
         systemdServiceInstallValidationPassed = $systemdServiceInstallValidationPassed
+        upgradeRehearsalStatus = $upgradeRehearsalStatus
+        upgradeRehearsalPassed = $upgradeRehearsalPassed
+        installCheckStatus = $installCheckStatus
+        installCheckPassed = $installCheckPassed
         bridgeDeployControlValidationStatus = $bridgeDeployControlValidationStatus
         bridgeDeployControlValidationPassed = $bridgeDeployControlValidationPassed
         bridgeRelayerOnceStatus = $bridgeRelayerOnceStatus

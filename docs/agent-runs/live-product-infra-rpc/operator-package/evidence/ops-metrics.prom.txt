@@ -1,15 +1,15 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 100743
+flowchain_latest_height 101241
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 100743
+flowchain_finalized_height 101241
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
 flowchain_state_file_age_seconds 5
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
-flowchain_monitor_samples_total 3
+flowchain_monitor_samples_total 2
 # HELP flowchain_height_advanced One when service monitor proved advancing block height.
 # TYPE flowchain_height_advanced gauge
 flowchain_height_advanced 1
@@ -27,7 +27,7 @@ flowchain_transaction_intake_accepted_rows_total 169
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 4863.567
+flowchain_transaction_intake_file_age_seconds 8025.036
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -42,10 +42,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 29
+flowchain_ops_alert_rules_total 30
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 22
+flowchain_ops_alert_rules_critical 23
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -253,6 +253,33 @@ flowchain_external_tester_missing_owner_inputs 14
 # HELP flowchain_external_tester_rehearsal_testers_total Tester wallet count covered by the latest local tester rehearsal.
 # TYPE flowchain_external_tester_rehearsal_testers_total gauge
 flowchain_external_tester_rehearsal_testers_total 4
+# HELP flowchain_public_tester_gateway_e2e_ready One when public tester gateway E2E wallet create, faucet, send, cap, route, no-secret, and no-broadcast proof is passed.
+# TYPE flowchain_public_tester_gateway_e2e_ready gauge
+flowchain_public_tester_gateway_e2e_ready 1
+# HELP flowchain_public_tester_gateway_accounts_total Tester accounts created by the public tester gateway E2E proof.
+# TYPE flowchain_public_tester_gateway_accounts_total gauge
+flowchain_public_tester_gateway_accounts_total 2
+# HELP flowchain_public_tester_gateway_failed_checks Failed checks in the public tester gateway E2E proof.
+# TYPE flowchain_public_tester_gateway_failed_checks gauge
+flowchain_public_tester_gateway_failed_checks 0
+# HELP flowchain_public_tester_gateway_routes_total Routes covered by the public tester gateway E2E proof.
+# TYPE flowchain_public_tester_gateway_routes_total gauge
+flowchain_public_tester_gateway_routes_total 5
+# HELP flowchain_public_tester_gateway_transfer_applied One when the gateway send proof applied to the local runtime.
+# TYPE flowchain_public_tester_gateway_transfer_applied gauge
+flowchain_public_tester_gateway_transfer_applied 1
+# HELP flowchain_public_tester_gateway_cap_rejected One when the gateway rejects an over-cap tester send.
+# TYPE flowchain_public_tester_gateway_cap_rejected gauge
+flowchain_public_tester_gateway_cap_rejected 1
+# HELP flowchain_public_tester_gateway_routes_covered One when the gateway E2E report covers all required tester routes.
+# TYPE flowchain_public_tester_gateway_routes_covered gauge
+flowchain_public_tester_gateway_routes_covered 1
+# HELP flowchain_public_tester_gateway_no_secrets One when the public tester gateway E2E report and checks contain no secrets.
+# TYPE flowchain_public_tester_gateway_no_secrets gauge
+flowchain_public_tester_gateway_no_secrets 1
+# HELP flowchain_public_tester_gateway_no_broadcasts One when the public tester gateway E2E proof made no live broadcasts.
+# TYPE flowchain_public_tester_gateway_no_broadcasts gauge
+flowchain_public_tester_gateway_no_broadcasts 1
 # HELP flowchain_external_tester_evidence_ready One when external tester returned evidence validation is passed.
 # TYPE flowchain_external_tester_evidence_ready gauge
 flowchain_external_tester_evidence_ready 1
@@ -339,10 +366,10 @@ flowchain_live_cutover_missing_owner_inputs 14
 flowchain_no_secret_ready 1
 # HELP flowchain_truth_gates_total Total production truth table gates.
 # TYPE flowchain_truth_gates_total gauge
-flowchain_truth_gates_total 54
+flowchain_truth_gates_total 55
 # HELP flowchain_truth_gates_passed Passed production truth table gates.
 # TYPE flowchain_truth_gates_passed gauge
-flowchain_truth_gates_passed 38
+flowchain_truth_gates_passed 39
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
 flowchain_truth_gates_owner_blocked 16

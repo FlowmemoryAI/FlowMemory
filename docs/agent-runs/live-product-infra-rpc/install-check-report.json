@@ -1,0 +1,174 @@
+{
+    "schema":  "flowchain.install_check_report.v0",
+    "generatedAt":  "2026-05-20T11:49:04.9199413Z",
+    "status":  "passed",
+    "repoRoot":  "E:/FlowMemory/flowmemory-live-infra-rpc",
+    "minDiskFreeGiB":  5,
+    "diskFreeGiB":  81.33,
+    "toolChecks":  [
+                       {
+                           "name":  "git",
+                           "found":  true,
+                           "source":  "C:\\Program Files\\Git\\cmd\\git.exe"
+                       },
+                       {
+                           "name":  "node",
+                           "found":  true,
+                           "source":  "C:\\Program Files\\nodejs\\node.exe"
+                       },
+                       {
+                           "name":  "npm",
+                           "found":  true,
+                           "source":  "C:\\Program Files\\nodejs\\npm.ps1"
+                       },
+                       {
+                           "name":  "powershell",
+                           "found":  true,
+                           "source":  "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+                       },
+                       {
+                           "name":  "cargo",
+                           "found":  true,
+                           "source":  "C:\\Users\\ntrap\\.cargo\\bin\\cargo.exe"
+                       },
+                       {
+                           "name":  "rustc",
+                           "found":  true,
+                           "source":  "C:\\Users\\ntrap\\.cargo\\bin\\rustc.exe"
+                       },
+                       {
+                           "name":  "forge",
+                           "found":  true,
+                           "source":  "C:\\Users\\ntrap\\.foundry\\bin\\forge.exe"
+                       }
+                   ],
+    "requiredScripts":  [
+                            "flowchain:prereq",
+                            "flowchain:doctor",
+                            "flowchain:install:check",
+                            "flowchain:upgrade:rehearse",
+                            "flowchain:service:start",
+                            "flowchain:service:status",
+                            "flowchain:service:monitor",
+                            "flowchain:service:restart",
+                            "flowchain:service:stop",
+                            "flowchain:service:supervisor",
+                            "flowchain:service:supervisor:validate",
+                            "flowchain:service:install:windows",
+                            "flowchain:service:install:validate",
+                            "flowchain:service:install:systemd",
+                            "flowchain:service:install:systemd:validate",
+                            "flowchain:public-rpc:deployment-bundle",
+                            "flowchain:public-rpc:deployment:automation",
+                            "flowchain:backup:restore:validate",
+                            "flowchain:backup:install:validate",
+                            "flowchain:ops:metrics:install:validate",
+                            "flowchain:ops:alerts:install:validate",
+                            "flowchain:bridge:relayer:loop:validate",
+                            "flowchain:operator:package",
+                            "flowchain:operator:package:verify",
+                            "flowchain:completion:audit",
+                            "flowchain:truth-table"
+                        ],
+    "missingScripts":  [
+
+                       ],
+    "requiredDocs":  [
+                         "docs/developer/FLOWCHAIN_NODE_OPERATOR.md",
+                         "docs/OPERATIONS/FLOWCHAIN_SERVICE_SUPERVISOR.md",
+                         "docs/OPERATIONS/FLOWCHAIN_OWNER_OPERATED_PUBLIC_RPC.md",
+                         "docs/FLOWCHAIN_SECOND_COMPUTER_SETUP.md",
+                         "docs/agent-runs/live-product-infra-rpc/SERVICE_INSTALL_VALIDATION.md",
+                         "docs/agent-runs/live-product-infra-rpc/SYSTEMD_SERVICE_INSTALL_VALIDATION.md",
+                         "docs/agent-runs/live-product-infra-rpc/OPERATOR_PACKAGE.md",
+                         "docs/agent-runs/live-product-infra-rpc/OPERATOR_PACKAGE_VERIFY.md"
+                     ],
+    "missingDocs":  [
+
+                    ],
+    "childResults":  [
+                         {
+                             "name":  "service-install-validation",
+                             "skipped":  false,
+                             "timedOut":  false,
+                             "exitCode":  0,
+                             "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\install-check\\20260520T114840414Z-22164-service-install-validation.stdout.log",
+                             "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\install-check\\20260520T114840414Z-22164-service-install-validation.stderr.log",
+                             "outputRedacted":  [
+                                                    "",
+                                                    "\u003e flowchain:service:install:validate",
+                                                    "\u003e powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-install-validation.ps1",
+                                                    "",
+                                                    "FlowChain service install validation status: passed",
+                                                    "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-validation-report.json",
+                                                    "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\SERVICE_INSTALL_VALIDATION.md"
+                                                ]
+                         },
+                         {
+                             "name":  "systemd-service-install-validation",
+                             "skipped":  false,
+                             "timedOut":  false,
+                             "exitCode":  0,
+                             "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\install-check\\20260520T114858551Z-22164-systemd-service-install-validation.stdout.log",
+                             "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\install-check\\20260520T114858551Z-22164-systemd-service-install-validation.stderr.log",
+                             "outputRedacted":  [
+                                                    "",
+                                                    "\u003e flowchain:service:install:systemd:validate",
+                                                    "\u003e powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-service-install-systemd-validation.ps1",
+                                                    "",
+                                                    "FlowChain systemd service install validation status: passed",
+                                                    "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\systemd-service-install-validation-report.json",
+                                                    "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\SYSTEMD_SERVICE_INSTALL_VALIDATION.md"
+                                                ]
+                         }
+                     ],
+    "missingOwnerInputNames":  [
+                                   "FLOWCHAIN_RPC_PUBLIC_URL",
+                                   "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                   "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                   "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                   "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                   "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                                   "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                                   "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
+                                   "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                   "FLOWCHAIN_BASE8453_RPC_URL",
+                                   "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                   "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                   "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                   "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                   "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                   "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                   "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                               ],
+    "blockedOnOwnerInputs":  true,
+    "checks":  {
+                   "repoRootResolved":  true,
+                   "packageJsonReadable":  true,
+                   "requiredPackageScriptsPresent":  true,
+                   "requiredRunbooksPresent":  true,
+                   "requiredToolsPresent":  true,
+                   "diskFreeMeetsMinimum":  true,
+                   "serviceInstallValidationReportPassed":  true,
+                   "systemdInstallValidationReportPassed":  true,
+                   "childValidationsPassed":  true,
+                   "childValidationsDidNotTimeout":  true,
+                   "ownerInputNamesOnly":  true,
+                   "ownerInputAbsenceIsNonRepoBlocker":  true,
+                   "hostMutationPerformedFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "hostMutationPerformed":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

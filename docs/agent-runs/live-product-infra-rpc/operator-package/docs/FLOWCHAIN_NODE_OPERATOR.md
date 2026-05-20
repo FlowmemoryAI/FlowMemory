@@ -7,9 +7,11 @@ Status: local/private operator guide with public deployment boundaries.
 ```powershell
 npm run flowchain:operator:package
 npm run flowchain:operator:package:verify
+npm run flowchain:install:check
 npm run flowchain:service:start -- -LiveProfile
 npm run flowchain:service:status -- -AllowBlocked
 npm run flowchain:service:monitor -- -AllowBlocked
+npm run flowchain:upgrade:rehearse
 npm run flowchain:service:restart -- -LiveProfile
 npm run flowchain:service:stop
 ```
@@ -22,6 +24,13 @@ fresh state file writes, and advancing height.
 the command matrix, owner-input names, and current readiness evidence.
 `flowchain:operator:package:verify` independently validates that package after
 it exists.
+
+`flowchain:install:check` is the top-level owner-host preflight. It checks the
+required tools, package scripts, install runbooks, Windows Scheduled Task
+validation, Linux systemd validation, and no-secret boundaries without mutating
+the host. `flowchain:upgrade:rehearse` copies the current live state into an
+ignored local rehearsal directory, proves next-release and rollback state hashes
+match the source, and writes the operator upgrade/rollback runbook.
 
 ## Service Supervisor
 

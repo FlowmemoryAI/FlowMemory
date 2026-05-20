@@ -57,6 +57,8 @@ $scripts = @($packageJson.scripts.PSObject.Properties.Name)
 foreach ($scriptName in @(
         "flowchain:prereq",
         "flowchain:doctor",
+        "flowchain:install:check",
+        "flowchain:upgrade:rehearse",
         "flowchain:init",
         "flowchain:operator:package",
         "flowchain:operator:package:verify",
