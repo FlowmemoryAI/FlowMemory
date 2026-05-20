@@ -1,9 +1,9 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 96674
+flowchain_latest_height 97692
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 96674
+flowchain_finalized_height 97692
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
 flowchain_state_file_age_seconds 1
@@ -13,6 +13,27 @@ flowchain_monitor_samples_total 2
 # HELP flowchain_height_advanced One when service monitor proved advancing block height.
 # TYPE flowchain_height_advanced gauge
 flowchain_height_advanced 1
+# HELP flowchain_mempool_depth Current local runtime mempool depth from service status.
+# TYPE flowchain_mempool_depth gauge
+flowchain_mempool_depth 0
+# HELP flowchain_transaction_intake_rows_total Signed transaction intake rows recorded in local NDJSON intake.
+# TYPE flowchain_transaction_intake_rows_total gauge
+flowchain_transaction_intake_rows_total 159
+# HELP flowchain_transaction_intake_accepted_rows_total Crypto-verified signed transaction intake rows recorded locally.
+# TYPE flowchain_transaction_intake_accepted_rows_total gauge
+flowchain_transaction_intake_accepted_rows_total 159
+# HELP flowchain_transaction_intake_invalid_rows Invalid NDJSON rows in signed transaction intake.
+# TYPE flowchain_transaction_intake_invalid_rows gauge
+flowchain_transaction_intake_invalid_rows 0
+# HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
+# TYPE flowchain_transaction_intake_file_age_seconds gauge
+flowchain_transaction_intake_file_age_seconds 4525.094
+# HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
+# TYPE flowchain_runtime_submit_fixtures_total gauge
+flowchain_runtime_submit_fixtures_total 4
+# HELP flowchain_runtime_inbox_files_total Current local runtime node inbox file count.
+# TYPE flowchain_runtime_inbox_files_total gauge
+flowchain_runtime_inbox_files_total 0
 # HELP flowchain_ops_critical_findings Current critical ops finding count.
 # TYPE flowchain_ops_critical_findings gauge
 flowchain_ops_critical_findings 0
@@ -21,10 +42,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 26
+flowchain_ops_alert_rules_total 27
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 19
+flowchain_ops_alert_rules_critical 20
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -246,13 +267,13 @@ flowchain_truth_gates_total 51
 flowchain_truth_gates_passed 35
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
-flowchain_truth_gates_owner_blocked 16
+flowchain_truth_gates_owner_blocked 13
 # HELP flowchain_truth_gates_repo_blocked Repo-blocked production truth table gates.
 # TYPE flowchain_truth_gates_repo_blocked gauge
 flowchain_truth_gates_repo_blocked 0
 # HELP flowchain_truth_gates_failed Failed production truth table gates.
 # TYPE flowchain_truth_gates_failed gauge
-flowchain_truth_gates_failed 0
+flowchain_truth_gates_failed 2
 # HELP flowchain_truth_gates_stale Stale production truth table gates.
 # TYPE flowchain_truth_gates_stale gauge
-flowchain_truth_gates_stale 0
+flowchain_truth_gates_stale 1

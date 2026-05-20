@@ -130,6 +130,14 @@ $rules = @(
         commands = @("npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30", "npm run flowchain:service:restart -- -LiveProfile")
     },
     [ordered]@{
+        id = "transaction-intake-corrupt"
+        severity = "critical"
+        findingCodes = @("transaction-intake-invalid-rows")
+        signal = "Signed transaction intake contains invalid local NDJSON rows."
+        threshold = "transactionIntake.txIntakeInvalidRows is greater than zero"
+        commands = @("npm run flowchain:ops:snapshot", "npm run flowchain:control-plane:smoke", "npm run flowchain:no-secret:scan")
+    },
+    [ordered]@{
         id = "secret-boundary-breach"
         severity = "critical"
         findingCodes = @("no-secret-scan-not-passed")

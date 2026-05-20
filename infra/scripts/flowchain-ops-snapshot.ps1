@@ -4,6 +4,9 @@ param(
     [int] $MonitorDurationSeconds = 20,
     [int] $MonitorPollSeconds = 5,
     [int] $MonitorMaxStateAgeSeconds = 90,
+    [string] $TxIntakePath = "devnet/local/intake/transactions.ndjson",
+    [string] $RuntimeSubmitDir = "devnet/local/intake/runtime-submit",
+    [string] $RuntimeInboxDir = "devnet/local/node/inbox",
     [string] $InputReportDir = "",
     [switch] $AllowBlocked,
     [switch] $NoRefresh
@@ -18,6 +21,9 @@ Set-StrictMode -Version Latest
 $repoRoot = Set-FlowChainRepoRoot
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
 $markdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $MarkdownPath)
+$txIntakeFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $TxIntakePath)
+$runtimeSubmitFullDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $RuntimeSubmitDir)
+$runtimeInboxFullDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $RuntimeInboxDir)
 $inputReportFullDir = ""
 if (-not [string]::IsNullOrWhiteSpace($InputReportDir)) {
     if (-not $NoRefresh.IsPresent) {
@@ -68,12 +74,129 @@ function Get-OpsProp {
     if ($null -ne $Object -and $Object.PSObject.Properties.Name -contains $Name) {
         return $Object.$Name
     }
+    if ($null -ne $Object -and $Object -is [System.Collections.IDictionary] -and $Object.Contains($Name)) {
+        return $Object[$Name]
+    }
     return $Default
 }
 
 function Get-OpsStatus {
     param([AllowNull()][object] $Report)
     return [string](Get-OpsProp -Object $Report -Name "status" -Default "missing")
+}
+
+function Get-OpsStringArray {
+    param([AllowNull()][object] $Value)
+
+    return @($Value | Where-Object { -not [string]::IsNullOrWhiteSpace([string] $_) } | ForEach-Object { [string] $_ })
+}
+
+function Test-OpsTruthTableCoordinationItem {
+    param([AllowNull()][object] $Item)
+
+    $id = [string](Get-OpsProp -Object $Item -Name "id" -Default "")
+    $classification = [string](Get-OpsProp -Object $Item -Name "classification" -Default "")
+    $rawStatus = [string](Get-OpsProp -Object $Item -Name "rawStatus" -Default "")
+    $blockers = @(Get-OpsStringArray -Value (Get-OpsProp -Object $Item -Name "blockers" -Default @()))
+    $ownerInputBlockers = @(Get-OpsStringArray -Value (Get-OpsProp -Object $Item -Name "ownerInputBlockers" -Default @()))
+    $staleReasons = @(Get-OpsStringArray -Value (Get-OpsProp -Object $Item -Name "staleReasons" -Default @()))
+    $allBlockersAreOwnerInputs = $blockers.Count -gt 0 -and (@($blockers | Where-Object { $_ -notin $ownerInputBlockers }).Count -eq 0)
+
+    if ($id -eq "ops-snapshot" -and $classification -eq "failed" -and $rawStatus -eq "failed") {
+        return $true
+    }
+
+    if ($id -eq "completion-audit" -and $classification -eq "failed" -and $rawStatus -eq "failed" -and $allBlockersAreOwnerInputs) {
+        return $true
+    }
+
+    if ($id -eq "live-cutover-rehearsal" -and $classification -eq "stale" -and $rawStatus -eq "blocked" -and $allBlockersAreOwnerInputs -and $staleReasons.Count -eq 1 -and $staleReasons[0] -eq "older-than-completion-audit") {
+        return $true
+    }
+
+    return $false
+}
+
+function ConvertTo-OpsInteger {
+    param([AllowNull()][object] $Value, [int] $Default = 0)
+
+    if ($null -eq $Value -or [string]::IsNullOrWhiteSpace("$Value")) {
+        return $Default
+    }
+    try {
+        return [int] $Value
+    }
+    catch {
+        return $Default
+    }
+}
+
+function Get-OpsFileAgeSeconds {
+    param([Parameter(Mandatory = $true)][string] $Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return $null
+    }
+    return [math]::Round(((Get-Date).ToUniversalTime() - (Get-Item -LiteralPath $Path).LastWriteTimeUtc).TotalSeconds, 3)
+}
+
+function Get-OpsDirectoryFacts {
+    param([Parameter(Mandatory = $true)][string] $Path)
+
+    $files = @()
+    if (Test-Path -LiteralPath $Path) {
+        $files = @(Get-ChildItem -LiteralPath $Path -File -ErrorAction SilentlyContinue)
+    }
+    $newestAge = $null
+    if ($files.Count -gt 0) {
+        $newest = @($files | Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1)[0]
+        $newestAge = [math]::Round(((Get-Date).ToUniversalTime() - $newest.LastWriteTimeUtc).TotalSeconds, 3)
+    }
+
+    return [ordered]@{
+        exists = Test-Path -LiteralPath $Path
+        fileCount = $files.Count
+        newestFileAgeSeconds = $newestAge
+    }
+}
+
+function Get-OpsTransactionIntakeFacts {
+    param(
+        [Parameter(Mandatory = $true)][string] $Path,
+        [Parameter(Mandatory = $true)][string] $PathLabel
+    )
+
+    $rowCount = 0
+    $acceptedRows = 0
+    $invalidRows = 0
+    $lastWriteAgeSeconds = Get-OpsFileAgeSeconds -Path $Path
+
+    if (Test-Path -LiteralPath $Path) {
+        foreach ($line in @(Get-Content -LiteralPath $Path -ErrorAction SilentlyContinue)) {
+            if ([string]::IsNullOrWhiteSpace($line)) {
+                continue
+            }
+            $rowCount += 1
+            try {
+                $row = $line | ConvertFrom-Json
+                if ([string](Get-OpsProp -Object $row -Name "status" -Default "") -like "accepted*") {
+                    $acceptedRows += 1
+                }
+            }
+            catch {
+                $invalidRows += 1
+            }
+        }
+    }
+
+    return [ordered]@{
+        path = $PathLabel
+        exists = Test-Path -LiteralPath $Path
+        rowCount = $rowCount
+        acceptedRows = $acceptedRows
+        invalidRows = $invalidRows
+        lastWriteAgeSeconds = $lastWriteAgeSeconds
+    }
 }
 
 function Add-OpsFinding {
@@ -168,8 +291,13 @@ $supervisorRelayerRecoveryHealthy = (-not ($supervisorBridgeRelayerRequested -eq
 $latestHeight = [string](Get-OpsProp -Object $chain -Name "latestHeight" -Default "")
 $finalizedHeight = [string](Get-OpsProp -Object $chain -Name "finalizedHeight" -Default "")
 $stateAge = [int](Get-OpsProp -Object $chain -Name "stateFileLastWriteAgeSeconds" -Default 999999)
+$mempoolDepth = ConvertTo-OpsInteger -Value (Get-OpsProp -Object $chain -Name "mempoolDepth" -Default 0) -Default 0
 $monitorHeightAdvanced = Get-OpsProp -Object $monitor -Name "heightAdvanced" -Default $false
 $monitorSamples = [int](Get-OpsProp -Object $monitor -Name "sampleCount" -Default 0)
+$txIntakeFacts = Get-OpsTransactionIntakeFacts -Path $txIntakeFullPath -PathLabel $TxIntakePath
+$runtimeSubmitFacts = Get-OpsDirectoryFacts -Path $runtimeSubmitFullDir
+$runtimeInboxFacts = Get-OpsDirectoryFacts -Path $runtimeInboxFullDir
+$txIntakeInvalidRows = [int](Get-OpsProp -Object $txIntakeFacts -Name "invalidRows" -Default 0)
 
 if ($serviceStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "service-status-not-passed" -Message "FlowChain service status is not passed." -Commands @("npm run flowchain:service:status", "npm run flowchain:service:restart -- -LiveProfile")
@@ -188,6 +316,9 @@ if ($stateAge -gt $MonitorMaxStateAgeSeconds) {
 }
 if ($monitorStatus -ne "passed" -or $monitorHeightAdvanced -ne $true -or $monitorSamples -lt 2) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "height-not-advancing" -Message "Service monitor did not prove advancing block height." -Commands @("npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30", "npm run flowchain:service:restart -- -LiveProfile")
+}
+if ($txIntakeInvalidRows -gt 0) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "transaction-intake-invalid-rows" -Message "Signed transaction intake contains invalid NDJSON rows." -Commands @("npm run flowchain:ops:snapshot", "npm run flowchain:control-plane:smoke", "npm run flowchain:no-secret:scan")
 }
 if ($bridgeRelayerLoopStatus -eq "running" -and $bridgeRelayerLoopReportHealthy -ne $true) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-relayer-loop-unhealthy" -Message "Bridge relayer loop is running without fresh no-secret/no-broadcast health evidence." -Commands @("npm run flowchain:service:status", "npm run flowchain:bridge:relayer:loop:validate", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop", "npm run flowchain:bridge:emergency-stop")
@@ -391,10 +522,24 @@ $truthTableCounts = Get-OpsProp -Object $reports.truthTable -Name "classificatio
 $truthTableFailedCount = [int](Get-OpsProp -Object $truthTableCounts -Name "failed" -Default 0)
 $truthTableStaleCount = [int](Get-OpsProp -Object $truthTableCounts -Name "stale" -Default 0)
 $truthTableRepoBlockedCount = [int](Get-OpsProp -Object $truthTableCounts -Name "blocked-repo-work" -Default 0)
-$truthTableUnsafe = $truthTableStatus -in @("missing", "failed", "stale") `
-    -or $truthTableFailedCount -gt 0 `
-    -or $truthTableStaleCount -gt 0 `
-    -or $truthTableRepoBlockedCount -gt 0
+$truthTableItems = @(Get-OpsProp -Object $reports.truthTable -Name "items" -Default @())
+$truthTableUnsafeItems = @($truthTableItems | Where-Object {
+    $classification = [string](Get-OpsProp -Object $_ -Name "classification" -Default "")
+    $classification -in @("failed", "stale", "blocked-repo-work") -and -not (Test-OpsTruthTableCoordinationItem -Item $_)
+})
+$truthTableUnsafe = $false
+if ($truthTableStatus -eq "missing") {
+    $truthTableUnsafe = $true
+}
+elseif ($truthTableItems.Count -gt 0) {
+    $truthTableUnsafe = $truthTableUnsafeItems.Count -gt 0
+}
+else {
+    $truthTableUnsafe = $truthTableStatus -in @("failed", "stale") `
+        -or $truthTableFailedCount -gt 0 `
+        -or $truthTableStaleCount -gt 0 `
+        -or $truthTableRepoBlockedCount -gt 0
+}
 $noSecretStatus = Get-OpsStatus -Report $reports.noSecret
 
 if ($publicRpcStatus -ne "passed") {
@@ -527,11 +672,34 @@ $report = [ordered]@{
         monitorStatus = $monitorStatus
         monitorSamples = $monitorSamples
         monitorHeightAdvanced = $monitorHeightAdvanced
+        mempoolDepth = $mempoolDepth
+    }
+    transactionIntake = [ordered]@{
+        txIntakePath = $TxIntakePath
+        txIntakeExists = Get-OpsProp -Object $txIntakeFacts -Name "exists" -Default $false
+        txIntakeRows = Get-OpsProp -Object $txIntakeFacts -Name "rowCount" -Default 0
+        txIntakeAcceptedRows = Get-OpsProp -Object $txIntakeFacts -Name "acceptedRows" -Default 0
+        txIntakeInvalidRows = $txIntakeInvalidRows
+        txIntakeLastWriteAgeSeconds = Get-OpsProp -Object $txIntakeFacts -Name "lastWriteAgeSeconds" -Default $null
+        runtimeSubmitDir = $RuntimeSubmitDir
+        runtimeSubmitFileCount = Get-OpsProp -Object $runtimeSubmitFacts -Name "fileCount" -Default 0
+        runtimeSubmitNewestFileAgeSeconds = Get-OpsProp -Object $runtimeSubmitFacts -Name "newestFileAgeSeconds" -Default $null
+        runtimeInboxDir = $RuntimeInboxDir
+        runtimeInboxFileCount = Get-OpsProp -Object $runtimeInboxFacts -Name "fileCount" -Default 0
+        runtimeInboxNewestFileAgeSeconds = Get-OpsProp -Object $runtimeInboxFacts -Name "newestFileAgeSeconds" -Default $null
+        mempoolDepth = $mempoolDepth
     }
     reportStatuses = [ordered]@{
         serviceStatus = $serviceStatus
         serviceSupervisor = $supervisorStatus
         serviceMonitor = $monitorStatus
+        transactionIntake = if ($txIntakeInvalidRows -eq 0) { "passed" } else { "failed" }
+        transactionIntakeInvalidRows = $txIntakeInvalidRows
+        transactionIntakeRows = Get-OpsProp -Object $txIntakeFacts -Name "rowCount" -Default 0
+        transactionIntakeAcceptedRows = Get-OpsProp -Object $txIntakeFacts -Name "acceptedRows" -Default 0
+        runtimeSubmitFileCount = Get-OpsProp -Object $runtimeSubmitFacts -Name "fileCount" -Default 0
+        runtimeInboxFileCount = Get-OpsProp -Object $runtimeInboxFacts -Name "fileCount" -Default 0
+        mempoolDepth = $mempoolDepth
         bridgeRelayerLoop = $bridgeRelayerLoopStatus
         bridgeRelayerLoopReport = $bridgeRelayerLoopReportStatus
         bridgeRelayerLoopReportFresh = $bridgeRelayerLoopReportFresh
@@ -632,6 +800,7 @@ $report = [ordered]@{
         truthTableFailedGates = $truthTableFailedCount
         truthTableStaleGates = $truthTableStaleCount
         truthTableRepoBlockedGates = $truthTableRepoBlockedCount
+        truthTableUnsafeGateIds = @($truthTableUnsafeItems | ForEach-Object { Get-OpsProp -Object $_ -Name "id" -Default "" })
         noSecret = $noSecretStatus
     }
     findings = @($findings)
@@ -655,6 +824,8 @@ $markdownLines.Add("Generated: $($report.generatedAt)")
 $markdownLines.Add("Status: $status")
 $markdownLines.Add("Latest height: $latestHeight")
 $markdownLines.Add("Finalized height: $finalizedHeight")
+$markdownLines.Add("Transaction intake rows: $((Get-OpsProp -Object $txIntakeFacts -Name "rowCount" -Default 0))")
+$markdownLines.Add("Runtime inbox files: $((Get-OpsProp -Object $runtimeInboxFacts -Name "fileCount" -Default 0))")
 $markdownLines.Add("")
 $markdownLines.Add("## Findings")
 $markdownLines.Add("")

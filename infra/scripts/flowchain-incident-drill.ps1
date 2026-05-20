@@ -346,7 +346,10 @@ function Copy-DrillBaseReports {
     New-Item -ItemType Directory -Force -Path $InputDir | Out-Null
     foreach ($entry in $baseReportPaths.GetEnumerator()) {
         $target = Join-Path $InputDir $entry.Key
-        if (Test-Path -LiteralPath $entry.Value) {
+        if ($entry.Key -eq "production-truth-table-report.json") {
+            Write-FlowChainJson -Path $target -Value (New-DrillFallbackReport -LeafName $entry.Key) -Depth 12
+        }
+        elseif (Test-Path -LiteralPath $entry.Value) {
             Copy-Item -LiteralPath $entry.Value -Destination $target -Force
         }
         else {

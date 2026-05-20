@@ -1,9 +1,11 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-20T02:42:21.7687845Z
+Generated: 2026-05-20T04:23:42.2316840Z
 Status: failed
-Latest height: 96674
-Finalized height: 96674
+Latest height: 97692
+Finalized height: 97692
+Transaction intake rows: 159
+Runtime inbox files: 0
 
 ## Findings
 

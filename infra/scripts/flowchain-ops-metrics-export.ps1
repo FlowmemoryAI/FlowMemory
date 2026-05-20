@@ -224,6 +224,7 @@ $noSecret = $reports.noSecret
 
 $metrics = New-Object System.Collections.ArrayList
 $chain = Get-MetricsProp -Object $opsSnapshot -Name "chain"
+$transactionIntake = Get-MetricsProp -Object $opsSnapshot -Name "transactionIntake"
 $reportStatuses = Get-MetricsProp -Object $opsSnapshot -Name "reportStatuses"
 $truthCounts = Get-MetricsProp -Object $truthTable -Name "classificationCounts"
 $externalTesterEvidenceChecks = Get-MetricsProp -Object $externalTesterEvidence -Name "checks"
@@ -272,6 +273,13 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_finalized_height" -Help "Fina
 Add-MetricGauge -Metrics $metrics -Name "flowchain_state_file_age_seconds" -Help "Age of the live state file in seconds." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $chain -Name "stateFileLastWriteAgeSeconds"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_monitor_samples_total" -Help "Service monitor samples recorded in the current ops snapshot." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $chain -Name "monitorSamples"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_height_advanced" -Help "One when service monitor proved advancing block height." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $chain -Name "monitorHeightAdvanced"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_mempool_depth" -Help "Current local runtime mempool depth from service status." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $transactionIntake -Name "mempoolDepth"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_transaction_intake_rows_total" -Help "Signed transaction intake rows recorded in local NDJSON intake." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $transactionIntake -Name "txIntakeRows"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_transaction_intake_accepted_rows_total" -Help "Crypto-verified signed transaction intake rows recorded locally." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $transactionIntake -Name "txIntakeAcceptedRows"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_transaction_intake_invalid_rows" -Help "Invalid NDJSON rows in signed transaction intake." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $transactionIntake -Name "txIntakeInvalidRows"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_transaction_intake_file_age_seconds" -Help "Age of the signed transaction intake file in seconds, or zero when absent." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $transactionIntake -Name "txIntakeLastWriteAgeSeconds"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_runtime_submit_fixtures_total" -Help "Runtime-submit fixture files produced by signed envelope forwarding." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $transactionIntake -Name "runtimeSubmitFileCount"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_runtime_inbox_files_total" -Help "Current local runtime node inbox file count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $transactionIntake -Name "runtimeInboxFileCount"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_ops_critical_findings" -Help "Current critical ops finding count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $opsSnapshot -Name "criticalCount"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_ops_blocked_findings" -Help "Current owner-blocked ops finding count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $opsSnapshot -Name "blockedCount"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_ops_alert_rules_total" -Help "Configured ops alert rule count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $opsAlerts -Name "ruleCount"))
@@ -400,6 +408,13 @@ $requiredMetricNames = @(
     "flowchain_finalized_height",
     "flowchain_state_file_age_seconds",
     "flowchain_height_advanced",
+    "flowchain_mempool_depth",
+    "flowchain_transaction_intake_rows_total",
+    "flowchain_transaction_intake_accepted_rows_total",
+    "flowchain_transaction_intake_invalid_rows",
+    "flowchain_transaction_intake_file_age_seconds",
+    "flowchain_runtime_submit_fixtures_total",
+    "flowchain_runtime_inbox_files_total",
     "flowchain_ops_critical_findings",
     "flowchain_ops_blocked_findings",
     "flowchain_ops_alert_rules_total",
@@ -529,6 +544,15 @@ $checks = [ordered]@{
         "flowchain_public_rpc_command_plan_cutover_rehearsal",
         "flowchain_public_rpc_command_plan_truth_table",
         "flowchain_public_rpc_command_plan_no_secret_scan"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    transactionIntakeMetricsPresent = @(
+        "flowchain_mempool_depth",
+        "flowchain_transaction_intake_rows_total",
+        "flowchain_transaction_intake_accepted_rows_total",
+        "flowchain_transaction_intake_invalid_rows",
+        "flowchain_transaction_intake_file_age_seconds",
+        "flowchain_runtime_submit_fixtures_total",
+        "flowchain_runtime_inbox_files_total"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     dashboardUiMetricsPresent = @(
         "flowchain_dashboard_ui_ready",

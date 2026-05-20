@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-20T02:42:30.5990910Z",
+    "generatedAt":  "2026-05-20T04:23:51.0376197Z",
     "status":  "failed",
     "refresh":  {
                     "performed":  false,
@@ -10,17 +10,40 @@
                     "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-rpc-edge-hardening-critical\\input"
                 },
     "chain":  {
-                  "latestHeight":  "96674",
-                  "finalizedHeight":  "96674",
+                  "latestHeight":  "97692",
+                  "finalizedHeight":  "97692",
                   "stateFileLastWriteAgeSeconds":  1,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
-                  "monitorHeightAdvanced":  true
+                  "monitorHeightAdvanced":  true,
+                  "mempoolDepth":  0
               },
+    "transactionIntake":  {
+                              "txIntakePath":  "devnet/local/intake/transactions.ndjson",
+                              "txIntakeExists":  true,
+                              "txIntakeRows":  159,
+                              "txIntakeAcceptedRows":  159,
+                              "txIntakeInvalidRows":  0,
+                              "txIntakeLastWriteAgeSeconds":  4559.449,
+                              "runtimeSubmitDir":  "devnet/local/intake/runtime-submit",
+                              "runtimeSubmitFileCount":  4,
+                              "runtimeSubmitNewestFileAgeSeconds":  412918.341,
+                              "runtimeInboxDir":  "devnet/local/node/inbox",
+                              "runtimeInboxFileCount":  0,
+                              "runtimeInboxNewestFileAgeSeconds":  null,
+                              "mempoolDepth":  0
+                          },
     "reportStatuses":  {
                            "serviceStatus":  "passed",
                            "serviceSupervisor":  "passed",
                            "serviceMonitor":  "passed",
+                           "transactionIntake":  "passed",
+                           "transactionIntakeInvalidRows":  0,
+                           "transactionIntakeRows":  159,
+                           "transactionIntakeAcceptedRows":  159,
+                           "runtimeSubmitFileCount":  4,
+                           "runtimeInboxFileCount":  0,
+                           "mempoolDepth":  0,
                            "bridgeRelayerLoop":  "stopped",
                            "bridgeRelayerLoopReport":  "blocked",
                            "bridgeRelayerLoopReportFresh":  false,
@@ -129,6 +152,9 @@
                            "truthTableFailedGates":  0,
                            "truthTableStaleGates":  0,
                            "truthTableRepoBlockedGates":  0,
+                           "truthTableUnsafeGateIds":  [
+
+                                                       ],
                            "noSecret":  "passed"
                        },
     "findings":  [

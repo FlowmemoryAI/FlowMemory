@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T02:41:17.8794675Z",
+    "generatedAt":  "2026-05-20T04:23:18.1749755Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  26,
-    "criticalRuleCount":  19,
+    "ruleCount":  27,
+    "criticalRuleCount":  20,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -36,6 +36,7 @@
                                 "chain-height-unreadable",
                                 "height-not-advancing",
                                 "state-stale",
+                                "transaction-intake-invalid-rows",
                                 "no-secret-scan-not-passed",
                                 "backup-retention-unsafe",
                                 "bridge-relayer-check-contract-failed",
@@ -172,6 +173,20 @@
                       "commands":  [
                                        "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
                                        "npm run flowchain:service:restart -- -LiveProfile"
+                                   ]
+                  },
+                  {
+                      "id":  "transaction-intake-corrupt",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "transaction-intake-invalid-rows"
+                                       ],
+                      "signal":  "Signed transaction intake contains invalid local NDJSON rows.",
+                      "threshold":  "transactionIntake.txIntakeInvalidRows is greater than zero",
+                      "commands":  [
+                                       "npm run flowchain:ops:snapshot",
+                                       "npm run flowchain:control-plane:smoke",
+                                       "npm run flowchain:no-secret:scan"
                                    ]
                   },
                   {

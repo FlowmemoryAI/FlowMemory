@@ -1,11 +1,20 @@
 {
     "schema":  "flowchain.ops_metrics_export_report.v0",
-    "generatedAt":  "2026-05-20T02:41:24.2140500Z",
+    "generatedAt":  "2026-05-20T04:23:19.1242615Z",
     "status":  "passed",
     "refresh":  {
-                    "performed":  false,
+                    "performed":  true,
                     "steps":  [
-
+                                  {
+                                      "name":  "ops-snapshot",
+                                      "exitCode":  0,
+                                      "outputLineCount":  5
+                                  },
+                                  {
+                                      "name":  "ops-alerts",
+                                      "exitCode":  0,
+                                      "outputLineCount":  5
+                                  }
                               ]
                 },
     "reportPaths":  {
@@ -32,12 +41,19 @@
                     },
     "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.json",
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
-    "metricCount":  86,
+    "metricCount":  93,
     "requiredMetricNames":  [
                                 "flowchain_latest_height",
                                 "flowchain_finalized_height",
                                 "flowchain_state_file_age_seconds",
                                 "flowchain_height_advanced",
+                                "flowchain_mempool_depth",
+                                "flowchain_transaction_intake_rows_total",
+                                "flowchain_transaction_intake_accepted_rows_total",
+                                "flowchain_transaction_intake_invalid_rows",
+                                "flowchain_transaction_intake_file_age_seconds",
+                                "flowchain_runtime_submit_fixtures_total",
+                                "flowchain_runtime_inbox_files_total",
                                 "flowchain_ops_critical_findings",
                                 "flowchain_ops_blocked_findings",
                                 "flowchain_ops_alert_rules_total",
@@ -132,6 +148,7 @@
                    "externalTesterEvidenceMetricsPresent":  true,
                    "bridgeDirectObserveMetricsPresent":  true,
                    "publicRpcEdgeMetricsPresent":  true,
+                   "transactionIntakeMetricsPresent":  true,
                    "dashboardUiMetricsPresent":  true,
                    "ownerInputsValidationMetricsPresent":  true,
                    "ownerActivationPlanMetricsPresent":  true,

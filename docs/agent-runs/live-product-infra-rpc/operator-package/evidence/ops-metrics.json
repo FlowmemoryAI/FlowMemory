@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T02:41:23.9630420Z",
+    "generatedAt":  "2026-05-20T04:23:18.9438954Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -13,7 +13,7 @@
                           "ownerInputsValidationStatus":  "passed",
                           "ownerActivationPlanStatus":  "passed",
                           "liveCutoverStatus":  "blocked",
-                          "truthTableStatus":  "blocked-owner-input",
+                          "truthTableStatus":  "failed",
                           "noSecretStatus":  "passed"
                       },
     "metrics":  [
@@ -21,13 +21,13 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  96674
+                        "value":  97692
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  96674
+                        "value":  97692
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
@@ -48,6 +48,48 @@
                         "value":  1
                     },
                     {
+                        "name":  "flowchain_mempool_depth",
+                        "type":  "gauge",
+                        "help":  "Current local runtime mempool depth from service status.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_transaction_intake_rows_total",
+                        "type":  "gauge",
+                        "help":  "Signed transaction intake rows recorded in local NDJSON intake.",
+                        "value":  159
+                    },
+                    {
+                        "name":  "flowchain_transaction_intake_accepted_rows_total",
+                        "type":  "gauge",
+                        "help":  "Crypto-verified signed transaction intake rows recorded locally.",
+                        "value":  159
+                    },
+                    {
+                        "name":  "flowchain_transaction_intake_invalid_rows",
+                        "type":  "gauge",
+                        "help":  "Invalid NDJSON rows in signed transaction intake.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_transaction_intake_file_age_seconds",
+                        "type":  "gauge",
+                        "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
+                        "value":  4525.094
+                    },
+                    {
+                        "name":  "flowchain_runtime_submit_fixtures_total",
+                        "type":  "gauge",
+                        "help":  "Runtime-submit fixture files produced by signed envelope forwarding.",
+                        "value":  4
+                    },
+                    {
+                        "name":  "flowchain_runtime_inbox_files_total",
+                        "type":  "gauge",
+                        "help":  "Current local runtime node inbox file count.",
+                        "value":  0
+                    },
+                    {
                         "name":  "flowchain_ops_critical_findings",
                         "type":  "gauge",
                         "help":  "Current critical ops finding count.",
@@ -63,13 +105,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  26
+                        "value":  27
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  19
+                        "value":  20
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -513,7 +555,7 @@
                         "name":  "flowchain_truth_gates_owner_blocked",
                         "type":  "gauge",
                         "help":  "Owner-input blocked production truth table gates.",
-                        "value":  16
+                        "value":  13
                     },
                     {
                         "name":  "flowchain_truth_gates_repo_blocked",
@@ -525,16 +567,16 @@
                         "name":  "flowchain_truth_gates_failed",
                         "type":  "gauge",
                         "help":  "Failed production truth table gates.",
-                        "value":  0
+                        "value":  2
                     },
                     {
                         "name":  "flowchain_truth_gates_stale",
                         "type":  "gauge",
                         "help":  "Stale production truth table gates.",
-                        "value":  0
+                        "value":  1
                     }
                 ],
-    "metricCount":  86,
+    "metricCount":  93,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,
