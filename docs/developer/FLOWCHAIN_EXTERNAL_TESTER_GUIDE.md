@@ -56,6 +56,7 @@ npm run flowchain:tester:readiness -- -AllowBlocked
 npm run flowchain:tester:gateway:e2e
 npm run flowchain:external-tester:packet -- -AllowBlocked
 npm run flowchain:external-tester:packet:validate
+npm run flowchain:external-tester:client:validate
 npm run flowchain:public-rpc:validate
 npm run flowchain:bridge:live:check
 npm run flowchain:no-secret:scan
@@ -123,6 +124,17 @@ Check RPC discovery:
 ```powershell
 npm run flowchain:devkit -- discover --json --rpc $env:FLOWCHAIN_RPC_URL
 ```
+
+The executable tester client can consume the owner packet and produce a
+no-network dry run before the owner provides endpoint/token values:
+
+```powershell
+npm run flowchain:external-tester:client -- --connect-pack docs/agent-runs/live-product-infra-rpc/external-tester-connect-pack.json --base-url "<owner-provided-public-base-url>" --dry-run --allow-blocked
+```
+
+After the owner marks the packet shareable and sends the tester token out of
+band, run the same client without `--dry-run` and with `--token-file` pointing
+at a local uncommitted token file.
 
 Check readiness:
 

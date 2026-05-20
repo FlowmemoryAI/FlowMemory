@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.external_tester_connect_pack.v0",
-    "generatedAt":  "2026-05-20T16:26:13.4323093Z",
+    "generatedAt":  "2026-05-20T16:39:42.2316926Z",
     "status":  "blocked",
     "shareable":  false,
     "network":  {
@@ -16,9 +16,9 @@
                                        }
                 },
     "currentEvidence":  {
-                            "latestHeight":  "104042",
-                            "finalizedHeight":  "104042",
-                            "latestHash":  "0x40bb5463a3c18af5533d8e43b2f689f560cbe6380fa3da653ca0896645c285c8",
+                            "latestHeight":  "104171",
+                            "finalizedHeight":  "104171",
+                            "latestHash":  "0x2ff48540c88ab9a3699994d83557d433ed9df1fdabcb3895f3cef9cd7949d77b",
                             "localTesterRehearsalReady":  true,
                             "externalSharingReady":  false,
                             "packetExecutableSmokeValidated":  true,
@@ -48,7 +48,8 @@
                     "readiness":  "npm run flowchain:devkit -- readiness --json --rpc $env:FLOWCHAIN_RPC_URL",
                     "status":  "npm run flowchain:devkit -- status --json --rpc $env:FLOWCHAIN_RPC_URL",
                     "walletBalances":  "npm run flowchain:devkit -- wallet-balances --json --rpc $env:FLOWCHAIN_RPC_URL",
-                    "walletTransfers":  "npm run flowchain:devkit -- wallet-transfers --json --rpc $env:FLOWCHAIN_RPC_URL"
+                    "walletTransfers":  "npm run flowchain:devkit -- wallet-transfers --json --rpc $env:FLOWCHAIN_RPC_URL",
+                    "externalTesterClientDryRun":  "npm run flowchain:external-tester:client -- --connect-pack docs/agent-runs/live-product-infra-rpc/external-tester-connect-pack.json --base-url <OWNER_PUBLIC_ENDPOINT> --dry-run --allow-blocked"
                 },
     "safety":  {
                    "secretsAllowedInPacket":  false,
