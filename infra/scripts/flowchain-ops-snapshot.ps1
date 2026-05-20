@@ -48,6 +48,7 @@ $paths = [ordered]@{
     serviceSupervisorValidation = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
     serviceMonitor = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     publicRpc = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
+    publicRpcSyntheticCanary = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json"
     publicRpcDeploymentBundle = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     publicRpcDeploymentAutomation = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
     backup = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
@@ -259,6 +260,7 @@ $refreshSteps = New-Object System.Collections.ArrayList
 if (-not $NoRefresh) {
     [void] $refreshSteps.Add((Invoke-OpsChild -Name "service-status" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-status.ps1"), "-AllowBlocked", "-ReportPath", $paths.serviceStatus)))
     [void] $refreshSteps.Add((Invoke-OpsChild -Name "service-monitor" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-monitor.ps1"), "-DurationSeconds", "$MonitorDurationSeconds", "-PollSeconds", "$MonitorPollSeconds", "-MaxStateAgeSeconds", "$MonitorMaxStateAgeSeconds", "-ReportPath", $paths.serviceMonitor)))
+    [void] $refreshSteps.Add((Invoke-OpsChild -Name "public-rpc-synthetic-canary" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-synthetic-canary.ps1"), "-AllowBlocked", "-ReportPath", $paths.publicRpcSyntheticCanary)))
 }
 
 $reports = [ordered]@{}
@@ -358,6 +360,13 @@ if ($supervisorNodeRecoveryHealthy -ne $true) {
 }
 
 $publicRpcStatus = Get-OpsStatus -Report $reports.publicRpc
+$publicRpcSyntheticCanary = $reports.publicRpcSyntheticCanary
+$publicRpcSyntheticCanaryStatus = Get-OpsStatus -Report $publicRpcSyntheticCanary
+$publicRpcSyntheticCanaryReady = (Get-OpsProp -Object $publicRpcSyntheticCanary -Name "syntheticCanaryReady" -Default $false) -eq $true
+$publicRpcSyntheticCanaryBlockedOnlyOnOwnerInputs = (Get-OpsProp -Object $publicRpcSyntheticCanary -Name "blockedOnlyOnKnownExternalOwnerInputs" -Default $false) -eq $true
+$publicRpcSyntheticCanaryMissingEnvNames = @((Get-OpsProp -Object $publicRpcSyntheticCanary -Name "missingEnvNames" -Default @()))
+$publicRpcSyntheticCanaryProbeCount = [int](Get-OpsProp -Object $publicRpcSyntheticCanary -Name "probeCount" -Default 0)
+$publicRpcSyntheticCanaryFailedProbeCount = [int](Get-OpsProp -Object $publicRpcSyntheticCanary -Name "failedProbeCount" -Default 0)
 $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
 $publicRpcDeploymentAutomation = $reports.publicRpcDeploymentAutomation
 $publicRpcDeploymentBundleStatus = Get-OpsStatus -Report $publicRpcDeploymentBundle
@@ -682,6 +691,9 @@ $noSecretStatus = Get-OpsStatus -Report $reports.noSecret
 if ($publicRpcStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "public-rpc-not-ready" -Message "Public RPC is not ready to share." -Commands @("npm run flowchain:public-rpc:check", "npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:abuse-test")
 }
+if ($publicRpcSyntheticCanaryStatus -eq "failed") {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "public-rpc-synthetic-canary-failed" -Message "Public RPC synthetic canary failed one or more read-only live probes." -Commands @("npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked", "npm run flowchain:public-rpc:check -- -AllowBlocked", "npm run flowchain:public-rpc:validate")
+}
 if (-not $publicRpcEdgeHardeningReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "public-rpc-edge-hardening-failed" -Message "Public RPC edge deployment hardening evidence is missing or failed." -Commands @("npm run flowchain:public-rpc:deployment-bundle", "npm run flowchain:public-rpc:deployment:automation", "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh")
 }
@@ -773,6 +785,7 @@ $incidentCommands = [ordered]@{
     )
     publicExposure = @(
         "npm run flowchain:public-rpc:check",
+        "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
         "npm run flowchain:public-rpc:abuse-test",
         "npm run flowchain:public-rpc:deployment-bundle",
         "npm run flowchain:public-rpc:deployment:automation",
@@ -872,6 +885,12 @@ $report = [ordered]@{
         supervisorNodeRecoveryLatestHeight = [string](Get-OpsProp -Object $supervisorNodeAfterRecovery -Name "latestHeight" -Default "")
         supervisorLatestRestartReasons = @($supervisorLatestRestartReasons)
         publicRpc = $publicRpcStatus
+        publicRpcSyntheticCanary = $publicRpcSyntheticCanaryStatus
+        publicRpcSyntheticCanaryReady = $publicRpcSyntheticCanaryReady
+        publicRpcSyntheticCanaryBlockedOnlyOnOwnerInputs = $publicRpcSyntheticCanaryBlockedOnlyOnOwnerInputs
+        publicRpcSyntheticCanaryProbeCount = $publicRpcSyntheticCanaryProbeCount
+        publicRpcSyntheticCanaryFailedProbeCount = $publicRpcSyntheticCanaryFailedProbeCount
+        publicRpcSyntheticCanaryMissingEnvCount = $publicRpcSyntheticCanaryMissingEnvNames.Count
         publicRpcLiveSecurityHeaderProbe = Get-OpsProp -Object $publicRpcChecks -Name "securityHeadersProbePerformed" -Default $false
         publicRpcLiveSecurityHeaders = ((Get-OpsProp -Object $publicRpcChecks -Name "securityHeadersProbePerformed" -Default $false) -eq $true) -and ((Get-OpsProp -Object $publicRpcChecks -Name "securityHeadersAllRequiredPresent" -Default $false) -eq $true)
         publicRpcSecurityHeaderPolicyReady = Get-OpsProp -Object $publicRpcChecks -Name "securityHeadersAllRequiredPresent" -Default $false

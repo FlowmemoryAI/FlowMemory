@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Command Matrix
 
-Generated: 2026-05-20T16:35:34.1845910Z
+Generated: 2026-05-20T16:52:34.6839915Z
 
 | Phase | Command | Purpose |
 | --- | --- | --- |
@@ -30,6 +30,7 @@ Generated: 2026-05-20T16:35:34.1845910Z
 | public-rpc | `npm run flowchain:public-rpc:deployment-bundle` | Generate owner-host public RPC edge artifacts. |
 | public-rpc | `npm run flowchain:public-rpc:deployment:automation` | Validate render, preflight, verify, and rollback phases. |
 | public-rpc | `npm run flowchain:public-rpc:validate` | Run local public-profile RPC readiness validation. |
+| public-rpc | `npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked` | Run read-only public endpoint canary probes after the owner endpoint is configured. |
 | public-rpc | `npm run flowchain:public-rpc:abuse-test` | Run CORS, media-type, batch/body cap, rate-limit, and response hygiene probes. |
 | backup | `npm run flowchain:backup:restore:validate` | Prove restore safety and tamper rejection locally. |
 | backup | `npm run flowchain:backup:owner-path:dry-run` | Exercise backup readiness with an ignored local owner-path stand-in. |

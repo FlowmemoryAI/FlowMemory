@@ -62,6 +62,7 @@ $paths = [ordered]@{
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     publicRpcDeploymentAutomation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
     publicRpc = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
+    publicRpcSyntheticCanary = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json"
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
     publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
     testerWriteTokenSetup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/tester-write-token-setup-report.json"
@@ -344,6 +345,7 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:public-rpc:deployment-bundle",
     "npm run flowchain:public-rpc:deployment:automation",
     "npm run flowchain:public-rpc:validate",
+    "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
     "npm run flowchain:public-rpc:abuse-test",
     "npm run flowchain:tester:token:setup",
     "npm run flowchain:tester:gateway:e2e",
@@ -384,6 +386,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "tester-write-token-setup" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-tester-write-token-setup.ps1"), "-ReportPath", $paths.testerWriteTokenSetup)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-tester-gateway-e2e" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-tester-gateway-e2e.ps1"), "-ReportPath", $paths.publicTesterGateway)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-readiness" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.publicRpc)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-synthetic-canary" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-synthetic-canary.ps1"), "-AllowBlocked", "-ReportPath", $paths.publicRpcSyntheticCanary)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "backup-restore-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-restore-validation.ps1"), "-ReportPath", $paths.backupRestoreValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "backup-owner-path-dry-run" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-owner-path-dry-run.ps1"), "-ReportPath", $paths.backupOwnerPathDryRun)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "backup-install-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-install-validation.ps1"), "-ReportPath", $paths.backupInstallValidation)
@@ -922,6 +925,11 @@ Add-DeploymentItem -Items $items -Id "owner-input-contract" `
 $publicRpc = $reports.publicRpc
 $publicRpcStatus = Get-DeploymentStatus -Report $publicRpc
 $publicRpcReady = Get-DeploymentProp -Object $publicRpc -Name "publicRpcReady" -Default $false
+$publicRpcSyntheticCanary = $reports.publicRpcSyntheticCanary
+$publicRpcSyntheticCanaryStatus = Get-DeploymentStatus -Report $publicRpcSyntheticCanary
+$publicRpcSyntheticCanaryReady = Get-DeploymentProp -Object $publicRpcSyntheticCanary -Name "syntheticCanaryReady" -Default $false
+$publicRpcSyntheticCanaryBlockedOnlyOnOwnerInputs = Get-DeploymentProp -Object $publicRpcSyntheticCanary -Name "blockedOnlyOnKnownExternalOwnerInputs" -Default $false
+$publicRpcSyntheticCanaryMissingEnvNames = @((Get-DeploymentProp -Object $publicRpcSyntheticCanary -Name "missingEnvNames" -Default @()))
 $publicValidation = $reports.publicRpcValidation
 $publicValidationStatus = Get-DeploymentStatus -Report $publicValidation
 $publicValidationChecks = Get-DeploymentProp -Object $publicValidation -Name "checks"
@@ -972,11 +980,17 @@ Add-DeploymentItem -Items $items -Id "public-rpc-abuse-test" `
     -Status $(if ($publicAbusePassed) { "passed" } else { "failed" }) `
     -Evidence "abuseStatus=$publicAbuseStatus, abuseReady=$publicAbuseReady, missingChecks=$($publicAbuseMissingChecks.Count)" `
     -Commands @("npm run flowchain:public-rpc:abuse-test")
+Add-DeploymentItem -Items $items -Id "public-rpc-synthetic-canary" `
+    -Requirement "The public RPC synthetic canary must run read-only live endpoint probes, avoid write methods, and stay owner-blocked until the public endpoint exists." `
+    -Status $(if (($publicRpcSyntheticCanaryStatus -eq "passed") -and ($publicRpcSyntheticCanaryReady -eq $true)) { "passed" } elseif (($publicRpcSyntheticCanaryStatus -eq "blocked") -and ($publicRpcSyntheticCanaryBlockedOnlyOnOwnerInputs -eq $true)) { "blocked" } else { "failed" }) `
+    -Evidence "canaryStatus=$publicRpcSyntheticCanaryStatus, ready=$publicRpcSyntheticCanaryReady, ownerBlocked=$publicRpcSyntheticCanaryBlockedOnlyOnOwnerInputs" `
+    -Commands @("npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked") `
+    -Blockers @($publicRpcSyntheticCanaryMissingEnvNames)
 Add-DeploymentItem -Items $items -Id "public-rpc-edge" `
     -Requirement "The owner TLS edge must pass endpoint, CORS, live security-header, rate-limit, readiness, and response-hygiene checks before sharing." `
-    -Status $(if (($publicRpcStatus -eq "passed") -and ($publicRpcReady -eq $true) -and ($publicValidationPassed -eq $true) -and ($publicAbusePassed -eq $true)) { "passed" } elseif (($publicRpcStatus -eq "blocked") -and ($publicValidationPassed -eq $true) -and ($publicAbusePassed -eq $true)) { "blocked" } else { "failed" }) `
-    -Evidence "publicRpcStatus=$publicRpcStatus, publicRpcReady=$publicRpcReady, validationStatus=$publicValidationStatus, validationPassed=$publicValidationPassed, abuseStatus=$publicAbuseStatus, abusePassed=$publicAbusePassed" `
-    -Commands @("npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:abuse-test", "npm run flowchain:public-rpc:check") `
+    -Status $(if (($publicRpcStatus -eq "passed") -and ($publicRpcReady -eq $true) -and ($publicRpcSyntheticCanaryReady -eq $true) -and ($publicValidationPassed -eq $true) -and ($publicAbusePassed -eq $true)) { "passed" } elseif (($publicRpcStatus -eq "blocked") -and ($publicRpcSyntheticCanaryStatus -in @("blocked", "passed")) -and ($publicValidationPassed -eq $true) -and ($publicAbusePassed -eq $true)) { "blocked" } else { "failed" }) `
+    -Evidence "publicRpcStatus=$publicRpcStatus, publicRpcReady=$publicRpcReady, canaryStatus=$publicRpcSyntheticCanaryStatus, canaryReady=$publicRpcSyntheticCanaryReady, validationStatus=$publicValidationStatus, validationPassed=$publicValidationPassed, abuseStatus=$publicAbuseStatus, abusePassed=$publicAbusePassed" `
+    -Commands @("npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked", "npm run flowchain:public-rpc:abuse-test", "npm run flowchain:public-rpc:check") `
     -Blockers @("FLOWCHAIN_RPC_PUBLIC_URL", "FLOWCHAIN_RPC_ALLOWED_ORIGINS", "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE", "FLOWCHAIN_RPC_TLS_TERMINATED")
 
 $backup = $reports.backup
@@ -1400,6 +1414,7 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:public-rpc:edge-template",
         "npm run flowchain:public-rpc:deployment-bundle",
         "npm run flowchain:public-rpc:validate",
+        "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
         "npm run flowchain:public-rpc:abuse-test",
         "npm run flowchain:tester:gateway:e2e",
         "npm run flowchain:wallet:live-tester:e2e",

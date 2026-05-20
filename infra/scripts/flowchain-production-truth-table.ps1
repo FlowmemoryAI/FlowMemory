@@ -879,6 +879,45 @@ $definitions = @(
         ownerInputGate = $true
     },
     [ordered]@{
+        id = "public-rpc-synthetic-canary"
+        requirement = "Public RPC synthetic canary runs read-only live probes against the owner endpoint, never plans write methods, and stays owner-blocked without printing endpoint values until the endpoint exists."
+        path = "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json"
+        command = "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked"
+        productionGate = $true
+        ownerInputGate = $true
+        requiredChecks = @(
+            "packageScriptPresent",
+            "endpointConfigured",
+            "endpointAbsoluteHttp",
+            "endpointValuePrintedFalse",
+            "publicModeNonLocal",
+            "httpsRequiredForPublicMode",
+            "safeReadMethodAllowlistEnforced",
+            "noWriteMethodsPlanned",
+            "noWriteMethodsInvoked",
+            "plannedReadPathsCovered",
+            "plannedReadMethodsCovered",
+            "allProbesPassedWhenNetworkAllowed",
+            "responseHygienePassed",
+            "broadcastsFalse",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredEmptyArrays = @(
+            "missingEnvNames",
+            "problems",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "syntheticCanaryReady" = $true
+            "endpointValuePrinted" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "public-rpc-validation"
         requirement = "Public RPC validation harness is present and fail-closed before endpoint sharing."
         path = "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
@@ -2246,7 +2285,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "tester-write-token-setup", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-synthetic-canary", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "tester-write-token-setup", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"

@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-20T15:28:15.6759968Z
+Generated: 2026-05-20T16:52:08.8271261Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 142
+- Metric count: 147
 
 ## Required Metrics
 
@@ -28,6 +28,11 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_ops_active_alert_rules: present
 - flowchain_service_status_ready: present
 - flowchain_public_rpc_ready: present
+- flowchain_public_rpc_synthetic_canary_ready: present
+- flowchain_public_rpc_synthetic_canary_probe_count: present
+- flowchain_public_rpc_synthetic_canary_failed_probes: present
+- flowchain_public_rpc_synthetic_canary_missing_owner_inputs: present
+- flowchain_public_rpc_synthetic_canary_no_write_methods: present
 - flowchain_public_rpc_live_security_header_probe: present
 - flowchain_public_rpc_live_security_headers: present
 - flowchain_public_rpc_security_header_policy_ready: present
@@ -142,6 +147,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | opsAlertRulesLoaded | True |
 | serviceStatusLoaded | True |
 | serviceMonitorLoaded | True |
+| publicRpcSyntheticCanaryLoaded | True |
 | externalTesterLoaded | True |
 | publicTesterGatewayLoaded | True |
 | externalTesterEvidenceLoaded | True |

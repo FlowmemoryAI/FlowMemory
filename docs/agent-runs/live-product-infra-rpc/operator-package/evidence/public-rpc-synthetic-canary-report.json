@@ -1,0 +1,86 @@
+{
+    "schema":  "flowchain.public_rpc_synthetic_canary_report.v0",
+    "generatedAt":  "2026-05-20T16:51:59.4682266Z",
+    "status":  "blocked",
+    "syntheticCanaryReady":  false,
+    "blockedOnlyOnKnownExternalOwnerInputs":  true,
+    "requiredEnvNames":  [
+                             "FLOWCHAIN_RPC_PUBLIC_URL"
+                         ],
+    "missingEnvNames":  [
+                            "FLOWCHAIN_RPC_PUBLIC_URL"
+                        ],
+    "endpointConfigured":  false,
+    "endpointHostRedacted":  "",
+    "endpointValuePrinted":  false,
+    "publicMode":  false,
+    "explicitLocalEndpoint":  false,
+    "networkProbeAllowed":  false,
+    "plannedReadPaths":  [
+                             "/health",
+                             "/rpc/discover",
+                             "/rpc/readiness",
+                             "/chain/status"
+                         ],
+    "plannedReadMethods":  [
+                               "chain_status",
+                               "node_status",
+                               "block_list",
+                               "mempool_list"
+                           ],
+    "deniedWriteMethods":  [
+                               "transaction_submit",
+                               "wallet_send",
+                               "wallet_create",
+                               "tester_wallet_send",
+                               "faucet_request",
+                               "bridge_credit_apply"
+                           ],
+    "probes":  [
+
+               ],
+    "probeCount":  0,
+    "passedProbeCount":  0,
+    "failedProbeCount":  0,
+    "responseHygiene":  {
+                            "passed":  true,
+                            "findings":  [
+
+                                         ]
+                        },
+    "checks":  {
+                   "packageScriptPresent":  true,
+                   "endpointConfigured":  false,
+                   "endpointAbsoluteHttp":  false,
+                   "endpointValuePrintedFalse":  true,
+                   "publicModeNonLocal":  false,
+                   "httpsRequiredForPublicMode":  true,
+                   "noNetworkUntilEndpointConfigured":  true,
+                   "networkProbeSkippedWhileOwnerBlocked":  true,
+                   "safeReadMethodAllowlistEnforced":  true,
+                   "noWriteMethodsPlanned":  true,
+                   "noWriteMethodsInvoked":  true,
+                   "plannedReadPathsCovered":  true,
+                   "plannedReadMethodsCovered":  true,
+                   "allProbesPassedWhenNetworkAllowed":  true,
+                   "responseHygienePassed":  true,
+                   "broadcastsFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "secretMarkerFindingsEmpty":  true
+               },
+    "problems":  [
+                     {
+                         "name":  "FLOWCHAIN_RPC_PUBLIC_URL",
+                         "category":  "env",
+                         "kind":  "blocked",
+                         "reason":  "missing required public endpoint value"
+                     }
+                 ],
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "secretMarkerFindings":  [
+
+                             ]
+}

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T15:28:09.7214353Z",
+    "generatedAt":  "2026-05-20T16:52:08.3988860Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  32,
-    "criticalRuleCount":  25,
+    "ruleCount":  33,
+    "criticalRuleCount":  26,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -57,6 +57,7 @@
                                 "owner-inputs-validation-failed",
                                 "owner-go-live-handoff-failed",
                                 "public-rpc-edge-hardening-failed",
+                                "public-rpc-synthetic-canary-failed",
                                 "public-rpc-not-ready",
                                 "backup-not-ready",
                                 "bridge-not-ready",
@@ -477,6 +478,20 @@
                                        "npm run flowchain:public-rpc:deployment-bundle",
                                        "npm run flowchain:public-rpc:deployment:automation",
                                        "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh"
+                                   ]
+                  },
+                  {
+                      "id":  "public-rpc-synthetic-canary-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "public-rpc-synthetic-canary-failed"
+                                       ],
+                      "signal":  "Public RPC synthetic canary failed a read-only live endpoint probe.",
+                      "threshold":  "synthetic canary status is failed, any planned read path or read-only JSON-RPC method fails, response hygiene fails, or a write method enters the probe plan",
+                      "commands":  [
+                                       "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
+                                       "npm run flowchain:public-rpc:check -- -AllowBlocked",
+                                       "npm run flowchain:public-rpc:validate"
                                    ]
                   },
                   {

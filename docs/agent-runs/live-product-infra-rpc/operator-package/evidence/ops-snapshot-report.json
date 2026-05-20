@@ -1,18 +1,32 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-20T15:28:03.9052309Z",
+    "generatedAt":  "2026-05-20T16:52:00.8998685Z",
     "status":  "blocked",
     "refresh":  {
-                    "performed":  false,
+                    "performed":  true,
                     "steps":  [
-
+                                  {
+                                      "name":  "service-status",
+                                      "exitCode":  0,
+                                      "outputLineCount":  10
+                                  },
+                                  {
+                                      "name":  "service-monitor",
+                                      "exitCode":  0,
+                                      "outputLineCount":  4
+                                  },
+                                  {
+                                      "name":  "public-rpc-synthetic-canary",
+                                      "exitCode":  0,
+                                      "outputLineCount":  4
+                                  }
                               ],
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "103440",
-                  "finalizedHeight":  "103440",
-                  "stateFileLastWriteAgeSeconds":  3,
+                  "latestHeight":  "104297",
+                  "finalizedHeight":  "104297",
+                  "stateFileLastWriteAgeSeconds":  4,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true,
@@ -21,13 +35,13 @@
     "transactionIntake":  {
                               "txIntakePath":  "devnet/local/intake/transactions.ndjson",
                               "txIntakeExists":  true,
-                              "txIntakeRows":  175,
-                              "txIntakeAcceptedRows":  175,
+                              "txIntakeRows":  181,
+                              "txIntakeAcceptedRows":  181,
                               "txIntakeInvalidRows":  0,
-                              "txIntakeLastWriteAgeSeconds":  5669.287,
+                              "txIntakeLastWriteAgeSeconds":  1785.577,
                               "runtimeSubmitDir":  "devnet/local/intake/runtime-submit",
                               "runtimeSubmitFileCount":  4,
-                              "runtimeSubmitNewestFileAgeSeconds":  452770.949,
+                              "runtimeSubmitNewestFileAgeSeconds":  457807.851,
                               "runtimeInboxDir":  "devnet/local/node/inbox",
                               "runtimeInboxFileCount":  0,
                               "runtimeInboxNewestFileAgeSeconds":  null,
@@ -40,8 +54,8 @@
                            "serviceMonitor":  "passed",
                            "transactionIntake":  "passed",
                            "transactionIntakeInvalidRows":  0,
-                           "transactionIntakeRows":  175,
-                           "transactionIntakeAcceptedRows":  175,
+                           "transactionIntakeRows":  181,
+                           "transactionIntakeAcceptedRows":  181,
                            "runtimeSubmitFileCount":  4,
                            "runtimeInboxFileCount":  0,
                            "mempoolDepth":  0,
@@ -69,6 +83,12 @@
 
                                                               ],
                            "publicRpc":  "blocked",
+                           "publicRpcSyntheticCanary":  "blocked",
+                           "publicRpcSyntheticCanaryReady":  false,
+                           "publicRpcSyntheticCanaryBlockedOnlyOnOwnerInputs":  true,
+                           "publicRpcSyntheticCanaryProbeCount":  0,
+                           "publicRpcSyntheticCanaryFailedProbeCount":  0,
+                           "publicRpcSyntheticCanaryMissingEnvCount":  1,
                            "publicRpcLiveSecurityHeaderProbe":  false,
                            "publicRpcLiveSecurityHeaders":  false,
                            "publicRpcSecurityHeaderPolicyReady":  true,
@@ -294,6 +314,7 @@
                                                 ],
                              "publicExposure":  [
                                                     "npm run flowchain:public-rpc:check",
+                                                    "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
                                                     "npm run flowchain:public-rpc:abuse-test",
                                                     "npm run flowchain:public-rpc:deployment-bundle",
                                                     "npm run flowchain:public-rpc:deployment:automation",
@@ -331,6 +352,7 @@
                         "serviceSupervisorValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-report.json",
                         "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json",
                         "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
+                        "publicRpcSyntheticCanary":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-synthetic-canary-report.json",
                         "publicRpcDeploymentBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle-report.json",
                         "publicRpcDeploymentAutomation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-automation-report.json",
                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",

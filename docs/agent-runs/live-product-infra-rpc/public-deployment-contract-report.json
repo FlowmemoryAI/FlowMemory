@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-20T16:36:38.5711526Z",
+    "generatedAt":  "2026-05-20T16:53:43.9195473Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -10,9 +10,9 @@
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
                        "passed":  25,
-                       "blocked":  6,
+                       "blocked":  7,
                        "failed":  0,
-                       "total":  31
+                       "total":  32
                    },
     "items":  [
                   {
@@ -40,6 +40,7 @@
                                        "npm run flowchain:public-rpc:deployment-bundle",
                                        "npm run flowchain:public-rpc:deployment:automation",
                                        "npm run flowchain:public-rpc:validate",
+                                       "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
                                        "npm run flowchain:public-rpc:abuse-test",
                                        "npm run flowchain:tester:token:setup",
                                        "npm run flowchain:tester:gateway:e2e",
@@ -124,7 +125,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=104144, finalizedHeight=104144",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=104310, finalizedHeight=104310",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -206,7 +207,7 @@
                       "id":  "ops-alert-rules",
                       "requirement":  "Owner deployment has a no-secret alert rule manifest that maps every current ops finding to operator commands without committing delivery credentials.",
                       "status":  "passed",
-                      "evidence":  "alertRules=passed, criticalRules=25, blockedRules=7, unmappedCurrentFindingCodes=0",
+                      "evidence":  "alertRules=passed, criticalRules=26, blockedRules=7, unmappedCurrentFindingCodes=0",
                       "commands":  [
                                        "npm run flowchain:ops:alerts -- -AllowBlocked"
                                    ],
@@ -304,12 +305,25 @@
                                    ]
                   },
                   {
+                      "id":  "public-rpc-synthetic-canary",
+                      "requirement":  "The public RPC synthetic canary must run read-only live endpoint probes, avoid write methods, and stay owner-blocked until the public endpoint exists.",
+                      "status":  "blocked",
+                      "evidence":  "canaryStatus=blocked, ready=False, ownerBlocked=True",
+                      "commands":  [
+                                       "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked"
+                                   ],
+                      "blockers":  [
+                                       "FLOWCHAIN_RPC_PUBLIC_URL"
+                                   ]
+                  },
+                  {
                       "id":  "public-rpc-edge",
                       "requirement":  "The owner TLS edge must pass endpoint, CORS, live security-header, rate-limit, readiness, and response-hygiene checks before sharing.",
                       "status":  "blocked",
-                      "evidence":  "publicRpcStatus=blocked, publicRpcReady=False, validationStatus=passed, validationPassed=True, abuseStatus=passed, abusePassed=True",
+                      "evidence":  "publicRpcStatus=blocked, publicRpcReady=False, canaryStatus=blocked, canaryReady=False, validationStatus=passed, validationPassed=True, abuseStatus=passed, abusePassed=True",
                       "commands":  [
                                        "npm run flowchain:public-rpc:validate",
+                                       "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
                                        "npm run flowchain:public-rpc:abuse-test",
                                        "npm run flowchain:public-rpc:check"
                                    ],
@@ -601,6 +615,7 @@
                         "publicRpcDeploymentBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle-report.json",
                         "publicRpcDeploymentAutomation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-automation-report.json",
                         "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
+                        "publicRpcSyntheticCanary":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-synthetic-canary-report.json",
                         "publicRpcValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation-report.json",
                         "publicRpcAbuseTest":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test-report.json",
                         "testerWriteTokenSetup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\tester-write-token-setup-report.json",
@@ -645,6 +660,7 @@
                                                  "npm run flowchain:public-rpc:edge-template",
                                                  "npm run flowchain:public-rpc:deployment-bundle",
                                                  "npm run flowchain:public-rpc:validate",
+                                                 "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
                                                  "npm run flowchain:public-rpc:abuse-test",
                                                  "npm run flowchain:tester:gateway:e2e",
                                                  "npm run flowchain:wallet:live-tester:e2e",

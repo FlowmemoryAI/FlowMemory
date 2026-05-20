@@ -1,11 +1,12 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T15:28:15.4379862Z",
+    "generatedAt":  "2026-05-20T16:52:08.5768875Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
                           "serviceStatusStatus":  "passed",
                           "serviceMonitorStatus":  "passed",
+                          "publicRpcSyntheticCanaryStatus":  "blocked",
                           "publicRpcDeploymentBundleStatus":  "passed",
                           "publicRpcDeploymentAutomationStatus":  "passed",
                           "externalTesterStatus":  "blocked",
@@ -24,19 +25,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  103440
+                        "value":  104297
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  103440
+                        "value":  104297
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  3
+                        "value":  4
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -60,13 +61,13 @@
                         "name":  "flowchain_transaction_intake_rows_total",
                         "type":  "gauge",
                         "help":  "Signed transaction intake rows recorded in local NDJSON intake.",
-                        "value":  175
+                        "value":  181
                     },
                     {
                         "name":  "flowchain_transaction_intake_accepted_rows_total",
                         "type":  "gauge",
                         "help":  "Crypto-verified signed transaction intake rows recorded locally.",
-                        "value":  175
+                        "value":  181
                     },
                     {
                         "name":  "flowchain_transaction_intake_invalid_rows",
@@ -78,7 +79,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  5669.287
+                        "value":  1785.577
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -145,6 +146,36 @@
                         "type":  "gauge",
                         "help":  "One when public RPC readiness is passed.",
                         "value":  0
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_synthetic_canary_ready",
+                        "type":  "gauge",
+                        "help":  "One when the public RPC synthetic canary passed all read-only live probes.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_synthetic_canary_probe_count",
+                        "type":  "gauge",
+                        "help":  "Read-only public RPC synthetic canary probe count.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_synthetic_canary_failed_probes",
+                        "type":  "gauge",
+                        "help":  "Failed read-only public RPC synthetic canary probes.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_synthetic_canary_missing_owner_inputs",
+                        "type":  "gauge",
+                        "help":  "Owner input names still blocking the public RPC synthetic canary.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_synthetic_canary_no_write_methods",
+                        "type":  "gauge",
+                        "help":  "One when the public RPC synthetic canary planned and invoked no write methods.",
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_public_rpc_live_security_header_probe",
@@ -873,7 +904,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  142,
+    "metricCount":  147,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

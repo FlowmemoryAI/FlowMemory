@@ -25,6 +25,7 @@ $paths = [ordered]@{
     serviceStatus = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     publicRpc = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
+    publicRpcSyntheticCanary = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json"
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     publicRpcDeploymentAutomation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
     backup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
@@ -216,6 +217,7 @@ $opsAlerts = $reports.opsAlerts
 $serviceStatus = $reports.serviceStatus
 $serviceMonitor = $reports.serviceMonitor
 $publicRpc = $reports.publicRpc
+$publicRpcSyntheticCanary = $reports.publicRpcSyntheticCanary
 $externalTester = $reports.externalTester
 $publicTesterGateway = $reports.publicTesterGateway
 $externalTesterEvidence = $reports.externalTesterEvidence
@@ -274,6 +276,8 @@ $publicTesterGatewayFailedChecks = @((Get-MetricsProp -Object $publicTesterGatew
 $publicTesterGatewaySecretFindings = @((Get-MetricsProp -Object $publicTesterGateway -Name "secretMarkerFindings" -Default @()))
 $publicTesterGatewayRoutes = @((Get-MetricsProp -Object $publicTesterGateway -Name "routes" -Default @()))
 $publicRpcChecks = Get-MetricsProp -Object $publicRpc -Name "checks"
+$publicRpcSyntheticCanaryChecks = Get-MetricsProp -Object $publicRpcSyntheticCanary -Name "checks"
+$publicRpcSyntheticCanaryMissingEnvCount = @((Get-MetricsProp -Object $publicRpcSyntheticCanary -Name "missingEnvNames" -Default @())).Count
 $publicRpcDeploymentBundleChecks = Get-MetricsProp -Object $publicRpcDeploymentBundle -Name "checks"
 $publicRpcDeploymentAutomationChecks = Get-MetricsProp -Object $publicRpcDeploymentAutomation -Name "checks"
 $publicRpcRequiredCutoverCommands = @(
@@ -318,6 +322,11 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_ops_active_alert_rules" -Help
 Add-MetricGauge -Metrics $metrics -Name "flowchain_service_status_ready" -Help "One when service status report is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $serviceStatus))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_service_monitor_ready" -Help "One when service monitor report is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $serviceMonitor))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_ready" -Help "One when public RPC readiness is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "publicRpc"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_synthetic_canary_ready" -Help "One when the public RPC synthetic canary passed all read-only live probes." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "publicRpcSyntheticCanaryReady" -Default (Get-MetricsProp -Object $publicRpcSyntheticCanary -Name "syntheticCanaryReady" -Default $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_synthetic_canary_probe_count" -Help "Read-only public RPC synthetic canary probe count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "publicRpcSyntheticCanaryProbeCount" -Default (Get-MetricsProp -Object $publicRpcSyntheticCanary -Name "probeCount" -Default 0)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_synthetic_canary_failed_probes" -Help "Failed read-only public RPC synthetic canary probes." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "publicRpcSyntheticCanaryFailedProbeCount" -Default (Get-MetricsProp -Object $publicRpcSyntheticCanary -Name "failedProbeCount" -Default 0)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_synthetic_canary_missing_owner_inputs" -Help "Owner input names still blocking the public RPC synthetic canary." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "publicRpcSyntheticCanaryMissingEnvCount" -Default $publicRpcSyntheticCanaryMissingEnvCount))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_synthetic_canary_no_write_methods" -Help "One when the public RPC synthetic canary planned and invoked no write methods." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $publicRpcSyntheticCanaryChecks -Name "noWriteMethodsPlanned" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $publicRpcSyntheticCanaryChecks -Name "noWriteMethodsInvoked" -Default $false) -eq $true)))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_live_security_header_probe" -Help "One when the configured public RPC endpoint security-header probe ran against a non-local public URL." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcChecks -Name "securityHeadersProbePerformed" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_live_security_headers" -Help "One when the live public RPC endpoint was probed and returned all required defensive security headers." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $publicRpcChecks -Name "securityHeadersProbePerformed" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $publicRpcChecks -Name "securityHeadersAllRequiredPresent" -Default $false) -eq $true)))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_security_header_policy_ready" -Help "One when the public RPC readiness policy requires live headers only for non-local public endpoints and currently passes that policy." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcChecks -Name "securityHeadersAllRequiredPresent" -Default $false))
@@ -454,6 +463,7 @@ $metricsJson = [ordered]@{
         opsAlertRulesStatus = Get-MetricsStatus -Report $opsAlerts
         serviceStatusStatus = Get-MetricsStatus -Report $serviceStatus
         serviceMonitorStatus = Get-MetricsStatus -Report $serviceMonitor
+        publicRpcSyntheticCanaryStatus = Get-MetricsStatus -Report $publicRpcSyntheticCanary
         publicRpcDeploymentBundleStatus = Get-MetricsStatus -Report $publicRpcDeploymentBundle
         publicRpcDeploymentAutomationStatus = Get-MetricsStatus -Report $publicRpcDeploymentAutomation
         externalTesterStatus = Get-MetricsStatus -Report $externalTester
@@ -502,6 +512,11 @@ $requiredMetricNames = @(
     "flowchain_ops_active_alert_rules",
     "flowchain_service_status_ready",
     "flowchain_public_rpc_ready",
+    "flowchain_public_rpc_synthetic_canary_ready",
+    "flowchain_public_rpc_synthetic_canary_probe_count",
+    "flowchain_public_rpc_synthetic_canary_failed_probes",
+    "flowchain_public_rpc_synthetic_canary_missing_owner_inputs",
+    "flowchain_public_rpc_synthetic_canary_no_write_methods",
     "flowchain_public_rpc_live_security_header_probe",
     "flowchain_public_rpc_live_security_headers",
     "flowchain_public_rpc_security_header_policy_ready",
@@ -617,6 +632,7 @@ $checks = [ordered]@{
     opsAlertRulesLoaded = $null -ne $opsAlerts
     serviceStatusLoaded = $null -ne $serviceStatus
     serviceMonitorLoaded = $null -ne $serviceMonitor
+    publicRpcSyntheticCanaryLoaded = $null -ne $publicRpcSyntheticCanary
     externalTesterLoaded = $null -ne $externalTester
     publicTesterGatewayLoaded = $null -ne $publicTesterGateway
     externalTesterEvidenceLoaded = $null -ne $externalTesterEvidence
@@ -678,6 +694,11 @@ $checks = [ordered]@{
         "flowchain_real_value_pilot_aggregate_owner_go_no_go"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     publicRpcEdgeMetricsPresent = @(
+        "flowchain_public_rpc_synthetic_canary_ready",
+        "flowchain_public_rpc_synthetic_canary_probe_count",
+        "flowchain_public_rpc_synthetic_canary_failed_probes",
+        "flowchain_public_rpc_synthetic_canary_missing_owner_inputs",
+        "flowchain_public_rpc_synthetic_canary_no_write_methods",
         "flowchain_public_rpc_deployment_bundle_ready",
         "flowchain_public_rpc_deployment_automation_ready",
         "flowchain_public_rpc_live_security_header_probe",

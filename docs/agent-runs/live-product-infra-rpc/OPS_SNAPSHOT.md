@@ -1,10 +1,10 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-20T15:28:03.9052309Z
+Generated: 2026-05-20T16:52:00.8998685Z
 Status: blocked
-Latest height: 103440
-Finalized height: 103440
-Transaction intake rows: 175
+Latest height: 104297
+Finalized height: 104297
+Transaction intake rows: 181
 Runtime inbox files: 0
 
 ## Findings
@@ -34,6 +34,7 @@ Runtime inbox files: 0
 
 ### publicExposure
 - npm run flowchain:public-rpc:check
+- npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked
 - npm run flowchain:public-rpc:abuse-test
 - npm run flowchain:public-rpc:deployment-bundle
 - npm run flowchain:public-rpc:deployment:automation

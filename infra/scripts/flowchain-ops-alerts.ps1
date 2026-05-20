@@ -298,6 +298,14 @@ $rules = @(
         commands = @("npm run flowchain:public-rpc:deployment-bundle", "npm run flowchain:public-rpc:deployment:automation", "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh")
     },
     [ordered]@{
+        id = "public-rpc-synthetic-canary-failed"
+        severity = "critical"
+        findingCodes = @("public-rpc-synthetic-canary-failed")
+        signal = "Public RPC synthetic canary failed a read-only live endpoint probe."
+        threshold = "synthetic canary status is failed, any planned read path or read-only JSON-RPC method fails, response hygiene fails, or a write method enters the probe plan"
+        commands = @("npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked", "npm run flowchain:public-rpc:check -- -AllowBlocked", "npm run flowchain:public-rpc:validate")
+    },
+    [ordered]@{
         id = "public-rpc-not-shareable"
         severity = "blocked"
         findingCodes = @("public-rpc-not-ready")
