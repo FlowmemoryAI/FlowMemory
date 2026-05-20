@@ -1,0 +1,114 @@
+{
+    "schema":  "flowchain.bridge_runtime_credit_validation_report.v1",
+    "generatedAt":  "2026-05-20T06:52:12.2587225Z",
+    "status":  "passed",
+    "targetSettlementSeconds":  60,
+    "validationRunDir":  "devnet/local/bridge-runtime-credit-validation",
+    "runtimeProofReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-runtime-credit-validation\\runtime-credit-proof.json",
+    "handoffPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\fixtures\\bridge\\base8453-runtime-bridge-handoff.json",
+    "childProcess":  {
+                         "exitCode":  0,
+                         "timedOut":  false,
+                         "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\bridge-runtime-credit-validation\\20260520015123008-33620-f2ad560b.stdout.log",
+                         "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\bridge-runtime-credit-validation\\20260520015123008-33620-f2ad560b.stderr.log"
+                     },
+    "source":  {
+                   "chainId":  8453,
+                   "txHash":  "0x8453000000000000000000000000000000000000000000000000000000000002",
+                   "logIndex":  0,
+                   "lockbox":  "0x1111111111111111111111111111111111111111",
+                   "asset":  "0x3333333333333333333333333333333333333333",
+                   "destinationWallet":  "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+               },
+    "creditId":  "0xc4f46eb30b6b1e47b682bbe2c892f40c4eb83149d662b22df6b8f72efad71468",
+    "amountBeforeRuntime":  "20000000",
+    "amountAppliedToWallet":  "20000000",
+    "postCreditBalance":  "20000000",
+    "transferAmount":  "1",
+    "recipientBalance":  "1",
+    "replayAttemptResult":  {
+                                "status":  "rejected",
+                                "txId":  "0x9c23c7b7441f207c83017254553de3827462cb44b0ea38c455030781d58e719f",
+                                "error":  "bridge replay key is already consumed: 0xea93b7d168d2f1f6c4be4f95ba4d85aa2d07fc4298a720d180000a19d98481f0"
+                            },
+    "timing":  {
+                   "runStartedAt":  "2026-05-20T06:51:24.3934732Z",
+                   "handoffQueuedAt":  "2026-05-20T06:52:07.2841339Z",
+                   "creditAppliedAt":  "2026-05-20T06:52:07.9631715Z",
+                   "firstSpendableAt":  "2026-05-20T06:52:07.9631715Z",
+                   "transferQueuedAt":  "2026-05-20T06:52:08.9725770Z",
+                   "transferSpendableAt":  "2026-05-20T06:52:09.5814503Z",
+                   "completedAt":  "2026-05-20T06:52:11.6516114Z",
+                   "queueToSpendableSeconds":  0.679,
+                   "transferSettlementSeconds":  0.609,
+                   "totalSeconds":  47.258,
+                   "targetSettlementSeconds":  60,
+                   "latencyGate":  "passed"
+               },
+    "requiredRuntimeChecks":  [
+                                  "handoff-live-runtime-flags",
+                                  "deposit-source-chain",
+                                  "confirmation-proof-present",
+                                  "pilot-cap-proof-present",
+                                  "runtime-u64-cap-bound",
+                                  "credit-applied-once",
+                                  "wallet-delta-equals-credit-amount",
+                                  "live-credit-record-flags",
+                                  "live-receipt-record-flags",
+                                  "runtime-credit-latency-recorded",
+                                  "runtime-credit-latency-under-target",
+                                  "replay-rejected",
+                                  "replay-does-not-change-balance",
+                                  "credited-balance-transferable",
+                                  "runtime-transfer-latency-under-target",
+                                  "restart-preserves-credit-history",
+                                  "export-import-preserves-state-root",
+                                  "export-import-preserves-replay-protection"
+                              ],
+    "missingRuntimeChecks":  [
+
+                             ],
+    "falseRuntimeChecks":  [
+
+                           ],
+    "proofFailedChecks":  [
+
+                          ],
+    "checks":  {
+                   "childCommandPassed":  true,
+                   "childDidNotTimeout":  true,
+                   "proofReportWritten":  true,
+                   "proofClassificationReady":  true,
+                   "proofFailedChecksEmpty":  true,
+                   "requiredRuntimeChecksCovered":  true,
+                   "requiredRuntimeChecksPassed":  true,
+                   "sourceChainBase8453":  true,
+                   "creditAppliedOnce":  true,
+                   "creditedBalanceTransferable":  true,
+                   "replayRejected":  true,
+                   "restartPreservesCreditHistory":  true,
+                   "exportImportPreservesReplayProtection":  true,
+                   "latencyRecorded":  true,
+                   "latencyGatePassed":  true,
+                   "transferLatencyUnderTarget":  true,
+                   "proofBroadcastsFalse":  true,
+                   "proofEnvValuesPrintedFalse":  true,
+                   "proofNoSecrets":  true,
+                   "handoffReportReadable":  true,
+                   "handoffNoReleaseBroadcast":  true,
+                   "handoffNoWithdrawalBroadcast":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "broadcastsFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.incident_drill_report.v0",
-    "generatedAt":  "2026-05-20T09:58:05.5293836Z",
+    "generatedAt":  "2026-05-20T11:13:55.3732079Z",
     "status":  "passed",
     "incidentDrillReady":  true,
     "validationScope":  "synthetic-ops-snapshot-incidents-plus-live-postcheck",
@@ -16,6 +16,7 @@
                    "allCasesPassed":  true,
                    "failedCasesAbsent":  true,
                    "minimumCaseCountMet":  true,
+                   "publicTesterGatewayIncidentCovered":  true,
                    "recoveryCommandPrinted":  true,
                    "postDrillLiveStatusPassed":  true,
                    "liveStateBeforeReadable":  true,
@@ -34,9 +35,9 @@
 
                              ],
     "caseCounts":  {
-                       "passed":  19,
+                       "passed":  20,
                        "failed":  0,
-                       "total":  19
+                       "total":  20
                    },
     "requiredScenarios":  [
                               "baseline-owner-blockers-only",
@@ -48,6 +49,7 @@
                               "height-not-advancing-critical",
                               "no-secret-scan-critical",
                               "dashboard-ui-readiness-critical",
+                              "public-tester-gateway-e2e-critical",
                               "owner-inputs-validation-critical",
                               "public-rpc-edge-hardening-critical",
                               "bridge-relayer-check-contract-critical",
@@ -55,6 +57,7 @@
                               "bridge-direct-observe-cursor-critical",
                               "bridge-relayer-loop-unhealthy-critical",
                               "supervisor-relayer-recovery-failed-critical",
+                              "supervisor-node-recovery-validation-critical",
                               "recovery-command-print",
                               "post-drill-live-status"
                           ],
@@ -79,7 +82,7 @@
                                     "exitCode":  0,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: blocked",
-                                                       "Latest height: 100638",
+                                                       "Latest height: 101275",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\baseline-owner-blockers-only\\OPS_SNAPSHOT.md",
                                                        "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, deployment-contract-not-ready"
@@ -110,7 +113,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 100638",
+                                                       "Latest height: 101275",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\deployment-refresh-aborted-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: deployment-refresh-aborted",
@@ -143,7 +146,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 100638",
+                                                       "Latest height: 101275",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\truth-table-stale-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\truth-table-stale-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: truth-table-stale-or-failed",
@@ -177,7 +180,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 100638",
+                                                       "Latest height: 101275",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\node-down-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\node-down-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: service-status-not-passed, node-not-running",
@@ -212,7 +215,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 100638",
+                                                       "Latest height: 101275",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\control-plane-down-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: service-status-not-passed, control-plane-not-running",
@@ -246,7 +249,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 100638",
+                                                       "Latest height: 101275",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\stale-state-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: state-stale",
@@ -279,7 +282,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 100638",
+                                                       "Latest height: 101275",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\height-not-advancing-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\height-not-advancing-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: height-not-advancing",
@@ -312,7 +315,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 100638",
+                                                       "Latest height: 101275",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\no-secret-scan-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: no-secret-scan-not-passed",
@@ -345,7 +348,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 100638",
+                                                       "Latest height: 101275",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\dashboard-ui-readiness-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\dashboard-ui-readiness-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: dashboard-ui-readiness-failed",
@@ -366,6 +369,39 @@
                                        ]
                   },
                   {
+                      "id":  "public-tester-gateway-e2e-critical",
+                      "requirement":  "A failed public tester gateway wallet create, faucet, capped send, cap rejection, route, no-secret, or no-broadcast proof is classified and mapped to the critical alert rule before friends-and-family access is shared.",
+                      "status":  "passed",
+                      "evidence":  "expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True, alertStatus=passed, alertExitCode=0, alertMissingCodes=0, unmappedAlertCodes=0, activeRulesWithoutCommands=0, alertSafeFlags=True",
+                      "expectedCodes":  [
+                                            "public-tester-gateway-e2e-failed"
+                                        ],
+                      "child":  {
+                                    "name":  "public-tester-gateway-e2e-critical",
+                                    "exitCode":  1,
+                                    "outputTail":  [
+                                                       "FlowChain ops snapshot status: failed",
+                                                       "Latest height: 101275",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\ops-snapshot-report.json",
+                                                       "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\OPS_SNAPSHOT.md",
+                                                       "Critical findings: public-tester-gateway-e2e-failed",
+                                                       "Blocked findings: public-rpc-not-ready, backup-not-ready, bridge-not-ready, bridge-relayer-not-ready, external-tester-not-shareable, deployment-contract-not-ready"
+                                                   ]
+                                },
+                      "reportStatus":  "failed",
+                      "criticalCount":  1,
+                      "blockedCount":  6,
+                      "findingCodes":  [
+                                           "public-rpc-not-ready",
+                                           "backup-not-ready",
+                                           "bridge-not-ready",
+                                           "bridge-relayer-not-ready",
+                                           "external-tester-not-shareable",
+                                           "public-tester-gateway-e2e-failed",
+                                           "deployment-contract-not-ready"
+                                       ]
+                  },
+                  {
                       "id":  "owner-inputs-validation-critical",
                       "requirement":  "A broken owner-input validator is classified as a critical incident before live cutover instructions are trusted.",
                       "status":  "passed",
@@ -378,7 +414,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 100638",
+                                                       "Latest height: 101275",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\owner-inputs-validation-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\owner-inputs-validation-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: owner-inputs-validation-failed",
@@ -411,7 +447,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 100638",
+                                                       "Latest height: 101275",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-rpc-edge-hardening-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-rpc-edge-hardening-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: public-rpc-edge-hardening-failed",
@@ -444,7 +480,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 100638",
+                                                       "Latest height: 101275",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-check-contract-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-check-contract-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: bridge-relayer-check-contract-failed",
@@ -477,7 +513,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 100638",
+                                                       "Latest height: 101275",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-guardrail-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-guardrail-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: bridge-relayer-guardrail-failed, bridge-direct-observe-cursor-unsafe",
@@ -511,7 +547,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 100638",
+                                                       "Latest height: 101275",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-direct-observe-cursor-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-direct-observe-cursor-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: bridge-relayer-guardrail-failed, bridge-direct-observe-cursor-unsafe",
@@ -545,7 +581,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 100638",
+                                                       "Latest height: 101275",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\bridge-relayer-loop-unhealthy-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: bridge-relayer-loop-unhealthy",
@@ -578,7 +614,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 100638",
+                                                       "Latest height: 101275",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\supervisor-relayer-recovery-failed-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\supervisor-relayer-recovery-failed-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: supervisor-relayer-recovery-failed",
@@ -611,7 +647,7 @@
                                     "exitCode":  1,
                                     "outputTail":  [
                                                        "FlowChain ops snapshot status: failed",
-                                                       "Latest height: 100638",
+                                                       "Latest height: 101275",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\supervisor-node-recovery-validation-critical\\ops-snapshot-report.json",
                                                        "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\supervisor-node-recovery-validation-critical\\OPS_SNAPSHOT.md",
                                                        "Critical findings: supervisor-node-recovery-validation-failed",
@@ -679,8 +715,8 @@
                                                        "Control plane: running PID=28192 bind=127.0.0.1:8787",
                                                        "Bridge relayer loop: stopped report=blocked healthy=False",
                                                        "Public readiness: blocked",
-                                                       "Latest height: 100668",
-                                                       "Finalized height: 100668",
+                                                       "Latest height: 101387",
+                                                       "Finalized height: 101387",
                                                        "Backup path: not-configured",
                                                        "Bridge readiness: live=blocked, infra=blocked",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\post-drill-service-status-report.json"
@@ -698,33 +734,33 @@
                             "readable":  true,
                             "statePathConfigured":  true,
                             "chainId":  "flowmemory-local-devnet-v0",
-                            "latestHeight":  "100661",
-                            "latestHash":  "0x06107758b153529b3dcddc5c608e8516b331aba8c3d915634fce4a7b85f32afb",
-                            "latestRoot":  "0x8c8e860f3cfca1b8444d3c63345335b29ce4858e5b55a4b05858b68ff708fd0f",
-                            "latestBlockTimestamp":  "1778788660",
-                            "latestBlockAgeSeconds":  1,
-                            "stateFileLastWriteAgeSeconds":  1,
-                            "finalizedHeight":  "100661",
-                            "finalizedHash":  "0x06107758b153529b3dcddc5c608e8516b331aba8c3d915634fce4a7b85f32afb",
+                            "latestHeight":  "101379",
+                            "latestHash":  "0x0c78c068bfb9c0cb5cc5ebfbed42ab5918954dfd5129ad35c231ae5832f32968",
+                            "latestRoot":  "0xa62d7f89841ba7d6a7981f10b522b727002d6b979c1c2bf897e85b6906255ed5",
+                            "latestBlockTimestamp":  "1778789378",
+                            "latestBlockAgeSeconds":  2,
+                            "stateFileLastWriteAgeSeconds":  2,
+                            "finalizedHeight":  "101379",
+                            "finalizedHash":  "0x0c78c068bfb9c0cb5cc5ebfbed42ab5918954dfd5129ad35c231ae5832f32968",
                             "mempoolDepth":  0,
                             "peerCount":  null,
-                            "blockCount":  100661
+                            "blockCount":  101379
                         },
     "liveStateAfter":  {
                            "readable":  true,
                            "statePathConfigured":  true,
                            "chainId":  "flowmemory-local-devnet-v0",
-                           "latestHeight":  "100669",
-                           "latestHash":  "0x707aa44b0e7f67ad9ed3924299f47522e0208b75dc3e977c436c6e4335a794fb",
-                           "latestRoot":  "0x8c8e860f3cfca1b8444d3c63345335b29ce4858e5b55a4b05858b68ff708fd0f",
-                           "latestBlockTimestamp":  "1778788668",
-                           "latestBlockAgeSeconds":  2,
-                           "stateFileLastWriteAgeSeconds":  2,
-                           "finalizedHeight":  "100669",
-                           "finalizedHash":  "0x707aa44b0e7f67ad9ed3924299f47522e0208b75dc3e977c436c6e4335a794fb",
+                           "latestHeight":  "101387",
+                           "latestHash":  "0xe259da78c536569fc98772729c2f282cd91ff021793b3dcfd77c92acafa7c5c5",
+                           "latestRoot":  "0xa62d7f89841ba7d6a7981f10b522b727002d6b979c1c2bf897e85b6906255ed5",
+                           "latestBlockTimestamp":  "1778789386",
+                           "latestBlockAgeSeconds":  7,
+                           "stateFileLastWriteAgeSeconds":  7,
+                           "finalizedHeight":  "101387",
+                           "finalizedHash":  "0xe259da78c536569fc98772729c2f282cd91ff021793b3dcfd77c92acafa7c5c5",
                            "mempoolDepth":  0,
                            "peerCount":  null,
-                           "blockCount":  100669
+                           "blockCount":  101387
                        },
     "reportPaths":  {
                         "report":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drill-report.json",

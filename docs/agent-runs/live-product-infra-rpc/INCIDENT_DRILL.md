@@ -1,6 +1,6 @@
 ﻿# FlowChain Incident Drill
 
-Generated: 2026-05-20T09:58:05.5293836Z
+Generated: 2026-05-20T11:13:55.3732079Z
 Status: passed
 Incident drill ready: True
 
@@ -19,6 +19,7 @@ This drill uses synthetic ops input reports for incident conditions, then checks
 | height-not-advancing-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | no-secret-scan-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | dashboard-ui-readiness-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
+| public-tester-gateway-e2e-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True, alertStatus=passed, alertExitCode=0, alertMissingCodes=0, unmappedAlertCodes=0, activeRulesWithoutCommands=0, alertSafeFlags=True |
 | owner-inputs-validation-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | public-rpc-edge-hardening-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | bridge-relayer-check-contract-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |

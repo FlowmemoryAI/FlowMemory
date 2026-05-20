@@ -30,6 +30,7 @@ $baseReportPaths = [ordered]@{
     "bridge-relayer-guardrail-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     "bridge-runtime-credit-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
     "external-tester-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
+    "public-tester-gateway-e2e-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     "external-tester-evidence-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
     "dashboard-ui-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
     "owner-inputs-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
@@ -209,6 +210,60 @@ function New-DrillFallbackReport {
                 envValuesPrinted = $false
                 noSecrets = $true
                 broadcasts = $false
+            }
+        }
+        "public-tester-gateway-e2e-report.json" {
+            return [ordered]@{
+                schema = "flowchain.public_tester_gateway_e2e_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "failed"
+                localOnly = $true
+                originRestricted = $true
+                testerGatewayConfigured = $false
+                testerWriteTokenHashConfigured = $false
+                maxSendUnits = ""
+                walletCreateSchema = ""
+                testerFaucetSchema = ""
+                walletSendSchema = ""
+                accountCount = 0
+                transferAccepted = $false
+                transferStatus = "missing"
+                transferId = ""
+                capRejected = $false
+                capRejectStatusCode = 0
+                capRejectSchema = ""
+                routes = @()
+                balancesAfter = [ordered]@{}
+                checks = [ordered]@{
+                    localOnly = $true
+                    originRestricted = $true
+                    testerGatewayConfigured = $false
+                    testerWriteTokenHashConfigured = $false
+                    walletCreateSchemaOk = $false
+                    testerFaucetSchemaOk = $false
+                    walletSendSchemaOk = $false
+                    accountCountAtLeastTwo = $false
+                    transferAccepted = $false
+                    transferAppliedLocalRuntime = $false
+                    transferIdPresent = $false
+                    capRejected = $false
+                    capRejectStatusCode400 = $false
+                    capRejectSchemaOk = $false
+                    capRejectNoSecrets = $true
+                    routesCoverRequired = $false
+                    balancesMatchExpected = $false
+                    noLiveBroadcast = $true
+                    envValuesPrintedFalse = $true
+                    noSecrets = $true
+                    broadcastsFalse = $true
+                    secretMarkerFindingsEmpty = $true
+                }
+                failedChecks = @("testerGatewayConfigured", "testerWriteTokenHashConfigured", "walletCreateSchemaOk", "testerFaucetSchemaOk", "walletSendSchemaOk", "accountCountAtLeastTwo", "transferAccepted", "transferAppliedLocalRuntime", "transferIdPresent", "capRejected", "capRejectStatusCode400", "capRejectSchemaOk", "routesCoverRequired", "balancesMatchExpected")
+                secretMarkerFindings = @()
+                noLiveBroadcast = $true
+                broadcasts = $false
+                envValuesPrinted = $false
+                noSecrets = $true
             }
         }
         "dashboard-ui-readiness-report.json" {
@@ -532,6 +587,7 @@ function Invoke-SyntheticOpsCase {
         [Parameter(Mandatory = $true)][string] $Requirement,
         [Parameter(Mandatory = $true)][string] $ExpectedStatus,
         [string[]] $ExpectedCodes = @(),
+        [switch] $RequireAlertMapping,
         [scriptblock] $Mutate = $null
     )
 
@@ -569,16 +625,54 @@ function Invoke-SyntheticOpsCase {
         -and (Get-DrillProp -Object $caseReport -Name "noSecrets" -Default $false) -eq $true `
         -and (Get-DrillProp -Object $caseReport -Name "broadcasts" -Default $true) -eq $false
     $commandsPresent = Test-DrillCommandGroups -Report $caseReport
+    $alertMappingPassed = $true
+    $alertEvidence = ""
+    if ($RequireAlertMapping.IsPresent) {
+        $caseAlertRulesPath = Join-Path $caseDir "ops-alert-rules-report.json"
+        $caseAlertMarkdownPath = Join-Path $caseDir "OPS_ALERT_RULES.md"
+        $alertChild = Invoke-DrillChild -Name "$Id-alerts" -ArgumentList @(
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            (Join-Path $PSScriptRoot "flowchain-ops-alerts.ps1"),
+            "-AllowBlocked",
+            "-NoRefresh",
+            "-OpsSnapshotPath",
+            $caseReportPath,
+            "-ReportPath",
+            $caseAlertRulesPath,
+            "-MarkdownPath",
+            $caseAlertMarkdownPath
+        )
+        $alertReport = Read-FlowChainJsonIfExists -Path $caseAlertRulesPath
+        $alertStatus = [string](Get-DrillProp -Object $alertReport -Name "status" -Default "missing")
+        $alertCurrentCodes = @((Get-DrillProp -Object $alertReport -Name "currentFindingCodes" -Default @()) | ForEach-Object { "$_" })
+        $alertMissingCodes = @($ExpectedCodes | Where-Object { $_ -notin $alertCurrentCodes })
+        $unmappedAlertCodes = @((Get-DrillProp -Object $alertReport -Name "unmappedCurrentFindingCodes" -Default @()))
+        $activeRulesWithoutCommands = @((Get-DrillProp -Object $alertReport -Name "activeRuleIdsWithoutCommands" -Default @()))
+        $alertSafeFlags = (Get-DrillProp -Object $alertReport -Name "envValuesPrinted" -Default $true) -eq $false `
+            -and (Get-DrillProp -Object $alertReport -Name "noSecrets" -Default $false) -eq $true `
+            -and (Get-DrillProp -Object $alertReport -Name "broadcasts" -Default $true) -eq $false
+        $alertMappingPassed = $alertChild.exitCode -eq 0 `
+            -and $alertStatus -eq "passed" `
+            -and $alertMissingCodes.Count -eq 0 `
+            -and $unmappedAlertCodes.Count -eq 0 `
+            -and $activeRulesWithoutCommands.Count -eq 0 `
+            -and $alertSafeFlags
+        $alertEvidence = ", alertStatus=$alertStatus, alertExitCode=$($alertChild.exitCode), alertMissingCodes=$($alertMissingCodes.Count), unmappedAlertCodes=$($unmappedAlertCodes.Count), activeRulesWithoutCommands=$($activeRulesWithoutCommands.Count), alertSafeFlags=$alertSafeFlags"
+    }
     $passed = $actualStatus -eq $ExpectedStatus `
         -and $missingCodes.Count -eq 0 `
         -and $exitMatches `
         -and $safeFlags `
-        -and $commandsPresent
+        -and $commandsPresent `
+        -and $alertMappingPassed
 
     Add-DrillResult -Id $Id `
         -Requirement $Requirement `
         -Passed $passed `
-        -Evidence "expectedStatus=$ExpectedStatus, actualStatus=$actualStatus, exitCode=$($child.exitCode), missingCodes=$($missingCodes.Count), commandsPresent=$commandsPresent, safeFlags=$safeFlags" `
+        -Evidence "expectedStatus=$ExpectedStatus, actualStatus=$actualStatus, exitCode=$($child.exitCode), missingCodes=$($missingCodes.Count), commandsPresent=$commandsPresent, safeFlags=$safeFlags$alertEvidence" `
         -Child $child `
         -Report $caseReport `
         -ExpectedCodes $ExpectedCodes
@@ -732,6 +826,49 @@ Invoke-SyntheticOpsCase -Id "dashboard-ui-readiness-critical" `
             Set-DrillProp -Object $checks -Name "dashboardBrowserE2ePassed" -Value $false
             Set-DrillProp -Object $report -Name "failedChecks" -Value @("testerWalletCreateCovered", "testerFaucetCovered", "testerSendCovered", "dashboardBrowserE2ePassed")
             Set-DrillProp -Object $report -Name "secretMarkerFindings" -Value @()
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
+        }
+    }
+
+Invoke-SyntheticOpsCase -Id "public-tester-gateway-e2e-critical" `
+    -Requirement "A failed public tester gateway wallet create, faucet, capped send, cap rejection, route, no-secret, or no-broadcast proof is classified and mapped to the critical alert rule before friends-and-family access is shared." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("public-tester-gateway-e2e-failed") `
+    -RequireAlertMapping `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "public-tester-gateway-e2e-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "failed"
+            Set-DrillProp -Object $report -Name "testerGatewayConfigured" -Value $true
+            Set-DrillProp -Object $report -Name "testerWriteTokenHashConfigured" -Value $true
+            Set-DrillProp -Object $report -Name "accountCount" -Value 1
+            Set-DrillProp -Object $report -Name "transferAccepted" -Value $false
+            Set-DrillProp -Object $report -Name "transferStatus" -Value "synthetic_gateway_failure"
+            Set-DrillProp -Object $report -Name "transferId" -Value ""
+            Set-DrillProp -Object $report -Name "capRejected" -Value $false
+            Set-DrillProp -Object $report -Name "capRejectStatusCode" -Value 200
+            Set-DrillProp -Object $report -Name "routes" -Value @("/tester/status", "/tester/wallets/create")
+            Set-DrillProp -Object $report -Name "balancesAfter" -Value ([ordered]@{
+                sender = "10"
+                recipient = "10"
+            })
+            $checks = Get-DrillProp -Object $report -Name "checks"
+            if ($null -eq $checks) {
+                $checks = [ordered]@{}
+                Set-DrillProp -Object $report -Name "checks" -Value $checks
+            }
+            foreach ($name in @("localOnly", "originRestricted", "testerGatewayConfigured", "testerWriteTokenHashConfigured", "walletCreateSchemaOk", "testerFaucetSchemaOk", "walletSendSchemaOk", "capRejectNoSecrets", "noLiveBroadcast", "envValuesPrintedFalse", "noSecrets", "broadcastsFalse", "secretMarkerFindingsEmpty")) {
+                Set-DrillProp -Object $checks -Name $name -Value $true
+            }
+            foreach ($name in @("accountCountAtLeastTwo", "transferAccepted", "transferAppliedLocalRuntime", "transferIdPresent", "capRejected", "capRejectStatusCode400", "capRejectSchemaOk", "routesCoverRequired", "balancesMatchExpected")) {
+                Set-DrillProp -Object $checks -Name $name -Value $false
+            }
+            Set-DrillProp -Object $report -Name "failedChecks" -Value @("accountCountAtLeastTwo", "transferAccepted", "transferAppliedLocalRuntime", "transferIdPresent", "capRejected", "capRejectStatusCode400", "capRejectSchemaOk", "routesCoverRequired", "balancesMatchExpected")
+            Set-DrillProp -Object $report -Name "secretMarkerFindings" -Value @()
+            Set-DrillProp -Object $report -Name "noLiveBroadcast" -Value $true
             Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
             Set-DrillProp -Object $report -Name "noSecrets" -Value $true
             Set-DrillProp -Object $report -Name "broadcasts" -Value $false
@@ -1042,6 +1179,11 @@ Add-DrillResult -Id "post-drill-live-status" `
 
 $liveStateAfter = Get-FlowChainStateFacts -StatePath (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/state.json")
 $failedCases = @($cases | Where-Object { $_.status -ne "passed" })
+$publicTesterGatewayIncidentCase = $cases | Where-Object { $_.id -eq "public-tester-gateway-e2e-critical" } | Select-Object -First 1
+$publicTesterGatewayIncidentFindingCodes = @()
+if ($null -ne $publicTesterGatewayIncidentCase) {
+    $publicTesterGatewayIncidentFindingCodes = @((Get-DrillProp -Object $publicTesterGatewayIncidentCase -Name "findingCodes" -Default @()))
+}
 $requiredScenarios = @(
     "baseline-owner-blockers-only",
     "deployment-refresh-aborted-critical",
@@ -1052,6 +1194,7 @@ $requiredScenarios = @(
     "height-not-advancing-critical",
     "no-secret-scan-critical",
     "dashboard-ui-readiness-critical",
+    "public-tester-gateway-e2e-critical",
     "owner-inputs-validation-critical",
     "public-rpc-edge-hardening-critical",
     "bridge-relayer-check-contract-critical",
@@ -1059,6 +1202,7 @@ $requiredScenarios = @(
     "bridge-direct-observe-cursor-critical",
     "bridge-relayer-loop-unhealthy-critical",
     "supervisor-relayer-recovery-failed-critical",
+    "supervisor-node-recovery-validation-critical",
     "recovery-command-print",
     "post-drill-live-status"
 )
@@ -1074,7 +1218,10 @@ $checks = [ordered]@{
     allRequiredScenariosCovered = $missingRequiredScenarios.Count -eq 0
     allCasesPassed = $failedCases.Count -eq 0
     failedCasesAbsent = $failedCases.Count -eq 0
-    minimumCaseCountMet = $cases.Count -ge 18
+    minimumCaseCountMet = $cases.Count -ge 20
+    publicTesterGatewayIncidentCovered = $null -ne $publicTesterGatewayIncidentCase `
+        -and [string](Get-DrillProp -Object $publicTesterGatewayIncidentCase -Name "status" -Default "") -eq "passed" `
+        -and ("public-tester-gateway-e2e-failed" -in $publicTesterGatewayIncidentFindingCodes)
     recoveryCommandPrinted = $recoveryPassed
     postDrillLiveStatusPassed = $postStatusPassed
     liveStateBeforeReadable = (Get-DrillProp -Object $liveStateBefore -Name "readable" -Default $false) -eq $true

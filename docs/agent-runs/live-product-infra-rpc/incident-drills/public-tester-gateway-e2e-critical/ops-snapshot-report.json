@@ -1,0 +1,347 @@
+{
+    "schema":  "flowchain.ops_snapshot_report.v1",
+    "generatedAt":  "2026-05-20T11:13:24.3522015Z",
+    "status":  "failed",
+    "refresh":  {
+                    "performed":  false,
+                    "steps":  [
+
+                              ],
+                    "inputReportDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input"
+                },
+    "chain":  {
+                  "latestHeight":  "101275",
+                  "finalizedHeight":  "101275",
+                  "stateFileLastWriteAgeSeconds":  3,
+                  "monitorStatus":  "passed",
+                  "monitorSamples":  2,
+                  "monitorHeightAdvanced":  true,
+                  "mempoolDepth":  0
+              },
+    "transactionIntake":  {
+                              "txIntakePath":  "devnet/local/intake/transactions.ndjson",
+                              "txIntakeExists":  true,
+                              "txIntakeRows":  169,
+                              "txIntakeAcceptedRows":  169,
+                              "txIntakeInvalidRows":  0,
+                              "txIntakeLastWriteAgeSeconds":  8896.372,
+                              "runtimeSubmitDir":  "devnet/local/intake/runtime-submit",
+                              "runtimeSubmitFileCount":  4,
+                              "runtimeSubmitNewestFileAgeSeconds":  437491.478,
+                              "runtimeInboxDir":  "devnet/local/node/inbox",
+                              "runtimeInboxFileCount":  0,
+                              "runtimeInboxNewestFileAgeSeconds":  null,
+                              "mempoolDepth":  0
+                          },
+    "reportStatuses":  {
+                           "serviceStatus":  "passed",
+                           "serviceSupervisor":  "passed",
+                           "serviceSupervisorValidation":  "passed",
+                           "serviceMonitor":  "passed",
+                           "transactionIntake":  "passed",
+                           "transactionIntakeInvalidRows":  0,
+                           "transactionIntakeRows":  169,
+                           "transactionIntakeAcceptedRows":  169,
+                           "runtimeSubmitFileCount":  4,
+                           "runtimeInboxFileCount":  0,
+                           "mempoolDepth":  0,
+                           "bridgeRelayerLoop":  "stopped",
+                           "bridgeRelayerLoopReport":  "blocked",
+                           "bridgeRelayerLoopReportFresh":  false,
+                           "bridgeRelayerLoopReportHealthy":  false,
+                           "bridgeRelayerLoopReportNoSecrets":  true,
+                           "bridgeRelayerLoopReportNoBroadcasts":  true,
+                           "bridgeRelayerLoopBlockedOnlyOnOwnerInputs":  true,
+                           "supervisorBridgeRelayerRequested":  false,
+                           "supervisorBridgeRelayerRecoveryHealthy":  true,
+                           "supervisorBridgeRelayerAfterStatus":  "missing",
+                           "supervisorBridgeRelayerAfterCommandLineMatched":  false,
+                           "supervisorBridgeRelayerAfterReportHealthy":  false,
+                           "supervisorNodeRecoveryHealthy":  true,
+                           "supervisorNodeRestartAttempts":  1,
+                           "supervisorNodeCrashDetected":  true,
+                           "supervisorNodeRecovered":  true,
+                           "supervisorNodeRecoveryControlPlaneRunning":  true,
+                           "supervisorNodeRecoveryLiveProfile":  true,
+                           "supervisorNodeRecoveryMaxBlocksUnbounded":  true,
+                           "supervisorNodeRecoveryLatestHeight":  "15319",
+                           "supervisorLatestRestartReasons":  [
+
+                                                              ],
+                           "publicRpc":  "blocked",
+                           "publicRpcDeploymentBundle":  "passed",
+                           "publicRpcDeploymentAutomation":  "passed",
+                           "publicRpcEdgeHardeningReady":  true,
+                           "publicRpcDisallowedOriginPreflight":  true,
+                           "publicRpcBroadStateBlockedPreflight":  true,
+                           "publicRpcPrivateWalletCreateBlockedPreflight":  true,
+                           "publicRpcAuthorizationForwardingScoped":  true,
+                           "publicRpcSecurityHeaders":  true,
+                           "publicRpcSecurityHeaderPreflight":  true,
+                           "publicRpcWalletCutoverCommands":  true,
+                           "publicRpcRenderedDisallowedOriginProbe":  true,
+                           "publicRpcRenderedBroadStateBlockedProbe":  true,
+                           "publicRpcRenderedPrivateWalletCreateBlockedProbe":  true,
+                           "publicRpcRenderedAuthorizationForwardingScoped":  true,
+                           "publicRpcRenderedSecurityHeaders":  true,
+                           "publicRpcRenderedSecurityHeaderPreflight":  true,
+                           "publicRpcCommandPlanWalletCutoverProof":  true,
+                           "publicRpcCommandPlanTesterGatewayE2e":  true,
+                           "publicRpcCommandPlanWalletTesterE2e":  true,
+                           "publicRpcCommandPlanCutoverRehearsal":  true,
+                           "publicRpcCommandPlanTruthTable":  true,
+                           "publicRpcCommandPlanNoSecretScan":  true,
+                           "backup":  "blocked",
+                           "backupRetentionCount":  null,
+                           "backupRetentionCandidateCount":  null,
+                           "backupRetentionCurrentSnapshotProtected":  false,
+                           "backupRetentionPruneErrorCount":  0,
+                           "bridgeLive":  "blocked",
+                           "bridgeInfra":  "blocked",
+                           "bridgeRelayer":  "blocked",
+                           "bridgeRelayerCheckContractReady":  true,
+                           "bridgeRelayerFailedChecks":  0,
+                           "bridgeRelayerMissingChecks":  0,
+                           "bridgeRelayerGuardrail":  "passed",
+                           "bridgeRelayerGuardrailReady":  true,
+                           "bridgeRelayerDirectObserveGuardrailReady":  true,
+                           "bridgeDirectObserveUsesStagedCursorByDefault":  true,
+                           "bridgeDirectObserveCursorNotFinal":  true,
+                           "bridgeDirectObserveFinalCursorUnchanged":  true,
+                           "bridgeDirectObserveStagedCursorNotWritten":  true,
+                           "bridgeRelayerLatencyGate":  "not-run",
+                           "bridgeRelayerCursorCommitRequired":  true,
+                           "bridgeRelayerCursorCommitted":  false,
+                           "bridgeRelayerCursorReason":  "not-run",
+                           "bridgeRuntimeCredit":  "passed",
+                           "bridgeRuntimeCreditReady":  true,
+                           "bridgeRuntimeCreditLatencySeconds":  0.679,
+                           "bridgeRuntimeTransferLatencySeconds":  0.609,
+                           "bridgeRuntimeCreditFailedChecks":  0,
+                           "bridgeRuntimeCreditMissingRuntimeChecks":  0,
+                           "bridgeRuntimeCreditFalseRuntimeChecks":  0,
+                           "bridgeRuntimeCreditProofFailedChecks":  0,
+                           "externalTester":  "blocked",
+                           "externalTesterLocalRehearsalReady":  true,
+                           "externalTesterExternalSharingReady":  false,
+                           "externalTesterServiceReady":  true,
+                           "externalTesterChainProducing":  true,
+                           "externalTesterWalletNetworkReady":  true,
+                           "externalTesterWalletNetworkFresh":  true,
+                           "externalTesterPacketSmokeValidated":  true,
+                           "externalTesterPublicGatewayReady":  true,
+                           "externalTesterPublicGatewayFresh":  true,
+                           "externalTesterFaucetRouteValidated":  true,
+                           "externalTesterLiveInfraReady":  false,
+                           "externalTesterMissingEnvCount":  14,
+                           "externalTesterTesterCount":  4,
+                           "publicTesterGateway":  "failed",
+                           "publicTesterGatewayReady":  false,
+                           "publicTesterGatewayAccountCount":  1,
+                           "publicTesterGatewayFailedChecks":  9,
+                           "publicTesterGatewayRouteCount":  2,
+                           "publicTesterGatewayTransferApplied":  false,
+                           "publicTesterGatewayCapRejected":  false,
+                           "publicTesterGatewayRoutesCovered":  false,
+                           "publicTesterGatewayNoSecrets":  true,
+                           "publicTesterGatewayNoBroadcasts":  true,
+                           "externalTesterEvidence":  "passed",
+                           "externalTesterEvidenceFailedChecks":  0,
+                           "externalTesterEvidenceMissingFiles":  0,
+                           "externalTesterEvidenceInvalidJson":  0,
+                           "externalTesterEvidenceSecretFindings":  0,
+                           "externalTesterEvidenceCredentialUrls":  0,
+                           "externalTesterEvidenceEnvAssignments":  0,
+                           "externalTesterEvidenceTransferConsistent":  true,
+                           "dashboardUi":  "passed",
+                           "dashboardUiReady":  true,
+                           "dashboardUiBrowserE2e":  true,
+                           "dashboardUiBuild":  true,
+                           "dashboardUiTesterWalletCreateCovered":  true,
+                           "dashboardUiTesterFaucetCovered":  true,
+                           "dashboardUiTesterSendCovered":  true,
+                           "dashboardUiTesterLaunchRouteCovered":  true,
+                           "dashboardUiExplorerRouteCovered":  true,
+                           "dashboardUiActivationRouteCovered":  true,
+                           "ownerInputsValidation":  "passed",
+                           "ownerInputsValidationReady":  true,
+                           "ownerInputsValidationScenarioCount":  6,
+                           "ownerInputsValidationFailedScenarios":  0,
+                           "ownerInputsValidationRequiredEnvCount":  17,
+                           "ownerActivationPlan":  "passed",
+                           "ownerActivationPlanReady":  true,
+                           "ownerActivationReady":  false,
+                           "ownerActivationStageCount":  8,
+                           "ownerActivationReadyStageCount":  1,
+                           "ownerActivationMissingEnvCount":  14,
+                           "ownerActivationInvalidEnvCount":  0,
+                           "publicDeployment":  "blocked",
+                           "deploymentRefreshAborted":  false,
+                           "deploymentRefreshAbortStep":  "",
+                           "deploymentRefreshAbortReason":  "",
+                           "deploymentRefreshFailedSteps":  [
+
+                                                            ],
+                           "deploymentRefreshTimedOutSteps":  [
+
+                                                              ],
+                           "deploymentRefreshSkippedSteps":  [
+
+                                                             ],
+                           "truthTable":  "blocked-owner-input",
+                           "truthTableFailedGates":  0,
+                           "truthTableStaleGates":  0,
+                           "truthTableRepoBlockedGates":  0,
+                           "truthTableUnsafeGateIds":  [
+
+                                                       ],
+                           "noSecret":  "passed"
+                       },
+    "findings":  [
+                     {
+                         "severity":  "blocked",
+                         "code":  "public-rpc-not-ready",
+                         "message":  "Public RPC is not ready to share.",
+                         "commands":  [
+                                          "npm run flowchain:public-rpc:check",
+                                          "npm run flowchain:public-rpc:validate",
+                                          "npm run flowchain:public-rpc:abuse-test"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
+                         "code":  "backup-not-ready",
+                         "message":  "State backup is not ready for public operation.",
+                         "commands":  [
+                                          "npm run flowchain:backup:restore:validate",
+                                          "npm run flowchain:backup:check"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
+                         "code":  "bridge-not-ready",
+                         "message":  "Base 8453 bridge readiness is not ready for external funded testing.",
+                         "commands":  [
+                                          "npm run flowchain:bridge:live:check",
+                                          "npm run flowchain:bridge:infra:check",
+                                          "npm run flowchain:bridge:emergency-stop"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
+                         "code":  "bridge-relayer-not-ready",
+                         "message":  "Bridge relayer one-shot proof is not ready.",
+                         "commands":  [
+                                          "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                                          "npm run flowchain:bridge:live:check",
+                                          "npm run flowchain:bridge:infra:check"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
+                         "code":  "external-tester-not-shareable",
+                         "message":  "External tester launch is not shareable; local rehearsal, public tester gateway, faucet route, external sharing, and live infra readiness must all pass first.",
+                         "commands":  [
+                                          "npm run flowchain:wallet:live-tester:e2e",
+                                          "npm run flowchain:tester:gateway:e2e",
+                                          "npm run flowchain:tester:readiness -- -AllowBlocked",
+                                          "npm run flowchain:external-tester:packet -- -AllowBlocked"
+                                      ]
+                     },
+                     {
+                         "severity":  "critical",
+                         "code":  "public-tester-gateway-e2e-failed",
+                         "message":  "Public tester gateway E2E proof is missing or unsafe; wallet create, faucet, capped send, cap rejection, routes, no-secret, and no-broadcast checks must pass.",
+                         "commands":  [
+                                          "npm run flowchain:tester:gateway:e2e",
+                                          "npm run flowchain:tester:readiness -- -AllowBlocked",
+                                          "npm run flowchain:external-tester:packet -- -AllowBlocked"
+                                      ]
+                     },
+                     {
+                         "severity":  "blocked",
+                         "code":  "deployment-contract-not-ready",
+                         "message":  "Public deployment contract is not ready.",
+                         "commands":  [
+                                          "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+                                      ]
+                     }
+                 ],
+    "criticalCount":  1,
+    "blockedCount":  6,
+    "incidentCommands":  {
+                             "status":  [
+                                            "npm run flowchain:ops:snapshot",
+                                            "npm run flowchain:service:status",
+                                            "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30"
+                                        ],
+                             "restart":  [
+                                             "npm run flowchain:service:restart -- -LiveProfile",
+                                             "npm run flowchain:service:status"
+                                         ],
+                             "backupRecovery":  [
+                                                    "npm run flowchain:backup:restore:validate",
+                                                    "npm run flowchain:backup:create",
+                                                    "npm run flowchain:backup:restore:verify"
+                                                ],
+                             "publicExposure":  [
+                                                    "npm run flowchain:public-rpc:check",
+                                                    "npm run flowchain:public-rpc:abuse-test",
+                                                    "npm run flowchain:public-rpc:deployment-bundle",
+                                                    "npm run flowchain:public-rpc:deployment:automation",
+                                                    "npm run flowchain:external-tester:packet"
+                                                ],
+                             "productSurface":  [
+                                                    "npm run flowchain:dashboard:ui:readiness",
+                                                    "npm run flowchain:tester:evidence:validate",
+                                                    "npm run flowchain:external-tester:packet"
+                                                ],
+                             "ownerInputs":  [
+                                                 "npm run flowchain:owner-inputs:validate",
+                                                 "npm run flowchain:owner-inputs",
+                                                 "npm run flowchain:owner-env:readiness"
+                                             ],
+                             "drills":  [
+                                            "npm run flowchain:ops:incident-drill",
+                                            "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh"
+                                        ],
+                             "emergency":  [
+                                               "npm run flowchain:emergency:stop-local",
+                                               "npm run flowchain:bridge:emergency-stop",
+                                               "npm run flowchain:emergency:export-evidence"
+                                           ],
+                             "bridgeRelayerLoop":  [
+                                                       "npm run flowchain:service:status",
+                                                       "npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop",
+                                                       "npm run flowchain:bridge:relayer:loop:validate",
+                                                       "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop"
+                                                   ]
+                         },
+    "reportPaths":  {
+                        "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\service-status-report.json",
+                        "serviceSupervisor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\service-supervisor-report.json",
+                        "serviceSupervisorValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\service-supervisor-validation-report.json",
+                        "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\service-monitor-report.json",
+                        "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\public-rpc-readiness-report.json",
+                        "publicRpcDeploymentBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\public-rpc-deployment-bundle-report.json",
+                        "publicRpcDeploymentAutomation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\public-rpc-deployment-automation-report.json",
+                        "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\backup-readiness-report.json",
+                        "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\bridge-live-readiness-report.json",
+                        "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\bridge-infra-readiness-report.json",
+                        "bridgeRelayer":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\bridge-relayer-once-report.json",
+                        "bridgeRelayerGuardrail":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\bridge-relayer-guardrail-validation-report.json",
+                        "bridgeRuntimeCredit":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\bridge-runtime-credit-validation-report.json",
+                        "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\external-tester-readiness-report.json",
+                        "publicTesterGateway":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\public-tester-gateway-e2e-report.json",
+                        "externalTesterEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\external-tester-evidence-validation-report.json",
+                        "dashboardUi":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\dashboard-ui-readiness-report.json",
+                        "ownerInputsValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\owner-inputs-validation-report.json",
+                        "ownerActivationPlan":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\owner-activation-plan-report.json",
+                        "publicDeployment":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\public-deployment-contract-report.json",
+                        "truthTable":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\production-truth-table-report.json",
+                        "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drills\\public-tester-gateway-e2e-critical\\input\\no-secret-scan-report.json"
+                    },
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

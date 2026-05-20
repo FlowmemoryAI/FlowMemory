@@ -2498,6 +2498,7 @@ $incidentDrillRequiredChecks = @(
     "allCasesPassed",
     "failedCasesAbsent",
     "minimumCaseCountMet",
+    "publicTesterGatewayIncidentCovered",
     "recoveryCommandPrinted",
     "postDrillLiveStatusPassed",
     "liveStateBeforeReadable",
@@ -2520,7 +2521,7 @@ $incidentDrillPassed = $incidentDrillExitCode -eq 0 `
     -and $incidentDrillSecretFindingCount -eq 0 `
     -and $incidentDrillMissingCheckCount -eq 0 `
     -and $incidentFailedCases -eq 0 `
-    -and $incidentTotalCases -ge 8 `
+    -and $incidentTotalCases -ge 20 `
     -and ((Get-AuditProp -Object $incidentDrill -Name "mutatesLiveState" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $incidentDrill -Name "noLiveBroadcast" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $incidentDrill -Name "broadcasts" -Default $true) -eq $false) `
@@ -2906,7 +2907,7 @@ Add-AuditItem -Items $items -Id "ops-escalation-dry-run" `
     -Commands @("npm run flowchain:ops:escalation:dry-run -- -NoRefresh")
 
 Add-AuditItem -Items $items -Id "incident-drill" `
-    -Requirement "Incident drills prove node-down, control-plane-down, stale-state, stalled-height, and no-secret failures classify as critical while owner-input blockers stay non-critical." `
+    -Requirement "Incident drills prove node-down, control-plane-down, stale-state, stalled-height, public tester gateway, and no-secret failures classify as critical while owner-input blockers stay non-critical." `
     -Status $(if ($incidentDrillPassed) { "passed" } else { "failed" }) `
     -Evidence "incidentStatus=$incidentDrillStatus, ready=$incidentDrillReady, cases=$incidentTotalCases, failedCases=$incidentFailedCases, failedChecks=$incidentDrillFailedCheckCount, secretFindings=$incidentDrillSecretFindingCount, missingChecks=$incidentDrillMissingCheckCount, report=$($paths.incidentDrill)" `
     -Commands @("npm run flowchain:ops:incident-drill")

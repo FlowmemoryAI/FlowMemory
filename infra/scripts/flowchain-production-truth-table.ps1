@@ -1911,6 +1911,7 @@ $definitions = @(
             "allCasesPassed",
             "failedCasesAbsent",
             "minimumCaseCountMet",
+            "publicTesterGatewayIncidentCovered",
             "recoveryCommandPrinted",
             "postDrillLiveStatusPassed",
             "liveStateBeforeReadable",
