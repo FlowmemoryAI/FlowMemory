@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T19:20:23.5969868Z",
+    "generatedAt":  "2026-05-20T19:31:41.1635747Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -9,6 +9,7 @@
                           "publicRpcSyntheticCanaryStatus":  "blocked",
                           "publicRpcDeploymentBundleStatus":  "passed",
                           "publicRpcDeploymentAutomationStatus":  "passed",
+                          "bridgeRelayerLoopValidationStatus":  "passed",
                           "bridgeReleaseEvidenceValidationStatus":  "passed",
                           "externalTesterStatus":  "blocked",
                           "publicTesterGatewayStatus":  "passed",
@@ -558,6 +559,66 @@
                         "value":  0
                     },
                     {
+                        "name":  "flowchain_bridge_relayer_loop_validation_ready",
+                        "type":  "gauge",
+                        "help":  "One when bridge relayer loop start/status/stop validation is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in bridge relayer loop validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_secret_findings",
+                        "type":  "gauge",
+                        "help":  "Secret marker findings in bridge relayer loop validation.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_poll_seconds",
+                        "type":  "gauge",
+                        "help":  "Configured bridge relayer loop poll seconds from validation.",
+                        "value":  5
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_settle_seconds",
+                        "type":  "gauge",
+                        "help":  "Configured bridge relayer loop validation settle seconds.",
+                        "value":  5
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_report_fresh",
+                        "type":  "gauge",
+                        "help":  "One when bridge relayer loop validation observed a fresh relayer report.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_blocked_only_owner_inputs",
+                        "type":  "gauge",
+                        "help":  "One when bridge relayer loop validation is blocked only by owner inputs.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_pid_cleanup_verified",
+                        "type":  "gauge",
+                        "help":  "One when bridge relayer loop validation proves stop removed PID state and no validation relayer process remains.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when bridge relayer loop validation reports no secrets and has no secret findings.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_relayer_loop_no_broadcasts",
+                        "type":  "gauge",
+                        "help":  "One when bridge relayer loop validation made no live broadcasts.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_supervisor_bridge_relayer_requested",
                         "type":  "gauge",
                         "help":  "One when the latest service supervisor report requested bridge relayer loop supervision.",
@@ -1032,7 +1093,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  168,
+    "metricCount":  178,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

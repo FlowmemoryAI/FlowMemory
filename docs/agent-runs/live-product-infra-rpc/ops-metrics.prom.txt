@@ -265,6 +265,36 @@ flowchain_real_value_pilot_aggregate_owner_go_no_go 1
 # HELP flowchain_bridge_relayer_loop_healthy One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence.
 # TYPE flowchain_bridge_relayer_loop_healthy gauge
 flowchain_bridge_relayer_loop_healthy 0
+# HELP flowchain_bridge_relayer_loop_validation_ready One when bridge relayer loop start/status/stop validation is passed.
+# TYPE flowchain_bridge_relayer_loop_validation_ready gauge
+flowchain_bridge_relayer_loop_validation_ready 1
+# HELP flowchain_bridge_relayer_loop_failed_checks Failed checks in bridge relayer loop validation.
+# TYPE flowchain_bridge_relayer_loop_failed_checks gauge
+flowchain_bridge_relayer_loop_failed_checks 0
+# HELP flowchain_bridge_relayer_loop_secret_findings Secret marker findings in bridge relayer loop validation.
+# TYPE flowchain_bridge_relayer_loop_secret_findings gauge
+flowchain_bridge_relayer_loop_secret_findings 0
+# HELP flowchain_bridge_relayer_loop_poll_seconds Configured bridge relayer loop poll seconds from validation.
+# TYPE flowchain_bridge_relayer_loop_poll_seconds gauge
+flowchain_bridge_relayer_loop_poll_seconds 5
+# HELP flowchain_bridge_relayer_loop_settle_seconds Configured bridge relayer loop validation settle seconds.
+# TYPE flowchain_bridge_relayer_loop_settle_seconds gauge
+flowchain_bridge_relayer_loop_settle_seconds 5
+# HELP flowchain_bridge_relayer_loop_report_fresh One when bridge relayer loop validation observed a fresh relayer report.
+# TYPE flowchain_bridge_relayer_loop_report_fresh gauge
+flowchain_bridge_relayer_loop_report_fresh 1
+# HELP flowchain_bridge_relayer_loop_blocked_only_owner_inputs One when bridge relayer loop validation is blocked only by owner inputs.
+# TYPE flowchain_bridge_relayer_loop_blocked_only_owner_inputs gauge
+flowchain_bridge_relayer_loop_blocked_only_owner_inputs 1
+# HELP flowchain_bridge_relayer_loop_pid_cleanup_verified One when bridge relayer loop validation proves stop removed PID state and no validation relayer process remains.
+# TYPE flowchain_bridge_relayer_loop_pid_cleanup_verified gauge
+flowchain_bridge_relayer_loop_pid_cleanup_verified 1
+# HELP flowchain_bridge_relayer_loop_no_secrets One when bridge relayer loop validation reports no secrets and has no secret findings.
+# TYPE flowchain_bridge_relayer_loop_no_secrets gauge
+flowchain_bridge_relayer_loop_no_secrets 1
+# HELP flowchain_bridge_relayer_loop_no_broadcasts One when bridge relayer loop validation made no live broadcasts.
+# TYPE flowchain_bridge_relayer_loop_no_broadcasts gauge
+flowchain_bridge_relayer_loop_no_broadcasts 1
 # HELP flowchain_supervisor_bridge_relayer_requested One when the latest service supervisor report requested bridge relayer loop supervision.
 # TYPE flowchain_supervisor_bridge_relayer_requested gauge
 flowchain_supervisor_bridge_relayer_requested 0

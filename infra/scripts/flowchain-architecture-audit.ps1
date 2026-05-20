@@ -331,6 +331,20 @@ $supervisorNodeRecoveryMetricNames = @(
 )
 $missingSupervisorNodeRecoveryMetricNames = @($supervisorNodeRecoveryMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
 $opsMetricsHasSupervisorNodeRecoveryMetrics = $missingSupervisorNodeRecoveryMetricNames.Count -eq 0
+$bridgeRelayerLoopValidationMetricNames = @(
+    "flowchain_bridge_relayer_loop_validation_ready",
+    "flowchain_bridge_relayer_loop_failed_checks",
+    "flowchain_bridge_relayer_loop_secret_findings",
+    "flowchain_bridge_relayer_loop_poll_seconds",
+    "flowchain_bridge_relayer_loop_settle_seconds",
+    "flowchain_bridge_relayer_loop_report_fresh",
+    "flowchain_bridge_relayer_loop_blocked_only_owner_inputs",
+    "flowchain_bridge_relayer_loop_pid_cleanup_verified",
+    "flowchain_bridge_relayer_loop_no_secrets",
+    "flowchain_bridge_relayer_loop_no_broadcasts"
+)
+$missingBridgeRelayerLoopValidationMetricNames = @($bridgeRelayerLoopValidationMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasBridgeRelayerLoopValidationMetrics = $missingBridgeRelayerLoopValidationMetricNames.Count -eq 0
 $externalTesterClientMetricNames = @(
     "flowchain_external_tester_client_validation_ready",
     "flowchain_external_tester_client_failed_checks",
@@ -465,6 +479,8 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false) -eq $true) `
     -and ($opsMetricsHasPublicRpcSecurityHeaderMetrics -eq $true) `
     -and ($opsMetricsHasSupervisorNodeRecoveryMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "bridgeRelayerLoopValidationMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasBridgeRelayerLoopValidationMetrics -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "bridgeReleaseEvidenceMetricsPresent" -Default $false) -eq $true) `
     -and ($opsMetricsHasBridgeReleaseEvidenceMetrics -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "externalTesterClientMetricsPresent" -Default $false) -eq $true) `
@@ -492,9 +508,9 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ($incidentFailedCases -eq 0) `
     -and ($incidentTotalCases -ge 8)
 Add-ArchitectureItem -Items $items -Id "ops-observability-boundary" -Layer "Operations" `
-    -Requirement "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, bridge release-evidence validation telemetry, external tester client validation telemetry, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers." `
+    -Requirement "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, bridge relayer-loop validation telemetry, bridge release-evidence validation telemetry, external tester client validation telemetry, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers." `
     -Status $(if ($observabilityReady) { "passed" } else { "failed" }) `
-    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, supervisorNodeRestartAttempts=$supervisorNodeRestartAttempts, supervisorNodeRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryNodeRunning" -Default $false), supervisorRelayerRestartAttempts=$supervisorRelayerRestartAttempts, supervisorRelayerRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false), opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), alertInstall=$alertInstallValidationStatus, systemdAlert=$(Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false), alertInstallFailedChecks=$($alertInstallFailedChecks.Count), metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, publicRpcEdgeMetrics=$(Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), publicRpcSecurityHeaderMetrics=$opsMetricsHasPublicRpcSecurityHeaderMetrics, supervisorNodeRecoveryMetrics=$opsMetricsHasSupervisorNodeRecoveryMetrics, bridgeReleaseEvidenceMetrics=$opsMetricsHasBridgeReleaseEvidenceMetrics, externalTesterClientMetrics=$opsMetricsHasExternalTesterClientMetrics, metricsInstall=$metricsInstallValidationStatus, systemdMetrics=$(Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdValidationPassed" -Default $false), metricsInstallFailedChecks=$($metricsInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
+    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, supervisorNodeRestartAttempts=$supervisorNodeRestartAttempts, supervisorNodeRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryNodeRunning" -Default $false), supervisorRelayerRestartAttempts=$supervisorRelayerRestartAttempts, supervisorRelayerRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false), opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), alertInstall=$alertInstallValidationStatus, systemdAlert=$(Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false), alertInstallFailedChecks=$($alertInstallFailedChecks.Count), metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, publicRpcEdgeMetrics=$(Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), publicRpcSecurityHeaderMetrics=$opsMetricsHasPublicRpcSecurityHeaderMetrics, supervisorNodeRecoveryMetrics=$opsMetricsHasSupervisorNodeRecoveryMetrics, bridgeRelayerLoopValidationMetrics=$opsMetricsHasBridgeRelayerLoopValidationMetrics, bridgeReleaseEvidenceMetrics=$opsMetricsHasBridgeReleaseEvidenceMetrics, externalTesterClientMetrics=$opsMetricsHasExternalTesterClientMetrics, metricsInstall=$metricsInstallValidationStatus, systemdMetrics=$(Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdValidationPassed" -Default $false), metricsInstallFailedChecks=$($metricsInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
     -Files $observabilityFiles `
     -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:alerts:install:systemd:validate", "npm run flowchain:ops:metrics:export -- -AllowBlocked", "npm run flowchain:ops:metrics:install:validate", "npm run flowchain:ops:metrics:install:systemd:validate", "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
 
@@ -1729,6 +1745,8 @@ $report = [ordered]@{
         missingPublicRpcSecurityHeaderMetricNames = @($missingPublicRpcSecurityHeaderMetricNames)
         supervisorNodeRecoveryMetricsPresent = $opsMetricsHasSupervisorNodeRecoveryMetrics
         missingSupervisorNodeRecoveryMetricNames = @($missingSupervisorNodeRecoveryMetricNames)
+        bridgeRelayerLoopValidationMetricsPresent = $opsMetricsHasBridgeRelayerLoopValidationMetrics
+        missingBridgeRelayerLoopValidationMetricNames = @($missingBridgeRelayerLoopValidationMetricNames)
         bridgeReleaseEvidenceMetricsPresent = $opsMetricsHasBridgeReleaseEvidenceMetrics
         missingBridgeReleaseEvidenceMetricNames = @($missingBridgeReleaseEvidenceMetricNames)
         externalTesterClientMetricsPresent = $opsMetricsHasExternalTesterClientMetrics

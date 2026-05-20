@@ -2176,6 +2176,7 @@ $definitions = @(
             "requiredMetricsPresent",
             "externalTesterEvidenceMetricsPresent",
             "publicTesterGatewayMetricsPresent",
+            "bridgeRelayerLoopValidationMetricsPresent",
             "bridgeReleaseEvidenceMetricsPresent",
             "externalTesterClientMetricsPresent",
             "ownerGoLiveHandoffMetricsPresent",

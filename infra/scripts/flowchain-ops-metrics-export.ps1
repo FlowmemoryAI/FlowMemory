@@ -32,6 +32,7 @@ $paths = [ordered]@{
     bridgeLive = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
     bridgeRelayerGuardrail = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
+    bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
     bridgeReleaseEvidenceValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-validation-report.json"
     realValuePilotAggregate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
@@ -228,6 +229,7 @@ $dashboardUi = $reports.dashboardUi
 $ownerInputsValidation = $reports.ownerInputsValidation
 $ownerActivationPlan = $reports.ownerActivationPlan
 $ownerGoLiveHandoff = $reports.ownerGoLiveHandoff
+$bridgeRelayerLoopValidation = $reports.bridgeRelayerLoopValidation
 $bridgeReleaseEvidenceValidation = $reports.bridgeReleaseEvidenceValidation
 $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
 $publicRpcDeploymentAutomation = $reports.publicRpcDeploymentAutomation
@@ -287,6 +289,12 @@ $publicRpcSyntheticCanaryChecks = Get-MetricsProp -Object $publicRpcSyntheticCan
 $publicRpcSyntheticCanaryMissingEnvCount = @((Get-MetricsProp -Object $publicRpcSyntheticCanary -Name "missingEnvNames" -Default @())).Count
 $publicRpcDeploymentBundleChecks = Get-MetricsProp -Object $publicRpcDeploymentBundle -Name "checks"
 $publicRpcDeploymentAutomationChecks = Get-MetricsProp -Object $publicRpcDeploymentAutomation -Name "checks"
+$bridgeRelayerLoopValidationChecks = Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "checks"
+$bridgeRelayerLoopValidationFailedChecks = @((Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "failedChecks" -Default @()))
+$bridgeRelayerLoopValidationSecretFindings = @((Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "secretMarkerFindings" -Default @()))
+$bridgeRelayerLoopValidationObserved = Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "observed"
+$bridgeRelayerLoopValidationStatusRelayer = Get-MetricsProp -Object $bridgeRelayerLoopValidationObserved -Name "statusRelayerLoop"
+$bridgeRelayerLoopValidationStatusReport = Get-MetricsProp -Object $bridgeRelayerLoopValidationStatusRelayer -Name "report"
 $bridgeReleaseEvidenceValidationChecks = Get-MetricsProp -Object $bridgeReleaseEvidenceValidation -Name "checks"
 $bridgeReleaseEvidenceValidationFailedChecks = @((Get-MetricsProp -Object $bridgeReleaseEvidenceValidation -Name "failedChecks" -Default @()))
 $bridgeReleaseEvidenceValidationFailedCases = @((Get-MetricsProp -Object $bridgeReleaseEvidenceValidation -Name "failedCases" -Default @()))
@@ -404,6 +412,16 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_real_value_pilot_aggregate_fa
 Add-MetricGauge -Metrics $metrics -Name "flowchain_real_value_pilot_aggregate_missing_proofs" -Help "Missing expected proof artifacts in the real-value pilot aggregate gate." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "realValuePilotAggregateMissingProofs"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_real_value_pilot_aggregate_owner_go_no_go" -Help "One when owner go/no-go is true in the real-value pilot aggregate gate." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "realValuePilotAggregateOwnerGoNoGo"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_loop_healthy" -Help "One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeRelayerLoopReportHealthy"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_loop_validation_ready" -Help "One when bridge relayer loop start/status/stop validation is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $bridgeRelayerLoopValidation))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_loop_failed_checks" -Help "Failed checks in bridge relayer loop validation." -Value (ConvertTo-MetricNumber -Value $bridgeRelayerLoopValidationFailedChecks.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_loop_secret_findings" -Help "Secret marker findings in bridge relayer loop validation." -Value (ConvertTo-MetricNumber -Value $bridgeRelayerLoopValidationSecretFindings.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_loop_poll_seconds" -Help "Configured bridge relayer loop poll seconds from validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "bridgePollSeconds" -Default 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_loop_settle_seconds" -Help "Configured bridge relayer loop validation settle seconds." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "settleSeconds" -Default 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_loop_report_fresh" -Help "One when bridge relayer loop validation observed a fresh relayer report." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $bridgeRelayerLoopValidationStatusReport -Name "fresh" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_loop_blocked_only_owner_inputs" -Help "One when bridge relayer loop validation is blocked only by owner inputs." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $bridgeRelayerLoopValidationStatusReport -Name "blockedOnlyOnOwnerInputs" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_loop_pid_cleanup_verified" -Help "One when bridge relayer loop validation proves stop removed PID state and no validation relayer process remains." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $bridgeRelayerLoopValidationChecks -Name "statusAfterStopNotRunning" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $bridgeRelayerLoopValidationChecks -Name "relayerPidFileRemovedAfterStop" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $bridgeRelayerLoopValidationChecks -Name "noValidationRelayerProcessAfterStop" -Default $false) -eq $true)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_loop_no_secrets" -Help "One when bridge relayer loop validation reports no secrets and has no secret findings." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "noSecrets" -Default $false) -eq $true) -and $bridgeRelayerLoopValidationSecretFindings.Count -eq 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_relayer_loop_no_broadcasts" -Help "One when bridge relayer loop validation made no live broadcasts." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "broadcasts" -Default $true) -eq $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_bridge_relayer_requested" -Help "One when the latest service supervisor report requested bridge relayer loop supervision." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorBridgeRelayerRequested"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_bridge_relayer_recovery_healthy" -Help "One when supervisor relayer-loop recovery evidence is healthy, or relayer supervision was not requested." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorBridgeRelayerRecoveryHealthy"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_supervisor_node_recovery_validated" -Help "One when isolated supervisor validation proves node crash recovery under the live profile." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "supervisorNodeRecoveryHealthy"))
@@ -501,6 +519,7 @@ $metricsJson = [ordered]@{
         publicRpcSyntheticCanaryStatus = Get-MetricsStatus -Report $publicRpcSyntheticCanary
         publicRpcDeploymentBundleStatus = Get-MetricsStatus -Report $publicRpcDeploymentBundle
         publicRpcDeploymentAutomationStatus = Get-MetricsStatus -Report $publicRpcDeploymentAutomation
+        bridgeRelayerLoopValidationStatus = Get-MetricsStatus -Report $bridgeRelayerLoopValidation
         bridgeReleaseEvidenceValidationStatus = Get-MetricsStatus -Report $bridgeReleaseEvidenceValidation
         externalTesterStatus = Get-MetricsStatus -Report $externalTester
         publicTesterGatewayStatus = Get-MetricsStatus -Report $publicTesterGateway
@@ -610,6 +629,16 @@ $requiredMetricNames = @(
     "flowchain_real_value_pilot_aggregate_missing_proofs",
     "flowchain_real_value_pilot_aggregate_owner_go_no_go",
     "flowchain_bridge_relayer_loop_healthy",
+    "flowchain_bridge_relayer_loop_validation_ready",
+    "flowchain_bridge_relayer_loop_failed_checks",
+    "flowchain_bridge_relayer_loop_secret_findings",
+    "flowchain_bridge_relayer_loop_poll_seconds",
+    "flowchain_bridge_relayer_loop_settle_seconds",
+    "flowchain_bridge_relayer_loop_report_fresh",
+    "flowchain_bridge_relayer_loop_blocked_only_owner_inputs",
+    "flowchain_bridge_relayer_loop_pid_cleanup_verified",
+    "flowchain_bridge_relayer_loop_no_secrets",
+    "flowchain_bridge_relayer_loop_no_broadcasts",
     "flowchain_supervisor_bridge_relayer_requested",
     "flowchain_supervisor_bridge_relayer_recovery_healthy",
     "flowchain_supervisor_node_recovery_validated",
@@ -695,6 +724,7 @@ $checks = [ordered]@{
     publicTesterGatewayLoaded = $null -ne $publicTesterGateway
     externalTesterClientValidationLoaded = $null -ne $externalTesterClientValidation
     externalTesterEvidenceLoaded = $null -ne $externalTesterEvidence
+    bridgeRelayerLoopValidationLoaded = $null -ne $bridgeRelayerLoopValidation
     bridgeReleaseEvidenceValidationLoaded = $null -ne $bridgeReleaseEvidenceValidation
     dashboardUiLoaded = $null -ne $dashboardUi
     ownerInputsValidationLoaded = $null -ne $ownerInputsValidation
@@ -764,6 +794,18 @@ $checks = [ordered]@{
         "flowchain_real_value_pilot_aggregate_failed_commands",
         "flowchain_real_value_pilot_aggregate_missing_proofs",
         "flowchain_real_value_pilot_aggregate_owner_go_no_go"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    bridgeRelayerLoopValidationMetricsPresent = @(
+        "flowchain_bridge_relayer_loop_validation_ready",
+        "flowchain_bridge_relayer_loop_failed_checks",
+        "flowchain_bridge_relayer_loop_secret_findings",
+        "flowchain_bridge_relayer_loop_poll_seconds",
+        "flowchain_bridge_relayer_loop_settle_seconds",
+        "flowchain_bridge_relayer_loop_report_fresh",
+        "flowchain_bridge_relayer_loop_blocked_only_owner_inputs",
+        "flowchain_bridge_relayer_loop_pid_cleanup_verified",
+        "flowchain_bridge_relayer_loop_no_secrets",
+        "flowchain_bridge_relayer_loop_no_broadcasts"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     publicRpcEdgeMetricsPresent = @(
         "flowchain_public_rpc_synthetic_canary_ready",
