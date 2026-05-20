@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T23:06:59.4648015Z",
+    "generatedAt":  "2026-05-20T23:22:30.2989695Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -35,19 +35,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  107268
+                        "value":  107373
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  107268
+                        "value":  107373
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  0
+                        "value":  2
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -89,7 +89,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  7091.653
+                        "value":  8030.755
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -1568,6 +1568,12 @@
                         "value":  36
                     },
                     {
+                        "name":  "flowchain_owner_go_live_launch_missing_package_scripts",
+                        "type":  "gauge",
+                        "help":  "Missing package scripts referenced by owner go-live launch sequence npm commands.",
+                        "value":  0
+                    },
+                    {
                         "name":  "flowchain_owner_go_live_rollback_ready",
                         "type":  "gauge",
                         "help":  "One when owner go-live rollback commands cover ops snapshot, local service stop, and bridge emergency stop.",
@@ -1578,6 +1584,12 @@
                         "type":  "gauge",
                         "help":  "Owner go-live rollback command count.",
                         "value":  7
+                    },
+                    {
+                        "name":  "flowchain_owner_go_live_rollback_missing_package_scripts",
+                        "type":  "gauge",
+                        "help":  "Missing package scripts referenced by owner go-live rollback npm commands.",
+                        "value":  0
                     },
                     {
                         "name":  "flowchain_public_deployment_ready",
@@ -1652,7 +1664,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  270,
+    "metricCount":  272,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

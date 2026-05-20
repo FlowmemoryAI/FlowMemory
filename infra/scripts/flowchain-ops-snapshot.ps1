@@ -914,7 +914,9 @@ $ownerGoLiveHandoffChecks = Get-OpsProp -Object $reports.ownerGoLiveHandoff -Nam
 $ownerGoLiveHandoffStageCount = [int](Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "stageCount" -Default 0)
 $ownerGoLiveHandoffLaunchSequenceCount = [int](Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "launchSequenceCount" -Default 0)
 $ownerGoLiveHandoffLaunchSequenceCommandCount = [int](Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "launchSequenceCommandCount" -Default 0)
+$ownerGoLiveHandoffMissingLaunchPackageScripts = @((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "missingLaunchSequencePackageScriptNames" -Default @()))
 $ownerGoLiveHandoffRollbackCommandCount = [int](Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "rollbackCommandCount" -Default 0)
+$ownerGoLiveHandoffMissingRollbackPackageScripts = @((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "missingRollbackPackageScriptNames" -Default @()))
 $ownerGoLiveHandoffReleaseReady = (Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "releaseReady" -Default $false) -eq $true
 $ownerGoLiveHandoffReady = $ownerGoLiveHandoffStatus -eq "passed" `
     -and $ownerGoLiveHandoffFailedChecks.Count -eq 0 `
@@ -927,9 +929,13 @@ $ownerGoLiveHandoffReady = $ownerGoLiveHandoffStatus -eq "passed" `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepStopsOnFailure" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversCutoverAudit" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversTruthAndNoSecret" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequencePackageScriptsPresent" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCommandsPresent" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversLocalStop" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversBridgeEmergencyStop" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackPackageScriptsPresent" -Default $false) -eq $true) `
+    -and $ownerGoLiveHandoffMissingLaunchPackageScripts.Count -eq 0 `
+    -and $ownerGoLiveHandoffMissingRollbackPackageScripts.Count -eq 0 `
     -and ((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "broadcasts" -Default $true) -eq $false)
@@ -1404,7 +1410,9 @@ $report = [ordered]@{
         ownerGoLiveStageCount = $ownerGoLiveHandoffStageCount
         ownerGoLiveLaunchSequenceCount = $ownerGoLiveHandoffLaunchSequenceCount
         ownerGoLiveLaunchSequenceCommandCount = $ownerGoLiveHandoffLaunchSequenceCommandCount
+        ownerGoLiveMissingLaunchPackageScripts = $ownerGoLiveHandoffMissingLaunchPackageScripts.Count
         ownerGoLiveRollbackCommandCount = $ownerGoLiveHandoffRollbackCommandCount
+        ownerGoLiveMissingRollbackPackageScripts = $ownerGoLiveHandoffMissingRollbackPackageScripts.Count
         ownerGoLiveNextInputCount = $ownerGoLiveHandoffNextInputs.Count
         ownerGoLiveFailedChecks = $ownerGoLiveHandoffFailedChecks.Count
         ownerGoLiveSecretFindings = $ownerGoLiveHandoffSecretFindings.Count

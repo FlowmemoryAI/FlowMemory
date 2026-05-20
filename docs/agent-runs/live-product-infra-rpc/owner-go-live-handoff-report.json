@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.owner_go_live_handoff_report.v0",
-    "generatedAt":  "2026-05-20T23:05:47.5233940Z",
+    "generatedAt":  "2026-05-20T23:21:04.1594641Z",
     "status":  "passed",
     "releaseReady":  false,
     "activationReady":  false,
@@ -42,10 +42,12 @@
                    "launchSequenceCoversTruthAndNoSecret":  true,
                    "launchSequenceCommandsAvoidInlineEnvAssignment":  true,
                    "launchSequenceCommandsAvoidUrls":  true,
+                   "launchSequencePackageScriptsPresent":  true,
                    "rollbackCommandsPresent":  true,
                    "rollbackCoversLocalStop":  true,
                    "rollbackCoversBridgeEmergencyStop":  true,
                    "rollbackCoversOpsSnapshot":  true,
+                   "rollbackPackageScriptsPresent":  true,
                    "releaseClaimBlockedUntilTruthPassed":  true,
                    "packetShareBlockedUntilReady":  true,
                    "envValuesPrintedFalse":  true,
@@ -127,10 +129,18 @@
     "stageCount":  8,
     "readyStageCount":  1,
     "blockedStageCount":  7,
-    "nextCommandCount":  61,
+    "nextCommandCount":  62,
     "launchSequenceCount":  9,
     "launchSequenceCommandCount":  36,
+    "launchSequencePackageScriptCount":  34,
+    "missingLaunchSequencePackageScriptNames":  [
+
+                                                ],
     "rollbackCommandCount":  7,
+    "rollbackPackageScriptCount":  7,
+    "missingRollbackPackageScriptNames":  [
+
+                                          ],
     "mustNotSendCount":  18,
     "externalResourceCount":  10,
     "stages":  [
@@ -905,6 +915,7 @@
                          "npm run flowchain:owner:onboarding",
                          "npm run flowchain:owner:signup-checklist",
                          "npm run flowchain:owner:activation-plan",
+                         "npm run flowchain:owner:go-live-handoff",
                          "npm run flowchain:owner-env:readiness:validate",
                          "npm run flowchain:owner-inputs",
                          "npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json",

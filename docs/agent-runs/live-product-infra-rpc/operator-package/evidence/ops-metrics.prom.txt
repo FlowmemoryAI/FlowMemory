@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 107268
+flowchain_latest_height 107373
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 107268
+flowchain_finalized_height 107373
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 0
+flowchain_state_file_age_seconds 2
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -27,7 +27,7 @@ flowchain_transaction_intake_accepted_rows_total 187
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 7091.653
+flowchain_transaction_intake_file_age_seconds 8030.755
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -766,12 +766,18 @@ flowchain_owner_go_live_launch_sequence_steps 9
 # HELP flowchain_owner_go_live_launch_sequence_commands Ordered owner go-live launch sequence command count.
 # TYPE flowchain_owner_go_live_launch_sequence_commands gauge
 flowchain_owner_go_live_launch_sequence_commands 36
+# HELP flowchain_owner_go_live_launch_missing_package_scripts Missing package scripts referenced by owner go-live launch sequence npm commands.
+# TYPE flowchain_owner_go_live_launch_missing_package_scripts gauge
+flowchain_owner_go_live_launch_missing_package_scripts 0
 # HELP flowchain_owner_go_live_rollback_ready One when owner go-live rollback commands cover ops snapshot, local service stop, and bridge emergency stop.
 # TYPE flowchain_owner_go_live_rollback_ready gauge
 flowchain_owner_go_live_rollback_ready 1
 # HELP flowchain_owner_go_live_rollback_commands Owner go-live rollback command count.
 # TYPE flowchain_owner_go_live_rollback_commands gauge
 flowchain_owner_go_live_rollback_commands 7
+# HELP flowchain_owner_go_live_rollback_missing_package_scripts Missing package scripts referenced by owner go-live rollback npm commands.
+# TYPE flowchain_owner_go_live_rollback_missing_package_scripts gauge
+flowchain_owner_go_live_rollback_missing_package_scripts 0
 # HELP flowchain_public_deployment_ready One when public deployment contract is passed.
 # TYPE flowchain_public_deployment_ready gauge
 flowchain_public_deployment_ready 0

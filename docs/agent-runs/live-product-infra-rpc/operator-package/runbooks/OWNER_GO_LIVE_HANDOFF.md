@@ -1,6 +1,6 @@
 # FlowChain Owner Go-Live Handoff
 
-Generated: 2026-05-20T23:05:47.5233940Z
+Generated: 2026-05-20T23:21:04.1594641Z
 Status: passed
 Release ready: False
 
@@ -60,6 +60,13 @@ This handoff records names, statuses, resource boundaries, and validation comman
 - npm run flowchain:bridge:emergency-stop
 - npm run flowchain:public-deployment:contract -- -AllowBlocked
 
+## Package Script Coverage
+
+- Launch sequence package scripts: 34
+- Missing launch sequence package scripts: 0
+- Rollback package scripts: 7
+- Missing rollback package scripts: 0
+
 ## External Resources
 
 - Always-on Windows host, Linux host, or VPS
@@ -108,6 +115,7 @@ This handoff records names, statuses, resource boundaries, and validation comman
 - npm run flowchain:owner:onboarding
 - npm run flowchain:owner:signup-checklist
 - npm run flowchain:owner:activation-plan
+- npm run flowchain:owner:go-live-handoff
 - npm run flowchain:owner-env:readiness:validate
 - npm run flowchain:owner-inputs
 - npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json

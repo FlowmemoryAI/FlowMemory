@@ -109,6 +109,20 @@ function Test-HandoffPackageScript {
     return $packageJson.scripts.PSObject.Properties.Name -contains $Name
 }
 
+function Get-HandoffNpmRunScriptNames {
+    param([AllowNull()][object[]] $Commands)
+
+    $scriptNames = New-Object System.Collections.ArrayList
+    foreach ($command in @($Commands)) {
+        $text = "$command"
+        $match = [regex]::Match($text, '^\s*npm\s+run\s+([^\s]+)')
+        if ($match.Success) {
+            Add-HandoffUnique -Target $scriptNames -Value $match.Groups[1].Value
+        }
+    }
+    return @($scriptNames)
+}
+
 function New-HandoffReportStatus {
     param(
         [Parameter(Mandatory = $true)][string] $Name,
@@ -341,6 +355,10 @@ $rollbackCommands = @(
 $launchSequenceCommands = @($launchSequence | ForEach-Object { @($_.commands) })
 $launchSequenceCommandText = @($launchSequenceCommands) -join "`n"
 $rollbackCommandText = @($rollbackCommands) -join "`n"
+$launchSequencePackageScriptNames = @(Get-HandoffNpmRunScriptNames -Commands $launchSequenceCommands)
+$rollbackPackageScriptNames = @(Get-HandoffNpmRunScriptNames -Commands $rollbackCommands)
+$missingLaunchSequencePackageScriptNames = @($launchSequencePackageScriptNames | Where-Object { -not (Test-HandoffPackageScript -Name $_) })
+$missingRollbackPackageScriptNames = @($rollbackPackageScriptNames | Where-Object { -not (Test-HandoffPackageScript -Name $_) })
 
 $coveredRequiredEnvNames = New-Object System.Collections.ArrayList
 foreach ($stage in @($stages)) {
@@ -402,10 +420,12 @@ $checks = [ordered]@{
     launchSequenceCoversTruthAndNoSecret = $launchSequenceCommandText.Contains("flowchain:truth-table") -and $launchSequenceCommandText.Contains("flowchain:no-secret:scan")
     launchSequenceCommandsAvoidInlineEnvAssignment = @($launchSequenceCommands | Where-Object { "$_" -match '(^|\s)(\$env:)?[A-Z][A-Z0-9_]+\s*=' }).Count -eq 0
     launchSequenceCommandsAvoidUrls = @($launchSequenceCommands | Where-Object { "$_" -match 'https?://' }).Count -eq 0
+    launchSequencePackageScriptsPresent = $missingLaunchSequencePackageScriptNames.Count -eq 0
     rollbackCommandsPresent = @($rollbackCommands).Count -ge 4
     rollbackCoversLocalStop = $rollbackCommandText.Contains("flowchain:service:stop") -and $rollbackCommandText.Contains("flowchain:emergency:stop-local")
     rollbackCoversBridgeEmergencyStop = $rollbackCommandText.Contains("flowchain:bridge:emergency-stop")
     rollbackCoversOpsSnapshot = $rollbackCommandText.Contains("flowchain:ops:snapshot")
+    rollbackPackageScriptsPresent = $missingRollbackPackageScriptNames.Count -eq 0
     releaseClaimBlockedUntilTruthPassed = $releaseReady -or (-not $truthTableClear)
     packetShareBlockedUntilReady = $packetShareable -or (-not $releaseReady)
     envValuesPrintedFalse = $true
@@ -441,7 +461,11 @@ $report = [ordered]@{
     nextCommandCount = @($nextCommands).Count
     launchSequenceCount = @($launchSequence).Count
     launchSequenceCommandCount = @($launchSequenceCommands).Count
+    launchSequencePackageScriptCount = @($launchSequencePackageScriptNames).Count
+    missingLaunchSequencePackageScriptNames = @($missingLaunchSequencePackageScriptNames)
     rollbackCommandCount = @($rollbackCommands).Count
+    rollbackPackageScriptCount = @($rollbackPackageScriptNames).Count
+    missingRollbackPackageScriptNames = @($missingRollbackPackageScriptNames)
     mustNotSendCount = @($mustNotSend).Count
     externalResourceCount = @($externalResources).Count
     stages = @($stages)
@@ -510,6 +534,13 @@ $markdownLines.Add("")
 foreach ($command in @($rollbackCommands)) {
     $markdownLines.Add("- $command")
 }
+$markdownLines.Add("")
+$markdownLines.Add("## Package Script Coverage")
+$markdownLines.Add("")
+$markdownLines.Add("- Launch sequence package scripts: $(@($launchSequencePackageScriptNames).Count)")
+$markdownLines.Add("- Missing launch sequence package scripts: $(@($missingLaunchSequencePackageScriptNames).Count)")
+$markdownLines.Add("- Rollback package scripts: $(@($rollbackPackageScriptNames).Count)")
+$markdownLines.Add("- Missing rollback package scripts: $(@($missingRollbackPackageScriptNames).Count)")
 $markdownLines.Add("")
 $markdownLines.Add("## External Resources")
 $markdownLines.Add("")

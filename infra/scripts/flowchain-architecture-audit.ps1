@@ -1408,7 +1408,9 @@ $ownerGoLiveHandoffSecretFindings = @((Get-ArchitectureProp -Object $ownerGoLive
 $ownerGoLiveHandoffStageCount = [int](Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "stageCount" -Default 0)
 $ownerGoLiveHandoffLaunchSequenceCount = [int](Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "launchSequenceCount" -Default 0)
 $ownerGoLiveHandoffLaunchSequenceCommandCount = [int](Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "launchSequenceCommandCount" -Default 0)
+$ownerGoLiveHandoffMissingLaunchPackageScripts = @((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "missingLaunchSequencePackageScriptNames" -Default @()))
 $ownerGoLiveHandoffRollbackCommandCount = [int](Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "rollbackCommandCount" -Default 0)
+$ownerGoLiveHandoffMissingRollbackPackageScripts = @((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "missingRollbackPackageScriptNames" -Default @()))
 $ownerGoLiveHandoffSafe = $ownerGoLiveHandoffStatus -eq "passed" `
     -and $ownerGoLiveHandoffFailedChecks.Count -eq 0 `
     -and $ownerGoLiveHandoffSecretFindings.Count -eq 0 `
@@ -1423,16 +1425,20 @@ $ownerGoLiveHandoffSafe = $ownerGoLiveHandoffStatus -eq "passed" `
     -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversBridgeRelayer" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversTesterPacket" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversCutoverAudit" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequencePackageScriptsPresent" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCommandsPresent" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversLocalStop" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversBridgeEmergencyStop" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "rollbackPackageScriptsPresent" -Default $false) -eq $true) `
+    -and $ownerGoLiveHandoffMissingLaunchPackageScripts.Count -eq 0 `
+    -and $ownerGoLiveHandoffMissingRollbackPackageScripts.Count -eq 0 `
     -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "broadcasts" -Default $true) -eq $false)
 Add-ArchitectureItem -Items $items -Id "owner-go-live-launch-boundary" -Layer "Deployment/governance" `
     -Requirement "Owner go-live handoff sequences owner inputs, public RPC render, service install, live monitoring, public RPC canaries, backup restore proof, bridge relayer pilot, external testers, final audits, and rollback commands as one no-secret launch-control boundary." `
     -Status $(if ($ownerGoLiveHandoffSafe) { "passed" } else { "failed" }) `
-    -Evidence "handoffStatus=$ownerGoLiveHandoffStatus, stages=$ownerGoLiveHandoffStageCount, launchSteps=$ownerGoLiveHandoffLaunchSequenceCount, launchCommands=$ownerGoLiveHandoffLaunchSequenceCommandCount, rollbackCommands=$ownerGoLiveHandoffRollbackCommandCount, failedChecks=$($ownerGoLiveHandoffFailedChecks.Count), secretFindings=$($ownerGoLiveHandoffSecretFindings.Count)" `
+    -Evidence "handoffStatus=$ownerGoLiveHandoffStatus, stages=$ownerGoLiveHandoffStageCount, launchSteps=$ownerGoLiveHandoffLaunchSequenceCount, launchCommands=$ownerGoLiveHandoffLaunchSequenceCommandCount, missingLaunchScripts=$($ownerGoLiveHandoffMissingLaunchPackageScripts.Count), rollbackCommands=$ownerGoLiveHandoffRollbackCommandCount, missingRollbackScripts=$($ownerGoLiveHandoffMissingRollbackPackageScripts.Count), failedChecks=$($ownerGoLiveHandoffFailedChecks.Count), secretFindings=$($ownerGoLiveHandoffSecretFindings.Count)" `
     -Files @("infra/scripts/flowchain-owner-go-live-handoff.ps1", "docs/agent-runs/live-product-infra-rpc/OWNER_GO_LIVE_HANDOFF.md") `
     -Commands @("npm run flowchain:owner:go-live-handoff") `
     -Blockers @($missingOwnerInputs)

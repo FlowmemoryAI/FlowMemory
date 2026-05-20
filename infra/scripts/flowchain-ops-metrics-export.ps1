@@ -322,7 +322,9 @@ $ownerGoLiveHandoffChecks = Get-MetricsProp -Object $ownerGoLiveHandoff -Name "c
 $ownerGoLiveHandoffStageCount = [int](Get-MetricsProp -Object $ownerGoLiveHandoff -Name "stageCount" -Default 0)
 $ownerGoLiveHandoffLaunchSequenceCount = [int](Get-MetricsProp -Object $ownerGoLiveHandoff -Name "launchSequenceCount" -Default 0)
 $ownerGoLiveHandoffLaunchSequenceCommandCount = [int](Get-MetricsProp -Object $ownerGoLiveHandoff -Name "launchSequenceCommandCount" -Default 0)
+$ownerGoLiveHandoffMissingLaunchPackageScripts = @((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "missingLaunchSequencePackageScriptNames" -Default @()))
 $ownerGoLiveHandoffRollbackCommandCount = [int](Get-MetricsProp -Object $ownerGoLiveHandoff -Name "rollbackCommandCount" -Default 0)
+$ownerGoLiveHandoffMissingRollbackPackageScripts = @((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "missingRollbackPackageScriptNames" -Default @()))
 $ownerGoLiveHandoffLaunchSequenceReady = ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequencePresent" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepHasCommands" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepHasExpectedStatuses" -Default $false) -eq $true) `
@@ -330,11 +332,15 @@ $ownerGoLiveHandoffLaunchSequenceReady = ((Get-MetricsProp -Object $ownerGoLiveH
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversCutoverAudit" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversTruthAndNoSecret" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCommandsAvoidInlineEnvAssignment" -Default $false) -eq $true) `
-    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCommandsAvoidUrls" -Default $false) -eq $true)
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCommandsAvoidUrls" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequencePackageScriptsPresent" -Default $false) -eq $true) `
+    -and $ownerGoLiveHandoffMissingLaunchPackageScripts.Count -eq 0
 $ownerGoLiveHandoffRollbackReady = ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCommandsPresent" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversLocalStop" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversBridgeEmergencyStop" -Default $false) -eq $true) `
-    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversOpsSnapshot" -Default $false) -eq $true)
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversOpsSnapshot" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackPackageScriptsPresent" -Default $false) -eq $true) `
+    -and $ownerGoLiveHandoffMissingRollbackPackageScripts.Count -eq 0
 $ownerGoLiveHandoffReady = (Get-MetricsStatus -Report $ownerGoLiveHandoff) -eq "passed" `
     -and $ownerGoLiveHandoffFailedChecks.Count -eq 0 `
     -and $ownerGoLiveHandoffSecretFindings.Count -eq 0 `
@@ -770,8 +776,10 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_failed_checks" 
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_sequence_ready" -Help "One when the owner go-live launch sequence has commands, expected statuses, stop-on-failure gates, final audits, and no unsafe command text." -Value (ConvertTo-MetricBool -Value $ownerGoLiveHandoffLaunchSequenceReady)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_sequence_steps" -Help "Ordered owner go-live launch sequence step count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveLaunchSequenceCount" -Default $ownerGoLiveHandoffLaunchSequenceCount))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_sequence_commands" -Help "Ordered owner go-live launch sequence command count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveLaunchSequenceCommandCount" -Default $ownerGoLiveHandoffLaunchSequenceCommandCount))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_missing_package_scripts" -Help "Missing package scripts referenced by owner go-live launch sequence npm commands." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveMissingLaunchPackageScripts" -Default $ownerGoLiveHandoffMissingLaunchPackageScripts.Count))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_rollback_ready" -Help "One when owner go-live rollback commands cover ops snapshot, local service stop, and bridge emergency stop." -Value (ConvertTo-MetricBool -Value $ownerGoLiveHandoffRollbackReady)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_rollback_commands" -Help "Owner go-live rollback command count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveRollbackCommandCount" -Default $ownerGoLiveHandoffRollbackCommandCount))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_rollback_missing_package_scripts" -Help "Missing package scripts referenced by owner go-live rollback npm commands." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveMissingRollbackPackageScripts" -Default $ownerGoLiveHandoffMissingRollbackPackageScripts.Count))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_deployment_ready" -Help "One when public deployment contract is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "publicDeployment"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_ready" -Help "One when the live cutover rehearsal is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $liveCutover))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_tester_network_e2e_passed" -Help "One when live cutover rehearsal directly ran the local tester wallet network E2E." -Value (ConvertTo-MetricBool -Value (Get-MetricsPathProp -Object $liveCutover -Path "ready.testerNetworkE2ePassed" -Default $false))
@@ -1080,8 +1088,10 @@ $requiredMetricNames = @(
     "flowchain_owner_go_live_launch_sequence_ready",
     "flowchain_owner_go_live_launch_sequence_steps",
     "flowchain_owner_go_live_launch_sequence_commands",
+    "flowchain_owner_go_live_launch_missing_package_scripts",
     "flowchain_owner_go_live_rollback_ready",
     "flowchain_owner_go_live_rollback_commands",
+    "flowchain_owner_go_live_rollback_missing_package_scripts",
     "flowchain_public_deployment_ready",
     "flowchain_live_cutover_ready",
     "flowchain_live_cutover_tester_network_e2e_passed",
@@ -1403,8 +1413,10 @@ $checks = [ordered]@{
         "flowchain_owner_go_live_launch_sequence_ready",
         "flowchain_owner_go_live_launch_sequence_steps",
         "flowchain_owner_go_live_launch_sequence_commands",
+        "flowchain_owner_go_live_launch_missing_package_scripts",
         "flowchain_owner_go_live_rollback_ready",
-        "flowchain_owner_go_live_rollback_commands"
+        "flowchain_owner_go_live_rollback_commands",
+        "flowchain_owner_go_live_rollback_missing_package_scripts"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     liveCutoverMetricsPresent = @(
         "flowchain_live_cutover_ready",

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T23:06:52.7230218Z",
+    "generatedAt":  "2026-05-20T23:22:29.2104828Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -576,7 +576,7 @@
                                            "owner-go-live-handoff-failed"
                                        ],
                       "signal":  "Owner go-live handoff is missing or unsafe.",
-                      "threshold":  "handoff report is not passed, has failedChecks or secretMarkerFindings, has fewer than eight stages, lacks an ordered launch sequence, lacks rollback commands, lacks next owner-input commands, prints env values, broadcasts, reports secrets, or claims release readiness before the truth table is clear",
+                      "threshold":  "handoff report is not passed, has failedChecks or secretMarkerFindings, has fewer than eight stages, lacks an ordered launch sequence, references missing package scripts, lacks rollback commands, lacks next owner-input commands, prints env values, broadcasts, reports secrets, or claims release readiness before the truth table is clear",
                       "commands":  [
                                        "npm run flowchain:owner:go-live-handoff",
                                        "npm run flowchain:owner:activation-plan",

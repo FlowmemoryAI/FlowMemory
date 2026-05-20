@@ -1326,10 +1326,12 @@ $ownerGoLiveHandoffRequiredChecks = @(
     "launchSequenceCoversTruthAndNoSecret",
     "launchSequenceCommandsAvoidInlineEnvAssignment",
     "launchSequenceCommandsAvoidUrls",
+    "launchSequencePackageScriptsPresent",
     "rollbackCommandsPresent",
     "rollbackCoversLocalStop",
     "rollbackCoversBridgeEmergencyStop",
     "rollbackCoversOpsSnapshot",
+    "rollbackPackageScriptsPresent",
     "releaseClaimBlockedUntilTruthPassed",
     "packetShareBlockedUntilReady",
     "envValuesPrintedFalse",
@@ -1346,7 +1348,9 @@ $ownerGoLiveHandoffInvalid = @((Get-AuditProp -Object $ownerGoLiveHandoff -Name 
 $ownerGoLiveHandoffStageCount = [int](Get-AuditProp -Object $ownerGoLiveHandoff -Name "stageCount" -Default 0)
 $ownerGoLiveHandoffLaunchSequenceCount = [int](Get-AuditProp -Object $ownerGoLiveHandoff -Name "launchSequenceCount" -Default 0)
 $ownerGoLiveHandoffLaunchSequenceCommandCount = [int](Get-AuditProp -Object $ownerGoLiveHandoff -Name "launchSequenceCommandCount" -Default 0)
+$ownerGoLiveHandoffMissingLaunchPackageScripts = @((Get-AuditProp -Object $ownerGoLiveHandoff -Name "missingLaunchSequencePackageScriptNames" -Default @()))
 $ownerGoLiveHandoffRollbackCommandCount = [int](Get-AuditProp -Object $ownerGoLiveHandoff -Name "rollbackCommandCount" -Default 0)
+$ownerGoLiveHandoffMissingRollbackPackageScripts = @((Get-AuditProp -Object $ownerGoLiveHandoff -Name "missingRollbackPackageScriptNames" -Default @()))
 $ownerGoLiveHandoffReleaseReady = (Get-AuditProp -Object $ownerGoLiveHandoff -Name "releaseReady" -Default $false) -eq $true
 $ownerGoLiveHandoffFailedCheckCount = @($ownerGoLiveHandoffFailedChecks | Where-Object { $null -ne $_ }).Count
 $ownerGoLiveHandoffSecretFindingCount = @($ownerGoLiveHandoffSecretFindings | Where-Object { $null -ne $_ }).Count
@@ -1361,6 +1365,8 @@ $ownerGoLiveHandoffPassed = $ownerGoLiveHandoffStatus -eq "passed" `
     -and $ownerGoLiveHandoffStageCount -ge 8 `
     -and $ownerGoLiveHandoffLaunchSequenceCount -ge 8 `
     -and $ownerGoLiveHandoffRollbackCommandCount -ge 4 `
+    -and $ownerGoLiveHandoffMissingLaunchPackageScripts.Count -eq 0 `
+    -and $ownerGoLiveHandoffMissingRollbackPackageScripts.Count -eq 0 `
     -and ((Get-AuditProp -Object $ownerGoLiveHandoff -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $ownerGoLiveHandoff -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $ownerGoLiveHandoff -Name "broadcasts" -Default $true) -eq $false)
@@ -3228,7 +3234,7 @@ Add-AuditItem -Items $items -Id "owner-activation-plan" `
 Add-AuditItem -Items $items -Id "owner-go-live-handoff" `
     -Requirement "Owner go-live handoff converts the remaining owner inputs and activation stages into one ordered launch sequence with expected statuses, stop-on-failure gates, rollback commands, and no-secret boundaries." `
     -Status $(if ($ownerGoLiveHandoffPassed) { "passed" } else { "failed" }) `
-    -Evidence "handoffStatus=$ownerGoLiveHandoffStatus, releaseReady=$ownerGoLiveHandoffReleaseReady, stages=$ownerGoLiveHandoffStageCount, launchSteps=$ownerGoLiveHandoffLaunchSequenceCount, launchCommands=$ownerGoLiveHandoffLaunchSequenceCommandCount, rollbackCommands=$ownerGoLiveHandoffRollbackCommandCount, failedChecks=$ownerGoLiveHandoffFailedCheckCount, secretFindings=$ownerGoLiveHandoffSecretFindingCount, missingChecks=$ownerGoLiveHandoffMissingCheckCount, report=$($paths.ownerGoLiveHandoff)" `
+    -Evidence "handoffStatus=$ownerGoLiveHandoffStatus, releaseReady=$ownerGoLiveHandoffReleaseReady, stages=$ownerGoLiveHandoffStageCount, launchSteps=$ownerGoLiveHandoffLaunchSequenceCount, launchCommands=$ownerGoLiveHandoffLaunchSequenceCommandCount, missingLaunchScripts=$($ownerGoLiveHandoffMissingLaunchPackageScripts.Count), rollbackCommands=$ownerGoLiveHandoffRollbackCommandCount, missingRollbackScripts=$($ownerGoLiveHandoffMissingRollbackPackageScripts.Count), failedChecks=$ownerGoLiveHandoffFailedCheckCount, secretFindings=$ownerGoLiveHandoffSecretFindingCount, missingChecks=$ownerGoLiveHandoffMissingCheckCount, report=$($paths.ownerGoLiveHandoff)" `
     -Commands @("npm run flowchain:owner:go-live-handoff")
 
 Add-AuditItem -Items $items -Id "owner-env-template" `
